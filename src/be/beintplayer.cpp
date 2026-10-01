@@ -72,7 +72,36 @@ INCLUDE_ASM("be/beintplayer", func_00145E68);
 
 INCLUDE_ASM("be/beintplayer", func_00145EF0);
 
+//100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+
+// PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
+extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak)
+{
+    if (peak != 0)
+    {
+        if (peak == 1)
+        {
+            int bOff = b * 0xF88;
+            int aOff = a * 0x9B50;
+            int off = bOff + aOff;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
+        }
+        else
+        {
+            int bOff = b * 0xF88;
+            int aOff = a * 0x9B50;
+            int off = bOff + aOff;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked1);
 

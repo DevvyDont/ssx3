@@ -1,6 +1,50 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_gainFocus);
+#ifdef SKIP_ASM
+struct sVec4HP {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4HP vu0SubHP(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline sVec4HP vu0DivHP(const sVec4HP& v, float s)
+{
+    sVec4HP r;
+    int t;
+    __asm__ __volatile__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+extern "C" void cHandplantMotion_gainFocus(char* self)
+{
+    char* rider = *(char**)(self + 0xA0);
+    *(sVec4HP*)(rider + 0x1E0) = vu0DivHP(vu0SubHP(*(sVec4HP*)(self + 0x30), *(sVec4HP*)(rider + 0x110)), *(float*)(self + 0x84));
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00138BA0);
 

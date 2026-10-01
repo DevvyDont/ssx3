@@ -233,7 +233,21 @@ void* func_00144D70(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberAI);
+#ifdef SKIP_ASM
+// Max AI riders per [gameType][eventKind] (7 event kinds per row).
+extern unsigned int D_0043D8F8[][7];
+
+extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
+{
+    D_00535BC8.field_0x3C = count;
+    D_00535BC8.field_0x30 = D_00535BC8.field_0x34 + count + D_00535BC8.field_0x38;
+    signed char eventKind = *(signed char*)((char*)&D_00535BC8 + 0x48);
+    signed char gameType = *(signed char*)((char*)&D_00535BC8 + 0x49);
+    return (unsigned int)count <= D_0043D8F8[gameType][eventKind];
+}
+#endif
 
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
 

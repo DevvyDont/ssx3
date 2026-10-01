@@ -48,15 +48,131 @@ extern "C" void func_0030DBA0(void* self, float a, float b)
 
 INCLUDE_ASM("animation/animmodel", cAnimModel_compile);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030E9E0);
+#ifdef SKIP_ASM
+struct sAnimChannel_0030E9E0
+{
+    int active;
+    int pad;
+};
+
+struct sAnimEntry_0030E9E0
+{
+    char pad[0x10];
+    ulong mask;                          // 0x10
+    sAnimChannel_0030E9E0 channels[4];   // 0x18
+    char pad2[0x18];
+    int param;                           // 0x50
+    int pad3;
+};
+
+struct sAnimModel_0030E9E0
+{
+    char pad0[0x8];
+    int numEntries;               // 0x8
+    sAnimEntry_0030E9E0* entries; // 0xC
+    char pad1[0x4];
+    int count;                    // 0x14
+    char pad2[0x4];
+    int* indices;                 // 0x1C
+    char pad3[0x130];
+    ulong mask;                   // 0x150
+};
+
+// PORT: ulong is 64-bit here
+extern "C" void func_0030E9E0(sAnimModel_0030E9E0* self, int i, int channel)
+{
+    if (i > self->count)
+    {
+        return;
+    }
+    if (self->indices == 0)
+    {
+        return;
+    }
+    int idx = self->indices[i];
+    if (idx < 0)
+    {
+        return;
+    }
+    sAnimEntry_0030E9E0* e = &self->entries[idx];
+    self->mask |= e->mask;
+    if (channel < 0)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            e->channels[k].active = 1;
+        }
+    }
+    else
+    {
+        e->channels[channel].active = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_0030EA80);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030EB60);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here
+extern "C" void func_0030EB60(sAnimModel_0030E9E0* self)
+{
+    for (int j = 0; j < self->numEntries; j++)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            self->entries[j].channels[k].active = 0;
+        }
+    }
+    self->mask = 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030EBC0);
+#ifdef SKIP_ASM
+extern "C" int func_0030EBC0(sAnimModel_0030E9E0* self, int i, int channel)
+{
+    int idx;
+    if (i > self->count || self->indices == 0 || (idx = self->indices[i]) < 0)
+    {
+        return 0;
+    }
+    return self->entries[idx].channels[channel].active;
+}
+#endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030EC18);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here
+extern "C" void func_0030EC18(sAnimModel_0030E9E0* self, int i, int param)
+{
+    if (i > self->count)
+    {
+        return;
+    }
+    if (self->indices == 0)
+    {
+        return;
+    }
+    int idx = self->indices[i];
+    if (idx < 0)
+    {
+        return;
+    }
+    sAnimEntry_0030E9E0* e = &self->entries[idx];
+    e->param = param;
+    self->mask |= e->mask;
+    for (int k = 0; k < 4; k++)
+    {
+        e->channels[k].active = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030ECA0);

@@ -93,9 +93,89 @@ INCLUDE_ASM("ai/ridermetrix", func_00117948);
 
 INCLUDE_ASM("ai/ridermetrix", func_00117990);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001179E0);
+#ifdef SKIP_ASM
+struct sMetrixSlot {
+    int type;
+    char pad_0x04[0x98];
+};
 
+struct sMetrixSlots {
+    char pad_0x00[0x1B0];
+    sMetrixSlot* slots;
+    int count;
+};
+
+extern "C" void func_001179E0(void* self_, int type)
+{
+    sMetrixSlots* self = (sMetrixSlots*)self_;
+    if (self->slots != 0)
+    {
+        if (type < 0x22)
+        {
+            self->slots[type].type = 0x34;
+        }
+        else
+        {
+            for (int i = 0x23; i < self->count; i++)
+            {
+                if (self->slots[i].type == type)
+                {
+                    self->slots[i].type = 0x34;
+                }
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117A58);
+#ifdef SKIP_ASM
+struct sMetrixSlotR {
+    int type;
+    float total;
+    float value;
+    char pad_0x0C[0x90];
+};
+
+struct sMetrixSlotsR {
+    char pad_0x00[0x1B0];
+    sMetrixSlotR* slots;
+    int count;
+};
+
+static inline bool slotIsFreeR(const sMetrixSlotR& s)
+{
+    return s.type == 0x34;
+}
+
+extern "C" int func_00117A58(void* self_, int type)
+{
+    sMetrixSlotsR* self = (sMetrixSlotsR*)self_;
+    if (type < 0x22)
+    {
+        return type;
+    }
+    float best = 1.0f;
+    int bestIdx = -1;
+    for (int i = 0x23; i < self->count; i++)
+    {
+        if (slotIsFreeR(self->slots[i]))
+        {
+            return i;
+        }
+        float r = self->slots[i].value / self->slots[i].total;
+        if (r < best)
+        {
+            best = r;
+            bestIdx = i;
+        }
+    }
+    return bestIdx;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117AE8);
 
@@ -107,13 +187,65 @@ INCLUDE_ASM("ai/ridermetrix", func_00117FE0);
 
 INCLUDE_ASM("ai/ridermetrix", func_00118FF8);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119068);
+#ifdef SKIP_ASM
+struct sMetrixRecent {
+    char pad_0x00[0x60];
+    int recent[3];
+};
+
+extern "C" void func_00119068(void* self_, int value)
+{
+    sMetrixRecent* self = (sMetrixRecent*)self_;
+    for (int i = 0; i < 3; i++)
+    {
+        if (self->recent[i] == 0)
+        {
+            self->recent[i] = value;
+            break;
+        }
+        if (self->recent[i] == value && i < 2 && self->recent[i + 1] == 0)
+        {
+            self->recent[i] = value;
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_001190F0);
 
 INCLUDE_ASM("ai/ridermetrix", func_00119210);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119310);
+#ifdef SKIP_ASM
+extern "C" int func_00119310(void* self, int points)
+{
+    if (points < 1000)
+    {
+        return 0;
+    }
+    if (points < 2500)
+    {
+        return 1;
+    }
+    if (points < 4000)
+    {
+        return 2;
+    }
+    if (points < 7500)
+    {
+        return 3;
+    }
+    if (points < 11500)
+    {
+        return 4;
+    }
+    return 5;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119368);
 

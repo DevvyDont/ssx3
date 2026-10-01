@@ -42,7 +42,35 @@ extern "C" int func_00153350(void* self, int start)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153390);
+#ifdef SKIP_ASM
+struct sMissionEntry_0043D950
+{
+    char pad_0x00[0x54];
+    int owner;          // 0x54
+    char pad_0x58[0xC];
+};
+
+extern sMissionEntry_0043D950 D_0043D950[];
+extern signed char D_0043FA70[];
+
+extern "C" int func_00153390(void* self, int owner)
+{
+    int sum = 0;
+    for (int i = 0; i < 1; i++)
+    {
+        for (int j = 0; j < 22; j++)
+        {
+            if (D_0043D950[j].owner == owner)
+            {
+                sum += D_0043FA70[i + j];
+            }
+        }
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00153498);
 
@@ -50,7 +78,42 @@ INCLUDE_ASM("be/beintmission", func_00153520);
 
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153688);
+#ifdef SKIP_ASM
+struct sEconRecord_00153688
+{
+    int id;
+    signed char count; // 0x4
+    char pad_0x05[0x7];
+};
+
+// One character's economy block (0xF88 bytes); 10 per profile (0x9B50).
+struct sEconChar_00153688
+{
+    sEconRecord_00153688 records[22];
+    char pad[0xF88 - 22 * 12];
+};
+
+extern sMissionEntry_0043D950 D_0043D950[];
+extern sEconChar_00153688 D_004A6CA8[][10];
+
+extern "C" int func_00153688(void* self, int profile, int character, int owner)
+{
+    int sum = 0;
+    for (int i = 0; i < 1; i++)
+    {
+        for (int j = 0; j < 22; j++)
+        {
+            if (D_0043D950[j].owner == owner)
+            {
+                sum += D_004A6CA8[profile][character].records[i + j].count;
+            }
+        }
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00153708);
 
@@ -111,7 +174,17 @@ extern "C" int func_00154240(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154278);
+#ifdef SKIP_ASM
+extern "C" int func_001542A0(void* self, int group);
+extern int D_005305F0[];
+
+extern "C" int func_00154278(void* self)
+{
+    return func_001542A0(self, D_005305F0[0]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_001542A0);
@@ -132,13 +205,55 @@ extern "C" int func_001542A0(void* self, int group)
 
 INCLUDE_ASM("be/beintmission", func_001542E0);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154368);
+#ifdef SKIP_ASM
+// D_0043EE20 is D_0043EE10 + 0x10: the `group` field of each 0x24-byte
+// sMissionDef_0043EE10 entry, addressed through its own symbol.
+struct sMissionGroup_0043EE20
+{
+    int group;          // 0x00 (0x10 in sMissionDef_0043EE10)
+    char pad_0x04[0x20];
+};
+
+extern sMissionEntry_0043D950 D_0043D950[];
+extern sMissionGroup_0043EE20 D_0043EE20[];
+
+extern "C" int func_00154368(void* self, int owner)
+{
+    int n = 0;
+    for (int i = 0; i < 88; i++)
+    {
+        for (int j = 0; j < 22; j++)
+        {
+            if (D_0043D950[j].owner == owner)
+            {
+                if (D_0043EE20[i].group == j)
+                {
+                    n++;
+                }
+            }
+        }
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_001543E0);
 
 INCLUDE_ASM("be/beintmission", func_001544D0);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154588);
+#ifdef SKIP_ASM
+extern "C" int func_001545B0(void* self, int a, int group);
+extern int D_005305F0[];
+
+extern "C" int func_00154588(void* self, int a)
+{
+    return func_001545B0(self, a, D_005305F0[0]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_001545B0);

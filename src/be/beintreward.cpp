@@ -26,7 +26,17 @@ void* cBERewardInterface_getThis()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00156A10);
+#ifdef SKIP_ASM
+extern "C" void cBERewardDB_init(void* db, int flag);
+extern void* D_004C3E98[];
+
+extern "C" void func_00156A10()
+{
+    cBERewardDB_init(D_004C3E98, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00156A38);
@@ -140,7 +150,26 @@ int func_00157370(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157390);
+#ifdef SKIP_ASM
+// Counts the set bits among the first `count` bits of `bits` (LSB first).
+extern "C" int func_00157390(void* self, int count, signed char* bits)
+{
+    int i = 0;
+    int total = 0;
+    while (i < count)
+    {
+        signed char b = *bits++;
+        for (int k = 0; k < 8 && i < count; k++)
+        {
+            i++;
+            total += (b >> k) & 1;
+        }
+    }
+    return total;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_001573F0);
@@ -188,7 +217,33 @@ INCLUDE_ASM("be/beintreward", func_00157A78);
 
 INCLUDE_ASM("be/beintreward", func_00157B08);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157B70);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+
+// PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
+extern "C" int func_00157B70(void* self, int a, int b, int peak)
+{
+    if (peak == 1)
+    {
+        int bOff = b * 0xF88;
+        int aOff = a * 0x9B50;
+        int off = bOff + aOff;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
+    }
+    if (peak == 2)
+    {
+        int bOff = b * 0xF88;
+        int aOff = a * 0x9B50;
+        int off = bOff + aOff;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00157BF0);
 
@@ -482,7 +537,33 @@ extern "C" int func_0015A5F0(void* self, int bit, unsigned char* bits)
 
 INCLUDE_ASM("be/beintreward", func_0015A628);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A6F0);
+#ifdef SKIP_ASM
+struct sRewardGrid_0015A6F0
+{
+    char pad_0x00[0x6];
+    signed char vals[32][10]; // 0x6 (func_0015A750 reads vals[a1][a2])
+};
+
+// PORT: the unit declares func_0015A6F0 as returning void* (line ~378, used by
+// func_00158F30); the body returns an int sum, so it is bound by asm label.
+// The lander should change that declaration to int instead.
+int func_0015A6F0_impl(sRewardGrid_0015A6F0* self) __asm__("func_0015A6F0");
+
+int func_0015A6F0_impl(sRewardGrid_0015A6F0* self)
+{
+    int sum = 0;
+    for (int i = 0; i < 32; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            sum += self->vals[i][j];
+        }
+    }
+    return sum;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A750);
@@ -502,7 +583,33 @@ int func_0015A768(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A778);
+#ifdef SKIP_ASM
+extern "C" void* func_0015A778(void* self)
+{
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x0) = -1;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    *(int*)((char*)self + 0x38) = 0;
+    *(int*)((char*)self + 0x3C) = 0;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x44) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_0015A7D0);
 

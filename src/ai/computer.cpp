@@ -190,12 +190,20 @@ INCLUDE_ASM("ai/computer", func_00111890);
 
 extern "C" void* func_002E23E0(void*);
 
-//80.0%
+//100%
 INCLUDE_ASM("ai/computer", func_00111AA0__FPv);
 #ifdef SKIP_ASM
-void* func_00111AA0(void* self)
+// PORT: prototype mismatch. The project names this func_00111AA0__FPv (one
+// void* param), but every caller passes (self, vecA, vecB, int, float) and the
+// body forwards them to func_002E23E0 with an extra 0 flag. The unit declares
+// func_002E23E0 as (void*), so both are bound by asm label.
+void func_002E23E0_impl(void* self, void* a, void* b, int c, int flag, float x) __asm__("func_002E23E0");
+
+void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+
+void func_00111AA0_impl(void* self, void* a, void* b, int c, float x)
 {
-    return func_002E23E0(((char*)self + 0xb40));
+    func_002E23E0_impl((char*)self + 0xB40, a, b, c, 0, x);
 }
 #endif
 
@@ -274,5 +282,17 @@ float func_00113130(void* self)
 
 INCLUDE_ASM("ai/computer", func_00113138);
 
+//100%
 INCLUDE_ASM("ai/computer", func_00113170);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_00113170(void* self, int flags)
+{
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 

@@ -73,7 +73,47 @@ extern "C" void func_00313D40(void* self, int a1, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313D70);
+#ifdef SKIP_ASM
+struct sSeqTrack_00313D70
+{
+    char pad0[0x8];
+    float time;   // 0x8
+    char pad1[0x4];
+    float end;    // 0x10
+    float weight; // 0x14
+    int flag;     // 0x18
+};
+
+struct sSeq_00313D70
+{
+    sSeqTrack_00313D70 tracks[5]; // 0x0
+    char pad0[0x8];
+    float scale;   // 0x94
+    char pad1[0xC];
+    float fadeOut; // 0xA4
+    float fadeIn;  // 0xA8
+};
+
+// PORT: g++ <? (min) operator, removed in GCC 4.3.
+extern "C" float func_00313D70(sSeq_00313D70* self, int i)
+{
+    float time = self->tracks[i].time;
+    float w = self->scale * self->tracks[i].weight;
+    float end = self->tracks[i].end;
+    if (time < self->fadeIn)
+    {
+        w = (time / self->fadeIn) <? w;
+    }
+    float rem = end - time;
+    if (rem < self->fadeOut)
+    {
+        w = (rem / self->fadeOut) <? w;
+    }
+    return w;
+}
+#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00313DD0);
 
@@ -91,7 +131,39 @@ void func_003142E8(void* self)
 
 INCLUDE_ASM("animation/animsequencer", func_003142F8);
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314368);
+#ifdef SKIP_ASM
+// Same layout as the unit's cAnimSequenceNode / cAnimSequencer (declared later in the unit).
+struct sSeqNode_00314368 {
+    char pad_0x00[0xC8];
+    sSeqNode_00314368* next; // 0xC8
+};
+
+struct sSequencer_00314368 {
+    int mCount;                      // 0x0
+    sSeqNode_00314368* mFirstSequence; // 0x4
+};
+
+extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node)
+{
+    if (self->mFirstSequence != 0)
+    {
+        sSeqNode_00314368* p = self->mFirstSequence;
+        while (p->next != 0)
+        {
+            p = p->next;
+        }
+        p->next = node;
+    }
+    else
+    {
+        self->mFirstSequence = node;
+    }
+    node->next = 0;
+    self->mCount++;
+}
+#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314418);
 
@@ -150,13 +222,16 @@ INCLUDE_ASM("animation/animsequencer", func_003149D0);
 
 extern "C" void* func_00314AA0(void*);
 
-//75.56%
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314A18__FPvi);
 #ifdef SKIP_ASM
-void* func_00314A18(void* self, int a1)
+// PORT: asm label (same binding the unit uses for func_00314AA0's two-argument body).
+void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
+
+void func_00314A18(void* self, int a1)
 {
     *(int*)self = a1;
-    return func_00314AA0(self);
+    func_00314AA0_impl(self, (char*)a1);
 }
 #endif
 

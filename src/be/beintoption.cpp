@@ -65,9 +65,47 @@ INCLUDE_ASM("be/beintoption", func_0014F758);
 
 INCLUDE_ASM("be/beintoption", func_0014F7A8);
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F7E8);
+#ifdef SKIP_ASM
+extern "C" int func_0014F870();
+extern int D_005308D4[]; // D_005308B8 + 0x1C, addressed through its own symbol
 
+extern "C" int func_0014F7E8(void* self)
+{
+    return func_0014F870() - D_005308D4[0];
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F810);
+#ifdef SKIP_ASM
+// View of D_005308B8 (the unit defines sOptionGlobal_005308B8 further down).
+struct sOptionTriple_005308B8 {
+    int a;
+    int b;
+    int c;
+};
+
+struct sOptionView_005308B8 {
+    sOptionTriple_005308B8 triples[2]; // 0x0
+    int field_0x18;
+    int field_0x1C;
+};
+
+struct sOptionGlobal_005308B8;
+extern sOptionGlobal_005308B8 D_005308B8;
+
+extern "C" int func_0014F810(int i)
+{
+    sOptionView_005308B8* g = (sOptionView_005308B8*)&D_005308B8;
+    if (g->triples[i].a != 0 || g->triples[i].b != 0 || g->triples[i].c != 0 || g->field_0x18 != 0 || g->field_0x1C != 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintoption", func_0014F870);
@@ -93,5 +131,22 @@ extern "C" int func_0014F870()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F898);
+#ifdef SKIP_ASM
+struct sOptionTriple_0014F898 {
+    int a;
+    int b;
+    int c;
+};
+
+// Swaps the two 12-byte triples at the start of D_005308B8.
+extern "C" void func_0014F898()
+{
+    sOptionTriple_0014F898* t = (sOptionTriple_0014F898*)&D_005308B8;
+    sOptionTriple_0014F898 tmp = t[0];
+    t[0] = t[1];
+    t[1] = tmp;
+}
+#endif
 

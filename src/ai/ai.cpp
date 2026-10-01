@@ -23,7 +23,36 @@ void* func_001289F0(void* self)
 
 INCLUDE_ASM("ai/ai", func_00128A10);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00128A48);
+#ifdef SKIP_ASM
+struct sAiObj128A48
+{
+    char pad0[0x28];
+    char* mRiders[19];
+    int mMode;
+    int mCount;
+};
+
+extern "C" void func_00128A48(sAiObj128A48* self, int mode)
+{
+    self->mMode = mode;
+    if (mode == 0)
+    {
+        for (int i = 0; i < self->mCount; i++)
+        {
+            *(int*)(self->mRiders[i] + 0xEC) = 0;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < self->mCount; i++)
+        {
+            *(int*)(self->mRiders[i] + 0xEC) = i;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00128AC0);
 
@@ -51,7 +80,34 @@ INCLUDE_ASM("ai/ai", cAI_initComputerActors);
 
 INCLUDE_ASM("ai/ai", func_0012A180);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012A250);
+#ifdef SKIP_ASM
+struct sAiObj12A250
+{
+    char pad0[0x40];
+    char* mRiders[15];
+    int mCount;
+};
+
+static inline bool aiRiderOk12A250(char* rider)
+{
+    return *(float*)(*(char**)(rider + 0x18) + 0x470) >= 0.0f;
+}
+
+extern "C" int func_0012A250(sAiObj12A250* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        bool ok = aiRiderOk12A250(self->mRiders[i]);
+        if (!ok)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012A340);
 

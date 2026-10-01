@@ -56,7 +56,18 @@ void func_0015BCC8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C228);
+#ifdef SKIP_ASM
+// func_003E6448 looks like memset(dst, value, size).
+extern "C" void* func_003E6448(void* dst, int value, int size);
+extern char D_005308B8[];
+
+extern "C" void func_0015C228()
+{
+    func_003E6448(D_005308B8, 0, 0x20);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C6C8__FPv);

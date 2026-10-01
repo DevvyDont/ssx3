@@ -232,9 +232,33 @@ void* func_001216E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121700);
+#ifdef SKIP_ASM
+extern "C" void func_0011EB60(void* self, float value);
 
+extern "C" void func_00121700(void* self)
+{
+    if (*(int*)((char*)self + 0xAC4) == 0)
+    {
+        func_0011EB60(self, *(float*)((char*)self + 0x300));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/rider", func_00121728);
+#ifdef SKIP_ASM
+extern "C" void func_0011EB98(void* self);
+
+extern "C" void func_00121728(void* self)
+{
+    if (*(int*)((char*)self + 0xAC4) == 0)
+    {
+        func_0011EB98(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00121750);
 
@@ -269,7 +293,19 @@ INCLUDE_ASM("ai/rider", func_00122448);
 
 INCLUDE_ASM("ai/rider", func_001225C0);
 
+//100%
 INCLUDE_ASM("ai/rider", func_001225F0);
+#ifdef SKIP_ASM
+extern "C" void func_00122898(void* self);
+
+extern "C" void func_001225F0(void* self)
+{
+    if (*(int*)((char*)self + 0xB18) != 0)
+    {
+        func_00122898(self);
+    }
+}
+#endif
 
 extern "C" void* func_002F2088(int);
 
@@ -282,7 +318,17 @@ void* func_00122638(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122658);
+#ifdef SKIP_ASM
+// func_003E6448 looks like memset(dst, value, size).
+extern "C" void* func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_00122658(void* self)
+{
+    func_003E6448((char*)self + 0x794, 0, 0x20);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00122898);
 
