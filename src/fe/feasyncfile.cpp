@@ -1340,39 +1340,46 @@ INCLUDE_ASM("fe/feasyncfile", func_001C5630);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C5750);
 
-//85.43%
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5780__FPvii);
 #ifdef SKIP_ASM
-int func_001C5780(void* self, int a1, int a2)
+struct cFEAsyncSlot {
+    int mState; // 0x0
+    int mValue; // 0x4
+};
+
+struct cFEAsyncSlots {
+    char pad_0x00[0x24];
+    cFEAsyncSlot mSlots[1]; // 0x24
+};
+
+void func_001C5780(void* self, int a1, int a2)
 {
-    int t0 = 2;
-    *(int*)((char*)((char*)self + a1 * 8) + 0x28) = a2;
-    *(int*)((char*)((char*)self + a1 * 8) + 0x24) = t0;
-    return t0;
+    cFEAsyncSlots* s = (cFEAsyncSlots*)self;
+    s->mSlots[a1].mValue = a2;
+    s->mSlots[a1].mState = 2;
 }
 #endif
 
-//85.43%
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C57A0__FPvii);
 #ifdef SKIP_ASM
-int func_001C57A0(void* self, int a1, int a2)
+void func_001C57A0(void* self, int a1, int a2)
 {
-    int t0 = 1;
-    *(int*)((char*)((char*)self + a1 * 8) + 0x28) = a2;
-    *(int*)((char*)((char*)self + a1 * 8) + 0x24) = t0;
-    return t0;
+    cFEAsyncSlots* s = (cFEAsyncSlots*)self;
+    s->mSlots[a1].mValue = a2;
+    s->mSlots[a1].mState = 1;
 }
 #endif
 
-//85.43%
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C57C0__FPvii);
 #ifdef SKIP_ASM
-int func_001C57C0(void* self, int a1, int a2)
+void func_001C57C0(void* self, int a1, int a2)
 {
-    int t0 = 3;
-    *(int*)((char*)((char*)self + a1 * 8) + 0x28) = a2;
-    *(int*)((char*)((char*)self + a1 * 8) + 0x24) = t0;
-    return t0;
+    cFEAsyncSlots* s = (cFEAsyncSlots*)self;
+    s->mSlots[a1].mValue = a2;
+    s->mSlots[a1].mState = 3;
 }
 #endif
 

@@ -268,18 +268,15 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00260F80);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00261008);
 
-//99.5%
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00261058__FPv);
 #ifdef SKIP_ASM
-int func_00261058(void* self)
+void func_00261058(void* self)
 {
-    int t0 = 0;
-    int t1 = -1;
-    *(signed char*)((char*)self + 0x64) = (signed char)t0;
-    *(int*)((char*)self + 0x40) = t1;
-    *(signed char*)self = (signed char)t0;
-    *(signed char*)((char*)self + 0x44) = (signed char)t0;
-    return t1;
+    *(char*)self = 0;
+    *(int*)((char*)self + 0x40) = -1;
+    *(char*)((char*)self + 0x44) = 0;
+    *(char*)((char*)self + 0x64) = 0;
 }
 #endif
 

@@ -79,16 +79,14 @@ void cCameraTriggerStack_init(cCameraTriggerStack* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D210);
 
-//28.33%
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D238__FPvi);
 #ifdef SKIP_ASM
-void* func_0016D238(void* self, int a1)
+void func_0016D238(void* self, int a1)
 {
-    void* t0 = ((char*)*(void**)self + 0x1);
-    *(int*)((char*)((char*)self + *(int*)self * 4) + 0x8) = a1;
+    *(int*)((char*)self + (*(int*)self << 2) + 0x8) = a1;
     *(int*)((char*)self + 0x4) = a1;
-    *(int*)self = (int)t0;
-    return t0;
+    *(int*)self = *(int*)self + 1;
 }
 #endif
 

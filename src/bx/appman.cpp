@@ -145,17 +145,17 @@ int func_00317520(void)
 }
 #endif
 
-//99.29%
+//100%
 INCLUDE_ASM("bx/appman", func_00317530__FPvf);
 #ifdef SKIP_ASM
 void func_00317530(void* self, float arg)
 {
     *(float*)((char*)self + 0xC) = arg;
-    *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
 }
 #endif
 
@@ -197,14 +197,14 @@ void func_003175A0(void* self)
 }
 #endif
 
-//99.67%
+//100%
 INCLUDE_ASM("bx/appman", func_00317600__FPv);
 #ifdef SKIP_ASM
 void func_00317600(void* self)
 {
+    *(float*)((char*)self + 0x14) = 100.0f;
     *(int*)((char*)self + 0x18) = 0;
     *(float*)((char*)self + 0x0) = 100.0f;
-    *(float*)((char*)self + 0x14) = 100.0f;
 }
 #endif
 

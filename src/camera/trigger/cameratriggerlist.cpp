@@ -29,22 +29,21 @@ struct cCameraTriggerList2 {
     int count; // 0x4
 };
 
-//27.25% - target uses branch-likely (bgezl/bnel) for both conditions, ours compiles to regular branches; logic is correct, several restructuring attempts made it worse
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_insert__FP19cCameraTriggerList2Pvi);
 #ifdef SKIP_ASM
 int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
 {
-    if (idx >= 0) {
+    if (idx < 0) {
+        if (list->count >= 0x78) {
+            return 0;
+        }
+        list->arr[list->count] = item;
+        list->count++;
+    } else {
         list->arr[idx] = item;
-        return 1;
     }
-    int count = list->count;
-    if (count < 0x78) {
-        list->arr[count] = item;
-        list->count = count + 1;
-        return 1;
-    }
-    return 0;
+    return 1;
 }
 #endif
 

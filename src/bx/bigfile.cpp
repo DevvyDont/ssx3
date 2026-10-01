@@ -80,5 +80,13 @@ void* func_00316A00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bigfile", func_00316A20);
+#ifdef SKIP_ASM
+extern "C" int func_00316A20(void* self, int size)
+{
+    int align = *(int*)((char*)self + 0x10);
+    return align * ((size + align - 1) / align);
+}
+#endif
 
