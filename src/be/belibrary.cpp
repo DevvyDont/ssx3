@@ -97,7 +97,16 @@ extern "C" int func_0014AC50(int a0)
 
 INCLUDE_ASM("be/belibrary", func_0014ACB0);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014AD28);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+
+extern "C" void* func_0014AD28(void* self, int a1, int a2)
+{
+    return (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014AD50);
 

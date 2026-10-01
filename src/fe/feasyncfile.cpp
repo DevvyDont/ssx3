@@ -1392,7 +1392,28 @@ extern "C" void* func_001C5800(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5838);
+#ifdef SKIP_ASM
+struct cFEAsyncReq {
+    int mState; // 0x0
+    int mValue; // 0x4
+    int mExtra; // 0x8
+};
+
+struct cFEAsyncReqs {
+    char pad_0x00[0x54];
+    cFEAsyncReq mReqs[1]; // 0x54
+};
+
+extern "C" void func_001C5838(void* self, int a1, int a2, int a3)
+{
+    cFEAsyncReqs* s = (cFEAsyncReqs*)self;
+    s->mReqs[a1].mValue = a2;
+    s->mReqs[a1].mState = 1;
+    s->mReqs[a1].mExtra = a3;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5860);
@@ -1404,7 +1425,17 @@ extern "C" void func_001C5860(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5878);
+#ifdef SKIP_ASM
+extern "C" void func_001C5878(void* self, int a1, int a2, int a3)
+{
+    cFEAsyncReqs* s = (cFEAsyncReqs*)self;
+    s->mReqs[a1].mValue = a2;
+    s->mReqs[a1].mState = 3;
+    s->mReqs[a1].mExtra = a3;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C58D0);

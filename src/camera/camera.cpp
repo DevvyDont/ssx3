@@ -622,7 +622,27 @@ INCLUDE_ASM("camera/camera", func_00167D98);
 
 INCLUDE_ASM("camera/camera", func_00167DA8);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167DB8);
+#ifdef SKIP_ASM
+struct sCamFilter {
+    float field_0x00[5];
+    float field_0x14[5];
+    int field_0x28[5];
+    int field_0x3C;
+};
+
+extern "C" void func_00167DB8(sCamFilter* self, float value)
+{
+    int i;
+    self->field_0x3C = 0;
+    for (i = 0; i < 5; i++) {
+        self->field_0x00[i] = value;
+        self->field_0x14[i] = value;
+        self->field_0x28[i] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00167DE8);
 

@@ -28,7 +28,21 @@ void* cBERewardInterface_getThis()
 
 INCLUDE_ASM("be/beintreward", func_00156A10);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00156A38);
+#ifdef SKIP_ASM
+// PORT: compares a pointer cast to int against -1; not 64-bit safe.
+extern void* D_004C3E98[];
+
+extern "C" int func_00156A38(void)
+{
+    int r = 0;
+    if ((int)D_004C3E98[0] == -1) {
+        r = D_004C3E98[1] != 0;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isBetterMedal__FPvii);
@@ -190,19 +204,83 @@ INCLUDE_ASM("be/beintreward", func_00158558);
 
 INCLUDE_ASM("be/beintreward", func_00158618);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158700);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
 
+extern "C" int func_00158700(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return *(int*)(p + 0xf80);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158728);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
+extern int D_004A6CA8[];
 
+extern "C" long func_00158728(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return *(long*)(p + 0xf70);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158750);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
+extern int D_004A6CA8[];
+
+extern "C" long func_00158750(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return *(long*)(p + 0xf78);
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_001587B8);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_001587F8);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
 
+extern "C" void func_001587F8(void* self, int a1, int a2, int value)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    *(int*)(p + 0xf80) = value;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158820);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
+extern int D_004A6CA8[];
 
+extern "C" void func_00158820(void* self, int a1, int a2, long value)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    *(long*)(p + 0xf70) = value;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158848);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
+extern int D_004A6CA8[];
+
+extern "C" void func_00158848(void* self, int a1, int a2, long value)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    *(long*)(p + 0xf78) = value;
+}
+#endif
 
 extern int D_0045AFE8[];
 

@@ -70,7 +70,17 @@ extern "C" void* func_00155270(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00155288);
+#ifdef SKIP_ASM
+extern char D_004A6CA8[];
+
+extern "C" void* func_00155288(void* self, int a1, int a2)
+{
+    char* p = D_004A6CA8 + (a1 * 0x9b50 + a2 * 0xf88);
+    return p + 0xde4;
+}
+#endif
 
 signed char cBELibrary_getCharacterID(int index);
 extern char D_004A6CA8[];

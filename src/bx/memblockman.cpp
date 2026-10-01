@@ -101,7 +101,14 @@ INCLUDE_ASM("bx/memblockman", func_0031AC60);
 
 INCLUDE_ASM("bx/memblockman", func_0031ACD8);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AD00);
+#ifdef SKIP_ASM
+extern "C" int func_0031AD00(void* self)
+{
+    return *(int*)((char*)self + 0x14048) == 0;
+}
+#endif
 
 extern "C" unsigned int D_004A3ED0;
 
