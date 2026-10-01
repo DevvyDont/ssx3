@@ -126,7 +126,17 @@ INCLUDE_ASM("fe/uitemplatemap", func_00208588);
 
 INCLUDE_ASM("fe/uitemplatemap", func_002085B8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/uitemplatemap", func_00208610);
+#ifdef SKIP_ASM
+extern "C" int func_00208610(void* self, int a1, int a2)
+{
+    if (func_00202738((char*)self + 0x9C, a1, a2) != 0) {
+        return 0x101;
+    }
+    return 0;
+}
+#endif
 
 //99.29% - identical instructions; jal addend differs only because the
 // callee sits at a different .text offset in our object than in the target
