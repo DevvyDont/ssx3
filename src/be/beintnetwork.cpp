@@ -84,5 +84,28 @@ INCLUDE_ASM("be/beintnetwork", func_0014EE28);
 
 INCLUDE_ASM("be/beintnetwork", func_0014EE58);
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EEC8);
+#ifdef SKIP_ASM
+struct sNetEntry8_0043FA38
+{
+    char data[8];
+};
+
+struct sNetEntry88_00530990
+{
+    char data[0x88];
+};
+
+extern sNetEntry8_0043FA38 D_0043FA38[];
+extern sNetEntry88_00530990 D_00530990[];
+
+extern "C" void* func_0014EEC8(void* self, int player, int index)
+{
+    if (index >= 10 && index < 30) {
+        return &D_0043FA38[index];
+    }
+    return &D_00530990[player];
+}
+#endif
 

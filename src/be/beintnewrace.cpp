@@ -173,7 +173,27 @@ extern "C" int func_00144CC0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00144CE0);
+#ifdef SKIP_ASM
+struct sRaceEntryFull_00144CE0 {
+    int field_0x0;
+    char pad_0x04[0x58];
+    int field_0x5C;
+    int field_0x60;
+};
+
+extern "C" int func_00144CE0(void* self, int a1)
+{
+    sRaceEntryFull_00144CE0* t = (sRaceEntryFull_00144CE0*)D_0043D950;
+    for (int i = 0; i < 23; i++) {
+        if (t[i].field_0x5C == a1) {
+            return t[i].field_0x0;
+        }
+    }
+    return 22;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144D18);
@@ -269,13 +289,58 @@ INCLUDE_ASM("be/beintnewrace", func_001453D0);
 
 INCLUDE_ASM("be/beintnewrace", func_001454F8);
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_001455D0);
+#ifdef SKIP_ASM
+struct sRaceTableEntry_00440D18
+{
+    char pad_0x00[4];
+    unsigned short field_0x4;
+    unsigned short field_0x6;
+    unsigned short field_0x8[5];
+    unsigned short field_0x12;
+};
 
+extern sRaceTableEntry_00440D18 D_00440D18[];
+
+extern "C" int func_001455D0(void* self, int a1, int a2)
+{
+    return D_00440D18[a2 + (a1 - 6) * 3].field_0x4;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145600);
+#ifdef SKIP_ASM
+extern sRaceTableEntry_00440D18 D_00440D18[];
 
+extern "C" int func_00145600(void* self, int a1, int a2)
+{
+    return D_00440D18[a2 + (a1 - 6) * 3].field_0x6;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145630);
+#ifdef SKIP_ASM
+extern sRaceTableEntry_00440D18 D_00440D18[];
 
+extern "C" int func_00145630(void* self, int a1, int a2)
+{
+    return D_00440D18[a2 + (a1 - 6) * 3].field_0x12 * 100;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145668);
+#ifdef SKIP_ASM
+extern sRaceTableEntry_00440D18 D_00440D18[];
+
+extern "C" int func_00145668(void* self, int a1, int a2, int a3)
+{
+    return D_00440D18[a2 + (a1 - 6) * 3].field_0x8[a3];
+}
+#endif
 
 INCLUDE_ASM("be/beintnewrace", func_001456A0);
 

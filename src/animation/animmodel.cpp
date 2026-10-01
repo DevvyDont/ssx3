@@ -27,7 +27,24 @@ extern "C" int func_0030DB90(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030DBA0);
+#ifdef SKIP_ASM
+struct sVec4_0030DBA0
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_0030DBA0(void* self, float a, float b)
+{
+    sVec4_0030DBA0 v;
+    v.x = a;
+    v.y = b;
+    v.z = b;
+    v.w = 1.0f;
+    *(sVec4_0030DBA0*)((char*)self + 0x140) = v;
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", cAnimModel_compile);
 
@@ -41,7 +58,33 @@ INCLUDE_ASM("animation/animmodel", func_0030EBC0);
 
 INCLUDE_ASM("animation/animmodel", func_0030EC18);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030ECA0);
+#ifdef SKIP_ASM
+struct sAnimEntry_0030ECA0
+{
+    char pad[0x10];
+    ulong mask;
+    char pad2[0x40];
+};
+
+struct sAnimModel_0030ECA0
+{
+    char pad0[0xC];
+    sAnimEntry_0030ECA0* entries; // 0xC
+    char pad1[0xC];
+    int* indices;                 // 0x1C
+    char pad2[0x138];
+    ulong mask;                   // 0x158
+};
+
+// PORT: ulong is 64-bit here
+extern "C" void func_0030ECA0(sAnimModel_0030ECA0* self, int i)
+{
+    sAnimEntry_0030ECA0* e = &self->entries[self->indices[i]];
+    self->mask |= e->mask;
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_0030ECD8);
 
@@ -71,7 +114,21 @@ INCLUDE_ASM("animation/animmodel", func_00310F18);
 
 INCLUDE_ASM("animation/animmodel", func_00311048);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_003110D0);
+#ifdef SKIP_ASM
+extern int D_004FE7A0[];
+extern int D_004FE860[];
+
+extern "C" void func_003110D0(void)
+{
+    for (int i = 0; i < 48; i++)
+    {
+        D_004FE7A0[i] = 0;
+        D_004FE860[i] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_00311110);
 
@@ -79,7 +136,18 @@ INCLUDE_ASM("animation/animmodel", func_00311220);
 
 INCLUDE_ASM("animation/animmodel", func_00311250);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00311290);
+#ifdef SKIP_ASM
+extern "C" void func_00311290(void* self, char* data)
+{
+    *(char**)((char*)self + 0x4) = data;
+    *(char**)((char*)self + 0x8) = data + 0x10;
+    *(char**)((char*)self + 0xC) = data + *(int*)(data + 0x4);
+    *(char**)((char*)self + 0x10) = data + *(int*)(data + 0x8);
+    *(char**)((char*)self + 0x14) = data + *(int*)(data + 0xC);
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_003112C8);
 

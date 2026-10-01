@@ -26,7 +26,21 @@ void* cBEMissionInterface_getThis()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153350);
+#ifdef SKIP_ASM
+extern signed char D_0043FA70[];
+
+extern "C" int func_00153350(void* self, int start)
+{
+    int sum = 0;
+    for (int i = 0; i < 1; i++)
+    {
+        sum += D_0043FA70[start + i];
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00153390);
 
@@ -72,11 +86,49 @@ INCLUDE_ASM("be/beintmission", func_00154160);
 
 INCLUDE_ASM("be/beintmission", func_001541D0);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154240);
+#ifdef SKIP_ASM
+struct sMissionDef_0043EE10
+{
+    int id;             // 0x00
+    char pad_0x04[0xC];
+    int group;          // 0x10
+    char pad_0x14[0xE];
+    short value;        // 0x22
+};
+
+extern sMissionDef_0043EE10 D_0043EE10[];
+
+extern "C" int func_00154240(void* self, int id)
+{
+    for (int i = 0; i < 88; i++) {
+        if (D_0043EE10[i].id == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00154278);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001542A0);
+#ifdef SKIP_ASM
+extern sMissionDef_0043EE10 D_0043EE10[];
+
+extern "C" int func_001542A0(void* self, int group)
+{
+    int n = 0;
+    for (int i = 0; i < 88; i++) {
+        if (D_0043EE10[i].group == group) {
+            n++;
+        }
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_001542E0);
 
@@ -88,7 +140,25 @@ INCLUDE_ASM("be/beintmission", func_001544D0);
 
 INCLUDE_ASM("be/beintmission", func_00154588);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001545B0);
+#ifdef SKIP_ASM
+extern sMissionDef_0043EE10 D_0043EE10[];
+
+extern "C" int func_001545B0(void* self, int index, int group)
+{
+    int n = 0;
+    for (int i = 0; i < 88; i++) {
+        if (D_0043EE10[i].group == group) {
+            if (n == index) {
+                return D_0043EE10[i].id;
+            }
+            n++;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_001545F8);
@@ -113,13 +183,51 @@ extern "C" int func_001545F8(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154630);
+#ifdef SKIP_ASM
+extern "C" int func_00154630(void* self, int value, int id)
+{
+    for (int i = 0; i < 22; i++) {
+        if (D_00440770[i].id == id && D_00440770[i].value >= value) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00154678);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154760);
+#ifdef SKIP_ASM
+extern "C" void* func_00154760(void* self, int id)
+{
+    for (int i = 0; i < 22; i++) {
+        if (D_00440770[i].id == id) {
+            return D_00440770[i].pad_0x04;
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001547A0);
+#ifdef SKIP_ASM
+extern sMissionDef_0043EE10 D_0043EE10[];
+
+extern "C" int func_001547A0(void* self, int id)
+{
+    for (int i = 0; i < 88; i++) {
+        if (D_0043EE10[i].id == id) {
+            return D_0043EE10[i].value;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_001547D8__FPv);

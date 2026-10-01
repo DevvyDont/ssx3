@@ -386,7 +386,17 @@ void func_00125AD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125AD8);
+#ifdef SKIP_ASM
+extern "C" int func_00125AD8(void* self)
+{
+    union { float f; int i; } u;
+    u.f = *(float*)((char*)self + 0x110) + *(float*)((char*)self + 0x114) + *(float*)((char*)self + 0x118)
+        + (*(float*)((char*)self + 0x120) + *(float*)((char*)self + 0x124) + *(float*)((char*)self + 0x128) + *(float*)((char*)self + 0x12C));
+    return u.i;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00125B18);
 

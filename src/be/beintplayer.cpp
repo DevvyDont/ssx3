@@ -100,7 +100,27 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderCtrlID);
 
 INCLUDE_ASM("be/beintplayer", func_00147290);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001472C8);
+#ifdef SKIP_ASM
+struct sPlayerCharFlags_001472C8 {
+    unsigned int bit0 : 1;
+    unsigned int bit1 : 1;
+    unsigned int bit2 : 1;
+    unsigned int rest : 29;
+};
+
+extern "C" void func_001472C8(void* self, int a1, int a2)
+{
+    D_00534FE0[a1].field_0xc = a2;
+    if (a2 >= 0) {
+        char* p = (char*)&D_00534FE0[0] + a1 * 0x1c;
+        sPlayerCharFlags_001472C8* f = (sPlayerCharFlags_001472C8*)(p + 0x10);
+        f->bit0 = a1;
+        f->bit2 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147318);
@@ -130,7 +150,31 @@ INCLUDE_ASM("be/beintplayer", func_001473D0);
 
 INCLUDE_ASM("be/beintplayer", func_00147410);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147448);
+#ifdef SKIP_ASM
+struct sPlayerCharFlags_00147448 {
+    unsigned int bit0 : 1;
+    unsigned int bit1 : 1;
+    unsigned int bit2 : 1;
+    unsigned int rest : 29;
+};
+
+static inline int func_00147448_getBit2(char* p)
+{
+    return ((sPlayerCharFlags_00147448*)(p + 0x10))->bit2;
+}
+
+extern "C" void func_00147448(void* self, int a1, int charID)
+{
+    char* p = (char*)&D_00534FE0[0] + a1 * 0x1c;
+    if (func_00147448_getBit2(p) == 1) {
+        *(signed char*)(p + 0x11) = D_00534FE0[0].mCharID;
+    } else {
+        *(signed char*)(p + 0x11) = charID;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCharID__FPvi);

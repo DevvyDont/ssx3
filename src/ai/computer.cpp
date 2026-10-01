@@ -54,7 +54,27 @@ INCLUDE_ASM("ai/computer", func_0010D410);
 
 INCLUDE_ASM("ai/computer", func_0010D870);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010D8F8);
+#ifdef SKIP_ASM
+struct sComputer_0010D8F8
+{
+    int a;
+    int b;
+    char pad[0x1C];
+};
+
+extern "C" int func_0010D8F8(void* self)
+{
+    sComputer_0010D8F8* p = *(sComputer_0010D8F8**)((char*)self + 0x18);
+    for (int i = 0; i < 6; i++, p++)
+    {
+        if (p->a != 0 && p->b != 0)
+            return i;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010D9E8);

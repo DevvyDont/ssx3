@@ -393,7 +393,18 @@ void* func_00144610(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here
+extern "C" void func_00144670(void* self, int bit)
+{
+    ulong mask = (ulong)1 << bit;
+    ulong a = *(ulong*)self;
+    *(ulong*)self = a & ~mask;
+    *(ulong*)((char*)self + 0x8) |= mask & a;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);

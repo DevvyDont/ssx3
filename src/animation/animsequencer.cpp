@@ -18,7 +18,19 @@ void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313A20);
+#ifdef SKIP_ASM
+extern "C" void func_00313A20(void* self, float v)
+{
+    if (*(float*)((char*)self + 0x98) != 0.0f || *(float*)((char*)self + 0x9C) == 0.0f || v < *(float*)((char*)self + 0x9C))
+    {
+        *(float*)((char*)self + 0x9C) = v;
+    }
+    *(float*)((char*)self + 0x98) = 0.0f;
+    *(int*)((char*)self + 0xA0) = 1;
+}
+#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00313A70);
 

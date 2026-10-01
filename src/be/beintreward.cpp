@@ -142,9 +142,25 @@ int func_00157370(void* self)
 
 INCLUDE_ASM("be/beintreward", func_00157390);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_001573F0);
+#ifdef SKIP_ASM
+extern "C" void func_001573F0(void* self, int bit, char* bits)
+{
+    int shift = bit % 8;
+    bits[(unsigned int)bit / 8] |= 1 << shift;
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157430);
+#ifdef SKIP_ASM
+extern "C" int func_00157430(void* self, int bit, char* bits)
+{
+    int shift = bit % 8;
+    return (bits[(unsigned int)bit / 8] >> shift) & 1;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00157468);
 
@@ -390,9 +406,25 @@ INCLUDE_ASM("be/beintreward", func_00159CD0);
 
 INCLUDE_ASM("be/beintreward", func_0015A2E0);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A320);
+#ifdef SKIP_ASM
+extern "C" int func_0015A320(void* self, int bit, unsigned char* bits)
+{
+    int shift = bit % 8;
+    return (bits[(unsigned int)bit / 8] >> shift) & 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A358);
+#ifdef SKIP_ASM
+extern "C" void func_0015A358(void* self, int bit, unsigned char* bits)
+{
+    int shift = bit % 8;
+    bits[(unsigned int)bit / 8] |= 1 << shift;
+}
+#endif
 
 // 0x64-byte array elements; arr[i].field indexing reproduces the target's
 // base-first addu
@@ -428,9 +460,25 @@ INCLUDE_ASM("be/beintreward", func_0015A488);
 
 INCLUDE_ASM("be/beintreward", func_0015A510);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A5B0);
+#ifdef SKIP_ASM
+extern "C" void func_0015A5B0(void* self, int bit, unsigned char* bits)
+{
+    int shift = bit % 8;
+    bits[(unsigned int)bit / 8] |= 1 << shift;
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A5F0);
+#ifdef SKIP_ASM
+extern "C" int func_0015A5F0(void* self, int bit, unsigned char* bits)
+{
+    int shift = bit % 8;
+    return (bits[(unsigned int)bit / 8] >> shift) & 1;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_0015A628);
 

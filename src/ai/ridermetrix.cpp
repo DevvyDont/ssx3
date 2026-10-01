@@ -2,7 +2,33 @@
 
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001173B8);
+#ifdef SKIP_ASM
+struct sRiderMetrixEntry_001173B8
+{
+    int state;
+    char pad[0x98];
+};
+
+struct sRiderMetrix_001173B8
+{
+    char pad[0x1B0];
+    sRiderMetrixEntry_001173B8* entries;
+    int count;
+};
+
+extern "C" void func_001173B8(sRiderMetrix_001173B8* self)
+{
+    if (self->entries != 0)
+    {
+        for (int i = 0; i < self->count; i++)
+        {
+            self->entries[i].state = 0x34;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117400);
 
