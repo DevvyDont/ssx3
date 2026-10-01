@@ -53,14 +53,12 @@ INCLUDE_ASM("object/effectlink", func_00345EF8);
 
 INCLUDE_ASM("object/effectlink", func_00345F90);
 
-//63.33%
+//100%
 INCLUDE_ASM("object/effectlink", func_00346060__FPv);
 #ifdef SKIP_ASM
-int func_00346060(void* self)
+void func_00346060(void* self)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x14) = t0;
-    return t0;
+    *(int*)((char*)self + 0x14) = 1;
 }
 #endif
 

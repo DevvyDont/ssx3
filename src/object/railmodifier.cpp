@@ -1449,14 +1449,12 @@ INCLUDE_ASM("object/railmodifier", func_00361940);
 
 INCLUDE_ASM("object/railmodifier", func_00361988);
 
-//63.33%
+//100%
 INCLUDE_ASM("object/railmodifier", func_003619B8__FPv);
 #ifdef SKIP_ASM
-int func_003619B8(void* self)
+void func_003619B8(void* self)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x44) = t0;
-    return t0;
+    *(int*)((char*)self + 0x44) = 1;
 }
 #endif
 

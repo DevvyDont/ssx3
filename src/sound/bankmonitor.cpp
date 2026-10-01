@@ -64,14 +64,12 @@ void func_002AD970(void* self, int a1)
 }
 #endif
 
-//63.33%
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD980__FPv);
 #ifdef SKIP_ASM
-int func_002AD980(void* self)
+void func_002AD980(void* self)
 {
-    int t0 = 1;
-    *(int*)self = t0;
-    return t0;
+    *(int*)self = 1;
 }
 #endif
 

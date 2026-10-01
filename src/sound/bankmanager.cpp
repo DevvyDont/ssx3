@@ -112,14 +112,12 @@ extern "C" int func_0028DEF0(void* self, int a1)
 }
 #endif
 
-//63.33%
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028DF08__FPv);
 #ifdef SKIP_ASM
-int func_0028DF08(void* self)
+void func_0028DF08(void* self)
 {
-    int t0 = -1;
-    *(int*)((char*)self + 0x629c) = t0;
-    return t0;
+    *(int*)((char*)self + 0x629C) = -1;
 }
 #endif
 

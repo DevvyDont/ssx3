@@ -151,14 +151,12 @@ extern "C" int func_002C4748(void* self)
 }
 #endif
 
-//63.33%
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4758__FPv);
 #ifdef SKIP_ASM
-int func_002C4758(void* self)
+void func_002C4758(void* self)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x48) = t0;
-    return t0;
+    *(int*)((char*)self + 0x48) = 1;
 }
 #endif
 
@@ -195,14 +193,12 @@ extern "C" int func_002C4880(void* self)
 }
 #endif
 
-//63.33%
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4890__FPv);
 #ifdef SKIP_ASM
-int func_002C4890(void* self)
+void func_002C4890(void* self)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x44) = t0;
-    return t0;
+    *(int*)((char*)self + 0x44) = 1;
 }
 #endif
 

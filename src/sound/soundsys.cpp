@@ -188,14 +188,12 @@ INCLUDE_ASM("sound/soundsys", func_0029D610);
 
 INCLUDE_ASM("sound/soundsys", func_0029D678);
 
-//63.33%
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029D6D0__FPv);
 #ifdef SKIP_ASM
-int func_0029D6D0(void* self)
+void func_0029D6D0(void* self)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x5fd8) = t0;
-    return t0;
+    *(int*)((char*)self + 0x5FD8) = 1;
 }
 #endif
 

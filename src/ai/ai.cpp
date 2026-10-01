@@ -233,14 +233,12 @@ INCLUDE_ASM("ai/ai", func_00130228);
 
 INCLUDE_ASM("ai/ai", func_001303E0);
 
-//63.33%
+//100%
 INCLUDE_ASM("ai/ai", func_001304D0__FPv);
 #ifdef SKIP_ASM
-int func_001304D0(void* self)
+void func_001304D0(void* self)
 {
-    int t0 = 1;
-    *(int*)self = t0;
-    return t0;
+    *(int*)self = 1;
 }
 #endif
 

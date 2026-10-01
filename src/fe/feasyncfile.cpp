@@ -597,14 +597,12 @@ INCLUDE_ASM("fe/feasyncfile", func_001B40D0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B4168);
 
-//63.33%
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4198__FPv);
 #ifdef SKIP_ASM
-int func_001B4198(void* self)
+void func_001B4198(void* self)
 {
-    int t0 = 6;
-    *(int*)((char*)self + 0x708) = t0;
-    return t0;
+    *(int*)((char*)self + 0x708) = 6;
 }
 #endif
 
