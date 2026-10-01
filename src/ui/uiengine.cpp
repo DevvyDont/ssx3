@@ -76,15 +76,14 @@ INCLUDE_ASM("ui/uiengine", func_00398910);
 
 INCLUDE_ASM("ui/uiengine", func_00398998);
 
-//58.0%
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398A60__FPvT0);
 #ifdef SKIP_ASM
-float func_00398A60(void* self, void* a1)
+void func_00398A60(void* a, void* b)
 {
-    float t0 = *(float*)a1;
-    *(float*)self = t0;
-    *(float*)a1 = *(float*)self;
-    return t0;
+    float t = *(float*)a;
+    *(float*)a = *(float*)b;
+    *(float*)b = t;
 }
 #endif
 

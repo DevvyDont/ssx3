@@ -472,12 +472,13 @@ int func_002B4868(void* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002B4878);
 
-//96.67%
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4908__FPv);
 #ifdef SKIP_ASM
 int func_002B4908(void* self)
 {
-    return *(int*)((char*)*(void**)((char*)((char*)self + *(int*)((char*)self + 0x3f0) * 4) + 0x4) + 0x98);
+    void* p = *(void**)((char*)self + (*(int*)((char*)self + 0x3f0) << 2) + 0x4);
+    return *(int*)((char*)p + 0x98);
 }
 #endif
 

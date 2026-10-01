@@ -58,7 +58,14 @@ INCLUDE_ASM("ui/uivector", func_003A4A08);
 
 INCLUDE_ASM("ui/uivector", func_003A4A28);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4A48);
+#ifdef SKIP_ASM
+extern "C" void func_003A4A48(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x14))->bit4 = enable;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A4A68);
 
@@ -194,7 +201,16 @@ int func_003A5500(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5508);
+#ifdef SKIP_ASM
+extern "C" void* func_003A5508(void* self)
+{
+    *(unsigned char*)((char*)self + 0x1) &= 0xc0;
+    *(unsigned char*)((char*)self + 0x0) &= 0xc0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A5658);
 
@@ -363,7 +379,14 @@ INCLUDE_ASM("ui/uivector", func_003A5E68);
 
 INCLUDE_ASM("ui/uivector", func_003A5E88);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5EA8);
+#ifdef SKIP_ASM
+extern "C" void func_003A5EA8(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit4 = enable;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A5EC8);
 

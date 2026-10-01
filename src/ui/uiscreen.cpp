@@ -43,27 +43,20 @@ struct cUIScreen {
     sFrameList* list; // 0x34
 };
 
-//44.71% - loop control-flow shape (bnel/lazy-stride idiom) not reproduced after several attempts; logic is correct
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
 #ifdef SKIP_ASM
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
     sFrameList* list = self->list;
-    int count = list->count;
-    if (count == 0) {
-        return 0xFFFF;
-    }
-    char* entry = (char*)list + 4;
-    int idx = 0;
-    do {
-        sFrameEntry* e = (sFrameEntry*)entry;
+    sFrameEntry* e = (sFrameEntry*)((char*)list + 4);
+    unsigned int i;
+    for (i = 0; i < (unsigned int)list->count; i++) {
         if (e->label == label) {
             return e->field_0x8;
         }
-        int stride = e->stride;
-        idx++;
-        entry += stride;
-    } while (idx < count);
+        e = (sFrameEntry*)((char*)e + e->stride);
+    }
     return 0xFFFF;
 }
 #endif

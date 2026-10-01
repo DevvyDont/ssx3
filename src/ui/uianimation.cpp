@@ -30,7 +30,24 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
 
 INCLUDE_ASM("ui/uianimation", func_003973A8);
 
+//100%
 INCLUDE_ASM("ui/uianimation", func_00397468);
+#ifdef SKIP_ASM
+extern "C" void func_00397468(void* self, int mode, unsigned short v)
+{
+    mode &= 7;
+    if (mode == 0) {
+        *(unsigned short*)((char*)self + 0xc) = v;
+    }
+    if (mode == 2) {
+        *(unsigned char*)((char*)self + 0xe) = 1;
+        *(unsigned short*)((char*)self + 0xa) = *(unsigned short*)((char*)*(void**)self + 0x2) - 1;
+    } else {
+        *(unsigned char*)((char*)self + 0xe) = 0;
+        *(unsigned short*)((char*)self + 0xa) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uianimation", func_003974B0);
 
