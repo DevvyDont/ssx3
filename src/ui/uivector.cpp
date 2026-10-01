@@ -1,5 +1,17 @@
 #include "common.h"
 
+// Flag word at cUIVector + 0x14. The setters take an int and store it into a
+// bool bitfield: that int->bool conversion is the `sltu` in their asm.
+struct sUIVectorFlags14 {
+    bool bit0 : 1;
+    bool bit1 : 1;
+    bool bit2 : 1;
+    bool bit3 : 1;
+    bool bit4 : 1;
+    bool bit5 : 1;
+    bool bit6 : 1;
+};
+
 INCLUDE_ASM("ui/uivector", cUIVector_setUIData);
 
 INCLUDE_ASM("ui/uivector", func_003A36D0);
@@ -33,7 +45,14 @@ extern "C" void func_003A4868(void* self)
 
 INCLUDE_ASM("ui/uivector", func_003A4888);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A49E8);
+#ifdef SKIP_ASM
+extern "C" void func_003A49E8(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x14))->bit1 = enable;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A4A08);
 
