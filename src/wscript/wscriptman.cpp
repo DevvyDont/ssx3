@@ -148,7 +148,21 @@ int func_0030B2C0(void* self, void* a1)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B2D0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B320);
+#ifdef SKIP_ASM
+extern "C" void* func_0030B320(void* self, int id)
+{
+    void* p = *(void**)self;
+    while (p != 0) {
+        if (*(int*)((char*)p + 0x20) == id) {
+            return p;
+        }
+        p = *(void**)((char*)p + 0x18);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B388);
 
@@ -172,55 +186,47 @@ struct cWScriptSlot {
     int valueC;
 };
 
-//75.4%
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B4C0__FPvii);
 #ifdef SKIP_ASM
-int func_0030B4C0(void* self, int a1, int a2)
+void func_0030B4C0(void* self, int b, int c)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0xc) = a2;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)((char*)self + 0x8) = a1;
-    return t0;
+    *(int*)((char*)self + 0x4) = 1;
+    *(int*)((char*)self + 0x8) = b;
+    *(int*)((char*)self + 0xc) = c;
 }
 #endif
 
-//75.4%
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B4D8__FPvii);
 #ifdef SKIP_ASM
-int func_0030B4D8(void* self, int a1, int a2)
+void func_0030B4D8(void* self, int b, int c)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x18) = a2;
-    *(int*)((char*)self + 0x10) = t0;
-    *(int*)((char*)self + 0x14) = a1;
-    return t0;
+    *(int*)((char*)self + 0x10) = 1;
+    *(int*)((char*)self + 0x14) = b;
+    *(int*)((char*)self + 0x18) = c;
 }
 #endif
 
-//75.4%
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B4F0__FPvii);
 #ifdef SKIP_ASM
-int func_0030B4F0(void* self, int a1, int a2)
+void func_0030B4F0(void* self, int b, int c)
 {
-    int t0 = 1;
-    *(int*)((char*)self + 0x24) = a2;
-    *(int*)((char*)self + 0x1c) = t0;
-    *(int*)((char*)self + 0x20) = a1;
-    return t0;
+    *(int*)((char*)self + 0x1c) = 1;
+    *(int*)((char*)self + 0x20) = b;
+    *(int*)((char*)self + 0x24) = c;
 }
 #endif
 
-//70.5%
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B508__FPviT0);
 #ifdef SKIP_ASM
-int func_0030B508(void* self, int a1, void* a2)
+void func_0030B508(void* self, int c, void* src)
 {
-    int t0 = *(int*)((char*)a2 + 0x78);
-    *(int*)((char*)self + 0x30) = a1;
     *(int*)((char*)self + 0x28) = 1;
-    *(int*)((char*)self + 0x2c) = t0;
-    return t0;
+    *(int*)((char*)self + 0x30) = c;
+    *(int*)((char*)self + 0x2c) = *(int*)((char*)src + 0x78);
 }
 #endif
 

@@ -14,8 +14,8 @@ INCLUDE_ASM("util/menu", cMenuItem_cMenuItem__FP9cMenuItemPv);
 #ifdef SKIP_ASM
 cMenuItem* cMenuItem_cMenuItem(cMenuItem* self, void* text)
 {
-    self->field_0x4 = 1;
     self->vtable = D_00486F28;
+    self->field_0x4 = 1;
     self->field_0x8 = text;
     self->field_0xC = 0;
     return self;
@@ -214,22 +214,18 @@ INCLUDE_ASM("util/menu", func_002CC018);
 
 INCLUDE_ASM("util/menu", func_002CC048);
 
-//98.4%
+//100%
 INCLUDE_ASM("util/menu", func_002CC070__FPv);
 #ifdef SKIP_ASM
-int func_002CC070(void* self)
+void func_002CC070(void* self)
 {
-    int t0 = -1;
-    int t1 = 11;
-    int t2 = 0;
-    *(int*)((char*)self + 0x50) = t0;
-    *(int*)((char*)self + 0x48) = t1;
-    *(int*)((char*)self + 0x58) = t2;
-    *(int*)((char*)self + 0x54) = t2;
-    *(int*)self = t2;
-    *(int*)((char*)self + 0x64) = t2;
-    *(int*)((char*)self + 0x4c) = t0;
-    return t1;
+    *(int*)((char*)self + 0x58) = 0;
+    *(int*)((char*)self + 0x54) = 0;
+    *(int*)self = 0;
+    *(int*)((char*)self + 0x64) = 0;
+    *(int*)((char*)self + 0x4c) = -1;
+    *(int*)((char*)self + 0x48) = 11;
+    *(int*)((char*)self + 0x50) = -1;
 }
 #endif
 

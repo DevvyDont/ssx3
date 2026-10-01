@@ -42,7 +42,18 @@ int cWorldView_isSectionLoaded(cWorldView* self, int section)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A9890);
+#ifdef SKIP_ASM
+extern "C" int func_003A9890(cWorldView* self, unsigned int i)
+{
+    cWorldViewSectionList* list = self->mSections;
+    if (list == 0 || i >= (unsigned int)list->mNumSections) {
+        return 0;
+    }
+    return *(int*)((char*)self + (i << 3) + 0x14) == 0;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003A98C8);
 

@@ -4,29 +4,28 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
 
 INCLUDE_ASM("world/worldcache", func_003A76C0);
 
-//51.2%
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7768__FPv);
 #ifdef SKIP_ASM
-int func_003A7768(void* self)
+void* func_003A7768(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)((char*)*(void**)((char*)self + 0x8) - 0x1);
-    *(int*)((char*)self + 0x10) = *(int*)((char*)*(void**)((char*)self + 0x10) + 0x14);
-    *(int*)((char*)*(void**)((char*)self + 0x10) + 0x10) = 1;
-    return *(int*)((char*)self + 0x10);
+    void* item = *(void**)((char*)self + 0x10);
+    *(void**)((char*)self + 0x10) = *(void**)((char*)item + 0x14);
+    *(int*)((char*)self + 0x8) -= 1;
+    *(int*)((char*)item + 0x10) = 1;
+    return item;
 }
 #endif
 
-//9.12%
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7790__FPvT0);
 #ifdef SKIP_ASM
-void* func_003A7790(void* self, void* a1)
+void func_003A7790(void* self, void* item)
 {
-    void* t0 = (char*)*(void**)((char*)self + 0x8) + 0x1;
-    *(int*)((char*)a1 + 0x10) = 0;
-    *(int*)((char*)a1 + 0x14) = *(int*)((char*)self + 0x10);
-    *(int*)((char*)self + 0x10) = (int)a1;
-    *(int*)((char*)self + 0x8) = (int)t0;
-    return t0;
+    *(int*)((char*)item + 0x10) = 0;
+    *(void**)((char*)item + 0x14) = *(void**)((char*)self + 0x10);
+    *(void**)((char*)self + 0x10) = item;
+    *(int*)((char*)self + 0x8) += 1;
 }
 #endif
 

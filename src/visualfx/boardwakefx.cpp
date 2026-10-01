@@ -143,7 +143,18 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4B98);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4C60);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);
+#ifdef SKIP_ASM
+extern "C" int func_002E4C90(void* self)
+{
+    int r = 0;
+    if (*(int*)((char*)self + 0x60) != 0) {
+        r = *(int*)((char*)self + 0x64) != 0;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4CB0);
 
@@ -165,17 +176,14 @@ void* func_002E4D70(void* self)
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4D88);
 
-//99.6%
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4F10__FPv);
 #ifdef SKIP_ASM
-int func_002E4F10(void* self)
+void func_002E4F10(void* self)
 {
-    int t0 = 0;
-    int t1 = 1;
-    *(int*)((char*)self + 0x90) = t0;
-    *(int*)((char*)self + 0xb0) = t1;
-    *(int*)((char*)self + 0x94) = t0;
-    return t1;
+    *(int*)((char*)self + 0x94) = 0;
+    *(int*)((char*)self + 0xb0) = 1;
+    *(int*)((char*)self + 0x90) = 0;
 }
 #endif
 
