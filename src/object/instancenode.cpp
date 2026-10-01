@@ -73,7 +73,36 @@ INCLUDE_ASM("object/instancenode", func_00350288);
 
 INCLUDE_ASM("object/instancenode", cInstanceNode_getBoundBoxInfo);
 
+//100%
 INCLUDE_ASM("object/instancenode", func_00350698);
+#ifdef SKIP_ASM
+struct sInstNodeEntry {
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    int field_0xc;
+};
+
+struct sInstNodeList {
+    int field_0x0;
+    int count;                // 0x4
+    sInstNodeEntry* entries;  // 0x8
+};
+
+extern "C" int func_00350698(void* self)
+{
+    sInstNodeList* list = *(sInstNodeList**)((char*)self + 0x80);
+    int i;
+    int count = list->count;
+    sInstNodeEntry* e = list->entries;
+    for (i = 0; i < count; i++, e++) {
+        if (e->field_0x8 != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("object/instancenode", func_003506D8);
 

@@ -83,7 +83,22 @@ void* func_00252F60(void* self)
 
 INCLUDE_ASM("mem/memstd", func_00252FA0);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00253390);
+#ifdef SKIP_ASM
+extern "C" void func_00253390(void* self)
+{
+    *(float*)((char*)self + 0x20) = 1.0f;
+    *(int*)((char*)self + 0x1c) = 31;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0xc) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_002533C8);
 
@@ -105,7 +120,26 @@ INCLUDE_ASM("mem/memstd", func_002539E0);
 
 INCLUDE_ASM("mem/memstd", func_00253A40);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00253AA0);
+#ifdef SKIP_ASM
+extern "C" void* func_00253AD0(int size);
+void* func_00253AF8(void* self);
+
+struct sMemAllocFuncs {
+    void* (*alloc)(int);    // 0x0
+    void* (*free)(void*);   // 0x4
+    int field_0x8;          // 0x8
+};
+extern sMemAllocFuncs D_00509430;
+
+extern "C" void func_00253AA0()
+{
+    D_00509430.alloc = func_00253AD0;
+    D_00509430.free = func_00253AF8;
+    D_00509430.field_0x8 = 0x400;
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_00253AD0);
 

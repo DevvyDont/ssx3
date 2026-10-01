@@ -110,7 +110,34 @@ INCLUDE_ASM("main/ssxapp", func_002294C8);
 
 INCLUDE_ASM("main/ssxapp", func_00229530);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229738);
+#ifdef SKIP_ASM
+struct sQuad229 {
+    int v[4];
+} __attribute__((aligned(16)));
+
+struct sRingEntry {
+    sQuad229 q;     // 0x0
+    int value;      // 0x10
+    int pad[3];
+};
+
+struct sRingOwner {
+    char pad_0x0[0x2214];
+    int index;              // 0x2214
+    int pad_0x2218[2];
+    sRingEntry entries[40]; // 0x2220
+};
+
+extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value)
+{
+    self->entries[self->index].q = *q;
+    self->entries[self->index].value = value;
+    self->index++;
+    self->index %= 40;
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229788);
 
@@ -135,7 +162,38 @@ INCLUDE_ASM("main/ssxapp", func_00229E20);
 
 INCLUDE_ASM("main/ssxapp", func_00229E58);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229F30);
+#ifdef SKIP_ASM
+// Upload two 4x4 matrices (a, b) to VU0 data memory starting at qword 4 (address 0x40).
+// PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own matrix store.
+extern "C" void func_00229F30(void* a, void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "ctc2.ni   %0, $vi1\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "vsqi.xyzw $vf1, ($vi1++)\n"
+        "vsqi.xyzw $vf2, ($vi1++)\n"
+        "vsqi.xyzw $vf3, ($vi1++)\n"
+        "vsqi.xyzw $vf4, ($vi1++)\n"
+        "lqc2      $vf1, 0x0(%2)\n"
+        "lqc2      $vf2, 0x10(%2)\n"
+        "lqc2      $vf3, 0x20(%2)\n"
+        "lqc2      $vf4, 0x30(%2)\n"
+        "vsqi.xyzw $vf1, ($vi1++)\n"
+        "vsqi.xyzw $vf2, ($vi1++)\n"
+        "vsqi.xyzw $vf3, ($vi1++)\n"
+        "vsqi.xyzw $vf4, ($vi1++)\n"
+        ".set reorder\n"
+        :
+        : "r"(0x40), "r"(a), "r"(b)
+        : "memory");
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229F80__FPv);
@@ -145,7 +203,33 @@ void func_00229F80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229F88);
+#ifdef SKIP_ASM
+// Upload a vector plus a 4x4 matrix (5 qwords) to VU0 data memory slot `index`,
+// starting at qword 0x50 + index * 5.
+// PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own store.
+extern "C" void func_00229F88(int index, void* v, void* m)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "ctc2.ni   %0, $vi1\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x0(%2)\n"
+        "lqc2      $vf3, 0x10(%2)\n"
+        "lqc2      $vf4, 0x20(%2)\n"
+        "lqc2      $vf5, 0x30(%2)\n"
+        "vsqi.xyzw $vf1, ($vi1++)\n"
+        "vsqi.xyzw $vf2, ($vi1++)\n"
+        "vsqi.xyzw $vf3, ($vi1++)\n"
+        "vsqi.xyzw $vf4, ($vi1++)\n"
+        "vsqi.xyzw $vf5, ($vi1++)\n"
+        ".set reorder\n"
+        :
+        : "r"(index * 5 + 0x50), "r"(v), "r"(m)
+        : "memory");
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229FC8);
 

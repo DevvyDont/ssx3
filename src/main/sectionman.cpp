@@ -2,7 +2,37 @@
 
 INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
 
+//100%
 INCLUDE_ASM("main/sectionman", func_0022E228);
+#ifdef SKIP_ASM
+struct sSectionNode {
+    int field_0x0;
+    sSectionNode* next; // 0x4
+};
+
+struct sSectionMan {
+    sSectionNode nodes[50]; // 0x0
+    int field_0x190;
+    int field_0x194;
+    sSectionNode* freeList; // 0x198
+    int field_0x19c;
+    int field_0x1a0;
+};
+
+extern "C" void func_0022E228(sSectionMan* self)
+{
+    int i;
+    self->freeList = self->nodes;
+    for (i = 0; i < 50; i++) {
+        self->nodes[i].field_0x0 = 49;
+        self->nodes[i].next = &self->nodes[i + 1];
+    }
+    self->field_0x190 = 49;
+    self->field_0x194 = 0;
+    self->field_0x19c = 0;
+    self->field_0x1a0 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/sectionman", func_0022E278__FPv);

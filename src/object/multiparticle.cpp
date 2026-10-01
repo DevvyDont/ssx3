@@ -6,7 +6,25 @@ INCLUDE_ASM("object/multiparticle", func_00358120);
 
 INCLUDE_ASM("object/multiparticle", func_00358140);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003581B8);
+#ifdef SKIP_ASM
+struct sParticleList {
+    int capacity; // 0x0
+    int count;    // 0x4
+    int field_0x8;
+    int* items;   // 0xc
+};
+
+extern "C" void func_003581B8(sParticleList* list, int item)
+{
+    int n = list->count;
+    if (n < list->capacity) {
+        list->items[n] = item;
+        list->count = n + 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_003581F0);
 

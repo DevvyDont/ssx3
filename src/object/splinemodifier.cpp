@@ -98,9 +98,40 @@ extern "C" void func_0035B670(void* self, void* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035B690);
+#ifdef SKIP_ASM
+struct sSplineLink {
+    sSplineLink* next; // 0x0
+    sSplineLink* prev; // 0x4
+};
 
+extern "C" void func_0035B690(sSplineLink* link, sSplineLink* other)
+{
+    while (link->next != 0) {
+        link = link->next;
+    }
+    other->next = 0;
+    other->prev = link;
+    link->next = other;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035B6D0);
+#ifdef SKIP_ASM
+extern "C" void func_0035B6D0(sSplineLink* link)
+{
+    if (link->next != 0) {
+        link->next->prev = link->prev;
+    }
+    if (link->prev != 0) {
+        link->prev->next = link->next;
+    }
+    link->next = 0;
+    link->prev = 0;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_0035B708);
 

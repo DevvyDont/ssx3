@@ -330,13 +330,69 @@ void* func_00242500(void* self)
 
 INCLUDE_ASM("movie/movieplayer", func_00242518);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00242540);
+#ifdef SKIP_ASM
+struct sMovieNode {
+    char pad_0x0[0xbc];
+    sMovieNode* next; // 0xbc
+    sMovieNode* prev; // 0xc0
+};
 
+struct sMovieList {
+    sMovieNode* head; // 0x0
+    int count;        // 0x4
+};
+
+extern "C" void func_00242540(sMovieList* list, sMovieNode* node)
+{
+    node->next = list->head;
+    node->prev = 0;
+    if (list->head != 0) {
+        list->head->prev = node;
+    }
+    list->head = node;
+    list->count++;
+}
+#endif
+
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00242570);
+#ifdef SKIP_ASM
+extern "C" void func_00242570(sMovieList* list, sMovieNode* node)
+{
+    if (node->prev != 0) {
+        node->prev->next = node->next;
+    }
+    if (node->next != 0) {
+        node->next->prev = node->prev;
+    }
+    if (node == list->head) {
+        list->head = node->next;
+    }
+    list->count--;
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_002425C0);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00242978);
+#ifdef SKIP_ASM
+// qsort-style comparator: orders by the float at +0x4, ascending.
+extern "C" int func_00242978(const void* a, const void* b)
+{
+    float fa = *(float*)((char*)a + 0x4);
+    float fb = *(float*)((char*)b + 0x4);
+    if (fa < fb) {
+        return -1;
+    }
+    if (fb < fa) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_002429B0);
 

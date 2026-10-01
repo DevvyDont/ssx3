@@ -23,7 +23,20 @@ void cInstanceMan_copyInstance(void* self, sInstanceStruct* a, void* b)
 
 INCLUDE_ASM("object/instanceman", func_003512C0);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00351398);
+#ifdef SKIP_ASM
+extern "C" void func_00351398(void* self, float* src)
+{
+    *(float**)((char*)self + 0x40) = src;
+    *(float*)((char*)self + 0x44) = src[0];
+    *(float*)((char*)self + 0x48) = src[1];
+    *(float*)((char*)self + 0x4c) = src[2];
+    *(float*)((char*)self + 0x50) = src[3];
+    *(float*)((char*)self + 0x54) = src[4];
+    *(float*)((char*)self + 0x58) = src[5];
+}
+#endif
 
 INCLUDE_ASM("object/instanceman", func_003513D0);
 

@@ -19,9 +19,35 @@ void cEffectLink_add(cEffectLink* link, cEffectLink* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345720);
+#ifdef SKIP_ASM
+extern "C" void func_00345720(cEffectLink* link, cEffectLink* other)
+{
+    while (link->next != 0) {
+        link = link->next;
+    }
+    other->next = 0;
+    other->prev = link;
+    link->next = other;
+}
+#endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345760);
+#ifdef SKIP_ASM
+extern "C" void func_00345760(cEffectLink* link)
+{
+    if (link->next != 0) {
+        link->next->prev = link->prev;
+    }
+    if (link->prev != 0) {
+        link->prev->next = link->next;
+    }
+    link->next = 0;
+    link->prev = 0;
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_00345798);
 
@@ -72,7 +98,19 @@ INCLUDE_ASM("object/effectlink", func_003461C0);
 
 INCLUDE_ASM("object/effectlink", func_00346228);
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00346258);
+#ifdef SKIP_ASM
+// Advance a rotation angle (degrees) by an integer step, wrapping to 0 at +/-360.
+extern "C" void func_00346258(void* self)
+{
+    float a = *(float*)((char*)self + 0x30) + (float)*(int*)((char*)self + 0x2c);
+    *(float*)((char*)self + 0x30) = a;
+    if (a >= 360.0f || a <= -360.0f) {
+        *(float*)((char*)self + 0x30) = 0.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_003462A0);
 

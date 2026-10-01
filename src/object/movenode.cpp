@@ -216,7 +216,35 @@ INCLUDE_ASM("object/movenode", func_00357660);
 
 INCLUDE_ASM("object/movenode", func_003576D0);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357750);
+#ifdef SKIP_ASM
+extern void* D_0048F338[];
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
+// port needs a plain 64-byte copy.
+extern "C" void* func_00357750(void* self, void* src)
+{
+    *(void***)self = D_0048F338;
+    *(void**)((char*)self + 0x80) = src;
+    *(int*)((char*)self + 0x30) = 0;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x40), "r"((char*)src + 0x10)
+        : "memory");
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00357798);
 

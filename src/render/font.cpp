@@ -36,9 +36,49 @@ INCLUDE_ASM("render/font", func_00392BA8);
 
 INCLUDE_ASM("render/font", func_00392C60);
 
+//100%
 INCLUDE_ASM("render/font", func_00392D18);
+#ifdef SKIP_ASM
+struct sFontVec3 {
+    float x, y, z;
+};
 
+struct sFontQuad {
+    int v[4];
+} __attribute__((aligned(16)));
+
+struct sFontState {
+    sFontVec3 field_0x0;    // 0x0
+    int count;              // 0xc
+    sFontVec3 vecs[5];      // 0x10
+    sFontQuad quads[5];     // 0x50
+    int field_0xa0;         // 0xa0
+    int field_0xa4;         // 0xa4
+};
+
+extern "C" void func_00392D18(sFontState* self)
+{
+    sFontVec3 t;
+    t.x = 0.0f;
+    t.y = 0.0f;
+    t.z = 0.0f;
+    self->count = 0;
+    self->field_0x0 = t;
+    self->field_0xa0 = 0;
+    self->field_0xa4 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/font", func_00392D90);
+#ifdef SKIP_ASM
+extern "C" void func_00392D90(sFontState* self, sFontQuad* q, sFontVec3* v)
+{
+    self->vecs[self->count] = *v;
+    self->quads[self->count] = *q;
+    self->count++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00392DE8__FPvi);
@@ -773,7 +813,32 @@ void func_003956E0(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003956E8);
+#ifdef SKIP_ASM
+// Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_003956E8(void* self)
+{
+    char* top = *(char**)((char*)self + 0x13e4);
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(top + 0x40), "r"(top)
+        : "memory");
+    *(char**)((char*)self + 0x13e4) += 0x40;
+    *(int*)((char*)self + 0x13e0) += 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00395730__FPv);
@@ -788,7 +853,30 @@ void func_00395730(void* self)
 
 INCLUDE_ASM("render/font", func_00395750);
 
+//100%
 INCLUDE_ASM("render/font", func_00395C38);
+#ifdef SKIP_ASM
+// Load matrix m into the top of the matrix stack and clear the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_00395C38(void* self, void* m)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(m)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00395C68__FPv);
@@ -801,9 +889,62 @@ int func_00395C68(void* self)
 
 INCLUDE_ASM("render/font", func_00395C70);
 
+//100%
 INCLUDE_ASM("render/font", func_00395CF0);
+#ifdef SKIP_ASM
+extern char D_004FF1A0[];
 
+// Load the matrix D_004FF1A0 (likely identity) into the top of the matrix stack
+// and clear the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_00395CF0(void* self)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(D_004FF1A0)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/font", func_00395D28);
+#ifdef SKIP_ASM
+// Translate the top matrix of the stack: row 3 = top * v (v is a 4-vector),
+// then clear the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
+// needs a C fallback.
+extern "C" void func_00395D28(void* self, void* v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, 0x0(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(v)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00395D60);
 
@@ -848,7 +989,18 @@ int func_00396108(void* self)
 
 INCLUDE_ASM("render/font", func_00396110);
 
+//100%
 INCLUDE_ASM("render/font", func_00396128);
+#ifdef SKIP_ASM
+extern "C" void func_00396128(void* self)
+{
+    int i;
+    for (i = 0; i < 2; i++) {
+        ((int*)((char*)self + 0x1f4c))[i] = -1;
+    }
+    *(int*)((char*)self + 0x1f54) = -1;
+}
+#endif
 
 INCLUDE_ASM("render/font", func_003961A8);
 

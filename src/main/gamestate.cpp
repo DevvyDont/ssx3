@@ -255,7 +255,20 @@ void func_00237030(void* self)
 
 INCLUDE_ASM("main/gamestate", func_00237038);
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00237060);
+#ifdef SKIP_ASM
+extern "C" void* func_00237060(void* self, int a1, int a2)
+{
+    *(int*)((char*)self + 0x4) = a1;
+    *(int*)((char*)self + 0x8) = a2;
+    *(int*)((char*)self + 0xc) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x0) = a1 * a2;
+    *(int*)((char*)self + 0x4) = (60 / a2) * a2;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_002370A0);
 

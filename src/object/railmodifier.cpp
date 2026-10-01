@@ -1136,7 +1136,31 @@ INCLUDE_ASM("object/railmodifier", func_003611D8);
 
 INCLUDE_ASM("object/railmodifier", func_00361290);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003612C0);
+#ifdef SKIP_ASM
+extern char D_004FF1A0[];
+
+// Copy the 4x4 matrix D_004FF1A0 into self+0x90.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_003612C0(void* self)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x90), "r"(D_004FF1A0)
+        : "memory");
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00361340);
 
@@ -1884,7 +1908,26 @@ void* func_00361D88(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361D90);
+#ifdef SKIP_ASM
+extern "C" int func_00361D90(void* self)
+{
+    int r;
+    if (*(signed char*)((char*)self + 0x14) != 0) {
+        r = -1;
+        if (*(float*)((char*)self + 0x0) >= 0.0f) {
+            r = 1;
+        }
+        return r;
+    }
+    r = -1;
+    if (*(float*)((char*)self + 0x28) >= 0.0f) {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 extern void* D_0048EA70[];
 extern "C" void* func_00341CF0(void*);
@@ -1991,7 +2034,26 @@ INCLUDE_ASM("object/railmodifier", func_003626D8);
 
 INCLUDE_ASM("object/railmodifier", func_003627A8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362978);
+#ifdef SKIP_ASM
+// Append a DMA packet to a chain: the first one becomes the head, later ones are
+// linked by patching the previous tail's tag (via the uncached-accelerated
+// mirror, | 0x30000000) into a NEXT tag pointing at the new packet.
+// PORT: 64-bit DMA tag writes (ulong) and addresses held in int.
+extern "C" void func_00362978(void* self, int packet, int tail)
+{
+    if (*(int*)((char*)self + 0xc) != 0) {
+        ulong* tag = (ulong*)(*(int*)((char*)self + 0x10) | 0x30000000);
+        tag[0] = ((ulong)packet << 32) | 0x20000000;
+        tag[1] = 0;
+        *(int*)((char*)self + 0x10) = tail;
+    } else {
+        *(int*)((char*)self + 0xc) = packet;
+        *(int*)((char*)self + 0x10) = tail;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003629B8);
 

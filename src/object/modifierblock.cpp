@@ -118,7 +118,27 @@ INCLUDE_ASM("object/modifierblock", func_00353300);
 
 INCLUDE_ASM("object/modifierblock", func_00353398);
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353418);
+#ifdef SKIP_ASM
+struct sModifierLink {
+    sModifierLink* next; // 0x0
+    char pad_0x4[0x30 - 0x4];
+    int id;              // 0x30
+};
+
+extern "C" int func_00353418(void* self, int id)
+{
+    sModifierLink* p = *(sModifierLink**)((char*)self + 0x1c);
+    while (p != 0) {
+        if (p->id == id) {
+            return 1;
+        }
+        p = p->next;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("object/modifierblock", func_00353448);
 

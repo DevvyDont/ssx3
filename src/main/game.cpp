@@ -93,7 +93,28 @@ extern "C" int func_0022E078(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022E098);
+#ifdef SKIP_ASM
+struct sGameEntry2 {
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    int field_0xc;
+    int field_0x10;
+    int field_0x14;
+    int field_0x18;
+    int field_0x1c;
+    int field_0x20;
+    int field_0x24;
+};
+extern sGameEntry2 D_00442488[];
+
+extern "C" int func_0022E098(void* self, int a1)
+{
+    return D_00442168[D_00442488[a1].field_0x10].field_0x4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022E0C8);
@@ -104,5 +125,18 @@ extern "C" int func_0022E0C8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022E0E0);
+#ifdef SKIP_ASM
+extern "C" int func_0022E0E0(void* self, int a1)
+{
+    int i;
+    for (i = 0; i < 50; i++) {
+        if (a1 == D_00442168[i].field_0x4) {
+            return i;
+        }
+    }
+    return 50;
+}
+#endif
 

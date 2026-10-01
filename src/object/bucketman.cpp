@@ -13,7 +13,23 @@ INCLUDE_ASM("object/bucketman", cBucketMan_add);
 
 INCLUDE_ASM("object/bucketman", func_00354C98);
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00354E48);
+#ifdef SKIP_ASM
+struct sBucketNode {
+    int field_0x0;
+    sBucketNode* prev; // 0x4
+    sBucketNode* next; // 0x8
+};
+
+extern "C" void func_00354E48(cBucketMan* self, sBucketNode* node)
+{
+    if (node->prev != 0 && node->next != 0) {
+        node->next->prev = node->prev;
+        node->prev->next = node->next;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);

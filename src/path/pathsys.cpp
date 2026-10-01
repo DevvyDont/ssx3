@@ -4,11 +4,78 @@ INCLUDE_ASM("path/pathsys", cPathSys_resolvePaths);
 
 INCLUDE_ASM("path/pathsys", func_0026B410);
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B508);
+#ifdef SKIP_ASM
+struct sPathEntry28 {
+    int field_0x0;
+    int field_0x4;
+    char pad_0x8[0x20];
+};
 
+struct sPathEntry40 {
+    char pad_0x0[0x40];
+};
+
+struct sPathEntry3C {
+    char pad_0x0[0x3c];
+};
+
+struct sPathSys {
+    int count28;             // 0x0
+    sPathEntry28* entries28; // 0x4
+    int count40;             // 0x8
+    sPathEntry40* entries40; // 0xc
+    int count3C;             // 0x10
+    sPathEntry3C* entries3C; // 0x14
+};
+
+extern "C" int func_0026B508(sPathSys* self, sPathEntry3C* entry)
+{
+    int i;
+    if (entry != 0) {
+        for (i = 0; i < self->count3C; i++) {
+            if (&self->entries3C[i] == entry) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B550);
+#ifdef SKIP_ASM
+extern "C" int func_0026B550(sPathSys* self, sPathEntry40* entry)
+{
+    int i;
+    if (entry != 0) {
+        for (i = 0; i < self->count40; i++) {
+            if (&self->entries40[i] == entry) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B598);
+#ifdef SKIP_ASM
+extern "C" int func_0026B598(sPathSys* self, int a, int b)
+{
+    int i;
+    int count = self->count28;
+    for (i = 0; i < count; i++) {
+        if (self->entries28[i].field_0x4 == a && self->entries28[i].field_0x0 == b) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("path/pathsys", func_0026B5E0);
 
