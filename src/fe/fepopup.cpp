@@ -93,7 +93,22 @@ INCLUDE_ASM("fe/fepopup", func_001C8678);
 
 INCLUDE_ASM("fe/fepopup", func_001C8758);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C88C8);
+#ifdef SKIP_ASM
+struct sVec3_88C8 { float x, y, z; };
+
+extern "C" void func_001C88C8(void* self)
+{
+    void* p = *(void**)((char*)self + 0x70);
+    if (p != 0) {
+        sVec3_88C8 v = *(sVec3_88C8*)((char*)self + 0x1AC);
+        v.y += *(float*)((char*)self + 0x294);
+        v.x += *(float*)((char*)self + 0x290);
+        *(sVec3_88C8*)((char*)p + 0x44) = v;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C8930);
 
@@ -340,5 +355,27 @@ INCLUDE_ASM("fe/fepopup", func_001CE560);
 
 INCLUDE_ASM("fe/fepopup", func_001CE5E0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CE6F0);
+#ifdef SKIP_ASM
+struct sPopupSlot_E6F0 {
+    signed char id;
+    signed char pad;
+};
+
+extern sPopupSlot_E6F0 D_0045AAD8[][4][5];
+
+extern "C" int func_001CE6F0(int a, int b)
+{
+    int n = 0;
+    for (int i = 0; i < 5; i++) {
+        if (D_0045AAD8[a][b][i].id >= 0) {
+            n++;
+        } else {
+            break;
+        }
+    }
+    return n;
+}
+#endif
 

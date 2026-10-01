@@ -23,7 +23,36 @@ INCLUDE_ASM("fe/festatenethelppopup", func_001DA238);
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA478);
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA4A8);
+#ifdef SKIP_ASM
+struct sNetHelpPopup_DA4A8 {
+    char pad_0x0[0x48];
+    int state;      // 0x48
+    char pad_0x4C[0x8];
+    int f54;        // 0x54
+    int c[3];       // 0x58
+    int f64;        // 0x64
+    int a[7];       // 0x68
+    int b[7];       // 0x84
+};
+
+extern "C" void func_001DA4A8(void* self)
+{
+    sNetHelpPopup_DA4A8* s = (sNetHelpPopup_DA4A8*)self;
+    int i;
+    s->state = 0;
+    s->f54 = 0;
+    for (i = 2; i >= 0; i--) {
+        s->c[i] = 0;
+    }
+    s->f64 = 0;
+    for (i = 0; i < 7; i++) {
+        s->a[i] = 0;
+        s->b[i] = -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA510__FPviii);

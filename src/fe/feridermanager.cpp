@@ -86,7 +86,16 @@ extern "C" void* func_001A0548(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0570);
+#ifdef SKIP_ASM
+extern "C" void func_0019E538(void* slot, int v);
+
+extern "C" void func_001A0570(void* self, int i, int v)
+{
+    func_0019E538((char*)self + i * 0xce0, v);
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_001A0598);
 

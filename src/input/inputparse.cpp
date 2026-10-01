@@ -261,7 +261,38 @@ int func_00327738(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00327740);
+#ifdef SKIP_ASM
+static inline int clamp_327740(int v, int lo, int hi)
+{
+    if (v >= lo) {
+        if (v > hi) {
+            v = hi;
+        }
+    } else {
+        v = lo;
+    }
+    return v;
+}
+
+extern "C" void func_00327740(void* self, int mode, float v)
+{
+    if (mode == 1) {
+        *(int*)((char*)self + 0x30) = v != 0.0f;
+        return;
+    }
+    int* p = (int*)((char*)self + 0x38);
+    int r;
+    if (v != 0.0f) {
+        int t = (int)(v * 205.0f + 50.0f);
+        r = clamp_327740(t, 50, 255);
+    } else {
+        r = 0;
+    }
+    *p = r;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_003277D0);
 

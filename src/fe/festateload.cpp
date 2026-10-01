@@ -30,7 +30,19 @@ INCLUDE_ASM("fe/festateload", func_00186778);
 
 INCLUDE_ASM("fe/festateload", func_001867A8);
 
+//100%
 INCLUDE_ASM("fe/festateload", func_00186950);
+#ifdef SKIP_ASM
+extern "C" int func_00202738(void* self, int a1, int a2);
+
+extern "C" int func_00186950(void* self, int a1, int a2)
+{
+    if (func_00202738((char*)self + 0x48, a1, a2) != 0) {
+        return 0x101;
+    }
+    return 0;
+}
+#endif
 
 void func_00202768(void*);
 

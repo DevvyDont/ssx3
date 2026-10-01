@@ -4,7 +4,19 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onCreateScreen);
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetCreate);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F49D0);
+#ifdef SKIP_ASM
+extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
+
+extern "C" int func_001F49D0(void* self, int on)
+{
+    if (on != 0) {
+        cFEStateBuyAttrib_updateExperienceDisplay(self);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F49F8);
 
@@ -32,7 +44,19 @@ INCLUDE_ASM("fe/festatebuyattrib", func_001F54B0);
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F55C0);
+#ifdef SKIP_ASM
+extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
+
+extern "C" int func_001F55C0(void* self, int on)
+{
+    if (on != 0) {
+        cFEStateCareerStats_setupHighlightsList(self);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F55E8);
 

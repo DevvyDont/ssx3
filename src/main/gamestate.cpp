@@ -296,7 +296,27 @@ INCLUDE_ASM("main/gamestate", func_00237B28);
 
 INCLUDE_ASM("main/gamestate", func_00237BE8);
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00237CB0);
+#ifdef SKIP_ASM
+extern "C" void cBxPseudoRng_Seed(uint* state, uint seed);
+extern uint D_004C9548[];
 
+extern "C" void func_00237CB0(uint seed)
+{
+    cBxPseudoRng_Seed(D_004C9548, seed);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamestate", func_00237CD8);
+#ifdef SKIP_ASM
+extern "C" uint cBxPseudoRng_NextInt(uint* state);
+extern uint D_004C9548[];
+
+extern "C" uint func_00237CD8(void)
+{
+    return cBxPseudoRng_NextInt(D_004C9548);
+}
+#endif
 

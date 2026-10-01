@@ -129,7 +129,17 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019C938);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CA70);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB38);
+#ifdef SKIP_ASM
+extern "C" void func_0019CB60(void* self);
+
+extern "C" void* func_0019CB38(void* self)
+{
+    func_0019CB60(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB60);
 
@@ -155,7 +165,36 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019D140);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D250);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D3B0);
+#ifdef SKIP_ASM
+struct sEquipSlot_D3B0 {
+    int used;               // 0x000
+    char pad_0x4[0x100];
+    int valid;              // 0x104
+    char pad_0x108[0x14];
+    unsigned int stamp;     // 0x11C
+};
+
+extern "C" int func_0019D3B0(void* self, int bank)
+{
+    unsigned int best = 0;
+    int bestIdx = -1;
+    sEquipSlot_D3B0* p = (sEquipSlot_D3B0*)((char*)self + bank * 0x12000);
+    for (int i = 0; i < 256; i++, p++) {
+        if (p->used == 0) {
+            if (p->valid == 0) {
+                return i;
+            }
+            if (bestIdx < 0 || p->stamp < best) {
+                best = p->stamp;
+                bestIdx = i;
+            }
+        }
+    }
+    return bestIdx;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D428);
 

@@ -10,7 +10,19 @@ INCLUDE_ASM("fe/festatestore", func_001849B0);
 
 INCLUDE_ASM("fe/festatestore", func_00184B70);
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_00184BB8);
+#ifdef SKIP_ASM
+extern "C" void cWScriptMan_checkGate(void* self);
+
+extern "C" int func_00184BB8(void* self, int on)
+{
+    if (on != 0) {
+        cWScriptMan_checkGate(self);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatestore", func_00184BE0);
 

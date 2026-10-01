@@ -28,7 +28,18 @@ INCLUDE_ASM("main/game", func_0022C830);
 
 INCLUDE_ASM("main/game", func_0022CCE8);
 
+//100%
 INCLUDE_ASM("main/game", func_0022CD18);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_0022CD18(void* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022CD40);
 

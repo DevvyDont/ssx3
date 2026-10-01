@@ -12,7 +12,18 @@ void func_00245B50(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245B58);
+#ifdef SKIP_ASM
+extern void* D_0047C608[];
+extern "C" void* func_0039E390(void* self);
+
+extern "C" void* func_00245B58(void* self)
+{
+    *(void**)((char*)self + 0x8) = D_0047C608;
+    return func_0039E390(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_onCreateScreen);
 
@@ -20,7 +31,18 @@ INCLUDE_ASM("fe/festateloadhint", func_00245C60);
 
 INCLUDE_ASM("fe/festateloadhint", func_00245CD0);
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245D28);
+#ifdef SKIP_ASM
+extern void* D_0047C538[];
+extern "C" void* func_0039E390(void* self);
+
+extern "C" void* func_00245D28(void* self)
+{
+    *(void**)((char*)self + 0x8) = D_0047C538;
+    return func_0039E390(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onCreateScreen);
 

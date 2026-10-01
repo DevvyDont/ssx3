@@ -174,11 +174,108 @@ INCLUDE_ASM("intersect/worldsphtree", func_00341CF0);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00341D48);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341E48);
+#ifdef SKIP_ASM
+struct sWrapFloat_1E48 {
+    char pad_0x00[0x10];
+    float speed;    // 0x10
+    float min;      // 0x14
+    float max;      // 0x18
+    float value;    // 0x1C
+    char pad_0x20[0x8];
+    float last;     // 0x28
+};
 
+extern "C" void func_00341E48(sWrapFloat_1E48* s)
+{
+    if (s->speed >= 0.0f) {
+        s->value += s->speed;
+        s->last = s->value;
+        if (s->value > s->max) {
+            s->value = s->min + (s->value - s->max);
+        }
+    } else {
+        s->value += s->speed;
+        s->last = s->value;
+        if (s->value < s->min) {
+            s->value = s->max - (s->min - s->value);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341EC0);
+#ifdef SKIP_ASM
+struct sBounceFloat_1EC0 {
+    char pad_0x00[0x10];
+    float speed;    // 0x10
+    float min;      // 0x14
+    float max;      // 0x18
+    float value;    // 0x1C
+    char pad_0x20[0x8];
+    float last;     // 0x28
+};
 
+extern "C" void func_00341EC0(sBounceFloat_1EC0* s)
+{
+    if (s->speed >= 0.0f) {
+        s->value += s->speed;
+        s->last = s->value;
+        if (s->value > s->max) {
+            s->speed = -s->speed;
+            s->value = s->max - (s->value - s->max);
+        }
+    } else {
+        s->value += s->speed;
+        s->last = s->value;
+        if (s->value < s->min) {
+            s->speed = -s->speed;
+            s->value = s->min + (s->min - s->value);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341F38);
+#ifdef SKIP_ASM
+struct sClampFloat_1F38 {
+    char pad_0x00[0x8];
+    int atLimit;    // 0x08
+    char pad_0x0C[0x4];
+    float speed;    // 0x10
+    float min;      // 0x14
+    float max;      // 0x18
+    float value;    // 0x1C
+    char pad_0x20[0x8];
+    float last;     // 0x28
+};
+
+extern "C" void func_00341F38(sClampFloat_1F38* s)
+{
+    if (s->speed >= 0.0f) {
+        if (s->value == s->max) {
+            s->atLimit = 1;
+        }
+        s->value += s->speed;
+        s->last = s->value;
+        if (s->value > s->max) {
+            s->value = s->max;
+        }
+    } else {
+        if (s->value == s->min) {
+            s->atLimit = 1;
+        }
+        s->value += s->speed;
+        s->last = s->value;
+        if (s->value < s->min) {
+            s->value = s->min;
+        }
+    }
+}
+#endif
 
 void func_0034FCC0(void*);
 
@@ -203,7 +300,20 @@ INCLUDE_ASM("intersect/worldsphtree", func_003422E8);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342358);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003424D0);
+#ifdef SKIP_ASM
+extern "C" float func_003424D0(void* self)
+{
+    if (*(float*)((char*)self + 0x30) <= *(float*)((char*)self + 0x10) && *(float*)((char*)self + 0x4) < 0.0f) {
+        return 0.0f;
+    }
+    if (*(float*)((char*)self + 0x30) >= *(float*)((char*)self + 0x14) && *(float*)((char*)self + 0x4) > 0.0f) {
+        return 0.0f;
+    }
+    return *(float*)((char*)self + 0x4);
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342538);
 

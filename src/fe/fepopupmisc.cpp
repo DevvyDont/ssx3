@@ -1682,7 +1682,19 @@ void* func_001E52B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E52D0);
+#ifdef SKIP_ASM
+extern "C" void func_001E5428(void* self);
+
+extern "C" int func_001E52D0(void* self, int on)
+{
+    if (on != 0) {
+        func_001E5428(self);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E52F8);
 
@@ -1696,7 +1708,26 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E5780);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E5800);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5A18);
+#ifdef SKIP_ASM
+extern "C" int func_001E5A18(void* self, int a1, unsigned int a2)
+{
+    switch (a2) {
+    case 6:
+    case 7:
+        return 1;
+    case 9:
+        return 0;
+    case 8: {
+        sPopupEntry18* a = &D_004C6C08[*(int*)((char*)self + 0x68)];
+        sPopupEntry14* b = &D_00441630[a->field_0x4];
+        return *(int*)b->pad_0x0 != 4;
+    }
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E5AA0);
 

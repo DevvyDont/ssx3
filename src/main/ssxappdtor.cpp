@@ -361,7 +361,18 @@ extern "C" int func_002453E0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002453F0);
+#ifdef SKIP_ASM
+extern void* D_0047C948[];
+extern "C" void* func_0039E390(void* self);
+
+extern "C" void* func_002453F0(void* self)
+{
+    *(void**)((char*)self + 0x8) = D_0047C948;
+    return func_0039E390(self);
+}
+#endif
 
 INCLUDE_ASM("main/ssxappdtor", func_00245418);
 
@@ -369,7 +380,18 @@ INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 
 INCLUDE_ASM("main/ssxappdtor", func_00245598);
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245600);
+#ifdef SKIP_ASM
+extern void* D_0047C878[];
+extern "C" void* func_0039E390(void* self);
+
+extern "C" void* func_00245600(void* self)
+{
+    *(void**)((char*)self + 0x8) = D_0047C878;
+    return func_0039E390(self);
+}
+#endif
 
 INCLUDE_ASM("main/ssxappdtor", func_00245628);
 
@@ -383,7 +405,18 @@ void func_00245690(void* self)
 
 INCLUDE_ASM("main/ssxappdtor", func_00245698);
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245708);
+#ifdef SKIP_ASM
+extern void* D_0047C7A8[];
+extern "C" void* func_0039E390(void* self);
+
+extern "C" void* func_00245708(void* self)
+{
+    *(void**)((char*)self + 0x8) = D_0047C7A8;
+    return func_0039E390(self);
+}
+#endif
 
 INCLUDE_ASM("main/ssxappdtor", func_00245730);
 
@@ -397,5 +430,16 @@ void func_002458B0(void* self)
 
 INCLUDE_ASM("main/ssxappdtor", func_002458B8);
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245928);
+#ifdef SKIP_ASM
+extern void* D_0047C6D8[];
+extern "C" void* func_0039E390(void* self);
+
+extern "C" void* func_00245928(void* self)
+{
+    *(void**)((char*)self + 0x8) = D_0047C6D8;
+    return func_0039E390(self);
+}
+#endif
 

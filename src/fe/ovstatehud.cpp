@@ -55,7 +55,34 @@ extern "C" void func_001E91F8(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9220);
+#ifdef SKIP_ASM
+extern "C" void func_001E9220(void* self, void* a1, void* a2)
+{
+    short* in = (short*)self;
+    float* out = (float*)a1;
+    float* def = (float*)a2;
+    float x = in[2];
+    if (x >= 0.0f) {
+        out[0] = x;
+    } else {
+        out[0] = 0.0f;
+        if (def != 0) {
+            out[0] = def[1];
+        }
+    }
+    float y = in[3];
+    if (y >= 0.0f) {
+        out[1] = y;
+    } else {
+        out[1] = 0.0f;
+        if (def != 0) {
+            out[1] = def[2];
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9290__FPvT0);
