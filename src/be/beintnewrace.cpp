@@ -221,11 +221,40 @@ INCLUDE_ASM("be/beintnewrace", func_00145108);
 
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145340);
+#ifdef SKIP_ASM
+extern signed char D_00535C12[];
+extern sPad16 D_0043E97C;
 
+extern "C" void* func_00145340()
+{
+    return (char*)&D_0043E97C + D_00535C12[0] * 0x54;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145378);
+#ifdef SKIP_ASM
+extern signed char D_00535C11[];
+extern char D_0043E707[]; // 0x43-byte records at an odd address
 
+extern "C" void* func_00145378()
+{
+    return D_0043E707 + D_00535C11[0] * 0x43;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145398);
+#ifdef SKIP_ASM
+extern signed char D_00535C10[];
+
+extern "C" void* func_00145398()
+{
+    return (char*)&D_0043E7D0 + D_00535C10[0] * 0x3c;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_001453B8);

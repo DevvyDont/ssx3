@@ -69,7 +69,29 @@ INCLUDE_ASM("be/beintoption", func_0014F7E8);
 
 INCLUDE_ASM("be/beintoption", func_0014F810);
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F870);
+#ifdef SKIP_ASM
+struct sOptionGlobal_005308B8 {
+    char pad_0x00[0x8];
+    int field_0x8;
+    char pad_0xC[0x8];
+    int field_0x14;
+    char pad_0x18[0x4];
+    int field_0x1C;
+};
+extern sOptionGlobal_005308B8 D_005308B8;
+
+extern "C" int func_0014F870()
+{
+    int m = D_005308B8.field_0x1C;
+    if (m < D_005308B8.field_0x8)
+        m = D_005308B8.field_0x8;
+    if (m < D_005308B8.field_0x14)
+        m = D_005308B8.field_0x14;
+    return m;
+}
+#endif
 
 INCLUDE_ASM("be/beintoption", func_0014F898);
 

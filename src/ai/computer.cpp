@@ -26,7 +26,27 @@ INCLUDE_ASM("ai/computer", func_0010CD20);
 
 INCLUDE_ASM("ai/computer", func_0010CF68);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010D170);
+#ifdef SKIP_ASM
+struct sComputer_0010D170
+{
+    char pad[0xE7C];
+    int a[15];
+    int b[15];
+    int c[15];
+};
+
+extern "C" void func_0010D170(sComputer_0010D170* self)
+{
+    for (int i = 0; i < 15; i++)
+    {
+        self->a[i] = 0;
+        self->b[i] = 0;
+        self->c[i] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010D1A0);
 

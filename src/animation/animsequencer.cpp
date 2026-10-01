@@ -67,14 +67,13 @@ INCLUDE_ASM("animation/animsequencer", func_00313DD0);
 
 INCLUDE_ASM("animation/animsequencer", func_00314050);
 
-//99.33%
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003142E8__FPv);
 #ifdef SKIP_ASM
 void func_003142E8(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)self = t0;
+    *(int*)self = 0;
+    *(void**)((char*)self + 0x4) = 0;
 }
 #endif
 
@@ -159,7 +158,22 @@ void* func_00314A40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314AA0);
+#ifdef SKIP_ASM
+// The original had the same mismatch: callers (func_00314A18/func_00314A40, the
+// latter already 100%) see the one-argument declaration above and leave $5 as-is,
+// while the definition takes two. The asm label binds this two-argument body to
+// the symbol without changing the callers' prototype.
+// PORT: asm labels are GCC/Clang-only; the port should give callers the real signature.
+void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
+void func_00314AA0_impl(void* self, char* data)
+{
+    *(char**)((char*)self + 0x4) = data;
+    *(char**)((char*)self + 0x8) = data + *(short*)(data + 0x6);
+    *(char**)((char*)self + 0xC) = data + *(int*)(data + 0x8);
+}
+#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314C00);
 

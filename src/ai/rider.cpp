@@ -398,14 +398,13 @@ INCLUDE_ASM("ai/rider", func_001276F0);
 
 INCLUDE_ASM("ai/rider", func_00127848);
 
-//99.33%
+//100%
 INCLUDE_ASM("ai/rider", func_001278C0__FPv);
 #ifdef SKIP_ASM
 void func_001278C0(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0xdfc) = t0;
-    *(int*)((char*)self + 0xe00) = t0;
+    *(float*)((char*)self + 0xE00) = 0.0f;
+    *(float*)((char*)self + 0xDFC) = 0.0f;
 }
 #endif
 

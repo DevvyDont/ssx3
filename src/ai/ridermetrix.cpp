@@ -38,7 +38,15 @@ extern "C" void func_001176F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117708);
+#ifdef SKIP_ASM
+// PORT: g++ >? (max) operator, removed in GCC 4.3.
+extern "C" void func_00117708(void* self, float seconds)
+{
+    *(float*)((char*)self + 0xa4) = *(float*)((char*)self + 0xa4) >? seconds;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117718);
 

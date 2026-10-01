@@ -110,7 +110,18 @@ extern "C" void func_0012BAC0(void* self, int* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012BAF0);
+#ifdef SKIP_ASM
+extern "C" void func_0012BAF0(void* self, int* dst)
+{
+    int* src = (int*)((char*)self + 0x20);
+    for (int i = 0; i < 2; i++)
+    {
+        dst[i] = src[i];
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012BB20);
 
@@ -200,7 +211,15 @@ INCLUDE_ASM("ai/ai", func_0012F230);
 
 INCLUDE_ASM("ai/ai", func_0012F398);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012F588);
+#ifdef SKIP_ASM
+extern "C" int func_0012F588(void* self)
+{
+    void* p = *(void**)((char*)self + 0x8);
+    return *(int*)((char*)p + 0x87C) != 0 && *(int*)((char*)p + 0x870) >= 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012F5B0);
 

@@ -251,19 +251,76 @@ INCLUDE_ASM("be/beintplayer", func_00148950);
 
 INCLUDE_ASM("be/beintplayer", func_00148AA8);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148B78);
+#ifdef SKIP_ASM
+struct sPlayerStat7 {
+    signed char v[7];
+};
+struct sPlayerStatRow {
+    sPlayerStat7 e[10]; // 0x46 bytes
+};
+extern sPlayerStatRow D_00535538[];
 
+extern "C" signed char func_00148B78(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[0];
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148BC8);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148BC8(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[1];
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148C18);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148C18(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[2];
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148C68);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148C68(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[3];
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148CB8);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148CB8(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[4];
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148D08);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148D08(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[5];
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148D58);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148D58(void* self, int a1, int a2)
+{
+    return D_00535538[a1].e[a2].v[6];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148D80);
 
