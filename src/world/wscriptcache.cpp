@@ -76,19 +76,108 @@ int func_003ADC48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADC50);
+#ifdef SKIP_ASM
+extern "C" int func_003ADC50(void* self, int i)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        return (*(int**)((char*)data + 0x3C))[i];
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADC80);
+#ifdef SKIP_ASM
+extern "C" int func_003ADC80(void* self)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        if (data != 0) {
+            return *(int*)((char*)data + 0x10);
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADCB0);
+#ifdef SKIP_ASM
+extern "C" int func_003ADCB0(void* self)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        if (data != 0) {
+            return *(int*)((char*)data + 0x14);
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADCE0);
+#ifdef SKIP_ASM
+extern "C" int func_003ADCE0(void* self)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        if (data != 0) {
+            return *(int*)((char*)data + 0x28);
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADD10);
+#ifdef SKIP_ASM
+extern "C" int func_003ADD10(void* self)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        if (data != 0) {
+            return *(int*)((char*)data + 0x2C);
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADD40);
+#ifdef SKIP_ASM
+extern "C" int func_003ADD40(void* self)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        if (data != 0) {
+            return *(int*)((char*)data + 0x20);
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADD70);
+#ifdef SKIP_ASM
+extern "C" int func_003ADD70(void* self)
+{
+    if (*(short*)self == 3) {
+        void* data = *(void**)((char*)self + 0x8);
+        if (data != 0) {
+            return *(int*)((char*)data + 0x24);
+        }
+    }
+    return 0;
+}
+#endif
 
 extern "C" void* func_003AD290(int, int);
 
@@ -333,7 +422,22 @@ void func_003B11E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B11F0);
+#ifdef SKIP_ASM
+extern int D_00495448[];
+
+extern "C" int func_003B11F0(int v)
+{
+    unsigned int i;
+    for (i = 0; i < 2; i++) {
+        if (D_00495448[i] == v) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B1228);
 
@@ -428,7 +532,21 @@ INCLUDE_ASM("world/wscriptcache", func_003B2528);
 
 INCLUDE_ASM("world/wscriptcache", func_003B2558);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B2688);
+#ifdef SKIP_ASM
+extern "C" int func_003B2688(int v)
+{
+    switch (v) {
+    case 8:
+        return 0x100;
+    case 4:
+        return 0x10;
+    default:
+        return 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B26B8);
 

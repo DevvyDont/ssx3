@@ -26,7 +26,25 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA820);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA860);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA8B8);
+#ifdef SKIP_ASM
+extern "C" void func_002EA8B8(void* self, int up)
+{
+    int s = *(int*)((char*)self + 0x10);
+    if (s == 2 || s == 3) {
+        *(int*)((char*)self + 0x1C) = 0;
+        return;
+    }
+    if (up) {
+        *(int*)((char*)self + 0x1C) += 1;
+        return;
+    }
+    if (*(int*)((char*)self + 0x1C) > 0) {
+        *(int*)((char*)self + 0x1C) -= 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA900);
 

@@ -45,7 +45,28 @@ INCLUDE_ASM("visualfx/lensfx", func_002EC9E0);
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECA68);
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECAF0);
+#ifdef SKIP_ASM
+struct sLensEntry {
+    int id;
+    int a;
+    int b;
+};
+
+struct sLensFx {
+    char pad00[0x10];
+    sLensEntry entries[15];
+};
+
+extern "C" void func_002ECAF0(sLensFx* self)
+{
+    int i;
+    for (i = 0; i < 15; i++) {
+        self->entries[i].id = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECB28);
 

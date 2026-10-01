@@ -20,15 +20,79 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2338);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C2430);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C24D0);
+#ifdef SKIP_ASM
+extern "C" int func_002C24D0(unsigned short* s)
+{
+    int n = 0;
+    while (*s++ != 0) {
+        n++;
+    }
+    return n;
+}
+#endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2508);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C2508(unsigned short* dst, unsigned short* src)
+{
+    unsigned short* ret = dst;
+    while (*src != 0) {
+        *dst++ = *src++;
+    }
+    *dst = 0;
+    return ret;
+}
+#endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2540);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src)
+{
+    unsigned short* ret = dst;
+    while (*src != 0) {
+        *dst++ = *src++;
+    }
+    *dst = 0;
+    return ret;
+}
+#endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2580);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit declares this as extern "C" void* func_002C2580(void*) further down
+// (its caller func_002C5500 passes one arg); bind the 2-arg body to the symbol.
+char* func_002C2580_impl(char* dst, unsigned short* src) __asm__("func_002C2580");
+char* func_002C2580_impl(char* dst, unsigned short* src)
+{
+    char* ret = dst;
+    while (*src != 0) {
+        *dst++ = *src++;
+    }
+    *dst = 0;
+    return ret;
+}
+#endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C25B8);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C25B8(unsigned short* dst, unsigned short* src, int n)
+{
+    unsigned short* ret = dst;
+    while (*src != 0 && n > 0) {
+        *dst++ = *src++;
+        n--;
+    }
+    *dst = 0;
+    return ret;
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C2688);
 
@@ -38,7 +102,19 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2718);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C27C0);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2868);
+#ifdef SKIP_ASM
+extern "C" void func_002C2868(char* s)
+{
+    while (*s != 0) {
+        if (*s >= 'A' && *s <= 'Z') {
+            *s += 'a' - 'A';
+        }
+        s++;
+    }
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C2F18);
 
@@ -119,7 +195,32 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4410);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4480);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C44E0);
+#ifdef SKIP_ASM
+struct sQTLevel {
+    int f00;
+    void* f04;
+    int f08;
+    int f0C;
+    int f10;
+};
+
+struct sQTState {
+    char pad000[0xC];
+    int level;
+    char pad010[0x16C];
+    sQTLevel levels[1];
+};
+
+extern "C" void func_002C44E0(sQTState* self)
+{
+    self->levels[self->level].f10 = 0;
+    if (self->levels[self->level].f08 == -1) {
+        self->levels[self->level].f08 = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4520);
 
@@ -215,7 +316,17 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C48C0);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C50E0);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5140);
+#ifdef SKIP_ASM
+extern "C" int func_002C5140(void* self)
+{
+    if (*(int*)((char*)self + 0x4) != 0 || *(int*)((char*)self + 0x40) != 0) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C5168);
 
@@ -232,7 +343,15 @@ int func_002C5230(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5250);
+#ifdef SKIP_ASM
+extern "C" void func_002C5250(sQTState* self)
+{
+    self->levels[self->level].f00 = 0;
+    self->levels[self->level].f04 = 0;
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C5278);
 
@@ -333,7 +452,28 @@ extern "C" void func_002C5570(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5588);
+#ifdef SKIP_ASM
+struct sQTSlot {
+    int a;
+    int b;
+    char pad08[0x70];
+};
+
+struct sQTSlots {
+    char pad000[0x1A4];
+    sQTSlot slots[1];
+};
+
+extern "C" int func_002C5588(sQTSlots* self, int i)
+{
+    if (self->slots[i].b != 0 || self->slots[i].a != 0) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C55C0);

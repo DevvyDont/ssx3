@@ -14,7 +14,24 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DDD30);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE058);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE368);
+#ifdef SKIP_ASM
+struct sVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sVec4 D_004FF120;
+
+extern "C" void func_002DE368(void* self)
+{
+    *(int*)((char*)self + 0x34) = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    *(sVec4*)((char*)self + 0x0) = D_004FF120;
+    *(sVec4*)((char*)self + 0x20) = D_004FF120;
+    *(sVec4*)((char*)self + 0x10) = D_004FF120;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE398);
 
@@ -80,7 +97,34 @@ void func_002E2F98(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2FA8);
+#ifdef SKIP_ASM
+struct sWakePoint {
+    int a;
+    int pad04;
+    int c;
+    short d;
+    short e;
+    char pad10[0x20];
+};
+
+struct sWakeFx {
+    char pad00[0x60];
+    int counts[10];
+    sWakePoint points[1][256];
+};
+
+extern "C" void func_002E2FA8(sWakeFx* self, int v, int i)
+{
+    int n = self->counts[i];
+    self->points[i][n].a = v;
+    self->points[i][n].d = 0;
+    self->points[i][n].e = 0;
+    self->points[i][n].c = 0;
+    self->counts[i]++;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
 
@@ -131,9 +175,41 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4540);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4578);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4638);
+#ifdef SKIP_ASM
+extern "C" void func_002E4638(void* self, int up)
+{
+    if (*(int*)((char*)self + 0x44) == 0) {
+        *(int*)((char*)self + 0x40) = 0;
+        return;
+    }
+    if (up) {
+        *(int*)((char*)self + 0x40) += 1;
+        return;
+    }
+    if (*(int*)((char*)self + 0x40) != 0) {
+        *(int*)((char*)self + 0x40) -= 1;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4678);
+#ifdef SKIP_ASM
+extern "C" float func_002E4678(void* self)
+{
+    if (*(int*)((char*)self + 0x44) == 0) {
+        return 0.0f;
+    }
+    float v = *(float*)((char*)self + 0x54) + *(float*)((char*)self + 0x58)
+            + *(float*)((char*)self + 0x5C) - *(float*)((char*)self + 0x48);
+    if (v < 0.0f) {
+        return 0.0f;
+    }
+    return v;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E46C8);
 
@@ -156,11 +232,46 @@ extern "C" int func_002E4C90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4CB0);
+#ifdef SKIP_ASM
+extern int D_00538850[];
+
+extern "C" void func_002E4CB0(void)
+{
+    int i;
+    for (i = 0; i < 4; i++) {
+        D_00538850[i] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4CE8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4D30);
+#ifdef SKIP_ASM
+struct sWakeSlot {
+    char pad[0x64];
+};
+
+extern sWakeSlot D_005382C0[];
+extern int D_00538850[];
+
+extern "C" void func_002E4D30(void* p)
+{
+    int i;
+    if (p == 0) {
+        return;
+    }
+    for (i = 0; i < 4; i++) {
+        if (&D_005382C0[i] == p) {
+            D_00538850[i] = 0;
+            return;
+        }
+    }
+}
+#endif
 
 extern void* D_004880E0[];
 

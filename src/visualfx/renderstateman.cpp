@@ -78,7 +78,18 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF3B0);
 
 INCLUDE_ASM("visualfx/renderstateman", func_002EF530);
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF6A0);
+#ifdef SKIP_ASM
+extern "C" void func_002EF6A0(void* self)
+{
+    int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x19 : 0x12;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x14) = mode;
+}
+#endif
 
 INCLUDE_ASM("visualfx/renderstateman", func_002EF6D0);
 

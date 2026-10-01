@@ -8,7 +8,33 @@ INCLUDE_ASM("wscript/wscriptprocess", func_003077F8);
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003078C0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003079D8);
+#ifdef SKIP_ASM
+struct cWScriptProcEntry {
+    int a;
+    unsigned int id;
+    char pad08[0x3C];
+};
+
+struct cWScriptProcList {
+    int pad00;
+    int count;
+    int cur;
+    int pad0C;
+    int pad10;
+    cWScriptProcEntry* entries;
+};
+
+extern "C" unsigned int func_003079D8(cWScriptProcList* self)
+{
+    int i = self->cur;
+    if (i < self->count) {
+        return self->entries[i].id;
+    }
+    return 0xFFFFFFFF;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A10);
 

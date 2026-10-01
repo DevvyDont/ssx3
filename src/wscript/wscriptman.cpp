@@ -118,7 +118,20 @@ extern "C" void* func_0030B208(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B228);
+#ifdef SKIP_ASM
+extern "C" int func_0030B228(cWScriptListHead* self)
+{
+    int n = 0;
+    cWScriptListNode* p = (cWScriptListNode*)self->head;
+    while (p != 0) {
+        p = (cWScriptListNode*)p->next;
+        n++;
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B260__FPvT0);
@@ -132,7 +145,23 @@ int func_0030B260(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B270);
+#ifdef SKIP_ASM
+extern "C" void func_0030B270(cWScriptListHead* self, cWScriptListNode* node)
+{
+    node->next = 0;
+    cWScriptListNode* p = (cWScriptListNode*)self->head;
+    if (p != 0) {
+        while (p->next != 0) {
+            p = (cWScriptListNode*)p->next;
+        }
+        p->next = node;
+    } else {
+        self->head = node;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B2C0__FPvT0);
@@ -146,7 +175,30 @@ int func_0030B2C0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B2D0);
+#ifdef SKIP_ASM
+extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node)
+{
+    if (node == self->head) {
+        self->head = node->next;
+        return 1;
+    }
+    cWScriptListNode* p = (cWScriptListNode*)self->head;
+    if (p != 0) {
+        cWScriptListNode* prev = p;
+        do {
+            p = (cWScriptListNode*)p->next;
+            if (p == node) {
+                prev->next = p->next;
+                return 1;
+            }
+            prev = p;
+        } while (p != 0);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B320);
@@ -166,7 +218,20 @@ extern "C" void* func_0030B320(void* self, int id)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B388);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B428);
+#ifdef SKIP_ASM
+extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node)
+{
+    cWScriptListNode* p;
+    for (p = (cWScriptListNode*)self->head; p != 0; p = (cWScriptListNode*)p->next) {
+        if (p == node) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B4B8__FPv);
@@ -286,7 +351,27 @@ INCLUDE_ASM("wscript/wscriptman", func_0030BEE8);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030BFC0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C390);
+#ifdef SKIP_ASM
+struct cWScriptIdTable {
+    unsigned int id;
+    int a;
+    int b;
+    unsigned int entries[64];
+};
+
+extern "C" void func_0030C390(cWScriptIdTable* self)
+{
+    int i;
+    self->id = 0xFFFFFFFF;
+    self->a = 0;
+    self->b = 0;
+    for (i = 0; i < 64; i++) {
+        self->entries[i] = 0xFFFFFFFF;
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C3E0);
 
@@ -306,9 +391,43 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C790);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C7C0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C820);
+#ifdef SKIP_ASM
+struct cWScriptQueueEntry {
+    int a;
+    int b;
+    int c;
+};
 
+struct cWScriptQueue {
+    int head;
+    int tail;
+    cWScriptQueueEntry entries[16];
+};
+
+extern "C" cWScriptQueueEntry* func_0030C820(cWScriptQueue* self)
+{
+    int head = self->head;
+    if (head == self->tail) {
+        return 0;
+    }
+    self->head = (head + 1) % 16;
+    return &self->entries[head];
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C870);
+#ifdef SKIP_ASM
+extern "C" cWScriptQueueEntry* func_0030C870(cWScriptQueue* self)
+{
+    if (self->head == self->tail) {
+        return 0;
+    }
+    return &self->entries[self->head];
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C8D8);
 

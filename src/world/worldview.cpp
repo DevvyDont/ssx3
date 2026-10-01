@@ -22,7 +22,18 @@ int cWorldView_getNumSections(cWorldView* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A9820);
+#ifdef SKIP_ASM
+extern "C" void* func_003A9820(cWorldView* self, unsigned int i)
+{
+    cWorldViewSectionList* list = self->mSections;
+    if (list == 0 || i >= (unsigned int)list->mNumSections) {
+        return 0;
+    }
+    return *(char**)((char*)self + 0x8) + i * 0x58;
+}
+#endif
 
 struct cWorldViewEntry {
     char pad_0x00[0x14];

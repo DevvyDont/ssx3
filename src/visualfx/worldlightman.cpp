@@ -6,7 +6,23 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F53B0);
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5400);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5998);
+#ifdef SKIP_ASM
+struct sWorldLight {
+    char pad00[0x10];
+    unsigned int id;
+    char pad14[0x2C];
+};
+
+extern "C" void func_002F5998(sWorldLight* lights)
+{
+    unsigned int i;
+    for (i = 0; i < 8; i++) {
+        lights[i].id = 0xFFFFFFFF;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F59D0);
 
