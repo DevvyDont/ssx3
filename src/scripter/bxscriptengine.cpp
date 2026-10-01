@@ -6,9 +6,35 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282020);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002820B0);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282150);
+#ifdef SKIP_ASM
+struct sSlot282150 { int value; int pad; };
+extern "C" int func_00282150(void* self, int value, int index)
+{
+    sSlot282150* slots = *(sSlot282150**)((char*)self + 0x2b0);
+    if (slots[index].value != 0) {
+        return 0;
+    }
+    slots[index].value = value;
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282178);
+#ifdef SKIP_ASM
+extern "C" int func_00282178(void* self, int index)
+{
+    sSlot282150* slots = *(sSlot282150**)((char*)self + 0x2b0);
+    int old = slots[index].value;
+    if (old == 0) {
+        return 0;
+    }
+    slots[index].value = 0;
+    return old;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002821A0);
 
@@ -32,7 +58,44 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282798);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282838);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002828B8);
+#ifdef SKIP_ASM
+struct sScriptThread2C0 {
+    int a;          // 0x00
+    int b;          // 0x04
+    int c;          // 0x08
+    int d;          // 0x0C
+    short e;        // 0x10
+    short f;        // 0x12
+    int g;          // 0x14
+    int h;          // 0x18
+    int id;         // 0x1C
+    int k;          // 0x20
+};
+struct sScriptEngine2B8 {
+    char pad[0x2b8];
+    int count;                      // 0x2B8
+    int unk2BC;                     // 0x2BC
+    sScriptThread2C0 threads[16];   // 0x2C0
+};
+extern "C" void func_002828B8(sScriptEngine2B8* self)
+{
+    int i;
+    self->count = 0;
+    self->unk2BC = 0;
+    for (i = 0; i < 16; i++) {
+        self->threads[i].id = i;
+        self->threads[i].k = 0;
+        self->threads[i].a = 0;
+        self->threads[i].b = 0;
+        self->threads[i].e = 0;
+        self->threads[i].f = 0;
+        self->threads[i].h = 0;
+        self->threads[i].g = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282908);
 

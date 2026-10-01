@@ -40,5 +40,17 @@ extern "C" void* func_00275718(sAnimList* self, int id)
 
 INCLUDE_ASM("scripter/scanimmgr", func_00275760);
 
+//100%
 INCLUDE_ASM("scripter/scanimmgr", func_002757F0);
+#ifdef SKIP_ASM
+extern "C" sAnimEntry* func_002757F0(sAnimList* self)
+{
+    for (int i = 0; i < self->count; i++) {
+        if (self->entries[i].data == 0) {
+            return &self->entries[i];
+        }
+    }
+    return 0;
+}
+#endif
 

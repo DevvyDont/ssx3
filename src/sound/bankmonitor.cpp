@@ -26,7 +26,22 @@ INCLUDE_ASM("sound/bankmonitor", func_002AD5F0);
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD650);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD810);
+#ifdef SKIP_ASM
+struct sBankVoice {
+    char pad[0x5c];
+    float value;
+    char pad2[0xc0 - 0x60];
+};
+
+extern "C" void func_002AD810(void* self)
+{
+    for (int i = 0; i < 64; i++) {
+        (*(sBankVoice**)((char*)self + 0x8ec))[i].value = -1.0f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD848__FPv);
@@ -157,9 +172,32 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE100);
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE138);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE188);
+#ifdef SKIP_ASM
+extern "C" void func_002AE188(void* p)
+{
+    for (int i = 0; i < 24; i++) {
+        if (D_004D3E98[i] == p) {
+            D_004D3E98[i] = 0;
+        }
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE1B8);
+#ifdef SKIP_ASM
+extern "C" int func_002AE1B8(void)
+{
+    for (int i = 0; i < 24; i++) {
+        if (D_004D3E98[i] == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE1F0);
 
@@ -177,7 +215,20 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE4C0);
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE690);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE768);
+#ifdef SKIP_ASM
+extern "C" void func_002AE768(unsigned int idx, int a1, int a2)
+{
+    if (idx < 24) {
+        void* m = D_004D3E98[idx];
+        if (m != 0 && *(signed char*)((char*)m + 0x64) == 0) {
+            *(int*)((char*)m + 0x28) = a1;
+            *(int*)((char*)m + 0x2c) = a2;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE7A8);
 
@@ -187,7 +238,19 @@ INCLUDE_ASM("sound/bankmonitor", func_002AEAA8);
 
 INCLUDE_ASM("sound/bankmonitor", func_002AEBD0);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AEC28);
+#ifdef SKIP_ASM
+extern "C" int func_002AEC28(int idx)
+{
+    void* m = D_004D3E98[idx];
+    if (m == 0) {
+        return -8;
+    }
+    *(char*)((char*)m + 0x65) = 1;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AEC58);
 
@@ -199,9 +262,31 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF370);
 
 INCLUDE_ASM("sound/bankmonitor", func_002AF428);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF480);
+#ifdef SKIP_ASM
+extern "C" int func_002AF480(int idx)
+{
+    void* m = D_004D3E98[idx];
+    if (m != 0) {
+        return *(int*)((char*)m + 0x14);
+    }
+    return -8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF4B0);
+#ifdef SKIP_ASM
+extern "C" int func_002AF4B0(int idx)
+{
+    void* m = D_004D3E98[idx];
+    if (m != 0) {
+        return *(int*)((char*)m + 0x10);
+    }
+    return -8;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AF4E0);
 
@@ -297,13 +382,46 @@ extern "C" int func_002B1220(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1428);
+#ifdef SKIP_ASM
+struct sBankSlot0018 {
+    int value;
+    int timer;
+    char pad[0x18];
+};
+
+struct sBankSlots {
+    char pad[0x18];
+    sBankSlot0018 slots[10];
+};
+
+extern "C" void func_002B1428(sBankSlots* self)
+{
+    for (int i = 9; i >= 0; i--) {
+        self->slots[i].value = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1458);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1520);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1720);
+#ifdef SKIP_ASM
+extern "C" void func_002B1720(sBankSlots* self)
+{
+    for (int i = 0; i < 10; i++) {
+        if (self->slots[i].value != 0) {
+            if (--self->slots[i].timer <= 0) {
+                self->slots[i].value = 0;
+            }
+        }
+    }
+}
+#endif
 
 extern "C" void* func_002AFD10(int);
 
@@ -425,7 +543,19 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3D10);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3D48);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3EB0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_002B3EB0(void* self)
+{
+    *(ulong*)((char*)self + 0x3f8) = 0;
+    *(int*)((char*)self + 0x3e8) = 0;
+    for (int i = 4; i >= 0; i--) {
+        ((int*)((char*)self + 0x920))[i] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3EE8);
 
@@ -441,11 +571,63 @@ void func_002B4060(void* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002B4070);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B40F0);
+#ifdef SKIP_ASM
+struct sBankEntry64 {
+    char data[0x64];
+};
 
+struct sBankMonitor934 {
+    char pad[0x3f0];
+    int current;                // 0x3F0
+    char pad2[0x934 - 0x3f4];
+    sBankEntry64 a[64];         // 0x934
+    sBankEntry64 b[64];         // 0x2234
+    sBankEntry64 c[64];         // 0x3B34
+};
+
+extern "C" sBankEntry64* func_002B40F0(sBankMonitor934* self, int i)
+{
+    if (i < 0) {
+        i = self->current;
+        if (i < 0) {
+            return 0;
+        }
+    }
+    return &self->a[i];
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4120);
+#ifdef SKIP_ASM
+extern "C" sBankEntry64* func_002B4120(sBankMonitor934* self, int i)
+{
+    if (i < 0) {
+        i = self->current;
+        if (i < 0) {
+            return 0;
+        }
+    }
+    return &self->b[i];
+}
+#endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4150);
+#ifdef SKIP_ASM
+extern "C" sBankEntry64* func_002B4150(sBankMonitor934* self, int i)
+{
+    if (i < 0) {
+        i = self->current;
+        if (i < 0) {
+            return 0;
+        }
+    }
+    return &self->c[i];
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B42B8);
 
@@ -531,7 +713,20 @@ extern "C" void func_002B49C0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B49E0);
+#ifdef SKIP_ASM
+extern "C" int func_002B49E0(void* self)
+{
+    if (*(int*)((char*)self + 0x418) != 0) {
+        void* p = *(void**)((char*)self + 0x408);
+        if (p != 0) {
+            return *(int*)((char*)p + 0x58);
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4A08);

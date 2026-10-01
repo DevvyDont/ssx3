@@ -4,7 +4,39 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 
 INCLUDE_ASM("sound/bankmanager", func_0028B650);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B730);
+#ifdef SKIP_ASM
+struct sBankNode {
+    int unk0;
+    int unk4;
+    int unk8;
+    int unkC;
+    int unk10;
+    int unk14;
+    sBankNode* next;
+    sBankNode* prev;
+};
+
+extern "C" void func_0028B730(sBankNode* self)
+{
+    if (self->next != 0) {
+        self->unkC = -1;
+        self->unk10 = 0;
+        self->unk14 = 0;
+        self->unk8 = 0;
+        if (self->next == self->prev) {
+            self->next->next = 0;
+            self->next->prev = 0;
+        } else {
+            self->next->prev = self->prev;
+            self->prev->next = self->next;
+        }
+        self->prev = 0;
+        self->next = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028B788);
 
@@ -97,7 +129,18 @@ int func_0028D898(void* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028D8A0);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028D960);
+#ifdef SKIP_ASM
+extern "C" int func_0028D960(void* self)
+{
+    unsigned int s = *(unsigned int*)((char*)self + 0x608c);
+    if (s < 2 || s == 3) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028D988);
 

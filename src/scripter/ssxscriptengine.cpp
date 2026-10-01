@@ -197,7 +197,39 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027B410);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B4B8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B528);
+#ifdef SKIP_ASM
+struct sSlot0628 {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+
+struct sScriptEng0628 {
+    char pad[0x628];
+    sSlot0628 slots[10];
+};
+
+static inline int isSlotFree(sSlot0628* s)
+{
+    if (s->c == 0) {
+        if (s->a == 0) return 1;
+    }
+    return 0;
+}
+
+extern "C" int func_0027B528(sScriptEng0628* self)
+{
+    for (int i = 2; i < 10; i++) {
+        if (isSlotFree(&self->slots[i])) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B578);
 
@@ -406,7 +438,31 @@ extern "C" int func_0027D2C8(void* self, int i, int val)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2E8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2F0);
+#ifdef SKIP_ASM
+struct sVar0050 {
+    int a;
+    int b;
+    int value;
+    int type;
+    int e;
+};
+
+struct sScriptEng0050 {
+    char pad[0x50];
+    sVar0050 vars[1];
+};
+
+extern "C" int func_0027D2F0(sScriptEng0050* self, void* a1)
+{
+    sVar0050* v = &self->vars[*(int*)((char*)a1 + 0x4)];
+    if (v->type != 1) {
+        return -1;
+    }
+    return v->value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D320__FPvi);
@@ -596,7 +652,18 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00281A50);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281AC8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281C40);
+#ifdef SKIP_ASM
+extern "C" int func_00281C40(void* self, int i)
+{
+    int j = *(int*)((char*)self + (i << 2) + 0xdc);
+    if (j < 0) {
+        return 0;
+    }
+    return *(int*)((char*)self + (j << 2) + 0xd0);
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281C68);
 

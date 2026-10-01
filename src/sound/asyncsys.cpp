@@ -55,7 +55,23 @@ int func_0028B240(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B248);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B248(void* self)
+{
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = -1;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xc) = -1;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x1c) = 0;
+    *(char*)((char*)self + 0x20) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("sound/asyncsys", func_0028B278);
 

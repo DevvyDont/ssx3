@@ -8,9 +8,33 @@ INCLUDE_ASM("scripter/videngine", func_00283AA0);
 
 INCLUDE_ASM("scripter/videngine", func_00283AF8);
 
+//100%
 INCLUDE_ASM("scripter/videngine", func_00283B78);
+#ifdef SKIP_ASM
+extern "C" void func_00283B78(void* self, int inc)
+{
+    if (*(int*)((char*)self + 0x0) != 0 && *(int*)((char*)self + 0x4) != 0) {
+        if (inc != 0) {
+            *(int*)((char*)self + 0xc) += 1;
+        } else if (*(int*)((char*)self + 0xc) != 0) {
+            *(int*)((char*)self + 0xc) -= 1;
+        }
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/videngine", func_00283BB8);
+#ifdef SKIP_ASM
+extern "C" int func_00283BB8(void* self)
+{
+    int* p = *(int**)((char*)self + 0x0);
+    if (p == 0 || *(int*)((char*)self + 0x4) == 0) {
+        return 0;
+    }
+    return *p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283C20__FPv);
