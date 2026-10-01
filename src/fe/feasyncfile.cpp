@@ -255,7 +255,16 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9710);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A97B8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A9890);
+#ifdef SKIP_ASM
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+
+extern "C" void func_001A9890(void* self, const char* str)
+{
+    cBXString_cBXString4((char*)self + 0x6C0, str);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A98B0__FPv);
@@ -690,7 +699,18 @@ INCLUDE_ASM("fe/feasyncfile", func_001B66B8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B6740);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B6770);
+#ifdef SKIP_ASM
+extern "C" void func_001A8918(void* self, int a1, int msg);
+
+extern "C" void func_001B6770(void* self, int a1, int msg)
+{
+    if (msg != 0xD) {
+        func_001A8918(self, a1, msg);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B6798);
 
@@ -801,7 +821,24 @@ INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B8860);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B8890);
+#ifdef SKIP_ASM
+extern "C" int func_001B8890(void* self, int id)
+{
+    switch (id) {
+    case 25:
+        return 28;
+    case 13:
+        return 15;
+    case 21:
+        return 23;
+    case 7:
+        return 9;
+    }
+    return 28;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B88F0);
 

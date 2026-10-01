@@ -49,5 +49,14 @@ extern "C" int func_0015D020(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/cameracontroller", func_0015D050);
+#ifdef SKIP_ASM
+extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
+
+extern "C" void* func_0015D050(void* self, int a1, int a2)
+{
+    return cChaseCameraController_createChaseAlgorithmBlend(self, a1, a2, 1.0f);
+}
+#endif
 

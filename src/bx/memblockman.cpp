@@ -61,7 +61,18 @@ INCLUDE_ASM("bx/memblockman", func_0031AA18);
 
 INCLUDE_ASM("bx/memblockman", func_0031AA58);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AAC8);
+#ifdef SKIP_ASM
+extern "C" void func_00423DC0(int);
+
+extern "C" void func_0031AAC8(void* self)
+{
+    if (*(int*)((char*)self + 0x1C) != 0) {
+        func_00423DC0(*(int*)((char*)self + 0x18));
+    }
+}
+#endif
 
 extern "C" void* func_00423DE0(int);
 
@@ -99,7 +110,17 @@ INCLUDE_ASM("bx/memblockman", func_0031AC08);
 
 INCLUDE_ASM("bx/memblockman", func_0031AC60);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031ACD8);
+#ifdef SKIP_ASM
+extern "C" void func_00423DC0(int);
+
+extern "C" void func_0031ACD8(void* self, int a1)
+{
+    *(int*)((char*)self + 0x14048) = a1;
+    func_00423DC0(*(int*)((char*)self + 0x14044));
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AD00);

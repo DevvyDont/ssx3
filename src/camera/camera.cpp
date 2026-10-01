@@ -14,7 +14,24 @@ INCLUDE_ASM("camera/camera", cCamera_init);
 
 INCLUDE_ASM("camera/camera", func_0015DF98);
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015DFD8);
+#ifdef SKIP_ASM
+extern "C" void func_0015DFD8(void* self, int mode)
+{
+    switch (mode) {
+    case 1:
+        *(int*)((char*)self + 0xA0) = *(int*)((char*)self + 0xA4);
+        break;
+    case 2:
+        *(int*)((char*)self + 0xA0) = *(int*)((char*)self + 0xA8);
+        break;
+    case 3:
+        *(int*)((char*)self + 0xA0) = *(int*)((char*)self + 0xAC);
+        break;
+    }
+}
+#endif
 
 extern "C" void* func_00166F28(void*);
 
@@ -481,7 +498,30 @@ INCLUDE_ASM("camera/camera", func_00161728);
 
 INCLUDE_ASM("camera/camera", func_00161848);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_00161950);
+#ifdef SKIP_ASM
+struct func_00161950_flags {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+};
+
+extern int D_gp_1CE0[2];
+
+extern "C" void func_00161950(void* self, int i)
+{
+    *(int*)((char*)self + 0x1C) = 0x3D;
+    *(int*)((char*)self + 0x38) = 0;
+    ((func_00161950_flags*)((char*)self + 0x30))->b1 = 0; ((func_00161950_flags*)((char*)self + 0x30))->b0 = 0; ((func_00161950_flags*)((char*)self + 0x30))->b2 = 0;
+    *(int*)((char*)self + 0x3C) = 0;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x2C) = 0x3D;
+    *(int*)((char*)self + 0x24) = D_gp_1CE0[i];
+    *(int*)((char*)self + 0x28) = 0x3D;
+    *(int*)((char*)self + 0x34) = 0;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_001619A8);
 
@@ -743,7 +783,26 @@ void func_00167E60(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167E68);
+#ifdef SKIP_ASM
+class func_00167E68_cObj {
+public:
+    char pad[0x10];
+    // vptr lands at 0x10 (g++ 2.95 places it after the class's own data);
+    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00167E68(func_00167E68_cObj* self)
+{
+    self->v05();
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167E90__FPv);

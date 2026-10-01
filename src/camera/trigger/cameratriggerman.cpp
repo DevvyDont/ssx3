@@ -28,9 +28,32 @@ void* func_0016CEC8(void* self, int a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEF0);
+#ifdef SKIP_ASM
+extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);
 
+// PORT: the unit declares func_0016CEF0 as returning void*, but the body returns nothing.
+void func_0016CEF0_impl(void* self, void* unused, void* stream) __asm__("func_0016CEF0");
+void func_0016CEF0_impl(void* self, void* unused, void* stream)
+{
+    if (stream != 0) {
+        cCameraTriggerMan_streamIn(self, stream);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF18);
+#ifdef SKIP_ASM
+// PORT: func_0016CF40__FPv is mangled as (void*), but this caller passes two args.
+void func_0016CF40_2(void* mgr, void* self) __asm__("func_0016CF40__FPv");
+
+extern "C" void func_0016CF18(void* self)
+{
+    func_0016CF40_2((void*)D_004C5830, self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF40__FPv);
@@ -77,7 +100,17 @@ void cCameraTriggerStack_init(cCameraTriggerStack* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D210);
+#ifdef SKIP_ASM
+void cCameraTriggerStack_init(cCameraTriggerStack* self);
+
+extern "C" cCameraTriggerStack* func_0016D210(cCameraTriggerStack* self)
+{
+    cCameraTriggerStack_init(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D238__FPvi);

@@ -55,7 +55,7 @@ INCLUDE_ASM("bx/cubicspline", func_0031DEE0);
 
 INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
 
-//86.24%
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
 #ifdef SKIP_ASM
 void func_0031E260(void* self)
@@ -66,18 +66,14 @@ void func_0031E260(void* self)
         *(void**)(p + 0x8) = p;
         p += 8;
     }
-    int flags = *(int*)self;
-    int f360 = *(int*)((char*)self + 0x360);
-    flags = (flags & 3) | 0x50;
-    f360 |= 1;
     *(int*)((char*)self + 0x34C) = 0x40000;
-    *(int*)((char*)self + 0x35C) = 0x1000;
     *(int*)((char*)self + 0x344) = 0x8000;
-    *(int*)((char*)self + 0x360) = f360;
-    *(int*)self = flags;
+    *(int*)((char*)self + 0x360) |= 1;
+    *(int*)self = (*(int*)self & 3) | 0x50;
     *(void**)((char*)self + 0x30) = (char*)self + 0x38;
     *(int*)((char*)self + 0x348) = 0;
     *(int*)((char*)self + 0x354) = 0;
+    *(int*)((char*)self + 0x35C) = 0x1000;
 }
 #endif
 
@@ -95,25 +91,21 @@ INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
 
 INCLUDE_ASM("bx/cubicspline", func_0031F4E8);
 
-//48%
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FBB8__FPvT0);
 #ifdef SKIP_ASM
-void* func_0031FBB8(void* self, void* ptr)
+unsigned int func_0031FBB8(void* self, void* mem)
 {
-    if (ptr == 0) {
-        return 0;
+    if (mem != 0) {
+        unsigned int size = *(unsigned int*)((char*)mem - 4);
+        char* p = (char*)mem - 8;
+        if (size & 2) {
+            return (size & ~3U) - 8;
+        } else if (*(unsigned int*)(p + (size & ~1U) + 4) & 1) {
+            return (size & ~3U) - 4;
+        }
     }
-    int flags = *(int*)((char*)ptr - 4);
-    if (flags & 2) {
-        return (void*)((flags & ~3) - 8);
-    }
-    char* p8 = (char*)ptr - 8;
-    void* p2 = p8 + (flags & ~1);
-    int flags2 = *(int*)((char*)p2 + 4);
-    if (!(flags2 & 1)) {
-        return 0;
-    }
-    return (void*)((flags & ~3) - 4);
+    return 0;
 }
 #endif
 
@@ -147,7 +139,24 @@ void func_0031FF38(void* self, int flags)
 
 INCLUDE_ASM("bx/cubicspline", func_0031FF60);
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FFD8);
+#ifdef SKIP_ASM
+extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit long param
+{
+    if (incr >= 0) {
+        unsigned int old = *(unsigned int*)((char*)self + 0x8);
+        unsigned int top = old + incr;
+        if (top <= *(unsigned int*)((char*)self + 0x4) + *(unsigned int*)((char*)self + 0xC)) {
+            *(unsigned int*)((char*)self + 0x8) = top;
+            return old;
+        }
+    } else {
+        return *(unsigned int*)((char*)self + 0x8) += incr;
+    }
+    return 0xFFFFFFFF;
+}
+#endif
 
 extern "C" int func_0031F2C8(void* self);
 

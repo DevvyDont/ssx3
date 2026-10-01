@@ -60,7 +60,29 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetEpoch);
 
 INCLUDE_ASM("dirtysock/tags", func_003ECB00);
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetNumber);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
+{
+    int sign;
+    int value;
+    if (data == 0) {
+        return defval;
+    }
+    sign = 1;
+    if (*data == '+') {
+        ++data;
+    } else if (*data == '-') {
+        ++data;
+        sign = -1;
+    }
+    for (value = 0; (*data >= '0') && (*data <= '9'); ) {
+        value = (value * 10) + (*data++ & 15);
+    }
+    return sign * value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFlags);
@@ -82,9 +104,43 @@ extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetAddr);
+#ifdef SKIP_ASM
+extern "C" unsigned int cDirtysock_tag_TagFieldGetAddr(const char* data, unsigned int defval)
+{
+    unsigned int addr = 0;
+    if (data != 0) {
+        for (;; data++) {
+            if ((*data >= '0') && (*data <= '9')) {
+                addr = (addr & 0xFFFFFF00) | (((addr & 0xFF) * 10) + (*data & 15));
+            } else if (*data == '.') {
+                addr <<= 8;
+            } else {
+                break;
+            }
+        }
+        defval = addr;
+    }
+    return defval;
+}
+#endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFourCC);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
+{
+    int token;
+    if ((data == 0) || (*data <= ' ') || (*data >= 127)) {
+        return defval;
+    }
+    for (token = 0x20202020; (token < 0x20FFFFFF) && (*data > ' ') && (*data < 127); data++) {
+        token = (token << 8) | *data;
+    }
+    return token;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetString);
 

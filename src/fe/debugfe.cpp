@@ -432,13 +432,81 @@ INCLUDE_ASM("fe/debugfe", func_001804B8);
 
 INCLUDE_ASM("fe/debugfe", func_001805D8);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180618);
+#ifdef SKIP_ASM
+extern "C" void func_00180618(void* self)
+{
+    int s = *(int*)((char*)self + 0x170);
+    if (s == 0 || s == 10 || s == 20 || s == 30) {
+        *(int*)((char*)self + 0x170) += 9;
+    } else if (s == 39 && *(int*)((char*)self + 0xE0) == 0) {
+        *(int*)((char*)self + 0x170) = 37;
+    } else {
+        *(int*)((char*)self + 0x170) -= 1;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180678);
+#ifdef SKIP_ASM
+extern "C" void func_00180678(void* self)
+{
+    int s = *(int*)((char*)self + 0x170);
+    if (s == 9 || s == 19 || s == 29 || s == 39) {
+        *(int*)((char*)self + 0x170) -= 9;
+    } else if (s == 37 && *(int*)((char*)self + 0xE0) == 0) {
+        *(int*)((char*)self + 0x170) = 39;
+    } else {
+        *(int*)((char*)self + 0x170) += 1;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_001806D8);
+#ifdef SKIP_ASM
+extern "C" void func_001806D8(void* self)
+{
+    int s = *(int*)((char*)self + 0x170);
+    if (s >= 0 && s < 10) {
+        if (s == 8 && *(int*)((char*)self + 0xE0) == 0) {
+            *(int*)((char*)self + 0x170) = 39;
+        } else {
+            *(int*)((char*)self + 0x170) += 30;
+        }
+    } else if (s >= 10 && s < 20 && *(int*)((char*)self + 0xD8) == 0) {
+        if (s == 18 && *(int*)((char*)self + 0xE0) == 0) {
+            *(int*)((char*)self + 0x170) = 39;
+        } else {
+            *(int*)((char*)self + 0x170) += 20;
+        }
+    } else {
+        *(int*)((char*)self + 0x170) -= 10;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180768);
+#ifdef SKIP_ASM
+extern "C" void func_00180768(void* self)
+{
+    int s = *(int*)((char*)self + 0x170);
+    if (s >= 30 && s < 40) {
+        if (*(int*)((char*)self + 0xD8) != 0) {
+            *(int*)((char*)self + 0x170) = s - 30;
+        } else {
+            *(int*)((char*)self + 0x170) = s - 20;
+        }
+    } else if (s == 28 && *(int*)((char*)self + 0xE0) == 0) {
+        *(int*)((char*)self + 0x170) = 39;
+    } else {
+        *(int*)((char*)self + 0x170) += 10;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_001807C8);

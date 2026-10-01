@@ -74,7 +74,16 @@ void* func_00320B48(void* self)
 
 INCLUDE_ASM("bx/execman", func_00320B68);
 
+//100%
 INCLUDE_ASM("bx/execman", func_00320BF0);
+#ifdef SKIP_ASM
+extern "C" void* func_00320FA8(int, int, int);
+
+extern "C" void* func_00320BF0(void* self, int a1)
+{
+    return func_00320FA8(*(int*)((char*)self + 0x4), *(int*)self, a1);
+}
+#endif
 
 extern "C" void* func_00321108(int, int, int);
 

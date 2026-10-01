@@ -219,9 +219,33 @@ extern "C" void func_00176808(float* v, sVec4A16* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176840);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
 
+extern "C" void func_00176840(void* self)
+{
+    int* p = *(int**)((char*)self + 0x8);
+    if (p != 0) {
+        operator_delete(p);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176868);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_00176868(void* self)
+{
+    int* p = *(int**)((char*)self + 0x8);
+    if (p != 0) {
+        operator_delete(p);
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176890);
 
@@ -478,9 +502,48 @@ void* func_00179FA8(void* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179FC8);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A028);
+#ifdef SKIP_ASM
+struct func_0017A028_sEntry {
+    int active;
+    char pad_0x4[0x88];
+};
 
+struct func_0017A028_sMgr {
+    int count;
+    char pad_0x4[0x88];
+    func_0017A028_sEntry entries[1];
+};
+
+extern "C" int func_0017A028(func_0017A028_sMgr* self, int i)
+{
+    if (*(int*)((char*)self + 0x8C08) == 0) {
+        return -1;
+    }
+    i = (i + 1) % self->count;
+    while (self->entries[i].active == 0) {
+        i = (i + 1) % self->count;
+    }
+    return i;
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A0B8);
+#ifdef SKIP_ASM
+extern "C" int func_0017A0B8(func_0017A028_sMgr* self, int i)
+{
+    if (*(int*)((char*)self + 0x8C08) == 0) {
+        return -1;
+    }
+    i = (i + self->count - 1) % self->count;
+    while (self->entries[i].active == 0) {
+        i = (i + self->count - 1) % self->count;
+    }
+    return i;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A158);
 
