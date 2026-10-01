@@ -1060,7 +1060,15 @@ int func_00361060(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361068);
+#ifdef SKIP_ASM
+extern "C" float func_00361068(void* self)
+{
+    float input = *(float*)((char*)self + 0x0);
+    return input * 30.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361080__FPv);
