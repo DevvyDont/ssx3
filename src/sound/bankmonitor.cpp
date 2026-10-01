@@ -438,7 +438,18 @@ extern "C" void func_002B46D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B46E8);
+#ifdef SKIP_ASM
+extern "C" void* func_002B46E8(void* self)
+{
+    void* inner = *(void**)((char*)self + 0x408);
+    if (inner == 0) {
+        return 0;
+    }
+    return *(void**)((char*)inner + 0x4C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4708);
