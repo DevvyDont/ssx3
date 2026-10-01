@@ -395,9 +395,25 @@ void* func_00144610(void* self)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);
+#ifdef SKIP_ASM
+extern "C" bool func_001446A0(void* self, int bit)
+{
+    ulong mask = (ulong)1 << bit;
+    return (*(ulong*)self & mask) != 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446B8);
+#ifdef SKIP_ASM
+extern "C" bool func_001446B8(void* self, int bit)
+{
+    ulong mask = (ulong)1 << bit;
+    return (*(ulong*)((char*)self + 0x8) & mask) != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446E8__FPv);

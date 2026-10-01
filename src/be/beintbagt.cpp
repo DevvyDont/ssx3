@@ -131,12 +131,21 @@ int func_00150528(void* self, int a1)
 }
 #endif
 
-//92.33%
+//100%
 INCLUDE_ASM("be/beintbagt", func_00150540__FPvi);
 #ifdef SKIP_ASM
+struct sBAGTEntry {
+    int key;
+    int value;
+};
+
+struct sBAGTTable {
+    sBAGTEntry entries[1];
+};
+
 int func_00150540(void* self, int a1)
 {
-    return *(int*)((char*)((char*)(void*)D_00530600 + a1 * 8) + 0x4);
+    return ((sBAGTTable*)D_00530600)->entries[a1].value;
 }
 #endif
 

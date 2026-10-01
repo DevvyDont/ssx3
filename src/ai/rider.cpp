@@ -178,7 +178,20 @@ INCLUDE_ASM("ai/rider", func_001200D0);
 
 INCLUDE_ASM("ai/rider", func_00120378);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120D58);
+#ifdef SKIP_ASM
+extern "C" void func_00120D58(void* self)
+{
+    *(float*)((char*)self + 0x2f8) = *(float*)((char*)self + 0xb24);
+    int state = *(int*)((char*)self + 0x304);
+    if (state == 3) {
+        *(float*)((char*)self + 0x2f8) = 0.0f;
+    } else if (state == 0) {
+        *(float*)((char*)self + 0x2f8) = 1.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00120D90);
 

@@ -90,7 +90,28 @@ INCLUDE_ASM("be/beintmission", func_00154588);
 
 INCLUDE_ASM("be/beintmission", func_001545B0);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001545F8);
+#ifdef SKIP_ASM
+struct sMissionEntry {
+    int id;              // 0x00
+    char pad_0x04[0x14];
+    int value;           // 0x18
+    char pad_0x1c[0x10];
+};
+
+extern sMissionEntry D_00440770[];
+
+extern "C" int func_001545F8(void* self, int id)
+{
+    for (int i = 0; i < 22; i++) {
+        if (D_00440770[i].id == id) {
+            return D_00440770[i].value;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00154630);
 

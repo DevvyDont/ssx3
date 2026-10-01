@@ -128,16 +128,16 @@ void* func_00119918(void* self, int a1)
 }
 #endif
 
-//97.62%
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119938__FPvii);
 #ifdef SKIP_ASM
 float func_00119938(void* self, int a1, int a2)
 {
-    *(int*)((char*)self + 0x6c) = 0;
+    *(float*)((char*)self + 0x6c) = 0.0f;
+    *(int*)((char*)self + 0xc) = a2;
     *(int*)((char*)self + 0x20) = a2;
     *(int*)((char*)self + 0x70) = a1;
     *(int*)((char*)self + 0x5c) = 1;
-    *(int*)((char*)self + 0xc) = a2;
     return *(float*)((char*)self + 0x6c);
 }
 #endif

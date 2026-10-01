@@ -60,12 +60,21 @@ INCLUDE_ASM("be/beintecon", func_00150C20);
 
 extern void* D_00440550[];
 
-//92.33%
+//100%
 INCLUDE_ASM("be/beintecon", func_00150E50__FPvi);
 #ifdef SKIP_ASM
+struct sEconEntry {
+    int key;
+    int value;
+};
+
+struct sEconTable {
+    sEconEntry entries[1];
+};
+
 int func_00150E50(void* self, int a1)
 {
-    return *(int*)((char*)((char*)(void*)D_00440550 + a1 * 8) + 0x4);
+    return ((sEconTable*)D_00440550)->entries[a1].value;
 }
 #endif
 
