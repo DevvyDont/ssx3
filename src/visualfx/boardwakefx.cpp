@@ -71,7 +71,22 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E26B8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E27E8);
+#ifdef SKIP_ASM
+extern "C" float func_002E27E8(int type)
+{
+    switch (type) {
+    case 0x10:
+        return 180.0f;
+    case 0x20:
+        return 100.0f;
+    case 0x40:
+        return 350.0f;
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2860__FPv);
@@ -298,7 +313,18 @@ void func_002E4F10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4F28);
+#ifdef SKIP_ASM
+void operator_delete(int* p);
+
+extern "C" void func_002E4F28(int* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4F50);
 
@@ -320,7 +346,37 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E6320);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6640);
+#ifdef SKIP_ASM
+struct sWakeVec4 {
+    float x;
+    float y;
+    float z;
+    float w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_002E6640(void* self)
+{
+    sWakeVec4 v;
+    v.x = 1.0f;
+    v.y = 0.0f;
+    v.z = 0.0f;
+    v.w = 1.0f;
+    *(int*)((char*)self + 0x398) = 0x39;
+    *(int*)((char*)self + 0x8) = 0;
+    *(sWakeVec4*)((char*)self + 0x40) = v;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x3A0) = 0;
+    *(int*)((char*)self + 0x39C) = 0;
+    *(int*)((char*)self + 0x3A4) = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x14 : 0x12;
+    *(int*)((char*)self + 0x3A8) = 0;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E66B8);
 

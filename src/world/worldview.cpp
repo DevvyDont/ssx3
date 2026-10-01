@@ -118,7 +118,26 @@ extern "C" int func_003AA6E8(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA700);
+#ifdef SKIP_ASM
+// PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
+extern "C" int func_003AA700(void* self, void* a1)
+{
+    unsigned int h = *(unsigned int*)((char*)a1 + 0x64);
+    char* sec = (*(char***)(**(char***)self + 8))[h & 0xFF];
+    void* res;
+    unsigned int i;
+    if (sec == 0 || (i = (*(unsigned int**)(sec + 0x24))[h >> 8] >> 8) == 0) {
+        res = 0;
+    } else {
+        res = (void*)(i << 2);
+    }
+    *(void**)((char*)a1 + 0x64) = res;
+    *(int*)((char*)a1 + 0x84) = 0;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA758);

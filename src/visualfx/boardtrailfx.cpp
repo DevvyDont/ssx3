@@ -20,7 +20,37 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA670);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA6B8);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA780);
+#ifdef SKIP_ASM
+struct sTrailFade {
+    char pad[0x10];
+    int state;
+    float value;
+    float time;
+};
+
+extern "C" void func_002EA780(sTrailFade* self, float t)
+{
+    switch (self->state) {
+    case 0:
+        return;
+    case 1:
+        self->time = t;
+        self->value = 0.0f;
+        break;
+    case 2:
+        self->value = (self->value / self->time) * t;
+        self->time = t;
+        break;
+    case 3:
+        self->value = (1.0f - self->value / self->time) * t;
+        self->time = t;
+        break;
+    }
+    self->state = 2;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA820);
 

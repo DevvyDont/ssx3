@@ -4,7 +4,21 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_init);
 
 INCLUDE_ASM("world/wscriptcache", func_003AC8F0);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ACA10);
+#ifdef SKIP_ASM
+struct sWScriptCacheItem {
+    char pad_0x00[0xC];
+};
+
+extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value);
+
+extern "C" void func_003ACA10(void* self, int index, int value)
+{
+    sWScriptCacheItem* p = *(sWScriptCacheItem**)((char*)self + 0x4);
+    func_003ACC50(&p[index], index, value);
+}
+#endif
 
 // 0xc-byte elements reached through a pointer at self+0x4
 struct sWScriptCacheEntry {
@@ -204,7 +218,21 @@ INCLUDE_ASM("world/wscriptcache", func_003AE6C8);
 
 INCLUDE_ASM("world/wscriptcache", func_003AE780);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AE860);
+#ifdef SKIP_ASM
+extern "C" int func_003AEFA8(void* p);
+
+extern "C" int func_003AE860(void** self)
+{
+    void* p = *self;
+    int r = 1;
+    if (p != 0) {
+        r = func_003AEFA8(p);
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003AE888);
 
@@ -371,7 +399,36 @@ INCLUDE_ASM("world/wscriptcache", func_003B07F8);
 
 INCLUDE_ASM("world/wscriptcache", func_003B08E0);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0948);
+#ifdef SKIP_ASM
+extern void* D_00456850[];
+
+struct sWSNode2 {
+    sWSNode2* next;
+    sWSNode2* prev;
+};
+
+static inline void wsListInit(sWSNode2* h)
+{
+    h->next = (sWSNode2*)3;
+    h->prev = (sWSNode2*)3;
+    h->next = h;
+    h->prev = h;
+    h->next = h;
+    h->prev = h;
+}
+
+extern "C" void* func_003B0948(void* self)
+{
+    *(void***)self = D_00456850;
+    wsListInit((sWSNode2*)((char*)self + 0x18));
+    wsListInit((sWSNode2*)((char*)self + 0x20));
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B09A0);
 
@@ -408,7 +465,65 @@ INCLUDE_ASM("world/wscriptcache", func_003B0FB8);
 
 INCLUDE_ASM("world/wscriptcache", func_003B1050);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B10D0);
+#ifdef SKIP_ASM
+struct sWSNode {
+    sWSNode* next;
+    sWSNode* prev;
+
+    void unlink()
+    {
+        sWSNode* n = next;
+        sWSNode* p = prev;
+        p->next = n;
+        n->prev = p;
+        prev = next = (sWSNode*)0xB;
+    }
+};
+
+struct sWSList {
+    sWSNode head;
+
+    void addTail(sWSNode* n)
+    {
+        sWSNode* tail = head.prev;
+        tail->next = n;
+        head.prev = n;
+        n->prev = tail;
+        n->next = &head;
+    }
+};
+
+struct sWSItemBase {
+    int a;
+    int b;
+};
+
+struct sWSItem : sWSItemBase, sWSNode {
+    int refs; // 0x10
+};
+
+struct sWSPool {
+    char pad00[0x18];
+    sWSList used; // 0x18
+    sWSList free; // 0x20
+};
+
+extern "C" sWSItem* func_003B10D0(sWSPool* self)
+{
+    sWSNode* n = self->free.head.next;
+    if (n != &self->free.head) {
+        sWSItem* item;
+        n->unlink();
+        item = static_cast<sWSItem*>(n);
+        self->used.addTail(item);
+        item->refs = 1;
+        return item;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B1140);
 
@@ -500,7 +615,16 @@ INCLUDE_ASM("world/wscriptcache", func_003B20B8);
 
 INCLUDE_ASM("world/wscriptcache", func_003B2230);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B22F8);
+#ifdef SKIP_ASM
+extern int D_00495608[];
+
+extern "C" void func_003B22F8(void)
+{
+    func_003B11E8(D_00495608);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B2318);
 
@@ -554,13 +678,56 @@ INCLUDE_ASM("world/wscriptcache", func_003B27C8);
 
 INCLUDE_ASM("world/wscriptcache", func_003B2A68);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B2B68);
+#ifdef SKIP_ASM
+extern void (*D_0044C458[])(char* buf);
+
+extern "C" void func_003B2B68(char* buf)
+{
+    buf[0] = 0;
+    D_0044C458[0](buf);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B2B90);
 
 INCLUDE_ASM("world/wscriptcache", func_003B2E78);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B3308);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` compares (ld); `long` is 8 bytes on this compiler.
+extern "C" int func_003B3308(void* buf, int size, int type)
+{
+    if (type == 3) {
+        unsigned long* p = (unsigned long*)buf;
+        int n = size / 16;
+        int i;
+        for (i = 0; i < n; i++) {
+            unsigned long v = *p++;
+            if (v != 0xFFFFFFFF) {
+                return 1;
+            }
+            if (*p != v) {
+                return 1;
+            }
+            p += 3;
+        }
+    } else {
+        unsigned short* q = (unsigned short*)buf;
+        int n = size / 16;
+        int i;
+        for (i = 0; i < n; i++) {
+            if (*q != 0xFFFF) {
+                return 1;
+            }
+            q += 16;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B33B0);
 

@@ -24,7 +24,53 @@ extern "C" void func_002F5998(sWorldLight* lights)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F59D0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sWorldLightNode {
+    long key;
+    char pad08[0x168];
+    sWorldLightNode* next;
+    sWorldLightNode* prev;
+    char pad178[8];
+};
+
+struct sWorldLightMan {
+    char pad000[0x210];
+    sWorldLightNode nodes[32];
+    sWorldLightNode* heads[32];
+};
+
+extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
+{
+    sWorldLightNode* best = 0;
+    int min = priority + 1;
+    unsigned int i;
+    for (i = 0; i < 32; i++) {
+        int p = *(int*)((char*)&self->nodes[i] + 4);
+        if (p < min) {
+            min = p;
+            best = &self->nodes[i];
+        }
+    }
+    int slot = (int)(best->key >> 8) & 0x1F;
+    if (best->prev == 0) {
+        self->heads[slot] = best->next;
+        if (best->next != 0) {
+            best->next->prev = 0;
+        }
+    } else {
+        if (best->next == 0) {
+            best->prev->next = 0;
+        } else {
+            best->prev->next = best->next;
+            best->next->prev = best->prev;
+        }
+    }
+    return best;
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5A70);
 
@@ -75,7 +121,24 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F6A58);
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F6A90);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6AC8);
+#ifdef SKIP_ASM
+extern "C" void func_002F6AC8(void* self, int type)
+{
+    switch (type) {
+    case 0:
+        *(unsigned char*)((char*)self + 7) |= 0x10;
+        break;
+    case 1:
+        *(unsigned char*)((char*)self + 7) |= 0x20;
+        break;
+    case 2:
+        *(unsigned char*)((char*)self + 7) |= 0x40;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B28);

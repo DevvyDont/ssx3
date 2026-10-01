@@ -10,7 +10,44 @@ INCLUDE_ASM("visualfx/avalanche", func_002D64D8);
 
 INCLUDE_ASM("visualfx/avalanche", tAvalancheNode_calculate);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_calculateScale);
+#ifdef SKIP_ASM
+struct sAvalancheData {
+    char pad[0xF0];
+    unsigned short type;
+    char padF2[0xE];
+    float f100;
+    float f104;
+    float f108;
+};
+
+extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t)
+{
+    sAvalancheData* d = *(sAvalancheData**)((char*)self + 0x2E0);
+    float x = t * 30.0f;
+    if (x < d->f104) {
+        *(float*)((char*)self + 0xB0) = 1.0f;
+        *(float*)((char*)self + 0xB4) = x / d->f104;
+        return;
+    }
+    if (x < d->f100 - d->f108) {
+        *(float*)((char*)self + 0xB4) = 1.0f;
+        *(float*)((char*)self + 0xB0) = 1.0f;
+        return;
+    }
+    if (d->type != 2) {
+        float v = (d->f100 - x) / d->f108;
+        *(float*)((char*)self + 0xB4) = v;
+        *(float*)((char*)self + 0xB0) = v;
+        if (v > 0.0f) {
+            // PORT: sqrt.s (sqrtf without errno check)
+            __asm__("sqrt.s %0, %1" : "=f"(v) : "f"(v));
+            *(float*)((char*)self + 0xB0) = v;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D7CA8);
 

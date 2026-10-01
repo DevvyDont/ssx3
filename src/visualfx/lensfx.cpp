@@ -76,7 +76,18 @@ INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECCB8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002ECF78);
+#ifdef SKIP_ASM
+extern "C" void func_002ECCB8(void* self);
+
+extern "C" void func_002ECF78(void* self)
+{
+    if (*(int*)self != 0) {
+        func_002ECCB8(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECFA0);
 
@@ -128,13 +139,55 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE268);
 
 INCLUDE_ASM("visualfx/lensfx", func_002EE2B0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EE2F8);
+#ifdef SKIP_ASM
+extern "C" void func_002EE010(void* p);
 
+// $gp-relative object at gp+0x24C0 (no symbol in the target)
+extern int D_gp_24C0;
+
+extern "C" void func_002EE2F8(void)
+{
+    func_002EE010(&D_gp_24C0);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EE318);
+#ifdef SKIP_ASM
+extern "C" void func_002EE010(void* p);
+extern "C" void* func_002EF0E8(void);
 
+extern "C" void func_002EE318(void)
+{
+    func_002EE010(func_002EF0E8());
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EE340);
+#ifdef SKIP_ASM
+extern "C" void func_002EE010(void* p);
+extern "C" void* func_002EF140(void);
 
+extern "C" void func_002EE340(void)
+{
+    func_002EE010(func_002EF140());
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EE368);
+#ifdef SKIP_ASM
+extern "C" void func_002EE010(void* p);
+extern "C" void* func_002EF198(void);
+
+extern "C" void func_002EE368(void)
+{
+    func_002EE010(func_002EF198());
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002EE3B8);
 
