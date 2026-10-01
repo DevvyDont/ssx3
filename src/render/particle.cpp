@@ -73,9 +73,55 @@ INCLUDE_ASM("render/particle", func_00374518);
 
 INCLUDE_ASM("render/particle", func_003747A0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00374A88);
+#ifdef SKIP_ASM
+struct sPartItem {
+    char pad[0xC];
+    short v;
+    short pad2;
+};
 
+struct sPartOwner {
+    char pad[0x18];
+    char* lists[1];
+};
+
+extern "C" void func_00374A88(sPartOwner* self, int count, sPartItem* items, int idx, int bit)
+{
+    int mask = (1 << bit) | 0xC;
+    for (int i = 0; i < count; i++) {
+        short v = items[i].v;
+        if (v >= 0) {
+            char* p = self->lists[idx] + v * 0xC;
+            *(int*)(p + 4) |= mask;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00374AE0);
+#ifdef SKIP_ASM
+struct sPartItem14 {
+    char pad[0xC];
+    short v;
+    short pad2;
+    int pad3;
+};
+
+extern "C" void func_00374AE0(sPartOwner* self, int count, sPartItem14* items, int idx, int bit)
+{
+    int mask = (1 << bit) | 0xC;
+    for (int i = 0; i < count; i++) {
+        short v = items[i].v;
+        if (v >= 0) {
+            char* p = self->lists[idx] + v * 0xC;
+            *(int*)(p + 4) |= mask;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00374B38);
 
@@ -181,7 +227,32 @@ extern "C" float func_00376C10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00376C28);
+#ifdef SKIP_ASM
+struct sPartEmitter {
+    char pad[0x10];
+    float x;
+    float y;
+    float z;
+    char pad2[0x230 - 0x1C];
+};
+
+struct sPartSys {
+    char pad[0x10dc];
+    int cur;
+    char pad2[0x6d20 - 0x10e0];
+    sPartEmitter emitters[1];
+};
+
+extern "C" void func_00376C28(sPartSys* self, float* a, float* b, float* c)
+{
+    sPartEmitter* e = &self->emitters[self->cur];
+    *a = e->z;
+    *b = e->x;
+    *c = e->y;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00376C58);
 
@@ -191,7 +262,18 @@ INCLUDE_ASM("render/particle", func_00377458);
 
 INCLUDE_ASM("render/particle", func_00377950);
 
+//100%
 INCLUDE_ASM("render/particle", func_003779E0);
+#ifdef SKIP_ASM
+struct sPart20 {
+    int v[5];
+};
+
+extern "C" void func_003779E0(void* self, sPart20* src)
+{
+    *(sPart20*)((char*)self + 0x6b94) = *src;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00377A10);
 
@@ -267,7 +349,51 @@ INCLUDE_ASM("render/particle", func_0037CAF8);
 
 INCLUDE_ASM("render/particle", func_0037CB50);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037CB90);
+#ifdef SKIP_ASM
+// PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
+struct sGsTex0 {
+    ulong TBP0 : 14;
+    ulong TBW : 6;
+    ulong PSM : 6;
+    ulong TW : 4;
+    ulong TH : 4;
+    ulong TCC : 1;
+    ulong TFX : 2;
+    ulong CBP : 14;
+    ulong CPSM : 4;
+    ulong CSM : 1;
+    ulong CSA : 5;
+    ulong CLD : 3;
+};
+
+struct sPartTex {
+    char pad[0x38];
+    sGsTex0 tex0;
+};
+
+struct sPartTexTable {
+    int pad[2];
+    sPartTex* entries[2000];
+};
+
+extern "C" int func_0037CB90(void* self, int idx)
+{
+    sPartTexTable* t = *(sPartTexTable**)((char*)self + 0x18f4);
+    int r;
+    if (idx >= 0) {
+        if (idx < 2000) {
+            r = t->entries[idx] != 0;
+        } else {
+            r = 0;
+        }
+    } else {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 extern "C" void* func_003691B0(int);
 
@@ -320,9 +446,27 @@ INCLUDE_ASM("render/particle", func_0037D758);
 
 INCLUDE_ASM("render/particle", func_0037D800);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D908);
+#ifdef SKIP_ASM
+// PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
+extern "C" int func_0037D908(void* self, int idx)
+{
+    sPartTexTable* t = *(sPartTexTable**)((char*)self + 0x18f4);
+    return 1 << t->entries[idx]->tex0.TW;
+}
+#endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D938);
+#ifdef SKIP_ASM
+// PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
+extern "C" int func_0037D938(void* self, int idx)
+{
+    sPartTexTable* t = *(sPartTexTable**)((char*)self + 0x18f4);
+    return 1 << t->entries[idx]->tex0.TH;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037D968);
 
@@ -370,7 +514,22 @@ INCLUDE_ASM("render/particle", func_00382650);
 
 INCLUDE_ASM("render/particle", func_00382688);
 
+//100%
 INCLUDE_ASM("render/particle", func_003826E0);
+#ifdef SKIP_ASM
+extern "C" int func_003826E0(void* self)
+{
+    volatile int* arr = (volatile int*)((char*)self + 0x5a90);
+    volatile int* s = &arr[*(int*)((char*)self + 0x5a10)];
+    if (*s == 0 || *s == 1) {
+        if (*s == 0) {
+            *s = 1;
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00382730);
@@ -437,7 +596,20 @@ INCLUDE_ASM("render/particle", func_00385A38);
 
 INCLUDE_ASM("render/particle", func_00385AA0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00385BA0);
+#ifdef SKIP_ASM
+struct sShortUV {
+    short u;
+    short v;
+};
+
+extern "C" void func_00385BA0(void* self, sShortUV* dst, int idx, float* src)
+{
+    dst[idx].u = (short)(src[0] * 4096.0f);
+    dst[idx].v = (short)(src[1] * 4096.0f);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00385BE0);
 
@@ -485,13 +657,35 @@ INCLUDE_ASM("render/particle", func_00389098);
 
 INCLUDE_ASM("render/particle", func_00389118);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389260);
+#ifdef SKIP_ASM
+struct sPartVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_00389260(sPartVec4* v)
+{
+    for (int i = 0; i < 10; i++) {
+        v[i].x = v[i].y = v[i].z = v[i].w = 0.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00389308);
 
 INCLUDE_ASM("render/particle", func_00389520);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389558);
+#ifdef SKIP_ASM
+extern "C" void func_00389558(float* a, float* b)
+{
+    a[0] += b[0];
+    a[1] += b[1];
+    a[2] += b[2];
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00389590);
 
@@ -501,7 +695,26 @@ INCLUDE_ASM("render/particle", func_00389730);
 
 INCLUDE_ASM("render/particle", func_003897A0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389810);
+#ifdef SKIP_ASM
+// PORT: VU0 macro-mode vector scale (vec4 *= s); the PC port needs plain C.
+extern "C" sPartVec4* func_00389810(sPartVec4* v, float s)
+{
+    for (int i = 0; i < 10; i++) {
+        __asm__ __volatile__(
+            "mfc1       $2, %1\n"
+            "lqc2       $vf4, 0x0(%0)\n"
+            "qmtc2.ni   $2, $vf3\n"
+            "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+            "sqc2       $vf5, 0x0(%0)\n"
+            :
+            : "r"(&v[i]), "f"(s)
+            : "$2", "memory");
+    }
+    return v;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00389840);
 

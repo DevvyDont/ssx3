@@ -76,7 +76,33 @@ INCLUDE_ASM("replay/playbackman", func_0026D558);
 
 INCLUDE_ASM("replay/playbackman", func_0026D5E8);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D628);
+#ifdef SKIP_ASM
+struct sPlaybackKey {
+    short a;
+    char b;
+    char c;
+};
+
+extern "C" void func_0026D628(void* self)
+{
+    sPlaybackKey k;
+    k.a = 0;
+    k.b = 0;
+    k.c = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x34) = -1;
+    *(sPlaybackKey*)((char*)self + 0x1c) = k;
+    *(int*)((char*)self + 0x20) = -1;
+    *(int*)((char*)self + 0x24) = -1;
+    *(int*)((char*)self + 0x28) = -1;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xc) = 0;
+    *(int*)((char*)self + 0x2c) = -1;
+    *(int*)((char*)self + 0x10) = 0;
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", func_0026D678);
 

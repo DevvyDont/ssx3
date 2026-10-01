@@ -90,9 +90,27 @@ INCLUDE_ASM("render/lightman", func_0038F708);
 
 INCLUDE_ASM("render/lightman", func_0038F738);
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F768);
+#ifdef SKIP_ASM
+// PORT: polls PS2 hardware register 0x1000D000 directly; needs a platform shim.
+extern "C" void func_0038F768(void)
+{
+    while (*(volatile int*)0x1000D000 & 0x100) {
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F7B0);
+#ifdef SKIP_ASM
+// PORT: polls PS2 hardware register 0x1000D400 directly; needs a platform shim.
+extern "C" void func_0038F7B0(void)
+{
+    while (*(volatile int*)0x1000D400 & 0x100) {
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F7F8__FPv);

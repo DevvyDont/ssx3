@@ -55,13 +55,75 @@ void func_0026E5C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replay", func_0026E5D0);
+#ifdef SKIP_ASM
+struct sReplayNode {
+    char pad[0x14];
+    sReplayNode* next;
+    sReplayNode* prev;
+};
+
+struct sReplayList {
+    sReplayNode* head;
+    sReplayNode* tail;
+    int count;
+};
+
+extern "C" void func_0026E5D0(sReplayList* list, sReplayNode* node)
+{
+    node->prev = list->tail;
+    node->next = 0;
+    if (list->tail) {
+        list->tail->next = node;
+    }
+    list->tail = node;
+    if (!list->head) {
+        list->head = node;
+    }
+    list->count++;
+}
+#endif
 
 INCLUDE_ASM("replay/replay", func_0026E608);
 
 INCLUDE_ASM("replay/replay", func_0026E670);
 
+//100%
 INCLUDE_ASM("replay/replay", func_0026E6A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sReplayFrame {
+    char pad[0x14];
+    sReplayFrame* next;
+    char pad2[0x30 - 0x18];
+    int time;
+};
+
+struct sReplayFrameList {
+    sReplayFrame* head;
+    sReplayFrame* tail;
+    int count;
+};
+
+// the unit declares this with one arg; bind the real 2-arg body to the symbol
+sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time) __asm__("func_0026E6A0");
+
+sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
+{
+    sReplayFrame* f = list->head;
+    while (f->next) {
+        if (f->time == time) {
+            break;
+        }
+        if (f->time < time && time < f->next->time) {
+            break;
+        }
+        f = f->next;
+    }
+    return f;
+}
+#endif
 
 INCLUDE_ASM("replay/replay", func_0026E6E0);
 
@@ -74,7 +136,18 @@ void func_0026E7F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replay", func_0026E800);
+#ifdef SKIP_ASM
+extern "C" void func_0026E800(void* self)
+{
+    unsigned char* p = *(unsigned char**)((char*)self + 0xb0);
+    if (p) {
+        p[0x1e] &= ~(1 << *(int*)self);
+        *(int*)((char*)self + 0xb0) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/replay", func_0026E838);
 
