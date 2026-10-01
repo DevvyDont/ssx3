@@ -30,14 +30,15 @@ int func_00275CD0(void* self, void* a1)
 }
 #endif
 
-//53.33%
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275CF8__FPv);
 #ifdef SKIP_ASM
-int func_00275CF8(void* self)
+void* func_00275CF8(void* self)
 {
-    *(int*)((char*)self + 0x8) = *(int*)((char*)*(void**)((char*)self + 0x8) + 0x14);
-    *(int*)((char*)*(void**)((char*)self + 0x8) + 0x14) = 0;
-    return *(int*)((char*)self + 0x8);
+    void* head = *(void**)((char*)self + 0x8);
+    *(void**)((char*)self + 0x8) = *(void**)((char*)head + 0x14);
+    *(void**)((char*)head + 0x14) = 0;
+    return head;
 }
 #endif
 
@@ -154,18 +155,15 @@ extern "C" int func_00277DD8(void* self, void* a1)
 
 INCLUDE_ASM("scripter/datamanager", func_00277DE8);
 
-//99.5%
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277F08__FPv);
 #ifdef SKIP_ASM
-int func_00277F08(void* self)
+void func_00277F08(void* self)
 {
-    int t0 = 0;
-    int t1 = -1;
-    *(int*)((char*)self + 0xc) = t0;
-    *(int*)((char*)self + 0x4) = t1;
-    *(int*)self = t0;
-    *(int*)((char*)self + 0x8) = t0;
-    return t1;
+    *(int*)self = 0;
+    *(int*)((char*)self + 0x4) = -1;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xc) = 0;
 }
 #endif
 

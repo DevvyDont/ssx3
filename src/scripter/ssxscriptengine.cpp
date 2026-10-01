@@ -211,30 +211,29 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027B948);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BB08);
 
-//53.33%
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD78__FPv);
 #ifdef SKIP_ASM
-int func_0027BD78(void* self)
+void* func_0027BD78(void* self)
 {
-    *(int*)((char*)self + 0x548) = *(int*)((char*)*(void**)((char*)self + 0x548) + 0x10);
-    *(int*)((char*)*(void**)((char*)self + 0x548) + 0x10) = 0;
-    return *(int*)((char*)self + 0x548);
+    void* head = *(void**)((char*)self + 0x548);
+    *(void**)((char*)self + 0x548) = *(void**)((char*)head + 0x10);
+    *(void**)((char*)head + 0x10) = 0;
+    return head;
 }
 #endif
 
-//41.78%
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD90__FPvT0);
 #ifdef SKIP_ASM
-int func_0027BD90(void* self, void* a1)
+void func_0027BD90(void* self, void* a1)
 {
-    int t0 = -1;
-    *(int*)((char*)a1 + 0xc) = t0;
-    *(int*)((char*)a1 + 0x10) = *(int*)((char*)self + 0x548);
-    *(int*)a1 = t0;
-    *(int*)((char*)a1 + 0x4) = t0;
-    *(int*)((char*)a1 + 0x8) = t0;
-    *(int*)((char*)self + 0x548) = (int)a1;
-    return t0;
+    *(void**)((char*)a1 + 0x10) = *(void**)((char*)self + 0x548);
+    *(int*)a1 = -1;
+    *(int*)((char*)a1 + 0x4) = -1;
+    *(int*)((char*)a1 + 0x8) = -1;
+    *(int*)((char*)a1 + 0xc) = -1;
+    *(void**)((char*)self + 0x548) = a1;
 }
 #endif
 
@@ -484,26 +483,23 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002803F0);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280458);
 
-//69.3%
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280520__FPviT0T0);
 #ifdef SKIP_ASM
-int func_00280520(void* self, int a1, void* a2, void* a3)
+void func_00280520(void* self, int a1, void* a2, void* a3)
 {
-    int t0 = *(int*)((char*)*(void**)((char*)*(void**)((char*)self + 0x1c) + 0x10) + a1 * 4);
     *(int*)a3 = *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
-    *(int*)a2 = t0;
-    return t0;
+    *(int*)a2 = (*(int**)((char*)*(void**)((char*)self + 0x1c) + 0x10))[a1];
 }
 #endif
 
-//68.0%
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280548__FPviT0T0);
 #ifdef SKIP_ASM
-int func_00280548(void* self, int a1, void* a2, void* a3)
+void func_00280548(void* self, int a1, void* a2, void* a3)
 {
     *(int*)a3 = *(int*)((char*)*(void**)((char*)self + 0x20) + 0x4);
     *(int*)a2 = a1;
-    return *(int*)((char*)self + 0x20);
 }
 #endif
 
@@ -528,14 +524,13 @@ extern "C" int func_002808D8(void* self, void* a1, int a2)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002808E8);
 
-//68.0%
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281000__FPviT0T0);
 #ifdef SKIP_ASM
-int func_00281000(void* self, int a1, void* a2, void* a3)
+void func_00281000(void* self, int a1, void* a2, void* a3)
 {
     *(int*)a3 = *(int*)((char*)*(void**)((char*)self + 0xf8) + 0x4);
     *(int*)a2 = a1;
-    return *(int*)((char*)self + 0xf8);
 }
 #endif
 

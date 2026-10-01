@@ -79,22 +79,19 @@ void* func_00282C18(void* self)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282C38);
 
-//87.5%
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282C88__FPvT0);
 #ifdef SKIP_ASM
-int func_00282C88(void* self, void* a1)
+void func_00282C88(void* self, void* a1)
 {
-    int t0 = 0;
-    int t1 = -1;
-    *(int*)((char*)a1 + 0xc) = t0;
-    *(int*)((char*)a1 + 0x14) = t1;
-    *(int*)a1 = t0;
-    *(int*)((char*)a1 + 0x4) = t0;
-    *(int*)((char*)a1 + 0x20) = t0;
-    *(short*)((char*)a1 + 0x10) = (short)t0;
-    *(short*)((char*)a1 + 0x12) = (short)t0;
-    *(int*)((char*)a1 + 0x18) = t0;
-    return t1;
+    *(int*)((char*)a1 + 0x0) = 0;
+    *(int*)((char*)a1 + 0x4) = 0;
+    *(int*)((char*)a1 + 0x20) = 0;
+    *(short*)((char*)a1 + 0x10) = 0;
+    *(short*)((char*)a1 + 0x12) = 0;
+    *(int*)((char*)a1 + 0x14) = -1;
+    *(int*)((char*)a1 + 0x18) = 0;
+    *(int*)((char*)a1 + 0xc) = 0;
 }
 #endif
 
@@ -149,13 +146,13 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282F30);
 
 extern void* D_00482418[];
 
-//48.5%
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282F60__FPv);
 #ifdef SKIP_ASM
 void* func_00282F60(void* self)
 {
+    *(void***)self = D_00482418;
     *(int*)((char*)self + 0x4) = -1;
-    *(int*)self = (int)(void*)D_00482418;
     *(int*)((char*)self + 0x8) = 0;
     return self;
 }
@@ -190,13 +187,13 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002831B0);
 
 extern void* D_00482558[];
 
-//75.44%
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283200__FPvi);
 #ifdef SKIP_ASM
 void* func_00283200(void* self, int a1)
 {
+    *(void***)((char*)self + 0xc) = D_00482558;
     *(int*)self = a1;
-    *(int*)((char*)self + 0xc) = (int)(void*)D_00482558;
     *(int*)((char*)self + 0x4) = -1;
     *(int*)((char*)self + 0x8) = 0;
     return self;
