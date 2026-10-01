@@ -478,7 +478,21 @@ int func_002CD398(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD3A0);
+#ifdef SKIP_ASM
+struct s2CD3A0Vec {
+    float x, y, z, w;
+};
+
+extern "C" s2CD3A0Vec func_002CD3A0(void* self)
+{
+    s2CD3A0Vec v;
+    v.x = v.y = v.z = 0.0f;
+    v.w = (float)*(int*)((char*)self + 0x14);
+    return v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CD3F0__FPv);
@@ -534,7 +548,20 @@ INCLUDE_ASM("util/menu", cFloatMenuItem_cFloatMenuItem);
 
 INCLUDE_ASM("util/menu", func_002CDD78);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CDF78);
+#ifdef SKIP_ASM
+extern "C" void func_002CDF78(void* self)
+{
+    float* p = *(float**)((char*)self + 0x18);
+    float v = *(float*)((char*)self + 0x1c);
+    if (v <= 0.0f) {
+        *p = 0.0f;
+    } else {
+        *p = v;
+    }
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CDFA0);
 

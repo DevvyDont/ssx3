@@ -52,7 +52,18 @@ INCLUDE_ASM("ui/uithing", func_003A0348);
 
 INCLUDE_ASM("ui/uithing", func_003A03F0);
 
+//100%
 INCLUDE_ASM("ui/uithing", func_003A04F0);
+#ifdef SKIP_ASM
+extern "C" int func_003A04F0(void* self)
+{
+    void* p = *(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
+    if (p != 0) {
+        return *(int*)((char*)*(void**)((char*)p + 0x8) + (*(unsigned char*)((char*)self + 0x74) & 3) * 12 + 0xC);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uithing", func_003A0528);
 

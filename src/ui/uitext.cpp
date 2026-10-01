@@ -81,9 +81,37 @@ INCLUDE_ASM("ui/uitext", func_003A1148);
 
 INCLUDE_ASM("ui/uitext", func_003A11B8);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A12D0);
+#ifdef SKIP_ASM
+extern "C" int func_003A12D0(void* self)
+{
+    void* p = *(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
+    if (p != 0) {
+        return *(int*)((char*)*(void**)((char*)p + 0x8) + ((*(unsigned int*)((char*)self + 0x74) >> 1) & 3) * 12 + 0xC);
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1310);
+#ifdef SKIP_ASM
+extern "C" void func_003A1310(void* self, char a1)
+{
+    if (a1 == 0) {
+        *(char*)((char*)self + 0x88) = 0;
+        *(char*)((char*)self + 0x89) = 1;
+        *(char*)((char*)self + 0x8A) = 2;
+        *(char*)((char*)self + 0x8B) = 3;
+    } else {
+        *(char*)((char*)self + 0x88) = 4;
+        *(char*)((char*)self + 0x89) = 5;
+        *(char*)((char*)self + 0x8A) = 6;
+        *(char*)((char*)self + 0x8B) = 7;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A1360);
 
@@ -107,7 +135,18 @@ INCLUDE_ASM("ui/uitext", func_003A1F18);
 
 INCLUDE_ASM("ui/uitext", func_003A1F90);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A2068);
+#ifdef SKIP_ASM
+extern "C" int func_003A2068(void* self, int i)
+{
+    int* arr = *(int**)((char*)self + 0xBC);
+    if (arr != 0 && i >= 0 && i < *(unsigned short*)((char*)self + 0xC8)) {
+        return arr[i];
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A3280);
 

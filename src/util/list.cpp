@@ -21,7 +21,31 @@ int cListNode_isSentinel(cListNode* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/list", cListNode_removeFromList);
+#ifdef SKIP_ASM
+extern "C" void cListNode_removeFromList(cListNode* self)
+{
+    cListNode* next = self->next;
+    cListNode* prev = self->prev;
+    if (next != 0 && next != self) {
+        if (prev == self) {
+            next->prev = next;
+        } else {
+            next->prev = prev;
+        }
+    }
+    if (prev != 0 && prev != self) {
+        if (next == self) {
+            prev->next = prev;
+        } else {
+            prev->next = next;
+        }
+    }
+    self->prev = self;
+    self->next = self;
+}
+#endif
 
 INCLUDE_ASM("util/list", func_00397788);
 
@@ -82,7 +106,20 @@ void func_00397930(void* self)
 
 INCLUDE_ASM("util/list", func_00397948);
 
+//100%
 INCLUDE_ASM("util/list", func_003979C0);
+#ifdef SKIP_ASM
+extern "C" int func_003979C0(cList* list)
+{
+    cListNode* node = list->head;
+    int count = 0;
+    while (node->prev != node) {
+        node = node->prev;
+        count++;
+    }
+    return count;
+}
+#endif
 
 INCLUDE_ASM("util/list", func_003979F8);
 

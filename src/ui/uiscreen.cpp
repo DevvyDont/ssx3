@@ -26,7 +26,23 @@ INCLUDE_ASM("ui/uiscreen", func_0039C558);
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_setData);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039C728);
+#ifdef SKIP_ASM
+extern "C" void* func_0039C728(void* self, unsigned short frame)
+{
+    int* list = *(int**)((char*)self + 0x34);
+    char* e = (char*)list + 4;
+    unsigned int i;
+    for (i = 0; i < (unsigned int)*list; i++) {
+        if (*(unsigned short*)(e + 0x8) == frame) {
+            return e;
+        }
+        e = e + *(int*)(e + 0x4);
+    }
+    return 0;
+}
+#endif
 
 struct sFrameEntry {
     int label; // 0x0
@@ -93,7 +109,22 @@ extern "C" void func_0039CBC8(void* p0, void* p1, void* p2, void* p3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CBE0);
+#ifdef SKIP_ASM
+extern "C" void func_0039CBE0(cUIScreen* self, void* p1, void* p2, void* p3)
+{
+    sFrameEntry* e = (sFrameEntry*)((char*)self->list + 4);
+    unsigned int i;
+    for (i = 0; i < (unsigned int)self->list->count; i++) {
+        if (e->label == *(int*)((char*)p2 + 4)) {
+            *(unsigned short*)((char*)p3 + 0xC) = e->field_0x8;
+            return;
+        }
+        e = (sFrameEntry*)((char*)e + e->stride);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039CC38);
 
@@ -146,7 +177,18 @@ void func_0039CE90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CE98);
+#ifdef SKIP_ASM
+extern "C" void func_0039CE98(void* self, void* p1, void* p2, void* p3)
+{
+    *(unsigned int*)((char*)p3 + 0x10) &= 0xFEFFFFFFU;
+    void* p = *(void**)((char*)self + 0xd0);
+    if (p != 0) {
+        ((sUIFlags1C*)((char*)p + 0x1c))->mode = 7;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_createAllObjects);
 

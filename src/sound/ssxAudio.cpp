@@ -92,9 +92,30 @@ extern "C" float func_00287920(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00287930);
+#ifdef SKIP_ASM
+extern "C" float func_00287930(void* self, int a1, int a2)
+{
+    if (a1 != 4 || a2 >= 10) {
+        return *(float*)((char*)self + (a1 << 4) + 0x62C8);
+    }
+    return *(float*)((char*)self + (a2 << 2) + 0x636C);
+}
+#endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00287968);
+#ifdef SKIP_ASM
+extern "C" void* func_00287968(void* self, int a1, int a2)
+{
+    if (a1 != 4 || a2 >= 10) {
+        // PORT: pointer held in int (only spelling found that gives idx-first addu)
+        return (char*)((a1 << 4) + (int)self + 0x62C8);
+    }
+    return (char*)self + ((a2 << 2) + 0x636C);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00287A10);
 
@@ -199,7 +220,28 @@ INCLUDE_ASM("sound/ssxAudio", func_00289C18);
 
 INCLUDE_ASM("sound/ssxAudio", func_00289C98);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289D08);
+#ifdef SKIP_ASM
+extern "C" int func_00289D08(void* self, unsigned char a1)
+{
+    int r = 1;
+    switch (a1) {
+    case 0:
+        break;
+    case 1:
+        r = 2;
+        break;
+    case 2:
+        r = 0;
+        break;
+    case 3:
+        r = 3;
+        break;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00289D60);
 

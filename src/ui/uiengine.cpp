@@ -39,9 +39,54 @@ INCLUDE_ASM("ui/uiengine", func_00398078);
 
 INCLUDE_ASM("ui/uiengine", cUITextureBank_setData);
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398380);
+#ifdef SKIP_ASM
+struct s398380Item {
+    char pad[0x1C];
+    int id;
+};
 
+extern "C" s398380Item* func_00398380(void* self, int id)
+{
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x10); i++) {
+        s398380Item* item = &(*(s398380Item**)((char*)self + 0xC))[i];
+        if (item->id == id) {
+            return item;
+        }
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uiengine", func_003983F0);
+#ifdef SKIP_ASM
+struct s3983F0Entry {
+    int key;
+    int unk4;
+    int value;
+};
+
+struct s3983F0 {
+    int unk0;
+    s3983F0Entry entries[4];
+    signed char count;
+};
+
+extern "C" int func_003983F0(s3983F0* self, int key)
+{
+    signed char i;
+    for (i = 0; i < self->count; i++) {
+        s3983F0Entry* e = &self->entries[i];
+        if (e->key == key) {
+            return e->value;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00398438);
 
