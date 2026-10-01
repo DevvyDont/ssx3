@@ -54,7 +54,55 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019B098);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B180);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B458);
+#ifdef SKIP_ASM
+struct sEquipListWidget {
+    char pad_0x0[0x95];
+    unsigned char sel;   // 0x95
+    char pad_0x96[2];
+    unsigned char top;   // 0x98
+};
+
+struct sEquipDetail {
+    char pad_0x0[0x5C];
+    sEquipListWidget* list;   // 0x5C
+    char pad_0x60[0x124 - 0x60];
+    int items[(0x958 - 0x124) / 4];  // 0x124
+    int count;   // 0x958
+};
+
+extern "C" int func_0019B458(sEquipDetail* self, int idx)
+{
+    int top, sel, n;
+    if (idx >= self->count) {
+        return 0;
+    }
+    for (; idx < self->count - 1; idx++) {
+        self->items[idx] = self->items[idx + 1];
+    }
+    self->count--;
+    self->items[self->count] = 0;
+    n = self->count;
+    top = self->list->top;
+    sel = self->list->sel;
+    if (n < top + 6) {
+        top = n - 6;
+    }
+    if (sel >= n) {
+        sel = n - 1;
+    }
+    if (top < 0) {
+        top = 0;
+    }
+    self->list->top = top;
+    if (sel < 0) {
+        sel = 0;
+    }
+    self->list->sel = sel;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B518);
 

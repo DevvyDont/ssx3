@@ -6,7 +6,17 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
 
 INCLUDE_ASM("fe/festatecredits", func_00185F40);
 
+//100%
 INCLUDE_ASM("fe/festatecredits", func_001863B8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E510(void* self);
+
+extern "C" void func_001863B8(void* self)
+{
+    *(int*)((char*)self + 0x60) += *(int*)((char*)self + 0x64);
+    func_0039E510(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecredits", func_001863E8);
 

@@ -185,7 +185,19 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D9BD0);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9CA8);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D18);
+#ifdef SKIP_ASM
+extern "C" void func_001C5DD8(void*, int);
+
+extern "C" void func_001D9D18(void* self, int a1)
+{
+    *(int*)((char*)self + 0x168) = a1;
+    if (*(int*)((char*)self + 0x40) != 0) {
+        func_001C5DD8(self, a1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D48);
 

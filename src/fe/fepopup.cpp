@@ -172,7 +172,43 @@ INCLUDE_ASM("fe/fepopup", func_001CA488);
 
 INCLUDE_ASM("fe/fepopup", func_001CA4C0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA4F8);
+#ifdef SKIP_ASM
+class func_001CA4F8_cObj {
+public:
+    char pad[0x8];
+    virtual int v01(int, int);
+    virtual int v02(int, int);
+    virtual int v03(int, int);
+    virtual int v04(int, int);
+    virtual int v05(int, int);
+    virtual int v06(int, int);
+    virtual int v07(int, int);
+    virtual int v08(int, int);
+    virtual int v09(int, int);
+    virtual int v10(int, int);
+    virtual int v11(int, int);
+    virtual int v12(int, int);
+    virtual int v13(int, int);
+    virtual int v14(int, int);
+    virtual int v15(int, int);
+    virtual int v16(int, int);
+    virtual int v17(int, int);
+    virtual int v18(int, int);
+    virtual int v19(int, int);
+    virtual int v20(int, int);
+    virtual int v21(int, int);
+    virtual int v22(int, int);
+    virtual int v23(int, int);
+    virtual int v24(int, int);
+};
+
+extern "C" int func_001CA4F8(void* self, int a1, int a2)
+{
+    return (*(func_001CA4F8_cObj**)((char*)self + 0x20))->v24(a1, a2);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CA528);
 

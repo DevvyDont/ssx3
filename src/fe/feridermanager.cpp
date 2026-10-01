@@ -18,9 +18,32 @@ INCLUDE_ASM("fe/feridermanager", func_0019F138);
 
 INCLUDE_ASM("fe/feridermanager", func_0019F2D0);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F3E8);
+#ifdef SKIP_ASM
+struct sQuadRM { int x[4]; } __attribute__((aligned(16)));
+extern "C" void func_0019F2D0(void* self);
 
+extern "C" void func_0019F3E8(void* self, sQuadRM* src)
+{
+    *(sQuadRM*)((char*)self + 0xC30) = src[0];
+    *(sQuadRM*)((char*)self + 0xC40) = src[1];
+    func_0019F2D0(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F548);
+#ifdef SKIP_ASM
+extern "C" void func_0019F2D0(void* self);
+
+extern "C" void func_0019F548(void* self, sQuadRM* src)
+{
+    *(sQuadRM*)((char*)self + 0xC50) = src[0];
+    *(sQuadRM*)((char*)self + 0xC60) = src[1];
+    func_0019F2D0(self);
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019F780);
 
@@ -66,7 +89,16 @@ extern "C" void func_001A0498(sRiderSlot_001A0498* self)
 
 INCLUDE_ASM("fe/feridermanager", func_001A04C8);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0508);
+#ifdef SKIP_ASM
+extern "C" void func_0019E588(void* slot, int a1, int a2);
+
+extern "C" void func_001A0508(void* self, int idx, int a2, int a3)
+{
+    func_0019E588((char*)self + idx * 0xce0, a2, a3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0538);

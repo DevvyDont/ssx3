@@ -22,7 +22,20 @@ INCLUDE_ASM("fe/festatebuyattrib", func_001F49F8);
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4A38);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4A60);
+#ifdef SKIP_ASM
+extern "C" void func_001F5300(void* self);
+
+extern "C" void func_001F4A60(void* self, void* sender, int msg)
+{
+    if (msg == 0x16) {
+        if (*(int*)((char*)sender + 0x6C) != 0) {
+            func_001F5300(self);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4A90);
 
@@ -58,7 +71,18 @@ extern "C" int func_001F55C0(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F55E8);
+#ifdef SKIP_ASM
+extern "C" void func_00186518(void* self);
+extern "C" void cFEStateCareerStats_setupMenuFocus(void* self, int focus);
+
+extern "C" void func_001F55E8(void* self)
+{
+    func_00186518(self);
+    cFEStateCareerStats_setupMenuFocus(self, *(int*)((char*)self + 0x48));
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5618);

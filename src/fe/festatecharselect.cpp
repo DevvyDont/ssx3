@@ -19,7 +19,18 @@ void* func_00181400(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00181420);
+#ifdef SKIP_ASM
+extern "C" void func_00181EF0(void* self);
+extern "C" void* func_0039E510(void* self);
+
+extern "C" void func_00181420(void* self)
+{
+    func_00181EF0(self);
+    func_0039E510(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharselect", func_00181450);
 

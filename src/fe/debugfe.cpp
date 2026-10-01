@@ -58,7 +58,20 @@ INCLUDE_ASM("fe/debugfe", func_0017F500);
 
 INCLUDE_ASM("fe/debugfe", func_0017F7B8);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017F838);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0046D970[];
+
+extern "C" void func_0017F838(void* self, int flags)
+{
+    *(void**)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017F868);
 
