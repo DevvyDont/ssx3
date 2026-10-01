@@ -48,7 +48,17 @@ INCLUDE_ASM("ai/rider", func_0011C298);
 
 INCLUDE_ASM("ai/rider", func_0011D390);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011D640);
+#ifdef SKIP_ASM
+extern "C" int func_0011D640(void* self)
+{
+    int s = *(int*)((char*)self + 0x880);
+    if (s == 7)
+        return 1;
+    return s == 7;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011D660);
 
@@ -386,7 +396,14 @@ void func_001278C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_001278D0);
+#ifdef SKIP_ASM
+extern "C" void func_001278D0(void* self, float val)
+{
+    *(float*)((char*)self + 0xDFC) = val >? *(float*)((char*)self + 0xDFC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001278E0__FPvf);

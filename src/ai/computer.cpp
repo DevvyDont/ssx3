@@ -167,7 +167,18 @@ INCLUDE_ASM("ai/computer", func_00112180);
 
 INCLUDE_ASM("ai/computer", func_00112338);
 
+//100%
 INCLUDE_ASM("ai/computer", func_00112588);
+#ifdef SKIP_ASM
+extern "C" float func_00112588(void* self, int arg1)
+{
+    float v = 796.0f;
+    if (arg1 == 0) {
+        v = 200.0f;
+    }
+    return v;
+}
+#endif
 
 // R5900 128-bit GPR quadword, for functions that copy/return a 16-byte
 // block via a single lq/sq pair instead of word-by-word.

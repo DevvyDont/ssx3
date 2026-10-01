@@ -99,7 +99,21 @@ void func_003A4BF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4C90);
+#ifdef SKIP_ASM
+// 12 bytes, 4-byte aligned (copied with ldl/ldr + lw). Float fields are a guess.
+struct sVec3 {
+    float x;
+    float y;
+    float z;
+};
+
+extern "C" void func_003A4C90(void* self, sVec3* out)
+{
+    *out = *(sVec3*)((char*)self + 0x60);
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A4CB0);
 

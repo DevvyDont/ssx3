@@ -97,7 +97,18 @@ INCLUDE_ASM("ai/ai", func_0012B7F0);
 
 INCLUDE_ASM("ai/ai", cAI_readFromReplayFrame);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012BAC0);
+#ifdef SKIP_ASM
+extern "C" void func_0012BAC0(void* self, int* src)
+{
+    int* dst = (int*)((char*)self + 0x20);
+    for (int i = 0; i < 2; i++)
+    {
+        dst[i] = src[i];
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012BAF0);
 
