@@ -214,13 +214,14 @@ void* func_00289DC0(void* self)
 }
 #endif
 
-//60.0%
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289DE0__FPv);
 #ifdef SKIP_ASM
 int func_00289DE0(void* self)
 {
+    int old = *(int*)((char*)self + 0x6c88);
     *(int*)((char*)self + 0x6c88) = 0;
-    return *(int*)((char*)self + 0x6c88);
+    return old;
 }
 #endif
 

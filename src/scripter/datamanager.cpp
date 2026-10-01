@@ -12,21 +12,18 @@ INCLUDE_ASM("scripter/datamanager", func_00275B08);
 
 INCLUDE_ASM("scripter/datamanager", func_00275B98);
 
-//0.0%
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275CD0__FPvT0);
 #ifdef SKIP_ASM
-int func_00275CD0(void* self, void* a1)
+void func_00275CD0(void* self, void* node)
 {
-    int t0 = 0;
-    int t1 = *(int*)((char*)self + 0x8);
-    *(int*)((char*)a1 + 0x8) = t0;
-    *(int*)((char*)a1 + 0xc) = t0;
-    *(int*)((char*)a1 + 0x10) = t0;
-    *(int*)a1 = t0;
-    *(int*)((char*)a1 + 0x4) = t0;
-    *(int*)((char*)a1 + 0x14) = t1;
-    *(int*)((char*)self + 0x8) = (int)a1;
-    return t1;
+    *(int*)((char*)node + 0x8) = 0;
+    *(int*)((char*)node + 0xc) = 0;
+    *(int*)((char*)node + 0x10) = 0;
+    *(int*)((char*)node + 0x0) = 0;
+    *(int*)((char*)node + 0x4) = 0;
+    *(void**)((char*)node + 0x14) = *(void**)((char*)self + 0x8);
+    *(void**)((char*)self + 0x8) = node;
 }
 #endif
 

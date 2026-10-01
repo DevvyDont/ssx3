@@ -394,7 +394,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D170);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D210);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2C8);
+#ifdef SKIP_ASM
+extern "C" int func_0027D2C8(void* self, int i, int val)
+{
+    char* p = (char*)self + i * 0x14;
+    return *(int*)(p + 0x58) == val;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2E8);
 

@@ -119,7 +119,22 @@ void func_0039CD98(void* self)
 
 INCLUDE_ASM("ui/uiscreen", func_0039CDA0);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CE20);
+#ifdef SKIP_ASM
+struct sUIFlags1C {
+    unsigned int lo : 8;
+    unsigned int mode : 6;
+};
+
+extern "C" void func_0039CE20(void* self)
+{
+    void* p = *(void**)((char*)self + 0xd0);
+    if (p != 0) {
+        ((sUIFlags1C*)((char*)p + 0x1c))->mode = 3;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039CE48);
 

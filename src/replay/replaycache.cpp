@@ -469,17 +469,31 @@ extern "C" void func_002749E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00274A08);
+#ifdef SKIP_ASM
+extern "C" void func_00274A08(void* self)
+{
+    if (*(int*)((char*)self + 0x20) != 0) {
+        int v = *(int*)((char*)self + 0x2c) - 1;
+        *(int*)((char*)self + 0x2c) = v;
+        if (v < 0) {
+            *(int*)((char*)self + 0x2c) = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00274A30);
 
-//78.33%
+//100%
 INCLUDE_ASM("replay/replaycache", func_00274C10__FPvi);
 #ifdef SKIP_ASM
 int func_00274C10(void* self, int a1)
 {
+    int old = *(int*)((char*)self + 0xc);
     *(int*)((char*)self + 0xc) = a1;
-    return *(int*)((char*)self + 0xc);
+    return old;
 }
 #endif
 

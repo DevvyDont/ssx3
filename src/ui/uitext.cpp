@@ -6,9 +6,29 @@ INCLUDE_ASM("ui/uitext", cUIText_deleteText);
 
 INCLUDE_ASM("ui/uitext", cUIText_getNumTextLines);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A0C00);
+#ifdef SKIP_ASM
+extern "C" int func_003A0C00(void* self)
+{
+    if (((*(int*)((char*)self + 0x74) >> 3) & 1) == 0) {
+        return *(int*)((char*)self + 0xb4);
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A0C28);
+#ifdef SKIP_ASM
+extern "C" int func_003A0C28(void* self)
+{
+    if (((*(int*)((char*)self + 0x74) >> 3) & 1) != 0) {
+        return *(int*)((char*)self + 0xb4);
+    }
+    return 0;
+}
+#endif
 
 struct cUITextManager {
     char pad_0x00[0x28];

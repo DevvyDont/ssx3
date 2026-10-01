@@ -82,7 +82,17 @@ INCLUDE_ASM("sound/streamsys", func_002AAE78);
 
 INCLUDE_ASM("sound/streamsys", func_002AB028);
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB0D0);
+#ifdef SKIP_ASM
+extern "C" void func_002AB0D0(void* self, int i, int val)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        *(int*)((char*)e + 0x10) = val;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AB150);
 
@@ -134,25 +144,25 @@ void* func_002ABC80(void* self, int a1)
 
 INCLUDE_ASM("sound/streamsys", func_002ABCA0);
 
-//96.0%
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABCE8__FPvii);
 #ifdef SKIP_ASM
 void func_002ABCE8(void* self, int a1, int a2)
 {
-    *(int*)((char*)self + 0x10) = a2;
     *(int*)((char*)self + 0xc) = a1;
+    *(int*)((char*)self + 0x10) = a2;
 }
 #endif
 
 INCLUDE_ASM("sound/streamsys", func_002ABCF8);
 
-//96.0%
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABD38__FPvii);
 #ifdef SKIP_ASM
 void func_002ABD38(void* self, int a1, int a2)
 {
-    *(int*)((char*)self + 0x10) = a2;
     *(int*)((char*)self + 0xc) = a1;
+    *(int*)((char*)self + 0x10) = a2;
 }
 #endif
 

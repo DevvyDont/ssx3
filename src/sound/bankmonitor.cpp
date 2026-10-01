@@ -54,13 +54,13 @@ extern "C" int func_002AD930(void* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD940);
 
-//99.33%
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD970__FPvi);
 #ifdef SKIP_ASM
 void func_002AD970(void* self, int a1)
 {
-    *(int*)((char*)self + 0x8) = a1;
     *(int*)((char*)self + 0x4) = a1;
+    *(int*)((char*)self + 0x8) = a1;
 }
 #endif
 
@@ -284,7 +284,18 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0F48);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B11B0);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1220);
+#ifdef SKIP_ASM
+extern "C" int func_002B1220(void* self, int i)
+{
+    void* e = (*(void***)((char*)self + 0x4))[i];
+    if (e != 0) {
+        return *(int*)((char*)e + 0x4);
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1428);
 
@@ -350,7 +361,15 @@ INCLUDE_ASM("sound/bankmonitor", func_002B25C8);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B2600);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2690);
+#ifdef SKIP_ASM
+extern "C" float func_002B2690(void* self)
+{
+    void* p = *(void**)self;
+    return (60.0f / *(float*)((char*)p + 0x90)) * 1000.0f;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B2718);
 
@@ -376,7 +395,19 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3BC0);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3C28);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3C98);
+#ifdef SKIP_ASM
+extern "C" void func_002B3C98(void* self, signed char a1)
+{
+    if (*(int*)((char*)self + 0x418) != 0) {
+        void* p = *(void**)((char*)self + 0x408);
+        if (p != 0) {
+            *(signed char*)((char*)p + 0x40) = a1;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3CC0);
@@ -527,5 +558,13 @@ int func_002B4AE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4AF0);
+#ifdef SKIP_ASM
+// PORT: needs a 64-bit return (ulong); use uint64_t off-PS2.
+extern "C" ulong func_002B4AF0(void* self)
+{
+    return (*(ulong*)((char*)self + 0x3f8) >> *(int*)((char*)self + 0x3f0)) & 1;
+}
+#endif
 
