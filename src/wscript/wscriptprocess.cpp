@@ -38,29 +38,161 @@ extern "C" unsigned int func_003079D8(cWScriptProcList* self)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A10);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A60);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307A60(void* self)
+{
+    void* script = *(void**)((char*)self + 0x34);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A90);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307A90(void* self)
+{
+    void* script = *(void**)((char*)self + 0x38);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307AC0);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307AC0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x3c);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307AF0);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307AF0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x40);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307B20);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307B20(void* self)
+{
+    void* script = *(void**)((char*)self + 0x44);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307B50);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307B50(void* self)
+{
+    void* script = *(void**)((char*)self + 0x48);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307B80);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307B80(void* self)
+{
+    void* script = *(void**)((char*)self + 0x4c);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307BB0);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307BB0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x50);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307BE0);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
 
+extern "C" void func_00307BE0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x54);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307C10);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
+
+extern "C" void func_00307C10(void* self)
+{
+    void* script = *(void**)((char*)self + 0x58);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307C40);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D00);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
+
+extern "C" void func_00307D00(void* self)
+{
+    void* script = *(void**)((char*)self + 0x2c);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D30);
 
@@ -97,29 +229,161 @@ INCLUDE_ASM("wscript/wscriptprocess", func_00308328);
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003083A0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003084D0);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_003084D0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x14);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308500);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_00308500(void* self)
+{
+    void* script = *(void**)((char*)self + 0x18);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308530);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_00308530(void* self)
+{
+    void* script = *(void**)((char*)self + 0x1c);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308560);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_00308560(void* self)
+{
+    void* script = *(void**)((char*)self + 0x20);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308590);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_00308590(void* self)
+{
+    void* script = *(void**)((char*)self + 0x24);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003085C0);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_003085C0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x28);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003085F0);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_003085F0(void* self)
+{
+    void* script = *(void**)((char*)self + 0x2c);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308620);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_00308620(void* self)
+{
+    void* script = *(void**)((char*)self + 0x30);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308650);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+extern "C" void func_00308650(void* self)
+{
+    void* script = *(void**)((char*)self + 0x34);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308680);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
+
+extern "C" void func_00308680(void* self)
+{
+    void* script = *(void**)((char*)self + 0x38);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003086B0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003086F0);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
+
+extern "C" void func_003086F0(void* self)
+{
+    void* script = *(void**)((char*)self + 0xc);
+    if (script != 0) {
+        func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308720);
 
