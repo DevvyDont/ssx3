@@ -4,7 +4,17 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_update);
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00232488);
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232510);
+#ifdef SKIP_ASM
+extern "C" int func_00232510(void* self)
+{
+    if (*(float*)((char*)self + 0x4) < 0.75f) {
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00232538);
 

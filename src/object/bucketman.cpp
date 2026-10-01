@@ -28,7 +28,18 @@ void* cBucketMan_first(cBucketMan* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00354ED0);
+#ifdef SKIP_ASM
+// PORT: holds a pointer in an int (same shape as cBucketMan_first); not 64-bit safe.
+extern "C" void* func_00354ED0(cBucketMan* self, int index)
+{
+    index *= 0x44;
+    index += (int)self->mBuckets;
+    void* tail = *(void**)(index + 0x1C);
+    return (tail == (void*)(index + 0x4)) ? 0 : tail;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
@@ -41,7 +52,15 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00354F20);
+#ifdef SKIP_ASM
+extern "C" void* func_00354F20(cBucketMan* self, void* node, int index)
+{
+    void* next = *(void**)((char*)node + 0x8);
+    return (next == (void*)(self->mBuckets + index * 0x44 + 0x4)) ? 0 : next;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
@@ -56,7 +75,15 @@ void* cBucketMan_addfirst(cBucketMan* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00354F70);
+#ifdef SKIP_ASM
+extern "C" void* func_00354F70(cBucketMan* self, void* node, int index)
+{
+    void* next = *(void**)((char*)node + 0x4);
+    return (next == (void*)(self->mBuckets + index * 0x44 + 0x34)) ? 0 : next;
+}
+#endif
 
 INCLUDE_ASM("object/bucketman", func_00354F98);
 

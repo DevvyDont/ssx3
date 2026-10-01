@@ -68,7 +68,19 @@ void* func_00325250(void* self)
 
 INCLUDE_ASM("input/inputparse", func_00325260);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_003252E8);
+#ifdef SKIP_ASM
+struct sInputParse_003252E8 {
+    int pad[2];
+    int a[1];
+};
+
+extern "C" void* func_003252E8(void* self, int i)
+{
+    return &((sInputParse_003252E8*)self)->a[i];
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_003252F8);
 
@@ -129,9 +141,45 @@ INCLUDE_ASM("input/inputparse", func_00326B88);
 
 INCLUDE_ASM("input/inputparse", func_00326C60);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326CA0);
+#ifdef SKIP_ASM
+struct sInputSlot_00326CA0 {
+    int value;
+    char pad[0x60];
+};
 
+struct sInputParse_00326CA0 {
+    sInputSlot_00326CA0 slots[30][4];
+    int bank;
+};
+
+extern "C" int func_00326CA0(void* self, int i)
+{
+    sInputParse_00326CA0* s = (sInputParse_00326CA0*)self;
+    return s->slots[s->bank][i].value;
+}
+#endif
+
+//100%
 INCLUDE_ASM("input/inputparse", func_00326CC8);
+#ifdef SKIP_ASM
+struct sInputSlot_00326CC8 {
+    int value;
+    char data[0x60];
+};
+
+struct sInputParse_00326CC8 {
+    sInputSlot_00326CC8 slots[30][4];
+    int bank;
+};
+
+extern "C" void* func_00326CC8(void* self, int i)
+{
+    sInputParse_00326CC8* s = (sInputParse_00326CC8*)self;
+    return s->slots[s->bank][i].data;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326CF0);
 

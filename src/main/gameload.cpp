@@ -14,7 +14,20 @@ INCLUDE_ASM("main/gameload", func_00230180);
 
 INCLUDE_ASM("main/gameload", cGame_restart);
 
+//100%
 INCLUDE_ASM("main/gameload", func_00230338);
+#ifdef SKIP_ASM
+extern "C" void func_00230338(void* self)
+{
+    void* a = *(void**)((char*)self + 0xC);
+    if (a != 0) {
+        void* b = *(void**)((char*)a + 0xA4);
+        if (b != 0) {
+            *(int*)((char*)b + 0xD0) = -1;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("main/gameload", func_00230360);
 

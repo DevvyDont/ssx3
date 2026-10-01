@@ -46,7 +46,17 @@ INCLUDE_ASM("main/game", func_0022D478);
 
 INCLUDE_ASM("main/game", func_0022D598);
 
+//100%
 INCLUDE_ASM("main/game", func_0022D640);
+#ifdef SKIP_ASM
+extern "C" void func_0022D640(void* self, int a1)
+{
+    if (a1 != 0 && *(int*)((char*)self + 0x1B4) == 0) {
+        *(int*)((char*)self + 0x1B4) = 1;
+        *(int*)((char*)self + 0x1B8) = a1;
+    }
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022D668);
 

@@ -47,7 +47,24 @@ int func_00252658(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00252660);
+#ifdef SKIP_ASM
+struct sMemUnalignedInt {
+    int value;
+} __attribute__((packed));
+
+// PORT: pointer arithmetic done in int; a plain `(char*)p - 0xE` makes gcc 2.95
+// emit the offset as unsigned 0xFFFFFFF2 (addiu -0x8000 / 0x7ff2 split).
+extern "C" int func_00252660(void* p)
+{
+    int r = 0;
+    if (*(unsigned short*)((int)p - 0xE) & 0x800) {
+        r = ((sMemUnalignedInt*)((char*)p + *(int*)((int)p - 0xC) + 4))->value;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_002526B8);
 
@@ -140,13 +157,13 @@ extern "C" void func_002543F0(void* self, float a, float b, float c)
 }
 #endif
 
-//96.0%
+//100%
 INCLUDE_ASM("mem/memstd", func_00254400__FPvff);
 #ifdef SKIP_ASM
 void func_00254400(void* self, float f0, float f1)
 {
-    *(float*)((char*)self + 0x50) = f1;
     *(float*)((char*)self + 0x4c) = f0;
+    *(float*)((char*)self + 0x50) = f1;
 }
 #endif
 

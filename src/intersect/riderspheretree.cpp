@@ -212,7 +212,18 @@ int func_0032F8B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032F8C0);
+#ifdef SKIP_ASM
+extern "C" float func_0032F8C0(void* self)
+{
+    if (*(int*)self == 0) {
+        return -1.0f;
+    }
+    void* sphere = *(void**)((char*)self + 0x60);
+    return *(float*)((char*)sphere + 0x20) * 2.0f;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032F8F0);
 

@@ -99,7 +99,17 @@ float func_00340A10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00340A18);
+#ifdef SKIP_ASM
+extern "C" float func_00340A18(void* self)
+{
+    if (*(int*)self == 0) {
+        return -1.0f;
+    }
+    return *(float*)((char*)self + 0x70) * 2.0f;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00340B18);
 
