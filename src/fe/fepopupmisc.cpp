@@ -1555,7 +1555,30 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2BB8);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2D58);
+#ifdef SKIP_ASM
+struct sPopupEntry18 {
+    int field_0x0;
+    int field_0x4;
+    char pad_0x8[0x18 - 0x8];
+};
+extern sPopupEntry18 D_004C6C08[];
+
+struct sPopupEntry14 {
+    char pad_0x0[0xC];
+    int field_0xC;
+    int field_0x10;
+};
+extern sPopupEntry14 D_00441630[];
+
+extern "C" int func_001E2D58(int v, int i)
+{
+    sPopupEntry18* a = &D_004C6C08[i];
+    sPopupEntry14* b = &D_00441630[a->field_0x4];
+    return b->field_0xC == v;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
 
@@ -1757,7 +1780,22 @@ extern "C" int func_001E81B0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E81D0);
+#ifdef SKIP_ASM
+extern "C" int func_001E81D0(void* self, int a1)
+{
+    switch (a1) {
+    case 0:
+        *(int*)((char*)self + 0xA0) = 0;
+        break;
+    case 1:
+        *(int*)((char*)self + 0xA0) = 1;
+        break;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E8200);
 
@@ -1767,7 +1805,22 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8880);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E88D0);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);
+#ifdef SKIP_ASM
+extern "C" int func_001E88F0(void* self, int a1)
+{
+    switch (a1) {
+    case 0:
+        *(int*)((char*)self + 0xA0) = 0;
+        break;
+    case 1:
+        *(int*)((char*)self + 0xA0) = 1;
+        break;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E8920);
 

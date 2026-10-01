@@ -254,7 +254,27 @@ INCLUDE_ASM("bx/bxstringctor", func_0026AA80);
 
 INCLUDE_ASM("bx/bxstringctor", func_0026AB20);
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AC48);
+#ifdef SKIP_ASM
+struct sBXElem16 {
+    float f0;
+    float f4;
+    float f8;
+    float fC;
+};
+
+extern "C" float func_0026AC48(void* self)
+{
+    int n = *(int*)((char*)self + 0x8);
+    float sum = 0.0f;
+    int i;
+    for (i = 0; i < n; i++) {
+        sum += (*(sBXElem16**)((char*)self + 0x18))[i].fC;
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026AC88);
 

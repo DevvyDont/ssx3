@@ -207,7 +207,21 @@ float func_0015F710(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015F720);
+#ifdef SKIP_ASM
+extern "C" int func_0015F720(void* self)
+{
+    void* a = *(void**)((char*)self + 0x4);
+    void* b = *(void**)((char*)a + 0x788);
+    int s = *(int*)((char*)b + 0xAC);
+    int r = 0;
+    if (s == 1 || s == 3) {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015F750__FPv);
@@ -491,7 +505,36 @@ INCLUDE_ASM("camera/camera", func_00162060);
 
 INCLUDE_ASM("camera/camera", func_001620D0);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00162138);
+#ifdef SKIP_ASM
+struct sCam162138 {
+    char pad_0x00[0x24];
+    int field_0x24;
+    int field_0x28;
+    int pad_0x2C;
+    unsigned int b0 : 1; // 0x30
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int rest : 29;
+    int field_0x34;
+    int pad_0x38;
+    int field_0x3C;
+    int field_0x40;
+};
+
+
+extern "C" void func_00162138(sCam162138* self)
+{
+    self->b1 = 0;
+    self->b0 = 0;
+    self->b2 = 0;
+    self->field_0x28 = self->field_0x24;
+    self->field_0x3C = 0;
+    self->field_0x40 = 0;
+    self->field_0x34 = 0;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00162170);
 

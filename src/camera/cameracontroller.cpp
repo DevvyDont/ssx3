@@ -33,7 +33,21 @@ INCLUDE_ASM("camera/cameracontroller", func_0015CF80);
 
 INCLUDE_ASM("camera/cameracontroller", func_0015CFE8);
 
+//100%
 INCLUDE_ASM("camera/cameracontroller", func_0015D020);
+#ifdef SKIP_ASM
+extern "C" int func_0015D020(void* self)
+{
+    int r = 0;
+    if (*(int*)((char*)self + 0x30) & 2) {
+        int s = *(int*)((char*)self + 0x2C);
+        if (s != 0x5D) {
+            r = s != 0x3C;
+        }
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("camera/cameracontroller", func_0015D050);
 

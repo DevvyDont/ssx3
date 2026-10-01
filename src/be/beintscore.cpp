@@ -96,7 +96,22 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderInde
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00155328);
+#ifdef SKIP_ASM
+extern "C" int func_00155328(void* self, int a)
+{
+    switch (a) {
+    case 0:
+        return 1;
+    case 1:
+        return 2;
+    case 2:
+        return 3;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintscore", func_00155380__FPv);

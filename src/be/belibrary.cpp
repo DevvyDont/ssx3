@@ -20,7 +20,16 @@ signed char cBELibrary_getCharacterID(int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014A0B0);
+#ifdef SKIP_ASM
+extern "C" signed char func_0014A0B0(int index)
+{
+    int charID = D_005305B0[index];
+    signed char* entry = (signed char*)((char*)D_00535B20 + charID * 0x1C);
+    return entry[0x12];
+}
+#endif
 
 struct sCharEntry2 {
     char pad_0x00[0xC];
@@ -166,7 +175,26 @@ INCLUDE_ASM("be/belibrary", func_0014C3C8);
 
 INCLUDE_ASM("be/belibrary", func_0014C488);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C620);
+#ifdef SKIP_ASM
+extern "C" void* func_0014C620(void* self)
+{
+    int* p = (int*)self;
+    p[0] = 0;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = 0;
+    p[4] = 0;
+    p[5] = 0;
+    p[6] = 0;
+    p[7] = 0;
+    p[8] = 0;
+    p[9] = 0;
+    p[10] = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014C658);
 
@@ -199,9 +227,45 @@ int func_0014D988(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D998);
+#ifdef SKIP_ASM
+struct sBELibTables {
+    char pad_0x00[4];
+    char* field_0x4;
+    char pad_0x8[4];
+    char* field_0xC;
+    char* field_0x10;
+    char pad_0x14[0x2C - 0x14];
+    int count0[30]; // 0x2C
+    int index0[30]; // 0xA4
+    char pad_0x11C[0x2FC - 0x11C];
+    int count1[30]; // 0x2FC
+    int index1[30]; // 0x374
+    int count2[30]; // 0x3EC
+    int index2[30]; // 0x464
+};
 
+extern "C" void* func_0014D998(sBELibTables* self, int i)
+{
+    if (self->count0[i] <= 0) {
+        return 0;
+    }
+    return self->field_0x4 + self->index0[i] * 0x38;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D9D0);
+#ifdef SKIP_ASM
+extern "C" void* func_0014D9D0(sBELibTables* self, int i)
+{
+    if (self->count0[i] <= 0) {
+        return 0;
+    }
+    return self->field_0x4 + self->index0[i] * 0x38;
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014DB40);
 
@@ -214,7 +278,17 @@ int func_0014DC00(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DC10);
+#ifdef SKIP_ASM
+extern "C" void* func_0014DC10(sBELibTables* self, int i)
+{
+    if (self->count1[i] > 0) {
+        return self->field_0xC + self->index1[i] * 8;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014DC40__FPvi);
@@ -225,5 +299,15 @@ int func_0014DC40(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DC50);
+#ifdef SKIP_ASM
+extern "C" void* func_0014DC50(sBELibTables* self, int i)
+{
+    if (self->count2[i] > 0) {
+        return self->field_0x10 + self->index2[i] * 8;
+    }
+    return 0;
+}
+#endif
 

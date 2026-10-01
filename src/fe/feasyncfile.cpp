@@ -487,7 +487,22 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0C08);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0E10);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0F28);
+#ifdef SKIP_ASM
+extern signed char D_00440F68[];
+
+extern "C" int func_001B0F28(int c)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        if (c == D_00440F68[i]) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0F60);
 
@@ -841,7 +856,17 @@ INCLUDE_ASM("fe/feasyncfile", func_001B9CD8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B9D68);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B9F68);
+#ifdef SKIP_ASM
+extern "C" int func_001B9F68(void* self, signed char val, signed char lo, signed char hi)
+{
+    if (val <= hi && val >= lo) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B9FA0);
 
@@ -910,7 +935,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB798);
 
 INCLUDE_ASM("fe/feasyncfile", func_001BB840);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BB968);
+#ifdef SKIP_ASM
+extern "C" int func_001BB968(void* self, int year)
+{
+    int leap = 0;
+    if ((year & 3) == 0) {
+        leap = 1;
+        if (year % 100 == 0) {
+            leap = (year % 400 == 0);
+        }
+    }
+    return leap;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BB9B0);
 

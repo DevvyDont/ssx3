@@ -70,7 +70,24 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeEllipse);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeBox);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001731C0);
+#ifdef SKIP_ASM
+extern "C" float func_001731C0(float* v)
+{
+    float x = v[0];
+    float y = v[1];
+    float r = v[2];
+    if (y < x) {
+        if (r < x) {
+            return x;
+        }
+    } else if (r < y) {
+        r = y;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173208);
 
@@ -184,7 +201,23 @@ void func_001765F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176808);
+#ifdef SKIP_ASM
+struct sVec4A16 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_00176808(float* v, sVec4A16* out)
+{
+    sVec4A16 t;
+    t.x = v[0];
+    t.y = v[1];
+    t.z = v[2];
+    t.w = 1.0f;
+    *out = t;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176840);
 
@@ -474,5 +507,17 @@ void* func_0017ABC8(void* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABE0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017AC98);
+#ifdef SKIP_ASM
+extern "C" int func_0017AC98(void* self, int i)
+{
+    if (i >= 0 && i < *(int*)((char*)self + 0x4)) {
+        *(int*)((char*)self + 0x8) = i;
+    } else {
+        *(int*)((char*)self + 0x8) = -1;
+    }
+    return 1;
+}
+#endif
 

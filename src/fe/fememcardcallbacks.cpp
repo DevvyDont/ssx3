@@ -146,7 +146,22 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D93E8);
 
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerDisplayState);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D97E0);
+#ifdef SKIP_ASM
+extern "C" int func_001D97E0(void* self, void* list, int idx, int back)
+{
+    int step = 1;
+    if (back) {
+        step = -1;
+    }
+    idx += step;
+    if (idx >= 0 && idx <= *(int*)((char*)list + 0x424) - 1) {
+        return 1;
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9818);
 

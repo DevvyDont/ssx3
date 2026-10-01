@@ -59,7 +59,17 @@ INCLUDE_ASM("fe/fepopup", func_001C7738);
 
 INCLUDE_ASM("fe/fepopup", func_001C78C0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C7BE0);
+#ifdef SKIP_ASM
+extern "C" float func_001C7BE0(void* self)
+{
+    if (*(int*)((char*)self + 0x2CC) != 0) {
+        return 0.0f;
+    }
+    return (640.0f - *(float*)((char*)self + 0x260)) * 0.5f - *(float*)((char*)self + 0x1B8);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C7C20);
 
@@ -105,13 +115,39 @@ INCLUDE_ASM("fe/fepopup", func_001C9938);
 
 INCLUDE_ASM("fe/fepopup", func_001C9B28);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C9B68);
+#ifdef SKIP_ASM
+extern "C" void func_001C9B68(void* self, float* size, float* item)
+{
+    float w = item[2];
+    if (size[0] < w) {
+        size[0] = w;
+    }
+    size[1] += item[3];
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cScreenPopup_createConfirmationPopup);
 
 INCLUDE_ASM("fe/fepopup", func_001C9CD0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA150);
+#ifdef SKIP_ASM
+extern "C" int func_001CA150(void* self)
+{
+    void* p = *(void**)((char*)self + 0x6C);
+    if (p == 0) {
+        return *(int*)((char*)self + 0x168);
+    }
+    int n = *(unsigned char*)((char*)p + 0x95);
+    if (*(int*)((char*)self + 0x30C) == -1) {
+        return n;
+    }
+    return n - 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CA180);
 
@@ -278,7 +314,19 @@ INCLUDE_ASM("fe/fepopup", func_001CDB98);
 
 INCLUDE_ASM("fe/fepopup", func_001CE2A8);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CE3C8);
+#ifdef SKIP_ASM
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode)
+{
+    if (mode == 0 || mode == 2) {
+        *(int*)((char*)self + (i << 2) + 0x148) = v;
+    }
+    if (mode == 1 || mode == 2) {
+        *(int*)((char*)self + (i << 2) + 0x298) = v;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CE408);
 
