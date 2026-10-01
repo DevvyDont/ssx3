@@ -8,7 +8,38 @@ INCLUDE_ASM("intersect/aifwddiff", func_00327AC0);
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327B30);
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327BB0);
+#ifdef SKIP_ASM
+struct sFwdDiffNode {
+    unsigned int key;
+    int pad4;
+    int pad8;
+    sFwdDiffNode* next;
+};
+
+struct sFwdDiffTable {
+    int pad0;
+    int pad4;
+    sFwdDiffNode** buckets;
+    unsigned int count;
+};
+
+extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node)
+{
+    unsigned int key = node->key;
+    sFwdDiffNode** link = &table->buckets[key % table->count];
+    for (;;) {
+        sFwdDiffNode* cur = *link;
+        if (cur == 0 || key < cur->key) {
+            *link = node;
+            node->next = cur;
+            return;
+        }
+        link = &cur->next;
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327C00);
 

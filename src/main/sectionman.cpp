@@ -4,13 +4,19 @@ INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
 
 INCLUDE_ASM("main/sectionman", func_0022E228);
 
-//95.0%
+//100%
 INCLUDE_ASM("main/sectionman", func_0022E278__FPv);
 #ifdef SKIP_ASM
-int func_0022E278(void* self)
+struct sSectionLink {
+    int pad0;
+    sSectionLink* next; // 0x4
+};
+
+void* func_0022E278(void* self)
 {
-    *(int*)((char*)self + 0x198) = *(int*)((char*)*(void**)((char*)self + 0x198) + 0x4);
-    return *(int*)((char*)self + 0x198);
+    sSectionLink* node = *(sSectionLink**)((char*)self + 0x198);
+    *(sSectionLink**)((char*)self + 0x198) = node->next;
+    return node;
 }
 #endif
 

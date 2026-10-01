@@ -25,14 +25,20 @@ INCLUDE_ASM("fe/festatenethelppopup", func_001DA478);
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA4A8);
 
-//61.67%
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA510__FPviii);
 #ifdef SKIP_ASM
-void* func_001DA510(void* self, int a1, int a2, int a3)
+struct sNetHelpPopup_DA510 {
+    char pad[0x68];
+    int a[7];
+    int b[7];
+};
+
+void func_001DA510(void* self, int i, int a, int b)
 {
-    *(int*)((char*)((char*)self + a1 * 4) + 0x68) = a2;
-    *(int*)((char*)((char*)self + a1 * 4) + 0x84) = a3;
-    return ((char*)self + a1 * 4);
+    sNetHelpPopup_DA510* s = (sNetHelpPopup_DA510*)self;
+    s->a[i] = a;
+    s->b[i] = b;
 }
 #endif
 

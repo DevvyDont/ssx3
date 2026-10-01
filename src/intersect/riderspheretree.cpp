@@ -27,7 +27,41 @@ INCLUDE_ASM("intersect/riderspheretree", func_003299C8);
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329A28);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329A90);
+#ifdef SKIP_ASM
+struct sSphereVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSphereChild {
+    sSphereVec4 pos;
+    float radius;
+    int pad[3];
+};
+
+struct sSphereTreeNode {
+    char pad_0x00[0x10];
+    sSphereVec4 center; // 0x10
+    float radius;       // 0x20
+    int pad_0x24;
+    int pad_0x28;
+    int count;          // 0x2C
+    sSphereChild children[1]; // 0x30
+};
+
+extern "C" void func_00329A90(sSphereTreeNode* s, int n, sSphereVec4* pos, float* radii,
+                              sSphereVec4* center, float radius)
+{
+    s->count = n;
+    for (int i = 0; i < s->count; i++) {
+        s->children[i].pos = pos[i];
+        s->children[i].radius = radii[i];
+    }
+    s->center = *center;
+    s->radius = radius;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329AE0);
 
@@ -70,7 +104,25 @@ extern "C" float func_0032C590(void* self)
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032C5A8);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C630);
+#ifdef SKIP_ASM
+// self->(0x80) += *v  (4-wide VU0 add, macro mode)
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+extern "C" void func_0032C630(void* self, void* v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf3, 0x80(%0)\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, 0x80(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(self), "r"(v)
+        : "memory");
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032C648);
 

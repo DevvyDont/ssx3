@@ -15,33 +15,31 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstatehud", func_001E9130);
 
-//64.67%
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91A8__FPvT0);
 #ifdef SKIP_ASM
-float func_001E91A8(void* self, void* a1)
+void func_001E91A8(void* self, void* a1)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    float t0 = e->z;
-    *(float*)a1 = e->x;
-    *(float*)((char*)a1 + 0x4) = e->y;
-    *(float*)((char*)a1 + 0x8) = t0;
-    *(float*)((char*)a1 + 0xc) = e->w;
-    return t0;
+    float* out = (float*)a1;
+    out[0] = e->x;
+    out[1] = e->y;
+    out[2] = e->z;
+    out[3] = e->w;
 }
 #endif
 
-//64.67%
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91D0__FPvT0);
 #ifdef SKIP_ASM
-float func_001E91D0(void* self, void* a1)
+void func_001E91D0(void* self, void* a1)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    float t0 = e->z;
-    *(float*)((char*)a1 + 0xc) = e->x;
-    *(float*)a1 = e->y;
-    *(float*)((char*)a1 + 0x4) = t0;
-    *(float*)((char*)a1 + 0x8) = e->w;
-    return t0;
+    float* out = (float*)a1;
+    out[3] = e->x;
+    out[0] = e->y;
+    out[1] = e->z;
+    out[2] = e->w;
 }
 #endif
 
@@ -119,17 +117,17 @@ void* func_001F30C0(void* self)
 
 INCLUDE_ASM("fe/ovstatehud", func_001F30D8);
 
-//99.2%
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F3170__FPv);
 #ifdef SKIP_ASM
 void func_001F3170(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
     int t0 = 0;
-    *(int*)&e->rangeMin = t0;
     e->field_0x0 = t0;
     *(int*)&e->rangeMax = t0;
     e->field_0x4 = t0;
+    *(int*)&e->rangeMin = t0;
 }
 #endif
 
