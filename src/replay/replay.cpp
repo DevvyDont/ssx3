@@ -44,15 +44,14 @@ void* func_0026E5A8(void* self)
 }
 #endif
 
-//99.25%
+//100%
 INCLUDE_ASM("replay/replay", func_0026E5C0__FPv);
 #ifdef SKIP_ASM
 void func_0026E5C0(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)self = t0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x8) = 0;
 }
 #endif
 

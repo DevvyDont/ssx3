@@ -148,7 +148,23 @@ INCLUDE_ASM("replay/replaycache", func_002712C0);
 
 INCLUDE_ASM("replay/replaycache", func_002712F8);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00271348);
+#ifdef SKIP_ASM
+extern "C" void func_00271348(void* self)
+{
+    void* p = *(void**)((char*)self + 0x3b0);
+    *(void**)((char*)self + 0x65c) = p;
+    if (p == *(void**)((char*)self + 0x3d0)) {
+        *(void**)((char*)self + 0x65c) = *(void**)((char*)p + 0x14);
+    }
+    *(int*)((char*)self + 0x660) = 0;
+    *(int*)((char*)self + 0x638) += 1;
+    *(int*)((char*)self + 0x644) = 0;
+    *(int*)((char*)self + 0x648) = 0;
+    *(int*)((char*)self + 0x668) = 0;
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00271380);
 
@@ -247,20 +263,19 @@ INCLUDE_ASM("replay/replaycache", func_002725B8);
 
 INCLUDE_ASM("replay/replaycache", func_002725F0);
 
-//99.11%
+//100%
 INCLUDE_ASM("replay/replaycache", func_00272680__FPv);
 #ifdef SKIP_ASM
 void func_00272680(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x24) = t0;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0xc) = t0;
-    *(int*)((char*)self + 0x10) = t0;
-    *(int*)((char*)self + 0x14) = t0;
-    *(int*)((char*)self + 0x18) = t0;
-    *(int*)((char*)self + 0x1c) = t0;
-    *(int*)((char*)self + 0x20) = t0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xc) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x1c) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x24) = 0;
 }
 #endif
 
@@ -370,7 +385,19 @@ int func_002742C8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002742E0);
+#ifdef SKIP_ASM
+extern "C" void* func_002742E0(void* self, int i)
+{
+    int* table = *(int**)((char*)self + 0x14);
+    char* p = *(char**)((char*)self + 0x4) + table[i];
+    if (*(unsigned short*)p > 8) {
+        return p + 8;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274348__FPv);

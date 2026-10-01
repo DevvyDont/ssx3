@@ -25,23 +25,17 @@ struct cSpline {
     sSplineNode* node; // 0x8
 };
 
-//81.47% - condition/branch shape (slt-vs-slti, speculative float load in delay slot) not reproduced
+//100%
 INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
 #ifdef SKIP_ASM
 float cSpline_calcLength(cSpline* self)
 {
-    sSplineNode* node = self->node;
-    sSplinePoint* cur = (sSplinePoint*)node->header;
-    int count = node->header->numPoints;
-    if (1 < count) {
-        cur = node->header->first;
-        int i = count - 1;
-        do {
-            i--;
-            cur = cur->next;
-        } while (i != 0);
+    sSplineHeader* header = self->node->header;
+    sSplinePoint* cur = header->first;
+    for (int i = 1; i < header->numPoints; i++) {
+        cur = cur->next;
     }
-    return cur->field_0xC + cur->field_0x84;
+    return cur->field_0x84 + cur->field_0xC;
 }
 #endif
 

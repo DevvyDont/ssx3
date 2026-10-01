@@ -126,17 +126,16 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_readFromReplayFrame);
 
 extern void* D_0048F008[];
 
-//58.1%
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353AC0__FPv);
 #ifdef SKIP_ASM
 void* func_00353AC0(void* self)
 {
-    int t0 = 0;
+    *(void***)((char*)self + 0xc) = D_0048F008;
     *(int*)((char*)self + 0x10) = -1;
-    *(int*)((char*)self + 0xc) = (int)(void*)D_0048F008;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0x14) = t0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x14) = 0;
     return self;
 }
 #endif

@@ -15,14 +15,16 @@ INCLUDE_ASM("object/bucketman", func_00354C98);
 
 INCLUDE_ASM("object/bucketman", func_00354E48);
 
-//95%
+//100%
 INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
 #ifdef SKIP_ASM
+// PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_first(cBucketMan* self, int index)
 {
-    char* bucket = &self->mBuckets[index * 0x44];
-    void* head = *(void**)(bucket + 0x8);
-    return (head == (void*)(bucket + 0x14)) ? 0 : head;
+    index *= 0x44;
+    index += (int)self->mBuckets;
+    void* head = *(void**)(index + 0x8);
+    return (head == (void*)(index + 0x14)) ? 0 : head;
 }
 #endif
 
@@ -41,15 +43,16 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index)
 
 INCLUDE_ASM("object/bucketman", func_00354F20);
 
-//95%
+//100%
 INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
 #ifdef SKIP_ASM
+// PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_addfirst(cBucketMan* self, int index)
 {
     index *= 0x44;
-    char* bucket = self->mBuckets + index;
-    void* head = *(void**)(bucket + 0x28);
-    return (head == (void*)(bucket + 0x34)) ? 0 : head;
+    index += (int)self->mBuckets;
+    void* head = *(void**)(index + 0x28);
+    return (head == (void*)(index + 0x34)) ? 0 : head;
 }
 #endif
 

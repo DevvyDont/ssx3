@@ -757,16 +757,14 @@ void func_003956E0(void* self, int val)
 
 INCLUDE_ASM("render/font", func_003956E8);
 
-//84.12%
+//100%
 INCLUDE_ASM("render/font", func_00395730__FPv);
 #ifdef SKIP_ASM
-void* func_00395730(void* self)
+void func_00395730(void* self)
 {
-    void* t0 = (char*)*(void**)((char*)self + 0x13e4) - 0x40;
     *(int*)((char*)self + 0x6b90) = 0;
-    *(int*)((char*)self + 0x13e4) = (int)t0;
-    *(int*)((char*)self + 0x13e0) = (int)((char*)*(void**)((char*)self + 0x13e0) - 0x1);
-    return t0;
+    *(char**)((char*)self + 0x13e4) -= 0x40;
+    *(int*)((char*)self + 0x13e0) -= 1;
 }
 #endif
 

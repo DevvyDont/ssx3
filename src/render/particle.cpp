@@ -101,15 +101,14 @@ INCLUDE_ASM("render/particle", func_00374D00);
 
 INCLUDE_ASM("render/particle", func_00375890);
 
-//99.71%
+//100%
 INCLUDE_ASM("render/particle", func_003758F8__FPv);
 #ifdef SKIP_ASM
 void* func_003758F8(void* self)
 {
-    int t0 = 0x80;
     *(int*)((char*)self + 0x170) = -1;
-    *(int*)((char*)self + 0x178) = t0;
-    *(int*)((char*)self + 0x174) = t0;
+    *(int*)((char*)self + 0x174) = 0x80;
+    *(int*)((char*)self + 0x178) = 0x80;
     return self;
 }
 #endif

@@ -29,16 +29,15 @@ void* func_0038B158(void* self)
 }
 #endif
 
-//99.2%
+//100%
 INCLUDE_ASM("render/bezierman", func_0038B178__FPv);
 #ifdef SKIP_ASM
 void func_0038B178(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4d84) = t0;
-    *(int*)((char*)self + 0x458) = t0;
-    *(int*)((char*)self + 0x3c9c) = t0;
-    *(int*)((char*)self + 0x4a60) = t0;
+    *(int*)((char*)self + 0x458) = 0;
+    *(int*)((char*)self + 0x3c9c) = 0;
+    *(int*)((char*)self + 0x4a60) = 0;
+    *(int*)((char*)self + 0x4d84) = 0;
 }
 #endif
 
