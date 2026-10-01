@@ -104,7 +104,18 @@ INCLUDE_ASM("main/ssxapp", func_00229398);
 
 INCLUDE_ASM("main/ssxapp", func_00229408);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229498);
+#ifdef SKIP_ASM
+extern "C" void func_00229398(void* self);
+extern "C" void func_002292E0(void* self);
+
+extern "C" void func_00229498(void* self)
+{
+    func_00229398(self);
+    func_002292E0(self);
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_002294C8);
 
@@ -247,7 +258,69 @@ INCLUDE_ASM("main/ssxapp", func_0022A5A0);
 
 INCLUDE_ASM("main/ssxapp", func_0022A698);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_0022A770);
+#ifdef SKIP_ASM
+struct sVisNode_A770 {
+    sVisNode_A770* next;    // 0x00
+    int pad_0x4;
+    int type;               // 0x08
+    char pad_0xC[0x44];
+    int sphere[4];          // 0x50
+};
+
+struct sVisSrc_A770 {
+    char pad_0x0[0x28];
+    sVisNode_A770* head;    // 0x28
+};
+
+struct sVisList_A770 {
+    sVisSrc_A770* src;
+    int vuFrustum;
+};
+
+struct sVisOwner_A770 {
+    char pad_0x0[0x78B4];
+    int countA;                 // 0x78B4
+    sVisNode_A770* nodesA[192]; // 0x78B8
+    int pad_0x7BB8[2];
+    int countB;                 // 0x7BC0
+    sVisNode_A770* nodesB[1];   // 0x7BC4
+};
+
+// PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
+// version of the microprogram at 0xEF0 (sphere vs frustum test; 2 = outside).
+static inline int visSphereTest_A770(int* sphere, int frustum)
+{
+    int r;
+    __asm__ __volatile__(
+        "lqc2      $vf22, 0x0(%1)\n"
+        "ctc2.ni   %0, $vi14\n"
+        "vcallms   0xEF0\n"
+        "cfc2.i    %0, $vi1\n"
+        : "=r"(r)
+        : "r"(sphere), "0"(frustum));
+    return r;
+}
+
+extern "C" void func_0022A770(sVisOwner_A770* self, sVisList_A770* list, int count)
+{
+    for (; count > 0; count--, list++) {
+        sVisNode_A770* n = list->src->head;
+        while (n != 0) {
+            if (n->type == 7) {
+                int frustum = list->vuFrustum;
+                if (frustum == 0 || visSphereTest_A770(n->sphere, frustum) != 2) {
+                    self->nodesA[self->countA++] = n;
+                }
+            } else if (n->type == 8) {
+                self->nodesB[self->countB++] = n;
+            }
+            n = n->next;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022A830);
 

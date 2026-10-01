@@ -120,9 +120,31 @@ void* func_00208538(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/uitemplatemap", func_00208558);
+#ifdef SKIP_ASM
+extern "C" void func_0039E4C0(void* self);
+extern "C" void func_00200AC0(void* self);
 
+extern "C" void func_00208558(void* self)
+{
+    func_0039E4C0(self);
+    func_00200AC0((char*)self + 0x9C);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/uitemplatemap", func_00208588);
+#ifdef SKIP_ASM
+extern "C" void func_00200AF0(void* self);
+extern "C" void func_0020A430(void* self);
+
+extern "C" void func_00208588(void* self)
+{
+    func_00200AF0((char*)self + 0x9C);
+    func_0020A430(self);
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", func_002085B8);
 
@@ -159,5 +181,16 @@ void* func_00208658(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/uitemplatemap", func_00208678);
+#ifdef SKIP_ASM
+extern "C" void func_0020E900(void* self);
+extern "C" void cUITemplate_MAP_onUpdate(void* self);
+
+extern "C" void func_00208678(void* self)
+{
+    func_0020E900(self);
+    cUITemplate_MAP_onUpdate((char*)self + 0x9C);
+}
+#endif
 

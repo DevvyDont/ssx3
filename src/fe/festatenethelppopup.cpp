@@ -21,7 +21,18 @@ INCLUDE_ASM("fe/festatenethelppopup", func_001DA110);
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA238);
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA478);
+#ifdef SKIP_ASM
+extern "C" void func_0039F190(void*, int);
+
+extern "C" void func_001DA478(void* self, int a1, int msg)
+{
+    if (msg == 6) {
+        func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA4A8);

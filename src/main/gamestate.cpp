@@ -292,7 +292,40 @@ INCLUDE_ASM("main/gamestate", func_002379C8);
 
 INCLUDE_ASM("main/gamestate", func_00237A98);
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00237B28);
+#ifdef SKIP_ASM
+struct sPackSrc_7B28 {
+    int count;
+    float vals[1];
+};
+
+struct sPackDst_7B28 {
+    unsigned char count;
+    unsigned char mask[3];
+    unsigned char vals[1];
+};
+
+extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
+{
+    int i;
+    int j;
+    int n;
+    dst->count = src->count;
+    for (j = 0; j < 3; j++) {
+        dst->mask[j] = 0;
+    }
+    n = 0;
+    for (i = 0; i < src->count; i++) {
+        unsigned char v = (int)(src->vals[i] * 255.0f);
+        if (v != 0) {
+            dst->mask[i >> 3] |= 1 << (i & 7);
+            dst->vals[n++] = v;
+        }
+    }
+    return n + 4;
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00237BE8);
 

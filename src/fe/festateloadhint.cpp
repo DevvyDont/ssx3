@@ -104,7 +104,20 @@ extern "C" int func_00245EC0(int* a, int* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245F00);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0047DB28[];
+
+extern "C" void func_00245F00(void* self, int flags)
+{
+    *(void**)self = D_0047DB28;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_0039E390(void* self);
 

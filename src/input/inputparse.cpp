@@ -294,7 +294,20 @@ extern "C" void func_00327740(void* self, int mode, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_003277D0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0048E4B8[];
+
+extern "C" void func_003277D0(void* self, int flags)
+{
+    *(void**)self = D_0048E4B8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00327800__FPv);

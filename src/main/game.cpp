@@ -26,7 +26,18 @@ INCLUDE_ASM("main/game", cGame_renderLightHalos);
 
 INCLUDE_ASM("main/game", func_0022C830);
 
+//100%
 INCLUDE_ASM("main/game", func_0022CCE8);
+#ifdef SKIP_ASM
+extern "C" void func_0022CD40(void* self);
+
+extern "C" void* func_0022CCE8(void* self, int a1)
+{
+    *(int*)((char*)self + 0x1B0) = a1;
+    func_0022CD40(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022CD18);

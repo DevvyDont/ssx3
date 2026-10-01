@@ -75,7 +75,38 @@ INCLUDE_ASM("intersect/aifwddiff", func_00327C00);
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327CC8);
+#ifdef SKIP_ASM
+struct sQuad_27CC8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBlock_27CC8 {
+    int d[32];
+};
+
+struct sFwdDiff_27CC8 {
+    sQuad_27CC8 m[8];       // 0x00
+    sQuad_27CC8 q;          // 0x80
+    char pad_0x90[0x8];
+    sBlock_27CC8* blkp;     // 0x98
+    char pad_0x9C[0x24];
+    sBlock_27CC8 blk;       // 0xC0
+};
+
+extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* src)
+{
+    int i;
+    for (i = 0; i < 8; i++) {
+        self->m[i] = src->m[i];
+    }
+    self->q = src->q;
+    self->blk = src->blk;
+    self->blkp = &self->blk;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327DA8);
 

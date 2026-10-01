@@ -2,9 +2,35 @@
 
 INCLUDE_ASM("main/ssxappdtor", cSSXApp__cSSXApp);
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A40);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0046D970[];
 
+extern "C" void func_00243A40(int* self, int flags)
+{
+    *(void**)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A80);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0046D970[];
+
+extern "C" void func_00243A80(int* self, int flags)
+{
+    *(void**)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243AB0__FPv);
@@ -14,11 +40,50 @@ void func_00243AB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243AE8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0046D970[];
 
+extern "C" void func_00243AE8(int* self, int flags)
+{
+    *(void**)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243B50);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0046D970[];
 
+extern "C" void func_00243B50(int* self, int flags)
+{
+    *(void**)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243B80);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern char D_0046D970[];
+
+extern "C" void func_00243B80(int* self, int flags)
+{
+    *(void**)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243C00);

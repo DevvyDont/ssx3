@@ -145,7 +145,18 @@ INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
 
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF6D0);
+#ifdef SKIP_ASM
+extern "C" void func_0039E4C0(void* self);
+extern "C" void func_001FFD08(void* self, int a1);
+
+extern "C" void func_001FF6D0(void* self)
+{
+    func_0039E4C0(self);
+    func_001FFD08(self, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FF700);
 

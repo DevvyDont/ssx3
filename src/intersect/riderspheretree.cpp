@@ -334,7 +334,64 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032F650);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032F708);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032F760);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
+static inline sSphereVec4 sphereVecSub(sSphereVec4* a, sSphereVec4* b)
+{
+    sSphereVec4 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*a), "m"(*b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
+{
+    sSphereVec4 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*a), "m"(*b)
+        : "memory");
+    return r;
+}
+
+// sphere (self+0x60) overlaps the box [mn, mx]?
+extern "C" int func_0032F760(void* self, sSphereVec4* mn, sSphereVec4* mx)
+{
+    sSphereVec4 rv;
+    int r = 0;
+    float rad = (*(sSphereTreeNode**)((char*)self + 0x60))->radius;
+    rv.x = rad;
+    rv.y = rad;
+    rv.z = rad;
+    rv.w = 0;
+    sSphereVec4 lo = sphereVecSub(&(*(sSphereTreeNode**)((char*)self + 0x60))->center, &rv);
+    sSphereVec4 hi = sphereVecAddR(&(*(sSphereTreeNode**)((char*)self + 0x60))->center, &rv);
+    if (mx->x >= lo.x && mn->x <= hi.x && mx->y >= lo.y && mn->y <= hi.y &&
+        lo.z <= mx->z && mn->z <= hi.z) {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032F840);
 
@@ -371,7 +428,56 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032FA30);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032FAC0);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032FB48);
+#ifdef SKIP_ASM
+extern char D_0048E650[];
+
+struct sRiderSphere_FB48 {
+    int state;              // 0x00
+    int f4;                 // 0x04
+    int f8;                 // 0x08
+    int pad_0xC[5];
+    sSphereVec4 max;        // 0x20
+    sSphereVec4 min;        // 0x30
+    sSphereVec4 center;     // 0x40
+    void* vtbl;             // 0x50
+    int pad_0x54[3];
+    sSphereVec4 pos;        // 0x60
+    float radius;           // 0x70
+    int pad_0x74[3];
+    sSphereVec4 pos0;       // 0x80
+    float radius0;          // 0x90
+};
+
+extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4* p, int flag, float r)
+{
+    sSphereVec4 t;
+    self->vtbl = D_0048E650;
+    self->f8 = 0;
+    self->f4 = 0;
+    if (flag != 0) {
+        self->state = 0;
+    } else {
+        self->state = 1;
+    }
+    self->pos0 = *p;
+    self->pos = self->pos0;
+    self->radius = r;
+    self->radius0 = r;
+    t.x = p->x + r;
+    t.y = p->y + r;
+    t.z = p->z + r;
+    t.w = 1.0f;
+    self->max = t;
+    t.x = p->x - r;
+    t.y = p->y - r;
+    t.z = p->z - r;
+    self->min = t;
+    self->center = *p;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032FC08);
 

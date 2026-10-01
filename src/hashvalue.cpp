@@ -64,4 +64,20 @@ ulong GetHashValue64(char* str) {
 
 INCLUDE_ASM("hashvalue", func_00317710);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("hashvalue", func_00317798);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sHash128 {
+    ulong lo;
+    ulong hi;
+};
+
+extern "C" sHash128 func_00317710(sHash128* out, char* str);
+
+extern "C" sHash128 func_00317798(char* str)
+{
+    sHash128 tmp;
+    return func_00317710(&tmp, str);
+}
+#endif

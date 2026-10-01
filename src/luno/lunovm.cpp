@@ -64,7 +64,18 @@ extern "C" void func_00224D00(cLunoTable* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00224DA0);
+#ifdef SKIP_ASM
+extern "C" void luno_cLunoTable_constructTable(cLunoTableRef* self);
+
+extern "C" cLunoTableRef* func_00224DA0(cLunoTableRef* self)
+{
+    self->table = 0;
+    luno_cLunoTable_constructTable(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00224DF0);
@@ -104,7 +115,52 @@ extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* othe
 }
 #endif
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00225248);
+#ifdef SKIP_ASM
+extern cLunoValue D_004C9098;
+
+// Hash node: key, value, chain link (0x20 bytes, vtable at +0x1C).
+struct cLunoNode {
+    cLunoValue key;     // 0x00
+    cLunoValue value;   // 0x0C
+    cLunoNode* next;    // 0x18
+    void* vtable;       // 0x1C
+};
+
+static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
+{
+    if (b->type == a->type) {
+        return a->word0 == b->word0;
+    }
+    if (a->type == 2 && b->type == 1) {
+        return *(float*)&a->word0 == (float)b->word0;
+    }
+    if (a->type == 1 && b->type == 2) {
+        return a->word0 == (int)*(float*)&b->word0;
+    }
+    if (a->type == 3 && b->type == 1) {
+        return a->word0 == b->word0;
+    }
+    return 0;
+}
+
+// Table lookup: returns the value stored under key, or the nil value.
+extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
+{
+    cLunoTable* t = self->table;
+    cLunoNode* n = (cLunoNode*)t->nodes + (unsigned int)key->word0 % (unsigned int)t->modulus;
+    if (n->value.type != 0) {
+        do {
+            if (lunoKeyEquals(&n->key, key)) {
+                return &n->value;
+            }
+            n = n->next;
+        } while (n != 0);
+    }
+    return &D_004C9098;
+}
+#endif
 
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_set);
 

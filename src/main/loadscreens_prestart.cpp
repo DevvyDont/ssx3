@@ -16,7 +16,20 @@ extern "C" int func_00232510(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232538);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern void* D_0046D970[];
+
+extern "C" void func_00232538(void* self, int flags)
+{
+    *(void***)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00232568);
 
@@ -68,9 +81,35 @@ void* func_00232738(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232750);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern void* D_0046D970[];
 
+extern "C" void func_00232750(void* self, int flags)
+{
+    *(void***)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232780);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern void* D_0046D970[];
+
+extern "C" void func_00232780(void* self, int flags)
+{
+    *(void***)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_002327B0);
 
@@ -128,5 +167,16 @@ INCLUDE_ASM("main/loadscreens_prestart", func_002332E8);
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00233390);
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00233408);
+#ifdef SKIP_ASM
+extern "C" void func_00398038(void*);
+void func_00231CB0(void*);
+
+extern "C" void func_00233408(void* self)
+{
+    func_00398038(*(void**)((char*)self + 0xC));
+    func_00231CB0(self);
+}
+#endif
 

@@ -17,7 +17,18 @@ void* func_001835A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_001835C8);
+#ifdef SKIP_ASM
+extern "C" void func_0039E510(void*);
+extern "C" void func_00182EC0(void*);
+
+extern "C" void func_001835C8(void* self)
+{
+    func_0039E510(self);
+    func_00182EC0(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festateriderbio", func_001835F8);
 
