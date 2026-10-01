@@ -525,7 +525,18 @@ extern "C" sWSItem* func_003B10D0(sWSPool* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B1140);
+#ifdef SKIP_ASM
+extern "C" void func_003B1140(sWSPool* self, sWSItem* item)
+{
+    if (--item->refs > 0) {
+        return;
+    }
+    item->unlink();
+    self->free.addTail(item);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B11A0);
 
