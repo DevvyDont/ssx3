@@ -69,7 +69,23 @@ extern "C" void func_00349798(void* self, void* node, sFrVec4* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00349840);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+extern "C" void func_00349840(void* self, void* node)
+{
+    if (*(int*)((char*)node + 0x64) >= 0) {
+        vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
+                 vu0ScaleFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64)].vel,
+                            *(float*)((char*)node + 0x68)));
+        vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
+                 vu0ScaleFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64) + 1].vel,
+                            1.0f - *(float*)((char*)node + 0x68)));
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_003498E8);
 
