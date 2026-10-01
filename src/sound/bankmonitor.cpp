@@ -169,7 +169,25 @@ extern "C" int func_002ADF60()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADF80);
+#ifdef SKIP_ASM
+class func_002ADF80_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(int a);
+};
+
+struct func_002ADF80_sHolder {
+    func_002ADF80_cObj* obj;
+};
+
+extern "C" int func_002ADF80(func_002ADF80_sHolder* self, int a)
+{
+    return self->obj->v02(a);
+}
+#endif
 
 extern void* D_004D3E98[];
 
@@ -433,7 +451,58 @@ extern "C" void func_002B1428(sBankSlots* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1458);
+#ifdef SKIP_ASM
+struct sBankEntry20 {
+    int used;
+    int timer;
+    int a;
+    int b;
+    int c;
+    int d;
+    float f;
+    int e;
+};
+
+struct sBankEntries {
+    char pad[0x18];
+    sBankEntry20 entries[10];
+};
+
+extern "C" int func_002B1458(sBankEntries* self, int a, int b, int c, int d, int e, int refresh, float f)
+{
+    int freeIdx = -1;
+    int i;
+    for (i = 0; i < 10; i++) {
+        if (self->entries[i].used != 0) {
+            if (self->entries[i].a == a && self->entries[i].b == b) {
+                if (refresh == 0) {
+                    return 0;
+                }
+                self->entries[i].timer = 180;
+                return 1;
+            }
+        } else {
+            if (freeIdx == -1) {
+                freeIdx = i;
+            }
+        }
+    }
+    if (freeIdx == -1) {
+        return 0;
+    }
+    self->entries[freeIdx].used = 1;
+    self->entries[freeIdx].timer = 180;
+    self->entries[freeIdx].a = a;
+    self->entries[freeIdx].b = b;
+    self->entries[freeIdx].c = c;
+    self->entries[freeIdx].d = d;
+    self->entries[freeIdx].f = f;
+    self->entries[freeIdx].e = e;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1520);
 
@@ -463,7 +532,47 @@ void* func_002B1758(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1A98);
+#ifdef SKIP_ASM
+extern char D_00483980[];
+extern unsigned char D_004A35A8[];
+
+struct func_002B1A98_sElem20 {
+    unsigned char b;
+    char pad[0x1F];
+};
+
+extern "C" void* func_002B1A98(void* self)
+{
+    *(void**)((char*)self + 0xA8) = D_00483980;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x64) = 4;
+    *(int*)((char*)self + 0x68) = 2;
+    *(int*)((char*)self + 0x6C) = 4;
+    *(int*)((char*)self + 0x70) = 8;
+    *(int*)((char*)self + 0x74) = 0x10;
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0x7C) = 0x5A;
+    *(int*)((char*)self + 0x80) = 100;
+    *(int*)((char*)self + 0x84) = 0x32;
+    *(int*)((char*)self + 0x88) = 100;
+    *(int*)((char*)self + 0x8C) = 100;
+    *(float*)((char*)self + 0x90) = 120.0f;
+    *(int*)((char*)self + 0x94) = 1;
+    *(int*)((char*)self + 0x98) = -1;
+    *(int*)((char*)self + 0x9C) = 0xFFFF;
+    *(int*)((char*)self + 0xA0) = -1;
+    *(int*)((char*)self + 0xA4) = 1;
+    *(unsigned char*)((char*)self + 0x0) = D_004A35A8[0];
+    *(unsigned char*)((char*)self + 0x20) = D_004A35A8[0];
+    func_002B1A98_sElem20* p = (func_002B1A98_sElem20*)((char*)self + 0x44);
+    for (int i = 0; i >= 0; i--, p++) {
+        p->b = D_004A35A8[0];
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1B68);
 
@@ -738,7 +847,38 @@ extern "C" sBankEntry64* func_002B4150(sBankMonitor934* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B42B8);
+#ifdef SKIP_ASM
+struct func_002B42B8_sMon {
+    char pad[0x3E4];
+    int count;              // 0x3E4
+    char pad3E8[0x3F0 - 0x3E8];
+    int current;            // 0x3F0
+    char pad3F4[0x3F8 - 0x3F4];
+    unsigned long mask;     // 0x3F8 (PORT: 64-bit long)
+    char pad400[0x420 - 0x400];
+    int table[64][5];       // 0x420
+    int counts[5];          // 0x920
+};
+
+extern "C" void func_002B42B8(func_002B42B8_sMon* self, int filter, int kind)
+{
+    if (filter == 0 || self->counts[kind] == 0) {
+        do {
+            if (++self->current >= self->count) {
+                self->current = 0;
+            }
+        } while (!((self->mask >> self->current) & 1));
+    } else {
+        do {
+            if (++self->current >= self->count) {
+                self->current = 0;
+            }
+        } while (!((self->mask >> self->current) & 1) || self->table[self->current][kind] == 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B4388);
 

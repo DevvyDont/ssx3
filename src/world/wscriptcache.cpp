@@ -325,7 +325,25 @@ INCLUDE_ASM("world/wscriptcache", func_003B05C0);
 
 INCLUDE_ASM("world/wscriptcache", func_003B0600);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0680);
+#ifdef SKIP_ASM
+class func_003B0680_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(int a);
+};
+
+extern "C" void func_003B0680(void* self, int a)
+{
+    (*(func_003B0680_cObj**)((char*)self + 0x14))->v06(a);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B06B0);
 
@@ -661,9 +679,64 @@ void* func_003B2380(void* self)
 
 INCLUDE_ASM("world/wscriptcache", func_003B23A0);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B2440);
+#ifdef SKIP_ASM
+extern int D_00509648[];
+extern int D_00509554[];
+extern int D_00509558[];
+extern int D_0044C378[];
+extern int D_0044C37C[];
+extern int D_0044C380[];
+extern int D_0044C3C8[];
+extern int D_0044C3CC[];
+extern int D_0050A098[];
 
+extern "C" void func_003B2440(void)
+{
+    if (D_0050A088.ptr != D_00509648) {
+        return;
+    }
+    int last;
+    if (D_00509558[0] != 3 && D_00509554[0] != (last = D_0044C3CC[0])) {
+        if (D_0044C3C8[0] != 0) {
+            D_0044C3C8[0] = 0;
+            D_0044C378[0] += 0x400;
+        }
+        if (D_00509554[0] < last && D_0044C380[0] == 0) {
+            D_0044C3C8[0] = 1;
+        }
+        D_0044C380[0] = 0;
+        D_0044C3CC[0] = D_00509554[0];
+    }
+    D_0050A098[0] = D_0044C378[0] + D_00509554[0];
+    if (D_0044C3C8[0] != 0 && D_0044C3CC[0] >= D_00509554[0]) {
+        D_0050A098[0] += 0x400;
+    }
+    D_0044C37C[0] = (D_0044C37C[0] < D_0050A098[0]) ? D_0050A098[0] : D_0044C37C[0];
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B2528);
+#ifdef SKIP_ASM
+struct func_003B2528_sKey {
+    char c;
+};
+
+extern "C" char func_003B3DA8(int key);
+extern "C" void func_003B39D8(func_003B2528_sKey* k);
+
+extern "C" void func_003B2528(int key)
+{
+    func_003B2528_sKey k;
+    if (key == 0) {
+        key = 0x20;
+    }
+    k.c = func_003B3DA8(key);
+    func_003B39D8(&k);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B2558);
 

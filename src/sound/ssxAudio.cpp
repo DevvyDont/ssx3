@@ -32,7 +32,23 @@ INCLUDE_ASM("sound/ssxAudio", func_00285D98);
 
 INCLUDE_ASM("sound/ssxAudio", func_00285F48);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00285F80);
+#ifdef SKIP_ASM
+// PORT: callee declared variadic to reproduce the original by-value struct passing; real signature takes an 8-byte struct.
+struct func_00285F80_sPair {
+    int a;
+    int b;
+};
+
+extern "C" void func_002AD410(void* obj, ...);
+
+extern "C" void func_00285F80(void* self, func_00285F80_sPair p)
+{
+    void* inner = **(void***)((char*)self + 0x118);
+    func_002AD410((char*)inner + 0x1D8, p);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00285FB0);
 

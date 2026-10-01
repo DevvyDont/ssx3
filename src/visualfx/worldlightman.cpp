@@ -80,7 +80,51 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F5B68);
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5D30);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6168);
+#ifdef SKIP_ASM
+struct func_002F6168_sVec3 {
+    float x;
+    float y;
+    float z;
+};
+
+struct func_002F6168_sLight {
+    char pad[0x1C];
+    float radius;               // 0x1C
+    char pad20[0x2C - 0x20];
+    func_002F6168_sVec3 dir;    // 0x2C
+    func_002F6168_sVec3 pos;    // 0x38
+};
+
+extern "C" int func_002F6168(void* self, func_002F6168_sVec3* p, func_002F6168_sLight* light,
+                             float* outDist, float* outInvDist, float* outDot)
+{
+    float dx = light->pos.x - p->x;
+    float dy = light->pos.y - p->y;
+    float dz = light->pos.z - p->z;
+    float d2 = dx * dx + dy * dy + dz * dz;
+    float dist;
+    float inv;
+    if (light->radius * light->radius < d2) {
+        return 0;
+    }
+    if (d2 != 0.0f) {
+        // PORT: sqrt.s (sqrtf without errno check)
+        __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(d2));
+        inv = 1.0f / dist;
+    } else {
+        inv = 1.0f;
+        dist = 1.0f;
+    }
+    if (outDot != 0) {
+        *outDot = -(dx * light->dir.x + dy * light->dir.y + dz * light->dir.z) * inv;
+    }
+    *outDist = dist;
+    *outInvDist = inv;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F6238);
 

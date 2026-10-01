@@ -8,14 +8,19 @@ struct cAsyncSys {
     int field_0x1D0;
 };
 
-//63.76% - target has a dead address computation (D_00482988) not reproduced; logic correct
+//100%
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi);
 #ifdef SKIP_ASM
-void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x)
+extern const char D_00482988[];
+// PORT: operator_new really takes (size, tag, flags, d); unit declares 1 arg
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+
+void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags) __asm__("cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi");
+void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 {
     if (x != 0) {
         self->field_0x1D0 = x;
-        self->field_0x1CC = operator_new(x);
+        self->field_0x1CC = operator_new_tag(x, D_00482988, flags, 0);
     }
 }
 #endif

@@ -154,7 +154,33 @@ extern "C" int func_003AA758(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA780);
+#ifdef SKIP_ASM
+// PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
+extern "C" int func_003AA780(void* self, int n, int* data)
+{
+    int g;
+    for (g = 0; g < n; g++) {
+        int j;
+        unsigned int* hp = (unsigned int*)(data + 1);
+        for (j = 0; j < *data; j++, hp++) {
+            unsigned int h = *hp;
+            char* sec = (*(char***)(**(char***)self + 8))[h & 0xFF];
+            void* res;
+            unsigned int i;
+            if (sec == 0 || (i = (*(unsigned int**)(sec + 0x4))[h >> 8] >> 8) == 0) {
+                res = 0;
+            } else {
+                res = (void*)(i << 2);
+            }
+            *(void**)hp = res;
+        }
+        data += *data + 1;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AA830);
 
@@ -170,7 +196,50 @@ extern "C" int func_003AA8D8(void* self, void* a1, int a2)
 
 INCLUDE_ASM("world/worldview", func_003AA8F0);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA960);
+#ifdef SKIP_ASM
+struct func_003AA960_sNode {
+    char pad[0x60];
+    int prev;       // 0x60 (index fixed up into a pointer)
+    int next;       // 0x64
+    void* owner;    // 0x68
+    char pad6C[0x90 - 0x6C];
+};
+
+// PORT: stores pointers in int fields (int typing needed to match); not 64-bit safe.
+extern "C" int func_003AA960(void* self, void* list)
+{
+    int i;
+    int count = *(int*)((char*)list + 0x20);
+    func_003AA960_sNode* nodes = (func_003AA960_sNode*)((char*)list + 0x30);
+    int next = 1;
+    *(func_003AA960_sNode**)((char*)list + 0x24) = nodes;
+    int prev = count - 1;
+    for (i = 0; i < *(int*)((char*)list + 0x20); i++) {
+        if (nodes[i].prev != -1) {
+            nodes[i].prev = (int)&nodes[prev];
+        } else {
+            nodes[i].prev = 0;
+        }
+        if (nodes[i].next != -1) {
+            nodes[i].next = (int)&nodes[next];
+        } else {
+            nodes[i].next = 0;
+        }
+        prev++;
+        next++;
+        if (prev >= *(int*)((char*)list + 0x20)) {
+            prev = 0;
+        }
+        if (next >= *(int*)((char*)list + 0x20)) {
+            next = 0;
+        }
+        nodes[i].owner = list;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AAA08);
 
@@ -200,7 +269,19 @@ INCLUDE_ASM("world/worldview", func_003AB498);
 
 INCLUDE_ASM("world/worldview", func_003ABE40);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003ABF20);
+#ifdef SKIP_ASM
+extern "C" void func_003ABF50(void* self, void* a1);
+
+// PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003ABF20(void* self, void* a1)
+{
+    *(int*)((char*)a1 + 0x24) += (int)a1;
+    func_003ABF50(self, a1);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003ABF50);
 

@@ -266,7 +266,18 @@ INCLUDE_ASM("util/menu", func_002CBF60);
 
 INCLUDE_ASM("util/menu", func_002CBFD0);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CC018);
+#ifdef SKIP_ASM
+void func_002CC070(void* self);
+
+extern "C" void* func_002CC018(void* self)
+{
+    *(int*)self = 0;
+    func_002CC070(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CC048);
@@ -485,12 +496,16 @@ struct cNullMenuItem {
     void* field_0x14;
 };
 
-//89.33% - target uses single-instruction addiu for the -1 constant, ours uses lui/ori for the void* constant
+//100%
 INCLUDE_ASM("util/menu", cNullMenuItem_cNullMenuItem__FP13cNullMenuItemPv);
 #ifdef SKIP_ASM
+// PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
+// A void* constant -1 materializes as lui/ori; the original passed an int.
+cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
+
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, (void*)-1);
+    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = text;
     self->vtable = D_00486CA0;
     return self;
@@ -529,12 +544,16 @@ struct cSpaceMenuItem {
     void* field_0x14;
 };
 
-//89.33% - same -1 constant materialization issue as cNullMenuItem
+//100%
 INCLUDE_ASM("util/menu", cSpaceMenuItem_cSpaceMenuItem__FP14cSpaceMenuItemPv);
 #ifdef SKIP_ASM
+// PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
+// A void* constant -1 materializes as lui/ori; the original passed an int.
+cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
+
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, (void*)-1);
+    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = text;
     self->vtable = D_00486C50;
     return self;
@@ -663,9 +682,55 @@ INCLUDE_ASM("util/menu", func_002CEEE8);
 
 INCLUDE_ASM("util/menu", func_002CF1C8);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CF788);
+#ifdef SKIP_ASM
+class func_002CF788_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual int v09(int a, int b);
+    virtual int v10(int a);
+};
 
+extern "C" int func_002CF788(void* self, int a, int b)
+{
+    return (*(func_002CF788_cItem**)((char*)self + 0x130))->v09(a, b);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002CF7B8);
+#ifdef SKIP_ASM
+class func_002CF7B8_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual int v09(int a, int b);
+    virtual void v10(int a);
+};
+
+extern "C" void func_002CF7B8(void* self, int a)
+{
+    (*(func_002CF7B8_cItem**)((char*)self + 0x130))->v10(a);
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CF860);
 
@@ -684,7 +749,23 @@ void cExpandMenuItem_addItem(void* self, void* item)
 
 INCLUDE_ASM("util/menu", func_002CFA08);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CFAF8);
+#ifdef SKIP_ASM
+class func_002CFAF8_cMenu {
+public:
+    char pad[0x12C];
+    // vptr at 0x12C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03(int a, int b);
+};
+
+extern "C" int func_002CFAF8(func_002CFAF8_cMenu** self, int a, int b)
+{
+    return (*self)->v03(a, b);
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CFB28);
 
@@ -694,7 +775,17 @@ INCLUDE_ASM("util/menu", func_002CFD28);
 
 INCLUDE_ASM("util/menu", func_002CFE78);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CFEF8);
+#ifdef SKIP_ASM
+extern "C" void func_002CBFD0(void* p);
+
+extern "C" void func_002CFEF8(void* self)
+{
+    func_002CA370(self);
+    func_002CBFD0((char*)self + 0x18);
+}
+#endif
 
 INCLUDE_ASM("util/menu", cRGBTitleMenuItem_cRGBTitleMenuItem);
 

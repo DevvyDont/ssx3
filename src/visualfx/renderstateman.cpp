@@ -107,9 +107,31 @@ INCLUDE_ASM("visualfx/renderstateman", func_002F03C8);
 
 INCLUDE_ASM("visualfx/renderstateman", func_002F0438);
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F04B0);
+#ifdef SKIP_ASM
+class func_002F04B0_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+};
 
+extern "C" void func_002F04B0(func_002F04B0_cObj** self)
+{
+    (*self)->v02();
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F04E0);
+#ifdef SKIP_ASM
+extern "C" void func_002F04E0(func_002F04B0_cObj** self)
+{
+    (*self)->v03();
+}
+#endif
 
 INCLUDE_ASM("visualfx/renderstateman", func_002F0510);
 

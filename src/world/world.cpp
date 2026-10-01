@@ -34,17 +34,82 @@ INCLUDE_ASM("world/world", func_003A6AE0);
 
 INCLUDE_ASM("world/world", func_003A6B78);
 
+//100%
 INCLUDE_ASM("world/world", func_003A6BA8);
+#ifdef SKIP_ASM
+struct func_003A6BA8_sEntry {
+    short type;
+    char pad2[6];
+    void* data;
+};
 
+struct func_003A6BA8_sTable {
+    char pad[4];
+    func_003A6BA8_sEntry* entries;
+};
+
+extern "C" int func_003ADC80(func_003A6BA8_sEntry* e);
+
+extern "C" int func_003A6BA8(void* self, int i)
+{
+    return func_003ADC80(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/world", func_003A6BD8);
+#ifdef SKIP_ASM
+extern "C" int func_003ADCB0(func_003A6BA8_sEntry* e);
 
+extern "C" int func_003A6BD8(void* self, int i)
+{
+    return func_003ADCB0(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/world", func_003A6C08);
+#ifdef SKIP_ASM
+extern "C" int func_003ADCE0(func_003A6BA8_sEntry* e);
 
+extern "C" int func_003A6C08(void* self, int i)
+{
+    return func_003ADCE0(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/world", func_003A6C38);
+#ifdef SKIP_ASM
+extern "C" int func_003ADD10(func_003A6BA8_sEntry* e);
 
+extern "C" int func_003A6C38(void* self, int i)
+{
+    return func_003ADD10(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/world", func_003A6C68);
+#ifdef SKIP_ASM
+extern "C" int func_003ADD40(func_003A6BA8_sEntry* e);
 
+extern "C" int func_003A6C68(void* self, int i)
+{
+    return func_003ADD40(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/world", func_003A6C98);
+#ifdef SKIP_ASM
+extern "C" int func_003ADD70(func_003A6BA8_sEntry* e);
+
+extern "C" int func_003A6C98(void* self, int i)
+{
+    return func_003ADD70(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/world", func_003A6CC8__FPvT0);

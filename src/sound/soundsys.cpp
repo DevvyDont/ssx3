@@ -8,7 +8,22 @@ INCLUDE_ASM("sound/soundsys", func_002906B8);
 
 INCLUDE_ASM("sound/soundsys", func_00290B58);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00290C10);
+#ifdef SKIP_ASM
+struct func_00290B58_sCurve {
+    float x[5];
+    float y[5];
+};
+
+extern "C" float func_00290B58(func_00290B58_sCurve* c, float v);
+extern func_00290B58_sCurve D_00445898[];
+
+extern "C" float func_00290C10(int i, float v)
+{
+    return func_00290B58(&D_00445898[i], v);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_00290C40);
 
@@ -570,7 +585,19 @@ INCLUDE_ASM("sound/soundsys", func_002A4770);
 
 INCLUDE_ASM("sound/soundsys", func_002A49E8);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A4A38);
+#ifdef SKIP_ASM
+extern "C" int func_002A10C0(void* self, int id);
+
+extern "C" int func_002A4A38(void* self)
+{
+    if (*(int*)((char*)self + 0x5818) != 0) {
+        return func_002A10C0(self, 10) != 0;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A4A78);
 

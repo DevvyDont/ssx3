@@ -91,7 +91,84 @@ INCLUDE_ASM("visualfx/avalanche", func_002D9A80);
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9B40);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9C00);
+#ifdef SKIP_ASM
+struct sAvVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sAvMatrix {
+    sAvVec4 row[4];
+};
+
+struct sAvNode {
+    char pad[0x60];
+    sAvVec4 pos;            // 0x60
+    sAvMatrix rot;          // 0x70
+    float scale;            // 0xB0
+    char padB4[0x2E0 - 0xB4];
+    void* data;             // 0x2E0
+    char pad2E4[0x2F0 - 0x2E4];
+};
+
+extern sAvNode D_004EE770[64];
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMatrixAV(sAvMatrix* dst, sAvMatrix* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix times scalar).
+static inline void vu0ScaleMatrixAV(sAvMatrix* dst, sAvMatrix* src, float s)
+{
+    int t;
+    __asm__ __volatile__(
+        "mfc1      %0, %3\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "qmtc2.ni  %0, $vf3\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulx.xyzw $vf8, $vf4, $vf3x\n"
+        "vmulx.xyzw $vf9, $vf5, $vf3x\n"
+        "vmulx.xyzw $vf10, $vf6, $vf3x\n"
+        "vmulx.xyzw $vf11, $vf7, $vf3x\n"
+        "sqc2      $vf8, 0x0(%1)\n"
+        "sqc2      $vf9, 0x10(%1)\n"
+        "sqc2      $vf10, 0x20(%1)\n"
+        "sqc2      $vf11, 0x30(%1)\n"
+        : "=&r"(t)
+        : "r"(dst), "r"(src), "f"(s)
+        : "memory");
+}
+
+extern "C" void func_002D9C00(int id, sAvMatrix* out)
+{
+    int i;
+    for (i = 0; i < 64; i++) {
+        sAvNode* node = &D_004EE770[i];
+        if (node->data != 0 && *(int*)((char*)node->data + 0xF8) == id) {
+            vu0CopyMatrixAV(out, &node->rot);
+            vu0ScaleMatrixAV(out, out, node->scale);
+            out->row[3] = node->pos;
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9CB0);
 

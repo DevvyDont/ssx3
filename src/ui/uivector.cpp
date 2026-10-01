@@ -22,9 +22,77 @@ INCLUDE_ASM("ui/uivector", func_003A39F8);
 
 INCLUDE_ASM("ui/uivector", func_003A3D28);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A3D70);
+#ifdef SKIP_ASM
+struct func_003A3D70_sVec3 {
+    float x;
+    float y;
+    float z;
+};
 
+extern func_003A3D70_sVec3 D_004FF0D8;
+
+extern "C" void func_003A3D70(void* self, func_003A3D70_sVec3* out)
+{
+    if (*(func_003A3D70_sVec3**)((char*)self + 0x80) == 0) {
+        return;
+    }
+    *out = D_004FF0D8;
+    float minX = 1000.0f;
+    float maxX = -1000.0f;
+    float minY = 1000.0f;
+    float maxY = -1000.0f;
+    unsigned int i;
+    for (i = 0; i < *(unsigned int*)((char*)self + 0x74) >> 17; i++) {
+        func_003A3D70_sVec3* p = &(*(func_003A3D70_sVec3**)((char*)self + 0x80))[i];
+        if (p->x < minX) {
+            minX = p->x;
+        }
+        if (maxX < p->x) {
+            maxX = p->x;
+        }
+        if (p->y < minY) {
+            minY = p->y;
+        }
+        if (maxY < p->y) {
+            maxY = p->y;
+        }
+    }
+    out->x = maxX - minX;
+    out->y = maxY - minY;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uivector", func_003A3E38);
+#ifdef SKIP_ASM
+struct func_003A3E38_sVec3 {
+    float x;
+    float y;
+    float z;
+};
+
+struct func_003A3E38_sCount74 {
+    unsigned int lo : 17;
+    unsigned int count : 15;
+};
+
+extern "C" void func_003A3E38(void* self, func_003A3E38_sVec3* off)
+{
+    if (((func_003A3E38_sCount74*)((char*)self + 0x74))->count == 4) {
+        signed char i;
+        for (i = 1; i < 4; i++) {
+            (*(func_003A3E38_sVec3**)((char*)self + 0x80))[i] = (*(func_003A3E38_sVec3**)((char*)self + 0x80))[0];
+        }
+        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[1].x += off->x;
+        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[3].y += off->y;
+        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[2].x += off->x;
+        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[2].y += off->y;
+    }
+    *(func_003A3E38_sVec3*)((char*)self + 0x60) = *off;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A3F48);
 

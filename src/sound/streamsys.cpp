@@ -27,7 +27,25 @@ INCLUDE_ASM("sound/streamsys", func_002AA068);
 
 INCLUDE_ASM("sound/streamsys", func_002AA108);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AA1B8);
+#ifdef SKIP_ASM
+struct func_002AA1B8_sStatus {
+    int state;
+    int a;
+    int b;
+    int c;
+};
+
+extern "C" void func_002AA068(void* self, func_002AA1B8_sStatus* out, int flags);
+
+extern "C" int func_002AA1B8(void* self)
+{
+    func_002AA1B8_sStatus st;
+    func_002AA068(self, &st, 0);
+    return st.state == 2;
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AA210);
 

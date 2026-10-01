@@ -226,7 +226,18 @@ extern "C" int func_002B6808(sTriggerIdCache* self, int id)
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6868);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B68D0);
+#ifdef SKIP_ASM
+extern "C" void func_002B5E68(void* self);
+void func_002B6900(void* self);
+
+extern "C" void func_002B68D0(void* self)
+{
+    func_002B5E68(self);
+    func_002B6900(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6900__FPv);
