@@ -53,7 +53,18 @@ extern "C" int func_002CA378(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CA388);
+#ifdef SKIP_ASM
+extern "C" void func_002CA388(void* self, int enable)
+{
+    if (enable) {
+        *(int*)((char*)self + 0x4) |= 1;
+    } else {
+        *(int*)((char*)self + 0x4) &= ~1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA3B0);
@@ -477,7 +488,18 @@ void func_002CD3F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD578);
+#ifdef SKIP_ASM
+extern "C" void func_002CD578(void* self)
+{
+    if (*(signed char*)((char*)self + 0x1C) <= 0) {
+        **(signed char**)((char*)self + 0x18) = 0;
+    } else {
+        **(signed char**)((char*)self + 0x18) = *(signed char*)((char*)self + 0x1C);
+    }
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CD5A0);
 

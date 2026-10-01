@@ -54,9 +54,23 @@ extern "C" void func_003A49E8(void* self, int enable)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4A08);
+#ifdef SKIP_ASM
+extern "C" void func_003A4A08(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x14))->bit2 = enable;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4A28);
+#ifdef SKIP_ASM
+extern "C" void func_003A4A28(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x14))->bit3 = enable;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4A48);
@@ -67,11 +81,40 @@ extern "C" void func_003A4A48(void* self, int enable)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4A68);
+#ifdef SKIP_ASM
+extern "C" void func_003A4A68(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x14))->bit5 = enable;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4A88);
+#ifdef SKIP_ASM
+extern "C" void func_003A4A88(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x14))->bit6 = enable;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4AF8);
+#ifdef SKIP_ASM
+// 16 bytes, 4-byte aligned (copied with ldl/ldr pairs). Float fields are a guess.
+struct sVec4 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+extern "C" void func_003A4AF8(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0x1C) = *in;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4BD8__FPv);
@@ -122,7 +165,14 @@ extern "C" void func_003A4C90(void* self, sVec3* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4CB0);
+#ifdef SKIP_ASM
+extern "C" void func_003A4CB0(void* self, sVec3* in)
+{
+    *(sVec3*)((char*)self + 0x60) = *in;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A4CD0);
 
@@ -231,7 +281,14 @@ extern "C" void func_003A56D8(void* self, int enable) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5708);
+#ifdef SKIP_ASM
+extern "C" void func_003A5708(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit5 = enable;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AA8__FPv);
@@ -375,9 +432,23 @@ int func_003A5DF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E68);
+#ifdef SKIP_ASM
+extern "C" void func_003A5E68(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit2 = enable;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E88);
+#ifdef SKIP_ASM
+extern "C" void func_003A5E88(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit3 = enable;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5EA8);
@@ -388,9 +459,23 @@ extern "C" void func_003A5EA8(void* self, int enable)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5EC8);
+#ifdef SKIP_ASM
+extern "C" void func_003A5EC8(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit5 = enable;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5EE8);
+#ifdef SKIP_ASM
+extern "C" void func_003A5EE8(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit6 = enable;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6000__FPv);
@@ -430,9 +515,23 @@ int func_003A6330(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6378);
+#ifdef SKIP_ASM
+extern "C" void func_003A6378(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit3 = enable;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6398);
+#ifdef SKIP_ASM
+extern "C" void func_003A6398(void* self, int enable)
+{
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit4 = enable;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6540__FPv);
