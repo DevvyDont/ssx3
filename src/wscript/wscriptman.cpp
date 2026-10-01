@@ -8,17 +8,93 @@ INCLUDE_ASM("wscript/wscriptman", func_00309750);
 
 INCLUDE_ASM("wscript/wscriptman", func_00309798);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_003097E0);
+#ifdef SKIP_ASM
+struct sWSOpData {
+    int a;
+    int b;
+};
 
+struct sWSOp {
+    int op;
+    sWSOpData data;
+};
+
+struct sWSOpList {
+    int count;
+    sWSOp ops[1];
+};
+
+static inline void sWSOpList_push(sWSOpList* l, sWSOp o)
+{
+    l->ops[l->count++] = o;
+}
+
+extern "C" void func_003097E0(void* self, int v)
+{
+    sWSOp o;
+    o.op = 0x70000;
+    o.data.a = v;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309848);
+#ifdef SKIP_ASM
+extern "C" void func_00309848(void* self)
+{
+    sWSOp o;
+    o.op = 0x70001;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+}
+#endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_003098B0);
+#ifdef SKIP_ASM
+extern "C" void func_003098B0(void* self)
+{
+    sWSOp o;
+    o.op = 0x70002;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+}
+#endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309918);
+#ifdef SKIP_ASM
+extern "C" void func_00309918(void* self, sWSOpData* d)
+{
+    sWSOp o;
+    o.op = 0x70003;
+    o.data = *d;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+}
+#endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309990);
+#ifdef SKIP_ASM
+extern "C" void func_00309990(void* self)
+{
+    sWSOp o;
+    o.op = 0x70004;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+}
+#endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_003099F8);
+#ifdef SKIP_ASM
+extern "C" void func_003099F8(void* self)
+{
+    sWSOp o;
+    o.op = 0x70005;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_00309A60);
 
@@ -42,11 +118,29 @@ INCLUDE_ASM("wscript/wscriptman", func_00309F18);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A060);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A270);
+#ifdef SKIP_ASM
+extern "C" int func_003A6B78(void* world, int id, int flag);
+
+extern "C" int func_0030A270(void* self, int id)
+{
+    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 1) != -1;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A298);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A2E8);
+#ifdef SKIP_ASM
+extern "C" int func_003A6B78(void* world, int id, int flag);
+
+extern "C" int func_0030A2E8(void* self, int id)
+{
+    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 3) != -1;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A310);
 
@@ -56,7 +150,16 @@ INCLUDE_ASM("wscript/wscriptman", func_0030A460);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A548);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A598);
+#ifdef SKIP_ASM
+extern "C" int func_003A6B78(void* world, int id, int flag);
+
+extern "C" int func_0030A598(void* self, int id)
+{
+    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 4) != -1;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A5C0);
 
@@ -64,9 +167,33 @@ INCLUDE_ASM("wscript/wscriptman", func_0030A610);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A688);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A6D8);
+#ifdef SKIP_ASM
+extern "C" void func_00307EC0(void* p);
 
+extern "C" void func_0030A6D8(void* self)
+{
+    void* p = *(void**)((char*)self + 0x2A4);
+    if (p != 0) {
+        func_00307EC0(p);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A700);
+#ifdef SKIP_ASM
+extern "C" void func_00307F58(void* p);
+
+extern "C" void func_0030A700(void* self)
+{
+    void* p = *(void**)((char*)self + 0x2A4);
+    if (p != 0) {
+        func_00307F58(p);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A728);
 
@@ -383,13 +510,47 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C6C8);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C700);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C738);
+#ifdef SKIP_ASM
+extern "C" void func_0030C760(void* self);
+
+extern "C" void* func_0030C738(void* self)
+{
+    func_0030C760(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C760);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C790);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C7C0);
+#ifdef SKIP_ASM
+// Same layout as cWScriptQueue / cWScriptQueueEntry, which the unit defines
+// further down (above func_0030C820). Renamed here only to avoid a redefinition.
+struct cWSQEntry {
+    int a;
+    int b;
+    int c;
+};
+
+struct cWSQueue {
+    int head;
+    int tail;
+    cWSQEntry entries[16];
+};
+
+extern "C" void func_0030C7C0(cWSQueue* self, int a, int b, int c)
+{
+    self->entries[self->tail].a = a;
+    self->entries[self->tail].b = b;
+    self->entries[self->tail].c = c;
+    self->tail = (self->tail + 1) % 16;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C820);
@@ -462,7 +623,45 @@ void* func_0030D498(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D4B8);
+#ifdef SKIP_ASM
+struct sWSVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sWSSlot8 {
+    int a;
+    int b;
+};
+
+extern "C" void* func_0030D4B8(void* self)
+{
+    sWSVec4 v;
+    *(int*)((char*)self + 0x38) = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    v.x = 1.0f;
+    v.y = 1.0f;
+    v.z = 1.0f;
+    v.w = 1.0f;
+    *(sWSVec4*)((char*)self + 0x140) = v;
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x3C) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x12C) = 0;
+    *(int*)((char*)self + 0x130) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    for (int i = 3; i >= 0; i--) {
+        ((sWSSlot8*)((char*)self + 0x44))[i].a = 0;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030D540);
 

@@ -609,7 +609,17 @@ void* func_002C1688(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16B8);
+#ifdef SKIP_ASM
+extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d)
+{
+    p[0] = (a << 1) | 1;
+    p[1] = (b << 1) | (p[1] & 1);
+    p[2] = (c << 1) | (p[2] & 1);
+    p[3] = (d << 1) | (p[3] & 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C17C0__FPv);
