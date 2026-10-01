@@ -80,7 +80,21 @@ float func_00355878(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355888);
+#ifdef SKIP_ASM
+struct sMnVEntryF {
+    short delta;
+    short index;
+    void (*fn)(void*, float);
+};
+
+extern "C" void func_00355888(void* self, void* a1)
+{
+    sMnVEntryF* vt = *(sMnVEntryF**)((char*)self + 0xC);
+    vt[41].fn((char*)self + vt[41].delta, *(float*)((char*)a1 + 0x4));
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_003558B8);
 
@@ -134,7 +148,19 @@ INCLUDE_ASM("object/movenode", func_003567E0);
 
 INCLUDE_ASM("object/movenode", func_003568B0);
 
+//100%
 INCLUDE_ASM("object/movenode", func_003569D0);
+#ifdef SKIP_ASM
+extern "C" int func_00352B88(void*);
+
+extern "C" int func_003569D0(cMoveNode* self)
+{
+    if (self->field_0x1C != 0) {
+        return func_00352B88(self->field_0x1C) != 0;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00356A00);

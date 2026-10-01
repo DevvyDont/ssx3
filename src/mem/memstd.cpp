@@ -138,7 +138,20 @@ INCLUDE_ASM("mem/memstd", func_002535F8);
 
 INCLUDE_ASM("mem/memstd", func_002536C8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253860);
+#ifdef SKIP_ASM
+extern "C" void func_002536C8(void* self);
+
+extern "C" int func_00253860(void* self)
+{
+    if (*(void**)((char*)self + 0x38) == 0) {
+        return 0;
+    }
+    func_002536C8(self);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_00253890);
 
@@ -267,7 +280,20 @@ INCLUDE_ASM("mem/memstd", func_00254DC0);
 
 INCLUDE_ASM("mem/memstd", func_00254E60);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00255638);
+#ifdef SKIP_ASM
+extern void* D_004802B0[];
+void operator_delete(int*);
+
+extern "C" void func_00255638(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004802B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00255668__FPv);
@@ -303,7 +329,19 @@ void* func_002557E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00255800);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+
+extern "C" void func_00255800(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00481320;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00255830__FPv);

@@ -55,7 +55,21 @@ INCLUDE_ASM("object/effectlink", func_003457C8);
 
 INCLUDE_ASM("object/effectlink", func_00345828);
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345890);
+#ifdef SKIP_ASM
+struct sEffVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_00345890(void* self, void* obj)
+{
+    sEffVEntry* vt = *(sEffVEntry**)obj;
+    vt[5].fn((char*)obj + vt[5].delta, *(void**)((char*)self + 0xC));
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_003458C0);
 
@@ -99,7 +113,18 @@ void func_00346060(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00346070);
+#ifdef SKIP_ASM
+extern "C" void func_00371380(void*, int);
+
+extern "C" void func_00346070(void* self)
+{
+    if (*(int*)((char*)self + 0x18) == 0) {
+        func_00371380((char*)self + 0x60, 7);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_003460A0);
 

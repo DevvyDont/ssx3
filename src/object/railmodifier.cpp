@@ -33,7 +33,64 @@ void* func_0035CFE8(void* self)
 
 INCLUDE_ASM("object/railmodifier", func_0035CFF0);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035D288);
+#ifdef SKIP_ASM
+struct sRmVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRmMat33 {
+    float m[3][3];
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sRmVec4 vu0ScaleRM(const sRmVec4& v, float s)
+{
+    sRmVec4 r;
+    int t;
+    __asm__ __volatile__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+struct sRmBody {
+    char pad_0x00[0x20];
+    sRmVec4 dir;        // 0x20
+    sRmVec4 pos;        // 0x30
+    float scale;        // 0x40
+    char pad_0x44[0xC];
+    sRmMat33 rot;       // 0x50
+    char pad_0x74[0xC];
+    sRmVec4 outDir;     // 0x80
+    sRmVec4 outPos;     // 0x90
+};
+
+static inline sRmVec4 xformRM(sRmBody* b)
+{
+    sRmVec4 r;
+    float x = b->pos.x;
+    float y = b->pos.y;
+    float z = b->pos.z;
+    r.x = b->rot.m[0][0] * x + b->rot.m[1][0] * y + b->rot.m[2][0] * z;
+    r.y = b->rot.m[0][1] * x + b->rot.m[1][1] * y + b->rot.m[2][1] * z;
+    r.z = b->rot.m[0][2] * x + b->rot.m[1][2] * y + b->rot.m[2][2] * z;
+    r.w = b->pos.w;
+    return r;
+}
+
+extern "C" void func_0035D288(sRmBody* self)
+{
+    self->outDir = vu0ScaleRM(self->dir, self->scale);
+    self->outPos = xformRM(self);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035D340);
 
@@ -55,7 +112,79 @@ INCLUDE_ASM("object/railmodifier", func_0035E1E0);
 
 INCLUDE_ASM("object/railmodifier", func_0035E248);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035E770);
+#ifdef SKIP_ASM
+struct sRmXform {
+    sRmVec4 pos;    // 0x00
+    sRmVec4 quat;   // 0x10
+};
+
+// PORT: PS2-only VU0 inline asm (dst = v * s).
+static inline void vu0ScaleToRM(sRmVec4& dst, const sRmVec4& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst), "=&r"(t)
+        : "m"(v), "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (dst = v rotated by quaternion q).
+static inline void vu0QuatRotToRM(sRmVec4& dst, const sRmVec4& q, const sRmVec4& v)
+{
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(dst)
+        : "m"(q), "m"(v));
+}
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+extern "C" sRmXform func_0035E770(void* self)
+{
+    sRmXform r = *(sRmXform*)((char*)self + 0x30);
+    sRmVec4 c;
+    sRmVec4 b;
+    sRmVec4 a;
+    sRmVec4 e;
+    sRmVec4 d;
+    vu0QuatRotToRM(a, *(sRmVec4*)((char*)self + 0x40), *(sRmVec4*)((char*)self + 0x2B0));
+    b = a;
+    vu0ScaleToRM(a, b, -1.0f);
+    c = a;
+    vu0QuatRotToRM(d, r.quat, c);
+    e = d;
+    vu0AddToRM(r.pos, e);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035E850);
 
@@ -77,7 +206,22 @@ INCLUDE_ASM("object/railmodifier", func_0035F1A8);
 
 INCLUDE_ASM("object/railmodifier", func_0035F218);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F378);
+#ifdef SKIP_ASM
+struct sRailModSelect;
+extern "C" void func_0035F3A8(sRailModSelect* self);
+
+extern "C" void func_0035F378(sRailModSelect* self, int i)
+{
+    int n = *(int*)((char*)self + 0x20);
+    if (i >= n) {
+        i = n - 1;
+    }
+    *(int*)((char*)self + 0x14) = i;
+    func_0035F3A8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F3A8);
@@ -122,7 +266,38 @@ INCLUDE_ASM("object/railmodifier", func_0035F788);
 
 INCLUDE_ASM("object/railmodifier", func_0035F7D0);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035FB30);
+#ifdef SKIP_ASM
+extern "C" void func_0035FB30(void* self, int id, float v)
+{
+    if (id == 200 || id == 201) {
+        if (v >= -1.0f && v <= 1.0f) {
+            if (id == 201) {
+                *(float*)((char*)self + 0x38) = v;
+            } else {
+                *(float*)((char*)self + 0x3C) = v;
+            }
+        }
+    } else if (id == 202 || id == 203) {
+        if (v >= 0.0f && v <= 60.0f) {
+            if (id == 202) {
+                *(float*)((char*)self + 0x8) = v;
+            } else {
+                *(float*)((char*)self + 0xC) = v;
+            }
+        }
+    } else if (id == 204 || id == 205) {
+        if (v >= -4.0f && v <= 4.0f) {
+            if (id == 204) {
+                *(float*)((char*)self + 0x30) = v;
+            } else {
+                *(float*)((char*)self + 0x34) = v;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035FC20);
 
@@ -745,7 +920,20 @@ void func_00360AF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00360B00);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_00360B00(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360B30__FPv);
@@ -969,7 +1157,20 @@ void func_00360C00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00360C28);
+#ifdef SKIP_ASM
+extern void* D_004913B8[];
+void operator_delete(int*);
+
+extern "C" void func_00360C28(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004913B8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360C58__FPv);
@@ -1234,9 +1435,35 @@ int func_00361198(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003611D8);
+#ifdef SKIP_ASM
+extern void* D_00490AF0[];
+void operator_delete(int*);
 
+extern "C" void func_003611D8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x84) = D_00490AF0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361290);
+#ifdef SKIP_ASM
+extern void* D_00490AF0[];
+void operator_delete(int*);
+
+extern "C" void func_00361290(void* self, int flags)
+{
+    *(void***)((char*)self + 0x84) = D_00490AF0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003612C0);
@@ -1264,7 +1491,20 @@ extern "C" void func_003612C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361340);
+#ifdef SKIP_ASM
+extern void* D_00490AF0[];
+void operator_delete(int*);
+
+extern "C" void func_00361340(void* self, int flags)
+{
+    *(void***)((char*)self + 0x84) = D_00490AF0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00361400);
 
@@ -1290,7 +1530,20 @@ extern "C" int func_00361460(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361488);
+#ifdef SKIP_ASM
+extern void* D_004913B8[];
+void operator_delete(int*);
+
+extern "C" void func_00361488(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004913B8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003614B8__FPv);
@@ -1528,7 +1781,20 @@ INCLUDE_ASM("object/railmodifier", func_00361800);
 
 INCLUDE_ASM("object/railmodifier", func_00361858);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003618C8);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_003618C8(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003618F8__FPv);
@@ -1595,7 +1861,20 @@ void func_00361938(void* self, float val)
 
 INCLUDE_ASM("object/railmodifier", func_00361940);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361988);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_00361988(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003619B8__FPv);
@@ -1624,7 +1903,20 @@ int func_003619D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003619E0);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_003619E0(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361A10__FPv);
@@ -1691,7 +1983,20 @@ int func_00361A58(void* self)
 
 INCLUDE_ASM("object/railmodifier", func_00361A60);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361AA8);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_00361AA8(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361AD8__FPv);
@@ -1748,7 +2053,20 @@ void* func_00361B10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361B18);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_00361B18(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361B48__FPv);
@@ -1874,7 +2192,20 @@ int func_00361C70(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361C78);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+void operator_delete(int*);
+
+extern "C" void func_00361C78(void* self, int flags)
+{
+    *(void***)self = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361CA8__FPv);
@@ -2122,7 +2453,22 @@ INCLUDE_ASM("object/railmodifier", func_00362230);
 
 INCLUDE_ASM("object/railmodifier", func_00362340);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_003623A8);
+#ifdef SKIP_ASM
+extern "C" void func_00362120(void*);
+extern "C" void func_00362230(void*);
+
+extern "C" int func_003623A8(void)
+{
+    char buf[0x100];
+    func_00362120(buf);
+    func_00362230(buf);
+    // PORT: PS2-only: re-enable interrupts (EI).
+    __asm__ __volatile__("sync.l\n\tei");
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003623D8);
@@ -2210,7 +2556,69 @@ extern "C" void func_00362660(sGifPacket* pkt, unsigned int zbp, unsigned int ps
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003626D8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sRmGsPacket {
+    int count;      // 0x0
+    ulong* ptr;     // 0x4
+};
+
+// GS TEST register (TEST_1 = 0x47, TEST_2 = 0x48), as in libgraph's SCE_GS_SET_TEST.
+extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned int aref, int ctx)
+{
+    ulong reg;
+    int atst;
+    int ztst;
+
+    switch (ctx) {
+    case 0:
+        reg = 0x47;
+        break;
+    case 1:
+        reg = 0x48;
+        break;
+    default:
+        reg = 0x47;
+        break;
+    }
+
+    switch (atest) {
+    case 0:
+    case 1:
+        atst = 1;
+        break;
+    case 2:
+        atst = 2;
+        break;
+    case 3:
+        atst = 6;
+        break;
+    default:
+        atst = 1;
+        break;
+    }
+
+    ztst = 1;
+    switch (ztest) {
+    case 1:
+        ztst = 2;
+        break;
+    case 0:
+        ztst = 3;
+        break;
+    case 2:
+        break;
+    }
+
+    pkt->ptr[0] = (ulong)1 | ((ulong)atst << 1) | ((ulong)aref << 4) | ((ulong)1 << 12)
+                | ((ulong)0 << 14) | ((ulong)0 << 15) | ((ulong)1 << 16) | ((ulong)ztst << 17);
+    pkt->ptr[1] = reg;
+    pkt->ptr += 2;
+    pkt->count++;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003627A8);
 

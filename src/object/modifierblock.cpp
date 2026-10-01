@@ -54,15 +54,25 @@ INCLUDE_ASM("object/modifierblock", func_00352AE8);
 
 INCLUDE_ASM("object/modifierblock", func_00352B88);
 
-//98.46% - target uses a2 for `node`, unclear source shape reproduces that register choice
+//100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_setBoundBox__FP14tModifierBlock);
 #ifdef SKIP_ASM
-void tModifierBlock_setBoundBox(tModifierBlock* self)
+struct sMbVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+// PORT: the symbol's mangling says one parameter, but the body passes $5 through
+// to the virtual call untouched, so the real function takes a second argument.
+void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
+
+void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
-        sBoundBoxTarget* target = node->target;
-        target->fnBoundBox((char*)node + target->field_0x68);
+        sMbVEntry* vt = *(sMbVEntry**)node;
+        vt[13].fn((char*)node + vt[13].delta, box);
     }
 }
 #endif

@@ -9,14 +9,17 @@ struct cFloatingNode {
     void* field_0x78;
 };
 
-//93.68%
+//100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_initInfo__FP13cFloatingNode);
 #ifdef SKIP_ASM
+// PORT: the unit declares cInstanceNode_getBoundBoxInfo with 2 args; its body uses 3 ($6 is written).
+void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("cInstanceNode_getBoundBoxInfo");
+
 void cFloatingNode_initInfo(cFloatingNode* self)
 {
     void* mem = cMemMan_alloc(0x30, D_0048E890, 0x20000000, 0);
     self->field_0x78 = mem;
-    cInstanceNode_getBoundBoxInfo(self, (char*)mem + 0x20);
+    cInstanceNode_getBoundBoxInfo_3(self, mem, (char*)mem + 0x20);
 }
 #endif
 
