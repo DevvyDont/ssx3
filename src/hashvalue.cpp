@@ -35,17 +35,34 @@ int GetHashValue32(char* param_1) {
 }
 #endif
 
-//99.17%
 //https://decomp.me/scratch/ZrcdK
+//100%
 INCLUDE_ASM("hashvalue", tHashName64_getHashValue__FPUlPc);
 #ifdef SKIP_ASM
-ulong tHashName64_getHashValue(ulong* out, char* str) {
-    //char md5[96];
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct md5_ctx {
+    unsigned int lo;    // 0x0
+    unsigned int hi;    // 0x4
+    unsigned int a;     // 0x8
+    unsigned int b;     // 0xC
+    unsigned int c;     // 0x10
+    unsigned int d;     // 0x14
+    unsigned char buffer[64]; // 0x18
+};
+
+void md5_init(md5_ctx* ctx);
+extern "C" void md5_append(md5_ctx* ctx, char* data, unsigned int len);
+extern "C" void md5_finish(md5_ctx* ctx, ulong* digest);
+extern "C" unsigned int strlen(const char*);
+
+ulong tHashName64_getHashValue(ulong* out, char* str)
+{
+    md5_ctx ctx;
     ulong hash[2];
 
-    //md5_init(md5);
-    //md5_append(md5, str, strlen(str));
-    //md5_finish(md5, hash);
+    md5_init(&ctx);
+    md5_append(&ctx, str, strlen(str));
+    md5_finish(&ctx, hash);
     *out = hash[0];
     return hash[0];
 }
