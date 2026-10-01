@@ -1,8 +1,8 @@
 #include "common.h"
 
-// Flag word at cUIVector + 0x14. The setters take an int and store it into a
+// Flag words at cUIVector + 0x14 and + 0x74. The setters take an int and store it into a
 // bool bitfield: that int->bool conversion is the `sltu` in their asm.
-struct sUIVectorFlags14 {
+struct sUIVectorFlags {
     bool bit0 : 1;
     bool bit1 : 1;
     bool bit2 : 1;
@@ -50,7 +50,7 @@ INCLUDE_ASM("ui/uivector", func_003A49E8);
 #ifdef SKIP_ASM
 extern "C" void func_003A49E8(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x14))->bit1 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x14))->bit1 = enable;
 }
 #endif
 
@@ -59,7 +59,7 @@ INCLUDE_ASM("ui/uivector", func_003A4A08);
 #ifdef SKIP_ASM
 extern "C" void func_003A4A08(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x14))->bit2 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x14))->bit2 = enable;
 }
 #endif
 
@@ -68,7 +68,7 @@ INCLUDE_ASM("ui/uivector", func_003A4A28);
 #ifdef SKIP_ASM
 extern "C" void func_003A4A28(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x14))->bit3 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x14))->bit3 = enable;
 }
 #endif
 
@@ -77,7 +77,7 @@ INCLUDE_ASM("ui/uivector", func_003A4A48);
 #ifdef SKIP_ASM
 extern "C" void func_003A4A48(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x14))->bit4 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x14))->bit4 = enable;
 }
 #endif
 
@@ -86,7 +86,7 @@ INCLUDE_ASM("ui/uivector", func_003A4A68);
 #ifdef SKIP_ASM
 extern "C" void func_003A4A68(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x14))->bit5 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x14))->bit5 = enable;
 }
 #endif
 
@@ -95,7 +95,7 @@ INCLUDE_ASM("ui/uivector", func_003A4A88);
 #ifdef SKIP_ASM
 extern "C" void func_003A4A88(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x14))->bit6 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x14))->bit6 = enable;
 }
 #endif
 
@@ -277,7 +277,7 @@ int func_003A56A0(void* self)
 INCLUDE_ASM("ui/uivector", func_003A56D8);
 #ifdef SKIP_ASM
 extern "C" void func_003A56D8(void* self, int enable) {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit2 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
 }
 #endif
 
@@ -286,7 +286,7 @@ INCLUDE_ASM("ui/uivector", func_003A5708);
 #ifdef SKIP_ASM
 extern "C" void func_003A5708(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit5 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
 }
 #endif
 
@@ -437,7 +437,7 @@ INCLUDE_ASM("ui/uivector", func_003A5E68);
 #ifdef SKIP_ASM
 extern "C" void func_003A5E68(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit2 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
 }
 #endif
 
@@ -446,7 +446,7 @@ INCLUDE_ASM("ui/uivector", func_003A5E88);
 #ifdef SKIP_ASM
 extern "C" void func_003A5E88(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit3 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
 }
 #endif
 
@@ -455,7 +455,7 @@ INCLUDE_ASM("ui/uivector", func_003A5EA8);
 #ifdef SKIP_ASM
 extern "C" void func_003A5EA8(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit4 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
 }
 #endif
 
@@ -464,7 +464,7 @@ INCLUDE_ASM("ui/uivector", func_003A5EC8);
 #ifdef SKIP_ASM
 extern "C" void func_003A5EC8(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit5 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
 }
 #endif
 
@@ -473,7 +473,7 @@ INCLUDE_ASM("ui/uivector", func_003A5EE8);
 #ifdef SKIP_ASM
 extern "C" void func_003A5EE8(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit6 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit6 = enable;
 }
 #endif
 
@@ -520,7 +520,7 @@ INCLUDE_ASM("ui/uivector", func_003A6378);
 #ifdef SKIP_ASM
 extern "C" void func_003A6378(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit3 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
 }
 #endif
 
@@ -529,7 +529,7 @@ INCLUDE_ASM("ui/uivector", func_003A6398);
 #ifdef SKIP_ASM
 extern "C" void func_003A6398(void* self, int enable)
 {
-    ((sUIVectorFlags14*)((char*)self + 0x74))->bit4 = enable;
+    ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
 }
 #endif
 
