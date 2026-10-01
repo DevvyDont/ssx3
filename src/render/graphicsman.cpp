@@ -85,7 +85,16 @@ INCLUDE_ASM("render/graphicsman", func_0036CBF8);
 
 INCLUDE_ASM("render/graphicsman", func_0036CCB8);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036CE00);
+#ifdef SKIP_ASM
+extern "C" void func_0036CE00(void* self, float a, float b, float c)
+{
+    *(float*)((char*)self + 0x10) = c;
+    *(float*)((char*)self + 0x20) = b - a;
+    *(float*)((char*)self + 0x18) = a - c * 1.5f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE28);
@@ -136,7 +145,23 @@ extern "C" void func_0036D3E8(void* self, float val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036D400);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 random-number unit (R register); the PC port needs a C PRNG.
+extern "C" void func_0036D400(float* seed)
+{
+    float v = *seed;
+    __asm__ __volatile__(
+        "qmtc2.ni  %0, $vf3\n"
+        "vrinit    R, $vf3x\n"
+        "vrnext.x  $vf3, R\n"
+        "qmfc2.ni  %0, $vf3\n"
+        : "=r"(v)
+        : "0"(v));
+    *seed = v;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036D428);
 

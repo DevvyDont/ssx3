@@ -1110,7 +1110,18 @@ extern "C" float func_00361158(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361170);
+#ifdef SKIP_ASM
+extern "C" int func_00361170(void* self)
+{
+    int r = -1;
+    if (*(float*)((char*)self + 0x10) >= 0.0f) {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361198__FPv);
@@ -1140,7 +1151,18 @@ void* func_00361458(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361460);
+#ifdef SKIP_ASM
+extern "C" int func_00361460(void* self)
+{
+    int r = -1;
+    if (*(float*)((char*)self + 0x4) >= 0.0f) {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00361488);
 
@@ -1737,7 +1759,14 @@ int func_00361CA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361CB0);
+#ifdef SKIP_ASM
+extern "C" int func_00361CB0(void* self)
+{
+    return *(float*)((char*)self + 0x20) >= 17.0f;
+}
+#endif
 
 extern "C" void* func_0035DDE8(void*);
 
@@ -1907,7 +1936,28 @@ void* func_00361F40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361F60);
+#ifdef SKIP_ASM
+struct sRailPair {
+    int a;
+    int b;
+};
+
+struct sRailPairs {
+    char pad_0x00[0x80];
+    sRailPair pairs[3];
+};
+
+extern "C" void func_00361F60(sRailPairs* self)
+{
+    int i;
+    for (i = 0; i < 3; i++) {
+        self->pairs[i].a = 0;
+        self->pairs[i].b = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361F90__FPv);

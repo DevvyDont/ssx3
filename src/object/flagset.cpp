@@ -64,7 +64,19 @@ INCLUDE_ASM("object/flagset", func_0034DC90);
 
 INCLUDE_ASM("object/flagset", func_0034DD18);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034E320);
+#ifdef SKIP_ASM
+extern char D_004FF1A0[];
+
+extern "C" void* func_0034E320(void* self, int i) {
+    char* base = *(char**)((char*)self + 0x48);
+    if (base == 0) {
+        return D_004FF1A0;
+    }
+    return base + i * 0xD0 + 0x90;
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034E348);
 

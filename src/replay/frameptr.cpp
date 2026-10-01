@@ -136,7 +136,18 @@ INCLUDE_ASM("replay/frameptr", func_0026F8A0);
 
 INCLUDE_ASM("replay/frameptr", func_0026F980);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026FA50);
+#ifdef SKIP_ASM
+extern "C" void func_0026FA50(void* self)
+{
+    int s = *(int*)((char*)self + 0x0);
+    bool ok = !(s == 0xE || s == 0xF);
+    if (ok) {
+        *(int*)((char*)self + 0x60C) = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026FA78);
 

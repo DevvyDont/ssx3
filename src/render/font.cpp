@@ -581,7 +581,14 @@ void func_00394D10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00394D18);
+#ifdef SKIP_ASM
+extern "C" char* func_00394D18(void* self)
+{
+    return *(char**)((char*)self + 0x8) + (*(int*)((char*)self + 0xC))++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00394D30__FPv);
@@ -716,7 +723,18 @@ void func_00395420(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003954D0);
+#ifdef SKIP_ASM
+struct sFontBlockA0 {
+    float f[40];
+} __attribute__((aligned(16)));
+
+extern "C" void func_003954D0(void* self, sFontBlockA0* src)
+{
+    *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00395500__FPv);

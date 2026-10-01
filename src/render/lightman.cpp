@@ -77,7 +77,14 @@ INCLUDE_ASM("render/lightman", func_0038F598);
 
 INCLUDE_ASM("render/lightman", func_0038F668);
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F6A8);
+#ifdef SKIP_ASM
+extern "C" void func_0038F6A8(void* self)
+{
+    *(int*)((char*)self + 0xC) = (*(int*)((char*)self + 0xC) + 1) % *(int*)((char*)self + 0x4);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038F708);
 
@@ -136,7 +143,17 @@ INCLUDE_ASM("render/lightman", func_00391418);
 
 INCLUDE_ASM("render/lightman", func_00391480);
 
+//100%
 INCLUDE_ASM("render/lightman", func_003914F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 integer register read (vi1); the PC port needs a C fallback.
+extern "C" int func_003914F8(void)
+{
+    int r;
+    __asm__ __volatile__("cfc2.i %0, $vi1" : "=r"(r));
+    return r;
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_003915E8);
 

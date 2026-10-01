@@ -398,7 +398,18 @@ INCLUDE_ASM("render/particle", func_00382AF0);
 
 INCLUDE_ASM("render/particle", func_00383A10);
 
+//100%
 INCLUDE_ASM("render/particle", func_00384D98);
+#ifdef SKIP_ASM
+extern "C" void* func_00384D98(void* self, unsigned int* src)
+{
+    *(unsigned int**)((char*)self + 0x0) = src;
+    *(unsigned int*)((char*)self + 0x4) = *src | 0x30000000;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00384DC0);
 
@@ -440,13 +451,13 @@ INCLUDE_ASM("render/particle", func_00386640);
 
 INCLUDE_ASM("render/particle", func_00386688);
 
-//96.0%
+//100%
 INCLUDE_ASM("render/particle", func_003866E0__FPvii);
 #ifdef SKIP_ASM
 void func_003866E0(void* self, int a1, int a2)
 {
-    *(int*)((char*)self + 0x6d10) = a2;
     *(int*)((char*)self + 0x6d0c) = a1;
+    *(int*)((char*)self + 0x6d10) = a2;
 }
 #endif
 
@@ -504,7 +515,22 @@ INCLUDE_ASM("render/particle", func_0038A618);
 
 INCLUDE_ASM("render/particle", func_0038A6A8);
 
+//100%
 INCLUDE_ASM("render/particle", func_0038ABF8);
+#ifdef SKIP_ASM
+struct sParticleEntryA0 {
+    char pad_0x00[0xA0];
+};
+
+extern "C" sParticleEntryA0* func_0038ABF8(void* self, int i)
+{
+    int count = *(int*)((char*)self + 0x4);
+    if (i >= count) {
+        i = count - 1;
+    }
+    return *(sParticleEntryA0**)((char*)self + 0x8) + i;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0038AC20);
 
