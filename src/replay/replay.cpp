@@ -132,7 +132,16 @@ extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E670);
+#ifdef SKIP_ASM
+extern "C" sReplayNode* func_0026E670(sReplayList* list)
+{
+    sReplayNode* node = list->head;
+    func_0026E608(list, node);
+    return node;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replay", func_0026E6A0);

@@ -227,9 +227,33 @@ extern "C" int func_00282EF0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282F00);
+#ifdef SKIP_ASM
+class cBxScriptVirt {
+public:
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+};
 
+extern "C" void func_00282F00(void* self)
+{
+    (*(cBxScriptVirt**)((char*)self + 0x10))->v02();
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282F30);
+#ifdef SKIP_ASM
+extern "C" void func_00282F30(void* self)
+{
+    (*(cBxScriptVirt**)((char*)self + 0x10))->v03();
+}
+#endif
 
 extern void* D_00482418[];
 
@@ -304,7 +328,17 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00283088);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002830C8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_00283180);
+#ifdef SKIP_ASM
+extern "C" void func_00283000(void* self);
+
+extern "C" void func_00283180(void* self)
+{
+    func_00283000(self);
+    *(int*)((char*)self + 0xC) = 9;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002831B0);
 

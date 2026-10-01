@@ -52,9 +52,45 @@ INCLUDE_ASM("render/particle", func_003717C0);
 
 INCLUDE_ASM("render/particle", func_00371940);
 
+//100%
 INCLUDE_ASM("render/particle", func_00371D10);
+#ifdef SKIP_ASM
+extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x1000D400 & 0x100) {
+        }
+    }
+    *(volatile int*)0x1000D410 = madr;
+    *(volatile int*)0x1000D480 = sadr & 0x3FFF;
+    *(volatile int*)0x1000D420 = qwc;
+    *(volatile int*)0x1000D400 = 0x100;
+    if (flags & 2) {
+        while (*(volatile int*)0x1000D400 & 0x100) {
+        }
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00371DD8);
+#ifdef SKIP_ASM
+extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x1000D000 & 0x100) {
+        }
+    }
+    *(volatile int*)0x1000D010 = madr;
+    *(volatile int*)0x1000D080 = sadr & 0x3FFF;
+    *(volatile int*)0x1000D020 = qwc;
+    *(volatile int*)0x1000D000 = 0x100;
+    if (flags & 2) {
+        while (*(volatile int*)0x1000D000 & 0x100) {
+        }
+    }
+}
+#endif
 
 extern "C" void* func_003725B0(void* self);
 
@@ -87,7 +123,38 @@ INCLUDE_ASM("render/particle", func_00374180);
 
 INCLUDE_ASM("render/particle", func_00374298);
 
+//100%
 INCLUDE_ASM("render/particle", func_00374440);
+#ifdef SKIP_ASM
+struct sPtVec2 {
+    float x, y;
+};
+
+struct sPtRect {
+    char pad_0x0[0x10];
+    sPtVec2 origin;
+    sPtVec2 size;
+};
+
+extern "C" void func_00374440(char* self, sPtRect* rect, sPtVec2* out, int idx)
+{
+    int i, j;
+    int n = *(int*)(self + (idx << 2) + 0x19C);
+    sPtVec2 pos = rect->origin;
+    sPtVec2 step = rect->size;
+    float inv = 1.0f / (float)(n - 1);
+    step.x *= inv;
+    step.y *= inv;
+    for (i = 0; i < n; i++) {
+        sPtVec2 cur = pos;
+        for (j = 0; j < n; j++) {
+            *out++ = cur;
+            cur.y += step.y;
+        }
+        pos.x += step.x;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00374518);
 
@@ -493,7 +560,16 @@ void* func_0037D090(void* self)
 
 INCLUDE_ASM("render/particle", func_0037D0B0);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D318);
+#ifdef SKIP_ASM
+extern "C" void func_00367D20(void* gm, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
+
+extern "C" void func_0037D318(char* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9)
+{
+    func_00367D20(*(void**)(self + 0x18F4), a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037D348);
 
@@ -510,7 +586,58 @@ void* func_0037D738(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D758);
+#ifdef SKIP_ASM
+struct sPartQ16 {
+    int w[4];
+} __attribute__((aligned(16)));
+
+struct sPartMtx {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPartDrawEntry {
+    sPartQ16 q;          // 0x00
+    sPartMtx m0;         // 0x10
+    sPartMtx m1;         // 0x50
+    float f;             // 0x90
+    int i;               // 0x94
+};
+
+struct sPartDrawList {
+    char pad_0x0[0x13EC];
+    int count;                    // 0x13EC
+    sPartDrawEntry entries[1];    // 0x13F0
+};
+
+// PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
+static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"(src), "r"(dst)
+        : "memory");
+}
+
+extern "C" void func_0037D758(sPartDrawList* self, sPartQ16* q, sPartMtx* m0, sPartMtx* m1, float f, int i)
+{
+    self->entries[self->count].q = *q;
+    vu0CopyMtxP(&self->entries[self->count].m0, m0);
+    vu0CopyMtxP(&self->entries[self->count].m1, m1);
+    self->entries[self->count].f = f;
+    self->entries[self->count].i = i;
+    self->count++;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037D800);
 
@@ -789,13 +916,66 @@ extern "C" void func_00384DC0(void* self)
 
 INCLUDE_ASM("render/particle", func_00384E50);
 
+//100%
 INCLUDE_ASM("render/particle", func_00384FD0);
+#ifdef SKIP_ASM
+struct sPartGsCtx {
+    int field_0x0;
+    ulong* p;            // 0x4
+    int field_0x8;
+    int field_0xc;
+    int count;           // 0x10
+};
+
+struct sPartGsVtx {
+    float s;             // 0x0
+    float t;             // 0x4
+    int field_0x8;
+    int field_0xc;
+    unsigned int r;      // 0x10
+    unsigned int g;      // 0x14
+    unsigned int b;      // 0x18
+    unsigned int a;      // 0x1c
+};
+
+struct sPartGsPos {
+    float x, y, z, q;
+};
+
+// PORT: 64-bit `ulong` GS packet words; float bits reinterpreted via *(int*)&f.
+extern "C" void func_00384FD0(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos)
+{
+    ctx->p[0] = (ulong)v->r | ((ulong)v->g << 8) | ((ulong)v->b << 16) | ((ulong)v->a << 24)
+              | ((ulong)*(int*)&pos->q << 32);
+    union { float f; int i; } us, ut;
+    us.f = v->s * pos->q;
+    ut.f = v->t * pos->q;
+    ctx->p[1] = (ulong)us.i | ((ulong)ut.i << 32);
+    ctx->p[2] = (ulong)(int)pos->x | ((ulong)(int)pos->y << 16) | ((ulong)(int)(pos->z * pos->q) << 32);
+    ctx->p += 3;
+    ctx->count++;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003850A8);
 
 INCLUDE_ASM("render/particle", func_00385138);
 
+//100%
 INCLUDE_ASM("render/particle", func_00385260);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00493938[];
+
+extern "C" void func_00385260(int* self, int flags)
+{
+    *(void**)((char*)self + 0x4) = D_00493938;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00385290);
 
@@ -845,7 +1025,27 @@ extern "C" void func_00385BA0(void* self, sShortUV* dst, int idx, float* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00385BE0);
+#ifdef SKIP_ASM
+class cPartVirt {
+public:
+    int field_0x0;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int, int, int);
+};
+
+extern "C" void func_00385BE0(cPartVirt* self, int a, void* b, int c)
+{
+    self->v08(a, **(short**)((char*)b + 4), c);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00385C10);
 
@@ -1037,7 +1237,42 @@ INCLUDE_ASM("render/particle", func_00389C38);
 
 INCLUDE_ASM("render/particle", func_00389CB8);
 
+//100%
 INCLUDE_ASM("render/particle", func_0038A530);
+#ifdef SKIP_ASM
+extern "C" int func_0038A530(float* p, float* n, void* s, float* dist, float* inv, float* planeD)
+{
+    float d;
+    float k;
+    float dx = *(float*)((char*)s + 0x38) - p[0];
+    float dy = *(float*)((char*)s + 0x3C) - p[1];
+    float r = *(float*)((char*)s + 0x1C);
+    float dz = *(float*)((char*)s + 0x40) - p[2];
+    float d2 = dx * dx + dy * dy + dz * dz;
+    if (r * r < d2) {
+        return 0;
+    }
+    if (d2 != 0.0f) {
+        // PORT: sqrt.s (sqrtf without errno check)
+        __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
+        k = 1.0f / d;
+    } else {
+        k = 1.0f;
+        d = k;
+    }
+    dx *= k;
+    dy *= k;
+    dz *= k;
+    *planeD = -(dx * *(float*)((char*)s + 0x2C) + dy * *(float*)((char*)s + 0x30) + dz * *(float*)((char*)s + 0x34));
+    *dist = d;
+    *inv = k;
+    n[0] = dx;
+    n[1] = dy;
+    n[2] = dz;
+    n[3] = 1.0f;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0038A618);
@@ -1088,7 +1323,16 @@ extern "C" sParticleEntryA0* func_0038ABF8(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0038AC20);
+#ifdef SKIP_ASM
+extern "C" int func_0038AC50(void* self, const char* name);
+
+extern "C" sParticleEntryA0* func_0038AC20(void* self, const char* name)
+{
+    return func_0038ABF8(self, func_0038AC50(self, name));
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0038AC50);
 

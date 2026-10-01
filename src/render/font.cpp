@@ -32,9 +32,65 @@ INCLUDE_ASM("render/font", func_00392A60);
 
 INCLUDE_ASM("render/font", func_00392B40);
 
+//100%
 INCLUDE_ASM("render/font", func_00392BA8);
+#ifdef SKIP_ASM
+struct sGlyph {
+    unsigned short code;
+    char pad_0x2[6];
+    signed char width;
+    char pad_0x9[3];
+};
 
+struct sGlyphTable {
+    int count;
+    sGlyph* glyphs;
+    sGlyph* fallback;
+    int first;
+    int last;
+};
+
+static inline sGlyph* findGlyph(sGlyphTable* t, int c)
+{
+    if (c < t->first)
+        return 0;
+    if (c <= t->last)
+        return t->glyphs + c - t->first;
+    int lo = t->last - t->first;
+    int hi = t->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph* g = &t->glyphs[mid];
+        if (c == g->code)
+            return g;
+        if (c < g->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return t->fallback;
+}
+
+extern "C" float func_00392BA8(sGlyphTable* t, char c)
+{
+    sGlyph* g = findGlyph(t, c);
+    if (g)
+        return g->width;
+    return 0.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/font", func_00392C60);
+#ifdef SKIP_ASM
+extern "C" float func_00392C60(sGlyphTable* t, unsigned short c)
+{
+    sGlyph* g = findGlyph(t, c);
+    if (g)
+        return g->width;
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00392D18);
@@ -411,7 +467,21 @@ void func_003946E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00394B38);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00493938[];
+
+extern "C" void func_00394B38(int* self, int flags)
+{
+    *(void**)((char*)self + 0x4) = D_00493938;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00394B68__FPv);
@@ -1105,11 +1175,53 @@ extern "C" void func_00396128(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003961A8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
 
+extern char D_00488680[];
+
+extern "C" void func_003961A8(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/font", func_003964C8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
 
+extern char D_00488680[];
+
+extern "C" void func_003964C8(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/font", func_00396838);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396838(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_003968C8__FPv);
@@ -1129,7 +1241,21 @@ extern "C" void func_003968D0(void* self, int a1, void* a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003968E8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_003968E8(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00396918__FPv);
@@ -1147,7 +1273,21 @@ void func_00396920(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00396928);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396928(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00396958__FPv);
@@ -1157,11 +1297,39 @@ void func_00396958(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00396A00);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396A00(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00396B40);
 
+//100%
 INCLUDE_ASM("render/font", func_00396D30);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396D30(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 extern "C" void* func_00393048(int, int);
 

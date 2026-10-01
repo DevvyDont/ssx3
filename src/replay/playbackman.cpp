@@ -23,7 +23,20 @@ void func_0026CBB0(void* self)
 
 INCLUDE_ASM("replay/playbackman", func_0026CBB8);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026CC18);
+#ifdef SKIP_ASM
+// PORT: func_0026DBD0 is declared in this unit with one parameter, but it passes a
+// second one ($5) through to cReplay_restoreFrame; bind the 2-arg form to the symbol.
+extern "C" void func_0026DBD0_2(void* replay, void* frame) __asm__("func_0026DBD0");
+
+extern "C" void* func_0026CC18(void* self)
+{
+    if (*(int*)((char*)self + 0x10)) {
+        func_0026DBD0_2(*(void**)(*(char**)((char*)self + 0x5C) + 0x28), (char*)self + 0x14);
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", func_0026CC48);
 

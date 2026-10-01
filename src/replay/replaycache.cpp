@@ -316,9 +316,37 @@ INCLUDE_ASM("replay/replaycache", func_00271758);
 
 INCLUDE_ASM("replay/replaycache", func_002718E8);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002721D0);
+#ifdef SKIP_ASM
+void operator_delete(int* p);
 
+extern void* D_00481898[];
+
+extern "C" void func_002721D0(int* self, int flags)
+{
+    *(void**)self = D_00481898;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/replaycache", func_00272258);
+#ifdef SKIP_ASM
+void operator_delete(int* p);
+
+extern void* D_00481898[];
+
+extern "C" void func_00272258(int* self, int flags)
+{
+    *(void**)self = D_00481898;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00272288);
 
@@ -349,7 +377,76 @@ void* func_002722E0(void* self, void* a1, void* a2)
 
 INCLUDE_ASM("replay/replaycache", func_00272308);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002723A8);
+#ifdef SKIP_ASM
+struct sRcBlock {
+    int size;
+    sRcBlock* next;
+};
+
+struct sRcHeap {
+    int field_0x0;
+    int field_0x4;
+    sRcBlock* freeList;
+};
+
+extern "C" void func_002723A8(sRcHeap* h, void* p)
+{
+    if (p) {
+        sRcBlock* b = (sRcBlock*)((char*)p - 8);
+        if (!h->freeList) {
+            h->freeList = b;
+            return;
+        }
+        sRcBlock* prev = 0;
+        sRcBlock* cur = h->freeList;
+        do {
+            if (b < cur) {
+                int size = b->size + 8;
+                if ((sRcBlock*)((char*)b + size) == cur) {
+                    b->next = cur->next;
+                    b->size = size + cur->size;
+                    if (!prev)
+                        h->freeList = b;
+                    else
+                        prev->next = b;
+                    return;
+                }
+                if (!prev) {
+                    b->next = h->freeList;
+                    h->freeList = b;
+                } else {
+                    b->next = prev->next;
+                    prev->next = b;
+                }
+                return;
+            }
+            int size = cur->size + 8;
+            if ((sRcBlock*)((char*)cur + size) == b) {
+                cur->size = size + b->size;
+                b = cur;
+                cur = b->next;
+                b->next = 0;
+                if (!prev)
+                    h->freeList = cur;
+                else
+                    prev->next = cur;
+            } else {
+                prev = cur;
+                cur = cur->next;
+            }
+        } while (cur);
+        if (!prev) {
+            b->next = h->freeList;
+            h->freeList = b;
+        } else {
+            b->next = prev->next;
+            prev->next = b;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00272488);
 
@@ -441,7 +538,17 @@ INCLUDE_ASM("replay/replaycache", func_00272938);
 
 INCLUDE_ASM("replay/replaycache", func_002729A8);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00272AD0);
+#ifdef SKIP_ASM
+extern "C" void* func_00274830(void*, int);
+extern "C" void* func_00272CC0(void* self, int a1);
+
+extern "C" void* func_00272AD0(void* self, int a1, int a2)
+{
+    return func_00274830(func_00272CC0(self, a1), a2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272B58);
