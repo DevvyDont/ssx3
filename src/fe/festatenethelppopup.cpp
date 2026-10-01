@@ -45,12 +45,12 @@ void func_001DA528(void* self, int val)
 }
 #endif
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA530__FPvii);
 #ifdef SKIP_ASM
-void func_001DA530(void* self, int a1, int a2)
+void func_001DA530(void* self, int i, int value)
 {
-    *(int*)((char*)((char*)self + a1 * 4) + 0x58) = a2;
+    *(int*)((char*)self + (i << 2) + 0x58) = value;
 }
 #endif
 

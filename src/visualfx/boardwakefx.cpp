@@ -71,12 +71,12 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2B00);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2E18);
 
-//95.0%
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2F98__FPvi);
 #ifdef SKIP_ASM
-void func_002E2F98(void* self, int a1)
+void func_002E2F98(void* self, int i)
 {
-    *(int*)((char*)((char*)self + a1 * 4) + 0x60) = 0;
+    *(int*)((char*)self + (i << 2) + 0x60) = 0;
 }
 #endif
 

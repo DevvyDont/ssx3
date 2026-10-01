@@ -367,12 +367,12 @@ extern "C" signed char func_0015A750(void* self, int a1, int a2)
 }
 #endif
 
-//95.0%
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A768__FPvi);
 #ifdef SKIP_ASM
-int func_0015A768(void* self, int a1)
+int func_0015A768(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0x174);
+    return *(int*)((char*)self + (i << 2) + 0x174);
 }
 #endif
 

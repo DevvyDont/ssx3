@@ -34,12 +34,12 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 
 INCLUDE_ASM("animation/rideranimbase", func_003129E0);
 
-//95.0%
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312AA0__FPvi);
 #ifdef SKIP_ASM
-int func_00312AA0(void* self, int a1)
+int func_00312AA0(void* self, int i)
 {
-    return *(int*)((char*)self + a1 * 4);
+    return *(int*)((char*)self + (i << 2));
 }
 #endif
 

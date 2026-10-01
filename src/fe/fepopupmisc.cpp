@@ -265,12 +265,12 @@ int func_001DFAE8(void* self)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFB28);
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFB88__FPvi);
 #ifdef SKIP_ASM
-int func_001DFB88(void* self, int a1)
+int func_001DFB88(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0xa28);
+    return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
@@ -305,12 +305,12 @@ int func_001DFBB8(void* self, void* other)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFBF8);
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFC58__FPvi);
 #ifdef SKIP_ASM
-int func_001DFC58(void* self, int a1)
+int func_001DFC58(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0xa28);
+    return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
@@ -345,12 +345,12 @@ int func_001DFC88(void* self, void* other)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFCC8);
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD28__FPvi);
 #ifdef SKIP_ASM
-int func_001DFD28(void* self, int a1)
+int func_001DFD28(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0xa28);
+    return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
@@ -385,12 +385,12 @@ int func_001DFD58(void* self, void* other)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD98);
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFDF8__FPvi);
 #ifdef SKIP_ASM
-int func_001DFDF8(void* self, int a1)
+int func_001DFDF8(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0xa28);
+    return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
@@ -425,12 +425,12 @@ int func_001DFE28(void* self, void* other)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE68);
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFEC8__FPvi);
 #ifdef SKIP_ASM
-int func_001DFEC8(void* self, int a1)
+int func_001DFEC8(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0xa28);
+    return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
@@ -465,12 +465,12 @@ int func_001DFEF8(void* self, void* other)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFF38);
 
-//95.0%
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFF98__FPvi);
 #ifdef SKIP_ASM
-int func_001DFF98(void* self, int a1)
+int func_001DFF98(void* self, int i)
 {
-    return *(int*)((char*)((char*)self + a1 * 4) + 0xa28);
+    return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 

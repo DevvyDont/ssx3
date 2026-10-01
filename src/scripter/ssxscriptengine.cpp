@@ -401,12 +401,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2E8);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2F0);
 
-//95.0%
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D320__FPvi);
 #ifdef SKIP_ASM
-int func_0027D320(void* self, int a1)
+int func_0027D320(void* self, int i)
 {
-    return *(int*)((char*)self + a1 * 4);
+    return *(int*)((char*)self + (i << 2));
 }
 #endif
 

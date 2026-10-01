@@ -81,12 +81,12 @@ INCLUDE_ASM("replay/playbackman", func_0026D628);
 
 INCLUDE_ASM("replay/playbackman", func_0026D678);
 
-//95.0%
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D730__FPvii);
 #ifdef SKIP_ASM
-void func_0026D730(void* self, int a1, int a2)
+void func_0026D730(void* self, int i, int value)
 {
-    *(int*)((char*)((char*)self + a1 * 4) + 0x20) = a2;
+    *(int*)((char*)self + (i << 2) + 0x20) = value;
 }
 #endif
 
