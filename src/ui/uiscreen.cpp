@@ -207,7 +207,23 @@ void* func_0039D758(void* self)
 
 INCLUDE_ASM("ui/uiscreen", func_0039D778);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
+#ifdef SKIP_ASM
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash)
+{
+    void** objs = *(void***)((char*)self + 0x3C);
+    if (objs != 0) {
+        for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
+            void* o = objs[i];
+            if (o != 0 && *(int*)((char*)o + 0x38) == hash) {
+                return o;
+            }
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039D8C0);
 

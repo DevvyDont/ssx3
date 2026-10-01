@@ -48,7 +48,44 @@ INCLUDE_ASM("ui/uistatestack", func_0039FD38);
 
 INCLUDE_ASM("ui/uistatestack", func_0039FE00);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FEB8);
+#ifdef SKIP_ASM
+struct sUIAlignFlags14 {
+    unsigned int lo : 13;
+    unsigned int align : 6;
+};
+
+struct sUIVec2 {
+    float x;
+    float y;
+};
+
+static inline unsigned int getUIAlign(void* self)
+{
+    return ((sUIAlignFlags14*)((char*)self + 0x14))->align;
+}
+
+extern "C" void func_0039FEB8(void* self, sUIVec2* pos, sUIVec2* size)
+{
+    unsigned int align = getUIAlign(self);
+    if ((align & 1) == 0) {
+        if (align & 4) {
+            float d = size->y;
+            pos->y -= d;
+        } else {
+            pos->y -= size->y * 0.5f;
+        }
+    }
+    if ((align & 8) == 0) {
+        if (align & 0x20) {
+            pos->x -= size->x;
+        } else {
+            pos->x -= size->x * 0.5f;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FF50__FPv);

@@ -243,7 +243,28 @@ extern "C" int func_00289D08(void* self, unsigned char a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289D60);
+#ifdef SKIP_ASM
+extern "C" void* func_00289D60(void* self, int a1)
+{
+    int r = 0;
+    switch (a1) {
+    case 1:
+        break;
+    case 2:
+        r = 1;
+        break;
+    case 0:
+        r = 2;
+        break;
+    case 3:
+        r = 3;
+        break;
+    }
+    return (void*)r;
+}
+#endif
 
 extern "C" void* func_00289D60(void*, int);
 

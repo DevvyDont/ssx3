@@ -47,7 +47,17 @@ void func_00283C20(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/videngine", func_00283C30);
+#ifdef SKIP_ASM
+void func_00283C20(void*);
+
+extern "C" void* func_00283C30(void* self)
+{
+    func_00283C20(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283C58__FPv);

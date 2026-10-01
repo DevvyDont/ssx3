@@ -12,7 +12,16 @@ INCLUDE_ASM("sound/bankmonitor", func_002AD2A8);
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD300);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD398);
+#ifdef SKIP_ASM
+extern "C" void func_002ABB38(void*);
+
+extern "C" void func_002AD398(void* self, int i)
+{
+    func_002ABB38((char*)*(void**)((char*)self + 0x8EC) + i * 0xC0);
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD3C0);
 
@@ -54,7 +63,18 @@ void* func_002AD848(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD860);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_002AD860(int* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD888);
 
@@ -138,7 +158,16 @@ INCLUDE_ASM("sound/bankmonitor", func_002ADE88);
 
 INCLUDE_ASM("sound/bankmonitor", func_002ADEE8);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADF60);
+#ifdef SKIP_ASM
+int BXrand();
+
+extern "C" int func_002ADF60()
+{
+    return BXrand();
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002ADF80);
 
@@ -491,7 +520,37 @@ extern "C" float func_002B2690(void* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002B2718);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2850);
+#ifdef SKIP_ASM
+struct sBMVec16 {
+    int x;
+    int y;
+    int z;
+    int w;
+};
+
+struct sBMTrack {
+    char pad0[0x1F4];
+    int cur;
+    char pad1F8[0x248 - 0x1F8];
+    sBMVec16* vecs;
+};
+
+struct sBMSrc {
+    char pad0[0x78];
+    int a;
+    int b;
+    int c;
+};
+
+extern "C" void func_002B2850(sBMSrc** src, sBMTrack*** dst)
+{
+    (**dst)->vecs[(**dst)->cur].y = (*src)->a;
+    (**dst)->vecs[(**dst)->cur].z = (*src)->b;
+    (**dst)->vecs[(**dst)->cur].x = (*src)->c;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B28C0);
 
@@ -501,9 +560,33 @@ INCLUDE_ASM("sound/bankmonitor", func_002B35A0);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3838);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B3A70);
+#ifdef SKIP_ASM
+extern "C" void func_002B2018(void*);
 
+extern "C" void func_002B3A70(void* self)
+{
+    void* p = *(void**)((char*)self + 0x408);
+    if (p != 0) {
+        func_002B2018(p);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B3A98);
+#ifdef SKIP_ASM
+extern "C" void func_002B2070(void*);
+
+extern "C" void func_002B3A98(void* self)
+{
+    void* p = *(void**)((char*)self + 0x408);
+    if (p != 0) {
+        func_002B2070(p);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3AC0);
 
@@ -559,7 +642,33 @@ extern "C" void func_002B3EB0(void* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3EE8);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3FE8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sBankMonUse {
+    char pad0[0x3E8];
+    int count;                  // 0x3E8
+    char pad3EC[0x3F8 - 0x3EC];
+    ulong mask;                 // 0x3F8
+    char pad400[0x420 - 0x400];
+    int grid[64][5];            // 0x420
+    int totals[5];              // 0x920
+};
+
+extern "C" void func_002B3FE8(sBankMonUse* self, int idx)
+{
+    if (self->count < 64) {
+        self->count++;
+        self->mask |= (ulong)1 << idx;
+        for (int i = 0; i < 5; i++) {
+            if (self->grid[idx][i] != 0) {
+                self->totals[i]++;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4060__FPv);

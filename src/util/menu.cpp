@@ -75,7 +75,16 @@ extern "C" int func_002CA3B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CA3E8);
+#ifdef SKIP_ASM
+int func_002CC248(void* self);
+
+extern "C" int func_002CA3E8(void** self)
+{
+    return func_002CC248(*(void**)((char*)*self + 0x124));
+}
+#endif
 
 extern "C" void* func_002CC260(int);
 
@@ -209,11 +218,47 @@ INCLUDE_ASM("util/menu", func_002CB8C8);
 
 INCLUDE_ASM("util/menu", func_002CBAC8);
 
+//100%
 INCLUDE_ASM("util/menu", cMenu_addItem);
+#ifdef SKIP_ASM
+struct cMenuList {
+    int count;          // 0x0
+    int selected;       // 0x4
+    int unk8;           // 0x8
+    void* items[70];    // 0xC
+    int wrap;           // 0x124
+};
+
+extern "C" void cMenu_addItem(cMenuList* menu, void** item, int index)
+{
+    *item = menu;
+    if (index < 0) {
+        index = menu->count;
+    }
+    for (int i = menu->count; index < i; i--) {
+        menu->items[i] = menu->items[i - 1];
+    }
+    menu->items[index] = item;
+    if (menu->wrap != 0 && menu->selected >= index && menu->count != 0) {
+        menu->selected++;
+    }
+    menu->count++;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CBE68);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CBF08);
+#ifdef SKIP_ASM
+extern "C" void func_002CAAB0(void* self);
+
+extern "C" int func_002CBF08(void* self)
+{
+    func_002CAAB0(self);
+    return *(int*)((char*)self + 0x4);
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CBF30);
 
@@ -223,7 +268,18 @@ INCLUDE_ASM("util/menu", func_002CBFD0);
 
 INCLUDE_ASM("util/menu", func_002CC018);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CC048);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_002CC048(int* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CC070__FPv);
@@ -359,12 +415,16 @@ INCLUDE_ASM("util/menu", func_002CCD90);
 
 extern "C" void* func_002CA988(void*, int, int, int);
 
-//88.33%
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CCDC8__FPvi);
 #ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
 void* func_002CCDC8(void* self, int a1)
 {
-    return func_002CA988(self, a1, 0, *(int*)((char*)self + 0x14));
+    return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
 }
 #endif
 
@@ -374,12 +434,16 @@ INCLUDE_ASM("util/menu", func_002CCE38);
 
 INCLUDE_ASM("util/menu", func_002CCEA8);
 
-//88.33%
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CCEE0__FPvi);
 #ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
 void* func_002CCEE0(void* self, int a1)
 {
-    return func_002CA988(self, a1, 0, *(int*)((char*)self + 0x14));
+    return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
 }
 #endif
 
@@ -400,12 +464,16 @@ INCLUDE_ASM("util/menu", func_002CD240);
 extern void* D_004866C8[];
 extern "C" void* func_002CA988(void*, int, int, int);
 
-//59.5%
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CD278__FPvi);
 #ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
 void* func_002CD278(void* self, int a1)
 {
-    return func_002CA988(self, a1, *(int*)((char*)self + 0x14), 0);
+    return func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, D_004866C8);
 }
 #endif
 
@@ -440,12 +508,16 @@ int func_002CD2E8(void* self)
 
 INCLUDE_ASM("util/menu", func_002CD2F0);
 
-//88.33%
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CD328__FPvi);
 #ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
 void* func_002CD328(void* self, int a1)
 {
-    return func_002CA988(self, a1, 0, *(int*)((char*)self + 0x14));
+    return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
 }
 #endif
 
@@ -667,7 +739,17 @@ INCLUDE_ASM("util/menu", func_002D0500);
 
 INCLUDE_ASM("util/menu", func_002D06E8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002D08E0);
+#ifdef SKIP_ASM
+void func_002CA368(void* self);
+
+extern "C" void func_002D08E0(void* self)
+{
+    func_002CA368(self);
+    *(int*)((char*)self + 0x40) = 0;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002D0908);
 
@@ -675,7 +757,20 @@ INCLUDE_ASM("util/menu", func_002D0D48);
 
 INCLUDE_ASM("util/menu", func_002D0EF8);
 
+//100%
 INCLUDE_ASM("util/menu", func_002D18B0);
+#ifdef SKIP_ASM
+extern float D_00445AB0[];
+
+extern "C" float func_002D18B0(float t)
+{
+    t = t * 160.0f;
+    int i = (int)t;
+    t = t - (float)i;
+    i = i % 160;
+    return D_00445AB0[i] * (1.0f - t) + D_00445AB0[i + 1] * t;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002D1928);
 

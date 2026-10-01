@@ -135,7 +135,18 @@ extern "C" void* func_002AB9E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABA18);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_002ABA18(int* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002ABA40);
 
@@ -143,7 +154,26 @@ INCLUDE_ASM("sound/streamsys", func_002ABB38);
 
 INCLUDE_ASM("sound/streamsys", func_002ABB80);
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABC18);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_002ABC18 as void*(int); the body takes (int, float, float).
+int func_002ABC18_impl(int vol, float dist, float range) __asm__("func_002ABC18");
+
+int func_002ABC18_impl(int vol, float dist, float range)
+{
+    dist = dist - 0.5f;
+    if (dist < 0.0f) {
+        dist = 0.0f;
+    }
+    int result = 0;
+    if (dist < range && 0.0f < range) {
+        float t = (range - dist) / range;
+        result = (int)(t * t * (float)vol);
+    }
+    return result;
+}
+#endif
 
 extern "C" void* func_002ABC18(int);
 

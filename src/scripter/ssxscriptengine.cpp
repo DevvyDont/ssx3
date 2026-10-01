@@ -88,9 +88,27 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00279148);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002791D8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279220);
+#ifdef SKIP_ASM
+extern "C" void func_00276BD8(void*);
 
+extern "C" void func_00279220(void* self, int i)
+{
+    func_00276BD8((char*)*(void**)((char*)self + 0x54C) + i * 0xCC);
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279248);
+#ifdef SKIP_ASM
+void func_00276CA8(void*);
+
+extern "C" void func_00279248(void* self, int i)
+{
+    func_00276CA8((char*)*(void**)((char*)self + 0x54C) + i * 0xCC);
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279298);
 
@@ -106,7 +124,19 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002795D0);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279720);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002797A0);
+#ifdef SKIP_ASM
+extern "C" int* cSSXScriptEngine_GetScriptFromCategory(void*, int);
+
+extern "C" int func_002797A0(void* self, int category)
+{
+    int* script = cSSXScriptEngine_GetScriptFromCategory(self, category);
+    if (script == 0)
+        return -1;
+    return *script;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002797C8);
 
@@ -120,7 +150,16 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002799E0);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279A70);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279CE0);
+#ifdef SKIP_ASM
+void func_0027BD90(void*, void*);
+
+extern "C" void func_00279CE0(void* self, int unused, void* arg)
+{
+    func_0027BD90(self, arg);
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279D00);
 
@@ -503,7 +542,25 @@ extern "C" void func_0027D558(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D578);
+#ifdef SKIP_ASM
+extern "C" int func_0027D578(sScriptEng0050* self, int key, int* out, int max)
+{
+    int n = 0;
+    int i = 0;
+    sVar0050* v = self->vars;
+    while (i < 30 && n != max) {
+        if (v->a != 0 && v->type != 1 && (v->e < 0 || v->e == key)) {
+            *out++ = v->a;
+            n++;
+        }
+        i++;
+        if (i < 30) v = &self->vars[i];
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D5E8);
 

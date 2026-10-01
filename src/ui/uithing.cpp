@@ -26,7 +26,30 @@ INCLUDE_ASM("ui/uithing", func_003A0048);
 
 INCLUDE_ASM("ui/uithing", func_003A0158);
 
+//100%
 INCLUDE_ASM("ui/uithing", func_003A0290);
+#ifdef SKIP_ASM
+struct sUIVec3 {
+    float x, y, z;
+};
+
+struct sUIThingPos {
+    char pad0[0x40];
+    sUIThingPos* parent;    // 0x40
+    sUIVec3 pos;            // 0x44
+};
+
+extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
+{
+    *out = self->pos;
+    for (sUIThingPos* p = self->parent; p != 0; p = p->parent) {
+        sUIVec3 v = p->pos;
+        out->x += v.x;
+        out->y += v.y;
+        out->z += v.z;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uithing", func_003A0318);

@@ -60,7 +60,17 @@ INCLUDE_ASM("ui/uitext", cUIText_setAsciiStringPrivate);
 
 INCLUDE_ASM("ui/uitext", func_003A0D00);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A0E90);
+#ifdef SKIP_ASM
+extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
+
+extern "C" void func_003A0E90(void* self, const unsigned short* str)
+{
+    *(int*)((char*)self + 0xB0) = 0;
+    cUIText_setUnicodeStringPrivate(self, str);
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringPrivate);
 

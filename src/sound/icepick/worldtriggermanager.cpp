@@ -19,9 +19,47 @@ void WORLDTRIGGERMANAGER_Init()
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B48);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B70);
+#ifdef SKIP_ASM
+extern unsigned char D_004A35A8[];
 
+extern "C" void* func_002B4B70(void* self)
+{
+    *(int*)((char*)self + 0x30) = -1;
+    *(float*)((char*)self + 0x2C) = 1.0f;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    *(int*)((char*)self + 0x38) = 0;
+    *(unsigned char*)((char*)self + 0x40) = D_004A35A8[0];
+    *(float*)((char*)self + 0x68) = -1.0f;
+    *(int*)((char*)self + 0x60) = 0;
+    *(int*)((char*)self + 0x64) = 0;
+    *(int*)((char*)self + 0x6C) = 0;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4BE0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_002B4BE0(int* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C08);
@@ -119,7 +157,22 @@ int func_002B6628(void* self)
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6630);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B66E8);
+#ifdef SKIP_ASM
+extern "C" int func_002B66E8(sWorldTrigger70** self, int a1, int a2, sWorldTrigger70* except)
+{
+    for (int i = 0; i < 40; i++) {
+        sWorldTrigger70* t = &(*self)[i];
+        if (t->active == 1 && t != except
+            && *(int*)((char*)t + 0x4) == a1
+            && *(int*)((char*)t + 0x8) == a2) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6740);
 
@@ -141,7 +194,35 @@ extern "C" int func_002B67D8(void* self, unsigned int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6808);
+#ifdef SKIP_ASM
+struct sTriggerIdCache {
+    int unk0;
+    int ids[200];       // 0x4
+    int count;          // 0x324
+    int unk328;
+    int lastId;         // 0x32C
+    int lastResult;     // 0x330
+};
+
+extern "C" int func_002B6808(sTriggerIdCache* self, int id)
+{
+    if (id == self->lastId) {
+        return self->lastResult;
+    }
+    int i = self->count - 1;
+    self->lastId = id;
+    for (; i >= 0; i--) {
+        if (self->ids[i] == id) {
+            self->lastResult = 1;
+            return 1;
+        }
+    }
+    self->lastResult = 0;
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6868);
 
@@ -217,9 +298,32 @@ extern "C" sTriggerSlots* func_002B6AA0(sTriggerSlots* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6AE0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
 
+extern "C" void func_002B6AE0(int* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B08);
+#ifdef SKIP_ASM
+extern "C" void func_002B6B50(void*);
+
+extern "C" int func_002B6B08(void* self, int a1)
+{
+    if (a1 != 0) {
+        func_002B6B50(self);
+    }
+    return 1;
+}
+#endif
 
 extern "C" void func_002B6C20(void*);
 
@@ -250,7 +354,35 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7410);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B75D0);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B77C0);
+#ifdef SKIP_ASM
+struct sTriggerIdSlot120 {
+    int count;
+    int ids[71];
+};
+
+static inline int getTriggerId(sTriggerIdSlot120* s, int j)
+{
+    return s->ids[j];
+}
+
+static inline void clearTriggerId(sTriggerIdSlot120* s, int j)
+{
+    s->ids[j] = 0;
+}
+
+extern "C" void func_002B77C0(sTriggerIdSlot120* self, int id)
+{
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < self[i].count; j++) {
+            if (getTriggerId(&self[i], j) == id) {
+                clearTriggerId(&self[i], j);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7848);
 
