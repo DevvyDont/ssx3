@@ -4,7 +4,27 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_Allocate);
 
 INCLUDE_ASM("render/particle", func_00370CF8);
 
+//100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_reset);
+#ifdef SKIP_ASM
+struct sVec4A {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sVec4A D_004FF120;
+
+extern "C" void cBaseClass_DynamicEmitter_reset(void* self)
+{
+    int i;
+    *(int*)((char*)self + 0x17C) = 0;
+    for (i = 0; i < *(int*)((char*)self + 0x178); i++) {
+        (*(sVec4A**)((char*)self + 0x1A0))[i] = D_004FF120;
+        (*(sVec4A**)((char*)self + 0x1A4))[i] = D_004FF120;
+        *(int*)((char*)self + 0x17C) = 0;
+        *(int*)((char*)self + 0x1E0) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00370DC8);
 
@@ -214,7 +234,28 @@ INCLUDE_ASM("render/particle", func_00376938);
 
 INCLUDE_ASM("render/particle", func_00376A70);
 
+//100%
 INCLUDE_ASM("render/particle", func_00376B90);
+#ifdef SKIP_ASM
+struct sPartVec4i {
+    float x, y, z, w;
+};
+
+extern "C" sPartVec4i* func_00376B90(sPartVec4i* r, void* self)
+{
+    int i = *(int*)((char*)self + 0x10dc);
+    float* p = (float*)((char*)self + (i * 0x230 + 0x6d20));
+    int x = (int)p[0];
+    int y = (int)p[1];
+    int z = (int)p[2];
+    int w = (int)p[3];
+    r->x = (float)x;
+    r->y = (float)y;
+    r->z = (float)z;
+    r->w = (float)w;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00376C10);
@@ -260,7 +301,34 @@ INCLUDE_ASM("render/particle", func_00377278);
 
 INCLUDE_ASM("render/particle", func_00377458);
 
+//100%
 INCLUDE_ASM("render/particle", func_00377950);
+#ifdef SKIP_ASM
+extern "C" void func_00377950(void* self, int mode)
+{
+    *(int*)((char*)self + 0x6b94) = mode;
+    switch (mode) {
+    case 0:
+        *(float*)((char*)self + 0x6b98) = 0.0f;
+        *(float*)((char*)self + 0x6b9c) = 1.0f;
+        *(float*)((char*)self + 0x6ba0) = 1.0f;
+        *(float*)((char*)self + 0x6ba4) = 1.0f;
+        break;
+    case 1:
+        *(float*)((char*)self + 0x6b98) = 0.125f;
+        *(float*)((char*)self + 0x6b9c) = 0.75f;
+        *(float*)((char*)self + 0x6ba0) = 0.75f;
+        *(float*)((char*)self + 0x6ba4) = 0.75f;
+        break;
+    case 2:
+        *(float*)((char*)self + 0x6ba0) = 0.75f;
+        *(float*)((char*)self + 0x6b98) = 0.0f;
+        *(float*)((char*)self + 0x6b9c) = 1.0f;
+        *(float*)((char*)self + 0x6ba4) = 1.0f;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003779E0);
@@ -474,15 +542,144 @@ INCLUDE_ASM("render/particle", func_0037DBE8);
 
 INCLUDE_ASM("render/particle", func_0037DD20);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037DE88);
+#ifdef SKIP_ASM
+// VU0 microprogram entry (micro-memory address 0x570; resolved via undefined_syms_auto.txt)
+extern char D_570[];
 
+// PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
+// version of the microprogram.
+extern "C" int func_0037DE88(void* self, void* a, void* b, void* m)
+{
+    int r1;
+    int r2;
+    __asm__ __volatile__(
+        "lqc2      $vf15, 0x0(%2)\n"
+        "lqc2      $vf16, 0x0(%3)\n"
+        "lqc2      $vf10, 0x0(%4)\n"
+        "lqc2      $vf11, 0x10(%4)\n"
+        "lqc2      $vf12, 0x20(%4)\n"
+        "lqc2      $vf13, 0x30(%4)\n"
+        "ctc2.ni   %5, $vi27\n"
+        "vnop\n"
+        "vnop\n"
+        "vcallmsr  $vi27\n"
+        "cfc2.i    %0, $vi1\n"
+        "cfc2.ni   %1, $vi2\n"
+        : "=r"(r1), "=r"(r2)
+        : "r"(a), "r"(b), "r"(m), "r"((unsigned int)D_570 >> 3));
+    if (r2 != 0) {
+        return 1;
+    }
+    if (r1 != 0) {
+        return 2;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_0037DEE0);
+#ifdef SKIP_ASM
+struct sPartQVec {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// Transforms v by the 4x4 matrix at self+0x58A0, divides by w, then scales by the
+// vector at self+0x58E0 and adds the one at self+0x58F0.
+// PORT: PS2-only VU0 macro-mode asm; the PC port needs a C version.
+extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* v)
+{
+    sPartQVec r;
+    __asm__ __volatile__(
+        "lqc2      $vf10, 0x0(%1)\n"
+        "lqc2      $vf1, 0x0(%2)\n"
+        "lqc2      $vf2, 0x10(%2)\n"
+        "lqc2      $vf3, 0x20(%2)\n"
+        "lqc2      $vf4, 0x30(%2)\n"
+        "lqc2      $vf5, %3\n"
+        "lqc2      $vf6, %4\n"
+        "vmulax.xyzw  ACC, $vf1, $vf10x\n"
+        "vmadday.xyzw ACC, $vf2, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf10z\n"
+        "vmaddw.xyzw  $vf11, $vf4, $vf10w\n"
+        "vdiv      Q, $vf0w, $vf11w\n"
+        "vwaitq\n"
+        "vmulq.xyzw   $vf12, $vf11, Q\n"
+        "vmula.xyzw   ACC, $vf5, $vf12\n"
+        "vmaddw.xyzw  $vf13, $vf6, $vf0w\n"
+        "sqc2      $vf13, %0\n"
+        : "=m"(r)
+        : "r"(v), "r"((char*)self + 0x58A0),
+          "m"(*(sPartQVec*)((char*)self + 0x58E0)),
+          "m"(*(sPartQVec*)((char*)self + 0x58F0)));
+    return r;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037DF88);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037E040);
+#ifdef SKIP_ASM
+// PORT: 128-bit GPR quadword (TImode); the PC port needs a 16-byte struct.
+typedef int cPartQuad128 __attribute__((mode(TI)));
 
+// Appends a DMA cnt tag (qwc 5) plus a VIF UNPACK V4-32 header and the 4x4 matrix m
+// to the packet at *pp.
+// PORT: 64-bit `ulong` packet words and PS2-only VU0 asm (lqc2/sqc2 copy).
+extern "C" void func_0037E040(void* m, char** pp)
+{
+    char* p = *pp;
+    *(cPartQuad128*)p = 0x10000005;
+    *(ulong*)(p + 0x18) = (ulong)0x6C048005 << 32;
+    *(ulong*)(p + 0x10) = 0;
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"(m), "r"(p + 0x20)
+        : "memory");
+    *pp = p + 0x60;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_0037E098);
+#ifdef SKIP_ASM
+struct sPartPktQuad {
+    int w[4];
+} __attribute__((aligned(16)));
+
+// PORT: 64-bit `ulong` packet words.
+extern "C" void func_0037E098(sPartPktQuad* src, void* self, sPartPktQuad* hdr, char** pp)
+{
+    char* p = *pp;
+    int i;
+    *(ulong*)(p + 0x0) = 0x1000000F;
+    *(ulong*)(p + 0x8) = 0;
+    *(ulong*)(p + 0x10) = 0;
+    *(ulong*)(p + 0x18) = (ulong)0x6C038009 << 32;
+    ((sPartPktQuad*)(p + 0x20))[0] = hdr[0];
+    ((sPartPktQuad*)(p + 0x20))[1] = hdr[1];
+    ((sPartPktQuad*)(p + 0x20))[2] = hdr[2];
+    *(ulong*)(p + 0x50) = 0;
+    *(ulong*)(p + 0x58) = (ulong)0x6C0A800F << 32;
+    p += 0x60;
+    for (i = 0; i < 10; i++) {
+        ((sPartPktQuad*)p)[i] = src[i];
+    }
+    p += 0xA0;
+    *pp = p;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037E120);
 
@@ -570,7 +767,25 @@ extern "C" void* func_00384D98(void* self, unsigned int* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00384DC0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `ulong` packet words.
+extern "C" void func_00384DC0(void* self)
+{
+    if (*(int*)((char*)self + 0x10) & 1) {
+        *(*(ulong**)((char*)self + 0x4))++ = 0;
+    }
+    *(ulong*)(*(char**)((char*)self + 0xC) + 0x0) = ((ulong)0x14000000 << 32) | 1;
+    *(ulong*)(*(char**)((char*)self + 0xC) + 0x8) = 0;
+    *(ulong*)(*(char**)((char*)self + 0xC) + 0x10) = 0x4A;
+    *(ulong*)(*(char**)((char*)self + 0xC) + 0x18) = 0;
+    *(ulong*)(*(char**)((char*)self + 0xC) + 0x20) =
+        (*(int*)((char*)self + 0x10) | 0x8000) | ((ulong)0xD000 << 46);
+    *(ulong*)(*(char**)((char*)self + 0xC) + 0x28) = 0x521;
+    *(char**)((char*)self + 0xC) += 0x30;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00384E50);
 
@@ -592,7 +807,26 @@ INCLUDE_ASM("render/particle", func_00385530);
 
 INCLUDE_ASM("render/particle", func_003856B8);
 
+//100%
 INCLUDE_ASM("render/particle", func_00385A38);
+#ifdef SKIP_ASM
+struct sPartVec3 {
+    float x, y, z;
+};
+
+extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v)
+{
+    float s = *(float*)((char*)self + 0x198);
+    sPartVec3 t;
+    t.x = v->x * s;
+    t.y = v->y * s;
+    t.z = v->z * s;
+    int j = i * 3;
+    out[j] = (short)t.x;
+    out[j + 1] = (short)t.y;
+    out[j + 2] = (short)t.z;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00385AA0);
 
@@ -637,7 +871,16 @@ INCLUDE_ASM("render/particle", func_003866F0);
 
 INCLUDE_ASM("render/particle", func_00386BD0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00386CF0);
+#ifdef SKIP_ASM
+void func_00369FF0(void* self);
+
+extern "C" void func_00386CF0(void* self)
+{
+    func_00369FF0(self);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00386D10);
 
@@ -687,13 +930,85 @@ extern "C" void func_00389558(float* a, float* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00389590);
+#ifdef SKIP_ASM
+extern "C" void func_00389590(sPartVec4* a, sPartVec4* b, sPartVec4* c, float s)
+{
+    float kx = s * c->x;
+    float ky = s * c->y;
+    float kz = s * c->z;
+    float kw = s * c->w;
+    for (int i = 0; i < 10; i++) {
+        a[i].x += b[i].x * ky;
+        a[i].y += b[i].y * kz;
+        a[i].z += b[i].z * kw;
+        a[i].w += b[i].w * kx;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00389620);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389730);
+#ifdef SKIP_ASM
+struct sPartVec4x10 {
+    sPartVec4 v[10];
+};
 
+// PORT: VU0 macro-mode vector add; the PC port needs plain C.
+static inline sPartVec4 sPartVec4_add(const sPartVec4& a, const sPartVec4& b)
+{
+    sPartVec4 r;
+    __asm__(
+        "lqc2       $vf3, 0x0(%1)\n"
+        "lqc2       $vf4, 0x0(%2)\n"
+        "vadd.xyzw  $vf5, $vf3, $vf4\n"
+        "sqc2       $vf5, %0\n"
+        : "=m"(r)
+        : "r"(&a), "r"(&b));
+    return r;
+}
+
+extern "C" sPartVec4x10 func_00389730(sPartVec4x10* a, sPartVec4x10* b)
+{
+    sPartVec4x10 r;
+    for (int i = 0; i < 10; i++) {
+        r.v[i] = sPartVec4_add(a->v[i], b->v[i]);
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_003897A0);
+#ifdef SKIP_ASM
+// PORT: VU0 macro-mode vector scale; the PC port needs plain C.
+static inline sPartVec4 sPartVec4_scale(const sPartVec4& a, float s)
+{
+    sPartVec4 r;
+    __asm__(
+        "mfc1       $2, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "qmtc2.ni   $2, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2       $vf5, %0\n"
+        : "=m"(r)
+        : "r"(&a), "f"(s)
+        : "$2");
+    return r;
+}
+
+extern "C" sPartVec4x10 func_003897A0(sPartVec4x10* a, float s)
+{
+    sPartVec4x10 r;
+    for (int i = 0; i < 10; i++) {
+        r.v[i] = sPartVec4_scale(a->v[i], s);
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389810);
@@ -724,7 +1039,35 @@ INCLUDE_ASM("render/particle", func_00389CB8);
 
 INCLUDE_ASM("render/particle", func_0038A530);
 
+//100%
 INCLUDE_ASM("render/particle", func_0038A618);
+#ifdef SKIP_ASM
+extern "C" int func_0038A618(float* p, float* n, void* s, float* dist, float* inv)
+{
+    float dx = *(float*)((char*)s + 0x38) - p[0];
+    float dy = *(float*)((char*)s + 0x3C) - p[1];
+    float r = *(float*)((char*)s + 0x1C);
+    float dz = *(float*)((char*)s + 0x40) - p[2];
+    float d2 = dx * dx + dy * dy + dz * dz;
+    if (r * r < d2) {
+        return 0;
+    }
+    float d;
+    // PORT: sqrt.s (sqrtf without errno check)
+    __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
+    *dist = d;
+    float k = 1.0f / d;
+    *inv = k;
+    dy *= k;
+    dz *= k;
+    dx *= k;
+    n[3] = 1.0f;
+    n[0] = dx;
+    n[1] = dy;
+    n[2] = dz;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0038A6A8);
 

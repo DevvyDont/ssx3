@@ -22,9 +22,25 @@ void func_00369FF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00369FF8);
+#ifdef SKIP_ASM
+extern "C" void func_00369FF8(void* self)
+{
+    char* vt = *(char**)((char*)self + 0x10D8);
+    ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
+}
+#endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036A020);
+#ifdef SKIP_ASM
+extern "C" void func_0036A020(void* self)
+{
+    char* vt = *(char**)((char*)self + 0x10D8);
+    ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036A048);
 

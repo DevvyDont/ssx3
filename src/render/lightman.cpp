@@ -131,7 +131,31 @@ void* func_0038F800(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F930);
+#ifdef SKIP_ASM
+extern int D_0044BDE0[];
+
+extern "C" int func_0038F930(void* self, unsigned char* src, unsigned char* dst)
+{
+    unsigned int n = 0;
+    unsigned int i;
+    for (i = 0; i < 4; i++) {
+        unsigned int k = (i & 1) * 64;
+        unsigned int j;
+        for (j = 0; j < 16; j++) {
+            unsigned int m;
+            for (m = 0; m < 4; m++) {
+                dst[n] = src[D_0044BDE0[k]];
+                k++;
+                n++;
+            }
+        }
+        src += 0x40;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038FC48);
 
@@ -157,9 +181,73 @@ INCLUDE_ASM("render/lightman", func_003912A8);
 
 INCLUDE_ASM("render/lightman", func_00391360);
 
+//100%
 INCLUDE_ASM("render/lightman", func_00391418);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (lqc2 x16 into vf1-vf16, then vcallmsr of the
+// microprogram at VU0 micro-memory address 0); the PC port needs a C version.
+extern "C" void func_00391418(void* self, void* m)
+{
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "lqc2      $vf5, 0x40(%0)\n"
+        "lqc2      $vf6, 0x50(%0)\n"
+        "lqc2      $vf7, 0x60(%0)\n"
+        "lqc2      $vf8, 0x70(%0)\n"
+        "lqc2      $vf9, 0x80(%0)\n"
+        "lqc2      $vf10, 0x90(%0)\n"
+        "lqc2      $vf11, 0xA0(%0)\n"
+        "lqc2      $vf12, 0xB0(%0)\n"
+        "lqc2      $vf13, 0xC0(%0)\n"
+        "lqc2      $vf14, 0xD0(%0)\n"
+        "lqc2      $vf15, 0xE0(%0)\n"
+        "lqc2      $vf16, 0xF0(%0)\n"
+        "lui       $2, 0\n"
+        "addiu     $2, $2, 0\n"
+        "srl       $2, $2, 3\n"
+        "ctc2.ni   $2, $vi27\n"
+        "vnop\n"
+        "vnop\n"
+        "vcallmsr  $vi27\n"
+        ".set pop\n"
+        :
+        : "r"(m)
+        : "$2", "memory");
+}
+#endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_00391480);
+#ifdef SKIP_ASM
+struct sQuad16 {
+    int w[4];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00391480(void* self, sQuad16* dst)
+{
+    sQuad16* src = (sQuad16*)0x11004200;
+    int i;
+    for (i = 0; i < 10; i++) {
+        dst[0] = src[0];
+        dst[1] = src[1];
+        dst[2] = src[2];
+        dst[3] = src[3];
+        dst[4] = src[4];
+        dst[5] = src[5];
+        dst[6] = src[6];
+        dst[7] = src[7];
+        dst[8] = src[8];
+        dst[9] = src[9];
+        src += 10;
+        dst += 10;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_003914F8);

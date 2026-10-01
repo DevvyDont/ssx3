@@ -31,13 +31,13 @@ INCLUDE_ASM("replay/playbackman", func_0026CD20);
 
 extern "C" void* func_0026CC18(void*);
 
-//72.8%
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026CDD0__FPv);
 #ifdef SKIP_ASM
-void* func_0026CDD0(void* self)
+void func_0026CDD0(void* self)
 {
+    func_0026CC18(self);
     *(int*)((char*)self + 0x70) = 0;
-    return func_0026CC18(self);
 }
 #endif
 
@@ -70,7 +70,40 @@ INCLUDE_ASM("replay/playbackman", func_0026D2B0);
 
 INCLUDE_ASM("replay/playbackman", func_0026D420);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D4D8);
+#ifdef SKIP_ASM
+struct sPlaybackChunk {
+    unsigned int info;
+    int data;
+};
+
+struct sPlaybackStream {
+    int count;
+    int index;
+    int offset;
+    sPlaybackChunk* chunks;
+};
+
+extern "C" int func_0026D4D8(sPlaybackStream* self, unsigned int pos)
+{
+    int i = 0;
+    sPlaybackChunk* c = self->chunks;
+    unsigned int total = 0;
+    for (; i < self->count; i++) {
+        total += (c++)->info & 0xFFF;
+        if (pos < total) {
+            break;
+        }
+    }
+    if (i >= self->count) {
+        return 0;
+    }
+    self->index = i;
+    self->offset = total - pos;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", func_0026D558);
 

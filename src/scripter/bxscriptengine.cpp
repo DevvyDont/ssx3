@@ -107,7 +107,18 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282A80);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282B40);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282B88);
+#ifdef SKIP_ASM
+void func_00282C88(void* self, void* v);
+
+extern "C" void func_00282B88(void* self, void* ctx)
+{
+    void* v = *(void**)((char*)ctx + 0xC);
+    *(int*)((char*)v + 0x4) = 7;
+    func_00282C88(self, v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282BB0__FPvT0);
@@ -127,7 +138,20 @@ int func_00282BE0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282BF0);
+#ifdef SKIP_ASM
+extern "C" void* func_00282CB0(void* self, int a1);
+
+extern "C" int func_00282BF0(void* self, int a1)
+{
+    int* p = (int*)func_00282CB0(self, a1);
+    if (p == 0) {
+        return 0;
+    }
+    return *p;
+}
+#endif
 
 extern "C" void* func_00272CC0(int);
 
@@ -230,15 +254,51 @@ int func_00282F80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282F90);
+#ifdef SKIP_ASM
+extern "C" void func_00274240(void* p, int a1);
+
+extern "C" void func_00282F90(void* self)
+{
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        func_00274240(p, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282FB8);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00283000);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283038);
+#ifdef SKIP_ASM
+extern "C" void func_002749E8(void* self);
 
+extern "C" void func_00283038(void* self)
+{
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        func_002749E8(*(void**)((char*)p + 0x8));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283060);
+#ifdef SKIP_ASM
+extern "C" void func_00274A08(void* self);
+
+extern "C" void func_00283060(void* self)
+{
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        func_00274A08(*(void**)((char*)p + 0x8));
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00283088);
 

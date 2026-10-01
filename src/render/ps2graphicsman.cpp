@@ -53,7 +53,19 @@ INCLUDE_ASM("render/ps2graphicsman", func_003673D8);
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367440);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
+#ifdef SKIP_ASM
+extern "C" void func_00367B60(void* self, int i)
+{
+    char* obj = *(char**)((char*)self + (i << 2) + 8);
+    if (*(int*)(obj + 0x28) != -1) {
+        char* sub = *(int*)(obj + 0xC) != 9 ? (char*)self + 0x1F60 : (char*)self + 0x4350;
+        char* e = *(char**)(sub + 0x1FF0) + *(int*)(obj + 0x30) * 0x1C;
+        *(int*)e &= ~2;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367BC0);
 
@@ -89,7 +101,45 @@ INCLUDE_ASM("render/ps2graphicsman", func_00368970);
 
 INCLUDE_ASM("render/ps2graphicsman", func_00369098);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369130);
+#ifdef SKIP_ASM
+// PORT: 64-bit `ulong` bitfield (GS TEX1 register layout)
+struct sGsTex1 {
+    ulong LCM : 1;
+    ulong pad0 : 1;
+    ulong MXL : 3;
+    ulong MMAG : 1;
+    ulong MMIN : 3;
+    ulong MTBA : 1;
+    ulong pad1 : 9;
+    ulong L : 2;
+    ulong pad2 : 11;
+    ulong K : 12;
+    ulong pad3 : 20;
+};
+
+struct sGfxTex1 {
+    char pad[0x40];
+    sGsTex1 tex1;
+};
+
+struct sGfxTexTable1 {
+    int pad[2];
+    sGfxTex1* entries[1];
+};
+
+extern "C" void func_00369130(sGfxTexTable1* self, int idx, int mmin, int mmag, int l, int k)
+{
+    sGfxTex1* e = self->entries[idx];
+    sGsTex1 t = e->tex1;
+    t.L = l;
+    t.K = k;
+    t.MMIN = mmin;
+    t.MMAG = mmag;
+    e->tex1 = t;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_003691B0);

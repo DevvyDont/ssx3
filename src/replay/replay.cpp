@@ -21,9 +21,33 @@ void* func_0026E448(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E468);
+#ifdef SKIP_ASM
+extern "C" void* func_0026E468(void* self)
+{
+    void* p = func_0026E448(self);
+    void* q = *(void**)((char*)p + 0x14);
+    if (q != 0) {
+        p = q;
+    }
+    return p;
+}
+#endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E490);
+#ifdef SKIP_ASM
+extern "C" void* func_0026E490(void* self)
+{
+    void* p = func_0026E448(self);
+    void* q = *(void**)((char*)p + 0x18);
+    if (q != 0) {
+        p = q;
+    }
+    return p;
+}
+#endif
 
 INCLUDE_ASM("replay/replay", func_0026E4B8);
 
@@ -85,7 +109,28 @@ extern "C" void func_0026E5D0(sReplayList* list, sReplayNode* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replay", func_0026E608);
+#ifdef SKIP_ASM
+extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
+{
+    if (node == list->head) {
+        list->head = node->next;
+    }
+    if (node == list->tail) {
+        list->tail = node->prev;
+    }
+    if (node->next != 0) {
+        node->next->prev = node->prev;
+    }
+    if (node->prev != 0) {
+        node->prev->next = node->next;
+    }
+    node->next = 0;
+    node->prev = 0;
+    list->count--;
+}
+#endif
 
 INCLUDE_ASM("replay/replay", func_0026E670);
 
