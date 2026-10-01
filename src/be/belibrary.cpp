@@ -81,7 +81,36 @@ INCLUDE_ASM("be/belibrary", func_0014A5E0);
 
 INCLUDE_ASM("be/belibrary", func_0014AB20);
 
+//100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getScoreType);
+#ifdef SKIP_ASM
+struct sScoreTypeMap {
+    int key;
+    int type;
+};
+extern sScoreTypeMap D_0045A2F8[][2];
+
+extern "C" int cBELibrary_getScoreType(int a, int b)
+{
+    int i;
+    if (a > 16) {
+        return 26;
+    }
+    if ((unsigned)(b - 6) < 3) {
+        return b - 6;
+    }
+    if ((unsigned)(b - 9) < 3) {
+        return b - 6;
+    }
+    sScoreTypeMap* row = D_0045A2F8[a];
+    for (i = 0; i < 2; i++) {
+        if (row[i].key == b) {
+            return row[i].type;
+        }
+    }
+    return 26;
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014ABE0);
 
@@ -119,9 +148,58 @@ extern "C" void* func_0014AD28(void* self, int a1, int a2)
 
 INCLUDE_ASM("be/belibrary", func_0014AD50);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014AEA8);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
 
+struct sBEFlagEntry {
+    unsigned short field_0x0;
+    short flags;
+};
+
+extern "C" void func_0014AEA8(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    int count = *(int*)(p + 0x28C);
+    sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
+    int i;
+    for (i = 0; i < count; i++, e++) {
+        if (e->flags & 0x10) {
+            e->flags |= 4;
+        } else {
+            e->flags &= ~4;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/belibrary", func_0014AF10);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+
+extern "C" void func_0014AF10(void)
+{
+    int a;
+    int b;
+    for (a = 0; a < 3; a++) {
+        for (b = 0; b < 10; b++) {
+            char* p = (char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88;
+            int count = *(int*)(p + 0x28C);
+            sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
+            int i;
+            for (i = 0; i < count; i++, e++) {
+                if (e->flags & 4) {
+                    e->flags |= 0x10;
+                } else {
+                    e->flags &= ~0x10;
+                }
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014AFB0);
 
@@ -167,7 +245,44 @@ void* func_0014BDB8(void* self)
 
 INCLUDE_ASM("be/belibrary", func_0014BE70);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C2B0);
+#ifdef SKIP_ASM
+struct sBEEntry38 {
+    signed char group; // 0x0
+    char pad_0x01[3];
+    short field_0x4;
+    short field_0x6;
+    char pad_0x08[0x30];
+};
+
+struct sBEGroupTable {
+    char pad_0x00[4];
+    sBEEntry38* entries; // 0x4
+    char pad_0x08[0x14];
+    int count; // 0x1C
+    char pad_0x20[0xC];
+    int groupCount[30]; // 0x2C
+    int groupFirst[30]; // 0xA4
+    short* lookup_0x11C[30]; // 0x11C
+    char pad_0x194[0x4DC - 0x194];
+    short* lookup_0x4DC[30]; // 0x4DC
+};
+
+extern "C" void func_0014C2B0(sBEGroupTable* self)
+{
+    int last = -1;
+    int i;
+    for (i = 0; i < self->count; i++) {
+        int g = self->entries[i].group;
+        self->groupCount[g]++;
+        if (last != g) {
+            last = g;
+            self->groupFirst[g] = i;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014C320);
 
@@ -206,9 +321,50 @@ INCLUDE_ASM("be/belibrary", func_0014D068);
 
 INCLUDE_ASM("be/belibrary", func_0014D240);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D448);
+#ifdef SKIP_ASM
+extern "C" int func_0014D448(sBEGroupTable* self, int g, int key)
+{
+    short* lookup = self->lookup_0x4DC[g];
+    if (lookup == 0) {
+        int i = self->groupFirst[g];
+        int end = i + self->groupCount[g];
+        sBEEntry38* e = &self->entries[i];
+        for (; i < end; i++, e++) {
+            if (e->field_0x4 == key) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    return lookup[key];
+}
+#endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D4C8);
+#ifdef SKIP_ASM
+extern "C" int func_0014D4C8(sBEGroupTable* self, int g, int key)
+{
+    short* lookup = self->lookup_0x11C[g];
+    if (lookup == 0) {
+        int n = 0;
+        int i = self->groupFirst[g];
+        int end = i + self->groupCount[g];
+        sBEEntry38* e = &self->entries[i];
+        for (; i < end; e++, i++) {
+            if (e->field_0x6 == key) {
+                n++;
+            } else if (e->field_0x6 > key) {
+                break;
+            }
+        }
+        return n;
+    }
+    return lookup[key];
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014D558);
 

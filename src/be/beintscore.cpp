@@ -129,7 +129,27 @@ void func_00155388(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00155390);
+#ifdef SKIP_ASM
+extern short D_00440ED0[][3];
+
+extern "C" void func_00155390(char* self, int idx, int score)
+{
+    signed char cur = *(signed char*)(self + idx + 0xBB8);
+    int level = 0;
+    int i;
+    for (i = 2; i >= 0; i--) {
+        if (score >= D_00440ED0[idx][i]) {
+            level = i + 1;
+            break;
+        }
+    }
+    if (cur < level) {
+        *(signed char*)(self + idx + 0xBB8) = level;
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintscore", func_00155420);
 
