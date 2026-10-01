@@ -41,7 +41,23 @@ INCLUDE_ASM("fe/festatecharselect", func_00182690);
 
 INCLUDE_ASM("fe/festatecharselect", func_00182808);
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00182870);
+#ifdef SKIP_ASM
+extern "C" void func_00182870(void* self)
+{
+    int i;
+    int idx = *(unsigned char*)(*(char**)((char*)self + 0x6c) + 0x98);
+    for (i = 0; i < 6; i++) {
+        void* it = ((void**)((char*)self + 0x54))[i];
+        if (it != 0) {
+            int v = ((int*)((char*)self + 0xf4))[idx + i];
+            *(int*)((char*)it + 0x78) = -1;
+            *(int*)((char*)it + 0x7c) = v;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharselect", func_001828C0);
 

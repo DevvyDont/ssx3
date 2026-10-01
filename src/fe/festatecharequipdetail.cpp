@@ -179,15 +179,62 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019DF20);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E238);
+#ifdef SKIP_ASM
+struct sEquipSlot120 {
+    int state;
+    char pad04[0x100];
+    int value;
+    char pad108[0x18];
+};
+struct sEquipRow12000 {
+    sEquipSlot120 slots[0x100];
+};
+struct sEquipTable {
+    sEquipRow12000 rows[1];
+};
 
+extern "C" int func_0019E238(sEquipTable* self, int a1, int a2)
+{
+    return self->rows[a1].slots[a2].state == 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2B0);
+#ifdef SKIP_ASM
+extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2)
+{
+    if (self->rows[a1].slots[a2].state != 1) {
+        return 0;
+    }
+    return self->rows[a1].slots[a2].value;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E498);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E538);
+#ifdef SKIP_ASM
+extern "C" void func_0019E538(void* self, int a1)
+{
+    if (a1 != 0) {
+        if (*(int*)((char*)self + 0xcc0) != 0 && *(int*)((char*)self + 0xcb8) != 0 &&
+            *(int*)((char*)self + 0xcb4) != 0 && *(int*)((char*)self + 0xcd4) < 0) {
+            *(int*)((char*)self + 0xcc8) = 1;
+        } else {
+            *(int*)((char*)self + 0xcc4) = 1;
+        }
+    } else {
+        *(int*)((char*)self + 0xcc8) = 0;
+        *(int*)((char*)self + 0xcc4) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E588);
 

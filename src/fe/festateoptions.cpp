@@ -68,7 +68,20 @@ void* func_0018A870(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018A890);
+#ifdef SKIP_ASM
+extern "C" int func_0018A890(void* self, int a1, int a2)
+{
+    switch (a2) {
+    case 9:
+        return 0x100;
+    case 6:
+        return 0;
+    }
+    return 0x101;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A8C0);
@@ -100,7 +113,20 @@ void* func_0018C198(void* self)
 
 INCLUDE_ASM("fe/festateoptions", func_0018C1B8);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C270);
+#ifdef SKIP_ASM
+extern "C" int func_0018C270(void* self, int a1, int a2)
+{
+    switch (a2) {
+    case 9:
+        return 0x100;
+    case 6:
+        return 0;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018C2A0);
 

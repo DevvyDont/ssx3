@@ -111,7 +111,24 @@ INCLUDE_ASM("input/inputparse", func_00326360);
 
 INCLUDE_ASM("input/inputparse", func_00326430);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326478);
+#ifdef SKIP_ASM
+struct sParseStream {
+    unsigned char* base;
+    int size;
+    unsigned char* cur;
+};
+
+extern "C" void func_00326478(void* self, sParseStream* s)
+{
+    if (s->cur == s->base + s->size) {
+        *(int*)((char*)self + 0xc) = -1;
+    } else {
+        *(int*)((char*)self + 0xc) = *s->cur++;
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_003264B0);
 
@@ -135,11 +152,55 @@ INCLUDE_ASM("input/inputparse", func_00326A68);
 
 INCLUDE_ASM("input/inputparse", func_00326AE0);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326B48);
+#ifdef SKIP_ASM
+struct sInputSlot_00326B48 {
+    int value;
+    char data[0x60];
+};
+
+struct sInputParse_00326B48 {
+    sInputSlot_00326B48 slots[30][4];
+    unsigned int head;
+    unsigned int tail;
+};
+
+extern "C" int func_00326B48(sInputParse_00326B48* s)
+{
+    unsigned int next = (s->head + 1) % 30;
+    if (next == s->tail) {
+        return 0;
+    }
+    s->head = next;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326B88);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326C60);
+#ifdef SKIP_ASM
+struct sInputSlot_00326C60 {
+    int value;
+    char data[0x60];
+};
+
+struct sInputParse_00326C60 {
+    sInputSlot_00326C60 slots[30][4];
+    int head;
+    int tail;
+};
+
+extern "C" int func_00326C60(sInputParse_00326C60* s)
+{
+    int tail = s->tail;
+    int head = s->head;
+    s->head = (tail + 29) % 30;
+    return (tail - head + 30) % 30;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326CA0);

@@ -39,7 +39,20 @@ INCLUDE_ASM("fe/ovstates", func_00194DD0);
 
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetEvent);
 
+//100%
 INCLUDE_ASM("fe/ovstates", func_001952E8);
+#ifdef SKIP_ASM
+extern "C" int func_001952E8(void* self, int a1, int a2)
+{
+    switch (a2) {
+    case 6:
+        return *(int*)((char*)self + 0x48) == 0 ? 1 : 0x101;
+    case 9:
+        return 0x100;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstates", func_00195328);
 

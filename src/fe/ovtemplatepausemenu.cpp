@@ -28,7 +28,21 @@ void* func_001F88E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8908);
+#ifdef SKIP_ASM
+extern "C" int func_001F8908(void* self, int a1, unsigned int a2)
+{
+    switch (a2) {
+    case 8:
+    case 9:
+        return 0x100;
+    case 6:
+        return 0;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetEvent);
 

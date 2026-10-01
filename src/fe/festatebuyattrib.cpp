@@ -36,7 +36,20 @@ INCLUDE_ASM("fe/festatebuyattrib", func_001F55C0);
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F55E8);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5618);
+#ifdef SKIP_ASM
+extern "C" int func_001F5618(void* self, int a1, unsigned int a2)
+{
+    switch (a2) {
+    case 6:
+    case 8:
+    case 9:
+        return 0x100;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5650);
 

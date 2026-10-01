@@ -65,7 +65,33 @@ extern "C" void func_00329A90(sSphereTreeNode* s, int n, sSphereVec4* pos, float
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329AE0);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329B40);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+static inline void sphereVecAdd(sSphereVec4* dst, sSphereVec4* v)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(*dst)
+        : "m"(*dst), "m"(*v));
+}
+
+// self->center += *v, then every child's pos += *v
+extern "C" void func_00329B40(sSphereTreeNode* s, sSphereVec4* v)
+{
+    sphereVecAdd(&s->center, v);
+    for (int i = 0; i < s->count; i++) {
+        sphereVecAdd(&s->children[i].pos, v);
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329B90);
 
@@ -81,7 +107,37 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032B2B8);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032B620);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B6A8);
+#ifdef SKIP_ASM
+// VU0 microprogram entry (micro-memory address 0x6E0; resolved via undefined_syms_auto.txt)
+extern char D_6E0[];
+
+// Loads four vectors into vf10-vf13, runs the VU0 microprogram at D_6E0 and
+// returns whether it left a nonzero result in vi2.
+// PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version
+// of the microprogram.
+extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
+{
+    int r;
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf10, 0x0(%1)\n"
+        "lqc2      $vf11, 0x0(%2)\n"
+        "lqc2      $vf12, 0x0(%3)\n"
+        "lqc2      $vf13, 0x0(%4)\n"
+        "ctc2.ni   %5, $vi27\n"
+        "vnop\n"
+        "vnop\n"
+        "vcallmsr  $vi27\n"
+        "cfc2.i    %0, $vi2\n"
+        ".set pop\n"
+        : "=r"(r)
+        : "r"(a), "r"(b), "r"(c), "r"(d), "0"((int)D_6E0 >> 3));
+    return r != 0;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032B6E0);
 
@@ -89,7 +145,22 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C0F8);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032C508);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C540);
+#ifdef SKIP_ASM
+extern sSphereVec4 D_004FF640[8];
+extern sSphereVec4 D_004FF130;
+
+extern "C" void func_0032C540(void* self)
+{
+    sSphereVec4* dst = (sSphereVec4*)self;
+    for (int i = 0; i < 8; i++) {
+        dst[i] = D_004FF640[i];
+    }
+    *(sSphereVec4*)((char*)self + 0x80) = D_004FF130;
+    *(float*)((char*)self + 0x90) = 1.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C590);
@@ -102,7 +173,22 @@ extern "C" float func_0032C590(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C5A8);
+#ifdef SKIP_ASM
+struct sSphereRadius12 {
+    float value;
+    int pad[2];
+};
+
+extern "C" float func_0032C5A8(void* self)
+{
+    void* p = *(void**)((char*)self + 0x98);
+    int idx = *(int*)((char*)p + 0xc);
+    sSphereRadius12* tab = *(sSphereRadius12**)((char*)p + 0x20);
+    return tab[idx].value * *(float*)((char*)self + 0x90) * 0.5f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C630);
@@ -260,7 +346,31 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032FE78);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032FFA0);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_003300F8);
+#ifdef SKIP_ASM
+// Returns -dot(*a, *b) (4-component dot product on VU0, macro mode).
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (-(ax*bx + ay*by + az*bz + aw*bw)).
+extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b)
+{
+    float d;
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, 0x0(%1)\n"
+        "lqc2      $vf5, 0x0(%2)\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %0, $vf4\n"
+        ".set pop\n"
+        : "=r"(d)
+        : "r"(a), "r"(b));
+    return -d;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_00330128);
 

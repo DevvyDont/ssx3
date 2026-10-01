@@ -22,7 +22,26 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetCreate);
 
 INCLUDE_ASM("fe/festatestore", func_00185268);
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_001859D8);
+#ifdef SKIP_ASM
+extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
+{
+    if (a1 == *(int*)((char*)self + 0x50)) {
+        switch (a2) {
+        case 9:
+            return 0x100;
+        }
+    } else {
+        switch (a2) {
+        case 8:
+        case 9:
+            return 0x100;
+        }
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festatestore", func_00185A18);
 

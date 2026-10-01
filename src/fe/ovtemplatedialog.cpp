@@ -2,7 +2,20 @@
 
 INCLUDE_ASM("fe/ovtemplatedialog", cPDATemplate_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8B0);
+#ifdef SKIP_ASM
+extern "C" int func_0020A8B0(int a0, int a1)
+{
+    if ((unsigned int)(a0 - 6) < 6) {
+        return 0x16;
+    }
+    if ((unsigned int)(a0 - 4) < 2 || a0 == 0 || a1 == 3) {
+        return 0xb;
+    }
+    return 0xa;
+}
+#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8F8);
 

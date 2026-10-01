@@ -34,11 +34,53 @@ void func_00245DB8(void* self)
 
 INCLUDE_ASM("fe/festateloadhint", func_00245DC0);
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245E30);
+#ifdef SKIP_ASM
+extern unsigned int D_00536640[];
 
+extern "C" int func_00245E30(int* a, int* b)
+{
+    unsigned int va = D_00536640[*a];
+    unsigned int vb = D_00536640[*b];
+    if (vb < va) {
+        return -1;
+    }
+    return va != vb;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245E78);
+#ifdef SKIP_ASM
+extern unsigned int D_00536640[];
 
+extern "C" int func_00245E78(int* a, int* b)
+{
+    unsigned int va = D_00536640[*a];
+    unsigned int vb = D_00536640[*b];
+    if (va < vb) {
+        return -1;
+    }
+    return va != vb;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245EC0);
+#ifdef SKIP_ASM
+extern int D_00536708[];
+
+extern "C" int func_00245EC0(int* a, int* b)
+{
+    int va = D_00536708[*a];
+    int vb = D_00536708[*b];
+    if (vb < va) {
+        return 1;
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadhint", func_00245F00);
 

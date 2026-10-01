@@ -29,13 +29,44 @@ INCLUDE_ASM("fe/festateruleselect", func_00192380);
 
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_001926F0);
+#ifdef SKIP_ASM
+extern void* D_0046B078[];
+
+extern "C" void* func_001926F0(void* self)
+{
+    int i;
+    *(void***)((char*)self + 0x30) = D_0046B078;
+    for (i = 7; i >= 0; i--) {
+        ((int*)((char*)self + 0x8))[i] = 0;
+    }
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x2c) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festateruleselect", func_00192740);
 
 INCLUDE_ASM("fe/festateruleselect", func_001927B0);
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00192918);
+#ifdef SKIP_ASM
+extern "C" int func_00192918(void* self, int val)
+{
+    int i;
+    for (i = 0; i < 8; i++) {
+        if (((int*)((char*)self + 0x8))[i] == val) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192948);

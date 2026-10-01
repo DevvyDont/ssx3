@@ -15,7 +15,20 @@ void* func_001D43D0(void* self)
 
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetCreate);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4660);
+#ifdef SKIP_ASM
+extern "C" int func_001D4660(void* self, int a1, unsigned int a2)
+{
+    switch (a2) {
+    case 6:
+    case 8:
+    case 9:
+        return 0x100;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4698);
 
