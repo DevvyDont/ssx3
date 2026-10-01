@@ -19,7 +19,20 @@ void* func_001DEDE8(void* self)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DEE10);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF028);
+#ifdef SKIP_ASM
+extern "C" int func_001DF028(void* self, int i)
+{
+    switch (i) {
+    case 0:
+        return *(int*)((char*)self + 0x48);
+    case 1:
+        return *(int*)((char*)self + 0x4c);
+    }
+    return *(signed char*)((char*)self + 0x50);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onUpdate);
 
@@ -1020,7 +1033,19 @@ void func_001E1088(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1090);
+#ifdef SKIP_ASM
+struct sFlags_001E1090 {
+    unsigned int pad : 27;
+    unsigned int flag : 1;
+};
+
+extern "C" void func_001E1090(void* self, int e)
+{
+    ((sFlags_001E1090*)self)->flag = (e != 0);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E10B8);
 

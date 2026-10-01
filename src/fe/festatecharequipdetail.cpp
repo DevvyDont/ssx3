@@ -84,9 +84,35 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019C7E8);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C880);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8D0);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C8D0(void* self, void* item)
+{
+    if (item != 0) {
+        short idx = *(short*)((char*)item + 0xc);
+        if (idx >= 0) {
+            return (char*)self + (idx << 4);
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8F8);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C8F8(void* self, void* item)
+{
+    if (item != 0) {
+        short idx = *(short*)((char*)item + 0xe);
+        if (idx >= 0) {
+            return (char*)self + (idx << 4);
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C920);

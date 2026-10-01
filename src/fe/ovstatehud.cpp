@@ -43,7 +43,17 @@ void func_001E91D0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91F8);
+#ifdef SKIP_ASM
+extern "C" void func_001E91F8(void* self, void* a1)
+{
+    short* in = (short*)self;
+    float* out = (float*)a1;
+    out[0] = in[0];
+    out[1] = in[1];
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001E9220);
 
@@ -144,7 +154,17 @@ extern "C" void func_001F36C0(void* self, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F36D8);
+#ifdef SKIP_ASM
+extern "C" void func_001F36D8(void* self, int bit)
+{
+    *(int*)((char*)self + 0x4) &= ~(1 << bit);
+    if (*(int*)((char*)self + 0x4) == 0) {
+        *(int*)((char*)self + 0x8) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F3700);
 

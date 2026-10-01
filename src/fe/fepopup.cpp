@@ -230,9 +230,39 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setStatic);
 
 INCLUDE_ASM("fe/fepopup", func_001CD020);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CD088);
+#ifdef SKIP_ASM
+extern "C" void func_001CD088(void* self, int v)
+{
+    if (v < 0) {
+        *(int*)((char*)self + 0x60) = 0;
+        return;
+    }
+    if (v >= 0x40) {
+        *(int*)((char*)self + 0x60) = 0x3f;
+        return;
+    }
+    *(int*)((char*)self + 0x60) = v;
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CD0B0);
+#ifdef SKIP_ASM
+extern "C" void func_001CD0B0(void* self, int v)
+{
+    if (v < 0) {
+        *(int*)((char*)self + 0x64) = 0;
+        return;
+    }
+    if (v >= 0x40) {
+        *(int*)((char*)self + 0x64) = 0x3f;
+        return;
+    }
+    *(int*)((char*)self + 0x64) = v;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_getObjName);
 

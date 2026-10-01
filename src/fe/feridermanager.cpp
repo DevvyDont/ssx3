@@ -44,7 +44,25 @@ INCLUDE_ASM("fe/feridermanager", func_001A03C0);
 
 INCLUDE_ASM("fe/feridermanager", func_001A0420);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0498);
+#ifdef SKIP_ASM
+struct sRiderSlot_001A0498 {
+    int field_0x0;
+    int index;
+    char pad[0xce0 - 8];
+};
+
+extern "C" void func_001A0498(sRiderSlot_001A0498* self)
+{
+    int i;
+    sRiderSlot_001A0498* p = self;
+    for (i = 0; i < 2; i++) {
+        p->index = i;
+        p++;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_001A04C8);
 
