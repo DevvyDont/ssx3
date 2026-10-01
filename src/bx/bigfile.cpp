@@ -47,16 +47,18 @@ void cBigFile__cBigFile(cBigFile* self, int flags)
 
 extern "C" void func_003DEDC0(void* handle, int arg);
 
-//90.59% - target keeps a "result=1" store that GCC dead-store-eliminates in ours since it's overwritten before any read; logic is correct
+//100%
 INCLUDE_ASM("bx/bigfile", cBigFile_close__FP8cBigFile);
 #ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit declares func_003DEDC0 as returning void; it returns int (the result is tested).
+int func_003DEDC0_ret(int handle, int arg) __asm__("func_003DEDC0");
+
 int cBigFile_close(cBigFile* self)
 {
-    int result = 0;
+    int result = 1;
     if (self->field_0x4 != 0) {
-        result = 1;
-        func_003DEDC0((void*)(long)self->field_0x0, 0x64);
-        result = self->field_0x4 != 0;
+        result = func_003DEDC0_ret(self->field_0x0, 0x64) != 0;
     }
     self->field_0x4 = 0;
     return result;

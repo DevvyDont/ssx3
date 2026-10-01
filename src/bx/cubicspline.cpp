@@ -368,31 +368,32 @@ void* func_00320330(void* self)
 }
 #endif
 
-//71.26%
+//100%
 INCLUDE_ASM("bx/cubicspline", func_00320368__FPv);
 #ifdef SKIP_ASM
+static inline void* popFreeNode(void** head)
+{
+    void* node = *head;
+    *head = *(void**)node;
+    return node;
+}
+
 void* func_00320368(void* self)
 {
-    void* node = *(void**)((char*)self + 0x32000);
-    if (node != 0) {
-        void* next = *(void**)node;
-        *(void**)((char*)self + 0x32000) = next;
-        return node;
+    if (*(void**)((char*)self + 0x32000) != 0) {
+        return popFreeNode((void**)((char*)self + 0x32000));
     }
     return func_00319E48(0x44);
 }
 #endif
 
-//71.26%
+//100%
 INCLUDE_ASM("bx/cubicspline", func_003203B8__FPv);
 #ifdef SKIP_ASM
 void* func_003203B8(void* self)
 {
-    void* node = *(void**)((char*)self + 0x25800);
-    if (node != 0) {
-        void* next = *(void**)node;
-        *(void**)((char*)self + 0x25800) = next;
-        return node;
+    if (*(void**)((char*)self + 0x25800) != 0) {
+        return popFreeNode((void**)((char*)self + 0x25800));
     }
     return func_00319E48(0x84);
 }

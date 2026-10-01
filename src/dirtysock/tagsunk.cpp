@@ -201,13 +201,66 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025EED8);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F030);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F120);
+#ifdef SKIP_ASM
+extern "C" int func_003EE558(void*);
 
+extern "C" int func_0025F120(void* self)
+{
+    if (*(int*)self == 0) {
+        return 0;
+    }
+    return func_003EE558(*(void**)((char*)self + 0x5C));
+}
+#endif
+
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F150);
+#ifdef SKIP_ASM
+extern "C" void* func_003EE560(void*);
 
+extern "C" void* func_0025F150(void* self)
+{
+    if (*(int*)self == 0) {
+        return 0;
+    }
+    return (char*)func_003EE560(*(void**)((char*)self + 0x5C)) + 0x1C;
+}
+#endif
+
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F180);
+#ifdef SKIP_ASM
+extern "C" void* func_003EE560(void*);
 
+static inline short getFlags(void* p)
+{
+    return *(short*)((char*)p + 0xA);
+}
+
+extern "C" int func_0025F180(void* self)
+{
+    if (*(int*)self == 0) {
+        return 0;
+    }
+    return getFlags(func_003EE560(*(void**)((char*)self + 0x5C))) & 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F1B0);
+#ifdef SKIP_ASM
+extern "C" int func_003EE558(void*);
+
+extern "C" int func_0025F1B0(void* self)
+{
+    if (*(int*)self == 0) {
+        return 0;
+    }
+    return func_003EE558(*(void**)((char*)self + 0x60));
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F1E0);
 
@@ -355,7 +408,19 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00262280);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002622F0);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262360);
+#ifdef SKIP_ASM
+extern "C" int func_00262468(void* self, int a1);
+// PORT: the unit declares func_00262390 as `int (void*)`; this caller passes a
+// second argument (it reaches func_00262620's callee in $a1). Bound by asm label.
+int func_00262390_2(void* self, int a1) __asm__("func_00262390__FPv");
+
+extern "C" int func_00262360(void* self, int a1)
+{
+    return func_00262390_2(self, func_00262468(self, a1));
+}
+#endif
 
 extern "C" void* func_00262620(void* self);
 
@@ -368,7 +433,19 @@ int func_00262390(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002623B0);
+#ifdef SKIP_ASM
+extern "C" int func_00262468(void* self, int a1);
+// PORT: the unit declares func_002623E0 as `int (void*)`; this caller passes a
+// second argument (it reaches func_00262658's callee in $a1). Bound by asm label.
+int func_002623E0_2(void* self, int a1) __asm__("func_002623E0__FPv");
+
+extern "C" int func_002623B0(void* self, int a1)
+{
+    return func_002623E0_2(self, func_00262468(self, a1));
+}
+#endif
 
 extern "C" void* func_00262658(void* self);
 
@@ -383,13 +460,36 @@ int func_002623E0(void* self)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00262400);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262438);
+#ifdef SKIP_ASM
+extern "C" int func_00262468(void* self, int a1);
+extern "C" int func_00262400(void* self, int a1);
+
+extern "C" int func_00262438(void* self, int a1)
+{
+    return func_00262400(self, func_00262468(self, a1));
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00262468);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002624F8);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262598);
+#ifdef SKIP_ASM
+extern "C" int func_003EE550(void*);
+
+extern "C" int func_00262598(void* self)
+{
+    void* p = *(void**)((char*)self + 0xCC);
+    if (p == 0) {
+        return 0;
+    }
+    return func_003EE550(p);
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002625C8);
 
@@ -434,7 +534,17 @@ extern "C" int func_00262938(void* self)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00262950);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_00262A08);
+#ifdef SKIP_ASM
+extern "C" int func_00262468(void* self, int a1);
+extern "C" int func_00262950(void* self, int a1);
+
+extern "C" int func_00262A08(void* self, int a1)
+{
+    return func_00262950(self, func_00262468(self, a1));
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00262A38);
 
@@ -466,11 +576,31 @@ extern "C" void* func_00263308(void* self, unsigned int i)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00263338);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_002633C8);
+#ifdef SKIP_ASM
+extern "C" int func_00262468(void* self, int a1);
+extern "C" int func_00263338(void* self, int a1);
+
+extern "C" int func_002633C8(void* self, int a1)
+{
+    return func_00263338(self, func_00262468(self, a1));
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002633F8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_00263490);
+#ifdef SKIP_ASM
+extern "C" int func_00262468(void* self, int a1);
+extern "C" int func_002633F8(void* self, int a1);
+
+extern "C" int func_00263490(void* self, int a1)
+{
+    return func_002633F8(self, func_00262468(self, a1));
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002634C0);
 
@@ -503,7 +633,21 @@ void* func_00263660(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00263678);
+#ifdef SKIP_ASM
+extern void* D_004810C8[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00263678(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_004810C8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002636A8);
 
@@ -524,7 +668,21 @@ void* func_00263998(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002639B0);
+#ifdef SKIP_ASM
+extern void* D_004810B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_002639B0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x14) = D_004810B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002639E0);
 
@@ -542,7 +700,17 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264138);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002642B8);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264960);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_004805A8[];
+
+extern "C" void* func_00264960(void)
+{
+    return cMemMan_alloc(0xF0, D_004805A8, 0x20000000, 0);
+}
+#endif
 
 void operator_delete(int*);
 
@@ -788,7 +956,18 @@ void* func_00266F38(void* self)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00266F58);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266F90);
+#ifdef SKIP_ASM
+extern "C" void func_003F6BA0(void* a, void* b);
+
+extern "C" void func_00266F90(void* self, void* a, void* b)
+{
+    if (*(int*)self != 0) {
+        func_003F6BA0(a, b);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00267128);
 
@@ -871,19 +1050,75 @@ int func_00267E10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267E18);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00267E18(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00267E48);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267E98);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00267E98(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00267EC8);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267F28);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00267F28(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00267F58);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267FB8);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00267FB8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00267FE8);
 
@@ -895,7 +1130,21 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00268158);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002681B0);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268210);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00268210(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00268240);
 
@@ -915,15 +1164,57 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00268588);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002685E0);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268658);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00268658(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00268688);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002686F0);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_002686F0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00268720);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268790);
+#ifdef SKIP_ASM
+extern void* D_004812B0[];
+void operator_delete(int*);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00268790(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_004812B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002687C0);
 

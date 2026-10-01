@@ -123,7 +123,42 @@ void func_0016D238(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D260);
+#ifdef SKIP_ASM
+struct sCamTrigStack {
+    unsigned int count; // 0x0
+    int top; // 0x4
+    int items[1]; // 0x8
+};
+
+extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* out)
+{
+    unsigned int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->items[i] == key) {
+            unsigned int j;
+            for (j = i + 1; j < self->count; j++) {
+                self->items[j - 1] = self->items[j];
+            }
+            self->count--;
+            break;
+        }
+    }
+    if (self->count != 0) {
+        int t = self->items[self->count - 1];
+        if (t == self->top) {
+            *changed = 0;
+        } else {
+            *changed = 1;
+            *out = t;
+        }
+        return 0;
+    }
+    *changed = 0;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D320);
 

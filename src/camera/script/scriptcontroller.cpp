@@ -64,7 +64,23 @@ extern "C" void func_00169518(cScriptCtlVirt* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169540);
+#ifdef SKIP_ASM
+class cScriptCtlVirt2 {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(int);
+};
+
+extern "C" void func_00169540(cScriptCtlVirt2* self)
+{
+    self->v03(0);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169570);
 
@@ -81,7 +97,14 @@ extern "C" void func_00169D58(cScriptCtlVirt* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169D80);
+#ifdef SKIP_ASM
+extern "C" void func_00169D80(cScriptCtlVirt2* self)
+{
+    self->v03(0);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169DB0);
 
@@ -98,7 +121,14 @@ extern "C" void func_0016A4B8(cScriptCtlVirt* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A4E0);
+#ifdef SKIP_ASM
+extern "C" void func_0016A4E0(cScriptCtlVirt2* self)
+{
+    self->v03(0);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A510);
 
@@ -108,7 +138,14 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD38);
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD98);
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016B150);
+#ifdef SKIP_ASM
+extern "C" void func_0016B150(cScriptCtlVirt2* self)
+{
+    self->v03(0);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016B180);
 

@@ -37,15 +37,17 @@ unsigned int AIrand()
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxrandom", AIrandf__Fff);
 #ifdef SKIP_ASM
-unsigned int AIrand();
-
 float AIrandf(float a, float b)
 {
-	unsigned int r = (AIrand() & 0x7FFFFFFF) | 0x3F800000;
-	float f = *((float*)&r) - 1.0f; // random 0.0 ? f < 1.0
-	return a + (b - a) * f;
+    union {
+        unsigned int i;
+        float f;
+    } r;
+    r.i = (AIrand() & 0x7FFFFF) | 0x3F800000; // float in [1.0, 2.0)
+    return a + (b - a) * (r.f - 1.0f);
 }
 #endif
 

@@ -36,7 +36,19 @@ INCLUDE_ASM("bx/bxstring", cBXString_ConcatImpl);
 
 INCLUDE_ASM("bx/bxstring", cBXString_Concat);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_003189A0);
+#ifdef SKIP_ASM
+struct cBXString;
+extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
+
+// cBXString += cBXString; the length lives in the header 8 bytes before the chars.
+extern "C" cBXString* func_003189A0(cBXString* self, char** other)
+{
+    cBXString_ConcatImpl(self, *(int*)(*other - 8), *other);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("bx/bxstring", func_003189D0);
 

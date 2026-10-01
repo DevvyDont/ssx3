@@ -620,7 +620,48 @@ done:
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A9B0);
+#ifdef SKIP_ASM
+struct sBXBox {
+    char pad_0x00[0x1C];
+    float min[3]; // 0x1C
+    float max[3]; // 0x28
+};
+
+// Largest per-axis distance from point p to the box.
+extern "C" float func_0026A9B0(sBXBox* self, float* p)
+{
+    float dx = 0.0f;
+    float dy = 0.0f;
+    float dz = 0.0f;
+    if (p[0] < self->min[0]) {
+        dx = self->min[0] - p[0];
+    } else if (self->max[0] < p[0]) {
+        dx = p[0] - self->max[0];
+    }
+    if (p[1] < self->min[1]) {
+        dy = self->min[1] - p[1];
+    } else if (self->max[1] < p[1]) {
+        dy = p[1] - self->max[1];
+    }
+    if (p[2] < self->min[2]) {
+        dz = self->min[2] - p[2];
+    } else if (self->max[2] < p[2]) {
+        dz = p[2] - self->max[2];
+    }
+    if (dy < dx) {
+        if (dx < dz) {
+            return dz;
+        }
+        return dx;
+    }
+    if (dy < dz) {
+        return dz;
+    }
+    return dy;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AA80);
@@ -688,7 +729,19 @@ extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AD70);
+#ifdef SKIP_ASM
+extern "C" void func_0026ADF0(void* self);
+
+extern "C" int func_0026AD70(void* self, int v)
+{
+    *(int*)((char*)self + 0x48) = v;
+    *(int*)((char*)self + 0x4C) = 1;
+    func_0026ADF0(self);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADA0__FPv);

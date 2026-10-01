@@ -37,7 +37,18 @@ void cExecutionMan_postpause()
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/execman", func_00320AD8);
+#ifdef SKIP_ASM
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00320AD8(cExecutionMan* self, int flags)
+{
+    self->field_0x8 = D_0048DC30;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_00423C90(void* self);
 

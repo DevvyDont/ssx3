@@ -366,7 +366,29 @@ extern "C" int func_0014D4C8(sBEGroupTable* self, int g, int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D558);
+#ifdef SKIP_ASM
+extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int g, int key)
+{
+    short* lookup;
+    if (key == -1 || (lookup = *(short**)((char*)self + (g << 2) + 0x194)) == 0) {
+        int i = self->groupFirst[g];
+        int end = i + self->groupCount[g];
+        sBEEntry38* e = &self->entries[i];
+        for (; i < end; i++, e++) {
+            if (e->field_0x6 == key) {
+                return e;
+            }
+        }
+        return 0;
+    }
+    if (self->lookup_0x11C[g][key] <= 0) {
+        return 0;
+    }
+    return &self->entries[lookup[key]];
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014D608);
 
@@ -423,7 +445,50 @@ extern "C" void* func_0014D9D0(sBELibTables* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DB40);
+#ifdef SKIP_ASM
+struct sBEEntryC {
+    char field_0x0;
+    signed char flag; // 0x1
+    short key; // 0x2
+    char pad_0x4[8];
+};
+
+struct sBEKeyTable {
+    char pad_0x00[8];
+    sBEEntryC* entries; // 0x8
+    char pad_0x0C[0x20C - 0xC];
+    int count[30]; // 0x20C
+    int first[30]; // 0x284
+};
+
+extern "C" sBEEntryC* func_0014DB40(sBEKeyTable* self, int g, int key, int want, int* out)
+{
+    sBEEntryC* result;
+    int i;
+    *out = 0;
+    if (self->count[g] <= 0) {
+        return 0;
+    }
+    result = 0;
+    for (i = self->first[g]; i < self->first[g] + self->count[g]; i++) {
+        if (self->entries[i].key == key) {
+            if ((self->entries[i].flag != 0) == want) {
+                if (result == 0) {
+                    result = &self->entries[i];
+                }
+                (*out)++;
+            } else if (result != 0) {
+                break;
+            }
+        } else if (key < self->entries[i].key) {
+            break;
+        }
+    }
+    return result;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014DC00__FPvi);

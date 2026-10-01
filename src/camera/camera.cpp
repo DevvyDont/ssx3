@@ -60,7 +60,17 @@ INCLUDE_ASM("camera/camera", func_0015EDC8);
 
 INCLUDE_ASM("camera/camera", func_0015EE00);
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015F568);
+#ifdef SKIP_ASM
+extern "C" void* func_0011FF48(void* dst, void* self);
+
+extern "C" void* func_0015F568(void* self, void* a1)
+{
+    func_0011FF48(self, *(void**)((char*)a1 + 0x4));
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015F598);
@@ -727,7 +737,21 @@ extern "C" void func_00167DB8(sCamFilter* self, float value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167DE8);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00167DE8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167E18__FPv);
@@ -821,13 +845,69 @@ int func_00167E98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167EA0);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
 
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00167EA0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/camera", func_00167F10);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
 
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00167F10(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/camera", func_00167F40);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
 
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00167F40(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/camera", func_00167F70);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00167F70(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167FA0);
@@ -856,7 +936,21 @@ void func_00167FB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168030);
+#ifdef SKIP_ASM
+extern void* D_0045B8B0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00168030(void* self, int flags)
+{
+    *(void***)((char*)self + 0x90) = D_0045B8B0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_0015D928(void* self);
 

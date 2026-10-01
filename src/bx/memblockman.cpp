@@ -43,7 +43,64 @@ INCLUDE_ASM("bx/memblockman", func_0031A200);
 
 INCLUDE_ASM("bx/memblockman", func_0031A268);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A308);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 state save (VF1-VF31, MAC/status/Q/clip flags, ACC) to a 0x210-byte buffer.
+extern "C" void func_0031A308(void* buf)
+{
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "daddu      $8, %0, $0\n"
+        "cfc2.i     $9, $vi17\n"
+        "sqc2       $vf1, 0x0($8)\n"
+        "sqc2       $vf2, 0x10($8)\n"
+        "sw         $9, 0x200($8)\n"
+        "sqc2       $vf3, 0x20($8)\n"
+        "sqc2       $vf4, 0x30($8)\n"
+        "cfc2.ni    $9, $vi16\n"
+        "sqc2       $vf5, 0x40($8)\n"
+        "sqc2       $vf6, 0x50($8)\n"
+        "sw         $9, 0x204($8)\n"
+        "vwaitq\n"
+        "cfc2.ni    $9, $vi22\n"
+        "sw         $9, 0x208($8)\n"
+        "cfc2.ni    $9, $vi18\n"
+        "sw         $9, 0x20C($8)\n"
+        "sqc2       $vf7, 0x60($8)\n"
+        "sqc2       $vf8, 0x70($8)\n"
+        "vmaddx.xyzw $vf1, $vf0, $vf0x\n"
+        "sqc2       $vf9, 0x80($8)\n"
+        "sqc2       $vf10, 0x90($8)\n"
+        "sqc2       $vf11, 0xA0($8)\n"
+        "sqc2       $vf12, 0xB0($8)\n"
+        "sqc2       $vf13, 0xC0($8)\n"
+        "sqc2       $vf14, 0xD0($8)\n"
+        "sqc2       $vf15, 0xE0($8)\n"
+        "sqc2       $vf16, 0xF0($8)\n"
+        "sqc2       $vf17, 0x100($8)\n"
+        "sqc2       $vf18, 0x110($8)\n"
+        "sqc2       $vf19, 0x120($8)\n"
+        "sqc2       $vf20, 0x130($8)\n"
+        "sqc2       $vf21, 0x140($8)\n"
+        "sqc2       $vf22, 0x150($8)\n"
+        "sqc2       $vf23, 0x160($8)\n"
+        "sqc2       $vf24, 0x170($8)\n"
+        "sqc2       $vf25, 0x180($8)\n"
+        "sqc2       $vf26, 0x190($8)\n"
+        "sqc2       $vf27, 0x1A0($8)\n"
+        "sqc2       $vf28, 0x1B0($8)\n"
+        "sqc2       $vf29, 0x1C0($8)\n"
+        "sqc2       $vf30, 0x1D0($8)\n"
+        "sqc2       $vf31, 0x1E0($8)\n"
+        "sqc2       $vf1, 0x1F0($8)\n"
+        ".set pop\n"
+        :
+        : "r"(buf)
+        : "$8", "$9", "memory");
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031A3C0);
 
