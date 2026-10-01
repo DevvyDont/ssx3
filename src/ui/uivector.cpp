@@ -193,7 +193,13 @@ int func_003A56A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A56D8);
+#ifdef SKIP_ASM
+extern "C" void func_003A56D8(void* self, int enable) {
+    ((sUIVectorFlags14*)((char*)self + 0x74))->bit2 = enable;
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A5708);
 
