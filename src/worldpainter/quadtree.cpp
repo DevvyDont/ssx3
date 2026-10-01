@@ -238,7 +238,15 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5278);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C52D8);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5300);
+#ifdef SKIP_ASM
+extern "C" int func_002C5300(void* self, int a1)
+{
+    char* p = (char*)self + a1 * 0x14;
+    return *(int*)(p + 0x184) == -0x2712;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5320);
@@ -364,7 +372,15 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C64F8);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C66B8);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C66D8);
+#ifdef SKIP_ASM
+extern "C" int func_002C66D8(void* self)
+{
+    char* p = (char*)self + *(int*)((char*)self + 0xc) * 0x14;
+    return *(int*)(p + 0x184) == -0xb;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6700__FPv);
@@ -413,7 +429,14 @@ int func_002C6750(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6758);
+#ifdef SKIP_ASM
+extern "C" int func_002C6758(void* self, int a1)
+{
+    return (a1 + 0x3ff) / 0x400 + 0x4d;
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C6778);
 

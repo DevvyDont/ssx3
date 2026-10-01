@@ -109,7 +109,20 @@ extern "C" int func_003AA6E8(void* self, void* a1)
 
 INCLUDE_ASM("world/worldview", func_003AA700);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA758);
+#ifdef SKIP_ASM
+// PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
+extern "C" int func_003AA758(void* self, void* a1)
+{
+    if (*(int*)((char*)a1 + 0x10) == -1) {
+        *(int*)((char*)a1 + 0x10) = 0;
+    } else {
+        *(int*)((char*)a1 + 0x10) = (int)((char*)a1 + 0x14);
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AA780);
 

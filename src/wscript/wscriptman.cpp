@@ -230,7 +230,20 @@ void func_0030B508(void* self, int c, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B520);
+#ifdef SKIP_ASM
+struct cWScriptPair {
+    int valueB;
+    int valueC;
+};
+
+extern "C" void func_0030B520(void* self, cWScriptPair* src)
+{
+    *(int*)((char*)self + 0x34) = 1;
+    *(cWScriptPair*)((char*)self + 0x38) = *src;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B540);
 
