@@ -312,7 +312,21 @@ extern "C" int func_00154630(void* self, int value, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00154678);
+#ifdef SKIP_ASM
+extern "C" sMissionEntry func_00154678(void* self, int id)
+{
+    for (int i = 0; i < 22; i++)
+    {
+        if (D_00440770[i].id == id)
+        {
+            return D_00440770[i];
+        }
+    }
+    return D_00440770[0];
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00154760);

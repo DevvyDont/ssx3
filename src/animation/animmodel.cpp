@@ -112,7 +112,48 @@ extern "C" void func_0030E9E0(sAnimModel_0030E9E0* self, int i, int channel)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_0030EA80);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here
+extern "C" void func_0030EA80(sAnimModel_0030E9E0* self, int i, int channel)
+{
+    if (i > self->count)
+    {
+        return;
+    }
+    if (self->indices == 0)
+    {
+        return;
+    }
+    int idx = self->indices[i];
+    if (idx < 0)
+    {
+        return;
+    }
+    sAnimEntry_0030E9E0* e = &self->entries[idx];
+    self->mask &= ~e->mask;
+    if (channel < 0)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            e->channels[k].active = 0;
+        }
+    }
+    else
+    {
+        e->channels[channel].active = 0;
+        for (int k = 0; k < 4; k++)
+        {
+            if (e->channels[k].active)
+            {
+                self->mask |= e->mask;
+                break;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030EB60);
@@ -248,7 +289,18 @@ extern "C" void func_003110D0(void)
 
 INCLUDE_ASM("animation/animmodel", func_00311110);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00311220);
+#ifdef SKIP_ASM
+extern "C" void func_00311290(void* self, char* data);
+
+extern "C" void* func_00311220(void* self, char* data)
+{
+    *(int*)self = 0;
+    func_00311290(self, data);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_00311250);
 

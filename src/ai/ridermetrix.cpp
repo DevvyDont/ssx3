@@ -30,7 +30,51 @@ extern "C" void func_001173B8(sRiderMetrix_001173B8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117400);
+#ifdef SKIP_ASM
+struct sRiderMetrixEntry_00117400
+{
+    int type;
+    char pad[0x98];
+};
+
+struct sRiderMetrix_00117400
+{
+    char pad[0x1B0];
+    sRiderMetrixEntry_00117400* entries;
+    int count;
+    int bits[2];
+    int dirty;
+};
+
+static inline bool rmBitTest00117400(int* bits, int i)
+{
+    int mask = 1 << i;
+    return (*(int*)((char*)bits + ((i & ~0x1F) >> 3)) & mask) != 0;
+}
+
+extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
+{
+    if (self->entries == 0)
+        return 0;
+    if (self->dirty)
+    {
+        for (int i = 0; i < self->count; i++)
+        {
+            int t = self->entries[i].type;
+            if (t != 0x34)
+            {
+                int off = (t & ~0x1F) >> 3;
+                int* b = self->bits;
+                *(int*)((char*)b + off) |= 1 << t;
+            }
+        }
+        self->dirty = 0;
+    }
+    return rmBitTest00117400(self->bits, type);
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_001174B0);
 
@@ -268,9 +312,29 @@ INCLUDE_ASM("ai/ridermetrix", func_00119448);
 
 INCLUDE_ASM("ai/ridermetrix", func_001194C0);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001195A8);
+#ifdef SKIP_ASM
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
 
+extern "C" float func_001195A8(void* self, int value)
+{
+    func_00117B88(self, 0x2A, value, 0, 5.0f);
+    return 0.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001195D8);
+#ifdef SKIP_ASM
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+
+extern "C" float func_001195D8(void* self, int value)
+{
+    func_00117B88(self, 0x2B, value, 0, 5.0f);
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119608);
 
@@ -354,7 +418,17 @@ float func_0011A0C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A0E0);
+#ifdef SKIP_ASM
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+
+extern "C" float func_0011A0E0(void* self)
+{
+    func_00117B88(self, 0x1A, 0, 0, 1.0f);
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011A110);
 

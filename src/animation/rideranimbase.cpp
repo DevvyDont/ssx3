@@ -62,7 +62,15 @@ int func_00312AA0(void* self, int i)
 
 INCLUDE_ASM("animation/rideranimbase", func_00312AB0);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312AE8);
+#ifdef SKIP_ASM
+extern "C" int func_00312AE8(void* self, int i)
+{
+    cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
+    return *(int*)((char*)cAnimSequencer_getSequence(&seqs[i], 0) + 0xC0);
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312B18);
 
@@ -115,7 +123,58 @@ extern "C" int func_00313800(sBlend_00313800* self, float dt)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00313868);
+#ifdef SKIP_ASM
+struct sAnimEvent_00313868
+{
+    int bit;                        // 0x0
+    int kind;                       // 0x4
+    float time;                     // 0x8
+    sAnimEvent_00313868* next;      // 0xC
+};
+
+struct sAnimEvents_00313868
+{
+    char pad0[0xAC];
+    sAnimEvent_00313868* head;      // 0xAC
+    ulong active;                   // 0xB0
+    ulong triggered;                // 0xB8
+};
+
+// Fires every kind-0 event whose time lies in (from, to] (or [to, from) when
+// playing backwards).
+// PORT: ulong is 64-bit here
+extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to)
+{
+    if (from == to)
+    {
+        return;
+    }
+    int forward = from <= to;
+    for (sAnimEvent_00313868* e = self->head; e != 0; e = e->next)
+    {
+        if (e->kind == 0)
+        {
+            float t = e->time;
+            if (forward)
+            {
+                if (!(from < t && t <= to))
+                    continue;
+            }
+            else
+            {
+                if (!(to <= t && t < from))
+                    continue;
+            }
+            ulong bit = (ulong)1 << e->bit;
+            ulong old = self->active;
+            self->active = old | bit;
+            self->triggered |= bit & ~old;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00313938);

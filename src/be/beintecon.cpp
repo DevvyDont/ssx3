@@ -202,7 +202,51 @@ extern "C" void func_001515B8(sEconItems_001515B8* self)
 
 INCLUDE_ASM("be/beintecon", func_00151600);
 
+//100%
 INCLUDE_ASM("be/beintecon", func_001519E0);
+#ifdef SKIP_ASM
+struct sEconColor_001519E0
+{
+    signed char a;
+    signed char b;
+    signed char c;
+};
+
+struct sEconRange_001519E0
+{
+    int lo;
+    int hi;
+    int pad;
+};
+
+extern sEconColor_001519E0 D_004A1218[];
+extern sEconRange_001519E0 D_004406FC[];
+
+struct sEcon_001519E0
+{
+    char pad0[0xBC1];
+    sEconColor_001519E0 colors[10];  // 0xBC1
+};
+
+extern "C" void func_001519E0(sEcon_001519E0* self, int k)
+{
+    sEconColor_001519E0 def = D_004A1218[0];
+    for (int i = 0; i < 10; i++)
+    {
+        self->colors[i] = def;
+        if (i == D_004406FC[k].lo)
+        {
+            self->colors[i].a = 0;
+            self->colors[i].b = 0;
+        }
+        else if (i == D_004406FC[k].hi)
+        {
+            self->colors[i].a = 3;
+            self->colors[i].b = 2;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintecon", func_00151A88);
 

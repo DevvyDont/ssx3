@@ -145,7 +145,21 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013FAD8);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013FB20);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140680);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern void* D_00459CC8[];
+
+extern "C" void func_00140680(int* self, int flags)
+{
+    *(void***)self = D_00459CC8;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 extern void* D_004FF120[];
 

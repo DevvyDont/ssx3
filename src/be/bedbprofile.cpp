@@ -2,16 +2,28 @@
 
 extern "C" int cBELibrary_getScoreType(int a, int b);
 
-//93.68%
+//100%
 INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_getScoreStats__FPvii);
 #ifdef SKIP_ASM
+struct sScoreStat_00152398
+{
+    int a;
+    int b;
+};
+
+struct sCharProfile_00152398
+{
+    char pad0[0xAD0];
+    sScoreStat_00152398 stats[0x1A];  // 0xAD0
+};
+
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b)
 {
     int type = cBELibrary_getScoreType(a, b);
     if (type == 0x1A) {
         return 0;
     }
-    return (char*)self + (type << 3) + 0xAD0;
+    return &((sCharProfile_00152398*)self)->stats[type];
 }
 #endif
 

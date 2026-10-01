@@ -69,9 +69,32 @@ void* cBENewRaceInterface_getThis()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00144928);
+#ifdef SKIP_ASM
+struct sRaceSettings_00144928
+{
+    int data[0x4C / 4];
+};
 
+extern sRaceSettings_00144928 D_005305B0;
+
+extern "C" void func_00144928(void)
+{
+    D_005305B0 = *(sRaceSettings_00144928*)&D_00535BC8;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnewrace", func_001449E8);
+#ifdef SKIP_ASM
+extern sRaceSettings_00144928 D_005305B0;
+
+extern "C" void func_001449E8(void)
+{
+    *(sRaceSettings_00144928*)&D_00535BC8 = D_005305B0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberHumans__FPvi);
@@ -356,7 +379,34 @@ extern "C" int func_00145668(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_001456A0);
+#ifdef SKIP_ASM
+struct sRacePair_001456A0
+{
+    short a;
+    short b;
+};
+
+extern sRacePair_001456A0 D_00440E80[];
+
+extern "C" int func_001456A0(void* self, int idx, int mode)
+{
+    if (mode == 9 || mode == 10 || mode == 11 || mode == 6 || mode == 7 || mode == 8)
+        return -1;
+    if (idx < 14)
+    {
+        if (mode == 0)
+            return D_00440E80[(short)idx].b;
+        return D_00440E80[(short)idx].b * 100;
+    }
+    if (mode == 4)
+        return D_00440E80[(short)idx].b;
+    if (mode == 5)
+        return D_00440E80[(short)idx + 3].b * 100;
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("be/beintnewrace", func_00145750);
 

@@ -28,9 +28,34 @@ void* cBEOptionInterface_getThis()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F2A8);
+#ifdef SKIP_ASM
+struct sOptions_0014F2A8
+{
+    int data[0x288 / 4];
+};
 
+extern sOptions_0014F2A8 D_00535610;
+extern sOptions_0014F2A8 D_00535898;
+
+extern "C" void func_0014F2A8(void)
+{
+    D_00535898 = D_00535610;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F360);
+#ifdef SKIP_ASM
+extern sOptions_0014F2A8 D_00535610;
+extern sOptions_0014F2A8 D_00535898;
+
+extern "C" void func_0014F360(void)
+{
+    D_00535610 = D_00535898;
+}
+#endif
 
 INCLUDE_ASM("be/beintoption", func_0014F418);
 

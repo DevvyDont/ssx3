@@ -26,9 +26,34 @@ void* cBENetworkInterface_getThis()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014E130);
+#ifdef SKIP_ASM
+struct sNetState_0014E130
+{
+    int data[0x4B0 / 4];
+};
 
+extern sNetState_0014E130 D_00534B30;
+extern sNetState_0014E130 D_00535088;
+
+extern "C" void func_0014E130(void)
+{
+    D_00535088 = D_00534B30;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014E1F8);
+#ifdef SKIP_ASM
+extern sNetState_0014E130 D_00534B30;
+extern sNetState_0014E130 D_00535088;
+
+extern "C" void func_0014E1F8(void)
+{
+    D_00534B30 = D_00535088;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014E2C0__FPv);
@@ -49,7 +74,34 @@ INCLUDE_ASM("be/beintnetwork", func_0014E9F8);
 
 INCLUDE_ASM("be/beintnetwork", func_0014EA90);
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EB08);
+#ifdef SKIP_ASM
+struct sNetSlot_0014EB08
+{
+    unsigned int a : 1;
+    unsigned int b : 2;
+    unsigned int c : 1;
+    unsigned int rest : 28;
+    int x;
+    int y;
+};
+
+extern sNetSlot_0014EB08 D_005308B8[];
+
+extern "C" void func_0014EB08(void)
+{
+    sNetSlot_0014EB08 tmp = D_005308B8[0];
+    D_005308B8[0].y = D_005308B8[1].y;
+    D_005308B8[0].c = D_005308B8[1].c;
+    D_005308B8[0].a = D_005308B8[1].a;
+    D_005308B8[0].x = D_005308B8[1].x;
+    D_005308B8[1].y = tmp.y;
+    D_005308B8[1].c = tmp.c;
+    D_005308B8[1].a = tmp.a;
+    D_005308B8[1].x = tmp.x;
+}
+#endif
 
 extern "C" char* strcpy(char*, const char*);
 extern char D_00534FC8[16];
@@ -80,7 +132,23 @@ INCLUDE_ASM("be/beintnetwork", func_0014ECA0);
 
 INCLUDE_ASM("be/beintnetwork", func_0014EDD8);
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EE28);
+#ifdef SKIP_ASM
+signed char cBELibrary_getCharacterID(int index);
+
+struct sNetChar_0014EE28
+{
+    char data[0x88];
+};
+
+extern sNetChar_0014EE28 D_00530970[];
+
+extern "C" void* func_0014EE28(void* self, int rider)
+{
+    return &D_00530970[cBELibrary_getCharacterID(rider)];
+}
+#endif
 
 INCLUDE_ASM("be/beintnetwork", func_0014EE58);
 

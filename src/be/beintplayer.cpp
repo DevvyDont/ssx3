@@ -56,7 +56,21 @@ INCLUDE_ASM("be/beintplayer", func_001459B8);
 
 INCLUDE_ASM("be/beintplayer", func_00145A98);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00145B20);
+#ifdef SKIP_ASM
+struct sPlayerTable_00145B20
+{
+    sPlayerCharEntry entries[6];
+};
+
+extern sPlayerTable_00145B20 D_00535B20;
+
+extern "C" void func_00145B20(void* self)
+{
+    *(sPlayerTable_00145B20*)D_00534FE0 = D_00535B20;
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_defaultCtrl);
 
@@ -256,15 +270,23 @@ int cBENewPlayerInterface_getPlayerID(int index)
 }
 #endif
 
-//96%
+//100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isMissionMan__Fi);
 #ifdef SKIP_ASM
+struct sPlayerFlags_001477E8
+{
+    char pad_0x00[0x10];
+    unsigned int flag0 : 1;       // 0x10 bit 0
+    unsigned int flag1 : 1;       // 0x10 bit 1
+    unsigned int missionMan : 1;  // 0x10 bit 2
+    unsigned int rest : 29;
+    char pad_0x14[0x1C - 0x14];
+};
+
 int cBENewPlayerInterface_isMissionMan(int index)
 {
     int playerID = cBENewPlayerInterface_getPlayerID(index);
-    char* entry = (char*)D_00534FE0 + playerID * 0x1C;
-    int flags = *(int*)(entry + 0x10);
-    return (flags >> 2) & 1;
+    return ((sPlayerFlags_001477E8*)D_00534FE0)[playerID].missionMan;
 }
 #endif
 
@@ -286,9 +308,56 @@ INCLUDE_ASM("be/beintplayer", func_00147E18);
 
 INCLUDE_ASM("be/beintplayer", func_00147F78);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147FD8);
+#ifdef SKIP_ASM
+struct sCtrl7_00147FD8
+{
+    signed char b[7];
+};
 
+struct sPlayerSlot_00147FD8
+{
+    sCtrl7_00147FD8 ctrl;
+    char pad[0xF88 - 7];
+};
+
+struct sPlayerStatRow;
+extern sPlayerStatRow D_00535538[];
+extern sPlayerSlot_00147FD8 D_004A7887[];
+extern sPlayerSlot_00147FD8 D_004B13D7[];
+extern sPlayerSlot_00147FD8 D_004BAF27[];
+
+extern "C" void func_00147FD8(void)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        D_004A7887[i].ctrl = ((sCtrl7_00147FD8 (*)[10])D_00535538)[0][i];
+        D_004B13D7[i].ctrl = ((sCtrl7_00147FD8 (*)[10])D_00535538)[1][i];
+        D_004BAF27[i].ctrl = ((sCtrl7_00147FD8 (*)[10])D_00535538)[2][i];
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148098);
+#ifdef SKIP_ASM
+struct sPlayerStatRow;
+extern sPlayerStatRow D_00535538[];
+extern sPlayerSlot_00147FD8 D_004A7887[];
+extern sPlayerSlot_00147FD8 D_004B13D7[];
+extern sPlayerSlot_00147FD8 D_004BAF27[];
+
+extern "C" void func_00148098(void)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        ((sCtrl7_00147FD8 (*)[10])D_00535538)[0][i] = D_004A7887[i].ctrl;
+        ((sCtrl7_00147FD8 (*)[10])D_00535538)[1][i] = D_004B13D7[i].ctrl;
+        ((sCtrl7_00147FD8 (*)[10])D_00535538)[2][i] = D_004BAF27[i].ctrl;
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148158);
 

@@ -54,7 +54,17 @@ extern "C" void func_00128A48(sAiObj128A48* self, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00128AC0);
+#ifdef SKIP_ASM
+extern "C" void cAI_initMissionRiders(void*);
+
+extern "C" void func_00128AC0(void* self)
+{
+    cAI_initMissionRiders(self);
+    func_001297C8(self, 0);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00128AF0);
 
@@ -127,9 +137,32 @@ INCLUDE_ASM("ai/ai", func_0012AED0);
 
 INCLUDE_ASM("ai/ai", cAI_purgeMissionRiders);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012B000);
+#ifdef SKIP_ASM
+extern "C" void func_0012AED0(void*);
+extern "C" void func_0010F3B8(void*);
 
+extern "C" void func_0012B000(void* self)
+{
+    func_0012AED0(self);
+    func_0010F3B8(self);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012B030);
+#ifdef SKIP_ASM
+extern "C" void func_0012AE38(void*);
+extern "C" void func_0010F3B8(void*);
+
+extern "C" void func_0012B030(void* self)
+{
+    func_0012AE38(self);
+    func_0010F3B8(self);
+    *(int*)((char*)self + 0x10) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012B090);
 

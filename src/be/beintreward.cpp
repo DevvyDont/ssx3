@@ -389,13 +389,17 @@ int func_001588B0(void* self, int a1)
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern int D_004A6CA8[];
 
-//88.68%
+//100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
 #ifdef SKIP_ASM
+struct sProfileSlot_00158910
+{
+    char data[0xF88];
+};
+
 signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e)
 {
-    char* ptr = (char*)D_004A6CA8 + c * 0xF88 + b * 0x9B50;
-    void* result = cBECharProfileDB_getScoreStats(ptr, e, d);
+    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])D_004A6CA8)[b][c], e, d);
     if (result == 0) {
         return -1;
     }
@@ -443,7 +447,50 @@ void* func_00158F30(void* self)
 
 INCLUDE_ASM("be/beintreward", func_00158F60);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00159080);
+#ifdef SKIP_ASM
+extern "C" int func_00159080(void* self, int a1, int a2, int kind, int tier)
+{
+    int r = -1;
+    switch (tier)
+    {
+    case 0:
+        if (kind == 0)
+            r = 5;
+        else if (kind == 1)
+            r = 6;
+        else if (kind == 2)
+            r = 7;
+        break;
+    case 1:
+        if (kind == 0)
+            r = 8;
+        else if (kind == 1)
+            r = 9;
+        else if (kind == 2)
+            r = 10;
+        break;
+    case 2:
+        if (kind == 0)
+            r = 11;
+        else if (kind == 1)
+            r = 12;
+        else if (kind == 2)
+            r = 13;
+        break;
+    case 3:
+        if (kind == 0)
+            r = 14;
+        else if (kind == 1)
+            r = 15;
+        else if (kind == 2)
+            r = 16;
+        break;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00159170);
 
@@ -499,7 +546,36 @@ extern "C" int func_0015A398(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A3B8);
+#ifdef SKIP_ASM
+struct sRewardPair_0015A3B8
+{
+    signed char a;
+    signed char b;
+};
+
+extern sRewardPair_0015A3B8 D_0045AAD8[3][4][5];
+
+extern "C" int func_0015A3B8(void* self, int a, int b)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            for (int k = 0; k < 5; k++)
+            {
+                if (D_0045AAD8[i][j][k].a == a)
+                {
+                    if (D_0045AAD8[i][j][k].b == b || a == 6 || a == 7 || a == 8 || a == 9 || a == 10 || a == 11)
+                        return j;
+                }
+            }
+        }
+    }
+    return -1;
+}
+#endif
 
 extern void* D_004C3E98[];
 

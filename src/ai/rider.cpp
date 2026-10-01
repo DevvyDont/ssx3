@@ -20,15 +20,18 @@ struct cRider {
     void* field_0x790;
 };
 
-//95%
+//100%
 INCLUDE_ASM("ai/rider", cRider_addRiderMetrix__FP6cRider);
 #ifdef SKIP_ASM
+// PORT: cRiderMetrix_linkToRider really takes (metrix, rider); the unit declares one arg.
+extern "C" void cRiderMetrix_linkToRider_impl(void* metrix, cRider* rider) __asm__("cRiderMetrix_linkToRider");
+
 void cRider_addRiderMetrix(cRider* self)
 {
     void* mem = cMemMan_alloc(0x1CC, D_00457970, 0, 0);
     void* metrix = func_00117248(mem);
     self->field_0x790 = metrix;
-    cRiderMetrix_linkToRider(metrix);
+    cRiderMetrix_linkToRider_impl(metrix, self);
 }
 #endif
 
@@ -70,7 +73,66 @@ INCLUDE_ASM("ai/rider", func_0011DF18);
 
 INCLUDE_ASM("ai/rider", func_0011DFE0);
 
+//100%
 INCLUDE_ASM("ai/rider", cRider_updateOrientationImplicit);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 macro-mode asm. Normalises the orientation quaternion at
+// self+0x120, then builds the rider matrix at self+0x1A0 from it (rows 0-2)
+// and the position at self+0x110 (row 3).
+extern "C" void cRider_updateOrientationImplicit(char* self)
+{
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2       $vf3, 0x120(%0)\n"
+        "vaddw.x    $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw  $vf4, $vf3, $vf3\n"
+        "vadday.x   ACC, $vf4, $vf4y\n"
+        "vmaddaz.x  ACC, $vf6, $vf4z\n"
+        "vmaddw.x   $vf4, $vf6, $vf4w\n"
+        "vrsqrt     Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2       $vf5, 0x120(%0)\n"
+        "lqc2       $vf4, 0x120(%0)\n"
+        "lqc2       $vf3, 0x110(%0)\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf3, 0x30(%1)\n"
+        "sqc2       $vf10, 0x0(%1)\n"
+        "sqc2       $vf11, 0x10(%1)\n"
+        "sqc2       $vf12, 0x20(%1)\n"
+        ".set pop\n"
+        :
+        : "r"(self), "r"(self + 0x1A0)
+        : "memory");
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011E150);
 
@@ -209,7 +271,18 @@ extern "C" void func_00120E30(void* self)
 
 INCLUDE_ASM("ai/rider", func_00120E50);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120E88);
+#ifdef SKIP_ASM
+extern "C" void func_002F1A08(void*);
+extern "C" void func_002ECF78(void*);
+
+extern "C" void func_00120E88(void* self)
+{
+    func_002F1A08(*(void**)((char*)self + 0x88C));
+    func_002ECF78(*(void**)((char*)self + 0x890));
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00120ED8);
 
@@ -291,7 +364,19 @@ INCLUDE_ASM("ai/rider", func_00122278);
 
 INCLUDE_ASM("ai/rider", func_00122448);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001225C0);
+#ifdef SKIP_ASM
+extern "C" void func_001220D8(void*);
+
+extern "C" int func_001225C0(void* self)
+{
+    if (*(int*)((char*)self + 0xB18) != 0) {
+        func_001220D8(self);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001225F0);
