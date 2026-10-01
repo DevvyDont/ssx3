@@ -21,7 +21,40 @@ void cInstanceMan_copyInstance(void* self, sInstanceStruct* a, void* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_003512C0);
+#ifdef SKIP_ASM
+struct sInstHandle {
+    unsigned int gen : 8;
+    unsigned int index : 24;
+};
+
+struct sInstSlot {
+    char pad_0x00[0x8];
+    int flags;              // 0x08
+    char pad_0x0C[0x6C];    // 0x0C
+    sInstHandle handle;     // 0x78
+    char pad_0x7C[0x34];    // 0x7C
+};
+
+struct sInstPool {
+    int gen;                // 0x0
+    char pad_0x4[0x8];      // 0x4
+    sInstSlot* slots;       // 0xC
+};
+
+extern "C" sInstSlot* func_003512C0(sInstPool* self, unsigned int handle)
+{
+    if ((handle & 0xFF) == self->gen) {
+        sInstSlot* slot = &self->slots[handle >> 8];
+        slot->handle.gen = self->gen;
+        slot->handle.index = slot - self->slots;
+        slot->flags |= 0x2000;
+        return slot;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00351398);

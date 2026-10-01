@@ -36,7 +36,19 @@ INCLUDE_ASM("mem/memstd", func_00252248);
 
 INCLUDE_ASM("mem/memstd", func_002522B0);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002523A8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+
+extern "C" void* func_002523A8(void* self)
+{
+    if (self != 0) {
+        cMemMan_free(self);
+    }
+    return (void*)1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00252658__FPv);
@@ -72,16 +84,32 @@ INCLUDE_ASM("mem/memstd", func_00252980);
 
 extern "C" void* func_00252980(void*);
 
-//90.71%
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252F60__FPv);
 #ifdef SKIP_ASM
-void* func_00252F60(void* self)
+void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
+
+// PORT: the project's symbol name says (void*), but callers pass and this
+// forwards 5 args (see func_00253AD0); the real body is bound by asm label.
+void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00252F60__FPv");
+
+void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4)
 {
-    return func_00252980(self);
+    return func_00252980_6(a0, a1, a2, a3, a4, 1);
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252FA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
+
+extern "C" void* func_00252FA0(void* a0, int a1, int a2)
+{
+    return func_00252980_6(a0, a1, 0x80, 0, a2, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00253390);
@@ -141,7 +169,22 @@ extern "C" void func_00253AA0()
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253AD0);
+#ifdef SKIP_ASM
+void* func_00252F60_5(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00252F60__FPv");
+
+// PORT: the unit declares this as (int size); the body uses 5 args (prototype mismatch).
+void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4) __asm__("func_00253AD0");
+
+void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4)
+{
+    if (align < 64) {
+        align = 64;
+    }
+    return func_00252F60_5(a0, a1, align, a3, a4);
+}
+#endif
 
 extern "C" void* func_002523A8(void* self);
 

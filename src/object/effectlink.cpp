@@ -65,7 +65,18 @@ INCLUDE_ASM("object/effectlink", func_00345AD0);
 
 INCLUDE_ASM("object/effectlink", func_00345B40);
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345BC8);
+#ifdef SKIP_ASM
+extern "C" void func_003708C0(void*);
+
+extern "C" void func_00345BC8(void* self)
+{
+    if (*(int*)((char*)self + 0x1E4) == 0) {
+        func_003708C0((char*)self + 0x50);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_00345BF0);
 

@@ -455,7 +455,43 @@ float func_00394B90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00394B98);
+#ifdef SKIP_ASM
+class cFontVirt {
+public:
+    int field_0x0;
+    // vptr lands at 0x4 (g++ 2.95 places it after the class's own data);
+    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22(int, int, int, int, int);
+};
+
+extern "C" void func_00394B98(cFontVirt* self, int a, int b, int c, int d, int e)
+{
+    self->v22(a, b, c, d, e);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00394BC0__FPvf);
@@ -610,7 +646,19 @@ void* func_00394C88(void* self, int a1)
 
 INCLUDE_ASM("render/font", func_00394C98);
 
+//100%
 INCLUDE_ASM("render/font", func_00394CE8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+
+extern "C" void func_00394CE8(void* self)
+{
+    void* p = *(void**)((char*)self + 0x4);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00394D10__FPv);
@@ -802,7 +850,18 @@ int func_00395510(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003956B0);
+#ifdef SKIP_ASM
+extern "C" void func_0037D968(void* self);
+
+extern "C" void func_003956B0(void* self)
+{
+    if (*(int*)((char*)self + 0x6B90) == 0) {
+        func_0037D968(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_003956E0__FPvi);
@@ -887,7 +946,51 @@ int func_00395C68(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00395C70);
+#ifdef SKIP_ASM
+// Multiply the top of the matrix stack by m in place (top = top * m) and clear
+// the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
+extern "C" void func_00395C70(void* self, void* m)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(m)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00395CF0);

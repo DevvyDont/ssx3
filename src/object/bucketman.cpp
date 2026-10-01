@@ -9,7 +9,38 @@ INCLUDE_ASM("object/bucketman", cBucketMan_init);
 
 INCLUDE_ASM("object/bucketman", func_00354B38);
 
+//100%
 INCLUDE_ASM("object/bucketman", cBucketMan_add);
+#ifdef SKIP_ASM
+struct sBucketLink {
+    int field_0x0;
+    sBucketLink* prev; // 0x4
+    sBucketLink* next; // 0x8
+};
+
+struct sBucketLists {
+    int flags;              // 0x00
+    sBucketLink head0;      // 0x04
+    char pad_0x10[0x14];    // 0x10
+    sBucketLink head1;      // 0x24
+    char pad_0x30[0x14];    // 0x30
+};
+
+extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
+{
+    if (((sBucketLists*)self->mBuckets)[index].flags & 1) {
+        node->prev = ((sBucketLists*)self->mBuckets)[index].head1.prev;
+        ((sBucketLists*)self->mBuckets)[index].head1.prev->next = node;
+        node->next = (sBucketLink*)(self->mBuckets + index * 0x44 + 0x24);
+        ((sBucketLists*)self->mBuckets)[index].head1.prev = node;
+    } else {
+        node->prev = ((sBucketLists*)self->mBuckets)[index].head0.prev;
+        ((sBucketLists*)self->mBuckets)[index].head0.prev->next = node;
+        node->next = (sBucketLink*)(self->mBuckets + index * 0x44 + 0x4);
+        ((sBucketLists*)self->mBuckets)[index].head0.prev = node;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/bucketman", func_00354C98);
 

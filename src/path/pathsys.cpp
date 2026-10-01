@@ -77,7 +77,34 @@ extern "C" int func_0026B598(sPathSys* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B5E0);
+#ifdef SKIP_ASM
+struct sPathEntry {
+    int id;                 // 0x0
+    int type;               // 0x4
+    char pad_0x8[0x20];
+};
+
+struct sPathEntryList {
+    int count;              // 0x0
+    sPathEntry* entries;    // 0x4
+};
+
+extern "C" sPathEntry* func_0026B5E0(sPathEntryList* list, int type, int id)
+{
+    int i;
+    for (i = 0; i < list->count; i++) {
+        if (list->entries[i].type == type && list->entries[i].id == id) {
+            return &list->entries[i];
+        }
+    }
+    if (list->count > 0) {
+        return list->entries;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("path/pathsys", func_0026B680);
 

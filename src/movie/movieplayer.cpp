@@ -328,7 +328,18 @@ void* func_00242500(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00242518);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+
+extern "C" void func_00242518(void* self, int flags)
+{
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00242540);

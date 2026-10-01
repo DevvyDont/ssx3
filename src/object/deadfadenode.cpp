@@ -8,7 +8,18 @@ INCLUDE_ASM("object/deadfadenode", func_00350BE0);
 
 INCLUDE_ASM("object/deadfadenode", func_00350C38);
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350C90);
+#ifdef SKIP_ASM
+// PORT: the project names this func_002D1CC0__FPv (one void* arg), but it is a
+// pass-through wrapper and this caller passes two args (prototype mismatch).
+void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
+
+extern "C" void func_00350C90(void* self)
+{
+    func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);
+}
+#endif
 
 INCLUDE_ASM("object/deadfadenode", func_00350CB8);
 

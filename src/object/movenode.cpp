@@ -52,7 +52,18 @@ INCLUDE_ASM("object/movenode", func_003556A8);
 
 INCLUDE_ASM("object/movenode", func_003556F8);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355748);
+#ifdef SKIP_ASM
+extern "C" void func_00352D20(void*);
+
+extern "C" void func_00355748(cMoveNode* self)
+{
+    if (self->field_0x1C != 0) {
+        func_00352D20(self->field_0x1C);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00355770);
 
@@ -125,17 +136,62 @@ INCLUDE_ASM("object/movenode", func_003568B0);
 
 INCLUDE_ASM("object/movenode", func_003569D0);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356A00);
+#ifdef SKIP_ASM
+extern "C" int func_00352B88(void*);
+
+extern "C" int func_00356A00(cMoveNode* self)
+{
+    if (self->field_0x1C != 0) {
+        return func_00352B88(self->field_0x1C);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00356A28);
 
 INCLUDE_ASM("object/movenode", func_00356A70);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356AB8);
+#ifdef SKIP_ASM
+extern "C" void func_00353020(void*);
 
+extern "C" void func_00356AB8(cMoveNode* self)
+{
+    if (self->field_0x1C != 0) {
+        func_00353020(self->field_0x1C);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/movenode", func_00356AE0);
+#ifdef SKIP_ASM
+extern "C" void func_00353098(void*);
 
+extern "C" void func_00356AE0(cMoveNode* self)
+{
+    if (self->field_0x1C != 0) {
+        func_00353098(self->field_0x1C);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/movenode", func_00356B08);
+#ifdef SKIP_ASM
+extern "C" void func_00352F40(void*);
+
+extern "C" void func_00356B08(cMoveNode* self)
+{
+    if (self->field_0x1C != 0) {
+        func_00352F40(self->field_0x1C);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00356B30);
 
@@ -162,9 +218,74 @@ void* func_00356E98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356EB8);
+#ifdef SKIP_ASM
+struct sMoveQuad {
+    float v[4];
+} __attribute__((aligned(16)));
 
+extern void* D_0048F5F0[];
+extern sMoveQuad D_004FF1A0[];
+
+extern "C" void* func_00356EB8(void* self, sMoveQuad* pos)
+{
+    *(void***)self = D_0048F5F0;
+    *(sMoveQuad*)((char*)self + 0x30) = *pos;
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, D_004FF1A0 -> self+0x50).
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x50), "r"(D_004FF1A0)
+        : "memory");
+    *(int*)((char*)self + 0x44) = 1;
+    *(sMoveQuad*)((char*)self + 0x80) = *(sMoveQuad*)((char*)self + 0x30);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/movenode", func_00356F10);
+#ifdef SKIP_ASM
+struct sMoveQuad2 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+extern void* D_0048F5F0[];
+
+extern "C" void* func_00356F10(void* self, void* src)
+{
+    *(void***)self = D_0048F5F0;
+    sMoveQuad2 v = *(sMoveQuad2*)((char*)src + 0x30);
+    *(sMoveQuad2*)((char*)self + 0x30) = v;
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src -> self+0x50).
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x50), "r"(src)
+        : "memory");
+    *(int*)((char*)self + 0x44) = 1;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00356F68);
 
@@ -248,7 +369,18 @@ extern "C" void* func_00357750(void* self, void* src)
 
 INCLUDE_ASM("object/movenode", func_00357798);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357820);
+#ifdef SKIP_ASM
+// PORT: the project names this func_002D1CF0__FPv (one void* arg), but it is a
+// pass-through wrapper and this caller passes two args (prototype mismatch).
+void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
+
+extern "C" void func_00357820(void* self)
+{
+    func_002D1CF0_2(*(void**)((char*)self + 0x80), (char*)self + 0x40);
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00357848);
 
@@ -275,23 +407,23 @@ INCLUDE_ASM("object/movenode", func_00357A78);
 
 extern "C" void* func_003581B8(int, int);
 
-//97.5%
+//100%
 INCLUDE_ASM("object/movenode", func_00357AE8__FPvii);
 #ifdef SKIP_ASM
 void* func_00357AE8(void* self, int a1, int a2)
 {
-    return func_003581B8(*(int*)((char*)self + a1 * 4), a2);
+    return func_003581B8(*(int*)((char*)self + (a1 << 2)), a2);
 }
 #endif
 
 extern "C" void* func_003581F0(int, int);
 
-//97.5%
+//100%
 INCLUDE_ASM("object/movenode", func_00357B10__FPvii);
 #ifdef SKIP_ASM
 void* func_00357B10(void* self, int a1, int a2)
 {
-    return func_003581F0(*(int*)((char*)self + a1 * 4), a2);
+    return func_003581F0(*(int*)((char*)self + (a1 << 2)), a2);
 }
 #endif
 

@@ -79,7 +79,36 @@ INCLUDE_ASM("object/railmodifier", func_0035F218);
 
 INCLUDE_ASM("object/railmodifier", func_0035F378);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F3A8);
+#ifdef SKIP_ASM
+struct sRailOut14 {
+    unsigned short value;   // 0x0
+    char pad_0x2[0x12];
+};
+
+struct sRailModSelect {
+    char pad_0x0[0x14];
+    int index;              // 0x14
+    char* owner;            // 0x18
+    int count;              // 0x1c
+    char pad_0x20[0x28];
+    sRailOut14 out[1];      // 0x48
+};
+
+extern "C" void func_0035F3A8(sRailModSelect* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        char* list = *(char**)(self->owner + 0x94);
+        char* item = *(char**)(list + (i << 2) + 4);
+        char* table = *(char**)(item + 0x10);
+        if (table != 0) {
+            self->out[i].value = *(unsigned short*)(table + (self->index << 2) + 4);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035F410);
 
@@ -250,7 +279,73 @@ int func_00360880(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003608E8);
+#ifdef SKIP_ASM
+class cRailVirt {
+public:
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    // vptr lands at 0xC (g++ 2.95 places it after the class's own data);
+    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual int v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+};
+
+extern "C" int func_003608E8(cRailVirt* self)
+{
+    return self->v15();
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360910__FPv);
@@ -1009,7 +1104,14 @@ void func_00360D90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00360DA0);
+#ifdef SKIP_ASM
+extern "C" void func_00360DA0(cRailVirt* self)
+{
+    self->v50();
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360DC8__FPv);
@@ -2022,13 +2124,91 @@ INCLUDE_ASM("object/railmodifier", func_00362340);
 
 INCLUDE_ASM("object/railmodifier", func_003623A8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003623D8);
+#ifdef SKIP_ASM
+struct sGifPacket {
+    int qwc;        // 0x0
+    ulong* cur;     // 0x4
+};
+
+// PORT: 64-bit GS register writes (ulong).
+extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int h)
+{
+    ulong scissor = (ulong)x | ((ulong)(x + (w - 1)) << 16) | ((ulong)y << 32) | ((ulong)(y + (h - 1)) << 48);
+    pkt->cur[0] = scissor;
+    pkt->cur[1] = 0x40;
+    pkt->cur[2] = scissor;
+    pkt->cur[3] = 0x41;
+    pkt->cur += 4;
+    pkt->qwc += 2;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00362478);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003625C0);
+#ifdef SKIP_ASM
+// PORT: 64-bit GS register writes (ulong).
+extern "C" void func_003625C0(sGifPacket* pkt, int mode, int ctx)
+{
+    ulong reg;
+    switch (ctx) {
+    case 0:
+        reg = 8;
+        break;
+    case 1:
+        reg = 9;
+        break;
+    default:
+        reg = 8;
+        break;
+    }
+    switch (mode) {
+    case 3:
+        pkt->cur[0] = 5;
+        break;
+    case 1:
+        pkt->cur[0] = 4;
+        break;
+    case 2:
+        pkt->cur[0] = 1;
+        break;
+    default:
+        pkt->cur[0] = 0;
+        break;
+    }
+    pkt->cur[1] = reg;
+    pkt->cur += 2;
+    pkt->qwc++;
+}
+#endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362660);
+#ifdef SKIP_ASM
+// PORT: 64-bit GS register writes (ulong).
+extern "C" void func_00362660(sGifPacket* pkt, unsigned int zbp, unsigned int psm, int zmsk, int ctx)
+{
+    ulong reg;
+    switch (ctx) {
+    case 0:
+        reg = 0x4E;
+        break;
+    case 1:
+        reg = 0x4F;
+        break;
+    default:
+        reg = 0x4E;
+        break;
+    }
+    pkt->cur[0] = (ulong)zbp | ((ulong)(psm - 0x30) << 24) | ((zmsk == 1) ? ((ulong)1 << 32) : 0);
+    pkt->cur[1] = reg;
+    pkt->cur += 2;
+    pkt->qwc++;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003626D8);
 
@@ -2103,11 +2283,77 @@ extern "C" void func_00365FE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366008);
+#ifdef SKIP_ASM
+struct sRailNode {
+    int field_0x0;
+    int size;               // 0x04
+    int field_0x8;
+    int prev;               // 0x0c
+    int next;               // 0x10
+    int prev2;              // 0x14
+    int next2;              // 0x18
+};
+
+struct sRailNodeMan {
+    char pad_0x0[0x1ff0];
+    sRailNode* nodes;       // 0x1ff0
+    int field_0x1ff4;
+    sRailNode headsA[17];   // 0x1ff8
+    sRailNode headsB[18];   // 0x21d4
+    char pad_0x23cc[0x10];
+    int freeHead;           // 0x23dc
+};
+
+extern "C" void func_00366008(sRailNodeMan* self, int idx)
+{
+    sRailNode* node = &self->nodes[idx];
+    sRailNode* prev;
+    int link = node->prev;
+    if (link < 0) {
+        if ((link & 0x70000000) == 0x10000000) {
+            prev = &self->headsA[link & 0x0FFFFFFF];
+        } else {
+            prev = &self->headsB[link & 0x0FFFFFFF];
+        }
+    } else {
+        prev = &self->nodes[link];
+    }
+    prev->next = node->next;
+    if (node->next >= 0) {
+        self->nodes[node->next].prev = node->prev;
+    }
+    node->next = self->freeHead;
+    self->freeHead = idx;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003660A8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366238);
+#ifdef SKIP_ASM
+extern "C" void func_00366238(sRailNodeMan* self, int idx)
+{
+    sRailNode* node = &self->nodes[idx];
+    sRailNode* prev;
+    int link = node->prev2;
+    if (link < 0) {
+        if ((link & 0x70000000) == 0x10000000) {
+            prev = &self->headsA[link & 0x0FFFFFFF];
+        } else {
+            prev = &self->headsB[link & 0x0FFFFFFF];
+        }
+    } else {
+        prev = &self->nodes[link];
+    }
+    prev->next2 = node->next2;
+    if (node->next2 >= 0) {
+        self->nodes[node->next2].prev2 = node->prev2;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003662D0);
 
@@ -2119,7 +2365,32 @@ INCLUDE_ASM("object/railmodifier", func_00366618);
 
 INCLUDE_ASM("object/railmodifier", func_003666F8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003667F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only MMI count-leading-sign-bits (plzcw); off-PS2 use a clz builtin.
+static inline int railFloorLog2(int x)
+{
+    long r;
+    __asm__("plzcw %0, %1\n\txori %0, %0, 0x1f\n\taddiu %0, %0, -1" : "=r"(r) : "0"(x));
+    return r;
+}
+
+extern "C" int func_003667F8(sRailNodeMan* self, int size)
+{
+    int b;
+    for (b = railFloorLog2(size) - 6; b < 17; b++) {
+        int i = self->headsB[b].next2;
+        while (i >= 0) {
+            if (self->nodes[i].size >= size) {
+                return i;
+            }
+            i = self->nodes[i].next2;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003668F8);
 

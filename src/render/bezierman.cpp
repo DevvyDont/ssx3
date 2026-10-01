@@ -59,7 +59,38 @@ INCLUDE_ASM("render/bezierman", func_0038D168);
 
 INCLUDE_ASM("render/bezierman", func_0038D448);
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038D638);
+#ifdef SKIP_ASM
+class cBezierVirt {
+public:
+    int field_0x0;
+    // vptr lands at 0x4 (g++ 2.95 places it after the class's own data);
+    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+};
+
+extern "C" void func_0038D638(cBezierVirt* self)
+{
+    self->v17();
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D660__FPv);
