@@ -61,7 +61,39 @@ void func_001549E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_001549E8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+struct sScoreSlot_001549E8 {
+    char pad_0x00[0xAC];
+    int last; // 0xAC
+};
+
+struct sScore_001549E8 {
+    char pad_0x00[0x10];
+    int a;    // 0x10
+    int b;    // 0x14
+    int c;    // 0x18
+    int d;    // 0x1C
+    sScoreSlot_001549E8 slots[2]; // 0x20
+};
+
+extern "C" void func_001549E8(void* p)
+{
+    sScore_001549E8* self = (sScore_001549E8*)p;
+    self->a = 0;
+    self->b = 0;
+    self->c = -1;
+    self->d = -1;
+    func_003E6448(self->slots, 0, sizeof(self->slots));
+    for (int i = 1; i >= 0; i--)
+    {
+        self->slots[i].last = -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintscore", func_00154A58);
@@ -220,7 +252,25 @@ extern "C" void func_00155390(char* self, int idx, int score)
 
 INCLUDE_ASM("be/beintscore", func_00155420);
 
+//100%
 INCLUDE_ASM("be/beintscore", func_001557E0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" bool func_0014F810(int i);
+extern int D_00535BFC[];
+
+extern "C" bool func_001557E0(void* self, int rider)
+{
+    if (rider >= 2 || func_0014F810(0))
+        return false;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535BFC[0] >= 2)
+        return !func_0014F810(0);
+    return true;
+}
+#endif
 
 INCLUDE_ASM("be/beintscore", func_001558F8);
 

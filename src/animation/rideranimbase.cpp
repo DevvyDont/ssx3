@@ -44,7 +44,19 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeHeadingOffset);
 
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeOrientationOffset);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311E88);
+#ifdef SKIP_ASM
+extern "C" void func_00314718(void* self, int v);
+extern "C" void func_003146D0(void* self, float v);
+
+extern "C" void func_00311E88(char* self, int i, float v)
+{
+    func_00314718(*(char**)(self + 0x50) + (i << 3), 0x3F);
+    func_003146D0(*(char**)(self + 0x50) + (i << 3), v);
+    *(int*)(self + (i << 2)) = 0x1B6;
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00311F00);
 

@@ -32,7 +32,31 @@ extern "C" void func_00313A20(void* self, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313A70);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0048A5B0[];
+
+struct sSeqNode313A70
+{
+    int key;
+    int active;
+    float weight;
+    sSeqNode313A70* next;
+};
+
+extern "C" void func_00313A70(void* self, int key, float weight)
+{
+    sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, D_0048A5B0, 0x20000000, 0);
+    sSeqNode313A70* old = *(sSeqNode313A70**)((char*)self + 0xAC);
+    *(sSeqNode313A70**)((char*)self + 0xAC) = n;
+    n->key = key;
+    n->weight = weight;
+    n->next = old;
+    n->active = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313AD8);
@@ -196,7 +220,34 @@ void func_003142E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003142F8);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0048A5C0[];
+
+struct sSeqNode_003142F8 {
+    char pad_0x00[0xC8];
+    sSeqNode_003142F8* next; // 0xC8
+};
+
+struct sSequencer_003142F8 {
+    int mCount;                        // 0x0
+    sSeqNode_003142F8* mFirstSequence; // 0x4
+};
+
+extern "C" void* func_00313508(void* mem, int arg);
+
+extern "C" void* func_003142F8(void* seq, int arg)
+{
+    sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
+    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, D_0048A5C0, 0x20000000, 0), arg);
+    node->next = self->mFirstSequence;
+    self->mFirstSequence = node;
+    self->mCount++;
+    return node;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314368);
@@ -234,13 +285,100 @@ extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node
 
 INCLUDE_ASM("animation/animsequencer", func_00314418);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_00314518);
+#ifdef SKIP_ASM
+extern "C" void* func_003142F8(void* seq, int arg);
+extern "C" void func_00313C50(void* self, int i, int anim);
 
+extern "C" void* func_00314518(void* self, int arg, int anim, float val)
+{
+    void* node = func_003142F8(self, arg);
+    func_00313C50(node, 0, anim);
+    func_00313CF0(node, 0, val);
+    func_00313D40(node, 0, 0);
+    return node;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_00314588);
+#ifdef SKIP_ASM
+extern "C" void* func_003142F8(void* seq, int arg);
+extern "C" void func_00313C50(void* self, int i, int anim);
 
+extern "C" void* func_00314588(void* self, int arg, int anim, float val)
+{
+    void* node = func_003142F8(self, arg);
+    func_00313C50(node, 0, anim);
+    func_00313CF0(node, 0, val);
+    func_00313D40(node, 0, 1);
+    return node;
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003145F8);
+#ifdef SKIP_ASM
+struct sSeqNode_003145F8 {
+    char pad_0x00[0xC8];
+    sSeqNode_003145F8* next; // 0xC8
+};
 
+struct sSequencer_003145F8 {
+    int mCount;                        // 0x0
+    sSeqNode_003145F8* mFirstSequence; // 0x4
+};
+
+extern "C" void func_003145F8(sSequencer_003145F8* self, sSeqNode_003145F8* node)
+{
+    sSeqNode_003145F8** pp;
+    for (pp = &self->mFirstSequence; *pp != 0; pp = &(*pp)->next)
+    {
+        sSeqNode_003145F8* n = *pp;
+        if (n == node)
+        {
+            *pp = n->next;
+            if (n != 0)
+            {
+                func_00313C08((char*)n);
+                operator_delete((int*)n);
+            }
+            self->mCount--;
+            return;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314668);
+#ifdef SKIP_ASM
+struct sSeqNode_00314668 {
+    char pad_0x00[0xC8];
+    sSeqNode_00314668* next; // 0xC8
+};
+
+struct sSequencer_00314668 {
+    int mCount;                        // 0x0
+    sSeqNode_00314668* mFirstSequence; // 0x4
+};
+
+extern "C" void func_00314668(sSequencer_00314668* self)
+{
+    while (self->mFirstSequence != 0)
+    {
+        sSeqNode_00314668* n = self->mFirstSequence;
+        self->mFirstSequence = n->next;
+        if (n != 0)
+        {
+            func_00313C08((char*)n);
+            operator_delete((int*)n);
+        }
+        self->mCount--;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_003146D0);

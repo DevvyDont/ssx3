@@ -87,7 +87,35 @@ extern "C" void func_0014E9C0(void* self, int a1, int a2)
 
 INCLUDE_ASM("be/beintnetwork", func_0014E9F8);
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EA90);
+#ifdef SKIP_ASM
+struct sVEntry0014EA90 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sBEIface0014EA90 {
+    char pad_0x00[0xC];
+    sVEntry0014EA90* vtable; // 0xC
+};
+
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_0014EB08 is defined (void) in this unit but called with self here.
+void func_0014EB08_self(void* self) __asm__("func_0014EB08");
+
+extern "C" void func_0014EA90(void* self)
+{
+    sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 3);
+    a->vtable[2].fn((char*)a + a->vtable[2].delta);
+    sBEIface0014EA90* b = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
+    b->vtable[2].fn((char*)b + b->vtable[2].delta);
+    func_0014EB08_self(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EB08);
@@ -165,7 +193,36 @@ extern "C" void* func_0014EE28(void* self, int rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EE58);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+signed char cBELibrary_getCharacterID(int index);
+extern "C" signed char func_0014A0B0(int index);
+
+struct sNetEntry8_0014EE58
+{
+    char data[8];
+};
+
+struct sNetEntry88_0014EE58
+{
+    char data[0x88];
+};
+
+extern sNetEntry8_0014EE58 D_0043FA38_0014EE58[] __asm__("D_0043FA38");
+extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
+
+extern "C" void* func_0014EE58(void* self, int rider)
+{
+    int c = cBELibrary_getCharacterID(rider);
+    int index = func_0014A0B0(rider);
+    if (index >= 10 && index < 30) {
+        return &D_0043FA38_0014EE58[index];
+    }
+    return &D_00530990_0014EE58[c];
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EEC8);

@@ -98,7 +98,28 @@ INCLUDE_ASM("ai/computer", func_0010DEB0);
 
 INCLUDE_ASM("ai/computer", func_0010DEF0);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010E028);
+#ifdef SKIP_ASM
+extern "C" int func_001298C8();
+
+extern "C" void func_0010E028(void* self, int mode, float t)
+{
+    int v;
+    if (mode == 0)
+    {
+        v = -1;
+        *(int*)((char*)self + 0x358) = 0;
+    }
+    else
+    {
+        int frames = (int)(t * 60.0f);
+        v = func_001298C8() + frames;
+        *(int*)((char*)self + 0x358) = mode;
+    }
+    *(int*)((char*)self + 0x354) = v;
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010E098);
 
@@ -110,7 +131,29 @@ INCLUDE_ASM("ai/computer", func_0010E3A8);
 
 INCLUDE_ASM("ai/computer", func_0010E468);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010E558);
+#ifdef SKIP_ASM
+extern int D_005308D0[];
+extern signed char D_00535C12[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001194C0(void*, int);
+
+extern "C" void func_0010E558(void* self, int* arg)
+{
+    *(int*)((char*)self + 0xE8) = *(int*)((char*)self + 0xEC);
+    if (((D_005308D0[0] >> 9) & 1) == 0)
+    {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C12[0] == 1)
+        {
+            func_001194C0(*(void**)((char*)self + 0x790), *arg);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010E5D8);
 

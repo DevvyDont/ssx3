@@ -119,7 +119,28 @@ extern "C" void func_00117520(void* self, int a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00117540);
+#ifdef SKIP_ASM
+extern "C" void func_001175B8(char* self);
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void func_00117838(void* self);
+extern "C" void func_001175F8(void* self);
+
+extern "C" void func_00117540(char* self)
+{
+    func_001175B8(self);
+    func_001173B8((sRiderMetrix_001173B8*)self);
+    func_003E6448(self + 0xA8, 0, 0x50);
+    *(int*)(self + 0xF8) = 0;
+    func_00117838(self);
+    func_001175F8(self);
+    *(int*)(self + 0x1A8) = 0;
+    *(float*)(self + 0xA4) = -1.0f;
+    func_003E6448(self + 0x1B8, 0, 8);
+    *(int*)(self + 0x1C0) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_001175B8);
@@ -433,7 +454,26 @@ extern "C" float func_00119400(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119448);
+#ifdef SKIP_ASM
+extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
+
+extern "C" float func_00119448(char* self, float value)
+{
+    *(int*)(self + 0x130) += 1;
+    char* p = *(char**)(self + 0x1B0);
+    if (p != 0)
+    {
+        if (*(float*)(self + 0x18) < value)
+        {
+            func_001171A8(p + 0x270, 4, (int)value, 0, 0.0f);
+            *(float*)(self + 0x18) = value;
+        }
+    }
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_001194C0);
 

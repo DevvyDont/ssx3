@@ -45,7 +45,26 @@ INCLUDE_ASM("ai/rider", func_0011C0E0);
 
 INCLUDE_ASM("ai/rider", func_0011C138);
 
+//100%
 INCLUDE_ASM("ai/rider", cRider_initOnce);
+#ifdef SKIP_ASM
+extern "C" void func_0011C298(void* self);
+extern "C" void THREAD_yieldticks(int ticks);
+
+extern "C" void cRider_initOnce(void* self, int immediate)
+{
+    if (immediate)
+    {
+        func_0011C298(self);
+        return;
+    }
+    while (*(int*)((char*)self + 0x880) != 7)
+    {
+        func_0011C298(self);
+        THREAD_yieldticks(1);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011C298);
 
@@ -597,7 +616,34 @@ INCLUDE_ASM("ai/rider", func_00125108);
 
 INCLUDE_ASM("ai/rider", func_00125228);
 
+//100%
 INCLUDE_ASM("ai/rider", cRider_quitEvent);
+#ifdef SKIP_ASM
+struct sVEntry001253D0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern int D_005366D0[];
+
+static inline bool riderHasFinished001253D0(char* rider)
+{
+    return *(float*)(rider + 0x470) >= 0.0f;
+}
+
+extern "C" void cRider_quitEvent(char* self)
+{
+    bool finished = riderHasFinished001253D0(self);
+    if (!finished)
+    {
+        *(int*)(self + 0x480) = 1;
+        char* sub = self + 0x6C0;
+        sVEntry001253D0* vt = *(sVEntry001253D0**)sub;
+        D_005366D0[vt[7].fn(sub + vt[7].delta)] = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00125448);
 
@@ -644,7 +690,24 @@ INCLUDE_ASM("ai/rider", func_00125EB8);
 
 INCLUDE_ASM("ai/rider", func_001276F0);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00127848);
+#ifdef SKIP_ASM
+int func_00320C48(void*, int);
+
+extern "C" int func_00127848(void* self)
+{
+    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1B))
+        return 0;
+    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1C))
+        return 1;
+    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1D))
+        return 2;
+    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1E))
+        return 3;
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001278C0__FPv);

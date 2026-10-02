@@ -444,7 +444,26 @@ INCLUDE_ASM("be/belibrary", func_0014D608);
 
 INCLUDE_ASM("be/belibrary", func_0014D7E8);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D908);
+#ifdef SKIP_ASM
+extern "C" int func_0014D908(sBEGroupTable* self, sBEEntry38* e, int key)
+{
+    if (e == 0)
+        return 0;
+    if (e->field_0x6 == key)
+        return 1;
+    if (e->field_0x6 == -1)
+        return 0;
+    int i = func_0014D448(self, e->group, e->field_0x6);
+    sBEEntry38* parent;
+    if (i < 0)
+        parent = 0;
+    else
+        parent = &self->entries[i];
+    return func_0014D908(self, parent, key);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014D988__FPvi);

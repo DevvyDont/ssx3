@@ -130,11 +130,44 @@ extern "C" void func_00128AC0(void* self)
 
 INCLUDE_ASM("ai/ai", func_00128AF0);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00129160);
+#ifdef SKIP_ASM
+extern "C" void func_0011EB60(void* self, float value);
+extern "C" void func_0011EB98(void* self);
+extern "C" void func_003103F0(void*);
+
+extern "C" void func_00129160(sAiObj128A48* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_0011EB60(self->mRiders[i], 1.0f);
+        func_0011EB98(self->mRiders[i]);
+        func_003103F0(*(void**)(self->mRiders[i] + 0x780));
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_001291E0);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001296F8);
+#ifdef SKIP_ASM
+extern "C" int func_0011D640(void* self);
+extern "C" void func_0011C298(void* self);
+
+extern "C" void func_001296F8(sAiObj128A48* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011D640(self->mRiders[i]) == 0)
+        {
+            func_0011C298(self->mRiders[i]);
+            break;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00129768);
@@ -166,7 +199,24 @@ INCLUDE_ASM("ai/ai", cAI_initComputerRiders);
 
 INCLUDE_ASM("ai/ai", cAI_initComputerActors);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012A180);
+#ifdef SKIP_ASM
+extern "C" int func_0011D640(void* self);
+
+extern "C" int func_0012A180(sAiObj128A48* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011D640(self->mRiders[i]) == 0)
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012A250);
@@ -203,11 +253,59 @@ INCLUDE_ASM("ai/ai", func_0012A490);
 
 INCLUDE_ASM("ai/ai", func_0012AB20);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012ABD0);
+#ifdef SKIP_ASM
+struct sAiObj12ABD0
+{
+    char pad0[0x48];
+    char* mRiders[14];
+    int mCount;
+};
+
+extern "C" int func_0011C0E0(void*);
+
+extern "C" int func_0012ABD0(sAiObj12ABD0* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012AC48);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012ACF8);
+#ifdef SKIP_ASM
+struct sAiObj12ACF8
+{
+    char pad0[0x5C];
+    char* mRiders[10];
+    int mCount;
+};
+
+extern "C" int func_0011C0E0(void*);
+
+extern "C" int func_0012ACF8(sAiObj12ACF8* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012AE38);
 
@@ -244,7 +342,21 @@ extern "C" void func_0012B030(void* self)
 
 INCLUDE_ASM("ai/ai", func_0012B090);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012B180);
+#ifdef SKIP_ASM
+extern "C" void func_00154A58(int rider, int a);
+extern "C" void func_001175B8(char* self);
+
+extern "C" void func_0012B180(sAiObj128A48* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_00154A58(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
+        func_001175B8(*(char**)(self->mRiders[i] + 0x790));
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012B200);
 
@@ -252,7 +364,22 @@ INCLUDE_ASM("ai/ai", cAI_loadAnims);
 
 INCLUDE_ASM("ai/ai", func_0012B340);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012B420);
+#ifdef SKIP_ASM
+unsigned int AIrand();
+extern "C" int func_00125AD8(void* self);
+
+extern "C" int func_0012B420(sAiObj128A48* self)
+{
+    int sum = AIrand();
+    for (int i = 0; i < self->mCount; i++)
+    {
+        sum += func_00125AD8(self->mRiders[i]);
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012B498);
 
@@ -426,7 +553,34 @@ INCLUDE_ASM("ai/ai", func_0012E468);
 
 INCLUDE_ASM("ai/ai", func_0012E528);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012E690);
+#ifdef SKIP_ASM
+struct sVEntry0012E690 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_001298C8();
+extern "C" void func_0010E028(void* self, int mode, float t);
+extern "C" void* func_0028B180();
+extern "C" void func_002A02D8(void*, void*);
+
+extern "C" void func_0012E690(void* self)
+{
+    if ((func_001298C8() & 1) == 0)
+    {
+        char* sub = *(char**)((char*)self + 0x80) + 0x6C0;
+        sVEntry0012E690* vt = *(sVEntry0012E690**)sub;
+        if (vt[8].fn(sub + vt[8].delta))
+        {
+            func_0010E028(*(void**)((char*)self + 0x80), 4, 0.0f);
+        }
+        func_002A02D8(func_0028B180(), *(void**)((char*)self + 0x80));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012E708);

@@ -247,13 +247,39 @@ extern "C" int func_001577A0(void* self, int a1, int a2)
 
 INCLUDE_ASM("be/beintreward", func_001577E0);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_001578A0);
+#ifdef SKIP_ASM
+extern "C" int func_00157A78(void* self, int a, int b, int i);
+
+extern "C" int func_001578A0(void* self, int a, int b)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (func_00157A78(self, a, b, i) == 0)
+            return 0;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00157920);
 
 INCLUDE_ASM("be/beintreward", func_00157A78);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157B08);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00157B70(void* self, int a, int b, int peak);
+
+extern "C" int func_00157B08(void* self, int rider, int peak)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    return func_00157B70(self, profile, cBELibrary_getCharacterID(rider), peak);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00157B70);
@@ -539,7 +565,22 @@ INCLUDE_ASM("be/beintreward", func_001589B0);
 
 INCLUDE_ASM("be/beintreward", func_00158A50);
 
+//100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsMedal);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
+
+extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int medal)
+{
+    unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 0xB), a, b);
+    if (earned >= *(unsigned int*)((char*)(void*)D_0045B048 + medal * 4))
+        return 1;
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00158BE0);
 
@@ -618,11 +659,37 @@ extern "C" int func_00159080(void* self, int a1, int a2, int kind, int tier)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00159170);
+#ifdef SKIP_ASM
+extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
+extern "C" void func_00159CD0(void* self, int a1, int a2, int bit);
+
+extern "C" void func_00159170(void* self, int a1, int a2, int kind, int tier)
+{
+    int bit = func_00159080(self, a1, a2, kind, tier);
+    if (func_0015A2E0(self, a1, a2, bit) == 0)
+    {
+        func_00159CD0(self, a1, a2, bit);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_001591E8);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_001597B0);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern "C" void func_00159818(void* self, int a, int b, int c);
+
+extern "C" void func_001597B0(void* self, int rider, int c)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    func_00159818(self, profile, cBELibrary_getCharacterID(rider), c);
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00159818);
 
