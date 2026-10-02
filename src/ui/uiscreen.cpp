@@ -361,7 +361,48 @@ extern "C" void func_0039CE98(void* self, void* p1, void* p2, void* p3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_createAllObjects);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void cList_addToEnd(cList*, cListNode*);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" char* cUIScreen_createObjectByStruct(void* self, char* rec);
+extern "C" void* func_003E6448(void* dst, int c, int n);
+extern char D_00493EF0[];
+
+struct sUIVtCED0 { short delta; short index; void (*fn)(void*, void*); };
+
+extern "C" void cUIScreen_createAllObjects(void* self)
+{
+    char* data = *(char**)((char*)self + 0x38);
+    char* rec = data + 4;
+    if (*(unsigned int*)data != 0) {
+        *(void***)((char*)self + 0x3C) = (void**)operator_new_tag(*(unsigned int*)data * 4, D_00493EF0, 0x20000000, 0);
+        func_003E6448(*(void***)((char*)self + 0x3C), 0, **(unsigned int**)((char*)self + 0x38) * 4);
+    }
+    void** out = *(void***)((char*)self + 0x3C);
+    for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
+        char* obj = cUIScreen_createObjectByStruct(self, rec);
+        if (obj != 0) {
+            *out++ = obj;
+            *(int*)(obj + 0x38) = *(int*)(rec + 4);
+            cList_addToEnd((cList*)((char*)self + 0xB4), (cListNode*)obj);
+        }
+        rec += *(unsigned short*)(rec + 2);
+    }
+    for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
+        void* o = (*(void***)((char*)self + 0x3C))[i];
+        if (o != 0) {
+            char* d = *(char**)((char*)self + 0xD0);
+            sUIVtCED0* vt = *(sUIVtCED0**)(d + 8);
+            vt[18].fn(d + vt[18].delta, o);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByStruct);
 

@@ -33,7 +33,73 @@ extern "C" void func_002DE368(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE398);
+#ifdef SKIP_ASM
+extern int D_004A3AFC;
+
+struct sWakeVecE398 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float wakeAbsE398(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: the seed is reinterpreted as a float in [1,2) through memory (type pun).
+static inline float wakeRandE398()
+{
+    D_004A3AFC = ((D_004A3AFC * 0x18FCD + 0xE9507C) & 0x7FFFFF) | 0x3F800000;
+    return *(float*)&D_004A3AFC - 1.0f;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline void wakeScaleE398(sWakeVecE398& r, const sWakeVecE398& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void wakeAddE398(sWakeVecE398& a, const sWakeVecE398& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+extern "C" void func_002DE398(char* self, sWakeVecE398* out)
+{
+    float s = *(float*)(self + 0x12C);
+    float a = (1.0f - wakeAbsE398(s)) * 55.0f;
+    float lo = -a;
+    sWakeVecE398 t;
+    sWakeVecE398 tmp;
+    wakeScaleE398(tmp, *(sWakeVecE398*)(self + 0x50), s * 55.0f + (lo + (a - lo) * wakeRandE398()));
+    t = tmp;
+    wakeAddE398(*out, t);
+    wakeScaleE398(tmp, *(sWakeVecE398*)(self + 0x40), wakeRandE398() * 20.0f + -10.0f);
+    t = tmp;
+    wakeAddE398(*out, t);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE4A8);
 
@@ -218,7 +284,45 @@ extern "C" void func_002E2550(void* self)
 #undef S28
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E26B8);
+#ifdef SKIP_ASM
+struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); };
+
+extern "C" void func_002E26B8(void* vself)
+{
+    char* self = (char*)vself;
+    int on = *(int*)(*(char**)self + 0x870) >= 0;
+    *(int*)(self + 0x124) = on;
+    if (on) {
+        *(float*)(*(char**)(self + 0x2C) + 0x498) = 55.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x4A0) = 25.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x554) = 170.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x580) = 30.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x588) = 20.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x63C) = 60.0f;
+    } else {
+        *(float*)(*(char**)(self + 0x2C) + 0x498) = 24.75f;
+        *(float*)(*(char**)(self + 0x2C) + 0x4A0) = 5.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x554) = 76.5f;
+        *(float*)(*(char**)(self + 0x2C) + 0x580) = 19.5f;
+        *(float*)(*(char**)(self + 0x2C) + 0x588) = 8.0f;
+        *(float*)(*(char**)(self + 0x2C) + 0x63C) = 39.0f;
+    }
+    {
+        char* b = *(char**)(self + 0x28);
+        char* o = b + 0xA50;
+        sWakeVt26B8* vt = *(sWakeVt26B8**)(b + 0xC48);
+        vt[3].fn(o + vt[3].delta, *(char**)(self + 0x2C) + 0x488, *(float*)(b + 0xAA8));
+    }
+    {
+        char* b = *(char**)(self + 0x28);
+        char* o = b + 0xC60;
+        sWakeVt26B8* vt = *(sWakeVt26B8**)(b + 0xE58);
+        vt[3].fn(o + vt[3].delta, *(char**)(self + 0x2C) + 0x570, *(float*)(b + 0xCB8));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E27E8);
@@ -457,7 +561,43 @@ extern "C" void func_002E3930(sWakeFade_3930* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E39D8);
+#ifdef SKIP_ASM
+extern "C" float func_0031C040(float x);
+extern float D_004A55AC;
+
+struct sWkVt39D8 { short delta; short index; int (*fn)(void*); };
+struct sWkCol39D8 {
+    char* rider;                // 0x0
+    float phase;                // 0x4
+    float a[4];                 // 0x8
+    float b[4];                 // 0x18
+    float out[4];               // 0x28
+};
+
+extern "C" void func_002E39D8(sWkCol39D8* self)
+{
+    char* o = self->rider + 0x6C0;
+    sWkVt39D8* vt = *(sWkVt39D8**)o;
+    if (vt[8].fn(o + vt[8].delta) == 0) return;
+    float half = 0.5f;
+    float p = self->phase + D_004A55AC * 0.01666666753590107f;
+    float t = p * 0.15915493667125702f + half;
+    float f;
+    // PORT: FPU-only float->int->float round trip (floor helper); no C cast reproduces it.
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(f) : "f"(t));
+    if (t < f) f -= 1.0f;
+    float q = p - f * 6.2831854820251465f;
+    self->phase = q;
+    float s = func_0031C040(q) * half + half;
+    float u = 1.0f - s;
+    self->out[0] = s * self->a[0] + u * self->b[0];
+    self->out[1] = s * self->a[1] + u * self->b[1];
+    self->out[2] = s * self->a[2] + u * self->b[2];
+    self->out[3] = s * self->a[3] + u * self->b[3];
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3AF8);
 
@@ -643,7 +783,40 @@ extern "C" float func_002E4678(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E46C8);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern char* D_004A5B64;
+
+struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
+struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
+
+extern "C" void func_002E46C8(char* self)
+{
+    char* ctx = D_004A5B80;
+    if (*(int*)(self + 0x7C) != 0) {
+        sWkVtA46C8* vt = *(sWkVtA46C8**)(ctx + 0x10D8);
+        if (vt[114].fn(ctx + vt[114].delta) - *(int*)(self + 0x80) >= 3) {
+            sWkVtB46C8* vt2 = *(sWkVtB46C8**)(ctx + 0x10D8);
+            vt2[60].fn(ctx + vt2[60].delta, self + 0x68);
+            *(int*)(self + 0x7C) = 0;
+        }
+    }
+    if (*(int*)(self + 0x44) == 0) return;
+    if (*(int*)(self + 0x40) != 0) return;
+    if (*(int*)(self + 0x18) > 0) {
+        *(float*)(self + 0x48) = *(float*)(self + 0x3C);
+    } else if (*(float**)(self + 0x70) != 0) {
+        *(float*)(self + 0x48) = **(float**)(self + 0x70) * (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C));
+    } else {
+        *(float*)(self + 0x48) += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    }
+    if (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C) <= *(float*)(self + 0x48)) {
+        func_002E4578(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E47E8);
 

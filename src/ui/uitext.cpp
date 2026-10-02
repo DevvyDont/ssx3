@@ -220,7 +220,55 @@ extern "C" void* func_003A1148(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A11B8);
+#ifdef SKIP_ASM
+// PORT: func_0039FE00 really takes (self, data); other units declare it with one argument.
+void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
+// PORT: called with only self here (the unit declares two arguments).
+void func_003A18C0_1(void* self) __asm__("func_003A18C0");
+extern "C" void func_003A1F18(void* self, int id);
+
+struct sUIColor11B8 {
+    float r, g, b, a;
+    sUIColor11B8() {}
+    sUIColor11B8(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+struct sUIVt11B8 { short delta; short index; void (*fn)(void*, int); };
+struct sUIText11B8 {
+    char pad0[0x8];
+    sUIVt11B8* vt;              // 0x8
+    char padC[0x74 - 0xC];
+    unsigned int b0 : 1;        // 0x74
+    unsigned int mode : 2;
+    unsigned int rest : 29;
+    sUIColor11B8 color;         // 0x78
+};
+struct sUIData11B8 {
+    char pad0[0x20];
+    unsigned char mode;         // 0x20
+    unsigned char vis;          // 0x21
+    char pad22[2];
+    int textId;                 // 0x24
+    unsigned char r, g, b, a;   // 0x28
+};
+
+extern "C" void func_003A11B8(sUIText11B8* self, sUIData11B8* data)
+{
+    func_0039FE00_2(self, data);
+    self->mode = data->mode & 3;
+    self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
+    if (data->textId != 0) {
+        func_003A18C0_1(self);
+        func_003A1F18(self, data->textId);
+    }
+    int f = *(int*)((char*)self + 0x74) >> 3;
+    if (f & 1) {
+        self->color = sUIColor11B8(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
+                                   data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A12D0);

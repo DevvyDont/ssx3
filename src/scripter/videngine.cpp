@@ -45,7 +45,57 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/videngine", func_002839A8);
+#ifdef SKIP_ASM
+extern "C" int func_00253860(void*);
+extern "C" void* func_0028B180();
+extern "C" void func_0029CE28(void*);
+extern "C" void func_002EA820(void*);
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_005366E8[];
+extern int D_00442918[];
+
+struct sVidObj { char pad0[0x10]; int state; };
+struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
+struct sVidMgr { char pad0[0x84]; sVidOwner* owner; };
+extern sVidMgr* D_004A28A8;
+extern char* D_004A289C;
+
+struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
+struct sVtEnt { short delta; short index; void* fn; };
+
+extern "C" int func_002839A8(sVidPlayer* self)
+{
+    void* p = self->p;
+    if (p == 0) return 0;
+    if (self->active != 0) return 1;
+    func_00253860(p);
+    int n = D_004A2A54 + 1;
+    self->active = 1;
+    D_005366E8[n] = 10;
+    D_004A2A50 = D_00442918[0];
+    D_004A2A54 = n;
+    sVidObj* q = D_004A28A8->owner->obj;
+    self->f14 = 0;
+    int s = q->state;
+    if (s != 0 && s != 2) self->f14 = 1;
+    func_002EA820(q);
+    {
+        char* o = D_004A289C;
+        sVtEnt* vt = *(sVtEnt**)(o + 0x10D8);
+        self->f10 = *((int*(*)(void*))vt[42].fn)(o + vt[42].delta);
+    }
+    {
+        char* o = D_004A289C;
+        sVtEnt* vt = *(sVtEnt**)(o + 0x10D8);
+        ((void(*)(void*, int))vt[40].fn)(o + vt[40].delta, 0);
+    }
+    func_0029CE28(func_0028B180());
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283AA0);

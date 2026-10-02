@@ -570,7 +570,44 @@ extern "C" void func_002ABA18(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABA40);
+#ifdef SKIP_ASM
+extern "C" int func_003B8AB8(int h);
+extern "C" int func_003B9FC8(int h);
+// PORT: the unit declares func_003B7C40(int, int); its second argument is a status buffer here.
+int func_003B7C40_st(int h, int* st) __asm__("func_003B7C40");
+
+extern "C" int func_002ABA40(void* self)
+{
+    int type = *(int*)self;
+    switch (type) {
+    case 1: {
+        func_003B58A0();
+        int r = func_003B8AB8(*(int*)((char*)self + 4)) != 0;
+        func_003B58D8();
+        return r;
+    }
+    case 2: {
+        func_003B58A0();
+        int r = func_003B9FC8(*(int*)((char*)self + 4));
+        func_003B58D8();
+        return r == 2 || r < 0;
+    }
+    case 3: {
+        int st[4];
+        func_003B58A0();
+        if (func_003B7C40_st(*(int*)((char*)self + 4), st) >= 0) {
+            func_003B58D8();
+            return st[0] == 3;
+        }
+        func_003B58D8();
+        return 1;
+    }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002ABB38);

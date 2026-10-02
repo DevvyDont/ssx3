@@ -237,7 +237,38 @@ extern "C" void func_002D8258(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D82A0);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void func_003DEC80(void* a, void* b, void* data, int size, int prio);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_004A3AE8[];
+
+extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows)
+{
+    if (direct) {
+        func_003DEC80(a, b, src, stride * rows, 100);
+    } else {
+        char* buf = (char*)operator_new_tag(stride * rows, D_004A3AE8, 0, 0);
+        char* d = buf;
+        for (int i = 0; i < rows; i++) {
+            char* end = src + stride;
+            char* p = end;
+            while (src != p) {
+                *d++ = *--p;
+            }
+            src = end;
+        }
+        func_003DEC80(a, b, buf, stride * rows, 100);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+    }
+    return stride * rows;
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D83B8);
 
@@ -299,7 +330,40 @@ INCLUDE_ASM("visualfx/avalanche", func_002D9130);
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_addAvalancheNode);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9538);
+#ifdef SKIP_ASM
+struct sAvParams9538 { int data[0xD8 / 4]; };
+struct sAvNode9538 {
+    sAvParams9538 params;       // 0x0
+    char padD8[0xF0 - 0xD8];
+    unsigned short type;        // 0xF0
+    unsigned char emit;         // 0xF2
+    char padF3;
+    sAvNode9538* next;          // 0xF4
+    int id;                     // 0xF8
+};
+struct sAvGroup9538 {
+    int f0;
+    sAvNode9538* nodes;         // 0x4
+    sAvGroup9538* next;         // 0x8
+};
+extern void* D_004A3AB0;
+
+extern "C" void func_002D9538(int id, sAvParams9538* params)
+{
+    for (sAvGroup9538* g = (sAvGroup9538*)D_004A3AB0; g != 0; g = g->next) {
+        for (sAvNode9538* n = g->nodes; n != 0; n = n->next) {
+            if (n->id == id) {
+                if (n->type == 2) return;
+                n->emit = 1;
+                n->params = *params;
+                return;
+            }
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D9660);

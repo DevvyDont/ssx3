@@ -458,7 +458,50 @@ extern "C" void func_0028D5A0(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028D630);
+#ifdef SKIP_ASM
+extern "C" int func_00285D98(void* self, int which);
+
+struct sBmVt630 { short delta; short index; int (*fn)(void*); };
+struct sBmVt630b { short delta; short index; int (*fn)(void*, int); };
+
+extern "C" void func_0028D630(void* self, int id, void* obj)
+{
+    int ok;
+    if (*(int*)((char*)self + 0x5FD4) != 0) return;
+    if (*(int*)((char*)self + 0x5FD8) != 0) return;
+    if (*(int*)((char*)self + 0x623C) == id) return;
+    ok = 0;
+    if (*(int*)((char*)self + 0x62A0) == -1) {
+        // PORT: func_00285D98 returns an object pointer as int
+        if ((int)obj == func_00285D98(self, -1)) {
+            char* o = (char*)obj + 0x6C0;
+            sBmVt630* e = &(*(sBmVt630**)o)[7];
+            ok = 1;
+            *(int*)((char*)self + 0x62A0) = e->fn(o + e->delta);
+        }
+    } else {
+        char* o = (char*)obj + 0x6C0;
+        sBmVt630* e = &(*(sBmVt630**)o)[7];
+        ok = e->fn(o + e->delta) == *(int*)((char*)self + 0x62A0);
+    }
+    if (ok) {
+        int n = *(int*)((char*)self + 0x623C);
+        char* mon = (char*)self + 0x118;
+        if (n != 0) {
+            sBmVt630b* vt = *(sBmVt630b**)((char*)self + 0x5558);
+            vt[4].fn(mon + vt[4].delta, n + 1);
+        }
+        *(int*)((char*)self + 0x623C) = id;
+        *(int*)((char*)self + 0x6240) = 0;
+        {
+            sBmVt630b* vt = *(sBmVt630b**)((char*)self + 0x5558);
+            vt[4].fn(mon + vt[4].delta, id);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D740);
@@ -635,7 +678,44 @@ INCLUDE_ASM("sound/bankmanager", func_0028E8C0);
 
 INCLUDE_ASM("sound/bankmanager", func_0028EF90);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F000);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+extern "C" int func_00285D98(void* self, int which);
+extern "C" int func_00289C18(void* self, int rider);
+
+extern "C" void func_0028F000(void* self)
+{
+    char* mon = (char*)self + 0x118;
+    int st = func_002B49E0(mon);
+    if (st >= 1 && st <= 3) {
+        func_002B3C28(mon, 0x7F);
+        return;
+    }
+    if (*(int*)((char*)self + 0x6288) != 2) {
+        *(int*)((char*)self + 0x6288) = 2;
+        *(int*)((char*)self + 0x628C) = 0;
+    }
+    int max = 800;
+    int r = func_00289C18(self, func_00285D98(self, -1));
+    if (r == 1) {
+        max = 1000;
+    } else if (r == 2) {
+        max = 1200;
+    }
+    int cur = *(int*)((char*)self + 0x628C);
+    float t = (float)cur / (float)max;
+    if (cur < max) {
+        *(int*)((char*)self + 0x628C) = cur + 1;
+    } else {
+        *(int*)((char*)self + 0x628C) = max;
+    }
+    t = t <? 1.0f;
+    t = t >? 0.0f;
+    func_002B3C28((char*)self + 0x118, (int)(t * 127.0f));
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028F108);
 

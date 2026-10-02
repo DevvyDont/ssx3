@@ -69,7 +69,59 @@ extern "C" void func_002EA480(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
+#ifdef SKIP_ASM
+extern int D_004A45C8;
+
+struct sTrailStripA538 {
+    char* pts;                  // 0x0
+    int start;                  // 0x4
+    int count;                  // 0x8
+    int fC;                     // 0xC
+    float scale;                // 0x10
+};
+struct sRctxVtA538 { short delta; short index; void (*fn)(void*, sTrailStripA538*, int); };
+
+extern "C" void func_002EA538(char** trails, int n)
+{
+    sTrailStripA538 strips[16];
+    int count = 0;
+    push_A480(D_004A289C);
+    if (n > 0) {
+    do {
+        char* t = *trails;
+        int len = *(int*)(t + 0x90);
+        if (len < 2) continue;
+        int k = len - 0x39;
+        int start = *(int*)(t + 0x8C) - k;
+        int cnt = len - 2;
+        int over = len - 0x32;
+        if (over > 0) {
+            cnt -= over;
+            start += over;
+        }
+        if (cnt < 2) continue;
+        int st = start % 0x36;
+        float sc = 1.0f / (float)D_004A45C8;
+        if (count < 16) {
+            strips[count].pts = t + 0x10;
+            strips[count].start = st;
+            strips[count].count = cnt;
+            strips[count].fC = 0;
+            strips[count].scale = sc;
+            count++;
+        }
+    } while (trails++, --n > 0);
+    }
+    {
+        char* ctx = (char*)D_004A289C;
+        sRctxVtA538* vt = *(sRctxVtA538**)(ctx + 0x10D8);
+        vt[89].fn(ctx + vt[89].delta, strips, count);
+    }
+    pop_A480(D_004A289C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA670);
@@ -381,7 +433,31 @@ extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const fun
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBC40);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBE20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+unsigned int BXrand();
+// base ctor returns this; the unit declares it void
+void* func_002E4D70_r(void* self) __asm__("func_002E4D70__FPv");
+extern void* D_00488080[];
+
+struct sBtRectBE20 { float x, y, w, h; };
+
+extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
+{
+    func_002E4D70_r(self);
+    *(void***)self = D_00488080;
+    *(sBtRectBE20*)((char*)self + 0x4) = rect;
+    unsigned int r1 = BXrand() % 1000;
+    float* p = (float*)((char*)self + 0x14);
+    *p = (float)r1 * 0.64000004529953f;
+    unsigned int r2 = BXrand() % 1000;
+    float* q = (float*)((char*)self + 0x18);
+    *q = (float)r2 * 0.48000001907348633f;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBF48);
 

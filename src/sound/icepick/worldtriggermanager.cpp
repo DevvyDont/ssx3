@@ -229,7 +229,54 @@ extern "C" void func_002B5988(char** self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_LoadTriggerInfo);
+#ifdef SKIP_ASM
+extern "C" int BXFILE_exists(const char* name);
+extern "C" char* func_003E22F0(const char* name, int a1);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char* D_004A3858;
+extern char D_004835C0[];
+
+struct sTrigInfoEnt { int type; int* data; };
+
+// PORT: the unit declares LoadTriggerInfo as void (the ctor ignores it); the body returns 0/1. Bound by asm label.
+int cWorldTriggerManager_LoadTriggerInfo_impl(void* self) __asm__("cWorldTriggerManager_LoadTriggerInfo");
+
+int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
+{
+    if (BXFILE_exists(D_004A3858) != 0) {
+        char* data = func_003E22F0(D_004A3858, 0);
+        *(char**)((char*)self + 0x338) = data;
+        if (*data != 0) {
+            return 0;
+        }
+        *(int*)((char*)self + 0x340) = *(int*)(data + 8) + 2;
+        *(sTrigInfoEnt**)((char*)self + 0x33C) = (sTrigInfoEnt*)operator_new_tag(*(int*)((char*)self + 0x340) * 8, D_004835C0, 0, 0);
+        int* p = (int*)(data + 0xC);
+        for (int i = 2; i < *(int*)((char*)self + 0x340); i++) {
+            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].type = *p;
+            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].data = p;
+            int t = *p;
+            if (t == 1) {
+                p += 6;
+            } else if (t == 2) {
+                p += 14;
+            } else if (t == 3) {
+                p += 12;
+            } else if (t == 4) {
+                p += 4;
+            }
+        }
+    } else {
+        *(char**)((char*)self + 0x338) = 0;
+        *(int*)((char*)self + 0x340) = 0;
+        *(sTrigInfoEnt**)((char*)self + 0x33C) = 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B90);
@@ -268,7 +315,40 @@ extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int a, int b, 
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5C68);
+#ifdef SKIP_ASM
+struct sWtVec3 { float x, y, z; };
+struct sWtVec4 {
+    float x, y, z, w;
+    sWtVec4() {}
+    sWtVec4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+extern "C" void func_002B5C68(sWorldTrigger70** self, int a, int b, int c, int d, int e, float f, const sWtVec3& pos)
+{
+    sWtVec3 p = pos;
+    if (*(int*)((char*)self + 0x334) != 0) {
+        char* t = (char*)func_002B5BC0(self, a, b, c);
+        if (t == 0) {
+            sWtVec4 q;
+            q = sWtVec4(p.x, p.y, p.z, 1.0f);
+            t = (char*)func_002B5B90(self);
+            *(int*)(t + 0x0) = 1;
+            *(int*)(t + 0x4) = a;
+            *(int*)(t + 0x8) = b;
+            *(int*)(t + 0x3C) = c;
+            *(int*)(t + 0xC) = d;
+            *(float*)(t + 0x10) = f;
+            *(int*)(t + 0x14) = e;
+            *(sWtVec4*)(t + 0x20) = q;
+        } else {
+            *(float*)(t + 0x10) = f;
+        }
+        *(int*)(t + 0x34) = 1;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5D78);

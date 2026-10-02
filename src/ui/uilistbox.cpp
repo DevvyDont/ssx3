@@ -40,7 +40,35 @@ extern "C" unsigned char func_0039A4B0(void* self, unsigned short* str, int data
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByStringID);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" int USTR_length(unsigned short* s);
+extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
+extern char D_00493DE0[];
+
+struct sUIStrVtA568 { short delta; short index; unsigned short* (*fn)(void*, int); };
+
+extern "C" unsigned char cUIListBox_addEntryByStringID(void* self, int id, int data)
+{
+    char* tbl = *(char**)(*(char**)(*(char**)(*(char**)((char*)self + 0x5C) + 0xD0) + 0x10) + 0x10);
+    if (tbl != 0) {
+        sUIStrVtA568* vt = *(sUIStrVtA568**)(tbl + 4);
+        unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
+        if (str != 0) {
+            unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DE0, 0x100, 0);
+            USTR_copy(u, str);
+            *(const char**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA0) = 0;
+            *(unsigned short**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0x9C) = u;
+            *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA4) = data;
+            *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0x98) = id;
+        }
+    }
+    return (*(unsigned char*)((char*)self + 0x318))++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A670);
@@ -225,7 +253,38 @@ extern "C" void func_0039AB00(void* self, char a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uilistbox", func_0039AB50);
+#ifdef SKIP_ASM
+extern "C" void* func_00397870(void* list, unsigned char i);
+
+struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
+
+extern "C" unsigned char func_0039AB50(void* self)
+{
+    unsigned char i = *(unsigned char*)((char*)self + 0x95) + 1;
+    unsigned char n = *(unsigned char*)((char*)self + 0x96);
+    do {
+        if (i < *(unsigned char*)((char*)self + 0x96)) {
+            if (*(int*)((char*)self + 0x90) & 4) {
+                char* o = *(char**)(*(char**)((char*)self + 0x5C) + 0xD0);
+                sUIVtAB50* vt = *(sUIVtAB50**)(o + 8);
+                if (vt[20].fn(o + vt[20].delta, self, 1, i) != 0) return i;
+            } else {
+                char* e = (char*)func_00397870((char*)self + 0x74, i);
+                int f = *(int*)(e + 0x14) >> 5;
+                if ((f & 1) == 0) return i;
+            }
+            i = i + 1;
+        } else {
+            int f = *(int*)((char*)self + 0x14) >> 7;
+            if ((f & 1) == 0) return *(unsigned char*)((char*)self + 0x95);
+            i = 0;
+        }
+    } while (n-- != 0);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039AC48);

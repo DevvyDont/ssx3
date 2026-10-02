@@ -1182,7 +1182,48 @@ extern "C" void func_002AF900(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF960);
+#ifdef SKIP_ASM
+extern "C" int BXFILE_exists(const char* name);
+extern "C" void* FILE_load(const char* name, int a1);
+extern "C" int func_003D69F0(void* data);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" char* func_0041ACC0(const char* s, int c);
+void* func_002AF8E0(void* self);
+extern char D_004A37C0[];
+extern char D_004832B0[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+
+// PORT: callers declare func_002AF960 as int(int, int, int); the body is (name, unused, data) returning an object pointer.
+void* func_002AF960_impl(const char* name, int unused, void* data) __asm__("func_002AF960");
+
+void* func_002AF960_impl(const char* name, int unused, void* data)
+{
+    char buf[0x50];
+    int owned = data == 0;
+    sprintf(buf, D_004A37C0, name);
+    if (data == 0) {
+        if (BXFILE_exists(buf) == 0) {
+            return 0;
+        }
+        data = FILE_load(buf, 0);
+    }
+    char* obj = (char*)func_002AF8E0(cMemMan_alloc(0x4C, D_004832B0, 0, 0));
+    *(int*)(obj + 0x48) = owned;
+    *(void**)(obj + 0x44) = data;
+    *(int*)obj = func_003D69F0(data);
+    strcpy(obj + 4, name);
+    char* p = func_0041ACC0(obj + 4, '\\');
+    if (p == 0) {
+        *(char**)(obj + 0x40) = obj + 4;
+    } else {
+        *(char**)(obj + 0x40) = p + 1;
+    }
+    return obj;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AFA58);
@@ -1373,7 +1414,29 @@ extern "C" void func_002B0348(sBankList_0348* self, int a, int b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B03B8);
+#ifdef SKIP_ASM
+extern "C" unsigned int strlen(const char* s);
+
+extern "C" int func_002B03B8(const char* name)
+{
+    int lang = 0;
+    int len = strlen(name);
+    if (name[len - 4] == '_') {
+        if (name[len - 3] == 'e' && name[len - 2] == 'n' && name[len - 1] == 'g') {
+            lang = 1;
+        } else if (name[len - 3] == 'f' && name[len - 2] == 'r' && name[len - 1] == 'n') {
+            lang = 2;
+        } else if (name[len - 3] == 'g' && name[len - 2] == 'r' && name[len - 1] == 'm') {
+            lang = 3;
+        } else if (name[len - 3] == 's' && name[len - 2] == 'p' && name[len - 1] == 'n') {
+            lang = 4;
+        }
+    }
+    return lang;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 
@@ -2179,7 +2242,42 @@ extern "C" void func_002B3EB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3EE8);
+#ifdef SKIP_ASM
+extern "C" int func_0041AD80(const char* a, const char* b);
+
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sBankMonFind {
+    char pad0[0x124];
+    char names[64][11];         // 0x124
+    int nnames;                 // 0x3E4
+    int count;                  // 0x3E8
+    char pad3EC[0x3F8 - 0x3EC];
+    ulong mask;                 // 0x3F8
+    char pad400[0x420 - 0x400];
+    int grid[64][5];            // 0x420
+    int totals[5];              // 0x920
+};
+
+extern "C" void func_002B3EE8(sBankMonFind* self, const char* name)
+{
+    if (self->count < 64) {
+        for (int i = 0; i < self->nnames; i++) {
+            if (func_0041AD80(self->names[i], name) != 0) {
+                self->mask |= (ulong)1 << i;
+                self->count++;
+                for (int j = 0; j < 5; j++) {
+                    if (self->grid[i][j] != 0) {
+                        self->totals[j]++;
+                    }
+                }
+                return;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3FE8);

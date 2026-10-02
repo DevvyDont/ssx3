@@ -280,7 +280,42 @@ extern "C" void func_0039F840(cList* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F8C8);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+struct sUIStVtF8C8 { short delta; short index; void (*fn)(void*, int); };
+struct sUIStVtF8C8a { short delta; short index; void (*fn)(void*); };
+
+static inline void func_0039F8C8_purge(cList* list)
+{
+    char* n = (char*)cList_first(list);
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            char* next = *(char**)(n + 4);
+            if (((*(int*)(n + 0x1C) >> 6) & 1) == 0) {
+                sUIStVtF8C8a* vt = *(sUIStVtF8C8a**)(n + 8);
+                vt[5].fn(n + vt[5].delta);
+                if (n != 0) {
+                    sUIStVtF8C8* vt2 = *(sUIStVtF8C8**)(n + 8);
+                    vt2[1].fn(n + vt2[1].delta, 3);
+                }
+            }
+            n = next;
+        }
+    }
+}
+
+extern "C" void func_0039F8C8(cList* self)
+{
+    func_0039F8C8_purge(self);
+    func_0039F8C8_purge((cList*)((char*)self + 0x1C));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039F9D8);

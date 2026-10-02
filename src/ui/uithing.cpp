@@ -127,7 +127,51 @@ extern "C" func_003A0348_sObj* func_003A0348(func_003A0348_sObj* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uithing", func_003A03F0);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText*, int);
+// PORT: func_0039FE00 really takes (self, data); other units declare it with one argument.
+void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
+
+struct sUIColor03F0 {
+    float r, g, b, a;
+    sUIColor03F0() {}
+    sUIColor03F0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+struct sUIVt03F0 { short delta; short index; void (*fn)(void*, int); };
+struct sUIThing03F0 {
+    char pad0[0x8];
+    sUIVt03F0* vt;              // 0x8
+    char padC[0x74 - 0xC];
+    unsigned int mode : 2;      // 0x74
+    unsigned int rest : 30;
+    sUIColor03F0 color;         // 0x78
+};
+struct sUIData03F0 {
+    char pad0[0x20];
+    unsigned char mode;         // 0x20
+    char pad21;
+    unsigned char vis;          // 0x22
+    char pad23;
+    int textId;                 // 0x24
+    unsigned char r, g, b, a;   // 0x28
+};
+
+extern "C" void func_003A03F0(sUIThing03F0* self, sUIData03F0* data)
+{
+    func_0039FE00_2(self, data);
+    self->mode = data->mode & 3;
+    self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
+    cUIText_setUnicodeStringByID((cUIText*)self, data->textId);
+    int f = *(int*)((char*)self + 0x74) >> 2;
+    if (f & 1) {
+        self->color = sUIColor03F0(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
+                                   data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uithing", func_003A04F0);

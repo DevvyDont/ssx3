@@ -113,7 +113,79 @@ extern "C" int cUIEngine_loadFile(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", cUIEngine_addScreenByHashName);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* func_003977E8(void* self);
+extern "C" void func_001DD580(void* self);
+extern "C" void cUIScreen_setData(void* self, char* data);
+extern "C" void func_0039E758(void* self, void* node);
+extern "C" void cUIScreen_createAllObjects(void* self);
+// PORT: func_0039FB30 really takes (self, a, b); the unit's other caller uses a 1-arg declaration.
+void* func_0039FB30_3(void* self, int a, int b) __asm__("func_0039FB30");
+extern char D_00493D80[];
+extern void* D_00494670[];
+extern void* D_004949E8[];
+
+struct sUIScreenD4 {
+    sUIScreenD4* next;          // 0x0
+    sUIScreenD4* prev;          // 0x4
+    void** vt;                  // 0x8
+    int fC;
+    int f10;
+    char o14[4];                // 0x14
+    char o18[0x1C];             // 0x18
+    int f34;
+    int f38;
+    int f3C;
+    char o40[8];                // 0x40
+    void** vt48;                // 0x48
+    char pad4C[0xB4 - 0x4C];
+    char oB4[0x1C];             // 0xB4
+    void* owner;                // 0xD0
+};
+struct sUIScrEnt { unsigned int hash; int offset; };
+struct sUIScrTbl { unsigned int count; sUIScrEnt ents[1]; };
+
+extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned int hash, void* screen)
+{
+    char* bank = *(char**)((char*)self + 4);
+    sUIScrTbl* tbl = (sUIScrTbl*)(bank + *(int*)(bank + 0xC));
+    sUIScrEnt* found = 0;
+    sUIScrEnt* e = tbl->ents;
+    for (unsigned int i = 0; i < tbl->count; i++, e++) {
+        if (e->hash == hash) {
+            found = e;
+            break;
+        }
+    }
+    char* data = (char*)tbl + found->offset;
+    if (screen == 0) {
+        sUIScreenD4* s = new (D_00493D80, 0x100, 0) sUIScreenD4;
+        s->prev = s;
+        s->next = s;
+        s->vt = D_00494670;
+        s->fC = 0;
+        s->f10 = 0;
+        func_001DD580(s->o14);
+        func_003977E8(s->o18);
+        s->f34 = 0;
+        s->f38 = 0;
+        s->f3C = 0;
+        func_0039FB30_3(s->o40, 0, 0);
+        s->vt48 = D_004949E8;
+        func_003977E8(s->oB4);
+        s->owner = owner;
+        screen = s;
+    }
+    cUIScreen_setData(screen, data);
+    func_0039E758(owner, screen);
+    cUIScreen_createAllObjects(screen);
+    return screen;
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00397DF8);
 
@@ -556,7 +628,50 @@ extern "C" func_00399768_sObj* func_00399768(func_00399768_sObj* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00399820);
+#ifdef SKIP_ASM
+// PORT: func_0039FE00 really takes (self, data); the unit declares it with one argument.
+void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
+
+struct sUIColor9820 {
+    float r, g, b, a;
+    sUIColor9820() {}
+    sUIColor9820(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+struct sUIVt9820 { short delta; short index; void (*fn)(void*, int); };
+struct sUIObj9820 {
+    char pad0[0x8];
+    sUIVt9820* vt;              // 0x8
+    char padC[0x14 - 0xC];
+    int flags14;                // 0x14
+    char pad18[0x74 - 0x18];
+    unsigned int mode : 2;      // 0x74
+    unsigned int tinted : 1;
+    unsigned int rest : 29;
+    sUIColor9820 color;         // 0x78
+};
+struct sUIData9820 {
+    char pad0[0x20];
+    unsigned char mode;         // 0x20
+    char pad21;
+    unsigned short vis;         // 0x22
+    unsigned char r, g, b, a;   // 0x24
+};
+
+extern "C" void func_00399820(sUIObj9820* self, sUIData9820* data)
+{
+    func_0039FE00_2(self, data);
+    self->mode = data->mode & 3;
+    self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
+    int f = *(int*)((char*)self + 0x74) >> 2;
+    if (f & 1) {
+        self->color = sUIColor9820(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
+                                   data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
+    }
+    self->flags14 |= 0x80;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", func_00399920);

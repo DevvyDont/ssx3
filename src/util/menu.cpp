@@ -956,7 +956,30 @@ extern "C" int func_002CC578(void** self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CC648);
+#ifdef SKIP_ASM
+extern "C" void func_002CA4C8(void*, void*, int, int, void*);
+
+struct sMenuRectC648 { float x, y, z, w; };
+
+extern "C" sMenuRectC648* func_002CC648(sMenuRectC648* ret, char* item)
+{
+    if (*(void**)(item + 0x18) != 0 && *(void**)(item + 0x1C) != 0) {
+        sMenuRectC648 a;
+        sMenuRectC648 b;
+        sMenuRectC648 tmp;
+        func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x18));
+        a = tmp;
+        func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x1C));
+        b = tmp;
+        *ret = (a.z > b.z) ? a : b;
+    } else {
+        func_002CA4C8(ret, item, 0, *(int*)(item + 0x14), 0);
+    }
+    return ret;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CC758);
@@ -978,7 +1001,31 @@ extern "C" void func_002CC758(void* self, int a1)
 
 INCLUDE_ASM("util/menu", func_002CC8F0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CCB18);
+#ifdef SKIP_ASM
+extern "C" void func_002CA4C8(void*, void*, int, int, void*);
+extern char D_004866B8[];
+
+struct sMenuRectCB18 { float x, y, z, w; };
+struct sMenuEntCB18 { void* name; int data; };
+
+extern "C" sMenuRectCB18* func_002CCB18(sMenuRectCB18* ret, char* item)
+{
+    sMenuRectCB18 best;
+    sMenuRectCB18 tmp;
+    func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, D_004866B8);
+    best = tmp;
+    for (int i = 0; i < *(int*)(item + 0x18); i++) {
+        func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, (*(sMenuEntCB18**)(item + 0x1C))[i].name);
+        if (tmp.z > best.z) {
+            best = tmp;
+        }
+    }
+    *ret = best;
+    return ret;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CCC38);
 
@@ -1988,7 +2035,33 @@ extern "C" func_002CFF88_sRect* func_002CFF88(func_002CFF88_sRect* out, void* it
 
 INCLUDE_ASM("util/menu", func_002D0008);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cARGBMenuItem_cARGBMenuItem);
+#ifdef SKIP_ASM
+extern "C" void* func_002CF860(void* self, void* name, void* title);
+// PORT: cExpandMenuItem_addItem forwards $a2 (insert index) to cMenu_addItem; bound with that third argument.
+void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
+extern void* D_00486908[];
+
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title, void* color)
+{
+    char* s = (char*)self;
+    func_002CF860(self, name, s + 0x640);
+    *(void**)(s + 0x5AC) = color;
+    *(void***)(s + 0x10) = D_00486908;
+    // PORT: the channel index is passed in the unit's void* parameter
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5B0), color, (void*)0);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5D4), color, (void*)1);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5F8), color, (void*)2);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x61C), color, (void*)3);
+    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem_sItem*)(s + 0x640), title, color);
+    cExpandMenuItem_addItem3(self, s + 0x5B0, -1);
+    cExpandMenuItem_addItem3(self, s + 0x5D4, -1);
+    cExpandMenuItem_addItem3(self, s + 0x5F8, -1);
+    cExpandMenuItem_addItem3(self, s + 0x61C, -1);
+    return self;
+}
+#endif
 
 extern "C" void* func_002CFA08(void* self);
 
@@ -2052,7 +2125,67 @@ extern "C" void func_002D0500(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D06E8);
+#ifdef SKIP_ASM
+extern "C" void* func_002CFA08(void* self);
+
+struct sMenuChanD6E8 {
+    char pad0[0x18];
+    float* target;              // 0x18
+    char pad1C[0x24 - 0x1C];
+    float scale;                // 0x24
+    float offset;               // 0x28
+    char pad2C[0x34 - 0x2C];
+    float get() { return *target; }
+    void set(float v) { *target = v; }
+};
+struct sMenuVecD6E8 {
+    float x, y, z;
+    sMenuVecD6E8() {}
+    sMenuVecD6E8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+struct sMenuColD6E8 {
+    char pad0[0x5B8];
+    sMenuChanD6E8 ch[3];        // 0x5B8
+    char pad654[0x670 - 0x654];
+    int linked;                 // 0x670
+};
+
+static inline void menuNormalizeD6E8(sMenuVecD6E8& out, const sMenuVecD6E8& v)
+{
+    float d = v.x * v.x + v.y * v.y + v.z * v.z;
+    float len;
+    // PORT: sqrt.s (sqrtf without errno check)
+    __asm__("sqrt.s %0, %1" : "=f"(len) : "f"(d));
+    if (len != 0.0f) {
+        float inv = 1.0f / len;
+        out.x = v.x * inv;
+        out.y = v.y * inv;
+        out.z = v.z * inv;
+    } else {
+        out.x = v.x;
+        out.y = v.y;
+        out.z = v.z;
+    }
+}
+
+extern "C" void* func_002D06E8(sMenuColD6E8* self)
+{
+    void* ret = func_002CFA08(self);
+    if (self->linked != 0) {
+        sMenuVecD6E8 n;
+        sMenuVecD6E8 v(self->ch[0].scale * self->ch[0].get() + self->ch[0].offset,
+                       self->ch[1].scale * self->ch[1].get() + self->ch[1].offset,
+                       self->ch[2].scale * self->ch[2].get() + self->ch[2].offset);
+        menuNormalizeD6E8(n, v);
+        self->ch[0].set(n.x);
+        self->ch[1].set(n.y);
+        self->ch[2].set(n.z);
+    }
+    return ret;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002D08E0);
