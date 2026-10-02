@@ -428,7 +428,57 @@ extern "C" void func_0010E028(void* self, int mode, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010E098);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void* func_0028B180();
+extern "C" void func_00149690(void* iface, int rider, int b);
+extern "C" void func_0029AB08(void* mgr, void* rider, float cur, float amt);
+extern "C" void func_0010E028(void* self, int mode, float t);
+
+// PORT: g++ `<?` (min) operator.
+static inline float clamp_10E098(float v, float lo, float hi)
+{
+    if (v >= lo) return v <? hi;
+    return lo;
+}
+
+extern "C" void func_0010E098(void* self, int mask, float amt)
+{
+    if (*(int*)((char*)self + 0x304) == 3)
+        return;
+    float zero = 0.0f;
+    if (amt == zero)
+        return;
+    if (amt > zero)
+    {
+        func_00149690(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self + 0x86C), *(int*)((char*)self + 0xB34));
+        if ((mask & *(int*)((char*)self + 0xB28)) == 0)
+            return;
+    }
+    func_0029AB08(func_0028B180(), self, *(float*)((char*)self + 0x2F8), amt);
+    *(float*)((char*)self + 0x2F8) = clamp_10E098(*(float*)((char*)self + 0x2F8) + amt, zero, 1.0f);
+    if (*(float*)((char*)self + 0x2F8) == 1.0f && amt > zero && *(int*)((char*)self + 0xB2C) != 0)
+    {
+        if (*(float*)((char*)self + 0x2F0) == zero)
+            func_0010E028(self, 5, zero);
+        if (*(int*)((char*)self + 0x2F4) <= 0)
+            *(int*)((char*)self + 0x2F4) += 1;
+        if (*(int*)((char*)self + 0x2F4) >= 1 && *(int*)((char*)self + 0x2F4) <= 9)
+        {
+            // PORT: g++ `>?` (max) operator.
+            *(float*)((char*)self + 0x2F0) = *(float*)((char*)self + 0x2F0) >? 20.0f;
+        }
+    }
+    else if (amt < 0.0f && *(int*)((char*)self + 0x2F4) < 10)
+    {
+        *(float*)((char*)self + 0x2F0) = 0.0f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010E228);
