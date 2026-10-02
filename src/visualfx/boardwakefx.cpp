@@ -350,7 +350,40 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E39D8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3AF8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4228);
+#ifdef SKIP_ASM
+extern "C" void* func_00354648(void* self, void* a1);
+extern "C" void* func_00282CD0(void* self);
+extern "C" void func_00283298(void* self);
+extern "C" void func_002E4CB0(void);
+extern void* D_00488100[];
+extern void* D_00488158[];
+
+extern "C" void* func_002E4228(void* self, void* a1, int a2)
+{
+    func_00354648(self, a1);
+    func_00282CD0((char*)self + 0x10);
+    *(int*)((char*)self + 0x74) = a2;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x44) = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    *(int*)((char*)self + 0x60) = 0;
+    *(int*)((char*)self + 0x64) = 0;
+    *(int*)((char*)self + 0x68) = 0;
+    *(int*)((char*)self + 0x70) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0x7C) = 0;
+    *(int*)((char*)self + 0x80) = 0;
+    *(void***)((char*)self + 0x1C) = D_00488100;
+    *(void***)((char*)self + 0xC) = D_00488158;
+    *(int*)((char*)self + 0x6C) = -1;
+    func_002E4CB0();
+    func_00283298((char*)self + 0x10);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E42D0);
 

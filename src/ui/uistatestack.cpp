@@ -27,9 +27,91 @@ extern "C" void cUIStateStack_pushExplicit(void* self, cUIStateStack_pushExplici
 
 INCLUDE_ASM("ui/uistatestack", func_0039F290);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushSpecial);
+#ifdef SKIP_ASM
+struct cListNode;
+void cList_addToFront(cList*, cListNode*);
 
+struct cUIStateStack_sState {
+    char pad0[0x1C];
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+};
+
+static inline int cUIStateStack_stateId(cUIStateStack_sState* s) { return s->id; }
+
+extern "C" void* cUIStateStack_getCurrentState(void* self);
+
+extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st, int a2, int a3)
+{
+    cUIStateStack_sState* cur = (cUIStateStack_sState*)cUIStateStack_getCurrentState(self);
+    if (cur != 0) {
+        if (((*(int*)((char*)cur + 0x1C) >> 5) & 1) && cUIStateStack_stateId(cur) == 5) {
+            cur->id = 7;
+            cur->b7 = a3;
+        }
+    } else {
+        a2 = 1;
+        st->id = 2;
+    }
+    cList_addToFront(self, (cListNode*)st);
+    st->b5 = a2;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F400);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList*);
+struct cListNode;
+void cList_addToFront(cList*, cListNode*);
+
+struct func_0039F400_sState {
+    char pad0[0x1C];
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+};
+
+static inline int func_0039F400_stateId(func_0039F400_sState* s) { return s->id; }
+
+extern "C" void func_0039F400(cList* self, func_0039F400_sState* st)
+{
+    int covered = 0;
+    func_0039F400_sState* top = (func_0039F400_sState*)cList_first(self);
+    if (top != 0) {
+        int f = *(int*)((char*)top + 0x1C);
+        if (((f >> 5) & 1) && ((f >> 6) & 1) == 0 && func_0039F400_stateId(top) < 6) {
+            covered = 1;
+            top->id = 6;
+            top->b7 = 1;
+        }
+    }
+    if (covered) {
+        st->id = 1;
+        st->b5 = 0;
+    } else {
+        st->id = 2;
+        st->b5 = 1;
+    }
+    cList_addToFront(self, (cListNode*)st);
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F4C0);
 
@@ -200,7 +282,35 @@ extern "C" void func_0039F840(cList* list)
 
 INCLUDE_ASM("ui/uistatestack", func_0039F8C8);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F9D8);
+#ifdef SKIP_ASM
+struct cListNode;
+int cListNode_isSentinel(cListNode*);
+
+extern "C" void* func_0039F9D8(void* self, int id)
+{
+    char* n = (char*)cList_first((cList*)self);
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            if (*(int*)(n + 0xC) == id) {
+                return n;
+            }
+            n = *(char**)(n + 4);
+        }
+    }
+    n = (char*)cList_first((cList*)((char*)self + 0x1C));
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            if (*(int*)(n + 0xC) == id) {
+                return n;
+            }
+            n = *(char**)(n + 4);
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_getCurrentState);

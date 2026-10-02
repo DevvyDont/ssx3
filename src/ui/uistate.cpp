@@ -66,9 +66,85 @@ extern "C" void cUIState_showObjSafe(void* self, char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistate", func_0039E9D8);
+#ifdef SKIP_ASM
+extern "C" void func_0039F8C8(void* self);
+extern "C" void func_00397948(void*);
+extern "C" void func_003A4868(void* self);
+void operator_delete(int*);
+extern void* D_00494C98[];
+extern void* D_00494CC0[];
 
+extern "C" void func_0039E9D8(void* self, int flags)
+{
+    func_0039F8C8(self);
+    *(void***)((char*)self + 0x34) = D_00494C98;
+    func_00397948((char*)self + 0x1C);
+    *(void***)((char*)self + 0x30) = D_00494CC0;
+    func_003A4868((char*)self + 0x28);
+    *(void***)((char*)self + 0x24) = D_00494CC0;
+    func_003A4868((char*)self + 0x1C);
+    *(void***)((char*)self + 0x18) = D_00494C98;
+    func_00397948(self);
+    *(void***)((char*)self + 0x14) = D_00494CC0;
+    func_003A4868((char*)self + 0xC);
+    *(void***)((char*)self + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uistate", func_0039EA90);
+#ifdef SKIP_ASM
+struct func_0039EA90_sFlags {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+};
+
+struct func_0039EA90_node {
+    char pad0[0x4];
+    func_0039EA90_node* next; // 0x4
+    char pad8[0x1C - 0x8];
+    union {
+        int flags; // 0x1C
+        func_0039EA90_sFlags bits;
+    };
+};
+
+static inline void func_0039EA90_setB3(func_0039EA90_node* n, int v) { n->bits.b3 = v; }
+static inline void func_0039EA90_setB5(func_0039EA90_node* n, int v) { n->bits.b5 = v; }
+static inline void func_0039EA90_setId(func_0039EA90_node* n, int v) { n->bits.id = v; }
+static inline void func_0039EA90_setB4(func_0039EA90_node* n, int v) { n->bits.b4 = v; }
+
+extern "C" int func_0039EA90(cList* list, signed char id)
+{
+    func_0039EA90_node* n = (func_0039EA90_node*)cList_first(list);
+    if (n != 0) {
+        do {
+            if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
+                func_0039EA90_setB3(n, 1);
+                func_0039EA90_setB5(n, 1);
+                func_0039EA90_setId(n, 2);
+                func_0039EA90_setB4(n, 1);
+                return 1;
+            }
+            n = n->next;
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistate", func_0039EB60);
@@ -100,7 +176,39 @@ extern "C" int func_0039EB60(cList* list, signed char id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistate", func_0039EBE0);
+#ifdef SKIP_ASM
+struct func_0039EBE0_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0039EBE0(void* self)
+{
+    char* n = (char*)cList_first((cList*)self);
+    if (n != 0) {
+        do {
+            if ((*(int*)(n + 0x1C) >> 3) & 1) {
+                func_0039EBE0_sVEntry* vt = *(func_0039EBE0_sVEntry**)(n + 8);
+                vt[15].fn(n + vt[15].delta);
+            }
+            n = *(char**)(n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+    n = (char*)cList_first((cList*)((char*)self + 0x1C));
+    if (n != 0) {
+        do {
+            if ((*(int*)(n + 0x1C) >> 3) & 1) {
+                func_0039EBE0_sVEntry* vt = *(func_0039EBE0_sVEntry**)(n + 8);
+                vt[15].fn(n + vt[15].delta);
+            }
+            n = *(char**)(n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistate", func_0039ECA8__FPv);

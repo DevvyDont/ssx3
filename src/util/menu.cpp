@@ -201,7 +201,46 @@ INCLUDE_ASM("util/menu", func_002CA4C8);
 
 INCLUDE_ASM("util/menu", func_002CA768);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CA988);
+#ifdef SKIP_ASM
+extern "C" void* func_002CBF30(void* self);
+extern char D_004D5380[];
+extern char D_004D5390[];
+
+struct func_002CA988_sVec3 {
+    float x;
+    float y;
+    float z;
+};
+extern func_002CA988_sVec3 D_004D53A0;
+extern func_002CA988_sVec3 D_004D53B0;
+
+struct func_002CA988_sColor {
+    float a;
+    float r;
+    float g;
+    float b;
+};
+
+extern "C" void* func_002CA768(void* self, int a1, int a2, int a3, void* a4, char* style, func_002CA988_sColor* col);
+
+// PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the body reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
+void* func_002CA988_5(void* self, int a1, int a2, int a3, void* a4)
+{
+    int focused = self == func_002CBF30(*(void**)self);
+    char* style = focused ? D_004D5380 : D_004D5390;
+    func_002CA988_sVec3* v = focused ? &D_004D53A0 : &D_004D53B0;
+    func_002CA988_sColor c;
+    c.a = 1.0f;
+    c.r = v->x;
+    c.g = v->y;
+    c.b = v->z;
+    return func_002CA768(self, a1, a2, a3, a4, style, &c);
+}
+#endif
 
 extern void* D_00486ED0[];
 
@@ -259,9 +298,81 @@ extern "C" void func_002CAAB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CAB08);
+#ifdef SKIP_ASM
+class func_002CAB08_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(int);
+    virtual void v07();
+};
 
+struct func_002CAB08_sMenu {
+    int count;
+    int cur;
+    int f8;
+    func_002CAB08_cItem* items[1];
+};
+
+extern "C" void func_002CAB08(void* menu)
+{
+    func_002CAB08_sMenu* self = (func_002CAB08_sMenu*)menu;
+    int start = self->cur;
+    do {
+        self->cur = (self->cur + 1) % self->count;
+        if (self->cur == start) {
+            return;
+        }
+    } while (!self->items[self->cur]->v03());
+    self->items[start]->v07();
+    self->items[self->cur]->v06(0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002CABE0);
+#ifdef SKIP_ASM
+class func_002CABE0_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(int);
+    virtual void v07();
+};
+
+struct func_002CABE0_sMenu {
+    int count;
+    int cur;
+    int f8;
+    func_002CABE0_cItem* items[1];
+};
+
+extern "C" void func_002CABE0(void* menu)
+{
+    func_002CABE0_sMenu* self = (func_002CABE0_sMenu*)menu;
+    int start = self->cur;
+    do {
+        self->cur = (self->cur + self->count - 1) % self->count;
+        if (self->cur == start) {
+            return;
+        }
+    } while (!self->items[self->cur]->v03());
+    self->items[start]->v07();
+    self->items[self->cur]->v06(1);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CACC0);
@@ -655,7 +766,40 @@ int func_002CC318_impl(void* self)
 
 INCLUDE_ASM("util/menu", func_002CC350);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CC3B8);
+#ifdef SKIP_ASM
+void func_002CC0B8(void*, int);
+
+class func_002CC3B8_cMenu {
+public:
+    char pad[0x12C];
+    // vptr at 0x12C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(void*);
+    virtual void v07();
+};
+
+struct func_002CC3B8_sStack {
+    int count;
+    func_002CC3B8_cMenu* items[1];
+};
+
+extern "C" void func_002CC3B8(void* stack, void* item)
+{
+    func_002CC3B8_sStack* self = (func_002CC3B8_sStack*)stack;
+    if (self->count != 0) {
+        self->items[self->count - 1]->v07();
+    }
+    self->items[self->count++] = (func_002CC3B8_cMenu*)item;
+    self->items[self->count - 1]->v06(self);
+    func_002CC0B8(self, 1);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CC460);
@@ -693,7 +837,35 @@ extern "C" void func_002CC460(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CC578);
+#ifdef SKIP_ASM
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3B0(void* self);
+extern "C" int func_002CA3E8(void** self);
+
+class func_002CC578_cMenu {
+public:
+    char pad[0x12C];
+    // vptr at 0x12C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04(void*);
+};
+
+extern "C" int func_002CC578(void** self)
+{
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) == 0 && r == 0) {
+        if ((self[6] != 0 && self[7] != 0 && (func_002CA3E8(self) == 2 || func_002CA3E8(self) == 3)) || func_002CA3E8(self) == 6) {
+            *(int*)self[8] ^= 1;
+            ((func_002CC578_cMenu*)self[0])->v04(self);
+        }
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CC648);
 
@@ -1387,7 +1559,44 @@ extern "C" func_002CE418_sItem* func_002CE418(func_002CE418_sItem* self, int a1,
 
 INCLUDE_ASM("util/menu", func_002CE488);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CE820);
+#ifdef SKIP_ASM
+extern "C" void* func_002CBF30(void* self);
+extern "C" void func_002CA4C8(void*, void*, int, int, void*);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int strlen(const char* s);
+extern "C" char* func_004162D0(char* dst, const char* src);
+extern char D_004A39D0[];
+
+struct func_002CE820_sResult {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+
+static inline func_002CE820_sResult func_002CE820_make(void* item, int id, char* text)
+{
+    func_002CE820_sResult t;
+    func_002CA4C8(&t, item, id, 0, text);
+    return t;
+}
+
+extern "C" func_002CE820_sResult func_002CE820(void* item)
+{
+    char buf[0x20];
+    char* name = (char*)item + 0x18;
+    int focused = item == func_002CBF30(*(void**)item);
+    strcpy(buf, name);
+    int len = strlen(name);
+    if (focused && *(int*)((char*)item + 0x28) == len && *(int*)((char*)item + 0x28) < 15) {
+        func_004162D0(buf, D_004A39D0);
+    }
+    func_002CE820_sResult r = func_002CE820_make(item, *(int*)((char*)item + 0x14), buf);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CE910);
 
@@ -1510,7 +1719,56 @@ void cExpandMenuItem_addItem(void* self, void* item)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CFA08);
+#ifdef SKIP_ASM
+extern "C" int func_002CA3B0(void* self);
+extern "C" void func_002CAAB0(void* self);
+extern "C" void func_002CAB08(void* self);
+extern "C" void func_002CABE0(void* self);
+
+class func_002CFA08_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02();
+};
+
+struct func_002CFA08_sOwner {
+    char pad[0x18];
+    func_002CBE68_sMenu menu;
+};
+
+// PORT: returns a key code (int) through the unit's void* declaration.
+extern "C" void* func_002CFA08(void* p)
+{
+    func_002CFA08_sOwner* self = (func_002CFA08_sOwner*)p;
+    func_002CAAB0(&self->menu);
+    int prev = self->menu.selected;
+    int key = ((func_002CFA08_cItem*)self->menu.items[prev])->v02();
+    if (func_002CA3B0(self) != 0) {
+        return (void*)key;
+    }
+    switch (key) {
+    case 3:
+        func_002CAB08(&self->menu);
+        if (prev < self->menu.selected) {
+            return 0;
+        }
+        func_002CBE68(&self->menu, prev);
+        return (void*)3;
+    case 4:
+        func_002CABE0(&self->menu);
+        if (self->menu.selected < prev) {
+            return 0;
+        }
+        func_002CBE68(&self->menu, prev);
+        return (void*)4;
+    }
+    return (void*)key;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CFAF8);
@@ -1647,9 +1905,47 @@ int func_002D0448(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002D0450);
+#ifdef SKIP_ASM
+extern "C" void func_002CA4C8(void*, void*, int, int, void*);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_00413AF8(float f);
+extern char D_00486720[];
 
+extern "C" void* func_002D0450(void* ret, void* item)
+{
+    char buf[0x80];
+    const char* fmt = D_00486720;
+    int x = func_00413AF8((*(float**)((char*)item + 0x14))[0]);
+    int y = func_00413AF8((*(float**)((char*)item + 0x14))[1]);
+    int z = func_00413AF8((*(float**)((char*)item + 0x14))[2]);
+    sprintf(buf, fmt, x, y, z);
+    func_002CA4C8(ret, item, *(int*)((char*)item + 0x18), 0, buf);
+    return ret;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002D0500);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_00413AF8(float f);
+extern char D_00486720[];
+// PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
+extern "C" void func_002D0500(void* self, int a1)
+{
+    char buf[0x80];
+    const char* fmt = D_00486720;
+    int x = func_00413AF8((*(float**)((char*)self + 0x14))[0]);
+    int y = func_00413AF8((*(float**)((char*)self + 0x14))[1]);
+    int z = func_00413AF8((*(float**)((char*)self + 0x14))[2]);
+    sprintf(buf, fmt, x, y, z);
+    func_002CA988_5(self, a1, *(int*)((char*)self + 0x18), 0, buf);
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002D06E8);
 

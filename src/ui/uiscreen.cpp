@@ -376,7 +376,45 @@ void* func_0039D758(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiscreen", func_0039D778);
+#ifdef SKIP_ASM
+extern "C" void func_0039C978(void* self, void* thread);
+extern "C" void func_00398910(void* list, unsigned short frame);
+
+extern "C" void func_0039D778(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x18));
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            void* next = *(void**)((char*)n + 4);
+            if (*(unsigned short*)((char*)n + 0xE) != *(unsigned short*)((char*)n + 0xC)) {
+                func_0039C978(self, n);
+                int flags = *(signed char*)((char*)n + 0x13);
+                if ((flags & 1) == 0) {
+                    cListNode_removeFromList(n);
+                    if (n != 0) {
+                        sDeleteTarget* target = *(sDeleteTarget**)((char*)n + 0x8);
+                        target->fn((char*)n + target->field_0x8, 3);
+                    }
+                }
+            }
+            n = next;
+        }
+    }
+    unsigned short frame = 0xFFFF;
+    void* t = cUIScreen_getPrimaryThread(self);
+    if (t != 0) {
+        frame = *(unsigned short*)((char*)t + 0xC);
+    } else {
+        t = cList_first((cList*)((char*)self + 0x18));
+        if (t != 0) {
+            frame = *(unsigned short*)((char*)t + 0xC);
+        }
+    }
+    func_00398910((char*)self + 0x40, frame);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
@@ -430,11 +468,69 @@ void* func_0039D948(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039D968);
+#ifdef SKIP_ASM
+struct func_0039D968_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
+
+extern "C" void func_0039D968(void* self, float x, float y)
+{
+    char* a = *(char**)((char*)self + 0x74);
+    if (a != 0 && *(void**)((char*)self + 0x78) != 0) {
+        float px = x + *(float*)((char*)self + 0x44);
+        float py = y + *(float*)((char*)self + 0x48);
+        if ((*(int*)(a + 0x14) >> 6) & 1) {
+            func_0039D968_sVEntry* vt = *(func_0039D968_sVEntry**)(a + 8);
+            vt[0x11].fn(a + vt[0x11].delta, px, py);
+        }
+        char* b = *(char**)((char*)self + 0x78);
+        if ((*(int*)(b + 0x14) >> 6) & 1) {
+            func_0039D968_sVEntry* vt = *(func_0039D968_sVEntry**)(b + 8);
+            vt[0x11].fn(b + vt[0x11].delta, px, py);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039DA20);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039DE68);
+#ifdef SKIP_ASM
+struct func_0039DE68_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void func_0039DE68_call(char* o, int a)
+{
+    func_0039DE68_sVEntry* vt = *(func_0039DE68_sVEntry**)(o + 8);
+    vt[9].fn(o + vt[9].delta, a);
+}
+
+extern "C" void func_0039DE68(void* self, int a)
+{
+    char* o = *(char**)((char*)self + 0x7C);
+    if (o != 0) {
+        func_0039DE68_call(o, a);
+    }
+    o = *(char**)((char*)self + 0x80);
+    if (o != 0) {
+        func_0039DE68_call(o, a);
+    }
+    o = *(char**)((char*)self + 0x84);
+    if (o != 0) {
+        func_0039DE68_call(o, a);
+    }
+    func_0039DE68_call(*(char**)((char*)self + 0x78), a);
+    func_0039DE68_call(*(char**)((char*)self + 0x74), a);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039DF28);
@@ -536,7 +632,34 @@ extern "C" void* func_0039E318(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E390);
+#ifdef SKIP_ASM
+// PORT: unit declares func_00397948 as returning void*; called here as void (bound by asm label).
+extern "C" void func_00397948_v(void*) __asm__("func_00397948");
+extern "C" void func_003A4868(void*);
+void operator_delete(int*);
+extern void* D_004946C8[];
+extern void* D_00494C98[];
+extern void* D_00494CC0[];
+
+extern "C" void func_0039E390(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_004946C8;
+    func_00397948_v((char*)self + 0x24);
+    *(void***)((char*)self + 0x3C) = D_00494C98;
+    func_00397948_v((char*)self + 0x24);
+    *(void***)((char*)self + 0x38) = D_00494CC0;
+    func_003A4868((char*)self + 0x30);
+    *(void***)((char*)self + 0x2C) = D_00494CC0;
+    func_003A4868((char*)self + 0x24);
+    *(void***)((char*)self + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_00397948(void*);
 

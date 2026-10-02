@@ -2,7 +2,40 @@
 
 INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A76C0);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+struct func_003A76C0_sEntry {
+    void* data;
+    int pad[5];
+};
+
+struct func_003A76C0_sCache {
+    int f0;
+    unsigned int count;
+    int f8;
+    func_003A76C0_sEntry* entries;
+};
+
+extern "C" void func_003A76C0(void* p, int flags)
+{
+    func_003A76C0_sCache* self = (func_003A76C0_sCache*)p;
+    for (unsigned int i = 0; i < self->count; i++) {
+        if (self->entries[i].data != 0) {
+            cMemMan_free(self->entries[i].data);
+        }
+    }
+    if (self->entries != 0) {
+        cMemMan_free(self->entries);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A7768__FPv);
@@ -524,7 +557,63 @@ void func_003A9180(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A9188);
+#ifdef SKIP_ASM
+struct func_003A9188_sVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+extern func_003A9188_sVec4 D_004FF130;
+
+extern "C" void func_003A9658(void* self, unsigned int i, func_003A9188_sVec4* v, float f);
+
+struct func_003A9188_sPair {
+    int a;
+    int b;
+};
+
+struct func_003A9188_sSlot {
+    int f0;
+    char pad[0x4C];
+};
+
+struct func_003A9188_sCache {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    func_003A9188_sPair pairs[64];
+    char pad214[0x220 - 0x214];
+    func_003A9188_sVec4 v220;
+    func_003A9188_sVec4 v230;
+    func_003A9188_sSlot slots[2];
+    int f2E0;
+    int f2E4;
+};
+
+extern "C" void func_003A9188(func_003A9188_sCache* self)
+{
+    unsigned int i;
+    self->f0 = 0;
+    self->f4 = 0;
+    self->f8 = 0;
+    self->fC = 0;
+    self->f10 = 0;
+    self->v220 = D_004FF130;
+    self->v230 = D_004FF130;
+    for (i = 0; i < 64; i++) {
+        self->pairs[i].a = 0;
+        self->pairs[i].b = 0;
+    }
+    for (i = 0; i < 2; i++) {
+        self->slots[i].f0 = 0;
+        func_003A9658(self, i, &D_004FF130, 0.0f);
+    }
+    self->f2E0 = 0;
+    self->f2E4 = 0;
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A9258);
 

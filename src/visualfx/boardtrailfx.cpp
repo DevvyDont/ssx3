@@ -34,7 +34,44 @@ extern "C" void* func_002EA670(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA6B8);
+#ifdef SKIP_ASM
+extern "C" void func_002EAA28(void* self);
+
+struct func_002EA6B8_sFade {
+    char pad[0x10];
+    int state;
+    float t;
+    float dur;
+};
+
+extern "C" void func_002EA6B8(func_002EA6B8_sFade* self, float dur)
+{
+    switch (self->state) {
+    case 0:
+        func_002EAA28(self);
+        self->dur = dur;
+        self->t = 0.0f;
+        break;
+    case 1:
+        return;
+    case 2: {
+        float r = self->t / self->dur;
+        self->dur = dur;
+        self->t = (1.0f - r) * dur;
+        break;
+    }
+    case 3: {
+        float r = self->t / self->dur;
+        self->dur = dur;
+        self->t = r * dur;
+        break;
+    }
+    }
+    self->state = 3;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA780);

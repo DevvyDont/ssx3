@@ -150,7 +150,50 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1030);
+#ifdef SKIP_ASM
+extern "C" void* func_003A04F0(void* self);
+extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
+
+struct func_003A1030_sVec3 {
+    float x;
+    float y;
+    float z;
+};
+extern func_003A1030_sVec3 D_004FF0D8;
+
+struct func_003A1030_sRect {
+    float x0;
+    float y0;
+    float x1;
+    float y1;
+};
+
+struct func_003A1030_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
+{
+    if (*(int*)((char*)self + 0xB4) == 0 || ((*(int*)((char*)self + 0x14) >> 2) & 1) == 0) {
+        func_003A1030_sVEntry* vt = *(func_003A1030_sVEntry**)((char*)self + 8);
+        vt[16].fn((char*)self + vt[16].delta);
+    }
+    void* font = func_003A04F0(self);
+    int str = *(int*)((char*)self + 0xB4);
+    if (str != 0 && font != 0) {
+        func_003A1030_sRect r;
+        func_003921F0(font, str, &r, 0, *(float*)((char*)self + 0x50), *(float*)((char*)self + 0x54));
+        out->x = r.x1;
+        out->y = r.y1;
+    } else {
+        *out = D_004FF0D8;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A1148);
@@ -385,7 +428,31 @@ extern "C" void func_003A1F18(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1F90);
+#ifdef SKIP_ASM
+extern "C" void func_003A1F90(void* self, int idx)
+{
+    if (*(void***)((char*)self + 0xBC) != 0) {
+        unsigned short n = *(unsigned short*)((char*)self + 0xC8);
+        if (idx < n) {
+            void** arr = (void**)operator_new_tag((n - 1) * 4, D_004940A8, 0x100, 0);
+            if (idx > 0) {
+                func_0041605C(arr, *(void***)((char*)self + 0xBC), idx * 4);
+            }
+            if (idx < *(unsigned short*)((char*)self + 0xC8) - 1) {
+                // PORT: pointer held in int (only spelling found that gives idx-first addu)
+                func_0041605C((void*)(idx * 4 + (int)arr), (void*)(idx * 4 + *(int*)((char*)self + 0xBC) + 4), (*(unsigned short*)((char*)self + 0xC8) - idx - 1) * 4);
+            }
+            if (*(void***)((char*)self + 0xBC) != 0) {
+                cMemMan_free(*(void***)((char*)self + 0xBC));
+            }
+            *(void***)((char*)self + 0xBC) = arr;
+            (*(unsigned short*)((char*)self + 0xC8))--;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A2068);
@@ -439,7 +506,33 @@ extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A32F0);
+#ifdef SKIP_ASM
+extern "C" void func_0039FC48(void* self, int flags);
+extern void* D_004941B8[];
+
+extern "C" void func_003A32F0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_004941B8;
+    if (*(void**)((char*)self + 0x7C) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x7C));
+    }
+    if (*(void**)((char*)self + 0x80) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x80));
+    }
+    if (*(void**)((char*)self + 0x84) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x84));
+    }
+    if (*(void**)((char*)self + 0x88) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x88));
+    }
+    if (*(void**)((char*)self + 0x8C) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x8C));
+    }
+    func_0039FC48(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A3398);

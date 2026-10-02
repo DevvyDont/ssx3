@@ -64,7 +64,31 @@ extern "C" void func_00285F80(void* self, func_00285F80_sPair p)
 
 INCLUDE_ASM("sound/ssxAudio", func_00285FB0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00286200);
+#ifdef SKIP_ASM
+struct func_00286200_vte { short delta; short index; void (*fn)(void*); };
+extern "C" void func_002B3AC0(void*);
+extern "C" void func_002B3D48(void*, float);
+extern "C" void func_002ADDA0(void*);
+extern "C" void func_0028BCE8(void*, int);
+
+extern "C" void func_00286200(void* self)
+{
+    if (*(int*)((char*)self + 0x608C) == 2 || *(int*)((char*)self + 0x6090) == 2) {
+        func_002B3AC0((char*)self + 0x118);
+    } else {
+        func_002B3D48((char*)self + 0x118, 1.0f);
+    }
+    func_00285BE0(self, 0);
+    func_002ADDA0(**(char***)((char*)self + 0x118) + 0x1D8);
+    char* in = **(char***)((char*)self + 0x118);
+    char* obj = in + 0x1D8;
+    func_00286200_vte* vt = *(func_00286200_vte**)(in + 0xAB0);
+    vt[2].fn(obj + vt[2].delta);
+    func_0028BCE8(**(void***)((char*)self + 0x118), 0);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndLoad);
 
@@ -72,7 +96,32 @@ INCLUDE_ASM("sound/ssxAudio", func_002867E8);
 
 INCLUDE_ASM("sound/ssxAudio", func_00286A80);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00286C00);
+#ifdef SKIP_ASM
+extern "C" void func_002A6F38(void*);
+extern "C" void func_00289DF0(void*, int);
+extern "C" void func_0028BCE8(void*, int);
+extern "C" void func_0028BDE0(void*, int);
+extern "C" void func_0028A230(void*);
+extern "C" void func_0029F5E0(void*);
+
+extern "C" void func_00286C00(void* self)
+{
+    int i;
+    func_002A6F38(self);
+    func_00289DF0(**(void***)((char*)self + 0x118), 1);
+    for (i = 0; i < 17; i++) {
+        if (i != 13) {
+            func_0028BCE8(**(void***)((char*)self + 0x118), i);
+        }
+    }
+    func_0028BDE0(**(void***)((char*)self + 0x118), 3);
+    func_0028BDE0(**(void***)((char*)self + 0x118), 12);
+    func_0028A230(**(void***)((char*)self + 0x118));
+    func_0029F5E0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00286CA8);
@@ -288,7 +337,30 @@ INCLUDE_ASM("sound/ssxAudio", func_00287A10);
 
 INCLUDE_ASM("sound/ssxAudio", func_00287C48);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287F00);
+#ifdef SKIP_ASM
+extern "C" void func_00287A10(void* self, int a1, float a2, float a3);
+extern "C" int func_00284BA0(int);
+
+extern "C" void func_00287F00(void* self, int a1, float f0, float f1)
+{
+    if (a1 == 3) {
+        if (*(int*)((char*)self + 0x63DC) != 0) {
+            func_00287A10(self, func_00284BA0(*(int*)((char*)self + 0x63D4)), 1.0f, f0);
+            *(float*)((char*)self + 0x63D8) = f1;
+            *(int*)((char*)self + 0x63D4) = a1;
+            *(int*)((char*)self + 0x63DC) = 0;
+        }
+    } else if (*(int*)((char*)self + 0x63DC) == 0) {
+        func_00287A10(self, func_00284BA0(a1), f1, f0);
+        *(int*)((char*)self + 0x63D4) = a1;
+        *(int*)((char*)self + 0x63DC) = 1;
+        *(float*)((char*)self + 0x63D8) = f1;
+        *(int*)((char*)self + 0x63E0) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00287FC8);
 
@@ -343,9 +415,85 @@ void* func_00288AC0(void* self, int a1)
 
 INCLUDE_ASM("sound/ssxAudio", func_00288AE0);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288B40);
+#ifdef SKIP_ASM
+struct sAudV4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
+void* func_00288AC0(void* self, int a1);
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sAudV4 audVu0Sub(const sAudV4& a, const sAudV4& b)
+{
+    sAudV4 r;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float audVu0Dot(const sAudV4& a, const sAudV4& b)
+{
+    float r;
+    int t;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" int func_00288B40(void* self, sAudV4* pos, float radius)
+{
+    float r = radius * 100.0f;
+    r = r * r;
+    int i;
+    for (i = 0; i < func_00288CE8_self(self); i++) {
+        sAudV4 d = audVu0Sub(*(sAudV4*)func_00288AC0(self, i), *pos);
+        if (audVu0Dot(d, d) < r) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288C08);
+#ifdef SKIP_ASM
+void* func_00288AC0(void* self, int a1);
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+extern "C" int func_00288C08(void* self, sAudV4* pos, float radius)
+{
+    float r = radius * 100.0f;
+    r = r * r;
+    int i;
+    for (i = 0; i < func_00288CE8_self(self); i++) {
+        sAudV4 d = audVu0Sub(*(sAudV4*)func_00288AC0(self, i), *pos);
+        if (audVu0Dot(d, d) < r && 0.0f < d.z) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00288CE8);

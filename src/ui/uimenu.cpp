@@ -6,7 +6,39 @@ INCLUDE_ASM("ui/uimenu", func_0039AE98);
 
 INCLUDE_ASM("ui/uimenu", func_0039B000);
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039B6A0);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+extern "C" void func_0039DA20(void* p, unsigned char a, unsigned char b, unsigned char c);
+
+struct func_0039B6A0_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
+
+extern "C" void func_0039B6A0(void* self, float x, float y)
+{
+    void* p = *(void**)((char*)self + 0x9C);
+    if (p != 0) {
+        func_0039DA20(p, *(unsigned char*)((char*)self + 0x98), *(unsigned char*)((char*)self + 0x97), *(unsigned char*)((char*)self + 0x96));
+    }
+    void* n = cList_first((cList*)((char*)self + 0x74));
+    if (n != 0) {
+        do {
+            if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
+                func_0039B6A0_sVEntry* vt = *(func_0039B6A0_sVEntry**)((char*)n + 8);
+                vt[0x11].fn((char*)n + vt[0x11].delta, *(float*)((char*)self + 0x44) + x, *(float*)((char*)self + 0x48) + y);
+            }
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039B760);
@@ -23,7 +55,38 @@ extern "C" void func_0039B760(void* self, char a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039B7B0);
+#ifdef SKIP_ASM
+extern "C" void* func_00397870(void* list, unsigned char i);
+
+struct func_0039B7B0_sVEntry {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, int, unsigned char);
+};
+
+extern "C" unsigned char func_0039B7B0(void* self, unsigned char start)
+{
+    unsigned char i = start == 0xFF ? 0 : start;
+    for (; i < *(unsigned char*)((char*)self + 0x96); i++) {
+        void* item = func_00397870((char*)self + 0x74, i);
+        if (*(int*)((char*)self + 0x90) & 4) {
+            char* mgr = *(char**)(*(char**)((char*)self + 0x5C) + 0xD0);
+            func_0039B7B0_sVEntry* vt = *(func_0039B7B0_sVEntry**)(mgr + 8);
+            if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
+                return i;
+            }
+        } else {
+            int f = *(int*)((char*)item + 0x14);
+            if (((f >> 5) & 1) == 0) {
+                return i;
+            }
+        }
+    }
+    return 0xFF;
+}
+#endif
 
 INCLUDE_ASM("ui/uimenu", cUIMenu_setSelectedByIndex);
 
@@ -119,7 +182,41 @@ extern "C" int func_0039BD38(void* a, func_0039BD38_cVirt* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039BD68);
+#ifdef SKIP_ASM
+class func_0039BD68_cPred {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(void*);
+};
+
+class func_0039BD68_cNode {
+public:
+    char pad[0x8];
+    // vptr at 0x8
+    virtual void v01();
+    virtual void v02();
+    virtual void* v03(func_0039BD68_cPred*);
+};
+
+extern "C" void* func_0039BD68(void* self, func_0039BD68_cPred* pred)
+{
+    if (pred->v02(self)) {
+        return self;
+    }
+    func_0039BD68_cNode* child = *(func_0039BD68_cNode**)((char*)self + 0x78);
+    if (child != 0 && child->v03(pred) != 0) {
+        return *(void**)((char*)self + 0x78);
+    }
+    func_0039BD68_cNode* next = *(func_0039BD68_cNode**)((char*)self + 0x7C);
+    if (next != 0) {
+        return next->v03(pred);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039BE10);
@@ -349,5 +446,62 @@ extern "C" void func_0039C398(void* self, unsigned short ev)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039C428);
+#ifdef SKIP_ASM
+struct func_0039C428_sVec3 {
+    float x;
+    float y;
+    float z;
+};
+extern func_0039C428_sVec3 D_004FF0D8;
+
+class func_0039C428_cWidget {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20(func_0039C428_sVec3*);
+    virtual void v21(func_0039C428_sVec3*);
+};
+
+extern "C" void func_0039C428(void* self, int pos)
+{
+    *(int*)((char*)self + 0x7C) = pos;
+    func_0039C428_cWidget* a = *(func_0039C428_cWidget**)((char*)self + 0x74);
+    func_0039C428_sVec3 v = D_004FF0D8;
+    if (a != 0) {
+        a->v20(&v);
+    }
+    if (*(void**)((char*)self + 0x78) != 0) {
+        int n = *(int*)((char*)self + 0x80);
+        if (n != 0) {
+            if (!(*(int*)((char*)self + 0x14) & 1)) {
+                v.x *= (float)*(int*)((char*)self + 0x7C) / (float)n;
+            } else {
+                v.y *= (float)*(int*)((char*)self + 0x7C) / (float)n;
+            }
+            (*(func_0039C428_cWidget**)((char*)self + 0x78))->v21(&v);
+        }
+    }
+}
+#endif
 

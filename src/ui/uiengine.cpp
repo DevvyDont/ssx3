@@ -38,7 +38,57 @@ extern "C" void* func_00397B08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00397B70);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+extern "C" void func_00398078(void* self, int flags);
+extern "C" void func_0039E9D8(void* self, int flags);
+
+class cUIEngOwnA {
+public:
+    int f0;
+    virtual ~cUIEngOwnA();
+};
+
+class cUIEngOwnB {
+public:
+    int f0;
+    int f4;
+    virtual ~cUIEngOwnB();
+};
+
+class cUIEngOwnC {
+public:
+    virtual ~cUIEngOwnC();
+};
+
+struct func_00397B70_sSelf {
+    cUIEngOwnA* a;
+    void* buf;
+    int f8;
+    cUIEngOwnB* b;
+    int f10;
+    cUIEngOwnC* c;
+};
+
+extern "C" void func_00397B70(void* self, int flags)
+{
+    func_00397B70_sSelf* s = (func_00397B70_sSelf*)self;
+    delete s->a;
+    if (s->buf) {
+        cMemMan_free(s->buf);
+    }
+    delete s->b;
+    delete s->c;
+    func_00398078((char*)self + 0x58, 2);
+    func_0039E9D8((char*)self + 0x18, 2);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", cUIEngine_loadFile);
@@ -172,7 +222,26 @@ extern "C" void func_00398438(s3983F0* self)
 
 INCLUDE_ASM("ui/uiengine", func_003984B0);
 
+//100%
 INCLUDE_ASM("ui/uiengine", cUIFontInterface_loadFonts);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" int func_003915E8(void* mem, int name, int a2);
+extern char D_004A4780[];
+
+static inline int uiFontNameOf(s3983F0Entry* e)
+{
+    return e->unk4;
+}
+
+extern "C" void cUIFontInterface_loadFonts(s3983F0* self)
+{
+    for (int i = 0; i < self->count; i++) {
+        signed char j = i;
+        *(int*)((char*)self + j * 12 + 0xC) = func_003915E8(cMemMan_alloc(0x84, D_004A4780, 0, 0), uiFontNameOf(&self->entries[i]), 0);
+    }
+}
+#endif
 
 extern "C" void* func_0039FE00(void* self);
 
@@ -328,7 +397,29 @@ extern "C" void func_003987F8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398868);
+#ifdef SKIP_ASM
+struct func_00398868_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
+
+extern "C" void func_00398868(void* self, float x, float y)
+{
+    void* n = cList_first((cList*)((char*)self + 0x74));
+    if (n != 0) {
+        do {
+            if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
+                func_00398868_sVEntry* vt = *(func_00398868_sVEntry**)((char*)n + 8);
+                vt[0x11].fn((char*)n + vt[0x11].delta, *(float*)((char*)self + 0x44) + x, *(float*)((char*)self + 0x48) + y);
+            }
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", func_00398910);
@@ -386,7 +477,56 @@ extern "C" void func_00399730(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00399768);
+#ifdef SKIP_ASM
+extern "C" void* func_0039FB30(void* self);
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern void* D_00494798[];
+
+struct func_00399768_sQuad {
+    int a, b, c, d;
+};
+extern func_00399768_sQuad D_004C66C8;
+
+struct func_00399768_sEntry {
+    int a;
+    int b;
+    int c;
+    int d;
+    char e;
+};
+
+struct func_00399768_sObj {
+    char base[0x74];
+    unsigned char flags;
+    char pad75[0x88 - 0x75];
+    func_00399768_sQuad quad;
+    func_00399768_sEntry entries[32];
+    char c318;
+    char c319;
+};
+
+extern "C" func_00399768_sObj* func_00399768(func_00399768_sObj* self)
+{
+    func_0039FB30(self);
+    *(void***)((char*)self + 8) = D_00494798;
+    self->flags = (self->flags | 4) & 0xC4;
+    func_00399768_sEntry* p = self->entries;
+    for (int i = 31; i != -1; i--, p++) {
+        p->a = 0;
+        p->b = 0;
+        p->c = 0;
+        p->d = 0;
+        p->e = 0;
+    }
+    self->c318 = 0;
+    self->c319 = 0;
+    func_00416210(self->entries, 0, 0x280);
+    self->quad = D_004C66C8;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00399820);
 
@@ -414,9 +554,84 @@ extern "C" int func_00399920(void* self)
 
 INCLUDE_ASM("ui/uiengine", func_00399970);
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00399D80);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" int USTR_length(unsigned short* s);
+extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
+extern char D_00493DC0[];
 
+struct func_00399D80_sEntry {
+    unsigned short* str;
+    int pad[4];
+};
+
+extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str)
+{
+    void* a = *(void**)((char*)self + 0x5C);
+    void* b = *(void**)((char*)a + 0xD0);
+    void* c = *(void**)((char*)b + 0x10);
+    if (*(void**)((char*)c + 0x10) != 0) {
+        func_00399D80_sEntry* tbl = (func_00399D80_sEntry*)((char*)self + 0x9C);
+        func_00399D80_sEntry* e = &tbl[idx];
+        if (e->str) {
+            cMemMan_free(e->str);
+        }
+        unsigned short* s = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DC0, 0x100, 0);
+        USTR_copy(s, str);
+        e->str = s;
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", func_00399E28);
+#ifdef SKIP_ASM
+extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str);
+
+struct func_00399E28_sEntry {
+    int id;
+    unsigned short* str;
+    int pad[3];
+};
+
+struct func_00399E28_sObj {
+    char pad[0x98];
+    func_00399E28_sEntry entries[32];
+    unsigned char count;
+};
+
+struct func_00399E28_sVEntry {
+    short delta;
+    short index;
+    void* fn;
+};
+
+extern "C" void func_00399E28(func_00399E28_sObj* self)
+{
+    void* a = *(void**)((char*)self + 0x5C);
+    void* b = *(void**)((char*)a + 0xD0);
+    void* c = *(void**)((char*)b + 0x10);
+    char* loc = *(char**)((char*)c + 0x10);
+    if (loc != 0) {
+        for (unsigned char i = 0; i < self->count; i++) {
+            int id = self->entries[i].id;
+            if (id != 0) {
+                func_00399E28_sVEntry* vt = *(func_00399E28_sVEntry**)(loc + 4);
+                unsigned short* s = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
+                if (s != 0) {
+                    func_00399D80(self, i, s);
+                }
+            }
+        }
+        func_00399E28_sVEntry* vt2 = *(func_00399E28_sVEntry**)((char*)self + 8);
+        ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00399F00);
 
