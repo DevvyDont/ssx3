@@ -9,14 +9,12 @@ struct sCharWeightEntry {
 };
 extern sCharWeightEntry D_00530970[];
 
-//98.67%
+//100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
 #ifdef SKIP_ASM
 int cBECharacterInterface_getWeight(void* self, int riderIndex)
 {
-    sCharWeightEntry* base = D_00530970;
-    int charID = cBELibrary_getCharacterID(riderIndex);
-    return base[charID].mWeight;
+    return D_00530970[cBELibrary_getCharacterID(riderIndex)].mWeight;
 }
 #endif
 
