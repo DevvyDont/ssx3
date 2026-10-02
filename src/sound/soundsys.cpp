@@ -538,7 +538,50 @@ extern "C" void func_0029CE70(void* self)
 
 INCLUDE_ASM("sound/soundsys", func_0029CED8);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029D290);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B1D8();
+extern "C" void func_0029D370(void* self);
+extern "C" void func_0029D678(void* self, float v);
+extern "C" void func_002AD650(void* self, int id, float v);
+
+static inline int sndIsOn(char* t)
+{
+    return *(int*)t == 1;
+}
+
+extern "C" void func_0029D290(void* self)
+{
+    char* s = *(char**)((char*)func_0028B1D8() + 0x28);
+    int v = *(int*)(s + 0x430);
+    int ok = v != -1;
+    if (ok) {
+        if ((v & 0xFF) != *(unsigned char*)((char*)self + 0x5FC0)) {
+            *(int*)((char*)self + 0x5FC0) = v;
+            if (*(int*)(s + 0x434) < 0x16) {
+                func_0029D370(self);
+            } else {
+                func_0029D678(self, 5.029983997344971f);
+
+                char* o = **(char***)((char*)self + 0x118);
+                char* bm = o + 0x1D8;
+                char* e = *(char**)(o + 0xACC);
+                int id = sndIsOn(e + 0x300);
+                if (id) id = *(int*)(e + 0x304); else id = -1;
+                func_002AD650(bm, id, 5.029983997344971f);
+
+                char* o2 = **(char***)((char*)self + 0x118);
+                char* bm2 = o2 + 0x1D8;
+                char* e2 = *(char**)(o2 + 0xACC);
+                int id2 = sndIsOn(e2 + 0x360);
+                if (id2) id2 = *(int*)(e2 + 0x364); else id2 = -1;
+                func_002AD650(bm2, id2, 5.029983997344971f);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_0029D370);
 
@@ -927,9 +970,63 @@ INCLUDE_ASM("sound/soundsys", func_002A1400);
 
 INCLUDE_ASM("sound/soundsys", func_002A1560);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A16B0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_0029F0A0(void* self);
+extern "C" int func_002B0E28(void* self, int i);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+// func_0029F2B0 returns a value (the unit's earlier declaration says void).
+int func_0029F2B0_r(int a, int b) __asm__("func_0029F2B0");
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
+extern signed char D_00535C11[];
 
+extern "C" void func_002A16B0(void* self, int a1)
+{
+    if (func_0029F0A0(self) != 0) {
+        char* bm = (char*)self + 0x5560;
+        if (func_002B0E28(bm, 0) != 0) {
+            cBE_getInterface_Fv(cBE_getBE(), 0);
+            if (D_00535C11[0] != 0) {
+                if (func_002B1458(bm, 0, 0x20BC, 0, a1, 0, 1, 0.0f) != 0) {
+                    int r = func_0029F2B0_r(a1, 0);
+                    D_004A482C(func_003D8008(1, 0, 0x20BC), 1, r);
+                }
+            }
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A1778);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0A0(void* self);
+extern "C" int func_002B0E28(void* self, int i);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+// func_0029F2B0 returns a value (the unit's earlier declaration says void).
+int func_0029F2B0_r(int a, int b) __asm__("func_0029F2B0");
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
+
+extern "C" void func_002A1778(void* self, int a1)
+{
+    if (func_0029F0A0(self) != 0) {
+        char* bm = (char*)self + 0x5560;
+        if (func_002B0E28(bm, 0) != 0) {
+            if (func_002B1458(bm, 0, 0x20BD, 0, a1, 0, 1, 0.0f) != 0) {
+                int r = func_0029F2B0_r(a1, 0);
+                D_004A482C(func_003D8008(1, 0, 0x20BD), 1, r);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A1820);
 
@@ -1001,25 +1098,286 @@ INCLUDE_ASM("sound/soundsys", func_002A1E20);
 
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2018);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2018(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20C8, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 0x20C8), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A20D0);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A20D0(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20C9, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 0x20C9), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2188);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1D8();
+// func_002A1D48 returns its tail call's value (the unit defines it as void).
+int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2188(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20CA, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int a = func_002A1D48_r(self, *(void**)((char*)func_0028B1D8() + 0x28));
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_5(func_003D8008(1, 0, 0x20CA), 3, r, a, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2260);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2260(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20E7, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 0x20E7), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2318);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2318(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20E8, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 0x20E8), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A23D0);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A23D0(void* self, int mode)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20E9, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m;
+            if (mode == -1) {
+                m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            } else {
+                m = func_002A1E20(self, mode);
+            }
+            D_004A482C_4(func_003D8008(1, 0, 0x20E9), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A24B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A24B0(void* self, int a1)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20CC, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1BD8(self, a1, -1);
+            D_004A482C_5(func_003D8008(1, 0, 0x20CC), 3, r, m, 3);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A2568);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2568(void* self, int a1)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20CC, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), a1);
+            D_004A482C_5(func_003D8008(1, 0, 0x20CC), 3, r, m, 3);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2638);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2638(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20BA, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 0x20BA), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A26F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0D8(void* self);
+extern "C" void func_002B11B0(void*, int);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+
+extern "C" void func_002A26F0(void* self, int a, int b)
+{
+    if (func_0029F0D8(self) != 0) {
+        char* bm = (char*)self + 0x5560;
+        func_002B11B0(bm, 0);
+        if (func_002B1458(bm, 0, 0x20E5, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int x = 2;
+            if (a) x = 1;
+            if (*(int*)((char*)self + 0x5794) != 0) {
+                *(int*)((char*)self + 0x5794) = 0;
+            }
+            int y = 2;
+            if (!b) y = 1;
+            D_004A482C_5(func_003D8008(1, 0, 0x20E5), 3, r, x, y);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A27D8);
@@ -1041,21 +1399,222 @@ extern "C" void func_002A27D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2860);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 6-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2860(void* self, int n)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20CF, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int lo = 0;
+            int hi = 0;
+            if (n >= 0 && n != 999) {
+                if (n < 100) {
+                    lo = 1 << n;
+                } else {
+                    n -= 100;
+                    hi = 1 << n;
+                }
+            }
+            D_004A482C_6(func_003D8008(1, 0, 0x20CF), 4, r, 3, lo, hi);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2938);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1D8();
+// func_002A1D48 returns its tail call's value (the unit defines it as void).
+int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2938(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x2102, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int a = func_002A1D48_r(self, *(void**)((char*)func_0028B1D8() + 0x28));
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_5(func_003D8008(1, 0, 0x2102), 3, r, a, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2A10);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00145750(void*);
+// func_002A1DA0 returns a value (the unit declares it void).
+int func_002A1DA0_r(void* self, int a, int b) __asm__("func_002A1DA0");
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2A10(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x210B, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1DA0_r(self, func_00145750(cBE_getInterface_Fv(func_0028B1E8(), 0)), 0);
+            D_004A482C_4(func_003D8008(1, 0, 0x210B), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2AD0);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2AD0(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x212B, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 0x212B), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2B88);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2B88(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x212C, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int v = *(int*)((char*)self + 0x5780);
+            D_004A482C_4(func_003D8008(1, 0, 0x212C), 2, r, v);
+        }
+        *(int*)((char*)self + 0x5780) = 1;
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A2C30);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2C30(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x212D, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+            D_004A482C_4(func_003D8008(1, 0, 0x212D), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A2CF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A2CF0(void* self, int a1)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x212E, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1BD8(self, a1, -1);
+            D_004A482C_4(func_003D8008(1, 0, 0x212E), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A2DA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+
+extern "C" void func_002A2DA0(void* self, int a1)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x212F, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1BD8(self, a1, -1);
+            D_004A482C_4(func_003D8008(1, 0, 0x212F), 2, r, m);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A2E50);
 
@@ -1075,13 +1634,116 @@ extern "C" void func_002A3170(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A31C0);
+#ifdef SKIP_ASM
+extern "C" int func_0029F128(void* self);
+extern "C" int func_002A4040(void* self);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern signed char D_00535C11[];
+extern char* D_004A28A8;
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A31C0(void* self)
+{
+    if (func_0029F128(self) == 0) return;
+    if (func_002A4040(self) != 0) return;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] != 0) return;
+    if (**(int**)(D_004A28A8 + 0xC0) < 2) {
+        if (func_00295028(self, 0, 0) != 0) return;
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20C0, 0, 0xB, 0, 0, 0.0f) == 0) return;
+        int r = func_0029F198(self);
+        D_004A482C_4(func_003D8008(1, 0, 0x20C0), 2, r, 1);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A32B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F128(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1D8();
+// func_002A1D48 returns its tail call's value (the unit defines it as void).
+int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A32B0(void* self)
+{
+    if (func_0029F128(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20C1, 0, 0xB, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int a = func_002A1D48_r(self, *(void**)((char*)func_0028B1D8() + 0x28));
+            D_004A482C_4(func_003D8008(1, 0, 0x20C1), 2, r, a);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3358);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F128(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1D8();
+// func_002A1D48 returns its tail call's value (the unit defines it as void).
+int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A3358(void* self)
+{
+    if (func_0029F128(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20C2, 0, 0xB, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int a = func_002A1D48_r(self, *(void**)((char*)func_0028B1D8() + 0x28));
+            D_004A482C_4(func_003D8008(1, 0, 0x20C2), 2, r, a);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A3400);
+#ifdef SKIP_ASM
+extern "C" int func_0029F128(void* self);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+
+extern "C" void func_002A3400(void* self)
+{
+    if (func_0029F128(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20C3, 0, 0xB, 0, 0, 0.0f) == 0) return;
+    int r = func_0029F198(self);
+    int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+    D_004A482C_4(func_003D8008(1, 0, 0x20C3), 2, r, m);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A34D0);
 
@@ -1089,17 +1751,132 @@ INCLUDE_ASM("sound/soundsys", func_002A3708);
 
 INCLUDE_ASM("sound/soundsys", func_002A3860);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A39E0);
+#ifdef SKIP_ASM
+extern "C" int func_0029F128(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" void* func_003D8008(int a, int b, int c);
+// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+extern "C" void func_002A39E0(void* self)
+{
+    if (func_0029F128(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20BB, 0, 0xB, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+            D_004A482C_4(func_003D8008(1, 0, 0x20BB), 2, r, m);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3B18);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F160(void* self);
+// func_00285D98 returns an object pointer here (the unit declares it int).
+void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
 
+extern "C" void func_002A3B18(void* self, void* obj, int a2)
+{
+    if (func_0029F160(self) == 0) return;
+    if (obj == 0) return;
+    int done = *(float*)((char*)obj + 0x470) >= 0.0f;
+    if (done) return;
+    if (obj != func_00285D98_p(self, -1)) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20A7, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 0x20A7), 1, a2);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3C00);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_0029F160(void* self);
+// func_00285D98 returns an object pointer here (the unit declares it int).
+void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
+
+extern "C" void func_002A3C00(void* self, void* obj, int a2)
+{
+    if (func_0029F160(self) == 0) return;
+    if (obj == 0) return;
+    if (a2 != 2) {
+        int done = *(float*)((char*)obj + 0x470) >= 0.0f;
+        if (done) return;
+    }
+    if (obj != func_00285D98_p(self, -1)) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20A8, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 0x20A8), 1, a2);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A3CE8);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3DE0);
+#ifdef SKIP_ASM
+extern "C" int func_0029F160(void* self);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
 
+extern "C" void func_002A3DE0(void* self, void* obj, int ev)
+{
+    if (func_0029F160(self) == 0) return;
+    if (obj == 0) return;
+    int done = *(float*)((char*)obj + 0x470) >= 0.0f;
+    if (done) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x2133, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 0x2133), 1, ev);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3EB8);
+#ifdef SKIP_ASM
+extern "C" int func_0029F160(void* self);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
+
+extern "C" void func_002A3EB8(void* self, void* obj, int ev)
+{
+    if (func_0029F160(self) == 0) return;
+    if (obj == 0) return;
+    int done = *(float*)((char*)obj + 0x470) >= 0.0f;
+    if (done) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x2145, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 0x2145), 1, ev);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3F90);
@@ -1452,7 +2229,30 @@ extern "C" void func_002A45C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A4660);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void* func_0028B1E8();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+
+extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
+{
+    char* g = *(char**)(D_004A28A8 + 0xC0);
+    if (*(int*)(g + 0x98) != 0 || *(int*)(g + 0x70) <= *(int*)g) {
+        *(int*)((char*)self + 0x57F8) = 1;
+        if (a4 != 0 && *(int*)g == 3) {
+            *(int*)((char*)self + 0x57FC) = 1;
+        }
+        *(int*)((char*)self + 0x5800) = a1;
+        *(int*)((char*)self + 0x5810) = *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0));
+    }
+    *(int*)((char*)self + 0x5804) += a2;
+    *(int*)((char*)self + 0x5808) += a3;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4718);
