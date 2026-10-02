@@ -26,7 +26,20 @@ extern "C" int func_00321AD8(void* self, int a1, int a2)
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_readToken);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", func_00323098);
+#ifdef SKIP_ASM
+extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_parseStatement(void* self);
+
+extern "C" void func_00323098(void* self)
+{
+    cInputMapParser_readToken(self);
+    while (*(int*)((char*)self + 0x98) != 0) {
+        cInputMapParser_parseStatement(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseStatement);
 
@@ -109,7 +122,20 @@ INCLUDE_ASM("input/inputparse", func_00326308);
 
 INCLUDE_ASM("input/inputparse", func_00326360);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", func_00326430);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_00326308(void* self, char* msg);
+extern char D_0048E3C8[];
+
+extern "C" void func_00326430(void* self, int a1, int a2)
+{
+    char buf[0xB0];
+    sprintf(buf, D_0048E3C8, a1, a2);
+    func_00326308(self, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326478);

@@ -27,7 +27,20 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D2F40);
 
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetEvent);
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3120);
+#ifdef SKIP_ASM
+extern "C" void func_001D31C0(void* self);
+extern "C" void* func_0039E510(void* self);
+
+extern "C" void func_001D3120(void* self)
+{
+    if (~*(int*)((char*)self + 0xBC) != 0) {
+        func_001D31C0(self);
+    }
+    func_0039E510(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D3160);
 

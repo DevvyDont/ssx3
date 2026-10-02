@@ -70,7 +70,20 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHelpText);
 
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateButtonsText);
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_001985B0);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" const char* func_00198AF0(void* a0);
+
+extern "C" void func_001985B0(void* self)
+{
+    if (*(cUIText**)((char*)self + 0x1E0) != 0) {
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x1E0), func_00198AF0(*(void**)((char*)self + 0x168)));
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/messagecenter", func_001985F0);
 

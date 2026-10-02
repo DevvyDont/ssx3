@@ -152,7 +152,26 @@ INCLUDE_ASM("fe/fepopup", func_001C84A8);
 
 INCLUDE_ASM("fe/fepopup", func_001C8568);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C8628);
+#ifdef SKIP_ASM
+struct sVec2_8628 { float x, y; };
+
+struct sVEntry001C8628 {
+    short delta;
+    short index;
+    void (*fn)(void*, sVec2_8628*);
+};
+
+extern "C" void func_001C8628(void* self, void* obj, void* out)
+{
+    sVec2_8628 v;
+    sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
+    vt[20].fn((char*)obj + vt[20].delta, &v);
+    *(float*)((char*)out + 0x8) = v.x;
+    *(float*)((char*)out + 0xC) = v.y;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C8678);
 
@@ -319,7 +338,27 @@ extern "C" int func_001CA4F8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA528);
+#ifdef SKIP_ASM
+struct sVEntry001CA528 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0039E510(void*);
+
+extern "C" void func_001CA528(void* self)
+{
+    if (*(int*)((char*)self + 0x2C0) != 0) {
+        void* obj = *(void**)((char*)self + 0x20);
+        sVEntry001CA528* vt = *(sVEntry001CA528**)((char*)obj + 8);
+        vt[12].fn((char*)obj + vt[12].delta);
+    }
+    func_0039E510(self);
+}
+#endif
 
 extern "C" void* func_0039E6B8(void* self);
 
@@ -386,7 +425,27 @@ extern "C" void func_001CB290(void* self, void* a1, unsigned int a2)
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetCreate);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CB3D0);
+#ifdef SKIP_ASM
+struct sVEntry001CB3D0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" int func_001CB3D0(void* self, int a1, int a2)
+{
+    if (*(int*)((char*)self + 0x438) != 0) {
+        void* obj = *(void**)((char*)self + 0x20);
+        if (obj != 0) {
+            sVEntry001CB3D0* vt = *(sVEntry001CB3D0**)((char*)obj + 8);
+            return vt[24].fn((char*)obj + vt[24].delta, a1, a2);
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CB418);
 
@@ -508,7 +567,19 @@ INCLUDE_ASM("fe/fepopup", func_001CE468);
 
 INCLUDE_ASM("fe/fepopup", func_001CE4C8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001CE520);
+#ifdef SKIP_ASM
+extern "C" int func_001CE560(void*, int, int);
+extern "C" void func_001CB9B0(void*, int);
+
+extern "C" void func_001CE520(void* self)
+{
+    if (func_001CE560(self, *(int*)((char*)self + 0x140), 0) == 0) {
+        func_001CB9B0(self, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CE560);
 

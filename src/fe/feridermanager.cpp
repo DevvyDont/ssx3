@@ -87,7 +87,19 @@ extern "C" void func_001A0498(sRiderSlot_001A0498* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A04C8);
+#ifdef SKIP_ASM
+extern "C" void func_0019EBA0(void* slot);
+
+extern "C" void func_001A04C8(void* self)
+{
+    int i;
+    for (i = 0; i < 2; i++) {
+        func_0019EBA0((char*)self + i * 0xce0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0508);
@@ -131,5 +143,17 @@ extern "C" void func_001A0570(void* self, int i, int v)
 
 INCLUDE_ASM("fe/feridermanager", func_001A0598);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0608);
+#ifdef SKIP_ASM
+extern "C" void func_0019F138(void* slot);
+
+extern "C" void func_001A0608(void* self)
+{
+    int i;
+    for (i = 0; i < 2; i++) {
+        func_0019F138((char*)self + i * 0xce0);
+    }
+}
+#endif
 

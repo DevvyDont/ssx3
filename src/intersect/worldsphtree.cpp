@@ -192,7 +192,24 @@ extern "C" void func_00341A30(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341A50);
+#ifdef SKIP_ASM
+struct sSerVEntry_00341A50 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+
+extern "C" void func_00341A50(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sSerVEntry_00341A50* vt = *(sSerVEntry_00341A50**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00341AA0);
 

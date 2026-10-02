@@ -114,7 +114,20 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019B7E0);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BA60);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BBA0);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" const char* func_00198AF0(void* a0);
+
+extern "C" void func_0019BBA0(void* self)
+{
+    if (*(cUIText**)((char*)self + 0x64) != 0) {
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x64), func_00198AF0(*(void**)((char*)self + 0xC0)));
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateHeading);
 
@@ -191,11 +204,41 @@ extern "C" void* func_0019CB38(void* self)
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB60);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CBE0);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
+
+extern "C" int func_0019CBE0(void* self, int a1, int a2)
+{
+    void* p = func_0019C938(self, a1, a2, 0);
+    if (p != 0) {
+        if ((*(short*)((char*)p + 6) >> a1) & 1) {
+            return *(short*)((char*)p + 0xA);
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CC30);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CCE8);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
+
+extern "C" int func_0019CCE8(void* self, int a1, int a2)
+{
+    void* p = func_0019C938(self, a1, a2, 0);
+    if (p != 0) {
+        if ((*(short*)((char*)p + 4) >> a1) & 1) {
+            return *(short*)((char*)p + 0x8);
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CD38);
 

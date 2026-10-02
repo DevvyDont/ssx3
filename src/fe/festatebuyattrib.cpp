@@ -18,7 +18,25 @@ extern "C" int func_001F49D0(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F49F8);
+#ifdef SKIP_ASM
+struct sVEntry001F49F8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00186518(void* self);
+
+extern "C" void func_001F49F8(void* self)
+{
+    func_00186518(self);
+    void* obj = *(void**)((char*)self + 0xAC);
+    sVEntry001F49F8* vt = *(sVEntry001F49F8**)((char*)obj + 8);
+    vt[7].fn((char*)obj + vt[7].delta, 1);
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4A38);
 

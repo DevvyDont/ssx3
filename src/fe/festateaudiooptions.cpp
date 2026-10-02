@@ -35,5 +35,21 @@ INCLUDE_ASM("fe/festateaudiooptions", func_00196E80);
 
 INCLUDE_ASM("fe/festateaudiooptions", func_00196F00);
 
+//100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196F50);
+#ifdef SKIP_ASM
+extern "C" void func_00197DB8(void* self);
+extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
+extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
+
+extern "C" int func_00196F50(void* self, int a1)
+{
+    if (a1 != 0) {
+        func_00197DB8(self);
+        cFEStateRequestLine_updateButtonsText(self, 0);
+        cFEStateRequestLine_updateHelpText(self, 0);
+    }
+    return 0;
+}
+#endif
 

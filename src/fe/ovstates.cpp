@@ -27,7 +27,22 @@ extern "C" int func_00194A48(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstates", func_00194A60);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void*);
+extern void* D_0046B9E8[];
+
+extern "C" void* func_00194A60(void* self)
+{
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 2;
+    *(void***)((char*)self + 0x8) = D_0046B9E8;
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
 

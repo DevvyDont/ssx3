@@ -77,7 +77,19 @@ extern "C" void func_00186978(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateload", func_00186998);
+#ifdef SKIP_ASM
+extern "C" void func_00202770(void* self, int a1);
+// PORT: func_0039E508__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
+void func_0039E508_2(void* self, int a1) __asm__("func_0039E508__FPv");
+
+extern "C" void func_00186998(void* self, int a1)
+{
+    func_00202770((char*)self + 0x48, a1);
+    func_0039E508_2(self, a1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateload", func_001869D8);

@@ -43,7 +43,26 @@ void cUITemplate_MAP_setupEventUnlock(cUITemplate_MAP* self)
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakUnlock);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00201868);
+#ifdef SKIP_ASM
+struct sVEntry00201868 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00201868(void* self)
+{
+    *(int*)((char*)self + 0x2F0) = 1;
+    *(int*)((char*)self + 0x2DC) = 0;
+    void* obj = *(void**)((char*)self + 0x2E4);
+    if (obj != 0) {
+        sVEntry00201868* vt = *(sVEntry00201868**)((char*)obj + 8);
+        vt[9].fn((char*)obj + vt[9].delta, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", func_002018A8);
 

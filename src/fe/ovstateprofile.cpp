@@ -2,7 +2,24 @@
 
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00211220);
+#ifdef SKIP_ASM
+extern "C" void func_00211380(void* self);
+extern "C" void func_00211270(void* self);
+
+extern "C" void func_00211220(void* self)
+{
+    if (*(int*)((char*)self + 0x1C0) != 0) {
+        *(int*)((char*)self + 0x22C) = 1;
+    }
+    if (*(int*)((char*)self + 0x214) == 3) {
+        func_00211380(self);
+    } else {
+        func_00211270(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00211270);
 
@@ -53,7 +70,19 @@ INCLUDE_ASM("fe/ovstateprofile", func_002122E8);
 
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_002124C8);
+#ifdef SKIP_ASM
+extern "C" void func_0039F718(void* self);
+
+extern "C" void func_002124C8(void* self)
+{
+    if (*(int*)((char*)self + 0x1AC) == 0) {
+        func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+    }
+    *(int*)((char*)self + 0x1AC) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00212508);
 

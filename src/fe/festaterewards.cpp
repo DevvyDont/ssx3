@@ -57,7 +57,20 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updatePageNumber);
 
 INCLUDE_ASM("fe/festaterewards", func_001D0D30);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D0E78);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" const char* func_00198AF0(void* a0);
+
+extern "C" void func_001D0E78(void* self)
+{
+    if (*(cUIText**)((char*)self + 0x910) != 0) {
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x910), func_00198AF0(*(void**)((char*)self + 0x54)));
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D0EB8);
 
@@ -78,7 +91,21 @@ void* func_001D1198(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festaterewards", func_001D11A8);
+#ifdef SKIP_ASM
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+extern "C" void func_001CFDD0(void* self, char* name);
+
+extern "C" void func_001D11A8(void* self, int i)
+{
+    char buf[5];
+    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    buf[4] = 0;
+    func_001CFDD0(self, buf);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D11F8);
 
@@ -109,7 +136,21 @@ void* func_001D1330(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festaterewards", func_001D1340);
+#ifdef SKIP_ASM
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+extern "C" void func_001CFDD0(void* self, char* name);
+
+extern "C" void func_001D1340(void* self, int i)
+{
+    char buf[5];
+    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    buf[4] = 0;
+    func_001CFDD0(self, buf);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D1390);
 
@@ -140,7 +181,21 @@ void* func_001D14C8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festaterewards", func_001D14D8);
+#ifdef SKIP_ASM
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+extern "C" void func_001CFDD0(void* self, char* name);
+
+extern "C" void func_001D14D8(void* self, int i)
+{
+    char buf[5];
+    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    buf[4] = 0;
+    func_001CFDD0(self, buf);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D1528);
 
@@ -171,7 +226,21 @@ void* func_001D1660(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festaterewards", func_001D1670);
+#ifdef SKIP_ASM
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+extern "C" void func_001CFDD0(void* self, char* name);
+
+extern "C" void func_001D1670(void* self, int i)
+{
+    char buf[5];
+    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    buf[4] = 0;
+    func_001CFDD0(self, buf);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D16C0);
 
@@ -202,7 +271,21 @@ void* func_001D17F8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festaterewards", func_001D1808);
+#ifdef SKIP_ASM
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+extern "C" void func_001CFDD0(void* self, char* name);
+
+extern "C" void func_001D1808(void* self, int i)
+{
+    char buf[5];
+    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    buf[4] = 0;
+    func_001CFDD0(self, buf);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D1858);
 
@@ -238,7 +321,20 @@ extern "C" void func_001D1A28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1A60);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* func_00398380(void* self, int id);
+
+extern "C" void func_001D1A60(void* self, int i)
+{
+    char* obj = *(char**)((char*)self + 0x10);
+    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
+    int h = GetHashValue32(*(char**)((char*)e + 4));
+    func_00398380(obj + 0x58, h);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D1AA0);
 
@@ -290,7 +386,20 @@ INCLUDE_ASM("fe/festaterewards", func_001D22F0);
 
 INCLUDE_ASM("fe/festaterewards", func_001D2380);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D23E0);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_002533C8(void* mem);
+extern "C" void func_001D25E8(void* self);
+extern char D_00461320[];
+
+extern "C" void func_001D23E0(void* self)
+{
+    *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(0x44, D_00461320, 0, 0));
+    func_001D25E8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D2430);
@@ -307,7 +416,22 @@ extern "C" void func_001D2430(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2468);
+#ifdef SKIP_ASM
+extern "C" void func_00253890(void* p, int a1);
+extern "C" void* func_0039E6B8(void* self);
+
+extern "C" void func_001D2468(void* self)
+{
+    void* p = *(void**)((char*)self + 0x248);
+    if (p != 0) {
+        *(int*)((char*)self + 0x278) = 1;
+        func_00253890(p, 0);
+    }
+    func_0039E6B8(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D24A8);
 
@@ -317,5 +441,18 @@ INCLUDE_ASM("fe/festaterewards", func_001D2598);
 
 INCLUDE_ASM("fe/festaterewards", func_001D25E8);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2638);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" void func_002B3A98(void* self);
+extern "C" void func_0039F190(void* self, int a1);
+
+extern "C" void func_001D2638(void* self)
+{
+    func_002B3A98((char*)func_0028B180() + 0x118);
+    *(int*)((char*)self + 0x27C) = 0;
+    func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+}
+#endif
 

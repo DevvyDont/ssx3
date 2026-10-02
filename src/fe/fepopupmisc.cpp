@@ -1812,7 +1812,18 @@ extern "C" void* func_001E39F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3A30);
+#ifdef SKIP_ASM
+extern "C" int func_00147980(void* iface, int a1, void* a2);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern "C" int func_001E3A30(void* self)
+{
+    return func_00147980(cBE_getInterface_Fv(cBE_getBE(), 1), 0, self) != 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E3A78);
 
@@ -1832,7 +1843,22 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4458);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E4578);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4610);
+#ifdef SKIP_ASM
+extern "C" void func_001E48B0(void*);
+extern "C" void func_001E4758(void*);
+extern "C" void func_0039F190(void* self, int a1);
+
+extern "C" void func_001E4610(void* self, int a1, int a2)
+{
+    if (a2 == 0x14) {
+        func_001E48B0(self);
+        func_001E4758(self);
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E4658);
 

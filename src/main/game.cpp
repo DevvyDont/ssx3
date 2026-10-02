@@ -60,7 +60,20 @@ INCLUDE_ASM("main/game", func_0022D088);
 
 INCLUDE_ASM("main/game", func_0022D278);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", func_0022D390);
+#ifdef SKIP_ASM
+extern "C" int func_0022D278(void* self);
+
+extern "C" int func_0022D390(void* self)
+{
+    int r = 0;
+    if (func_0022D278(self) != 0) {
+        r = *(int*)((char*)self + 0x1C0) != 0;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022D3D8);
 
@@ -86,7 +99,20 @@ INCLUDE_ASM("main/game", func_0022D6C8);
 
 INCLUDE_ASM("main/game", func_0022D8D8);
 
+//100%
 INCLUDE_ASM("main/game", func_0022DE58);
+#ifdef SKIP_ASM
+extern "C" void func_0022D478(void* self, int v);
+
+extern "C" void func_0022DE58(void* self, int v)
+{
+    if (*(int*)((char*)self + 0x1AC) != v) {
+        *(int*)((char*)self + 0x1AC) = v;
+        func_0022D478(self, v);
+        *(int*)((char*)self + 0x1A8) = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022DE98);
 

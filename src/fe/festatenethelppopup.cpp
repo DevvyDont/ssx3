@@ -2,7 +2,27 @@
 
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001D9E20);
+#ifdef SKIP_ASM
+struct sVEntry001D9E20 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" int func_001D9E20(void* self, int a1, int a2)
+{
+    if (*(int*)((char*)self + 0x50) != 0) {
+        void* obj = *(void**)((char*)self + 0x20);
+        if (obj != 0) {
+            sVEntry001D9E20* vt = *(sVEntry001D9E20**)((char*)obj + 8);
+            return vt[24].fn((char*)obj + vt[24].delta, a1, a2);
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001D9E68);
 

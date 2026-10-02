@@ -96,13 +96,38 @@ extern "C" int func_001FDB78(void* self, int a1, int a2)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FDB88);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FDBF0);
+#ifdef SKIP_ASM
+extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
+extern void* D_00472440[];
+
+extern "C" void* func_001FDBF0(void* self, int a1, int a2)
+{
+    func_001D5330(self, a1, 1, a2);
+    *(void***)((char*)self + 0x8) = D_00472440;
+    *(int*)((char*)self + 0x22C) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FDC30);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FDE60);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FDF00);
+#ifdef SKIP_ASM
+extern "C" void func_0039F718(void* self);
+
+extern "C" void func_001FDF00(void* self)
+{
+    if (*(int*)((char*)self + 0x1AC) == 0) {
+        func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+    }
+    *(int*)((char*)self + 0x1AC) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FDF40);
 
@@ -116,7 +141,20 @@ INCLUDE_ASM("fe/ovstatepause", func_001FE6E8);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FE8F0);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE968);
+#ifdef SKIP_ASM
+extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
+extern void* D_004722B8[];
+
+extern "C" void* func_001FE968(void* self, int a1, int a2)
+{
+    func_001D5330(self, a1, 2, a2);
+    *(void***)((char*)self + 0x8) = D_004722B8;
+    *(int*)((char*)self + 0x22C) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FE9A8);
 
@@ -131,7 +169,19 @@ void* func_001FEC40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FEC60);
+#ifdef SKIP_ASM
+extern "C" void func_0039F718(void* self);
+
+extern "C" void func_001FEC60(void* self)
+{
+    if (*(int*)((char*)self + 0x1AC) == 0) {
+        func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+    }
+    *(int*)((char*)self + 0x1AC) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FECA0);
 
