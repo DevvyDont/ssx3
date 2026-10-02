@@ -12,7 +12,62 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002E87E8);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E8938);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA480);
+#ifdef SKIP_ASM
+struct sMtxEntry_A480 {
+    int v[5];
+};
+extern int D_004A4518;
+extern int D_004A451C;
+struct sRenderCtx_A480 {
+    char pad[0xE84];
+    sMtxEntry_A480* top;
+};
+extern sRenderCtx_A480* D_004A289C;
+
+class func_002EA480_cObj {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual int v09();
+};
+
+static inline void push_A480(sRenderCtx_A480* ctx)
+{
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+}
+
+static inline void pop_A480(sRenderCtx_A480* ctx)
+{
+    ctx->top--;
+}
+
+extern "C" void func_002EA480(void* self)
+{
+    if (D_004A4518 != 0) {
+        return;
+    }
+    if (D_004A451C != 0) {
+        func_002EA480_cObj* o = (func_002EA480_cObj*)(*(char**)self + 0x6C0);
+        if (o->v09() != 0) {
+            return;
+        }
+    }
+    if (*(int*)((char*)self + 0x90) < 2) {
+        return;
+    }
+    push_A480(D_004A289C);
+    pop_A480(D_004A289C);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
 
@@ -166,7 +221,54 @@ extern "C" void func_002EA8B8(void* self, int up)
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA900);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EAA28);
+#ifdef SKIP_ASM
+struct sBTState {
+    int mode;
+    float a;
+    float b;
+    float c;
+    float d;
+};
+
+struct sBTFx {
+    char pad[0x20];
+    sBTState saved;
+    sBTState cur;
+};
+
+struct sBTVEntryGet {
+    short delta;
+    short index;
+    sBTState* (*fn)(void*);
+};
+
+extern char* D_004A5B80;
+
+extern "C" void func_002EAA28(void* self)
+{
+    sBTFx* s = (sBTFx*)self;
+    char* obj = D_004A5B80;
+    sBTVEntryGet* e = &(*(sBTVEntryGet**)(obj + 0x10D8))[42];
+    s->saved = *e->fn(obj + e->delta);
+    float c = 0.75f;
+    float d = 0.6299999952316284f;
+    if (s->saved.mode == 2) {
+        s->cur.d = d;
+        s->cur.mode = 2;
+        s->cur.b = 1.0f;
+        s->cur.c = c;
+        s->cur.a = 0.0f;
+    } else {
+        s->cur.mode = 1;
+        s->cur.a = 0.125f;
+        s->cur.b = c;
+        s->cur.c = c;
+        s->cur.d = d;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EAAE0);
 

@@ -442,7 +442,31 @@ void* func_002C4290(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C42B0);
+#ifdef SKIP_ASM
+extern "C" int func_0040A688(int h, int a1, char* name, int a3, int a4, void* buf);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern int D_004A3940;
+extern char D_004A3948[];
+
+extern "C" void func_002C42B0(void* self)
+{
+    char* name = (char*)self + 0xB9;
+    *(int*)((char*)self + 0x3C) = 0;
+    char* path = (char*)self + 0xF9;
+    strcpy(name, (char*)self + *(int*)((char*)self + 0x1C) * 0x78 + 0x1B0);
+    sprintf(path, D_004A3948, name, name);
+    int r = func_0040A688(*(int*)((char*)self + 0xC), 0, path, 0, 1, (char*)self + 0x480);
+    D_004A3940 = r;
+    if (r < 0) {
+        func_002C48C0(self, 1);
+    } else {
+        func_002C48C0(self, 0x23);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4368__FPv);
@@ -1002,7 +1026,62 @@ extern "C" int func_002C53C8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C53E0);
+#ifdef SKIP_ASM
+int GetHashValue32(char*);
+extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" int func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+// PORT: the unit defines func_002C5320 as returning void*; it returns an int count here.
+extern "C" int func_002C5320_i(void* self, int idx) __asm__("func_002C5320");
+extern char D_004A3968[];
+extern char D_004861F8[];
+extern char* D_004A28A8;
+
+struct sQTEntry_53E0 {
+    int count;
+    int status;
+    void* data;
+    int fC;
+    int f10;
+};
+
+struct sQT_53E0 {
+    char pad[0x180];
+    sQTEntry_53E0 entries[1];
+};
+
+struct func_002C53E0_sVEntry {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern "C" void func_002C53E0(sQT_53E0* self, int idx, unsigned short* dst)
+{
+    if (self->entries[idx].data == 0) {
+        func_002C2540(dst, D_004A3968);
+        return;
+    }
+    switch (self->entries[idx].status) {
+    case -2:
+        func_002C2540(dst, D_004A3968);
+        break;
+    case 0: {
+        // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
+        int v = func_002C5320_i(self, idx) >? 0;
+        char* obj = *(char**)(D_004A28A8 + 0x8C);
+        func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
+        char* thisp = obj + vt[4].delta;
+        func_002C26D0(dst, vt[4].fn(thisp, GetHashValue32(D_004861F8)), v);
+        break;
+    }
+    default:
+        func_002C2540(dst, D_004A3968);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C54D0);
@@ -1244,7 +1323,40 @@ extern "C" int func_002C63E8(void* self, unsigned int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C63F8);
+#ifdef SKIP_ASM
+int GetHashValue32(char*);
+extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" int func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+// PORT: void view of func_002C26D0 (defined returning int); this caller treats it as void.
+extern "C" void func_002C26D0_v(unsigned short* dst, const unsigned short* fmt, ...) __asm__("func_002C26D0");
+extern char D_004A3970[];
+extern char D_004864E8[];
+extern char* D_004A28A8;
+
+struct func_002C63F8_sVEntry {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern "C" void func_002C63F8(void* self, int n, unsigned short* dst)
+{
+    unsigned short fmt[8];
+    unsigned short num[8];
+    func_002C2540(fmt, D_004A3970);
+    func_002C26D0_v(num, fmt, n + 1);
+    if (n < 2) {
+        if (n >= 0) {
+            char* obj = *(char**)(D_004A28A8 + 0x8C);
+            func_002C63F8_sVEntry* vt = *(func_002C63F8_sVEntry**)(obj + 4);
+            char* thisp = obj + vt[4].delta;
+            func_002C26D0(dst, vt[4].fn(thisp, GetHashValue32(D_004864E8)), num);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C64A8);

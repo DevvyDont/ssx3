@@ -1,6 +1,32 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("world/world", cWorld_cWorld);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_003A7DD0(void* mem);
+extern "C" void* func_003AC7C8(void* mem, void* world);
+extern "C" void* func_002BB130(void* mem);
+extern "C" void func_0032DC10(int a, int b, int c, int d);
+extern char D_00494D58[];
+extern char D_00494D68[];
+extern char D_00494D78[];
+// The unit declares D_004A47B8 as int (later); this view stores the world pointer.
+extern void* D_world_4A47B8 __asm__("D_004A47B8");
+
+extern "C" void* cWorld_cWorld(void** self)
+{
+    D_world_4A47B8 = self;
+    self[0] = func_003A7DD0(cMemMan_alloc(0x1C00, D_00494D58, 0, 0));
+    self[1] = func_003AC7C8(cMemMan_alloc(0x10, D_00494D68, 0, 0), self);
+    self[2] = func_002BB130(cMemMan_alloc(8, D_00494D78, 0, 0));
+    self[4] = 0;
+    self[5] = 0;
+    func_0032DC10(0xA, 4, 2, 5);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/world", func_003A6740);

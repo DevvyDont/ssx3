@@ -214,7 +214,43 @@ extern "C" void func_002ECF78(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECFA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sLensRow_CFA0 {
+    char* objs[9];
+    char pad[0xF0 - 0x24];
+};
+
+struct sLensVE_CFA0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+// The unit declares D_004FA370 later as sLensFxSlot[]; bind a row view to the same symbol.
+extern sLensRow_CFA0 D_lensRows_CFA0[] __asm__("D_004FA370");
+extern int D_004A3B54;
+
+extern "C" void func_002ECFA0(void)
+{
+    if (D_004A3B54 != 0) {
+        int i;
+        for (i = 0; i < 8; i++) {
+            int j;
+            for (j = 0; j < 9; j++) {
+                char* o = D_lensRows_CFA0[i].objs[j];
+                if (o != 0) {
+                    sLensVE_CFA0* vt = *(sLensVE_CFA0**)(o + 4);
+                    vt[1].fn(o + vt[1].delta, 3);
+                }
+            }
+        }
+    }
+    D_004A3B54 = 0;
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002ED048);
 
@@ -257,7 +293,45 @@ INCLUDE_ASM("visualfx/lensfx", func_002ED490);
 
 INCLUDE_ASM("visualfx/lensfx", func_002EDB20);
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002EDF00);
+#ifdef SKIP_ASM
+extern "C" float func_0040DA10(float x);
+extern "C" float func_0040D758(float x);
+
+// PORT: abs.s via inline asm (as an SDK math-header fabsf would); gcc folds __builtin_fabsf of a constant.
+static inline float absf_DF00(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `<?` (min) operator, removed in GCC 4.3.
+static inline float clamp_DF00(float f, float lo, float hi)
+{
+    if (f >= lo) {
+        return f <? hi;
+    }
+    return lo;
+}
+
+extern "C" float func_002EDF00(void* self)
+{
+    float lum = *(float*)((char*)self + 0x4) * 0.29899999499320984f
+              + *(float*)((char*)self + 0x8) * 0.5870000123977661f
+              + *(float*)((char*)self + 0xC) * 0.11400000005960464f;
+    if (lum <= 0.10000000149011612f) {
+        return 0.0f;
+    }
+    if (lum >= 0.44999998807907104f) {
+        return 1.0f;
+    }
+    float k = 0.600117564201355f;
+    float t = (lum - 0.10000000149011612f) / absf_DF00(0.3499999940395355f);
+    return clamp_DF00(func_0040D758(func_0040DA10(t) * k), 0.0f, 1.0f);
+}
+#endif
 
 // padded past the 8-byte gp-relative threshold so the compiler emits
 // absolute lui/lo addressing like the target

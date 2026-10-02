@@ -539,7 +539,36 @@ void* func_00308018(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308038);
+#ifdef SKIP_ASM
+class func_00308038_cStream {
+public:
+    // slot N at vtable offset N*8
+    virtual void v01(void* data, int size);
+};
+
+class func_00308760_cObj;
+extern "C" int func_00308760(void* a, func_00308760_cObj* obj);
+extern char* D_004A47B8;
+extern "C" int func_003ACA38(void* map, int id);
+extern "C" void func_002257E0(void* obj, void* stream, int a2);
+
+extern "C" void func_00308038(void* self, func_00308038_cStream* stream)
+{
+    stream->v01(self, 0x10);
+    int x = func_003ACA38(*(void**)(D_004A47B8 + 0x4), *(int*)((char*)self + 0x24));
+    int has = *(void**)((char*)self + 0x1C) != 0;
+    stream->v01(&has, 4);
+    if (has) {
+        func_002257E0(*(void**)((char*)self + 0x1C), stream, x);
+    }
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
+        func_00308760(*(char**)((char*)self + 0x14) + i * 0x44, (func_00308760_cObj*)stream);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308118);
 
@@ -849,7 +878,34 @@ extern "C" int func_00308798(void* a, func_00308798_cObj* obj)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003087D0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003088D8);
+#ifdef SKIP_ASM
+extern "C" void func_00308A48(void* self);
+extern "C" void func_0030B068(void* self, int flags);
+void operator_delete(int* p);
+extern char D_00489C00[];
+extern int D_004A3DD8;
+
+extern "C" void func_003088D8(void* self, int flags)
+{
+    *(void**)((char*)self + 0x494) = D_00489C00;
+    func_00308A48(self);
+    D_004A3DD8 = 0;
+    if ((char*)self + 0x2C0 != 0) {
+        char* p = (char*)self + 0x2C0 + 0x10C;
+        while ((char*)self + 0x2C0 != p) {
+            p -= 0x10C;
+        }
+    }
+    func_0030B068((char*)self + 0x2BC, 2);
+    func_0030B068((char*)self + 0x2B8, 2);
+    func_0030B068((char*)self + 0x2B4, 2);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308988);

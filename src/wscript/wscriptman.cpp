@@ -233,7 +233,72 @@ extern "C" int func_00309B70(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309BA8);
+#ifdef SKIP_ASM
+struct func_00309BA8_sVec {
+    float x;
+    float y;
+    float z;
+    float w;
+} __attribute__((aligned(16)));
+
+struct func_00309BA8_sPos {
+    char pad[8];
+    float z;
+};
+
+struct func_00309BA8_sVEntry {
+    short delta;
+    short index;
+    func_00309BA8_sPos* (*fn)(void*);
+};
+
+extern char* D_004A28A8;
+
+static inline char* func_00309BA8_toPtr(unsigned int i)
+{
+    return (char*)(i << 2);
+}
+
+static inline char* func_00309BA8_get(char* e, unsigned int h)
+{
+    unsigned int i = ((unsigned int*)*(char**)(e + 0x1C))[h >> 8] >> 8;
+    if (i == 0) {
+        return 0;
+    }
+    return func_00309BA8_toPtr(i);
+}
+
+static inline char* func_00309BA8_resolve(char* tbl, unsigned int h)
+{
+    char* e = ((char**)*(char**)(tbl + 0x8))[h & 0xFF];
+    if (e == 0) {
+        return 0;
+    }
+    return func_00309BA8_get(e, h);
+}
+
+extern "C" float func_00309BA8(void* self)
+{
+    if (*(int*)((char*)self + 0x28) == 0) {
+        return 0.0f;
+    }
+    char* node = func_00309BA8_resolve(**(char***)((char*)self + 0x28C), *(unsigned int*)((char*)self + 0x2C));
+    char* list = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    char* obj = *(char**)(list + (*(int*)((char*)self + 0x30) << 2) + 0x28);
+    char* sub = obj + 0x6C0;
+    func_00309BA8_sVEntry* vt = *(func_00309BA8_sVEntry**)sub;
+    func_00309BA8_sPos* r = vt[5].fn(sub + vt[5].delta);
+    float z = r->z;
+    func_00309BA8_sVec pos = *(func_00309BA8_sVec*)(node + 0x40);
+    float d = z - pos.z;
+    if (d >= 0.0f) {
+        return d;
+    }
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_00309C88);
 
@@ -1122,7 +1187,44 @@ extern "C" void func_0030B928(void* self, unsigned int id, int arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B9A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct func_0030C3E0_sTable;
+extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id);
+extern "C" void* func_0028B180();
+extern "C" void func_0029CED8(void*, int, void*, float);
+extern "C" int func_00144C98(void* iface);
+extern "C" int func_00151178(void* self, int level);
+extern "C" void func_0010F338(void* rider, int level, int a2);
+extern char* D_004A28A8;
+
+struct sWSSlot_B9A0 {
+    int id;
+    char pad[0x10C - 4];
+};
+
+extern "C" void func_0030B9A0(void* self, int rider, int id, int a3)
+{
+    sWSSlot_B9A0* slots = (sWSSlot_B9A0*)((char*)self + 0x2C0);
+    int i;
+    for (i = 0; i < 1; i++) {
+        if (slots[i].id == id) {
+            func_0030C3E0((func_0030C3E0_sTable*)&slots[i], a3);
+            func_0029CED8(func_0028B180(), 5, 0, 1.0f);
+            void* i0 = cBE_getInterface_Fv(cBE_getBE(), 0);
+            void* i11 = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+            int lvl = func_00144C98(i0);
+            int v = func_00151178(i11, lvl);
+            func_0010F338(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + (rider << 2) + 0x28), lvl, v);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030BA80);

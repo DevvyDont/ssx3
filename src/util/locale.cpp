@@ -256,7 +256,72 @@ extern "C" void* func_00195F70(void* self, void* arg)
 
 INCLUDE_ASM("util/locale", func_00195FF0);
 
+//100%
 INCLUDE_ASM("util/locale", func_00196148);
+#ifdef SKIP_ASM
+int GetHashValue32(char*);
+extern char D_004A18A8[];
+extern char* D_004A28A8;
+extern char D_00460400[];
+extern char D_00460410[];
+class func_00196228_cObj;
+extern "C" func_00196228_cObj* func_0039F9D8(void* list, int hash);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+
+class func_00196148_cObj {
+public:
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual int v24(int a, int b);
+};
+
+extern "C" void func_00196148(void* self)
+{
+    char* name;
+    if (*(void**)(D_004A28A8 + 0x84) != 0) {
+        name = D_00460400;
+        func_00196148_cObj* obj = (func_00196148_cObj*)func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        if (obj != 0) {
+            obj->v24(3, 0);
+        }
+    } else {
+        name = D_00460410;
+        func_0028F140(func_0028B180(), 4);
+    }
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(name), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/locale", func_00196228);

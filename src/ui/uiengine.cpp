@@ -148,7 +148,35 @@ extern "C" void func_00398038(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398078);
+#ifdef SKIP_ASM
+struct sVEntry398078 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+extern void* D_004A289C;
+
+extern "C" void func_00398078(void* self, int flags)
+{
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x8); i++) {
+        char* obj = (char*)D_004A289C;
+        sVEntry398078* vt = *(sVEntry398078**)(obj + 0x10D8);
+        vt[0x32].fn(obj + vt[0x32].delta, (*(int**)((char*)self + 0x4))[i]);
+    }
+    if (*(void**)((char*)self + 0x4) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x4));
+    }
+    if (*(void**)((char*)self + 0xC) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0xC));
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", cUITextureBank_setData);
 

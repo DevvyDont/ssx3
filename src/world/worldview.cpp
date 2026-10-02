@@ -114,7 +114,64 @@ int func_003A9AB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A9D60);
+#ifdef SKIP_ASM
+struct sWVSlot_9D60 {
+    int state;
+    int f4;
+};
+
+struct sWVItem_9D60 {
+    char pad0[0x1C];
+    void* section;
+    char pad20[0x58 - 0x20];
+};
+
+struct sWVCam_9D60 {
+    int active;
+    int f4;
+    int frame;
+    char padC[0x40 - 0xC];
+    float f40;
+    float f44;
+    float f48;
+    char pad4C[0x50 - 0x4C];
+};
+
+struct sWV_9D60 {
+    void* world;
+    cWorldViewSectionList* mSections;
+    sWVItem_9D60* items;
+    int fC;
+    int f10;
+    sWVSlot_9D60 slots[0x45];
+    char pad23C[0x240 - 0x23C];
+    sWVCam_9D60 cams[4];
+};
+
+extern char* D_004A5B64;
+extern "C" void func_003AA028(void* self, void* section, int cam, int loaded);
+
+extern "C" void func_003A9D60(sWV_9D60* self, int cam)
+{
+    if (*(int*)((char*)self + cam * 0x50 + 0x240) != 0) {
+        int frame = *(int*)(D_004A5B64 + 0x18);
+        float v = *(float*)((char*)self + cam * 0x50 + 0x280);
+        *(float*)((char*)self + cam * 0x50 + 0x284) = v;
+        *(float*)((char*)self + cam * 0x50 + 0x288) = v;
+        unsigned int i;
+        for (i = 0; i < (unsigned int)self->mSections->mNumSections; i++) {
+            int st = self->slots[i].state;
+            if (st == 5 || st == 6) {
+                func_003AA028(self, self->items[i].section, cam, st == 6);
+            }
+        }
+        *(int*)((char*)self + cam * 0x50 + 0x248) = frame;
+        *(int*)((char*)self + cam * 0x50 + 0x244) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003A9E50);
 

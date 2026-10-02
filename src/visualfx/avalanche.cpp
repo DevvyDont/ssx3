@@ -30,7 +30,56 @@ extern "C" void func_002D6378(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D6410);
+#ifdef SKIP_ASM
+struct func_002D6410_sElem {
+    float x;
+    float y;
+    float z;
+    float w;
+    int r;
+    int g;
+    int b;
+    int a;
+    char pad[0x10];
+};
+extern func_002D6410_sElem D_004D5B70[];
+extern func_002D6410_sElem D_004EDB70[];
+extern char D_00538450[];
+extern int D_004A3AC0;
+extern "C" void func_00416210(void* dst, int c, int n);
+
+extern "C" void func_002D6410(void)
+{
+    int i;
+    for (i = 0; i < 0x800; i++) {
+        int c = (i & 1) ? 0xFF : 0;
+        func_002D6410_sElem* e = &D_004D5B70[i];
+        e->a = 0xFF;
+        e->r = c;
+        e->g = c;
+        e->b = c;
+        e->z = 1.0f;
+        e->w = 0.0f;
+        e->x = 0.0f;
+        e->y = 0.0f;
+    }
+    for (i = 0; i < 0x20; i++) {
+        func_002D6410_sElem* e = &D_004EDB70[i];
+        e->a = 0xFF;
+        e->r = 0xFF;
+        e->g = 0xFF;
+        e->b = 0;
+        e->z = 1.0f;
+        e->w = 0.0f;
+        e->x = 0.0f;
+        e->y = 0.0f;
+    }
+    D_004A3AC0 = 0;
+    func_00416210(D_00538450, 0, 0x400);
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D64D8);
 
@@ -142,7 +191,35 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
 
 INCLUDE_ASM("visualfx/avalanche", func_002D7EF8);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D81B0);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void* func_0028B180();
+extern "C" void func_0029DEF0(void* self, int a1);
+extern char* D_004A28A8;
+
+extern "C" void func_002D81B0(void* self)
+{
+    if (*(void**)((char*)self + 0x8) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x8));
+        *(void**)((char*)self + 0x8) = 0;
+    }
+    if (*(int*)self != 0) {
+        char* n = *(char**)((char*)self + 0x4);
+        while (n != 0) {
+            func_002D7DD8(n, 1);
+            n = *(char**)(n + 0x2E4);
+        }
+        *(int*)self = 0;
+        func_0029DEF0(func_0028B180(), 0);
+        char* p = *(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0xA8);
+        if (*(int*)(p + 0x708) != 0) {
+            *(int*)(p + 0x708) = *(int*)(p + 0x708) - 1;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D8258);
@@ -166,7 +243,53 @@ INCLUDE_ASM("visualfx/avalanche", func_002D83B8);
 
 INCLUDE_ASM("visualfx/avalanche", func_002D87D0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D8948);
+#ifdef SKIP_ASM
+struct sAvalancheSlot {
+    int active;
+    char pad[0x18];
+};
+extern int D_004A3A30;
+extern int D_004A3A34;
+extern int D_004A3A5C;
+extern int D_004A3A60;
+extern int D_004A3A7C;
+extern int D_004A3ABC;
+extern int D_004A3AC4;
+extern sAvalancheSlot D_00538938[];
+extern "C" void func_002D96E0(void);
+extern "C" void cAvalanche_resolveDataPointers(void);
+extern "C" int cAvalanche_triggerAvalanche(int a);
+extern "C" void func_002D7EF8(void* self);
+
+extern "C" void func_002D8948(void)
+{
+    if (D_004A3A30 != 0) {
+        if (D_004A3A34 != 0) {
+            func_002D96E0();
+            D_004A3A34 = 0;
+            D_004A3AC4 = 0;
+        }
+        cAvalanche_resolveDataPointers();
+        if (D_004A3A5C != 0) {
+            cAvalanche_triggerAvalanche(D_004A3A7C);
+            if (D_004A3A5C < 0) {
+                D_004A3A5C = 0;
+            }
+        }
+        if (D_004A3A30 != 0 && D_004A3ABC != 0 && D_004A3A60 != 0) {
+            int i;
+            for (i = 0; i < 16; i++) {
+                func_002D7EF8(&D_00538938[i]);
+            }
+            if (D_004A3A60 < 0) {
+                D_004A3A60 = 0;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D8A00);
 
@@ -216,9 +339,86 @@ INCLUDE_ASM("visualfx/avalanche", func_002D9738);
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_triggerAvalanche);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9A80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002D9A80_sSlot {
+    int active;
+    char pad[0x18];
+};
+// Typed view of D_00538938 (func_002D8948 declares it earlier in the unit with its own element type).
+extern func_002D9A80_sSlot D_slots_9A80[] __asm__("D_00538938");
+extern int D_004A3AB8;
+void cMemMan_free(void*);
+extern "C" void func_002D81B0(void* self);
 
+static inline void freeSlot_9A80(func_002D9A80_sSlot* s)
+{
+    if (s->active != 0) {
+        func_002D81B0(s);
+    }
+}
+
+extern "C" void func_002D9A80(void)
+{
+    int i;
+    for (i = 0; i < 16; i++) {
+        freeSlot_9A80(&D_slots_9A80[i]);
+    }
+    if (D_004A3AB8 != 0) {
+        for (char* p = (char*)D_004A3AB0; p != 0; p = *(char**)(p + 0x8)) {
+            for (char* n = *(char**)(p + 0x4); n != 0; n = *(char**)(n + 0xF4)) {
+                if (*(unsigned char*)(n + 0xF3) != 0 && *(void**)(n + 0xFC) != 0) {
+                    cMemMan_free(*(void**)(n + 0xFC));
+                }
+                *(unsigned char*)(n + 0xF3) = 0;
+                *(void**)(n + 0xFC) = 0;
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9B40);
+#ifdef SKIP_ASM
+extern "C" void func_002D9A80(void);
+extern "C" void func_00416210(void* dst, int c, int n);
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern char D_00538450[];
+extern int D_004A3AC0;
+extern void* D_004A3AB4;
+extern int D_004A3AB8;
+extern int D_004A3ABC;
+
+extern "C" void func_002D9B40(void* self)
+{
+    func_002D9A80();
+    char* p = (char*)D_004A3AB0;
+    while (p != 0) {
+        char* cur = p;
+        char* n = *(char**)(p + 0x4);
+        while (n != 0) {
+            char* next = *(char**)(n + 0xF4);
+            operator_delete((int*)n);
+            n = next;
+        }
+        p = *(char**)(p + 0x8);
+        operator_delete((int*)cur);
+    }
+    D_004A3AB0 = 0;
+    D_004A3AC0 = 0;
+    func_00416210(D_00538450, 0, 0x400);
+    if (D_004A3AB4 != 0 && D_004A3AB8 != 0) {
+        cMemMan_free(D_004A3AB4);
+        D_004A3AB4 = 0;
+        D_004A3AB8 = 0;
+    }
+    D_004A3ABC = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9C00);
