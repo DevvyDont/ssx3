@@ -858,7 +858,46 @@ INCLUDE_ASM("render/particle", func_0037A260);
 
 INCLUDE_ASM("render/particle", func_0037A430);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037A540);
+#ifdef SKIP_ASM
+struct sPartVEntryI_A540 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sPartVEntryD_A540 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sPartEmitter_A540 {
+    int field_0x0;
+    void* vt;       // 0x4
+};
+
+extern "C" sPartEmitter_A540* func_00385138(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
+extern const char D_004928D8[];
+
+extern "C" sPartEmitter_A540* func_0037A540(void* a0, void* a1, void* a2, unsigned int flags)
+{
+    sPartEmitter_A540* e = func_00385138(cMemMan_alloc(0x1CC, D_004928D8, flags, 0), a1, a2, a0, flags);
+    if (flags & 0x40000000) {
+        if (e == 0) {
+            return 0;
+        }
+        sPartVEntryI_A540* vt = (sPartVEntryI_A540*)e->vt;
+        if (vt[2].fn((char*)e + vt[2].delta) == 0) {
+            sPartVEntryD_A540* vt2 = (sPartVEntryD_A540*)e->vt;
+            vt2[1].fn((char*)e + vt2[1].delta, 3);
+            return 0;
+        }
+    }
+    return e;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037A610);
 
@@ -876,7 +915,29 @@ INCLUDE_ASM("render/particle", func_0037BD98);
 
 INCLUDE_ASM("render/particle", func_0037C198);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037C570);
+#ifdef SKIP_ASM
+extern "C" int func_004139F8(float f);
+
+// PORT: g++ `<?` (min) operator; needs a macro / std::min on a modern compiler.
+static inline float clamp_C570(float x, float hi)
+{
+    return x >= 0.0f ? (x <? hi) : 0.0f;
+}
+
+struct sPartColour_C570 {
+    float r, g, b;
+};
+
+extern "C" void func_0037C570(void* self, sPartColour_C570* c)
+{
+    float one = 1.0f;
+    *(int*)((char*)self + 0x59EC) = func_004139F8(clamp_C570(c->r, one) * 128.0f);
+    *(int*)((char*)self + 0x59F0) = func_004139F8(clamp_C570(c->g, one) * 128.0f);
+    *(int*)((char*)self + 0x59F4) = func_004139F8(clamp_C570(c->b, one) * 128.0f);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037C720);
 
@@ -1262,7 +1323,40 @@ extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037DF88);
+#ifdef SKIP_ASM
+struct sPartVEntry_DF88 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, void*, void*);
+};
+
+struct sPartItem_DF88 {
+    char data[0xA0];
+};
+
+struct sPartSys_DF88 {
+    char pad_0x0[0x10D8];
+    sPartVEntry_DF88* vt;       // 0x10D8
+    char pad_0x10dc[0x310];
+    unsigned int count;         // 0x13EC
+    char pad_0x13f0[0x10];
+    sPartItem_DF88 items[1];    // 0x1400
+};
+
+extern "C" unsigned int func_0037DF88(sPartSys_DF88* self, void* a1, void* a2)
+{
+    unsigned int mask = 0;
+    for (unsigned int i = 0; i < self->count; i++) {
+        sPartVEntry_DF88* e = &self->vt[93];
+        if (e->fn((char*)self + e->delta, a1, a2, &self->items[i]) != 1) {
+            mask |= 1 << i;
+        }
+    }
+    return mask;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037E040);
@@ -1731,9 +1825,51 @@ extern "C" void func_00386CF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00386D10);
+#ifdef SKIP_ASM
+struct sPartStrip_6D10 {
+    void* verts;    // 0x0
+    void* cols;     // 0x4
+    int count;      // 0x8
+    int field_0xc;
+    int field_0x10;
+};
 
+extern "C" void func_00387EC0(void* self, void* verts, void* cols, int count, void* a4, void* a5, void* a6, float f0, float f1);
+
+extern "C" void func_00386D10(void* self, sPartStrip_6D10* strips, int n, void* a3, void* a4, void* a5, float f0, float f1)
+{
+    for (; n > 0; n--, strips++) {
+        if (strips->count >= 2) {
+            func_00387EC0(self, strips->verts, strips->cols, strips->count, a3, a4, a5, f0, f1);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00386DD0);
+#ifdef SKIP_ASM
+struct sPartStrip_6DD0 {
+    void* verts;    // 0x0
+    void* cols;     // 0x4
+    int count;      // 0x8
+    float f0;       // 0xC
+    float f1;       // 0x10
+};
+
+extern "C" void func_00387EC0(void* self, void* verts, void* cols, int count, void* a4, void* a5, void* a6, float f0, float f1);
+
+extern "C" void func_00386DD0(void* self, sPartStrip_6DD0* strips, int n, void* a3, void* a4, void* a5)
+{
+    for (; n > 0; n--, strips++) {
+        if (strips->count >= 2) {
+            func_00387EC0(self, strips->verts, strips->cols, strips->count, a3, a4, a5, strips->f0, strips->f1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00386E78);
 

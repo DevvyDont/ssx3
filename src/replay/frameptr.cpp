@@ -258,7 +258,41 @@ INCLUDE_ASM("replay/frameptr", func_0026EFB8);
 
 INCLUDE_ASM("replay/frameptr", func_0026F088);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F180);
+#ifdef SKIP_ASM
+struct sReplayBlock_F180 {
+    char data[0x38];
+};
+
+struct cReplayFramePtr_F180 {
+    char pad_0x0[0x8];
+    int numBlocks;          // 0x8
+    char pad_0xc[0x8];
+    int blockSize;          // 0x14
+    int field_0x18;         // 0x18
+    char pad_0x1c[0x10];
+    sReplayBlock_F180 blocks[1];    // 0x2C
+};
+
+extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size);
+extern "C" void func_0026F228(void* self);
+void func_0026F4A0(void* self, int state);
+
+extern "C" void func_0026F180(cReplayFramePtr_F180* self)
+{
+    self->blockSize = 0x14000;
+    self->numBlocks = 0xC9800 / self->blockSize;
+    self->field_0x18 = 0;
+    int i = 0;
+    do {
+        cReplayFramePtr_initBlock(&self->blocks[i], self->blockSize);
+        i++;
+    } while (i < self->numBlocks);
+    func_0026F4A0(self, 10);
+    func_0026F228(self);
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026F228);
 
@@ -379,9 +413,102 @@ void func_0026F898(void* self, int val)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/frameptr", func_0026F8A0);
+#ifdef SKIP_ASM
+extern "C" void func_0026EE68(void* self);
+extern "C" void func_0026EF30(void* self);
+extern "C" void func_0026F7F8(void* self);
+void func_0026F4A0(void* self, int state);
+extern "C" void func_002702F8(void* self, void* a1);
+extern "C" void func_002703F0(void* self, int a1);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F200(void* self);
 
+struct cReplayFramePtr_F8A0 {
+    int state;              // 0x0
+    char pad_0x4[0x604];
+    int field_0x608;        // 0x608
+    char pad_0x60c[0xC];
+    int field_0x618;        // 0x618
+    int field_0x61c;        // 0x61C
+    int field_0x620;        // 0x620
+};
+
+extern "C" void func_0026F8A0(cReplayFramePtr_F8A0* self, void* a1, int a2, int a3)
+{
+    int ok = !(self->state == 14 || self->state == 15);
+    if (ok) {
+        if (self->field_0x608 == 0) {
+            func_0026F7F8(self);
+        }
+        func_0026F4A0(self, 7);
+        self->field_0x618 = 0;
+        self->field_0x61c = 0;
+        self->field_0x620 = a2;
+        func_002702F8(self, a1);
+        func_002703F0(self, 1);
+        if (a2) {
+            func_0026EF30(self);
+        } else {
+            func_0026EE68(self);
+        }
+        if (a2 == 0 && a3 == 0) {
+            func_0028F200(func_0028B180());
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/frameptr", func_0026F980);
+#ifdef SKIP_ASM
+extern "C" void func_0026EEA0(void* self);
+extern "C" void func_0026EF80(void* self);
+void func_0026F4A0(void* self, int state);
+extern "C" void func_0026F850(void* self);
+extern "C" void func_00270628(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F2C0(void* self);
+
+struct cReplayFramePtr_F980 {
+    int state;              // 0x0
+    char pad_0x4[0x604];
+    int field_0x608;        // 0x608
+    int field_0x60c;        // 0x60C
+    char pad_0x610[0xC];
+    int field_0x61c;        // 0x61C
+    int field_0x620;        // 0x620
+    int field_0x624;        // 0x624
+};
+
+extern "C" void func_0026F980(cReplayFramePtr_F980* self)
+{
+    int ok = !(self->state == 14 || self->state == 15);
+    if (ok) {
+        func_00270628(self);
+        if (self->field_0x61c == 0 && self->field_0x620 == 0) {
+            func_0028F2C0(func_0028B180());
+        }
+        self->field_0x61c = 0;
+        self->field_0x620 = 0;
+        self->field_0x624 = 0;
+        if (self->field_0x608 == 0) {
+            func_0026F850(self);
+            if (self->field_0x620) {
+                func_0026EF80(self);
+            } else {
+                func_0026EEA0(self);
+            }
+            if (self->field_0x60c) {
+                func_0026F4A0(self, 13);
+            } else {
+                func_0026F4A0(self, 0);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026FA50);

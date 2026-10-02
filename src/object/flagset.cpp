@@ -45,7 +45,38 @@ extern "C" void func_0034C2E0(void* elem, void* stream)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034C378);
+#ifdef SKIP_ASM
+struct sFlagSetVEntryC378a {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sFlagSetVEntryC378b {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+extern "C" void cFlagSet_CreateMesh(void* self, void* item);
+
+extern "C" void func_0034C378(void* elem, void* stream)
+{
+    int i;
+    sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
+    sFlagSetVEntryC378a* e = &(*(sFlagSetVEntryC378a**)stream)[2];
+    e->fn((char*)stream + e->delta, self, 0x60);
+    for (i = 0; i < self->count; i++) {
+        sFlagSetVEntryC378b* e2 = &(*(sFlagSetVEntryC378b**)stream)[3];
+        self->items[i] = e2->fn((char*)stream + e2->delta);
+    }
+    if (self->count > 0) {
+        cFlagSet_CreateMesh(self, self->items[0]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034C428);
@@ -123,7 +154,42 @@ extern "C" void func_0034C4B8(sFlagSet_C4B8* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034C548);
+#ifdef SKIP_ASM
+struct sFlagSetElem_C548 {
+    char pad0[0x5C];
+    int active; // 0x5C
+    char pad60[0x188 - 0x60];
+};
+
+struct sFlagSet_C548 {
+    char pad0[0x20];
+    sFlagSetElem_C548 elems[15]; // 0x20
+};
+
+extern "C" int func_0034AFE8(void* self, void* data, void* ctx);
+extern "C" void func_0034B038(void* self, void* data, void* ctx);
+
+extern "C" void func_0034C548(sFlagSet_C548* self, void* node, void* desc)
+{
+    int i;
+    sFlagSetElem_C548* e;
+    for (i = 0, e = self->elems; i < 15; i++, e++) {
+        if (e->active != 0 && func_0034AFE8(e, desc, node) != 0) {
+            func_0034B038(e, desc, node);
+            return;
+        }
+    }
+    sFlagSetElem_C548* f = self->elems;
+    for (int j = 0; j < 15; j++, f++) {
+        if (f->active == 0) {
+            func_0034B038(f, desc, node);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034C600);
@@ -292,7 +358,60 @@ INCLUDE_ASM("object/flagset", func_0034D9B0);
 
 INCLUDE_ASM("object/flagset", func_0034DAC8);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034DBA8);
+#ifdef SKIP_ASM
+struct sFlagVEntry_DBA8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sFlagItem_DBA8 {
+    char pad_0x0[0x84];
+    sFlagVEntry_DBA8* vt;       // 0x84
+    char pad_0x88[0x48];
+};
+
+struct sFlagOwner_DBA8 {
+    char pad_0x0[0x14];
+    char node[0xC];             // 0x14
+    void** vtable;              // 0x20
+    char pad_0x24[0x20];
+    void* cache;                // 0x44
+    sFlagItem_DBA8* items;      // 0x48, array-new block (count at -0x10)
+    void* buf;                  // 0x4C
+};
+
+void cMemMan_free(void*);
+void operator_delete(int*);
+extern "C" void func_003553C0(void* self, int flags);
+extern void* D_00490CC8[];
+
+extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
+{
+    self->vtable = D_00490CC8;
+    if (self->cache != 0) {
+        cMemMan_free(self->cache);
+    }
+    sFlagItem_DBA8* items = self->items;
+    if (items != 0) {
+        sFlagItem_DBA8* p = items + ((int*)items)[-4];
+        while (self->items != p) {
+            p--;
+            p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+        }
+        cMemMan_free((char*)self->items - 0x10);
+    }
+    if (self->buf != 0) {
+        cMemMan_free(self->buf);
+    }
+    func_003553C0(self->node, 0);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034DC90);

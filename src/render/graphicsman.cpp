@@ -98,7 +98,90 @@ extern "C" void func_0036A290()
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036A2C0);
+#ifdef SKIP_ASM
+struct sGmVec4_A2C0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sGmMtx_A2C0 {
+    sGmVec4_A2C0 r[4];
+};
+
+extern "C" sGmMtx_A2C0* func_0038F2A8(sGmVec4_A2C0* pos);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply out = a * b); the PC port needs a plain multiply.
+static inline void gmMtxMul_A2C0(sGmMtx_A2C0* out, sGmMtx_A2C0* a, sGmMtx_A2C0* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(out), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy); the PC port needs a plain copy.
+static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+extern "C" void func_0036A2C0(void* self, sGmMtx_A2C0* m)
+{
+    if (*(int*)((char*)self + 0xA4) != 0) {
+        sGmMtx_A2C0 t2;
+        sGmVec4_A2C0 pos = m->r[3];
+        sGmMtx_A2C0 tmp;
+        sGmMtx_A2C0* r = func_0038F2A8(&pos);
+        gmMtxMul_A2C0(&tmp, m, r);
+        gmMtxCopy_A2C0(&t2, &tmp);
+        gmMtxCopy_A2C0(m, &t2);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036A428);
 
@@ -556,7 +639,55 @@ extern "C" void func_00370AF8(void* self, cStream00370AF8* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00370B60);
+#ifdef SKIP_ASM
+void func_002F7A68(void*);
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern void* D_00493118[];
+
+struct sGmView_0B60 {
+    char pad_0x0[0xC];
+    int field_0xc;          // 0xC
+    int field_0x10;         // 0x10
+    int field_0x14;         // 0x14
+    char pad_0x18[0x158];
+    int field_0x170;        // 0x170
+    int field_0x174;        // 0x174
+    int field_0x178;        // 0x178
+    int field_0x17c;        // 0x17C
+    char pad_0x180[0x20];
+    int field_0x1a0;        // 0x1A0
+    int field_0x1a4;        // 0x1A4
+    char pad_0x1a8[0x38];
+    int field_0x1e0;        // 0x1E0
+    char block[0x10];       // 0x1E4
+    short ids[2];           // 0x1F4
+    void** vtable;          // 0x1F8
+};
+
+extern "C" sGmView_0B60* func_00370B60(sGmView_0B60* self)
+{
+    self->field_0xc = 0;
+    self->field_0x10 = 0;
+    self->field_0x14 = 0;
+    self->vtable = D_00493118;
+    func_002F7A68((char*)self + 0x20);
+    self->field_0x170 = 0;
+    self->field_0x174 = 1;
+    self->field_0x178 = -1;
+    self->field_0x17c = 0;
+    self->field_0x1a0 = 0;
+    self->field_0x1a4 = 0;
+    self->field_0x1e0 = 0;
+    char* blk = self->block;
+    for (unsigned int i = 0; i < 2; i++) {
+        self->ids[i] = -1;
+    }
+    func_00416210(blk, 0, 0x10);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370C08);

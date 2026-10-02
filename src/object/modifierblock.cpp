@@ -157,9 +157,97 @@ void tModifierBlock_setRadius(tModifierBlock* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00352C70);
+#ifdef SKIP_ASM
+struct sMbVEntryV2C70 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
 
+struct sMbVEntryI2C70 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sMbChild2C70 {
+    int field_0x0;
+    sMbVEntryV2C70* vt;     // 0x4
+};
+
+extern "C" void func_0035F7D0(int h);
+extern "C" void func_0035F410(int h);
+extern "C" void func_00353188(tModifierBlock* self);
+
+extern "C" void func_00352C70(tModifierBlock* self)
+{
+    sBoundBoxNode* node = self->node;
+    if (node != 0) {
+        sMbVEntryV2C70* vt = *(sMbVEntryV2C70**)node;
+        vt[2].fn((char*)node + vt[2].delta);
+    }
+    if (self->field_0x4 != 0) {
+        func_0035F7D0(self->field_0x4);
+    }
+    if (self->field_0x8 != 0) {
+        func_0035F410(self->field_0x8);
+    }
+    sMbChild2C70* c = (sMbChild2C70*)self->field_0xC;
+    if (c != 0) {
+        c->vt[2].fn((char*)c + c->vt[2].delta);
+        c = (sMbChild2C70*)self->field_0xC;
+        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)c->vt;
+        if (vt2[4].fn((char*)c + vt2[4].delta) == 0) {
+            func_00353188(self);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/modifierblock", func_00352D20);
+#ifdef SKIP_ASM
+struct sMbVEntryV2D20 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sMbLink2D20 {
+    sMbLink2D20* next;      // 0x0
+    int field_0x4;
+    sMbVEntryV2D20* vt;     // 0x8
+};
+
+extern "C" void func_00352D20(tModifierBlock* self)
+{
+    sMbLink2D20* h = *(sMbLink2D20**)&self->field_0x10;
+    if (h != 0) {
+        sMbLink2D20* p = h;
+        do {
+            sMbLink2D20* next = p->next;
+            p->vt[5].fn((char*)p + p->vt[5].delta);
+            p = next;
+        } while (p != 0);
+    }
+    h = *(sMbLink2D20**)&self->field_0x1C;
+    if (h != 0) {
+        sMbLink2D20* p = h;
+        do {
+            sMbLink2D20* next = p->next;
+            p->vt[3].fn((char*)p + p->vt[3].delta);
+            p = next;
+        } while (p != 0);
+    }
+    sBoundBoxNode* node = self->node;
+    if (node != 0) {
+        sMbVEntryV2D20* vt = *(sMbVEntryV2D20**)node;
+        vt[4].fn((char*)node + vt[4].delta);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/modifierblock", func_00352DD0);
 
@@ -212,7 +300,57 @@ extern "C" void func_00352F08(tModifierBlock* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00352F40);
+#ifdef SKIP_ASM
+struct sMbVEntryP2F40 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, float);
+};
+
+struct sMbChild2F40 {
+    int field_0x0;
+    sMbVEntryP2F40* vt;     // 0x4
+};
+
+struct sMbLink2F40 {
+    sMbLink2F40* next;      // 0x0
+    int field_0x4;
+    sMbVEntryP2F40* vt;     // 0x8
+};
+
+extern "C" void func_0035FB30(void* self, int id, float v);
+extern "C" void func_0035F598(void* self, int id, float v);
+
+extern "C" void func_00352F40(tModifierBlock* self, int id, float v)
+{
+    sBoundBoxNode* node = self->node;
+    if (node != 0) {
+        sMbVEntryP2F40* vt = *(sMbVEntryP2F40**)node;
+        vt[5].fn((char*)node + vt[5].delta, id, v);
+    }
+    if (self->field_0x4 != 0) {
+        func_0035FB30((void*)self->field_0x4, id, v);
+    }
+    if (self->field_0x8 != 0) {
+        func_0035F598((void*)self->field_0x8, id, v);
+    }
+    sMbChild2F40* c = (sMbChild2F40*)self->field_0xC;
+    if (c != 0) {
+        c->vt[3].fn((char*)c + c->vt[3].delta, id, v);
+    }
+    sMbLink2F40* h = *(sMbLink2F40**)&self->field_0x10;
+    if (h != 0) {
+        sMbLink2F40* p = h;
+        do {
+            sMbLink2F40* next = p->next;
+            p->vt[7].fn((char*)p + p->vt[7].delta, id, v);
+            p = next;
+        } while (p != 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353020);
@@ -547,7 +685,77 @@ void* func_00353AE8(void* self)
 
 INCLUDE_ASM("object/modifierblock", func_00353B10);
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353CF0);
+#ifdef SKIP_ASM
+struct sMbTrackEntry3CF0 {
+    char pad_0x0[0x26];
+    short count;            // 0x26
+    char pad_0x28[0x30];
+};
+
+struct sMbTrackTable3CF0 {
+    char pad_0x0[0x14];
+    sMbTrackEntry3CF0* entries; // 0x14
+};
+
+struct sMbModelSet3CF0 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+
+struct sMbWorld3CF0 {
+    sMbTrackTable3CF0* table;   // 0x0
+    int field_0x4;
+    sMbModelSet3CF0** sets;     // 0x8
+};
+
+extern "C" sMbWorld3CF0** func_002D1BD8();
+int func_00353D98(void* self);
+
+static inline void* refToPtr3CF0(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+struct sMbModelRef3CF0 {
+    unsigned int id;
+
+    void* get(sMbWorld3CF0* w)
+    {
+        sMbModelSet3CF0* set = w->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        unsigned int p = set->refs[id >> 8] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtr3CF0(p);
+    }
+};
+
+struct sMbTrackRef3CF0 {
+    char pad_0x0[0x10];
+    int id;                 // 0x10
+    void* model;            // 0x14
+};
+
+extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
+{
+    self->id = id;
+    if (id < 0) {
+        func_00353D98(self);
+        return;
+    }
+    sMbWorld3CF0* w = *func_002D1BD8();
+    if (w->table->entries[id].count > 0) {
+        sMbModelRef3CF0 ref;
+        ref.id = id & 0xFF;
+        self->model = ref.get(w);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353D98__FPv);

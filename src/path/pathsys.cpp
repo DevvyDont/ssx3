@@ -108,7 +108,37 @@ extern "C" sPathEntry* func_0026B5E0(sPathEntryList* list, int type, int id)
 
 INCLUDE_ASM("path/pathsys", func_0026B680);
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B7D8);
+#ifdef SKIP_ASM
+extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" void func_0026BA88(void* dst, void* src);
+
+struct sPathPair_B7D8 {
+    int a;      // 0x0
+    int b;      // 0x4
+};
+
+struct sPathSys_B7D8 {
+    char pad_0x0[0x18];
+    sPathPair_B7D8 pairs[1];    // 0x18
+};
+
+extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* p)
+{
+    int count;
+    char* start = p;
+    func_0026BA68(&count, p);
+    p += 4;
+    for (int i = 0; i < count; i++) {
+        func_0026BA88(&self->pairs[i].b, p);
+        p += 4;
+        func_0026BA68(&self->pairs[i].a, p);
+        p += 4;
+    }
+    return p - start;
+}
+#endif
 
 INCLUDE_ASM("path/pathsys", func_0026B880);
 

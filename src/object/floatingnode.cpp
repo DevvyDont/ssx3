@@ -39,7 +39,54 @@ extern "C" void func_0034EF08(cFloatingNode* self)
 
 INCLUDE_ASM("object/floatingnode", func_0034EF40);
 
+//100%
 INCLUDE_ASM("object/floatingnode", func_0034F048);
+#ifdef SKIP_ASM
+struct sVec4_F048 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_F048 {
+    sVec4_F048 min;
+    sVec4_F048 max;
+};
+
+struct sInst_F048 {
+    char pad_0x00[0x60];
+    float min[3];   // 0x60
+    float max[3];   // 0x6C
+};
+
+extern "C" void* func_002D1BE0();
+extern "C" void func_003291E0(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+extern "C" void func_003567E0(void* self);
+
+extern "C" void func_0034F048(cFloatingNode* self)
+{
+    sBox_F048* info = (sBox_F048*)self->field_0x78;
+    if (info != 0) {
+        sBox_F048 nb;
+        sBox_F048 old = *info;
+        sInst_F048* inst = *(sInst_F048**)((char*)self + 0x18);
+        sVec4_F048 t;
+        t.x = inst->min[0];
+        t.y = inst->min[1];
+        t.z = inst->min[2];
+        t.w = 1.0f;
+        nb.min = t;
+        t.x = inst->max[0];
+        t.y = inst->max[1];
+        t.z = inst->max[2];
+        nb.max = t;
+        *info = nb;
+        void* id = *(void**)((char*)self + 0x18);
+        func_003291E0(func_002D1BE0(), 0, id, &nb, &old);
+        func_0034EF08(self);
+    } else {
+        func_003567E0(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/floatingnode", func_0034F120);
 

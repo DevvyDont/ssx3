@@ -1,6 +1,48 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/movenode", cMoveNode_cMoveNode);
+#ifdef SKIP_ASM
+struct sSerVEntry_55298 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct cMoveNode;
+void cMoveNode_addModifierBlock(cMoveNode* self);
+extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
+extern "C" void tModifierBlock_readFromReplayFrame(void* block, void* stream);
+extern "C" void cMoveNode_setupOverlapSystem(void* self);
+extern char D_00491028[];
+
+// PORT: the unit declares cMoveNode_cMoveNode(void*) (1 arg) for its callers; the body reads a1/a2
+// (forwarded to cInstanceNode_cInstanceNode), so the 3-arg body is bound by asm label.
+void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream) __asm__("cMoveNode_cMoveNode");
+
+void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
+{
+    int flag;
+    cInstanceNode_cInstanceNode(self, a, stream);
+    *(int*)((char*)self + 0x1C) = 0;
+    *(void**)((char*)self + 0xC) = D_00491028;
+    sSerVEntry_55298* e = &(*(sSerVEntry_55298**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x20, 4);
+    e = &(*(sSerVEntry_55298**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x24, 4);
+    e = &(*(sSerVEntry_55298**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x28, 4);
+    e = &(*(sSerVEntry_55298**)stream)[2];
+    e->fn((char*)stream + e->delta, &flag, 4);
+    if (flag) {
+        cMoveNode_addModifierBlock((cMoveNode*)self);
+        tModifierBlock_readFromReplayFrame(*(void**)((char*)self + 0x1C), stream);
+    }
+    cMoveNode_setupOverlapSystem(self);
+    *(unsigned short*)((char*)self + 0x12) |= 1;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_003553C0);
@@ -368,7 +410,22 @@ extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addDynamicParticle);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void* func_00345C90(void* mem, void* desc, void* inst, int index, void* a4);
+extern const char D_0048E990[];
+
+extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, void* a4)
+{
+    if (index < 0 || index >= *(int*)(*(char**)(*(char**)((char*)self + 0x18) + 0x80) + 4)) {
+        operator_delete((int*)desc);
+        return;
+    }
+    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, *(void**)((char*)self + 0x18), index, a4));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00355DB8);
@@ -567,7 +624,40 @@ extern "C" void func_00356B08(cMoveNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356B30);
+#ifdef SKIP_ASM
+struct sSerVEntry_56B30 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void func_00353448(void* block, void* stream);
+
+// PORT: the unit declares func_00356B30 as `void* (void*)` for its callers; the body writes
+// to the stream in a1, so the 2-arg body is bound by asm label.
+void func_00356B30_2(void* self, void* stream) __asm__("func_00356B30");
+
+void func_00356B30_2(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sSerVEntry_56B30* e = &(*(sSerVEntry_56B30**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x20, 4);
+    e = &(*(sSerVEntry_56B30**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x24, 4);
+    e = &(*(sSerVEntry_56B30**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x28, 4);
+    int flag = *(void**)((char*)self + 0x1C) != 0;
+    e = &(*(sSerVEntry_56B30**)stream)[1];
+    e->fn((char*)stream + e->delta, &flag, 4);
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_00353448(block, stream);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00356BF0);
 
@@ -652,7 +742,32 @@ extern "C" int func_00356D48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356DB0);
+#ifdef SKIP_ASM
+struct sMoveFlags_6DB0 {
+    char pad_0x00[0x8];
+    unsigned int w;     // 0x8
+};
+
+extern void* D_00490E80[];
+extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
+
+extern "C" void* func_00356DB0(void* self, void* a1, void* a2, int a3, int a4)
+{
+    func_00355280(self, a1, 0x11, a2);
+    *(void***)((char*)self + 0xC) = D_00490E80;
+    if (a4 != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
+        sMoveFlags_6DB0* f = *(sMoveFlags_6DB0**)((char*)self + 0x18);
+        f->w = (f->w & ~2) | 4;
+    }
+    if (a3 != 0) {
+        sMoveFlags_6DB0* f = *(sMoveFlags_6DB0**)((char*)self + 0x18);
+        f->w = (f->w & ~0x40) | 0x20;
+    }
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00356E60);
@@ -1311,9 +1426,90 @@ extern "C" void func_00357CA8(void** self, void* stream)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00357D28);
+#ifdef SKIP_ASM
+struct sMnVEntrySer7D28 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void* func_00357E80(void* mem, void* stream);
+
+extern "C" void func_00357D28(void** self, void* stream)
+{
+    int i;
+    func_00357B38(self);
+    for (i = 0; i < 4; i++) {
+        int has;
+        sMnVEntrySer7D28* e = &(*(sMnVEntrySer7D28**)stream)[2];
+        e->fn((char*)stream + e->delta, &has, 4);
+        if (has) {
+            self[i] = func_00357E80(cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), stream);
+        } else {
+            self[i] = 0;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/movenode", func_00357DD8);
+#ifdef SKIP_ASM
+struct sQuad_7DD8 {
+    float v[4];
+
+    sQuad_7DD8() {}
+    sQuad_7DD8(float x, float y, float z, float w)
+    {
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
+        v[3] = w;
+    }
+} __attribute__((aligned(16)));
+
+struct sPartDesc_7DD8 {
+    char pad_0x000[0xC0];
+    float pos[3];           // 0xC0
+    char pad_0x0cc[0x94];
+    sQuad_7DD8 a;           // 0x160
+    sQuad_7DD8 b;           // 0x170
+};
+
+struct sMultiPart_7DD8 {
+    void* owner;            // 0x0
+    int field_0x4;          // 0x4
+    void* data;             // 0x8
+    int field_0xc;          // 0xC
+    sPartDesc_7DD8* desc;   // 0x10
+    char pad_0x14[0xC];
+    sQuad_7DD8 a;           // 0x20
+    sQuad_7DD8 b;           // 0x30
+    sQuad_7DD8 pos;         // 0x40
+};
+
+extern char D_0048EA10[];
+extern "C" void func_003E6574(void* dst, const void* src, int n);
+extern "C" void cMultiParticle_setupMultiParticle(void* self);
+
+extern "C" void* func_00357DD8(void* mem, void* a1, void* a2)
+{
+    sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
+    self->owner = a2;
+    self->field_0x4 = 0;
+    void* buf = cMemMan_alloc(0xD8, D_0048EA10, 0x20000000, 0);
+    self->data = buf;
+    func_003E6574(buf, a1, 0xD8);
+    cMultiParticle_setupMultiParticle(self);
+    sPartDesc_7DD8* d = self->desc;
+    self->a = d->a;
+    self->b = d->b;
+    self->pos = sQuad_7DD8(d->pos[0], d->pos[1], d->pos[2], 0.0f);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00357E80);
 

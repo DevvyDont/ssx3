@@ -116,7 +116,61 @@ extern "C" void func_00342FA8(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343010);
+#ifdef SKIP_ASM
+struct sVec2_3010 {
+    float x;
+    float y;
+};
+
+struct sDesc_3010 {
+    int f0;
+    float f4;
+    float f8;
+    float fC;
+    int f10[8];
+};
+
+struct sFlags_3010 {
+    char pad_0x00[0x8];
+    unsigned int w;
+};
+
+struct sDebounce_3010 {
+    char pad_0x00[0xC];
+    char* vt;               // 0xC
+    char pad_0x10[0x8];
+    sFlags_3010* flags;     // 0x18
+    float f1C;              // 0x1C
+    unsigned char c20[8];   // 0x20
+    char pad_0x28[0x10];
+    sVec2_3010 v38;         // 0x38
+    int f40;
+    int f44;
+};
+
+extern char D_00490570[];
+extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+
+extern "C" void* func_00343010(sDebounce_3010* self, void* a1, void* a2, sDesc_3010* desc)
+{
+    func_0034FB00(self, a1, 0xF, a2);
+    self->vt = D_00490570;
+    self->f1C = desc->f4;
+    sVec2_3010 v;
+    v.x = desc->f8;
+    v.y = desc->fC;
+    self->v38 = v;
+    self->f40 = 0;
+    self->f44 = 0;
+    for (int i = 0; i < 8; i++) {
+        self->c20[i] = desc->f10[i];
+    }
+    self->flags->w = (self->flags->w & ~2) | 4;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_003430D0);
@@ -490,7 +544,90 @@ INCLUDE_ASM("object/debouncenode", func_00344368);
 
 INCLUDE_ASM("object/debouncenode", func_003443A8);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344730);
+#ifdef SKIP_ASM
+struct sTrackWorld51C0;
+extern "C" sTrackWorld51C0** func_002D1BD8();
+
+struct sItem4730 {
+    char pad_0x0[0x10];
+    char* data;             // 0x10
+};
+
+struct sItemList4730 {
+    int count;              // 0x0
+    sItem4730* items[1];    // 0x4
+};
+
+struct sModel4730 {
+    char pad_0x0[0x94];
+    sItemList4730* list;    // 0x94
+};
+
+static inline sModel4730* refToPtr4730(unsigned int p)
+{
+    return (sModel4730*)(p << 2);
+}
+
+struct sModelSet4730 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+
+    sModel4730* lookup(unsigned int idx)
+    {
+        unsigned int p = refs[idx] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtr4730(p);
+    }
+};
+
+struct sWorld4730 {
+    char pad_0x0[0x8];
+    sModelSet4730** sets;   // 0x8
+};
+
+
+struct sModelRef4730 {
+    unsigned int id;
+
+    sModel4730* get()
+    {
+        sModelSet4730* set = (*(sWorld4730**)func_002D1BD8())->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return set->lookup(id >> 8);
+    }
+};
+
+struct sSlot4730 {
+    unsigned short value;   // 0x0
+    char pad_0x2[0x12];
+};
+
+struct sDebounce4730 {
+    int field_0x0;
+    sModelRef4730 model;    // 0x4
+    char pad_0x8[0x108];
+    int count;              // 0x110
+    char pad_0x114[0x28];
+    sSlot4730 slots[1];     // 0x13C
+};
+
+extern "C" void func_00344730(sDebounce4730* self, int index)
+{
+    sModel4730* m = self->model.get();
+    for (int i = 0; i < self->count; i++) {
+        char* d = m->list->items[i]->data;
+        if (d != 0) {
+            self->slots[i].value = *(unsigned short*)(d + (index << 2) + 4);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344800);
@@ -541,7 +678,50 @@ void func_00344800_v(sDebounceOwner4800* self)
 
 INCLUDE_ASM("object/debouncenode", func_00344898);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_003449F0);
+#ifdef SKIP_ASM
+struct sDebounceVEntry49F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, float);
+};
+
+struct sDebounceItem49F0 {
+    char pad_0x0[0x84];
+    sDebounceVEntry49F0* vt;    // 0x84
+    char pad_0x88[0x48];
+};
+
+struct sDebounceOwner49F0 {
+    char pad_0x0[0x10C];
+    int count;                  // 0x10C
+    char pad_0x110[0xCC];
+    float time;                 // 0x1DC
+    float period;               // 0x1E0
+    float step;                 // 0x1E4
+    void* buf;                  // 0x1E8
+    sDebounceItem49F0* items;   // 0x1EC
+};
+
+extern "C" void func_00344AA0(sDebounceOwner49F0* self);
+
+// PORT: pointer held in int for the element address (index-first addu); not 64-bit safe.
+extern "C" void func_003449F0(void* elem)
+{
+    sDebounceOwner49F0* self = (sDebounceOwner49F0*)elem;
+    float t = self->time + self->step;
+    self->time = t;
+    if (t > self->period) {
+        self->time = t - self->period;
+    }
+    for (int i = 0; i < self->count; i++) {
+        sDebounceItem49F0* p = (sDebounceItem49F0*)(i * 0xD0 + (int)self->items);
+        p->vt[2].fn((char*)p + p->vt[2].delta, self->time);
+    }
+    func_00344AA0(self);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00344AA0);
 

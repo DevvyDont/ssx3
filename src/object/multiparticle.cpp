@@ -55,7 +55,44 @@ INCLUDE_ASM("object/multiparticle", func_003581F0);
 
 INCLUDE_ASM("object/multiparticle", func_00358260);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358380);
+#ifdef SKIP_ASM
+struct sSerVEntry_58380 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sMultiPart_58380 {
+    void* owner;            // 0x0
+    int count;              // 0x4
+    void* data;             // 0x8
+    int* items;             // 0xC
+    void* desc;             // 0x10
+};
+
+extern "C" void func_00370AA8(void* desc, void* stream);
+
+extern "C" void func_00358380(sMultiPart_58380* self, void* stream)
+{
+    sSerVEntry_58380* e = &(*(sSerVEntry_58380**)stream)[1];
+    e->fn((char*)stream + e->delta, self, 4);
+    e = &(*(sSerVEntry_58380**)stream)[1];
+    e->fn((char*)stream + e->delta, &self->count, 4);
+    e = &(*(sSerVEntry_58380**)stream)[1];
+    e->fn((char*)stream + e->delta, self->data, 0xD8);
+    func_00370AA8(self->desc, stream);
+    e = &(*(sSerVEntry_58380**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x40, 0x10);
+    e = &(*(sSerVEntry_58380**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x20, 0x20);
+    if (self->count > 0) {
+        e = &(*(sSerVEntry_58380**)stream)[1];
+        e->fn((char*)stream + e->delta, self->items, self->count << 2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_003584B8);
@@ -206,7 +243,82 @@ extern "C" void func_003590F0(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00359140);
+#ifdef SKIP_ASM
+struct sMpItem_9140 {
+    char data[0xD0];
+};
+
+struct sMpMtx_9140 {
+    float m[16];
+};
+
+struct sMpPartInfo_9140 {
+    char pad_0x0[0x1C];
+    int active;             // 0x1C
+};
+
+struct sMpPart_9140 {
+    int field_0x0;
+    int field_0x4;
+    sMpPartInfo_9140* info; // 0x8
+    int field_0xc;
+};
+
+struct sMpModel_9140 {
+    int field_0x0;
+    int count;              // 0x4
+    sMpPart_9140* parts;    // 0x8
+};
+
+struct sMpInst_9140 {
+    char pad_0x0[0x80];
+    sMpModel_9140* model;   // 0x80
+};
+
+struct sMp_9140 {
+    char pad_0x0[0x14];
+    signed char f14;        // 0x14
+    signed char f15;        // 0x15
+    signed char f16;        // 0x16
+    signed char f17;        // 0x17
+    char pad_0x18[0x48];
+    sMpInst_9140* inst;     // 0x60
+    char pad_0x64[0x18];
+    sMpItem_9140* items;    // 0x7C
+    int field_0x80;
+    sMpMtx_9140* mtx;       // 0x84
+};
+
+extern "C" void func_0034E348(void* self);
+extern "C" void func_00351948(sMpItem_9140* item, sMpMtx_9140* mtx);
+
+extern "C" void func_00359140(sMp_9140* self)
+{
+    func_0034E348((char*)self + 0x34);
+    if (self->items == 0) {
+        return;
+    }
+    if (self->f14 == 0) {
+        if (self->f17 == 0) {
+            return;
+        }
+        if (self->f15 == 0) {
+            return;
+        }
+    }
+    sMpModel_9140* model = self->inst->model;
+    int n = 0;
+    sMpPart_9140* p = model->parts;
+    for (int i = 0; i < model->count; i++, p++) {
+        if (p->info->active != 0) {
+            func_00351948(&self->items[n], (sMpMtx_9140*)((char*)self->mtx + (n << 6)));
+            n++;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00359228);

@@ -7,7 +7,35 @@ struct cBucketMan {
 
 INCLUDE_ASM("object/bucketman", cBucketMan_init);
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00354B38);
+#ifdef SKIP_ASM
+extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index);
+extern "C" void func_003546C8(void* self, int flags);
+void cMemMan_free(void*);
+
+extern "C" void func_00354B38(cBucketMan* self)
+{
+    int i;
+    for (i = 0; i < *(int*)self; i++) {
+        cBucketMan_purgeBucket(self, i);
+    }
+    char* b = self->mBuckets;
+    if (b != 0) {
+        char* p = b + ((int*)b)[-4] * 0x44;
+        while (self->mBuckets != p) {
+            p -= 0x44;
+            func_003546C8(p + 0x34, 2);
+            func_003546C8(p + 0x24, 2);
+            func_003546C8(p + 0x14, 2);
+            func_003546C8(p + 0x4, 2);
+        }
+        cMemMan_free(self->mBuckets - 0x10);
+    }
+    self->mBuckets = 0;
+    *(int*)self = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_add);
@@ -217,7 +245,40 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", func_003551A8);
+#ifdef SKIP_ASM
+struct sBucketVEntry51A8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sBucketVEntry51A8b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+void* cBucketMan_first(cBucketMan* self, int index);
+void* cBucketMan_next(cBucketMan* self, void* node, int index);
+
+extern "C" void func_003551A8(cBucketMan* self, int index, int key)
+{
+    void* node = cBucketMan_first(self, index);
+    while (node != 0) {
+        void* next = cBucketMan_next(self, node, index);
+        sBucketVEntry51A8* e = &(*(sBucketVEntry51A8**)((char*)node + 0xC))[11];
+        if (e->fn((char*)node + e->delta) == key) {
+            if (node != 0) {
+                sBucketVEntry51A8b* vt = *(sBucketVEntry51A8b**)((char*)node + 0xC);
+                vt[1].fn((char*)node + vt[1].delta, 3);
+            }
+        }
+        node = next;
+    }
+}
+#endif
 
 // 0x44-byte elements reached through a pointer at self+0x4
 struct sBucketEntry {

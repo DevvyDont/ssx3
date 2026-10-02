@@ -190,7 +190,48 @@ extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F598);
+#ifdef SKIP_ASM
+struct sLightDma_F598 {
+    int field_0x0;
+    int count;              // 0x4
+    int next;               // 0x8
+    int cur;                // 0xC
+    int defSize;            // 0x10
+    int result[3];          // 0x14
+    unsigned int addr[3];   // 0x20
+};
+
+extern "C" void func_0038F768(void);
+extern "C" void func_0038F6A8(void* self);
+extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
+
+// PORT: the unit declares func_0038F598 as `void (sLmStack*, int, int, int)`; the body takes
+// (self, size, flags) and returns the buffer address, so it is bound by asm label.
+unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags) __asm__("func_0038F598");
+
+unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags)
+{
+    if (size == 0) {
+        if (flags & 6) {
+            func_0038F768();
+        }
+        unsigned int r = self->addr[self->cur];
+        func_0038F6A8(self);
+        return r;
+    }
+    size >>= 4;
+    // PORT: EE sync (memory barrier before kicking the DMA)
+    __asm__ __volatile__("sync");
+    unsigned int* addrs = self->addr;
+    func_00371DD8(self->result[self->cur], *(unsigned int*)((char*)addrs + (self->cur << 2)), size, flags);
+    int cur = self->cur;
+    unsigned int r = *(unsigned int*)((char*)addrs + (cur << 2)) + (size << 4);
+    self->cur = (cur + 1) % self->count;
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/lightman", func_0038F668);
@@ -312,9 +353,47 @@ INCLUDE_ASM("render/lightman", func_00390EF8);
 
 INCLUDE_ASM("render/lightman", func_00390F20);
 
+//100%
 INCLUDE_ASM("render/lightman", func_003912A8);
+#ifdef SKIP_ASM
+extern char D_0043BD00[];
+extern "C" void func_00424020(int);
 
+// PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
+// 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
+extern "C" void func_003912A8(void)
+{
+    while (*(volatile int*)0x10008000 & 0x100) {
+    }
+    *(volatile int*)0x10008030 = (int)D_0043BD00;
+    *(volatile int*)0x10008020 = 0;
+    *(volatile int*)0x10008000 = 0x104;
+    while (*(volatile int*)0x10008000 & 0x100) {
+    }
+    func_00424020(0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/lightman", func_00391360);
+#ifdef SKIP_ASM
+extern char D_0043CCA0[];
+extern "C" void func_00424020(int);
+
+// PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
+// 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
+extern "C" void func_00391360(void)
+{
+    while (*(volatile int*)0x10008000 & 0x100) {
+    }
+    *(volatile int*)0x10008030 = (int)D_0043CCA0;
+    *(volatile int*)0x10008020 = 0;
+    *(volatile int*)0x10008000 = 0x104;
+    while (*(volatile int*)0x10008000 & 0x100) {
+    }
+    func_00424020(0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_00391418);
@@ -396,7 +475,68 @@ extern "C" int func_003914F8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_003915E8);
+#ifdef SKIP_ASM
+struct sLmVec2_15E8 {
+    float x, y;
+
+    sLmVec2_15E8() {}
+    sLmVec2_15E8(float a, float b)
+    {
+        x = a;
+        y = b;
+    }
+};
+
+struct sLmVec4_15E8 {
+    float x, y, z, w;
+
+    sLmVec4_15E8() {}
+    sLmVec4_15E8(float a, float b, float c, float d)
+    {
+        x = a;
+        y = b;
+        z = c;
+        w = d;
+    }
+};
+
+struct sLmLight_15E8 {
+    char pad_0x0[0x8];
+    int field_0x8;          // 0x8
+    char pad_0xc[0x1C];
+    sLmVec2_15E8 v28;       // 0x28
+    sLmVec2_15E8 v30;       // 0x30
+    sLmVec2_15E8 v38;       // 0x38
+    sLmVec4_15E8 v40;       // 0x40
+    sLmVec4_15E8 v50;       // 0x50
+    char pad_0x60[0x4];
+    unsigned char b64;      // 0x64
+};
+
+extern "C" void func_00391708(void* self, const char* name, int flags);
+
+extern "C" sLmLight_15E8* func_003915E8(sLmLight_15E8* self, const char* name, int flags)
+{
+    self->field_0x8 = 0;
+    self->v28 = sLmVec2_15E8(0.0f, 0.0f);
+    self->v30 = sLmVec2_15E8(1.0f, 1.0f);
+    self->v38 = self->v30;
+    {
+        sLmVec4_15E8 t;
+        t.x = 1.0f;
+        t.y = 1.0f;
+        t.z = 1.0f;
+        t.w = 1.0f;
+        self->v40 = t;
+    }
+    self->v50 = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
+    self->b64 = 0;
+    func_00391708(self, name, flags);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_003916C0);

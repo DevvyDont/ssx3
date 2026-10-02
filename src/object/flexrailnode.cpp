@@ -1,6 +1,48 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/flexrailnode", cFlexRailNode_addSpaceHash);
+#ifdef SKIP_ASM
+struct sHashKey_8B90 {
+    int level;      // 0x0
+    int x;          // 0x4
+    int y;          // 0x8
+    int z;          // 0xC
+};
+
+struct sHashCell_8B90 {
+    char data[0x14];
+};
+
+struct sHashNode_8B90 {
+    int field_0x0;
+    int field_0x4;
+    int type;       // 0x8
+    void* owner;    // 0xC
+};
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_002D1BE0();
+extern "C" void func_00328F28(sHashKey_8B90* out, void* box);
+extern "C" void func_00328C20(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
+extern const char D_0048E808[];
+
+extern "C" void cFlexRailNode_addSpaceHash(void* self)
+{
+    sHashNode_8B90* n = (sHashNode_8B90*)cMemMan_alloc(0x10, D_0048E808, 0x20000000, 0);
+    n->owner = self;
+    n->type = 3;
+    *(sHashNode_8B90**)((char*)self + 0x54) = n;
+    sHashCell_8B90* cell = (sHashCell_8B90*)func_002D1BE0();
+    sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
+    sHashKey_8B90 key;
+    func_00328F28(&key, (char*)self + 0x30);
+    sHashCell_8B90* c1 = key.x < 0 ? cell + 4 : cell;
+    sHashCell_8B90* c2 = key.y < 0 ? c1 + 2 : c1;
+    sHashCell_8B90* c3 = key.z < 0 ? c2 + 1 : c2;
+    func_00328C20(c3, 2, node, &key);
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_00348C48);
 
@@ -528,5 +570,45 @@ extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
 
 INCLUDE_ASM("object/flexrailnode", func_0034B038);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034B168);
+#ifdef SKIP_ASM
+struct sFrRider_B168 {
+    char pad_0x0[0x78];
+    int id;                 // 0x78
+    char pad_0x7c[0x4];
+    int* track;             // 0x80
+};
+
+struct sFrRail_B168 {
+    char pad_0x0[0x58];
+    int track;              // 0x58
+    int count;              // 0x5C
+    char pad_0x60[0x34];
+    sFrRider_B168* riders[1]; // 0x94
+};
+
+extern "C" void func_0034B7B8(void* self);
+
+extern "C" int func_0034B168(sFrRail_B168* self, sFrRider_B168* rider)
+{
+    if (self->count == 0) {
+        return 0;
+    }
+    if (*rider->track != self->track) {
+        return 0;
+    }
+    for (int i = 0; i < self->count; i++) {
+        if (self->riders[i]->id == rider->id) {
+            self->riders[i] = self->riders[self->count - 1];
+            self->riders[self->count - 1] = 0;
+            if (--self->count == 0) {
+                func_0034B7B8(self);
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 

@@ -27,7 +27,49 @@ extern "C" void func_0026C588(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_update);
+#ifdef SKIP_ASM
+extern "C" int func_003DF980(int handle);
+extern "C" int ASYNCFILE_release(int handle, void** data, int* size);
+extern "C" void func_002523A8(void* p);
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern const char D_00481560[];
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+
+struct sPlaybackEntry_C5F8 {
+    int field_0x0;
+    void* buf;      // 0x4
+    int size;       // 0x8
+};
+
+struct cPlaybackMan_C5F8 {
+    char pad_0x0[0x58];
+    sPlaybackEntry_C5F8* entries;   // 0x58
+    char pad_0x5c[0x18];
+    int cur;                        // 0x74
+    int handle;                     // 0x78
+};
+
+extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
+{
+    if (self->handle >= 0 && func_003DF980(self->handle) == 1) {
+        void* data = 0;
+        int size = 0;
+        ASYNCFILE_release(self->handle, &data, &size);
+        if (data != 0 && size > 0) {
+            // PORT: pointer held in int for the entry address (index-first addu); not 64-bit safe.
+            sPlaybackEntry_C5F8* e = (sPlaybackEntry_C5F8*)(self->cur * 12 + (int)self->entries);
+            e->buf = operator_new_tag(size, D_00481560, 0x20000000, 0);
+            self->entries[self->cur].size = size;
+            func_003E6574(self->entries[self->cur].buf, data, size);
+            func_002523A8(data);
+        }
+        self->handle = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_initLocation);
 
@@ -104,7 +146,35 @@ extern "C" void* func_0026CC18(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026CC48);
+#ifdef SKIP_ASM
+extern "C" void cAI_purgeMissionRiders(void*);
+extern "C" void func_00128AC0(void* self);
+extern "C" void func_0015EDC8(void* self, int value);
+void func_0026F4A0(void* self, int val);
+extern "C" void func_0026CBB8(void* self);
+void func_00317908(void* self);
+
+extern "C" void func_0026CC48(void* self)
+{
+    if (*(int*)((char*)self + 0x70) == 0 && *(int*)(*(char**)((char*)self + 0x4) + 0xC) > 0) {
+        cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
+        func_00128AC0(*(void**)((char*)self + 0x60));
+        void* fp = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
+        *(int*)((char*)fp + 0x4) = *(int*)fp;
+        func_0026F4A0(fp, 14);
+        func_0026CBB8(self);
+        *(int*)(*(char**)((char*)self + 0x4) + 0x8) = 0;
+        func_00317908(*(char**)((char*)self + 0x4) + 0x1C214);
+        *(int*)(*(char**)((char*)self + 0x60) + 0x8) = *(int*)(*(char**)((char*)self + 0x4) + 0x1C210);
+        *(int*)((char*)self + 0x70) = 1;
+        char* x = *(char**)(*(char**)((char*)self + 0x60) + 0x70);
+        int v = x ? *(int*)(x + 0x18) : 0;
+        func_0015EDC8(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026CD20);
@@ -226,9 +296,77 @@ INCLUDE_ASM("replay/playbackman", func_0026D178);
 
 INCLUDE_ASM("replay/playbackman", func_0026D228);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026D2B0);
+#ifdef SKIP_ASM
+struct sPbChunk_D2B0 {
+    unsigned int n : 12;
+    unsigned int key : 20;
+    int data;
+};
 
+struct sPbStream_D2B0 {
+    int count;              // 0x0
+    int index;              // 0x4
+    int offset;             // 0x8
+    sPbChunk_D2B0* chunks;  // 0xC
+};
+
+extern "C" int func_00415FC8(const void* a, const void* b, int n);
+extern "C" void func_0026D228(sPbStream_D2B0* self, sPbChunk_D2B0* chunk);
+
+extern "C" int func_0026D2B0(sPbStream_D2B0* self, sPbChunk_D2B0* chunk)
+{
+    if (self->count > 0) {
+        int i = self->count - 1;
+        sPbChunk_D2B0 last = self->chunks[i];
+        last.n = 0;
+        if (func_00415FC8(&last, chunk, 8) == 0 && (int)self->chunks[i].n < 0xFFF) {
+            self->chunks[i].n++;
+        } else {
+            func_0026D228(self, chunk);
+        }
+    } else {
+        func_0026D228(self, chunk);
+    }
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D420);
+#ifdef SKIP_ASM
+struct sPbChunk_D420 {
+    unsigned int n : 12;
+    unsigned int key : 20;
+    int data;
+};
+
+struct sPbStream_D420 {
+    int count;              // 0x0
+    int index;              // 0x4
+    int offset;             // 0x8
+    sPbChunk_D420* chunks;  // 0xC
+};
+
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+extern "C" int func_0026D420(sPbStream_D420* self, sPbChunk_D420* out)
+{
+    func_003E6448(out, 0, 8);
+    if (self->index >= self->count) {
+        return 0;
+    }
+    if (self->offset <= 0) {
+        self->offset = self->chunks[self->index].n;
+    }
+    *out = self->chunks[self->index];
+    if (--self->offset <= 0) {
+        self->index++;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D4D8);
@@ -333,7 +471,64 @@ extern "C" void func_0026D628(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D678);
+#ifdef SKIP_ASM
+struct sPbRgba_D678 {
+    unsigned char c[4];
+};
+
+struct sPbHeader_D678 {
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    int field_0xc;
+    sPbRgba_D678 colour;    // 0x10
+    int field_0x14;
+    int field_0x18;
+    int field_0x1c;
+    int field_0x20;
+    int field_0x24;
+};
+
+struct sPbFrame_D678 {
+    char pad_0x0[0x10];
+    int field_0x10;         // 0x10
+    char pad_0x14[0x8];
+    sPbRgba_D678 colour;    // 0x1C
+    int field_0x20;         // 0x20
+    int field_0x24;         // 0x24
+    int field_0x28;         // 0x28
+    int field_0x2c;         // 0x2C
+    int field_0x30;         // 0x30
+    int field_0x34;         // 0x34
+};
+
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" int func_0026EAB8(void* self, char** pp, void* src);
+// PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
+// argument; bind the 2-arg form to the symbol.
+void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
+
+extern "C" int func_0026D678(sPbFrame_D678* self, char** pp)
+{
+    sPbHeader_D678 h;
+    char* p = *pp;
+    *pp = p + 0x28;
+    func_003E6574(&h, p, 0x28);
+    self->field_0x10 = h.field_0x4;
+    self->field_0x30 = h.field_0x8;
+    self->field_0x34 = h.field_0xc;
+    self->colour = h.colour;
+    self->field_0x20 = h.field_0x14;
+    self->field_0x24 = h.field_0x18;
+    self->field_0x28 = h.field_0x1c;
+    self->field_0x2c = h.field_0x20;
+    func_0026EAB8(self, pp, p + 0x24);
+    func_0026ED88_2(self, 1);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D730__FPvii);

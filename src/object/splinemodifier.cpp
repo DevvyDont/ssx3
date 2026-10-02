@@ -1,6 +1,60 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/splinemodifier", cSplineModifier_cSplineModifier);
+#ifdef SKIP_ASM
+class cStream003595D8 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+struct sSmQuad_95D8 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+struct sSmFollow_95D8 {
+    unsigned int id;        // 0xD8
+    int count;              // 0xDC
+    void* node;             // 0xE0
+    float length;           // 0xE4
+};
+
+struct cSplineModifier_95D8 {
+    void** vtable;          // 0x0
+    char pad_0x4[0x54];
+    int field_0x58;         // 0x58
+    char pad_0x5c[0x54];
+    sSmQuad_95D8 qB0;       // 0xB0
+    sSmQuad_95D8 qC0;       // 0xC0
+    int field_0xd0;         // 0xD0
+    int field_0xd4;         // 0xD4
+    sSmFollow_95D8 follow;  // 0xD8
+};
+
+extern void* D_0048F250[];
+extern sSmQuad_95D8 D_004FF120;
+extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream);
+
+extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier_95D8* self, cStream003595D8* stream)
+{
+    self->vtable = D_0048F250;
+    sSmFollow_95D8* f = &self->follow;
+    self->follow.id = 0xFFFFFFFF;
+    self->follow.node = 0;
+    self->follow.count = 0;
+    self->follow.length = 0;
+    stream->v02((char*)self + 0x10, 0x50);
+    cSpline_readFromReplayFrame(f, stream);
+    self->qB0 = D_004FF120;
+    self->qC0 = D_004FF120;
+    self->field_0x58 = 1;
+    self->field_0xd0 = 0;
+    self->field_0xd4 = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_00359688);
 
@@ -54,7 +108,49 @@ INCLUDE_ASM("object/splinemodifier", func_00359F88);
 
 INCLUDE_ASM("object/splinemodifier", func_0035A118);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035A250);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+void* cObjectInterface_getInstanceMan();
+void func_00351260(void* man, void* inst);
+extern "C" void func_0035A780(void* self);
+extern void* D_0048F168[];
+extern void* D_004913F8[];
+
+struct cMultiSplineModifier_A250 {
+    void** vtable;          // 0x0
+    int count;              // 0x4
+    char pad_0x8[0x30];
+    void* nodes;            // 0x38
+    void* data;             // 0x3C
+    int field_0x40;
+    void** insts;           // 0x44
+};
+
+extern "C" void func_0035A250(cMultiSplineModifier_A250* self, int flags)
+{
+    self->vtable = D_0048F168;
+    func_0035A780(self);
+    if (self->nodes != 0) {
+        cMemMan_free(self->nodes);
+    }
+    if (self->data != 0) {
+        cMemMan_free(self->data);
+    }
+    for (int i = 0; i < self->count; i++) {
+        func_00351260(cObjectInterface_getInstanceMan(), self->insts[i]);
+    }
+    if (self->insts != 0) {
+        cMemMan_free(self->insts);
+    }
+    self->vtable = D_004913F8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_allocNodes);
 
@@ -273,7 +369,32 @@ INCLUDE_ASM("object/splinemodifier", func_0035B200);
 
 INCLUDE_ASM("object/splinemodifier", func_0035B418);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035B5A8);
+#ifdef SKIP_ASM
+class cStream0035B5A8 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(void* obj);
+};
+
+class cStream00359F30;
+extern "C" void func_00345538(void* self, cStream00359F30* stream);
+
+extern "C" void func_0035B5A8(void* self, cStream0035B5A8* stream)
+{
+    stream->v01((char*)self + 0x4, 0x34);
+    func_00345538((char*)self + 0x48, (cStream00359F30*)stream);
+    stream->v05(*(void**)((char*)self + 0x40));
+    for (int i = 0; i < *(int*)((char*)self + 0x4); i++) {
+        stream->v01((*(char***)((char*)self + 0x44))[i] + 0x78, 4);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035B670);
@@ -331,5 +452,100 @@ INCLUDE_ASM("object/splinemodifier", func_0035BA88);
 
 INCLUDE_ASM("object/splinemodifier", func_0035BD70);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035C040);
+#ifdef SKIP_ASM
+struct sSmVec4_C040 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSmBox_C040 {
+    sSmVec4_C040 min;
+    sSmVec4_C040 max;
+};
+
+struct sSmVEntryI_C040 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sSmVEntryB_C040 {
+    short delta;
+    short index;
+    sSmBox_C040* (*fn)(void*);
+};
+
+struct sSmVtbl_C040 {
+    char pad_0x0[0x160];
+    sSmVEntryI_C040 v44;    // 0x160
+    sSmVEntryB_C040 v45;    // 0x168
+};
+
+struct sSmObj_C040 {
+    char pad_0x0[0xC];
+    sSmVtbl_C040* vt;       // 0xC
+};
+
+struct sSmOwner_C040 {
+    char pad_0x0[0xC];
+    sSmObj_C040* obj;       // 0xC
+};
+
+struct sSmMod_C040 {
+    char pad_0x0[0x10];
+    sSmBox_C040 box;        // 0x10
+    char pad_0x30[0x10];
+    sSmOwner_C040* owner;   // 0x40
+};
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a -= b, 4 floats).
+static inline void vecSubEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a += b, 4 floats).
+static inline void vecAddEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+extern "C" void func_0035C040(sSmMod_C040* self)
+{
+    sSmObj_C040* o = self->owner->obj;
+    if (o->vt->v44.fn((char*)o + o->vt->v44.delta) != 0) {
+        o = self->owner->obj;
+        sSmBox_C040* b = o->vt->v45.fn((char*)o + o->vt->v45.delta);
+        self->box = *b;
+        sSmVec4_C040 pad;
+        pad.x = 100.0f;
+        pad.y = 100.0f;
+        pad.z = 100.0f;
+        pad.w = 0.0f;
+        vecSubEq_C040(self->box.min, pad);
+        vecAddEq_C040(self->box.max, pad);
+    }
+}
+#endif
 
