@@ -97,6 +97,47 @@ compiler_type = "gcc"
 "tools/cc/eegcc-2.95.3-V1.36/bin/gcc" = "eegcc-2.95.3-V1.36"
 """)
 
+
+def rewrite_lit4_loads_for_objdiff():
+    """Objects mode only: turn `lwc1 $fN, (D_x)` loads of .lit4 pool entries back into `li.s $fN, value`.
+
+    The compiler never names float literals: it emits `li.s` and the assembler puts the value in
+    the object's own .lit4 (R_MIPS_LITERAL). splat instead references the retail pool entry by name
+    (GPREL16 to an external D_ symbol), which no C can reproduce. Rewriting the target asm the same
+    way the original toolchain built it makes the two comparable; the instruction bytes are
+    unchanged (one gp-relative lwc1). Values with a zero low half are skipped, because gas would
+    expand those to lui+mtc1. Never used for the linked ELF: its .lit4 layout comes from the split
+    .lit4 data segment.
+    """
+    import re
+    import struct
+
+    lit4_files = list(Path("asm/data").glob("*.lit4.s"))
+    values = {}
+    for f in lit4_files:
+        for addr, word in re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/\s+\.float", f.read_text()):
+            raw = bytes.fromhex(word)
+            if int.from_bytes(raw, "little") & 0xFFFF:
+                values[addr] = struct.unpack("<f", raw)[0]
+    load = re.compile(r"lwc1(\s+)(\$f\d+), \((D_([0-9A-F]{8}))\) /\* gp_rel: \(D_[0-9A-F]{8}\) \*/")
+    rewritten = 0
+    for f in Path("asm/nonmatchings").rglob("*.s"):
+        text = f.read_text()
+        if "gp_rel" not in text:
+            continue
+
+        def sub(m):
+            nonlocal rewritten
+            if m.group(4) not in values:
+                return m.group(0)
+            rewritten += 1
+            return f"li.s{m.group(1)}{m.group(2)}, {values[m.group(4)]!r} /* lit4: {m.group(3)} */"
+
+        new = load.sub(sub, text)
+        if new != text:
+            f.write_text(new)
+    print(f"lit4: rewrote {rewritten} literal loads to li.s for objdiff")
+
 def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_only=False, dual_objects=False):
     """
     Build the objects and the final ELF file.
@@ -423,6 +464,7 @@ def main():
     linker_entries = split.linker_writer.entries
 
     if do_objects:
+        rewrite_lit4_loads_for_objdiff()
         build_stuff(linker_entries, skip_checksum=True, objects_only=True, dual_objects=True)
     else:
         build_stuff(linker_entries, do_skip_checksum)

@@ -194,7 +194,6 @@ void func_00317530(void* self, float arg)
 }
 #endif
 
-extern float D_004A01FC;
 
 //99.9%
 INCLUDE_ASM("bx/appman", func_00317550__FPvf);
@@ -208,7 +207,7 @@ void func_00317550(void* self, float arg)
     float rate = raw * diff;
     int v1 = *(int*)((char*)D_004A5B64 + 0x1C);
     x0 = x0 - arg;
-    rate = rate * D_004A01FC;
+    rate = rate * 0.01f;
     *(float*)((char*)self + 0x4) = old8;
     *(float*)((char*)self + 0x18) = x0;
     *(int*)((char*)self + 0x10) = v1;
