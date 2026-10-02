@@ -370,7 +370,49 @@ extern "C" void func_0025A8B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025A948);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_003E7FF0(const char* tag, int a, void* cb);
+extern "C" void func_003E8248(void* mgr, int idx, void* cb, void* user);
+extern "C" const char* func_00259198();
+extern "C" void func_00268B08(void* self, void* a1, int a2);
+extern "C" void func_00268B30(void* self, void* a1, int a2);
+extern "C" void func_00268B58(void* self, void* a1, int a2);
+extern "C" void func_00268B80(void* self, void* a1, int a2);
+extern char D_004A2FC8[];
+extern char D_004A2FD0[];
+extern char D_004A2FD8[];
+extern char D_004A2FE0[];
+extern char D_004A2FE8[];
+extern char D_004813A0[];
+extern char D_004813B0[];
+extern char D_00481390[];
+extern char D_00480818[];
+extern char D_00480828[];
+
+extern "C" void func_0025A948(void* self_)
+{
+    char* self = (char*)self_;
+    char buf[0x40];
+    char tag[0x100];
+    tag[0] = 0;
+    cDirtysock_tag_TagFieldSetString(tag, 0x100, D_004A2FC8, D_004813A0);
+    sprintf(buf, D_00480818, D_004A2FD0, D_004813B0, D_00480828);
+    cDirtysock_tag_TagFieldSetString(tag, 0x100, D_004A2FD8, buf);
+    const char* key = D_004A2FE0;
+    cDirtysock_tag_TagFieldSetString(tag, 0x100, key, func_00259198());
+    cDirtysock_tag_TagFieldSetString(tag, 0x100, D_004A2FE8, D_00481390);
+    void* mgr = func_003E7FF0(tag, 0, (void*)func_00259390);
+    *(void**)(self + 0x54) = mgr;
+    func_003E8248(mgr, 0, (void*)func_00268B08, self);
+    func_003E8248(*(void**)(self + 0x54), 1, (void*)func_00268B30, self);
+    func_003E8248(*(void**)(self + 0x54), 3, (void*)func_00268B58, self);
+    func_003E8248(*(void**)(self + 0x54), 4, (void*)func_00268B80, self);
+    func_0025A778((sDsSessK2*)self);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_0025AA98);
@@ -601,7 +643,69 @@ extern "C" void func_0025B800(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025B848);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern char D_00480848[];
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeB848 {
+    sMsgListNodeB848* next;
+    sMsgListNodeB848* prev;
+    void* data;
+};
+
+struct sMsgListIterB848 {
+    sMsgListNodeB848* node;
+    sMsgListIterB848(sMsgListNodeB848* x) : node(x) {}
+    sMsgListIterB848(const sMsgListIterB848& x) : node(x.node) {}
+};
+
+static inline sMsgListIterB848 sMsgListB848_insert(sMsgListIterB848 pos, void* const& x)
+{
+    sMsgListNodeB848* tmp = (sMsgListNodeB848*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_B848(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListB848_insert(*(sMsgListNodeB848**)(self + 0xF0), mp);
+}
+
+extern "C" void func_0025B848(char* self, char* msg)
+{
+    *(int*)self = 1;
+    if (*(int*)(msg + 0x8) == 0) {
+        func_003E8B10(*(void**)(self + 0x54), 0x73656C65, D_00480848, 0, 0);
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        m[0] = 0xC9;
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        post_B848(self, m);
+    } else {
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = *(int*)(msg + 0x8);
+        post_B848(self, m);
+        *(int*)(self + 0x10) = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025B9C8);
 
@@ -931,7 +1035,76 @@ void* func_0025CD28(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025CD50);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern char D_004A3108[];
+extern char D_004A30C8[];
+extern char D_004A30D0[];
+extern char D_004A3110[];
+extern char D_004813A0[];
+extern "C" const char* func_003F3F78();
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025B608(void* self, int a1, int tag, void* cb, int a4, float f);
+extern "C" void func_00268C98(void* self, void* a1, int a2);
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeCD50 {
+    sMsgListNodeCD50* next;
+    sMsgListNodeCD50* prev;
+    void* data;
+};
+
+struct sMsgListIterCD50 {
+    sMsgListNodeCD50* node;
+    sMsgListIterCD50(sMsgListNodeCD50* x) : node(x) {}
+    sMsgListIterCD50(const sMsgListIterCD50& x) : node(x.node) {}
+};
+
+static inline sMsgListIterCD50 sMsgListCD50_insert(sMsgListIterCD50 pos, void* const& x)
+{
+    sMsgListNodeCD50* tmp = (sMsgListNodeCD50*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+// PORT: the unit declares func_0025CD50 as void* (void*, int) (a caller tail-calls it); the body takes (self, name).
+extern "C" void func_0025CD50_impl(char* self, const char* name) __asm__("func_0025CD50");
+
+extern "C" void func_0025CD50_impl(char* self, const char* name)
+{
+    cBXString_cBXString4(self + 0x80, name);
+    char buf[0x200];
+    buf[0] = 0;
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A3108, name);
+    const char* key = D_004A30C8;
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, key, func_003F3F78());
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A30D0, D_004813A0);
+    if (*(int*)(self + 0x18) != 0)
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A3110, self + 0x1C);
+    // PORT: function pointer passed through func_0025B608's int parameter.
+    func_0025B608(self, 9, 0x70657273, buf, (int)func_00268C98, 20.0f);
+    int type = 0xD9;
+    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+    m[0] = type;
+    *(void***)((char*)m + 0x4) = D_004812B0;
+    void* mp = m;
+    sMsgListCD50_insert(*(sMsgListNodeCD50**)(self + 0xF0), mp);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025CEB0);
@@ -1010,7 +1183,81 @@ extern "C" void func_0025CFE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025D048);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
+extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* tag, int defval);
+extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern char D_004A3128[];
+extern char D_004A3130[];
+extern char D_004A2F40[];
+extern char D_004A2F30[];
+extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
+extern "C" void func_0025E0C8(void* self, int value);
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeD048 {
+    sMsgListNodeD048* next;
+    sMsgListNodeD048* prev;
+    void* data;
+};
+
+struct sMsgListIterD048 {
+    sMsgListNodeD048* node;
+    sMsgListIterD048(sMsgListNodeD048* x) : node(x) {}
+    sMsgListIterD048(const sMsgListIterD048& x) : node(x.node) {}
+};
+
+static inline sMsgListIterD048 sMsgListD048_insert(sMsgListIterD048 pos, void* const& x)
+{
+    sMsgListNodeD048* tmp = (sMsgListNodeD048*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_D048(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListD048_insert(*(sMsgListNodeD048**)(self + 0xF0), mp);
+}
+
+extern "C" void func_0025D048(char* self, char* msg)
+{
+    *(int*)self = 1;
+    if (*(int*)(msg + 0x8) == 0) {
+        char buf[0x100];
+        int st[16];
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3128), buf, 0x100, D_004A2F40);
+        cDirtysock_tag_TagFieldGetStructure(buf, st, 0x40, D_004A2F30);
+        *(int*)(self + 0xBC) = st[2];
+        *(int*)(self + 0xC0) = st[2] + st[3] + st[4];
+        *(int*)(self + 0xC4) = st[6];
+        *(int*)(self + 0xB8) = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3130), 0);
+        *(int*)(self + 0xC8) = -1;
+        func_0025E0C8(self, 0);
+    } else {
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = *(int*)(msg + 0x8);
+        post_D048(self, m);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025D1B8);
@@ -1073,7 +1320,70 @@ extern "C" void func_0025D1B8(char* self, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025D2D8);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeD2D8 {
+    sMsgListNodeD2D8* next;
+    sMsgListNodeD2D8* prev;
+    void* data;
+};
+
+struct sMsgListIterD2D8 {
+    sMsgListNodeD2D8* node;
+    sMsgListIterD2D8(sMsgListNodeD2D8* x) : node(x) {}
+    sMsgListIterD2D8(const sMsgListIterD2D8& x) : node(x.node) {}
+};
+
+static inline sMsgListIterD2D8 sMsgListD2D8_insert(sMsgListIterD2D8 pos, void* const& x)
+{
+    sMsgListNodeD2D8* tmp = (sMsgListNodeD2D8*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_D2D8(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListD2D8_insert(*(sMsgListNodeD2D8**)(self + 0xF0), mp);
+}
+
+extern "C" void func_0025D2D8(char* self, char* msg)
+{
+    *(int*)self = 1;
+    if (*(int*)(msg + 0x8) == 0) {
+        (*(int*)(self + 0x6C))++;
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        m[0] = 0xD6;
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        post_D2D8(self, m);
+    } else {
+        if (*(int*)(msg + 0x8) == 0x6475706C)
+            func_0025BC48((sDsNameListK2*)self, msg);
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = *(int*)(msg + 0x8);
+        post_D2D8(self, m);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025D428);
@@ -1128,7 +1438,80 @@ extern "C" void func_0025D428(char* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025D538);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern "C" void* cBXString_operatorE(void* self, void* other);
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeD538 {
+    sMsgListNodeD538* next;
+    sMsgListNodeD538* prev;
+    void* data;
+};
+
+struct sMsgListIterD538 {
+    sMsgListNodeD538* node;
+    sMsgListIterD538(sMsgListNodeD538* x) : node(x) {}
+    sMsgListIterD538(const sMsgListIterD538& x) : node(x.node) {}
+};
+
+static inline sMsgListIterD538 sMsgListD538_insert(sMsgListIterD538 pos, void* const& x)
+{
+    sMsgListNodeD538* tmp = (sMsgListNodeD538*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_D538(char* lst, void* msg)
+{
+    void* mp = msg;
+    sMsgListD538_insert(*(sMsgListNodeD538**)(lst + 4), mp);
+}
+
+struct sDsNamesD538 {
+    char pad_0x00[0x50];
+    int index;          // 0x50
+    char pad_0x54[0x6C - 0x54];
+    int count;          // 0x6C
+    char* names[8];     // 0x70 (cBXString)
+};
+
+extern "C" void func_0025D538(char* self, char* msg)
+{
+    *(int*)self = 1;
+    if (*(int*)(msg + 0x8) == 0) {
+        sDsNamesD538* s = (sDsNamesD538*)self;
+        char* lst = self + 0xEC;
+        s->count--;
+        for (int i = s->index; i < s->count; i++)
+            cBXString_operatorE(&s->names[i], &s->names[i + 1]);
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        m[0] = 0xD8;
+        post_D538(lst, m);
+    } else {
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = *(int*)(msg + 0x8);
+        post_D538(self + 0xEC, m);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025D6C0);
 
@@ -1246,7 +1629,76 @@ extern "C" void func_0025DAC0(void* self, int a1, int a2, const char* a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025DB80);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern char D_004A2F58[];
+extern char D_004A2F40[];
+extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
+extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeDB80 {
+    sMsgListNodeDB80* next;
+    sMsgListNodeDB80* prev;
+    void* data;
+};
+
+struct sMsgListIterDB80 {
+    sMsgListNodeDB80* node;
+    sMsgListIterDB80(sMsgListNodeDB80* x) : node(x) {}
+    sMsgListIterDB80(const sMsgListIterDB80& x) : node(x.node) {}
+};
+
+static inline sMsgListIterDB80 sMsgListDB80_insert(sMsgListIterDB80 pos, void* const& x)
+{
+    sMsgListNodeDB80* tmp = (sMsgListNodeDB80*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_DB80(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListDB80_insert(*(sMsgListNodeDB80**)(self + 0xF0), mp);
+}
+
+extern "C" void func_0025DB80(char* self, char* msg)
+{
+    *(int*)self = 1;
+    int v = *(int*)(msg + 0x8);
+    if (v == 0) {
+        int type = 0xE4;
+        char buf[0x100];
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F58), buf, 0x100, D_004A2F40);
+        cBXString_cBXString4(self + 0x84, buf);
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        m[0] = type;
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        post_DB80(self, m);
+    } else {
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = v;
+        post_DB80(self, m);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025DD08);
@@ -1462,7 +1914,57 @@ extern "C" void func_0025E348(sDsSlotSessK2* self, int slot)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025E420);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag_TagFieldSetNumber(char* buf, int size, const char* key, int value);
+extern "C" void func_0025B608(void* self, int a1, int tag, void* cb, int a4, float f);
+extern "C" void* func_003E85B0(void* mgr, int idx, void* cb, void* user);
+extern "C" void func_003E8D70(void* p, int a);
+extern "C" void func_00268AE0(void* self, void* a1, int a2);
+extern "C" void func_00268E00(void* self, void* a1, int a2);
+extern int D_004A3180;
+extern char D_004A3188[];
+extern char D_004A3190[];
+extern char D_004A3198[];
+extern char D_004A31A0[];
+extern char D_004A31A8[];
+
+struct sDsSlotSessE420 {
+    int active;                  // 0x0
+    char pad_0x04[0x3C];
+    int f40;                     // 0x40
+    char pad_0x44[0x10];
+    void* ctx;                   // 0x54
+    char pad_0x58[0xF8 - 0x58];
+    int slot;                    // 0xF8
+    int pad_0xFC;
+    void* slotTag;               // 0x100
+    unsigned int limitA[29];     // 0x104
+    unsigned int limitB[29];     // 0x178
+    void* handles[29];           // 0x1EC
+};
+
+extern "C" void func_0025E420(void* self_, int a1, int a2, int a3)
+{
+    sDsSlotSessE420* self = (sDsSlotSessE420*)self_;
+    if (self->active == 0)
+        return;
+    if (self->handles[self->slot] == 0)
+        self->handles[self->slot] = func_003E85B0(self->ctx, 4, (void*)func_00268AE0, self);
+    char buf[0x100];
+    buf[0] = 0;
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A3188, self->slot);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A3190, D_004A3180 + 4);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A3198, a1);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A31A0, a2);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A31A8, self->slot);
+    func_003E8D70(self->ctx, self->limitB[a3]);
+    // PORT: function pointer passed through func_0025B608's int parameter.
+    func_0025B608(self, self->active, 0x736E6170, buf, (int)func_00268E00, 20.0f);
+    self->limitB[self->slot] = self->f40;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025E590);
@@ -1606,7 +2108,78 @@ extern "C" void func_0025EE20(void* self, const void* data, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025EED8);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern char D_004A3200[];
+extern char D_004A3218[];
+extern "C" int* func_002591D0();
+extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00268E78(void* self, void* a1, int a2);
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNodeEED8 {
+    sMsgListNodeEED8* next;
+    sMsgListNodeEED8* prev;
+    void* data;
+};
+
+struct sMsgListIterEED8 {
+    sMsgListNodeEED8* node;
+    sMsgListIterEED8(sMsgListNodeEED8* x) : node(x) {}
+    sMsgListIterEED8(const sMsgListIterEED8& x) : node(x.node) {}
+};
+
+static inline sMsgListIterEED8 sMsgListEED8_insert(sMsgListIterEED8 pos, void* const& x)
+{
+    sMsgListNodeEED8* tmp = (sMsgListNodeEED8*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_EED8(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListEED8_insert(*(sMsgListNodeEED8**)(self + 0xF0), mp);
+}
+
+extern "C" void func_0025EED8(char* self)
+{
+    int st = *(int*)self;
+    if (st == 0)
+        return;
+    if (st == 0x19) {
+        if (*func_002591D0() != 0)
+            func_00263BA8(func_002591D0(), 2);
+    } else if (st != 1) {
+        char buf[0x100];
+        buf[0] = 0;
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A3200, D_004A3218);
+        *(float*)(self + 0xE0) = 20.0f;
+        // PORT: function pointer passed through func_003E8B10's int parameter.
+        *(int*)(self + 0x40) = func_003E8B10(*(void**)(self + 0x54), 0x7175696B, buf, (int)func_00268E78, self);
+    }
+    *(int*)self = 1;
+    int type = 0xE7;
+    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+    m[0] = type;
+    *(void***)((char*)m + 0x4) = D_004812B0;
+    post_EED8(self, m);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F030);
@@ -2292,9 +2865,117 @@ extern "C" void func_00261070(sVec261070* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002610D0);
+#ifdef SKIP_ASM
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern "C" void func_00260F80(void);
+extern "C" int func_00261460(void* p);
+extern "C" void func_002613C8(void* p);
+extern "C" void func_0025B800(void* self);
+extern "C" int func_00262938(void* self);
+extern "C" void* func_00263630(void* self, unsigned int i);
+extern "C" int func_00262468(void* self, int a1);
+extern "C" void func_00261EF8(void* self, int a1, int a2, void* out);
 
+static inline void* Mgr_2610D0()
+{
+    if (D_004A3328 == 0)
+        func_00260F80();
+    if (func_00261460(D_004A3328) == 0)
+        func_002613C8(D_004A3328);
+    if (D_004A3328 == 0)
+        func_0025B800(D_004A3028);
+    return D_004A3328;
+}
+
+extern "C" void func_002610D0()
+{
+    for (int i = 0; i < func_00262938(Mgr_2610D0()); i++)
+    {
+        int* e = (int*)func_00263630(Mgr_2610D0(), i);
+        if (func_00262468(Mgr_2610D0(), *e) < 0)
+        {
+            int out;
+            func_00261EF8(Mgr_2610D0(), *e, 2, &out);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00261248);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_Concat(void* self, const char* str);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" const char* func_00259198();
+extern "C" void func_002614E8(void* self, void* a1);
+extern "C" void func_003F0818(void* p, const char* a1, int tag, const char* a3, int a4);
+extern "C" void func_003F08E8(void* p, const char* name, int a2, int a3, const char* s1, const char* s2, void* cb, void* user);
+extern "C" void func_00268F18(void* self, void* a1, int a2);
+extern void* D_004A3E90;
+extern char D_004A3330[];
+extern char D_004A3338[];
+
+struct sDsGame_261248 {
+    char name[0x40];        // 0x0
+    int idx;                // 0x40
+    char a[0x20];           // 0x44
+    char b[0x64];           // 0x64
+    void* ctx;              // 0xC8
+    int fCC;
+    int fD0;                // 0xD0
+    float fD4;              // 0xD4
+    int fD8;                // 0xD8
+    int fDC;                // 0xDC
+    int fE0;                // 0xE0
+};
+
+struct sBXStr_261248 {
+    char* p;
+    sBXStr_261248() : p((char*)D_004A3E90) {}
+    sBXStr_261248(const sBXStr_261248& o) : p(o.p) {}
+};
+
+// PORT: the unit declares (void*, void*, int, void*, void*, int); the last int is really a string pointer.
+extern "C" void func_00261248(void* self_, void* name_, int a2, void* a3_, void* a4_, int a5_)
+{
+    char* self = (char*)self_;
+    const char* name = (const char*)name_;
+    const char* a3 = (const char*)a3_;
+    const char* a4 = (const char*)a4_;
+    const char* a5 = (const char*)a5_;
+    if (*(void**)(self + 0xC8) == 0)
+    {
+        func_002614E8(self, (void*)a5);
+        func_003F0818(*(void**)(self + 0xC8), a5, 0x73737833, func_00259198(), 0);
+    }
+    strcpy(self, name);
+    *(int*)(self + 0x40) = a2;
+    strcpy(self + 0x44, a3);
+    strcpy(self + 0x64, a4);
+    sDsGame_261248* g = (sDsGame_261248*)self;
+    g->fD0 = 0;
+    g->fD4 = 30.0f;
+    g->fD8 = 1;
+    g->fDC = 0;
+    g->fE0 = 0;
+    sBXStr_261248 s1;
+    cBXString_cBXString4(&s1, a3);
+    cBXString_Concat(&s1, D_004A3330);
+    cBXString_Concat(&s1, a4);
+    sBXStr_261248 s2;
+    cBXString_cBXString4(&s2, D_004A3338);
+    cBXString_Concat(&s2, a5);
+    cBXString_cBXString4(self + 0xEC, a5);
+    func_003F08E8(*(void**)(self + 0xC8), name, a2, 0x1E, s1.p, s2.p, (void*)func_00268F18, self);
+    cBXString__cBXString(&s2, 2);
+    cBXString__cBXString(&s1, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002613C8);
@@ -2787,7 +3468,53 @@ extern "C" void func_00262690(char* self, const char* name, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262768);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag_TagFieldSetNumber(char* buf, int size, const char* key, int value);
+extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char* key, const char* value);
+extern "C" int func_002628C0(void* self, int sel);
+extern "C" void func_003F1538(void* p);
+extern "C" void func_003F1548(void* p, char* buf);
+extern "C" void func_003F1578(void* p, const char* a, const char* b);
+extern "C" void func_003F15C8(void* p, const char* name, int a2, int a3);
+extern char D_004A31F8[];
+extern char D_004A33A8[];
+extern char D_004A33B0[];
+extern char D_004A33B8[];
+extern char D_004A33C0[];
+extern char D_004A33C8[];
+extern char D_00480EA8[];
+extern char D_004A2F18[];
+
+// PORT: the unit declares every argument as int; a3..a5 are really string pointers.
+extern "C" void func_00262768(void* self_, int a1, int a2, int a3, int a4, int a5)
+{
+    char* self = (char*)self_;
+    if (*(void**)(self + 0xC8) == 0)
+        return;
+    char buf[0x50];
+    buf[0] = 0;
+    cDirtysock_tag_TagFieldSetString(buf, 0x50, D_004A31F8, *(const char**)(self + 0xEC));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x50, D_004A33A8, 3);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x50, D_004A33B0, a2);
+    if (a3 != 0)
+    {
+        cDirtysock_tag_TagFieldSetString(buf, 0x50, D_004A33B8, (const char*)a3);
+        if (a4 != 0)
+        {
+            cDirtysock_tag_TagFieldSetString(buf, 0x50, D_004A33C0, (const char*)a4);
+            if (a5 != 0)
+                cDirtysock_tag_TagFieldSetString(buf, 0x50, D_004A33C8, (const char*)a5);
+        }
+    }
+    func_003F1538(*(void**)(self + 0xC8));
+    func_003F1548(*(void**)(self + 0xC8), buf);
+    func_003F1578(*(void**)(self + 0xC8), D_00480EA8, D_004A2F18);
+    const char* name = *(const char**)(self + 0xEC);
+    func_003F15C8(*(void**)(self + 0xC8), name, func_002628C0(self, a1), 0x7D0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002628C0);
@@ -2904,7 +3631,77 @@ extern "C" int func_00262E20(void* self, void* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262EC0);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+// PORT: callee defined as returning void* in this unit; called here as void.
+void func_0025FC28_v(void* self, int a1) __asm__("func_0025FC28__FPvi");
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" int func_00262400(void* self, int a1);
+extern "C" void* func_002625C8(void* self, int idx);
+extern "C" int func_00262938(void* self);
+extern "C" int func_00262A38(void* self, void* name);
+extern "C" int func_00262E20(void* self, void* name);
+extern "C" int func_00263128(char* self, char* name);
+extern "C" void func_002635A8(void* self, int i);
+extern "C" void* func_00263630(void* self, unsigned int i);
+extern "C" void func_003F11F8(void* h, void* e, void* cb, void* user, int timeout);
+extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
+extern "C" void* func_0041AA88(void*, void*);
+extern "C" void func_00268F90(void* self, void* a1, int a2);
+
+struct sBXStr_262EC0 {
+    char* p;
+};
+
+struct sObjVec_262EC0 {
+    void* alloc;
+    void** mStart;
+    void** mFinish;
+};
+
+static inline void** sObjVec_262EC0_copy(void** first, void** last, void** result)
+{
+    func_0041610C(result, first, (last - first) * sizeof(void*));
+    return result + (last - first);
+}
+
+extern "C" void func_00262EC0(char* self, int idx)
+{
+    if (func_00262400(self, idx) == 0)
+        return;
+    char* name = (char*)func_002625C8(self, idx);
+    if (name == 0)
+        return;
+    sBXStr_262EC0 s;
+    cBXString_cBXString2(&s, name);
+    func_003F11F8(*(void**)(self + 0xC8), name, (void*)func_00268F90, self, 600);
+    if (func_00262A38(self, s.p))
+    {
+        for (int i = func_00262938(self) - 1; i >= 0; i--)
+        {
+            void** e = (void**)func_00263630(self, i);
+            if (e != 0 && func_0041AA88(*e, s.p) == 0)
+                func_002635A8(self, i);
+        }
+    }
+    if (func_00263128(self, s.p))
+    {
+        // PORT: the name is passed through an int parameter.
+        func_0025FC28_v(D_004A3028, (int)s.p);
+        int k = func_00262E20(self, s.p);
+        sObjVec_262EC0* v = (sObjVec_262EC0*)(self + 0xB8);
+        // PORT: pointer arithmetic through int.
+        void** pos = (void**)(k * 4 + (int)*(void***)(self + 0xBC));
+        if (pos + 1 != *(void***)(self + 0xC0))
+            sObjVec_262EC0_copy(pos + 1, v->mFinish, pos);
+        --*(void***)(self + 0xC0);
+    }
+    cBXString__cBXString(&s, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00263018);
@@ -3298,7 +4095,95 @@ extern "C" void func_002636F0(int* out, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00263828);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern void* D_004A3028;
+extern void* D_004A2EB8;
+extern void* D_004A28A8;
+extern "C" void func_002636F0(int* out, int val);
+
+static inline bool isState_3828(int st)
+{
+    return *(int*)((char*)D_004A2EB8 + 0x20) == st;
+}
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNode3828 {
+    sMsgListNode3828* next;
+    sMsgListNode3828* prev;
+    void* data;
+};
+
+struct sMsgListIter3828 {
+    sMsgListNode3828* node;
+    sMsgListIter3828(sMsgListNode3828* x) : node(x) {}
+    sMsgListIter3828(const sMsgListIter3828& x) : node(x.node) {}
+};
+
+static inline sMsgListIter3828 sMsgList3828_insert(sMsgListIter3828 pos, void* const& x)
+{
+    sMsgListNode3828* tmp = (sMsgListNode3828*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_3828(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgList3828_insert(*(sMsgListNode3828**)(self + 0xF0), mp);
+}
+
+struct sDsTimer_263828 {
+    int state;
+    float timer;
+};
+
+extern "C" void func_00263828(int* self)
+{
+    sDsTimer_263828* t = (sDsTimer_263828*)self;
+    switch (t->state)
+    {
+    case 0:
+        break;
+    case 1:
+        if (isState_3828(5)) {
+            t->state = 2;
+            char* g = (char*)D_004A3028;
+            int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+            *(void***)((char*)m + 0x4) = D_004812B0;
+            m[0] = 0x105;
+            post_3828(g, m);
+        } else if (isState_3828(6)) {
+            func_002636F0(self, *(int*)((char*)D_004A2EB8 + 0x28));
+        } else {
+            int expired = t->timer < 0.0f;
+            if (expired)
+                func_002636F0(self, 0x2D3F3F3F);
+            else
+                t->timer -= *(float*)((char*)D_004A28A8 + 0x14);
+        }
+        break;
+    case 2:
+        if (isState_3828(6))
+            func_002636F0(self, *(int*)((char*)D_004A2EB8 + 0x28));
+        break;
+    }
+}
+#endif
 
 extern void* D_004810B0[];
 
@@ -3331,7 +4216,87 @@ extern "C" void func_002639B0(void* self, int flags)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002639E0);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00263BA8);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern void* D_004A3028;
+extern void* D_004A2EB8;
+extern void* D_004A33CC;
+extern void* D_004A33F4;
+extern "C" int func_00255D38(void* comm, int chan);
+extern "C" void func_00255CC8(void* comm, int chan);
+extern "C" void func_00264098(void);
+extern "C" void func_00266DF8(void* self);
+extern "C" void func_00266E88(void* self);
+extern "C" void func_0025F740(void* self, int type);
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNode3BA8 {
+    sMsgListNode3BA8* next;
+    sMsgListNode3BA8* prev;
+    void* data;
+};
+
+struct sMsgListIter3BA8 {
+    sMsgListNode3BA8* node;
+    sMsgListIter3BA8(sMsgListNode3BA8* x) : node(x) {}
+    sMsgListIter3BA8(const sMsgListIter3BA8& x) : node(x.node) {}
+};
+
+static inline sMsgListIter3BA8 sMsgList3BA8_insert(sMsgListIter3BA8 pos, void* const& x)
+{
+    sMsgListNode3BA8* tmp = (sMsgListNode3BA8*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_3BA8(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgList3BA8_insert(*(sMsgListNode3BA8**)(self + 0xF0), mp);
+}
+
+extern "C" void func_00263BA8(void* p, int arg)
+{
+    int* self = (int*)p;
+    if (self[0] != 0 && func_00255D38(D_004A2EB8, self[1]) != 0)
+    {
+        func_00255CC8(D_004A2EB8, self[1]);
+        func_00266E88(D_004A33F4);
+        func_00266DF8(D_004A33F4);
+    }
+    if (D_004A33CC != 0)
+        func_00264098();
+    func_0025F740(D_004A3028, 0);
+    self[0] = 0;
+    if (arg == 1) {
+        char* g = (char*)D_004A3028;
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        m[0] = 0x10C;
+        post_3BA8(g, m);
+    } else if (arg == 0) {
+        char* g = (char*)D_004A3028;
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        m[0] = 0x112;
+        post_3BA8(g, m);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00263CF0);
 
@@ -3388,7 +4353,67 @@ extern "C" void* func_002640C0(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264138);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_00264990(void* self, int* p);
+
+struct sRing_264138
+{
+    int end;
+    int head;
+    int* q[32];
+};
+
+struct sRingOwner_264138
+{
+    int f0;
+    int* f4;
+    sRing_264138 a;     // 0x8
+    sRing_264138 b;     // 0x90
+};
+
+static inline int* PeekA_264138(sRingOwner_264138* o)
+{
+    if (o->a.head < o->a.end)
+        return o->a.q[o->a.head % 32];
+    return 0;
+}
+
+static inline int* PopA_264138(sRingOwner_264138* o)
+{
+    int h = o->a.head++;
+    return o->a.q[h % 32];
+}
+
+static inline int* PeekB_264138(sRingOwner_264138* o)
+{
+    if (o->b.head < o->b.end)
+        return o->b.q[o->b.head % 32];
+    return 0;
+}
+
+static inline int* PopB_264138(sRingOwner_264138* o)
+{
+    int h = o->b.head++;
+    return o->b.q[h % 32];
+}
+
+extern "C" void func_00264138(void* self_, int flags)
+{
+    sRingOwner_264138* self = (sRingOwner_264138*)self_;
+    if (self->f4 != 0)
+        func_00264990(self, self->f4);
+    while (PeekA_264138(self) != 0)
+        func_00264990(self, PopA_264138(self));
+    while (PeekB_264138(self) != 0)
+        func_00264990(self, PopB_264138(self));
+    self->f0 = 1;
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002642B8);
 

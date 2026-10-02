@@ -949,7 +949,52 @@ extern "C" void func_001772E0(cCamCtrlK8940* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177368);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+extern "C" void func_00165540(void* self, float ang);
+
+struct sCamInfo_177368
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00177368(char* self)
+{
+    sCamInfo_177368 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 356.4251708984375f, 0.0f, 76.68663024902344f, 0.0f, 1.6834967136383057f,
+                  0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 0.0f, -168.60406494140625f, 0.0f, 0.0f, 0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9709749817848206f, 1.0f, 0.949999988079071f);
+    func_00162B90(self, &info, -0.24752351641654968f, 0.008603549562394619f, 0.12915411591529846f,
+                  0.22476252913475037f, 0.9241908192634583f);
+    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.19890090823173523f, 0.8672914505004883f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 0.0f, 0.9706981778144836f);
+    func_00165540(self, *(float*)(self + 0x390));
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001774C0);
@@ -1207,7 +1252,124 @@ extern "C" void func_001785C0(void* self, void* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001785F0);
+#ifdef SKIP_ASM
+struct sVec4_1785F0
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+
+struct sVEntry_1785F0 { short delta; short index; sVec4_1785F0 (*fn)(void*); };
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_1785F0 Sub_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+{
+    sVec4_1785F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_1785F0 Add_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+{
+    sVec4_1785F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_1785F0 Scale_1785F0(const sVec4_1785F0& v, float s)
+{
+    sVec4_1785F0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_1785F0 Normalize_1785F0(const sVec4_1785F0& v)
+{
+    sVec4_1785F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sVec4_1785F0 GetPos_1785F0(char* self)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEntry_1785F0* e = &(*(sVEntry_1785F0**)o)[1];
+    return e->fn(o + e->delta);
+}
+
+// The unit declares func_001785F0 later with its own vector type; bind this body by asm label.
+extern "C" sVec4_1785F0 func_001785F0_impl(char* self) __asm__("func_001785F0");
+
+extern "C" sVec4_1785F0 func_001785F0_impl(char* self)
+{
+    sVec4_1785F0 dir = Normalize_1785F0(Sub_1785F0(*(sVec4_1785F0*)(self + 0x390), *(sVec4_1785F0*)(self + 0x3A0)));
+    sVec4_1785F0 rel = Sub_1785F0(GetPos_1785F0(self), *(sVec4_1785F0*)(self + 0x390));
+    sVec4_1785F0 off = Scale_1785F0(dir, Dot_1785F0(rel, dir) / Dot_1785F0(dir, dir));
+    sVec4_1785F0 res = Sub_1785F0(Add_1785F0(*(sVec4_1785F0*)(self + 0x390), off), Scale_1785F0(dir, 1500.0f));
+    return res;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178758);
 
@@ -1259,7 +1421,175 @@ extern "C" void func_00178938(cCamCtrl_00178938* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001789E8);
+#ifdef SKIP_ASM
+struct sVec4_1789E8
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+
+struct sVEntry_1789E8 { short delta; short index; sVec4_1789E8 (*fn)(void*); };
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_1789E8 Sub_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+{
+    sVec4_1789E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_1789E8 Add_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+{
+    sVec4_1789E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_1789E8 Scale_1789E8(const sVec4_1789E8& v, float s)
+{
+    sVec4_1789E8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_1789E8 Normalize_1789E8(const sVec4_1789E8& v)
+{
+    sVec4_1789E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_1789E8(const sVec4_1789E8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void DivEq_1789E8(sVec4_1789E8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+struct sQuad_1789E8
+{
+    float v[4];
+} __attribute__((aligned(16)));
+extern sQuad_1789E8 D_004FF140_v1789E8 __asm__("D_004FF140");
+extern void* D_0045CBD8[];
+extern "C" void* func_00162318(void* self);
+
+static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
+{
+    sVEntry_1789E8* e = &(*(sVEntry_1789E8**)o)[slot];
+    return e->fn(o + e->delta);
+}
+
+extern "C" void* func_001789E8(char* self, char* src)
+{
+    func_00162318(self);
+    sVec4_1789E8* d = (sVec4_1789E8*)(self + 0x390);
+    *(int*)(self + 0xC) = 0x44;
+    *(void***)(self + 0x10) = D_0045CBD8;
+    *(int*)(self + 0x3A0) = 0;
+    sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(src, 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(src, 3)) : Get_1789E8(src, 4);
+    *d = dir;
+    *(float*)(self + 0x398) = 0.0f;
+    float len = Length_1789E8(*(sVec4_1789E8*)(self + 0x390));
+    if (len > 0.009999999776482582f)
+        DivEq_1789E8(*(sVec4_1789E8*)(self + 0x390), len);
+    else
+        *(sQuad_1789E8*)(self + 0x390) = D_004FF140_v1789E8;
+    return self;
+}
+#endif
 
 extern void* D_0045CBD8[];
 extern "C" void* func_00162458(void*);

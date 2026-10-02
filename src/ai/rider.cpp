@@ -659,7 +659,67 @@ extern "C" void func_00120ED8(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120F20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_001298C8();
+extern "C" int func_001448A8(void* obj);
+extern "C" void func_00332DB8(void*, void*);
+extern "C" void func_00122088(void*);
+extern "C" void func_001242B0(void* self, void* p);
+extern "C" void func_0011B3F8(void* self);
+extern void* D_004A28A8;
+
+struct sQuad_120F20
+{
+    float v[4];
+} __attribute__((aligned(16)));
+// D_004FF120 is declared later in the unit as a 4-aligned sVec4; this view gives the lq/sq copy.
+extern sQuad_120F20 D_004FF120_q120F20 __asm__("D_004FF120");
+
+static inline int IsState1_120F20(void* obj)
+{
+    return *(int*)((char*)obj + 0x70) == 1;
+}
+
+extern "C" void func_00120F20(char* self)
+{
+    *(int*)(self + 0x3FC) = 0;
+    *(int*)(self + 0xAA4) = 0;
+    int a = func_001298C8() % 3;
+    if (a != *(int*)(self + 0x86C) % 3)
+    {
+        char* g = *(char**)((char*)D_004A28A8 + 0x84);
+        if (*(int*)(*(char**)(self + 0x860) + 4) == *(int*)(*(char**)(g + 0x20) + 0xA0))
+        {
+            void* obj = *(void**)(g + 0x34);
+            int busy = 0;
+            if (func_001448A8(obj) || IsState1_120F20(obj))
+                busy = 1;
+            if (busy == 0)
+                goto skip;
+        }
+    }
+    func_00332DB8(*(void**)(self + 0x860), self + 0x400);
+    func_00122088(self);
+skip:
+    if (*(int*)(self + 0xAC4))
+    {
+        char* p = self + 0x110;
+        if (*(int*)(self + 0xAFC))
+            p = *(char**)(*(char**)(self + 0x780) + 0x2C) + (*(int*)(self + 0x8A0) << 5);
+        func_001242B0(self, p);
+    }
+    *(sQuad_120F20*)(self + 0x9D0) = D_004FF120_q120F20;
+    *(int*)(self + 0xA30) = 0;
+    *(unsigned*)(self + 0x5B8) = 0xFFFFFFFF;
+    func_0011B3F8(self);
+    float t = *(float*)(self + 0x470);
+    if (t >= 0.0f)
+        *(float*)(self + 0x470) = t + 0.01666666753590107f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00121068);
@@ -682,7 +742,56 @@ extern "C" void func_00121068(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001210B0);
+#ifdef SKIP_ASM
+extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void func_001200D0(void* self);
+extern "C" void func_00120D90(void* self);
+
+struct sVec4_1210B0
+{
+    float v[4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v *= s).
+static inline void VecScale_1210B0(sVec4_1210B0* v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(*v), "=&r"(t)
+        : "m"(*v), "f"(s));
+}
+
+extern "C" void func_001210B0(char* self)
+{
+    VecScale_1210B0((sVec4_1210B0*)(self + 0x3E0), 0.9800000190734863f);
+    *(float*)(self + 0x3F0) *= 0.9559999704360962f;
+    *(float*)(self + 0x3F4) *= 0.9783333539962769f;
+    if (*(float*)(self + 0x3F0) > 4.5f)
+    {
+        func_00116120(self, 0, 2);
+    }
+    else if (func_0011FE98(self) == 1 ||
+             (func_0011FE98(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1))
+    {
+        char* obj = *(char**)(self + 0x788);
+        int ok = 0;
+        if (*(int*)(obj + 0xAC) == 1 || *(int*)(obj + 0xAC) == 3)
+            ok = 1;
+        obj = *(char**)(self + 0x788);
+        if ((ok && *(float*)(obj + 0x98) - *(float*)(obj + 0xA0) > 45.0f) || *(float*)(self + 0x3F4) > 5.0f)
+            func_00116120(self, 0, 2);
+    }
+    func_001200D0(self);
+    func_00120D90(self);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_001211F8);
 
@@ -837,7 +946,74 @@ extern "C" void func_001218D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121950);
+#ifdef SKIP_ASM
+extern "C" int func_001231A8(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_002898A8(void* mgr, void* rider);
+extern "C" float func_0031C228(float x);
+extern "C" void func_00122CF0(void* self);
+
+struct sVec2_121950
+{
+    float x, y;
+    sVec2_121950(float a, float b) : x(a), y(b) {}
+};
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_121950(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Length_121950(const sVec2_121950& v)
+{
+    return Sqrt_121950(v.x * v.x + v.y * v.y);
+}
+
+static inline float Atan2_121950(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        float a = -1.5707963705062866f;
+        if (y >= 0.0f)
+            a = 1.5707963705062866f;
+        return a;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+extern "C" void func_00121950(char* self)
+{
+    func_002898A8(func_0028B180(), self);
+    if (func_001231A8(self))
+    {
+        sVec2_121950 v(*(float*)(self + 0x370), *(float*)(self + 0x374));
+        float z = *(float*)(self + 0x378);
+        float ang = Atan2_121950(Length_121950(v), z);
+        float d = ang - *(float*)(self + 0x5B4);
+        if (d > 3.1415927410125732f)
+            d -= 6.2831854820251465f;
+        else if (d < -3.1415927410125732f)
+            d += 6.2831854820251465f;
+        *(float*)(self + 0x5B4) += d * 0.15000000596046448f;
+    }
+    func_00122CF0(self);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00121AA0);
 
@@ -927,7 +1103,57 @@ INCLUDE_ASM("ai/rider", func_001220D8);
 
 INCLUDE_ASM("ai/rider", func_00122278);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122448);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern "C" void func_00121F30(char* self);
+extern "C" void func_00310640(void* model, int lod, int a, int b);
+
+struct sVec4_122448 { float v[4]; };
+extern sVec4_122448 D_004FF120_v122448 __asm__("D_004FF120");
+
+struct sVEntryI_122448 { short delta; short index; void (*fn)(void*, void*, int); };
+struct sVEntryF_122448 { short delta; short index; void (*fn)(void*, float, void*); };
+
+extern "C" void func_00122448(char* self)
+{
+    if (*(int*)(self + 0xB18))
+    {
+        char* p = *(char**)(self + 0x77C);
+        char* q = p ? p + 0xD30 : 0;
+        int b = 0;
+        if (*(int*)(q + 0xA0) || *(int*)(self + 0x2F4) >= 11)
+            b = 1;
+        int a = 0;
+        if (*(int*)(q + 0xA4) || *(int*)(self + 0x2F4) >= 11)
+            a = 1;
+        func_00121F30(self);
+        void* g = D_004A289C;
+        sVEntryI_122448* vt = *(sVEntryI_122448**)((char*)g + 0x10D8);
+        vt[69].fn((char*)g + vt[69].delta, self + 0x7C0, 1);
+        void* g2 = D_004A289C;
+        int* rs = *(int**)((char*)g2 + 0xE84);
+        rs[1] = (rs[1] & ~0x7C) | 0x14;
+        sVEntryF_122448* vt2 = *(sVEntryF_122448**)((char*)g2 + 0x10D8);
+        vt2[27].fn((char*)g2 + vt2[27].delta, 0.0f, self + 0x110);
+        func_00310640(*(void**)(self + 0x780), *(int*)(self + 0x898), a, b);
+        void* g3 = D_004A289C;
+        sVEntryF_122448* vt3 = *(sVEntryF_122448**)((char*)g3 + 0x10D8);
+        vt3[27].fn((char*)g3 + vt3[27].delta, 0.0f, &D_004FF120_v122448);
+    }
+    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x14) == 0 || *(int*)(self + 0xB1C))
+    {
+        int* f = (int*)(self + 0xB1C);
+        int v = 0;
+        if (*(int*)(self + 0xB18) == 0 || *(int*)(self + 0x898) == 2)
+            v = 1;
+        *f = v;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001225C0);
@@ -1407,7 +1633,85 @@ extern "C" void func_00125958(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125970);
+#ifdef SKIP_ASM
+extern "C" float func_002EF0A0(int rider);
+extern "C" float func_002EE570(int rider);
+extern float D_00504FB8[];
+
+struct sVec4_125970
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVEntry_125970 { short delta; short index; void (*fn)(void*, sVec4_125970*); };
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_125970(const sVec4_125970& a, const sVec4_125970& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_125970 Scale_125970(const sVec4_125970& v, float s)
+{
+    sVec4_125970 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00125970(char* self)
+{
+    if (*(int*)(self + 0x874) == 0)
+        return;
+    float maxSpeed = 1388.888916015625f;
+    float speed = func_002EF0A0(*(int*)(self + 0x86C)) * 27.77777862548828f;
+    if (speed > maxSpeed)
+        speed = maxSpeed;
+    if (speed >= 277.77777099609375f)
+    {
+        float ang = func_002EE570(*(int*)(self + 0x86C)) * 0.01745329424738884f;
+        sVec4_125970 dir;
+        dir.z = 0.0f;
+        dir.w = 0.0f;
+        int idx = (int)(ang * 81.4873275756836f) & 0x1FF;
+        dir.y = D_00504FB8[idx];
+        dir.x = D_00504FB8[idx + 0x80];
+        float d = speed - Dot_125970(*(sVec4_125970*)(self + 0x1E0), dir);
+        if (d > dir.z)
+        {
+            sVec4_125970 imp = Scale_125970(Scale_125970(dir, d), 0.015000000596046448f);
+            char* obj = self + 0x6C0;
+            sVEntry_125970* vt = *(sVEntry_125970**)obj;
+            vt[4].fn(obj + vt[4].delta, &imp);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00125AD0__FPv);
@@ -1429,13 +1733,85 @@ extern "C" int func_00125AD8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125B18);
+#ifdef SKIP_ASM
+extern "C" void func_00326CF0(void* obj);
+
+struct sVEntryI_125B18 { short delta; short index; int (*fn)(void*); };
+struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int); };
+
+// PORT: the unit declares (void*, int, int); the second argument is really an object pointer.
+extern "C" void func_00125B18(void* p, int a, int on)
+{
+    float* s = (float*)p;
+    void* obj = (void*)a;
+    if (on == 0)
+    {
+        s[0] = s[1] = 0.0f;
+        func_00326CF0(obj);
+        return;
+    }
+    float v = s[0] * 0.9133333563804626f - 18.518518447875977f;
+    float r = 0.0f;
+    if (v >= 0.0f)
+        r = v;
+    s[0] = r;
+    s[1] *= 0.9916666746139526f;
+    sVEntryI_125B18* vt = *(sVEntryI_125B18**)obj;
+    if (vt[3].fn((char*)obj + vt[3].delta) == 2)
+    {
+        sVEntryF_125B18* vt2 = *(sVEntryF_125B18**)obj;
+        vt2[4].fn((char*)obj + vt2[4].delta, ((s[1] - 0.5f) * 0.009999999776482582f >? (s[0] - 2.0f) / 972.2222290039062f) >? 0.0f, 0);
+        sVEntryF_125B18* vt3 = *(sVEntryF_125B18**)obj;
+        vt3[4].fn((char*)obj + vt3[4].delta, ((s[1] - 70.0f) * 0.0062500000931322575f >? (s[0] - 100.0f) / 5000.0f) >? 0.0f, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00125C70);
 
 INCLUDE_ASM("ai/rider", func_00125EB8);
 
+//100%
 INCLUDE_ASM("ai/rider", func_001276F0);
+#ifdef SKIP_ASM
+int func_00320C48(void*, int);
+extern "C" int func_001276F0(char* self)
+{
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x1F))
+        return 0;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x20))
+        return 1;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x21))
+        return 2;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x22))
+        return 3;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x23))
+        return 4;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x24))
+        return 5;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x25))
+        return 6;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x26))
+        return 7;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x27))
+        return 8;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x28))
+        return 9;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x29))
+        return 10;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x2A))
+        return 11;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x2B))
+        return 12;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x2C))
+        return 13;
+    if (func_00320C48(*(void**)(self + 0xDF0), 0x2D))
+        return 14;
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00127848);

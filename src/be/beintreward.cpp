@@ -352,7 +352,57 @@ extern "C" int func_001578A0(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157920);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+signed char cBERewardInterface_getTrackMedal(void* self, int a, int b, int track, int kind);
+int cBERewardInterface_isBetterMedal(void* self, int a, int b);
+extern "C" int func_001589B0(void* self, int a, int b, int kind);
+extern "C" int func_00158A50(void* self, int a, int b, int kind);
+
+struct sRewardReq_157920
+{
+    signed char track;
+    signed char kind;
+};
+extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("D_0045AAD8");
+
+extern "C" int func_00157920(void* self, int a, int b, int k)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            int track = D_0045AAD8_v157920[k][i][j].track;
+            int kind = D_0045AAD8_v157920[k][i][j].kind;
+            if (track < 0)
+                break;
+            if (i == 3)
+                continue;
+            if (i == 2)
+            {
+                if (func_001589B0(self, a, b, k))
+                    return 0;
+                if (func_00158A50(self, a, b, k))
+                    return 0;
+            }
+            else
+            {
+                int m = cBERewardInterface_getTrackMedal(self, a, b, track, kind);
+                if ((unsigned int)(track - 4) < 8)
+                {
+                    if (!cBERewardInterface_isBetterMedal(self, -1, m))
+                        return 0;
+                }
+                else if ((unsigned int)m >= 2)
+                    return 0;
+            }
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00157A78);
@@ -412,7 +462,52 @@ extern "C" int func_00157B70(void* self, int a, int b, int peak)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157BF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e);
+int cBERewardInterface_isBetterMedal(void* self, int a, int b);
+extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int medal);
+extern "C" int func_001589B0(void* self, int a, int b, int kind);
+extern "C" int func_00158A50(void* self, int a, int b, int kind);
+
+struct sRewardReq_157BF0
+{
+    signed char track;
+    signed char kind;
+};
+extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("D_0045AAD8");
+
+extern "C" int func_00157BF0(void* self, int a, int b, int k, int i)
+{
+    switch (i)
+    {
+    case 0:
+    case 1:
+        for (int j = 0; j < 5; j++)
+        {
+            int track = D_0045AAD8_v157BF0[k][i][j].track;
+            int kind = D_0045AAD8_v157BF0[k][i][j].kind;
+            if (track < 0)
+                break;
+            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, a, b, track, kind)))
+                return 0;
+        }
+        return 1;
+    case 2:
+    {
+        int r = 0;
+        if (cBERewardInterface_isBetterMedal(self, -1, func_001589B0(self, a, b, k)))
+            r = cBERewardInterface_isBetterMedal(self, -1, func_00158A50(self, a, b, k)) != 0;
+        return r;
+    }
+    case 3:
+        return cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getEarningsMedal(self, a, b, k));
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157D60);
@@ -1189,11 +1284,124 @@ extern "C" void func_001597B0(void* self, int rider, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00159818);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
+extern "C" int func_00157BF0(void* self, int a, int b, int c, int i);
+extern "C" void func_00150A90(void* econ, int a, int b, int amount);
+extern "C" void* func_00158BE0(void* self, int a, int b);
+extern "C" void func_00159170(void* self, int a1, int a2, int kind, int tier);
+extern void* D_004A1260;
+extern void* D_004C3EF0[];
 
+extern "C" void func_00159818(void* self, int a, int b, int amount)
+{
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    *(int*)D_004C3EF0 += amount;
+    if (D_004A1260 != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, a, b) + amount) >= (unsigned int)D_004A1260)
+    {
+        int before[3];
+        int i;
+        for (i = 0; i < 3; i++)
+            before[i] = func_00157BF0(self, a, b, i, 3);
+        func_00150A90(econ, a, b, amount);
+        D_004A1260 = func_00158BE0(self, a, b);
+        for (i = 0; i < 3; i++)
+        {
+            if (before[i] == 0 && func_00157BF0(self, a, b, i, 3))
+                func_00159170(self, a, b, i, 3);
+        }
+    }
+    else
+    {
+        func_00150A90(econ, a, b, amount);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_001599A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner);
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern "C" int func_001577E0(void* self, int a, int b);
+extern "C" int func_00157BF0(void* self, int a, int b, int c, int i);
+extern "C" int func_00158C80(void* self, int a, int b, int kind);
+extern "C" void func_00159170(void* self, int a1, int a2, int kind, int tier);
+extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
+extern "C" void func_00159CD0(void* self, int a1, int a2, int bit);
+extern int D_00440F48[];
+extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 
+extern "C" void func_001599A0(void* self, int rider, int k)
+{
+    int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), rider, k);
+    int* p = &D_00440F48[k];
+    if (*p <= 0)
+        return;
+    if (cur < *p)
+        return;
+    int prof = cBELibrary_getProfileIndex(rider);
+    int ch = cBELibrary_getCharacterID(rider);
+    int was = func_00157BF0(self, prof, ch, k, 2);
+    *p = func_00158C80(self, prof, ch, k);
+    if (was && cur == D_0045AFE8_2d[k][3])
+        func_00159170(self, prof, ch, k, 2);
+    if (func_001577E0(self, prof, ch))
+    {
+        if (func_0015A2E0(self, prof, ch, 0) == 0)
+            func_00159CD0(self, prof, ch, 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00159B08);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_001543E0(void* self, int owner);
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern "C" int func_001577E0(void* self, int a, int b);
+extern "C" int func_00157BF0(void* self, int a, int b, int c, int i);
+extern "C" int func_00158D58(void* self, int a, int b, int kind);
+extern "C" void func_00159170(void* self, int a1, int a2, int kind, int tier);
+extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
+extern "C" void func_00159CD0(void* self, int a1, int a2, int bit);
+extern int D_00440F58[];
+extern int D_0045B018_2d[][4] __asm__("D_0045B018");
+
+extern "C" void func_00159B08(void* self, int rider, int k)
+{
+    int cur = func_001543E0(cBE_getInterface_Fv(cBE_getBE(), 0xA), k);
+    int* p = &D_00440F58[k];
+    if (*p <= 0)
+        return;
+    if (cur < *p)
+        return;
+    int prof = cBELibrary_getProfileIndex(rider);
+    int ch = cBELibrary_getCharacterID(rider);
+    int was = func_00157BF0(self, prof, ch, k, 2);
+    *p = func_00158D58(self, prof, ch, k);
+    if (was && cur == D_0045B018_2d[k][3])
+        func_00159170(self, prof, ch, k, 2);
+    if (func_001577E0(self, prof, ch))
+    {
+        if (func_0015A2E0(self, prof, ch, 0) == 0)
+            func_00159CD0(self, prof, ch, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00159CD0);
 

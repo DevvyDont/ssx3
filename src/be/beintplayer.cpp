@@ -1254,7 +1254,40 @@ extern "C" signed char func_001488F0(void* self, int rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148950);
+#ifdef SKIP_ASM
+extern "C" signed char func_00148410(void* self, int rider);
+extern "C" signed char func_001484E0(void* self, int rider);
+extern "C" signed char func_001485B0(void* self, int rider);
+extern "C" signed char func_00148680(void* self, int rider);
+extern "C" signed char func_00148750(void* self, int rider);
+extern "C" signed char func_00148820(void* self, int rider);
+extern "C" signed char func_001488F0(void* self, int rider);
+
+extern "C" int func_00148950(void* self, int rider)
+{
+    int v;
+    v = func_001484E0(self, rider);
+    int sum = v / 5;
+    v = func_00148680(self, rider);
+    sum += v / 5;
+    v = func_00148410(self, rider);
+    sum += v / 5;
+    v = func_00148750(self, rider);
+    sum += v / 5;
+    v = func_00148820(self, rider);
+    sum += v / 5;
+    v = func_001488F0(self, rider);
+    sum += v / 5;
+    v = func_001485B0(self, rider);
+    sum += v / 5;
+    int r = sum / 7;
+    if (r > 0)
+        return r;
+    return 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintplayer", func_00148AA8);

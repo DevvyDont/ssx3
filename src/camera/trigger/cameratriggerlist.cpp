@@ -20,7 +20,66 @@ void cCameraTriggerList_init(cCameraTriggerList* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016BF40);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+void tCameraTrigger__tCameraTrigger(void* self, int flags);
+
+struct sVEntry_16BF40 { short delta; short index; void (*fn)(void*); };
+
+struct sTrigPart_16BF40
+{
+    int f0;
+    sVEntry_16BF40* vt;     // 0x4
+};
+
+struct sTrig_16BF40
+{
+    int f0;
+    int f4;
+    int* f8;
+    sTrigPart_16BF40* fC;
+    sTrigPart_16BF40* f10;
+};
+
+struct sTrigList_16BF40
+{
+    sTrig_16BF40** arr;
+    int count;
+};
+
+extern "C" void func_0016BF40(void* self_)
+{
+    sTrigList_16BF40* self = (sTrigList_16BF40*)self_;
+    for (int i = 0; i < self->count; i++)
+    {
+        if (self->arr[i]->f8)
+        {
+            operator_delete(self->arr[i]->f8);
+            self->arr[i]->f8 = 0;
+        }
+        if (self->arr[i]->fC)
+        {
+            sTrigPart_16BF40* p = self->arr[i]->fC;
+            p->vt[1].fn((char*)p + p->vt[1].delta);
+            operator_delete((int*)self->arr[i]->fC);
+            self->arr[i]->fC = 0;
+        }
+        if (self->arr[i]->f10)
+        {
+            sTrigPart_16BF40* p = self->arr[i]->f10;
+            p->vt[1].fn((char*)p + p->vt[1].delta);
+            operator_delete((int*)self->arr[i]->f10);
+            self->arr[i]->f10 = 0;
+        }
+        if (self->arr[i])
+            tCameraTrigger__tCameraTrigger(self->arr[i], 3);
+        self->arr[i] = 0;
+    }
+    cCameraTriggerList_initHeader((cCameraTriggerList*)self);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C098);

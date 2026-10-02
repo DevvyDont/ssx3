@@ -319,7 +319,40 @@ extern "C" void func_00145108(void* self, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
+#ifdef SKIP_ASM
+extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
+
+struct sGameEvent_001451E8
+{
+    int kind;
+    char rest[0x50];
+};
+extern sGameEvent_001451E8 D_0043E978[];
+
+static inline char* Race_1451E8()
+{
+    return (char*)&D_00535BC8;
+}
+
+extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
+{
+    sGameEvent_001451E8 e = D_0043E978[event];
+    *((signed char*)Race_1451E8() + 0x4A) = event;
+    if (event < 6)
+    {
+        if (event >= 4)
+        {
+            if (*((signed char*)Race_1451E8() + 0x49) == 2)
+                cBENewRaceInterface_setNumberAI(self, 0);
+            else
+                cBENewRaceInterface_setNumberAI(self, 1);
+        }
+    }
+    return e.kind == *((signed char*)Race_1451E8() + 0x48);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00145340);

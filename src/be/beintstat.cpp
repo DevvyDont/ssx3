@@ -306,7 +306,53 @@ extern "C" int func_00149778(void* self, int rider, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintstat", func_00149860);
+#ifdef SKIP_ASM
+extern "C" void func_00149BB8();
+extern "C" void* func_0014EDD8();
+extern "C" void* func_00147F78(void);
+extern "C" void* func_0014ABE0();
+void* cBENewRaceInterface_getThis();
+void* cBENewPlayerInterface_getThis();
+void* cBEOptionInterface_getThis();
+void* cBESaveInterface_getThis();
+void* cBEBAGTInterface_getThis();
+void* cBENetworkInterface_getThis();
+void* cBEScoreInterface_getThis();
+void* cBEMissionInterface_getThis();
+void* cBEEconInterface_getThis();
+void* cBEAggressionInterface_getThis();
+void* cBERewardInterface_getThis();
+
+struct sStatDefaults_149860
+{
+    int v[0xA28 / 4];
+};
+extern sStatDefaults_149860 D_00535C18;
+extern sStatDefaults_149860 D_0043FB28;
+
+extern "C" void* func_00149860(void* self)
+{
+    func_00149BB8();
+    D_00535C18 = D_0043FB28;
+    cBENewRaceInterface_getThis();
+    cBENewPlayerInterface_getThis();
+    func_0014EDD8();
+    func_00147F78();
+    cBEOptionInterface_getThis();
+    cBESaveInterface_getThis();
+    cBEBAGTInterface_getThis();
+    cBENetworkInterface_getThis();
+    cBEScoreInterface_getThis();
+    func_0014ABE0();
+    cBEMissionInterface_getThis();
+    cBEEconInterface_getThis();
+    cBEAggressionInterface_getThis();
+    cBERewardInterface_getThis();
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintstat", func_001499A8);

@@ -358,7 +358,70 @@ extern "C" void func_001519E0(sEcon_001519E0* self, int k)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintecon", func_00151A88);
+#ifdef SKIP_ASM
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(void* self, int i);
+extern "C" void func_001513B8(void* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern int D_004A11E8;
+extern const char D_0045A7A8[];
+extern char D_004A6750[];
+
+struct sEconDef_151A88
+{
+    int f0;
+    short id;           // 0x4
+    char pad[0x32];
+};
+
+struct sEconItem_151A88
+{
+    short id;
+    short flags;
+};
+
+struct sEconItems_151A88
+{
+    char pad[0x288];
+    short* lookup;              // 0x288
+    int count;                  // 0x28C
+    sEconItem_151A88 items[0x20D]; // 0x290
+    char pad2[0xBC0 - 0x290 - 0x20D * 4];
+    signed char kind;           // 0xBC0
+};
+
+extern "C" void func_00151A88(sEconItems_151A88* self, int k)
+{
+    void* db = D_004A6750;
+    sEconDef_151A88* d = (sEconDef_151A88*)func_0014D998(db, k);
+    int n = func_0014D988(db, k);
+    self->kind = k;
+    self->count = n;
+    if (self->lookup == 0)
+        self->lookup = (short*)operator_new_tag(D_004A11E8 * 2, D_0045A7A8, 0, 0);
+    int i;
+    for (i = 0; i < D_004A11E8; i++)
+        self->lookup[i] = -1;
+    for (i = 0; i < n; i++, d++)
+    {
+        sEconItem_151A88* p = &self->items[i];
+        p->flags = 0;
+        int id = d->id;
+        p->id = id;
+        self->lookup[d->id] = i;
+    }
+    for (i = n; i < 0x20D; i++)
+    {
+        sEconItem_151A88* q = &self->items[i];
+        q->id = -1;
+        q->flags = 0;
+    }
+    func_001513B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00151C48);
@@ -456,5 +519,84 @@ extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_001521F0);
+#ifdef SKIP_ASM
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+int func_0014DC40(void* self, int kind);
+extern "C" void* func_0014DC50(void* self, int kind);
+extern "C" int func_0014D608(void* self, int kind, int id, void** out, int a, int b);
+extern "C" int func_00151C90(void* self, int id, int on);
+
+struct sEconItem_1521F0
+{
+    short id;
+    unsigned short flags;
+};
+
+struct sEconItems_1521F0
+{
+    char pad[0x288];
+    short* lookup;                  // 0x288
+    int count;                      // 0x28C
+    sEconItem_1521F0 items[0x20D];  // 0x290
+    char pad2[0xBC0 - 0x290 - 0x20D * 4];
+    signed char kind;               // 0xBC0
+};
+
+struct sEconGroup_1521F0
+{
+    int f0;
+    short id;       // 0x4
+    short prize;    // 0x6
+};
+
+struct sEconDef_1521F0
+{
+    int f0;
+    short id;       // 0x4
+    char pad[0x2E];
+    int flags;      // 0x34
+};
+
+static inline sEconItem_1521F0* Find_1521F0(sEconItems_1521F0* self, int id)
+{
+    int idx = self->lookup[id];
+    if (idx >= 0)
+        return &self->items[idx];
+    return 0;
+}
+
+extern "C" int func_001521F0(sEconItems_1521F0* self)
+{
+    int i = 0;
+    int ok = 1;
+    void* db = func_0014BDB8_noarg();
+    sEconGroup_1521F0* g = (sEconGroup_1521F0*)func_0014DC50(db, self->kind);
+    int n = func_0014DC40(db, self->kind);
+    for (; i < n; i++, g++)
+    {
+        sEconDef_1521F0* list[528];
+        int cnt = func_0014D608(db, self->kind, g->id, (void**)list, -1, 1);
+        int j;
+        for (j = 0; j < cnt; j++)
+        {
+            if (!(Find_1521F0(self, list[j]->id)->flags & 0x10))
+                continue;
+            if (list[j]->flags & 0x10)
+                break;
+        }
+        if (j == cnt)
+        {
+            if (func_00151C90(self, g->prize, 1) == 0)
+            {
+                ok = 0;
+                break;
+            }
+        }
+    }
+    return ok;
+}
+#endif
 

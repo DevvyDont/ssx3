@@ -59,7 +59,49 @@ extern "C" void func_001690D0(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addCamera);
+#ifdef SKIP_ASM
+int func_002743C8(void* self);
+void func_001694A8(void* self, int val);
+extern "C" void* func_001694B8(void* self);
+extern "C" void* func_00169CF8(void* self);
+extern "C" void* func_0016A458(void* self);
+extern "C" void* func_0016AD38(void* self);
+// PORT: func_00169340 is defined with (self, algo); this caller passes a third int argument.
+extern "C" void func_00169340_3(void* self, void* algo, int a) __asm__("func_00169340");
+extern char D_0045BEB0[];
+extern char D_0045BED0[];
+extern char D_0045BEF0[];
+extern char D_0045BF10[];
+
+extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
+{
+    void* ctl;
+    switch (func_002743C8(*(void**)(*(char**)(cam + 0x14) + 8)))
+    {
+    case 0:
+        ctl = func_001694B8(cMemMan_alloc(0xB0, D_0045BEB0, 0x20000000, 0));
+        break;
+    case 1:
+        ctl = func_00169CF8(cMemMan_alloc(0xB0, D_0045BED0, 0x20000000, 0));
+        break;
+    case 2:
+        ctl = func_0016A458(cMemMan_alloc(0xA0, D_0045BEF0, 0x20000000, 0));
+        break;
+    case 3:
+        ctl = func_0016AD38(cMemMan_alloc(0xA0, D_0045BF10, 0x20000000, 0));
+        break;
+    default:
+        return;
+    }
+    // PORT: the camera pointer is passed through an int parameter.
+    func_001694A8(ctl, (int)cam);
+    *(void**)(cam + 0x1C) = ctl;
+    func_00169340_3(self, ctl, 1);
+    *(int*)(self + 0x18) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_001692D8);
