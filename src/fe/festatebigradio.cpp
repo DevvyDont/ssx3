@@ -24,7 +24,51 @@ void* func_00193318(void* self)
 
 INCLUDE_ASM("fe/festatebigradio", func_00193338);
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00193568);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cUIScreen;
+int GetHashValue32(char* str);
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern char D_004A1790[];
+extern char D_004A1798[];
+extern int D_004A1A70;
+extern "C" void func_001A87D0(void* self, int a1);
+extern "C" void func_001927B0(void* p);
+// func_0039E4C0 returns nothing (ends in a void vcall).
+void func_0039E4C0_v(void* self) __asm__("func_0039E4C0");
+
+static inline int isOn00193568()
+{
+    return D_004A1A70 == 1;
+}
+
+static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
+
+extern "C" void func_00193568(void* self, int a1)
+{
+    if (isOn00193568()) {
+        func_001A87D0(self, a1);
+        return;
+    }
+    func_0039E4C0_v(self);
+    if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_004A1790));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+    } else if (get6F8_3568(self) == 0 && *(int*)((char*)self + 0x72C) != 0) {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_004A1798));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+    }
+    func_001927B0((char*)self + 0x6D0);
+    func_001927B0((char*)self + 0x704);
+}
+#endif
 
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetCreate);
 

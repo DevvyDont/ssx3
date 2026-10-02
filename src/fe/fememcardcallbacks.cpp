@@ -6,7 +6,49 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackReadSuccess);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D68E8);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D69E0);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_002C2508(void* dst, void* src);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_004641F0[];
+
+struct sVEntry001D69E0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, ...);
+};
+
+struct sVEntryV001D69E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+extern "C" void func_001D69E0(void)
+{
+    void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
+    func_002C2508(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_004641F0)));
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 2;
+    sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
+    vt2[36].fn(fe + vt2[36].delta, buf, 0, 0, 0, 0, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(m + 8);
+    vt3[25].fn(m + vt3[25].delta, 1);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D6AD0);
 
@@ -68,7 +110,60 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDeleteDone);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8020);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8160);
+#ifdef SKIP_ASM
+void func_0023FB18(void* mp, int a);
+extern "C" void func_0023FAE0(void* mp);
+extern "C" void func_00241400(void* mp);
+
+class cMoviePlayerK1D8160 {
+public:
+    char pad_0x000[0x748];
+    virtual void v01(int);
+};
+
+class cMovieStreamK1D8160 {
+public:
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
+    virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
+    virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12();
+    virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16();
+    virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20();
+    virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24();
+    virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28();
+    virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32();
+    virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36();
+    virtual void v37(); virtual void v38(); virtual void v39(); virtual void v40();
+    virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44();
+    virtual void v45(); virtual void v46(); virtual void v47(); virtual void v48();
+    virtual void v49(); virtual void v50(); virtual void v51();
+    virtual int v52(int);
+};
+
+extern "C" void func_001D8160(void)
+{
+    cMoviePlayerK1D8160* mp = (cMoviePlayerK1D8160*)func_00227F80(D_004A28A8);
+    int next = *(int*)((char*)mp + 0x428) + 1;
+    if (next < *(int*)((char*)mp + 0x424)) {
+        func_0023FB18(mp, next);
+        mp->v01(0x31);
+        return;
+    }
+    func_0023FB18(mp, 0);
+    if ((*(cMovieStreamK1D8160**)((char*)mp + 0x434))->v52(0) == 0) {
+        char* fe = (char*)D_004A2028;
+        if (*(int*)(fe + 0x208) != 0) {
+            *(int*)(fe + 0x1C0) = 6;
+            mp->v01(2);
+            return;
+        }
+        func_00241400(mp);
+    }
+    func_0023FAE0(mp);
+    mp->v01(0x36);
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8240);
 
@@ -403,7 +498,53 @@ void func_001D9878(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9880);
+#ifdef SKIP_ASM
+class cMovieStreamK1D9880 {
+public:
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
+    virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
+    virtual void v09(); virtual void v10();
+    virtual int v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
+    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
+    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
+    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
+    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
+    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43();
+    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
+    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
+    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
+    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
+    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
+    virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67();
+    virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
+    virtual void v72(); virtual void v73(); virtual void v74();
+    virtual int v75();
+};
+
+static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) == m; }
+
+extern "C" int func_001D9880(void* self)
+{
+    int r = 0;
+    int one = 1;
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    int st = *(int*)((char*)self + 0x1C0);
+    if (st != 0 && st != 6 && *(int*)(mp + 0x340) != 0 && *(int*)(mp + 0xE0) == 0
+        && (*(cMovieStreamK1D9880**)(mp + 0x434))->v11() == 0) {
+        if (!IsModeK1D9880(mp, 6) && !IsModeK1D9880(mp, 1)) {
+            if ((*(cMovieStreamK1D9880**)(mp + 0x434))->v75() != 0) {
+                r = one;
+            }
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_createReadBuffer);
@@ -430,7 +571,37 @@ extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D99C8);
+#ifdef SKIP_ASM
+extern "C" void* cScreenPopup_cScreenPopup(void* mem, void* engine, void* owner);
+extern "C" void func_001D9A80(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern char D_0046C890[];
+extern int D_004A203C;
+
+struct sMemCardPopupK1D99C8 {
+    char pad_0x000[0x8];
+    void* vtbl;    // 0x8
+    char pad_0x00C[0x14C - 0xC];
+    int f14C;      // 0x14C
+    char pad_0x150[0x17C - 0x150];
+    int f17C;      // 0x17C
+};
+
+extern "C" sMemCardPopupK1D99C8* func_001D99C8(sMemCardPopupK1D99C8* self, void* engine, void* owner, int a3, int a4, int a5, int a6, int a7, int a8)
+{
+    cScreenPopup_cScreenPopup(self, engine, owner);
+    self->vtbl = D_0046C890;
+    if (D_004A203C == 0) {
+        self->f17C = 1;
+    } else {
+        self->f17C = 2;
+        self->f14C = 4;
+    }
+    func_001D9A80(self, a3, a4, a5, a6, a7, a8);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9A80);
 

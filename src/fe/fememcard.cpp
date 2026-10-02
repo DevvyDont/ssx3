@@ -39,9 +39,125 @@ extern "C" void cFEStateMemCard_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00186BF0);
+#ifdef SKIP_ASM
+extern char D_004A14C0[];
+extern "C" void func_001D8DE0(void* self);
+extern "C" int func_0023C898(void* mp);
+extern "C" void func_0039FD38(void* obj);
 
+class cUIObjK186BF0 {
+public:
+    char pad_0x000[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int);
+};
+
+extern "C" void func_00186BF0(void* self)
+{
+    func_001D8DE0(self);
+    if (func_0023C898(func_00227F80(D_004A28A8)) != 0 || *(int*)((char*)self + 0x1C0) == 6) {
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A14C0));
+        if (obj != 0) {
+            func_0039FD38(obj);
+        }
+        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DC80)))->v09(0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcard", func_00186C98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char D_0045DC90[];
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+
+class cUIObjK186C98 {
+public:
+    char pad_0x000[0x4];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual int v04(int hash);
+};
+
+class cFEMemCardStateK186C98 {
+public:
+    char pad_0x000[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36(void* buf, int a, int b, int c, int d, int e);
+};
+extern cFEMemCardStateK186C98* D_004A14B8_K186C98 __asm__("D_004A14B8");
+
+struct sVtEntK186C98 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+struct sLocalK186C98 {
+    int v[8];
+};
+
+extern "C" void func_00186C98(void)
+{
+    unsigned short buf[0x320];
+    sLocalK186C98 loc;
+    void* mp = func_00227F80(D_004A28A8);
+    func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVtEntK186C98* vt = *(sVtEntK186C98**)(o + 4);
+    unsigned short* r = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045DC90));
+    func_002C26D0(buf, r, &loc);
+    cFEMemCardStateK186C98* st = D_004A14B8_K186C98;
+    *(int*)((char*)st + 0x19C) = 4;
+    st->v36(buf, 1, 1, 0, 0, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/fememcard", func_00186D60);
 
@@ -190,7 +306,37 @@ extern "C" void func_00187230(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00187270);
+#ifdef SKIP_ASM
+extern "C" void func_00187318(void* self);
+extern "C" void func_001877B0(void);
+extern "C" void func_00187920(void);
+
+struct sFEMemCardK187270 {
+    char pad_0x000[0x234];
+    int f234;      // 0x234
+    int flags;     // 0x238
+};
+
+extern "C" void func_00187270(sFEMemCardK187270* self)
+{
+    self->f234 = 1;
+    void* mp = func_00227F80(D_004A28A8);
+    int flags = self->flags;
+    if (!(flags & 2)) {
+        func_0023FB18(mp, 0);
+        func_0023FAE0(mp);
+        func_00187920();
+    } else if (!(flags & 1)) {
+        func_0023FB18(mp, 0);
+        func_0023FAE0(mp);
+        func_001877B0();
+    } else {
+        func_00187318(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187318);

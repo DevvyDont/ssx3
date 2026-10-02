@@ -29,7 +29,45 @@ extern "C" int func_00196B08(void* self, int a1, int a2, int a3)
 
 INCLUDE_ASM("fe/festateaudiooptions", func_00196B90);
 
+//100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196DB0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0039B760(void* self, int a1);
+extern "C" void* func_0039F9D8(void* self, int id);
+extern void* D_004A28A8;
+extern char D_004A18A8[];
+extern char D_004A18B0[];
+extern char D_00460578[];
+
+struct sVEntry00196DB0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" void func_00196DB0(void* self)
+{
+    char* name = D_004A18B0;
+    if (*(void**)((char*)D_004A28A8 + 0x84) != 0) {
+        name = D_00460578;
+        void* list = *(char**)((char*)self + 0x10) + 0x18;
+        char* obj = (char*)func_0039F9D8(list, GetHashValue32(D_004A18A8));
+        if (obj != 0) {
+            sVEntry00196DB0* vt = *(sVEntry00196DB0**)(obj + 8);
+            vt[24].fn(obj + vt[24].delta, 3, 0);
+        }
+    }
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(name), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0039B760(*(void**)((char*)self + 0x170), *(unsigned char*)((char*)self + 0x14C));
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196E80);

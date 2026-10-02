@@ -191,7 +191,38 @@ INCLUDE_ASM("fe/fereal", func_001A2208);
 
 INCLUDE_ASM("fe/fereal", func_001A27A0);
 
+//100%
 INCLUDE_ASM("fe/fereal", cRealFE_loadCharAnimations);
+#ifdef SKIP_ASM
+extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
+extern "C" void func_003DEDC0(void* handle, int arg);
+extern "C" void* func_00311250(void* self, void* src);
+extern "C" void func_00314F30(void* self, int kind, void* list);
+// PORT: cGameAnimMap_testResolve__Fv is called with the map in $a0; bind the 1-arg form to that symbol.
+void cGameAnimMap_testResolve_p(void* map) __asm__("cGameAnimMap_testResolve__Fv");
+extern char D_00461330[];
+extern char D_00461348[];
+extern void* D_004A19C0[1];
+struct sAnimTableK1A2B00 {
+    void* anims[1];
+};
+extern sAnimTableK1A2B00* D_004A3DF8_K1A2B00 __asm__("D_004A3DF8");
+extern void* D_004A3E7C;
+
+extern "C" void cRealFE_loadCharAnimations(void)
+{
+    void* handle;
+    int i;
+    func_003DED50(D_00461330, 0, 0x64, &handle);
+    for (i = 0; i < 1; i++) {
+        void* anim = func_00311250(cMemMan_alloc(0x18, D_00461348, 0, 0), D_004A19C0[i]);
+        D_004A3DF8_K1A2B00->anims[(unsigned char)i] = anim;
+        func_00314F30(D_004A3E7C, i, anim);
+    }
+    cGameAnimMap_testResolve_p(D_004A3E7C);
+    func_003DEDC0(handle, 0x64);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fereal", func_001A2BC0);
