@@ -25,7 +25,20 @@ INCLUDE_ASM("world/streamman", func_003A6F38);
 
 INCLUDE_ASM("world/streamman", func_003A6F88);
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A7010);
+#ifdef SKIP_ASM
+extern "C" void func_003E0E90(int, int);
+
+extern "C" void func_003A7010(void* self)
+{
+    if (*(int*)((char*)self + 0x90) != 0) {
+        func_003E0E90(*(int*)((char*)self + 0x88), *(int*)((char*)self + 0x9C));
+        *(int*)((char*)self + 0x90) = 0;
+        *(int*)((char*)self + 0x94) = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("world/streamman", func_003A7058);
 

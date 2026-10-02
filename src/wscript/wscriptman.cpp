@@ -4,9 +4,43 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
 
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess1);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309750);
+#ifdef SKIP_ASM
+struct sVEntry00309750 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
 
+extern "C" void func_00309750(void* self, void* obj)
+{
+    void* saved = *(void**)((char*)self + 0x2A4);
+    *(void**)((char*)self + 0x2A4) = obj;
+    sVEntry00309750* vt = *(sVEntry00309750**)((char*)obj + 0x5C);
+    vt[4].fn((char*)obj + vt[4].delta);
+    *(void**)((char*)self + 0x2A4) = saved;
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309798);
+#ifdef SKIP_ASM
+struct sVEntry00309798 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00309798(void* self, void* obj)
+{
+    void* saved = *(void**)((char*)self + 0x2A4);
+    *(void**)((char*)self + 0x2A4) = obj;
+    sVEntry00309798* vt = *(sVEntry00309798**)((char*)obj + 0x5C);
+    vt[6].fn((char*)obj + vt[6].delta);
+    *(void**)((char*)self + 0x2A4) = saved;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_003097E0);
@@ -96,7 +130,20 @@ extern "C" void func_003099F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309A60);
+#ifdef SKIP_ASM
+struct cWScriptListHead;
+struct cWScriptListNode;
+extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
+int func_0030B260(void* self, void* a1);
+
+extern "C" void func_00309A60(void* self, cWScriptListNode* node)
+{
+    func_0030B2D0((cWScriptListHead*)((char*)self + 0x2B4), node);
+    func_0030B260((char*)self + 0x2B8, node);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_00309AA0);
 
@@ -217,7 +264,27 @@ INCLUDE_ASM("wscript/wscriptman", func_0030AC98);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030ADA8);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030AEB8);
+#ifdef SKIP_ASM
+struct sVEntry0030AEB8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void* func_0030AEB8(void* self)
+{
+    void* obj = *(void**)((char*)self + 0x2A4);
+    if (obj != 0) {
+        sVEntry0030AEB8* vt = *(sVEntry0030AEB8**)((char*)obj + 0x5C);
+        if (vt[3].fn((char*)obj + vt[3].delta) != 0) {
+            return *(void**)((char*)self + 0x2A4);
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030AF08);
 
@@ -478,9 +545,61 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B928);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B9A0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030BA80);
+#ifdef SKIP_ASM
+struct func_0030BA80_sEntry {
+    int id;
+    char pad04[0x10C - 4];
+};
 
+struct func_0030BA80_sMan {
+    char pad000[0x2C0];
+    func_0030BA80_sEntry entries[1];
+};
+
+extern "C" int func_0030C468(void* entry);
+
+extern "C" int func_0030BA80(func_0030BA80_sMan* self, int id)
+{
+    func_0030BA80_sEntry* e = self->entries;
+    int i;
+    for (i = 0; i < 1; i++, e++) {
+        if (e->id == id) {
+            return func_0030C468(e);
+        }
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030BAC8);
+#ifdef SKIP_ASM
+struct func_0030BAC8_sEntry {
+    int id;
+    char pad04[0x10C - 4];
+};
+
+struct func_0030BAC8_sMan {
+    char pad000[0x2C0];
+    func_0030BAC8_sEntry entries[1];
+};
+
+extern "C" void func_0030C4A8(void* e, int a1, int a2);
+
+extern "C" void func_0030BAC8(func_0030BAC8_sMan* self, int id, int a1, int a2)
+{
+    func_0030BAC8_sEntry* e = self->entries;
+    int i;
+    for (i = 0; i < 1; i++, e++) {
+        if (e->id == id) {
+            func_0030C4A8(e, a1, a2);
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030BB10);
 
@@ -516,7 +635,19 @@ extern "C" void func_0030C390(cWScriptIdTable* self)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C3E0);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C468);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" int func_00153498(void* iface, int a1, int id);
+
+extern "C" int func_0030C468(void* entry)
+{
+    return func_00153498(cBE_getInterface_Fv(cBE_getBE(), 10), 0, *(int*)entry);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C4A8);
 

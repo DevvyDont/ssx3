@@ -54,7 +54,23 @@ INCLUDE_ASM("world/wscriptcache", func_003ACA70);
 
 INCLUDE_ASM("world/wscriptcache", func_003ACC50);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ACC90);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+
+extern "C" void func_003ACC90(void* self)
+{
+    void* buf = *(void**)((char*)self + 0x8);
+    if (buf != 0) {
+        if (*(short*)((char*)self + 0x2) == 0) {
+            cMemMan_free(buf);
+        }
+        *(void**)((char*)self + 0x8) = 0;
+    }
+    *(short*)self = 0;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003ACCD8);
 
@@ -217,7 +233,18 @@ void* func_003ADDA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADDC0);
+#ifdef SKIP_ASM
+extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+
+extern "C" void* func_003ADDC0(void* self, int a1, int a2, int a3, int a4)
+{
+    *(int*)((char*)self + 0x60) = 0;
+    func_003ADEC8(self, a1, 0, a2, 0, 0, 0, a3, a4);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003ADE08);
 
@@ -227,7 +254,21 @@ INCLUDE_ASM("world/wscriptcache", func_003AE300);
 
 INCLUDE_ASM("world/wscriptcache", func_003AE450);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AE6C8);
+#ifdef SKIP_ASM
+extern "C" int func_004139F8(float f);
+extern "C" int func_003B0600(void* p, int a1);
+extern "C" int func_003B0580(void* self);
+
+extern "C" int func_003AE6C8(void* self, float f)
+{
+    *(float*)((char*)self + 0x48) = f;
+    *(int*)((char*)self + 0x74) = func_003B0600(*(void**)((char*)self + 0x64), func_004139F8(f));
+    *(int*)((char*)self + 0x44) = func_003B0580(*(void**)((char*)self + 0x64));
+    return *(int*)((char*)self + 0x74);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003AE780);
 
@@ -286,7 +327,22 @@ void* func_003AECB8(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AECE0);
+#ifdef SKIP_ASM
+extern "C" void* func_003E13E8(void* p, int a1);
+extern void* (*D_00509434[])(void*);
+
+extern "C" void* func_003AECE0(int self, int a1)
+{
+    int* obj = (int*)a1;
+    void* r = func_003E13E8(*(void**)(self + 0x30), *obj);
+    if (obj != 0) {
+        r = D_00509434[0](obj);
+    }
+    return r;
+}
+#endif
 
 extern "C" void* func_003AECE0(int, int);
 
@@ -349,7 +405,25 @@ extern "C" void func_003B04F8(void* self, func_003B04F8_cObj* obj, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0538);
+#ifdef SKIP_ASM
+struct sVEntry003B0538 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_003B0538(void* self)
+{
+    void* obj = *(void**)((char*)self + 0x14);
+    if (obj != 0) {
+        sVEntry003B0538* vt = *(sVEntry003B0538**)obj;
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+        *(void**)((char*)self + 0x14) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B0580);
@@ -399,7 +473,28 @@ extern "C" void func_003B0680(void* self, int a)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B06B0);
+#ifdef SKIP_ASM
+struct func_003B06B0_sReq {
+    int pending;
+    int arg;
+    void (*fn)(func_003B06B0_sReq* self, int arg, int* out);
+};
+
+extern "C" int func_003B06B0(func_003B06B0_sReq* self)
+{
+    int r;
+    int v = self->pending;
+    if (v != 0) {
+        self->pending = 0;
+        r = v;
+        return v;
+    }
+    self->fn(self, self->arg, &r);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B06F8);
 
@@ -443,7 +538,23 @@ extern "C" void* func_003B0758(void* self, int a1, int a2, int a3, int a4)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B0770);
+#ifdef SKIP_ASM
+extern char D_00509430[];
+extern void* D_0050943C[];
+
+extern "C" void* func_003B0770(int init, int prio)
+{
+    if (prio == 0xFFFF) {
+        if (init != 0) {
+            func_003B0410(D_00509430);
+        } else {
+            D_0050943C[0] = (void*)D_00456890;
+        }
+    }
+}
+#endif
 
 extern "C" void* func_003B0770(int, int);
 
@@ -760,7 +871,23 @@ extern "C" void func_003B22F8(void)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B2318);
+#ifdef SKIP_ASM
+// PORT: func_003B1270 takes a void* it never reads; this caller passes nothing, so it binds
+// a no-argument declaration to the mangled symbol.
+void* func_003B1270_noarg() __asm__("func_003B1270__FPv");
+
+extern "C" int func_003B2318(void)
+{
+    int n = 0;
+    while (func_003B1270_noarg() != 0) {
+        func_003B1290(8);
+        n++;
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B2360__FPv);

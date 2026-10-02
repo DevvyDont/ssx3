@@ -181,9 +181,38 @@ extern "C" unsigned short* func_002C25B8(unsigned short* dst, unsigned short* sr
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2688);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C2508(unsigned short* dst, unsigned short* src);
 
+extern "C" unsigned short* func_002C2688(unsigned short* dst, unsigned short* src)
+{
+    while (*dst != 0) {
+        dst++;
+    }
+    return func_002C2508(dst, src);
+}
+#endif
+
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C26D0);
+#ifdef SKIP_ASM
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+typedef char* func_002C26D0_va_list;
+#define func_002C26D0_va_start(ap)                                       \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
+extern "C" int USTR_vsprintf(unsigned short* dst, const unsigned short* fmt, char* ap);
+
+extern "C" int func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...)
+{
+    func_002C26D0_va_list ap;
+    func_002C26D0_va_start(ap);
+    return USTR_vsprintf(dst, fmt, ap);
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C2718);
 
@@ -231,7 +260,26 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C3FE0);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4050);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C4198);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+char* func_002C2580_impl(char* dst, unsigned short* src) __asm__("func_002C2580");
+
+struct sVEntry002C4198 {
+    short delta;
+    short index;
+    void (*fn)(void*, char*);
+};
+
+extern "C" void func_002C4198(void* self, unsigned short* name)
+{
+    char buf[1000];
+    func_002C2580_impl(buf, name);
+    sVEntry002C4198* vt = *(sVEntry002C4198**)self;
+    vt[6].fn((char*)self + vt[6].delta, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C41D8);

@@ -44,7 +44,20 @@ void* func_003A77B0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A77D0);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void func_003A7818(void* self);
+
+extern "C" void func_003A77D0(void* self, int flags)
+{
+    func_003A7818(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A7818);
 
@@ -56,7 +69,21 @@ INCLUDE_ASM("world/worldcache", func_003A7AA8);
 
 INCLUDE_ASM("world/worldcache", cWorldMemoryMan_activateSectionMem);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7B98);
+#ifdef SKIP_ASM
+extern "C" void func_003A77D0(void* self, int flags);
+
+extern "C" void func_003A7B98(void* self, int i)
+{
+    char* base = (char*)self + 0x3C;
+    void** p = (void**)(base + (i << 2));
+    if (*p != 0) {
+        func_003A77D0(*p, 3);
+    }
+    *p = 0;
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", cHullPage_cHullPage);
 
@@ -171,7 +198,20 @@ INCLUDE_ASM("world/worldcache", func_003A8F10);
 
 INCLUDE_ASM("world/worldcache", func_003A8F80);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8FB8);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+void func_003A9180(void* self);
+
+extern "C" void func_003A8FB8(void* self, int flags)
+{
+    func_003A9180(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A9000);

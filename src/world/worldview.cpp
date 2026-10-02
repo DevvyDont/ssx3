@@ -98,7 +98,30 @@ INCLUDE_ASM("world/worldview", func_003AA028);
 
 INCLUDE_ASM("world/worldview", func_003AA2F0);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA3F0);
+#ifdef SKIP_ASM
+class func_003AA3F0_cObj {
+public:
+    char pad00[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual int v06(void* a1);
+};
+
+// PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AA3F0(func_003AA3F0_cObj* self, void* a1)
+{
+    *(int*)((char*)a1 + 0x8) += (int)a1;
+    *(int*)((char*)a1 + 0xC) += (int)a1;
+    self->v06(a1);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AA438);
 

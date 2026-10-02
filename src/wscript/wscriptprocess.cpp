@@ -194,11 +194,60 @@ extern "C" void func_00307D00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D30);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void func_00307D78(void* self);
 
+extern "C" void func_00307D30(void* self)
+{
+    *(int*)self = 3;
+    void* script = *(void**)((char*)self + 0x30);
+    if (script != 0) {
+        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+    }
+    func_00307D78(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D78);
+#ifdef SKIP_ASM
+extern "C" void func_00309AA0(void* man, void* proc);
+extern "C" void func_00224DF0(void* obj, int flags);
 
+extern "C" void func_00307D78(void* self)
+{
+    *(int*)self = 3;
+    func_00309AA0(*(void**)((char*)self + 0x10), self);
+    void* obj = *(void**)((char*)self + 0x1C);
+    if (obj != 0) {
+        func_00224DF0(obj, 3);
+    }
+    *(void**)((char*)self + 0x1C) = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307DC8);
+#ifdef SKIP_ASM
+int func_0030B898(void* man, void* proc);
+
+struct sVEntry00307DC8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00307DC8(void* self)
+{
+    if (func_0030B898(*(void**)((char*)self + 0x10), self) != 0) {
+        sVEntry00307DC8* vt = *(sVEntry00307DC8**)((char*)self + 0x5C);
+        vt[6].fn((char*)self + vt[6].delta);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307E10);
 
@@ -221,7 +270,22 @@ INCLUDE_ASM("wscript/wscriptprocess", func_00308038);
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308118);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308228);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern void* D_00489AE0[];
+
+extern "C" void* func_00308228(void* self)
+{
+    *(void***)((char*)self + 0x40) = D_00489AE0;
+    func_003E6448((char*)self + 8, 0, 0xC);
+    *(int*)((char*)self + 0x3C) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)self = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308278);
 
@@ -369,7 +433,22 @@ extern "C" void func_00308680(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003086B0);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
+
+extern "C" void func_003086B0(void* self)
+{
+    if (*(int*)self != 1) {
+        *(int*)self = 1;
+        void* script = *(void**)((char*)self + 0x8);
+        if (script != 0) {
+            func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3C) + 0x10), self, script);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003086F0);
@@ -385,7 +464,22 @@ extern "C" void func_003086F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308720);
+#ifdef SKIP_ASM
+extern "C" void func_0030ADA8(void* man, void* proc, void* script);
+
+extern "C" void func_00308720(void* self)
+{
+    if (*(int*)self != 3) {
+        *(int*)self = 3;
+        void* script = *(void**)((char*)self + 0x10);
+        if (script != 0) {
+            func_0030ADA8(*(void**)(*(char**)((char*)self + 0x3C) + 0x10), self, script);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308760);
@@ -462,7 +556,24 @@ extern "C" void func_00308F38(void* self)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308F70);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptprocess", func_00308FE0);
+#ifdef SKIP_ASM
+struct func_00308FE0_sEntry {
+    char pad[0xC];
+};
+
+extern "C" void func_00308F70(void* self, int i);
+extern "C" void func_003ACC90(void* entry);
+
+extern "C" void func_00308FE0(void* self, int i)
+{
+    func_00308F70(self, i);
+    func_00308FE0_sEntry* items =
+        *(func_00308FE0_sEntry**)(*(char**)(*(char**)((char*)self + 0x28C) + 4) + 4);
+    func_003ACC90(&items[i]);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00309030);
 

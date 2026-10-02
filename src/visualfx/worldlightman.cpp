@@ -2,7 +2,29 @@
 
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_initLightCache);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F53B0);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+
+struct func_002F53B0_sSlot {
+    int* buf;
+    char pad04[0x3C];
+};
+
+struct func_002F53B0_sMan {
+    char pad00[0x40];
+    func_002F53B0_sSlot slots[8];
+};
+
+extern "C" void func_002F53B0(func_002F53B0_sMan* self)
+{
+    unsigned int i;
+    for (i = 0; i < 8; i++) {
+        operator_delete(self->slots[i].buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5400);
 
