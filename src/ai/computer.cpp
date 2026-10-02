@@ -715,7 +715,152 @@ void* func_0010F398(void* self)
 
 INCLUDE_ASM("ai/computer", func_0010F3B8);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010F560);
+#ifdef SKIP_ASM
+void* cBEAggressionInterface_getThis();
+extern "C" int func_00155B50(void* agg, int a, int b);
+extern "C" float func_0031C228(float x);
+struct sComputer_0010F878;
+extern "C" void func_0010F878(sComputer_0010F878* self);
+extern "C" void func_0010F998(void* self);
+
+struct sVec_0010F560 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVEntry0010F560 {
+    short delta;
+    short index;
+    sVec_0010F560* (*fn)(void*);
+};
+
+struct sRiderInfo_0010F560 {
+    int active;     // 0x0
+    int f4;         // 0x4
+    float dist;     // 0x8
+    float angle;    // 0xC
+    char pad10[0xC];
+    int aggressive; // 0x1C
+    int f20;        // 0x20
+};
+
+struct sRider_0010F560 {
+    sRiderInfo_0010F560 info[6];  // 0x0
+    char padD8[0xDC - 0xD8];
+    float minDist;                // 0xDC
+    float maxDist;                // 0xE0
+
+    sVec_0010F560* getPos()
+    {
+        char* o = (char*)this + 0x6C0;
+        sVEntry0010F560* e = &(*(sVEntry0010F560**)o)[5];
+        return e->fn(o + e->delta);
+    }
+};
+
+struct sComputer_0010F560 {
+    char pad0[0x8];
+    int frame;                       // 0x8
+    char padC[0x28 - 0xC];
+    sRider_0010F560* riders[0x14];   // 0x28
+    int count;                       // 0x78
+    char pad7C[0x84 - 0x7C];
+    int skip;                        // 0x84
+};
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_0010F560 sub_0010F560(const sVec_0010F560& a, const sVec_0010F560& b)
+{
+    sVec_0010F560 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline float atan2_0010F560(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f) {
+            return y;
+        }
+        if (y >= 0.0f) {
+            return 1.5707963705062866f;
+        }
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f) {
+            a += 3.1415927410125732f;
+        } else {
+            a -= 3.1415927410125732f;
+        }
+    }
+    return a;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_0010F560(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float wrap_0010F560(float x)
+{
+    return x - ffloor_0010F560(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+extern "C" void func_0010F560(sComputer_0010F560* self)
+{
+    if (self->frame % 6 != 0) {
+        return;
+    }
+    func_0010F998(self);
+    int n = self->count - self->skip;
+    if (n < 2) {
+        return;
+    }
+    for (int i = 0; i < n; i++) {
+        self->riders[i]->minDist = -50000.0f;
+        self->riders[i]->maxDist = 50000.0f;
+        for (int j = i + 1; j < n; j++) {
+            if (self->riders[i]->info[j].active == 0) {
+                continue;
+            }
+            sVec_0010F560 d = sub_0010F560(*self->riders[i]->getPos(), *self->riders[j]->getPos());
+            float dist;
+            float dx = d.x;
+            float dy = d.y;
+            float sq = dx * dx + dy * dy;
+            // PORT: sqrt.s (sqrtf without errno check)
+            __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(sq));
+            float ang = atan2_0010F560(dy, dx);
+            self->riders[i]->info[j].dist = dist;
+            self->riders[j]->info[i].dist = dist;
+            self->riders[i]->info[j].angle = wrap_0010F560(ang + 3.1415927410125732f);
+            self->riders[j]->info[i].angle = ang;
+            if (func_00155B50(cBEAggressionInterface_getThis(), i, j) >= 2) {
+                self->riders[i]->info[j].aggressive = 1;
+            } else {
+                self->riders[i]->info[j].aggressive = 0;
+            }
+        }
+    }
+    func_0010F878((sComputer_0010F878*)self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010F878);
