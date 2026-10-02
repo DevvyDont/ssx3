@@ -929,5 +929,64 @@ extern "C" void func_002ACB30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ACB80);
+#ifdef SKIP_ASM
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" void func_003B8530(int h, int a, int b);
+extern "C" void func_003B85F0(int h, int a);
+extern "C" void func_003B9E48(int h, int a);
+extern "C" void func_003B9F38(int h, int a, int b);
+void* func_002AA408(void* self);
+void func_002A9F30(void* self, int val);
+
+extern "C" void func_002ACB80(void* self, int n, int a2, float t)
+{
+    if (a2) {
+        *(int*)((char*)self + 0x58) = 1;
+        *(int*)((char*)self + 0x9C) = 1;
+    }
+    if (*(int*)((char*)self + 0x54) != 0) {
+        return;
+    }
+    if (n == -1) {
+        *(int*)((char*)self + 0x54) = 1;
+    } else {
+        if (n > 127) {
+            n = 127;
+        }
+        if (n < 0) {
+            n = 0;
+        }
+    }
+    switch (*(int*)self) {
+    case 1:
+        func_003B58A0();
+        if (t != 0.0f) {
+            func_003B8530(*(int*)((char*)self + 0x4), (int)(t * 100.0f), n);
+        } else {
+            func_003B85F0(*(int*)((char*)self + 0x4), n);
+        }
+        func_003B58D8();
+        break;
+    case 2:
+        func_003B58A0();
+        if (t != 0.0f) {
+            func_003B9F38(*(int*)((char*)self + 0x4), (int)(t * 100.0f), n);
+        } else {
+            func_003B9E48(*(int*)((char*)self + 0x4), n);
+        }
+        func_003B58D8();
+        break;
+    case 3:
+        if (*(int*)((char*)self + 0x54) != 0) {
+            func_002AA408(*(void**)((char*)self + 0xC));
+        } else {
+            func_002A9F30(*(void**)((char*)self + 0xC), n);
+        }
+        break;
+    }
+}
+#endif
 

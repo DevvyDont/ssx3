@@ -128,7 +128,56 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndLoad);
 
 INCLUDE_ASM("sound/ssxAudio", func_002867E8);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00286A80);
+#ifdef SKIP_ASM
+extern "C" void func_00289BB8(void* self);
+extern "C" void func_00285BE0(void* self, int a1);
+extern "C" void func_002B3AC0(void*);
+extern "C" void func_0029D678(void* self, float v);
+extern "C" void func_002A4550(void*);
+extern "C" void func_00292B48(void* self);
+extern "C" void func_002980B0(void* self);
+extern "C" void func_002883B0(void* self, int id);
+extern "C" void func_002ADDA0(void*);
+extern "C" void func_002B11B0(void*, int);
+
+struct sSaDelVt6A80 { short delta; short index; void (*fn)(void*, int); };
+
+static inline void saDeleteObj(void** slot)
+{
+    char* p = (char*)*slot;
+    if (p) {
+        sSaDelVt6A80* vt = *(sSaDelVt6A80**)(p + 4);
+        vt[1].fn(p + vt[1].delta, 3);
+    }
+    *slot = 0;
+}
+
+extern "C" void func_00286A80(void* self)
+{
+    func_00289BB8(self);
+    func_00285BE0(self, 0);
+    func_002B3AC0((char*)self + 0x118);
+    func_0029D678(self, 0.0f);
+    func_002A4550(self);
+    func_00292B48(self);
+    saDeleteObj((void**)((char*)self + 0x625C));
+    saDeleteObj((void**)((char*)self + 0x6260));
+    saDeleteObj((void**)((char*)self + 0x5FA0));
+    saDeleteObj((void**)((char*)self + 0x5FA4));
+    saDeleteObj((void**)((char*)self + 0x6C80));
+    saDeleteObj((void**)((char*)self + 0x6C84));
+    func_002980B0(self);
+    func_002883B0(self, 0);
+    func_002ADDA0(**(char***)((char*)self + 0x118) + 0x1D8);
+    char* in = **(char***)((char*)self + 0x118);
+    char* obj = in + 0x1D8;
+    func_00286200_vte* vt = *(func_00286200_vte**)(in + 0xAB0);
+    vt[2].fn(obj + vt[2].delta);
+    func_002B11B0((char*)self + 0x5560, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00286C00);

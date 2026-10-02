@@ -427,7 +427,94 @@ void func_002CAD50(void* self)
 
 INCLUDE_ASM("util/menu", func_002CAD58);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CB180);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002CB180_sRS {
+    int f0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 5;
+    unsigned int f4_12 : 8;
+    unsigned int f4_20 : 2;
+    unsigned int f4_22 : 1;
+    unsigned int f4_23 : 2;
+    unsigned int f4_25 : 7;
+    unsigned int f8_0 : 5;
+    unsigned int f8_5 : 5;
+    unsigned int f8_10 : 22;
+    int fC;
+    int f10;
+};
+
+class func_002CB180_cCtx {
+public:
+    char pad0[0xE84];
+    func_002CB180_sRS* top;
+    char pad1[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26(int a, int b, float x, float y, float w, float h, float zn, float zf);
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34(void* p);
+};
+
+// Typed view of the render context (the unit declares D_004A289C with another class later).
+extern func_002CB180_cCtx* D_004A289C_cb180 __asm__("D_004A289C");
+extern char D_004FF1A0[];
+
+static inline void func_002CB180_setF8_5(func_002CB180_sRS* rs, int v) { rs->f8_5 = v; }
+static inline void func_002CB180_setF4_23(func_002CB180_sRS* rs, int v) { rs->f4_23 = v; }
+static inline void func_002CB180_setF4_20(func_002CB180_sRS* rs, int v) { rs->f4_20 = v; }
+static inline void func_002CB180_setF4_12(func_002CB180_sRS* rs, int v) { rs->f4_12 = v; }
+static inline void func_002CB180_setF4_2(func_002CB180_sRS* rs, int v) { rs->f4_2 = v; }
+
+extern "C" void func_002CB180()
+{
+    func_002CB180_cCtx* ctx = D_004A289C_cb180;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    D_004A289C_cb180->v21();
+    D_004A289C_cb180->v31();
+    func_002CB180_setF8_5(D_004A289C_cb180->top, 0x11);
+    func_002CB180_setF4_23(D_004A289C_cb180->top, 2);
+    func_002CB180_setF4_20(D_004A289C_cb180->top, 3);
+    func_002CB180_setF4_12(D_004A289C_cb180->top, 0x14);
+    func_002CB180_setF4_2(D_004A289C_cb180->top, 5);
+    D_004A289C_cb180->v26(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+    D_004A289C_cb180->v34(D_004FF1A0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CB2F8);
@@ -479,7 +566,117 @@ extern "C" void func_002CB2F8()
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CB350);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002CB350_sVec4 {
+    float x, y, z, w;
+    func_002CB350_sVec4(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct func_002CB350_sVtx {
+    float u, v;
+    char pad[0x18];
+    func_002CB350_sVec4 pos;
+};
+
+class func_002CB350_cCtx {
+public:
+    char pad0[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71(int n, void* verts, int flags);
+};
+
+// Typed view of the render context (the unit declares D_004A289C with another class later).
+extern func_002CB350_cCtx* D_004A289C_cb350 __asm__("D_004A289C");
+
+extern "C" void func_002CB350(func_002CB350_sVtx* v, float* r, float* t)
+{
+    v[0].pos = func_002CB350_sVec4(r[0], r[1], 0.0f, 1.0f);
+    v[0].u = t[0];
+    v[0].v = t[1];
+    v[1].pos = func_002CB350_sVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[1].u = t[0] + t[2];
+    v[1].v = t[1];
+    v[2].pos = func_002CB350_sVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].u = t[0];
+    v[2].v = t[1] + t[3];
+    v[3].pos = func_002CB350_sVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    v[3].u = t[0] + t[2];
+    v[3].v = t[1] + t[3];
+    D_004A289C_cb350->v71(4, v, 0);
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CB498);
 
@@ -1818,7 +2015,60 @@ extern "C" void func_002CE100(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CE1F0);
+#ifdef SKIP_ASM
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3B0(void* self);
+
+// PORT: uses g++'s >? (max) operator.
+extern "C" int func_002CE1F0(void* self)
+{
+    char* s = (char*)self;
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) != 0) {
+        return r;
+    }
+    if (r != 0) {
+        return r;
+    }
+    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    int dir;
+    if (d <= -0.1f || d >= 0.1f) {
+        dir = 1;
+        if (d < 0.0f) {
+            dir = -1;
+        }
+    } else {
+        dir = 0;
+    }
+    if (dir == *(int*)(s + 0x28)) {
+        *(int*)(s + 0x24) += 1;
+    } else {
+        *(int*)(s + 0x24) = 0;
+        *(int*)(s + 0x28) = dir;
+    }
+    if (dir != 0) {
+        int n = *(int*)(s + 0x24);
+        float k = (float)(n * n) * 0.0034722222480922937f;
+        k = k >? 1.0f;
+        float step = 4.999999873689376e-05f;
+        step = k * step;
+        float* p = *(float**)(s + 0x18);
+        *p = *p + d * step * (*(float*)(s + 0x20) - *(float*)(s + 0x1C));
+        if (**(float**)(s + 0x18) < *(float*)(s + 0x1C)) {
+            **(float**)(s + 0x18) = *(float*)(s + 0x1C);
+        }
+        if (*(float*)(s + 0x20) < **(float**)(s + 0x18)) {
+            **(float**)(s + 0x18) = *(float*)(s + 0x20);
+        }
+        char* menu = *(char**)s;
+        sVEntry002CD9D8* vt = *(sVEntry002CD9D8**)(menu + 0x12C);
+        vt[4].fn(menu + vt[4].delta, self);
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CE368);
@@ -1946,7 +2196,61 @@ extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CED78);
+#ifdef SKIP_ASM
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3B0(void* self);
+
+// PORT: uses g++'s >? (max) operator.
+extern "C" int func_002CED78(void* self)
+{
+    char* s = (char*)self;
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) != 0) {
+        return r;
+    }
+    if (r != 0) {
+        return r;
+    }
+    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    int dir;
+    if (d <= -0.1f || d >= 0.1f) {
+        dir = 1;
+        if (d < 0.0f) {
+            dir = -1;
+        }
+    } else {
+        dir = 0;
+    }
+    if (dir == *(int*)(s + 0x20)) {
+        *(int*)(s + 0x1C) += 1;
+    } else {
+        *(int*)(s + 0x1C) = 0;
+        *(int*)(s + 0x20) = dir;
+    }
+    if (dir != 0) {
+        int n = *(int*)(s + 0x1C);
+        int m = (n * n / 0x120) >? 1;
+        float* p = (float*)(*(char**)(s + 0x14) + (*(int*)(s + 0x18) << 2));
+        float step = 0.0003906250058207661f;
+        step = (float)m * step;
+        float v = *p;
+        v += d * step;
+        if (v < 0.0f) {
+            v = 0.0f;
+        }
+        if (1.0f < v) {
+            v = 1.0f;
+        }
+        *p = v;
+        char* menu = *(char**)s;
+        sVEntry002CD9D8* vt = *(sVEntry002CD9D8**)(menu + 0x12C);
+        vt[4].fn(menu + vt[4].delta, self);
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CEEE8);
 
@@ -2131,7 +2435,58 @@ extern "C" void func_002CFB28(func_002CFB28_cMenu** self)
 
 INCLUDE_ASM("util/menu", func_002CFB58);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CFD28);
+#ifdef SKIP_ASM
+extern "C" int func_002CA378(void* self);
+extern "C" void* func_002CBF30(void* self);
+
+struct func_002CFD28_sRect {
+    float x, y, w, h;
+};
+
+class func_002CFD28_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(func_002CFD28_sRect* r);
+};
+
+struct func_002CFD28_sOwner {
+    void* menu;                         // 0x0
+    char pad4[0x10];
+    func_002CFD28_cItem* cur;           // 0x14
+    int count;                          // 0x18
+    int selected;                       // 0x1C
+    int unk20;                          // 0x20
+    func_002CFD28_cItem* items[70];     // 0x24
+    int wrap;                           // 0x13C
+    char pad140[0xC];
+    func_002CFD28_sRect rects[70];      // 0x14C
+};
+
+extern "C" void func_002CFD28(func_002CFD28_sOwner* self, func_002CFD28_sRect* r)
+{
+    func_002CFD28_sRect pos = *r;
+    for (int i = 0; i < self->count; i++) {
+        if (func_002CA378(self->items[i]) == 0) {
+            continue;
+        }
+        if ((void*)self == func_002CBF30(self->menu) || self->items[i] == self->cur) {
+            int off = self->items[i] == self->cur ? 0 : 20;
+            self->rects[i].x = pos.x + (float)off;
+            self->rects[i].y = pos.y;
+            self->rects[i].w = pos.w - (float)off;
+            self->items[i]->v05(&self->rects[i]);
+            pos.y += self->rects[i].h;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CFE78);
 

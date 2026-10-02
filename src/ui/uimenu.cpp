@@ -1,6 +1,63 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_setSelected);
+#ifdef SKIP_ASM
+struct cUIThing;
+unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+void cUIScreen_jumpToFrame(void* self, unsigned short frame);
+
+struct cUIMenu_sVEntryA {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct cUIMenu_sVEntryB {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void cUIMenu_setSelected(char* self, char* item, int play)
+{
+    *(unsigned char*)(self + 0xA4) = 0xFF;
+    char* cur = *(char**)(self + 0xA0);
+    if (cur != 0 && ((*(int*)(cur + 0x14) >> 4) & 1)) {
+        unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
+        if (ev != 0xFFFF) {
+            void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+            if (scr != 0) {
+                cUIScreen_playFrame(scr, ev, 1);
+            }
+        }
+        char* c = *(char**)(self + 0xA0);
+        cUIMenu_sVEntryA* va = *(cUIMenu_sVEntryA**)(c + 8);
+        va[7].fn(c + va[7].delta, 0);
+        char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(o + 8);
+        vb[19].fn(o + vb[19].delta, *(void**)(self + 0xA0), 2);
+    }
+    *(char**)(self + 0xA0) = item;
+    char* o2 = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+    cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(o2 + 8);
+    vb2[19].fn(o2 + vb2[19].delta, item, 1);
+    char* c2 = *(char**)(self + 0xA0);
+    cUIMenu_sVEntryA* va2 = *(cUIMenu_sVEntryA**)(c2 + 8);
+    va2[7].fn(c2 + va2[7].delta, 1);
+    unsigned short ev2 = cUIThing_getKeyframerEvent(*(cUIThing**)(self + 0xA0), 0);
+    if (ev2 != 0xFFFF) {
+        void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+        if (scr != 0) {
+            if (play) {
+                cUIScreen_playFrame(scr, ev2, 1);
+            } else {
+                cUIScreen_jumpToFrame(scr, ev2);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039AE98);
 
@@ -88,7 +145,41 @@ extern "C" unsigned char func_0039B7B0(void* self, unsigned char start)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_setSelectedByIndex);
+#ifdef SKIP_ASM
+extern "C" void cUIMenu_setSelected(char* self, char* item, int play);
+// PORT: called with an int index here (the unit declares an unsigned char parameter).
+void* func_00397870_i(void* list, int i) __asm__("func_00397870");
+
+static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
+{
+    char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+    func_0039B7B0_sVEntry* vt = *(func_0039B7B0_sVEntry**)(mgr + 8);
+    vt[20].fn(mgr + vt[20].delta, self, ev, v);
+}
+
+extern "C" void cUIMenu_setSelectedByIndex(char* self, unsigned char idx)
+{
+    if (((*(int*)(self + 0x14) >> 4) & 1) == 0 || ((*(int*)(*(char**)(*(char**)(self + 0x5C) + 0xD0) + 0x1C) >> 5) & 1) == 0) {
+        *(unsigned char*)(self + 0xA4) = idx;
+        return;
+    }
+    unsigned char top = *(unsigned char*)(self + 0x98);
+    unsigned char vis = *(unsigned char*)(self + 0x97);
+    *(unsigned char*)(self + 0x95) = idx;
+    if (idx >= top + vis) {
+        *(unsigned char*)(self + 0x98) = idx - vis + 1;
+        cUIMenu_notify(self, 3, *(unsigned char*)(self + 0x98));
+        cUIMenu_notify(self, 4, *(unsigned char*)(self + 0x98));
+    } else if (idx < top) {
+        *(unsigned char*)(self + 0x98) = idx;
+        cUIMenu_notify(self, 2, *(unsigned char*)(self + 0x98));
+        cUIMenu_notify(self, 4, *(unsigned char*)(self + 0x98));
+    }
+    cUIMenu_setSelected(self, (char*)func_00397870_i(self + 0x74, idx - *(unsigned char*)(self + 0x98)), 1);
+}
+#endif
 
 extern "C" void* func_0039FE00(void* self);
 
@@ -164,7 +255,74 @@ extern "C" void func_0039BB50(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039BBD8);
+#ifdef SKIP_ASM
+struct cUIThing;
+unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+struct func_0039BBD8_sVEntryA {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct func_0039BBD8_sVEntryB {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+struct func_0039BBD8_sFlags {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int on : 1;
+};
+
+extern "C" void func_0039BBD8(char* self, int on)
+{
+    ((func_0039BBD8_sFlags*)(self + 0x14))->on = on != 0;
+    char* a = *(char**)(self + 0x78);
+    if (a != 0) {
+        func_0039BBD8_sVEntryA* va = *(func_0039BBD8_sVEntryA**)(a + 8);
+        va[7].fn(a + va[7].delta, on);
+    }
+    char* b = *(char**)(self + 0x7C);
+    if (b == 0) {
+        return;
+    }
+    if (on) {
+        unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)b, 0);
+        if (ev != 0xFFFF) {
+            void* scr = *(void**)(*(char**)(self + 0x7C) + 0x5C);
+            if (scr != 0) {
+                cUIScreen_playFrame(scr, ev, 1);
+            }
+        }
+        char* c = *(char**)(self + 0x7C);
+        func_0039BBD8_sVEntryA* vc = *(func_0039BBD8_sVEntryA**)(c + 8);
+        vc[7].fn(c + vc[7].delta, 1);
+        char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        func_0039BBD8_sVEntryB* vo = *(func_0039BBD8_sVEntryB**)(o + 8);
+        vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 1);
+    } else {
+        unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)b, 1);
+        if (ev != 0xFFFF) {
+            void* scr = *(void**)(*(char**)(self + 0x7C) + 0x5C);
+            if (scr != 0) {
+                cUIScreen_playFrame(scr, ev, 1);
+            }
+        }
+        char* c = *(char**)(self + 0x7C);
+        func_0039BBD8_sVEntryA* vc = *(func_0039BBD8_sVEntryA**)(c + 8);
+        vc[7].fn(c + vc[7].delta, 0);
+        char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        func_0039BBD8_sVEntryB* vo = *(func_0039BBD8_sVEntryB**)(o + 8);
+        vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039BD38);

@@ -2,7 +2,61 @@
 
 INCLUDE_ASM("sound/soundsys", cBankSys_cBankSys);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0028FEA0);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+
+struct sSndDtVtEnt {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sSndDtVt4 {
+    sSndDtVtEnt e[4];
+} __attribute__((aligned(8)));
+struct sSndDtVt7 {
+    sSndDtVtEnt e[7];
+} __attribute__((aligned(8)));
+
+extern char D_00483A48[];
+extern const sSndDtVt4 D_00483A60;
+extern const sSndDtVt7 D_00483A80;
+extern char D_00483B48[];
+extern int D_004A3664;
+
+// PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
+extern "C" void func_0028FEA0(char* self, int flags)
+{
+    *(void**)(self + 0xC) = D_00483A48;
+    *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_00483A60;
+    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A80;
+    if (flags == 0) {
+        sSndDtVt4 t1 = D_00483A60;
+        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
+        char* c1 = *(char**)(*(char**)self + 0x1D8) - 0x10;
+        int adj1 = self - c1;
+        t1.e[1].delta = D_00483A60.e[1].delta + adj1;
+        sSndDtVt7 t2 = D_00483A80;
+        *(void**)(*(char**)self + 0x1D4) = &t2;
+        char* c2 = *(char**)self - 0x18;
+        int adj2 = self - c2;
+        t2.e[1].delta = D_00483A80.e[1].delta + adj2;
+    }
+    if (*(void**)(self + 4)) cMemMan_free(*(void**)(self + 4));
+    if (*(void**)(self + 8)) cMemMan_free(*(void**)(self + 8));
+    D_004A3664 = 0;
+    if (flags & 2) {
+        func_0028BB10(*(void**)self, 0);
+        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+    }
+    if (flags & 1) operator_delete((int*)self);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002906B8);
 
@@ -302,7 +356,41 @@ INCLUDE_ASM("sound/soundsys", func_00295628);
 
 INCLUDE_ASM("sound/soundsys", func_00295950);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00296088);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00288B40(void* self, int which, float f);
+// func_00295028 takes the event pointer here (the unit declares (void*, int, int) later).
+int func_00295028_p(void* self, void* evt, int idx) __asm__("func_00295028");
+extern "C" int func_002B5F60(void* mgr, void* evt, int id, void* rider, int vol);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+extern void* D_004A52D4;
+
+struct sSsVt6088 { short delta; short index; int (*fn)(void*); };
+
+extern "C" void func_00296088(void* self, char* rider, char* evt, int idx)
+{
+    if (*(void**)(evt + 0x8C) == 0) return;
+    char* obj = rider + 0x6C0;
+    sSsVt6088* e = &(*(sSsVt6088**)obj)[5];
+    if (func_00288B40(self, e->fn(obj + e->delta), 100.0f) < 0) return;
+    if (func_00295028_p(self, evt, idx) != 0) return;
+    sSndVEntryVec* vt = *(sSndVEntryVec**)obj;
+    sSndVec4* p = vt[2].fn(obj + vt[2].delta);
+    int v = (int)func_00290C10(0, sndVu0Length(*p));
+    if (v > 127) v = 127;
+    if (v < 0) v = 0;
+    int* tbl = *(int**)(*(char**)(evt + 0x8C) + 0x10);
+    if (idx >= tbl[0]) idx = 0;
+    int* ids = tbl + 2;
+    int* q = ids;
+    if (ids[idx] != 0) q = &ids[idx];
+    int r = func_002B5F60(D_004A52D4, evt, *q, rider, v);
+    if (r < 0) return;
+    func_00295628(self, evt, r, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 1000, 0, idx);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002961F0);
@@ -662,7 +750,50 @@ INCLUDE_ASM("sound/soundsys", func_0029C420);
 
 INCLUDE_ASM("sound/soundsys", func_0029C7B0);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029CCA8);
+#ifdef SKIP_ASM
+extern "C" int func_00288AE0(void* self);
+extern "C" void* func_0028B1D8();
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+// PORT: func_004139F8 is libgcc's float -> unsigned conversion (__fixunssfsi).
+extern "C" int func_004139F8(float f);
+extern char* D_004A28A8;
+extern int D_005308D0[];
+extern sSndKey8 D_004A3678[];
+
+// PORT: 64-bit long sound key
+extern "C" void func_0029CCA8(char* self)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    char* g = *(char**)(D_004A28A8 + 0xC0);
+    if (g == 0) {
+        return;
+    }
+    int ok = 0;
+    if (*(int*)(g + 0x88) != 0) {
+        ok = ((D_005308D0[0] >> 9) & 1) ^ 1;
+    }
+    if (!ok) {
+        return;
+    }
+    int t = (int)((float)*(int*)((char*)func_0028B1D8() + 0xC) * 0.01666666753590107f);
+    int m = (func_004139F8((float)*(unsigned int*)(g + 0x78) * 0.01666666753590107f) - t) % 3600;
+    if (m <= 0) {
+        return;
+    }
+    if (m != *(int*)(self + 0x607C) && m < 11 && (m == 10 || m == 8 || m == 6 || m < 5)) {
+        char* p = **(char***)(self + 0x118) + 0x1D8;
+        sSndKey8* key = D_004A3678;
+        int r = (int)func_00287968(self, 9, 0);
+        func_002ADCA0(p, 0x1C2, key->v, r, 0, 0x4E, 0x7F, 0);
+    }
+    *(int*)(self + 0x607C) = m;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029CE28);
@@ -878,7 +1009,59 @@ extern "C" void func_0029ED18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029ED90);
+#ifdef SKIP_ASM
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int BXFILE_exists(const char* name);
+extern "C" void func_002B0CE0(void* self);
+extern "C" void func_002B0DA0(void* self);
+extern "C" void func_002B0E60(void* self, int a, int b, char* name, int c, int d, int e);
+extern "C" void func_003DED50(const char* name, int a, int b, void** h);
+extern "C" void func_003DEDC0(void* h, int a);
+extern char D_00482DF8[];
+extern char D_00482E10[];
+extern char D_00482E28[];
+extern char D_00482E40[];
+extern char D_004A3568[];
+
+static inline void sndStreamLoad(const char* name, void** h)
+{
+    if (BXFILE_exists(name)) {
+        func_003DED50(name, 0, 100, h);
+    }
+}
+
+extern "C" void func_0029ED90(char* self, int restart)
+{
+    int mode = func_0029F198(self);
+    if (mode == *(int*)(self + 0x572C)) {
+        return;
+    }
+    if (restart) {
+        func_002B0DA0(self + 0x5560);
+    }
+    void** h = (void**)(self + 0x5728);
+    if (*h) {
+        func_003DEDC0(*h, 100);
+    }
+    if (mode == 2) {
+        sndStreamLoad(D_00482DF8, h);
+    } else if (mode == 4) {
+        sndStreamLoad(D_00482E10, h);
+    } else if (mode == 8) {
+        sndStreamLoad(D_00482E28, h);
+    } else {
+        sndStreamLoad(D_00482E40, h);
+    }
+    *(int*)(self + 0x572C) = mode;
+    if (restart) {
+        func_002B0CE0(self + 0x5560);
+        func_002B0E60(self + 0x5560, 0, 0, D_004A3568, (int)func_00287968(self, 4, 0), 1, -1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029EEE0);
@@ -1161,7 +1344,40 @@ extern "C" int func_002A10C0(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1138);
+#ifdef SKIP_ASM
+extern "C" int func_00288B40(void* self, int which, float f);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" void* func_003D8008(int a, int b, int c);
+// PORT: the unit defines func_0029F330/func_002A1D48 as void; they return their tail call's result.
+int func_0029F330_i(void* self) __asm__("func_0029F330");
+int func_002A1D48_i(void* self, void* obj) __asm__("func_002A1D48");
+// PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+extern float D_004A36D8;
+
+struct sSsVt1138 { short delta; short index; int (*fn)(void*); };
+
+// PORT: callers declare func_002A1138 as (void*, int, int); the body takes (self, rider, obj).
+void func_002A1138_impl(void* self, char* rider, void* obj) __asm__("func_002A1138");
+
+void func_002A1138_impl(void* self, char* rider, void* obj)
+{
+    if (func_0029F0A0(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (rider == 0) rider = *(char**)((char*)func_0028B1D8() + 0x2C);
+    if (obj == 0) obj = *(void**)((char*)func_0028B1D8() + 0x28);
+    char* o = rider + 0x6C0;
+    sSsVt1138* e = &(*(sSsVt1138**)o)[5];
+    if (func_00288B40(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20D3, (int)rider, func_00123128(rider), 0, 0, 0.0f) == 0) return;
+    int r = func_0029F330_i(rider);
+    int s = func_002A1D48_i(self, obj);
+    D_004A482C_5(func_003D8008(1, 0, 0x20D3), 3, r, s, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1280);
@@ -1215,9 +1431,69 @@ extern "C" int func_002A1388(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1400);
+#ifdef SKIP_ASM
+extern "C" int func_002A1E68(void* self, void* rider);
+// PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
+int func_002A4248_s(void* self) __asm__("func_002A4248");
+extern signed char D_00535C11[];
 
+// PORT: callers declare func_002A1400 as (void*, int); the body takes (self, rider).
+void func_002A1400_impl(void* self, char* rider) __asm__("func_002A1400");
+
+void func_002A1400_impl(void* self, char* rider)
+{
+    if (func_0029F0A0(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    char* o = rider + 0x6C0;
+    sSsVt1280* e = &(*(sSsVt1280**)o)[5];
+    if (func_00288B40(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20B9, (int)rider, func_00123128(rider), 0, 0, 0.0f) == 0) return;
+    int r = func_0029F330_i(rider);
+    int k = func_002A1E68(self, rider);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int v;
+    if (k == 1) {
+        v = 1;
+    } else if (func_002A4248_s(self) != 0) {
+        v = 2;
+    } else if (D_00535C11[0] == 2) {
+        v = 2;
+    } else if (k == 2 || k == 4) {
+        v = 4;
+    } else {
+        v = 2;
+    }
+    D_004A482C_4(func_003D8008(1, 0, 0x20B9), 2, r, v);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1560);
+#ifdef SKIP_ASM
+extern "C" int func_002B0E28(void* self, int i);
+extern void (*D_004A482C)(void*, int, int);
+
+extern "C" void func_002A1560(void* self, char* rider)
+{
+    if (func_0029F0A0(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    char* o = rider + 0x6C0;
+    int check = 0;
+    sSsVt1280* e9 = &(*(sSsVt1280**)o)[9];
+    if (e9->fn(o + e9->delta) != 0 || *(int*)(rider + 0x87C) == 0) check = 1;
+    if (check && func_00285D98_p(self, -1) != rider) return;
+    char* bm = (char*)self + 0x5560;
+    if (func_002B0E28(bm, 0) == 0) return;
+    char* o2 = rider + 0x6C0;
+    sSsVt1280* e = &(*(sSsVt1280**)o2)[5];
+    if (func_00288B40(self, e->fn(o2 + e->delta), D_004A36D8) < 0) return;
+    if (func_002B1458(bm, 0, 0x20B8, (int)rider, func_00123128(rider), 0, 0, 0.0f) == 0) return;
+    int r = func_0029F330_i(rider);
+    D_004A482C(func_003D8008(1, 0, 0x20B8), 1, r);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A16B0);
@@ -1996,7 +2272,41 @@ extern "C" void func_002A3400(void* self)
 
 INCLUDE_ASM("sound/soundsys", func_002A34D0);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3708);
+#ifdef SKIP_ASM
+extern "C" int func_0029F128(void* self);
+extern "C" int func_00123168(void*);
+extern "C" int func_0029F198(void* self);
+extern "C" int func_002A1E68(void* self, void* rider);
+// PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
+int func_002A4248_s(void* self) __asm__("func_002A4248");
+// PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+extern sSndKey8 D_004A36E8[];
+
+// PORT: 64-bit long sound key
+extern "C" void func_002A3708(void* self, char* rider)
+{
+    if (func_0029F128(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_00123168(rider) != 0) return;
+    if (func_002A4248_s(self) != 0) {
+        char* o = rider + 0x6C0;
+        char* p = **(char***)((char*)self + 0x118) + 0x1D8;
+        sSndKey8* key = D_004A36E8;
+        sSsVt1280* e = &(*(sSsVt1280**)o)[7];
+        int v = e->fn(o + e->delta);
+        func_002ADCA0(p, 1000, key->v, 0, v, 0, 0, 0);
+        return;
+    }
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20C5, 0, 0xB, 0, 0, 0.0f) == 0) return;
+    int a = func_0029F198(self);
+    int b = func_002A1D48_i(self, rider);
+    int c = func_002A1E68(self, rider);
+    D_004A482C_5(func_003D8008(1, 0, 0x20C5), 3, a, b, c);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A3860);
 
@@ -3402,7 +3712,64 @@ extern "C" int func_002A80D8(void* self, const char* name, int* out)
 
 INCLUDE_ASM("sound/soundsys", func_002A8140);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A82D8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void func_0028FEA0(char* self, int flags);
+extern "C" void func_003B9880();
+
+struct sSndDtBVtEnt {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sSndDtBVt4 {
+    sSndDtBVtEnt e[4];
+} __attribute__((aligned(8)));
+struct sSndDtBVt7 {
+    sSndDtBVtEnt e[7];
+} __attribute__((aligned(8)));
+
+extern char D_00483A48[];
+extern const sSndDtBVt4 D_004839F0;
+extern const sSndDtBVt7 D_00483A10;
+extern char D_00483B48[];
+extern int D_004A3744;
+
+// PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
+extern "C" void func_002A82D8(char* self, int flags)
+{
+    *(void**)(self + 0xC) = D_00483A48;
+    *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_004839F0;
+    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A10;
+    if (flags == 0) {
+        sSndDtBVt4 t1 = D_004839F0;
+        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
+        char* c1 = *(char**)(*(char**)self + 0x1D8) - 0x14;
+        int adj1 = self - c1;
+        t1.e[1].delta = D_004839F0.e[1].delta + adj1;
+        sSndDtBVt7 t2 = D_00483A10;
+        *(void**)(*(char**)self + 0x1D4) = &t2;
+        char* c2 = *(char**)self - 0x1C;
+        int adj2 = self - c2;
+        t2.e[1].delta = D_00483A10.e[1].delta + adj2;
+    }
+    if (*(void**)(self + 0x10)) cMemMan_free(*(void**)(self + 0x10));
+    D_004A3744 = 0;
+    func_003B9880();
+    func_0028FEA0(self, 0);
+    if (flags & 2) {
+        func_0028BB10(*(void**)self, 0);
+        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+    }
+    if (flags & 1) operator_delete((int*)self);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A8450);
 
@@ -3541,7 +3908,65 @@ extern "C" void* func_002A8FA0()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A8FD8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_003B5B20(int a, int b);
+extern "C" int func_003B5B68(int* out);
+// The unit defines func_002A92B8 with its own entry/pool view types; bind this unit's struct view.
+sSndVoice8CB0* func_002A92B8_v(sSndSys8CB0* self) __asm__("func_002A92B8");
+
+extern "C" int func_002A8FD8(sSndSys8CB0* self, int size)
+{
+    int i = self->f318;
+    if (i >= 0) {
+        sSndVoice8CB0* prev = 0;
+        sSndVoice8CB0* b = &self->voices[i];
+        for (;;) {
+            if (b->c == size) {
+                b->d = 2;
+                if (prev) {
+                    prev->next = b->next;
+                }
+                b->next = -1;
+                return b->idx;
+            }
+            if (size < b->c) {
+                sSndVoice8CB0* n = func_002A92B8_v(self);
+                int top = b->b;
+                n->d = 2;
+                n->next = -1;
+                n->b = top;
+                n->a = top - size;
+                n->c = size;
+                b->b = top - size;
+                b->c -= size;
+                return n->idx;
+            }
+            if (b->next < 0) break;
+            prev = b;
+            b = &self->voices[b->next];
+        }
+    }
+    int avail = 0;
+    if (func_003B5B68(&avail) < size) {
+        return -1;
+    }
+    if (self->f31C != 0) {
+        return -2;
+    }
+    sSndVoice8CB0* n = func_002A92B8_v(self);
+    int top = self->f30C;
+    n->d = 2;
+    n->a = top - size;
+    n->next = -1;
+    n->b = top;
+    n->c = size;
+    func_003B5B20(-1, self->f30C -= size);
+    return n->idx;
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A9128);
 

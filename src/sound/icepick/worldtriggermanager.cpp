@@ -400,7 +400,64 @@ extern "C" void func_002B5E68(void* self)
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B63D0);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_002ADF60(int a);
+extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int arg);
+
+struct sWTMObj {
+    char pad0[0x10];
+    int f10;
+    int f14;
+    int f18;
+    int f1C;
+    int f20;
+    int f24;
+    int f28;
+    int f2C;
+    int pad30;
+    int f34;
+};
+
+struct sWTMEntry {
+    int type;
+    sWTMObj* obj;
+};
+
+extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d)
+{
+    *b = 0;
+    if (idx >= *(int*)((char*)self + 0x340)) {
+        *type = 0;
+        *a = 0;
+        return 0;
+    }
+    int r = 1;
+    int t = (*(sWTMEntry**)((char*)self + 0x33C))[idx].type;
+    if (t == 3) {
+        *type = t;
+        *a = 0;
+    } else if (t == 1) {
+        *type = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj->f10;
+        *a = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj->f14;
+    } else if (t == 2) {
+        *type = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj->f10;
+        void* p = func_0028B180();
+        int rnd = func_002ADF60(*(int*)(*(char**)*(void**)((char*)p + 0x118) + 0x1D8));
+        sWTMObj* o = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj;
+        int v = (unsigned)((rnd & 0x7FFF) * o->f34) / 0x7FFF;
+        if (v < o->f24) *a = o->f14;
+        else if (v < o->f28 + o->f24) *a = o->f18;
+        else if (v < o->f2C + o->f28 + o->f24) *a = o->f1C;
+        else *a = o->f20;
+    } else if (d == 0) {
+        r = func_002B6550(self, idx, type, a, b, c);
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6550);

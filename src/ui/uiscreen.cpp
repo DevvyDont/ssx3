@@ -607,9 +607,118 @@ extern "C" void func_0039DFB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039DFE8);
+#ifdef SKIP_ASM
+struct cUIThing;
+unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+void* func_0039FF50(void* self);
+extern char D_004A5A58;
 
+struct func_0039DFE8_sVEntryI {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct func_0039DFE8_sVEntryM {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+struct func_0039DFE8_sVEntryS {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" int func_0039DFE8(char* self, char* input)
+{
+    char* t = *(char**)((char*)func_0039FF50(self) + 0x14);
+    char* snd = &D_004A5A58;
+    if (t) snd = t;
+    func_0039DFE8_sVEntryI* vi = *(func_0039DFE8_sVEntryI**)(input + 8);
+    if (vi[19].fn(input + vi[19].delta)) {
+        if (*(int*)(self + 0x74) > 0) {
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
+            if (ev != 0xFFFF) {
+                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+            }
+            *(int*)(self + 0x74) = *(int*)(self + 0x74) - 1;
+            char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            func_0039DFE8_sVEntryM* vm = *(func_0039DFE8_sVEntryM**)(mgr + 8);
+            vm[19].fn(mgr + vm[19].delta, self, 9);
+            func_0039DFE8_sVEntryS* vs = *(func_0039DFE8_sVEntryS**)snd;
+            vs[2].fn(snd + vs[2].delta, 1);
+        }
+        return 1;
+    }
+    func_0039DFE8_sVEntryI* vi2 = *(func_0039DFE8_sVEntryI**)(input + 8);
+    if (vi2[20].fn(input + vi2[20].delta)) {
+        if (*(int*)(self + 0x74) + 1 < *(int*)(self + 0x78)) {
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
+            if (ev != 0xFFFF) {
+                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+            }
+            *(int*)(self + 0x74) = *(int*)(self + 0x74) + 1;
+            char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            func_0039DFE8_sVEntryM* vm = *(func_0039DFE8_sVEntryM**)(mgr + 8);
+            vm[19].fn(mgr + vm[19].delta, self, 9);
+            func_0039DFE8_sVEntryS* vs = *(func_0039DFE8_sVEntryS**)snd;
+            vs[2].fn(snd + vs[2].delta, 1);
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E130);
+#ifdef SKIP_ASM
+struct func_0039E130_sVec3 {
+    float x, y, z;
+};
+struct func_0039E130_sVEntryF {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
+struct func_0039E130_sVEntryV {
+    short delta;
+    short index;
+    void (*fn)(void*, func_0039E130_sVec3*);
+};
+
+extern "C" void func_0039E130(char* self, float dx, float dy)
+{
+    char* a = *(char**)(self + 0x88);
+    if (a == 0 || *(char**)(self + 0x8C) == 0) {
+        return;
+    }
+    float x = dx + *(float*)(self + 0x44);
+    float y = dy + *(float*)(self + 0x48);
+    func_0039E130_sVEntryF* va = *(func_0039E130_sVEntryF**)(a + 8);
+    va[17].fn(a + va[17].delta, x, y);
+    char* o = *(char**)(self + 0x88);
+    func_0039E130_sVec3 pos = *(func_0039E130_sVec3*)(o + 0x44);
+    func_0039E130_sVec3 s1;
+    func_0039E130_sVEntryV* vo = *(func_0039E130_sVEntryV**)(o + 8);
+    vo[20].fn(o + vo[20].delta, &s1);
+    char* b = *(char**)(self + 0x8C);
+    func_0039E130_sVec3 s2;
+    func_0039E130_sVEntryV* vb = *(func_0039E130_sVEntryV**)(b + 8);
+    vb[20].fn(b + vb[20].delta, &s2);
+    float w = s1.x - s2.x;
+    char* b2 = *(char**)(self + 0x8C);
+    func_0039E130_sVec3 p = *(func_0039E130_sVec3*)(b2 + 0x44);
+    p.x = pos.x + w / ((float)*(int*)(self + 0x78) - 1.0f) * (float)*(int*)(self + 0x74);
+    *(func_0039E130_sVec3*)(b2 + 0x44) = p;
+    char* b3 = *(char**)(self + 0x8C);
+    func_0039E130_sVEntryF* vb3 = *(func_0039E130_sVEntryF**)(b3 + 8);
+    vb3[17].fn(b3 + vb3[17].delta, x, y);
+}
+#endif
 
 extern void* D_0046DD60[];
 
@@ -743,7 +852,74 @@ void func_0039E508(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E510);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+struct func_0039E510_sVEntryC {
+    short delta;
+    short index;
+    void (*fn)(void*, unsigned char);
+};
+struct func_0039E510_sVEntryI {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct func_0039E510_sVEntryV {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+struct func_0039E510_sVEntryP {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+
+static inline int func_0039E510_padTest(char* pad, int slot)
+{
+    func_0039E510_sVEntryI* vt = *(func_0039E510_sVEntryI**)(pad + 8);
+    return vt[slot].fn(pad + vt[slot].delta);
+}
+
+extern "C" void func_0039E510(char* self)
+{
+    int mask = *(signed char*)(self + 0x15);
+    char* pad = *(char**)(*(char**)(self + 0x10) + 0xC);
+    *(signed char*)(self + 0x14) = 0;
+    do {
+        func_0039E510_sVEntryC* vc = *(func_0039E510_sVEntryC**)(pad + 8);
+        vc[44].fn(pad + vc[44].delta, *(unsigned char*)(self + 0x14));
+        if (func_0039E510_padTest(pad, 45)) {
+            if (func_0039E510_padTest(pad, 41) || (func_0039E510_padTest(pad, 40) && (mask & 1))) {
+                func_0039E510_sVEntryP* vs = *(func_0039E510_sVEntryP**)(self + 8);
+                if (!vs[8].fn(self + vs[8].delta, pad)) {
+                    char* n = (char*)cList_first((cList*)(self + 0x24));
+                    if (n != 0) {
+                        do {
+                            if (*(int*)(n + 0x14) & 1) {
+                                func_0039E510_sVEntryP* vn = *(func_0039E510_sVEntryP**)(n + 8);
+                                if (vn[4].fn(n + vn[4].delta, pad)) break;
+                            }
+                            n = *(char**)(n + 4);
+                        } while (!cListNode_isSentinel((cListNode*)n));
+                    }
+                }
+                func_0039E510_sVEntryV* vs2 = *(func_0039E510_sVEntryV**)(self + 8);
+                vs2[9].fn(self + vs2[9].delta, pad);
+                break;
+            }
+        }
+        mask >>= 1;
+    } while (++*(signed char*)(self + 0x14) < 2);
+    *(signed char*)(self + 0x14) = -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039E688);

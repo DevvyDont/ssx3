@@ -121,7 +121,58 @@ extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A0D00);
+#ifdef SKIP_ASM
+extern "C" void* func_003A04F0(void* self);
+extern "C" float func_00392C60(void* font, unsigned short ch);
+extern "C" int USTR_length(unsigned short* s);
+extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
+extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
+void cMemMan_free(void*);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00494078[];
+extern unsigned short D_004A47A8;
+
+extern "C" void func_003A0D00(void* self, unsigned short* str)
+{
+    ((cUIText_3A0C70*)self)->v05(1);
+    void* font = func_003A04F0(self);
+    if (font == 0) {
+        return;
+    }
+    int last = -1;
+    float w = 0.0f;
+    int len = USTR_length(str);
+    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494078, 0x100, 0);
+    int i = 0;
+    USTR_copy(buf, str);
+    while (i < len) {
+        if (buf[i] == D_004A47A8 && buf[i + 1] == buf[i]) {
+            last = -1;
+            w = 0.0f;
+            i += 2;
+        } else {
+            w += func_00392C60(font, buf[i]) * *(float*)((char*)self + 0x50);
+            if (buf[i] == 0x20) {
+                last = i;
+            }
+            if (w > *(float*)((char*)self + 0x60) && last >= 0) {
+                buf[last] = 0xD;
+                i = last;
+                w = 0.0f;
+                last = -1;
+            }
+            i++;
+        }
+    }
+    cUIText_setUnicodeStringPrivate(self, buf);
+    if (buf) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A0E90);

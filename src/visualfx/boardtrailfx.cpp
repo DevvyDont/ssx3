@@ -4,7 +4,78 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_initialize);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E83F0);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E8560);
+#ifdef SKIP_ASM
+struct func_002E8560_sVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct func_002E8560_sVtx {
+    float x, y, z;
+    char pad[0x24];
+};
+
+struct func_002E8560_sTrail {
+    int f0;
+    float f4;
+    float f8;
+    int fC;
+    float* v10;
+    float* v14;
+    float* v18;
+    float* v1C;
+    float* v20;
+    float* v24;
+    char pad28[0x8C - 0x28];
+    int f8C;
+    int f90;
+    int f94;
+    int f98;
+    int f9C;
+    int fA0;
+    int fA4;
+    char padA8[8];
+    func_002E8560_sVec4 colB0;
+    func_002E8560_sVec4 colC0;
+    func_002E8560_sVec4 colD0;
+    int fE0;
+};
+
+extern func_002E8560_sVec4 D_004FF130;
+extern func_002E8560_sVec4 D_004FF120;
+extern float D_004A45B0;
+extern float D_004A45B4;
+extern float D_004A45B8;
+
+extern "C" void func_002E8560(func_002E8560_sTrail* self)
+{
+    self->f94 = 2;
+    self->f90 = 0;
+    self->f8C = 0;
+    self->f98 = 0;
+    self->f9C = 0;
+    self->fA0 = 0;
+    self->fA4 = 0;
+    self->colB0 = D_004FF130;
+    self->colC0 = D_004FF120;
+    self->colD0 = D_004FF120;
+    self->f4 = 1.0f;
+    self->f8 = 1.0f;
+    self->fE0 = 0;
+    for (int i = 0; i < 54; i++) {
+        float t = (float)(i & 1);
+        self->v18[i * 12] = D_004A45B8;
+        self->v10[i * 12] = D_004A45B4;
+        self->v1C[i * 12] = D_004A45B0;
+        self->v20[i * 12] = 1.0f - D_004A45B0;
+        self->v14[i * 12] = 1.0f - D_004A45B4;
+        self->v24[i * 12] = 1.0f - D_004A45B8;
+        self->v18[i * 12 + 1] = self->v10[i * 12 + 1] = self->v1C[i * 12 + 1] = self->v20[i * 12 + 1] = self->v14[i * 12 + 1] = self->v24[i * 12 + 1] = t;
+        self->v18[i * 12 + 2] = self->v10[i * 12 + 2] = self->v1C[i * 12 + 2] = self->v20[i * 12 + 2] = self->v14[i * 12 + 2] = self->v24[i * 12 + 2] = 1.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E86F0);
 
@@ -431,7 +502,61 @@ extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const fun
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBC40);
+#ifdef SKIP_ASM
+extern float D_004A3B30;
+extern float D_004A3B34;
+extern float D_004A3B38;
+extern float D_004A3B3C;
+extern float D_004A3B40;
+extern float D_004A3B44;
+extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
+
+extern "C" void func_002EBC40(char* self, float t)
+{
+    float k = 1.0f - t;
+    float dx = (float)*(int*)(self + 0x14) * k * 640.0f;
+    float dy = (float)*(int*)(self + 0x18) * k * -480.0f;
+    float w = 640.0f;
+    float u0, u1;
+    if (dx < 0.0f) {
+        w = dx + w;
+        u0 = D_004A3B30 + D_004A3B38 * 0.0015625000232830644f * dx;
+        u1 = D_004A3B34;
+        dx = 0.0f;
+    } else {
+        w = w - dx;
+        u0 = D_004A3B30;
+        u1 = u0 + D_004A3B38 * 0.0015625000232830644f * w;
+    }
+    float h;
+    float v0, v1;
+    if (dy < 0.0f) {
+        h = dy + 480.0f;
+        v0 = D_004A3B3C + D_004A3B44 * 0.0020833334419876337f * dy;
+        v1 = D_004A3B40;
+        dy = 0.0f;
+    } else {
+        h = 480.0f - dy;
+        v0 = D_004A3B3C;
+        v1 = v0 + D_004A3B44 * 0.0020833334419876337f * h;
+    }
+    float uw = u1 - u0;
+    float vh = v1 - v0;
+    sBTRect4 pos;
+    pos.x = dx;
+    pos.y = dy;
+    pos.z = w;
+    pos.w = h;
+    sBTRect4 rect;
+    rect.x = u0;
+    rect.y = v0;
+    rect.z = uw;
+    rect.w = vh;
+    func_002EB938(&pos, &rect, (sBTRect4*)(self + 4), 0.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBE20);

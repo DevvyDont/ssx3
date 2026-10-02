@@ -127,7 +127,64 @@ extern "C" void func_00195B70(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/locale", func_00195BE0);
+#ifdef SKIP_ASM
+extern "C" void cFELocale_addFile(void* self, int lang);
+
+extern "C" void func_00195BE0(void* p)
+{
+    char* self = (char*)p;
+    int id = -1;
+    *(char*)(self + 0x58) = 1;
+    switch (*(signed char*)(self + 1)) {
+    case 0:
+        id = 4;
+        break;
+    case 1:
+        id = 5;
+        break;
+    case 2:
+        id = 6;
+        break;
+    case 3:
+        id = 7;
+        break;
+    }
+    cFELocale_addFile(self, id);
+    switch (*(signed char*)(self + 1)) {
+    case 0:
+        id = 8;
+        break;
+    case 1:
+        id = 9;
+        break;
+    case 2:
+        id = 10;
+        break;
+    case 3:
+        id = 11;
+        break;
+    }
+    cFELocale_addFile(self, id);
+    id = -1;
+    switch (*(signed char*)(self + 1)) {
+    case 0:
+        id = 0x10;
+        break;
+    case 1:
+        id = 0x11;
+        break;
+    case 2:
+        id = 0x12;
+        break;
+    case 3:
+        id = 0x13;
+        break;
+    }
+    cFELocale_addFile(self, id);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", func_00195D50);
@@ -254,7 +311,55 @@ extern "C" void* func_00195F70(void* self, void* arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/locale", func_00195FF0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" void* func_00398380(void* self, int id);
+extern "C" int func_00158700(void* self, int a1, int a2);
+extern "C" int func_001587B8(void* self, int a1, int a2);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+int GetHashValue32(char*);
+extern void* D_00469448[];
+extern char D_0045DA48[];
+extern char D_0045DA38[];
+
+extern "C" void* func_00195FF0(void* self, void* engine, signed char idx, int a3)
+{
+    char* s = (char*)self;
+    func_0039E2A0(self, engine);
+    *(int*)(s + 0xC) = 0x10;
+    *(void***)(s + 0x8) = D_00469448;
+    *(signed char*)(s + 0x44) = idx;
+    void* p = **(void***)(s + 0x10);
+    if (p != 0) {
+        *(unsigned char*)(s + 0x15) = func_001A1CD0(p, idx);
+    }
+    *(int*)(s + 0x48) = 0;
+    *(int*)(s + 0x64) = 0;
+    *(int*)(s + 0x68) = 0;
+    *(int*)(s + 0x6C) = 0;
+    for (int i = 3; i >= 0; i--) {
+        ((int*)(s + 0x4C))[i] = 0;
+    }
+    *(int*)(s + 0x74) = a3;
+    char* t = *(char**)(s + 0x10);
+    int h = GetHashValue32(D_0045DA48);
+    *(void**)(s + 0x5C) = func_00398380(t + 0x58, h);
+    char* t2 = *(char**)(s + 0x10);
+    int h2 = GetHashValue32(D_0045DA38);
+    *(void**)(s + 0x60) = func_00398380(t2 + 0x58, h2);
+    *(int*)(s + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(s + 0x44));
+    void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    *(int*)(s + 0x78) = func_00158700(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70));
+    *(int*)(s + 0x7C) = func_001587B8(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70)) > 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/locale", func_00196148);
