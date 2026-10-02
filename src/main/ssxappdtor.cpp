@@ -948,7 +948,33 @@ void* func_00245228(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245248);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern char D_004A2AD8[];
+extern char D_004A2AC0[];
+extern char D_0047B988[];
+
+extern "C" void func_00245248(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A2AD8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AC0));
+    if (text != 0) {
+        cUIText_setAsciiString(text, D_0047B988);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxappdtor", func_002452D8);
 

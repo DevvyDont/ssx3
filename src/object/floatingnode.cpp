@@ -72,5 +72,26 @@ extern "C" void func_0034FA88(cFloatingNode* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/floatingnode", func_0034FB00);
+#ifdef SKIP_ASM
+extern "C" void* func_00354850(void* self, void* a1, int type);
+extern "C" void func_0034FC78(void* self, void* node);
+extern "C" void func_002D1BF0(void* node);
+extern char D_00491C80[];
+
+extern "C" void* func_0034FB00(void* self, void* a1, int type, void* node)
+{
+    func_00354850(self, a1, type);
+    *(void**)((char*)self + 0x18) = node;
+    *(void**)((char*)self + 0xC) = D_00491C80;
+    func_0034FC78(self, node);
+    if ((*(int*)((char*)node + 0x8) & 0x100) == 0) {
+        if (type != 6 && type != 0x10 && type != 0x16) {
+            func_002D1BF0(node);
+        }
+    }
+    return self;
+}
+#endif
 

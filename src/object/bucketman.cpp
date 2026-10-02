@@ -132,7 +132,27 @@ extern "C" void* func_00354F70(cBucketMan* self, void* node, int index)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", func_00354F98);
+#ifdef SKIP_ASM
+struct sBucketVEntry4F98 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00354F98(cBucketMan* self, int index)
+{
+    void* node = cBucketMan_first(self, index);
+    while (node != 0) {
+        void* next = cBucketMan_next(self, node, index);
+        sBucketVEntry4F98* vt = *(sBucketVEntry4F98**)((char*)node + 0xC);
+        vt[2].fn((char*)node + vt[2].delta);
+        node = next;
+    }
+    cBucketMan_first(self, index);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", func_00355028);
@@ -174,7 +194,28 @@ extern "C" void func_003550A0(cBucketMan* self, int index)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", cBucketMan_purgeBucket);
+#ifdef SKIP_ASM
+struct sBucketVEntryPurge {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
+{
+    void* node = cBucketMan_first(self, index);
+    while (node != 0) {
+        void* next = cBucketMan_next(self, node, index);
+        if (node != 0) {
+            sBucketVEntryPurge* vt = *(sBucketVEntryPurge**)((char*)node + 0xC);
+            vt[1].fn((char*)node + vt[1].delta, 3);
+        }
+        node = next;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/bucketman", func_003551A8);
 

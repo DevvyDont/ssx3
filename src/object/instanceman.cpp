@@ -267,7 +267,32 @@ extern "C" void func_00352708(void* self, int check)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352780);
+#ifdef SKIP_ASM
+extern "C" void func_0034FE28(void* self);
+
+struct sInstManVEntry2780 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00352780(void* self)
+{
+    if (*(int*)((char*)self + 0x6B0) != 0) {
+        *(int*)(*(char**)((char*)self + 0x18) + 0x8) &= 0xFFFF0300;
+        *(int*)(*(char**)((char*)self + 0x18) + 0x8) |= *(int*)(*(char**)((char*)self + 0x18) + 0x8) >> 16;
+        *(int*)(*(char**)((char*)self + 0x18) + 0x8) |= 2;
+        if (self != 0) {
+            sInstManVEntry2780* vt = *(sInstManVEntry2780**)((char*)self + 0xC);
+            vt[1].fn((char*)self + vt[1].delta, 3);
+        }
+    } else {
+        func_0034FE28(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/instanceman", func_00352810);
 

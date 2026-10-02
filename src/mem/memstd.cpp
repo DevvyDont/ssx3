@@ -116,7 +116,22 @@ extern "C" void* func_002526B8(void* block, int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00252980);
+#ifdef SKIP_ASM
+extern "C" int func_00320B68(int);
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+
+// PORT: the unit declares func_00252980 as `void* (void*)`; existing callers bind the
+// 6-argument form below by asm label (the 6th argument is unused).
+void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
+
+void* func_00252980_6(void* tag, int size, int align, int d, int flags, int unused)
+{
+    int lvl = func_00320B68(align) - 2 < 0 ? 0 : func_00320B68(align) - 2;
+    return operator_new_tag(size, (const char*)tag, flags | (lvl << 24) | 0x10000000, d);
+}
+#endif
 
 extern "C" void* func_00252980(void*);
 
@@ -328,7 +343,22 @@ extern "C" int func_00254350(int x)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00254368);
+#ifdef SKIP_ASM
+extern char D_004A2EA0[];
+extern "C" void* func_00254410(void* self, void* a0, int a1, int a2, int a3);
+
+// PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
+// takes (tag, size, align, d, flags) (see func_00252F60 / func_00253AD0).
+typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
+
+extern "C" void* func_00254368(void* a0, int a1, int a2, int a3)
+{
+    void* p = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 0x54, 0, 0, D_00509430.field_0x8);
+    return func_00254410(p, a0, a1, a2, a3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002543F0);

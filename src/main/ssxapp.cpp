@@ -119,7 +119,22 @@ INCLUDE_ASM("main/ssxapp", func_002292E0);
 
 INCLUDE_ASM("main/ssxapp", func_00229398);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229408);
+#ifdef SKIP_ASM
+extern "C" void func_00229B90(void* self, int a1);
+
+extern "C" void func_00229408(void* self, int id)
+{
+    int i;
+    for (i = 0; i < 0x80; i++) {
+        unsigned* e = (unsigned*)((char*)self + 0x8) + i;
+        if (*e != 0xFFFFFFFF && *(unsigned char*)e == id) {
+            func_00229B90(self, i);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229498);
@@ -333,9 +348,73 @@ INCLUDE_ASM("main/ssxapp", func_0022A128);
 
 INCLUDE_ASM("main/ssxapp", func_0022A270);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022A368);
+#ifdef SKIP_ASM
+extern "C" void func_00229FC8(void* self, void* node, int frustum);
 
+struct sNode_A368 {
+    sNode_A368* next;
+};
+
+struct sSrc_A368 {
+    char pad_0x0[0x20];
+    sNode_A368* head;   // 0x20
+};
+
+struct sList_A368 {
+    sSrc_A368* src;
+    int vuFrustum;
+};
+
+extern "C" void func_0022A368(void* self, sList_A368* list, int count)
+{
+    for (; count > 0; count--, list++) {
+        sNode_A368* n = list->src->head;
+        while (n != 0) {
+            func_00229FC8(self, n, list->vuFrustum);
+            n = n->next;
+        }
+    }
+    if (*(int*)((char*)self + 0x50A4) != 0) {
+        func_00229FC8(self, 0, 0);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022A408);
+#ifdef SKIP_ASM
+extern "C" void func_0022A128(void* self, void* node, int frustum);
+
+struct sNode_A408 {
+    sNode_A408* next;
+};
+
+struct sSrc_A408 {
+    char pad_0x0[0x24];
+    sNode_A408* head;   // 0x24
+};
+
+struct sList_A408 {
+    sSrc_A408* src;
+    int vuFrustum;
+};
+
+extern "C" void func_0022A408(void* self, sList_A408* list, int count)
+{
+    for (; count > 0; count--, list++) {
+        sNode_A408* n = list->src->head;
+        while (n != 0) {
+            func_0022A128(self, n, list->vuFrustum);
+            n = n->next;
+        }
+    }
+    if (*(int*)((char*)self + 0x78B0) != 0) {
+        func_0022A128(self, 0, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022A4A8);
 

@@ -112,7 +112,69 @@ extern "C" void func_00349110(sFrBoxRail* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00349220);
+#ifdef SKIP_ASM
+struct sFrNodeVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFrNodeMtx {
+    sFrNodeVec4 r[4];
+};
+
+struct sFrModelSet9220 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C, (model >> 2) << 8 | low byte
+};
+
+struct sFrWorld9220 {
+    char pad_0x0[0x8];
+    sFrModelSet9220** sets; // 0x8
+};
+
+extern "C" sFrWorld9220** func_002D1BD8();
+extern "C" void func_0034FED8(void* model, int bone, sFrNodeMtx* out);
+
+static inline void* refToPtr9220(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+struct sFrModelRef9220 {
+    unsigned int id;
+
+    void* get()
+    {
+        sFrModelSet9220* set = (*func_002D1BD8())->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        unsigned int p = set->refs[id >> 8] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtr9220(p);
+    }
+};
+
+struct sFrNode9220 {
+    char pad_0x0[0x20];
+    sFrNodeVec4 posA;       // 0x20
+    sFrNodeVec4 posB;       // 0x30
+    sFrModelRef9220 model;  // 0x40
+    int bone;               // 0x44
+};
+
+extern "C" void func_00349220(void* self, sFrNode9220* node)
+{
+    sFrNodeMtx m;
+    func_0034FED8(node->model.get(), node->bone, &m);
+    sFrNodeVec4 v = m.r[3];
+    node->posB = v;
+    node->posA = v;
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_003492A8);
 
@@ -291,7 +353,27 @@ extern "C" void func_00349F18(sFrBoxRail60* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034A028);
+#ifdef SKIP_ASM
+extern "C" sFrWorld9220** func_002D1BD8();
+extern "C" void func_0034FED8(void* model, int bone, sFrNodeMtx* out);
+
+struct sFrNodeA028 {
+    sFrNodeVec4 pos;        // 0x0
+    char pad_0x10[0x40];
+    sFrModelRef9220 model;  // 0x50
+    int bone;               // 0x54
+};
+
+extern "C" void func_0034A028(void* self, sFrNodeA028* node)
+{
+    sFrNodeMtx m;
+    func_0034FED8(node->model.get(), node->bone, &m);
+    sFrNodeVec4 v = m.r[3];
+    node->pos = v;
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034A0B0);
 
@@ -324,7 +406,31 @@ extern "C" void func_0034AC10(void* self, void* stream)
 
 INCLUDE_ASM("object/flexrailnode", func_0034AC88);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", func_0034ADD8);
+#ifdef SKIP_ASM
+extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+extern "C" void* func_002D1CB0(void);
+extern char D_0048FC10[];
+
+struct sFrRailDesc {
+    int data[0x58 / 4];
+};
+
+extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src);
+extern "C" void func_0034C548(void* mgr, void* node, sFrRailDesc* desc);
+
+extern "C" void* func_0034ADD8(void* self, void* a1, void* node, void* src)
+{
+    sFrRailDesc desc;
+    func_0034FB00(self, a1, 0xA, node);
+    *(void**)((char*)self + 0xC) = D_0048FC10;
+    *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
+    func_0034AC88(&desc, src);
+    func_0034C548(func_002D1CB0(), node, &desc);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AE68);

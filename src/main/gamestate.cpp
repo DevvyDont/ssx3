@@ -71,9 +71,53 @@ INCLUDE_ASM("main/gamestate", func_002357F8);
 
 INCLUDE_ASM("main/gamestate", func_00235868);
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00235990);
+#ifdef SKIP_ASM
+struct sVEntry_func_00235990 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+// PORT: func_00233AF0 also reads $a1 (the stream); bound with its real arity.
+void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
+
+extern "C" void func_00235990(void* self, void* stream)
+{
+    func_00233AF0_2(self, stream);
+    sVEntry_func_00235990* e = &(*(sVEntry_func_00235990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00235990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00235990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamestate", func_00235A18);
+#ifdef SKIP_ASM
+struct sVEntry_func_00235A18 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+// PORT: func_00233B28 also reads $a1 (the stream); bound with its real arity.
+void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+
+extern "C" void func_00235A18(void* self, void* stream)
+{
+    func_00233B28_2(self, stream);
+    sVEntry_func_00235A18* e = &(*(sVEntry_func_00235A18**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00235A18**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00235A18**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00235AA0);
 
@@ -81,9 +125,53 @@ INCLUDE_ASM("main/gamestate", func_00235CC8);
 
 INCLUDE_ASM("main/gamestate", func_00235F20);
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00235F48);
+#ifdef SKIP_ASM
+struct sVEntry_func_00235F48 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+// PORT: func_00233AF0 also reads $a1 (the stream); bound with its real arity.
+void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
+
+extern "C" void func_00235F48(void* self, void* stream)
+{
+    func_00233AF0_2(self, stream);
+    sVEntry_func_00235F48* e = &(*(sVEntry_func_00235F48**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00235F48**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00235F48**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamestate", func_00235FD0);
+#ifdef SKIP_ASM
+struct sVEntry_func_00235FD0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+// PORT: func_00233B28 also reads $a1 (the stream); bound with its real arity.
+void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+
+extern "C" void func_00235FD0(void* self, void* stream)
+{
+    func_00233B28_2(self, stream);
+    sVEntry_func_00235FD0* e = &(*(sVEntry_func_00235FD0**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00235FD0**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00235FD0**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00236058);
 
@@ -113,9 +201,57 @@ INCLUDE_ASM("main/gamestate", func_00236250);
 
 INCLUDE_ASM("main/gamestate", func_00236418);
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00236728);
+#ifdef SKIP_ASM
+struct sVEntry_func_00236728 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+// PORT: func_00233AF0 also reads $a1 (the stream); bound with its real arity.
+void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
+
+extern "C" void func_00236728(void* self, void* stream)
+{
+    func_00233AF0_2(self, stream);
+    sVEntry_func_00236728* e = &(*(sVEntry_func_00236728**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00236728**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00236728**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
+    e = &(*(sVEntry_func_00236728**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamestate", func_002367C8);
+#ifdef SKIP_ASM
+struct sVEntry_func_002367C8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+// PORT: func_00233B28 also reads $a1 (the stream); bound with its real arity.
+void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+
+extern "C" void func_002367C8(void* self, void* stream)
+{
+    func_00233B28_2(self, stream);
+    sVEntry_func_002367C8* e = &(*(sVEntry_func_002367C8**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_002367C8**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_002367C8**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
+    e = &(*(sVEntry_func_002367C8**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00236868);
 
@@ -270,7 +406,39 @@ extern "C" void* func_00237060(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_002370A0);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+struct sEntry_func_002370A0 {
+    void* buf;
+    int pad[3];
+    int* a;
+    int* b;
+};
+
+struct sObj_func_002370A0 {
+    char pad[0x10];
+    int count;
+    sEntry_func_002370A0 entries[1];
+};
+
+extern "C" void func_002370A0(sObj_func_002370A0* self, int flags)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        sEntry_func_002370A0* e = &self->entries[i];
+        if (e->buf)
+            cMemMan_free(e->buf);
+        operator_delete(e->a);
+        operator_delete(e->b);
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00237140);
 

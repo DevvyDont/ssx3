@@ -49,7 +49,38 @@ extern "C" int func_00342D88(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00342DD8);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_003506D8(void* self, void* parent);
+extern const char D_0048E738[];
+
+struct sDebounceVEntry2DD8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00342DD8(void* self)
+{
+    if (*(int*)((char*)self + 0x2C) >= 0) {
+        if (*(int*)((char*)self + 0x30) == 0) {
+            void* parent = *(void**)((char*)self + 0x18);
+            if (self != 0) {
+                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+                vt[1].fn((char*)self + vt[1].delta, 3);
+            }
+            func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), parent);
+        } else {
+            if (self != 0) {
+                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+                vt[1].fn((char*)self + vt[1].delta, 3);
+            }
+        }
+    }
+}
+#endif
 
 extern "C" void* func_00356B08(void* self);
 
@@ -335,9 +366,70 @@ extern "C" void func_00344138(sDebounceElem4138* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_003441A8);
+#ifdef SKIP_ASM
+class cDebounceStream;
+extern "C" void func_00344FC0(void* self, cDebounceStream* s);
 
+struct sDebounceElem41A8 {
+    int field_0x0;
+    unsigned int field_0x4;
+    unsigned int field_0x8;
+    char pad_0xc[0x1E8];
+};
+
+struct sDebounceVEntry41A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* s)
+{
+    int i;
+    for (i = 0; i < 5; i++) {
+        sDebounceVEntry41A8* e = &(*(sDebounceVEntry41A8**)s)[1];
+        e->fn((char*)s + e->delta, &self[i].field_0x8, 4);
+        if (self[i].field_0x8 != 0xFFFFFFFF) {
+            func_00344FC0(&self[i], s);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/debouncenode", func_00344240);
+#ifdef SKIP_ASM
+class cDebounceStream;
+extern "C" void func_00344FF8(void* self, cDebounceStream* s);
+
+struct sDebounceElem4240 {
+    int field_0x0;
+    unsigned int field_0x4;
+    unsigned int field_0x8;
+    char pad_0xc[0x1E8];
+};
+
+struct sDebounceVEntry4240 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* s)
+{
+    int i;
+    func_00343BC0((sDebounceBlock*)self);
+    for (i = 0; i < 5; i++) {
+        sDebounceVEntry4240* e = &(*(sDebounceVEntry4240**)s)[2];
+        e->fn((char*)s + e->delta, &self[i].field_0x8, 4);
+        if (self[i].field_0x8 != 0xFFFFFFFF) {
+            func_00344FF8(&self[i], s);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_003442E0);
@@ -400,7 +492,52 @@ INCLUDE_ASM("object/debouncenode", func_003443A8);
 
 INCLUDE_ASM("object/debouncenode", func_00344730);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344800);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void cMemMan_free(void*);
+
+struct sDebounceVEntry4800 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sDebounceItem4800 {
+    char pad_0x0[0x84];
+    sDebounceVEntry4800* vt;    // 0x84
+    char pad_0x88[0x48];
+};
+
+struct sDebounceOwner4800 {
+    char pad_0x0[0x1E8];
+    void* buf;                  // 0x1E8
+    sDebounceItem4800* items;   // 0x1EC, array-new block (count at -0x10)
+};
+
+// The unit declares func_00344800 as `void* (void*)`, but the body returns nothing
+// (its wrapper func_00344348 only forwards). Bound by asm label.
+void func_00344800_v(sDebounceOwner4800* self) __asm__("func_00344800");
+
+void func_00344800_v(sDebounceOwner4800* self)
+{
+    sDebounceItem4800* items = self->items;
+    if (items != 0) {
+        sDebounceItem4800* p = items + ((int*)items)[-4];
+        while (self->items != p) {
+            p--;
+            p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+        }
+        cMemMan_free((char*)self->items - 0x10);
+    }
+    if (self->buf != 0) {
+        cMemMan_free(self->buf);
+    }
+    self->items = 0;
+    self->buf = 0;
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00344898);
 
@@ -529,7 +666,66 @@ extern "C" void func_00345048(sDebCurve* self, float t, sDebVec4* pos, sDebVec4*
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_003451C0);
+#ifdef SKIP_ASM
+struct cSpline;
+float cSpline_calcLength(cSpline* self);
+
+struct sTrackNode51C0 {
+    char pad_0x0[0x24];
+    int value;              // 0x24
+};
+
+struct sTrackSet51C0 {
+    char pad_0x0[0x44];
+    unsigned int* refs;     // 0x44, (node >> 2) << 8 | low byte
+};
+
+struct sTrackWorld51C0 {
+    char pad_0x0[0x8];
+    sTrackSet51C0** sets;   // 0x8
+};
+
+extern "C" sTrackWorld51C0** func_002D1BD8();
+
+static inline sTrackNode51C0* refToNode51C0(unsigned int p)
+{
+    return (sTrackNode51C0*)(p << 2);
+}
+
+struct sTrackRef51C0 {
+    unsigned int id;
+
+    sTrackNode51C0* get()
+    {
+        sTrackSet51C0* set = (*func_002D1BD8())->sets[id & 0xFF];
+        if (set != 0) {
+            unsigned int p = set->refs[id >> 8] >> 8;
+            if (p != 0) {
+                return refToNode51C0(p);
+            }
+        }
+        return 0;
+    }
+};
+
+struct sSplineFollow51C0 {
+    sTrackRef51C0 ref;      // 0x0
+    int field_0x4;          // 0x4
+    int field_0x8;          // 0x8
+    float length;           // 0xC
+};
+
+extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
+{
+    self->ref.id = id;
+    sTrackNode51C0* node = self->ref.get();
+    self->field_0x8 = node->value;
+    self->field_0x4 = 0;
+    self->length = cSpline_calcLength((cSpline*)self);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00345248);
 
