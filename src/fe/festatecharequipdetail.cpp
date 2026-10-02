@@ -6,7 +6,23 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_00199148);
 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199350);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+void* func_0039E4A0(void* self);
+
+extern "C" void func_00199350(void* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    if (mgr != 0) {
+        char* r = (char*)func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        *(unsigned int*)(r + 0xC2C) = 0xFFFFFFFF;
+    }
+    func_0039E4A0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_001993A0);
@@ -33,7 +49,18 @@ extern "C" void func_001993A0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199420);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0019E538(void* rider, int a1);
+
+extern "C" void func_00199420(void* self)
+{
+    func_0019E538(func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetCreate);
 
@@ -86,7 +113,24 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A308);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A3D0);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A498);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+struct sEquipTable_DC20;
+extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
+
+extern "C" void func_0019A498(void* self)
+{
+    int idx = *(int*)((char*)self + 0xA6C);
+    if (idx >= 0) {
+        func_0019DC20((sEquipTable_DC20*)(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC), idx);
+    }
+    *(char*)((char*)self + 0x960) = 0;
+    *(int*)((char*)self + 0xA6C) = -1;
+    *(int*)((char*)self + 0x95C) = -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A4E8);
 
@@ -117,7 +161,23 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AB78);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
+
+extern "C" void func_0019ACA0(void* self)
+{
+    void* rider = func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+    func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC)), 0, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AFD0);
@@ -625,9 +685,36 @@ extern "C" void func_0019CD38(void* self, int bit, int a2, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CDF0);
+#ifdef SKIP_ASM
+extern void* D_004A196C;
+extern "C" void func_0019CE68(void* self);
 
+extern "C" void* func_0019CDF0(void* self)
+{
+    D_004A196C = self;
+    func_0019CE68(self);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CE20);
+#ifdef SKIP_ASM
+extern void* D_004A196C;
+extern "C" void func_0019CF40(void* self);
+void operator_delete(int* p);
+
+extern "C" void func_0019CE20(void* self, int flags)
+{
+    D_004A196C = 0;
+    func_0019CF40(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CE68);
 
@@ -850,7 +937,44 @@ extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2)
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E498);
+#ifdef SKIP_ASM
+struct sVEntry0019E498 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sSlot0019E498 {
+    int id;
+    char flag;
+    char pad[7];
+};
+
+extern void* D_004A289C;
+extern "C" void func_0019EBA0(void* self);
+void operator_delete(int* p);
+
+extern "C" void func_0019E498(void* self, int flags)
+{
+    sSlot0019E498* s = (sSlot0019E498*)((char*)self + 0x1C);
+    func_0019EBA0(self);
+    int i;
+    int none = -1;
+    for (i = 0xFF; i >= 0; i--, s++) {
+        if (s->id >= 0) {
+            char* g = (char*)D_004A289C;
+            sVEntry0019E498* vt = *(sVEntry0019E498**)(g + 0x10D8);
+            vt[50].fn(g + vt[50].delta, s->id);
+        }
+        s->id = none;
+        s->flag = 0;
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E538);

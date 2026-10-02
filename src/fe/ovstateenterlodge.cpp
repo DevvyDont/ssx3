@@ -136,7 +136,22 @@ extern "C" void func_001F74E0(void* self, void* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
+#ifdef SKIP_ASM
+extern void* D_004A3DD8;
+extern "C" int* func_0030C820(void* list);
+
+extern "C" void func_001F7548(void* self)
+{
+    int* p = func_0030C820((char*)D_004A3DD8 + 0x1C4);
+    if (p != 0) {
+        *(int*)((char*)self + 0x9C) = *p;
+    } else {
+        *(int*)((char*)self + 0x9C) = *(int*)((char*)D_004A3DD8 + 0x2A0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7590);
@@ -173,7 +188,17 @@ extern "C" void func_001F76B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
+#ifdef SKIP_ASM
+extern void* D_004A3DD8;
+extern "C" int* func_0030C820(void* list);
+
+extern "C" void func_001F7738(void* self)
+{
+    *(int*)((char*)self + 0x9C) = *func_0030C820((char*)D_004A3DD8 + 0x1C4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7770);
@@ -215,7 +240,38 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F7800);
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7958);
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetCreate);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern char D_0046F578[];
+extern char D_0046F588[];
+extern char D_0046F598[];
+extern char D_0046F5A8[];
+extern int D_004A2700;
+
+static inline int isHashTOPTIMES(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
+{
+    int id = *(int*)((char*)w + 0x38);
+    if (isHashTOPTIMES(id, D_0046F578)) {
+        if (D_004A2700 == 0) {
+            cUIText_setUnicodeStringByID(w, GetHashValue32(D_0046F588));
+        } else {
+            cUIText_setUnicodeStringByID(w, GetHashValue32(D_0046F598));
+        }
+        *(int*)((char*)w + 0x18) = 0;
+    } else if (isHashTOPTIMES(id, D_0046F5A8)) {
+        *(int*)((char*)w + 0x18) = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7F08);
 
@@ -248,5 +304,27 @@ extern "C" void func_001F80D8(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F8118);
+#ifdef SKIP_ASM
+extern int D_004A26FC;
+extern "C" void func_0020AB50(int id);
+
+extern "C" void func_001F8118(void* self, void* a1)
+{
+    if (*(int*)((char*)self + 0xA0) == 0) {
+        int v = *(int*)((char*)a1 + 0x18);
+        switch (v) {
+        case 0:
+            *(int*)((char*)self + 0xA0) = 1;
+            D_004A26FC = 1;
+            break;
+        case 1:
+            *(int*)((char*)self + 0xA0) = v;
+            func_0020AB50(0x13);
+            break;
+        }
+    }
+}
+#endif
 

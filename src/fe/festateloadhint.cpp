@@ -2,7 +2,28 @@
 
 INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245AE0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A2BC8[];
+extern char D_004A2BD0[];
+extern void* D_004A5B64;
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
+extern "C" void func_003A0E90(void* obj, char* text);
+
+extern "C" int func_00245AE0(void* self)
+{
+    char buf[200];
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    if (obj != 0) {
+        func_002C27C0(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        func_003A0E90(obj, buf);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245B50__FPv);
@@ -62,7 +83,28 @@ extern "C" void cFELoadState_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245C60);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A2BC8[];
+extern char D_004A2BD0[];
+extern void* D_004A5B64;
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
+extern "C" void func_003A0E90(void* obj, char* text);
+
+extern "C" int func_00245C60(void* self)
+{
+    char buf[200];
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    if (obj != 0) {
+        func_002C27C0(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        func_003A0E90(obj, buf);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245CD0);
@@ -122,7 +164,28 @@ void func_00245DB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245DC0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A2BC8[];
+extern char D_004A2BD0[];
+extern void* D_004A5B64;
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
+extern "C" void func_003A0E90(void* obj, char* text);
+
+extern "C" int func_00245DC0(void* self)
+{
+    char buf[200];
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    if (obj != 0) {
+        func_002C27C0(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        func_003A0E90(obj, buf);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245E30);

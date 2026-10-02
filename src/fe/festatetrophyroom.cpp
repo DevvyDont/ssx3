@@ -476,7 +476,22 @@ extern "C" void* func_001D53B0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5428);
+#ifdef SKIP_ASM
+extern void* D_0046C980[];
+extern void* D_00474E08[];
+extern void* D_004A2028;
+extern "C" void func_0039E390(void* self, int flags);
+
+extern "C" void func_001D5428(void* self, int flags)
+{
+    *(void***)((char*)self + 8) = D_0046C980;
+    D_004A2028 = 0;
+    *(void***)((char*)self + 8) = D_00474E08;
+    func_0039E390(self, flags);
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 

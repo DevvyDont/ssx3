@@ -988,7 +988,41 @@ extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1B68);
+#ifdef SKIP_ASM
+struct sVEntry001D1B68 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern void* D_004699F8[];
+extern void* D_0046D0D0[];
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void func_0039E390(void* self, int flags);
+
+extern "C" void func_001D1B68(void* self, int flags)
+{
+    *(void***)((char*)self + 8) = D_004699F8;
+    int id = *(int*)((char*)self + 0x70);
+    if (id >= 0) {
+        char* g = (char*)D_004A289C;
+        sVEntry001D1B68* vt = *(sVEntry001D1B68**)(g + 0x10D8);
+        vt[50].fn(g + vt[50].delta, id);
+    }
+    int slot = *(int*)((char*)self + 0x6C);
+    if (slot >= 0) {
+        func_0019DC20(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70, *(int*)((char*)self + 0x64), slot);
+    }
+    *(int*)((char*)self + 0x6C) = -1;
+    *(int*)((char*)self + 0x70) = -1;
+    *(void***)((char*)self + 8) = D_0046D0D0;
+    func_0039E390(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onCreateScreen);
@@ -1125,7 +1159,17 @@ extern "C" void func_001D20D8(void* self, int kind, void* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2150);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+
+extern "C" void func_001D2150(void* self, int id)
+{
+    *(int*)((char*)self + 0x6C) = func_0019DA10(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70, *(int*)((char*)self + 0x64), id, 9, 1, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D2198);
 

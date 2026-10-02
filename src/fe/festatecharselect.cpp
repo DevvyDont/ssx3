@@ -2,7 +2,28 @@
 
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00181238);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern signed char D_00535C11[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0019E538(void* self, int a1);
+void* func_0039E4A0(void* self);
+
+extern "C" void func_00181238(void* self)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    if (mgr != 0 && D_00535C11[0] != 0) {
+        func_0019E538(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    }
+    func_0039E4A0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_001812A8);

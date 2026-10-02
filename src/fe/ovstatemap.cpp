@@ -43,7 +43,21 @@ extern "C" void func_00208B00(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_00208B78);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
+extern "C" void func_0020A088(void* self);
+extern "C" void func_0020A430(void* self);
+
+extern "C" void func_00208B78(void* self)
+{
+    cFEAsyncManager_UnloadFEAsyncFile(*(void**)((char*)D_004A28A8 + 0x11C), *(int*)((char*)self + 0xC4));
+    func_0020A088(self);
+    func_0020A430(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_00208BB8);
@@ -86,7 +100,26 @@ extern "C" int func_00208EF8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_00208F10);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
+extern "C" int* func_00144BC0(void*);
+extern "C" void func_001A37F8(void* mgr, int a1, int file, int a3);
+
+extern "C" void func_00208F10(void* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* mgr = *(void**)((char*)D_004A28A8 + 0x11C);
+    cFEAsyncManager_UnloadFEAsyncFile(mgr, *(int*)((char*)self + 0xC4));
+    func_001A37F8(mgr, *func_00144BC0(iface), *(int*)((char*)self + 0xC4), 1);
+    *(int*)((char*)self + 0xC8) = 0;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPopup);
 
@@ -178,7 +211,29 @@ INCLUDE_ASM("fe/ovstatemap", func_0020A430);
 
 INCLUDE_ASM("fe/ovstatemap", func_0020A4E0);
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A6A8);
+#ifdef SKIP_ASM
+struct sVEntry0020A6A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+extern void* D_004A28A8;
+
+extern "C" void func_0020A6A8(void* self, int a1, int a2)
+{
+    char* w = *(char**)((char*)D_004A28A8 + 0x84);
+    if (w != 0) {
+        char* o = *(char**)(w + 0x200);
+        if (o != 0) {
+            sVEntry0020A6A8* vt = *(sVEntry0020A6A8**)(o + 0xC);
+            vt[9].fn(o + vt[9].delta, a1, a2);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A6F0);

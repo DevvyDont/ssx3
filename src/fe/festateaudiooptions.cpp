@@ -31,7 +31,33 @@ INCLUDE_ASM("fe/festateaudiooptions", func_00196B90);
 
 INCLUDE_ASM("fe/festateaudiooptions", func_00196DB0);
 
+//100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196E80);
+#ifdef SKIP_ASM
+struct sVEntry00196E80 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+int GetHashValue32(char* str);
+void* func_0039E4A0(void* self);
+extern "C" void* func_0039F9D8(void* self, int id);
+extern char D_004A18A8[];
+extern void* D_004A28A8;
+
+extern "C" void func_00196E80(void* self)
+{
+    if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+        void* obj = func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        if (obj != 0) {
+            sVEntry00196E80* e = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
+            e->fn((char*)obj + e->delta, 4, 0);
+        }
+    }
+    func_0039E4A0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196F00);

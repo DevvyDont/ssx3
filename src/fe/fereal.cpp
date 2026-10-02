@@ -125,9 +125,67 @@ INCLUDE_ASM("fe/fereal", func_001A1DC0);
 
 INCLUDE_ASM("fe/fereal", cRealFE_load);
 
+//100%
 INCLUDE_ASM("fe/fereal", func_001A2128);
+#ifdef SKIP_ASM
+extern "C" void* func_00231CF0(void* self);
+extern "C" void func_00253418(void* p, int a1);
+extern "C" void func_001A06B0(void* flow);
+extern int D_004A19CC;
+extern char D_004A4E80;
 
+extern "C" int func_001A2128(void* self)
+{
+    if (func_00231CF0(self) == 0) {
+        return 0;
+    }
+    void* h = *(void**)((char*)self + 0xB5AD4);
+    if (h != 0) {
+        func_00253418(h, 3);
+        *(void**)((char*)self + 0xB5AD4) = 0;
+    }
+    *(int*)((char*)self + 0xB5AD8) = 0;
+    D_004A19CC = 0;
+    *(int*)((char*)self + 0xB5ADC) = 0;
+    func_001A06B0(&D_004A4E80);
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fereal", func_001A2190);
+#ifdef SKIP_ASM
+struct sVEntry001A2190 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern char D_005047F8[];
+extern "C" void func_001A2BC0(void* self);
+extern "C" void func_001A04C8(void* p);
+extern "C" void func_0019CF40(void* p);
+extern "C" void func_0038ADB0(void* p);
+extern "C" void* func_0028B180();
+extern "C" void func_00286200(void* p);
+
+extern "C" void func_001A2190(void* self)
+{
+    char* g = (char*)D_004A289C;
+    sVEntry001A2190* vt = *(sVEntry001A2190**)(g + 0x10D8);
+    vt[19].fn(g + vt[19].delta);
+    func_001A2BC0(self);
+    func_001A04C8((char*)self + 0xB0);
+    func_0019CF40((char*)self + 0x1A70);
+    func_0038ADB0(D_005047F8);
+    char* st = (char*)D_004A28A8;
+    *(int*)(st + 0x7C) = 0;
+    *(int*)(st + 0x80) = 0;
+    func_00286200(func_0028B180());
+}
+#endif
 
 INCLUDE_ASM("fe/fereal", func_001A2208);
 
@@ -135,7 +193,31 @@ INCLUDE_ASM("fe/fereal", func_001A27A0);
 
 INCLUDE_ASM("fe/fereal", cRealFE_loadCharAnimations);
 
+//100%
 INCLUDE_ASM("fe/fereal", func_001A2BC0);
+#ifdef SKIP_ASM
+extern void** D_004A3DF8;
+extern void* D_004A3E7C;
+extern "C" void func_00314FE8(void* a, void* b);
+extern "C" void func_00311110(void* a);
+extern "C" void func_003112C8(void* a, int b);
+
+extern "C" void func_001A2BC0(void* self)
+{
+    int i;
+    for (i = 0; i < 1; i++) {
+        unsigned char idx = i;
+        void* p = *(void**)((char*)D_004A3DF8 + (idx << 2));
+        if (p != 0) {
+            func_00314FE8(D_004A3E7C, p);
+            void** tbl = D_004A3DF8;
+            *(void**)((char*)tbl + (idx << 2)) = 0;
+            func_00311110(tbl);
+            func_003112C8(p, 3);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fereal", cRealFE_loadStartState);
 

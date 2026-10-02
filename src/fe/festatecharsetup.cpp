@@ -43,7 +43,28 @@ INCLUDE_ASM("fe/festatecharsetup", func_00182DB8);
 
 INCLUDE_ASM("fe/festatecharsetup", func_00182EC0);
 
+//100%
 INCLUDE_ASM("fe/festatecharsetup", func_001831D0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0019E538(void* self, int a1);
+
+extern "C" void func_001831D0(void* self, int on)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    if (mgr != 0) {
+        void* r = func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        if (on == 0) {
+            func_0019E538(r, 0);
+        }
+        *(int*)((char*)self + 0x4C) = on;
+        if (on == 0) {
+            *(int*)((char*)self + 0x48) = 1;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharsetup", func_00183238);

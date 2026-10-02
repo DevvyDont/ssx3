@@ -46,7 +46,22 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_trickVisible);
 
 INCLUDE_ASM("fe/festatestore", func_001849B0);
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_00184B70);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void func_001A0570(void* self, int a1, int a2);
+void* func_0039E4A0(void* self);
+
+extern "C" void func_00184B70(void* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    if (mgr != 0) {
+        func_001A0570(mgr + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    }
+    func_0039E4A0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatestore", func_00184BB8);

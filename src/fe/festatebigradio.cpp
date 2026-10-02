@@ -65,13 +65,72 @@ extern "C" void func_00194080(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00194138);
+#ifdef SKIP_ASM
+extern int D_004A1A70;
+extern "C" void* func_001A8B88(void* self, int size, int a2);
 
+static inline int isOn00194138()
+{
+    return D_004A1A70 == 1;
+}
+
+extern "C" void* func_00194138(void* self, int a1, int a2)
+{
+    if (isOn00194138()) {
+        return func_001A8B88(self, a1, a2);
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00194168);
+#ifdef SKIP_ASM
+extern int D_004A1A70;
+extern "C" void func_00194440(void* self, void* a1, int a2);
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+
+static inline int isOn00194168()
+{
+    return D_004A1A70 == 1;
+}
+
+extern "C" void func_00194168(void* self, void* a1, int a2)
+{
+    if (isOn00194168()) {
+        if (*(int*)((char*)a1 + 0x18) == 0x838) {
+            func_00194440(self, a1, a2);
+        } else {
+            func_001A97B8(self, a1, a2);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebigradio", func_001941B0);
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00194440);
+#ifdef SKIP_ASM
+extern void* D_004A33CC;
+extern "C" void func_00265768(void* snd, int id);
+void func_001A94D8(void* self);
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+
+extern "C" void func_00194440(void* self, void* a1, int a2)
+{
+    if (a2 == 0xF) {
+        if (D_004A33CC != 0) {
+            func_00265768(D_004A33CC, 0xF9);
+        }
+        func_001A94D8(self);
+    } else {
+        func_001A97B8(self, a1, a2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", func_00194498);

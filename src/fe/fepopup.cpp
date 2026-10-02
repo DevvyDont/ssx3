@@ -893,7 +893,35 @@ extern "C" void cKeyboardPopup_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CB208);
+#ifdef SKIP_ASM
+struct sVEntry001CB208 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern void* D_004A2EEC;
+extern void* D_004A28A8;
+extern "C" void func_0039E510(void*);
+extern "C" void func_0039F190(void* self, int a1);
+
+extern "C" void func_001CB208(void* self)
+{
+    func_0039E510(self);
+    if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x64) == 0 && *(int*)((char*)D_004A28A8 + 0x84) != 0) {
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+    }
+    if (*(int*)((char*)self + 0x440) != 0) {
+        void* obj = *(void**)((char*)self + 0x20);
+        if (obj != 0) {
+            sVEntry001CB208* vt = *(sVEntry001CB208**)((char*)obj + 8);
+            vt[12].fn((char*)obj + vt[12].delta);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CB290);

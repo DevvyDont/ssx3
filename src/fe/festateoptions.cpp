@@ -25,7 +25,17 @@ INCLUDE_ASM("fe/festateoptions", func_00188870);
 
 INCLUDE_ASM("fe/festateoptions", func_00188980);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00188C58);
+#ifdef SKIP_ASM
+extern int D_004A3484;
+
+extern "C" int func_00188C58(void* self, void* a1)
+{
+    D_004A3484 = *(unsigned char*)((char*)a1 + 4);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00188C68);
@@ -61,7 +71,36 @@ extern "C" int func_00188C68(void* self, void* menu, unsigned int key, int index
 
 INCLUDE_ASM("fe/festateoptions", func_00188D08);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00188E58);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_0039F290(void* list, void* item);
+extern char D_0045DD68[];
+extern void* D_0046B3D0[];
+extern int D_004A14D0;
+extern int D_004A14D4;
+extern int D_004A14D8;
+extern int D_004A14DC;
+extern int D_004A14E0;
+
+extern "C" void func_00188E58(void* self)
+{
+    char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+    func_0039E318(p, *(void**)((char*)self + 0x10), self);
+    *(void***)(p + 8) = D_0046B3D0;
+    *(char*)(p + 0x48) = 0;
+    func_0039F290(*(char**)((char*)self + 0x10) + 0x18, p);
+    D_004A14D8 = 0;
+    D_004A14E0 = 1;
+    D_004A14DC = 0;
+    D_004A14D4 = 0;
+    D_004A14D0 = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00188EE8);
@@ -115,7 +154,22 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetEvent);
 
 INCLUDE_ASM("fe/festateoptions", func_00189D60);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018A258);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern void* D_0046C620[];
+extern int D_004A14D4;
+
+extern "C" void* func_0018A258(void* self)
+{
+    func_0039E2A0(self);
+    *(void***)((char*)self + 8) = D_0046C620;
+    *(int*)((char*)self + 0xC) = 0x1D;
+    D_004A14D4 = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onCreateScreen);
 
@@ -160,7 +214,22 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
 
 INCLUDE_ASM("fe/festateoptions", func_0018BEF8);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern void* D_0046C550[];
+extern int D_004A14D8;
+
+extern "C" void* func_0018C0E8(void* self)
+{
+    func_0039E2A0(self);
+    *(void***)((char*)self + 8) = D_0046C550;
+    *(int*)((char*)self + 0xC) = 0x1E;
+    D_004A14D8 = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C128);
@@ -213,7 +282,23 @@ INCLUDE_ASM("fe/festateoptions", func_0018C2A0);
 
 INCLUDE_ASM("fe/festateoptions", func_0018C478);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C658);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern void* D_0046C480[];
+extern int D_004A14DC;
+
+extern "C" void* func_0018C658(void* self)
+{
+    func_0039E2A0(self);
+    *(void***)((char*)self + 8) = D_0046C480;
+    *(int*)((char*)self + 0xC) = 0x1F;
+    *(char*)((char*)self + 0x50) = 0;
+    D_004A14DC = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
 
@@ -348,7 +433,30 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018D3C0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_00194498(void* obj);
+extern int D_004A19D8;
+extern char D_0045E0F0[];
+extern char D_0045E100[];
+
+extern "C" void func_0018D3C0(void* self)
+{
+    if (D_004A19D8 != 0) {
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E0F0));
+        if (obj != 0) {
+            func_00194498(obj);
+        }
+        obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E100));
+        if (obj != 0) {
+            func_00194498(obj);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018D438);
 
@@ -356,7 +464,29 @@ INCLUDE_ASM("fe/festateoptions", func_0018D460);
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetEvent);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
+#ifdef SKIP_ASM
+extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" void* func_00227F80(void* app);
+extern void* D_0046C228[];
+extern void* D_004A28A8;
+
+extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
+{
+    func_001D53B0(self, a1, a2);
+    *(int*)((char*)self + 0x230) = a4;
+    *(void***)((char*)self + 8) = D_0046C228;
+    *(int*)((char*)self + 0xC) = 0x21;
+    *(int*)((char*)self + 0x22C) = a3;
+    *(int*)((char*)self + 0x234) = 0;
+    *(int*)((char*)self + 0x238) = 0;
+    if (a3 == 0) {
+        *(int*)((char*)func_00227F80(D_004A28A8) + 0x11C) = 0;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onCreateScreen);
 

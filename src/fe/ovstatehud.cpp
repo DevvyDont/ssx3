@@ -216,7 +216,41 @@ void* func_001F30C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F30D8);
+#ifdef SKIP_ASM
+struct sVEntry001F30D8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sHudIds001F30D8 {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+
+int GetHashValue32(char* str);
+extern "C" int func_003983F0(void* self, int key);
+extern void* D_004A28A8;
+extern char D_0046ED78[];
+extern char D_004A21F0[];
+
+extern "C" void func_001F30D8(void* p)
+{
+    sHudIds001F30D8* self = (sHudIds001F30D8*)p;
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001F30D8* vt = *(sVEntry001F30D8**)(o + 4);
+    char* adj = o + vt[4].delta;
+    int h = GetHashValue32(D_0046ED78);
+    self->a = vt[4].fn(adj, h);
+    void* tbl = *(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 8);
+    self->d = func_003983F0(tbl, GetHashValue32(D_004A21F0));
+    self->b = 0;
+    self->c = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F3170__FPv);
@@ -232,7 +266,21 @@ void func_001F3170(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F3188);
+#ifdef SKIP_ASM
+extern "C" void func_001F3188(void* self)
+{
+    if (*(int*)((char*)self + 4) != 0) {
+        float* t = (float*)((char*)self + 8);
+        float two = 2.0f;
+        *t += 0.01666666753590107f;
+        while (*t > two) {
+            *t -= two;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F31E0);
 

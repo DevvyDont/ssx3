@@ -18,7 +18,33 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D7010);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7190);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D72A8);
+#ifdef SKIP_ASM
+struct sVEntry001D72A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_0023D570(void*, int);
+
+extern "C" void func_001D72A8(void)
+{
+    char* fe = (char*)D_004A2028;
+    sVEntry001D72A8* vt = *(sVEntry001D72A8**)(fe + 8);
+    vt[41].fn(fe + vt[41].delta);
+    void* app = D_004A28A8;
+    *(int*)((char*)D_004A2028 + 0x1E4) = 0;
+    char* obj = (char*)func_00227F80(app);
+    sVEntry001D72A8* vt2 = *(sVEntry001D72A8**)(obj + 0x748);
+    vt2[1].fn(obj + vt2[1].delta, 0x24);
+    func_0023D570(obj, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7318);
 
@@ -46,13 +72,47 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D8160);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8240);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8358);
+#ifdef SKIP_ASM
+struct sVEntry001D8358 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern void* D_004A2028;
+
+extern "C" void func_001D8358(void)
+{
+    char* fe = (char*)D_004A2028;
+    if (*(int*)(fe + 0x214) != 2 && *(int*)(fe + 0x1C0) == 0) {
+        *(int*)(fe + 0x214) = 2;
+        sVEntry001D8358* vt = *(sVEntry001D8358**)(fe + 8);
+        vt[35].fn(fe + vt[35].delta, 2);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D83A8);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8530);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8670);
+#ifdef SKIP_ASM
+extern void* D_004A2028;
+
+extern "C" void func_001D8670(void)
+{
+    if (*(int*)((char*)D_004A2028 + 0x1C0) == 4) {
+        *(int*)((char*)D_004A2028 + 0x1C0) = 1;
+    }
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x1A8) = 0;
+    *(int*)(fe + 0x1E0) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D86A0__FPv);
@@ -119,7 +179,30 @@ void func_001D8C38(void* self)
 
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onInputBegin);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8D68);
+#ifdef SKIP_ASM
+struct sVEntry001D8D68 {
+    short delta;
+    short index;
+    void (*fn)(void*, unsigned short*, int, int, int, int, int);
+};
+
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241E18(void*, unsigned short*, int);
+
+extern "C" void func_001D8D68(void* self)
+{
+    unsigned short buf[0x320];
+    void* obj = func_00227F80(D_004A28A8);
+    *(int*)((char*)self + 0x19C) = 0x16;
+    func_00241E18(obj, buf, 0x320);
+    sVEntry001D8D68* vt = *(sVEntry001D8D68**)((char*)self + 8);
+    vt[36].fn((char*)self + vt[36].delta, buf, 1, 1, 0, 0, 1);
+    *(int*)((char*)self + 0x210) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8DE0);
 
@@ -152,7 +235,31 @@ extern "C" void func_001D9258(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9308);
+#ifdef SKIP_ASM
+struct sVEntry001D9308 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, void*);
+};
+
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* app);
+
+extern "C" void func_001D9308(void* self, int on)
+{
+    *(int*)((char*)self + 0x1F4) = on;
+    if (on) {
+        char* r = (char*)func_00227F80(D_004A28A8);
+        char* obj = *(char**)(r + 0x434);
+        sVEntry001D9308* vt = *(sVEntry001D9308**)obj;
+        vt[14].fn(obj + vt[14].delta, *(void**)(r + 0xF8), (char*)self + 0x9C);
+    } else {
+        *(short*)((char*)self + 0x9C) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9368);
