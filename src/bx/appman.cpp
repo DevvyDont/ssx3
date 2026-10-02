@@ -49,41 +49,52 @@ int cAppMan_checkHalt(cAppMan* self)
 }
 #endif
 
-//93.78%
+//100%
 INCLUDE_ASM("bx/appman", func_00317348__FPv);
 #ifdef SKIP_ASM
-int func_00317348(void* self)
+class cAppSubK2 {
+public:
+    char pad_0x00[8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+class cAppTickK2 {
+public:
+    char pad_0x00[8];
+    cAppSubK2* sub; // 0x8
+    char pad_0x0C[0xC];
+    int ticks; // 0x18
+    char pad_0x1C[8];
+    float step; // 0x24
+    float accum; // 0x28
+    char pad_0x2C[0x5C - 0x2C];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+};
+
+int func_00317348(void* p)
 {
-    float f28 = *(float*)((char*)self + 0x28);
-    float f24 = *(float*)((char*)self + 0x24);
+    cAppTickK2* self = (cAppTickK2*)p;
+    float f28 = self->accum;
+    float f24 = self->step;
     int i28 = (int)f28;
-    int cnt = *(int*)((char*)self + 0x18);
+    self->ticks++;
     float sum = f28 + f24;
-    cnt = cnt + 1;
-    *(int*)((char*)self + 0x18) = cnt;
-    int isum = (int)sum;
-    int n = isum - i28;
-    float fn = (float)n;
-    n = n - 1;
-    sum = sum - fn;
-    *(float*)((char*)self + 0x28) = sum;
-
-    if (n != -1) {
-        void* obj = *(void**)((char*)self + 0x5C);
-        do {
-            n--;
-            short off = *(short*)((char*)obj + 0x38);
-            void (*fn2)(void*) = *(void (**)(void*))((char*)obj + 0x3C);
-            fn2((char*)self + off);
-            obj = *(void**)((char*)self + 0x5C);
-        } while (n != -1);
+    int n = (int)sum - i28;
+    self->accum = sum - (float)n;
+    while (n--) {
+        self->v07();
     }
-
-    void* obj2 = *(void**)((char*)self + 0x8);
-    void* inner = *(void**)((char*)obj2 + 0x8);
-    short off2 = *(short*)((char*)inner + 0x28);
-    void (*fn3)(void*) = *(void (**)(void*))((char*)inner + 0x2C);
-    fn3((char*)obj2 + off2);
+    self->sub->v05();
 }
 #endif
 

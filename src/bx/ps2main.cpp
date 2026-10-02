@@ -15,7 +15,17 @@ extern "C" float func_0031B088(float a, float b, float c, float d)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/ps2main", func_0031B098);
+#ifdef SKIP_ASM
+extern "C" float func_0031B088(float a, float b, float c, float d);
+
+// 3x3 determinant by cofactor expansion along the first column.
+extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i)
+{
+    return a * func_0031B088(e, f, h, i) - d * func_0031B088(b, c, h, i) + g * func_0031B088(b, c, e, f);
+}
+#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031B178);
 

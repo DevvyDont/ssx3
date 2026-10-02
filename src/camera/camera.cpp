@@ -8,7 +8,40 @@ INCLUDE_ASM("camera/camera", cCamera_resetChaseControllerSwitches);
 
 INCLUDE_ASM("camera/camera", cCamera_cCamera);
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015DD88);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern void* D_0045B888[];
+extern void* D_0045B8B0[];
+void func_0015CD60(void* p);
+void func_00176DA8_2(void* self, int flags) __asm__("func_00176DA8__FPv");
+
+class cCamPartK2 {
+public:
+    char pad[0x14];
+    // vptr at 0x14
+    virtual ~cCamPartK2();
+};
+
+// PORT: func_00176DA8__FPv is a destructor taking (self, flags); bind the 2-arg form.
+extern "C" void func_0015DD88(void* self, int flags)
+{
+    *(void***)((char*)self + 0x90) = D_0045B888;
+    func_0015CD60(*(cCamPartK2**)((char*)self + 0xA4));
+    func_0015CD60(*(cCamPartK2**)((char*)self + 0xA8));
+    func_0015CD60(*(cCamPartK2**)((char*)self + 0xAC));
+    delete *(cCamPartK2**)((char*)self + 0xA4);
+    delete *(cCamPartK2**)((char*)self + 0xA8);
+    delete *(cCamPartK2**)((char*)self + 0xAC);
+    func_00176DA8_2((char*)self + 0xC0, 2);
+    *(void***)((char*)self + 0x90) = D_0045B8B0;
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/camera", cCamera_init);
 
@@ -862,7 +895,29 @@ extern "C" void func_00161F50(sCam161F50* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00161FA0);
+#ifdef SKIP_ASM
+extern "C" void func_00161FA0(void* self, int mode)
+{
+    int flags = *(int*)((char*)self + 0x30) | 2;
+    *(int*)((char*)self + 0x30) = flags;
+    if (mode == 0x4C) {
+        mode = *(int*)((char*)self + 0x24);
+        func_0015D050(self, mode, 0);
+    } else if (mode == 0x5D) {
+        if (flags & 1)
+            func_0015D050(self, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x34));
+        else if (flags & 4)
+            func_0015D050(self, 0x42, 0);
+        else
+            func_0015D050(self, *(int*)((char*)self + 0x24), 0);
+    } else {
+        func_0015D050(self, mode, 0);
+    }
+    *(int*)((char*)self + 0x2C) = mode;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00162060);

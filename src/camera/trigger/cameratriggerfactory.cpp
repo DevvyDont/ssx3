@@ -2,7 +2,30 @@
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionBoundedCam);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int get_float(void* reader, void* dst);
+extern "C" int get_uint(void* reader, void* dst);
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+extern "C" int get_cCTActionBoundedCam(void* reader, char* obj)
+{
+    int n;
+    *(int*)obj = 1;
+    n = get_float(reader, obj + 0xC);
+    n += get_float(reader, obj + 0x10);
+    n += get_float(reader, obj + 0x14);
+    n += get_float(reader, obj + 0x18);
+    n += get_float(reader, obj + 0x1C);
+    n += get_float(reader, obj + 0x20);
+    n += get_uint(reader, obj + 0x24);
+    n += get_t3Vector_n(reader, obj + 0x28);
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSwitchCam);
@@ -44,9 +67,67 @@ void* get_cCTActionNone(void* unused, int* outType)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camboundobj);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjEllipse);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
+class cCTBoundObjEllK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 0;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjBox);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTBoundObjBoxK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 1;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjLine);
 
@@ -80,19 +161,159 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camspline);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00171FA8);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001721C0);
+#ifdef SKIP_ASM
+extern "C" float func_001731C0(float* v);
+
+struct sCTVec3K2 {
+    float x, y, z;
+    sCTVec3K2() {}
+    sCTVec3K2(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+static inline sCTVec3K2 operator-(const sCTVec3K2& a, float s)
+{
+    return sCTVec3K2(a.x - s, a.y - s, a.z - s);
+}
+
+static inline sCTVec3K2 operator+(const sCTVec3K2& a, float s)
+{
+    return sCTVec3K2(a.x + s, a.y + s, a.z + s);
+}
+
+struct sCTVec4K2 {
+    float x, y, z, w;
+    sCTVec4K2() {}
+    sCTVec4K2(const sCTVec3K2& v, float w_) : x(v.x), y(v.y), z(v.z), w(w_) {}
+} __attribute__((aligned(16)));
+
+struct sCTBoxK2 {
+    sCTVec4K2 min;
+    sCTVec4K2 max;
+    sCTBoxK2(const sCTVec4K2& a, const sCTVec4K2& b) : min(a), max(b) {}
+};
+
+// Bounding box of a trigger volume: centre +- the largest half-extent.
+extern "C" sCTBoxK2 func_001721C0(char* obj)
+{
+    float r = func_001731C0((float*)(obj + 0x18));
+    sCTVec3K2 rv(r, r, r);
+    const sCTVec3K2& c = *(sCTVec3K2*)obj;
+    return sCTBoxK2(sCTVec4K2(c - r, 1.0f), sCTVec4K2(c + r, 1.0f));
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00172278);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00172840);
+#ifdef SKIP_ASM
+extern "C" float func_001731C0(float* v);
+
+struct sCTVec3K2b {
+    float x, y, z;
+    sCTVec3K2b() {}
+    sCTVec3K2b(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+static inline sCTVec3K2b operator-(const sCTVec3K2b& a, float s)
+{
+    return sCTVec3K2b(a.x - s, a.y - s, a.z - s);
+}
+
+static inline sCTVec3K2b operator+(const sCTVec3K2b& a, float s)
+{
+    return sCTVec3K2b(a.x + s, a.y + s, a.z + s);
+}
+
+struct sCTVec4K2b {
+    float x, y, z, w;
+    sCTVec4K2b() {}
+    sCTVec4K2b(const sCTVec3K2b& v, float w_) : x(v.x), y(v.y), z(v.z), w(w_) {}
+} __attribute__((aligned(16)));
+
+struct sCTBoxK2b {
+    sCTVec4K2b min;
+    sCTVec4K2b max;
+    sCTBoxK2b(const sCTVec4K2b& a, const sCTVec4K2b& b) : min(a), max(b) {}
+};
+
+// Bounding box of a trigger volume: centre +- the largest half-extent.
+extern "C" sCTBoxK2b func_00172840(char* obj)
+{
+    float r = func_001731C0((float*)(obj + 0x18));
+    sCTVec3K2b rv(r, r, r);
+    const sCTVec3K2b& c = *(sCTVec3K2b*)obj;
+    return sCTBoxK2b(sCTVec4K2b(c - r, 1.0f), sCTVec4K2b(c + r, 1.0f));
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001728F8);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camvolume);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeEllipse);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
+class cCTVolumeEllK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 0;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeBox);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTVolumeBoxK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 1;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001731C0);
@@ -833,9 +1054,43 @@ extern "C" int func_0017A0B8(func_0017A028_sMgr* self, int i)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A158);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A220);
+#ifdef SKIP_ASM
+extern "C" int func_0017A158(int* self, int i, void* key);
 
+// Circular search: first index after `start` for which func_0017A158 matches.
+extern "C" int func_0017A220(int* self, int start, void* key)
+{
+    int n;
+    int i = (start + 1) % self[0];
+    for (n = 0; n < self[0]; n++) {
+        if (func_0017A158(self, i, key))
+            return i;
+        i = (i + 1) % self[0];
+    }
+    return -1;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A2C8);
+#ifdef SKIP_ASM
+extern "C" int func_0017A158(int* self, int i, void* key);
+
+// Circular search backwards: first index before `start` for which func_0017A158 matches.
+extern "C" int func_0017A2C8(int* self, int start, void* key)
+{
+    int n;
+    int i = (start + self[0] - 1) % self[0];
+    for (n = 0; n < self[0]; n++) {
+        if (func_0017A158(self, i, key))
+            return i;
+        i = (i + self[0] - 1) % self[0];
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
 

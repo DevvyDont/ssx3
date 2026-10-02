@@ -602,7 +602,55 @@ extern "C" void func_00269ED8(void* self, int a1, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_00269F18);
+#ifdef SKIP_ASM
+struct sBXVec4K2 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sBXPath;
+// sBXVec4 (defined later in the unit) has this layout.
+sBXVec4K2 func_0026AB20_K2(sBXPath* self, int* inRange, float t) __asm__("func_0026AB20");
+
+struct sBXRangeK2 {
+    int type;   // 0x0
+    int pad_0x4;
+    float lo;   // 0x8
+    float hi;   // 0xC
+};
+
+struct sBXRangeListK2 {
+    int count;            // 0x0
+    sBXRangeK2* entries;  // 0x4
+};
+
+// PORT: >? and <? (g++ min/max operators).
+extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
+{
+    sBXRangeListK2* list = (sBXRangeListK2*)path;
+    float hi = *t + 50.0f;
+    float lo = hi;
+    int i;
+    for (i = 0; i < list->count; i++) {
+        sBXRangeK2* e = &list->entries[i];
+        if (*t < e->lo)
+            continue;
+        if (e->hi < *t)
+            continue;
+        if (e->type == 16)
+            hi = e->hi >? hi;
+        else if (e->type == 12)
+            lo = e->lo <? lo;
+        else if (e->type == 14)
+            lo = e->hi >? lo;
+    }
+    if (lo != *t)
+        *t = lo;
+    else
+        *t = hi;
+    return func_0026AB20_K2(path, 0, *t);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A068__FPv);
@@ -690,7 +738,32 @@ extern "C" void func_0026A338(void* self, void* src, void* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A378);
+#ifdef SKIP_ASM
+// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
+void func_0026BA68_K2(void* dst, void* src) __asm__("func_0026BA68");
+extern int D_004453D0[];
+
+extern "C" void func_0026A378(void* self, char* src, int* dst)
+{
+    int key;
+    int i;
+    func_0026BA68_K2(&key, src);
+    src += 4;
+    *dst = 0;
+    for (i = 0; i < 21; i++) {
+        if (D_004453D0[i] == key) {
+            *dst = i;
+            break;
+        }
+    }
+    func_0026BA68_K2(dst + 1, src);
+    src += 4;
+    func_0026BA88_2(dst + 2, src);
+    func_0026BA88_2(dst + 3, src + 4);
+}
+#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A428);
 

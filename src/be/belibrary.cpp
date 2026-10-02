@@ -239,7 +239,50 @@ extern "C" void func_0014AF10(void)
 
 INCLUDE_ASM("be/belibrary", func_0014AFB0);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014B478);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern void* D_004A6750[];
+struct sBELibTables;
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(sBELibTables* self, int i);
+
+struct sBEFlagEntryB {
+    unsigned short field_0x0;
+    unsigned short flags;
+};
+
+struct sBEEntry38B {
+    signed char group; // 0x0
+    char pad_0x01[3];
+    short field_0x4;
+    short field_0x6;
+    char pad_0x08[4];
+    short field_0xC;
+    char pad_0x0E[0x2A];
+};
+
+extern "C" int func_0014B478(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    int sum = 0;
+    int count = func_0014D988(D_004A6750, a2);
+    sBEEntry38B* e = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, a2);
+    int i;
+    for (i = 0; i < count; i++, e++) {
+        short s = (*(short**)(p + 0x288))[e->field_0x4];
+        sBEFlagEntryB* f;
+        if (s >= 0)
+            f = (sBEFlagEntryB*)(p + 0x290) + s;
+        else
+            f = 0;
+        if (f->flags & 0x10)
+            sum += e->field_0xC;
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014B560);
 
@@ -320,11 +363,115 @@ extern "C" void func_0014C2B0(sBEGroupTable* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C320);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
 
+struct sBEEntryC_G {
+    signed char group; // 0x0
+    char pad_0x01[0xB];
+};
+
+struct sBEKeyTableG {
+    char pad_0x00[8];
+    sBEEntryC_G* entries; // 0x8
+    char pad_0x0C[0x14];
+    int count; // 0x20
+    char pad_0x24[0x20C - 0x24];
+    int groupCount[30]; // 0x20C
+    int groupFirst[30]; // 0x284
+};
+
+extern "C" void func_0014C320(sBEKeyTableG* self)
+{
+    int last = 30;
+    int i;
+    func_003E6448(self->groupCount, 0, sizeof(self->groupCount));
+    for (i = 0; i < self->count; i++) {
+        int g = self->entries[i].group;
+        self->groupCount[g]++;
+        if (last != g) {
+            last = g;
+            self->groupFirst[g] = i;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C3C8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
 
+struct sBEEntry8G {
+    signed char group; // 0x0
+    char pad_0x01[7];
+};
+
+struct sBEKeyTableG1 {
+    char pad_0x00[0xC];
+    sBEEntry8G* entries; // 0xC
+    char pad_0x10[0x14];
+    int count; // 0x24
+    char pad_0x28[0x2FC - 0x28];
+    int groupCount[30]; // 0x2FC
+    int groupFirst[30]; // 0x374
+};
+
+extern "C" void func_0014C3C8(sBEKeyTableG1* self)
+{
+    int last = -1;
+    int i;
+    func_003E6448(self->groupCount, 0, sizeof(self->groupCount));
+    func_003E6448(self->groupFirst, 0, sizeof(self->groupFirst));
+    for (i = 0; i < self->count; i++) {
+        int g = self->entries[i].group;
+        self->groupCount[g]++;
+        if (last != g) {
+            last = g;
+            self->groupFirst[g] = i;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C488);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+struct sBEEntry8G2 {
+    signed char group; // 0x0
+    char pad_0x01[7];
+};
+
+struct sBEKeyTableG2 {
+    char pad_0x00[0x10];
+    sBEEntry8G2* entries; // 0x10
+    char pad_0x14[0x14];
+    int count; // 0x28
+    char pad_0x2C[0x3EC - 0x2C];
+    int groupCount[30]; // 0x3EC
+    int groupFirst[30]; // 0x464
+};
+
+extern "C" void func_0014C488(sBEKeyTableG2* self)
+{
+    int last = -1;
+    int i;
+    func_003E6448(self->groupCount, 0, sizeof(self->groupCount));
+    func_003E6448(self->groupFirst, 0, sizeof(self->groupFirst));
+    for (i = 0; i < self->count; i++) {
+        int g = self->entries[i].group;
+        self->groupCount[g]++;
+        if (last != g) {
+            last = g;
+            self->groupFirst[g] = i;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C620);

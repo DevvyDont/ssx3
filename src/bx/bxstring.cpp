@@ -168,7 +168,42 @@ INCLUDE_ASM("bx/bxstring", func_00318630);
 
 INCLUDE_ASM("bx/bxstring", func_003186D0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_ConcatImpl);
+#ifdef SKIP_ASM
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString_Reset(cBXString* self);
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+
+struct cBXStringHdrK2 {
+    int ref; // -0xC
+    int len; // -0x8
+    int cap; // -0x4
+};
+
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str)
+{
+    int s = *(int*)self;
+    cBXStringHdrK2* h = (cBXStringHdrK2*)(s - 0xC);
+    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < *(int*)(s - 8) + len)
+    {
+        char* tmp;
+        cBXString_cBXString1((cBXString*)&tmp, self);
+        int old = *(int*)self;
+        cBXString_Reset(self);
+        func_00318540(self, *(int*)(old - 8), (char*)old, len, str);
+        cBXString__cBXString((cBXString*)&tmp, 2);
+    }
+    else
+    {
+        func_0041605C((char*)s + h->len, str, len);
+        *(int*)(*(int*)self - 8) += len;
+        (*(char**)self)[*(int*)(*(int*)self - 8)] = 0;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_Concat);
@@ -203,7 +238,30 @@ extern "C" cBXString* func_003189A0(cBXString* self, char** other)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_003189D0);
+#ifdef SKIP_ASM
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" char* func_003189D0(cBXString* self, int size)
+{
+    int s = *(int*)self;
+    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < size)
+    {
+        char* tmp;
+        cBXString_cBXString1((cBXString*)&tmp, self);
+        int len = *(int*)((int)tmp - 8);
+        cBXString_Reset(self);
+        cBXString_Realloc(self, len < size ? size : len);
+        func_0041605C(*(char**)self, tmp, len);
+        *(int*)(*(int*)self - 8) = len;
+        (*(char**)self)[len] = 0;
+        cBXString__cBXString((cBXString*)&tmp, 2);
+    }
+    return *(char**)self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318A88);

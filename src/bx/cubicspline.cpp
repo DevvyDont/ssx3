@@ -80,7 +80,33 @@ void func_0031D790(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031D7E0);
+#ifdef SKIP_ASM
+struct sCubicSplineKeyK2 {
+    float x;  // 0x0
+    float y;  // 0x4
+    float tx; // 0x8
+    float ty; // 0xC
+    float pad_0x10;
+};
+
+extern "C" void func_0031D8B0(sCubicSpline* self);
+
+extern "C" void func_0031D7E0(sCubicSpline* self, float x, float y)
+{
+    if (self->flags.f3 == self->flags.count) {
+        ((sCubicSplineKeyK2*)self->data)[self->flags.f3 - 1].tx = x;
+        ((sCubicSplineKeyK2*)self->data)[self->flags.f3 - 1].ty = y;
+        func_0031D8B0(self);
+        self->flags.b2 = 1;
+    } else {
+        ((sCubicSplineKeyK2*)self->data)[self->flags.f3].x = x;
+        ((sCubicSplineKeyK2*)self->data)[self->flags.f3].y = y;
+        self->flags.f3++;
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
 
