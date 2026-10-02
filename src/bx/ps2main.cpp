@@ -2,9 +2,66 @@
 
 INCLUDE_ASM("bx/ps2main", systemInit);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/ps2main", main);
+#ifdef SKIP_ASM
+struct cExecutionMan;
+struct cExecutionManMainK {
+    int field_0x0;
+    int field_0x4;
+    void* field_0x8; // vtable
+};
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+cExecutionMan* cExecutionMan_halt(cExecutionMan* self);
+extern "C" void func_0040FC90(void); // __main
+extern "C" void systemInit(void);
+extern "C" int cAppMan_run(void* self, cExecutionMan* exec, int argc, char** argv);
+extern void* D_004A5B64;
+extern const char D_0048DAE8[];
+extern void* D_0048DB68[];
 
+// PORT: bound to "main" by asm label so gcc doesn't emit its own __main call;
+// the target calls func_0040FC90 (__main) explicitly. Off-PS2 this is plain main().
+int main_impl(int argc, char** argv) __asm__("main");
+
+int main_impl(int argc, char** argv)
+{
+    func_0040FC90();
+    systemInit();
+    cExecutionManMainK* exec = (cExecutionManMainK*)cMemMan_alloc(0x142C0, D_0048DAE8, 0, 0);
+    cExecutionMan_halt((cExecutionMan*)exec);
+    exec->field_0x8 = D_0048DB68;
+    return cAppMan_run(D_004A5B64, (cExecutionMan*)exec, argc, argv);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031B008);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cAppManB008 {
+public:
+    char pad_0x00[0x5C];
+    virtual void v01();
+    virtual void v02();
+};
+// Typed view of D_004A5B64 (main() in this unit declares it as void*).
+extern cAppManB008* D_004A5B64_B008 __asm__("D_004A5B64");
+extern "C" void func_00402450(int);
+extern "C" void func_00401718(int);
+extern "C" void func_00425FB8(void);
+extern "C" void func_0042C6A0(int, int, int);
+
+extern "C" void func_0031B008(int a0, int a1, int a2)
+{
+    D_004A5B64_B008->v02();
+    func_00402450(2);
+    func_00401718(0);
+    func_00401718(5);
+    func_00425FB8();
+    func_0042C6A0(a0, a1, a2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031B088);

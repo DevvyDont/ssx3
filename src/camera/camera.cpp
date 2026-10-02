@@ -4,7 +4,25 @@
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
+//100%
 INCLUDE_ASM("camera/camera", cCamera_resetChaseControllerSwitches);
+#ifdef SKIP_ASM
+struct sCam162138;
+extern "C" void func_00162138(sCam162138* self);
+extern void* D_004A28A8;
+
+extern "C" void cCamera_resetChaseControllerSwitches(void)
+{
+    void* cam = *(void**)((char*)D_004A28A8 + 0x84);
+    int* chase = *(int**)((char*)cam + 0x84);
+    if (chase != 0) {
+        func_00162138(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8));
+        if (*chase >= 2) {
+            func_00162138(*(sCam162138**)(*(char**)((char*)chase + 8) + 0xA8));
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/camera", cCamera_cCamera);
 
@@ -396,7 +414,31 @@ void* func_0015F928(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015F938);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+extern void* D_0045BD78[];
+// PORT: cQuad128 (the unit's 128-bit TImode typedef) is a 16-byte register copy.
+extern cQuad128 D_004FF130;
+extern "C" float func_00167E30(void* self);
+
+extern "C" void* func_0015F938(void* self)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    *(float*)self = func_00167E30(self);
+    *(int*)((char*)self + 0xC) = 0x4E;
+    *(float*)((char*)self + 0x4) = 10.0f;
+    *(float*)((char*)self + 0x8) = 30000.0f;
+    *(void***)((char*)self + 0x10) = D_0045BD78;
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    cQuad128 v = D_004FF130;
+    *(int*)((char*)self + 0xC) = 0x4F;
+    *(cQuad128*)((char*)self + 0x20) = v;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_0015F9B8);
 
@@ -440,7 +482,24 @@ extern "C" void* func_0015FFB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015FFF0);
+#ifdef SKIP_ASM
+extern "C" void* func_0015FFF0(void* self)
+{
+    *(float*)((char*)self + 0x28) = 0.05000000074505806f;
+    *(float*)((char*)self + 0x2C) = 0.05000000074505806f;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(float*)((char*)self + 0x20) = 1.0499999523162842f;
+    *(float*)((char*)self + 0x24) = 1.0499999523162842f;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00160028);
 
@@ -448,7 +507,18 @@ INCLUDE_ASM("camera/camera", func_00160130);
 
 INCLUDE_ASM("camera/camera", func_00160228);
 
+//100%
 INCLUDE_ASM("camera/camera", func_001603F0);
+#ifdef SKIP_ASM
+extern "C" float func_001603F0(void* self)
+{
+    float s = *(float*)((char*)self + 0x1C);
+    if (s == 0.0f)
+        return 0.0f;
+    return s * (*(float*)((char*)self + 0x24) / *(float*)((char*)self + 0x2C) * 0.007853982038795948f)
+             * (*(float*)((char*)self + 0x14) - *(float*)((char*)self + 0x8));
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00160438);
@@ -1062,11 +1132,43 @@ extern "C" void* func_00162170(sCam162138* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_001621A8);
+#ifdef SKIP_ASM
+int func_0011FE98(void*);
 
+extern "C" void func_001621A8(sCam162138* self)
+{
+    self->b2 = 1;
+    if (!self->b0 && !self->b1) {
+        float t = func_0011FE98(*(void**)(*(char**)((char*)self + 0x20) + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
+        cChaseCameraController_createChaseAlgorithmBlend(self, 0x42, 0, t * 0.01666666753590107f);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/camera", func_00162218);
+#ifdef SKIP_ASM
+extern "C" void func_00162218(sCam162138* self)
+{
+    self->b2 = 0;
+    if (!self->b0 && !self->b1) {
+        cChaseCameraController_createChaseAlgorithmBlend(self, self->field_0x24, 0, 0.0066666672937572f);
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00162258);
+#ifdef SKIP_ASM
+extern "C" void func_00162258(sCam162138* self)
+{
+    if (!self->b0) {
+        cChaseCameraController_createChaseAlgorithmBlend(self, 0x44, 0, 0.016793444752693176f);
+    }
+}
+#endif
 
 extern "C" void* func_0015D050(void*, int, int);
 
@@ -1079,7 +1181,25 @@ void* func_00162290(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_001622B0);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+extern void* D_0045BC38[];
+extern "C" float func_00167E30(void* self);
+
+extern "C" void* func_001622B0(void* self)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    *(float*)self = func_00167E30(self);
+    *(int*)((char*)self + 0xC) = 0x4E;
+    *(float*)((char*)self + 0x4) = 10.0f;
+    *(float*)((char*)self + 0x8) = 30000.0f;
+    *(void***)((char*)self + 0x10) = D_0045BC38;
+    *(int*)((char*)self + 0xC) = 0x53;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00162310__FPvi);
@@ -1144,7 +1264,28 @@ extern "C" void func_001624E8(void* self, int a1)
 
 INCLUDE_ASM("camera/camera", func_00162568);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00162998);
+#ifdef SKIP_ASM
+extern "C" void func_00162998(void* self, void* obj)
+{
+    float v;
+    if (*(int*)((char*)obj + 0x5C) == 0) {
+        if (*(int*)((char*)self + 0x2C0) < 0x334)
+            *(int*)((char*)self + 0x2C0) = *(int*)((char*)self + 0x2C0) + 1;
+        int t = *(int*)((char*)self + 0x2C0);
+        v = 1.0f;
+        if (t >= 0x78)
+            v = 1.0f - ((float)t - 120.0f) * 0.0014285714132711291f;
+        if (v < 0.0f)
+            v = 0.0f;
+    } else {
+        *(int*)((char*)self + 0x2C0) = 0;
+        v = 1.0f;
+    }
+    *(float*)((char*)obj + 0x48) = v;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00162A20);
 
@@ -1169,7 +1310,24 @@ INCLUDE_ASM("camera/camera", func_00163158);
 
 INCLUDE_ASM("camera/camera", func_00163270);
 
+//100%
 INCLUDE_ASM("camera/camera", func_001633B0);
+#ifdef SKIP_ASM
+extern "C" void* func_00168150(void* self);
+extern "C" void func_001633B0(void* self, void* obj, float a, float b, float c, float d)
+{
+    float k = *(float*)((char*)obj + 0x44);
+    float x = a * (k * 1.0000000116860974e-07f) * k + 1.0f + (c - 1.0f) * *(float*)((char*)obj + 0x4C);
+    int mode = *(int*)((char*)obj + 0x40);
+    if (mode == 1)
+        d = 1.0f;
+    else if (mode != 0)
+        d = 0.9990000128746033f;
+    *(float*)((char*)self + 0x1DC) = d * *(float*)((char*)self + 0x1DC) + (1.0f - d) * x;
+    *(float*)self = b * 0.7853981852531433f * *(float*)((char*)self + 0x1DC);
+    func_00168150(self);
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00163450);
 
@@ -1283,9 +1441,23 @@ INCLUDE_ASM("camera/camera", func_001673F8);
 
 INCLUDE_ASM("camera/camera", func_00167D88);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167D98);
+#ifdef SKIP_ASM
+extern "C" float func_00167D98(void* self)
+{
+    return 0.10000000149011612f;
+}
+#endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167DA8);
+#ifdef SKIP_ASM
+extern "C" float func_00167DA8(void* self)
+{
+    return 0.10000000149011612f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167DB8);
@@ -1349,7 +1521,14 @@ void func_00167E28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167E30);
+#ifdef SKIP_ASM
+extern "C" float func_00167E30(void* self)
+{
+    return 0.7853981852531433f;
+}
+#endif
 
 extern cQuad128 D_004FF120;
 
@@ -1646,7 +1825,39 @@ void func_001686C8(void* self, void* other)
 
 INCLUDE_ASM("camera/camera", func_001686D0);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168940);
+#ifdef SKIP_ASM
+class cCamTargetK8940 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+class cCamCtrlK8940 {
+public:
+    char pad_0x00[0x10];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00168940(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_001689C8);
@@ -1676,13 +1887,43 @@ void* func_00168A08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168A30);
+#ifdef SKIP_ASM
+extern "C" float func_00168A30(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168A40);
+#ifdef SKIP_ASM
+extern "C" void func_00168A40(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00168A70);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168C50);
+#ifdef SKIP_ASM
+extern "C" void func_00168C50(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00168CD8);
@@ -1712,11 +1953,41 @@ void* func_00168D18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168D40);
+#ifdef SKIP_ASM
+extern "C" float func_00168D40(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168D50);
+#ifdef SKIP_ASM
+extern "C" void func_00168D50(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00168D80);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168F60);
+#ifdef SKIP_ASM
+extern "C" void func_00168F60(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
 

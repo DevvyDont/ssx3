@@ -2,7 +2,39 @@
 
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D008);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern void* D_004A28A8;
+struct sDbgRaceSel17D008 {
+    char pad_0x00[0x48];
+    signed char mode;  // 0x48
+    signed char slot;  // 0x49
+};
+extern sDbgRaceSel17D008 D_00535BC8;
+class cBENewRaceIfaceK17D008 {
+public:
+    char pad_0x00[0xC];
+    virtual int v01();
+};
+struct sDbgFE17D008 {
+    char pad_0x0000[0x8C38];
+    int modes[8]; // 0x8C38
+};
+extern "C" void func_00145108(void* iface, int idx);
+extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
+
+extern "C" void func_0017D008(void* self, int idx)
+{
+    cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 0);
+    ((sDbgFE17D008*)self)->modes[D_00535BC8.slot] = D_00535BC8.mode;
+    func_00145108(iface, idx);
+    cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
+    iface->v01();
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017D0A8);
 
@@ -27,13 +59,61 @@ extern "C" void* func_0017D200(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D260);
+#ifdef SKIP_ASM
+extern void* D_004A4E90;
+extern "C" void func_0017D6F0(void* self, void* ev);
+extern "C" void func_00259230(void* ev);
+
+extern "C" void func_0017D260(void* self, void* ev)
+{
+    if (D_004A4E90 != 0)
+        func_0017D6F0(D_004A4E90, ev);
+    func_00259230(ev);
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017D298);
 
 INCLUDE_ASM("fe/debugfe", func_0017D3B0);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D688);
+#ifdef SKIP_ASM
+extern void* D_004A2EB8;
+extern void* D_004A3028;
+extern "C" void func_00255A20(void*);
+extern "C" void func_0025AC50(void*);
+extern "C" void func_002CC0C0(void* stack);
+extern "C" void func_0017DB18(void* self);
+
+struct sMenuStack17D688 {
+    int count;      // 0x0
+    void* items[8]; // 0x4
+};
+struct sDebugFE17D688 {
+    int f0;
+    int f4;
+    sMenuStack17D688 stack; // 0x8
+};
+
+static inline void* sMenuStack17D688_top(sMenuStack17D688* s)
+{
+    if (s->count > 0)
+        return s->items[s->count - 1];
+    return 0;
+}
+
+extern "C" void func_0017D688(sDebugFE17D688* self)
+{
+    func_00255A20(D_004A2EB8);
+    func_0025AC50(D_004A3028);
+    if (sMenuStack17D688_top(&self->stack) != 0)
+        func_002CC0C0(&self->stack);
+    func_0017DB18(self);
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 
@@ -47,13 +127,97 @@ INCLUDE_ASM("fe/debugfe", func_0017E030);
 
 INCLUDE_ASM("fe/debugfe", func_0017E118);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E1C0);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E1C0 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_0025D1B8(void* a, int b);
 
+extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int arg)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    self->state = 0x8;
+    func_0025D1B8(D_004A3028, arg);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E228);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E228 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_0025D428(void* a, int b);
 
+extern "C" void func_0017E228(sDebugFEState17E228* self, int arg)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    self->state = 0x9;
+    func_0025D428(D_004A3028, arg);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E290);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E290 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+void func_0025CD28(void* a, int b);
 
+extern "C" void func_0017E290(sDebugFEState17E290* self, int arg)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    self->state = 0x7;
+    func_0025CD28(D_004A3028, arg);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E2F8);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E2F8 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_0025D800(void* a, int b, int c);
+
+extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int arg)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    self->state = 0xB;
+    func_0025D800(D_004A3028, arg, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E368);
@@ -87,13 +251,103 @@ extern "C" void func_0017E3B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E418);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E418 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_002CC3B8(void* list, void* item);
+extern "C" void func_0025AAE0(void* a, int b);
 
+extern "C" void func_0017E418(sDebugFEState17E418* self, int arg)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
+    self->state = 0xC;
+    func_0025AAE0(D_004A3028, arg);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E490);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E490 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_0025FB58(void* a, int b, int c);
 
+extern "C" void func_0017E490(sDebugFEState17E490* self)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    self->state = 0xD;
+    func_0025FB58(D_004A3028, *(int*)((char*)self + 0x1C0C), 0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E4F0);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E4F0 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_002CC3B8(void* list, void* item);
+void func_0025FC28(void* a, int b);
 
+extern "C" void func_0017E4F0(sDebugFEState17E4F0* self)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
+    self->state = 0xC;
+    func_0025FC28(D_004A3028, *(int*)((char*)self + 0x1C0C));
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E558);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+struct sDebugFEState17E558 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+extern "C" void func_002CC460(void* list);
+extern "C" void func_002CC3B8(void* list, void* item);
+extern "C" void func_0025F628(void* a, int b, int c);
+
+extern "C" void func_0017E558(sDebugFEState17E558* self)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
+    self->state = 0xC;
+    func_0025F628(D_004A3028, 1, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 
@@ -135,7 +389,26 @@ int func_0017FAB0(void* self)
 
 INCLUDE_ASM("fe/debugfe", func_0017FAD0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", func_0017FB98);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+class cFEObjK17FB98 {
+public:
+    virtual void v01();
+    virtual void v02();
+};
+extern "C" void func_00231D18(void* self);
+extern "C" void func_0017F2D0(void* p);
+
+extern "C" void func_0017FB98(void* self)
+{
+    func_00231D18(self);
+    if (*(int*)((char*)D_004A28A8 + 4) == 0)
+        (*(cFEObjK17FB98**)((char*)self + 0x14))->v02();
+    func_0017F2D0((char*)self + 0x24);
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017FBF0);
 
@@ -471,7 +744,18 @@ void* func_001802E0(void* self)
 
 INCLUDE_ASM("fe/debugfe", func_00180300);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180478);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+
+extern "C" void func_00180478(void* self, unsigned char idx)
+{
+    int v = *(int*)((char*)D_004A28A8 + (idx << 2) + 0xB0);
+    *(unsigned char*)((char*)self + 0x4) = idx;
+    *(int*)((char*)self + 0x18) = v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180498);
@@ -486,7 +770,30 @@ extern "C" int func_00180498(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_001804B8);
+#ifdef SKIP_ASM
+extern void* D_004A33F0;
+extern "C" int func_00266BA8(void* mgr, int a1, int* out0, int* out1);
+
+struct sDebugFE1804B8 {
+    char pad_0x00[0xC];
+    int found; // 0xC
+    int a;     // 0x10
+    int b;     // 0x14
+};
+
+extern "C" void func_001804B8(sDebugFE1804B8* self)
+{
+    self->found = 0;
+    if (D_004A33F0 != 0) {
+        self->b = 0;
+        self->a = 0;
+        if (func_00266BA8(D_004A33F0, 0, &self->a, &self->b) != 0)
+            self->found = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_001805D8);

@@ -54,7 +54,19 @@ extern "C" void func_0015D700(void* self, float x, float y, float z)
 
 INCLUDE_ASM("camera/cameraalgorithms", func_0015D928);
 
+//100%
 INCLUDE_ASM("camera/cameraalgorithms", func_0015DAC0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+
+extern "C" void func_0015DAC0(void)
+{
+    void* cam = *(void**)((char*)D_004A28A8 + 0x84);
+    void* chase = *(void**)((char*)cam + 0x84);
+    void* ctrl = *(void**)((char*)chase + 0x4);
+    *(int*)((char*)ctrl + 0x4A4) = 1;
+}
+#endif
 
 INCLUDE_ASM("camera/cameraalgorithms", func_0015DB58);
 

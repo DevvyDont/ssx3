@@ -65,7 +65,31 @@ int cBigFile_close(cBigFile* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bigfile", cBigFile_open);
+#ifdef SKIP_ASM
+extern int D_004A2E78;
+extern "C" int func_003DEE18(const char* name, int a1);
+extern "C" int func_003DED50(const char* name, int memclass, int a2, cBigFile* out);
+
+// PORT: the unit declares cBigFile_open(cBigFile*) returning void; the body takes
+// (self, name, memclass) and returns field_0x4. Bound by asm label.
+int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("cBigFile_open");
+
+int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
+{
+    if (func_003DEE18(name, 0x64) == 0) {
+        return 0;
+    }
+    int saved = D_004A2E78;
+    D_004A2E78 = memclass;
+    if (func_003DED50(name, memclass, 0x64, self) != 0) {
+        self->field_0x4 = 1;
+    }
+    D_004A2E78 = saved;
+    return self->field_0x4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bigfile", func_00316A00__FPv);

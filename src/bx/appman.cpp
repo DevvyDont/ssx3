@@ -1,6 +1,29 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
+#ifdef SKIP_ASM
+extern void* D_0048DBE8[16];
+extern void* D_004A5B64;
+
+extern "C" void* cAppMan_cAppMan(void* self)
+{
+    *(void**)((char*)self + 0x5C) = D_0048DBE8;
+    *(int*)((char*)self + 0x20) = 0xC;
+    *(float*)((char*)self + 0x24) = 1.0f;
+    *(float*)((char*)self + 0x30) = 0.8999999761581421f;
+    *(int*)((char*)self + 0x34) = 0;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    D_004A5B64 = self;
+    return self;
+}
+#endif
 
 extern void* D_0048DBE8[16];
 extern void* D_004A5B64;

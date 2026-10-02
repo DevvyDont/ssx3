@@ -11,9 +11,13 @@ struct cBXString2 {
     void* arr[4]; // 0x14-0x23
 };
 
-//85.05% - loop shape (down-counting bne vs ours) not fully reproduced
+//100%
 INCLUDE_ASM("bx/bxstringctor", cBXString_cBXString__FP10cBXString2);
 #ifdef SKIP_ASM
+struct cBXStrK2 {
+    void* str;
+};
+
 cBXString2* cBXString_cBXString(cBXString2* self)
 {
     self->field_0x0 = D_004A3E90;
@@ -21,8 +25,9 @@ cBXString2* cBXString_cBXString(cBXString2* self)
     self->field_0x8 = D_004A3E90;
     self->field_0xC = D_004A3E90;
     self->field_0x10 = D_004A3E90;
-    for (int i = 0; i < 4; i++) {
-        self->arr[i] = D_004A3E90;
+    cBXStrK2* p = (cBXStrK2*)self->arr;
+    for (int i = 3; i != -1; i--, p++) {
+        p->str = D_004A3E90;
     }
     return self;
 }

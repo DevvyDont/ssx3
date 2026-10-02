@@ -1,6 +1,27 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("bx/memblockman", cMemMan_initialize);
+#ifdef SKIP_ASM
+extern void* D_00538B00[16];
+extern char D_004FF250[];
+extern unsigned int D_004A3EBC;
+extern unsigned int D_004A3EC0;
+extern int D_004A3EB8;
+extern "C" void func_003E5698(void* mutex);
+extern "C" void func_0031FF60(void* heap, unsigned int base, unsigned int size);
+extern "C" void cMemBlockMan_initialize(void);
+
+extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
+{
+    func_003E5698(D_00538B00);
+    D_004A3EBC = base;
+    D_004A3EC0 = size;
+    func_0031FF60(D_004FF250, base, size);
+    D_004A3EB8 = 1;
+    cMemBlockMan_initialize();
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_00319A90);
@@ -151,9 +172,80 @@ INCLUDE_ASM("bx/memblockman", func_0031A088);
 
 INCLUDE_ASM("bx/memblockman", func_0031A130);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A200);
+#ifdef SKIP_ASM
+extern int D_004A3EC8;
+extern void* D_004A5B50;
+extern void* D_004A5B58;
+extern void* D_004A5B5C;
+extern void* D_004A5B60;
+extern void* D_004A5B68;
+extern void* D_004A5B6C;
+extern void* D_004A5B74;
+// PORT: these empty stubs are defined as f(void), but this caller passes one argument.
+void func_00320518_1(void*) __asm__("func_00320518__Fv");
+void func_00320520_1(void*) __asm__("func_00320520__Fv");
+void func_00320528_1(void*) __asm__("func_00320528__Fv");
+void func_00320530_1(void*) __asm__("func_00320530__Fv");
+void func_00320538_1(void*) __asm__("func_00320538__Fv");
+void func_00320540_1(void*) __asm__("func_00320540__Fv");
+void func_00320548_1(void*) __asm__("func_00320548__Fv");
 
+extern "C" void func_0031A200(void)
+{
+    if (D_004A3EC8 != 0) {
+        func_00320518_1(D_004A5B60);
+        func_00320520_1(D_004A5B50);
+        func_00320528_1(D_004A5B5C);
+        func_00320530_1(D_004A5B6C);
+        func_00320538_1(D_004A5B74);
+        func_00320540_1(D_004A5B68);
+        func_00320548_1(D_004A5B58);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A268);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 FPU-flag probe: builds two float4s from flag bits and multiplies them on VU0.
+extern "C" void func_0031A268(int flags)
+{
+    float a[4] __attribute__((aligned(16)));
+    float b[4] __attribute__((aligned(16)));
+    int i;
+    for (i = 0; i < 4; i++) {
+        float f;
+        if ((flags & 0x8800) == 0) {
+            f = 0.0f;
+            if (!(flags & 8))
+                f = 1.0f;
+        } else {
+            f = 1.0000000031710769e-30f;
+            if (!(flags & 8))
+                f = 1.0000000150474662e+30f;
+        }
+        a[i] = f;
+        if (flags & 0x80)
+            f = -f;
+        b[i] = f;
+        flags <<= 1;
+    }
+    __asm__ __volatile__(
+        "qmfc2.ni   $8, $vf1\n"
+        "qmfc2.ni   $9, $vf2\n"
+        "lqc2       $vf1, %0\n"
+        "lqc2       $vf2, %1\n"
+        "vmul.xyzw  $vf1, $vf1, $vf2\n"
+        "qmtc2.ni   $8, $vf1\n"
+        "qmtc2.ni   $9, $vf2\n"
+        "vnop\n"
+        :
+        : "m"(a[0]), "m"(b[0])
+        : "$8", "$9");
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A308);
@@ -283,7 +375,17 @@ extern "C" void func_0031A3C0(void* buf)
 
 INCLUDE_ASM("bx/memblockman", func_0031A490);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A6B8);
+#ifdef SKIP_ASM
+extern int D_004A3ECC;
+extern "C" void func_00423C30(int, int);
+
+extern "C" void func_0031A6B8(void)
+{
+    func_00423C30(D_004A3ECC, 0x65);
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031A6D8);
 
@@ -511,5 +613,32 @@ extern "C" void func_0031AD18()
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AD20);
+#ifdef SKIP_ASM
+extern int D_00519C40[];
+extern int D_004A3ED4;
+extern "C" int func_00402618(int cmd, int* out);
+extern "C" void func_003E3D78(void);
+
+extern "C" int func_0031AD20(void)
+{
+    int flags = D_00519C40[0];
+    if (D_004A3ED4 != 0) {
+        int r;
+        D_004A3ED4 = 0;
+        r = 0;
+        func_00402618(2, &r);
+    }
+    if ((flags & 6) == 6) {
+        int r2 = 0;
+        func_00402618(2, &r2);
+        if (r2 != 0)
+            D_004A3ED0 = 1;
+        D_00519C40[0] &= ~6;
+        func_003E3D78();
+    }
+    return 0;
+}
+#endif
 

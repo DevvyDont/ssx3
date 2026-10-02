@@ -149,7 +149,49 @@ extern "C" void func_00169368(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169418);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_0045BDE0[];
+extern void* D_0045C8B8[];
+extern void* D_004A28A8;
+struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
+// Same object as the unit's later `extern func_001694B8_sVec4 D_004FF130;` (that type is defined below this point).
+extern sVec4K9418 D_004FF130_K9418 __asm__("D_004FF130");
+extern "C" float func_00167E30(void* self);
+
+struct sCamCtlK9418 {
+    float fov;      // 0x0
+    float nearZ;    // 0x4
+    float farZ;     // 0x8
+    int type;       // 0xC
+    void** vtbl;    // 0x10
+    int f14;        // 0x14
+    int f18;        // 0x18
+    int pad_1C;
+    sVec4K9418 v20; // 0x20
+};
+
+extern "C" void* func_00169418(void* p)
+{
+    sCamCtlK9418* self = (sCamCtlK9418*)p;
+    self->vtbl = D_0045BDE0;
+    float fov = func_00167E30(self);
+    self->type = 0x55;
+    self->vtbl = D_0045C8B8;
+    self->fov = fov;
+    self->nearZ = 10.0f;
+    self->farZ = 30000.0f;
+    self->f14 = 0;
+    void* cam = *(void**)((char*)D_004A28A8 + 0x84);
+    void* chase = *(void**)((char*)cam + 0x84);
+    void* ctrl = *(void**)((char*)chase + 0x4);
+    self->f18 = *(int*)((char*)ctrl + 0xAC);
+    self->v20 = D_004FF130_K9418;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_001694A8__FPvi);
