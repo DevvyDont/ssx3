@@ -102,7 +102,21 @@ INCLUDE_ASM("wscript/wscriptman", func_00309AA0);
 
 INCLUDE_ASM("wscript/wscriptman", func_00309B00);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309B70);
+#ifdef SKIP_ASM
+extern "C" int func_003A6D18(void*, int*);
+
+static inline bool func_00309B70_valid(int id) { return id != -1; }
+
+extern "C" int func_00309B70(void* self, int id)
+{
+    if (func_00309B70_valid(id)) {
+        return func_003A6D18(*(void**)((char*)self + 0x28C), &id);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_00309BA8);
 
@@ -506,9 +520,36 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C468);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C4A8);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C6C8);
+#ifdef SKIP_ASM
+class func_0030C6C8_cObj {
+public:
+    // slot N at vtable offset N*8
+    virtual int v01(void* a, int b);
+};
 
+extern "C" int func_0030C6C8(void* a, func_0030C6C8_cObj* obj)
+{
+    return obj->v01(a, 0x10C);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C700);
+#ifdef SKIP_ASM
+class func_0030C700_cObj {
+public:
+    // slot N at vtable offset N*8
+    virtual int v01(void* a, int b);
+    virtual int v02(void* a, int b);
+};
+
+extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj)
+{
+    return obj->v02(a, 0x10C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C738);
@@ -522,9 +563,31 @@ extern "C" void* func_0030C738(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C760);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
 
+extern "C" void func_0030C760(void* self)
+{
+    *(int*)self = 0;
+    *(int*)((char*)self + 4) = 0;
+    func_003E6448((char*)self + 8, 0, 0xC0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C790);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_0030C790(void* self)
+{
+    *(int*)self = 0;
+    *(int*)((char*)self + 4) = 0;
+    func_003E6448((char*)self + 8, 0, 0xC0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C7C0);
@@ -601,7 +664,21 @@ int func_0030D3D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D420);
+#ifdef SKIP_ASM
+extern void* D_00489AE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_0030D420(void* self, int flags)
+{
+    *(void***)((char*)self + 0x40) = D_00489AE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D480__FPv);

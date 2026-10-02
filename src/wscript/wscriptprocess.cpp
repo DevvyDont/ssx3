@@ -387,9 +387,36 @@ extern "C" void func_003086F0(void* self)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308720);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308760);
+#ifdef SKIP_ASM
+class func_00308760_cObj {
+public:
+    // slot N at vtable offset N*8
+    virtual int v01(void* a, int b);
+};
 
+extern "C" int func_00308760(void* a, func_00308760_cObj* obj)
+{
+    return obj->v01(a, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308798);
+#ifdef SKIP_ASM
+class func_00308798_cObj {
+public:
+    // slot N at vtable offset N*8
+    virtual int v01(void* a, int b);
+    virtual int v02(void* a, int b);
+};
+
+extern "C" int func_00308798(void* a, func_00308798_cObj* obj)
+{
+    return obj->v02(a, 4);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003087D0);
 
@@ -420,7 +447,18 @@ INCLUDE_ASM("wscript/wscriptprocess", func_00308C60);
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308DB8);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308F38);
+#ifdef SKIP_ASM
+extern "C" void func_0030B1B8(void*);
+
+extern "C" void func_00308F38(void* self)
+{
+    func_0030B1B8((char*)self + 0x2B8);
+    func_0030B1B8((char*)self + 0x2BC);
+    func_0030B1B8((char*)self + 0x2B4);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308F70);
 
