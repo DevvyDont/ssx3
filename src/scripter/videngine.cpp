@@ -19,7 +19,31 @@ extern "C" void func_00283AA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/videngine", func_00283AF8);
+#ifdef SKIP_ASM
+extern "C" void func_00253890(void* p, int a1);
+extern "C" void func_002539E0(void* self);
+extern "C" void func_00253A40(void* self);
+
+extern "C" void func_00283AF8(void* self)
+{
+    void* v = *(void**)((char*)self + 0x0);
+    if (v != 0 && *(int*)((char*)self + 0x4) != 0) {
+        if (*(int*)((char*)self + 0x8) != 0) {
+            if (*(int*)((char*)v + 0x8) != 0) {
+                func_00253A40(v);
+            }
+        } else {
+            if (*(int*)((char*)v + 0x8) == 0) {
+                func_002539E0(v);
+            }
+        }
+        func_00253890(*(void**)((char*)self + 0x0), *(int*)((char*)self + 0x8) ^ 1);
+        *(int*)((char*)self + 0x8) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283B78);

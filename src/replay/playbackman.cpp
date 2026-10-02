@@ -2,7 +2,30 @@
 
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026C588);
+#ifdef SKIP_ASM
+struct cBigFile;
+void cBigFile__cBigFile(cBigFile* self, int flags);
+void operator_delete(int* ptr);
+extern "C" void func_0026C898(void* self);
+extern void* D_00481898[];
+
+extern "C" void func_0026C588(void* self, int flags)
+{
+    cBigFile* bf = *(cBigFile**)self;
+    if (bf != 0) {
+        cBigFile__cBigFile(bf, 3);
+    }
+    operator_delete(*(int**)((char*)self + 0x6C));
+    operator_delete(*(int**)((char*)self + 0x68));
+    func_0026C898(self);
+    *(void***)((char*)self + 0x14) = D_00481898;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_update);
 
@@ -10,7 +33,25 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_initLocation);
 
 INCLUDE_ASM("replay/playbackman", func_0026C898);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026CA90);
+#ifdef SKIP_ASM
+extern "C" void func_0026CDF8(void* self);
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+extern "C" void func_0026CA90(void* self)
+{
+    func_0026CDF8(self);
+    unsigned int* buf = *(unsigned int**)((char*)self + 0x4);
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x70) = 0;
+    if (buf != 0) {
+        func_003E6448(buf, 0, 0x1C22C);
+        buf[0] = 0xDBAC0101;
+        buf[1] = 0x1C200;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026CBB0__FPv);
@@ -65,7 +106,28 @@ extern "C" void* func_0026CC18(void* self)
 
 INCLUDE_ASM("replay/playbackman", func_0026CC48);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026CD20);
+#ifdef SKIP_ASM
+extern "C" void cAI_purgeMissionRiders(void*);
+extern "C" void func_00128AC0(void* self);
+extern "C" void func_0015EDC8(void* self, int value);
+void func_0026F4A0(void* self, int val);
+
+extern "C" void func_0026CD20(void* self)
+{
+    if (*(int*)((char*)self + 0x70) == 1) {
+        cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
+        func_00128AC0(*(void**)((char*)self + 0x60));
+        void* fp = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
+        func_0026F4A0(fp, *(int*)((char*)fp + 0x4));
+        func_0026CC18(self);
+        *(int*)((char*)self + 0x70) = 0;
+        int v = *(int*)(*(char**)((char*)self + 0x60) + 0x28);
+        func_0015EDC8(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
+    }
+}
+#endif
 
 extern "C" void* func_0026CC18(void*);
 
@@ -271,7 +333,29 @@ void* func_0026D740(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D760);
+#ifdef SKIP_ASM
+struct sPbBytes4D760 {
+    char b[4];
+};
+
+extern "C" void* func_00270130(void* self);
+extern "C" void func_0026D818(void* self, void* out);
+// PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
+// argument; bind the 2-arg form to the symbol.
+void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
+
+extern "C" void* func_0026D760(void* self, sPbBytes4D760* src)
+{
+    void* out = func_00270130(self);
+    *(sPbBytes4D760*)((char*)out + 0x1C) = *src;
+    func_0026D818(self, out);
+    *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
+    func_0026ED88_2(out, 0);
+    return out;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D7D0);

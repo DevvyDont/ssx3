@@ -49,7 +49,39 @@ extern "C" void func_00283610(sSndList* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283658);
+#ifdef SKIP_ASM
+struct sDmEntry283658 {
+    char pad_0x00[0x8];
+    int used;
+    
+};
+
+struct sDmVEntry283658 {
+    short delta;
+    short index;
+    void (*fn)(void*, sDmEntry283658*);
+};
+
+struct sDmTable283658 {
+    int unk_0x0;
+    int count;
+    sDmEntry283658* entries;
+    sDmVEntry283658* vt;
+};
+
+extern "C" void func_00283658(void* self_)
+{
+    sDmTable283658* self = (sDmTable283658*)self_;
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i].used != 0) {
+            self->vt[2].fn((char*)self + self->vt[2].delta, &self->entries[i]);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", func_002836D8);

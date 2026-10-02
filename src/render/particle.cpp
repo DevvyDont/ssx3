@@ -2,7 +2,27 @@
 
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_Allocate);
 
+//100%
 INCLUDE_ASM("render/particle", func_00370CF8);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+
+extern "C" void func_00370CF8(void* self, int reset)
+{
+    if (*(void**)((char*)self + 0x1A0) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x1A0));
+        *(void**)((char*)self + 0x1A0) = 0;
+    }
+    if (*(void**)((char*)self + 0x1A4) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x1A4));
+        *(void**)((char*)self + 0x1A4) = 0;
+    }
+    if (reset) {
+        *(int*)((char*)self + 0x170) = 0;
+        *(int*)((char*)self + 0x178) = -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_reset);
@@ -57,7 +77,33 @@ extern "C" void func_003712B8(void* self, cStream003712B8* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00371318);
+#ifdef SKIP_ASM
+class cStream00371318 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void func_00371318(void* self, cStream00371318* stream)
+{
+    struct {
+        float a;
+        float b;
+        int c;
+        int d;
+        int e;
+    } buf;
+    stream->v02(&buf, 0x14);
+    *(float*)((char*)self + 0x0) = buf.a;
+    *(float*)((char*)self + 0x28) = buf.b;
+    *(int*)((char*)self + 0x170) = buf.d;
+    *(int*)((char*)self + 0x174) = buf.c;
+    *(int*)((char*)self + 0x17C) = buf.e;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00371380);
 
@@ -828,7 +874,26 @@ void* func_0037C808(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037C830);
+#ifdef SKIP_ASM
+struct sVEntry0037C830 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0037C830(void* self)
+{
+    int i;
+    for (i = 0; i < 2000; i++) {
+        if (((int*)((char*)self + 0x18F8))[i] != 0) {
+            sVEntry0037C830* vt = *(sVEntry0037C830**)((char*)self + 0x10D8);
+            vt[50].fn((char*)self + vt[50].delta, i);
+        }
+    }
+}
+#endif
 
 // declared by mangled name so we can call it with a single argument, the way
 // the target does (its real signature takes a second arg the caller leaves set)
@@ -1631,7 +1696,20 @@ INCLUDE_ASM("render/particle", func_003885E0);
 
 INCLUDE_ASM("render/particle", func_003889F0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389098);
+#ifdef SKIP_ASM
+extern "C" int func_004139F8(float f);
+
+extern "C" void func_00389098(void* self, const float* c)
+{
+    float k = 255.0f;
+    int r = func_004139F8(c[0] * k);
+    r |= func_004139F8(c[1] * k) << 8;
+    r |= func_004139F8(c[2] * k) << 16;
+    *(int*)((char*)self + 0x6AE0) = r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389118);
@@ -1893,5 +1971,20 @@ extern "C" sParticleEntryA0* func_0038AC20(void* self, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0038AC50);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+
+extern "C" int func_0038AC50(void* self, const char* name)
+{
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
+        if (func_004165A8(name, *(char**)((char*)self + 0xC) + (i << 3)) == 0) {
+            return i;
+        }
+    }
+    return 0;
+}
+#endif
 

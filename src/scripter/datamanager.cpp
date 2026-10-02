@@ -26,7 +26,32 @@ INCLUDE_ASM("scripter/datamanager", func_00275920);
 
 INCLUDE_ASM("scripter/datamanager", func_00275A20);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", func_00275B08);
+#ifdef SKIP_ASM
+extern "C" void func_00275A20(void* self, void* entry);
+
+struct sDmEntry275B08 {
+    char pad_0x00[0x10];
+    int used;
+    int unk_0x14;
+};
+
+struct sDmTable275B08 {
+    int count;
+    sDmEntry275B08* entries;
+};
+
+extern "C" void func_00275B08(sDmTable275B08* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i].used != 0) {
+            func_00275A20(self, &self->entries[i]);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00275B98);
 
@@ -57,7 +82,33 @@ void* func_00275CF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275D10);
+#ifdef SKIP_ASM
+extern "C" void func_00283C30(void* self);
+void func_00283C20(void* self);
+
+extern "C" void* func_00275D10(void* self)
+{
+    void* list = (char*)self + 0xC;
+    func_00283C30(list);
+    func_00283C20(list);
+    *(int*)((char*)self + 0xBC) = -1;
+    *(int*)((char*)self + 0x4) = 1;
+    *(int*)((char*)self + 0xA4) = 0;
+    *(int*)((char*)self + 0xA8) = 0;
+    *(int*)((char*)self + 0xC8) = 0;
+    *(int*)((char*)self + 0xB0) = 0;
+    *(int*)((char*)self + 0xAC) = 0;
+    *(int*)((char*)self + 0xB8) = 0;
+    *(int*)((char*)self + 0xC0) = 0;
+    *(int*)((char*)self + 0xC4) = 0;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0xB4) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275D90);
@@ -100,7 +151,23 @@ INCLUDE_ASM("scripter/datamanager", func_002766D0);
 
 INCLUDE_ASM("scripter/datamanager", func_00276868);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276998);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_00283D70(void* list, int i);
+// The unit declares func_00283D28 as returning void*, but it returns the list's count.
+int func_00283D28_count(void* list) __asm__("func_00283D28");
+
+extern "C" int func_00276998(void* self, int i)
+{
+    void* list = (char*)self + 0xC;
+    if (i < func_00283D28_count(list) && *(int*)func_00283D70(list, i) < 0x1C) {
+        return *(int*)func_00283D70(list, i);
+    }
+    return 0x1C;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276B98);

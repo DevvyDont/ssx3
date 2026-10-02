@@ -93,7 +93,25 @@ extern "C" void func_0038DF38(cObj0038DF38* obj, int a, int b, int c, float f)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038DF98);
+#ifdef SKIP_ASM
+class cObj0038DF98 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void* v01(int a);
+    virtual void* v02(int a);
+};
+
+// PORT: the unit defines func_0038DC60(void*) (an empty stub), but this caller
+// passes (void*, int, int, float, int); bind the 5-arg call by asm label.
+void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC60__FPv");
+
+extern "C" void func_0038DF98(cObj0038DF98* obj, int a, int b, int c, float f, int d)
+{
+    func_0038DC60_5(obj->v02(a), b, c, f, d);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038E008);
 
@@ -344,5 +362,25 @@ extern "C" void func_003916C0(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_00391708);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* FILE_load(const char* name, int flags);
+extern "C" void cFont_linkFont(void* self, void* data, int flags);
+void cMemMan_free(void*);
+extern const char D_00492F30[];
+
+extern "C" void func_00391708(void* self, const char* name, int flags)
+{
+    void* data;
+
+    sprintf((char*)self + 0x64, D_00492F30, name);
+    data = FILE_load(name, flags ^ 0x100);
+    cFont_linkFont(self, data, flags);
+    if (data != 0) {
+        cMemMan_free(data);
+    }
+}
+#endif
 

@@ -242,7 +242,32 @@ INCLUDE_ASM("replay/frameptr", func_0026F180);
 
 INCLUDE_ASM("replay/frameptr", func_0026F228);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F428);
+#ifdef SKIP_ASM
+void func_0026E5C0(void* self);
+
+struct sFpEntry26F428 {
+    char pad[0x38];
+};
+
+struct sFpOwner26F428 {
+    char pad_0x00[0x8];
+    int count;
+    char pad_0x0C[0x20];
+    sFpEntry26F428 entries[1];
+};
+
+extern "C" void func_0026F428(sFpOwner26F428* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        func_0026E968(&self->entries[i]);
+    }
+    func_0026E5C0((char*)self + 0x3B0);
+    func_0026E5C0((char*)self + 0x3BC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F498__FPv);

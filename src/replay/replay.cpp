@@ -49,7 +49,35 @@ extern "C" void* func_0026E490(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E4B8);
+#ifdef SKIP_ASM
+// PORT: func_0026E448 is declared in this unit with one parameter, but this caller
+// passes (self, index); bind the 2-arg form to the symbol.
+void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
+extern "C" int func_0026D4D8(void* stream, unsigned int pos);
+
+struct sReplay0026E4B8 {
+    char pad_0x000[0x484];
+    int pos;
+    void* frame;
+    void* streams[2];
+};
+
+extern "C" void func_0026E4B8(void* self_)
+{
+    sReplay0026E4B8* self = (sReplay0026E4B8*)self_;
+    int i;
+    void* p = func_0026E448_2(self, self->pos);
+    self->frame = p;
+    self->pos = *(int*)((char*)p + 0x30);
+    for (i = 0; i < 2; i++) {
+        if (self->streams[i] != 0) {
+            func_0026D4D8(self->streams[i], self->pos);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E528);

@@ -1,6 +1,30 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewNonBindTexID);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00492068[];
+
+struct cTexSlots367150 {
+    int unk_0x0;
+    int count;
+    void* slots[2000];
+    void** freeHead;
+};
+
+extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTexSlots367150* self)
+{
+    void** head = self->freeHead;
+    int id = head - self->slots;
+    self->freeHead = (void**)*head;
+    self->count++;
+    char* tex = (char*)self + 8;
+    void** slot = (void**)(tex + (id << 2));
+    *slot = cMemMan_alloc(0x58, D_00492068, 0x21000000, 0);
+    return id;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_003671C8);
@@ -89,7 +113,26 @@ void* func_00367340(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367360);
+#ifdef SKIP_ASM
+extern "C" void func_00366548(void* p);
+// PORT: the unit defines func_00367310(void), but this caller passes self.
+void func_00367310_1(void* self) __asm__("func_00367310");
+
+extern "C" void func_00367360(void* self)
+{
+    int i;
+    func_00367230();
+    func_00367310_1(self);
+    func_00366548((char*)self + 0x1F60);
+    func_00366548((char*)self + 0x4350);
+    for (i = 1; i >= 0; i--) {
+        ((int*)((char*)self + 0x1F4C))[i] = -1;
+    }
+    *(int*)((char*)self + 0x1F54) = -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_003673D0__FPv);
@@ -299,7 +342,29 @@ INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
 
 INCLUDE_ASM("render/ps2graphicsman", func_003695D8);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369610);
+#ifdef SKIP_ASM
+struct sVEntry00369610 {
+    short delta;
+    short index;
+    void (*fn)(void*, int*);
+};
+
+extern "C" void func_00369610(void* self, int* mask)
+{
+    int i;
+    unsigned int j;
+    for (i = 0; i < 4; i++) {
+        ((int*)((char*)self + 0xED8))[i] = ~mask[i];
+    }
+    for (j = 0; j < 2; j++) {
+        ((short*)((char*)self + 0xEE8))[j] = 0x7FFF;
+    }
+    sVEntry00369610* vt = *(sVEntry00369610**)((char*)self + 0x10D8);
+    vt[62].fn((char*)self + vt[62].delta, mask);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369690);

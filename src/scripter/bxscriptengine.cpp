@@ -150,7 +150,28 @@ extern "C" void func_002826D8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282720);
+#ifdef SKIP_ASM
+extern "C" void func_00274A08(void* self);
+
+extern "C" void func_00282720(void* self, int a1)
+{
+    char* p = (char*)self + (a1 * 0x24 + 0x2c0);
+    func_00274A08(*(void**)p);
+    if (*(int*)(p + 0x4) == 5) {
+        char* s = *(char**)p;
+        if (*(int*)(s + 0x2C) <= 0) {
+            int t = *(int*)(s + 0x20);
+            if (t == 3 || t == 4) {
+                *(int*)(p + 0x4) = 4;
+            } else {
+                *(int*)(p + 0x4) = 3;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282798);
@@ -171,7 +192,27 @@ extern "C" int func_00282798(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282838);
+#ifdef SKIP_ASM
+extern "C" void* func_00282CB0(void* self, int a1);
+extern "C" void func_00282908(void* self, void* script);
+
+extern "C" int func_00282838(void* self, int a1)
+{
+    char* s = (char*)func_00282CB0(self, a1);
+    if (s == 0) {
+        return 0;
+    }
+    if (*(int*)(s + 0x4) == 1) {
+        func_00282908(self, s);
+    }
+    if (*(int*)(s + 0x4) != 4 && *(int*)(s + 0x4) != 5) {
+        return 0;
+    }
+    return *(int*)(*(char**)s + 0x20) == 4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002828B8);
@@ -586,7 +627,24 @@ void* func_00283200(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283228);
+#ifdef SKIP_ASM
+extern "C" void func_002832D8(void* self);
+void operator_delete(int* ptr);
+
+extern "C" void func_00283228(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_00482558;
+    if (*(int*)((char*)self + 0x4) != -1 && *(int*)((char*)self + 0x4) != 0) {
+        func_002832D8(self);
+        *(int*)((char*)self + 0x4) = -1;
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283298);

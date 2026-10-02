@@ -48,7 +48,39 @@ extern "C" void func_00275650(sAnimList* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scanimmgr", func_00275698);
+#ifdef SKIP_ASM
+struct sDmEntry275698 {
+    char pad_0x00[0x8];
+    int used;
+    char pad_0x0C[0x8];
+};
+
+struct sDmVEntry275698 {
+    short delta;
+    short index;
+    void (*fn)(void*, sDmEntry275698*);
+};
+
+struct sDmTable275698 {
+    int unk_0x0;
+    int count;
+    sDmEntry275698* entries;
+    sDmVEntry275698* vt;
+};
+
+extern "C" void func_00275698(void* self_)
+{
+    sDmTable275698* self = (sDmTable275698*)self_;
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i].used != 0) {
+            self->vt[2].fn((char*)self + self->vt[2].delta, &self->entries[i]);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/scanimmgr", func_00275718);
