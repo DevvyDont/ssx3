@@ -41,7 +41,21 @@ void* func_00275CF8(void* self)
 
 INCLUDE_ASM("scripter/datamanager", func_00275D10);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275D90);
+#ifdef SKIP_ASM
+extern "C" void func_00276868(void* self, int a1);
+void operator_delete(int* ptr);
+
+extern "C" void func_00275D90(int* self, int flags)
+{
+    func_00276868(self, 1);
+    *self = 0;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00275DD8);
 
@@ -148,7 +162,22 @@ INCLUDE_ASM("scripter/datamanager", func_00277310);
 
 INCLUDE_ASM("scripter/datamanager", func_002773A0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", func_00277400);
+#ifdef SKIP_ASM
+extern "C" int func_002771C8(void* self, void* obj);
+char* func_0027C070(void* obj);
+extern "C" void func_002EF378(int a0);
+
+extern "C" void func_00277400(void* self, int a1, void* obj)
+{
+    if (func_002771C8(self, obj) != 0) {
+        if (*func_0027C070(obj) != 0) {
+            func_002EF378(0);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00277450);
 

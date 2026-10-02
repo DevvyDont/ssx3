@@ -16,7 +16,25 @@ extern "C" void func_00367230(void)
 
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewBindTexID);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_003672C0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+struct sGmPtrTable {
+    int count;
+    int pad_0x4;
+    int* entries[1];
+};
+
+extern "C" void func_003672C0(sGmPtrTable* self, int idx)
+{
+    int** base = self->entries; int** e = base + idx;
+    operator_delete(*e);
+    *e = 0;
+    self->count--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367310);

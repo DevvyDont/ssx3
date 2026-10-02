@@ -6,7 +6,28 @@ INCLUDE_ASM("scripter/scsndmgr", func_00283518);
 
 INCLUDE_ASM("scripter/scsndmgr", func_00283580);
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283610);
+#ifdef SKIP_ASM
+struct sScSndVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sSndEntry;
+struct sSndList;
+extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
+
+extern "C" void func_00283610(sSndList* self, int id)
+{
+    sSndEntry* p = func_002836D8(self, id);
+    if (p != 0) {
+        sScSndVEntry* vt = *(sScSndVEntry**)((char*)self + 0xC);
+        vt[2].fn((char*)self + vt[2].delta, p);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/scsndmgr", func_00283658);
 
@@ -36,7 +57,19 @@ extern "C" sSndEntry* func_002836D8(sSndList* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283720);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" void func_0028BE90(void* bank, int handle);
+
+extern "C" void func_00283720(sSndList* self, sSndEntry* e)
+{
+    func_0028BE90(**(void***)((char*)func_0028B180() + 0x118), e->unk4);
+    e->id = -1;
+    e->data = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283760);

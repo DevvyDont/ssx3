@@ -8,7 +8,20 @@ INCLUDE_ASM("replay/replaycache", func_00270130);
 
 INCLUDE_ASM("replay/replaycache", func_002701A0);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270238);
+#ifdef SKIP_ASM
+extern "C" void func_0026E608(void* list, void* node);
+extern "C" void func_0026D628(void* node);
+extern "C" void func_0026E5D0(void* list, void* node);
+
+extern "C" void func_00270238(void* self, void* node)
+{
+    func_0026E608((char*)self + 0x3B0, node);
+    func_0026D628(node);
+    func_0026E5D0((char*)self + 0x3BC, node);
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00270280);
 
@@ -227,7 +240,25 @@ void func_00270F18(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00270F20);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270F78);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+void operator_delete(int* p);
+
+// The unit declares this as returning void* (line ~198, used by the tail-call
+// wrapper func_00270ED8); nothing meaningful is returned.
+extern "C" void* func_00270F78(void* self)
+{
+    operator_delete(*(int**)((char*)self + 0x63C));
+    void* p = *(void**)((char*)self + 0x640);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    *(void**)((char*)self + 0x63C) = 0;
+    *(void**)((char*)self + 0x640) = 0;
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00270FC0);
 
@@ -351,7 +382,19 @@ void* func_002716F0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00271708);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void func_00271058(void* self, signed char* data, int size);
+
+extern "C" void func_00271708(void* self)
+{
+    func_003E6574(*(void**)((char*)self + 0x640), (char*)self + 0x680, 8);
+    func_00271058(self, *(signed char**)((char*)self + 0x640), 8);
+    *(int*)((char*)self + 0x638) += 1;
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00271758);
 
@@ -988,7 +1031,19 @@ extern "C" void* func_00273938(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00273970);
+#ifdef SKIP_ASM
+extern "C" void func_00273A00(void* self);
+
+extern "C" void func_00273970(void* self, int flags)
+{
+    func_00273A00(self);
+    if (flags & 1) {
+        func_002724E8(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002739B8);

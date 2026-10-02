@@ -281,7 +281,20 @@ extern "C" int func_003914F8(void)
 
 INCLUDE_ASM("render/lightman", func_003915E8);
 
+//100%
 INCLUDE_ASM("render/lightman", func_003916C0);
+#ifdef SKIP_ASM
+extern "C" void func_003919E8(void* self);
+void operator_delete(int* ptr);
+
+extern "C" void func_003916C0(int* self, int flags)
+{
+    func_003919E8(self);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_00391708);
 

@@ -913,7 +913,21 @@ extern "C" int func_00395350(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00395370);
+#ifdef SKIP_ASM
+struct sFontVEntry23 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, float, float, float, float);
+};
+
+extern "C" void func_00395370(void* self, float* v, int a2)
+{
+    sFontVEntry23* vt = *(sFontVEntry23**)((char*)self + 0x10D8);
+    vt[23].fn((char*)self + vt[23].delta, a2, v[0], v[1], v[2], v[3]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_003953B0__FPv);

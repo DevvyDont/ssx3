@@ -6,7 +6,27 @@ INCLUDE_ASM("scripter/scanimmgr", func_00275498);
 
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_LinkBank);
 
+//100%
 INCLUDE_ASM("scripter/scanimmgr", func_00275650);
+#ifdef SKIP_ASM
+struct sScAnimVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sAnimList;
+extern "C" void* func_00275718(sAnimList* self, int id);
+
+extern "C" void func_00275650(sAnimList* self, int id)
+{
+    void* p = func_00275718(self, id);
+    if (p != 0) {
+        sScAnimVEntry* vt = *(sScAnimVEntry**)((char*)self + 0xC);
+        vt[2].fn((char*)self + vt[2].delta, p);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/scanimmgr", func_00275698);
 

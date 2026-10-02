@@ -58,9 +58,36 @@ INCLUDE_ASM("replay/playbackman", func_0026CDF8);
 
 INCLUDE_ASM("replay/playbackman", func_0026CE50);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D0A0);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_004815A0[];
+void func_0026D168(void* self);
 
+extern "C" void* func_0026D0A0(void* self)
+{
+    *(void**)((char*)self + 0xC) = operator_new_tag(0x8000, D_004815A0, 0, 0);
+    func_0026D168(self);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D0E8);
+#ifdef SKIP_ASM
+extern "C" void func_0026D130(void* self);
+void operator_delete(int* ptr);
+
+extern "C" void func_0026D0E8(int* self, int flags)
+{
+    func_0026D130(self);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D130);
@@ -201,7 +228,22 @@ void* func_0026D740(void* self)
 
 INCLUDE_ASM("replay/playbackman", func_0026D760);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D7D0);
+#ifdef SKIP_ASM
+struct sPbBytes4 {
+    char b[4];
+};
+
+extern "C" void func_0026D818(void* self, void* out);
+
+extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src)
+{
+    *(sPbBytes4*)((char*)out + 0x1C) = *src;
+    func_0026D818(self, out);
+    *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", func_0026D818);
 
@@ -209,7 +251,20 @@ INCLUDE_ASM("replay/playbackman", func_0026D988);
 
 INCLUDE_ASM("replay/playbackman", func_0026DA88);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026DB88);
+#ifdef SKIP_ASM
+// PORT: cReplayFramePtr_getFrameBlock is mangled with no parameters (__Fv) but is
+// called here with (frame, 1); bind the 2-arg form to the symbol.
+void cReplayFramePtr_getFrameBlock_2(void* frame, int n) __asm__("cReplayFramePtr_getFrameBlock__Fv");
+extern "C" void func_0026DBD0_2(void* replay, void* frame) __asm__("func_0026DBD0");
+
+extern "C" void func_0026DB88(void* self, void* frame)
+{
+    cReplayFramePtr_getFrameBlock_2(frame, 1);
+    func_0026DBD0_2(self, frame);
+}
+#endif
 
 extern "C" void cReplay_restoreFrame(void*);
 

@@ -10,7 +10,21 @@ INCLUDE_ASM("render/graphicsman", func_00369A78);
 
 INCLUDE_ASM("render/graphicsman", func_00369C28);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00369CB0);
+#ifdef SKIP_ASM
+struct sGfxVEntry95 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, void*, int, int, int, float);
+};
+
+extern "C" void func_00369CB0(void* self, void* obj, int a2, int a3, int a4)
+{
+    sGfxVEntry95* vt = *(sGfxVEntry95**)((char*)self + 0x10D8);
+    vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, a2, a3, a4, 1.0f);
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_00369CF8);
 
@@ -424,7 +438,21 @@ INCLUDE_ASM("render/graphicsman", func_0036D428);
 
 INCLUDE_ASM("render/graphicsman", func_0036D500);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00370018);
+#ifdef SKIP_ASM
+extern char D_00493160[];
+void func_002F7A68(void*);
+
+extern "C" void* func_00370018(void* self)
+{
+    *(void**)((char*)self + 0x18C) = D_00493160;
+    func_002F7A68((char*)self + 0x10);
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x184) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_00370058);
 
@@ -472,7 +500,34 @@ extern "C" void func_00370888(void* self, const sGmQuad2* m, const sGmQuad* v)
 
 INCLUDE_ASM("render/graphicsman", func_003708C0);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00370AA8);
+#ifdef SKIP_ASM
+struct sGmSerVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sGmSerObj {
+    sGmSerVEntry* vt;
+};
+
+struct sGmSer12 {
+    float a;
+    float b;
+    int c;
+};
+
+extern "C" void func_00370AA8(void* self, sGmSerObj* out)
+{
+    sGmSer12 buf;
+    buf.a = *(float*)((char*)self + 0x0);
+    buf.b = *(float*)((char*)self + 0x18);
+    buf.c = *(int*)((char*)self + 0xC);
+    out->vt[1].fn((char*)out + out->vt[1].delta, &buf, 12);
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_00370AF8);
 

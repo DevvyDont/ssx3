@@ -46,11 +46,43 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282390);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002823F0);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282450);
+#ifdef SKIP_ASM
+extern "C" void* func_00282CB0(void* self, int a1);
+extern "C" void func_00274A30(void* p);
+
+extern "C" int func_00282450(void* self, int a1)
+{
+    void* t = func_00282CB0(self, a1);
+    if (t == 0) {
+        return 0;
+    }
+    int type = *(int*)((char*)t + 0x4);
+    if (type == 3 || type == 4) {
+        func_00274A30(*(void**)t);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282540);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002826D8);
+#ifdef SKIP_ASM
+extern "C" void func_002749E8(void* self);
+
+extern "C" void func_002826D8(void* self, int a1)
+{
+    char* p = (char*)self + (a1 * 0x24 + 0x2c0);
+    func_002749E8(*(void**)p);
+    if (*(int*)(*(char**)p + 0x2C) > 0) {
+        *(int*)(p + 0x4) = 5;
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282720);
 
@@ -99,13 +131,50 @@ extern "C" void func_002828B8(sScriptEngine2B8* self)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282908);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002829D0);
+#ifdef SKIP_ASM
+struct sBxsVEntry10 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, int);
+};
+
+extern "C" void func_002829D0(void* self, void* a1)
+{
+    char* t = *(char**)((char*)a1 + 0xC);
+    sBxsVEntry10* vt = *(sBxsVEntry10**)((char*)self + 0x2A8);
+    vt[10].fn((char*)self + vt[10].delta, a1, *(int*)(t + 0x8), *(int*)(t + 0xC));
+    *(int*)(t + 0x4) = 4;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282A18);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282A80);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282B40);
+#ifdef SKIP_ASM
+struct sBxsThreadHdr {
+    void* owner;    // 0x0
+    int state;      // 0x4
+    int handle;     // 0x8
+};
+
+extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1);
+// PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
+int func_00274C10(void* self, int a1);
+
+extern "C" void func_00282B40(void* self, void* obj)
+{
+    sBxsThreadHdr* t = func_00282C38(self, 1);
+    t->state = 2;
+    t->handle = -1;
+    t->owner = obj;
+    func_00274C10(obj, (int)t);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282B88);
@@ -292,7 +361,18 @@ extern "C" void func_00282F90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282FB8);
+#ifdef SKIP_ASM
+extern "C" void* func_0027D2E8(void);
+extern "C" void func_0027D400(void* mgr, void* self, int a2);
+
+extern "C" void func_00282FB8(void* self, void* a1)
+{
+    *(void**)((char*)self + 0x8) = a1;
+    func_0027D400(func_0027D2E8(), self, **(int**)((char*)a1 + 0x8));
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283000);
@@ -335,7 +415,21 @@ extern "C" void func_00283060(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_00283088);
+#ifdef SKIP_ASM
+extern void* D_004823E0[];
+void* func_00282F60(void* self);
+
+extern "C" void* func_00283088(void* self)
+{
+    func_00282F60(self);
+    *(void***)self = D_004823E0;
+    *(int*)((char*)self + 0xC) = 9;
+    *(int*)((char*)self + 0x10) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002830C8);
 
@@ -370,9 +464,40 @@ void* func_00283200(void* self, int a1)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00283228);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283298);
+#ifdef SKIP_ASM
+struct sBxsVEntryA {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
 
+extern "C" void func_00283298(void* self)
+{
+    char* mgr = (char*)func_0027D2E8();
+    sBxsVEntryA* vt = *(sBxsVEntryA**)(mgr + 0x2A8);
+    *(int*)((char*)self + 0x4) = vt[2].fn(mgr + vt[2].delta, self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002832D8);
+#ifdef SKIP_ASM
+struct sBxsVEntryB {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+extern "C" void func_002832D8(void* self)
+{
+    char* mgr = (char*)func_0027D2E8();
+    sBxsVEntryB* vt = *(sBxsVEntryB**)(mgr + 0x2A8);
+    vt[3].fn(mgr + vt[3].delta, *(int*)((char*)self + 0x4));
+    *(int*)((char*)self + 0x4) = -1;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00283320);
 

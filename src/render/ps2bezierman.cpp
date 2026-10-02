@@ -18,5 +18,17 @@ void* cPSPBezierMan_cPSPBezierMan(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2bezierman", func_0038AEB0);
+#ifdef SKIP_ASM
+extern "C" void func_0038B0F8(void* self);
+extern "C" void func_00374CA8(void* self, int flags);
+
+extern "C" void func_0038AEB0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00493760;
+    func_0038B0F8(self);
+    func_00374CA8(self, flags);
+}
+#endif
 

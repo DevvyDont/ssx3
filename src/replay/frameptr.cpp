@@ -1,6 +1,26 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_00481730[];
+
+// same body as func_0026E950 (setBlock), inlined here
+static inline void cReplayFramePtr_setBlockInl(void* self, char* buf, int size)
+{
+    *(char**)((char*)self + 0x4) = buf;
+    *(char**)((char*)self + 0x8) = buf + size;
+    *(char**)((char*)self + 0xc) = buf;
+    *(int*)((char*)self + 0x10) = size;
+}
+
+extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size)
+{
+    cReplayFramePtr_setBlockInl(self, (char*)operator_new_tag(size, D_00481730, 0, 0), 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026E950);
@@ -14,7 +34,20 @@ extern "C" void func_0026E950(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026E968);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+
+extern "C" void func_0026E968(void* self)
+{
+    void* p = *(void**)((char*)self + 0x4);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    cReplayFramePtr_setBlockInl(self, 0, 0);
+}
+#endif
 
 struct cReplayFramePtr {
     char pad_0x00[0x4];
@@ -44,9 +77,30 @@ int func_0026E9C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026E9D0);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int size);
 
+extern "C" void func_0026E9D0(void* self, void* src, int n)
+{
+    func_003E6574(*(char**)((char*)self + 0x8), src, n);
+    *(char**)((char*)self + 0x8) += n;
+    *(int*)((char*)self + 0x10) += n;
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EA20);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int size);
+
+extern "C" void func_0026EA20(void* self, void* dst, int n)
+{
+    func_003E6574(dst, *(char**)((char*)self + 0xC), n);
+    *(char**)((char*)self + 0xC) += n;
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EA68);
 
@@ -56,7 +110,28 @@ INCLUDE_ASM("replay/frameptr", func_0026EB48);
 
 INCLUDE_ASM("replay/frameptr", func_0026EC08);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026ECD8);
+#ifdef SKIP_ASM
+struct sFpSerVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sFpSerObj {
+    sFpSerVEntry* vt;
+};
+
+extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
+{
+    unsigned int id = 0xFFFFFFFF;
+    if (obj != 0) {
+        id = *(unsigned int*)((char*)obj + 0x78);
+    }
+    out->vt[1].fn((char*)out + out->vt[1].delta, &id, 4);
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026ED28);
 
@@ -106,7 +181,15 @@ extern "C" void func_0026EE68(void* self)
 
 INCLUDE_ASM("replay/frameptr", func_0026EEA0);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EF30);
+#ifdef SKIP_ASM
+extern "C" void func_0026EF30(void* self)
+{
+    func_0016D1D8(D_004C5830);
+    *(int*)((char*)self + 0x634) = (*(int*)((char*)self + 0x634) + 1) % 9;
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EF80);
 
@@ -158,7 +241,22 @@ extern "C" void func_0026F7B8(int* self)
 
 INCLUDE_ASM("replay/frameptr", func_0026F7F8);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F850);
+#ifdef SKIP_ASM
+extern "C" void func_0026DB88(void* self, void* p);
+extern "C" void func_00270238(void* self, void* p);
+
+extern "C" void func_0026F850(void* self)
+{
+    void* p = *(void**)((char*)self + 0x3D0);
+    if (p != 0) {
+        func_0026DB88(self, p);
+        func_00270238(self, *(void**)((char*)self + 0x3D0));
+        *(void**)((char*)self + 0x3D0) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F898__FPvi);
