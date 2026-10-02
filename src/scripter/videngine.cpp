@@ -4,7 +4,20 @@ INCLUDE_ASM("scripter/videngine", cVidEngine_ReadyVideo);
 
 INCLUDE_ASM("scripter/videngine", func_002839A8);
 
+//100%
 INCLUDE_ASM("scripter/videngine", func_00283AA0);
+#ifdef SKIP_ASM
+extern "C" void func_00253938(void* self);
+
+extern "C" void func_00283AA0(void* self)
+{
+    void* p = *(void**)self;
+    if (p != 0 && *(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) == 0) {
+        func_00253938(p);
+        *(int*)((char*)self + 0x8) = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/videngine", func_00283AF8);
 

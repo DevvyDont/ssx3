@@ -78,11 +78,60 @@ extern "C" void* func_0028B248(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B278);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_0028B528(void* self);
+extern "C" void func_0028B730(void* self);
+extern "C" void func_0028B650(void* self);
 
+extern "C" void func_0028B278(void* self, int flags)
+{
+    func_0028B528(self);
+    func_0028B730(self);
+    func_0028B650(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B2D0);
+#ifdef SKIP_ASM
+extern "C" void func_0028B528(void* self);
+
+extern "C" void func_0028B2D0(void* self)
+{
+    if (*(void**)((char*)self + 0x18) != 0) {
+        for (void* p = *(void**)((char*)self + 0x18); p != self; p = *(void**)((char*)p + 0x18)) {
+            func_0028B528(p);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/asyncsys", func_0028B320);
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B528);
+#ifdef SKIP_ASM
+extern "C" int func_003B6300(int id);
+extern "C" void* func_002523A8(void* self);
+
+extern "C" void func_0028B528(void* self)
+{
+    if (*(int*)self == 1) {
+        *(int*)self = 0;
+        func_003B6300(*(int*)((char*)self + 0x4));
+        *(int*)((char*)self + 0x4) = -1;
+        if (*(int*)((char*)self + 0x8) == 0) {
+            func_002523A8(*(void**)((char*)self + 0x10));
+            *(int*)((char*)self + 0x10) = 0;
+            *(int*)((char*)self + 0x14) = 0;
+        }
+    }
+}
+#endif
 

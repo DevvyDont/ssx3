@@ -142,7 +142,25 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B63D0);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6550);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
+
+extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int arg)
+{
+    int r = 0;
+    *a = 0;
+    *b = 0;
+    *c = 0;
+    if (type == 0x4D) {
+        *c = 1;
+        r = func_002A34D0(func_0028B180(), 0, 1, arg);
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B65B0);
 
@@ -224,7 +242,20 @@ extern "C" int func_002B6808(sTriggerIdCache* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6868);
+#ifdef SKIP_ASM
+extern "C" void func_002B6868(sTriggerIdCache* self, int id)
+{
+    if (func_002B6808(self, id) == 0) {
+        if (self->count < 200) {
+            self->ids[self->count] = id;
+            self->count++;
+        }
+        self->lastId = -1;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B68D0);
@@ -353,7 +384,30 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B50);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6C20);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6C90);
+#ifdef SKIP_ASM
+struct sTriggerEntry18 {
+    int unk0;
+    int unk4;
+    int unk8;
+    int active;
+    void* unk10;
+    int unk14;
+};
+
+extern "C" void func_002B7318(void* self, sTriggerEntry18* e);
+
+extern "C" int func_002B6C90(void* self, int a1, sTriggerEntry18* entries, int n)
+{
+    for (int i = 0; i < n; i++) {
+        if (entries[i].active != 0) {
+            func_002B7318(self, &entries[i]);
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6CF8);
 

@@ -2,7 +2,27 @@
 
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_cScriptAnimBankManager);
 
+//100%
 INCLUDE_ASM("scripter/scanimmgr", func_00275498);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_00275698(void* self);
+extern char D_004825D8[];
+
+extern "C" void func_00275498(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_004825D8;
+    func_00275698(self);
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_LinkBank);
 

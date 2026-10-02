@@ -154,7 +154,25 @@ extern "C" void func_00278E90(void* self, int i, int a, int b, int c, int d, int
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278ED0);
+#ifdef SKIP_ASM
+struct sScriptKeyEntry {
+    int unk0;
+    int key;
+    int unk8;
+};
+
+extern "C" void func_00278ED0(void* self, int a1, int key, int b, int c, int d, int f)
+{
+    for (int i = 0; i < **(int**)((char*)self + 0x52C); i++) {
+        if ((*(sScriptKeyEntry**)((char*)self + 0x530))[i].key == key) {
+            func_00278E90(self, a1, i, b, c, d, f);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278F38);
@@ -191,7 +209,20 @@ extern "C" void func_00279070(void* self, int i, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002790A0);
+#ifdef SKIP_ASM
+extern "C" void func_00276868(void* self, int a1);
+extern "C" void func_0027BF90(void* self);
+
+extern "C" void func_002790A0(void* self, int i)
+{
+    func_00276868(*(char**)((char*)self + 0x54C) + i * 0xCC, 1);
+    if (*(int*)((char*)self + 0x550) == i) {
+        func_0027BF90(self);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_002790F8);
@@ -285,7 +316,18 @@ extern "C" int func_00279370(void* self, int a)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279488);
+#ifdef SKIP_ASM
+extern "C" void func_00276868(void* self, int a1);
+
+extern "C" void func_00279488(void* self)
+{
+    for (int i = 0; i < 2; i++) {
+        func_00276868(&(*(sSsxScriptRider**)((char*)self + 0x624))[i], 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279528);
 
@@ -404,7 +446,20 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027A6B0);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A720);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A798);
+#ifdef SKIP_ASM
+extern "C" void func_002773A0(void* self, int a1, void* obj);
+int func_00282BE0(void* self, void* a1);
+
+extern "C" void func_0027A798(void* self, void* a1)
+{
+    int r = *(int*)((char*)self + 0x550);
+    if (r != 2) {
+        func_002773A0(*(char**)((char*)self + 0x54C) + r * 0xCC, func_00282BE0(self, a1), a1);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A7F0);
 
@@ -818,7 +873,20 @@ void func_0027D788(void* self, float val)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D790);
+#ifdef SKIP_ASM
+extern "C" void* func_0027D2E8(void);
+extern "C" int func_0027D2C8(void* self, int i, int val);
+
+extern "C" int func_0027D790(void* self, int val)
+{
+    if (*(void**)((char*)self + 0x14) == 0) {
+        return 0;
+    }
+    return func_0027D2C8(func_0027D2E8(), *(int*)(*(char**)((char*)self + 0x14) + 0x4), val);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D7F0);
@@ -947,7 +1015,24 @@ extern "C" void* func_00281170(void* self, int a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281190);
+#ifdef SKIP_ASM
+void func_0027D680(void* self, int val);
+
+extern "C" int func_00281190(void* self, void* obj)
+{
+    void** slots = (void**)((char*)self + 0xD0);
+    for (int i = 0; i < 2; i++) {
+        if (slots[i] == 0) {
+            slots[i] = obj;
+            func_0027D680(obj, (int)self); // PORT: pointer passed as int (callee mangled __FPvi)
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002811E8);
 

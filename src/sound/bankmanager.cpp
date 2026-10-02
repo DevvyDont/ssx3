@@ -38,9 +38,38 @@ extern "C" void func_0028B730(sBankNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B788);
+#ifdef SKIP_ASM
+extern "C" void func_0028B7E0(void*);
+extern "C" int func_003B6098(void* sema, int a1);
 
+extern "C" void func_0028B788(void* self, int a1, int a2)
+{
+    func_0028B7E0(self);
+    *(int*)((char*)self + 0x10) = a1;
+    *(int*)((char*)self + 0x14) = a2;
+    func_003B6098((char*)self + 0x4, a1);
+    *(int*)self = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B7E0);
+#ifdef SKIP_ASM
+extern "C" int func_003B6300(int id);
+
+extern "C" void func_0028B7E0(void* self)
+{
+    *(int*)self = 0;
+    if (*(int*)((char*)self + 0x4) != -1) {
+        func_003B6300(*(int*)((char*)self + 0x4));
+        *(int*)((char*)self + 0x4) = -1;
+    }
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B830);
@@ -308,7 +337,30 @@ INCLUDE_ASM("sound/bankmanager", func_0028F140);
 
 INCLUDE_ASM("sound/bankmanager", func_0028F200);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F2C0);
+#ifdef SKIP_ASM
+extern "C" void* func_002B3AC0(void*);
+
+struct sBankMgrVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0028F2C0(void* self)
+{
+    if (*(int*)((char*)self + 0x6294) != 0) {
+        func_002B3AC0((char*)self + 0x118);
+    } else if (*(int*)((char*)self + 0x6298) != 0) {
+        char* obj = (char*)self + 0x118;
+        sBankMgrVEntry* vt = *(sBankMgrVEntry**)((char*)self + 0x5558);
+        vt[4].fn(obj + vt[4].delta, 0x24);
+    }
+    *(int*)((char*)self + 0x6294) = 0;
+    *(int*)((char*)self + 0x6298) = 0;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028F328);
 
@@ -330,7 +382,26 @@ extern "C" void func_0028F520(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028F558);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" void func_0028EF90(void* self);
+
+extern "C" void func_0028F558(void* self, int id)
+{
+    *(int*)((char*)self + 0x6284) = id;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (iface != 0) {
+        if (*func_00144BC0(iface) == *(int*)((char*)self + 0x6284)) {
+            func_0028EF90(self);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028F5B8);
 

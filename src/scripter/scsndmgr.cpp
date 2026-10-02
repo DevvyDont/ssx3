@@ -2,7 +2,27 @@
 
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_cScriptSoundBankManager);
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283518);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_00283658(void* self);
+extern char D_00482240[];
+
+extern "C" void func_00283518(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_00482240;
+    func_00283658(self);
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/scsndmgr", func_00283580);
 
@@ -103,7 +123,22 @@ extern "C" void* func_00283798(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_002837C8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_00283818(void* self);
+extern char D_00482228[];
+
+extern "C" void func_002837C8(void* self, int flags)
+{
+    *(void**)((char*)self + 0x18) = D_00482228;
+    func_00283818(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/scsndmgr", func_00283818);
 
