@@ -41,7 +41,29 @@ int func_001694B0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", func_001694B8);
+#ifdef SKIP_ASM
+struct func_001694B8_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
+
+extern void* D_0045C850[];
+extern func_001694B8_sVec4 D_004FF130;
+extern "C" void* func_00169418(void* self);
+extern "C" void* func_0015FFF0(void* self);
+
+extern "C" void* func_001694B8(void* self)
+{
+    func_00169418(self);
+    *(void***)((char*)self + 0x10) = D_0045C850;
+    func_0015FFF0((char*)self + 0x74);
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(int*)((char*)self + 0xC) = 0x56;
+    *(int*)((char*)self + 0x44) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x40) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169518);
@@ -86,7 +108,27 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169570);
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169828);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169CF8);
+#ifdef SKIP_ASM
+extern void* D_0045C7E8[];
+extern func_001694B8_sVec4 D_004FF130;
+extern "C" void* func_00169418(void* self);
+extern "C" void* func_0015FFF0(void* self);
+
+extern "C" void* func_00169CF8(void* self)
+{
+    func_00169418(self);
+    *(void***)((char*)self + 0x10) = D_0045C7E8;
+    func_0015FFF0((char*)self + 0x74);
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(int*)((char*)self + 0xC) = 0x57;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x44) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169D58);
@@ -110,7 +152,27 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169DB0);
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169F88);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A458);
+#ifdef SKIP_ASM
+extern void* D_0045C780[];
+extern func_001694B8_sVec4 D_004FF130;
+extern "C" void* func_00169418(void* self);
+extern "C" void* func_0015FFF0(void* self);
+
+extern "C" void* func_0016A458(void* self)
+{
+    func_00169418(self);
+    *(void***)((char*)self + 0x10) = D_0045C780;
+    func_0015FFF0((char*)self + 0x70);
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(int*)((char*)self + 0xC) = 0x58;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x44) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A4B8);
@@ -134,7 +196,27 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016A510);
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A868);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD38);
+#ifdef SKIP_ASM
+extern void* D_0045C718[];
+extern func_001694B8_sVec4 D_004FF130;
+extern "C" void* func_00169418(void* self);
+extern "C" void* func_0015FFF0(void* self);
+
+extern "C" void* func_0016AD38(void* self)
+{
+    func_00169418(self);
+    *(void***)((char*)self + 0x10) = D_0045C718;
+    func_0015FFF0((char*)self + 0x70);
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(int*)((char*)self + 0xC) = 0x59;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x44) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD98);
 

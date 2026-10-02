@@ -38,7 +38,22 @@ void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
 
 INCLUDE_ASM("fe/feasyncfile", func_001A39F0);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A3BF0);
+#ifdef SKIP_ASM
+int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
+
+extern "C" int func_001A3BF0(cFEAsyncManager* self)
+{
+    int i;
+    for (i = 0; i < 5; i++) {
+        if (cFEAsyncManager_GetFileStatus(self, i) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A3C50);
 
@@ -56,7 +71,30 @@ INCLUDE_ASM("fe/feasyncfile", func_001A3FE0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A4040);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A4170);
+#ifdef SKIP_ASM
+struct sVE1A4170 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void func_001A6C40(void* self, int a1);
+
+extern "C" int func_001A4170(void* self, void* obj)
+{
+    int r;
+    sVE1A4170* vt = *(sVE1A4170**)((char*)obj + 0x8);
+    if (vt[27].fn((char*)obj + vt[27].delta) == 0) {
+        r = 0;
+    } else {
+        func_001A6C40(self, *(int*)((char*)self + 0x6F8));
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A41C0);
 
@@ -286,9 +324,74 @@ void func_001A8768(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8770);
+#ifdef SKIP_ASM
+class cFEAsync1A8770 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+};
 
+extern "C" void func_0039E510(void*);
+extern "C" void* func_001A8B88(void* self, int size, int a2);
+
+extern "C" void* func_001A8770(void* self)
+{
+    ((cFEAsync1A8770*)self)->v27();
+    ((cFEAsync1A8770*)self)->v28();
+    func_0039E510(self);
+    return func_001A8B88(self, 0x114, 0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A87D0);
+#ifdef SKIP_ASM
+struct sVE1A87D0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0039E4C0(void* self, int a1);
+
+extern "C" void func_001A87D0(void* self, int a1)
+{
+    sVE1A87D0* vt = *(sVE1A87D0**)((char*)self + 0x8);
+    vt[32].fn((char*)self + vt[32].delta);
+    func_0039E4C0(self, a1);
+    *(int*)((char*)self + 0x48) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8828__FPv);

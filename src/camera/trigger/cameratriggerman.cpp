@@ -1,6 +1,28 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_cleanupOnExit);
+#ifdef SKIP_ASM
+struct cActiveTriggerList;
+struct cCameraTriggerList;
+struct cCameraTriggerStack;
+void cCameraTriggerStack_init(cCameraTriggerStack* self);
+void cActiveTriggerList_purge(cActiveTriggerList* self);
+void cCameraTriggerList_init(cCameraTriggerList* self);
+extern "C" void cCameraTriggerMan_purge(void* self);
+extern "C" void cCamera_resetChaseControllerSwitches();
+
+extern "C" void cCameraTriggerMan_cleanupOnExit(void* self)
+{
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x1C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
+    cCameraTriggerMan_purge(self);
+    cCameraTriggerList_init((cCameraTriggerList*)self);
+    cCamera_resetChaseControllerSwitches();
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA10__FPv);

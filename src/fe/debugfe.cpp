@@ -8,7 +8,24 @@ INCLUDE_ASM("fe/debugfe", func_0017D0A8);
 
 INCLUDE_ASM("fe/debugfe", func_0017D1B8);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D200);
+#ifdef SKIP_ASM
+extern void* D_0046D740[];
+extern char D_0045D060[];
+void* func_002CAA58(void* self);
+extern "C" void* func_002CCDF0(void* self, void* text);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+
+extern "C" void* func_0017D200(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0046D740;
+    func_002CCDF0((char*)self + 0x130, D_0045D060);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017D260);
 
@@ -38,9 +55,37 @@ INCLUDE_ASM("fe/debugfe", func_0017E290);
 
 INCLUDE_ASM("fe/debugfe", func_0017E2F8);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E368);
+#ifdef SKIP_ASM
+extern "C" void func_002CC460(void* list);
 
+extern "C" void func_0017E368(void* self)
+{
+    int* list = (int*)((char*)self + 0x8);
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    *(int*)((char*)self + 0x4) = 0xD;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E3B8);
+#ifdef SKIP_ASM
+extern "C" void func_002CC460(void* list);
+extern "C" void func_002CC3B8(void* list, void* item);
+
+extern "C" void func_0017E3B8(void* self)
+{
+    int* list = (int*)((char*)self + 0x8);
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    *(int*)((char*)self + 0x4) = 0xE;
+    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1534);
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017E418);
 

@@ -2,7 +2,25 @@
 
 INCLUDE_ASM("camera/cameracontroller", cCameraController_cCameraController);
 
+//100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CC10);
+#ifdef SKIP_ASM
+extern void* D_0045B938[];
+extern "C" void func_0015C940(void* p, int mode);
+void operator_delete(int* ptr);
+
+extern "C" void func_0015CC10(void* self, int flags)
+{
+    *(void***)((char*)self + 0x14) = D_0045B938;
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        func_0015C940(p, 3);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/cameracontroller", func_0015CC70);
 
@@ -67,9 +85,35 @@ extern "C" void func_0015CEE8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", func_0015CF28);
+#ifdef SKIP_ASM
+extern "C" void cCameraAlgoList_insert(void* list, int a, int b, float w);
 
+extern "C" void func_0015CF28(void* self, int a, int b)
+{
+    func_0015CD60(self);
+    cCameraAlgoList_insert(*(void**)((char*)self + 0x8), a, b, 1.0f);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", func_0015CF80);
+#ifdef SKIP_ASM
+extern "C" void func_0015CF28(void* self, int a, int b);
+
+extern "C" void func_0015CF80(void* self, int msg)
+{
+    switch (msg) {
+    case 0x50:
+        func_0015CF28(self, *(int*)((char*)self + 0x1C), 0);
+        break;
+    case 0x51:
+        func_0015CF28(self, *(int*)((char*)self + 0x18), 0);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CFE8);

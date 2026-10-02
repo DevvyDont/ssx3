@@ -4,7 +4,19 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionBoundedCam);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSwitchCam);
+#ifdef SKIP_ASM
+extern "C" int get_float(void* reader, void* dst);
+extern "C" int get_uint(void* reader, void* dst);
+
+extern "C" int get_cCTActionSwitchCam(void* reader, void* dst)
+{
+    *(int*)dst = 0;
+    int n = get_float(reader, (char*)dst + 0xC);
+    return n + get_uint(reader, (char*)dst + 0x8);
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSpline);
 
@@ -113,7 +125,29 @@ void func_001732B8_impl(void* self, int flags)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732E8);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173678);
+#ifdef SKIP_ASM
+struct sVE173678a {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+struct sVE173678b {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*);
+};
+
+extern "C" void* func_00173678(void* self)
+{
+    sVE173678b* vt = *(sVE173678b**)((char*)self + 0x10);
+    char* o = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE173678a* vt2 = *(sVE173678a**)o;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
 
@@ -153,7 +187,29 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174200);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001744B0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001747A0);
+#ifdef SKIP_ASM
+struct sVE1747A0a {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+struct sVE1747A0b {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*);
+};
+
+extern "C" void* func_001747A0(void* self)
+{
+    sVE1747A0b* vt = *(sVE1747A0b**)((char*)self + 0x10);
+    char* o = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE1747A0a* vt2 = *(sVE1747A0a**)o;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174848);
 
@@ -565,7 +621,23 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178208);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001783E0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178520);
+#ifdef SKIP_ASM
+struct func_00178520_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
+extern void* D_0045CC50[];
+extern "C" void* func_00162318(void* self);
+
+extern "C" void* func_00178520(void* self, func_00178520_sVec4* a, func_00178520_sVec4* b)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x43;
+    *(void***)((char*)self + 0x10) = D_0045CC50;
+    *(func_00178520_sVec4*)((char*)self + 0x390) = *a;
+    *(func_00178520_sVec4*)((char*)self + 0x3A0) = *b;
+    return self;
+}
+#endif
 
 extern void* D_0045CC50[];
 extern "C" void* func_00162458(void*);
@@ -655,7 +727,25 @@ void* func_00179FA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179FC8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144CC0(void* iface, int id);
+
+extern "C" int func_00179FC8(void* self, int id)
+{
+    if (func_00144CC0(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
+        return 1;
+    }
+    if (id >= 0xE && id <= 0x10) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A028);

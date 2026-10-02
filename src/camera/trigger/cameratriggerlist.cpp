@@ -88,5 +88,19 @@ void cCameraTriggerList_readCookie(cCameraTriggerList* self, void* buffer)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readHeader);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit declares get_uint with C++ linkage; the target calls the unmangled symbol.
+int get_uint_c(void* buffer, void* dest) __asm__("get_uint");
+
+extern "C" int cCameraTriggerList_readHeader(cCameraTriggerList* self, void* buffer)
+{
+    get_uint_c(buffer, &self->field_0x10);
+    get_uint_c(buffer, &self->field_0x4);
+    get_uint_c(buffer, &self->field_0x8);
+    return 0;
+}
+#endif
 

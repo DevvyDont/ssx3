@@ -81,7 +81,23 @@ extern "C" void* func_0016C6E0(cActiveTriggerList* self, void* key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_add);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern char D_0045BF68[];
+
+extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
+{
+    sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, D_0045BF68, 0x20000000, 0);
+    sTriggerNode* old = self->head;
+    self->head = n;
+    n->pad = item;
+    n->next = old;
+    *(int*)((char*)n + 0xC) = 1;
+    *(int*)((char*)n + 0x8) = 1;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C778);
 
