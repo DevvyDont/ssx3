@@ -77,5 +77,51 @@ INCLUDE_ASM("fe/festateriderbio", func_00183B08);
 
 INCLUDE_ASM("fe/festateriderbio", func_00183C08);
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_00183D08);
+#ifdef SKIP_ASM
+struct sVec2_00183D08 { float x, y; };
+
+class cWidget_00183D08 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int a);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20(sVec2_00183D08* p);
+    virtual void v21(sVec2_00183D08* p);
+};
+
+extern "C" void func_00183D08(cWidget_00183D08* self, void* rect, float scale)
+{
+    if (rect) {
+        sVec2_00183D08 pos;
+        self->v20(&pos);
+        float k = scale * 256.0f;
+        pos.x = (*(float*)((char*)rect + 0x14) - *(float*)((char*)rect + 0x10)) * k;
+        pos.y = (*(float*)((char*)rect + 0x18) - *(float*)((char*)rect + 0xC)) * k;
+        self->v21(&pos);
+        self->v09(1);
+    } else {
+        self->v09(0);
+    }
+}
+#endif
 

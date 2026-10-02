@@ -2,7 +2,45 @@
 
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_costVisible);
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_00184780);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList* list);
+int GetHashValue32(char* str);
+extern char D_004A1458[];
+extern char D_004A1460[];
+
+class cWidget_00184780 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int a);
+};
+
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+
+extern "C" void func_00184780(void* self, int on)
+{
+    void* screen = cList_first((cList*)((char*)self + 0x24));
+    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1458));
+    if (w) {
+        w->v09(on);
+    }
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1460));
+    if (w) {
+        w->v09(on);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_trickVisible);
 

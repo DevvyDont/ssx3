@@ -83,7 +83,37 @@ extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onGainTransition);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* func_00153C88(void* iface, int id);
+extern "C" void* func_00153D28(void* iface, int id);
+extern "C" void func_003A0E90(void* text, void* str);
+extern "C" void func_003A0D00(void* text, void* str);
+extern char D_0046F4F0[];
+extern char D_004A23F0[];
+
+extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gained)
+{
+    if (gained) {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xA);
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046F4F0));
+        if (obj) {
+            func_003A0E90(obj, func_00153C88(iface, *(int*)((char*)self + 0x9C)));
+        }
+        obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23F0));
+        if (obj) {
+            func_003A0D00(obj, func_00153D28(iface, *(int*)((char*)self + 0x9C)));
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F74E0);

@@ -2,7 +2,55 @@
 
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_003279D0);
+#ifdef SKIP_ASM
+struct sFwdDiffList;
+struct sFwdDiffLink;
+struct sFwdDiffTable;
+struct sFwdDiffNode;
+extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n);
+extern "C" void func_00327B30(void* self, void* node);
+extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node);
+extern "C" void func_00327C00(void* self, void* src, void* node);
+
+struct sCacheNode_279D0 {
+    unsigned int key;           // 0x0
+    sCacheNode_279D0* lruNext;  // 0x4
+    sCacheNode_279D0* lruPrev;  // 0x8
+    sCacheNode_279D0* next;     // 0xC
+};
+
+struct sCache_279D0 {
+    int pad0;
+    sCacheNode_279D0* lru;      // 0x4
+    sCacheNode_279D0** buckets; // 0x8
+    unsigned int count;         // 0xC
+};
+
+static inline int func_003279D0_less(unsigned int a, unsigned int b) { return a < b; }
+
+extern "C" void func_003279D0(sCache_279D0* self, void* src, sCacheNode_279D0** out)
+{
+    unsigned int key = *(unsigned int*)((char*)src + 0x150);
+    sCacheNode_279D0* n = self->buckets[key % self->count];
+    while (n != 0 && !func_003279D0_less(key, n->key)) {
+        if (n->key == key) {
+            func_00327AC0((sFwdDiffList*)self, (sFwdDiffLink*)n);
+            *out = n;
+            return;
+        }
+        n = n->next;
+    }
+    n = self->lru;
+    func_00327B30(self, n);
+    n->key = key;
+    func_00327BB0((sFwdDiffTable*)self, (sFwdDiffNode*)n);
+    self->lru = n->lruNext;
+    func_00327C00(self, src, n);
+    *out = n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327AC0);

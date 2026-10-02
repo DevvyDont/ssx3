@@ -329,7 +329,28 @@ extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032CA78);
+#ifdef SKIP_ASM
+extern "C" int func_0032DF28(void* self);
+extern "C" void func_0032DB40(void* self, void* v);
+extern "C" int func_0032D470(void* self, void* a1, void* a2, void* a3, void* v, void* pos, int a6, int a7, void* a8, void* a9);
+
+extern "C" int func_0032CA78(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6)
+{
+    void* t = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)t + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+    }
+    func_0032DB40(self, v);
+    *(float*)((char*)self + 0x94) = 0.0f;
+    func_0032D470(self, a1, a2, a3, v, (char*)self + 0x80, 0, 0, a5, a6);
+    if (*(float*)((char*)self + 0x94) < 0.0f) {
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032CB58);
@@ -568,7 +589,85 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032E690);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032E9A0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032F650);
+#ifdef SKIP_ASM
+struct sVec4_2F650 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+static inline sVec4_2F650 vecAdd_2F650(sVec4_2F650* a, sVec4_2F650* b)
+{
+    sVec4_2F650 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*a), "m"(*b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v * s).
+static inline sVec4_2F650 vecScale_2F650(const sVec4_2F650& v, float s)
+{
+    sVec4_2F650 r;
+    int t;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+struct sRiderSphere_2F650 {
+    int state;          // 0x00
+    int f4;             // 0x04
+    int f8;             // 0x08
+    int pad_0xC[5];
+    sVec4_2F650 max;    // 0x20
+    sVec4_2F650 min;    // 0x30
+    sVec4_2F650 center; // 0x40
+    void** vtbl;        // 0x50
+    int pad_0x54[3];
+    void* tree;         // 0x60
+    void* tree2;        // 0x64
+    int pad_0x68[2];
+    cRiderSphereTree node; // 0x70
+};
+
+cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
+extern "C" void func_00329DC8(void* tree, sVec4_2F650* mn, sVec4_2F650* mx);
+extern void* D_0048E590[];
+
+extern "C" sRiderSphere_2F650* func_0032F650(sRiderSphere_2F650* self, void* tree, int flag)
+{
+    self->f8 = 0;
+    self->f4 = 0;
+    self->vtbl = D_0048E590;
+    cRiderSphereTree_cRiderSphereTree(&self->node);
+    self->tree2 = tree;
+    self->tree = tree;
+    self->state = flag == 0;
+    func_00329DC8(tree, &self->min, &self->max);
+    self->center = vecScale_2F650(vecAdd_2F650(&self->min, &self->max), 0.5f);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032F708);

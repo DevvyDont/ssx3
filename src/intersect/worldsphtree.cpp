@@ -475,7 +475,46 @@ void* func_003415A8(void* self)
 
 INCLUDE_ASM("intersect/worldsphtree", func_003415D0);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341770);
+#ifdef SKIP_ASM
+struct sVec4_341770 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_341770 vu0Scale_341770(const sVec4_341770& v, float s)
+{
+    sVec4_341770 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+class cMover_341770 {
+public:
+    virtual void v01();
+    virtual sVec4_341770* getVelocity();
+    virtual void v03();
+    virtual void setVelocity(sVec4_341770* v);
+};
+
+extern "C" float func_002D1C70();
+
+extern "C" void func_00341770(void* self, cMover_341770* obj)
+{
+    sVec4_341770 u = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), func_002D1C70());
+    obj->setVelocity(&u);
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00341818);
 
@@ -777,7 +816,46 @@ extern "C" void* func_00342808(void* self, sVEntry00342808** stream)
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342880);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003429E0);
+#ifdef SKIP_ASM
+struct sVec4_3429E0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_3429E0 vu0Scale_3429E0(const sVec4_3429E0& v, float s)
+{
+    sVec4_3429E0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+class cMover_3429E0 {
+public:
+    virtual void v01();
+    virtual sVec4_3429E0* getVelocity();
+    virtual void v03();
+    virtual void setVelocity(sVec4_3429E0* v);
+};
+
+extern "C" float func_002D1C70();
+
+extern "C" void func_003429E0(void* self, cMover_3429E0* obj)
+{
+    sVec4_3429E0 u = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), *(float*)((char*)self + 0x24) + 1.0f), func_002D1C70());
+    obj->setVelocity(&u);
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342A88);
 

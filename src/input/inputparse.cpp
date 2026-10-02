@@ -1,6 +1,37 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupModifierName);
+#ifdef SKIP_ASM
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern char D_004A3EF8[];
+extern char D_004A3F00[];
+extern char D_004A3F08[];
+extern char D_0048DDD8[];
+extern char D_004A3F10[];
+
+extern "C" int cInputMapParser_lookupModifierName(void* self, const char* name)
+{
+    if (func_0041AA88(name, D_004A3EF8) == 0) {
+        return 0;
+    }
+    if (func_0041AA88(name, D_004A3F00) == 0) {
+        return 1;
+    }
+    if (func_0041AA88(name, D_004A3F08) == 0) {
+        return 2;
+    }
+    if (func_0041AA88(name, D_0048DDD8) == 0) {
+        return 3;
+    }
+    int c = func_0041AA88(name, D_004A3F10);
+    int r = 4;
+    if (c != 0) {
+        r = 6;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupConfigName);
 
@@ -162,7 +193,43 @@ INCLUDE_ASM("input/inputparse", func_00325450);
 
 INCLUDE_ASM("input/inputparse", func_00325F48);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326078);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+void cMemMan_free(void* ptr);
+struct sParseStream;
+extern "C" void func_00326478(void* self, sParseStream* s);
+extern "C" void func_00326430(void* self, int a1, int a2);
+extern "C" int func_00326150(void* self, sParseStream* s, int a2, int a3);
+extern "C" unsigned char* func_003E1A10(const char* name, int* size, int flags);
+extern char D_004A3FA0[];
+
+struct sParseStream_326078 {
+    unsigned char* base;
+    int size;
+    unsigned char* cur;
+    int line;
+};
+
+extern "C" void func_00326078(void* self, int a1, int a2)
+{
+    char name[0xA0];
+    sParseStream_326078 st;
+    sprintf(name, D_004A3FA0, a1, a2);
+    unsigned char* p = func_003E1A10(name, &st.size, 0);
+    st.cur = st.base = p;
+    st.line = 1;
+    func_00326478(self, (sParseStream*)&st);
+    // PORT: the unit declares func_00326430's third parameter as int; it receives a char*.
+    func_00326430(self, st.line, (int)name);
+    while (func_00326150(self, (sParseStream*)&st, a1, a2)) {
+    }
+    if (st.base) {
+        cMemMan_free(st.base);
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326150);
 
@@ -179,7 +246,41 @@ extern "C" void func_00326308(void* self, char* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326360);
+#ifdef SKIP_ASM
+void cMemMan_free(void* ptr);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+extern char D_0048E3B8[];
+
+struct sCharBuf_326360 {
+    int count;
+    int cap;
+    char* data;
+};
+
+extern "C" void func_00326360(void* self, char c)
+{
+    sCharBuf_326360* b = (sCharBuf_326360*)self;
+    if (b->count == b->cap) {
+        int newCap = b->count + 0x400;
+        int grow = b->count * 3 / 2;
+        if (newCap < grow) {
+            newCap = grow;
+        }
+        char* p = (char*)operator_new_tag(newCap, D_0048E3B8, 0, 0);
+        func_0041605C(p, b->data, b->cap);
+        if (b->data) {
+            cMemMan_free(b->data);
+        }
+        b->data = p;
+        b->cap = newCap;
+    }
+    b->data[b->count++] = c;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", func_00326430);
@@ -217,7 +318,34 @@ extern "C" void func_00326478(void* self, sParseStream* s)
 
 INCLUDE_ASM("input/inputparse", func_003264B0);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_003265C0);
+#ifdef SKIP_ASM
+struct sParseStream;
+extern "C" void func_00326478(void* self, sParseStream* s);
+// PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
+void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
+extern char D_0048E3D8[];
+
+extern "C" void func_003265C0(void* self, sParseStream* s, int a2, int a3)
+{
+    for (;;) {
+        int ch = *(int*)((char*)self + 0xC);
+        if (ch == '\n') {
+            *(int*)((char*)s + 0xC) += 1;
+            func_00326360(self, (char)*(int*)((char*)self + 0xC));
+            func_00326478(self, s);
+            return;
+        }
+        if (ch < 0) {
+            goto error;
+        }
+        func_00326478(self, s);
+    }
+error:
+    func_00326A20_5(self, s, a2, a3, D_0048E3D8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326678);
@@ -328,7 +456,37 @@ extern "C" int func_00326B48(sInputParse_00326B48* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326B88);
+#ifdef SKIP_ASM
+class cInputDevice_326B88 {
+public:
+    virtual void v01();
+    virtual int read(char* buf, int size);
+};
+
+struct sInputSlot_00326B88 {
+    int value;
+    char data[0x60];
+};
+
+struct sInputParse_00326B88 {
+    sInputSlot_00326B88 slots[30][4];
+    unsigned int head;
+    unsigned int tail;
+    int count;
+    cInputDevice_326B88* devices[4];
+};
+
+extern "C" void func_00326B88(sInputParse_00326B88* s)
+{
+    int i;
+    for (i = 0; i < s->count; i++) {
+        s->slots[s->tail][i].value = s->devices[i]->read(s->slots[s->tail][i].data, 0x18);
+    }
+    s->tail = (s->tail + 1) % 30;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326C60);

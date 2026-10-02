@@ -107,9 +107,127 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstates", func_00194BF0);
 
+//100%
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_00460050[];
+extern char D_00460060[];
+extern char D_00460040[];
+extern char D_00460070[];
+extern char D_004A17D8[];
 
+extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
+{
+    int id;
+    id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_00460050)) {
+        *(int*)((char*)item + 0x18) = 0xB;
+        return;
+    }
+    id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_00460060)) {
+        *(int*)((char*)item + 0x18) = 9;
+        return;
+    }
+    id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_00460040)) {
+        *(int*)((char*)item + 0x18) = 0x16;
+        return;
+    }
+    id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_00460070)) {
+        *(int*)((char*)item + 0x18) = 5;
+        return;
+    }
+    id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_004A17D8)) {
+        *(int*)((char*)item + 0x18) = 0x31;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstates", func_00194DD0);
+#ifdef SKIP_ASM
+extern "C" void func_0039E510(void* self);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
+extern char D_004A1398[];
+
+class cProfileMan_194DD0 {
+public:
+    int pad[2];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void select(unsigned char i);
+    virtual int isValid();
+};
+
+extern "C" void func_00194DD0(void* self)
+{
+    int i = 0;
+    func_0039E510(self);
+    cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)((char*)*(void**)((char*)self + 0x10) + 0xC);
+    *(signed char*)((char*)self + 0x55) = 0;
+    for (; i < 2; i++) {
+        pm->select(i);
+        if (pm->isValid()) {
+            (*(signed char*)((char*)self + 0x55))++;
+        }
+    }
+    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1398));
+    if (menu != 0) {
+        if (*(unsigned char*)((char*)menu + 0x95) == 2) {
+            if (*(signed char*)((char*)self + 0x55) < 2) {
+                cUIMenu_setSelectedByIndex(menu, 1);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetEvent);
 

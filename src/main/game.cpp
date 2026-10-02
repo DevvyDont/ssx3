@@ -185,7 +185,38 @@ extern "C" void func_0022DE58(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022DE98);
+#ifdef SKIP_ASM
+extern "C" void func_0022D598(void* self, int id);
+void func_00353D98(void* self);
+extern "C" void func_00353CF0(void* self, int id);
+
+extern "C" void func_0022DE98(void* self)
+{
+    if (*(int*)((char*)self + 0x1A8) == 0) {
+        return;
+    }
+    if (*(int*)((char*)self + 0x1A4) == 0) {
+        return;
+    }
+    int i;
+    for (i = 0x2C; i < 0x31; i++) {
+        if (i != *(int*)((char*)self + 0x1AC)) {
+            func_0022D598(self, i);
+        }
+    }
+    int id = D_00442168[*(int*)((char*)self + 0x1AC)].field_0x4;
+    void* o = *(void**)((char*)*(void**)((char*)self + 0x1B0) + 0x14);
+    if (*(int*)((char*)o + 0x10) != id) {
+        func_00353D98(o);
+        func_00353CF0(*(void**)((char*)*(void**)((char*)self + 0x1B0) + 0x14), id);
+    }
+    *(int*)((char*)self + 0x1A4) = 0;
+    *(int*)((char*)self + 0x1A8) = 0;
+    *(int*)((char*)self + 0x1AC) = -1;
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022DF50);
 

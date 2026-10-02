@@ -234,9 +234,77 @@ extern "C" int func_00253860(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00253890);
+#ifdef SKIP_ASM
+class cMemObj_253890 {
+public:
+    int field_0x0;
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04(int a);
+    virtual void v05();
+};
 
+extern "C" void func_00253890(void* self, int force)
+{
+    if (*(void**)((char*)self + 0x38) == 0) {
+        return;
+    }
+    cMemObj_253890* obj = *(cMemObj_253890**)((char*)self + 0x3C);
+    if (obj == 0) {
+        return;
+    }
+    if (force != 0 || *(int*)((char*)self + 0x8) != 0
+        || (*(int*)((char*)self + 0x40) == 0 && *(int*)((char*)self + 0x4) != 0)
+        || *(int*)((char*)self + 0x0) != 0) {
+        (*(cMemObj_253890**)((char*)self + 0x3C))->v05();
+    } else {
+        obj->v04(*(int*)((char*)self + 0xC));
+        *(int*)((char*)self + 0x40) = 0;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("mem/memstd", func_00253938);
+#ifdef SKIP_ASM
+extern "C" int func_003AE780(void* p);
+extern "C" int func_003AE6C8(void* p, float f);
+extern "C" int func_003AE860(void* p);
+
+class cMemObj_253938 {
+public:
+    int field_0x0;
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04(int a);
+    virtual void v05();
+    virtual void v06();
+};
+
+extern "C" void func_00253938(void* self)
+{
+    if (*(int*)((char*)self + 0x40) == 0 && func_003AE780(*(void**)((char*)self + 0x38)) != 0) {
+        (*(cMemObj_253938**)((char*)self + 0x3C))->v06();
+        void* p = *(void**)((char*)self + 0x38);
+        *(int*)((char*)self + 0xC) = func_003AE6C8(p, *(float*)((char*)p + 0x48));
+        *(int*)((char*)self + 0x40) = 1;
+        *(int*)((char*)self + 0x4) = 0;
+    } else {
+        *(int*)((char*)self + 0x4) = 1;
+    }
+    if (*(int*)((char*)self + 0xC) == 0 && *(int*)((char*)self + 0x0) == 0) {
+        *(int*)((char*)self + 0x40) = 0;
+        *(int*)((char*)self + 0x4) = 1;
+        *(int*)((char*)self + 0x0) = func_003AE860(*(void**)((char*)self + 0x38));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002539E0);

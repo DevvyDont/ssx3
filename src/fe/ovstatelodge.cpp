@@ -108,9 +108,77 @@ void* func_001D3C60(void* self)
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D3C80);
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3E08);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" void* func_00397870(void* list, int id);
 
+extern "C" int func_001D3E08(void* self, void* item, unsigned int key, int id)
+{
+    switch (key) {
+    default:
+        break;
+    case 8:
+    case 9:
+        return 0x100;
+    case 6: {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        void* e = func_00397870((char*)item + 0x74, id);
+        if (func_00157BF0(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
+                          *(int*)((char*)self + 0xE0), *(int*)((char*)e + 0x18)) == 0) {
+            return 0x10;
+        }
+        break;
+    }
+    }
+    return 0x101;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_updateHelpText);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern char D_00467688[];
+extern char D_004676A0[];
+
+class cPeakWidget_3EC8 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
+{
+    if (*(void**)((char*)self + 0xD0) != 0) {
+        if (func_00157BF0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+                          *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), index) != 0) {
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(D_00467688));
+        } else {
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(D_004676A0));
+        }
+        (*(cPeakWidget_3EC8**)((char*)self + 0xD0))->show(1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D3F80);
 

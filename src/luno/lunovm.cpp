@@ -231,7 +231,24 @@ extern "C" void func_00225B90(cLunoValue* self, int flags)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", func_00225BE8);
+#ifdef SKIP_ASM
+extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base);
+extern "C" void func_002257E0(void* self, sVEntry00224C00** stream, int base);
+
+extern "C" void func_00225BE8(cLunoValue* self, sVEntry00224C00** stream, int base)
+{
+    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &self->type, 4);
+    if (self->type == 5) {
+        func_00224C00(self, stream, base);
+    } else if (self->type == 4) {
+        func_002257E0(self, stream, base);
+    } else {
+        (*stream)[1].fn((char*)stream + (*stream)[1].delta, self, 4);
+    }
+}
+#endif
 
 INCLUDE_ASM("luno/lunovm", func_00225CA0);
 

@@ -127,7 +127,27 @@ INCLUDE_ASM("fe/ovstateprofile", func_00211B38);
 
 INCLUDE_ASM("fe/ovstateprofile", func_00211BC8);
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212080);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A2138[];
+extern char D_00471D68[];
+
+extern "C" void func_00212080(void* self)
+{
+    char buf[16];
+    int i;
+    for (i = 1; i < 7; i++) {
+        sprintf(buf, D_004A2138, i);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)), buf);
+        sprintf(buf, D_00471D68, i);
+        *(int*)((char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)) + 0x18) = i - 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212138);

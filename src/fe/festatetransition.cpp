@@ -36,7 +36,27 @@ extern "C" void cFEStateTransition_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetransition", cFEStateTransition_onScreenEvent);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A1360[];
+extern char D_004A17B8[];
+
+extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id)
+{
+    int h1 = GetHashValue32(D_004A1360);
+    int h2 = GetHashValue32(D_004A17B8);
+    if (id == h1) {
+        *(int*)((char*)self + 0x1C) &= ~8;
+        *(int*)((char*)screen + 0x54) &= ~0x40;
+    } else if (id == h2) {
+        *(int*)((char*)self + 0x1C) |= 8;
+        *(int*)((char*)screen + 0x54) |= 0x40;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetransition", func_001946A8);

@@ -1,6 +1,32 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+// PORT: func_001A34A0__FPv is called with (self, obj) here; bind the 2-arg form to that symbol.
+void func_001A34A0_2(void* self, void* obj) __asm__("func_001A34A0__FPv");
+extern char D_004613C8[];
+extern char D_004A19E8[];
+
+extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004613C8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
+    if (obj != 0) {
+        *(int*)((char*)obj + 0x14) = (*(int*)((char*)obj + 0x14) & ~1) | 0x80;
+        func_001A34A0_2(self, obj);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemission", func_001A3300__FPv);

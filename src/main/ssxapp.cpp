@@ -115,7 +115,44 @@ INCLUDE_ASM("main/ssxapp", func_00229180);
 
 INCLUDE_ASM("main/ssxapp", func_00229278);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_002292E0);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
+unsigned int BXrand();
+
+struct sCrowdSlot_2292E0 {
+    char pad_0x00[0x30];
+    int delay;              // 0x30
+    char pad_0x34[0xC];
+};
+
+struct sCrowd_2292E0 {
+    int pad0;
+    int pad4;
+    unsigned int ids[128];          // 0x8
+    char pad_0x208[0x8];
+    sCrowdSlot_2292E0 slots[128];   // 0x210
+    int count;                      // 0x2210
+    int count2;                     // 0x2214
+    char pad_0x2218[0x8];
+    char rest[0x500];               // 0x2220
+};
+
+extern "C" void func_002292E0(void* self)
+{
+    sCrowd_2292E0* c = (sCrowd_2292E0*)self;
+    int i;
+    c->count = 0;
+    func_003E6448(c->slots, 0, 0x2000);
+    for (i = 0; i < 128; i++) {
+        c->ids[i] = 0xFFFFFFFF;
+        c->slots[i].delay = BXrand() % 300 + 300;
+    }
+    c->count2 = 0;
+    func_003E6448(c->rest, 0, 0x500);
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229398);
 
@@ -271,7 +308,39 @@ extern "C" void func_00229E20(void* self, cSSXAppStream* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229E58);
+#ifdef SKIP_ASM
+extern "C" void func_00229398(void* self);
+extern "C" void func_002292E0(void* self);
+extern "C" void func_00229910(void* self, int slot, int a1);
+
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+class cSSXAppStream_229E58 {
+public:
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+struct sCrowdId_229E58 {
+    unsigned int id;
+    sCrowdId_229E58() : id(0xFFFFFFFF) {}
+};
+
+extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* s)
+{
+    func_00229398(self);
+    func_002292E0(self);
+    sCrowdId_229E58 ids[128];
+    s->v02(ids, 0x200);
+    int i;
+    for (i = 0; i < 128; i++) {
+        if (ids[i].id != 0xFFFFFFFF) {
+            func_00229910(self, i, ids[i].id);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229F30);

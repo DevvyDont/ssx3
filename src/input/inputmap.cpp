@@ -145,5 +145,37 @@ extern "C" void* func_003215F8(void* self)
 
 INCLUDE_ASM("input/inputmap", func_00321638);
 
+//100%
 INCLUDE_ASM("input/inputmap", func_003216E8);
+#ifdef SKIP_ASM
+extern "C" int func_0041AB78(const char* a, const char* b, int n);
+extern char D_004A3EF0[];
+
+extern "C" int func_003216E8(void* self, char* name)
+{
+    if (func_0041AB78(name, D_004A3EF0, 6) != 0) {
+        return -1;
+    }
+    int d = name[6] - '0';
+    if ((unsigned char)d >= 10) {
+        return -1;
+    }
+    int n = d;
+    char* p = name + 7;
+    while ((unsigned)(*p - '0') < 10) {
+        n = n * 10 + (*p++ - '0');
+    }
+    int alpha = 0;
+    if ((unsigned)(*p - 'a') < 26 || (unsigned)(*p - 'A') < 26) {
+        alpha = 1;
+    }
+    if (alpha) {
+        return -1;
+    }
+    if (*p != '_' && n < 0x39C) {
+        return n;
+    }
+    return -1;
+}
+#endif
 

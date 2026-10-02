@@ -120,7 +120,31 @@ void* func_0024F840(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024F860);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024F860(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x398, 2);
+    func_002CA280((char*)self + 0x364, 2);
+    func_002CA280((char*)self + 0x330, 2);
+    func_002CA280((char*)self + 0x2FC, 2);
+    func_002CA280((char*)self + 0x2C8, 2);
+    func_002CA280((char*)self + 0x298, 2);
+    func_002CA280((char*)self + 0x264, 2);
+    func_002CA280((char*)self + 0x230, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024F940__FPv);
@@ -211,7 +235,29 @@ void* func_0024FA98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024FAB8);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024FAB8(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x334, 2);
+    func_002CA280((char*)self + 0x300, 2);
+    func_002CA280((char*)self + 0x2CC, 2);
+    func_002CA280((char*)self + 0x298, 2);
+    func_002CA280((char*)self + 0x264, 2);
+    func_002CA280((char*)self + 0x230, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024FB80__FPv);
@@ -231,7 +277,28 @@ void* func_0024FBA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024FBC0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024FBC0(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x2EC, 2);
+    func_002CA280((char*)self + 0x2B8, 2);
+    func_002CA280((char*)self + 0x284, 2);
+    func_002CA280((char*)self + 0x254, 2);
+    func_002CA280((char*)self + 0x224, 2);
+    func_002CA280((char*)self + 0x1F4, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024FC80__FPv);
@@ -269,7 +336,28 @@ void* func_0024FCE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024FD00);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024FD00(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x2FC, 2);
+    func_002CA280((char*)self + 0x2C8, 2);
+    func_002CA280((char*)self + 0x294, 2);
+    func_002CA280((char*)self + 0x260, 2);
+    func_002CA280((char*)self + 0x22C, 2);
+    func_002CA280((char*)self + 0x1F8, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024FDC0__FPv);
@@ -289,7 +377,26 @@ void* func_0024FDE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024FE00);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024FE00(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x294, 2);
+    func_002CA280((char*)self + 0x260, 2);
+    func_002CA280((char*)self + 0x22C, 2);
+    func_002CA280((char*)self + 0x1F8, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024FEA8__FPv);

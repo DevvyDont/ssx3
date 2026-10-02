@@ -47,7 +47,59 @@ extern "C" int func_001D4660(void* self, int a1, unsigned int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4698);
+#ifdef SKIP_ASM
+struct sVEntry001D4698 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void func_001D47A0(void* self, int index);
+extern "C" void func_001D4890(void* self, int index);
+
+class cTrophyWidget_4698 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+extern "C" void func_001D4698(void* self, void* item, int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 6: {
+        cTrophyWidget_4698* w = *(cTrophyWidget_4698**)((char*)self + 0x48);
+        if (w != 0) {
+            w->show(0);
+        }
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)self + 0x54));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 1:
+        *(int*)((char*)self + 0x9C) = *(int*)((char*)item + 0x18);
+        func_001D47A0(self, *(int*)((char*)item + 0x18));
+        func_001D4890(self, *(int*)((char*)item + 0x18));
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4760);
@@ -64,7 +116,63 @@ extern "C" void func_001D4760(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D47A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int func_001CED90(int rider, int a, int b, int c, int index);
+
+class cTrophyWidget_47A0 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+extern "C" void func_001D47A0(void* self, int index)
+{
+    int v;
+    if (index < 0) {
+        goto hide;
+    }
+    v = -1;
+    {
+        if (index == 0) {
+            if (func_00157BF0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+                              *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
+                              *(int*)((char*)self + 0x58)) != 0) {
+                v = *(int*)((char*)self + 0x60);
+            }
+        } else {
+            int r = func_001CED90(*(signed char*)((char*)self + 0x44),
+                                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
+                                  *(int*)((char*)self + 0x58), index - 1);
+            if (r != -1) {
+                v = *(int*)((char*)self + ((r + 1) << 2) + 0x60);
+            }
+        }
+    }
+    if (v < 0) {
+    hide:
+        (*(cTrophyWidget_47A0**)((char*)self + 0x48))->show(0);
+    } else {
+        (*(cTrophyWidget_47A0**)((char*)self + 0x48))->show(1);
+        char* w = *(char**)((char*)self + 0x48);
+        *(int*)(w + 0x78) = v;
+        *(int*)(w + 0x7C) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4890);
@@ -156,11 +264,69 @@ extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
 
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetCreate);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4EA8);
+#ifdef SKIP_ASM
+struct sVEntry001D4EA8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+extern "C" void func_0039F400(void* list, void* item);
+
+extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 0:
+        break;
+    case 5: {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
+        void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        break;
+    }
+    case 6: {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4F68);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4F90);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_00157210(void* iface, int index);
+extern "C" int func_00157518(void* iface, int rider, int a, int index);
+extern char D_004A2020[];
+
+extern "C" void func_001D4F90(void* self, int index, cUIText* text)
+{
+    char buf[256];
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    int total = func_00157210(iface, index);
+    int got = func_00157518(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48), index);
+    sprintf(buf, D_004A2020, got, total);
+    cUIText_setAsciiString(text, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5038);
@@ -234,7 +400,33 @@ extern "C" int func_001D5240(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5280);
+#ifdef SKIP_ASM
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int func_0039F698(void* p);
+extern "C" void* cUIStateStack_getCurrentState(void* self);
+extern "C" void* func_002591B8();
+extern "C" void func_002636F0(void* p, int a1);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B3F78(void* mem, void* owner);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern char D_00460BF0[];
+
+extern "C" void func_001D5280(void* self, void* item, int msg)
+{
+    if (msg == 0xF || msg == 0x14) {
+        func_001A97B8(self, item, msg);
+        func_0039F698((char*)*(void**)((char*)self + 0x10) + 0x18);
+        void* state = cUIStateStack_getCurrentState((char*)*(void**)((char*)self + 0x10) + 0x18);
+        *(int*)((char*)state + 0x1C) |= 0x80;
+        func_002636F0(func_002591B8(), 0);
+        func_001A8A40(self, func_001B3F78(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *(void**)((char*)self + 0x10)));
+    } else {
+        func_001A97B8(self, item, msg);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5330);

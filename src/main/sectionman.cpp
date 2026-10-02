@@ -62,7 +62,42 @@ int func_0022E288(void* self, void* a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/sectionman", func_0022E298);
+#ifdef SKIP_ASM
+struct sSectionNode_E298 {
+    int id;
+    sSectionNode_E298* next; // 0x4
+};
+
+void* func_0022E278(void* self);
+extern "C" void func_0022E360(void* self, void* prev, void* node);
+
+extern "C" void func_0022E298(void* self, int id)
+{
+    sSectionNode_E298* n = *(sSectionNode_E298**)((char*)self + 0x19C);
+    sSectionNode_E298* prev = 0;
+    while (n != 0) {
+        if (n->id == id) {
+            sSectionNode_E298* cur = n;
+            n = n->next;
+            func_0022E360(self, prev, cur);
+        } else {
+            prev = n;
+            n = n->next;
+        }
+    }
+    n = (sSectionNode_E298*)func_0022E278(self);
+    n->id = id;
+    n->next = 0;
+    if (prev != 0) {
+        prev->next = n;
+    } else {
+        *(sSectionNode_E298**)((char*)self + 0x19C) = n;
+    }
+    *(int*)((char*)self + 0x1A0) += 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/sectionman", func_0022E348);

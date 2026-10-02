@@ -1000,7 +1000,42 @@ extern "C" void* func_002453F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245418);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void func_00246CF8(void* self, int a1);
+extern signed char D_00535C11[];
+extern char D_0047BA28[];
+extern char D_0047BA38[];
+
+extern "C" void func_00245418(void* self)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] == 2) {
+        void* engine = *(void**)((char*)self + 0x10);
+        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BA28), 0);
+        *(void**)((char*)self + 0x40) = screen;
+        if (screen != 0) {
+            cUIScreen_playFrame(screen, 0, 0);
+        }
+    } else {
+        void* engine = *(void**)((char*)self + 0x10);
+        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BA38), 0);
+        *(void**)((char*)self + 0x40) = screen;
+        if (screen != 0) {
+            cUIScreen_playFrame(screen, 0, 0);
+        }
+    }
+    func_00246CF8(self, 0);
+    func_00246CF8(self, 1);
+}
+#endif
 
 INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 

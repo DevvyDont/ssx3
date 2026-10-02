@@ -41,9 +41,78 @@ int func_001FAF08(void* self)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FAF10);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FAFF8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0046FA90[];
+extern char D_004A2470[];
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
 
+class cUIObj_1FAFF8 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int v);
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void func_001FAFF8(void* self, bool on)
+{
+    cUIObj_1FAFF8* o = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FA90));
+    o->setVisible(on);
+    o->setEnabled(!on);
+    if (on) {
+        cUIObj_1FAFF8* m = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2470));
+        m->v07(1);
+        cUIMenu_setSelectedByIndex(m, 1);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FB0C0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void func_001FB2B8(void* self, void* item, int msg);
+extern "C" void func_001FB458(void* self, int on);
+extern "C" void func_001FB588(void* self, int on);
+extern char D_0046FA90[];
+extern char D_0046FB48[];
+
+extern "C" void func_001FB0C0(void* self, void* item, int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5:
+        func_001FB2B8(self, item, msg);
+        break;
+    case 1: {
+        int id = *(int*)((char*)item + 0x38);
+        if (id == GetHashValue32(D_0046FA90)) {
+            func_001FB588(self, 1);
+            func_001FB458(self, 0);
+        } else {
+            int id2 = *(int*)((char*)item + 0x38);
+            if (id2 == GetHashValue32(D_0046FB48)) {
+                func_001FB458(self, 1);
+                func_001FB588(self, 0);
+            }
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut);
@@ -105,7 +174,43 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FB2B8);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible);
+#ifdef SKIP_ASM
+extern char D_0046FB48[];
+extern char D_0046FBB0[];
+extern char D_004A2470[];
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
+
+class cUIObj_1FB378 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible)
+{
+    cUIObj_1FB378* t = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB48));
+    if (t != 0) {
+        cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_0046FBB0));
+        t->setEnabled(visible ^ 1);
+        t->setVisible(visible);
+        *(int*)((char*)t + 0x18) = 4;
+    }
+    t = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2470));
+    if (t != 0 && visible) {
+        cUIMenu_setSelectedByIndex(t, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FB458);
 
@@ -135,7 +240,35 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD150);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FD190);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD268);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void func_0020A380(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+extern char D_0046FF58[];
+extern char D_0046E378[];
+
+extern "C" void func_001FD268(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046FF58), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E378), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+    func_00294F78(func_0028B180(), 0xE);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FD320);
 
