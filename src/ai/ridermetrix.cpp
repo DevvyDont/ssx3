@@ -121,7 +121,18 @@ extern "C" void func_00117520(void* self, int a1)
 
 INCLUDE_ASM("ai/ridermetrix", func_00117540);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001175B8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_001175B8(char* self)
+{
+    func_003E6448(self + 0xFC, 0, 0xAC);
+    *(int*)(self + 0x18C) = -1;
+    *(int*)(self + 0x198) = *(int*)(self + 0x1C8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_001175F8);
@@ -409,7 +420,18 @@ extern "C" float func_001193E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119400);
+#ifdef SKIP_ASM
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+
+extern "C" float func_00119400(char* self)
+{
+    *(int*)(self + 0x128) += 1;
+    func_00117B88(self, 0x2C, 0, 0, 1.5f);
+    return 1.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119448);
 
@@ -477,7 +499,19 @@ float func_00119938(void* self, int a1, int a2)
 
 INCLUDE_ASM("ai/ridermetrix", func_00119958);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_001199F8);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+extern "C" float func_001199F8(char* self, int v)
+{
+    *(int*)(self + 0x10) = v;
+    *(int*)(self + 0x28) = v;
+    *(float*)(self + 0x2C) = *(float*)(self + 0x2C) >? 0.0f;
+    func_001176F8(self);
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119A38);
 

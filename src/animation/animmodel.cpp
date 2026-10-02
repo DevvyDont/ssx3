@@ -407,7 +407,19 @@ extern "C" void* func_00311220(void* self, char* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00311250);
+#ifdef SKIP_ASM
+extern "C" char* func_003E22F0(void* src, int flags);
+
+extern "C" void* func_00311250(char** self, void* src)
+{
+    char* data = func_003E22F0(src, 0);
+    *self = data;
+    func_00311290(self, data);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00311290);

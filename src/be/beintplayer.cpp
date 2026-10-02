@@ -208,7 +208,15 @@ signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001473D0);
+#ifdef SKIP_ASM
+extern "C" void func_001473D0(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    D_00534FE0[id].field_0x12 = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147410);
@@ -319,7 +327,15 @@ extern "C" signed char func_00147618(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147658);
+#ifdef SKIP_ASM
+extern "C" void func_00147658(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    D_00534FE0[id].pad_0x13[0] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerID__Fi);

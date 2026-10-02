@@ -38,7 +38,21 @@ INCLUDE_ASM("animation/animsequencer", func_00313AD8);
 
 INCLUDE_ASM("animation/animsequencer", func_00313BA8);
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313C08);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_00313C08(char* self)
+{
+    while (*(char**)(self + 0xAC) != 0)
+    {
+        char* node = *(char**)(self + 0xAC);
+        *(char**)(self + 0xAC) = *(char**)(node + 0xC);
+        operator_delete((int*)node);
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00313C50);
 
@@ -175,9 +189,31 @@ INCLUDE_ASM("animation/animsequencer", func_003145F8);
 
 INCLUDE_ASM("animation/animsequencer", func_00314668);
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003146D0);
+#ifdef SKIP_ASM
+extern "C" void func_003146D0(void* self, float v)
+{
+    for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
+    {
+        func_00313A20(node, v);
+    }
+}
+#endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_00314718);
+#ifdef SKIP_ASM
+extern "C" void func_00313BA8(void* self, int v);
+
+extern "C" void func_00314718(void* self, int v)
+{
+    for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
+    {
+        func_00313BA8(node, v);
+    }
+}
+#endif
 
 struct cAnimSequenceNode {
     char pad_0x00[0xC8];
@@ -216,9 +252,39 @@ void* func_00314978(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314988);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_003149D0(void** self);
 
+extern "C" void func_00314988(int* self, int flags)
+{
+    func_003149D0((void**)self);
+    if (flags & 1)
+    {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003149D0);
+#ifdef SKIP_ASM
+void cMemMan_free(void* ptr);
+
+extern "C" void func_003149D0(void** self)
+{
+    if (self[0] != 0)
+    {
+        cMemMan_free(self[0]);
+    }
+    self[0] = 0;
+    self[1] = 0;
+    self[2] = 0;
+    self[3] = 0;
+}
+#endif
 
 extern "C" void* func_00314AA0(void*);
 

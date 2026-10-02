@@ -157,5 +157,19 @@ void* func_0015C930(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C940);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_0015CB08(void* self);
+
+extern "C" void func_0015C940(int* self, int flags)
+{
+    func_0015CB08(self);
+    if (flags & 1)
+    {
+        operator_delete(self);
+    }
+}
+#endif
 

@@ -6,7 +6,22 @@ INCLUDE_ASM("ai/ai", func_001287B8);
 
 INCLUDE_ASM("ai/ai", func_00128818);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00128958);
+#ifdef SKIP_ASM
+extern "C" void cAI_purgeMissionRiders(void*);
+extern "C" void cAI_initComputerRiders(void*);
+
+extern "C" void func_00128958(void* self)
+{
+    *(int*)((char*)self + 0x94) = 0;
+    if (*(int*)((char*)self + 0x88) > 0)
+    {
+        cAI_purgeMissionRiders(self);
+    }
+    cAI_initComputerRiders(self);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00128998);
 
@@ -684,11 +699,53 @@ INCLUDE_ASM("ai/ai", func_00135CB0);
 
 INCLUDE_ASM("ai/ai", func_00135DB0);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00135EB0);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
 
+extern "C" int func_00135EB0(void* self)
+{
+    int r = 0;
+    if (*(int*)((char*)self + 0x4) == 2)
+    {
+        r = func_00311AE8(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 2) == 0x12;
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00135EF0);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
 
+extern "C" int func_00135EF0(void* self)
+{
+    int r = 0;
+    if (*(int*)((char*)self + 0x4) == 4)
+    {
+        r = func_00311AE8(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 2) == 0x13;
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00135F30);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
+
+extern "C" int func_00135F30(void* self)
+{
+    int r = 0;
+    if (*(int*)((char*)self + 0x4) == 4)
+    {
+        r = func_00311AE8(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 2) == 0x14;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00135F70);
 

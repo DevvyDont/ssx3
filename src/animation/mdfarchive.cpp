@@ -44,7 +44,18 @@ extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/mdfarchive", func_00314EF0);
+#ifdef SKIP_ASM
+extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void* value)
+{
+    int i = func_00314E88(self, hash);
+    if (i >= 0)
+    {
+        ((void**)((char*)self + 0x1030))[i] = value;
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/mdfarchive", func_00314F30);
 

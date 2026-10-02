@@ -69,7 +69,24 @@ INCLUDE_ASM("be/beintscore", func_00154AB8);
 
 INCLUDE_ASM("be/beintscore", func_00154EE8);
 
+//100%
 INCLUDE_ASM("be/beintscore", func_001550E8);
+#ifdef SKIP_ASM
+struct sScoreEntry_001550E8 {
+    int value;
+    char pad[0x10];
+};
+extern "C" sScoreEntry_001550E8* func_0014AB20(int a, int b);
+
+extern "C" int func_001550E8(void* self, int i, int a, int b)
+{
+    sScoreEntry_001550E8* t = func_0014AB20(a, b);
+    if (t != 0) {
+        return t[i].value;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintscore", func_00155130);
 

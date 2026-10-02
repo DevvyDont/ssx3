@@ -115,7 +115,19 @@ extern "C" char* func_0014F6A8(void* self, int i)
 
 INCLUDE_ASM("be/beintoption", func_0014F6E8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintoption", func_0014F758);
+#ifdef SKIP_ASM
+extern "C" void func_0014F6E8(void* self, int i);
+
+extern "C" void func_0014F758(void* self)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        func_0014F6E8(self, i);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintoption", func_0014F7A8);

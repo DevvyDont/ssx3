@@ -306,11 +306,44 @@ extern "C" void func_00120E88(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120ED8);
+#ifdef SKIP_ASM
+extern "C" void func_0011EB98(void* self);
+
+extern "C" void func_00120ED8(char* self)
+{
+    cRider_updateOrientationImplicit(self);
+    if (*(int*)(self + 0xAC4) == 0)
+    {
+        func_0011EB60(self, 1.0f);
+        func_0011EB98(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00120F20);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121068);
+#ifdef SKIP_ASM
+struct sVEntry00121068 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_00111728(void* obj, void* v);
+
+extern "C" void func_00121068(void* self)
+{
+    int buf[4];
+    char* obj = *(char**)((char*)self + 0x77C);
+    sVEntry00121068* vt = *(sVEntry00121068**)(obj + 0xDE8);
+    vt[1].fn(obj + vt[1].delta, buf);
+    func_00111728(*(void**)((char*)self + 0x77C), buf);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_001210B0);
 
@@ -508,7 +541,22 @@ INCLUDE_ASM("ai/rider", func_00123210);
 
 INCLUDE_ASM("ai/rider", func_001234D0);
 
+//100%
 INCLUDE_ASM("ai/rider", func_001235F8);
+#ifdef SKIP_ASM
+// PORT: prototype mismatch. The unit defines func_0011FEC8/func_0011FE78 with one
+// param, but their bodies forward $5 to func_00111538/func_001112B8 (int arg).
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+
+extern "C" void func_001235F8(void* self)
+{
+    *(int*)(*(char**)((char*)self + 0x77C) + 0x350) = 1;
+    func_0011FEC8_impl(self, 9);
+    func_0011FE78_impl(self, 3);
+    *(int*)(*(char**)((char*)self + 0x77C) + 0x290) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00123640);
 

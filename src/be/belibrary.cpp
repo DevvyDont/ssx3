@@ -79,7 +79,24 @@ INCLUDE_ASM("be/belibrary", func_0014A188);
 
 INCLUDE_ASM("be/belibrary", func_0014A5E0);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014AB20);
+#ifdef SKIP_ASM
+struct sScoreTable_0014AB20 {
+    char data[0x64];
+};
+extern sScoreTable_0014AB20 D_00535C18[];
+extern "C" int cBELibrary_getScoreType(int a, int b);
+
+extern "C" void* func_0014AB20(int a, int b)
+{
+    int type = cBELibrary_getScoreType(a, b);
+    if (type == 26) {
+        return 0;
+    }
+    return &D_00535C18[type];
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getScoreType);
@@ -133,7 +150,18 @@ extern "C" int func_0014AC50(int a0)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014ACB0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" void* func_003E6574(void* dst, void* src, int n);
+
+extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    func_003E6574(p + 0x290, src, 0x834);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AD28);
@@ -311,7 +339,21 @@ extern "C" void* func_0014C620(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C658);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_0014D240(void* self);
+
+extern "C" void func_0014C658(int* self, int flags)
+{
+    func_0014D240(self);
+    if (flags & 1)
+    {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014C6A0);
 

@@ -69,11 +69,38 @@ int cBERewardInterface_isBetterMedal(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00156A90);
+#ifdef SKIP_ASM
+extern "C" void* func_0015A478(void* self);
 
+extern "C" char* func_00156A90(void* self, int a1, int a2)
+{
+    return *(char**)((char*)func_0015A478(self) + 0x8) + (a2 * 3 + a1) * 0xC;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00156AE0);
+#ifdef SKIP_ASM
+extern "C" void* func_0015A478(void* self);
 
+extern "C" char* func_00156AE0(void* self, int a1, int a2)
+{
+    return *(char**)((char*)func_0015A478(self) + 0xC) + (a1 * 4 + a2) * 0xC;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00156B28);
+#ifdef SKIP_ASM
+extern "C" void* func_0015A478(void* self);
+
+extern "C" char* func_00156B28(void* self, int a1, int a2)
+{
+    return *(char**)((char*)func_0015A478(self) + 0x10) + (a2 * 3 + a1) * 8;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00156C70);
 
@@ -205,7 +232,18 @@ INCLUDE_ASM("be/beintreward", func_001576E0);
 
 INCLUDE_ASM("be/beintreward", func_00157740);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001577A0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157390(void* self, int count, signed char* bits);
+
+extern "C" int func_001577A0(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, 0x14, (signed char*)(p + 0xF57));
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_001577E0);
 
@@ -247,17 +285,83 @@ extern "C" int func_00157B70(void* self, int a, int b, int peak)
 
 INCLUDE_ASM("be/beintreward", func_00157BF0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157D60);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157430(void* self, int bit, char* bits);
 
+extern "C" int func_00157D60(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157430(self, bit, p + 0xF30);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157DA0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157430(void* self, int bit, char* bits);
 
+extern "C" int func_00157DA0(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157430(self, bit, p + 0xF36);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157DE0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157430(void* self, int bit, char* bits);
 
+extern "C" int func_00157DE0(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157430(self, bit, p + 0xF45);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157E20);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157430(void* self, int bit, char* bits);
 
+extern "C" int func_00157E20(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157430(self, bit, p + 0xF53);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157E60);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157430(void* self, int bit, char* bits);
 
+extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157430(self, bit, p + 0xF52);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157EE0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157430(void* self, int bit, char* bits);
+
+extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157430(self, bit-10, p + 0xF57);
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00157F20);
 
@@ -313,7 +417,18 @@ extern "C" long func_00158750(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001587B8);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_00157390(void* self, int count, signed char* bits);
+
+extern "C" int func_001587B8(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, 0x40, (signed char*)(p + 0xF78));
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_001587F8);
@@ -407,7 +522,18 @@ signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, in
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158960);
+#ifdef SKIP_ASM
+extern "C" int func_00158960(void* self, int b, int c, int d, int e)
+{
+    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])D_004A6CA8)[b][c], e, d);
+    if (result == 0) {
+        return 0;
+    }
+    return ((int*)result)[1];
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_001589B0);
 
@@ -506,7 +632,18 @@ INCLUDE_ASM("be/beintreward", func_00159B08);
 
 INCLUDE_ASM("be/beintreward", func_00159CD0);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A2E0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+extern "C" int func_0015A320(void* self, int bit, unsigned char* bits);
+
+extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_0015A320(self, bit, (unsigned char*)(p + 0xF28));
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A320);
@@ -697,7 +834,21 @@ extern "C" void* func_0015A778(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A7D0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_0015AE00(void* self);
+
+extern "C" void func_0015A7D0(int* self, int flags)
+{
+    func_0015AE00(self);
+    if (flags & 1)
+    {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_0015A818);
 
