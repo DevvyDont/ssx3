@@ -81,7 +81,29 @@ extern "C" void func_003A7818(void* self)
 
 INCLUDE_ASM("world/worldcache", func_003A7878);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7A20);
+#ifdef SKIP_ASM
+struct func_003A7A20_sCfg {
+    int id;
+    int size;
+    int count;
+};
+extern func_003A7A20_sCfg D_0044C1E0[];
+extern "C" void cWorldBlockAllocator_init(void* self, int size, int count);
+
+extern "C" void* func_003A7A20(void* self)
+{
+    cWorldBlockAllocator_init(self, D_0044C1E0[0].size, D_0044C1E0[0].count);
+    cWorldBlockAllocator_init((char*)self + 0x14, D_0044C1E0[1].size, D_0044C1E0[1].count);
+    cWorldBlockAllocator_init((char*)self + 0x28, D_0044C1E0[2].size, D_0044C1E0[2].count);
+    int i;
+    for (i = 63; i >= 0; i--) {
+        ((int*)((char*)self + 0x3C))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7AA8);
@@ -239,7 +261,21 @@ extern "C" void func_003A7F90(void* self)
 
 INCLUDE_ASM("world/worldcache", cWorldCache_init);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
+#ifdef SKIP_ASM
+extern char D_00494E60[];
+extern "C" void* cWorldCacheTable_cWorldCacheTable(void* self, void* data);
+
+extern "C" void cWorldCache_activateSectionMem(void* self, int i, int section)
+{
+    cWorldMemoryMan_activateSectionMem(*(void**)((char*)self + 0xC), i, section);
+    // PORT: pointer held in int (index-first address arithmetic)
+    void** slot = (void**)(i * 4 + *(int*)((char*)self + 0x8));
+    *slot = cWorldCacheTable_cWorldCacheTable(cMemMan_alloc(0xE8, D_00494E60, 0, 0),
+        *(char**)(*(char**)self + 0x14) + i * 0x58 + 0x20);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A8230);
@@ -518,11 +554,74 @@ extern "C" void func_003A9558(void** self, func_003A9558_sNode* node)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A95C0);
+#ifdef SKIP_ASM
+extern "C" int func_003A8638(void* self, int a1);
+
+extern "C" void func_003A95C0(void** self, void* node, int* ok)
+{
+    if (*ok != 0) {
+        void* d = *(void**)((char*)node + 0x58);
+        if (d != 0 && func_003A8638(*self, *(unsigned short*)((char*)d + 2)) == 0) {
+            *ok = 0;
+            return;
+        }
+        if (*(void**)((char*)node + 0x50) != 0) {
+            func_003A95C0(self, *(void**)((char*)node + 0x50), ok);
+        }
+        if (*(void**)((char*)node + 0x54) != 0 && *ok != 0) {
+            func_003A95C0(self, *(void**)((char*)node + 0x54), ok);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A9658);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A96E0);
+#ifdef SKIP_ASM
+extern "C" void func_003A9D60(void* self, int i);
 
+extern "C" int func_003A96E0(void* self, int i, sWCQuad* outPos, float* outT)
+{
+    char* e = (char*)self + i * 0x50;
+    if (*(int*)(e + 0x240) == 0) {
+        return 0;
+    }
+    func_003A9D60(self, i);
+    int r = 1;
+    *outPos = *(sWCQuad*)(e + 0x250);
+    float t = *(float*)(e + 0x284) - 0.5f;
+    *outT = t;
+    if (!(t > 0.0f)) {
+        r = 0;
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/worldcache", func_003A9770);
+#ifdef SKIP_ASM
+extern "C" void func_003A9D60(void* self, int i);
+
+extern "C" int func_003A9770(void* self, int i, sWCQuad* outPos, float* outT)
+{
+    char* e = (char*)self + i * 0x50;
+    if (*(int*)(e + 0x240) == 0) {
+        return 0;
+    }
+    func_003A9D60(self, i);
+    int r = 1;
+    *outPos = *(sWCQuad*)(e + 0x250);
+    float t = *(float*)(e + 0x288) - 0.5f;
+    *outT = t;
+    if (!(t > 0.0f)) {
+        r = 0;
+    }
+    return r;
+}
+#endif
 

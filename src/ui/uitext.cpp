@@ -73,7 +73,55 @@ void cUIText_setAsciiString(cUIText* self, const char* str)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", cUIText_setAsciiStringPrivate);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char* s);
+void UIAsciiToUnicode(unsigned short* dst, const char* src);
+extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
+
+class cUIText_3A0C70 {
+public:
+    char pad[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int);
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24(int);
+};
+
+// NOTE: the unit's C++-linkage declaration cUIText_setAsciiStringPrivate(cUIText*, const char*)
+// is a different overload; this is the extern "C" symbol.
+extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str)
+{
+    unsigned short buf[0x200];
+    ((cUIText_3A0C70*)self)->v05(1);
+    ((cUIText_3A0C70*)self)->v24(0);
+    if (strlen(str) + 1 < 0x200) {
+        UIAsciiToUnicode(buf, str);
+        cUIText_setUnicodeStringPrivate(self, buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A0D00);
 
@@ -211,13 +259,76 @@ INCLUDE_ASM("ui/uitext", func_003A13E0);
 
 INCLUDE_ASM("ui/uitext", func_003A1588);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A18C0);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
 
+extern "C" void func_003A18C0(void* self, void* a1)
+{
+    if (*(void***)((char*)self + 0xBC) != 0) {
+        unsigned short i;
+        for (i = 0; i < *(unsigned short*)((char*)self + 0xC8); i++) {
+            if ((*(void***)((char*)self + 0xBC))[i] != 0) {
+                cMemMan_free((*(void***)((char*)self + 0xBC))[i]);
+            }
+        }
+        if (*(void***)((char*)self + 0xBC) != 0) {
+            cMemMan_free(*(void***)((char*)self + 0xBC));
+        }
+        *(void***)((char*)self + 0xBC) = 0;
+    }
+    *(unsigned short*)((char*)self + 0xC6) = 0;
+    *(unsigned short*)((char*)self + 0xC8) = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1958);
+#ifdef SKIP_ASM
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_004940A8[];
+
+extern "C" int func_003A1958(void* self)
+{
+    unsigned short old = *(unsigned short*)((char*)self + 0xC8);
+    *(unsigned short*)((char*)self + 0xC8) = old + 1;
+    void** arr = (void**)operator_new_tag(*(unsigned short*)((char*)self + 0xC8) * 4, D_004940A8, 0x100, 0);
+    if (*(void***)((char*)self + 0xBC) != 0) {
+        func_0041605C(arr, *(void***)((char*)self + 0xBC), old * 4);
+        void** prev = *(void***)((char*)self + 0xBC);
+        arr[old] = 0;
+        if (prev != 0) {
+            cMemMan_free(prev);
+        }
+    }
+    *(void***)((char*)self + 0xBC) = arr;
+    return old;
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A19F8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeString);
+#ifdef SKIP_ASM
+extern "C" int func_003A1958(void* self);
+extern "C" int USTR_length(unsigned short* s);
+extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_004940B8[];
+
+extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str)
+{
+    int idx = func_003A1958(self);
+    unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_004940B8, 0x100, 0);
+    USTR_copy(copy, str);
+    (*(unsigned short***)((char*)self + 0xBC))[idx] = copy;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A1CF0);

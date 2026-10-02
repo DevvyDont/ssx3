@@ -24,7 +24,33 @@ void cUIThread_deleteThread(void* self)
 
 INCLUDE_ASM("ui/uiscreen", func_0039C558);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_setData);
+#ifdef SKIP_ASM
+extern "C" int func_003B4818(void* data);
+extern "C" void* func_003B47F8(void* src, void* dst);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00493E00[];
+
+extern "C" void cUIScreen_setData(void* self, char* data)
+{
+    int size = func_003B4818(data);
+    if (size != 0) {
+        char* buf = (char*)operator_new_tag(size, D_00493E00, 0x100, 0);
+        *(char**)((char*)self + 0xC) = buf;
+        char* old = data;
+        data = buf;
+        func_003B47F8(old, data);
+        *(int*)((char*)self + 0x14) |= 2;
+    } else {
+        *(int*)((char*)self + 0x14) &= ~2;
+    }
+    *(char**)((char*)self + 0x10) = data;
+    *(char**)((char*)self + 0x34) = data + *(int*)(data + 8);
+    *(char**)((char*)self + 0x38) = data + *(int*)(data + 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039C728);
@@ -163,7 +189,27 @@ extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CCA8);
+#ifdef SKIP_ASM
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
+// PORT: callers pass a 5th arg (0) that func_0039FCC8 never reads
+extern "C" void func_0039FCC8(void* self, void* anim, unsigned char mode, unsigned short v, int x);
+
+extern "C" void func_0039CCA8(void* self, void* p1, void* msg)
+{
+    void* obj = cUIScreen_getObjectByHashName(self, *(int*)((char*)msg + 8));
+    if (obj != 0) {
+        void* anim = cUIAnimationBank_getAnimationByHashName(
+            (char*)*(void**)((char*)*(void**)((char*)self + 0xD0) + 0x10) + 0x50,
+            *(int*)((char*)msg + 4));
+        if (anim != 0) {
+            func_0039FCC8(obj, anim, *(unsigned char*)((char*)msg + 0xC), *(unsigned short*)((char*)p1 + 8), 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CD30);
@@ -350,7 +396,28 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039D8C0);
+#ifdef SKIP_ASM
+extern "C" void func_0039FC48(void* self, int flags);
+extern void* D_004944C8[];
+
+extern "C" void func_0039D8C0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_004944C8;
+    void* a = *(void**)((char*)self + 0x74);
+    if (a != 0) {
+        sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
+        t->fn((char*)a + t->field_0x8, 3);
+    }
+    void* b = *(void**)((char*)self + 0x78);
+    if (b != 0) {
+        sDeleteTarget* t = *(sDeleteTarget**)((char*)b + 0x8);
+        t->fn((char*)b + t->field_0x8, 3);
+    }
+    func_0039FC48(self, flags);
+}
+#endif
 
 extern "C" void* func_0039FE00(void* self);
 
@@ -369,7 +436,28 @@ INCLUDE_ASM("ui/uiscreen", func_0039DA20);
 
 INCLUDE_ASM("ui/uiscreen", func_0039DE68);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039DF28);
+#ifdef SKIP_ASM
+extern "C" void func_0039FC48(void* self, int flags);
+extern void* D_00494348[];
+
+extern "C" void func_0039DF28(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00494348;
+    void* a = *(void**)((char*)self + 0x88);
+    if (a != 0) {
+        sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
+        t->fn((char*)a + t->field_0x8, 3);
+    }
+    void* b = *(void**)((char*)self + 0x8C);
+    if (b != 0) {
+        sDeleteTarget* t = *(sDeleteTarget**)((char*)b + 0x8);
+        t->fn((char*)b + t->field_0x8, 3);
+    }
+    func_0039FC48(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039DFB0);
@@ -515,7 +603,42 @@ extern "C" void func_0039E688(void* self, func_0039E688_cVirt* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E6B8);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+struct sVEntry39E6B8a {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sVEntry39E6B8b {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
+
+extern "C" void func_0039E6B8(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        sVEntry39E6B8a* vt = *(sVEntry39E6B8a**)((char*)self + 8);
+        vt[0xE].fn((char*)self + vt[0xE].delta);
+        do {
+            char* obj = (char*)n + 0x40;
+            if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
+                sVEntry39E6B8b* vt2 = *(sVEntry39E6B8b**)((char*)n + 0x48);
+                vt2[0x11].fn(obj + vt2[0x11].delta, 0.0f, 0.0f);
+            }
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
 
 struct cList;
 struct cListNode;

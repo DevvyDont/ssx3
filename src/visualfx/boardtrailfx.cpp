@@ -120,7 +120,34 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EB938);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBB10);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBBA8);
+#ifdef SKIP_ASM
+void func_002E4D70(void* self);
+extern void* D_004880A0[];
+
+struct func_002EBBA8_sVec4 {
+    float x, y, z, w;
+};
+
+struct func_002EBBA8_sObj {
+    void** vtable;               // 0x0
+    func_002EBBA8_sVec4 v;       // 0x4
+    int a;                       // 0x14
+    int b;                       // 0x18
+};
+
+extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const func_002EBBA8_sVec4& v, int a, int b)
+{
+    func_002EBBA8_sVec4 t = v;
+    func_002E4D70(self);
+    self->vtable = D_004880A0;
+    self->v = t;
+    self->a = a;
+    self->b = b;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBC40);
 

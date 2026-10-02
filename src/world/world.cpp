@@ -30,7 +30,33 @@ void* func_003A6928(void* self)
 
 INCLUDE_ASM("world/world", func_003A6948);
 
+//100%
 INCLUDE_ASM("world/world", func_003A6AE0);
+#ifdef SKIP_ASM
+struct cWorldView;
+extern "C" void* cBXString_cBXString2(void* self, const char* str);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_003A7F90(void* cache);
+extern "C" void cWorldCache_init(void* cache, const char* name, int a2);
+int cWorldView_getNumSections(cWorldView* view);
+extern "C" void cWScriptCache_init(void* cache, int n);
+extern "C" void func_002BB1D0(void* p, int n);
+
+struct func_003A6AE0_sBXString {
+    char* str;
+};
+
+extern "C" void func_003A6AE0(void** self, const char* name, int a2)
+{
+    func_003A6AE0_sBXString s;
+    cBXString_cBXString2(&s, name);
+    func_003A7F90(self[0]);
+    cWorldCache_init(self[0], name, a2);
+    cWScriptCache_init(self[1], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
+    func_002BB1D0(self[2], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
+    cBXString__cBXString(&s, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/world", func_003A6B78);

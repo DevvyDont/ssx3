@@ -854,7 +854,29 @@ extern "C" float func_003B0FA8()
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0FB8);
+#ifdef SKIP_ASM
+struct sWSPool;
+struct sWSItem;
+extern "C" sWSItem* func_003B10D0(sWSPool* self);
+extern "C" void func_00402A10(void* dma, void* data, int qwc);
+
+extern "C" void* func_003B0FB8(void* self)
+{
+    sWSItem* item = func_003B10D0((sWSPool*)self);
+    char* hdr = *(char**)((char*)item + 0x4);
+    char* data;
+    if (*(int*)(hdr + 0xC) & 0x1000) {
+        data = hdr + *(int*)(hdr + 0x10);
+    } else {
+        data = hdr + 0x10;
+    }
+    func_00402A10((char*)self + 0x30, data, *(int*)((char*)self + 0x8) / 16 * *(int*)((char*)self + 0xC) / 16);
+    *(int*)((char*)self + 0x10) += 1;
+    return item;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B1050);
@@ -1094,7 +1116,33 @@ INCLUDE_ASM("world/wscriptcache", func_003B1988);
 
 INCLUDE_ASM("world/wscriptcache", func_003B1AB0);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B1CC0);
+#ifdef SKIP_ASM
+extern void* D_00509538[];
+extern void* D_0050953C[];
+extern void* D_00509540[];
+extern void* D_00509544[];
+extern void* D_00509548[];
+extern void* D_0050954C[];
+extern void* D_00509550[];
+extern char D_004954D0[];
+void* func_003B2360(void* self);
+
+extern "C" void func_003B1CC0(void)
+{
+    D_00509538[0] = func_003B1300(3);
+    D_0050953C[0] = func_003B1300(1);
+    if (D_0050953C[0] != 0) {
+        D_00509540[0] = func_003B1300(8);
+        D_00509544[0] = func_003B1300(8);
+        D_00509548[0] = func_003B1300(8);
+    }
+    D_0050954C[0] = func_003B1300(0xE);
+    func_003B2360(D_004954D0);
+    D_00509550[0] = func_003B1300(0xE);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B1D58);
 
@@ -1155,7 +1203,34 @@ void* func_003B2380(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B23A0);
+#ifdef SKIP_ASM
+extern void* D_00509610[];
+extern void* D_00509614[];
+extern void* D_00509618[];
+extern void* D_0050961C[];
+extern void* D_00509620[];
+extern void* D_00509624[];
+extern char D_00495630[];
+extern char D_00495658[];
+extern char D_00495688[];
+void* func_003B2360(void* self);
+
+extern "C" void func_003B23A0(void)
+{
+    D_00509610[0] = func_003B1300(1);
+    D_00509614[0] = func_003B1300(8);
+    D_00509618[0] = func_003B1300(1);
+    func_003B1300(7);
+    func_003B2360(D_00495630);
+    D_0050961C[0] = func_003B1300(0x14);
+    func_003B2360(D_00495658);
+    D_00509620[0] = func_003B1300(0x16);
+    func_003B2360(D_00495688);
+    D_00509624[0] = func_003B1300(0x16);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B2440);

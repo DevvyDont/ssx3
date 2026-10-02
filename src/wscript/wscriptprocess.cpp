@@ -270,7 +270,44 @@ extern "C" void func_00307DC8(void* self)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307E10);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307EC0);
+#ifdef SKIP_ASM
+class func_00307EC0_cState {
+public:
+    int state;          // 0x0
+    int id;             // 0x4
+    char pad8[0x40 - 0x8];
+    // vptr at 0x40; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+};
+
+struct func_00307EC0_sProc {
+    int pad0;
+    int count;                          // 0x4
+    int cur;                            // 0x8
+    char padC[0x14 - 0xC];
+    func_00307EC0_cState* states;       // 0x14
+};
+
+extern "C" void func_00307EC0(func_00307EC0_sProc* self, int id)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->states[i].id == id) {
+            if (self->cur < self->count) {
+                self->states[self->cur].state = 3;
+            }
+            self->cur = i;
+            self->states[i].v04();
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00307F58);
 

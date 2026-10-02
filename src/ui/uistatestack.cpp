@@ -33,7 +33,47 @@ INCLUDE_ASM("ui/uistatestack", func_0039F400);
 
 INCLUDE_ASM("ui/uistatestack", func_0039F4C0);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F600);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList*);
+
+struct func_0039F600_node {
+    char pad0[0x4];
+    func_0039F600_node* next; // 0x4
+    char pad8[0x1C - 0x8];
+    unsigned int b0 : 1;
+    unsigned int b1 : 5;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+    unsigned int b14 : 1;
+    unsigned int b15 : 1;
+};
+
+static inline void func_0039F600_setId(func_0039F600_node* n, int v) { n->id = v; }
+static inline void func_0039F600_setB7(func_0039F600_node* n, int v) { n->b7 = v; }
+
+extern "C" func_0039F600_node* func_0039F600(cList* list)
+{
+    func_0039F600_node* n = (func_0039F600_node*)cList_first(list);
+    if (n != 0) {
+        while (n->b0) {
+            if ((*(int*)((char*)n + 0x1C) >> 15) & 1) {
+                break;
+            }
+            if (n->id < 6) {
+                func_0039F600_setId(n, 7);
+                func_0039F600_setB7(n, 1);
+            }
+            n = n->next;
+        }
+        return n;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039F698);
@@ -74,11 +114,89 @@ extern "C" func_0039F698_node* func_0039F698(cList* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F718);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList*);
+
+struct func_0039F718_node {
+    char pad0[0x4];
+    func_0039F718_node* next; // 0x4
+    char pad8[0x1C - 0x8];
+    unsigned int b0 : 1;
+    unsigned int b1 : 5;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+};
+
+static inline void func_0039F718_setId(func_0039F718_node* n, int v) { n->id = v; }
+static inline void func_0039F718_setB7(func_0039F718_node* n, int v) { n->b7 = v; }
+
+extern "C" func_0039F718_node* func_0039F718(cList* list)
+{
+    func_0039F718_node* n = (func_0039F718_node*)cList_first(list);
+    if (n != 0) {
+        if (n->b0) {
+            do {
+                if (n->id < 6) {
+                    func_0039F718_setId(n, 7);
+                    func_0039F718_setB7(n, 1);
+                }
+                n = n->next;
+            } while (n->b0);
+        }
+        if (n->id < 6) {
+            n->id = 7;
+            n->b7 = 1;
+        }
+        return n->next;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F7B8);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F840);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+struct func_0039F840_node {
+    char pad0[0x4];
+    func_0039F840_node* next; // 0x4
+    char pad8[0x1C - 0x8];
+    unsigned int b0 : 1;
+    unsigned int b1 : 4;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+};
+
+static inline void func_0039F840_setId(func_0039F840_node* n, int v) { n->id = v; }
+static inline void func_0039F840_setB7(func_0039F840_node* n, int v) { n->b7 = v; }
+static inline void func_0039F840_setB5(func_0039F840_node* n, int v) { n->b5 = v; }
+
+extern "C" void func_0039F840(cList* list)
+{
+    func_0039F840_node* n = (func_0039F840_node*)cList_first(list);
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            func_0039F840_node* next = n->next;
+            func_0039F840_setId(n, 7);
+            func_0039F840_setB7(n, 1);
+            func_0039F840_setB5(n, 1);
+            n = next;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F8C8);
 

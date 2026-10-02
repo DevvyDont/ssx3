@@ -1,6 +1,24 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
+#ifdef SKIP_ASM
+extern char D_00489908[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
+int func_0030B260(void* self, void* a1);
+
+extern "C" void* cWScriptMan_addProcess(void* self, int a1, int a2, int front)
+{
+    void* p = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, D_00489908, 0x20000000, 0), self, a1, a2);
+    if (front != 0) {
+        func_0030B260((char*)self + 0x2BC, p);
+    } else {
+        func_0030B260((char*)self + 0x2B4, p);
+    }
+    return p;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess1);
 
@@ -746,7 +764,32 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B6F8);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B758);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B7F8);
+#ifdef SKIP_ASM
+extern "C" void func_00307D78(void* obj);
+extern "C" void func_0030C790(void* self);
+
+extern "C" void func_0030B7F8(void* self)
+{
+    unsigned int id = *(unsigned int*)((char*)self + 0x2A0);
+    if (id != 0xFFFFFFFF) {
+        func_0030B388_cObj* obj = func_0030B388((char*)self + 0x2B8, id);
+        if (obj != 0) {
+            func_00307D78(obj);
+        }
+        *(int*)((char*)self + 0x2AC) = 0;
+        *(unsigned int*)((char*)self + 0x2B0) = 0xFFFFFFFF;
+        *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
+    }
+    void* p;
+    while ((p = func_0030B208((char*)self + 0x2B8)) != 0) {
+        *(int*)p = 0;
+        func_0030B260((char*)self + 0x2B4, p);
+    }
+    func_0030C790((char*)self + 0x1C4);
+}
+#endif
 
 extern "C" void* func_0030B320(void*, int);
 
@@ -878,7 +921,33 @@ extern "C" void func_0030BAC8(func_0030BAC8_sMan* self, int id, int a1, int a2)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030BB10);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030BC80);
+#ifdef SKIP_ASM
+extern "C" int func_0030B228(cWScriptListHead* self);
+extern "C" void func_00308038(void* node, void* stream);
+
+struct sVEntry30BC80 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0030BC80(void* self, void** list, void* stream)
+{
+    int n = func_0030B228((cWScriptListHead*)list);
+    sVEntry30BC80* e = &(*(sVEntry30BC80**)stream)[1];
+    e->fn((char*)stream + e->delta, &n, 4);
+    char* node = (char*)*list;
+    while (node != 0) {
+        int id = *(int*)(node + 0x20);
+        e = &(*(sVEntry30BC80**)stream)[1];
+        e->fn((char*)stream + e->delta, &id, 4);
+        func_00308038(node, stream);
+        node = *(char**)(node + 0x18);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030BD20);
 
@@ -908,7 +977,32 @@ extern "C" void func_0030C390(cWScriptIdTable* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C3E0);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void func_00153B00(void* iface, int a1, int index, int value);
+
+struct func_0030C3E0_sTable {
+    int value;      // 0x0
+    int pad4;       // 0x4
+    int count;      // 0x8
+    int ids[1];     // 0xC
+};
+
+extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->ids[i] == id) {
+            func_00153B00(cBE_getInterface_Fv(cBE_getBE(), 10), 0, i, self->value);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C468);

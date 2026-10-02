@@ -263,7 +263,35 @@ INCLUDE_ASM("util/menu", func_002CAB08);
 
 INCLUDE_ASM("util/menu", func_002CABE0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CACC0);
+#ifdef SKIP_ASM
+class func_002CACC0_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02();
+};
+
+extern "C" void func_002CABE0(void* self);
+
+extern "C" int func_002CACC0(void* self)
+{
+    func_002CAAB0(self);
+    func_002CACC0_cItem* item = *(func_002CACC0_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
+    int r = item->v02();
+    switch (r) {
+    case 3:
+        func_002CAB08(self);
+        return 0;
+    case 4:
+        func_002CABE0(self);
+        return 0;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CAD48__FPv);
@@ -346,7 +374,43 @@ extern "C" void cMenu_addItem(cMenuList* menu, void** item, int index)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CBE68);
+#ifdef SKIP_ASM
+class func_002CBE68_cItem {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(int);
+    virtual void v07();
+};
+
+struct func_002CBE68_sMenu {
+    int count;          // 0x0
+    int selected;       // 0x4
+    int unk8;           // 0x8
+    func_002CBE68_cItem* items[70];    // 0xC
+    int wrap;           // 0x124
+};
+
+extern "C" void func_002CBE68(func_002CBE68_sMenu* self, int index)
+{
+    if (index < 0) {
+        index += self->count;
+    }
+    if (index != self->selected) {
+        self->items[self->selected]->v07();
+        self->selected = index;
+        self->items[index]->v06(2);
+        func_002CAAB0(self);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CBF08);
@@ -593,7 +657,41 @@ INCLUDE_ASM("util/menu", func_002CC350);
 
 INCLUDE_ASM("util/menu", func_002CC3B8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CC460);
+#ifdef SKIP_ASM
+class func_002CC460_cMenu {
+public:
+    char pad[0x12C];
+    // vptr at 0x12C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(void*);
+    virtual void v07();
+};
+
+struct func_002CC460_sStack {
+    int count;                          // 0x0
+    func_002CC460_cMenu* entries[8];    // 0x4
+};
+
+extern "C" void func_002CC460(void* p)
+{
+    func_002CC460_sStack* self = (func_002CC460_sStack*)p;
+    self->count--;
+    self->entries[self->count]->v07();
+    if (self->count != 0) {
+        self->entries[self->count - 1]->v06(self);
+        if (self->count != 0) {
+            return;
+        }
+    }
+    func_002CC0B8(self, 0);
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CC578);
 
@@ -812,7 +910,30 @@ extern "C" func_002CCF98_sItem* func_002CCF98(func_002CCF98_sItem* self, void* t
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD008);
+#ifdef SKIP_ASM
+class func_002CD008_cMenu {
+public:
+    char pad[0x12C];
+    // vptr at 0x12C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03(void* item, void* data);
+};
+
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3E8(void** self);
+
+extern "C" int func_002CD008(void* self)
+{
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) == 0 && r == 0 && func_002CA3E8((void**)self) == 6) {
+        r = (*(func_002CD008_cMenu**)self)->v03(self, *(void**)((char*)self + 0x1C));
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CD090);
@@ -1130,7 +1251,39 @@ extern "C" void func_002CDC28(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", cFloatMenuItem_cFloatMenuItem);
+#ifdef SKIP_ASM
+extern void* D_00486B60[];
+
+struct cFloatMenuItem_sItem {
+    char pad_0x00[0x10];
+    void* vtable;    // 0x10
+    int field_0x14;
+    int field_0x18;
+    float field_0x1C;
+    float field_0x20;
+    float field_0x24;
+    int field_0x28;
+    int field_0x2C;
+    int field_0x30;
+};
+
+extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sItem* self, void* text, int a2, int a3, float f1, float f2)
+{
+    cMenuItem_cMenuItem((cMenuItem*)self, text);
+    self->field_0x14 = a3;
+    self->field_0x18 = a2;
+    self->field_0x1C = f1;
+    self->field_0x20 = f2;
+    self->vtable = D_00486B60;
+    self->field_0x24 = 1.0f;
+    self->field_0x30 = 0;
+    self->field_0x2C = 0;
+    self->field_0x28 = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CDD78);
 
@@ -1533,7 +1686,28 @@ extern "C" float func_002D18B0(float t)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002D1928);
+#ifdef SKIP_ASM
+extern "C" float func_002D18B0(float t);
+
+extern "C" float func_002D1928(int n, float x)
+{
+    float sum = 0.0f;
+    float amp = 1.0f;
+    float v = 0.0f;
+    float freq = 1.0f;
+    int i;
+    for (i = 0; i < n; i++) {
+        float t = x * freq;
+        freq = freq * 2.0f;
+        v = func_002D18B0(t) * amp;
+        amp = amp * 0.5f;
+        sum = sum + v;
+    }
+    return sum + v;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002D19B8);
 

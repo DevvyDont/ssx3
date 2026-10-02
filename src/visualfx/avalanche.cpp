@@ -2,7 +2,33 @@
 
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_getFrameData);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D6378);
+#ifdef SKIP_ASM
+extern void* D_00488648[];
+extern void* D_00488680[];
+struct func_002D6378_sElem {
+    char pad[0x2F0];
+};
+extern func_002D6378_sElem D_004EE840[];
+extern "C" void func_002D9B40(void* self);
+extern "C" void func_003715B0(void* p, int flags);
+void operator_delete(int* ptr);
+
+extern "C" void func_002D6378(int* self, int flags)
+{
+    *(void***)self = D_00488648;
+    func_002D9B40(self);
+    int i;
+    for (i = 0; i < 64; i++) {
+        func_003715B0(&D_004EE840[i], 1);
+    }
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D6410);
 
@@ -51,9 +77,68 @@ extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t)
 
 INCLUDE_ASM("visualfx/avalanche", func_002D7CA8);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D7DD8);
+#ifdef SKIP_ASM
+extern "C" void cDynamicColourEmitter_reset(void* self);
 
+struct sVEntry2D7DD8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_002D7DD8(void* self, int force)
+{
+    char* p = *(char**)((char*)self + 0x2E0);
+    if (p != 0 && (force != 0 || *(unsigned short*)(p + 0xF0) != 2)) {
+        char* q = *(char**)(p + 0xF8);
+        if (q != 0) {
+            char* obj = *(char**)(q + 0xC);
+            if (obj != 0) {
+                sVEntry2D7DD8* vt = *(sVEntry2D7DD8**)(obj + 0xC);
+                vt[1].fn(obj + vt[1].delta, 3);
+            }
+        }
+        *(int*)(*(char**)((char*)self + 0x2E0) + 0x114) = 0;
+        *(char**)((char*)self + 0x2E0) = 0;
+        cDynamicColourEmitter_reset((char*)self + 0xD0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_buildArray);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00487548[];
+
+struct tActiveAvalanche_node {
+    char pad[0x2E4];
+    tActiveAvalanche_node* next; // 0x2E4
+};
+
+struct tActiveAvalanche {
+    int unk0;
+    tActiveAvalanche_node* head;   // 0x4
+    tActiveAvalanche_node** array; // 0x8
+};
+
+extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
+{
+    tActiveAvalanche_node* p;
+    int n = 0;
+    for (p = self->head; p != 0; p = p->next) {
+        n++;
+    }
+    self->array = (tActiveAvalanche_node**)operator_new_tag(n * 4, D_00487548, 0, 0);
+    int i = 0;
+    for (p = self->head; p != 0; p = p->next) {
+        self->array[i++] = p;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D7EF8);
 

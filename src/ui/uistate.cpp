@@ -1,8 +1,70 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ui/uistate", cUIState_hideObjSafe);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+cListNode* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+int GetHashValue32(char*);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
+struct sVEntry39E8B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cUIState_hideObjSafe(void* self, char* name)
+{
+    cListNode* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
+            if (obj != 0) {
+                sVEntry39E8B8* vt = *(sVEntry39E8B8**)((char*)obj + 8);
+                vt[9].fn((char*)obj + vt[9].delta, 0);
+                return;
+            }
+            n = *(cListNode**)((char*)n + 4);
+        } while (!cListNode_isSentinel(n));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uistate", cUIState_showObjSafe);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+cListNode* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+int GetHashValue32(char*);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+
+struct sVEntry39E948 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cUIState_showObjSafe(void* self, char* name)
+{
+    cListNode* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
+            if (obj != 0) {
+                sVEntry39E948* vt = *(sVEntry39E948**)((char*)obj + 8);
+                vt[9].fn((char*)obj + vt[9].delta, 1);
+                return;
+            }
+            n = *(cListNode**)((char*)n + 4);
+        } while (!cListNode_isSentinel(n));
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uistate", func_0039E9D8);
 
@@ -50,7 +112,36 @@ void func_0039ECA8(void* self)
 
 INCLUDE_ASM("ui/uistate", func_0039ECB0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uistate", func_0039F100);
+#ifdef SKIP_ASM
+extern "C" int func_0039ECB0(void* self);
+extern "C" void func_0039E868(void* self);
+
+struct sVEntry39F100 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0039F100(void* self)
+{
+    if (func_0039ECB0(self) != 0) {
+        func_0039ECB0(self);
+    }
+    cListNode* n = cList_first((cList*)((char*)self + 0x1C));
+    if (n != 0) {
+        do {
+            if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
+                sVEntry39F100* vt = *(sVEntry39F100**)((char*)n + 8);
+                vt[0xC].fn((char*)n + vt[0xC].delta);
+            }
+            func_0039E868(n);
+            n = *(cListNode**)((char*)n + 4);
+        } while (!cListNode_isSentinel(n));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistate", func_0039F190);

@@ -81,7 +81,30 @@ extern "C" void func_003A6F38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A6F88);
+#ifdef SKIP_ASM
+extern "C" int func_003E0C88(int h, void* p, int a, int tag);
+
+extern "C" int func_003A6F88(void* self, int a1, int a2, int a3)
+{
+    if (*(int*)((char*)self + 0x90) == 0) {
+        int r = func_003E0C88(*(int*)((char*)self + 0x88), (char*)self + 0x4, a3, 0x444E4543);
+        *(int*)((char*)self + 0x9C) = r;
+        if (r != 0) {
+            *(int*)((char*)self + 0x94) = a1;
+            *(int*)((char*)self + 0x90) = 1;
+            *(int*)((char*)self + 0x98) = a2;
+            *(int*)((char*)self + 0xA0) = 0;
+            *(int*)((char*)self + 0xC4) = 0;
+            *(int*)((char*)self + 0xE4) = 0;
+            *(int*)((char*)self + 0xE0) = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/streamman", func_003A7010);

@@ -459,7 +459,25 @@ int func_003ABF50_impl(void* self, func_003ABF50_sList* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003ABFC0);
+#ifdef SKIP_ASM
+extern "C" void func_003AC048(void* self, void* obj, void* list, int index);
+
+// PORT: the unit declares func_003ABFC0 as returning void (func_003ABF50 calls it that way),
+// but the body returns 1; bind the int-returning body to the symbol with an asm label.
+int func_003ABFC0_impl(void* self, void* item, void* list) __asm__("func_003ABFC0");
+
+int func_003ABFC0_impl(void* self, void* item, void* list)
+{
+    void** p = *(void***)((char*)item + 0x20);
+    int i;
+    for (i = 0; i < *(int*)((char*)item + 0x1C); i++, p++) {
+        func_003AC048(self, *p, list, i);
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AC048);
 

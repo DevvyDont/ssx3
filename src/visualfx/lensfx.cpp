@@ -56,9 +56,53 @@ void* func_002EC9D0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EC9E0);
+#ifdef SKIP_ASM
+extern void* D_00487EE8[];
+struct sLensFx;
+extern "C" void func_002ECAF0(sLensFx* self);
 
+extern "C" void* func_002EC9E0(void* self, int a1, int a2)
+{
+    *(void***)((char*)self + 0xC4) = D_00487EE8;
+    *(int*)((char*)self + 0x0) = 1;
+    *(int*)((char*)self + 0x4) = a1;
+    *(int*)((char*)self + 0xC) = a2;
+    *(int*)((char*)self + 0x8) = 0;
+    char* p = (char*)self + 0x10;
+    int i;
+    for (i = 14; i != -1; i--, p += 0xC) {
+        func_002EC9D0(p);
+    }
+    func_002ECAF0((sLensFx*)self);
+    return self;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002ECA68);
+#ifdef SKIP_ASM
+extern void* D_00487EE8[];
+struct sLensFx;
+extern "C" void func_002ECAF0(sLensFx* self);
+
+extern "C" void* func_002ECA68(void* self, int a1, int a2)
+{
+    *(void***)((char*)self + 0xC4) = D_00487EE8;
+    *(int*)((char*)self + 0x0) = 1;
+    *(int*)((char*)self + 0x8) = a1;
+    *(int*)((char*)self + 0xC) = a2;
+    *(int*)((char*)self + 0x4) = 0;
+    char* p = (char*)self + 0x10;
+    int i;
+    for (i = 14; i != -1; i--, p += 0xC) {
+        func_002EC9D0(p);
+    }
+    func_002ECAF0((sLensFx*)self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECAF0);
@@ -83,7 +127,28 @@ extern "C" void func_002ECAF0(sLensFx* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECB28);
+#ifdef SKIP_ASM
+extern void* D_00487EE8[];
+extern "C" void func_002F2218(int a, int id);
+void operator_delete(int* ptr);
+
+extern "C" void func_002ECB28(sLensFx* self, int flags)
+{
+    *(void***)((char*)self + 0xC4) = D_00487EE8;
+    int i;
+    for (i = 0; i < 15; i++) {
+        if (self->entries[i].id != -1) {
+            func_002F2218(*(int*)((char*)self + 0xC), self->entries[i].id);
+            self->entries[i].id = -1;
+        }
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECBC0);
@@ -113,7 +178,26 @@ extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
+#ifdef SKIP_ASM
+extern "C" int func_002F2130(int a, int x, int y);
+
+extern "C" int func_002ECC28(void* p, int x, int y)
+{
+    sLensFx* self = (sLensFx*)p;
+    int i;
+    for (i = 0; i < 15; i++) {
+        if (self->entries[i].id == -1) {
+            self->entries[i].id = func_002F2130(*(int*)((char*)self + 0xC), x, y);
+            self->entries[i].a = y;
+            self->entries[i].b = x;
+            return i;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECCB8);
 

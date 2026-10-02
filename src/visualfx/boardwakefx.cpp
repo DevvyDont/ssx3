@@ -39,9 +39,73 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DE4A8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF1C8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
+#ifdef SKIP_ASM
+extern "C" void func_002E26B8(void* self);
+extern "C" void func_002E2550(void* self);
 
+extern "C" void func_002DF3B0(void* self)
+{
+    sVec4 c;
+    c.x = 1.0f;
+    c.y = 1.0f;
+    c.z = 1.0f;
+    c.w = 1.0f;
+    *(float*)((char*)self + 0x120) = 0.5f;
+    *(int*)((char*)self + 0x10) = 0;
+    *(sVec4*)((char*)self + 0x90) = c;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x80) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0xE0) = 0;
+    *(int*)((char*)self + 0x12C) = 0;
+    if (*(int*)((char*)self + 0x124) != (*(int*)(*(char**)self + 0x870) >= 0)) {
+        func_002E26B8(self);
+    }
+    func_002E2550(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF448);
+#ifdef SKIP_ASM
+struct sVEntry2DF448 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, float);
+};
+
+struct func_002DF448_sElem {
+    char pad0[0x58];
+    float f58;                      // 0x58
+    char pad5C[0x1F8 - 0x5C];
+    sVEntry2DF448* vt;              // 0x1F8
+    char pad1FC[0x210 - 0x1FC];
+};
+
+struct func_002DF448_sFx {
+    char pad0[0x28];
+    func_002DF448_sElem* elems;     // 0x28
+    char* data;                     // 0x2C
+    char pad30[0x60 - 0x30];
+    int f60;                        // 0x60
+};
+
+extern "C" void func_002DF448(func_002DF448_sFx* self)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        // PORT: pointer held in int (index-first address arithmetic)
+        func_002DF448_sElem* e = (func_002DF448_sElem*)(i * 0x210 + (int)self->elems);
+        sVEntry2DF448* vt = e->vt;
+        vt[3].fn((char*)e + vt[3].delta, self->data + i * 0xE8, e->f58);
+    }
+    self->f60 = 0;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF4D0);
 
@@ -477,7 +541,29 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E55D8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5920);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5D18);
+#ifdef SKIP_ASM
+extern void* D_00487FD8[];
+extern "C" void func_00319CC8(void);
+extern "C" void func_002E4F28(int* self, int flags);
+extern "C" void func_003546C8(void* self, int flags);
+
+extern "C" void func_002E5D18(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_00487FD8;
+    func_00319CC8();
+    int i;
+    for (i = 0; i < 12; i++) {
+        int* p = ((int**)((char*)self + 0x10))[i];
+        if (p != 0) {
+            func_002E4F28(p, 3);
+        }
+    }
+    func_00319CC8();
+    func_003546C8(self, flags);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
 
