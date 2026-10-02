@@ -1,11 +1,7 @@
 #include "common.h"
 
-INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourR);
-
-INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourG);
-
 //100%
-INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourB);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourR);
 #ifdef SKIP_ASM
 struct sRSMVEntry {
     short delta;
@@ -28,6 +24,34 @@ struct sRSMEntry {
     char pad24[0xF0 - 0x24];
 };
 
+extern sRSMEntry D_004FA370[];
+
+extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
+{
+    sRSMEntry* e = &D_004FA370[i];
+    sRSMObj* o = *e->p20;
+    sRSMVEntry* vt = o->vt;
+    return *vt[55].fn((char*)o + vt[55].delta);
+}
+#endif
+
+//100%
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourG);
+#ifdef SKIP_ASM
+extern sRSMEntry D_004FA370[];
+
+extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
+{
+    sRSMEntry* e = &D_004FA370[i];
+    sRSMObj* o = *e->p20;
+    sRSMVEntry* vt = o->vt;
+    return *vt[56].fn((char*)o + vt[56].delta);
+}
+#endif
+
+//100%
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourB);
+#ifdef SKIP_ASM
 extern sRSMEntry D_004FA370[];
 
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
