@@ -24,7 +24,33 @@ INCLUDE_ASM("object/flagset", func_0034C600);
 
 INCLUDE_ASM("object/flagset", func_0034C668);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034C7F8);
+#ifdef SKIP_ASM
+struct sFlagSetEntry {
+    char pad_0x0[0x5C];
+    int active; // 0x5C
+    char pad_0x60[0x128];
+};
+
+struct sFlagSetOwner {
+    char pad_0x0[0x20];
+    sFlagSetEntry entries[15]; // 0x20
+};
+
+extern "C" void func_0034B9B0(sFlagSetEntry* e);
+
+extern "C" void func_0034C7F8(sFlagSetOwner* self)
+{
+    int i;
+    for (i = 0; i < 15; i++) {
+        sFlagSetEntry* e = &self->entries[i];
+        if (e->active != 0) {
+            func_0034B9B0(e);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034C848);
 
@@ -52,7 +78,24 @@ INCLUDE_ASM("object/flagset", func_0034D6F0);
 
 INCLUDE_ASM("object/flagset", func_0034D778);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034D960);
+#ifdef SKIP_ASM
+struct sSerVEntry_0034D960 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+
+extern "C" void func_0034D960(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x24);
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034D9B0);
 

@@ -123,7 +123,21 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232930);
 
 INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_update);
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232AE0);
+#ifdef SKIP_ASM
+extern "C" void func_00231CD0(void* self);
+extern void* D_0047D7D0[];
+
+extern "C" void* func_00232AE0(void* self, int arg)
+{
+    func_00231CD0(self);
+    *(void***)self = D_0047D7D0;
+    *(int*)((char*)self + 0x18) = arg;
+    *(int*)((char*)self + 0xC) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00232B28);
 

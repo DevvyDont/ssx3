@@ -846,7 +846,19 @@ extern "C" void func_00244978(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002449A8);
+#ifdef SKIP_ASM
+extern "C" void func_003546C8(void* self, int flags);
+extern void* D_0047CAE8[];
+
+extern "C" void func_002449A8(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_0047CAE8;
+    operator_delete(*(int**)((char*)self + 0x10));
+    func_003546C8(self, flags);
+}
+#endif
 
 void func_002D21B0(void*);
 

@@ -128,9 +128,39 @@ extern "C" void func_00253390(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_002533C8);
+#ifdef SKIP_ASM
+extern "C" void func_00253AA0();
 
+extern "C" void* func_002533C8(void* self)
+{
+    func_00253AA0();
+    func_00253390((char*)self + 0x14);
+    *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x34);
+    *(int*)((char*)self + 0x38) = 0;
+    *(int*)((char*)self + 0x3C) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("mem/memstd", func_00253418);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void func_002535F8(void* self);
+
+extern "C" void func_00253418(void* self, int flags)
+{
+    func_002535F8(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_002534A8);
 

@@ -26,7 +26,24 @@ INCLUDE_ASM("object/objnode", func_00354720);
 
 INCLUDE_ASM("object/objnode", cTypeObjNode_cTypeObjNode);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", func_00354808);
+#ifdef SKIP_ASM
+extern "C" void func_003546C8(void* self, int flags);
+extern void* D_00491E80[];
+extern int D_0044AFF0[];
+
+// PORT: the unit declares func_00354808(void*), but this is a deleting
+// destructor taking (self, flags); the real body is bound by asm label.
+void func_00354808_impl(void* self, int flags) __asm__("func_00354808");
+
+void func_00354808_impl(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_00491E80;
+    D_0044AFF0[*(short*)((char*)self + 0x10)]--;
+    func_003546C8(self, flags);
+}
+#endif
 
 INCLUDE_ASM("object/objnode", func_00354850);
 
@@ -60,7 +77,15 @@ extern "C" void func_00354948(void* self, func_00354948_cObj* obj)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", func_00354980);
+#ifdef SKIP_ASM
+extern "C" void func_00354980(void* self, func_00354948_cObj* obj)
+{
+    func_00354948(self, obj);
+    obj->v01((char*)self + 0x14, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/objnode", func_003549D0__FPv);

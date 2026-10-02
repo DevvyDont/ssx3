@@ -4,7 +4,29 @@ INCLUDE_ASM("object/movenode", cMoveNode_cMoveNode);
 
 INCLUDE_ASM("object/movenode", func_003553C0);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355420);
+#ifdef SKIP_ASM
+struct sMoveNodeVEntryI {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_00355420(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block == 0) {
+        return 1;
+    }
+    void* node = *(void**)block;
+    if (node == 0) {
+        return 1;
+    }
+    sMoveNodeVEntryI* vt = *(sMoveNodeVEntryI**)node;
+    return vt[8].fn((char*)node + vt[8].delta);
+}
+#endif
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 struct tModifierBlock;
@@ -48,7 +70,19 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003556A8);
+#ifdef SKIP_ASM
+extern "C" void func_0035B670(void* list, void* item);
+
+extern "C" void func_003556A8(cMoveNode* self, void* item)
+{
+    if (self->field_0x1C == 0) {
+        cMoveNode_addModifierBlock(self);
+    }
+    func_0035B670((char*)self->field_0x1C + 0x1C, item);
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_003556F8);
 
@@ -176,9 +210,53 @@ extern "C" int func_00356A00(cMoveNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356A28);
+#ifdef SKIP_ASM
+struct sMoveNodeVEntryA28 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
 
+extern "C" int func_00356A28(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block == 0) {
+        return 0;
+    }
+    void* node = *(void**)block;
+    if (node == 0) {
+        return 0;
+    }
+    sMoveNodeVEntryA28* vt = *(sMoveNodeVEntryA28**)node;
+    return vt[20].fn((char*)node + vt[20].delta);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/movenode", func_00356A70);
+#ifdef SKIP_ASM
+struct sMoveNodeVEntryA70 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int, int, int);
+};
+
+extern "C" int func_00356A70(void* self, int a, int b, int c, int d)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block == 0) {
+        return 0;
+    }
+    void* node = *(void**)block;
+    if (node == 0) {
+        return 0;
+    }
+    sMoveNodeVEntryA70* vt = *(sMoveNodeVEntryA70**)node;
+    return vt[21].fn((char*)node + vt[21].delta, a, b, c, d);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00356AB8);

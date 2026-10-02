@@ -71,7 +71,18 @@ extern "C" void func_00351398(void* self, float* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_003513D0);
+#ifdef SKIP_ASM
+extern "C" void* func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_003513D0(void* self)
+{
+    func_003E6448(self, 0, 0x40);
+    func_003E6448((char*)self + 0x44, 0, 0x40);
+    *(int*)((char*)self + 0x40) = 0;
+}
+#endif
 
 INCLUDE_ASM("object/instanceman", func_00351508);
 
@@ -235,5 +246,22 @@ INCLUDE_ASM("object/instanceman", func_00352780);
 
 INCLUDE_ASM("object/instanceman", func_00352810);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352A58);
+#ifdef SKIP_ASM
+struct sSerVEntry_00352A58 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+
+extern "C" void func_00352A58(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0xC);
+}
+#endif
 

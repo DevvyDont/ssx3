@@ -152,7 +152,22 @@ extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value)
 
 INCLUDE_ASM("main/ssxapp", func_00229788);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_002297D8);
+#ifdef SKIP_ASM
+extern "C" void func_00229B90(void* self, int a1);
+
+extern "C" void func_002297D8(void* self, int val)
+{
+    int i;
+    for (i = 0; i < 0x40; i++) {
+        if (((int*)self)[i + 2] == val) {
+            func_00229B90(self, i);
+            break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229820);
 

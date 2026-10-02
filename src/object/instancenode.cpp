@@ -65,7 +65,24 @@ void* func_0034FE00(void* self, int a1, int a2, int a3)
 
 INCLUDE_ASM("object/instancenode", func_0034FE28);
 
+//100%
 INCLUDE_ASM("object/instancenode", func_0034FE90);
+#ifdef SKIP_ASM
+struct sInstNodeVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_00354980(void* self, void* stream);
+
+extern "C" void func_0034FE90(void* self, void* stream)
+{
+    func_00354980(self, stream);
+    sInstNodeVEntry* vt = *(sInstNodeVEntry**)stream;
+    vt[6].fn((char*)stream + vt[6].delta, self);
+}
+#endif
 
 INCLUDE_ASM("object/instancenode", func_0034FED8);
 

@@ -134,5 +134,22 @@ INCLUDE_ASM("object/flexbridgenode", func_003480C8);
 
 INCLUDE_ASM("object/flexbridgenode", func_00348290);
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00348B40);
+#ifdef SKIP_ASM
+struct sSerVEntry_00348B40 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+
+extern "C" void func_00348B40(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sSerVEntry_00348B40* vt = *(sSerVEntry_00348B40**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
+}
+#endif
 

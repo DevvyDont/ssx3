@@ -57,23 +57,93 @@ extern "C" void func_003434E8(sDebounceScroll* self)
 
 INCLUDE_ASM("object/debouncenode", func_00343588);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343718);
+#ifdef SKIP_ASM
+struct sDebounceVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+
+extern "C" void func_00343718(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x2C);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343768);
 
 INCLUDE_ASM("object/debouncenode", func_003437C0);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343820);
+#ifdef SKIP_ASM
+struct sDebounceVEntry1 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00343820(void* self)
+{
+    if (*(int*)((char*)self + 0x1C) == 0) {
+        *(int*)((char*)self + 0x1C) = -1;
+        sDebounceVEntry1* vt = *(sDebounceVEntry1**)((char*)self + 0xC);
+        vt[34].fn((char*)self + vt[34].delta, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343868);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343A18);
+#ifdef SKIP_ASM
+struct sDebounceVEntryA18 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+
+extern "C" void func_00343A18(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x8);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343A68);
 
 INCLUDE_ASM("object/debouncenode", func_00343B28);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343BC0);
+#ifdef SKIP_ASM
+struct sDebounceState;
+extern "C" void func_003442E0(sDebounceState* self);
+void* func_00344348(void* self);
+
+struct sDebounceBlock {
+    char data[0x1F4];
+};
+
+extern "C" void func_00343BC0(sDebounceBlock* self)
+{
+    int i;
+    for (i = 0; i < 5; i++) {
+        func_00344348(&self[i]);
+        func_003442E0((sDebounceState*)&self[i]);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343C08);
 

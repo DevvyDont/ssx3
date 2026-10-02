@@ -87,7 +87,28 @@ void func_00231278(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_002312D8);
+#ifdef SKIP_ASM
+struct sVEntry_002312D8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_002312D8(void* self)
+{
+    if (*(int*)((char*)self + 0x208) != 0) {
+        return 0;
+    }
+    void* p = *(void**)((char*)self + 0x204);
+    if (p == 0) {
+        return 1;
+    }
+    sVEntry_002312D8* vt = *(sVEntry_002312D8**)((char*)p + 0xC);
+    return vt[8].fn((char*)p + vt[8].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00231320);

@@ -45,7 +45,23 @@ extern "C" int func_0023C8D0(void* self)
 
 INCLUDE_ASM("movie/movieplayer", func_0023C8F0);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023CA28);
+#ifdef SKIP_ASM
+struct sMovieVEntryCA28 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int, int);
+};
+
+extern "C" void func_0023CA28(void* self, int a, int b, int c)
+{
+    void* obj = *(void**)((char*)self + 0x434);
+    sMovieVEntryCA28* vt = *(sMovieVEntryCA28**)obj;
+    vt[29].fn((char*)obj + vt[29].delta, a, b, c);
+    *(int*)((char*)self + 0xE8) = c;
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023CA70);
@@ -64,7 +80,27 @@ extern "C" void func_0023CA70(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023CAA0);
+#ifdef SKIP_ASM
+struct sMovieVEntryCAA0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+// PORT: the unit declares func_0023CAA0(void* self), but the body takes a
+// second argument (callers pass it in $5); the real body is bound by asm label.
+void func_0023CAA0_impl(void* self, int a) __asm__("func_0023CAA0");
+
+void func_0023CAA0_impl(void* self, int a)
+{
+    void* obj = *(void**)((char*)self + 0x434);
+    sMovieVEntryCAA0* vt = *(sMovieVEntryCAA0**)obj;
+    vt[19].fn((char*)obj + vt[19].delta, a);
+    *(int*)((char*)self + 0xF0) = a;
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023CAE8);
 
@@ -114,7 +150,24 @@ extern "C" void func_0023D5E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023D618);
+#ifdef SKIP_ASM
+extern "C" void func_0023D7D8(void* self);
+extern "C" void func_0023D660(void* self);
+
+extern "C" void func_0023D618(void* self)
+{
+    switch (*(int*)((char*)self + 0xB8)) {
+    case 0:
+        func_0023D7D8(self);
+        break;
+    case 1:
+        func_0023D660(self);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023D660);
 
@@ -148,7 +201,23 @@ void func_0023E4F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023E4F8);
+#ifdef SKIP_ASM
+struct sMovieVEntryE4F8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0023E4F8(void* self)
+{
+    if ((*(int*)((char*)self + 0x108))-- <= 0) {
+        sMovieVEntryE4F8* vt = *(sMovieVEntryE4F8**)((char*)self + 0x748);
+        vt[1].fn((char*)self + vt[1].delta, 3);
+    }
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023E540);
 
@@ -439,7 +508,19 @@ INCLUDE_ASM("movie/movieplayer", func_00241CD8);
 
 INCLUDE_ASM("movie/movieplayer", func_00241D40);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241DC8);
+#ifdef SKIP_ASM
+extern "C" void func_002C26D0(void* dst, void* src, int n);
+extern char D_004A2C28[];
+
+extern "C" void func_00241DC8(void* self, void* dst, int n)
+{
+    unsigned short buf[256];
+    func_002C2540(buf, D_004A2C28);
+    func_002C26D0(dst, buf, n + 1);
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241E18);
 

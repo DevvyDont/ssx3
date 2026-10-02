@@ -2,7 +2,22 @@
 
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode);
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350B98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* cInstanceNode_ctor_v(void* self) __asm__("cInstanceNode_cInstanceNode");
+extern char D_00491980[];
+
+extern "C" void* func_00350B98(void* self)
+{
+    cInstanceNode_ctor_v(self);
+    *(void**)((char*)self + 0xC) = D_00491980;
+    *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFFU;
+    *(int*)((char*)self + 0x38) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/deadfadenode", func_00350BE0);
 

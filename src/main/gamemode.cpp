@@ -21,11 +21,62 @@ int func_00238348(void* self)
 
 INCLUDE_ASM("main/gamemode", func_00238358);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00238510);
+#ifdef SKIP_ASM
+struct sVEntry_00238510 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
 
+extern void* D_00536668[];
+
+extern "C" void func_00238510(void* self, int a, int b)
+{
+    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    sVEntry_00238510* vt = *(sVEntry_00238510**)obj;
+    vt[6].fn((char*)obj + vt[6].delta, a, b);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamemode", func_00238550);
+#ifdef SKIP_ASM
+struct sVEntry_00238550 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
 
+extern void* D_00536668[];
+
+extern "C" void func_00238550(void* self, int a, int b)
+{
+    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    sVEntry_00238550* vt = *(sVEntry_00238550**)obj;
+    vt[7].fn((char*)obj + vt[7].delta, a, b);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamemode", func_00238590);
+#ifdef SKIP_ASM
+struct sVEntry_00238590 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+extern void* D_00536668[];
+
+extern "C" void func_00238590(void* self, int a, int b)
+{
+    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    sVEntry_00238590* vt = *(sVEntry_00238590**)obj;
+    vt[9].fn((char*)obj + vt[9].delta, a, b);
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_00238B70);
 

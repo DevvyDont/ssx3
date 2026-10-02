@@ -86,7 +86,24 @@ INCLUDE_ASM("object/multiparticle", func_00358998);
 
 INCLUDE_ASM("object/multiparticle", func_00358B28);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358C30);
+#ifdef SKIP_ASM
+struct sSerVEntry_00358C30 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00354980(void* self, void* stream);
+
+extern "C" void func_00358C30(void* self, void* stream)
+{
+    func_00354980(self, stream);
+    sSerVEntry_00358C30* vt = *(sSerVEntry_00358C30**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x18, 0x200);
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00358C80);
 
@@ -96,7 +113,23 @@ INCLUDE_ASM("object/multiparticle", func_00358E50);
 
 INCLUDE_ASM("object/multiparticle", func_00358EB8);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358F90);
+#ifdef SKIP_ASM
+struct sMpQuad {
+    float v[4];
+} __attribute__((aligned(16)));
+
+extern sMpQuad D_004FF120;
+extern "C" void func_00356AE0(void* self, void* out);
+
+extern "C" void func_00358F90(void* self, void* out)
+{
+    func_00356AE0((char*)self + 0x48, out);
+    *(sMpQuad*)((char*)out + 0x20) = D_004FF120;
+    *(sMpQuad*)((char*)out + 0x30) = D_004FF120;
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00358FD0);
 
@@ -119,7 +152,21 @@ INCLUDE_ASM("object/multiparticle", func_003590F0);
 
 INCLUDE_ASM("object/multiparticle", func_00359140);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00359228);
+#ifdef SKIP_ASM
+extern "C" void func_00341AA0(void* self, int a, int type, int b, int c);
+extern void* D_0048EA70[];
+
+extern "C" void* func_00359228(void* self, int a, int b, int c)
+{
+    func_00341AA0(self, a, 2, b, c);
+    *(void***)((char*)self + 0x3C) = D_0048EA70;
+    *(int*)((char*)self + 0x6C) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00359270);
 
@@ -127,7 +174,24 @@ INCLUDE_ASM("object/multiparticle", func_003592D0);
 
 INCLUDE_ASM("object/multiparticle", func_003593D0);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00359410);
+#ifdef SKIP_ASM
+struct sSerVEntry_00359410 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00342150(void* self, void* stream);
+
+extern "C" void func_00359410(void* self, void* stream)
+{
+    func_00342150(self, stream);
+    sSerVEntry_00359410* vt = *(sSerVEntry_00359410**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x6C, 0x4);
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00359460);
 

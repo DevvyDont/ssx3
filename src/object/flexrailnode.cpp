@@ -315,7 +315,22 @@ extern "C" void func_0034AFB8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034AFE8);
+#ifdef SKIP_ASM
+extern "C" int func_00415FC8(const void* a, const void* b, int n);
+
+extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
+{
+    if (*(int*)((char*)self + 0x5C) == 0) {
+        return 0;
+    }
+    if (**(int**)((char*)ctx + 0x80) != *(int*)((char*)self + 0x58)) {
+        return 0;
+    }
+    return func_00415FC8(data, self, 0x58) == 0;
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034B038);
 

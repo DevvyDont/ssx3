@@ -134,7 +134,21 @@ INCLUDE_ASM("object/modifierblock", func_00352D20);
 
 INCLUDE_ASM("object/modifierblock", func_00352DD0);
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00352E50);
+#ifdef SKIP_ASM
+extern "C" int func_00352E50(tModifierBlock* self)
+{
+    sBoundBoxNode* node = self->node;
+    if (node != 0) {
+        sMbVEntryI* vt = *(sMbVEntryI**)node;
+        if (vt[17].fn((char*)node + vt[17].delta) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00352ED0);
@@ -186,7 +200,25 @@ extern "C" void func_00353098(tModifierBlock* self, void* arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_003530D0);
+#ifdef SKIP_ASM
+struct sMbVEntryDel {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_003530D0(tModifierBlock* self)
+{
+    sBoundBoxNode* node = self->node;
+    if (node != 0) {
+        sMbVEntryDel* vt = *(sMbVEntryDel**)node;
+        vt[1].fn((char*)node + vt[1].delta, 3);
+        self->node = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353118);
@@ -218,7 +250,25 @@ extern "C" void func_00353150(tModifierBlock* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353188);
+#ifdef SKIP_ASM
+struct sMbVEntryDel2 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00353188(tModifierBlock* self)
+{
+    void* obj = *(void**)((char*)self + 0xC);
+    if (obj != 0) {
+        sMbVEntryDel2* vt = *(sMbVEntryDel2**)((char*)obj + 0x4);
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+        *(void**)((char*)self + 0xC) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/modifierblock", func_003531D0);
 
