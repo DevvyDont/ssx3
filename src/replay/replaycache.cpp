@@ -73,7 +73,45 @@ extern "C" void* func_00270130(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002701A0);
+#ifdef SKIP_ASM
+extern "C" void func_00270238(void* self, void* node);
+
+struct sRcNode1A0 {
+    char pad_0x00[0x14];
+    sRcNode1A0* next;       // 0x14
+    char pad_0x18[0x6];
+    unsigned char locked;   // 0x1E
+    unsigned char used;     // 0x1F
+};
+
+struct sRcCursor1A0 {
+    char pad_0x000[0x3AC];
+    sRcNode1A0* cursor;     // 0x3AC
+    sRcNode1A0* head;       // 0x3B0
+};
+
+extern "C" void func_002701A0(void* self)
+{
+    sRcCursor1A0* c = (sRcCursor1A0*)self;
+    int i;
+    for (i = 0; i < 2; i++) {
+        while (c->cursor != 0 && c->cursor->next != 0 && c->cursor->next->next != 0) {
+            sRcNode1A0* n = c->cursor->next;
+            if (n->used == 0) {
+                if (n->locked == 0) {
+                    c->cursor = n->next;
+                    func_00270238(self, n);
+                    return;
+                }
+            }
+            c->cursor = c->cursor->next;
+        }
+        c->cursor = c->head;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270238);
@@ -244,7 +282,28 @@ void cReplay_stopAutoReplay(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00270730);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002707E0);
+#ifdef SKIP_ASM
+extern "C" int func_00270730(int id);
+extern "C" void func_00270B88(void* self, int slot, int id);
+// PORT: the unit defines func_002705A8(void*) (an empty stub), but this caller
+// passes (self, id); bind the 2-arg call by asm label.
+void func_002705A8_2(void* self, int id) __asm__("func_002705A8__FPv");
+
+extern "C" void func_002707E0(void* self, int key, int id)
+{
+    if (*(int*)((char*)self + 0x61C) == 0 && *(int*)((char*)self + 0x620) == 0 &&
+        *(int*)((char*)self + 0x610) == 0 && *(int*)((char*)self + 0x60C) == 0 &&
+        *(int*)((char*)self + 0x0) == 0) {
+        int slot = func_00270730(key);
+        if (slot >= 0) {
+            func_00270B88(self, slot, id);
+            func_002705A8_2(self, id);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00270870);
@@ -520,7 +579,36 @@ extern "C" void* func_00270F78(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270FC0);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int size);
+
+struct sRcStream0FC0 {
+    char pad_0x000[0x644];
+    char* src;      // 0x644
+    int left;       // 0x648
+    int used;       // 0x64C
+    char* dst;      // 0x650
+};
+
+extern "C" void func_00270FC0(sRcStream0FC0* self)
+{
+    if (self->src != 0) {
+        if (self->left > 0) {
+            int space = 0x4000 - self->used;
+            int n = space < self->left ? space : self->left;
+            if (n > 0) {
+                func_003E6574(self->dst, self->src, n);
+                self->dst += n;
+                self->src += n;
+                self->left -= n;
+                self->used += n;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00271058);
@@ -868,7 +956,46 @@ extern "C" void* func_002725B8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002725F0);
+#ifdef SKIP_ASM
+extern "C" float func_00272570(float* coef, float t);
+
+struct sRcTrack25F0 {
+    char pad_0x00[0x8];
+    unsigned int* data;     // 0x8
+    int key;                // 0xC
+    unsigned int* cur;      // 0x10
+    char* body;             // 0x14
+    int field_0x18;         // 0x18
+    float value;            // 0x1C
+    char* extra;            // 0x20
+    char* next;             // 0x24
+};
+
+extern "C" int func_002725F0(sRcTrack25F0* self, unsigned int* data, int key)
+{
+    char* body = (char*)data + 4;
+    self->data = data;
+    self->key = key;
+    self->cur = data;
+    self->body = body;
+    self->field_0x18 = 0;
+    if (data[0] >= 2) {
+        self->next = body + *(unsigned short*)((char*)data + 4);
+    } else {
+        self->next = 0;
+    }
+    self->value = func_00272570((float*)(self->body + 4), 0.0f);
+    char* b = self->body;
+    if (*(unsigned short*)b >= 0x15) {
+        self->extra = b + 0x14;
+    } else {
+        self->extra = 0;
+    }
+    return self->next != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272680__FPv);
@@ -1539,7 +1666,37 @@ extern "C" void func_00273A60(void* self, int idx)
 
 INCLUDE_ASM("replay/replaycache", func_00273AA8);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00273D20);
+#ifdef SKIP_ASM
+class cRcListener3D20 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(void* src, int id, int h, float t);
+    virtual void v04(void* src, int id, int h, float t0, float t1);
+};
+
+extern "C" int func_00273D20(void* self)
+{
+    cRcListener3D20* obj = *(cRcListener3D20**)((char*)self + 0x2C);
+    int ret = *(int*)((char*)self + 0x30);
+    if (obj != 0) {
+        int h = *(int*)((char*)self + 0x34);
+        if (h != 0) {
+            obj->v03(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3), h, 0.0f);
+        }
+        (*(cRcListener3D20**)((char*)self + 0x2C))->v04(self,
+            *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3),
+            *(int*)((char*)self + 0x34), 0.0f, 0.0f);
+    }
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    *(int*)((char*)self + 0x38) = 0;
+    return ret;
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00273DC0);
 
@@ -1547,7 +1704,29 @@ INCLUDE_ASM("replay/replaycache", func_00273F68);
 
 INCLUDE_ASM("replay/replaycache", func_00274100);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00274240);
+#ifdef SKIP_ASM
+class cRcListener4240 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* src, int id);
+    virtual void v02(void* src, int id);
+};
+
+extern "C" cRcListener4240* func_00274240(void* self, cRcListener4240* l)
+{
+    cRcListener4240* old = *(cRcListener4240**)((char*)self + 0x2C);
+    if (old != 0) {
+        old->v02(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3));
+    }
+    *(cRcListener4240**)((char*)self + 0x2C) = l;
+    if (l != 0) {
+        l->v01(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3));
+    }
+    return old;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002742C8__FPvi);
@@ -1735,7 +1914,33 @@ extern "C" void* func_00274C38(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00274C70);
+#ifdef SKIP_ASM
+struct sRcTrack4C70 {
+    char pad[0x3C];
+};
+
+extern "C" int func_00274C70(void* self)
+{
+    int r = *(int*)((char*)self + 0x30);
+    if (r < 0) {
+        int best = 0;
+        int i;
+        for (i = 0; i < *(unsigned char*)(*(char**)((char*)self + 0x10) + 1); i++) {
+            int v = func_00274348(&(*(sRcTrack4C70**)((char*)self + 0x18))[i]);
+            if (best < v) {
+                best = v;
+            }
+        }
+        if (*(int*)((char*)self + 0x20) != 0) {
+            *(int*)((char*)self + 0x30) = best;
+        }
+        r = best;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00274D08);
 

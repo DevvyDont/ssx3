@@ -2,7 +2,42 @@
 
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282020);
+#ifdef SKIP_ASM
+struct sScriptEngine282390;
+struct sScriptEngine2823F0;
+struct sScriptEngine2B8;
+extern "C" void func_00282390(sScriptEngine282390* self);
+extern "C" void func_002823F0(sScriptEngine2823F0* self);
+extern "C" void func_002828B8(sScriptEngine2B8* self);
+extern "C" void func_0027D050(void* self);
+extern "C" void func_002728D0(void* obj, int flags);
+void cMemMan_free(void*);
+
+extern "C" void func_00282020(void* self)
+{
+    if (*(void**)((char*)self + 0x2B0) != 0) {
+        func_00282390((sScriptEngine282390*)self);
+        func_002823F0((sScriptEngine2823F0*)self);
+        func_0027D050(self);
+        if (*(void**)((char*)self + 0x2B0) != 0) {
+            cMemMan_free(*(void**)((char*)self + 0x2B0));
+        }
+        *(void**)((char*)self + 0x2B0) = 0;
+        *(int*)((char*)self + 0x2B4) = 0;
+        if (*(void**)((char*)self + 0x2B8) != 0) {
+            func_002728D0(*(void**)((char*)self + 0x2B8), 3);
+        }
+        *(void**)((char*)self + 0x2B8) = 0;
+        if (*(void**)((char*)self + 0x2BC) != 0) {
+            cMemMan_free(*(void**)((char*)self + 0x2BC));
+        }
+        *(void**)((char*)self + 0x2BC) = 0;
+        func_002828B8((sScriptEngine2B8*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002820B0);
 
@@ -38,7 +73,30 @@ extern "C" int func_00282178(void* self, int index)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002821A0);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002822A0);
+#ifdef SKIP_ASM
+extern "C" void* func_00282CB0(void* self, int a1);
+extern "C" void func_00272AD0(void* cache, void* data, int a2);
+
+extern "C" int func_002822A0(void* self, int id, int value, int arg)
+{
+    char* e = (char*)func_00282CB0(self, id);
+    if (e == 0) {
+        return 0;
+    }
+    int state = *(int*)(e + 0x4);
+    if (state != 2) {
+        return state;
+    }
+    *(short*)(e + 0x10) = value;
+    if (*(int*)(e + 0x20) == 1) {
+        *(int*)(e + 0x4) = 3;
+        func_00272AD0(*(void**)((char*)self + 0x2B8), **(void***)e, arg);
+    }
+    return *(int*)(e + 0x4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282338);
@@ -681,9 +739,61 @@ extern "C" void func_002832D8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_00283320);
+#ifdef SKIP_ASM
+class cScriptOwner3320 {
+public:
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    // vptr at 0xC; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual int v06();
+    virtual void* v07(int i);
+};
 
+extern "C" void func_00283320(cScriptOwner3320* self)
+{
+    int i = 0;
+    int n = self->v06();
+    for (; i < n; i++) {
+        func_00283038(self->v07(i));
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_002833A8);
+#ifdef SKIP_ASM
+class cScriptOwner33A8 {
+public:
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    // vptr at 0xC; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual int v06();
+    virtual void* v07(int i);
+};
+
+extern "C" void func_002833A8(cScriptOwner33A8* self)
+{
+    int i = 0;
+    int n = self->v06();
+    for (; i < n; i++) {
+        func_00283060(self->v07(i));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283430__FPv);

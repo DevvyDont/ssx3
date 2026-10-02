@@ -164,7 +164,40 @@ extern "C" void* func_0035AAF0(void* self, void* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035AB60);
+#ifdef SKIP_ASM
+struct sSmVEntryI_AB60 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sSmVEntryV_AB60 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" int func_0035AB60(void* self, void* item)
+{
+    void* cur = *(void**)((char*)self + 0x40);
+    if (item == cur) {
+        void* obj = *(void**)((char*)item + 0xC);
+        sSmVEntryI_AB60* e = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[26];
+        if (e->fn((char*)obj + e->delta) != 0) {
+            obj = *(void**)(*(char**)((char*)self + 0x40) + 0xC);
+            e = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[27];
+            return e->fn((char*)obj + e->delta);
+        }
+        return 0;
+    }
+    void* obj = *(void**)((char*)cur + 0xC);
+    sSmVEntryV_AB60* vt = *(sSmVEntryV_AB60**)((char*)obj + 0xC);
+    vt[33].fn((char*)obj + vt[33].delta, (char*)item + 0x10, *(int*)((char*)self + 0x38));
+    return *(int*)((char*)self + 0x38);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035ABF0);

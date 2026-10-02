@@ -265,7 +265,29 @@ extern "C" int func_0026D4D8(sPlaybackStream* self, unsigned int pos)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D558);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" int func_002C85A0(void* src, int a, int dst);
+
+extern "C" int func_0026D558(void* self, char** pp)
+{
+    struct {
+        int tag;
+        int value;
+    } hdr;
+    int size;
+    func_003E6574(&hdr, *pp, 8);
+    *pp += 8;
+    *(int*)self = hdr.value;
+    func_003E6574(&size, *pp, 4);
+    *pp += 4;
+    func_002C85A0(*pp, 0, *(int*)((char*)self + 0xC));
+    *pp += size;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D5E8);

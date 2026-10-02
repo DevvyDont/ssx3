@@ -579,7 +579,37 @@ extern "C" void* func_00375A08(void)
 
 INCLUDE_ASM("render/particle", func_00375A40);
 
+//100%
 INCLUDE_ASM("render/particle", func_00376268);
+#ifdef SKIP_ASM
+extern "C" void func_00424880(int);
+extern "C" void func_00423AA0(int, int);
+extern "C" void func_00424950(int);
+extern "C" void func_00423AD0(int, int);
+extern "C" void func_00423BF0(int);
+extern "C" void func_00423BB0(int);
+extern "C" void func_00423DB0(int);
+extern "C" void func_00367360(void*);
+void* func_00361F40(void* self);
+void operator_delete(int* ptr);
+extern char D_005059D8[];
+
+extern "C" void func_00376268(void* self)
+{
+    func_00424880(2);
+    func_00423AA0(2, *(int*)((char*)self + 0x5AC0));
+    func_00424950(1);
+    func_00423AD0(0, *(int*)((char*)self + 0x5AC4));
+    func_00423BF0(*(int*)((char*)self + 0x5AD0));
+    func_00423BB0(*(int*)((char*)self + 0x5AD0));
+    func_00423DB0(*(int*)((char*)self + 0x5AC8));
+    func_00423DB0(*(int*)((char*)self + 0x5ACC));
+    operator_delete(*(int**)((char*)self + 0x18F0));
+    func_00367360(*(void**)((char*)self + 0x18F4));
+    operator_delete(*(int**)((char*)self + 0x18F4));
+    func_00361F40(D_005059D8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003762F8);
@@ -1506,7 +1536,26 @@ extern "C" void func_00384FD0(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_003850A8);
+#ifdef SKIP_ASM
+// PORT: packet pointers held in int fields (field_0x8 / field_0xc).
+extern "C" void func_003850A8(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos)
+{
+    if (ctx->field_0x8 == 0) {
+        ulong* p = ctx->p;
+        ctx->field_0x8 = (int)p;
+        ctx->p = p + 4;
+    } else if (ctx->field_0xc != 0) {
+        func_00384DC0(ctx);
+    }
+    ulong* q = ctx->p;
+    ctx->count = 0;
+    ctx->field_0xc = (int)q;
+    ctx->p = q + 6;
+    func_00384FD0(ctx, v, pos);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00385138);
 

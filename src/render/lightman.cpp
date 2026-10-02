@@ -113,7 +113,25 @@ extern "C" void func_0038DF98(cObj0038DF98* obj, int a, int b, int c, float f, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038E008);
+#ifdef SKIP_ASM
+class cObj0038E008 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void* v01(int a);
+    virtual void* v02(int a);
+};
+
+// PORT: the unit defines func_0038DC68(void*) (an empty stub), but this caller
+// passes (void*, int, int, int, float, float, int, float); bind the call by asm label.
+void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("func_0038DC68__FPv");
+
+extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, float x, float y, int e, float z)
+{
+    func_0038DC68_8(obj->v02(a), b, c, d, x, y, e, z);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038EC40);
 
@@ -123,7 +141,40 @@ INCLUDE_ASM("render/lightman", func_0038F2A8);
 
 INCLUDE_ASM("render/lightman", func_0038F300);
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F460);
+#ifdef SKIP_ASM
+struct sLightRing {
+    int field_0x0;
+    int count;        // 0x4
+    int next;         // 0x8
+    int field_0xC;
+    int defSize;      // 0x10
+    int result[3];    // 0x14
+    unsigned int addr[3]; // 0x20
+    int size[3];      // 0x2C
+};
+
+extern "C" void func_0038F768(void);
+
+extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags)
+{
+    sLightRing* r = (sLightRing*)self;
+    if (flags & 4) {
+        func_0038F768();
+    }
+    if (size < 0) {
+        size = r->defSize;
+    } else {
+        size >>= 4;
+    }
+    int i = r->next++;
+    r->next %= r->count;
+    r->addr[i] = addr;
+    r->size[i] = size;
+    return r->result[i];
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/lightman", func_0038F4F8);

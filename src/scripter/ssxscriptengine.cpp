@@ -208,7 +208,24 @@ extern "C" void func_00278F38(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278F68);
+#ifdef SKIP_ASM
+extern "C" void func_002EF368(int);
+extern "C" int func_00276388(sSsxScriptRider* r, int a, int b);
+
+extern "C" int func_00278F68(void* self, int i, int a, int b)
+{
+    *(int*)((char*)self + 0x550) = i;
+    func_002EF368(1);
+    int r = func_00276388(&(*(sSsxScriptRider**)((char*)self + 0x54C))[i], a, b);
+    if (r != 3) {
+        *(int*)((char*)self + 0x550) = 2;
+        func_002EF368(0);
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279040);
@@ -322,7 +339,29 @@ extern "C" int func_00279298(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002792E0);
+#ifdef SKIP_ASM
+extern "C" int func_00277060(sSsxScriptRider* r);
+// PORT: the unit declares func_00276BD8 as returning void, but this caller uses
+// its int result; bind an int-returning alias by asm label.
+extern "C" int func_00276BD8_i(sSsxScriptRider* r) __asm__("func_00276BD8");
+
+extern "C" int func_002792E0(void* self)
+{
+    int idx = *(int*)((char*)self + 0x550);
+    if (idx == 2) {
+        return 1;
+    }
+    int r = 0;
+    if (*(int*)((char*)self + 0x554) == 0) {
+        if (func_00277060(&(*(sSsxScriptRider**)((char*)self + 0x54C))[idx]) != 0) {
+            r = func_00276BD8_i(&(*(sSsxScriptRider**)((char*)self + 0x54C))[*(int*)((char*)self + 0x550)]) != 3;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279370);
@@ -434,7 +473,29 @@ extern "C" void func_00279888(void* self, int a1)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002798C0);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002799E0);
+#ifdef SKIP_ASM
+void* func_0027C078(void* self);
+extern "C" void func_00282178(void* self, int a1);
+extern "C" void func_00275650(void* list, int id);
+extern "C" void func_00283610(void* list, int id);
+
+extern "C" void func_002799E0(void* self, void* obj, int a2, int type, int id)
+{
+    switch (type) {
+    case 0:
+        func_00282178(self, *(int*)((char*)func_0027C078(obj) + 0x18));
+        break;
+    case 1:
+        func_00275650((char*)self + 0xA28, id);
+        break;
+    case 2:
+        func_00283610((char*)self + 0xA38, id);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279A70);
 
@@ -453,7 +514,28 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00279D00);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279DA8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279E50);
+#ifdef SKIP_ASM
+int func_0027D320(void* self, int i);
+extern "C" int func_0027D790(void* self, int val);
+extern "C" void func_0027D210(void* self, int i, int val);
+extern "C" void func_00282EF0(void* obj, int val);
+
+extern "C" void func_00279E50(void* self, int i, int val)
+{
+    // PORT: func_0027D320 returns a table pointer as int
+    int* obj = (int*)func_0027D320(self, i);
+    int type = *obj;
+    if (type == 1) {
+        func_0027D790(obj, val);
+    } else if (type != 2) {
+        func_0027D210(self, i, val);
+    } else {
+        func_00282EF0(obj, val);
+    }
+}
+#endif
 
 extern "C" void* func_00275718(void*);
 
@@ -593,7 +675,32 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetScriptFromCategory);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B268);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B370);
+#ifdef SKIP_ASM
+extern "C" void* func_003DF748(const char* name, int a, int b);
+extern "C" void* func_003DF690(const char* name, int flags, int b);
+void func_00277F08(void* slot);
+
+extern "C" void func_0027B370(void* self, int i, const char* name, int flags, int key, int a, int b)
+{
+    char* slot = (char*)self + (i * 16 + 0x628);
+    *(int*)(slot + 0x4) = key;
+    if (a != 0) {
+        *(void**)(slot + 0x8) = func_003DF748(name, a, b);
+        *(int*)(slot + 0xC) = 0;
+    } else {
+        *(void**)(slot + 0x8) = func_003DF690(name, flags, b);
+        *(int*)(slot + 0xC) = 1;
+    }
+    if (*(void**)(slot + 0x8) != 0) {
+        *(int*)((char*)self + 0x620) += 1;
+    }
+    if (*(void**)(slot + 0x8) == 0) {
+        func_00277F08(slot);
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B410);
 
@@ -654,7 +761,48 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027B578);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B5D8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B6B0);
+#ifdef SKIP_ASM
+// PORT: the unit declares ASYNCFILE_release(void*, int, int); this caller passes
+// out-pointers, so bind a pointer-typed alias by asm label.
+extern "C" int ASYNCFILE_release_out(void* file, int** data, int* size) __asm__("ASYNCFILE_release");
+
+struct sScrReloc6B0 {
+    int used;
+    int offset;
+};
+
+struct sScrRelocOwner6B0 {
+    char pad_0x000[0x538];
+    void* file;                 // 0x538
+    int* header;                // 0x53C
+    sScrReloc6B0* entries;      // 0x540
+    char pad_0x544[0x620 - 0x544];
+    int pending;                // 0x620
+};
+
+extern "C" void func_0027B6B0(sScrRelocOwner6B0* self, void* file)
+{
+    struct {
+        int* data;
+        int size;
+    } r;
+    self->file = 0;
+    ASYNCFILE_release_out(file, &r.data, &r.size);
+    self->pending -= 1;
+    if (r.size != 0) {
+        self->header = r.data;
+        self->entries = (sScrReloc6B0*)(r.data + 1);
+        for (int i = 0; i < *self->header; i++) {
+            if (self->entries[i].used != 0) {
+                // PORT: offset relocated to an absolute pointer held in int
+                self->entries[i].offset = (int)r.data + self->entries[i].offset;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B750);
 
@@ -933,7 +1081,36 @@ extern "C" void func_0027D050(void* self)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D0C0);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D170);
+#ifdef SKIP_ASM
+class cScriptOwnerD170 {
+public:
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    // vptr at 0xC; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual int v06();
+    virtual void* v07(int i);
+};
+
+extern "C" void func_0027D558(void* self, void* a1);
+
+extern "C" void func_0027D170(void* self, int idx)
+{
+    cScriptOwnerD170* obj = *(cScriptOwnerD170**)((char*)self + (idx << 2));
+    int i = 0;
+    int n = obj->v06();
+    for (; i < n; i++) {
+        func_0027D558(self, obj->v07(i));
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D210);
 
@@ -1015,9 +1192,90 @@ extern "C" int func_0027D390(void* self, void* msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D400);
+#ifdef SKIP_ASM
+struct sScrVEntryD400 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
 
+struct sScrVEntryD400b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sScrSlotD400 {
+    int field_0x0;
+    int id;         // 0x4
+    int value;      // 0x8
+    int set;        // 0xC
+    int field_0x10;
+};
+
+struct sScrOwnerD400 {
+    void* objs[0x14];           // 0x0
+    sScrSlotD400 slots[1];      // 0x50
+};
+
+extern "C" void func_0027D400(sScrOwnerD400* self, int* key, int value)
+{
+    sScrVEntryD400* vt = *(sScrVEntryD400**)((char*)self + 0x2A8);
+    sScrSlotD400* s = &self->slots[key[1]];
+    if (vt[4].fn((char*)self + vt[4].delta, s->id, value) == 0) {
+        char* obj = (char*)self->objs[s->id];
+        sScrVEntryD400b* vt2 = *(sScrVEntryD400b**)(obj + 0xC);
+        vt2[4].fn(obj + vt2[4].delta, value);
+    }
+    s->value = value;
+    s->set = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D4A0);
+#ifdef SKIP_ASM
+struct sScrVEntryD4A0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+struct sScrVEntryD4A0b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sScrSlotD4A0 {
+    int field_0x0;
+    int id;         // 0x4
+    int value;      // 0x8
+    int set;        // 0xC
+    int field_0x10;
+};
+
+struct sScrOwnerD4A0 {
+    void* objs[0x14];           // 0x0
+    sScrSlotD4A0 slots[1];      // 0x50
+};
+
+extern "C" void func_0027D4A0(sScrOwnerD4A0* self, int* key)
+{
+    sScrSlotD4A0* s = &self->slots[key[1]];
+    int old = s->value;
+    s->value = -1;
+    s->set = 0;
+    sScrVEntryD4A0* vt = *(sScrVEntryD4A0**)((char*)self + 0x2A8);
+    if (vt[4].fn((char*)self + vt[4].delta, s->id, old) == 0) {
+        char* obj = (char*)self->objs[s->id];
+        sScrVEntryD4A0b* vt2 = *(sScrVEntryD4A0b**)(obj + 0xC);
+        vt2[5].fn(obj + vt2[5].delta, old);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D540);
@@ -1061,7 +1319,44 @@ extern "C" int func_0027D578(sScriptEng0050* self, int key, int* out, int max)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D5E8);
+#ifdef SKIP_ASM
+void* func_00283200(void*, int);
+extern char D_004820B8[];
+extern char D_004FF1A0[];
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// the PC port needs a plain 64-byte copy.
+extern "C" void* func_0027D5E8(void* self, int a1)
+{
+    func_00283200(self, 1);
+    *(void**)((char*)self + 0xC) = D_004820B8;
+    *(int*)((char*)self + 0x20) = -1;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x30), "r"(D_004FF1A0)
+        : "memory");
+    *(int*)((char*)self + 0x7C) = a1;
+    *(int*)((char*)self + 0x70) = 0;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D680__FPvi);
@@ -1132,7 +1427,45 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D8D8);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D970);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027F968);
+#ifdef SKIP_ASM
+void func_00282F60(void*);
+void* func_00283200(void*, int);
+extern char D_00481FD8[];
+extern char D_00482018[];
+extern char D_004FF1A0[];
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// the PC port needs a plain 64-byte copy.
+extern "C" void* func_0027F968(void* self)
+{
+    func_00282F60(self);
+    func_00283200((char*)self + 0xC, 3);
+    *(void**)((char*)self + 0x18) = D_00482018;
+    *(void**)((char*)self + 0x0) = D_00481FD8;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x30), "r"(D_004FF1A0)
+        : "memory");
+    *(int*)((char*)self + 0x70) = 0;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027F9F8);
 
@@ -1193,7 +1526,48 @@ void func_00280548(void* self, int a1, void* a2, void* a3)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280560);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002805B8);
+#ifdef SKIP_ASM
+void func_00282F60(void*);
+void* func_00283200(void*, int);
+extern void* D_00482298[];
+extern void* D_00482260[];
+
+struct sScrTrig05B8 {
+    int id;         // 0x0
+    int count;      // 0x4
+    int target;     // 0x8
+};
+
+struct sScrObj05B8 {
+    char pad_0x00[0xBC];
+    sScrTrig05B8 trig[4];   // 0xBC
+    int field_0xEC;
+    int field_0xF0;
+    int field_0xF4;
+    int field_0xF8;
+};
+
+extern "C" void* func_002805B8(sScrObj05B8* self)
+{
+    func_00282F60(self);
+    func_00283200((char*)self + 0xC, 5);
+    *(void***)((char*)self + 0x18) = D_00482298;
+    *(void***)self = D_00482260;
+    self->field_0xEC = 0;
+    self->field_0xF0 = 0;
+    self->field_0xF4 = 0;
+    self->field_0xF8 = 0;
+    for (int i = 0; i < 4; i++) {
+        sScrTrig05B8* t = &self->trig[i];
+        t->target = -1;
+        t->id = -1;
+        t->count = 0;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280640);
 
@@ -1277,7 +1651,36 @@ extern "C" int func_00281190(void* self, void* obj)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002811E8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002812E0);
+#ifdef SKIP_ASM
+// PORT: func_00282DB0 forwards four float args in $f12..$f15 (declared (void*, int, int)
+// in bxscriptengine); func_00282DA8 stores an owner pointer in an int field. Both bound
+// by asm label with the real argument types.
+void* func_00282DB0_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
+    __asm__("func_00282DB0__FPvii");
+void func_00282DA8_p(void* self, void* owner) __asm__("func_00282DA8__FPvi");
+
+extern "C" int func_002812E0(void* self, void* obj)
+{
+    if (obj == 0) {
+        char* cur = *(char**)((char*)self + 0xD8);
+        if (*(int*)(cur + 0x8) > 0) {
+            func_00282DB0_f(cur, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+            *(int*)((char*)self + 0xE8) = 0;
+        }
+        func_00282DA8_p(*(void**)((char*)self + 0xD8), 0);
+        *(void**)((char*)self + 0xD8) = 0;
+        return 1;
+    }
+    if (*(void**)((char*)self + 0xD8) != 0) {
+        return 0;
+    }
+    *(void**)((char*)self + 0xD8) = obj;
+    func_00282DA8_p(obj, self);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281370);
 

@@ -66,7 +66,33 @@ void cMoveNode_addModifierBlock(cMoveNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003554B0);
+#ifdef SKIP_ASM
+struct sMoveNodeVEntryV54B0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_003530D0(void* block);
+
+extern "C" void func_003554B0(cMoveNode* self, void* mod)
+{
+    sMoveNodeVEntryV54B0* e = &(*(sMoveNodeVEntryV54B0**)((char*)self + 0xC))[49];
+    e->fn((char*)self + e->delta);
+    if (self->field_0x1C == 0) {
+        cMoveNode_addModifierBlock(self);
+    } else {
+        func_003530D0(self->field_0x1C);
+    }
+    *(void**)self->field_0x1C = mod;
+    e = &(*(sMoveNodeVEntryV54B0**)((char*)self + 0xC))[48];
+    e->fn((char*)self + e->delta);
+    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    *f = (*f & ~0x20u) | 0x40;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00355550);
@@ -722,7 +748,41 @@ extern "C" void* func_00356F10(void* self, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356F68);
+#ifdef SKIP_ASM
+struct sMnVEntrySer6F68 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+// PORT: callers declare this void; the body returns self, so bind it via an asm label.
+extern "C" void* func_00356F68_ret(void* self, void* stream) __asm__("func_00356F68");
+extern "C" void* func_00356F68_ret(void* self, void* stream)
+{
+    *(void***)self = D_0048F5F0;
+    sMnVEntrySer6F68* vt = *(sMnVEntrySer6F68**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x40);
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, D_004FF1A0 -> self+0x50).
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"((char*)self + 0x50), "r"(D_004FF1A0)
+        : "memory");
+    *(int*)((char*)self + 0x44) = 1;
+    return self;
+}
+#endif
 
 typedef int cQuad128 __attribute__((mode(TI)));
 
@@ -854,7 +914,37 @@ extern "C" void func_00357278(void* self, void* stream)
 
 INCLUDE_ASM("object/movenode", func_003572E0);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357358);
+#ifdef SKIP_ASM
+struct sMnVEntrySer7358 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sMnVEntryRd7358 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+extern char D_0048F420[];
+
+extern "C" void* func_00357358(void* self, void* stream)
+{
+    char* m = (char*)self + 0x10;
+    *(void**)self = D_0048F420;
+    sMnVEntryRd7358* r = &(*(sMnVEntryRd7358**)stream)[3];
+    *(void**)((char*)self + 0xA0) = r->fn((char*)stream + r->delta);
+    sMnVEntrySer7358* e = &(*(sMnVEntrySer7358**)stream)[2];
+    e->fn((char*)stream + e->delta, m, 0x50);
+    e = &(*(sMnVEntrySer7358**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x60, 0x40);
+    *(int*)((char*)self + 0x50) = 1;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_003573F8);
 
@@ -956,7 +1046,37 @@ extern "C" void* func_00357750(void* self, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357798);
+#ifdef SKIP_ASM
+struct sMnVEntrySer7798 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sMnVEntryRd7798 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+// PORT: the project names this func_002D1CF0__FPv (one void* arg), but it is a
+// pass-through wrapper and this caller passes two args (prototype mismatch).
+void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
+
+extern "C" void* func_00357798(void* self, void* stream)
+{
+    char* m = (char*)self + 0x10;
+    *(void***)self = D_0048F338;
+    sMnVEntryRd7798* r = &(*(sMnVEntryRd7798**)stream)[3];
+    *(void**)((char*)self + 0x80) = r->fn((char*)stream + r->delta);
+    sMnVEntrySer7798* e = &(*(sMnVEntrySer7798**)stream)[2];
+    e->fn((char*)stream + e->delta, m, 0x30);
+    func_002D1CF0_2(*(void**)((char*)self + 0x80), (char*)self + 0x40);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357820);

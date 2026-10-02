@@ -22,7 +22,27 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instancenode", func_0034FBF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0034FC80(void* self, void* a1);
+extern void* func_00354920_dtor(void* self, int flags) __asm__("func_00354920__FPv");
+
+extern "C" void func_0034FBF0(void* self, int flags)
+{
+    *(void***)((char*)self + 0xc) = (void**)D_00491C80;
+    func_0034FC80(self, *(void**)((char*)self + 0x18));
+    *(int*)(*(char**)((char*)self + 0x18) + 8) &= 0xFFFF0300;
+    {
+        char* o = *(char**)((char*)self + 0x18);
+        int v = *(int*)(o + 8);
+        *(int*)(o + 8) = v | (v >> 16);
+    }
+    *(int*)(*(char**)((char*)self + 0x18) + 8) |= 2;
+    func_00354920_dtor(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FC78);
@@ -68,7 +88,33 @@ void* func_0034FCE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instancenode", func_0034FD00);
+#ifdef SKIP_ASM
+struct sInstNodeVEntryFD00 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0034FD00(void* self, int a1)
+{
+    if (a1 != 0) {
+        if (func_0034FCC0(self) != 0) return;
+    }
+    *(int*)(*(char**)((char*)self + 0x18) + 8) &= 0xFFFF0300;
+    {
+        char* o = *(char**)((char*)self + 0x18);
+        int v = *(int*)(o + 8);
+        *(int*)(o + 8) = v | (v >> 16);
+    }
+    *(int*)(*(char**)((char*)self + 0x18) + 8) |= 2;
+    if (self != 0) {
+        sInstNodeVEntryFD00* vt = *(sInstNodeVEntryFD00**)((char*)self + 0xc);
+        vt[1].fn((char*)self + vt[1].delta, 3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FD90);

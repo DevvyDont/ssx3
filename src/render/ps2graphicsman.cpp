@@ -175,7 +175,27 @@ extern "C" int func_00367CD0(void* self, int a, int b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
+#ifdef SKIP_ASM
+extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void func_00369098(void* self, int idx);
+
+extern "C" void func_00367D20(void* self, int idx, void* data, int a3, int a4, int a5, int a6,
+                              int a7, void* clut, int upload)
+{
+    char* e = *(char**)((char*)self + (idx << 2) + 8);
+    if (upload != 0) {
+        if (data != 0) {
+            func_003E6574(*(void**)(e + 0x1C), data, *(int*)(e + 0x10));
+        }
+        if (clut != 0) {
+            func_003E6574(*(void**)(e + 0x20), clut, 4 << *(int*)(e + 0x18));
+        }
+    }
+    func_00369098(self, idx);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367DB8);
@@ -259,7 +279,29 @@ INCLUDE_ASM("render/ps2graphicsman", func_00368660);
 
 INCLUDE_ASM("render/ps2graphicsman", func_00368970);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369098);
+#ifdef SKIP_ASM
+extern "C" void func_00366E30(void* list, int i);
+
+extern "C" void func_00369098(void* self, int idx)
+{
+    char* e = *(char**)((char*)self + (idx << 2) + 8);
+    if (*(int*)(e + 0x28) != -1) {
+        if (*(int*)(e + 0xC) != 9) {
+            func_00366E30((char*)self + 0x1F60, idx);
+        } else {
+            func_00366E30((char*)self + 0x4350, idx);
+        }
+    }
+    int v = -1;
+    int* a = (int*)((char*)self + 0x1F4C);
+    for (int i = 1; i >= 0; i--) {
+        a[i] = v;
+    }
+    *(int*)((char*)self + 0x1F54) = -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369130);

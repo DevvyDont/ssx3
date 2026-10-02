@@ -24,7 +24,28 @@ extern "C" void func_00283518(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283580);
+#ifdef SKIP_ASM
+struct sSndEntry;
+struct sSndList;
+extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
+extern "C" sSndEntry* func_00283760(sSndList* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
+
+extern "C" int func_00283580(sSndList* self, int id, void* data, int b)
+{
+    char* e = (char*)func_002836D8(self, id);
+    if (e == 0) {
+        e = (char*)func_00283760(self);
+        *(int*)(e + 0x0) = id;
+        *(void**)(e + 0x8) = data;
+        func_0028BE60(**(void***)((char*)func_0028B180() + 0x118), *(int*)(e + 0x4), data, b);
+    }
+    return *(int*)(e + 0x4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283610);

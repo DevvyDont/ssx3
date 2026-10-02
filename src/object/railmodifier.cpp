@@ -2864,7 +2864,29 @@ extern "C" void* func_00361E80(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00361EB8);
+#ifdef SKIP_ASM
+struct sRailPairs;
+extern "C" void func_00361F60(sRailPairs* self);
+extern "C" void func_00361E30(void* self);
+
+static inline void func_00361EB8_fill(int* p, int v)
+{
+    int i;
+    for (i = 15; i >= 0; i--) {
+        p[i] = v;
+    }
+}
+
+extern "C" void func_00361EB8(void* self)
+{
+    func_00361EB8_fill((int*)self, -1);
+    func_00361EB8_fill((int*)((char*)self + 0x40), -1);
+    func_00361F60((sRailPairs*)self);
+    func_00361E30(self);
+}
+#endif
 
 extern "C" void* func_00361E80(void* self);
 
@@ -3569,7 +3591,25 @@ void func_00366FE0(void* self, int val)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00366FE8);
+#ifdef SKIP_ASM
+extern "C" void func_003670E0(void* self);
+extern "C" void func_00365E40(void* list, int a, int size, void* pool);
+
+extern "C" void func_00366FE8(void* self)
+{
+    *(int*)((char*)self + 0x1F58) = 0;
+    func_003670E0(self);
+    int* a = (int*)((char*)self + 0x1F4C);
+    for (int i = 1; i >= 0; i--) {
+        a[i] = -1;
+    }
+    *(int*)((char*)self + 0x1F54) = -1;
+    func_00365E40((char*)self + 0x1F60, 0, 0x400000, (char*)self + 0x8);
+    func_00365E40((char*)self + 0x4350, 0, 0x1000, (char*)self + 0x8);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00367078);

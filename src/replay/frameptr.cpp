@@ -126,7 +126,27 @@ extern "C" short func_0026EA68(cStream26EA68* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EAB8);
+#ifdef SKIP_ASM
+extern "C" int func_002C85A0(void* src, int a, int dst);
+
+extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
+{
+    struct {
+        int tag;
+        int size;
+    } hdr;
+    func_003E6574(&hdr.tag, src, 4);
+    func_003E6574(&hdr.size, *pp, 4);
+    *pp += 4;
+    int n = func_002C85A0(*pp, 0, self->field_0x4);
+    *pp += hdr.size;
+    *(int*)((char*)self + 0x8) = self->field_0x4 + n;
+    cReplayFramePtr_readRewind(self);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EB48);
 
