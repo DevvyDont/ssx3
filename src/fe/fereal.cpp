@@ -50,11 +50,37 @@ INCLUDE_ASM("fe/fereal", func_001A2BC0);
 
 INCLUDE_ASM("fe/fereal", cRealFE_loadStartState);
 
+//100%
 INCLUDE_ASM("fe/fereal", func_001A2E20);
+#ifdef SKIP_ASM
+void* func_0039E288(void* self);
+extern void* D_00469348[];
+
+extern "C" void* func_001A2E20(void* self)
+{
+    func_0039E288(self);
+    *(void***)self = D_00469348;
+    *(int*)((char*)self + 0x4) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/fereal", func_001A2E58);
 
+//100%
 INCLUDE_ASM("fe/fereal", func_001A2F38);
+#ifdef SKIP_ASM
+void* func_0039E288(void* self);
+extern void* D_00469318[];
+
+extern "C" void* func_001A2F38(void* self)
+{
+    func_0039E288(self);
+    *(void***)self = D_00469318;
+    *(int*)((char*)self + 0x4) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/fereal", func_001A2F70);
 

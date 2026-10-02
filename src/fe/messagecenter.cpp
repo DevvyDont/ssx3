@@ -39,7 +39,22 @@ extern "C" void func_00197AD8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_00197B88);
+#ifdef SKIP_ASM
+extern "C" void func_00197BC8(void* self);
+extern "C" void func_00197CA0(void* self);
+extern "C" void func_00197DB8(void* self);
+extern "C" void func_00198118(void* self);
+
+extern "C" void func_00197B88(void* self)
+{
+    func_00197BC8(self);
+    func_00197CA0(self);
+    func_00197DB8(self);
+    func_00198118(self);
+}
+#endif
 
 INCLUDE_ASM("fe/messagecenter", func_00197BC8);
 

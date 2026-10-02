@@ -22,7 +22,21 @@ void cCameraTriggerList_init(cCameraTriggerList* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016BF40);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C098);
+#ifdef SKIP_ASM
+extern "C" void func_0016BF40(void*);
+void cMemMan_free(void*);
+
+extern "C" void func_0016C098(void** self)
+{
+    func_0016BF40(self);
+    if (*self != 0) {
+        cMemMan_free(*self);
+        *self = 0;
+    }
+}
+#endif
 
 struct cCameraTriggerList2 {
     void** arr; // 0x0

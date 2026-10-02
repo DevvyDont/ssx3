@@ -4,7 +4,20 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onCreateScreen);
 
 INCLUDE_ASM("fe/festaterewards", func_001CF168);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001CF238);
+#ifdef SKIP_ASM
+extern "C" void func_001D0238(void* self);
+extern "C" void func_001CFF10(void* self);
+extern "C" void* func_0039E510(void* self);
+
+extern "C" void func_001CF238(void* self)
+{
+    func_001D0238(self);
+    func_001CFF10(self);
+    func_0039E510(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001CF270);
 
@@ -250,7 +263,20 @@ extern "C" int func_001D1F78(void* self, int a1, unsigned int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1FB0);
+#ifdef SKIP_ASM
+extern "C" void func_001D2198(void* self);
+extern "C" void* func_0039E510(void* self);
+
+extern "C" void func_001D1FB0(void* self)
+{
+    if (*(int*)((char*)self + 0x6C) >= 0) {
+        func_001D2198(self);
+    }
+    func_0039E510(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D1FF0);
 
@@ -266,7 +292,20 @@ INCLUDE_ASM("fe/festaterewards", func_001D2380);
 
 INCLUDE_ASM("fe/festaterewards", func_001D23E0);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2430);
+#ifdef SKIP_ASM
+extern "C" void func_00253418(void* p, int a1);
+
+extern "C" void func_001D2430(void* self)
+{
+    void* p = *(void**)((char*)self + 0x248);
+    if (p != 0) {
+        func_00253418(p, 3);
+    }
+    *(void**)((char*)self + 0x248) = 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D2468);
 

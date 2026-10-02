@@ -14,7 +14,20 @@ INCLUDE_ASM("fe/festateoptions", func_00188D08);
 
 INCLUDE_ASM("fe/festateoptions", func_00188E58);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00188EE8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern void* D_0046C6F0[];
+
+extern "C" void* func_00188EE8(void* self)
+{
+    func_0039E2A0(self);
+    *(void***)((char*)self + 0x8) = D_0046C6F0;
+    *(int*)((char*)self + 0xC) = 0x1C;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onCreateScreen);
 

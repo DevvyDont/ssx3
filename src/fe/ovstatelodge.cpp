@@ -6,7 +6,18 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D28F8);
 
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D2A90);
+#ifdef SKIP_ASM
+extern "C" void func_001D3340(void* self);
+extern "C" void func_00186518(void* self, int a1);
+
+extern "C" void func_001D2A90(void* self, int a1)
+{
+    func_001D3340(self);
+    func_00186518(self, a1);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetCreate);
 

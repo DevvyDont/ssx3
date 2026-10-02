@@ -17,7 +17,18 @@ void* func_00191C48(void* self)
 
 INCLUDE_ASM("fe/festateruleselect", func_00191C68);
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00191E08);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A13A0[];
+
+extern "C" int func_00191E08(void* self, void* msg)
+{
+    int id = *(int*)((char*)msg + 0x38);
+    return (id == GetHashValue32(D_004A13A0)) ? 0x101 : 0x100;
+}
+#endif
 
 INCLUDE_ASM("fe/festateruleselect", func_00191E48);
 

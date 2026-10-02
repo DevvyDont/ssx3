@@ -27,7 +27,21 @@ INCLUDE_ASM("fe/festateprofile", func_0018F0B8);
 
 INCLUDE_ASM("fe/festateprofile", func_0018F168);
 
+//100%
 INCLUDE_ASM("fe/festateprofile", func_0018F278);
+#ifdef SKIP_ASM
+extern "C" void func_0018F2B8(void* self);
+extern "C" void func_0018F9D8(void* self);
+
+extern "C" void func_0018F278(void* self)
+{
+    if (*(int*)((char*)self + 0x214) == 3) {
+        func_0018F2B8(self);
+    } else {
+        func_0018F9D8(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateprofile", func_0018F2B8);
 

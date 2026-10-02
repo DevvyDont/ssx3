@@ -55,7 +55,72 @@ INCLUDE_ASM("fe/fepopup", func_001C75C8);
 
 INCLUDE_ASM("fe/fepopup", func_001C7620);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C7738);
+#ifdef SKIP_ASM
+struct sColor_7738 { int r, g, b; };
+
+extern "C" void func_001C7738(void* self, sColor_7738* color)
+{
+    sColor_7738 c = *color;
+    switch (*(int*)((char*)self + 0x31C)) {
+    case 0:
+        {
+            void* p = *(void**)((char*)self + 0x48);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        {
+            void* p = *(void**)((char*)self + 0x4C);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        break;
+    case 1:
+        {
+            void* p = *(void**)((char*)self + 0x58);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        {
+            void* p = *(void**)((char*)self + 0x5C);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        {
+            void* p = *(void**)((char*)self + 0x50);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        {
+            void* p = *(void**)((char*)self + 0x54);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        {
+            void* p = *(void**)((char*)self + 0x60);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        break;
+    case 2:
+        {
+            void* p = *(void**)((char*)self + 0x68);
+            if (p != 0) {
+                *(sColor_7738*)((char*)p + 0x50) = c;
+            }
+        }
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C78C0);
 
@@ -128,7 +193,19 @@ INCLUDE_ASM("fe/fepopup", func_001C97E0);
 
 INCLUDE_ASM("fe/fepopup", func_001C9938);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001C9B28);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3);
+
+extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int a3)
+{
+    func_001C9210(self, text, str, a3);
+    cUIText_setAsciiString(text, str);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C9B68);
@@ -168,9 +245,41 @@ INCLUDE_ASM("fe/fepopup", func_001CA180);
 
 INCLUDE_ASM("fe/fepopup", func_001CA298);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA488);
+#ifdef SKIP_ASM
+struct sVEntry_func_001CA488 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
 
+extern "C" void func_001CA488(void* self, void* obj)
+{
+    if (obj != 0) {
+        sVEntry_func_001CA488* vt = *(sVEntry_func_001CA488**)((char*)obj + 0x8);
+        vt[9].fn((char*)obj + vt[9].delta, 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA4C0);
+#ifdef SKIP_ASM
+struct sVEntry_func_001CA4C0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001CA4C0(void* self, void* obj)
+{
+    if (obj != 0) {
+        sVEntry_func_001CA4C0* vt = *(sVEntry_func_001CA4C0**)((char*)obj + 0x8);
+        vt[9].fn((char*)obj + vt[9].delta, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CA4F8);
@@ -259,7 +368,21 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onCreateScreen);
 
 INCLUDE_ASM("fe/fepopup", func_001CB208);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CB290);
+#ifdef SKIP_ASM
+extern "C" void func_0039F190(void* self, int a1);
+
+extern "C" void func_001CB290(void* self, void* a1, unsigned int a2)
+{
+    switch (a2) {
+    case 5:
+    case 6:
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetCreate);
 

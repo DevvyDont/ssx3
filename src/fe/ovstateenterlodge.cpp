@@ -71,7 +71,25 @@ extern "C" int func_001F80C8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F80D8);
+#ifdef SKIP_ASM
+struct sVEntry_001F80D8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_001F80D8(void* self, void* a1, int a2)
+{
+    if (a1 != 0) {
+        if (a2 == 5) {
+            sVEntry_001F80D8* vt = *(sVEntry_001F80D8**)((char*)self + 0x8);
+            vt[26].fn((char*)self + vt[26].delta);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F8118);
 

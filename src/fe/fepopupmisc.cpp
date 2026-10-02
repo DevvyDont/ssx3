@@ -1798,7 +1798,19 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3760);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E38B8);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E39F8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_00147908(void* iface, int a1);
+
+extern "C" void* func_001E39F8(void* self)
+{
+    return func_00147908(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E3A30);
 
@@ -1826,9 +1838,41 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4658);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E4758);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4840);
+#ifdef SKIP_ASM
+struct sVEntry_func_001E4840 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
 
+extern "C" void func_001E4840(void* self, void* obj)
+{
+    if (obj != 0) {
+        sVEntry_func_001E4840* vt = *(sVEntry_func_001E4840**)((char*)obj + 0x8);
+        vt[9].fn((char*)obj + vt[9].delta, 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4878);
+#ifdef SKIP_ASM
+struct sVEntry_func_001E4878 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001E4878(void* self, void* obj)
+{
+    if (obj != 0) {
+        sVEntry_func_001E4878* vt = *(sVEntry_func_001E4878**)((char*)obj + 0x8);
+        vt[9].fn((char*)obj + vt[9].delta, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E48B0);
 

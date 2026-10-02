@@ -144,7 +144,38 @@ extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetString);
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetBinary);
+#ifdef SKIP_ASM
+extern unsigned char D_004961C0[];
+extern unsigned char D_004962C0[];
+
+extern "C" int cDirtysock_tag_TagFieldGetBinary(const char* data, void* buffer, int len)
+{
+    int count;
+    const char* p;
+    char* buf = (char*)buffer;
+
+    if ((data == 0) || (*data != '$')) {
+        return -1;
+    }
+    if (buf == 0) {
+        for (count = 0, p = data + 1; ((unsigned char)p[0] >= '0') && ((unsigned char)p[1] >= '0'); count++) {
+            p += 2;
+        }
+        return count;
+    }
+    p = data + 1;
+    if (len <= 0) {
+        return -1;
+    }
+    for (count = 0; (count < len) && ((unsigned char)p[0] >= '0') && ((unsigned char)p[1] >= '0'); count++) {
+        *buf++ = D_004961C0[(unsigned char)p[0]] | D_004962C0[(unsigned char)p[1]];
+        p += 2;
+    }
+    return count;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetStructure);
 

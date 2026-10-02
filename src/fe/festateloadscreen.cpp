@@ -25,9 +25,45 @@ extern "C" void func_00233A70(void* self)
 
 INCLUDE_ASM("fe/festateloadscreen", func_00233AA0);
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233AF0);
+#ifdef SKIP_ASM
+struct sVEntry_func_00233AF0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
 
+// PORT: the unit declares func_00233AF0 as `void* (void*)`; the body also uses $a1 (obj).
+// Bound by asm label.
+void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
+
+void* func_00233AF0_2(void* self, void* obj)
+{
+    sVEntry_func_00233AF0* vt = *(sVEntry_func_00233AF0**)obj;
+    return vt[1].fn((char*)obj + vt[1].delta, self, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233B28);
+#ifdef SKIP_ASM
+struct sVEntry_func_00233B28 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+// PORT: the unit declares func_00233B28 as `void* (void*)`; the body also uses $a1 (obj).
+// Bound by asm label.
+void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+
+void* func_00233B28_2(void* self, void* obj)
+{
+    sVEntry_func_00233B28* vt = *(sVEntry_func_00233B28**)obj;
+    return vt[2].fn((char*)obj + vt[2].delta, self, 4);
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_00233B60);
 

@@ -2,7 +2,21 @@
 
 INCLUDE_ASM("fe/feflowstate", cFEFlowState_setNumStates);
 
+//100%
 INCLUDE_ASM("fe/feflowstate", func_001A06B0);
+#ifdef SKIP_ASM
+void cMemMan_free(void* ptr);
+
+extern "C" void func_001A06B0(void* self)
+{
+    void* p = *(void**)((char*)self + 0x4);
+    if (p != 0) {
+        cMemMan_free(p);
+        *(void**)((char*)self + 0x4) = 0;
+    }
+    *(char*)self = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feflowstate", func_001A06F0);

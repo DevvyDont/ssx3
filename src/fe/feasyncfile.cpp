@@ -366,7 +366,19 @@ INCLUDE_ASM("fe/feasyncfile", func_001ABE58);
 
 INCLUDE_ASM("fe/feasyncfile", func_001ABED8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001ABF70);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void* self);
+extern void* D_0046B6F8[];
+
+extern "C" void* func_001ABF70(void* self)
+{
+    func_001A8500(self);
+    *(void***)((char*)self + 0x8) = D_0046B6F8;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001ABFA8);
 
@@ -681,7 +693,18 @@ INCLUDE_ASM("fe/feasyncfile", func_001B33D8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B3490);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B3528);
+#ifdef SKIP_ASM
+extern "C" void func_001B3BF0(void* self);
+extern "C" void func_001A87D0(void* self, int a1);
+
+extern "C" void func_001B3528(void* self, int a1)
+{
+    func_001B3BF0(self);
+    func_001A87D0(self, a1);
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B3568);
 
@@ -1282,7 +1305,19 @@ INCLUDE_ASM("fe/feasyncfile", func_001BCE38);
 
 INCLUDE_ASM("fe/feasyncfile", func_001BD1B8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BD428);
+#ifdef SKIP_ASM
+extern "C" void func_001BD540(void* self, int a1, void* a2);
+
+extern "C" void func_001BD428(void* self)
+{
+    char* p = *(char**)((char*)self + 0x69C);
+    if (*(int*)(p + 0x18) == 8) {
+        func_001BD540(self, *(int*)((char*)self + 0xB80), p + 0x74);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BD460);
 
@@ -1537,7 +1572,23 @@ INCLUDE_ASM("fe/feasyncfile", func_001C17F8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C19C8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1B48);
+#ifdef SKIP_ASM
+extern "C" int func_001C1B88(void* self, void* a1, int a2);
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+
+extern "C" int func_001C1B48(void* self, void* a1, int a2)
+{
+    int r;
+    if (*(int*)((char*)a1 + 0x18) == 0x82F) {
+        r = func_001C1B88(self, a1, a2);
+    } else {
+        r = func_001A97B8(self, a1, a2);
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C1B88);
 
@@ -1632,7 +1683,24 @@ INCLUDE_ASM("fe/feasyncfile", func_001C49C8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C4B78);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4B98);
+#ifdef SKIP_ASM
+extern "C" void func_001C3310(void* self);
+
+extern "C" int func_001C4B98(void* self, void* a1, int a2, int a3)
+{
+    switch (a2) {
+    case 6:
+        return 0x100;
+    case 4:
+        *(int*)((char*)self + 0x6E8) = a3;
+        func_001C3310(self);
+        break;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C4BD8);
 
@@ -1678,7 +1746,19 @@ INCLUDE_ASM("fe/feasyncfile", func_001C5430);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C5540);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C55F8);
+#ifdef SKIP_ASM
+extern "C" void func_001C5630(void* self);
+extern void* D_0046CCA8[];
+
+extern "C" void* func_001C55F8(void* self)
+{
+    *(void***)((char*)self + 0xC8) = D_0046CCA8;
+    func_001C5630(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C5630);
 
