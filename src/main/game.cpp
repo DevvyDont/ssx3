@@ -37,7 +37,42 @@ extern "C" void func_0022C3B8(void* self, int flags)
 
 INCLUDE_ASM("main/game", func_0022C410);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", cGame_renderPatches);
+#ifdef SKIP_ASM
+extern "C" void func_0022C1B0(void* ctx);
+extern "C" void func_0022C410(void* ctx, int patch, int flag);
+extern "C" void func_0022C3B8(void* self, int flags);
+extern void* D_004A4248;
+
+struct sVEntry0022C620 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void cGame_renderPatches(void* self, void* world)
+{
+    char ctx[0x30];
+    func_0022C1B0(ctx);
+    int n = *(int*)((char*)world + 0x50A8);
+    int* items = (int*)((char*)world + 0x50AC);
+    for (int i = 0; i < n; i++) {
+        func_0022C410(ctx, items[i], 0);
+    }
+    n = *(int*)((char*)world + 0x70AC);
+    items = (int*)((char*)world + 0x70B0);
+    for (int i = 0; i < n; i++) {
+        func_0022C410(ctx, items[i], 1);
+    }
+    if (*(int*)(*(char**)((char*)self + 0x84) + 0x14) == 0) {
+        void* obj = D_004A4248;
+        sVEntry0022C620* vt = *(sVEntry0022C620**)((char*)obj + 4);
+        vt[5].fn((char*)obj + vt[5].delta);
+    }
+    func_0022C3B8(ctx, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/game", cGame_renderFogVolumes);

@@ -1,6 +1,71 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
+#ifdef SKIP_ASM
+extern "C" void* cAppMan_cAppMan(void* self);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern int D_004A3E90;
+extern void* D_0047D9C8[];
+
+struct cSSXApp00226830 {
+    char base[0x5C];
+    void** vt;
+    int f60;
+    int f64;
+    int f68;
+    int f6C;
+    int f70;
+    int f74;
+    char pad78[0xA8 - 0x78];
+    char fA8[8];
+    char fB0[8];
+    char fB8[8];
+    int fC0;
+    int fC4;
+    int fC8;
+    int fCC;
+    int fD0;
+    int fD4;
+    int fD8;
+    int fDC;
+    int fE0;
+    int fE4;
+    int fE8;
+    int arr[11];
+    int f118;
+};
+
+extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp00226830* self)
+{
+    cAppMan_cAppMan(self);
+    self->vt = D_0047D9C8;
+    self->fC4 = D_004A3E90;
+    self->fC8 = D_004A3E90;
+    self->fCC = D_004A3E90;
+    self->fD4 = 0;
+    self->fD8 = 0;
+    self->fDC = 0;
+    self->fE0 = 0;
+    self->fE4 = 0;
+    self->fE8 = 0;
+    int i;
+    for (i = 0; i < 11; i++) {
+        self->arr[i] = 0;
+    }
+    self->f118 = 0;
+    self->f74 = 0;
+    self->f68 = 0;
+    self->f6C = 0;
+    self->f70 = 0;
+    self->f60 = 1;
+    self->f64 = 1;
+    func_003E6448(self->fA8, 0, 8);
+    func_003E6448(self->fB8, 0, 8);
+    func_003E6448(self->fB0, 0, 8);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_init);
 
@@ -23,7 +88,39 @@ int cSSXApp_flush()
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_preUpdate);
+#ifdef SKIP_ASM
+extern "C" int func_00326B48(void* pad);
+extern "C" void func_00255A20(void* p);
+extern "C" void func_002668E8(void* p);
+extern "C" int func_00326CA0(void* self, int i);
+extern "C" void* func_00326CC8(void* self, int i);
+extern "C" void func_00321298(void* target, int a, void* data);
+extern void* D_004A28A0;
+extern void* D_004A2EB8;
+extern void* D_004A33F0;
+
+extern "C" int cSSXApp_preUpdate(void* self)
+{
+    if (D_004A28A0 != 0 && func_00326B48(D_004A28A0) != 0) {
+        if (D_004A2EB8 != 0) {
+            func_00255A20(D_004A2EB8);
+        }
+        if (D_004A33F0 != 0) {
+            func_002668E8(D_004A33F0);
+        }
+        int i;
+        for (i = 0; i < 2; i++) {
+            int a = func_00326CA0(D_004A28A0, i);
+            void* d = func_00326CC8(D_004A28A0, i);
+            func_00321298(((void**)((char*)self + 0xA8))[i], a, d);
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 extern "C" void func_00326B88(void* mgr);
 

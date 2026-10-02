@@ -485,7 +485,55 @@ extern "C" void func_0023EA30(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023EA90);
+#ifdef SKIP_ASM
+extern "C" int func_0023C8D0(void* self);
+extern "C" void func_0023FAE0(void* self);
+void func_0023FB18(void* self, int val);
+extern "C" void func_00241FD0(void* self);
+extern "C" void func_00242050(void* self);
+extern int D_004A2C78;
+
+struct sMovieVEntryEA90 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sMovieVEntryEA90b {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0023EA90(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0xBC) != 0) {
+        int playing = *(int*)(s + 0x118);
+        D_004A2C78 = 0;
+        if (playing != 0) {
+            void* o = *(void**)(s + 0x434);
+            sMovieVEntryEA90b* vt2 = *(sMovieVEntryEA90b**)o;
+            vt2[44].fn((char*)o + vt2[44].delta);
+        }
+        sMovieVEntryEA90* vt = *(sMovieVEntryEA90**)(s + 0x748);
+        vt[1].fn(s + vt[1].delta, 2);
+    } else {
+        *(int*)(s + 0x440) = 0;
+        if (*(int*)(s + 0x12C) != 0) {
+            func_0023FB18(self, 0);
+            func_0023FAE0(self);
+            sMovieVEntryEA90* vt = *(sMovieVEntryEA90**)(s + 0x748);
+            vt[1].fn(s + vt[1].delta, 0x31);
+        } else if (func_0023C8D0(self) == 0) {
+            func_00241FD0(self);
+        } else {
+            func_00242050(self);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023EB50);
@@ -1602,7 +1650,40 @@ extern "C" void func_00241240(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_002412A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00152758(void* iface);
+// PORT: func_00152948__FPv ignores its argument; this caller passes none.
+int func_00152948_r() __asm__("func_00152948__FPv");
+extern "C" void func_002C2540(void*, void*);
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
+extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern "C" void func_00241000_r(void* self, char* text, int a, int b) __asm__("func_00241000");
+extern int D_004A2C78;
+extern char D_0047C178[];
+
+extern "C" void func_002412A0(void* self)
+{
+    char text[0x82];
+    char name[0x82];
+    char desc[0x200];
+    char fmt[0x200];
+    D_004A2C78 = 1;
+    int a = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
+    int b = func_00152948_r();
+    func_002C2540(fmt, D_0047C178);
+    func_00241D40_r(self, 2, name, 0x82);
+    func_00241AA0_r(desc, 0x200);
+    func_002C26D0_v(text, fmt, desc, name, *(int*)((char*)self + 0xF8) + 1);
+    func_00241000_r(self, text, a, b);
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241380);

@@ -147,7 +147,67 @@ extern "C" void func_00345890(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_003458C0);
+#ifdef SKIP_ASM
+extern "C" void* func_00345798(void* self, int a1);
+extern "C" void* func_00370018(void* self);
+extern "C" void func_003705E0(void* self, void* mat, int a2);
+extern int D_004A3FF8;
+extern void* D_004912B0[];
+
+struct sVEntry003458C0 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy); returns dst.
+static inline void* vu0CopyMatrix003458C0(void* dst, void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+    return dst;
+}
+
+struct sEffObj003458C0 {
+    char pad0[0x1E0];
+    int f1E0;
+    int f1E4;
+};
+
+extern "C" void* func_003458C0(void* self, int a1, int owner)
+{
+    char* s = (char*)self;
+    func_00345798(self, owner);
+    *(void***)(s + 0x8) = D_004912B0;
+    func_00370018(s + 0x50);
+    *(int*)(s + 0x1E0) = a1;
+    char* own = *(char**)(s + 0xC);
+    void* obj = *(void**)(own + 0xC);
+    void* m;
+    if (obj != 0) {
+        sVEntry003458C0* vt = *(sVEntry003458C0**)((char*)obj + 0xC);
+        m = vu0CopyMatrix003458C0(s + 0x10, vt[24].fn((char*)obj + vt[24].delta));
+    } else {
+        m = vu0CopyMatrix003458C0(s + 0x10, own + 0x10);
+    }
+    func_003705E0(s + 0x50, m, *(int*)(s + 0x1E0));
+    ((sEffObj003458C0*)self)->f1E4 = 0;
+    D_004A3FF8++;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_003459A8);
 
@@ -235,7 +295,70 @@ extern "C" void func_00345BF0(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345C90);
+#ifdef SKIP_ASM
+extern "C" void* func_00345798(void* self, int a1);
+extern "C" void* func_00370B60(void* self);
+extern "C" void func_00370DC8(void* self, void* target, float t);
+struct sEffectLink5EF8;
+extern "C" void func_00345EF8(sEffectLink5EF8* self);
+extern int D_004A3FFC;
+extern void* D_00491268[];
+extern void* D_00491370[];
+
+struct sVec4_00345C90 {
+    float x, y, z, w;
+    sVec4_00345C90(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+} __attribute__((aligned(16)));
+
+struct sTarget00345C90 {
+    char pad0[0x48];
+    float x;
+    float y;
+    float z;
+};
+
+struct sEff00345C90 {
+    void* next;
+    void* prev;
+    void** vt;
+    void* owner;
+    int bone;
+    int f14;
+    int f18;
+    int f1C;
+    sVec4_00345C90 localA;
+    sVec4_00345C90 worldA;
+    sVec4_00345C90 worldB;
+    sVec4_00345C90 localB;
+    char sub60[0x258 - 0x60];
+    void** subVt;
+    int f25C;
+    sTarget00345C90* target;
+};
+
+extern "C" sEff00345C90* func_00345C90(sEff00345C90* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
+{
+    func_00345798(self, owner);
+    self->vt = D_00491268;
+    func_00370B60(self->sub60);
+    self->subVt = D_00491370;
+    self->target = t;
+    self->bone = bone;
+    self->localA = *pos;
+    self->localB = sVec4_00345C90(t->x, t->y, t->z, 0.0f);
+    self->f14 = 0;
+    t->x = 0.0f;
+    t->y = 0.0f;
+    t->z = 0.0f;
+    func_00370DC8(self->sub60, self->target, -1.0f);
+    func_00345EF8((sEffectLink5EF8*)self);
+    D_004A3FFC++;
+    self->f18 = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_00345D80);
 
@@ -320,7 +443,40 @@ extern "C" void func_00345EF8(sEffectLink5EF8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345F90);
+#ifdef SKIP_ASM
+struct sEffectLink5EF8;
+extern "C" void func_00345EF8(sEffectLink5EF8* self);
+extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
+
+extern "C" void func_00345F90(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0x18) != 0) {
+        return;
+    }
+    func_00345EF8((sEffectLink5EF8*)self);
+    if (*(int*)(s + 0x14) > 0) {
+        float* sub = (float*)(s + 0x60);
+        if (*(int*)(s + 0x240) > 0) {
+            func_003710D0(sub, s + 0x30, s + 0x40, 0, 0.01666666753590107f);
+            return;
+        }
+    } else {
+        float* sub = (float*)(s + 0x60);
+        if (*(float*)(s + 0x60) < 0.0f) {
+            func_003710D0(sub, s + 0x30, s + 0x40, 1, 0.01666666753590107f);
+            return;
+        }
+        func_003710D0(sub, s + 0x30, s + 0x40, 1, 0.01666666753590107f);
+        if (!(*(float*)(s + 0x60) <= 0.0f)) {
+            return;
+        }
+    }
+    *(int*)(s + 0x18) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00346060__FPv);

@@ -416,7 +416,40 @@ extern "C" void* func_00236868(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_002368A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cBE_setState(int state);
+extern "C" void func_0026F228(void* p);
+extern "C" void func_00145CB0(void* iface, int i, int a);
+extern char* D_004A2C68;
+
+struct sRace002368A0 {
+    char pad0[0x30];
+    int count;
+    char pad34[0x15];
+    signed char flag49;
+};
+extern sRace002368A0 D_00535BC8_r002368A0 __asm__("D_00535BC8");
+
+extern "C" void func_002368A0(void* self)
+{
+    cBE_setState(0);
+    func_0026F228(*(void**)(D_004A2C68 + 0x28));
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535BC8_r002368A0.flag49 == 0) {
+        int i = 0;
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        for (; i < D_00535BC8_r002368A0.count; i++) {
+            func_00145CB0(iface, i, 0);
+        }
+    }
+    *(int*)((char*)self + 0x10) = 0;
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00236960);
 
@@ -575,7 +608,40 @@ void* func_00236D80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00236DA0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00145CB0(void* iface, int i, int a);
+extern "C" void func_002790A0(void* a, int b);
+extern "C" void func_0020A8F8(int a);
+extern void* D_004A28A4;
+
+struct sRace00236DA0 {
+    char pad0[0x30];
+    int count;
+    char pad34[0x15];
+    signed char flag49;
+};
+extern sRace00236DA0 D_00535BC8_r00236DA0 __asm__("D_00535BC8");
+
+extern "C" void func_00236DA0(void* self)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535BC8_r00236DA0.flag49 == 0) {
+        int i = 0;
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        for (; i < D_00535BC8_r00236DA0.count; i++) {
+            func_00145CB0(iface, i, 0);
+        }
+    }
+    func_002790A0(D_004A28A4, 0);
+    *(int*)((char*)self + 0x8) = 0;
+    func_0020A8F8(7);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00236E60);
@@ -822,7 +888,50 @@ extern "C" int func_00237950(sOwner237950* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_002379C8);
+#ifdef SKIP_ASM
+extern "C" void func_00321298(void* target, int a, void* data);
+
+struct sFrame002379C8 {
+    int first;
+    char data[0x60];
+};
+struct sTrack002379C8 {
+    sFrame002379C8* frames;
+    int cur;
+    int f8;
+    int fC;
+    void* target;
+    int f14;
+};
+struct sPlayer002379C8 {
+    int f0;
+    int nFrames;
+    int f8;
+    int fC;
+    int count;
+    sTrack002379C8 tracks[1];
+};
+
+extern "C" int func_002379C8(sPlayer002379C8* self)
+{
+    if (*(int*)(D_004A2EEC + 0x70) < 14) {
+        return 0;
+    }
+    if (func_00237950((sOwner237950*)self) == 0) {
+        return 0;
+    }
+    int i;
+    for (i = 0; i < self->count; i++) {
+        sTrack002379C8* t = &self->tracks[i];
+        sFrame002379C8* f = &t->frames[t->cur % self->nFrames];
+        func_00321298(t->target, f->first, f->data);
+        t->cur++;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00237A98);
@@ -882,7 +991,27 @@ extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00237BE8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_00237BE8(void* self, sPackSrc_7B28* out, char* buf)
+{
+    sPackDst_7B28* in = (sPackDst_7B28*)buf;
+    out->count = in->count;
+    func_003E6448(out->vals, 0, 0x60);
+    int k = 0;
+    int i;
+    for (i = 0; i < out->count; i++) {
+        if ((in->mask[i >> 3] >> (i & 7)) & 1) {
+            out->vals[i] = in->vals[k++] * 0.003921568859368563f;
+        } else {
+            out->vals[i] = 0.0f;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00237CB0);

@@ -164,7 +164,69 @@ extern "C" void func_00238BF8(void* self, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00238C80);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+struct sGM00238C80 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int a18[10];
+    int a40[10];
+    int f68;
+    int f6C;
+    int f70;
+    int f74;
+    int f78;
+    int f7C;
+    int f80;
+    int f84;
+    int f88;
+    int f8C;
+    int f90;
+    int f94;
+    int f98;
+};
+extern char* D_004A2C70;
+
+struct sVEntry00238C80 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00238C80(void* self)
+{
+    sGM00238C80* gm = (sGM00238C80*)D_004A2C70;
+    gm->f84 = 1;
+    gm->f4 = -1;
+    gm->f68 = -1;
+    gm->f6C = -1;
+    gm->f8 = -1;
+    gm->f98 = 0;
+    gm->f0 = 0;
+    gm->f70 = 0;
+    gm->f74 = 0;
+    gm->f10 = 0;
+    gm->f14 = 0;
+    gm->f78 = 0;
+    gm->f7C = 0;
+    gm->f80 = 0;
+    gm->f88 = 0;
+    gm->f8C = 0;
+    gm->f90 = 0;
+    gm->f94 = 0;
+    func_00416210(gm->a18, 0, 0x28);
+    func_00416210(((sGM00238C80*)D_004A2C70)->a40, 0, 0x28);
+    sVEntry00238C80* e = &(*(sVEntry00238C80**)self)[5];
+    e->fn((char*)self + e->delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_00238D30);
@@ -363,7 +425,39 @@ INCLUDE_ASM("main/gamemode", func_0023B268);
 
 INCLUDE_ASM("main/gamemode", func_0023B468);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023B5F8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144BE0(void* iface);
+extern "C" int func_00145668(void* iface, int a1, int a2, int a3);
+extern "C" float func_001195A8(void* self, int value);
+extern signed char D_00535C12[];
+
+extern "C" int func_0023B5F8(void* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int state = func_00144BE0(iface);
+    int ok = 0;
+    int t = state >= 17;
+    if (t) {
+        ok = state;
+        ok = ok < 22;
+    }
+    if (ok) {
+        int d = func_00145668(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8));
+        void* clk = *(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+        int secs = (int)((float)*(int*)((char*)clk + 0xC) * 0.01666666753590107f);
+        if (d != 0) {
+            func_001195A8(*(void**)(*(char**)((char*)clk + 0x28) + 0x790), secs - d);
+        }
+        (*(unsigned short*)((char*)self + 8))++;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_0023B6C0);
 
@@ -377,7 +471,39 @@ INCLUDE_ASM("main/gamemode", func_0023C0D0);
 
 INCLUDE_ASM("main/gamemode", func_0023C2D8);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023C560);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144BE0(void* iface);
+extern "C" int func_00145668(void* iface, int a1, int a2, int a3);
+extern "C" float func_001195D8(void* self, int value);
+extern signed char D_00535C12[];
+
+extern "C" int func_0023C560(void* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int state = func_00144BE0(iface);
+    int ok = 0;
+    int t = state >= 17;
+    if (t) {
+        ok = state;
+        ok = ok < 22;
+    }
+    if (ok) {
+        int d = func_00145668(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
+        void* m = *(void**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x28) + 0x790);
+        int v = *(int*)((char*)m + 0x198);
+        if (d != 0) {
+            func_001195D8(m, v - d);
+        }
+        (*(unsigned short*)((char*)self + 8))++;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_0023C618);
 

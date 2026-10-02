@@ -150,11 +150,77 @@ extern "C" void func_00230338(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_00230360);
+#ifdef SKIP_ASM
+extern "C" void func_00358700(int kind);
+extern "C" void func_00229408(void* self, int id);
+extern "C" void func_00343C08(void* self, int arg);
+extern "C" void func_00357B90(void* self, int arg);
+extern "C" void func_003551A8(void* self, int index, int key);
+extern "C" void func_00103308(void* p, int arg);
+extern "C" void func_00308FE0(void* self, int i);
+extern void* D_004A2A00;
+extern void* D_004A3FF0;
+extern void* D_004A4028;
+
+extern "C" void func_00230360(void* self, int id)
+{
+    void* bm = &D_004A5988_bm;
+    func_00358700(id);
+    func_00229408(D_004A2A00, id);
+    func_00343C08(D_004A3FF0, id);
+    func_00357B90(D_004A4028, id);
+    func_00354C98(bm, 1);
+    func_003551A8(bm, 1, id);
+    func_003551A8(bm, 8, id);
+    void* p = *(void**)((char*)self + 0xC);
+    if (p != 0) {
+        void* q = *(void**)((char*)p + 0xA4);
+        if (q != 0) {
+            func_00103308(q, id);
+            func_00103308(*(void**)(*(char**)((char*)self + 0xC) + 0xA4), 0x80);
+        }
+    }
+    func_00308FE0(*(void**)((char*)self + 0x30), id);
+}
+#endif
 
 INCLUDE_ASM("main/gameload", func_00230430);
 
+//100%
 INCLUDE_ASM("main/gameload", cGame_exit);
+#ifdef SKIP_ASM
+struct cAppMan;
+void cReplay_stopAutoReplay(void* self);
+extern "C" void func_00258AE0(void* p);
+extern "C" void func_00266DF8(void* p);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* func_00232720(void* self);
+void* func_00232738(void* self);
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern void* D_004A2EEC;
+extern void* D_004A33F4;
+extern char D_0047B770[];
+extern char D_0047B788[];
+
+extern "C" void cGame_exit(void* self, int toFrontEnd)
+{
+    cReplay_stopAutoReplay(*(void**)((char*)self + 0x28));
+    func_00231250(self, 6, 0, 0);
+    if (D_004A2EEC != 0) {
+        func_00258AE0(D_004A2EEC);
+    }
+    if (D_004A33F4 != 0) {
+        func_00266DF8(D_004A33F4);
+    }
+    if (toFrontEnd != 0) {
+        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_0047B770, 0x100, 0)));
+    } else {
+        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232738(cMemMan_alloc(8, D_0047B788, 0x100, 0)));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_002305C8);
@@ -214,7 +280,64 @@ int func_002306A8(void* self, int i)
 
 INCLUDE_ASM("main/gameload", func_002306B8);
 
+//100%
 INCLUDE_ASM("main/gameload", func_00230E98);
+#ifdef SKIP_ASM
+extern "C" int func_00231CF0(void* self);
+void func_00278718(void* self);
+void func_001F3170(void* self);
+
+struct sVEntry00230E98 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sVec3_00230E98 {
+    float x, y, z;
+    sVec3_00230E98(float ax, float ay, float az) { x = ax; y = ay; z = az; }
+};
+struct cMgr00230E98 {
+    char pad0[0x270];
+    int f270;
+    char pad274[0x10D8 - 0x274];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15(const sVec3_00230E98& v);
+};
+
+extern "C" int func_00230E98(void* self)
+{
+    void* obj = *(void**)((char*)self + 0x98);
+    sVEntry00230E98* vt = *(sVEntry00230E98**)obj;
+    if (vt[3].fn((char*)obj + vt[3].delta) == 0) {
+        return 0;
+    }
+    if (func_00231CF0(self) == 0) {
+        return 0;
+    }
+    cMgr00230E98* mgr = (cMgr00230E98*)D_004A289C;
+    mgr->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
+    ((cMgr00230E98*)D_004A289C)->f270 = 1;
+    D_004A4324 = 0;
+    D_004A45D8 = 0;
+    D_004A43C8 = 0;
+    func_00278718(D_004A28A4);
+    func_001F3170(*(void**)((char*)self + 0x94));
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("main/gameload", func_00230F40);
 

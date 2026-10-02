@@ -93,7 +93,34 @@ extern "C" void func_00200AF0(void* self)
 
 INCLUDE_ASM("fe/uitemplatemap", func_00200B50);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00200D00);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBELibrary_getCharacterID(int);
+extern "C" int func_001464D0(void* iface, int player, int charID, int x, int flag);
+extern "C" int func_00146A70(void* iface, int player, int charID, int x);
+
+extern "C" int func_00200D00(void* self, int kind, int x)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    if (D_004A2594 < 2) {
+        return 0;
+    }
+    if (kind == 4) {
+        return func_001464D0(iface, 0, cBELibrary_getCharacterID(0), x, 1);
+    }
+    if (kind == 5) {
+        return func_001464D0(iface, 0, cBELibrary_getCharacterID(0), x, 0);
+    }
+    if (kind >= 6 && kind <= 11) {
+        return func_00146A70(iface, 0, cBELibrary_getCharacterID(0), kind);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMenus);
 
@@ -168,7 +195,46 @@ int func_00202768(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00202770);
+#ifdef SKIP_ASM
+extern "C" void cUITemplate_MAP_setupPeakInfo(void* self);
+extern "C" void cUITemplate_MAP_setupPeakGoals(void* self);
+extern "C" void cUITemplate_MAP_setupLayout(void* self);
+extern "C" void func_00207430(void* self);
+extern int D_004A259C;
+
+struct sVEntry00202770 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+// PORT: the unit declares func_00202770(void*); the body also takes the menu object in $5.
+extern "C" void func_00202770_r(void* self, void* menu) __asm__("func_00202770");
+
+extern "C" void func_00202770_r(void* self, void* menu)
+{
+    sVEntry00202770* e = &(*(sVEntry00202770**)((char*)menu + 8))[17];
+    if (e->fn((char*)menu + e->delta) == 0) {
+        sVEntry00202770* e2 = &(*(sVEntry00202770**)((char*)menu + 8))[18];
+        if (e2->fn((char*)menu + e2->delta) == 0) {
+            return;
+        }
+    }
+    if (D_004A259C == 0) {
+        cUITemplate_MAP_setupPeakInfo(self);
+        cUITemplate_MAP_setupLayout(self);
+    }
+    if (D_004A259C == 1) {
+        cUITemplate_MAP_setupPeakGoals(self);
+        cUITemplate_MAP_setupLayout(self);
+    }
+    if (D_004A259C == 2) {
+        func_00207430(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onUpdate);
 
@@ -176,7 +242,36 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupLayout);
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMenuFocus);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMapPic);
+#ifdef SKIP_ASM
+extern "C" void cFEAsyncManager_Load3PeakPic(void* mgr, int file, int a);
+extern "C" void cFEAsyncManager_Load1PeakPic(void* mgr, int peak, int file, int a);
+extern int D_004A25A4;
+
+extern "C" void cUITemplate_MAP_setupMapPic(void* self)
+{
+    void* mgr = *(void**)((char*)D_004A28A8 + 0x11C);
+    if (D_004A259C == 0) {
+        if (*(int*)((char*)self + 0x2D4) != 1) {
+            cFEAsyncManager_UnloadFEAsyncFile(mgr, *(int*)((char*)self + 0x2D8));
+            cFEAsyncManager_Load3PeakPic(mgr, *(int*)((char*)self + 0x2D8), 1);
+            *(int*)((char*)self + 0x2D4) = 1;
+            *(int*)((char*)self + 0x2DC) = 0;
+        }
+    } else if (D_004A259C >= 0) {
+        if (D_004A259C < 3) {
+            if (*(int*)((char*)self + 0x2D4) != D_004A25A4 + 2) {
+                cFEAsyncManager_UnloadFEAsyncFile(mgr, *(int*)((char*)self + 0x2D8));
+                cFEAsyncManager_Load1PeakPic(mgr, D_004A25A4, *(int*)((char*)self + 0x2D8), 1);
+                int v = D_004A25A4 + 2;
+                *(int*)((char*)self + 0x2DC) = 0;
+                *(int*)((char*)self + 0x2D4) = v;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPopup);
 
@@ -205,7 +300,44 @@ extern "C" void cUITemplate_MAP_setShowInfo(void* self, int show)
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakInfo);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00204FF0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern void* D_004A28A8;
+extern char D_00470E10[];
+extern char D_00470E20[];
+extern char D_00470E30[];
+extern char D_00470E40[];
+
+struct sVEntry00204FF0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int setPic00204FF0(char* name)
+{
+    void* obj = *(void**)((char*)D_004A28A8 + 0x8C);
+    sVEntry00204FF0* vt = *(sVEntry00204FF0**)((char*)obj + 4);
+    return vt[4].fn((char*)obj + vt[4].delta, GetHashValue32(name));
+}
+
+extern "C" int func_00204FF0(void* self, int peak)
+{
+    switch (peak) {
+    case 0:
+    default:
+        return setPic00204FF0(D_00470E10);
+    case 1:
+        return setPic00204FF0(D_00470E20);
+    case 2:
+        return setPic00204FF0(D_00470E30);
+    case 3:
+        return setPic00204FF0(D_00470E40);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakGoals);
 

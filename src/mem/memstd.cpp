@@ -75,7 +75,54 @@ extern "C" int func_00252248(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002522B0);
+#ifdef SKIP_ASM
+struct sMemBlock002522B0 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    int f8;
+    int fC;
+    void* a;
+    void* b;
+};
+
+static inline unsigned int readBE32_002522B0(unsigned char* p)
+{
+    return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+}
+
+// PORT: the block-end address is computed as size + (int)blk (pointer held in int) to get the target's addu operand order.
+extern "C" int func_002522B0(sMemBlock002522B0* blk)
+{
+    int ok = 0;
+    unsigned short tag = blk->tag;
+    if (tag == 0x4253) {
+        if (blk->flags & 0x8000) {
+            ok = 1;
+        } else {
+            D_004A2E74 = 2;
+        }
+    } else if (tag == 0x4246) {
+        if (blk->flags & 0x4000) {
+            ok = func_00252248(blk->a);
+            if (ok) {
+                ok = func_00252248(blk->b);
+            }
+        }
+    } else if (tag == 0x424D) {
+        if (!(blk->flags & 0x2000) || readBE32_002522B0((unsigned char*)(blk->size + (int)blk) + 0x10) == 0x42454E44) {
+            ok = 1;
+        } else {
+            D_004A2E74 = 3;
+        }
+    } else {
+        D_004A2E74 = 4;
+    }
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002523A8);
@@ -236,7 +283,84 @@ extern "C" void func_00253418(void* self, int flags)
 
 INCLUDE_ASM("mem/memstd", func_002534A8);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002535F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_003B0680(void*, void*);
+extern "C" void func_003AE300(void* p, int flags);
+extern int D_004A2E9C;
+
+class cWorld002535F8 {
+public:
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+};
+extern cWorld002535F8* D_004A5B80_w __asm__("D_004A5B80");
+
+struct sVEntry002535F8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sStream002535F8 {
+    int f0;
+    int f4;
+    int f8;
+    void* fC;
+    char pad10[0x28];
+    char* f38;
+    void* f3C;
+    int f40;
+};
+
+extern "C" void func_002535F8(void* self)
+{
+    sStream002535F8* s = (sStream002535F8*)self;
+    if (s->f38 != 0 && s->f3C != 0) {
+        D_004A5B80_w->v19();
+    }
+    if (s->f40 != 0 && s->fC != 0) {
+        func_003B0680(*(void**)(s->f38 + 0x64), s->fC);
+    }
+    void* o = s->f3C;
+    if (o != 0) {
+        sVEntry002535F8* e = &(*(sVEntry002535F8**)((char*)o + 4))[1];
+        e->fn((char*)o + e->delta, 3);
+        s->f3C = 0;
+        D_004A2E9C--;
+    }
+    char* m = s->f38;
+    if (m != 0) {
+        func_003AE300(m, 3);
+        s->f38 = 0;
+    }
+    s->f0 = 0;
+    s->f4 = 0;
+    s->f8 = 0;
+    s->fC = 0;
+    s->f40 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002536C8);

@@ -323,7 +323,49 @@ extern "C" void func_00343A18(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343A68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sDebounceState;
+extern "C" void func_003442E0(sDebounceState* self);
+extern void* D_004A3FF0_p __asm__("D_004A3FF0");
+
+struct sSlot00343A68 {
+    unsigned int id;
+    int value;
+};
+struct sState00343A68 {
+    int f0;
+    unsigned int f4;
+    unsigned int f8;
+    sSlot00343A68 slots[32];
+    char rest[0x1F4 - 0x10C];
+};
+
+extern "C" sState00343A68* func_00343A68(sState00343A68* self)
+{
+    sState00343A68* p = self;
+    int i;
+    for (i = 4; i != -1; i--) {
+        sState00343A68* next = p + 1;
+        p->f4 = 0xFFFFFFFF;
+        sSlot00343A68* q = p->slots;
+        int j;
+        for (j = 31; j != -1; j--) {
+            q->id = 0xFFFFFFFF;
+            q++;
+        }
+        func_003442E0((sDebounceState*)p);
+        p = next;
+    }
+    D_004A3FF0_p = self;
+    for (i = 0; i < 5; i++) {
+        func_003442E0((sDebounceState*)&self[i]);
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00343B28);
@@ -958,5 +1000,118 @@ extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
 
 INCLUDE_ASM("object/debouncenode", func_00345248);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00345430);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00345638(void* node);
+
+class cWorld00345430 {
+public:
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual void v73();
+    virtual void v74();
+    virtual void v75(void* a, int b, int c);
+};
+extern cWorld00345430* D_004A5B80_w345430 __asm__("D_004A5B80");
+
+struct sCtl00345430 {
+    int f0;
+    unsigned int lo : 2;
+    unsigned int mode : 5;
+    unsigned int hi : 25;
+    int f8;
+    int fC;
+    short f10;
+};
+
+extern "C" void func_00345430(void* self, int arg)
+{
+    cWorld00345430* w = D_004A5B80_w345430;
+    char* list = *(char**)(*(char**)((char*)self + 8) + 0x68);
+    int n = *(int*)(list + 0x20);
+    char* node = *(char**)(list + 0x24);
+    (*(sCtl00345430**)((char*)w + 0xE84))->f10 = -1;
+    (*(sCtl00345430**)((char*)w + 0xE84))->mode = 1;
+    int i;
+    for (i = 0; i < n; i++) {
+        if (func_00345638(node) != 0) {
+            w->v75(node + 0x10, arg, 10);
+        }
+        node = *(char**)(node + 0x64);
+    }
+}
+#endif
 
