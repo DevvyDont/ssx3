@@ -51,7 +51,26 @@ extern "C" void func_00195B70(void* self)
 
 INCLUDE_ASM("util/locale", func_00195BE0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", func_00195D50);
+#ifdef SKIP_ASM
+extern "C" void func_00195A50(void* self, signed char i);
+
+extern "C" void func_00195D50(void* self)
+{
+    int flags = *(signed char*)((char*)self + 0x3);
+    if ((flags & 1) == 0) {
+        func_00195A50(self, 4);
+        func_00195A50(self, 5);
+        func_00195A50(self, 6);
+        func_00195A50(self, 7);
+        func_00195A50(self, 0x10);
+        func_00195A50(self, 0x11);
+        func_00195A50(self, 0x12);
+        func_00195A50(self, 0x13);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", func_00195DE0);
