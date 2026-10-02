@@ -1,8 +1,133 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_cBankMonitor);
+#ifdef SKIP_ASM
+struct sSndPlayerD9C8;
+extern "C" sSndPlayerD9C8* func_002AD9C8(sSndPlayerD9C8* self, int inchrg, int heap);
+extern "C" void* func_002ADE88(void* self, int a);
+extern "C" void* func_002AB9E0(void* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_00483238[];
+extern void* D_00483B48[];
 
+struct sBmVEntryCD08 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmVtblCD08 {
+    sBmVEntryCD08 e[4];
+} __attribute__((aligned(8)));
+extern const sBmVtblCD08 D_00483B88;
+
+struct sBmVoiceCD08 {
+    char pad_0x0[0xC0];
+    sBmVoiceCD08() { func_002AB9E0(this); }
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sBankMonitorCD08 {
+    char* vbase;                // 0x0
+    char pad_0x4[0x8D8 - 0x4];
+    void** vtbl;                // 0x8D8
+    int f8DC;                   // 0x8DC
+    int f8E0;                   // 0x8E0
+    int f8E4;                   // 0x8E4
+    int f8E8;                   // 0x8E8
+    sBmVoiceCD08* voices;       // 0x8EC
+    char vb[0x4];               // 0x8F0
+};
+
+extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, int inchrg, int heap)
+{
+    if (inchrg) {
+        self->vbase = self->vb;
+        func_002ADE88(self->vb, heap);
+    }
+    func_002AD9C8((sSndPlayerD9C8*)self, 0, heap);
+    *(const sBmVtblCD08**)(self->vbase + 4) = &D_00483B88;
+    if (!inchrg) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
+        sBmVtblCD08 vt = D_00483B88;
+        *(sBmVtblCD08**)(self->vbase + 4) = &vt;
+        char* base = self->vbase - 0x8F0;
+        int d = (char*)self - base;
+        vt.e[1].delta = D_00483B88.e[1].delta + d;
+    }
+    self->vtbl = D_00483B48;
+    self->f8DC = 0;
+    self->f8E0 = 1;
+    self->f8E4 = 1;
+    sBmVoiceCD08** slot = &self->voices;
+    *slot = new (D_00483238, 0, 0) sBmVoiceCD08[64];
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ACE40);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_002ABA18(void* self, int flags);
+struct sSndPlayerDAC8;
+extern "C" void func_002ADAC8(sSndPlayerDAC8* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern void* D_00483B48[];
+
+struct sBmVEntryE40 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmVtblE40 {
+    sBmVEntryE40 e[4];
+} __attribute__((aligned(8)));
+extern const sBmVtblE40 D_00483B88_E40 __asm__("D_00483B88");
+
+struct sBmVoiceE40 {
+    char pad_0x0[0xC0];
+};
+
+struct sBankMonitorE40 {
+    char* vbase;                // 0x0
+    char pad_0x4[0x8D8 - 0x4];
+    void** vtbl;                // 0x8D8
+    char pad_0x8DC[0x8EC - 0x8DC];
+    sBmVoiceE40* voices;        // 0x8EC
+};
+
+extern "C" void func_002ACE40(sBankMonitorE40* self, int flags)
+{
+    self->vtbl = D_00483B48;
+    *(const sBmVtblE40**)(self->vbase + 4) = &D_00483B88_E40;
+    if (flags == 0) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
+        sBmVtblE40 vt = D_00483B88_E40;
+        *(sBmVtblE40**)(self->vbase + 4) = &vt;
+        char* base = self->vbase - 0x8F0;
+        int d = (char*)self - base;
+        vt.e[1].delta = D_00483B88_E40.e[1].delta + d;
+    }
+    if (self->voices != 0) {
+        sBmVoiceE40* q = self->voices + ((int*)self->voices)[-4];
+        while (self->voices != q) {
+            q--;
+            func_002ABA18(q, 0);
+        }
+        cMemMan_free((char*)self->voices - 0x10);
+    }
+    func_002ADAC8((sSndPlayerDAC8*)self, 0);
+    if (flags & 2) {
+        func_002ADEE8(self->vbase, 0);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ACF60);
@@ -336,7 +461,68 @@ extern "C" void func_002AD998()
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD9C8);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADAC8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_003B5948(int id);
+extern "C" void func_002A97C0(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern void* D_00483BA8[];
+
+struct sBmVEntryDAC8 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmVtblDAC8 {
+    sBmVEntryDAC8 e[4];
+} __attribute__((aligned(8)));
+extern const sBmVtblDAC8 D_00483BC0_DAC8 __asm__("D_00483BC0");
+
+struct sBmSlotDAC8 {
+    char pad_0x0[0x2C];
+};
+
+struct sSndPlayerDAC8 {
+    char* vbase;                // 0x0
+    char pad_0x4[0x98 - 0x4];
+    sBmSlotDAC8 slots[48];      // 0x98
+    void** vtbl;                // 0x8D8
+};
+
+extern "C" void func_002ADAC8(sSndPlayerDAC8* self, int flags)
+{
+    sBmSlotDAC8* end = self->slots + 48;
+    self->vtbl = D_00483BA8;
+    *(const sBmVtblDAC8**)(self->vbase + 4) = &D_00483BC0_DAC8;
+    if (flags == 0) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
+        sBmVtblDAC8 vt = D_00483BC0_DAC8;
+        *(sBmVtblDAC8**)(self->vbase + 4) = &vt;
+        char* base = self->vbase - 0x8DC;
+        int d = (char*)self - base;
+        vt.e[1].delta = D_00483BC0_DAC8.e[1].delta + d;
+    }
+    // PORT: function pointer passed as int
+    func_003B5948((int)func_002AD998);
+    D_004A3778 = 0;
+    if (self->slots != 0) {
+        sBmSlotDAC8* p = end;
+        while (self->slots != p) {
+            p--;
+            func_002AD860((int*)p, 0);
+        }
+    }
+    func_002A97C0(self, 0);
+    if (flags & 2) {
+        func_002ADEE8(self->vbase, 0);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void func_002AD998();
 extern "C" void* func_003B5910(void*);
