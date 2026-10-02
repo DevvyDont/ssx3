@@ -109,7 +109,27 @@ INCLUDE_ASM("object/multiparticle", func_00358C80);
 
 INCLUDE_ASM("object/multiparticle", func_00358DB0);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358E50);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+void cMemMan_free(void*);
+extern "C" void func_00341CF0(void* p, int flags);
+extern char D_0048EC28[];
+
+extern "C" void func_00358E50(void* self, int flags)
+{
+    *(void**)((char*)self + 0x54) = D_0048EC28;
+    void* buf = *(void**)((char*)self + 0x84);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+    func_00341CF0((char*)self + 0x18, 0);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00358EB8);
 

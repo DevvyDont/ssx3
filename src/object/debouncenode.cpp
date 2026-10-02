@@ -1,6 +1,28 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
+#ifdef SKIP_ASM
+struct sDebounceVEntry2D10 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* cMoveNode_cMoveNode(void* self, void*, void*);
+extern char D_004906F0[];
+
+extern "C" void* cDebounceNode_cDebounceNode(void* self, void* unused, void* stream)
+{
+    cMoveNode_cMoveNode(self, unused, stream);
+    *(void**)((char*)self + 0xC) = D_004906F0;
+    sDebounceVEntry2D10* e = &(*(sDebounceVEntry2D10**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
+    e = &(*(sDebounceVEntry2D10**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x30, 4);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00342D88);
@@ -42,7 +64,26 @@ void* func_00342E78(void* self)
 
 INCLUDE_ASM("object/debouncenode", func_00342E98);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00342FA8);
+#ifdef SKIP_ASM
+struct sDebounceVEntry2FA8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00356B30(void* self, void* stream);
+
+extern "C" void func_00342FA8(void* self, void* stream)
+{
+    func_00356B30(self, stream);
+    sDebounceVEntry2FA8* e = &(*(sDebounceVEntry2FA8**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
+    e = &(*(sDebounceVEntry2FA8**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x30, 4);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343010);
 
@@ -244,9 +285,55 @@ INCLUDE_ASM("object/debouncenode", func_00343C60);
 
 INCLUDE_ASM("object/debouncenode", func_00343F38);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_003440C8);
+#ifdef SKIP_ASM
+struct sDebounceElem40C8 {
+    int field_0x0;
+    unsigned int field_0x4;
+    unsigned int field_0x8;
+    char pad_0xc[0x1E8];
+};
 
+extern "C" void func_003449F0(void* elem);
+
+extern "C" void func_003440C8(sDebounceElem40C8* self)
+{
+    int i;
+    sDebounceElem40C8* p = self;
+    for (i = 0; i < 5; i++) {
+        if (self[i].field_0x8 != 0xFFFFFFFF) {
+            func_003449F0(p);
+        }
+        p++;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344138);
+#ifdef SKIP_ASM
+struct sDebounceElem4138 {
+    int field_0x0;
+    unsigned int field_0x4;
+    unsigned int field_0x8;
+    char pad_0xc[0x1E8];
+};
+
+extern "C" void func_00344E18(void* elem);
+
+extern "C" void func_00344138(sDebounceElem4138* self)
+{
+    int i;
+    sDebounceElem4138* p = self;
+    for (i = 0; i < 5; i++) {
+        if (self[i].field_0x8 != 0xFFFFFFFF) {
+            func_00344E18(p);
+        }
+        p++;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_003441A8);
 

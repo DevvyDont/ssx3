@@ -185,7 +185,37 @@ extern "C" void func_00352F08(tModifierBlock* self)
 
 INCLUDE_ASM("object/modifierblock", func_00352F40);
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353020);
+#ifdef SKIP_ASM
+struct sMbVEntryP3020 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+struct sMbVEntryVII3020 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+extern "C" void func_00353020(tModifierBlock* self, int a1, int a2)
+{
+    sBoundBoxNode* node = self->node;
+    void* obj;
+    if (node != 0) {
+        sMbVEntryP3020* vt = *(sMbVEntryP3020**)node;
+        obj = vt[25].fn((char*)node + vt[25].delta);
+    } else {
+        obj = 0;
+    }
+    if (obj != 0) {
+        sMbVEntryVII3020* vt2 = *(sMbVEntryVII3020**)((char*)obj + 0xC);
+        vt2[43].fn((char*)obj + vt2[43].delta, a1, a2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353098);
@@ -334,7 +364,31 @@ INCLUDE_ASM("object/modifierblock", func_00353278);
 
 INCLUDE_ASM("object/modifierblock", func_00353300);
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353398);
+#ifdef SKIP_ASM
+struct sMbVEntryV3398 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00345720(void* pool, void* item);
+
+extern "C" void func_00353398(void* self, void* list)
+{
+    void* p = *(void**)list;
+    while (p != 0) {
+        void* next = *(void**)p;
+        sMbVEntryV3398* vt = *(sMbVEntryV3398**)((char*)p + 0x8);
+        vt[3].fn((char*)p + vt[3].delta);
+        func_00345720((char*)self + 0x10, p);
+        p = next;
+    }
+    *(void**)list = 0;
+    *(void**)((char*)list + 0x4) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353418);
@@ -436,5 +490,25 @@ extern "C" void func_00353DB8(void* self, int flags)
 
 INCLUDE_ASM("object/modifierblock", func_00353E08);
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353E80);
+#ifdef SKIP_ASM
+struct sMbVEntrySer3E80 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void cSpring_setupNodes(void* self);
+
+extern "C" void* func_00353E80(void* self, void* stream)
+{
+    sMbVEntrySer3E80* e = &(*(sMbVEntrySer3E80**)stream)[2];
+    e->fn((char*)stream + e->delta, self, 0x24);
+    cSpring_setupNodes(self);
+    e = &(*(sMbVEntrySer3E80**)stream)[2];
+    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 0x50);
+    return self;
+}
+#endif
 

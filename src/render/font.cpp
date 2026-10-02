@@ -40,11 +40,31 @@ INCLUDE_ASM("render/font", func_00392430);
 
 INCLUDE_ASM("render/font", func_00392680);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392908);
+#ifdef SKIP_ASM
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+extern "C" void func_00392908(void* self, const char* str, float x, float y)
+{
+    float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
+}
+#endif
 
 INCLUDE_ASM("render/font", func_003929F8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392A60);
+#ifdef SKIP_ASM
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+extern "C" void func_00392A60(void* self, const char* str, float x, float y)
+{
+    float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    func_00391CB0(self, x - w, y, (sMat00391C48*)str);
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00392B40);
 

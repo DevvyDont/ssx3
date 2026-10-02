@@ -189,7 +189,26 @@ extern "C" void func_00349840(void* self, void* node)
 
 INCLUDE_ASM("object/flexrailnode", func_003498E8);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00349AD0);
+#ifdef SKIP_ASM
+struct sFlexRailVEntry9AD0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00348B40(void* self, void* stream);
+
+extern "C" void func_00349AD0(void* self, void* stream)
+{
+    func_00348B40(self, stream);
+    sFlexRailVEntry9AD0* e = &(*(sFlexRailVEntry9AD0**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x60, 0xC);
+    e = &(*(sFlexRailVEntry9AD0**)stream)[1];
+    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x50);
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_00349B48);
 
@@ -282,7 +301,26 @@ INCLUDE_ASM("object/flexrailnode", func_0034A838);
 
 INCLUDE_ASM("object/flexrailnode", func_0034A8C8);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034AC10);
+#ifdef SKIP_ASM
+struct sFlexRailVEntryAC10 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00348B40(void* self, void* stream);
+
+extern "C" void func_0034AC10(void* self, void* stream)
+{
+    func_00348B40(self, stream);
+    sFlexRailVEntryAC10* e = &(*(sFlexRailVEntryAC10**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x60, 0xC);
+    e = &(*(sFlexRailVEntryAC10**)stream)[1];
+    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x60);
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034AC88);
 

@@ -143,7 +143,34 @@ INCLUDE_ASM("object/flexbridgenode", func_00347D90);
 
 INCLUDE_ASM("object/flexbridgenode", func_00347EA8);
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00347F90);
+#ifdef SKIP_ASM
+struct sFlexBridgeVEntry7F90 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+void cMemMan_free(void*);
+extern "C" void func_0034FBF0(void* self, int flags);
+extern char D_004900D0[];
+
+extern "C" void func_00347F90(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_004900D0;
+    void* buf = *(void**)((char*)self + 0x50);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+    void* obj = *(void**)((char*)self + 0x58);
+    if (obj != 0) {
+        sFlexBridgeVEntry7F90* vt = *(sFlexBridgeVEntry7F90**)obj;
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+    }
+    func_0034FBF0(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", func_00348008);
@@ -166,7 +193,41 @@ extern "C" void func_00348008(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00348058);
+#ifdef SKIP_ASM
+struct sBox00348058 {
+    float min[4];
+    float max[4];
+} __attribute__((aligned(16)));
+
+struct sFlexBridgeVEntry8058 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sObj00348058 {
+    char pad_0x00[0xC];
+    sFlexBridgeVEntry8058* vt;
+    char pad_0x10[0x20];
+    sBox00348058 box;
+    char pad_0x50[0x4];
+    int id;
+};
+
+extern "C" void* func_002D1BE0();
+extern "C" void func_003291E0(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
+
+extern "C" void func_00348058(void* p)
+{
+    sObj00348058* self = (sObj00348058*)p;
+    sBox00348058* box = &self->box;
+    sBox00348058 old = self->box;
+    self->vt[50].fn((char*)self + self->vt[50].delta);
+    func_003291E0(func_002D1BE0(), 2, self->id, box, &old);
+}
+#endif
 
 INCLUDE_ASM("object/flexbridgenode", func_003480C8);
 

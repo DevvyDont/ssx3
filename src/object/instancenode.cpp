@@ -70,7 +70,29 @@ void* func_0034FCE0(void* self)
 
 INCLUDE_ASM("object/instancenode", func_0034FD00);
 
+//100%
 INCLUDE_ASM("object/instancenode", func_0034FD90);
+#ifdef SKIP_ASM
+struct sInstNodeVEntryFD90 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0034FD90(void* self)
+{
+    int* f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f &= 0xFFFF0000;
+    f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f |= *f >> 16;
+    f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f |= 2;
+    if (self != 0) {
+        sInstNodeVEntryFD90* vt = *(sInstNodeVEntryFD90**)((char*)self + 0xC);
+        vt[1].fn((char*)self + vt[1].delta, 3);
+    }
+}
+#endif
 
 extern "C" void* func_002D19B8(int, int, int);
 
@@ -163,5 +185,21 @@ extern "C" int func_00350698(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instancenode", func_003506D8);
+#ifdef SKIP_ASM
+extern "C" void* func_0034FB00(void* self, int a1, int type, int a3);
+extern char D_00491B00[];
+
+extern "C" void* func_003506D8(void* self, int v)
+{
+    func_0034FB00(self, 8, 6, v);
+    *(void**)((char*)self + 0xC) = D_00491B00;
+    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f &= 0xFFFFFF9F;
+    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f = (*f & 0xFFFFFFFD) | 4;
+    return self;
+}
+#endif
 

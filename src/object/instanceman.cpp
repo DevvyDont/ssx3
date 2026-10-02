@@ -240,7 +240,32 @@ INCLUDE_ASM("object/instanceman", func_00352230);
 
 INCLUDE_ASM("object/instanceman", func_00352500);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352708);
+#ifdef SKIP_ASM
+struct sInstanceManVEntry2708 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+int func_0034FCC0(void* self);
+extern "C" void func_0034FE28(void* self);
+
+extern "C" void func_00352708(void* self, int check)
+{
+    if (check != 0 && func_0034FCC0(self) != 0) {
+        return;
+    }
+    if (*(int*)((char*)self + 0x6B0) == 0) {
+        func_0034FE28(self);
+    }
+    if (*(int*)((char*)self + 0x6B0) == 2 && self != 0) {
+        sInstanceManVEntry2708* vt = *(sInstanceManVEntry2708**)((char*)self + 0xC);
+        vt[1].fn((char*)self + vt[1].delta, 3);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/instanceman", func_00352780);
 

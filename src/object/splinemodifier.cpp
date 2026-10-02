@@ -10,7 +10,27 @@ INCLUDE_ASM("object/splinemodifier", func_00359830);
 
 INCLUDE_ASM("object/splinemodifier", func_00359CF8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/splinemodifier", func_00359EB8);
+#ifdef SKIP_ASM
+extern "C" void func_00359688(void* self);
+
+extern "C" void func_00359EB8(void* self, int msg)
+{
+    if (msg == 0x190) {
+        func_00359688(self);
+        *(int*)((char*)self + 0x50) = 0;
+        *(int*)((char*)self + 0x54) = 1;
+    } else if (msg == 0x191) {
+        *(int*)((char*)self + 0x50) = 0;
+        *(int*)((char*)self + 0x54) = 1;
+    } else if (msg == 0x192) {
+        *(float*)((char*)self + 0x48) = -*(float*)((char*)self + 0x48);
+        *(int*)((char*)self + 0x50) = 0;
+        *(int*)((char*)self + 0x54) = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_00359F30);
@@ -38,13 +58,42 @@ INCLUDE_ASM("object/splinemodifier", func_0035A250);
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_allocNodes);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035A3F0);
+#ifdef SKIP_ASM
+void* cObjectInterface_getInstanceMan();
+extern "C" void* func_00351170(void* man);
+
+extern "C" void func_0035A3F0(void* self)
+{
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
+        (*(void***)((char*)self + 0x44))[i] = func_00351170(cObjectInterface_getInstanceMan());
+    }
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupNodes);
 
 INCLUDE_ASM("object/splinemodifier", func_0035A550);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035A560);
+#ifdef SKIP_ASM
+extern "C" float func_002D1C70();
+
+extern "C" void func_0035A560(void* self)
+{
+    float t = *(float*)((char*)self + 0x10) + *(float*)((char*)self + 0x14) * func_002D1C70();
+    *(float*)((char*)self + 0x10) = t;
+    if (t < 0.0f) {
+        *(float*)((char*)self + 0x10) = t + *(float*)((char*)self + 0x54);
+    } else if (t >= *(float*)((char*)self + 0x54)) {
+        *(float*)((char*)self + 0x10) = t - *(float*)((char*)self + 0x54);
+    }
+    *(int*)((char*)self + 0x30) = 1;
+}
+#endif
 
 extern "C" void* func_0035AC20(void* self);
 
@@ -85,7 +134,35 @@ void* func_0035AAE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035AAF0);
+#ifdef SKIP_ASM
+struct sSmVEntryV_AAF0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sSmVEntryP_AAF0 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+extern "C" void* func_0035AAF0(void* self, void* item)
+{
+    if (*(int*)((char*)self + 0x30) != 0) {
+        sSmVEntryV_AAF0* vt = *(sSmVEntryV_AAF0**)self;
+        vt[3].fn((char*)self + vt[3].delta);
+    }
+    if (item == *(void**)((char*)self + 0x40)) {
+        void* obj = *(void**)((char*)item + 0xC);
+        sSmVEntryP_AAF0* vt2 = *(sSmVEntryP_AAF0**)((char*)obj + 0xC);
+        return vt2[24].fn((char*)obj + vt2[24].delta);
+    }
+    return (char*)item + 0x10;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_0035AB60);
 

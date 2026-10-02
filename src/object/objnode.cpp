@@ -22,9 +22,48 @@ cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
 
 INCLUDE_ASM("object/objnode", func_003546C8);
 
+//100%
 INCLUDE_ASM("object/objnode", func_00354720);
+#ifdef SKIP_ASM
+extern void* D_00491E80[];
+extern int D_0044AFF0[];
+extern "C" void* func_00354648(void* self, void* a1);
 
+extern "C" void* func_00354720(void* self, void* a1, int type)
+{
+    func_00354648(self, a1);
+    *(void***)((char*)self + 0xC) = D_00491E80;
+    *(short*)((char*)self + 0x10) = type;
+    *(short*)((char*)self + 0x12) = 0;
+    D_0044AFF0[*(short*)((char*)self + 0x10)]++;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/objnode", cTypeObjNode_cTypeObjNode);
+#ifdef SKIP_ASM
+struct sObjNodeVEntry4788 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern void* D_00491E80[];
+extern int D_0044AFF0[];
+// PORT: cObjNode_cObjNode takes (self, param2); this caller also leaves the stream in $6.
+cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm__("cObjNode_cObjNode__FP8cObjNodePv");
+
+extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream)
+{
+    cObjNode_cObjNode_3((cObjNode*)self, a, stream);
+    *(void***)((char*)self + 0xC) = D_00491E80;
+    sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 4);
+    D_0044AFF0[*(short*)((char*)self + 0x10)]++;
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", func_00354808);

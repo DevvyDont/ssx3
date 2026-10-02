@@ -126,7 +126,29 @@ extern "C" void func_00346070(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/effectlink", func_003460A0);
+#ifdef SKIP_ASM
+struct sEffectLinkVEntry60A0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_003712B8(void* self, void* stream);
+
+extern "C" void func_003460A0(void* self, void* stream)
+{
+    func_00345890(self, stream);
+    sEffectLinkVEntry60A0* e = &(*(sEffectLinkVEntry60A0**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 0x50);
+    if (*(int*)((char*)self + 0x18) == 0) {
+        e = &(*(sEffectLinkVEntry60A0**)stream)[1];
+        e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x260), 0xD8);
+        func_003712B8((char*)self + 0x60, stream);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/effectlink", func_00346120);
 

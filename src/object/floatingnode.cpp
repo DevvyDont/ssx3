@@ -49,7 +49,28 @@ INCLUDE_ASM("object/floatingnode", func_0034F790);
 
 INCLUDE_ASM("object/floatingnode", func_0034F930);
 
+//100%
 INCLUDE_ASM("object/floatingnode", func_0034FA88);
+#ifdef SKIP_ASM
+struct sFloatingVEntryFA88 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00356B30(void* self, void* stream);
+
+extern "C" void func_0034FA88(cFloatingNode* self, void* stream)
+{
+    int has;
+    func_00356B30(self, stream);
+    has = self->field_0x78 != 0;
+    sFloatingVEntryFA88* e = &(*(sFloatingVEntryFA88**)stream)[1];
+    e->fn((char*)stream + e->delta, &has, 4);
+    e = &(*(sFloatingVEntryFA88**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x2C, 0x48);
+}
+#endif
 
 INCLUDE_ASM("object/floatingnode", func_0034FB00);
 

@@ -83,7 +83,23 @@ void* func_00350E70(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350E90);
+#ifdef SKIP_ASM
+extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
+extern char D_00491800[];
+
+extern "C" void* func_00350E90(void* self, void* a1)
+{
+    func_0034FB00(self, 1, 0x10, a1);
+    *(void**)((char*)self + 0xC) = D_00491800;
+    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f &= 0xFFFFFF9F;
+    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f = (*f & 0xFFFFFFFD) | 4;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350F08);
@@ -108,7 +124,23 @@ void* func_00350F40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350F60);
+#ifdef SKIP_ASM
+extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
+extern char D_00491680[];
+
+extern "C" void* func_00350F60(void* self, void* a1)
+{
+    func_0034FB00(self, 1, 0x13, a1);
+    *(void**)((char*)self + 0xC) = D_00491680;
+    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f &= 0xFFFFFF9F;
+    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *f = (*f & 0xFFFFFFFD) | 4;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350FD8);

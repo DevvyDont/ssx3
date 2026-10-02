@@ -209,5 +209,25 @@ extern "C" void* func_0034E320(void* self, int i) {
 
 INCLUDE_ASM("object/flagset", func_0034E348);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034E3D8);
+#ifdef SKIP_ASM
+struct sSerVEntry_0034E3D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00356B30(void* self, void* stream);
+
+extern "C" void func_0034E3D8(void* self, void* stream)
+{
+    int dummy;
+    func_00356B30((char*)self + 0x14, stream);
+    sSerVEntry_0034E3D8* e = &(*(sSerVEntry_0034E3D8**)stream)[1];
+    e->fn((char*)stream + e->delta, self, 0x14);
+    e = &(*(sSerVEntry_0034E3D8**)stream)[1];
+    e->fn((char*)stream + e->delta, &dummy, 4);
+}
+#endif
 
