@@ -125,15 +125,85 @@ INCLUDE_ASM("be/beintmission", func_00153C88);
 
 INCLUDE_ASM("be/beintmission", func_00153D28);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153D78);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00154240(void* self, int id);
 
+extern "C" int func_00153D78(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    int c = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    return (*(unsigned int*)(p + 0x118) >> 3) & 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153DD0);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00154240(void* self, int id);
 
+extern "C" int func_00153DD0(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    int c = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    return (*(unsigned int*)(p + 0x118) >> 1) & 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153E28);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00154240(void* self, int id);
 
+extern "C" int func_00153E28(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    int c = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    return (*(unsigned int*)(p + 0x118)) & 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153E80);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00154240(void* self, int id);
 
+extern "C" int func_00153E80(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    int c = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    return (*(unsigned int*)(p + 0x118) >> 2) & 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153ED8);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00154240(void* self, int id);
+
+extern "C" int func_00153ED8(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    int c = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    return (*(unsigned int*)(p + 0x118) >> 4) & 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00153FA0);

@@ -32,7 +32,19 @@ extern "C" void cAirPredictor_reset(char* self)
 
 INCLUDE_ASM("ai/airpredictor", func_00113200);
 
+//100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_startLaunchIntoAir);
+#ifdef SKIP_ASM
+struct sQuad;
+void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b);
+
+extern "C" void cAirPredictor_startLaunchIntoAir(char* self, sQuad* a, sQuad* b, float t)
+{
+    cAirPredictor_reset(self);
+    *(float*)(self + 0xA8) = t;
+    cAirPredictor_initLaunch(self, a, b);
+}
+#endif
 
 // 16-byte aligned: the original copies these with lq/sq, which require it
 // (PS2 VU-style quadword).

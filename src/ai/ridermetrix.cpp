@@ -523,7 +523,21 @@ INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
 
 INCLUDE_ASM("ai/ridermetrix", func_00119BF0);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119C38);
+#ifdef SKIP_ASM
+extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
+extern "C" void func_00117838(void* self);
+
+extern "C" float func_00119C38(void* self)
+{
+    *(int*)((char*)self + 0x80) += 1;
+    float r = func_0011A228(self, 0, 0, 0, 0, 1);
+    func_00117838(self);
+    *(int*)((char*)self + 0x30) = 0;
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119C98);
 
@@ -567,7 +581,17 @@ extern "C" float func_0011A0E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A110);
+#ifdef SKIP_ASM
+extern "C" void func_00119EF8(void* self, int kind, int amount);
+extern "C" float func_0011A110(void* self, int amount)
+{
+    func_00117B88(self, 0x1B, amount, 0, 1.5f);
+    func_00119EF8(self, 4, amount);
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011A168);
 

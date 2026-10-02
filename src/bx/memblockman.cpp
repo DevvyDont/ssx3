@@ -4,7 +4,30 @@ INCLUDE_ASM("bx/memblockman", cMemMan_initialize);
 
 INCLUDE_ASM("bx/memblockman", func_00319A90);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_00319B48);
+#ifdef SKIP_ASM
+extern "C" int func_0031A088(void* p);
+extern "C" void func_00319F68(void* p);
+extern char D_004FF250[];
+// PORT: func_003200C0__FPv is called with (list, item) here; bind the 2-arg form to that symbol.
+int func_003200C0_2(void* list, void* item) __asm__("func_003200C0__FPv");
+
+extern "C" void func_00319B48(void* p)
+{
+    if (p != 0)
+    {
+        if (func_0031A088(p) != 0)
+        {
+            func_00319F68(p);
+        }
+        else
+        {
+            func_003200C0_2(D_004FF250, p);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_00319B98);
@@ -223,7 +246,25 @@ extern "C" void func_0031ABD0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AC08);
+#ifdef SKIP_ASM
+extern "C" void* func_00423DE0(int);
+extern "C" void func_00423CD0(int);
+extern "C" void func_00423CC0();
+// PORT: func_00317500__Fv is called with self here; bind the 1-arg form to that symbol.
+int func_00317500_1(void* self) __asm__("func_00317500__Fv");
+
+extern "C" void func_0031AC08(void* self)
+{
+    while (func_00423DE0(*(int*)((char*)self + 0x4034)), *(int*)((char*)self + 0x20) == 0)
+    {
+        func_00317500_1(self);
+    }
+    func_00423CD0(*(int*)((char*)self + 0x10));
+    func_00423CC0();
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031AC60);
 

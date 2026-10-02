@@ -174,7 +174,15 @@ extern "C" void* func_0014AD28(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", func_0014AD50);
+#ifdef SKIP_ASM
+extern "C" void* func_0014AD50(void* self, int rider)
+{
+    int profile = func_0014AC50(rider);
+    return func_0014AD28(self, profile, func_0014AC30(rider));
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AEA8);

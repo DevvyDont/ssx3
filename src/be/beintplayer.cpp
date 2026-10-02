@@ -72,7 +72,37 @@ extern "C" void func_00145B20(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_defaultCtrl);
+#ifdef SKIP_ASM
+struct sVEntry00145BD8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sCtrlEntry00145BD8 {
+    char pad_0x00[0x10];
+    unsigned int flag0 : 1;
+    unsigned int flag1 : 1;
+    unsigned int flag2 : 1;
+    unsigned int rest : 29;
+    char pad_0x14[0x8];
+};
+
+extern "C" void cBENewPlayerInterface_defaultCtrl(void* self)
+{
+    int i;
+    sCtrlEntry00145BD8* e = (sCtrlEntry00145BD8*)&D_00535B20;
+    for (i = 0; i < 6; i++)
+    {
+        ((char*)&e[i])[0x13] = 0;
+        e[i].flag1 = 1;
+    }
+    sVEntry00145BD8* vt = *(sVEntry00145BD8**)((char*)self + 0xC);
+    vt[2].fn((char*)self + vt[2].delta);
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00145C38);
 
@@ -193,7 +223,28 @@ extern "C" int func_00147318(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderCharID);
+#ifdef SKIP_ASM
+static inline int func_00147338_isLocked(sPlayerCharEntry* e)
+{
+    return (*(unsigned int*)((char*)e + 0x10) >> 2) & 1;
+}
+
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* self, int index, int charID)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    sPlayerCharEntry* e = &D_00534FE0[id];
+    if (func_00147338_isLocked(e) == 1)
+    {
+        e->mCharID = D_00534FE0[0].mCharID;
+    }
+    else
+    {
+        e->mCharID = charID;
+    }
+}
+#endif
 
 int cBENewPlayerInterface_getPlayerID(int index);
 
@@ -303,7 +354,24 @@ extern "C" int func_001474E8(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147528);
+#ifdef SKIP_ASM
+struct sPlayerCharFlags_00147528 {
+    unsigned int bit0 : 1;
+    unsigned int bit1 : 1;
+    unsigned int bit2 : 1;
+    unsigned int bit3 : 1;
+    unsigned int rest : 28;
+};
+
+extern "C" void func_00147528(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    sPlayerCharEntry* e = &D_00534FE0[id];
+    ((sPlayerCharFlags_00147528*)((char*)e + 0x10))->bit1 = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147580);
@@ -316,7 +384,24 @@ extern "C" int func_00147580(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001475C0);
+#ifdef SKIP_ASM
+struct sPlayerCharFlags_001475C0 {
+    unsigned int bit0 : 1;
+    unsigned int bit1 : 1;
+    unsigned int bit2 : 1;
+    unsigned int bit3 : 1;
+    unsigned int rest : 28;
+};
+
+extern "C" void func_001475C0(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    sPlayerCharEntry* e = &D_00534FE0[id];
+    ((sPlayerCharFlags_001475C0*)((char*)e + 0x10))->bit3 = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147618);
@@ -376,7 +461,26 @@ INCLUDE_ASM("be/beintplayer", func_00147980);
 
 INCLUDE_ASM("be/beintplayer", func_00147A30);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147CB8);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+
+extern "C" short func_00147CB8(void* self, int which)
+{
+    int c = cBELibrary_getCharacterID(0);
+    if (which != 0)
+    {
+        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        return *(short*)(p + 0x280);
+    }
+    else
+    {
+        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        return *(short*)(p + 0x284);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00147D20);
 
@@ -439,31 +543,142 @@ INCLUDE_ASM("be/beintplayer", func_00148158);
 
 INCLUDE_ASM("be/beintplayer", func_001483A0);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148410);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+struct sPlayerStat7View_00148410 {
+    signed char v[7];
+};
+struct sPlayerStatRowView_00148410 {
+    sPlayerStat7View_00148410 e[10];
+};
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_00148410(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[0];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148470);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001484E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_001484E0(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[1];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148540);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001485B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_001485B0(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[2];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148610);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148680);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_00148680(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[3];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_001486E0);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148750);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_00148750(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[4];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_001487B0);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148820);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_00148820(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[5];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148880);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001488F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+
+extern "C" signed char func_001488F0(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[a].e[c].v[6];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00148950);
 

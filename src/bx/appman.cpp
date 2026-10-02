@@ -87,7 +87,31 @@ int func_00317348(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/appman", cAppMan_loadexecpurge);
+#ifdef SKIP_ASM
+struct sVEntry00317400 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sAppObj00317400 {
+    char pad[8];
+    sVEntry00317400* vt;
+};
+
+extern "C" void cAppMan_loadexecpurge(void* self)
+{
+    sAppObj00317400* o = *(sAppObj00317400**)((char*)self + 8);
+    ((void (*)(void*))o->vt[3].fn)((char*)o + o->vt[3].delta);
+    sAppObj00317400* d = *(sAppObj00317400**)((char*)self + 8);
+    if (d != 0)
+    {
+        ((void (*)(void*, int))d->vt[1].fn)((char*)d + d->vt[1].delta, 3);
+    }
+}
+#endif
 
 struct cExecutionMan {
     int field_0x0;

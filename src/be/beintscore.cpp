@@ -63,7 +63,22 @@ void func_001549E0(void* self)
 
 INCLUDE_ASM("be/beintscore", func_001549E8);
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00154A58);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+extern "C" void func_00155420(int rider, int a, int b, int c);
+extern signed char D_005305F9[];
+
+extern "C" void func_00154A58(int rider, int a)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    if (D_005305F9[0] == 0 && profile < 2)
+    {
+        func_00155420(rider, a, -1, -1);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintscore", func_00154AB8);
 
@@ -88,7 +103,26 @@ extern "C" int func_001550E8(void* self, int i, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00155130);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern int D_005305F0[];
+extern signed char D_00535C12[];
+
+extern "C" int func_00155130(void* self, int i)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    sScoreEntry_001550E8* t = func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    if (t != 0)
+    {
+        return t[i].value;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintscore", func_00155190);
 

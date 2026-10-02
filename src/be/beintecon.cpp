@@ -44,7 +44,23 @@ extern "C" int func_00150928(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00150960);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern "C" int func_00150960(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int b = cBELibrary_getCharacterID(rider);
+    int bOff = b * 0xF88;
+    int aOff = a * 0x9B50;
+    int off = bOff + aOff;
+    char* p = (char*)D_004A6CA8 + off;
+    return *(int*)(p + 0xAC4);
+}
+#endif
 
 extern int D_004A6CA8[];
 
@@ -64,7 +80,23 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_001509F8);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern "C" int func_001509F8(void* self, int rider)
+{
+    int a = cBELibrary_getProfileIndex(rider);
+    int b = cBELibrary_getCharacterID(rider);
+    int bOff = b * 0xF88;
+    int aOff = a * 0x9B50;
+    int off = bOff + aOff;
+    char* p = (char*)D_004A6CA8 + off;
+    return *(int*)(p + 0xAC8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00150A90);
@@ -166,7 +198,26 @@ extern "C" int func_001511B0(void* self, int level)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00151368);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+extern "C" void func_00151368(void* self, int flags)
+{
+    void* p = *(void**)((char*)self + 0x288);
+    if (p != 0)
+    {
+        cMemMan_free(p);
+    }
+    *(void**)((char*)self + 0x288) = 0;
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintecon", func_001513B8);
 

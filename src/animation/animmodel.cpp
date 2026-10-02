@@ -251,7 +251,33 @@ INCLUDE_ASM("animation/animmodel", func_00310120);
 
 INCLUDE_ASM("animation/animmodel", func_00310200);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animmodel", func_003103F0);
+#ifdef SKIP_ASM
+struct sAm3103F0Pair
+{
+    char pad[0x20];
+};
+
+struct sAm3103F0
+{
+    char pad0[0x10];
+    int count;
+    char pad14[0x18];
+    sAm3103F0Pair* pairs;
+};
+
+extern "C" void func_00310120(sAm3103F0* self, int i, sAm3103F0Pair* p);
+
+extern "C" void func_003103F0(sAm3103F0* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++)
+    {
+        func_00310120(self, i, &self->pairs[i]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00310530);
@@ -434,7 +460,25 @@ extern "C" void func_00311290(void* self, char* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_003112C8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+extern "C" void func_003112C8(void* self, int flags)
+{
+    void* p = *(void**)self;
+    if (p != 0)
+    {
+        cMemMan_free(p);
+    }
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_00311318);
 

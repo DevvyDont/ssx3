@@ -28,7 +28,24 @@ cBXString2* cBXString_cBXString(cBXString2* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_00268950);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(void* self, int flags);
+void operator_delete(int*);
+extern char D_004810E0[];
+
+extern "C" void func_00268950(void* self, int flags)
+{
+    *(void**)((char*)self + 0x3C) = D_004810E0;
+    cBXString__cBXString((char*)self + 4, 2);
+    cBXString__cBXString(self, 2);
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_002689B8);
 
@@ -490,7 +507,29 @@ void* func_00269DA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_00269DC0);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00480488[];
+extern char D_004813E0[];
+
+struct sNode00269DC0 {
+    int kind;
+    void* vtbl;
+    int value;
+};
+
+extern "C" sNode00269DC0* func_00269DC0(void* self)
+{
+    sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, D_00480488, 0x20000000, 0);
+    int v = *(int*)((char*)self + 8);
+    n->kind = 0xFD;
+    n->vtbl = D_004813E0;
+    n->value = v;
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00269E20__FPv);
@@ -501,7 +540,29 @@ void* func_00269E20(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_00269E40);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00480488[];
+extern char D_004813C0[];
+
+struct sNode00269E40 {
+    int kind;
+    void* vtbl;
+    int value;
+};
+
+extern "C" sNode00269E40* func_00269E40(void* self)
+{
+    sNode00269E40* n = (sNode00269E40*)cMemMan_alloc(0xC, D_00480488, 0x20000000, 0);
+    int v = *(int*)((char*)self + 8);
+    n->kind = 0xFE;
+    n->vtbl = D_004813C0;
+    n->value = v;
+    return n;
+}
+#endif
 
 extern "C" void* func_00267468(int, int);
 

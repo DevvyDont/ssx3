@@ -34,9 +34,62 @@ extern "C" void func_00313A20(void* self, float v)
 
 INCLUDE_ASM("animation/animsequencer", func_00313A70);
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313AD8);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0048A5B0[];
 
+struct sSeqNode313AD8
+{
+    int key;
+    int active;
+    int unk8;
+    sSeqNode313AD8* next;
+};
+
+extern "C" void func_00313AD8(void* self, int key)
+{
+    sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, D_0048A5B0, 0x20000000, 0);
+    sSeqNode313AD8* old = *(sSeqNode313AD8**)((char*)self + 0xAC);
+    *(sSeqNode313AD8**)((char*)self + 0xAC) = n;
+    n->key = key;
+    n->active = 1;
+    n->next = old;
+    n->unk8 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313BA8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+struct sSeqNode313BA8
+{
+    int key;
+    int active;
+    int unk8;
+    sSeqNode313BA8* next;
+};
+
+extern "C" void func_00313BA8(void* self, int key)
+{
+    sSeqNode313BA8** pp;
+    for (pp = (sSeqNode313BA8**)((char*)self + 0xAC); *pp != 0; pp = &(*pp)->next)
+    {
+        if ((*pp)->key == key)
+        {
+            sSeqNode313BA8* n = *pp;
+            if (n->active != 0)
+            {
+                *pp = n->next;
+                operator_delete((int*)n);
+                return;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313C08);

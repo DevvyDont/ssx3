@@ -96,7 +96,18 @@ extern "C" int func_00312AE8(void* self, int i)
 
 INCLUDE_ASM("animation/rideranimbase", func_00312B18);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", func_00312BD0);
+#ifdef SKIP_ASM
+extern "C" void func_00144670(void* self, int bit);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+
+extern "C" void func_00312BD0(void* self, void* unused, void* rider, int anim)
+{
+    func_00144670((char*)rider + 0xB0, 0x3F);
+    cRiderAnimBase_play(self, anim, 0, -1.0f);
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312C20);
 

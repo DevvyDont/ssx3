@@ -2,7 +2,25 @@
 
 INCLUDE_ASM("ai/ai", cAI_cAI);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001287B8);
+#ifdef SKIP_ASM
+extern "C" void func_0012B090(void*);
+void operator_delete(int*);
+extern char D_00458488[];
+
+extern "C" void func_001287B8(void* self, int flags)
+{
+    *(void**)((char*)self + 0xCC) = D_00458488;
+    func_0012B090(self);
+    operator_delete(*(int**)((char*)self + 0xA4));
+    operator_delete(*(int**)((char*)self + 0xA8));
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00128818);
 
@@ -23,7 +41,25 @@ extern "C" void func_00128958(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00128998);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cAI_initComputerActors(void*);
+extern signed char D_00535C11[];
+
+extern "C" void func_00128998(void* self, int n)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] == 0)
+    {
+        *(int*)((char*)self + 0x94) = n;
+        cAI_initComputerActors(self);
+    }
+}
+#endif
 
 extern "C" void* func_001297C8(void*, int);
 
@@ -100,7 +136,23 @@ INCLUDE_ASM("ai/ai", func_001291E0);
 
 INCLUDE_ASM("ai/ai", func_001296F8);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00129768);
+#ifdef SKIP_ASM
+extern "C" void func_00103358(void*);
+extern "C" void func_00101688(void*);
+extern "C" void cAI_setAIState(void*, int);
+
+extern "C" void func_00129768(void* self, int state)
+{
+    func_00103358(*(void**)((char*)self + 0xA4));
+    func_00101688(*(void**)((char*)self + 0xA8));
+    *(int*)((char*)self + 0x98) = 0;
+    *(int*)((char*)self + 0x0) = 0;
+    cAI_setAIState(self, state);
+    func_001297C8(self, 1);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_001297C8);
 
@@ -206,7 +258,27 @@ INCLUDE_ASM("ai/ai", func_0012B498);
 
 INCLUDE_ASM("ai/ai", func_0012B698);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012B788);
+#ifdef SKIP_ASM
+extern "C" void func_00120E50(void*);
+
+struct sAi12B788
+{
+    char pad0[0x28];
+    void* items[20];
+    int count;
+};
+
+extern "C" void func_0012B788(sAi12B788* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++)
+    {
+        func_00120E50(self->items[i]);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012B7F0);
 
@@ -537,7 +609,26 @@ INCLUDE_ASM("ai/ai", func_00130DD0);
 
 INCLUDE_ASM("ai/ai", func_00131200);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00131348);
+#ifdef SKIP_ASM
+extern "C" void func_001313A8(void*);
+extern "C" void func_00131428(void*);
+extern "C" float func_00119A38(void*);
+extern "C" void func_0010E098(void*, int, float);
+
+extern "C" void func_00131348(void* self)
+{
+    func_001313A8(self);
+    func_00131428(self);
+    void* r = *(void**)((char*)self + 0x14);
+    int s = *(int*)((char*)r + 0x330);
+    if (s >= 1 && s <= 2)
+    {
+        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119A38(*(void**)((char*)r + 0x790)));
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_001313A8);
 

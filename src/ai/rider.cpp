@@ -472,7 +472,22 @@ extern "C" void func_00122658(void* self)
 
 INCLUDE_ASM("ai/rider", func_00122898);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122C28);
+#ifdef SKIP_ASM
+extern "C" void* func_0026B5E0(void*, int, int);
+extern char D_004D33A0[];
+
+extern "C" float* func_00122C28(float* out, void* rider)
+{
+    float* p = (float*)func_0026B5E0(D_004D33A0, 1, *(int*)((char*)rider + 0x86C));
+    out[0] = p[2];
+    out[1] = p[3];
+    out[2] = p[4];
+    out[3] = 1.0f;
+    return out;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00122C98);
 
