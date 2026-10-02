@@ -37,9 +37,51 @@ INCLUDE_ASM("fe/ovstatemap", func_00209300);
 
 INCLUDE_ASM("fe/ovstatemap", func_00209370);
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_002095E8);
+#ifdef SKIP_ASM
+struct sVEntry_func_002095E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+extern char D_004C8B38[];
+extern char D_004C8B28[];
 
+extern "C" void func_002095E8(void* self, void* obj, int on)
+{
+    if (on != 0) {
+        sVEntry_func_002095E8* vt = *(sVEntry_func_002095E8**)((char*)obj + 0x8);
+        vt[11].fn((char*)obj + vt[11].delta, D_004C8B38);
+    } else {
+        sVEntry_func_002095E8* vt = *(sVEntry_func_002095E8**)((char*)obj + 0x8);
+        vt[11].fn((char*)obj + vt[11].delta, D_004C8B28);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_00209648);
+#ifdef SKIP_ASM
+struct sVEntry_func_00209648 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+extern char D_004C8B58[];
+extern char D_004C8B48[];
+
+extern "C" void func_00209648(void* self, void* obj, int on)
+{
+    if (on != 0) {
+        sVEntry_func_00209648* vt = *(sVEntry_func_00209648**)((char*)obj + 0x8);
+        vt[11].fn((char*)obj + vt[11].delta, D_004C8B58);
+    } else {
+        sVEntry_func_00209648* vt = *(sVEntry_func_00209648**)((char*)obj + 0x8);
+        vt[11].fn((char*)obj + vt[11].delta, D_004C8B48);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPlayerIndicator);
 

@@ -1,6 +1,19 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", cSSXApp__cSSXApp);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(void* self, int flags);
+void cAppMan__cAppMan(void* self, int flags);
+
+extern "C" void cSSXApp__cSSXApp(void* self, int flags)
+{
+    cBXString__cBXString((char*)self + 0xCC, 2);
+    cBXString__cBXString((char*)self + 0xC8, 2);
+    cBXString__cBXString((char*)self + 0xC4, 2);
+    cAppMan__cAppMan(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A40);
@@ -492,7 +505,28 @@ void func_00244408(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244410);
+#ifdef SKIP_ASM
+extern "C" void func_003546C8(void* self, int flags);
+extern void* D_0047D070[];
+struct sVEntry_func_00244410 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00244410(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_0047D070;
+    void* obj = *(void**)((char*)self + 0x10);
+    if (obj != 0) {
+        sVEntry_func_00244410* vt = *(sVEntry_func_00244410**)((char*)obj + 0x44);
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+    }
+    func_003546C8(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244478);
@@ -816,7 +850,28 @@ void func_00244880(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002448E0);
+#ifdef SKIP_ASM
+extern "C" void func_003546C8(void* self, int flags);
+extern void* D_0047CB60[];
+struct sVEntry_func_002448E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_002448E0(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_0047CB60;
+    void* obj = *(void**)((char*)self + 0x10);
+    if (obj != 0) {
+        sVEntry_func_002448E0* vt = *(sVEntry_func_002448E0**)((char*)obj + 0x4);
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+    }
+    func_003546C8(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244948);
@@ -938,7 +993,24 @@ extern "C" void* func_00245600(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245628);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern char D_0047BCC8[];
+
+extern "C" void func_00245628(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BCC8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245690__FPv);

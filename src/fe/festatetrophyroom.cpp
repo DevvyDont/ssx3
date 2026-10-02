@@ -1,6 +1,23 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern char D_004676C8[];
+
+extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004676C8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 extern "C" void* func_0039E4C0(void* self);
 
@@ -84,9 +101,42 @@ extern "C" void* func_001D5038(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5078);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern char D_00467778[];
 
+extern "C" void func_001D5078(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467778), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D50E0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern char D_00467790[];
+extern char D_00461CC0[];
+
+extern "C" void func_001D50E0(void* self, cUIText* item)
+{
+    int id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_00467790)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(D_00461CC0));
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5138);
 

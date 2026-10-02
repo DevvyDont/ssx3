@@ -111,9 +111,55 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_showEventPath);
 
 INCLUDE_ASM("fe/uitemplatemap", func_00207430);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_002083D8);
+#ifdef SKIP_ASM
+struct sVEntry_func_002083D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+extern char D_004C8B38[];
+extern char D_004C8B28[];
 
+extern "C" void func_002083D8(void* self, void* obj, int on)
+{
+    if (obj != 0) {
+        if (on != 0) {
+            sVEntry_func_002083D8* vt = *(sVEntry_func_002083D8**)((char*)obj + 0x8);
+            vt[11].fn((char*)obj + vt[11].delta, D_004C8B38);
+        } else {
+            sVEntry_func_002083D8* vt = *(sVEntry_func_002083D8**)((char*)obj + 0x8);
+            vt[11].fn((char*)obj + vt[11].delta, D_004C8B28);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00208438);
+#ifdef SKIP_ASM
+struct sVEntry_func_00208438 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+extern char D_004C8B58[];
+extern char D_004C8B48[];
+
+extern "C" void func_00208438(void* self, void* obj, int on)
+{
+    if (obj != 0) {
+        if (on != 0) {
+            sVEntry_func_00208438* vt = *(sVEntry_func_00208438**)((char*)obj + 0x8);
+            vt[11].fn((char*)obj + vt[11].delta, D_004C8B58);
+        } else {
+            sVEntry_func_00208438* vt = *(sVEntry_func_00208438**)((char*)obj + 0x8);
+            vt[11].fn((char*)obj + vt[11].delta, D_004C8B48);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", func_00208498);
 

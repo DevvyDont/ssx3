@@ -493,7 +493,22 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032E9A0);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032F650);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032F708);
+#ifdef SKIP_ASM
+extern "C" void func_00329970(void* p, int flags);
+void operator_delete(int* ptr);
+extern void* D_0048E590[];
+
+extern "C" void func_0032F708(void* self, int flags)
+{
+    *(void***)((char*)self + 0x50) = D_0048E590;
+    func_00329970((char*)self + 0x70, 2);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032F760);

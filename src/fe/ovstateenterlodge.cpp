@@ -24,7 +24,26 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onGainTransition);
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F74E0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A23E0[];
+extern char D_004A23E8[];
+
+extern "C" void func_001F74E0(void* self, void* item)
+{
+    int id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_004A23E0)) {
+        *(int*)((char*)item + 0x18) = 0;
+    } else {
+        int id2 = *(int*)((char*)item + 0x38);
+        if (id2 == GetHashValue32(D_004A23E8)) {
+            *(int*)((char*)item + 0x18) = 1;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
 

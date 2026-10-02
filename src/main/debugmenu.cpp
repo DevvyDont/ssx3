@@ -490,7 +490,20 @@ void* func_00251610(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_00251630);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_00251630(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 extern "C" void* func_00250CB0(int, int);
 

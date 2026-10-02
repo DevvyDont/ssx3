@@ -14,7 +14,26 @@ INCLUDE_ASM("main/game", cGame_renderModels);
 
 INCLUDE_ASM("main/game", func_0022C1B0);
 
+//100%
 INCLUDE_ASM("main/game", func_0022C3B8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+struct sVEntry_func_0022C3B8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0022C3B8(void* self, int flags)
+{
+    void* obj = *(void**)self;
+    sVEntry_func_0022C3B8* vt = *(sVEntry_func_0022C3B8**)((char*)obj + 0x4);
+    vt[18].fn((char*)obj + vt[18].delta);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022C410);
 

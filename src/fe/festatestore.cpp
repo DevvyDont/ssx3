@@ -55,7 +55,25 @@ extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_00185A18);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern void* D_0046BDF8[];
+
+extern "C" void* func_00185A18(void* self)
+{
+    func_0039E2A0(self);
+    *(void***)((char*)self + 0x8) = D_0046BDF8;
+    *(int*)((char*)self + 0x60) = -100;
+    *(int*)((char*)self + 0x64) = 1;
+    *(int*)((char*)self + 0xC) = 0x24;
+    *(int*)((char*)self + 0x58) = 0;
+    *(int*)((char*)self + 0x5C) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    return self;
+}
+#endif
 
 extern void* D_0046D0D0[];
 extern "C" void* func_0039E390(void*);

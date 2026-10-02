@@ -76,5 +76,21 @@ extern "C" int func_0022E348(void* self, void* a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/sectionman", func_0022E360);
+#ifdef SKIP_ASM
+// PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
+void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
+
+extern "C" void func_0022E360(void* self, void* prev, void* node)
+{
+    if (prev == 0) {
+        *(int*)((char*)self + 0x19C) = *(int*)((char*)node + 0x4);
+    } else {
+        *(int*)((char*)prev + 0x4) = *(int*)((char*)node + 0x4);
+    }
+    func_0022E288_v(self, node);
+    *(int*)((char*)self + 0x1A0) = *(int*)((char*)self + 0x1A0) - 1;
+}
+#endif
 

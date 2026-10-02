@@ -10,7 +10,19 @@ INCLUDE_ASM("main/gamerender", func_0022E7C8);
 
 INCLUDE_ASM("main/gamerender", cGameViewMan_updateAll);
 
+//100%
 INCLUDE_ASM("main/gamerender", func_0022E8B8);
+#ifdef SKIP_ASM
+extern "C" void func_0015EC98(void* p);
+
+extern "C" void func_0022E8B8(void* self)
+{
+    unsigned int i;
+    for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
+        func_0015EC98(((void**)((char*)self + 0x4))[i]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamerender", func_0022E920);

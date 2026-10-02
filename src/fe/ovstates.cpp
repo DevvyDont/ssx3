@@ -14,9 +14,45 @@ void func_00194980(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstates", func_00194988);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void func_003A0330(void* self, int a1, int a2);
+extern char D_004A17D0[];
 
+extern "C" void func_00194988(void* self, void* item)
+{
+    int id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_004A17D0)) {
+        *(int*)((char*)item + 0x18) = 0;
+        func_003A0330(item, 0, 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstates", func_001949E0);
+#ifdef SKIP_ASM
+struct sVEntry_func_001949E0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+extern "C" void func_0039F400(void* list, void* item);
+
+extern "C" void func_001949E0(void* self, void* msg, int type)
+{
+    if (type == 5) {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry_func_001949E0* vt = *(sVEntry_func_001949E0**)((char*)obj + 0x4);
+        void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstates", func_00194A48);

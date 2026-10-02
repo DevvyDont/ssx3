@@ -51,7 +51,24 @@ INCLUDE_ASM("fe/ovstateprofile", func_00211BC8);
 
 INCLUDE_ASM("fe/ovstateprofile", func_00212080);
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212138);
+#ifdef SKIP_ASM
+extern "C" void* func_001D53B0(void* self, void* a1, int a2);
+extern void* D_00471F80[];
+
+extern "C" void* func_00212138(void* self, void* a1, int a2)
+{
+    func_001D53B0(self, a1, 0);
+    *(void***)((char*)self + 0x8) = D_00471F80;
+    *(int*)((char*)self + 0xC) = 0x25;
+    *(int*)((char*)self + 0x208) = 1;
+    *(int*)((char*)self + 0x22C) = a2;
+    *(int*)((char*)self + 0x1C4) = 0;
+    *(int*)((char*)self + 0x230) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onCreateScreen);
 

@@ -99,9 +99,35 @@ float func_001E9290(void* self, void* a1)
 
 INCLUDE_ASM("fe/ovstatehud", func_001E92A8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovstatehud", func_001E94E0);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" void func_001E92A8(void* self);
+struct sVec2f { float x, y; };
 
+extern "C" void func_001E94E0(void* self, char* str, int a2, sVec2f* pos)
+{
+    func_002C2540((unsigned short*)((char*)self + 0x4C), str);
+    *(int*)((char*)self + 0x8) = a2;
+    *(sVec2f*)((char*)self + 0x10) = *pos;
+    func_001E92A8(self);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovstatehud", func_001E9540);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C2508(unsigned short* dst, unsigned short* src);
+extern "C" void func_001E92A8(void* self);
+extern "C" void func_001E9540(void* self, unsigned short* str, int a2, sVec2f* pos)
+{
+    func_002C2508((unsigned short*)((char*)self + 0x4C), str);
+    *(int*)((char*)self + 0x8) = a2;
+    *(sVec2f*)((char*)self + 0x10) = *pos;
+    func_001E92A8(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001E95A0);
 

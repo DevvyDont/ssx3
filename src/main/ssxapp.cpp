@@ -51,7 +51,24 @@ extern "C" void* func_00227F80()
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_purge);
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_startGameLoad);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_0022E968(void* self);
+struct cAppMan;
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern "C" void* cGameModeMan_getGM();
+extern char D_0047A808[];
+
+extern "C" void cSSXApp_startGameLoad(void* self)
+{
+    void* m = func_0022E968(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
+    *(void**)((char*)self + 0x84) = m;
+    cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
+    *(void**)((char*)self + 0xC0) = cGameModeMan_getGM();
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00228238);
 
@@ -117,7 +134,31 @@ extern "C" void func_00229498(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_002294C8);
+#ifdef SKIP_ASM
+extern "C" void cCrowdAnim2D_update(void* p);
+extern "C" void func_00229530(void* self);
+extern short D_00536690[];
+
+extern "C" void func_002294C8(void* self)
+{
+    int i;
+    char* p;
+    int t;
+    cCrowdAnim2D_update(*(void**)((char*)self + 0x4));
+    t = *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
+    D_00536690[0] = t;
+    p = (char*)self;
+    for (i = 0x27; i >= 0; i--) {
+        if (*(int*)(p + 0x2230) > 0) {
+            *(int*)(p + 0x2230) = *(int*)(p + 0x2230) - 1;
+        }
+        p += 0x20;
+    }
+    func_00229530(self);
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229530);
 
@@ -150,7 +191,22 @@ extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229788);
+#ifdef SKIP_ASM
+extern "C" void func_00229910(void* self, int slot, int a1);
+
+extern "C" void func_00229788(void* self, int a1)
+{
+    int i;
+    for (i = 0; i < 0x40; i++) {
+        if (((unsigned int*)((char*)self + 0x8))[i] == 0xFFFFFFFF) {
+            func_00229910(self, i, a1);
+            break;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_002297D8);

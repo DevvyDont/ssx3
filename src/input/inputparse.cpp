@@ -118,7 +118,18 @@ INCLUDE_ASM("input/inputparse", func_00326078);
 
 INCLUDE_ASM("input/inputparse", func_00326150);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326308);
+#ifdef SKIP_ASM
+extern "C" void func_00326360(void* self, char c);
+
+extern "C" void func_00326308(void* self, char* s)
+{
+    while (*s != 0) {
+        func_00326360(self, *s++);
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326360);
 
@@ -187,7 +198,19 @@ extern "C" void func_00326A28(void* self)
 
 INCLUDE_ASM("input/inputparse", func_00326A68);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326AE0);
+#ifdef SKIP_ASM
+extern "C" void func_00326CF0(void* p);
+
+extern "C" void func_00326AE0(void* self)
+{
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x2EE8); i++) {
+        func_00326CF0(((void**)((char*)self + 0x2EEC))[i]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326B48);
@@ -283,9 +306,46 @@ INCLUDE_ASM("input/inputparse", func_00326CF0);
 
 INCLUDE_ASM("input/inputparse", func_00326D60);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326DF0);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern void* D_0048E488[];
 
+extern "C" void* func_00326DF0(void* self, int a1, int a2)
+{
+    *(void***)self = D_0048E488;
+    *(int*)((char*)self + 0x4) = a1;
+    *(int*)((char*)self + 0x8) = a2;
+    func_00416210((char*)self + 0xC, 0, 0x24);
+    *(int*)((char*)self + 0x54) = 0;
+    *(int*)((char*)self + 0x58) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    *(int*)((char*)self + 0x5C) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("input/inputparse", func_00326E50);
+#ifdef SKIP_ASM
+extern "C" int func_003FF8F0(int a, int b);
+void operator_delete(int* ptr);
+extern void* D_0048E488[];
+extern char D_0048E4B8[];
+
+extern "C" void func_00326E50(void* self, int flags)
+{
+    *(void***)self = D_0048E488;
+    func_003FF8F0(*(int*)((char*)self + 0x4), *(int*)((char*)self + 0x8));
+    *(void**)self = D_0048E4B8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326EB0);
 
@@ -377,5 +437,23 @@ void* func_00327810(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00327828);
+#ifdef SKIP_ASM
+void cMemMan_free(void* ptr);
+void operator_delete(int* ptr);
+
+extern "C" void func_00327828(void* self, int flags)
+{
+    if (*(void**)self != 0) {
+        cMemMan_free(*(void**)self);
+    }
+    if (*(void**)((char*)self + 0x8) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x8));
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 

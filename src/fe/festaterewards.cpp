@@ -45,7 +45,20 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showReward);
 
 INCLUDE_ASM("fe/festaterewards", func_001D0510);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D05F0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00157468(void* iface, int a, int b, int c, int d);
+
+extern "C" void func_001D05F0(void* self, int arg)
+{
+    func_00157468(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), arg);
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateHelpText);
 
@@ -384,7 +397,24 @@ INCLUDE_ASM("fe/festaterewards", func_001D2198);
 
 INCLUDE_ASM("fe/festaterewards", func_001D22F0);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2380);
+#ifdef SKIP_ASM
+extern "C" void func_00253418(void* p, int a1);
+extern "C" void func_0039E390(void* self, int flags);
+extern void* D_00469928[];
+extern void* D_0046D0D0[];
+
+extern "C" void func_001D2380(void* self, int flags)
+{
+    *(void***)((char*)self + 8) = D_00469928;
+    if (*(void**)((char*)self + 0x248) != 0) {
+        func_00253418(*(void**)((char*)self + 0x248), 3);
+    }
+    *(void***)((char*)self + 8) = D_0046D0D0;
+    func_0039E390(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D23E0);
@@ -437,9 +467,40 @@ INCLUDE_ASM("fe/festaterewards", func_001D24A8);
 
 INCLUDE_ASM("fe/festaterewards", func_001D2518);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2598);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
 
+extern "C" void func_001D2598(void* self, const char* a, const char* b)
+{
+    strcpy((char*)self + 0x48, a);
+    if (b != 0) {
+        strcpy((char*)self + 0x148, b);
+    } else {
+        *((char*)self + 0x148) = 0;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D25E8);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" void func_002B3A70(void* p);
+extern "C" int func_002534A8(void* p, void* q);
+extern "C" void func_00253860(void* p);
+
+extern "C" void func_001D25E8(void* self)
+{
+    func_002B3A70((char*)func_0028B180() + 0x118);
+    *(int*)((char*)self + 0x254) = 1;
+    func_002534A8(*(void**)((char*)self + 0x248), (char*)self + 0x24C);
+    func_00253860(*(void**)((char*)self + 0x248));
+    *(int*)((char*)self + 0x278) = 0;
+    *(int*)((char*)self + 0x274) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D2638);
