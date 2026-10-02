@@ -136,7 +136,21 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5C68);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5D78);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5E68);
+#ifdef SKIP_ASM
+extern "C" void func_002B5758(sWorldTrigger70* t);
+
+extern "C" void func_002B5E68(void* self)
+{
+    for (int i = 0; i < 40; i++) {
+        if ((*(sWorldTrigger70**)self)[i].active == 1) {
+            (*(sWorldTrigger70**)self)[i].active = 0;
+            func_002B5758(&(*(sWorldTrigger70**)self)[i]);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
 
@@ -295,7 +309,31 @@ extern "C" int func_002B6988(void* self, unsigned int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B69B8);
+#ifdef SKIP_ASM
+struct sWtmVEntryF {
+    short delta;
+    short index;
+    float (*fn)(void*);
+};
+
+extern "C" int func_002B69B8(void* self, void* src, void* state)
+{
+    void* obj = *(void**)((char*)src + 0xC);
+    if (obj == 0) {
+        return 0;
+    }
+    float prev = *(float*)((char*)state + 0x68);
+    sWtmVEntryF* vt = *(sWtmVEntryF**)((char*)obj + 0xC);
+    float cur = vt[30].fn((char*)obj + vt[30].delta);
+    int below = cur < prev;
+    int r = *(int*)((char*)state + 0x6C) != 0 && !below;
+    *(float*)((char*)state + 0x68) = cur;
+    *(int*)((char*)state + 0x6C) = below;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A68);
@@ -382,7 +420,37 @@ extern "C" void func_002B6B30(void* self, int a1)
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B50);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6C20);
+#ifdef SKIP_ASM
+struct sWtmEnt18 {
+    char pad[0xC];
+    int active;
+    char pad2[0x8];
+};
+struct sWtmEntList {
+    char pad[0xC];
+    int count;
+    sWtmEnt18 entries[1];
+};
+extern "C" void func_002B7410(void* self, sWtmEnt18* e);
+
+// PORT: the unit declares func_002B6C20 as void(void*); its callers pass a1 through.
+int func_002B6C20_impl(void* self, sWtmEntList* list) __asm__("func_002B6C20");
+
+int func_002B6C20_impl(void* self, sWtmEntList* list)
+{
+    int n = list->count;
+    sWtmEnt18* entries = list->entries;
+    for (int i = 0; i < n; i++) {
+        sWtmEnt18* e = &entries[i];
+        if (e->active != 0) {
+            func_002B7410(self, e);
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6C90);

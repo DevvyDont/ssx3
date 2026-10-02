@@ -74,7 +74,26 @@ INCLUDE_ASM("sound/ssxAudio", func_00286A80);
 
 INCLUDE_ASM("sound/ssxAudio", func_00286C00);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00286CA8);
+#ifdef SKIP_ASM
+struct sSsxAudioBanks {
+    char pad[0x6C70];
+    int loaded[2];
+    int sub[2];
+};
+extern "C" void func_0028BE60(void* self, int i, int a, int b);
+
+extern "C" void func_00286CA8(sSsxAudioBanks* self, unsigned int id, int on)
+{
+    unsigned int bank = id >> 8;
+    if (on != 0) {
+        func_0028BE60(**(void***)((char*)self + 0x118), bank + 8, on, 0x20000);
+        self->loaded[bank] = 1;
+        self->sub[bank] = id & 0xFF;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00286D18);
 
@@ -82,7 +101,22 @@ INCLUDE_ASM("sound/ssxAudio", func_00286E20);
 
 INCLUDE_ASM("sound/ssxAudio", func_00286EA0);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002870A0);
+#ifdef SKIP_ASM
+extern "C" void func_002871B0(void* self);
+extern "C" int func_002A4040(void* self);
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" void func_00295628(void* self, int a, int b, int c, int d, int e);
+
+extern "C" void func_002870A0(void* self)
+{
+    func_002871B0(self);
+    if (func_002A4040(self) == 0 && func_00295028(self, 0, 0) == 0) {
+        func_00295628(self, 0, 0, -1, 0, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00287108);
 
@@ -92,7 +126,23 @@ INCLUDE_ASM("sound/ssxAudio", func_002872A8);
 
 INCLUDE_ASM("sound/ssxAudio", func_002873D8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287410);
+#ifdef SKIP_ASM
+extern "C" float func_002873D8(void*);
+// PORT: func_00287700's real parameter order is (self, int, float); the unit declares (self, float, int).
+void func_00287700_if(void*, int, float) __asm__("func_00287700");
+
+extern "C" void func_00287410(void* self)
+{
+    float v = func_002873D8(self);
+    func_00287700_if(self, 1, v);
+    func_00287700_if(self, 8, v);
+    if (*(int*)((char*)self + 0x62B8) != 0 && *(int*)((char*)self + 0x608C) != 2) {
+        func_00287700_if(self, 2, v);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00287488);
 
@@ -108,7 +158,23 @@ extern "C" void func_00287520(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00287558);
+#ifdef SKIP_ASM
+extern "C" void func_00287700(void*, float, int);
+extern "C" float func_00287920(void* self, int a1);
+
+extern "C" void func_00287558(void* self, int on)
+{
+    if (on != 0 && *(int*)((char*)self + 0x608C) != 2 && *(int*)((char*)self + 0x608C) != 3) {
+        func_00287700(self, func_00287920(self, 1), 2);
+        *(int*)((char*)self + 0x62B8) = 1;
+    } else {
+        func_00287700(self, 0.0f, 2);
+        *(int*)((char*)self + 0x62B8) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_002875D0);
 
@@ -358,9 +424,56 @@ extern "C" void func_00289BB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289C18);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00148950(void* iface, int id);
 
+struct sSsxAudioVEntryI {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_00289C18(void* self, void* src)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
+    char* obj = (char*)src + 0x6C0;
+    sSsxAudioVEntryI* vt = *(sSsxAudioVEntryI**)obj;
+    int n = func_00148950(iface, vt[7].fn(obj + vt[7].delta));
+    if (n < 4) {
+        return 0;
+    }
+    if (n < 8) {
+        return 1;
+    }
+    return 2;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00289C98);
+#ifdef SKIP_ASM
+extern "C" int func_00285D98(void* self, int which);
+extern "C" void func_002883B0(void* self, int id);
+
+struct sSsxAudioVEntryP {
+    short delta;
+    short index;
+    int* (*fn)(void*);
+};
+
+extern "C" void func_00289C98(void* self, int id, void* obj)
+{
+    if (id == func_00285D98(self, -1) && obj != 0) {
+        sSsxAudioVEntryP* vt = *(sSsxAudioVEntryP**)((char*)obj + 0x4);
+        func_002883B0(self, *vt[3].fn((char*)obj + vt[3].delta));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289D08);
