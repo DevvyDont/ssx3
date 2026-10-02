@@ -123,9 +123,91 @@ INCLUDE_ASM("fe/debugfe", func_0017DB18);
 
 INCLUDE_ASM("fe/debugfe", func_0017DE70);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E030);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+extern "C" void func_002CC460(void* list);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025B9C8(void* mgr, void* req);
+extern char D_0045D248[];
 
+struct sDebugFEState17E030 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+};
+
+struct sDsReq17E030 {
+    char pad_0x000[0x260];
+    char* user;     // 0x260
+    char* pass;     // 0x264
+    char* pass2;    // 0x268
+    char* host;     // 0x26C
+    char pad_0x270[0x288 - 0x270];
+    int f288;
+    int f28C;
+    int port;       // 0x290
+    int f294;
+    int f298;
+    int f29C;
+};
+
+extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const char* b)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    cBXString_cBXString4((char*)self + 0x1C04, a);
+    cBXString_cBXString4((char*)self + 0x1C08, b);
+    self->state = 0x4;
+    sDsReq17E030* g = (sDsReq17E030*)D_004A3028;
+    cBXString_cBXString4(&g->user, a);
+    cBXString_cBXString4(&g->pass, b);
+    cBXString_cBXString4(&g->pass2, b);
+    cBXString_cBXString4(&g->host, D_0045D248);
+    g->port = 0x79E;
+    g->f294 = 1;
+    g->f288 = 1;
+    g->f29C = 0;
+    g->f298 = 0;
+    g->f28C = 1;
+    func_0025B9C8(D_004A3028, &g->user);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017E118);
+#ifdef SKIP_ASM
+extern void* D_004A3028;
+extern "C" void func_002CC460(void* list);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025C610(void* mgr);
+
+struct sDebugFEState17E118 {
+    int f0;
+    int state; // 0x4
+    int list;  // 0x8
+    char pad_0x0C[0x1C04 - 0xC];
+    char* user;  // 0x1C04
+    char* pass;  // 0x1C08
+};
+
+extern "C" void func_0017E118(sDebugFEState17E118* self, const char* a, const char* b)
+{
+    int* list = &self->list;
+    while (*list != 0) {
+        func_002CC460(list);
+    }
+    cBXString_cBXString4(&self->user, a);
+    cBXString_cBXString4(&self->pass, b);
+    self->state = 0x5;
+    cBXString_cBXString4((char*)D_004A3028 + 0x48, self->user);
+    cBXString_cBXString4((char*)D_004A3028 + 0x4C, self->pass);
+    func_0025C610(D_004A3028);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E1C0);
@@ -387,7 +469,58 @@ int func_0017FAB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017FAD0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern char* D_004A289C;
+extern "C" void func_003916C0(void* p, int flags);
+
+struct sVEi_0017FAD0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sDebugFE_0017FAD0 {
+    char pad_0x00[0xC];
+    char* objs[2];      // 0xC
+    char pad_0x14[4];
+    void* font;         // 0x18
+    int snd1C;          // 0x1C
+    int snd20;          // 0x20
+};
+
+extern "C" void func_0017FAD0(sDebugFE_0017FAD0* self)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        char* o = self->objs[i];
+        if (o != 0)
+        {
+            sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)o;
+            vt[1].fn(o + vt[1].delta, 3);
+        }
+    }
+    char* g = (char*)D_004A28A8;
+    *(int*)(g + 0x7C) = 0;
+    *(int*)(g + 0x80) = 0;
+    if (self->snd20 >= 0)
+    {
+        char* m = D_004A289C;
+        sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)(m + 0x10D8);
+        vt[50].fn(m + vt[50].delta, self->snd20);
+    }
+    if (self->snd1C >= 0)
+    {
+        char* m = D_004A289C;
+        sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)(m + 0x10D8);
+        vt[50].fn(m + vt[50].delta, self->snd1C);
+    }
+    if (self->font != 0)
+        func_003916C0(self->font, 3);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", func_0017FB98);

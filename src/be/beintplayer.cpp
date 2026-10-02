@@ -383,7 +383,37 @@ extern "C" void func_00147138(void* self, int a1, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147170);
+#ifdef SKIP_ASM
+extern "C" unsigned int strlen(const char* s);
+int GetHashValue32(char* str);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" char* func_002C2580(char* dst, unsigned short* src);
+extern char D_0045A268[];
+
+struct sVtEntry_00147170 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern char* D_004A28A8;
+
+extern "C" char* func_00147170(void* self, int idx)
+{
+    char* name = (char*)&D_00534FE0[idx];
+    if (strlen(name) == 0)
+    {
+        unsigned short buf[0x68];
+        char* db = *(char**)(D_004A28A8 + 0x8C);
+        sVtEntry_00147170* vt = *(sVtEntry_00147170**)(db + 4);
+        func_002C26D0(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(D_0045A268)), idx + 1);
+        func_002C2580(name, buf);
+    }
+    return name;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderCtrlID);

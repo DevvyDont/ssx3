@@ -862,7 +862,30 @@ extern "C" int func_00158D58(void* self, int a, int b, int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158E30);
+#ifdef SKIP_ASM
+int cBELibrary_getRiderIndex(int);
+extern void* D_004A1260;
+extern int D_00440F48[];
+extern int D_00440F58[];
+extern void* D_004C3EF0[];
+extern "C" void func_0015A510(void* self);
+
+extern "C" void func_00158E30(void* self)
+{
+    func_0015A510(D_004C3EF0);
+    int charID = cBELibrary_getCharacterID(cBELibrary_getRiderIndex(0));
+    D_004A1260 = func_00158BE0(self, 0, charID);
+    for (int i = 0; i < 3; i++)
+        D_00440F48[i] = func_00158C80(self, 0, charID, i);
+    for (int i = 0; i < 3; i++)
+        D_00440F58[i] = func_00158D58(self, 0, charID, i);
+    char* p = (char*)D_004A1264;
+    *(int*)(p + 0x10) = 0;
+    *(int*)(p + 0x14) = -1;
+}
+#endif
 
 extern void* D_004C3EF0[];
 

@@ -168,9 +168,75 @@ INCLUDE_ASM("bx/memblockman", func_00319E48);
 
 INCLUDE_ASM("bx/memblockman", func_00319F68);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A088);
+#ifdef SKIP_ASM
+extern void* D_004A5B50;
+extern void* D_004A5B58;
+extern void* D_004A5B5C;
+extern void* D_004A5B60;
+extern void* D_004A5B68;
+extern void* D_004A5B6C;
+extern void* D_004A5B74;
 
+static inline int func_0031A088_in(void* p, void* base, unsigned int size)
+{
+    return (unsigned int)((char*)p - (char*)base) <= size - 1;
+}
+
+extern "C" int func_0031A088(void* p)
+{
+    if (func_0031A088_in(p, D_004A5B60, 0x800))
+        return 1;
+    if (func_0031A088_in(p, D_004A5B50, 0x2000))
+        return 1;
+    if (func_0031A088_in(p, D_004A5B5C, 0x6000))
+        return 1;
+    if (func_0031A088_in(p, D_004A5B6C, 0x32000))
+        return 1;
+    if (func_0031A088_in(p, D_004A5B74, 0x25800))
+        return 1;
+    if (func_0031A088_in(p, D_004A5B68, 0x20000))
+        return 1;
+    return func_0031A088_in(p, D_004A5B58, 0x20000);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A130);
+#ifdef SKIP_ASM
+extern void* D_004A5B50;
+extern void* D_004A5B58;
+extern void* D_004A5B5C;
+extern void* D_004A5B60;
+extern void* D_004A5B68;
+extern void* D_004A5B6C;
+extern void* D_004A5B74;
+
+static inline int func_0031A130_in(void* p, void* base, unsigned int size)
+{
+    return (unsigned int)((char*)p - (char*)base) <= size - 1;
+}
+
+extern "C" int func_0031A130(void* p)
+{
+    if (func_0031A130_in(p, D_004A5B60, 0x800))
+        return 0x8;
+    if (func_0031A130_in(p, D_004A5B50, 0x2000))
+        return 0x10;
+    if (func_0031A130_in(p, D_004A5B5C, 0x6000))
+        return 0x20;
+    if (func_0031A130_in(p, D_004A5B6C, 0x32000))
+        return 0x40;
+    if (func_0031A130_in(p, D_004A5B74, 0x25800))
+        return 0x80;
+    if (func_0031A130_in(p, D_004A5B68, 0x20000))
+        return 0x100;
+    if (func_0031A130_in(p, D_004A5B58, 0x20000))
+        return 0x200;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A200);

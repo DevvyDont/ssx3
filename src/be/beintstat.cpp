@@ -308,7 +308,58 @@ extern "C" int func_00149778(void* self, int rider, int value)
 
 INCLUDE_ASM("be/beintstat", func_00149860);
 
+//100%
 INCLUDE_ASM("be/beintstat", func_001499A8);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void func_00153050(void);
+extern int* D_004A11B4;
+extern int* D_004A11C0;
+extern int* D_004A11C4;
+extern int* D_004A11C8;
+extern int* D_004A1204;
+extern int* D_004A1208;
+extern int* D_004A120C;
+extern int* D_004A1210;
+extern int* D_004A1214;
+extern int* D_004A1238;
+extern int* D_004A1248;
+extern int* D_004A124C;
+extern int* D_004A1264;
+
+extern "C" void func_001499A8(void* self, int flags)
+{
+    operator_delete(D_004A11B4);
+    D_004A11B4 = 0;
+    operator_delete(D_004A11C0);
+    D_004A11C0 = 0;
+    operator_delete(D_004A1208);
+    D_004A1208 = 0;
+    operator_delete(D_004A11C4);
+    D_004A11C4 = 0;
+    operator_delete(D_004A120C);
+    D_004A120C = 0;
+    func_00153050();
+    operator_delete(D_004A1210);
+    D_004A1210 = 0;
+    operator_delete(D_004A1204);
+    D_004A1204 = 0;
+    operator_delete(D_004A1248);
+    D_004A1248 = 0;
+    operator_delete(D_004A11C8);
+    D_004A11C8 = 0;
+    operator_delete(D_004A1238);
+    D_004A1238 = 0;
+    operator_delete(D_004A1214);
+    D_004A1214 = 0;
+    operator_delete(D_004A124C);
+    D_004A124C = 0;
+    operator_delete(D_004A1264);
+    D_004A1264 = 0;
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 INCLUDE_ASM("be/beintstat", func_00149A88);
 

@@ -334,7 +334,38 @@ extern "C" float func_001731C0(float* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173208);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_001622B0(void* self);
+extern void* D_0045C4C8[];
+struct sQuad_00173208 {
+    int v[4];
+} __attribute__((aligned(16)));
+
+extern sQuad_00173208 D_004FF130_00173208 __asm__("D_004FF130");
+
+extern "C" void* func_00173208(void* self)
+{
+    func_001622B0(self);
+    *(void***)((char*)self + 0x10) = D_0045C4C8;
+    *(float*)((char*)self + 0x58) = 0.800000011920929f;
+    *(float*)((char*)self + 0x5C) = 10.300000190734863f;
+    *(float*)((char*)self + 0x60) = 1.100000023841858f;
+    *(float*)((char*)self + 0x64) = 5.0f;
+    *(float*)((char*)self + 0x68) = 10.0f;
+    *(float*)((char*)self + 0x6C) = 70.0f;
+    *(float*)((char*)self + 0x70) = 400.0f;
+    *(int*)((char*)self + 0x74) = 0;
+    *(float*)((char*)self + 0x78) = 20.0f;
+    *(sQuad_00173208*)((char*)self + 0x40) = D_004FF130_00173208;
+    *(int*)((char*)self + 0xC) = 0x5A;
+    *(int*)((char*)self + 0x54) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732B8);
@@ -1019,7 +1050,72 @@ extern "C" void func_00177EC8(void* self, void* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177EF8);
+#ifdef SKIP_ASM
+struct sVec_00177EF8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVEa_00177EF8 {
+    short delta;
+    short index;
+    sVec_00177EF8* (*fn)(void*);
+};
+
+struct sVEb_00177EF8 {
+    short delta;
+    short index;
+    sVec_00177EF8 (*fn)(void*);
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_00177EF8 ctScale_00177EF8(const sVec_00177EF8& v, float s)
+{
+    sVec_00177EF8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_00177EF8 ctAdd_00177EF8(const sVec_00177EF8& a, const sVec_00177EF8& b)
+{
+    sVec_00177EF8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
+{
+    char* o2 = *(char**)((char*)self + 0x30);
+    sVEb_00177EF8* e2 = &(*(sVEb_00177EF8**)o2)[1];
+    return e2->fn(o2 + e2->delta);
+}
+
+extern "C" sVec_00177EF8 func_00177EF8(void* self)
+{
+    char* o = *(char**)(*(char**)((char*)self + 0x30) + 4) + 0x6C0;
+    sVEa_00177EF8* e = &(*(sVEa_00177EF8**)o)[5];
+    sVec_00177EF8* v = e->fn(o + e->delta);
+    return ctAdd_00177EF8(ctScale_00177EF8(*v, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177FC0);
 
@@ -1086,7 +1182,51 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178758);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001787E0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178938);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+
+struct sVec4_00178938 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" sVec4_00178938 func_001785F0(void* self);
+extern "C" sVec4_00178938 func_00178758(void* self);
+
+class cCamTarget_00178938 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+class cCamCtrl_00178938 {
+public:
+    char pad_0x00[0x10];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00178938(cCamCtrl_00178938* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->v07()) {
+        *(sVec4_00178938*)((char*)self + 0x40) = func_001785F0(self);
+        *(sVec4_00178938*)((char*)self + 0x20) = func_00178758(self);
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001789E8);
 
@@ -1300,7 +1440,45 @@ void* func_0017ABC8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABE0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+void cMemMan_free(void* p);
+extern char* D_004A289C;
+
+struct sVE_0017ABE0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sIdList_0017ABE0 {
+    int* ids;
+    int count;
+};
+
+extern "C" void func_0017ABE0(sIdList_0017ABE0* self, int flags)
+{
+    if (self->ids != 0)
+    {
+        for (int i = 0; i < self->count; i++)
+        {
+            int id = self->ids[i];
+            if (id >= 0)
+            {
+                char* obj = D_004A289C;
+                sVE_0017ABE0* vt = *(sVE_0017ABE0**)(obj + 0x10D8);
+                vt[50].fn(obj + vt[50].delta, id);
+            }
+        }
+        if (self->ids != 0)
+            cMemMan_free(self->ids);
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017AC98);
