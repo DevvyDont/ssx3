@@ -68,7 +68,22 @@ INCLUDE_ASM("be/beintnetwork", func_0014E2C8);
 
 INCLUDE_ASM("be/beintnetwork", func_0014E5C8);
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014E9C0);
+#ifdef SKIP_ASM
+struct sBEPlayerData {
+    char data[0x9B50];
+};
+extern sBEPlayerData D_004A6CA8[];
+
+extern "C" void func_00156858(sBEPlayerData* dst, sBEPlayerData* src);
+
+extern "C" void func_0014E9C0(void* self, int a1, int a2)
+{
+    sBEPlayerData* src = &D_004A6CA8[a1];
+    func_00156858(&D_004A6CA8[a2], src);
+}
+#endif
 
 INCLUDE_ASM("be/beintnetwork", func_0014E9F8);
 

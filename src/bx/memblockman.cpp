@@ -6,11 +6,38 @@ INCLUDE_ASM("bx/memblockman", func_00319A90);
 
 INCLUDE_ASM("bx/memblockman", func_00319B48);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_00319B98);
+#ifdef SKIP_ASM
+extern "C" int func_0031A130(void* self);
+void func_0031FBB8(void* list, void* item);
+extern char D_004FF250[];
+
+extern "C" void func_00319B98(void* self)
+{
+    if (func_0031A130(self) == 0) {
+        func_0031FBB8(D_004FF250, self);
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", cMemMan_internalResizeBlock);
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_00319CC8);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern "C" void func_0031A200(void);
+extern void* D_00538B00[16];
+
+extern "C" void func_00319CC8(void)
+{
+    MUTEX_lock(D_00538B00);
+    func_0031A200();
+    MUTEX_unlock(D_00538B00);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_00319D10__FPv);
@@ -112,9 +139,29 @@ INCLUDE_ASM("bx/memblockman", func_0031A6D8);
 
 INCLUDE_ASM("bx/memblockman", func_0031A920);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/memblockman", func_0031A9D8);
+#ifdef SKIP_ASM
+extern "C" void func_0031A3C0(void* buf);
 
+extern "C" void func_0031A9D8(void* self)
+{
+    if (*(int*)((char*)self + 0x14048) != 0) {
+        func_0031A3C0((char*)self + 0x14080);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/memblockman", func_0031AA18);
+#ifdef SKIP_ASM
+extern "C" void func_0031AA18(void* self)
+{
+    if (*(int*)((char*)self + 0x14048) != 0) {
+        func_0031A308((char*)self + 0x14080);
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031AA58);
 
@@ -161,7 +208,20 @@ int func_0031ABC8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031ABD0);
+#ifdef SKIP_ASM
+void* func_00317520();
+extern "C" void func_00423DD0(int);
+
+extern "C" void func_0031ABD0(void)
+{
+    char* app = (char*)func_00317520();
+    if (*(int*)(app + 0x4038) == 0) {
+        func_00423DD0(*(int*)(app + 0x4034));
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031AC08);
 

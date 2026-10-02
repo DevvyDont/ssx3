@@ -56,7 +56,26 @@ INCLUDE_ASM("camera/camera", func_0015E668);
 
 INCLUDE_ASM("camera/camera", func_0015EC98);
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015EDC8);
+#ifdef SKIP_ASM
+class cCamVObj_0015EDC8 {
+public:
+    char pad[0x14];
+    // vptr at 0x14 (g++ 2.95 places it after the class's own data)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+};
+
+extern "C" void func_0015EDC8(void* self, int value)
+{
+    char* obj = *(char**)((char*)self + 0xA8);
+    *(int*)(*(char**)(obj + 0x20) + 0x4) = value;
+    (*(cCamVObj_0015EDC8**)((char*)self + 0xA8))->v04();
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_0015EE00);
 
@@ -310,7 +329,20 @@ INCLUDE_ASM("camera/camera", func_0015F938);
 
 INCLUDE_ASM("camera/camera", func_0015F9B8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_0015FD08);
+#ifdef SKIP_ASM
+extern "C" void* func_0015F938(void* self);
+extern void* D_0045BD10[];
+
+extern "C" void* func_0015FD08(void* self)
+{
+    func_0015F938(self);
+    *(int*)((char*)self + 0xC) = 0x51;
+    *(void***)((char*)self + 0x10) = D_0045BD10;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015FD48__FPv);
@@ -322,7 +354,20 @@ void func_0015FD48(void* self)
 
 INCLUDE_ASM("camera/camera", func_0015FD50);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_0015FFB0);
+#ifdef SKIP_ASM
+extern "C" void* func_0015F938(void* self);
+extern void* D_0045BCA8[];
+
+extern "C" void* func_0015FFB0(void* self)
+{
+    func_0015F938(self);
+    *(int*)((char*)self + 0xC) = 0x50;
+    *(void***)((char*)self + 0x10) = D_0045BCA8;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_0015FFF0);
 
@@ -334,7 +379,20 @@ INCLUDE_ASM("camera/camera", func_00160228);
 
 INCLUDE_ASM("camera/camera", func_001603F0);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00160438);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045BAD0[];
+
+extern "C" void* func_00160438(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0xB;
+    *(void***)((char*)self + 0x10) = D_0045BAD0;
+    return self;
+}
+#endif
 
 extern void* D_0045BAD0[];
 extern "C" void* func_00162458(void*);
@@ -471,7 +529,20 @@ INCLUDE_ASM("camera/camera", func_001613F0);
 
 INCLUDE_ASM("camera/camera", func_00161630);
 
+//100%
 INCLUDE_ASM("camera/camera", func_001616A8);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045BB48[];
+
+extern "C" void* func_001616A8(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x7;
+    *(void***)((char*)self + 0x10) = D_0045BB48;
+    return self;
+}
+#endif
 
 extern void* D_0045BB48[];
 extern "C" void* func_00162458(void*);
@@ -563,7 +634,17 @@ extern "C" void func_00162138(sCam162138* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00162170);
+#ifdef SKIP_ASM
+extern "C" void* func_0015D050(void*, int, int);
+
+extern "C" void* func_00162170(sCam162138* self)
+{
+    func_00162138(self);
+    return func_0015D050(self, self->field_0x24, 0);
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_001621A8);
 
@@ -953,7 +1034,20 @@ void* func_00168298(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_001682B8);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045C628[];
+
+extern "C" void* func_001682B8(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0xD;
+    *(void***)((char*)self + 0x10) = D_0045C628;
+    return self;
+}
+#endif
 
 extern void* D_0045C628[];
 extern "C" void* func_00162458(void*);
@@ -990,7 +1084,20 @@ INCLUDE_ASM("camera/camera", func_00168338);
 
 INCLUDE_ASM("camera/camera", func_00168508);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168650);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045C6A0[];
+
+extern "C" void* func_00168650(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x20;
+    *(void***)((char*)self + 0x10) = D_0045C6A0;
+    return self;
+}
+#endif
 
 extern void* D_0045C6A0[];
 extern "C" void* func_00162458(void*);
@@ -1027,7 +1134,20 @@ INCLUDE_ASM("camera/camera", func_001686D0);
 
 INCLUDE_ASM("camera/camera", func_00168940);
 
+//100%
 INCLUDE_ASM("camera/camera", func_001689C8);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045C538[];
+
+extern "C" void* func_001689C8(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x9;
+    *(void***)((char*)self + 0x10) = D_0045C538;
+    return self;
+}
+#endif
 
 extern void* D_0045C538[];
 extern "C" void* func_00162458(void*);
@@ -1050,7 +1170,20 @@ INCLUDE_ASM("camera/camera", func_00168A70);
 
 INCLUDE_ASM("camera/camera", func_00168C50);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168CD8);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045C5B0[];
+
+extern "C" void* func_00168CD8(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x9;
+    *(void***)((char*)self + 0x10) = D_0045C5B0;
+    return self;
+}
+#endif
 
 extern void* D_0045C5B0[];
 extern "C" void* func_00162458(void*);

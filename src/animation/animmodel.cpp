@@ -253,7 +253,92 @@ INCLUDE_ASM("animation/animmodel", func_00310200);
 
 INCLUDE_ASM("animation/animmodel", func_003103F0);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310530);
+#ifdef SKIP_ASM
+struct sAmVec4
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sAmMtx
+{
+    sAmVec4 row[4];
+};
+
+struct sAmPair
+{
+    sAmVec4 a;
+    sAmVec4 b;
+};
+
+struct sAmEntry
+{
+    int unk0;
+    int start;
+    char pad8[0x3C];
+    int count;
+    char pad48[0x10];
+};
+
+struct sAmModel
+{
+    int unk0;
+    int unk4;
+    int numEntries;
+    sAmEntry* entries;
+    char pad10[0x1C];
+    sAmPair* pairs;
+    sAmMtx* mtxA;
+    sAmMtx* mtxB;
+};
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void amVecAddEq(sAmVec4* dst, sAmVec4* v)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(*dst)
+        : "m"(*dst), "m"(*v));
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sAmVec4 amVecAdd(const sAmVec4& src, sAmVec4* b)
+{
+    sAmVec4 a = src;
+    sAmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(*b)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00310530(sAmModel* self, sAmVec4* v)
+{
+    for (int i = 0; i < self->numEntries; i++) {
+        for (int j = 0; j < self->entries[i].count; j++) {
+            int k = j + self->entries[i].start;
+            amVecAddEq(&self->pairs[k].a, v);
+            {
+                sAmVec4 t = amVecAdd(self->mtxA[k].row[3], v);
+                self->mtxA[k].row[3] = t;
+            }
+            {
+                sAmVec4 t = amVecAdd(self->mtxB[k].row[3], v);
+                self->mtxB[k].row[3] = t;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_00310640);
 
@@ -263,9 +348,29 @@ INCLUDE_ASM("animation/animmodel", func_00310C48);
 
 INCLUDE_ASM("animation/animmodel", func_00310CE8);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310EA8);
+#ifdef SKIP_ASM
+class cAmStream {
+public:
+    virtual void read(void* data, int size);
+    virtual void write(void* data, int size);
+};
 
+extern "C" void func_00310EA8(void* self, cAmStream* s)
+{
+    s->read(*(void**)((char*)self + 0x2C), *(int*)((char*)self + 0x10) << 5);
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310EE0);
+#ifdef SKIP_ASM
+extern "C" void func_00310EE0(void* self, cAmStream* s)
+{
+    s->write(*(void**)((char*)self + 0x2C), *(int*)((char*)self + 0x10) << 5);
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_00310F18);
 

@@ -135,13 +135,32 @@ INCLUDE_ASM("be/beintplayer", func_00146E98);
 
 INCLUDE_ASM("be/beintplayer", func_00146F88);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147138);
+#ifdef SKIP_ASM
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+
+extern "C" void func_00147138(void* self, int a1, const char* name)
+{
+    strncpy(D_00534FE0[a1].pad_0x00, name, 0xC);
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00147170);
 
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderCtrlID);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147290);
+#ifdef SKIP_ASM
+int cBENewPlayerInterface_getPlayerID(int index);
+
+extern "C" int func_00147290(void* self, int index)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    return D_00534FE0[id].field_0xc;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_001472C8);
@@ -191,7 +210,15 @@ signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex)
 
 INCLUDE_ASM("be/beintplayer", func_001473D0);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147410);
+#ifdef SKIP_ASM
+extern "C" signed char func_00147410(void* self, int index)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    return D_00534FE0[id].field_0x12;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147448);
@@ -249,15 +276,48 @@ extern "C" signed char func_001474C8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001474E8);
+#ifdef SKIP_ASM
+struct sPlayerCharFlags_0x10 {
+    unsigned int bit0 : 1;
+    unsigned int bit1 : 1;
+    unsigned int bit2 : 1;
+    unsigned int bit3 : 1;
+    unsigned int rest : 28;
+};
+
+extern "C" int func_001474E8(void* self, int index)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    char* p = (char*)&D_00534FE0[0] + id * 0x1c;
+    return ((sPlayerCharFlags_0x10*)(p + 0x10))->bit1;
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00147528);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147580);
+#ifdef SKIP_ASM
+extern "C" int func_00147580(void* self, int index)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    char* p = (char*)&D_00534FE0[0] + id * 0x1c;
+    return ((sPlayerCharFlags_0x10*)(p + 0x10))->bit3;
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_001475C0);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147618);
+#ifdef SKIP_ASM
+extern "C" signed char func_00147618(void* self, int index)
+{
+    return D_00534FE0[cBENewPlayerInterface_getPlayerID(index)].pad_0x13[0];
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00147658);
 

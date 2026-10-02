@@ -135,9 +135,51 @@ INCLUDE_ASM("be/beintmission", func_00153E80);
 
 INCLUDE_ASM("be/beintmission", func_00153ED8);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153FA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
+// the fields at 0x18/0x1C; this local view of the same table binds to D_0043EE10.
+struct sMissionDefView_0043EE10
+{
+    int id;             // 0x00
+    char pad_0x04[0xC];
+    int group;          // 0x10
+    char pad_0x14[0x4];
+    short field_0x18;   // 0x18
+    char pad_0x1A[0x2];
+    int field_0x1C;     // 0x1C
+    char pad_0x20[0x2];
+    short value;        // 0x22
+};
+extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("D_0043EE10");
 
+extern "C" int func_00154240(void* self, int id);
+
+extern "C" short func_00153FA0(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    return D_0043EE10_view[i].field_0x18;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153FD8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
+// the fields at 0x18/0x1C; this local view of the same table binds to D_0043EE10.
+extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("D_0043EE10");
+
+extern "C" int func_00154240(void* self, int id);
+
+extern "C" int func_00153FD8(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    return D_0043EE10_view[i].field_0x1C;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00154010);
 

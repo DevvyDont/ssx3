@@ -359,7 +359,20 @@ void* func_00176A48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176A68);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CAB0[];
+
+extern "C" void* func_00176A68(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x3C;
+    *(void***)((char*)self + 0x10) = D_0045CAB0;
+    return self;
+}
+#endif
 
 extern void* D_0045CAB0[];
 extern "C" void* func_00162458(void*);
@@ -382,7 +395,20 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176B10);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176CE0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176D68);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CA38[];
+
+extern "C" void* func_00176D68(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x3D;
+    *(void***)((char*)self + 0x10) = D_0045CA38;
+    return self;
+}
+#endif
 
 extern void* D_0045CA38[];
 extern "C" void* func_00162458(void*);
@@ -405,7 +431,20 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176E10);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176FE0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177068);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045C9C0[];
+
+extern "C" void* func_00177068(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x3E;
+    *(void***)((char*)self + 0x10) = D_0045C9C0;
+    return self;
+}
+#endif
 
 extern void* D_0045C9C0[];
 extern "C" void* func_00162458(void*);
@@ -471,7 +510,20 @@ void* func_00177E30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E50);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CCC8[];
+
+extern "C" void* func_00177E50(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x42;
+    *(void***)((char*)self + 0x10) = D_0045CCC8;
+    return self;
+}
+#endif
 
 extern void* D_0045CCC8[];
 extern "C" void* func_00162458(void*);

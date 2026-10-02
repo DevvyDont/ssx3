@@ -34,11 +34,60 @@ void* cBEBAGTInterface_getThis()
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014F960);
+#ifdef SKIP_ASM
+struct sBagtRec {
+    short data[0xFF];
+};
 
+struct sBagtSlot {
+    sBagtRec rec;
+    char pad[0xF88 - 0x1FE];
+};
+
+extern sBagtSlot D_004A788E[3][10];
+extern sBagtRec D_00530EC0[3][10];
+
+extern "C" void func_0014F960(void)
+{
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 10; j++) {
+            D_004A788E[i][j].rec = D_00530EC0[i][j];
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014FAD0);
+#ifdef SKIP_ASM
+extern sBagtSlot D_004A788E[3][10];
+extern sBagtRec D_00530EC0[3][10];
 
+extern "C" void func_0014FAD0(void)
+{
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 10; j++) {
+            D_00530EC0[i][j] = D_004A788E[i][j].rec;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014FC40);
+#ifdef SKIP_ASM
+extern sBagtSlot D_004A788E[3][10];
+extern sBagtRec D_00530EC0[3][10];
+
+extern "C" void func_0014FC40(int i)
+{
+    for (int j = 0; j < 10; j++) {
+        D_00530EC0[i][j] = D_004A788E[i][j].rec;
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintbagt", func_0014FD80);
 

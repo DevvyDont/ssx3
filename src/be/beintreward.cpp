@@ -589,7 +589,17 @@ void* func_0015A478(void* self)
 
 INCLUDE_ASM("be/beintreward", func_0015A488);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A510);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+extern "C" void func_0015A510(void* self)
+{
+    func_003E6448(self, 0, 0x174);
+    *(short*)((char*)self + 0x4) = -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A5B0);

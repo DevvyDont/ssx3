@@ -688,7 +688,101 @@ done:
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AB20);
+#ifdef SKIP_ASM
+struct sBXVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBXPathSeg {
+    float x, y, z;   // direction
+    float len;       // 0xC
+};
+
+struct sBXPath {
+    char pad_0x00[8];
+    int count;          // 0x8
+    float x, y, z;      // 0xC start
+    sBXPathSeg* segs;   // 0x18
+};
+
+// PORT: PS2-only VU0 inline asm (direction times scalar).
+static inline sBXVec4 bxVu0ScaleDir(const sBXPathSeg& seg, float s)
+{
+    sBXVec4 v;
+    v.x = seg.x;
+    v.y = seg.y;
+    v.z = seg.z;
+    v.w = 0.0f;
+    sBXVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void bxVu0AddEq(sBXVec4& dst, sBXVec4 b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sBXVec4 bxVu0Add(const sBXVec4& a, sBXVec4 b)
+{
+    sBXVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" sBXVec4 func_0026AB20(sBXPath* self, int* inRange, float t)
+{
+    sBXVec4 pos;
+    pos.x = self->x;
+    pos.y = self->y;
+    pos.z = self->z;
+    pos.w = 1.0f;
+    if (inRange) {
+        *inRange = 1;
+    }
+    for (int i = 0;; ) {
+        sBXPathSeg* seg = &self->segs[i];
+        if (i == self->count) {
+            if (inRange) {
+                *inRange = 0;
+            }
+            return pos;
+        }
+        float len = seg->len;
+        if (t < len) {
+            return bxVu0Add(pos, bxVu0ScaleDir(*seg, t));
+        }
+        t -= len;
+        i++;
+        bxVu0AddEq(pos, bxVu0ScaleDir(*seg, len));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AC48);

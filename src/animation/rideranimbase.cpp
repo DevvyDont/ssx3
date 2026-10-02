@@ -6,7 +6,20 @@ INCLUDE_ASM("animation/rideranimbase", func_00311958);
 
 INCLUDE_ASM("animation/rideranimbase", func_00311A50);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311AE8);
+#ifdef SKIP_ASM
+extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+
+extern "C" int func_00311AE8(void* self, int i)
+{
+    int anim = *(int*)((char*)self + (i << 2));
+    if (anim == 0x1B6) {
+        return 0;
+    }
+    return *cAIAnimEventMap_getBlendInTime(anim);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311B20);
@@ -60,7 +73,16 @@ int func_00312AA0(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312AB0);
+#ifdef SKIP_ASM
+extern "C" float func_00312AB0(void* self, int i)
+{
+    cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
+    cAnimSequenceNode* node = cAnimSequencer_getSequence(&seqs[i], 0);
+    return *(float*)((char*)node + 0x8) / *(float*)((char*)node + 0x10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00312AE8);

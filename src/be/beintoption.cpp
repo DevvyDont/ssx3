@@ -57,7 +57,22 @@ extern "C" void func_0014F360(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F418);
+#ifdef SKIP_ASM
+extern "C" void func_0014F648(void* self);
+extern "C" void func_0014F600(void* self);
+extern "C" void func_0014F4F8(void* self);
+extern "C" void func_0014F458(void* self);
+
+extern "C" void func_0014F418(void* self)
+{
+    func_0014F648(self);
+    func_0014F600(self);
+    func_0014F4F8(self);
+    func_0014F458(self);
+}
+#endif
 
 INCLUDE_ASM("be/beintoption", func_0014F458);
 
@@ -82,13 +97,49 @@ int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F6A8);
+#ifdef SKIP_ASM
+extern "C" unsigned int strlen(const char* s);
+extern char D_00535617[][0x40];
+
+extern "C" char* func_0014F6A8(void* self, int i)
+{
+    char* s = D_00535617[i];
+    if (strlen(s) == 0) {
+        return 0;
+    }
+    return s;
+}
+#endif
 
 INCLUDE_ASM("be/beintoption", func_0014F6E8);
 
 INCLUDE_ASM("be/beintoption", func_0014F758);
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F7A8);
+#ifdef SKIP_ASM
+struct sOptionTripleView_0014F7A8 {
+    int a;
+    int b;
+    int c;
+};
+
+struct sOptionTriplesView_0014F7A8 {
+    sOptionTripleView_0014F7A8 triples[2]; // 0x0
+};
+
+struct sOptionGlobal_005308B8;
+extern sOptionGlobal_005308B8 D_005308B8;
+extern "C" int func_0014F870();
+
+extern "C" int func_0014F7A8(int i)
+{
+    int c = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
+    return func_0014F870() - c;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintoption", func_0014F7E8);
