@@ -90,7 +90,17 @@ int cBXString_FindFirstOf(cBXString* self, char ch)
 
 INCLUDE_ASM("bx/bxstring", func_00318D28);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318E68);
+#ifdef SKIP_ASM
+extern "C" void func_00318120(cBXString* self);
+
+extern "C" void func_00318E68(cBXString* self, int idx, char ch)
+{
+    func_00318120(self);
+    self->str[idx] = ch;
+}
+#endif
 
 INCLUDE_ASM("bx/bxstring", func_00319028);
 

@@ -23,7 +23,26 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_cManualCameraCont
 
 INCLUDE_ASM("camera/cameracontroller", func_0015CE10);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", func_0015CE98);
+#ifdef SKIP_ASM
+class cCamCtrlVObj_0015CE98 {
+public:
+    char pad[0x10];
+    // vptr at 0x10
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(int a);
+};
+
+extern "C" void func_0015CC70(void* self);
+
+extern "C" void func_0015CE98(void* self, int a)
+{
+    func_0015CC70(self);
+    (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->v03(a);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", func_0015CEE8);

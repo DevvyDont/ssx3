@@ -89,7 +89,40 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C800);
 
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C888);
 
+//100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C918);
+#ifdef SKIP_ASM
+struct cCameraTriggerList;
+struct cCameraTriggerStack;
+void cCameraTriggerList_init(cCameraTriggerList* self);
+void cCameraTriggerStack_init(cCameraTriggerStack* self);
+extern "C" void cCamera_resetChaseControllerSwitches(void);
 
+extern "C" void func_0016C918(void* self)
+{
+    cCameraTriggerList_init((cCameraTriggerList*)self);
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x1C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
+    cCamera_resetChaseControllerSwitches();
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C968);
+#ifdef SKIP_ASM
+struct cCameraTriggerStack;
+void cCameraTriggerStack_init(cCameraTriggerStack* self);
+extern "C" void cCamera_resetChaseControllerSwitches(void);
+
+extern "C" void func_0016C968(void* self)
+{
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x1C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
+    cCamera_resetChaseControllerSwitches();
+}
+#endif
 

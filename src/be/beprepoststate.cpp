@@ -58,7 +58,19 @@ INCLUDE_ASM("be/beprepoststate", func_00156750);
 
 INCLUDE_ASM("be/beprepoststate", func_001567B8);
 
+//100%
 INCLUDE_ASM("be/beprepoststate", func_00156810);
+#ifdef SKIP_ASM
+extern "C" void func_001519E0(void* p, int i);
+
+extern "C" void func_00156810(void* self)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        func_001519E0((char*)self + i * 0xF88, i);
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beprepoststate", func_00156858);
 

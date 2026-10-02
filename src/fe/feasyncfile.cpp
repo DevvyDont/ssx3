@@ -192,9 +192,75 @@ extern "C" int func_001A7D10(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A7D40);
+#ifdef SKIP_ASM
+extern "C" void func_001A7F78(void* self);
+extern "C" void func_001A81F0(void* self);
+extern "C" void* func_001A8E40(void* self);
+extern "C" void* func_001A7D40(void* self, int msg)
+{
+    if (msg == 0x109) {
+        func_001A7F78(self);
+        func_001A81F0(self);
+        return 0;
+    }
+    return func_001A8E40(self);
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A7D90);
+#ifdef SKIP_ASM
+class cFEVObj_001A7D90 {
+public:
+    int field_0x0;
+    int field_0x4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+};
+
+extern "C" void func_001A7F78(void* self);
+extern "C" void func_001A81F0(void* self);
+
+extern "C" int func_001A7D90(cFEVObj_001A7D90* self)
+{
+    self->v32();
+    func_001A7F78(self);
+    func_001A81F0(self);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A7DD8);
 
@@ -434,7 +500,22 @@ INCLUDE_ASM("fe/feasyncfile", func_001ACDD0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001ACEF8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AD130);
+#ifdef SKIP_ASM
+extern void* D_00468F50[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001AD130(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x38;
+    *(void***)((char*)self + 0x8) = D_00468F50;
+    *(int*)((char*)self + 0x6D0) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AD178);
 
@@ -545,9 +626,74 @@ INCLUDE_ASM("fe/feasyncfile", func_001AF098);
 
 INCLUDE_ASM("fe/feasyncfile", func_001AF208);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AF3E0);
+#ifdef SKIP_ASM
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int func_0039F698(void* p);
 
+extern "C" int func_001AF3E0(void* self, void* a1, int a2)
+{
+    if (a2 == 0xF || a2 == 0x14) {
+        return func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+    }
+    return func_001A97B8(self, a1, a2);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AF428);
+#ifdef SKIP_ASM
+class cFEVObj_001AF428 {
+public:
+    int field_0x0;
+    int field_0x4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33(void* a1, int a2);
+};
+
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+
+extern "C" void func_001AF428(cFEVObj_001AF428* self, void* a1, int a2)
+{
+    if (*(int*)((char*)a1 + 0x18) == 0x835) {
+        self->v33(a1, a2);
+    } else {
+        func_001A97B8(self, a1, a2);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AF470);
 
@@ -582,9 +728,74 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0150);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0538);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B05E0);
+#ifdef SKIP_ASM
+class cFEVObj_001B05E0 {
+public:
+    int field_0x0;
+    int field_0x4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33(void* a1, int a2);
+};
 
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+
+extern "C" void func_001B05E0(cFEVObj_001B05E0* self, void* a1, int a2)
+{
+    if (*(int*)((char*)a1 + 0x18) == 0x835) {
+        self->v33(a1, a2);
+    } else {
+        func_001A97B8(self, a1, a2);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0628);
+#ifdef SKIP_ASM
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int func_0039F698(void* p);
+
+extern "C" int func_001B0628(void* self, void* a1, int a2)
+{
+    if (a2 == 0xF || a2 == 0x14) {
+        return func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+    }
+    return func_001A97B8(self, a1, a2);
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0670);
 
@@ -615,7 +826,23 @@ extern "C" int func_001B0F28(int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0F60);
+#ifdef SKIP_ASM
+extern void* D_00468C10[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001B0F60(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(void***)((char*)self + 0x8) = D_00468C10;
+    *(int*)((char*)self + 0x6DC) = 1;
+    *(int*)((char*)self + 0xC) = 0x41;
+    *(int*)((char*)self + 0x6D8) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0FB0);
 
@@ -706,7 +933,26 @@ extern "C" void func_001B3528(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B3568);
+#ifdef SKIP_ASM
+extern "C" void func_001B2378(void* self, int a1);
+
+extern "C" int func_001B3568(void* self, void* sender, int event, int value)
+{
+    if (event == 4) {
+        if (sender == *(void**)((char*)self + 0x6FC)) {
+            *(int*)((char*)self + 0x704) = value;
+            func_001B2378(self, 0);
+            return 0x101;
+        }
+        if (sender == *(void**)((char*)self + 0x700)) {
+            *(int*)((char*)self + 0x708) = value;
+        }
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B35B0);
 
@@ -767,7 +1013,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001B47C0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B4888);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4C00);
+#ifdef SKIP_ASM
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int func_001B4C00(void* self, void* a1, int a2)
+{
+    int r;
+    if (a2 == 0xF || a2 == 0x14) {
+        r = func_001A97B8(self, a1, a2);
+    } else {
+        r = func_001A97B8(self, a1, a2);
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B4C40);
 
@@ -1161,7 +1421,22 @@ INCLUDE_ASM("fe/feasyncfile", func_001BA280);
 
 INCLUDE_ASM("fe/feasyncfile", func_001BA358);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BA3E0);
+#ifdef SKIP_ASM
+extern void* D_004685B0[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001BA3E0(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x4E;
+    *(void***)((char*)self + 0x8) = D_004685B0;
+    *(int*)((char*)self + 0x6A8) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BA428);
 
@@ -1192,7 +1467,22 @@ INCLUDE_ASM("fe/feasyncfile", func_001BADE8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001BAED8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BB098);
+#ifdef SKIP_ASM
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" void func_001BBAC8(void* self, int state);
+
+extern "C" void func_001BB098(void* self, void* a1, int a2)
+{
+    if (a2 == 0x16) {
+        func_001A97B8(self, a1, a2);
+        func_001BBAC8(self, 0x11);
+    } else {
+        func_001A97B8(self, a1, a2);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BB0E8);
 
@@ -1440,7 +1730,23 @@ extern "C" int func_001BED28(void* self, int a1, int a2)
 
 INCLUDE_ASM("fe/feasyncfile", func_001BED58);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BEE30);
+#ifdef SKIP_ASM
+extern void* D_00468388[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001BEE30(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x33;
+    *(void***)((char*)self + 0x8) = D_00468388;
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(int*)((char*)self + 0x6A8) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BEE78);
 
@@ -1471,7 +1777,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001BF758);
 
 INCLUDE_ASM("fe/feasyncfile", func_001BFAE0);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BFBB8);
+#ifdef SKIP_ASM
+extern void* D_0046AD48[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001BFBB8(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x3B;
+    *(void***)((char*)self + 0x8) = D_0046AD48;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BFBF8);
 
@@ -1498,7 +1818,23 @@ INCLUDE_ASM("fe/feasyncfile", func_001C02F8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0358);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C0418);
+#ifdef SKIP_ASM
+extern void* D_0046AC38[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001C0418(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x43;
+    *(void***)((char*)self + 0x8) = D_0046AC38;
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(int*)((char*)self + 0x6D8) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C04A8);
 
@@ -1519,7 +1855,20 @@ extern "C" int func_001C0B08(void* self, int a1, int a2)
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0B20);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C0CE0);
+#ifdef SKIP_ASM
+extern char D_004619B8[];
+int GetHashValue32(char* str);
+
+extern "C" void func_001C0CE0(void* self, void* item)
+{
+    int hash = *(int*)((char*)item + 0x38);
+    if (hash == GetHashValue32(D_004619B8)) {
+        *(int*)((char*)item + 0x14) |= 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0D28);
 
@@ -1540,7 +1889,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0F40);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0FC0);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1038);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8770(void* self);
+extern "C" void* func_001C1038(void* self)
+{
+    if (*(int*)((char*)self + 0x6EC) != 0) {
+        int t = (*(int*)((char*)self + 0x6E8))--;
+        if (t == 0) {
+            *(int*)((char*)self + 0x6E8) = 30;
+        }
+    }
+    return func_001A8770(self);
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C1080);
 
@@ -1592,7 +1955,21 @@ extern "C" int func_001C1B48(void* self, void* a1, int a2)
 
 INCLUDE_ASM("fe/feasyncfile", func_001C1B88);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1C50);
+#ifdef SKIP_ASM
+extern void* D_0046AA18[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001C1C50(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x4A;
+    *(void***)((char*)self + 0x8) = D_0046AA18;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C1C90);
 
@@ -1611,7 +1988,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001C1E08);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C1EA8);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C20F8);
+#ifdef SKIP_ASM
+extern void* D_0046A908[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001C20F8(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x4B;
+    *(void***)((char*)self + 0x8) = D_0046A908;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C2138);
 
@@ -1630,7 +2021,19 @@ INCLUDE_ASM("fe/feasyncfile", func_001C2298);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C23C0);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C2418);
+#ifdef SKIP_ASM
+extern "C" void func_001C2468(void* self, int i);
+
+extern "C" void func_001C2418(void* self)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        func_001C2468(self, i);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C2468);
 
@@ -1712,7 +2115,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001C4E40);
 
 INCLUDE_ASM("fe/feasyncfile", func_001C4F58);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5018);
+#ifdef SKIP_ASM
+extern void* D_00468168[];
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+
+extern "C" void* func_001C5018(void* self, int a1)
+{
+    func_001A8500_3(self, a1, 0);
+    *(int*)((char*)self + 0xC) = 0x43;
+    *(void***)((char*)self + 0x8) = D_00468168;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C5098);
 

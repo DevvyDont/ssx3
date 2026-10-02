@@ -119,7 +119,22 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173E40);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174190);
+#ifdef SKIP_ASM
+extern void* D_0045C458[];
+extern "C" void* func_00173208(void* self);
+
+extern "C" void* func_00174190(void* self)
+{
+    func_00173208(self);
+    *(int*)((char*)self + 0xC) = 0x5B;
+    *(void***)((char*)self + 0x10) = D_0045C458;
+    *(int*)((char*)self + 0x80) = 0;
+    *(int*)((char*)self + 0x74) = 0;
+    return self;
+}
+#endif
 
 extern void* D_0045C458[];
 extern "C" void* func_001732B8(void*);

@@ -23,5 +23,18 @@ void* func_0016C5D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggervolumes", func_0016C5E0);
+#ifdef SKIP_ASM
+struct cActiveTriggerList;
+void cActiveTriggerList_purge(cActiveTriggerList* self);
+
+extern "C" void func_0016C5E0(cActiveTriggerList* self, int flags)
+{
+    cActiveTriggerList_purge(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 

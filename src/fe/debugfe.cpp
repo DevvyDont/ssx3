@@ -443,7 +443,19 @@ extern "C" int func_00180498(void* self)
 
 INCLUDE_ASM("fe/debugfe", func_001804B8);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_001805D8);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int strlen(const char* s);
+
+extern "C" void func_001805D8(void* self, const char* text)
+{
+    char* buf = (char*)self + 0xEC;
+    strcpy(buf, text);
+    *(int*)((char*)self + 0x16C) = strlen(buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180618);

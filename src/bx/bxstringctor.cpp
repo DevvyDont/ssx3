@@ -526,7 +526,20 @@ int func_00269EC0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_00269ED8);
+#ifdef SKIP_ASM
+extern "C" void func_0026BA68(void* p);
+
+extern "C" void func_00269ED8(void* self, int a1, int id)
+{
+    if (id == 0x64) {
+        func_0026BA68((char*)self + 0x38);
+    } else if (id == 0x65) {
+        func_0026BA68((char*)self + 0x3C);
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_00269F18);
 
@@ -582,7 +595,19 @@ INCLUDE_ASM("bx/bxstringctor", func_0026A0B8);
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A180);
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A338);
+#ifdef SKIP_ASM
+extern "C" void func_0026BA48(void* p, void* q);
+// PORT: func_0026BA88 takes (dst, src); the unit declares it with one arg
+void func_0026BA88_2(void* dst, void* src) __asm__("func_0026BA88");
+
+extern "C" void func_0026A338(void* self, void* src, void* dst)
+{
+    func_0026BA48(dst, src);
+    func_0026BA88_2((char*)dst + 0xC, (char*)src + 0xC);
+}
+#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A378);
 
