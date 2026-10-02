@@ -51,9 +51,37 @@ extern "C" void* func_0026E490(void* self)
 
 INCLUDE_ASM("replay/replay", func_0026E4B8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E528);
+#ifdef SKIP_ASM
+// PORT: func_0026E468 really takes (self, index); the unit declares it with 1 arg
+void* func_0026E468_2(void* self, int idx) __asm__("func_0026E468");
+extern "C" void func_0026E4B8(void* self);
 
+extern "C" void func_0026E528(void* self)
+{
+    void* p = func_0026E468_2(self, *(int*)((char*)self + 0x484));
+    *(void**)((char*)self + 0x488) = p;
+    *(int*)((char*)self + 0x484) = *(int*)((char*)p + 0x30);
+    func_0026E4B8(self);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E568);
+#ifdef SKIP_ASM
+// PORT: func_0026E490 really takes (self, index); the unit declares it with 1 arg
+void* func_0026E490_2(void* self, int idx) __asm__("func_0026E490");
+extern "C" void func_0026E4B8(void* self);
+
+extern "C" void func_0026E568(void* self)
+{
+    void* p = func_0026E490_2(self, *(int*)((char*)self + 0x484));
+    *(void**)((char*)self + 0x488) = p;
+    *(int*)((char*)self + 0x484) = *(int*)((char*)p + 0x30);
+    func_0026E4B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replay", func_0026E5A8__FPv);

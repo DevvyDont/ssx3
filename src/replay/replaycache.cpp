@@ -45,7 +45,19 @@ extern "C" void func_00270658(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00270670);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002706B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void func_0026F4A0_cpp(void* self, int arg) __asm__("func_0026F4A0__FPvi");
+
+extern "C" void func_002706B8(void* self)
+{
+    if (*(int*)((char*)self + 0x61C) == 0 && *(int*)self != 9) {
+        func_0026F4A0_cpp(self, 9);
+    }
+}
+#endif
 
 extern "C" void func_0026F980(void* self);
 extern "C" void func_0026F4A0(void* self, int arg);
@@ -156,7 +168,28 @@ extern "C" sReplayCacheNode2* func_00270C58(void* self, int i, sReplayCacheNode2
 
 INCLUDE_ASM("replay/replaycache", func_00270CE8);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270DE0);
+#ifdef SKIP_ASM
+extern "C" void func_0026E800(void* p);
+
+struct sRcSlot {
+    char data[0xB4];
+};
+
+struct sRcSlots {
+    int state;
+    char pad[0x494 - 4];
+    sRcSlot slots[1];
+};
+
+extern "C" void func_00270DE0(sRcSlots* self, int i)
+{
+    if (self->state == 0) {
+        func_0026E800(&self->slots[i]);
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00270E18);
 
@@ -217,7 +250,15 @@ INCLUDE_ASM("replay/replaycache", func_002710A8);
 
 INCLUDE_ASM("replay/replaycache", func_00271228);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002712C0);
+#ifdef SKIP_ASM
+extern "C" void func_002712C0(void* self)
+{
+    func_00271058(self, *(signed char**)((char*)self + 0x640), 0x28);
+    *(int*)((char*)self + 0x638) += 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002712F8);
@@ -532,7 +573,20 @@ extern "C" void func_002728D0(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002728F8);
+#ifdef SKIP_ASM
+extern "C" void func_00274A30(void* p);
+
+extern "C" void func_002728F8(void* self)
+{
+    char* n = *(char**)((char*)self + 0x1C);
+    while (n != 0) {
+        func_00274A30(n + 8);
+        n = *(char**)(n + 0x50);
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00272938);
 

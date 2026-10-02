@@ -399,7 +399,78 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7848);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7908);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8190);
+#ifdef SKIP_ASM
+extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, int* o3)
+{
+    int* hdr = *(int**)(*(char**)((char*)obj + 0x8C) + 0x10);
+    char* base = (char*)hdr + 8;
+    char* p = base + (hdr[0] << 2);
+    int n = hdr[1];
+    int* recs[4];
+    int i;
+    int j;
+
+    for (i = 0; i < n; i++) {
+        recs[i] = (int*)p;
+        switch (*(int*)p) {
+        case 0:
+            p += 0x1C;
+            break;
+        case 1:
+            p += 0x30;
+            break;
+        case 2:
+            p += 0x30;
+            break;
+        case 3:
+            p += 0x18;
+            break;
+        }
+    }
+
+    *o0 = 0;
+    *o1 = 0;
+    *o2 = 0;
+    *o3 = 0;
+
+    for (j = 0; j < n; j++) {
+        int v;
+        switch (*recs[0]) {
+        case 0:
+            v = recs[j][1];
+            break;
+        case 1:
+            v = recs[j][1];
+            break;
+        case 2:
+            v = recs[j][1];
+            break;
+        case 3:
+            v = recs[j][1];
+            break;
+        default:
+            v = recs[j][1];
+            break;
+        }
+        switch (j) {
+        case 0:
+            *o0 = v;
+            break;
+        case 1:
+            *o1 = v;
+            break;
+        case 2:
+            *o2 = v;
+            break;
+        case 3:
+            *o3 = v;
+            break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
 

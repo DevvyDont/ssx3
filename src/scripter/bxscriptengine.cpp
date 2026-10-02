@@ -294,7 +294,18 @@ extern "C" void func_00282F90(void* self)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282FB8);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283000);
+#ifdef SKIP_ASM
+extern "C" void* func_0027D2E8(void);
+extern "C" void func_0027D4A0(void* mgr, void* obj);
+
+extern "C" void func_00283000(void* self)
+{
+    func_0027D4A0(func_0027D2E8(), self);
+    *(int*)((char*)self + 0x8) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283038);
