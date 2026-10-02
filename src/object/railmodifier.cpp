@@ -98,9 +98,36 @@ INCLUDE_ASM("object/railmodifier", func_0035D4A0);
 
 INCLUDE_ASM("object/railmodifier", func_0035D908);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035DA00);
+#ifdef SKIP_ASM
+class func_0035DA00_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
 
+extern "C" void func_0035DA00(void* self, func_0035DA00_cObj* obj)
+{
+    obj->v01(self, 0x50);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035DA38);
+#ifdef SKIP_ASM
+class func_0035DA38_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void func_0035DA38(void* self, func_0035DA38_cObj* obj)
+{
+    obj->v02(self, 0x50);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035DA70);
 
@@ -196,7 +223,32 @@ void func_0035ED88(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035ED90);
+#ifdef SKIP_ASM
+extern "C" void func_0032C630(void* p, const sRmVec4* d);
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void vu0AddED90(sRmVec4& dst, const sRmVec4& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+extern "C" void func_0035ED90(sRmBody* self, const sRmVec4* b)
+{
+    vu0AddED90(self->pos, *b);
+    func_0032C630((char*)self + 0xE0, b);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035EDC8);
 
@@ -301,7 +353,20 @@ extern "C" void func_0035FB30(void* self, int id, float v)
 
 INCLUDE_ASM("object/railmodifier", func_0035FC20);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035FD98);
+#ifdef SKIP_ASM
+class func_0035FD98_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_0035FD98(void* self, func_0035FD98_cObj* obj)
+{
+    obj->v01(self, 0x50);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035FE10);
 
@@ -1764,7 +1829,20 @@ int func_00361770(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361778);
+#ifdef SKIP_ASM
+extern "C" int func_00352B88(void* p);
+
+extern "C" int func_00361778(void* self)
+{
+    void* p = *(void**)((char*)self + 0x1C);
+    if (p != 0) {
+        return func_00352B88(p);
+    }
+    return *(int*)((char*)self + 0x78);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003617B0__FPv);
@@ -2397,7 +2475,17 @@ void* func_00361E10(void* self)
 
 INCLUDE_ASM("object/railmodifier", func_00361E30);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361E80);
+#ifdef SKIP_ASM
+extern "C" void* func_00362008(void* self, int id);
+
+extern "C" void* func_00361E80(void* self)
+{
+    func_00362008(self, 5);
+    return func_00362008(self, 7);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00361EB8);
 
@@ -2447,9 +2535,168 @@ INCLUDE_ASM("object/railmodifier", func_00361F98);
 
 INCLUDE_ASM("object/railmodifier", func_00362008);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362120);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (dump all 32 FPU registers as 64-bit words into buf).
+extern "C" void func_00362120(void* buf)
+{
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "por       $2, $0, $0\n"
+        "mfc1      $2, $f0\n"
+        "sd        $2, 0x0(%0)\n"
+        "mfc1      $2, $f1\n"
+        "sd        $2, 0x8(%0)\n"
+        "mfc1      $2, $f2\n"
+        "sd        $2, 0x10(%0)\n"
+        "mfc1      $2, $f3\n"
+        "sd        $2, 0x18(%0)\n"
+        "mfc1      $2, $f4\n"
+        "sd        $2, 0x20(%0)\n"
+        "mfc1      $2, $f5\n"
+        "sd        $2, 0x28(%0)\n"
+        "mfc1      $2, $f6\n"
+        "sd        $2, 0x30(%0)\n"
+        "mfc1      $2, $f7\n"
+        "sd        $2, 0x38(%0)\n"
+        "mfc1      $2, $f8\n"
+        "sd        $2, 0x40(%0)\n"
+        "mfc1      $2, $f9\n"
+        "sd        $2, 0x48(%0)\n"
+        "mfc1      $2, $f10\n"
+        "sd        $2, 0x50(%0)\n"
+        "mfc1      $2, $f11\n"
+        "sd        $2, 0x58(%0)\n"
+        "mfc1      $2, $f12\n"
+        "sd        $2, 0x60(%0)\n"
+        "mfc1      $2, $f13\n"
+        "sd        $2, 0x68(%0)\n"
+        "mfc1      $2, $f14\n"
+        "sd        $2, 0x70(%0)\n"
+        "mfc1      $2, $f15\n"
+        "sd        $2, 0x78(%0)\n"
+        "mfc1      $2, $f16\n"
+        "sd        $2, 0x80(%0)\n"
+        "mfc1      $2, $f17\n"
+        "sd        $2, 0x88(%0)\n"
+        "mfc1      $2, $f18\n"
+        "sd        $2, 0x90(%0)\n"
+        "mfc1      $2, $f19\n"
+        "sd        $2, 0x98(%0)\n"
+        "mfc1      $2, $f20\n"
+        "sd        $2, 0xA0(%0)\n"
+        "mfc1      $2, $f21\n"
+        "sd        $2, 0xA8(%0)\n"
+        "mfc1      $2, $f22\n"
+        "sd        $2, 0xB0(%0)\n"
+        "mfc1      $2, $f23\n"
+        "sd        $2, 0xB8(%0)\n"
+        "mfc1      $2, $f24\n"
+        "sd        $2, 0xC0(%0)\n"
+        "mfc1      $2, $f25\n"
+        "sd        $2, 0xC8(%0)\n"
+        "mfc1      $2, $f26\n"
+        "sd        $2, 0xD0(%0)\n"
+        "mfc1      $2, $f27\n"
+        "sd        $2, 0xD8(%0)\n"
+        "mfc1      $2, $f28\n"
+        "sd        $2, 0xE0(%0)\n"
+        "mfc1      $2, $f29\n"
+        "sd        $2, 0xE8(%0)\n"
+        "mfc1      $2, $f30\n"
+        "sd        $2, 0xF0(%0)\n"
+        "mfc1      $2, $f31\n"
+        "sd        $2, 0xF8(%0)\n"
+        ".set pop\n"
+        :
+        : "r"(buf)
+        : "$2", "memory");
+}
+#endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362230);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (reload all 32 FPU registers from buf; deliberately
+// no FPU clobbers so the compiler doesn't save/restore $f20-$f31 around it).
+extern "C" void func_00362230(void* buf)
+{
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "por       $2, $0, $0\n"
+        "ld        $2, 0x0(%0)\n"
+        "mtc1      $2, $f0\n"
+        "ld        $2, 0x8(%0)\n"
+        "mtc1      $2, $f1\n"
+        "ld        $2, 0x10(%0)\n"
+        "mtc1      $2, $f2\n"
+        "ld        $2, 0x18(%0)\n"
+        "mtc1      $2, $f3\n"
+        "ld        $2, 0x20(%0)\n"
+        "mtc1      $2, $f4\n"
+        "ld        $2, 0x28(%0)\n"
+        "mtc1      $2, $f5\n"
+        "ld        $2, 0x30(%0)\n"
+        "mtc1      $2, $f6\n"
+        "ld        $2, 0x38(%0)\n"
+        "mtc1      $2, $f7\n"
+        "ld        $2, 0x40(%0)\n"
+        "mtc1      $2, $f8\n"
+        "ld        $2, 0x48(%0)\n"
+        "mtc1      $2, $f9\n"
+        "ld        $2, 0x50(%0)\n"
+        "mtc1      $2, $f10\n"
+        "ld        $2, 0x58(%0)\n"
+        "mtc1      $2, $f11\n"
+        "ld        $2, 0x60(%0)\n"
+        "mtc1      $2, $f12\n"
+        "ld        $2, 0x68(%0)\n"
+        "mtc1      $2, $f13\n"
+        "ld        $2, 0x70(%0)\n"
+        "mtc1      $2, $f14\n"
+        "ld        $2, 0x78(%0)\n"
+        "mtc1      $2, $f15\n"
+        "ld        $2, 0x80(%0)\n"
+        "mtc1      $2, $f16\n"
+        "ld        $2, 0x88(%0)\n"
+        "mtc1      $2, $f17\n"
+        "ld        $2, 0x90(%0)\n"
+        "mtc1      $2, $f18\n"
+        "ld        $2, 0x98(%0)\n"
+        "mtc1      $2, $f19\n"
+        "ld        $2, 0xA0(%0)\n"
+        "mtc1      $2, $f20\n"
+        "ld        $2, 0xA8(%0)\n"
+        "mtc1      $2, $f21\n"
+        "ld        $2, 0xB0(%0)\n"
+        "mtc1      $2, $f22\n"
+        "ld        $2, 0xB8(%0)\n"
+        "mtc1      $2, $f23\n"
+        "ld        $2, 0xC0(%0)\n"
+        "mtc1      $2, $f24\n"
+        "ld        $2, 0xC8(%0)\n"
+        "mtc1      $2, $f25\n"
+        "ld        $2, 0xD0(%0)\n"
+        "mtc1      $2, $f26\n"
+        "ld        $2, 0xD8(%0)\n"
+        "mtc1      $2, $f27\n"
+        "ld        $2, 0xE0(%0)\n"
+        "mtc1      $2, $f28\n"
+        "ld        $2, 0xE8(%0)\n"
+        "mtc1      $2, $f29\n"
+        "ld        $2, 0xF0(%0)\n"
+        "mtc1      $2, $f30\n"
+        "ld        $2, 0xF8(%0)\n"
+        "mtc1      $2, $f31\n"
+        ".set pop\n"
+        :
+        : "r"(buf)
+        : "$2", "memory");
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00362340);
 
@@ -2661,15 +2908,73 @@ INCLUDE_ASM("object/railmodifier", func_00364360);
 
 INCLUDE_ASM("object/railmodifier", func_003645B8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00364B88);
+#ifdef SKIP_ASM
+struct sRailKey4 {
+    unsigned short a, b, c, d;
+};
+
+struct sRailKeyTable {
+    char pad_0x00[0x69CC4];
+    int found;                  // 0x69CC4
+    char pad_0x69CC8[0x6AED0 - 0x69CC8];
+    int count;                  // 0x6AED0
+    sRailKey4 keys[1];          // 0x6AED4
+};
+
+extern "C" void func_00364B88(sRailKeyTable* self, sRailKey4* k)
+{
+    int i;
+    self->found = -1;
+    for (i = 0; i < self->count; i++) {
+        if (self->keys[i].a == k->a && self->keys[i].b == k->b &&
+            self->keys[i].c == k->c && self->keys[i].d == k->d) {
+            self->found = i;
+            break;
+        }
+    }
+    if (self->found < 0) {
+        self->keys[self->count].a = k->a;
+        self->keys[self->count].b = k->b;
+        self->keys[self->count].c = k->c;
+        self->keys[self->count].d = k->d;
+        self->found = self->count;
+        self->count++;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00364CD0);
 
 INCLUDE_ASM("object/railmodifier", func_00365E40);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00365F68);
+#ifdef SKIP_ASM
+extern "C" void func_00424698(void* begin, void* end);
+extern "C" int func_0038F708(void* base, int size, int mode);
 
+extern "C" void func_00365F68(void* self)
+{
+    func_00424698(self, (char*)self + 0x1FEF);
+    *(int*)((char*)self + 0x1FF0) = func_0038F708(self, 0x1FF0, 2);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/railmodifier", func_00365FA8);
+#ifdef SKIP_ASM
+extern "C" void func_004247D8(void* begin, void* end);
+extern "C" void func_0038F738(void* base, int size, int mode);
+
+extern "C" void func_00365FA8(void* self)
+{
+    func_004247D8(self, (char*)self + 0x1FEF);
+    func_0038F738(self, 0x1FF0, 2);
+    *(void**)((char*)self + 0x1FF0) = self;
+}
+#endif
 
 // 0x1c-byte elements reached through a pointer at self+0x1ff0, indexed by
 // the cursor at self+0x23dc (which the function then advances)

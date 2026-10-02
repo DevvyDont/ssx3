@@ -36,7 +36,21 @@ INCLUDE_ASM("render/particle", func_00371318);
 
 INCLUDE_ASM("render/particle", func_00371380);
 
+//100%
 INCLUDE_ASM("render/particle", func_003714B8);
+#ifdef SKIP_ASM
+extern "C" void* func_00370B60(void* self);
+extern void* D_004930D0[];
+
+extern "C" void* func_003714B8(void* self)
+{
+    func_00370B60(self);
+    *(void***)((char*)self + 0x1F8) = D_004930D0;
+    *(int*)((char*)self + 0x200) = 0;
+    *(int*)((char*)self + 0x204) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003714F8);
 
@@ -50,7 +64,37 @@ INCLUDE_ASM("render/particle", func_00371688);
 
 INCLUDE_ASM("render/particle", func_003717C0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00371940);
+#ifdef SKIP_ASM
+struct sGifQuad {
+    unsigned int w[4];
+} __attribute__((aligned(16)));
+
+extern sGifQuad D_0044B430;
+
+// PORT: PS2 hardware registers (D2 = GIF DMA channel, VIF1 FIFO, GIF_MODE).
+extern "C" void func_00371940(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x1000A000 & 0x100) {
+        }
+    }
+    *(sGifQuad*)0x10005000 = D_0044B430;
+    *(volatile int*)0x10003010 = 4;
+    if (madr > 0x6FFFFFFF) {
+        *(volatile unsigned int*)0x1000A010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile unsigned int*)0x1000A010 = madr;
+    }
+    *(volatile int*)0x1000A020 = qwc;
+    *(volatile int*)0x1000A000 = 0x101;
+    if (flags & 2) {
+        while (*(volatile int*)0x1000A000 & 0x100) {
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00371D10);
@@ -119,7 +163,87 @@ INCLUDE_ASM("render/particle", func_00372B78);
 
 INCLUDE_ASM("render/particle", func_003739D0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00374180);
+#ifdef SKIP_ASM
+struct sPatchVec {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPatchOut {
+    float x, y, z;
+};
+
+struct sPatchSet {
+    char pad_0x00[0x190];
+    sPatchVec* basis[3];    // 0x190
+    int count[3];           // 0x19C
+};
+
+// PORT: PS2-only VU0 inline asm (tensor-product patch evaluation: out[i][j] =
+// sum over basis[i] (x) basis[j] of the 4x4 control block at mat+0x40).
+extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int idx)
+{
+    int n = self->count[idx];
+    sPatchVec* basis = self->basis[idx];
+    int i;
+    int j;
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "lqc2      $vf5, 0x40(%0)\n"
+        "lqc2      $vf6, 0x50(%0)\n"
+        "lqc2      $vf7, 0x60(%0)\n"
+        "lqc2      $vf8, 0x70(%0)\n"
+        "lqc2      $vf9, 0x80(%0)\n"
+        "lqc2      $vf10, 0x90(%0)\n"
+        "lqc2      $vf11, 0xA0(%0)\n"
+        "lqc2      $vf12, 0xB0(%0)\n"
+        "lqc2      $vf13, 0xC0(%0)\n"
+        "lqc2      $vf14, 0xD0(%0)\n"
+        "lqc2      $vf15, 0xE0(%0)\n"
+        "lqc2      $vf16, 0xF0(%0)\n"
+        :
+        : "r"(mat + 0x40));
+    for (i = 0; i < n; i++) {
+        __asm__ __volatile__(
+            "lqc2      $vf17, 0x0(%0)\n"
+            "vmulax.xyzw ACC, $vf1, $vf17x\n"
+            "vmadday.xyzw ACC, $vf2, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf3, $vf17z\n"
+            "vmaddw.xyzw $vf18, $vf4, $vf17w\n"
+            "vmulax.xyzw ACC, $vf5, $vf17x\n"
+            "vmadday.xyzw ACC, $vf6, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf7, $vf17z\n"
+            "vmaddw.xyzw $vf19, $vf8, $vf17w\n"
+            "vmulax.xyzw ACC, $vf9, $vf17x\n"
+            "vmadday.xyzw ACC, $vf10, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf11, $vf17z\n"
+            "vmaddw.xyzw $vf20, $vf12, $vf17w\n"
+            "vmulax.xyzw ACC, $vf13, $vf17x\n"
+            "vmadday.xyzw ACC, $vf14, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf15, $vf17z\n"
+            "vmaddw.xyzw $vf21, $vf16, $vf17w\n"
+            :
+            : "r"(&basis[i]));
+        for (j = 0; j < n; j++) {
+            sPatchVec t;
+            __asm__(
+                "lqc2      $vf22, 0x0(%1)\n"
+                "vmulax.xyzw ACC, $vf18, $vf22x\n"
+                "vmadday.xyzw ACC, $vf19, $vf22y\n"
+                "vmaddaz.xyzw ACC, $vf20, $vf22z\n"
+                "vmaddw.xyzw $vf23, $vf21, $vf22w\n"
+                "sqc2      $vf23, %0\n"
+                : "=m"(t)
+                : "r"(&basis[j]));
+            *out++ = *(sPatchOut*)&t;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00374298);
 
@@ -210,7 +334,59 @@ extern "C" void func_00374AE0(sPartOwner* self, int count, sPartItem14* items, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00374B38);
+#ifdef SKIP_ASM
+struct sPartRef {
+    char pad_0x00[0x1A6];
+    short slot[3];          // 0x1A6
+};
+
+struct sPartSlotEntry {
+    sPartRef* owner;      // 0x00
+    int flags;              // 0x04
+    int slot;               // 0x08
+};
+
+struct sPartLists {
+    int count[3];               // 0x00
+    char pad_0x0C[0xC];
+    sPartSlotEntry* entries[3];     // 0x18
+    char pad_0x24[0xC];
+    int* freeList[3];           // 0x30
+    int freeCount[3];           // 0x3C
+    char pad_0x48[0x1CC - 0x48];
+    int* slotList[3];           // 0x1CC
+    int slotCount[3];           // 0x1D8
+};
+
+extern "C" void func_00374B38(sPartLists* self)
+{
+    int i;
+    for (i = 0; i < 3; i++) {
+        int j;
+        int n = self->count[i];
+        sPartSlotEntry* list = self->entries[i];
+        for (j = 0; j < n; j++) {
+            sPartSlotEntry* e = &list[j];
+            int f = e->flags;
+            if (f & 4) {
+                e->flags = f & ~4;
+            } else if (f & 8) {
+                e->flags = f & ~8;
+            } else if (f != 0) {
+                e->flags = 0;
+                e->owner->slot[i] = -1;
+                if (e->slot >= 0) {
+                    self->slotList[i][self->slotCount[i]++] = e->slot;
+                    e->slot = -1;
+                }
+                self->freeList[i][self->freeCount[i]++] = j;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00374C90);
 
@@ -270,13 +446,86 @@ void func_00375A00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00375A08);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00492878[];
+extern "C" void* func_00395288(void* self);
+
+extern "C" void* func_00375A08(void)
+{
+    return func_00395288(cMemMan_alloc(0x75E0, D_00492878, 0, 0));
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00375A40);
 
 INCLUDE_ASM("render/particle", func_00376268);
 
+//100%
 INCLUDE_ASM("render/particle", func_003762F8);
+#ifdef SKIP_ASM
+struct sPartTexEntA4 {
+    char pad_0x00[0x88];
+    int width;          // 0x88
+    int height;         // 0x8C
+    int psm;            // 0x90
+    int clutPsm;        // 0x94
+    int fmt;            // 0x98
+    char pad_0x9C[4];
+    int id;             // 0xA0
+};
+
+struct sPartTexCache {
+    char pad_0x00[0x59C4];
+    int count;              // 0x59C4
+    char pad_0x59C8[4];
+    sPartTexEntA4* textures;     // 0x59CC
+};
+
+extern "C" int func_003762F8(sPartTexCache* self, int width, int height, unsigned int bpp,
+                             unsigned int clutBpp, int fmt, int id)
+{
+    int i;
+    sPartTexEntA4* t = self->textures;
+    for (i = 0; i < self->count; i++, t++) {
+        if (t->width == width && t->height == height && t->id == id) {
+            int ok1 = 0;
+            int ok2 = 0;
+            int ok3 = 0;
+            switch (bpp) {
+            case 16:
+                if (t->psm == 2) ok1 = 1; else ok1 = 0;
+            case 24:
+                if (t->psm == 1) ok1 = 1;
+                break;
+            case 32:
+                if (t->psm == 0) ok1 = 1; else ok1 = 0;
+                break;
+            }
+            switch (clutBpp) {
+            case 16:
+                if (t->clutPsm == 2) ok2 = 1; else ok2 = 0;
+                break;
+            case 24:
+                if (t->clutPsm == 1) ok2 = 1; else ok2 = 0;
+                break;
+            case 32:
+                if (t->clutPsm == 0) ok2 = 1; else ok2 = 0;
+                break;
+            }
+            if (fmt == 24) {
+                if (t->fmt == 0x31) ok3 = 1; else ok3 = 0;
+            }
+            if (ok1 && ok2 && ok3) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00376468);
 
@@ -830,11 +1079,43 @@ INCLUDE_ASM("render/particle", func_00381F10);
 
 INCLUDE_ASM("render/particle", func_00382170);
 
+//100%
 INCLUDE_ASM("render/particle", func_003825C0);
+#ifdef SKIP_ASM
+extern "C" void func_003825F8(void* arg);
+
+extern "C" int func_003825C0(int cause, void* arg)
+{
+    if (cause != 2) {
+        // PORT: PS2-only debug trap (assert).
+        __asm__ __volatile__("break 0");
+    }
+    func_003825F8(arg);
+    // PORT: PS2-only: re-enable interrupts (EI).
+    __asm__ __volatile__("sync.l\n\tei");
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003825F8);
 
+//100%
 INCLUDE_ASM("render/particle", func_00382650);
+#ifdef SKIP_ASM
+extern "C" void func_00382688(void* arg);
+
+extern "C" int func_00382650(int cause, void* arg)
+{
+    if (cause != 1) {
+        // PORT: PS2-only debug trap (assert).
+        __asm__ __volatile__("break 0");
+    }
+    func_00382688(arg);
+    // PORT: PS2-only: re-enable interrupts (EI).
+    __asm__ __volatile__("sync.l\n\tei");
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00382688);
 
@@ -1008,7 +1289,31 @@ extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00385AA0);
+#ifdef SKIP_ASM
+// PORT: g++ `<?` (min) operator.
+static inline float partClampf(float x, float lo, float hi)
+{
+    if (x >= lo) {
+        return x <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_00385AA0(void* self, unsigned short* buf, int idx, const float* c)
+{
+    unsigned char r = (int)(partClampf(c[1], 0.0f, 1.0f) * 32.0f);
+    unsigned char g = (int)(partClampf(c[2], 0.0f, 1.0f) * 32.0f);
+    unsigned char b = (int)(partClampf(c[3], 0.0f, 1.0f) * 32.0f);
+    unsigned char a = (int)(partClampf(c[0], 0.0f, 1.0f) * 32.0f);
+    if (r > 31) r = 31;
+    if (g > 31) g = 31;
+    if (b > 31) b = 31;
+    if (a > 0) a = 1;
+    buf[idx] = (a << 15) | (b << 10) | (g << 5) | r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00385BA0);
@@ -1117,7 +1422,16 @@ extern "C" void func_00389260(sPartVec4* v)
 
 INCLUDE_ASM("render/particle", func_00389308);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_00389520);
+#ifdef SKIP_ASM
+extern "C" void func_00389308(void* self, void* dst, float w, float x, float y, float z);
+
+extern "C" void func_00389520(void* self, const float* v, void* dst)
+{
+    func_00389308(self, dst, 1.0f, v[0], v[1], v[2]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389558);

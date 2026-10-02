@@ -76,11 +76,33 @@ void cReplayFramePtr_getFrameBlock()
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026ED98);
+#ifdef SKIP_ASM
+extern "C" void func_0026EDD8(void* self);
+
+extern "C" void func_0026ED98(void* self)
+{
+    *(int*)((char*)self + 0x630) = (*(int*)((char*)self + 0x630) + 1) % 9;
+    func_0026EDD8(self);
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EDD8);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EE68);
+#ifdef SKIP_ASM
+void* func_0016D1D8(void* p);
+extern void* D_004C5830[];
+extern "C" void func_0026EDD8(void* self);
+
+extern "C" void func_0026EE68(void* self)
+{
+    func_0016D1D8(D_004C5830);
+    func_0026EDD8(self);
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EEA0);
 
@@ -117,7 +139,22 @@ void func_0026F4A0(void* self, int val)
 
 INCLUDE_ASM("replay/frameptr", func_0026F4A8);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F7B8);
+#ifdef SKIP_ASM
+void func_0026F4A0(void* self, int state);
+
+extern "C" void func_0026F7B8(int* self)
+{
+    int s = *self;
+    bool ok = !(s == 14 || s == 15);
+    if (ok) {
+        if (s == 10) {
+            func_0026F4A0(self, 11);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026F7F8);
 

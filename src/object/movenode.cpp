@@ -231,7 +231,19 @@ INCLUDE_ASM("object/movenode", func_00356D48);
 
 INCLUDE_ASM("object/movenode", func_00356DB0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00356E60);
+#ifdef SKIP_ASM
+extern "C" void* cMoveNode_cMoveNode(void* self);
+extern void* D_00490E80[];
+
+extern "C" void* func_00356E60(void* self)
+{
+    cMoveNode_cMoveNode(self);
+    *(void***)((char*)self + 0xC) = D_00490E80;
+    return self;
+}
+#endif
 
 extern "C" void* func_00356B30(void* self);
 
@@ -328,7 +340,20 @@ extern "C" void func_00356FF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357000);
+#ifdef SKIP_ASM
+class func_00357000_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_00357000(void* self, func_00357000_cObj* obj)
+{
+    obj->v01((char*)self + 0x10, 0x40);
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00357038);
 
@@ -412,7 +437,19 @@ INCLUDE_ASM("object/movenode", func_00357848);
 
 INCLUDE_ASM("object/movenode", func_003578A8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00357918);
+#ifdef SKIP_ASM
+extern "C" void* cMoveNode_cMoveNode(void* self);
+extern void* D_0048EE60[];
+
+extern "C" void* func_00357918(void* self)
+{
+    cMoveNode_cMoveNode(self);
+    *(void***)((char*)self + 0xC) = D_0048EE60;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00357950);
 

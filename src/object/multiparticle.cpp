@@ -57,7 +57,20 @@ INCLUDE_ASM("object/multiparticle", func_00358260);
 
 INCLUDE_ASM("object/multiparticle", func_00358380);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003584B8);
+#ifdef SKIP_ASM
+class func_003584B8_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_003584B8(void* self, func_003584B8_cObj* obj)
+{
+    obj->v01(self, 4);
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_003584F0);
 

@@ -45,7 +45,20 @@ void* func_00354920(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/objnode", func_00354948);
+#ifdef SKIP_ASM
+class func_00354948_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_00354948(void* self, func_00354948_cObj* obj)
+{
+    obj->v01((char*)self + 0x10, 4);
+}
+#endif
 
 INCLUDE_ASM("object/objnode", func_00354980);
 

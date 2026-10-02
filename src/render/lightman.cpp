@@ -75,7 +75,25 @@ INCLUDE_ASM("render/lightman", func_0038F4F8);
 
 INCLUDE_ASM("render/lightman", func_0038F598);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/lightman", func_0038F668);
+#ifdef SKIP_ASM
+struct sLmStack {
+    char pad_0x00[0xC];
+    int depth;          // 0x0C
+    char pad_0x10[4];
+    int marks[1];       // 0x14
+};
+
+extern "C" void func_0038F598(sLmStack* self, int size, int arg, int base);
+
+extern "C" void func_0038F668(sLmStack* self, int end, int arg)
+{
+    int base = self->marks[self->depth];
+    int size = end - base;
+    func_0038F598(self, size + (-size & 0xF), arg, base);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F6A8);

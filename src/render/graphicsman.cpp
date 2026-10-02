@@ -88,7 +88,34 @@ INCLUDE_ASM("render/graphicsman", func_0036A2C0);
 
 INCLUDE_ASM("render/graphicsman", func_0036A428);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036AA60);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here (GIF/DMA packet words); cQuad128 is a 128-bit GPR quadword.
+extern "C" void func_0036AA60(void* self, int x, int y, char** pp)
+{
+    *(cQuad128*)(*pp + 0x00) = 0x10000006;
+    *(ulong*)(*pp + 0x10) = ((ulong)0x10000000 << 32) | 4;
+    *(ulong*)(*pp + 0x18) = 0xE;
+    *(ulong*)(*pp + 0x20) = ((ulong)y << 32) | ((ulong)0x8000 << 33);
+    *(ulong*)(*pp + 0x28) = 0x50;
+    *(ulong*)(*pp + 0x30) = 0;
+    *(ulong*)(*pp + 0x38) = 0x51;
+    *(ulong*)(*pp + 0x40) = ((ulong)0x10 << 32) | 0x10;
+    *(ulong*)(*pp + 0x48) = 0x52;
+    *(ulong*)(*pp + 0x50) = 0;
+    *(ulong*)(*pp + 0x58) = 0x53;
+    *(cQuad128*)(*pp + 0x60) = ((cQuad128)0x08000000 << 32) | 0x40;
+    *(ulong*)(*pp + 0x70) = ((ulong)x << 32) | 0x30000040;
+    *(ulong*)(*pp + 0x78) = 0;
+    *(cQuad128*)(*pp + 0x80) = 0x10000002;
+    *(ulong*)(*pp + 0x90) = ((ulong)0x10000000 << 32) | 1;
+    *(ulong*)(*pp + 0x98) = 0xE;
+    *(ulong*)(*pp + 0xA0) = 0;
+    *(ulong*)(*pp + 0xA8) = 0x3F;
+    *pp += 0xB0;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036ABA0);
 
@@ -251,7 +278,95 @@ extern "C" void func_0036D008(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036D1F0);
+#ifdef SKIP_ASM
+struct sGmVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sGmFrustum {
+    char pad_0x00[0x4C];
+    float scale;        // 0x4C
+    char pad_0x50[0x20];
+    sGmVec4 v70;        // 0x70
+    sGmVec4 v80;        // 0x80
+    sGmVec4 v90;        // 0x90
+    sGmVec4 vA0;        // 0xA0
+};
+
+// PORT: PS2-only VU0 inline asm (v / s).
+static inline sGmVec4 gmDivD1F0(const sGmVec4& v, float s)
+{
+    sGmVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sGmVec4 gmAddD1F0(const sGmVec4& a, const sGmVec4& b)
+{
+    sGmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sGmVec4 gmSubD1F0(const sGmVec4& a, const sGmVec4& b)
+{
+    sGmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
+{
+    sGmVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+extern "C" void func_0036D1F0(sGmFrustum* self, const sGmVec4* a, const sGmVec4* b,
+                              const sGmVec4* c, const sGmVec4* d)
+{
+    self->v80 = gmDivD1F0(*b, self->scale);
+    self->v90 = gmDivD1F0(*c, self->scale);
+    self->vA0 = gmDivD1F0(*d, self->scale);
+    self->v70 = gmSubD1F0(gmDivD1F0(*a, self->scale), gmScaleD1F0(gmAddD1F0(gmAddD1F0(self->v80, self->v90), self->vA0), 1.5f));
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036D318);
@@ -333,7 +448,27 @@ extern "C" void func_00370758(int* self, int flags)
 
 INCLUDE_ASM("render/graphicsman", func_00370788);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00370888);
+#ifdef SKIP_ASM
+struct sGmQuad {
+    float v[4];
+} __attribute__((aligned(16)));
+
+struct sGmQuad2 {
+    sGmQuad a;
+    sGmQuad b;
+};
+
+extern "C" void func_003708C0(void* self);
+
+extern "C" void func_00370888(void* self, const sGmQuad2* m, const sGmQuad* v)
+{
+    *(sGmQuad2*)((char*)self + 0x160) = *m;
+    *(sGmQuad*)((char*)self + 0xC0) = *v;
+    func_003708C0(self);
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_003708C0);
 

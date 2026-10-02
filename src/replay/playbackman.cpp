@@ -62,7 +62,20 @@ INCLUDE_ASM("replay/playbackman", func_0026D0A0);
 
 INCLUDE_ASM("replay/playbackman", func_0026D0E8);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D130);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+
+extern "C" void func_0026D130(void* self)
+{
+    void* p = *(void**)((char*)self + 0xC);
+    if (p != 0) {
+        cMemMan_free(p);
+        *(void**)((char*)self + 0xC) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D168__FPv);
@@ -120,7 +133,21 @@ extern "C" int func_0026D4D8(sPlaybackStream* self, unsigned int pos)
 
 INCLUDE_ASM("replay/playbackman", func_0026D558);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D5E8);
+#ifdef SKIP_ASM
+void* func_0026E8E0(void* self);
+extern "C" void func_0026D628(void* self);
+extern void* D_00481850[];
+
+extern "C" void* func_0026D5E8(void* self)
+{
+    func_0026E8E0(self);
+    *(void***)self = D_00481850;
+    func_0026D628(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D628);

@@ -73,7 +73,63 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367DB8);
+#ifdef SKIP_ASM
+// PORT: 64-bit GS register words (ulong is 64-bit here).
+struct sGsTex0Bits {
+    ulong TBP0 : 14;
+    ulong TBW : 6;
+    ulong PSM : 6;
+    ulong TW : 4;
+    ulong TH : 4;
+    ulong TCC : 1;
+    ulong TFX : 2;
+    ulong CBP : 14;
+    ulong CPSM : 4;
+    ulong CSM : 1;
+    ulong CSA : 5;
+    ulong CLD : 3;
+};
+
+struct sPs2RenderTex {
+    char pad_0x00[0x28];
+    int addr;               // 0x28
+    char pad_0x2C[0xC];
+    sGsTex0Bits tex0;       // 0x38
+};
+
+struct sPs2TexSet {
+    char pad_0x00[0x8];
+    sPs2RenderTex* tex[1];  // 0x08
+};
+
+static inline ulong gsSetFrame367DB8(int fbp, int fbw, int psm, int fbmsk)
+{
+    return (ulong)fbp | ((ulong)fbw << 16) | ((ulong)psm << 24) | ((ulong)fbmsk << 32);
+}
+
+extern "C" void func_00367DB8(sPs2TexSet* self, int idx, ulong** pp)
+{
+    sPs2RenderTex* t = self->tex[idx];
+    ulong* p = *pp;
+    p[0] = 0x10000005;
+    p[1] = 0;
+    p[2] = (ulong)0x8800 << 45;
+    p[3] = (ulong)0x50000004 << 32;
+    p[4] = ((ulong)0x10000000 << 32) | 0x8003;
+    p[5] = 0xE;
+    p[6] = gsSetFrame367DB8(t->addr >> 5, (1 << t->tex0.TW) >> 6, t->tex0.PSM, 0);
+    p[7] = 0x4C;
+    p[8] = ((ulong)((1 << t->tex0.TW) - 1) << 16) | ((ulong)((1 << t->tex0.TH) - 1) << 48);
+    p[9] = 0x40;
+    p[10] = (ulong)((0x800 - ((1 << t->tex0.TW) >> 1)) << 4) |
+            ((ulong)((0x800 - ((1 << t->tex0.TH) >> 1)) << 4) << 32);
+    p[11] = 0x18;
+    p += 12;
+    *pp = p;
+}
+#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367F18);
 
@@ -184,7 +240,17 @@ INCLUDE_ASM("render/ps2graphicsman", func_003695D8);
 
 INCLUDE_ASM("render/ps2graphicsman", func_00369610);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369690);
+#ifdef SKIP_ASM
+extern "C" void* func_003E6574(void*, void*, int);
+
+extern "C" void func_00369690(void* self, int count, void* src)
+{
+    *(int*)((char*)self + 0xE80) = count;
+    func_003E6574((char*)self + 0x280, src, count * 0xC);
+}
+#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_003696C8);
 
@@ -199,5 +265,19 @@ void func_00369890(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_003698A0);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+
+extern "C" void func_003698A0(void* self)
+{
+    void* p = *(void**)((char*)self + 0xF48);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    *(void**)((char*)self + 0xF48) = 0;
+    *(int*)((char*)self + 0xF4C) = 0;
+}
+#endif
 

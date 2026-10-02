@@ -39,7 +39,20 @@ float cSpline_calcLength(cSpline* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/spline3d", func_00345538);
+#ifdef SKIP_ASM
+class func_00345538_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_00345538(void* self, func_00345538_cObj* obj)
+{
+    obj->v01(self, 8);
+}
+#endif
 
 INCLUDE_ASM("object/spline3d", cSpline_readFromReplayFrame);
 

@@ -782,7 +782,61 @@ void func_00394D48(void* self)
 
 INCLUDE_ASM("render/font", func_00394D50);
 
+//100%
 INCLUDE_ASM("render/font", func_00394ED0);
+#ifdef SKIP_ASM
+struct sGlyphKey {
+    int k[4];
+    int v;
+};
+
+struct sGlyphEntry {
+    sGlyphKey key;          // 0x00
+    sGlyphEntry* next;      // 0x14
+};
+
+struct sGlyphCache {
+    char pad_0x00[0x51480];
+    int count;                  // 0x51480
+    sGlyphEntry entries[3755];  // 0x51484
+    char pad_0x6748C[0x14];
+    sGlyphEntry* buckets[256];  // 0x674A0
+};
+
+static inline int glyphKeyEq(const int* a, const int* b)
+{
+    unsigned int i;
+    for (i = 0; i < 4; i++) {
+        if (a[i] != b[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+extern "C" sGlyphEntry* func_00394ED0(sGlyphCache* self, sGlyphKey* key, unsigned char hash)
+{
+    sGlyphEntry** pp = &self->buckets[hash];
+    while (*pp != 0) {
+        sGlyphEntry* e = *pp;
+        if (glyphKeyEq(e->key.k, key->k)) {
+            if (e == self->buckets[hash]) {
+                return e;
+            }
+            *pp = e->next;
+            e->next = self->buckets[hash];
+            self->buckets[hash] = e;
+            return e;
+        }
+        pp = &e->next;
+    }
+    sGlyphEntry* e = &self->entries[self->count++];
+    e->key = *key;
+    e->next = self->buckets[hash];
+    self->buckets[hash] = e;
+    return e;
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00395000);
 
