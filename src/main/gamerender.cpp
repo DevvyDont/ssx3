@@ -6,9 +6,46 @@ INCLUDE_ASM("main/gamerender", func_0022E550);
 
 INCLUDE_ASM("main/gamerender", func_0022E730);
 
+//100%
 INCLUDE_ASM("main/gamerender", func_0022E7C8);
+#ifdef SKIP_ASM
+struct sVEntry_0022E7C8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
 
+extern "C" void func_0022E7C8(void* self)
+{
+    unsigned int i;
+    for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
+        void* v = ((void**)((char*)self + 0x4))[i];
+        void* o = *(void**)((char*)v + 0xA0);
+        sVEntry_0022E7C8* vt = *(sVEntry_0022E7C8**)((char*)o + 0x14);
+        vt[4].fn((char*)o + vt[4].delta);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamerender", cGameViewMan_updateAll);
+#ifdef SKIP_ASM
+struct sVEntry_0022E840 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void cGameViewMan_updateAll(void* self)
+{
+    unsigned int i;
+    for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
+        void* v = ((void**)((char*)self + 0x4))[i];
+        sVEntry_0022E840* vt = *(sVEntry_0022E840**)((char*)v + 0x90);
+        vt[3].fn((char*)v + vt[3].delta);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamerender", func_0022E8B8);

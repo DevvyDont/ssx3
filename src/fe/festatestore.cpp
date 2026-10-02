@@ -24,7 +24,38 @@ extern "C" int func_00184BB8(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_00184BE0);
+#ifdef SKIP_ASM
+struct sVEntry00184BE0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObj00184BE0 {
+    int pad[2];
+    sVEntry00184BE0* vt;
+};
+
+extern "C" void func_00183B08(void* self);
+extern "C" void func_0039E4C0(void* self, int a1);
+
+extern "C" void func_00184BE0(void* self, int a1)
+{
+    sObj00184BE0* o;
+    func_00183B08(self);
+    o = *(sObj00184BE0**)((char*)self + 0x4C);
+    if (o != 0) {
+        o->vt[7].fn((char*)o + o->vt[7].delta, 1);
+    }
+    o = *(sObj00184BE0**)((char*)self + 0x50);
+    if (o != 0) {
+        o->vt[7].fn((char*)o + o->vt[7].delta, 0);
+    }
+    func_0039E4C0(self, a1);
+}
+#endif
 
 INCLUDE_ASM("fe/festatestore", func_00184C60);
 

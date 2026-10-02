@@ -978,7 +978,27 @@ INCLUDE_ASM("main/ssxappdtor", func_00245418);
 
 INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245598);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_002464E8(void* self, int a1);
+extern "C" void func_00246278(void* self, int a1);
+extern signed char D_00535C11[];
+
+extern "C" void func_00245598(void* self, int a1)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    bool ok = D_00535C11[0] != 2;
+    if (ok) {
+        func_002464E8(self, a1);
+    } else {
+        func_00246278(self, a1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245600);

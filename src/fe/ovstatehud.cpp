@@ -13,7 +13,34 @@ struct cOVStateHUDElem {
 
 INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9130);
+#ifdef SKIP_ASM
+struct sVEntry001E9130 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sObj001E9130 {
+    int field_0x0;
+    sVEntry001E9130* vt;
+};
+
+extern "C" void func_0039F400(void* list, void* item);
+
+extern "C" void func_001E9130(void* self, void* item, int a2)
+{
+    if (item != 0 && a2 == 5) {
+        void* r = 0;
+        if (*(int*)((char*)item + 0x18) == 1) {
+            sObj001E9130* o = **(sObj001E9130***)((char*)self + 0x10);
+            r = o->vt[4].fn((char*)o + o->vt[4].delta, self, 1);
+        }
+        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91A8__FPvT0);

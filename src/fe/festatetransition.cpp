@@ -18,7 +18,23 @@ extern "C" void cFEStateBackground_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetransition", cFEStateTransition_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern char D_0045FFE8[];
+extern char D_0045FFF8[];
+
+extern "C" void cFEStateTransition_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* engine2;
+    *(void**)((char*)self + 0x48) = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FFE8), 0);
+    engine2 = *(void**)((char*)self + 0x10);
+    *(void**)((char*)self + 0x4C) = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(D_0045FFF8), 0);
+}
+#endif
 
 INCLUDE_ASM("fe/festatetransition", cFEStateTransition_onScreenEvent);
 

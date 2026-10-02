@@ -60,7 +60,32 @@ extern "C" void* func_001926F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00192740);
+#ifdef SKIP_ASM
+struct sVEntry00192740 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObj00192740 {
+    int pad[2];
+    sVEntry00192740* vt;
+};
+
+extern "C" void func_00192740(void* self, int a1)
+{
+    int i;
+    *(int*)((char*)self + 0x28) = a1;
+    for (i = 0; i < 8; i++) {
+        sObj00192740* o = ((sObj00192740**)((char*)self + 0x8))[i];
+        if (o != 0) {
+            o->vt[8].fn((char*)o + o->vt[8].delta, a1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateruleselect", func_001927B0);
 
@@ -100,5 +125,25 @@ void func_00192968(void* self, int val)
 
 INCLUDE_ASM("fe/festateruleselect", func_00192970);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateruleselect", func_00192D00);
+#ifdef SKIP_ASM
+extern void* D_0046AF68[];
+extern "C" void* func_001A8500(void* self, int a1, int a2);
+
+extern "C" void* func_00192D00(void* self, int a1)
+{
+    char* p;
+    int i;
+    func_001A8500(self, a1, 0);
+    *(void***)((char*)self + 0x8) = D_0046AF68;
+    p = (char*)self + 0x6D0;
+    for (i = 1; i != -1; i--, p += 0x34) {
+        func_001926F0(p);
+    }
+    *(int*)((char*)self + 0xC) = 0x14;
+    *(int*)((char*)self + 0x738) = 0;
+    return self;
+}
+#endif
 

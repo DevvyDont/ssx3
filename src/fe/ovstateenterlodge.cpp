@@ -1,6 +1,27 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void cOVStateManager_addPDATemplate();
+extern "C" void func_0020A380(void* self);
+extern char D_0046F4D0[];
+
+extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F4D0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    cOVStateManager_addPDATemplate();
+    func_0020A380(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7210);
 
@@ -20,7 +41,26 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F72B8);
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F72E0);
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void func_0020A380(void* self);
+extern char D_0046F4E0[];
+
+extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F4E0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onGainTransition);
 
@@ -58,11 +98,58 @@ extern "C" int func_001F7590(void* self, int a1, int a2)
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F75A0);
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F76B8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void func_0020A380(void* self);
+extern char D_0046F500[];
+
+extern "C" void func_001F76B8(void* self)
+{
+    void* engine;
+    void* screen;
+    *(int*)((char*)self + 0xC) = GetHashValue32(D_0046F500);
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F500), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7770);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A23E0[];
+extern char D_004A23E8[];
+extern char D_004A23F8[];
+
+extern "C" void func_001F7770(void* self, void* item)
+{
+    int id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_004A23E0)) {
+        *(int*)((char*)item + 0x18) = 0;
+    } else {
+        int id2 = *(int*)((char*)item + 0x38);
+        if (id2 == GetHashValue32(D_004A23E8)) {
+            *(int*)((char*)item + 0x18) = 1;
+        } else {
+            int id3 = *(int*)((char*)item + 0x38);
+            if (id3 == GetHashValue32(D_004A23F8)) {
+                *(int*)((char*)item + 0x18) = 2;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);

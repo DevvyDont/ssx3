@@ -171,7 +171,21 @@ INCLUDE_ASM("input/inputparse", func_003264B0);
 
 INCLUDE_ASM("input/inputparse", func_003265C0);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326678);
+#ifdef SKIP_ASM
+extern "C" void func_00326678(void* self, sParseStream* s)
+{
+    while (*(int*)((char*)self + 0xC) >= 0) {
+        func_00326478(self, s);
+        if (*(int*)((char*)self + 0xC) == 10) {
+            func_00326478(self, s);
+            *(int*)((char*)s + 0xC) += 1;
+            break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_readCmdLine);
 
@@ -196,7 +210,36 @@ extern "C" void func_00326A28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326A68);
+#ifdef SKIP_ASM
+struct sVEntry00326A68 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObj00326A68 {
+    sVEntry00326A68* vt;
+};
+
+struct sOwner00326A68 {
+    char pad[0x2EE8];
+    int count;
+    sObj00326A68* objs[1];
+};
+
+extern "C" void func_00326A68(sOwner00326A68* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        sObj00326A68* o = self->objs[i];
+        if (o != 0) {
+            o->vt[1].fn((char*)o + o->vt[1].delta, 3);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326AE0);
@@ -302,7 +345,27 @@ extern "C" void* func_00326CC8(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326CF0);
+#ifdef SKIP_ASM
+struct sVEntry00326CF0 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef int (*CountFn00326CF0)(void*);
+typedef void (*SetFn00326CF0)(void*, int, float);
+
+extern "C" void func_00326CF0(void* p)
+{
+    sVEntry00326CF0** self = (sVEntry00326CF0**)p;
+    int i;
+    for (i = 0; i < ((CountFn00326CF0)(*self)[3].fn)((char*)self + (*self)[3].delta); i++) {
+        ((SetFn00326CF0)(*self)[4].fn)((char*)self + (*self)[4].delta, i, 0.0f);
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326D60);
 

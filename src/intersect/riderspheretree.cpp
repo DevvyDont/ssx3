@@ -61,7 +61,38 @@ extern "C" void func_003299C8(sSphereLeaf_99C8* s, int type, int n, int* ids, fl
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329A28);
+#ifdef SKIP_ASM
+struct sVec4_9A28 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSphereNode_9A28 {
+    int type;            // 0x00
+    char pad_0x04[0xC];
+    sVec4_9A28 center;   // 0x10
+    float radius;        // 0x20
+    int user;            // 0x24
+    int parent;          // 0x28
+    int count;           // 0x2C
+    char children[1];    // 0x30
+};
+
+extern "C" void func_003E6574(void* dst, void* src, int size);
+
+extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src)
+{
+    self->type = src->type;
+    self->radius = src->radius;
+    self->center = src->center;
+    self->user = src->user;
+    self->count = src->count;
+    self->parent = src->parent;
+    func_003E6574(self->children, src->children, self->count << 5);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329A90);
@@ -569,7 +600,23 @@ extern "C" int func_0032F760(void* self, sSphereVec4* mn, sSphereVec4* mx)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032F840);
+#ifdef SKIP_ASM
+struct sSphereNode_9A28;
+struct sSphereMtx;
+extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src);
+extern "C" void func_00329B90(sSphereTreeNode* s, sSphereMtx* m, float scale);
+
+extern "C" void func_0032F840(void* self, sSphereMtx* m, float scale)
+{
+    sSphereTreeNode* node = (sSphereTreeNode*)((char*)self + 0x70);
+    func_00329A28((sSphereNode_9A28*)node, *(sSphereNode_9A28**)((char*)self + 0x60));
+    *(sSphereTreeNode**)((char*)self + 0x60) = node;
+    func_00329B90(node, m, scale);
+    *(int*)((char*)self + 0x4) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032F8B0__FPv);

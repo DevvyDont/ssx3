@@ -52,7 +52,25 @@ INCLUDE_ASM("fe/ovtemplatedialog", func_0020D318);
 
 INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D4F0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
+extern char D_0046E818[];
+
+extern "C" void func_0020D4F0(void* self, void* item)
+{
+    int id = *(int*)((char*)item + 0x38);
+    if (id == GetHashValue32(D_0046E818)) {
+        if (*(int*)((char*)self + 0x9C) == 6) {
+            cUIMenu_setSelectedByIndex(item, 0);
+        } else {
+            cUIMenu_setSelectedByIndex(item, 1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
 

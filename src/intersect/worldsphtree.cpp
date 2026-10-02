@@ -273,7 +273,27 @@ extern "C" void func_00341A50(void* self, void* stream)
 
 INCLUDE_ASM("intersect/worldsphtree", func_00341AA0);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341C80);
+#ifdef SKIP_ASM
+struct sVEntry00341C80 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_0034DAC8(void* p, int a1, void* stream);
+extern void* D_00490B10[];
+
+extern "C" void* func_00341C80(void* self, int a1, sVEntry00341C80** stream)
+{
+    func_0034DAC8((char*)self + 0x1C, a1, stream);
+    *(void***)((char*)self + 0x3C) = D_00490B10;
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x1C);
+    *(unsigned short*)((char*)self + 0x42) |= 1;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341CF0);
@@ -432,7 +452,27 @@ extern "C" void func_00342150(void* self, void* stream)
 
 INCLUDE_ASM("intersect/worldsphtree", func_003421A0);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003422E8);
+#ifdef SKIP_ASM
+struct sVEntry003422E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_0034DAC8(void* p, int a1, void* stream);
+extern void* D_004908F8[];
+
+extern "C" void* func_003422E8(void* self, int a1, sVEntry003422E8** stream)
+{
+    func_0034DAC8((char*)self + 0x30, a1, stream);
+    *(void***)((char*)self + 0x50) = D_004908F8;
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x30);
+    *(unsigned short*)((char*)self + 0x56) |= 1;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342358);
 
@@ -473,7 +513,29 @@ extern "C" void func_00342718(void* self, void* stream)
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342768);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342808);
+#ifdef SKIP_ASM
+struct sVEntry00342808 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef void (*ReadFn00342808)(void*, void*, int);
+typedef int (*ReadIntFn00342808)(void*);
+
+extern void* D_00490898[];
+
+extern "C" void* func_00342808(void* self, sVEntry00342808** stream)
+{
+    *(int*)((char*)self + 0x0) = 1;
+    *(void***)((char*)self + 0x4) = D_00490898;
+    ((ReadFn00342808)(*stream)[2].fn)((char*)stream + (*stream)[2].delta, (char*)self + 0x10, 0x30);
+    *(int*)((char*)self + 0x40) = ((ReadIntFn00342808)(*stream)[3].fn)((char*)stream + (*stream)[3].delta);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00342880);
 

@@ -6,7 +6,29 @@ INCLUDE_ASM("main/gamemode", func_002380E8);
 
 INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
 
+//100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_restartHeat);
+#ifdef SKIP_ASM
+struct sVEntry_002382D8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern void* D_00536668[];
+extern int D_005366D0[];
+
+extern "C" void cGameModeMan_restartHeat(void* self)
+{
+    int i;
+    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    sVEntry_002382D8* vt = *(sVEntry_002382D8**)obj;
+    vt[2].fn((char*)obj + vt[2].delta);
+    for (i = 5; i >= 0; i--) {
+        D_005366D0[i] = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_00238348__FPv);
@@ -84,9 +106,45 @@ INCLUDE_ASM("main/gamemode", func_00238BF8);
 
 INCLUDE_ASM("main/gamemode", func_00238C80);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00238D30);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern int D_00536730[];
+extern int D_00536708[];
+extern unsigned int D_00536640[];
+extern int D_005366A8[];
+extern int D_005366D0[];
 
+extern "C" void func_00238D30(void)
+{
+    func_00416210(D_00536730, 9, 0x28);
+    func_00416210(D_00536708, 0, 0x28);
+    func_00416210(D_00536640, 0, 0x28);
+    func_00416210(D_005366A8, 0, 0x28);
+    func_00416210(D_005366D0, 0, 0x18);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamemode", func_00238DA8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern int D_00536730[];
+extern int D_00536708[];
+extern unsigned int D_00536640[];
+extern int D_005366A8[];
+extern int D_005366D0[];
+
+extern "C" void func_00238DA8(void)
+{
+    func_00416210(D_00536730, 9, 0x28);
+    func_00416210(D_00536708, 0, 0x28);
+    func_00416210(D_00536640, 9, 0x28);
+    func_00416210(D_005366A8, 0, 0x28);
+    func_00416210(D_005366D0, 0, 0x18);
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_00238E20);
 

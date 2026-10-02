@@ -1,6 +1,29 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void cOVStateManager_addPDATemplate();
+extern "C" void func_0020A380(void* self);
+extern "C" void func_00212080(void* self);
+extern char D_00471D50[];
+
+extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471D50), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    cOVStateManager_addPDATemplate();
+    func_00212080(self);
+    func_0020A380(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_00211220);
@@ -70,7 +93,26 @@ extern "C" void* func_00212138(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void func_0020A380(void* self);
+extern char D_00471E28[];
+
+extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471E28), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00212208);
 
@@ -83,7 +125,36 @@ int func_002122E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_002122E8);
+#ifdef SKIP_ASM
+struct sVEntry002122E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObj002122E8 {
+    int pad[2];
+    sVEntry002122E8* vt;
+};
+
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cOVState_AUTOSAVE_displayOn(void* self);
+extern char D_00471E38[];
+
+extern "C" void func_002122E8(void* self)
+{
+    int s = *(int*)((char*)self + 0x1C0);
+    if (s != 0 && s != 6) {
+        cOVState_AUTOSAVE_displayOn(self);
+    } else {
+        sObj002122E8* o = (sObj002122E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
+        o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
 

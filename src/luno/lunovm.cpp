@@ -38,7 +38,25 @@ extern "C" void func_00224DF0(cLunoTableRef* ref, int flags);
 
 INCLUDE_ASM("luno/lunovm", luno_cLunoVM_execute);
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00224C00);
+#ifdef SKIP_ASM
+struct sVEntry00224C00 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base)
+{
+    int off;
+    int v;
+    off = *(int*)((char*)self + 0x0) - base;
+    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &off, 4);
+    v = *(int*)((char*)self + 0x4);
+    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &v, 4);
+}
+#endif
 
 INCLUDE_ASM("luno/lunovm", func_00224C78);
 

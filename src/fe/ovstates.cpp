@@ -1,6 +1,29 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+extern char D_004A17C8[];
+
+extern "C" void cFEStateTitle_onCreateScreen(void* self)
+{
+    void* engine;
+    void* screen;
+    *(int*)((char*)self + 0x48) = 0;
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A17C8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0028F140(func_0028B180(), 0);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstates", func_001947F8);
 
