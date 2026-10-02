@@ -2,9 +2,93 @@
 
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_cWScriptProcess);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307738);
+#ifdef SKIP_ASM
+class func_00307738_cElem {
+public:
+    char pad00[0x40];
+    // vptr at 0x40
+    virtual void v01(int flags);
+};
 
+void cMemMan_free(void* p);
+void operator_delete(int* p);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern char D_00489B70[];
+
+// PORT: array cookie arithmetic through int (pointer in int).
+extern "C" void func_00307738(void* self, int flags)
+{
+    *(void**)((char*)self + 0x5C) = D_00489B70;
+    char* arr = *(char**)((char*)self + 0x14);
+    if (arr != 0) {
+        char* p = (char*)(*(int*)(arr - 0x10) * 0x44 + (int)arr);
+        while (*(char**)((char*)self + 0x14) != p) {
+            p -= 0x44;
+            ((func_00307738_cElem*)p)->v01(0);
+        }
+        cMemMan_free(*(char**)((char*)self + 0x14) - 0x10);
+    }
+    void* obj = *(void**)((char*)self + 0x1C);
+    if (obj != 0) {
+        func_00224DF0(obj, 3);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003077F8);
+#ifdef SKIP_ASM
+class func_003077F8_cElem {
+public:
+    char pad00[0x40];
+    // vptr at 0x40
+    virtual void v01();
+    virtual void v02();
+};
+
+class func_003077F8_cProc {
+public:
+    int state;
+    int count;
+    int cur;
+    char pad0C[0x8];
+    func_003077F8_cElem* elems;
+    char pad18[0x44];
+    // vptr at 0x5C
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_003077F8(func_003077F8_cProc* self)
+{
+    switch (self->state) {
+    case 0:
+        break;
+    case 1:
+        self->state = 2;
+    case 2: {
+        int st = self->state;
+        if (st == 2) {
+            if (self->cur < self->count) {
+                self->elems[self->cur].v02();
+            }
+            if (self->state == st) {
+                self->v05();
+            }
+        }
+        break;
+    }
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003078C0);
 
@@ -197,7 +281,57 @@ extern "C" void func_00307C10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307C40);
+#ifdef SKIP_ASM
+class func_00307C40_cElem {
+public:
+    char pad00[0x40];
+    // vptr at 0x40
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+};
+
+struct func_00307C40_sProc {
+    int state;
+    int count;
+    int cur;
+    int pad0C;
+    void* man;
+    func_00307C40_cElem* elems;
+    int pad18;
+    void* luno;
+    int pad20;
+    int pad24;
+    void* script;
+};
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00224DA0(void* mem, int a1);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void func_00309A60(void* man, void* proc);
+extern char D_00489888[];
+
+extern "C" void func_00307C40(func_00307C40_sProc* self)
+{
+    if (self->luno != 0) {
+        func_00224DF0(self->luno, 3);
+    }
+    self->luno = func_00224DA0(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
+    self->state = 1;
+    self->cur = 0;
+    if (self->script != 0) {
+        func_0030AC98(self->man, self, self->script);
+    }
+    func_00309A60(self->man, self);
+    if (self->cur < self->count) {
+        self->elems[self->cur].v04();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D00);
@@ -268,7 +402,50 @@ extern "C" void func_00307DC8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307E10);
+#ifdef SKIP_ASM
+class func_00307E10_cElem {
+public:
+    char pad00[0x40];
+    // vptr at 0x40
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+};
+
+class func_00307E10_cProc {
+public:
+    int state;
+    int count;
+    int cur;
+    char pad0C[0x8];
+    func_00307E10_cElem* elems;
+    char pad18[0x44];
+    // vptr at 0x5C
+    virtual void v01();
+    virtual void v02();
+};
+
+extern "C" void func_00307E10(func_00307E10_cProc* self)
+{
+    if (self->state == 3) {
+        return;
+    }
+    self->elems[self->cur].v06();
+    int next = self->cur + 1;
+    if (next < self->count) {
+        self->cur = next;
+        func_00307E10_cElem* e = &self->elems[next];
+        e->v04();
+    } else {
+        self->v02();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307EC0);
@@ -309,7 +486,47 @@ extern "C" void func_00307EC0(func_00307EC0_sProc* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307F58);
+#ifdef SKIP_ASM
+class func_00307F58_cElem {
+public:
+    int f0;
+    int id;
+    char pad08[0x38];
+    // vptr at 0x40
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+};
+
+struct func_00307F58_sProc {
+    int state;
+    int count;
+    int cur;
+    int pad0C;
+    void* man;
+    func_00307F58_cElem* elems;
+};
+
+extern "C" void func_00307F58(func_00307F58_sProc* self, int id)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->elems[i].id == id) {
+            if (self->cur < self->count) {
+                self->elems[self->cur].v06();
+            }
+            self->cur = i;
+            self->elems[i].v04();
+            return;
+        }
+    }
+}
+#endif
 
 extern "C" void* func_00309B70(int);
 
@@ -343,7 +560,40 @@ extern "C" void* func_00308228(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptprocess", func_00308278);
+#ifdef SKIP_ASM
+// PORT: func_00308018 is declared (void*) but takes (self, id) and forwards id; bound by asm label
+void* func_00308018_2(void* self, int id) __asm__("func_00308018__FPv");
+
+struct func_00308278_sDef {
+    int f0;
+    int a[3];
+    int b[10];
+};
+
+struct func_00308278_sObj {
+    int f0;
+    int f4;
+    void* a[3];
+    void* b[10];
+    void* owner;
+};
+
+extern "C" void func_00308278(func_00308278_sObj* self, void* owner, func_00308278_sDef* def)
+{
+    int i;
+    int j;
+    self->owner = owner;
+    self->f4 = def->f0;
+    for (i = 0; i < 3; i++) {
+        self->a[i] = func_00308018_2(self->owner, def->a[i]);
+    }
+    for (j = 0; j < 10; j++) {
+        self->b[j] = func_00308018_2(self->owner, def->b[j]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308328);
@@ -601,7 +851,51 @@ INCLUDE_ASM("wscript/wscriptprocess", func_003087D0);
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003088D8);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308988);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void func_0030C760(void* p);
+extern "C" void func_00308AA0(void* self);
+
+#define WSP308988_I(off) (*(int*)((char*)self + (off)))
+#define WSP308988_U(off) (*(unsigned int*)((char*)self + (off)))
+
+extern "C" void func_00308988(void* self)
+{
+    WSP308988_I(0x290) = 0;
+    WSP308988_I(0x0) = 0;
+    WSP308988_I(0x294) = 0;
+    WSP308988_I(0x298) = 0;
+    WSP308988_I(0x2A4) = 0;
+    WSP308988_I(0x2A8) = 0;
+    WSP308988_I(0x29C) = 0;
+    WSP308988_I(0x2AC) = 0;
+    WSP308988_I(0x4) = 0;
+    WSP308988_I(0x8) = 0;
+    WSP308988_I(0x10) = 0;
+    WSP308988_I(0x14) = 0;
+    WSP308988_I(0x18) = 0;
+    WSP308988_I(0x1C) = 0;
+    WSP308988_I(0x20) = 0;
+    WSP308988_I(0x28) = 0;
+    WSP308988_I(0x30) = 0;
+    WSP308988_I(0x34) = 0;
+    WSP308988_U(0x2A0) = 0xFFFFFFFF;
+    WSP308988_U(0x2B0) = 0xFFFFFFFF;
+    WSP308988_I(0xC) = -1;
+    WSP308988_I(0x24) = -1;
+    WSP308988_U(0x2C) = 0xFFFFFFFF;
+    func_003E6448((char*)self + 0x38, 0, 8);
+    func_0030C760((char*)self + 0x1C4);
+    WSP308988_I(0x40) = 0;
+    func_003E6448((char*)self + 0x44, 0, 0x180);
+    func_00308AA0(self);
+}
+
+#undef WSP308988_I
+#undef WSP308988_U
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308A48);
@@ -621,7 +915,36 @@ extern "C" void func_00308A48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308AA0);
+#ifdef SKIP_ASM
+struct cWorldView;
+int cWorldView_getNumSections(cWorldView* view);
+extern "C" void func_00308A48(void* self);
+// PORT: the unit declares func_00308B78 as (void* self); the body also takes the slot index
+void* func_00308B78_impl(void* self, int i) __asm__("func_00308B78");
+
+struct func_00308AA0_sSection {
+    short type;
+    short pad2;
+    int f4;
+    int f8;
+};
+
+extern "C" void func_00308AA0(void* self)
+{
+    int i = 0;
+    func_00308A48(self);
+    int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+    for (; i < n; i++) {
+        func_00308AA0_sSection* tbl = *(func_00308AA0_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
+        if (ok) {
+            func_00308B78_impl(self, i);
+        }
+    }
+}
+#endif
 
 extern "C" void* func_00308B78(void* self);
 
@@ -734,7 +1057,42 @@ extern "C" void func_00308FE0(void* self, int i)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptprocess", func_00309030);
+#ifdef SKIP_ASM
+struct cWorldView;
+int cWorldView_getNumSections(cWorldView* view);
+extern "C" void func_0030B1B8(void*);
+extern "C" void func_00308988(void* self);
+extern "C" void func_00308BE0(void* self, int section);
+extern "C" void func_00308F70(void* self, int section);
+
+struct func_00309030_sSection {
+    short type;
+    short pad2;
+    int f4;
+    int f8;
+};
+
+extern "C" void func_00309030(void* self)
+{
+    int i = 0;
+    func_0030B1B8((char*)self + 0x2B8);
+    func_0030B1B8((char*)self + 0x2BC);
+    func_0030B1B8((char*)self + 0x2B4);
+    func_00308988(self);
+    int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+    for (; i < n; i++) {
+        func_00309030_sSection* tbl = *(func_00309030_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
+        if (ok) {
+            func_00308BE0(self, i);
+        } else {
+            func_00308F70(self, i);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00309118);
 

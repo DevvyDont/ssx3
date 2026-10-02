@@ -147,9 +147,89 @@ extern "C" int func_003AA3F0(func_003AA3F0_cObj* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA438);
+#ifdef SKIP_ASM
+class func_003AA438_cObj {
+public:
+    char pad00[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07(void* p, void* base);
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int v11(void* p, void* base);
+};
 
+struct func_003AA438_sEnt {
+    int f0;
+    int f4;
+    int f8;
+    unsigned int fC;
+};
+
+extern char D_004FF1A0[];
+
+// PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AA438(func_003AA438_cObj* self, void* a1)
+{
+    int n = *(int*)((char*)a1 + 0x4);
+    func_003AA438_sEnt* e = *(func_003AA438_sEnt**)((char*)a1 + 0x8);
+    int i;
+    for (i = 0; i < n; i++, e++) {
+        if (e->f4 != 0) {
+            e->f4 += (int)a1;
+            self->v07((void*)e->f4, a1);
+        }
+        if (e->fC == 0xFFFFFFFF) {
+            e->fC = (unsigned int)D_004FF1A0;
+        } else {
+            e->fC += (int)a1;
+        }
+        if (e->f8 != 0) {
+            e->f8 += (int)a1;
+            self->v11((void*)e->f8, a1);
+        }
+    }
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/worldview", func_003AA520);
+#ifdef SKIP_ASM
+class func_003AA520_cObj {
+public:
+    char pad00[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual int v08(void* p, int base);
+};
+
+// PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AA520(func_003AA520_cObj* self, void* a1, int base)
+{
+    int i = 0;
+    int* p = (int*)(*(int*)((char*)a1 + 0x20) += base);
+    for (; i < *(int*)((char*)a1 + 0x1C); i++) {
+        *p += base;
+        self->v08((void*)*p++, base);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA5C8);
@@ -184,7 +264,64 @@ extern "C" int func_003AA5C8(func_003AA5C8_cObj* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA608);
+#ifdef SKIP_ASM
+class func_003AA608_cObj {
+public:
+    char pad00[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int v11(void* p, void* base);
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual int v16(void* p);
+};
+
+struct func_003AA608_sEnt {
+    int f0;
+    int f4;
+    int f8;
+    unsigned int fC;
+};
+
+extern char D_004FF1A0[];
+
+// PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AA608(func_003AA608_cObj* self, void* a1)
+{
+    int n = *(int*)((char*)a1 + 0x4);
+    func_003AA608_sEnt* e = *(func_003AA608_sEnt**)((char*)a1 + 0x8);
+    int i;
+    for (i = 0; i < n; i++, e++) {
+        if (e->f4 != 0) {
+            e->f4 += (int)a1;
+            self->v16((void*)e->f4);
+        }
+        if (e->fC == 0xFFFFFFFF) {
+            e->fC = (unsigned int)D_004FF1A0;
+        } else {
+            e->fC += (int)a1;
+        }
+        if (e->f8 != 0) {
+            e->f8 += (int)a1;
+            self->v11((void*)e->f8, 0);
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA6E8);
@@ -260,7 +397,39 @@ extern "C" int func_003AA780(void* self, int n, int* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA830);
+#ifdef SKIP_ASM
+class func_003AA830_cObj {
+public:
+    char pad00[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual int v12(void* p, int base);
+};
+
+// PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AA830(func_003AA830_cObj* self, void* a1, int base)
+{
+    int i = 0;
+    int* p = (int*)(*(int*)((char*)a1 + 0x20) += base);
+    for (; i < *(int*)((char*)a1 + 0x1C); i++) {
+        *p += base;
+        self->v12((void*)*p++, base);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA8D8);
@@ -407,7 +576,63 @@ INCLUDE_ASM("world/worldview", func_003AAE68);
 
 INCLUDE_ASM("world/worldview", func_003AB498);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003ABE40);
+#ifdef SKIP_ASM
+struct func_003ABE40_sTab {
+    int f0;
+    unsigned int* entries;
+};
+struct func_003ABE40_sLib {
+    int f0;
+    int f4;
+    func_003ABE40_sTab** tables;
+};
+
+class func_003ABE40_cObj {
+public:
+    func_003ABE40_sLib** f0;
+    int f4;
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual int v06(void* a1);
+};
+
+extern "C" int func_003ABF20(void* self, void* a1);
+
+static inline unsigned int func_003ABE40_lookup(func_003ABE40_cObj* self, unsigned int id)
+{
+    func_003ABE40_sTab* t = (*self->f0)->tables[id & 0xFF];
+    unsigned int r;
+    unsigned int v;
+    if (t == 0 || (v = t->entries[id >> 8] >> 8) == 0) {
+        r = 0;
+    } else {
+        r = v << 2;
+    }
+    return r;
+}
+
+// PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003ABE40(func_003ABE40_cObj* self, void* a1)
+{
+    int i = 0;
+    *(int*)((char*)a1 + 0x8) += (int)a1;
+    *(int*)((char*)a1 + 0xC) += (int)a1;
+    int* tbl = *(int**)((char*)a1 + 0xC);
+    unsigned int* p = (unsigned int*)(tbl + 1);
+    for (; i < *tbl; i++, p++) {
+        *p = func_003ABE40_lookup(self, *p);
+    }
+    self->v06(a1);
+    func_003ABF20(self, a1);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003ABF20);
@@ -481,9 +706,104 @@ int func_003ABFC0_impl(void* self, void* item, void* list)
 
 INCLUDE_ASM("world/worldview", func_003AC048);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AC2A8);
+#ifdef SKIP_ASM
+struct func_003AC2A8_sRes {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct func_003AC2A8_sTab {
+    int pad[5];
+    unsigned int* entries;
+};
+struct func_003AC2A8_sLib {
+    int f0;
+    int f4;
+    func_003AC2A8_sTab** tables;
+};
+struct func_003AC2A8_sView {
+    int f0;
+    int f4;
+};
+struct func_003AC2A8_cObj {
+    func_003AC2A8_sLib** f0;
+    func_003AC2A8_sView* f4;
+};
 
+extern "C" int func_003AC358(void* self, void* a1);
+
+static inline func_003AC2A8_sRes* func_003AC2A8_lookup(func_003AC2A8_cObj* self, unsigned int id)
+{
+    func_003AC2A8_sTab* t = (*self->f0)->tables[id & 0xFF];
+    unsigned int v;
+    if (t == 0 || (v = t->entries[id >> 8] >> 8) == 0) {
+        return 0;
+    }
+    return (func_003AC2A8_sRes*)(v << 2);
+}
+
+// PORT: stores pointers in int fields; not 64-bit safe.
+extern "C" int func_003AC2A8(func_003AC2A8_cObj* self, void* a1)
+{
+    func_003AC2A8_sRes* r = func_003AC2A8_lookup(self, *(unsigned int*)((char*)a1 + 0x80));
+    *(func_003AC2A8_sRes**)((char*)a1 + 0x80) = r;
+    *(int*)((char*)a1 + 0x94) = r->fC;
+    *(int*)((char*)a1 + 0x8C) = 0;
+    *(func_003AC2A8_sView**)((char*)a1 + 0x88) = self->f4;
+    int x = self->f4->f4 & 0xFFFF0000;
+    *(int*)((char*)a1 + 0x8) = x | (x >> 16) | 2;
+    func_003AC358(self, a1);
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/worldview", func_003AC358);
+#ifdef SKIP_ASM
+struct func_003AC358_sObj {
+    char pad[0x1C];
+    int count;
+};
+struct func_003AC358_sEnt {
+    int f0;
+    func_003AC358_sObj* obj;
+    int f8;
+    int fC;
+};
+struct func_003AC358_sList {
+    int f0;
+    int count;
+    func_003AC358_sEnt* entries;
+};
+
+extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, void* cur);
+
+// PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AC358(void* self, void* a1)
+{
+    int i;
+    func_003AC358_sList* list;
+    void* cur;
+    *(int*)((char*)a1 + 0x98) += (int)a1;
+    list = *(func_003AC358_sList**)((char*)a1 + 0x80);
+    cur = *(void**)((char*)a1 + 0x98);
+    int n = list->count;
+    func_003AC358_sEnt* e = list->entries;
+    for (i = 0; i < n; i++, e++) {
+        func_003AC358_sObj* o = e->obj;
+        if (o != 0) {
+            int j;
+            for (j = 0; j < o->count; j++) {
+                cur = func_003AC508(self, a1, list, cur);
+            }
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AC508);
 

@@ -1,6 +1,53 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("wscript/wscriptcompile", cWScriptCompile_parseKeywords);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_0048E8C0[];
+
+struct cWScriptKeyword {
+    cWScriptKeyword* next;
+    char pad04[0x74];
+    unsigned int f78;
+    unsigned char f7C;
+    unsigned char f7D;
+    short f7E;
+    char pad80[0x30];
+};
+
+struct cWScriptCompileKw {
+    int f0;
+    int count;
+    cWScriptKeyword* free;
+    cWScriptKeyword* pool;
+};
+
+extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* self, int a1, int n)
+{
+    int i;
+    self->f0 = a1;
+    self->count = n;
+    cWScriptKeyword** slot = &self->pool;
+    cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 0xB0, D_0048E8C0, 0x20000000, 0);
+    cWScriptKeyword* q = mem;
+    int j;
+    for (j = n - 1; j != -1; j--, q++) {
+        q->f78 = 0xFFFFFFFF;
+        q->f7C = 0;
+        q->f7D = 0xFF;
+        q->f7E = -1;
+    }
+    *slot = mem;
+    self->free = 0;
+    for (i = 0; i < self->count; i++) {
+        self->pool[i].next = self->free;
+        self->free = &self->pool[i];
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptcompile", func_00351120);

@@ -20,7 +20,24 @@ extern "C" void* cWScriptMan_addProcess(void* self, int a1, int a2, int front)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess1);
+#ifdef SKIP_ASM
+extern char D_00489918[];
+extern "C" void* func_00307128(void* self, void* man, int a1, int a2, int a3);
+int func_0030B2C0(void* self, void* a1);
+
+extern "C" void* cWScriptMan_addProcess1(void* self, int a1, int a2, int a3, int front)
+{
+    void* p = func_00307128(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, a1, a2, a3);
+    if (front != 0) {
+        func_0030B2C0((char*)self + 0x2BC, p);
+    } else {
+        func_0030B2C0((char*)self + 0x2B4, p);
+    }
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_00309750);
@@ -220,7 +237,42 @@ INCLUDE_ASM("wscript/wscriptman", func_00309BA8);
 
 INCLUDE_ASM("wscript/wscriptman", func_00309C88);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309D20);
+#ifdef SKIP_ASM
+struct func_00309DD0_sValue;
+// cLunoValue: { word0, word1, type } (same layout as func_00309DD0_sValue)
+struct func_00309D20_sValue {
+    int word0;
+    int word1;
+    int type;
+};
+struct func_00309D20_sCall {
+    int pad[4];
+};
+
+void func_00226600(void* self, int a1, int a2);
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+
+extern "C" void func_00309D20(void* self, int* handle, int id)
+{
+    func_00309D20_sValue arg;
+    func_00309D20_sValue ret;
+    func_00309D20_sCall call;
+    int saved = *(int*)((char*)self + 0x290);
+    *(int*)((char*)self + 0x290) = id;
+    func_00226600(&arg, func_003A6D18(*(void**)((char*)self + 0x28C), handle), 0);
+    ret.type = 0;
+    ret.word0 = 0;
+    void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
+    func_002224A8(&call);
+    func_002224B8(&call, &arg, table, &ret);
+    *(int*)((char*)self + 0x290) = saved;
+    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_00309DD0);
@@ -253,7 +305,39 @@ extern "C" int func_00309DD0(void* self, int idx, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309E50);
+#ifdef SKIP_ASM
+struct func_00309E50_sArg {
+    int word0;
+    int word1;
+};
+struct func_00309E50_sCall {
+    int pad[4];
+};
+
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+
+extern "C" void func_00309E50(void* self, int idx, int value)
+{
+    func_00309DD0_sValue key;
+    key.type = 3;
+    *(int*)func_00226620(&key) = value;
+    int off = idx << 2;
+    char* base = (char*)self + 0x3CC;
+    void** slot = (void**)(base + off);
+    func_00309E50_sArg arg = *(func_00309E50_sArg*)func_00225248(*slot, &key);
+    func_00309DD0_sValue ret;
+    ret.type = 0;
+    ret.word0 = 0;
+    func_00309E50_sCall call;
+    func_002224A8(&call);
+    func_002224B8(&call, &arg, *slot, &ret);
+    func_00225B90(&ret, 2);
+    func_00225B90(&key, 2);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_00309F18);
 
@@ -302,9 +386,112 @@ extern "C" int func_0030A2E8(void* self, int id)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A310);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A3A0);
+#ifdef SKIP_ASM
+// script object controller: 0xC bytes of data, then the vptr
+class cWScriptCtl {
+public:
+    int f0;
+    int f4;
+    int f8;
+    // vptr at 0xC; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual int v20();
+    virtual int v21(void* obj);
+    virtual int v22(void* obj);
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+};
 
+struct func_0030A3A0_sType {
+    short type;
+    short pad;
+    int f4;
+    int f8;
+};
+
+// PORT: func_0030A270/func_0030A298 take the object pointer as an int id
+extern "C" void func_0030A3A0(void* self, void* obj)
+{
+    cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
+    if (ctl != 0) {
+        if (ctl->v20() != 0) {
+            (*(cWScriptCtl**)((char*)obj + 0xC))->v21(obj);
+        }
+    } else {
+        func_0030A3A0_sType* t = *(func_0030A3A0_sType**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        bool isScript = t[*(unsigned char*)((char*)obj + 0x78)].type == 3;
+        if (isScript) {
+            if (func_0030A270(self, (int)obj) != 0) {
+                func_0030A298(self, (int)obj);
+            }
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A460);
+#ifdef SKIP_ASM
+// script object controller: 0xC bytes of data, then the vptr
+extern "C" void func_0030A548(void* self, int id);
+
+// PORT: func_0030A2E8/func_0030A548 take the object pointer as an int id
+extern "C" void func_0030A460(void* self, void* obj)
+{
+    cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
+    if (ctl != 0) {
+        if (ctl->v20() != 0) {
+            (*(cWScriptCtl**)((char*)obj + 0xC))->v22(obj);
+            return;
+        }
+        ctl = *(cWScriptCtl**)((char*)obj + 0xC);
+        if (*(short*)((char*)ctl + 0x10) == 6) {
+            return;
+        }
+        obj = *(void**)((char*)ctl + 0x18);
+        if (func_0030A2E8(self, (int)obj) != 0) {
+            func_0030A548(self, (int)obj);
+            return;
+        }
+        (*(cWScriptCtl**)((char*)obj + 0xC))->v35();
+        return;
+    }
+    if (func_0030A2E8(self, (int)obj) != 0) {
+        func_0030A548(self, (int)obj);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A548);
@@ -951,7 +1138,35 @@ extern "C" void func_0030BC80(void* self, void** list, void* stream)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030BD20);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030BEE8);
+#ifdef SKIP_ASM
+class func_0030BEE8_cStream {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void Read(void* dst, int size);
+};
+
+extern "C" void func_00308118(void* proc, func_0030BEE8_cStream* stream);
+extern "C" void func_0030B270(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
+
+extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream)
+{
+    int n;
+    int id;
+    int i = 0;
+    stream->Read(&n, 4);
+    for (; i < n; i++) {
+        stream->Read(&id, 4);
+        cWScriptListNode* node = (cWScriptListNode*)func_0030B320((char*)self + 0x2B4, id);
+        func_0030B2D0((cWScriptListHead*)((char*)self + 0x2B4), node);
+        func_00308118(node, stream);
+        func_0030B270(list, node);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030BFC0);
 

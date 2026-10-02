@@ -31,7 +31,33 @@ extern "C" void* func_002C1CD8(void* self, float fx, float fz)
 
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2088);
+#ifdef SKIP_ASM
+struct func_002C2088_sNode {
+    unsigned short child[4];
+};
+struct func_002C2088_sOut {
+    int f0;
+    int f4;
+};
+
+// PORT: node index computed from pointers cast to unsigned int
+extern "C" void func_002C2088(void* self, func_002C2088_sOut* out, int* count, int* map, func_002C2088_sNode* node)
+{
+    int i;
+    unsigned short* p;
+    out[*count].f4 = *(int*)((char*)node + 4);
+    out[*count].f0 = *(int*)((char*)node + 0);
+    map[(unsigned short)(((unsigned int)node - *(unsigned int*)((char*)self + 0x20)) >> 3)] = (*count)++;
+    if (node->child[0] & 1) {
+        p = node->child;
+        for (i = 0; i < 4; i++) {
+            func_002C2088(self, out, count, map, *(func_002C2088_sNode**)((char*)self + 0x20) + (*p++ >> 1));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2210);
@@ -238,9 +264,53 @@ extern "C" int func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2718);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char* s);
 
+// PORT: hand-rolled EE EABI va_start (func_002C26D0_va_start, defined above); use <stdarg.h> off-PS2.
+extern "C" int func_002C2718(unsigned short* dst, const char* fmt, ...)
+{
+    func_002C26D0_va_list ap;
+    unsigned short buf[0x400];
+    unsigned short* p;
+    int n;
+    int i;
+    p = buf;
+    n = strlen(fmt);
+    for (i = 0; i < n; i++) {
+        *p++ = *fmt++;
+    }
+    *p = 0;
+    func_002C26D0_va_start(ap);
+    return USTR_vsprintf(dst, buf, ap);
+}
+#endif
+
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C27C0);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char* s);
+
+// PORT: hand-rolled EE EABI va_start (func_002C26D0_va_start, defined above); use <stdarg.h> off-PS2.
+extern "C" int func_002C27C0(unsigned short* dst, const char* fmt, ...)
+{
+    func_002C26D0_va_list ap;
+    unsigned short buf[0x400];
+    unsigned short* p;
+    int n;
+    int i;
+    p = buf;
+    n = strlen(fmt);
+    for (i = 0; i < n; i++) {
+        *p++ = *fmt++;
+    }
+    *p = 0;
+    func_002C26D0_va_start(ap);
+    return USTR_vsprintf(dst, buf, ap);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2868);
@@ -979,7 +1049,108 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C55D8);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C6128);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6280);
+#ifdef SKIP_ASM
+class func_002C6280_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual int v20();
+    virtual void v21();
+    virtual int v22(int a);
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual int v67(int i);
+};
+
+struct func_002C6280_sElem {
+    int flag;
+    char pad[0x74];
+};
+
+struct func_002C6280_sData {
+    char pad[0x1AC];
+    func_002C6280_sElem elems[1];
+};
+
+extern "C" void func_002C6280(func_002C6280_cObj* self)
+{
+    int i = 0;
+    int remain = self->v20();
+    int unit = self->v22(*(int*)((char*)self + 0x24));
+    for (; i < *(int*)((char*)self + 0x14); i++) {
+        ((func_002C6280_sData*)self)->elems[i].flag = 0;
+        if (self->v67(i) == 0) {
+            if (remain >= unit) {
+                remain -= unit;
+            } else {
+                ((func_002C6280_sData*)self)->elems[i].flag = 1;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C6360);
 
