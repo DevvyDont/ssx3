@@ -8,6 +8,10 @@ options:
   base_path: ../
   platform: ps2
   compiler: EEGCC
+  # $gp as set by crt0 (`daddu $gp, $a0` with $a0 = &D_004A30F0, passed to SetupThread).
+  # Lets splat symbolize $gp-relative accesses as %gp_rel(sym) instead of raw offsets.
+  gp_value: 0x004A30F0
+  use_gp_rel_macro_nonmatching: False
 
   asm_path: asm
   src_path: src/
