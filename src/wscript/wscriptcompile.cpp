@@ -2,7 +2,23 @@
 
 INCLUDE_ASM("wscript/wscriptcompile", cWScriptCompile_parseKeywords);
 
+//100%
 INCLUDE_ASM("wscript/wscriptcompile", func_00351120);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+void cMemMan_free(void* p);
+
+extern "C" void func_00351120(void* self, int flags)
+{
+    void* p = *(void**)((char*)self + 0xC);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptcompile", func_00351170);

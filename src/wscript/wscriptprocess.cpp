@@ -36,7 +36,26 @@ extern "C" unsigned int func_003079D8(cWScriptProcList* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A10);
+#ifdef SKIP_ASM
+class func_00307A10_cObj {
+public:
+    char pad_0x00[0x40];
+    // vptr at 0x40; sizeof == 0x44 (same layout as cWScriptProcEntry)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(int a1); // 0x18
+};
+
+extern "C" void func_00307A10(cWScriptProcList* self, int a1)
+{
+    int i = self->cur;
+    if (i < self->count) {
+        ((func_00307A10_cObj*)self->entries)[i].v03(a1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A60);
@@ -518,7 +537,23 @@ INCLUDE_ASM("wscript/wscriptprocess", func_003088D8);
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308988);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308A48);
+#ifdef SKIP_ASM
+extern "C" void func_00224DF0(void* obj, int flags);
+
+extern "C" void func_00308A48(void* self)
+{
+    void** objs = (void**)((char*)self + 0x3CC);
+    int i;
+    for (i = 0; i < 50; i++) {
+        if (objs[i] != 0) {
+            func_00224DF0(objs[i], 3);
+            objs[i] = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308AA0);
 
@@ -533,7 +568,26 @@ void* func_00308B58(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308B78);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00224DA0(void* mem, int a1);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern const char D_004898C8[];
+
+// PORT: the unit declares func_00308B78 as (void* self); the body also takes the slot index
+void* func_00308B78_impl(void* self, int i) __asm__("func_00308B78");
+void* func_00308B78_impl(void* self, int i)
+{
+    char* base = (char*)self + 0x3CC;
+    void** slot = (void**)(base + (i << 2));
+    if (*slot != 0) {
+        func_00224DF0(*slot, 3);
+    }
+    return *slot = func_00224DA0(cMemMan_alloc(4, D_004898C8, 0x20000000, 0), 0x40);
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308BE0);
 

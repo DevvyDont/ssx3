@@ -33,9 +33,33 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C2088);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2210);
+#ifdef SKIP_ASM
+extern "C" short func_002C2338(unsigned char c);
 
+extern "C" void func_002C2210(void* self, short* dst, const char* src)
+{
+    while (*src != 0) {
+        *dst++ = func_002C2338(*src++);
+    }
+    *dst = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2268);
+#ifdef SKIP_ASM
+extern "C" char func_002C2430(short c);
+
+extern "C" void func_002C2268(void* self, char* dst, const short* src)
+{
+    for (; *src != 0; src++, dst++) {
+        *dst = func_002C2430(*src);
+    }
+    *dst = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C22C8);
@@ -350,7 +374,26 @@ void func_002C4408(void* self, int val)
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4410);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4480);
+#ifdef SKIP_ASM
+class func_002C4480_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
+    virtual int v11(); // 0x58
+};
+
+extern "C" void func_002C4480(func_002C4480_cObj* self, int a1)
+{
+    *(int*)((char*)self + 0xC) = a1;
+    if (self->v11() == 0) {
+        *(int*)((char*)self + 0x10) = a1;
+        func_002C48C0(self, 3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C44E0);
@@ -379,15 +422,96 @@ extern "C" void func_002C44E0(sQTState* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4520);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A3950[];
 
+extern "C" void func_002C4520(void* self, const char* name)
+{
+    char* p = (char*)self + 0xB9;
+    strcpy(p, name);
+    sprintf((char*)self + 0xF9, D_004A3950, p);
+    func_002C48C0(self, 0x14);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C4578);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A3950[];
+// PORT: func_002C2580 takes (dst, src); the unit declares it with one arg
+char* func_002C2580_impl(char* dst, unsigned short* src) __asm__("func_002C2580");
+
+extern "C" void func_002C4578(void* self, unsigned short* name)
+{
+    char* p = (char*)self + 0xB9;
+    func_002C2580_impl(p, name);
+    sprintf((char*)self + 0xF9, D_004A3950, p);
+    func_002C48C0(self, 0x14);
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C45D0);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4648);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C46C0);
+#ifdef SKIP_ASM
+class func_002C46C0_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36(char* name, int a2, int a3); // 0x120
+};
+
+extern "C" void func_002C54D0(void* self, int a1, char* dst);
+
+extern "C" void func_002C46C0(func_002C46C0_cObj* self, int a1, int a2, int a3)
+{
+    char name[64];
+    func_002C54D0(self, a1, name);
+    self->v36(name, a2, a3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4720__FPvii);
@@ -429,7 +553,19 @@ void* func_002C4768(void* self)
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4788);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C4800);
+#ifdef SKIP_ASM
+extern "C" void func_002C54D0(void* self, int a1, char* dst);
+extern "C" void func_002C4788(void* self, char* name, int a2, int a3);
+
+extern "C" void func_002C4800(void* self, int a1, int a2, int a3)
+{
+    char name[64];
+    func_002C54D0(self, a1, name);
+    func_002C4788(self, name, a2, a3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4858__FPvii);
@@ -555,7 +691,22 @@ extern "C" void func_002C5250(sQTState* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5278);
+#ifdef SKIP_ASM
+extern "C" void* func_003E6448(void* dst, int c, int n);
+extern "C" void func_002C52D8(void* self);
+
+extern "C" void func_002C5278(void* self)
+{
+    *(int*)((char*)self + 0x50) = 0;
+    *(int*)((char*)self + 0x54) = 0;
+    func_003E6448((char*)self + 0x480, 0, 0x40);
+    func_003E6448((char*)self + 0x1A4, 0, 0x2D0);
+    func_003E6448((char*)self + 0x4C0, 0, 0x1000);
+    func_002C52D8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C52D8);
@@ -1052,7 +1203,23 @@ extern "C" void func_002C6CE0(void* self, const char* name)
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C6D18);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6D70);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_002523A8(void* p);
+
+extern "C" void func_002C6D70(void* self, int flags)
+{
+    void* p = *(void**)((char*)self + 0x4);
+    if (p != 0) {
+        func_002523A8(p);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_003DBB68(int);
 
