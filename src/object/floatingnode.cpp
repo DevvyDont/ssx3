@@ -23,7 +23,19 @@ void cFloatingNode_initInfo(cFloatingNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/floatingnode", func_0034EF08);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_0034EF08(cFloatingNode* self)
+{
+    if (self->field_0x78 != 0) {
+        operator_delete((int*)self->field_0x78);
+        self->field_0x78 = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/floatingnode", func_0034EF40);
 

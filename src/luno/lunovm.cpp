@@ -93,7 +93,20 @@ extern "C" void func_00224DF0(cLunoTableRef* self, int flags)
 
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_constructTable);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", func_00224F30);
+#ifdef SKIP_ASM
+extern "C" void func_00224D00(cLunoTable* table, int flags);
+
+extern "C" void func_00224F30(cLunoTableRef* ref)
+{
+    cLunoTable* t = ref->table;
+    if (t != 0) {
+        func_00224D00(t, 3);
+    }
+    ref->table = 0;
+}
+#endif
 
 INCLUDE_ASM("luno/lunovm", func_00224F68);
 

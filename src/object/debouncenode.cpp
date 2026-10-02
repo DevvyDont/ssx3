@@ -160,11 +160,113 @@ INCLUDE_ASM("object/debouncenode", func_00344AA0);
 
 INCLUDE_ASM("object/debouncenode", func_00344E18);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344FC0);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+class cDebounceStream {
+public:
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void func_00344FC0(void* self, cDebounceStream* s)
+{
+    s->v01(self, 0x10C);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00344FF8);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00345048);
+#ifdef SKIP_ASM
+struct sDebVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sDebMtx {
+    sDebVec4 r[4];
+};
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
+static inline sDebVec4 debMtxApply(sDebMtx* m, const sDebVec4& v)
+{
+    sDebVec4 out;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf8, %1\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(out)
+        : "m"(v), "r"(m)
+        : "memory");
+    return out;
+}
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v * s).
+static inline sDebVec4 debVecScale(const sDebVec4& v, float s)
+{
+    sDebVec4 out;
+    int t;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(out), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return out;
+}
+
+struct sDebCurve {
+    char pad_0x00[0x10];
+    sDebMtx basis;   // 0x10
+    float coef[4];   // 0x50: time-warp cubic
+    char pad_0x60[0x24];
+    float t0;        // 0x84
+};
+
+// Evaluate the curve at time t: position, velocity and acceleration.
+extern "C" void func_00345048(sDebCurve* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+{
+    t -= self->t0;
+    float u = ((self->coef[0] * t + self->coef[1]) * t + self->coef[2]) * t + self->coef[3];
+    float du = (self->coef[0] * (t * 3.0f) + self->coef[1] * 2.0f) * t + self->coef[2];
+    sDebVec4 a;
+    a.x = u * 6.0f;
+    a.y = 2.0f;
+    a.z = 0.0f;
+    a.w = 0.0f;
+    *acc = debVecScale(debMtxApply(&self->basis, a), du);
+    sDebVec4 p;
+    p.x = u * u * u;
+    p.y = u * u;
+    p.z = u;
+    p.w = 1.0f;
+    *pos = debMtxApply(&self->basis, p);
+    sDebVec4 v;
+    v.x = u * u * 3.0f;
+    v.y = u * 2.0f;
+    v.z = 1.0f;
+    v.w = 0.0f;
+    *vel = debMtxApply(&self->basis, v);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_003451C0);
 

@@ -284,7 +284,42 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032D440);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032D470);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032DA40);
+#ifdef SKIP_ASM
+extern int D_0044AF98[];
+
+// Shell sort of keys[] (descending) carrying vals[] along, gap table D_0044AF98.
+extern "C" void func_0032DA40(int n, int* keys, int* vals)
+{
+    int k = 1;
+    while (D_0044AF98[k] < n) {
+        k++;
+    }
+    int gap;
+    for (;;) {
+        gap = D_0044AF98[--k];
+        for (int i = gap; i < n; i++) {
+            int key = keys[i];
+            int val = vals[i];
+            int j = i - gap;
+            do {
+                if (keys[j] >= key) {
+                    break;
+                }
+                keys[j + gap] = keys[j];
+                vals[j + gap] = vals[j];
+                j -= gap;
+            } while (j >= 0);
+            keys[j + gap] = key;
+            vals[j + gap] = val;
+        }
+        if (gap < 2) {
+            break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032DB40);
 
@@ -294,9 +329,135 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032DE20);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032DF28);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E100);
+#ifdef SKIP_ASM
+extern char D_0048E6A8[];
 
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
+static inline sSphereVec4 sphereCapsuleSub(sSphereVec4* a, sSphereVec4* b)
+{
+    sSphereVec4 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*a), "m"(*b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+static inline sSphereVec4 sphereCapsuleAdd(sSphereVec4* a, sSphereVec4* b)
+{
+    sSphereVec4 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*a), "m"(*b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v / s).
+static inline sSphereVec4 sphereCapsuleDiv(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        ".set pop\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+struct sSphereV4_E100 : sSphereVec4 {
+    sSphereV4_E100(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+struct sRiderCapsule_E100 {
+    int state;          // 0x00
+    int f4;             // 0x04
+    int f8;             // 0x08
+    int pad_0xC[5];
+    sSphereVec4 max;    // 0x20
+    sSphereVec4 min;    // 0x30
+    sSphereVec4 center; // 0x40
+    void* vtbl;         // 0x50
+    int pad_0x54[3];
+    sSphereVec4 p0;     // 0x60
+    sSphereVec4 dir;    // 0x70
+    sSphereVec4 p0b;    // 0x80
+    sSphereVec4 dirb;   // 0x90
+    float radius;       // 0xA0
+};
+
+extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVec4* p0, sSphereVec4* p1,
+                                             int state, float r)
+{
+    self->state = state;
+    self->vtbl = D_0048E6A8;
+    self->f8 = 0;
+    self->f4 = 0;
+    self->p0b = *p0;
+    self->p0 = self->p0b;
+    self->dirb = sphereCapsuleSub(p1, p0);
+    self->dir = self->dirb;
+    self->radius = r;
+    self->max = sSphereV4_E100(p0->x > p1->x ? p0->x : p1->x,
+                               p0->y > p1->y ? p0->y : p1->y,
+                               p0->z > p1->z ? p0->z : p1->z, 1.0f);
+    self->min = sSphereV4_E100(p0->x < p1->x ? p0->x : p1->x,
+                               p0->y < p1->y ? p0->y : p1->y,
+                               p0->z < p1->z ? p0->z : p1->z, 1.0f);
+    self->center = sphereCapsuleDiv(sphereCapsuleAdd(&self->min, &self->max), 2.0f);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E288);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+// segment self->p0 .. p0+dir overlaps the box [mn, mx]?
+extern "C" int func_0032E288(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereVec4* mx)
+{
+    sSphereVec4 e = sphereCapsuleAdd(&self->p0, &self->dir);
+    if ((self->p0.x < mn->x && e.x < mn->x) || (mx->x < self->p0.x && mx->x < e.x) ||
+        (self->p0.y < mn->y && e.y < mn->y) || (mx->y < self->p0.y && mx->y < e.y) ||
+        (self->p0.z < mn->z && e.z < mn->z) || (mx->z < self->p0.z && mx->z < e.z)) {
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032E398);
 
@@ -479,7 +640,30 @@ extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032FC08);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
+// sphere (pos 0x60, radius 0x70) overlaps the box [mn, mx]?
+extern "C" int func_0032FC08(void* self, sSphereVec4* mn, sSphereVec4* mx)
+{
+    sSphereVec4 rv;
+    float rad = *(float*)((char*)self + 0x70);
+    rv.x = rad;
+    rv.y = rad;
+    rv.z = rad;
+    rv.w = 0;
+    sSphereVec4 hi = sphereCapsuleAdd((sSphereVec4*)((char*)self + 0x60), &rv);
+    sSphereVec4 lo = sphereCapsuleSub((sSphereVec4*)((char*)self + 0x60), &rv);
+    if ((mn->x > hi.x && lo.x < mn->x) || (mx->x < hi.x && mx->x < lo.x) ||
+        (mn->y > hi.y && lo.y < mn->y) || (mx->y < hi.y && mx->y < lo.y) ||
+        (mn->z > hi.z && lo.z < mn->z) || (mx->z < hi.z && mx->z < lo.z)) {
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032FD40);
@@ -532,7 +716,17 @@ extern "C" void func_0032FD98(void* self)
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032FDB0);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032FE40);
+#ifdef SKIP_ASM
+extern "C" int func_00329590(void* a, void* b, void* center, void* box, void* boxMin, void* boxMax, float radius);
+
+extern "C" int func_0032FE40(void* self, void* a, void* b, void* box)
+{
+    return func_00329590(a, b, (char*)self + 0x60, box, (char*)box + 0x10, (char*)box + 0x40,
+                         *(float*)((char*)self + 0x70)) != 0;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032FE78);
 

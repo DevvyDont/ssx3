@@ -169,7 +169,21 @@ extern "C" void func_00229B90(void* self, int a1)
 
 INCLUDE_ASM("main/ssxapp", func_00229BA8);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229E20);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+class cSSXAppStream {
+public:
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void func_00229E20(void* self, cSSXAppStream* s)
+{
+    s->v01((char*)self + 0x8, 0x200);
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229E58);
 

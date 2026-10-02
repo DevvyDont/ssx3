@@ -146,7 +146,18 @@ void func_00326A20(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326A28);
+#ifdef SKIP_ASM
+extern "C" int func_00326D60(void* p, int n);
+
+extern "C" void func_00326A28(void* self)
+{
+    *(int*)((char*)self + 0x2EE8) = func_00326D60((char*)self + 0x2EEC, 4);
+    *(int*)((char*)self + 0x2EE0) = 0x1D;
+    *(int*)((char*)self + 0x2EE4) = 0;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_00326A68);
 

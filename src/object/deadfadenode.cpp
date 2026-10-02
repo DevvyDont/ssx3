@@ -36,7 +36,19 @@ void* func_00350E70(void* self)
 
 INCLUDE_ASM("object/deadfadenode", func_00350E90);
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350F08);
+#ifdef SKIP_ASM
+extern "C" void cInstanceNode_cInstanceNode(void* self);
+extern char D_00491800[];
+
+extern "C" void* func_00350F08(void* self)
+{
+    cInstanceNode_cInstanceNode(self);
+    *(void**)((char*)self + 0xC) = D_00491800;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350F40__FPv);
@@ -49,7 +61,19 @@ void* func_00350F40(void* self)
 
 INCLUDE_ASM("object/deadfadenode", func_00350F60);
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350FD8);
+#ifdef SKIP_ASM
+extern "C" void cInstanceNode_cInstanceNode(void* self);
+extern char D_00491680[];
+
+extern "C" void* func_00350FD8(void* self)
+{
+    cInstanceNode_cInstanceNode(self);
+    *(void**)((char*)self + 0xC) = D_00491680;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00351010__FPv);

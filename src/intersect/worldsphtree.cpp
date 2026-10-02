@@ -6,7 +6,22 @@ INCLUDE_ASM("intersect/worldsphtree", func_003304E8);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00330540);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003306D8);
+#ifdef SKIP_ASM
+extern "C" float func_0032C590(void* self);
+
+extern "C" float func_003306D8(void* self)
+{
+    float r;
+    if (*(int*)self != 0) {
+        r = func_0032C590(*(void**)((char*)self + 0x60)) * 2.0f;
+    } else {
+        r = -1.0f;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00330710);
 
@@ -46,7 +61,20 @@ INCLUDE_ASM("intersect/worldsphtree", func_00334680);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00334800);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00334850);
+#ifdef SKIP_ASM
+extern "C" void func_00327828(void* p, int flags);
+
+extern "C" void func_00334850(void* self)
+{
+    void* p = *(void**)((char*)self + 0xA4);
+    if (p != 0) {
+        func_00327828(p, 3);
+    }
+    *(void**)((char*)self + 0xA4) = 0;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00334888);
 

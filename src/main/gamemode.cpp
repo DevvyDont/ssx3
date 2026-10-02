@@ -49,9 +49,31 @@ INCLUDE_ASM("main/gamemode", func_00239AA0);
 
 INCLUDE_ASM("main/gamemode", func_00239CE0);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00239D18);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+class cGameModeStream {
+public:
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
 
+extern "C" void func_00239D18(void* self, cGameModeStream* s)
+{
+    s->v01((char*)self + 0x4, 0xA0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamemode", func_00239D50);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+extern "C" void func_00239D50(void* self, cGameModeStream* s)
+{
+    s->v02((char*)self + 0x4, 0xA0);
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_00239D88);
 
@@ -75,17 +97,49 @@ void func_0023AC10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023AC18);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+extern "C" void func_0023AC18(void* self, cGameModeStream* s)
+{
+    s->v01(self, 0xD0);
+}
+#endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023AC50);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+extern "C" void func_0023AC50(void* self, cGameModeStream* s)
+{
+    s->v02(self, 0xD0);
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_0023AC88);
 
 INCLUDE_ASM("main/gamemode", func_0023AE00);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023B038);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+extern "C" void func_0023B038(void* self, cGameModeStream* s)
+{
+    s->v01(self, 0x2C);
+}
+#endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023B070);
+#ifdef SKIP_ASM
+// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+extern "C" void func_0023B070(void* self, cGameModeStream* s)
+{
+    s->v02(self, 0x2C);
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_0023B0A8);
 

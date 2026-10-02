@@ -10,7 +10,89 @@ INCLUDE_ASM("object/flexrailnode", func_00348FA0);
 
 INCLUDE_ASM("object/flexrailnode", func_003490B0);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00349110);
+#ifdef SKIP_ASM
+struct sFrBoxVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFrBoxElem {
+    char pad_0x00[0x20];
+    sFrBoxVec4 pos; // 0x20
+    char pad_0x30[0x20];
+};
+
+struct sFrBoxRail {
+    char pad_0x00[0x20];
+    int count;          // 0x20
+    char pad_0x24[0xC];
+    sFrBoxVec4 min;     // 0x30
+    sFrBoxVec4 max;     // 0x40
+    char pad_0x50[0x20];
+    sFrBoxElem* elems;  // 0x70
+};
+
+// PORT: PS2-only VU0 inline asm (vector sub-assign).
+static inline void vu0SubFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vu0AddFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+// bounding box of the rail elements, padded by 200 on x/y/z
+extern "C" void func_00349110(sFrBoxRail* self)
+{
+    sFrBoxElem* e = self->elems;
+    int n = self->count;
+    self->min = self->max = e[0].pos;
+    for (int i = 1; i < n; i++) {
+        sFrBoxVec4* p = &e[i].pos;
+        if (p->x < self->min.x) {
+            self->min.x = p->x;
+        }
+        if (p->y < self->min.y) {
+            self->min.y = p->y;
+        }
+        if (p->z < self->min.z) {
+            self->min.z = p->z;
+        }
+        if (p->x > self->max.x) {
+            self->max.x = p->x;
+        }
+        if (p->y > self->max.y) {
+            self->max.y = p->y;
+        }
+        if (p->z > self->max.z) {
+            self->max.z = p->z;
+        }
+    }
+    sFrBoxVec4 pad;
+    pad.x = 200.0f;
+    pad.y = 200.0f;
+    pad.z = 200.0f;
+    pad.w = 0.0f;
+    vu0SubFRBox(self->min, pad);
+    vu0AddFRBox(self->max, pad);
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_00349220);
 
@@ -97,7 +179,62 @@ INCLUDE_ASM("object/flexrailnode", func_00349DB0);
 
 INCLUDE_ASM("object/flexrailnode", func_00349EB8);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00349F18);
+#ifdef SKIP_ASM
+struct sFrBoxElem60 {
+    sFrBoxVec4 pos; // 0x00
+    char pad_0x10[0x50];
+};
+
+struct sFrBoxRail60 {
+    char pad_0x00[0x20];
+    int count;           // 0x20
+    char pad_0x24[0xC];
+    sFrBoxVec4 min;      // 0x30
+    sFrBoxVec4 max;      // 0x40
+    char pad_0x50[0x20];
+    sFrBoxElem60* elems; // 0x70
+};
+
+// PORT: PS2-only VU0 inline asm (vector sub-assign).
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+// bounding box of the rail elements, padded by 200 on x/y/z
+extern "C" void func_00349F18(sFrBoxRail60* self)
+{
+    sFrBoxElem60* e = self->elems;
+    int n = self->count;
+    self->min = self->max = e[0].pos;
+    for (int i = 1; i < n; i++) {
+        sFrBoxVec4* p = &e[i].pos;
+        if (p->x < self->min.x) {
+            self->min.x = p->x;
+        }
+        if (p->y < self->min.y) {
+            self->min.y = p->y;
+        }
+        if (p->z < self->min.z) {
+            self->min.z = p->z;
+        }
+        if (p->x > self->max.x) {
+            self->max.x = p->x;
+        }
+        if (p->y > self->max.y) {
+            self->max.y = p->y;
+        }
+        if (p->z > self->max.z) {
+            self->max.z = p->z;
+        }
+    }
+    sFrBoxVec4 pad;
+    pad.x = 200.0f;
+    pad.y = 200.0f;
+    pad.z = 200.0f;
+    pad.w = 0.0f;
+    vu0SubFRBox(self->min, pad);
+    vu0AddFRBox(self->max, pad);
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034A028);
 
@@ -115,7 +252,19 @@ INCLUDE_ASM("object/flexrailnode", func_0034AC88);
 
 INCLUDE_ASM("object/flexrailnode", func_0034ADD8);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034AE68);
+#ifdef SKIP_ASM
+extern "C" void cInstanceNode_cInstanceNode(void* self);
+extern char D_0048FC10[];
+
+extern "C" void* func_0034AE68(void* self)
+{
+    cInstanceNode_cInstanceNode(self);
+    *(void**)((char*)self + 0xC) = D_0048FC10;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034AEA0);
 

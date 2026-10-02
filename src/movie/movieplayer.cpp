@@ -68,7 +68,18 @@ INCLUDE_ASM("movie/movieplayer", func_0023CAA0);
 
 INCLUDE_ASM("movie/movieplayer", func_0023CAE8);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023CC20);
+#ifdef SKIP_ASM
+extern "C" void func_0023CC20(void* self)
+{
+    if (*(int*)((char*)self + 0x118) != 0) {
+        void* obj = *(void**)((char*)self + 0x434);
+        sMovieVEntry* vt = *(sMovieVEntry**)obj;
+        vt[43].fn((char*)obj + vt[43].delta);
+    }
+}
+#endif
 
 extern "C" void* func_0023CAA0(void* self);
 
@@ -201,7 +212,22 @@ INCLUDE_ASM("movie/movieplayer", func_0023F578);
 
 INCLUDE_ASM("movie/movieplayer", func_0023F698);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023FAE0);
+#ifdef SKIP_ASM
+extern "C" void func_0023FB20(void* self, int v);
+
+extern "C" void func_0023FAE0(void* self)
+{
+    int cur = *(int*)((char*)self + 0x428);
+    if (*(int*)((char*)self + 0x444) != cur) {
+        *(int*)((char*)self + 0x444) = cur;
+        *(int*)((char*)self + 0x43C) = 0;
+        *(int*)((char*)self + 0x440) = 0;
+    }
+    func_0023FB20(self, *(int*)((char*)self + 0x428));
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023FB18__FPvi);
@@ -212,7 +238,17 @@ void func_0023FB18(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023FB20);
+#ifdef SKIP_ASM
+extern "C" void func_0023FB20(void* self, int v)
+{
+    *(int*)((char*)self + 0x42C) = v;
+    void* obj = *(void**)((char*)self + 0x434);
+    sMovieVEntry2* vt = *(sMovieVEntry2**)obj;
+    vt[5].fn((char*)obj + vt[5].delta, v);
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023FB58);
 
@@ -220,7 +256,17 @@ INCLUDE_ASM("movie/movieplayer", func_0023FBB8);
 
 INCLUDE_ASM("movie/movieplayer", func_0023FC70);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023FD08);
+#ifdef SKIP_ASM
+extern "C" void func_0023EA30(void* self, int v);
+
+extern "C" void func_0023FD08(void* self)
+{
+    func_0023EA30(self, 1);
+    (*(void (**)())((char*)self + 0x38))();
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023FD40);
 
@@ -330,7 +376,23 @@ INCLUDE_ASM("movie/movieplayer", func_00241138);
 
 INCLUDE_ASM("movie/movieplayer", func_00241180);
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241200);
+#ifdef SKIP_ASM
+struct sMovieVEntry3 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+extern "C" void func_00241200(void* self, int a, int n)
+{
+    *(int*)((char*)self + 0xE8) += n;
+    void* obj = *(void**)((char*)self + 0x434);
+    sMovieVEntry3* vt = *(sMovieVEntry3**)obj;
+    vt[30].fn((char*)obj + vt[30].delta, a, n);
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241240);
 

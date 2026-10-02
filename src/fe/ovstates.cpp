@@ -56,5 +56,18 @@ extern "C" int func_001952E8(void* self, int a1, int a2)
 
 INCLUDE_ASM("fe/ovstates", func_00195328);
 
+//100%
 INCLUDE_ASM("fe/ovstates", func_00195498);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void*);
+extern char D_0046B918[];
+
+extern "C" void* func_00195498(void* self)
+{
+    func_0039E2A0(self);
+    *(void**)((char*)self + 0x8) = D_0046B918;
+    *(int*)((char*)self + 0xC) = 5;
+    return self;
+}
+#endif
 

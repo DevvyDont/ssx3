@@ -140,7 +140,19 @@ void* func_00232CF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232D18);
+#ifdef SKIP_ASM
+void func_00231CB0(void*);
+extern "C" void func_00398038(void*);
+
+extern "C" void func_00232D18(void* self)
+{
+    func_00231CB0(self);
+    func_00398038(*(void**)((char*)self + 0xC));
+    (*(int*)((char*)self + 0x14))++;
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00232D50);
 
