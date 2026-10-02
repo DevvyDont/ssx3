@@ -2,9 +2,43 @@
 
 INCLUDE_ASM("fe/fepopup", cScreenPopup_cScreenPopup);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C5A90);
+#ifdef SKIP_ASM
+extern void* D_0046CBD8[];
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_001C5750(void* self, int flags);
+extern "C" void func_0039E390(void* self, int flags);
 
+extern "C" void func_001C5A90(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_0046CBD8;
+    cBXString__cBXString((char*)self + 0x2B4, 2);
+    cBXString__cBXString((char*)self + 0x2B0, 2);
+    func_001C5750((char*)self + 0xBC, 2);
+    func_0039E390(self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A1C40[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+extern "C" void cScreenPopup_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A1C40), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        *(int*)((char*)self + 0x2B8) = 1;
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 extern "C" void* func_0039E4A0(void*);
 
@@ -31,7 +65,32 @@ int func_001C5DD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C5DD8);
+#ifdef SKIP_ASM
+struct sColor_7738;
+struct sColor5DD8 { int r, g, b; };
+struct sVEntry001C5DD8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+extern "C" void func_001C8A38(void* self);
+extern "C" void func_001C6B08(void* self, void* p);
+extern "C" void func_001C7738(void* self, sColor_7738* color);
+
+extern "C" void func_001C5DD8(void* self)
+{
+    if (*(int*)((char*)self + 0x2BC) != 0) {
+        func_001C8A38(self);
+        func_001C6B08(self, (char*)self + 0xBC);
+        sColor5DD8 c = *(sColor5DD8*)((char*)self + 0x278);
+        func_001C7738(self, (sColor_7738*)&c);
+        sVEntry001C5DD8* vt = *(sVEntry001C5DD8**)((char*)self + 8);
+        vt[6].fn((char*)self + vt[6].delta, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C5F20);
 
@@ -413,7 +472,27 @@ extern "C" void func_001CA8A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuySongByCredit);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004661B8[];
+extern char D_004661C8[];
+
+extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int credit)
+{
+    int three = 3;
+    int h = GetHashValue32(D_004661B8);
+    *(int*)((char*)self + 0x10) = song;
+    *(int*)((char*)self + 0x14) = three;
+    *(int*)((char*)self + 0xC) = 2;
+    *(int*)((char*)self + 0x18) = h;
+    h = GetHashValue32(D_004661C8);
+    *(int*)((char*)self + 0x8) = credit;
+    *(int*)((char*)self + 0x1C) = three;
+    *(int*)((char*)self + 0x20) = h;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuySong);
 
@@ -467,9 +546,51 @@ extern "C" void func_001CAF00(void* self, void* item, int event)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_initBuyTrick);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_00466338[];
+extern char D_00466350[];
 
+extern "C" void cUIStateBuyPopup_initBuyTrick(void* self, int trick, int a2, int a3)
+{
+    int three = 3;
+    *(int*)((char*)self + 0x48) = a2;
+    *(int*)((char*)self + 0x4C) = a3;
+    *(int*)((char*)self + 0x58) = trick;
+    *(int*)((char*)self + 0x54) = 2;
+    int h = GetHashValue32(D_00466338);
+    *(int*)((char*)self + 0x5C) = three;
+    *(int*)((char*)self + 0x60) = h;
+    h = GetHashValue32(D_00466350);
+    *(int*)((char*)self + 0x64) = three;
+    *(int*)((char*)self + 0x68) = h;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CAFC0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_00466368[];
+extern char D_004A1408[];
+
+extern "C" void func_001CAFC0(void* self, int a1, int a2, int a3)
+{
+    char* s = D_004A1408;
+    int two = 2;
+    *(char**)((char*)self + 0x58) = s;
+    *(int*)((char*)self + 0x54) = two;
+    *(int*)((char*)self + 0x48) = a2;
+    *(int*)((char*)self + 0x4C) = a3;
+    int h = GetHashValue32(D_00466368);
+    *(int*)((char*)self + 0x64) = two;
+    *(char**)((char*)self + 0x68) = s;
+    *(int*)((char*)self + 0x5C) = 3;
+    *(int*)((char*)self + 0x60) = h;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CB030);
 
@@ -648,7 +769,34 @@ INCLUDE_ASM("fe/fepopup", func_001CC620);
 
 INCLUDE_ASM("fe/fepopup", func_001CC6E8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001CC7C8);
+#ifdef SKIP_ASM
+extern "C" void func_001CC620(void* self, int value);
+extern signed char D_00441390[];
+extern signed char D_004413E8[];
+
+extern "C" void func_001CC7C8(void* self)
+{
+    bool b = *(int*)((char*)self + 0x68) != 0;
+    int flag = *(int*)((char*)self + 0x6C);
+    if (flag) {
+        flag = !b;
+    } else {
+        flag = b != 0;
+    }
+    int idx = *(int*)((char*)self + 0x140);
+    if (idx >= 15 && idx <= 26) {
+        // PORT: reads the int field at 0x6C as a bool (bool is 4 bytes in SN gcc 2.95); use `*(int*)... == 0` off-PS2.
+        flag = !*(bool*)((char*)self + 0x6C);
+    }
+    if (flag) {
+        func_001CC620(self, D_00441390[idx]);
+    } else {
+        func_001CC620(self, D_004413E8[idx]);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CC848);
 
@@ -677,7 +825,28 @@ extern "C" void func_001CCE98(sPwd_CCE98* self, char* str)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CCF00);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_00466580[];
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+
+extern "C" void func_001CCF00(void* self, const char* str)
+{
+    if (*(void**)((char*)self + 0x40) == 0) {
+        cBXString_cBXString4((char*)self + 0x424, str);
+        return;
+    }
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00466580));
+    if (text != 0) {
+        cUIText_setAsciiString(text, str);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setStatic);
 

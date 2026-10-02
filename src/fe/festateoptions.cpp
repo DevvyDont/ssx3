@@ -1,6 +1,25 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0045DD30[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+extern "C" void cFEStateOptions_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DD30), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x4C) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_00188870);
 
@@ -113,7 +132,26 @@ INCLUDE_ASM("fe/festateoptions", func_0018BEF8);
 
 INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C128);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0045E038[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0018C478(void* self);
+
+extern "C" void func_0018C128(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E038), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0018C478(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C198__FPv);

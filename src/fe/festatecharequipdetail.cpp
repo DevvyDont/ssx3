@@ -8,7 +8,30 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onCreateScreen);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199350);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_001993A0);
+#ifdef SKIP_ASM
+extern "C" void func_0019A308(void* self);
+extern "C" void func_0019A238(void* self);
+extern "C" void func_0019BC90(void* self);
+extern "C" void func_0019BD48(void* self, int a1);
+extern "C" void func_0019B618(void* self, int a1, int a2);
+extern "C" void func_00186518(void* self, int a1);
+
+extern "C" void func_001993A0(void* self, int a1)
+{
+    bool off = !*(bool*)((char*)self + 0xC8);
+    if (!off) {
+        func_0019A308(self);
+    } else {
+        func_0019A238(self);
+    }
+    func_0019BC90(self);
+    func_0019BD48(self, 0);
+    func_0019B618(self, 1, 1);
+    func_00186518(self, a1);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199420);
 
@@ -121,9 +144,41 @@ extern "C" int func_0019B458(sEquipDetail* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B518);
+#ifdef SKIP_ASM
+extern "C" void func_0019B7E0(void* self, int idx);
 
+extern "C" int func_0019B518(void* self)
+{
+    int j = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
+    int i = 0;
+    while (i < 6 && j < *(int*)((char*)self + 0x958)) {
+        func_0019B7E0(self, i);
+        i++;
+        j++;
+    }
+    return i;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B598);
+#ifdef SKIP_ASM
+extern "C" void func_0019BA60(void* self, int idx);
+
+extern "C" int func_0019B598(void* self)
+{
+    int j = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
+    int i = 0;
+    while (i < 6 && j < *(int*)((char*)self + 0x958)) {
+        func_0019BA60(self, i);
+        i++;
+        j++;
+    }
+    return i;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B618);
 
@@ -152,7 +207,22 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019BC90);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BD48);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BE80);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_0014B560(void* iface, int a1, int a2, int a3, int a4);
+
+extern "C" void func_0019BE80(void* self)
+{
+    int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
+    char* item = *(char**)((char*)self + (idx << 2) + 0x124);
+    *(void**)((char*)self + 0xC0) = func_0014B560(cBE_getInterface_Fv(cBE_getBE(), 9),
+        *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC), *(short*)(item + 4), 1);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BEE8);
 
@@ -235,7 +305,35 @@ extern "C" void* func_0019CB38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB60);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, unsigned int value, int size);
+
+struct sNode0019CB60 {
+    int field_0x0;
+    short field_0x4;
+    short field_0x6;
+    int field_0x8;
+    short prev;
+    short next;
+};
+
+extern "C" void func_0019CB60(void* self)
+{
+    func_003E6448(self, 0xFFFFFFFF, 0x1900);
+    func_003E6448((char*)self + 0x1900, 0, 0x640);
+    *(void**)((char*)self + 0x1F40) = self;
+    sNode0019CB60* n = (sNode0019CB60*)self;
+    for (int i = 0; i < 400; i++) {
+        n[i].next = i + 1;
+        n[i].prev = i - 1;
+        n[i].field_0x4 = 0;
+        n[i].field_0x6 = 0;
+    }
+    n[399].next = -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CBE0);

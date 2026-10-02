@@ -123,9 +123,43 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233CD8);
 
 INCLUDE_ASM("fe/festateloadscreen", func_00234008);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", func_002340B8);
+#ifdef SKIP_ASM
+struct sVEntry_func_002340B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_002340B8(void* self, void* stream)
+{
+    func_00233AF0_2(self, stream);
+    sVEntry_func_002340B8* e = &(*(sVEntry_func_002340B8**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_002340B8**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", func_00234120);
+#ifdef SKIP_ASM
+struct sVEntry_func_00234120 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00234120(void* self, void* stream)
+{
+    func_00233B28_2(self, stream);
+    sVEntry_func_00234120* e = &(*(sVEntry_func_00234120**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00234120**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_00234188);
 

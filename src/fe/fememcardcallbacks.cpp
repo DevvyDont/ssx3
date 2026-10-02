@@ -252,7 +252,30 @@ void func_001D9878(void* self)
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9880);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_createReadBuffer);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+extern char D_00467990[];
+
+extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
+{
+    if (*(int*)((char*)self + 0x228) == 1) {
+        void* buf = *(void**)((char*)self + 0x1D4);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+        *(void**)((char*)self + 0x1D4) = 0;
+        *(int*)((char*)self + 0x228) = 0;
+    }
+    void* p = operator_new_tag(size, D_00467990, 0x100, 0);
+    *(void**)((char*)self + 0x1D0) = p;
+    *(void**)((char*)self + 0x1D4) = p;
+    *(int*)((char*)self + 0x228) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D99C8);
 
@@ -260,7 +283,27 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D9A80);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9BD0);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9CA8);
+#ifdef SKIP_ASM
+extern "C" int func_002C24D0(void* p);
+extern "C" void* func_002C2508(void* dst, void* src);
+// PORT: func_001C5DD8 takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
+void func_001C5DD8_self(void* self) __asm__("func_001C5DD8");
+
+extern "C" void func_001D9CA8(void* self, void* src)
+{
+    if (src != 0 && func_002C24D0(src) != 0) {
+        void* dst = (char*)self + 0x360;
+        func_002C2508(dst, src);
+        *(void**)((char*)self + 0xC4) = dst;
+        *(int*)((char*)self + 0xC0) = 1;
+        if (*(int*)((char*)self + 0x40) != 0) {
+            func_001C5DD8_self(self);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D18);

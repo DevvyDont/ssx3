@@ -85,13 +85,73 @@ extern "C" void func_001D0E78(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D0EB8);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A12C0[];
+
+extern "C" void func_001D0EB8(void* self)
+{
+    char buf[32];
+    if (*(cUIText**)((char*)self + 0x918) != 0) {
+        sprintf(buf, D_004A12C0, *(int*)((char*)self + 0x6C));
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x918), buf);
+    }
+    if (*(cUIText**)((char*)self + 0x914) != 0) {
+        sprintf(buf, D_004A12C0, *(int*)((char*)self + 0x68));
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x914), buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D0F30);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D10A8);
+#ifdef SKIP_ASM
+struct sVEntry001D10A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
 
+extern "C" void func_001D10A8(void* self)
+{
+    void* obj = *(void**)((char*)self + 0x91C);
+    if (obj != 0) {
+        sVEntry001D10A8* vt = *(sVEntry001D10A8**)((char*)obj + 8);
+        vt[9].fn((char*)obj + vt[9].delta, *(int*)((char*)self + 0x64) > 0);
+    }
+    void* obj2 = *(void**)((char*)self + 0x920);
+    if (obj2 != 0) {
+        sVEntry001D10A8* vt = *(sVEntry001D10A8**)((char*)obj2 + 8);
+        vt[9].fn((char*)obj2 + vt[9].delta,
+                 *(int*)((char*)self + 0x64) + *(int*)((char*)self + 0x58) < *(int*)((char*)self + 0x60));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1128);
+#ifdef SKIP_ASM
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern void* D_0046A248[];
+
+extern "C" void* func_001D1128(void* self, void* engine, signed char idx, int a3)
+{
+    func_001CEEA0(self, engine, idx, a3, 3);
+    *(void***)((char*)self + 0x8) = D_0046A248;
+    *(int*)((char*)self + 0x68) = 0;
+    *(int*)((char*)self + 0xA24) = 0;
+    for (int i = 42; i >= 0; i--) {
+        ((void**)((char*)self + 0xA28))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 extern void* D_00467070[];
 
@@ -136,7 +196,23 @@ extern "C" void func_001D1290(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D12C8);
+#ifdef SKIP_ASM
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern void* D_0046A0C8[];
+
+extern "C" void* func_001D12C8(void* self, void* engine, signed char idx, int a3)
+{
+    func_001CEEA0(self, engine, idx, a3, 4);
+    *(void***)((char*)self + 0x8) = D_0046A0C8;
+    *(int*)((char*)self + 0xA24) = 0;
+    for (int i = 115; i >= 0; i--) {
+        ((void**)((char*)self + 0xA28))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 extern void* D_00467098[];
 
@@ -181,7 +257,23 @@ extern "C" void func_001D1428(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1460);
+#ifdef SKIP_ASM
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern void* D_00469F48[];
+
+extern "C" void* func_001D1460(void* self, void* engine, signed char idx, int a3)
+{
+    func_001CEEA0(self, engine, idx, a3, 5);
+    *(void***)((char*)self + 0x8) = D_00469F48;
+    *(int*)((char*)self + 0xA24) = 0;
+    for (int i = 99; i >= 0; i--) {
+        ((void**)((char*)self + 0xA28))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 extern void* D_004670C8[];
 
@@ -226,7 +318,23 @@ extern "C" void func_001D15C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D15F8);
+#ifdef SKIP_ASM
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern void* D_00469DC8[];
+
+extern "C" void* func_001D15F8(void* self, void* engine, signed char idx, int a3)
+{
+    func_001CEEA0(self, engine, idx, a3, 6);
+    *(void***)((char*)self + 0x8) = D_00469DC8;
+    *(int*)((char*)self + 0xA24) = 0;
+    for (int i = 1; i >= 0; i--) {
+        ((void**)((char*)self + 0xA28))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 extern void* D_004670F0[];
 
@@ -271,7 +379,23 @@ extern "C" void func_001D1758(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1790);
+#ifdef SKIP_ASM
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern void* D_00469C48[];
+
+extern "C" void* func_001D1790(void* self, void* engine, signed char idx, int a3)
+{
+    func_001CEEA0(self, engine, idx, a3, 7);
+    *(void***)((char*)self + 0x8) = D_00469C48;
+    *(int*)((char*)self + 0xA24) = 0;
+    for (int i = 27; i >= 0; i--) {
+        ((void**)((char*)self + 0xA28))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 extern void* D_00467118[];
 
@@ -316,7 +440,23 @@ extern "C" void func_001D18F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1928);
+#ifdef SKIP_ASM
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern void* D_00469AC8[];
+
+extern "C" void* func_001D1928(void* self, void* engine, signed char idx, int a3)
+{
+    func_001CEEA0(self, engine, idx, a3, 8);
+    *(void***)((char*)self + 0x8) = D_00469AC8;
+    *(int*)((char*)self + 0xA24) = 0;
+    for (int i = 27; i >= 0; i--) {
+        ((void**)((char*)self + 0xA28))[i] = 0;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D1990);
 
@@ -389,7 +529,31 @@ extern "C" void func_001D1FB0(void* self)
 
 INCLUDE_ASM("fe/festaterewards", func_001D1FF0);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D20D8);
+#ifdef SKIP_ASM
+extern "C" void func_001D2150(void* self, int a1);
+
+extern "C" void func_001D20D8(void* self, int kind, void* data)
+{
+    *(int*)((char*)self + 0x68) = kind;
+    *(void**)((char*)self + 0x60) = data;
+    switch (kind) {
+    case 3:
+        func_001D2150(self, *(int*)((char*)data + 4));
+        break;
+    case 4:
+        func_001D2150(self, *(int*)((char*)data + 4));
+        break;
+    case 5:
+        func_001D2150(self, *(int*)((char*)data + 4));
+        break;
+    case 7:
+        func_001D2150(self, *(int*)((char*)data + 4));
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D2150);
 
@@ -463,9 +627,54 @@ extern "C" void func_001D2468(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D24A8);
+#ifdef SKIP_ASM
+extern "C" void func_00253938(void* p);
+extern "C" void func_001D2638(void* self);
+extern "C" void* func_0039E510(void* self);
 
+extern "C" void func_001D24A8(void* self)
+{
+    void* p = *(void**)((char*)self + 0x248);
+    if (p != 0) {
+        *(int*)((char*)self + 0x274) = 1;
+        func_00253938(p);
+        if ((*(int*)((char*)self + 0x27C) != 0 && *(int*)((char*)self + 0x278) != 0)
+            || **(int**)((char*)self + 0x248) != 0) {
+            func_001D2638(self);
+        }
+    }
+    func_0039E510(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2518);
+#ifdef SKIP_ASM
+struct sVEntry001D2518 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+static inline int vcall001D2518(void* obj, int slot)
+{
+    sVEntry001D2518* vt = *(sVEntry001D2518**)((char*)obj + 8);
+    return vt[slot].fn((char*)obj + vt[slot].delta);
+}
+
+extern "C" int func_001D2518(void* self, void* obj)
+{
+    if (*(int*)((char*)self + 0x270) != 0) {
+        if (vcall001D2518(obj, 5) != 0 || vcall001D2518(obj, 6) != 0) {
+            *(int*)((char*)self + 0x27C) = 1;
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D2598);

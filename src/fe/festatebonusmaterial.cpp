@@ -19,7 +19,30 @@ extern "C" void cFEStateBonusMaterial_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebonusmaterial", func_00195540);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A14F8[];
+extern char D_004A1500[];
+extern char D_004A1508[];
+
+extern "C" void func_00195540(void* self, void* menu)
+{
+    int h = *(int*)((char*)menu + 0x38);
+    if (h == GetHashValue32(D_004A14F8)) {
+        *(int*)((char*)menu + 0x18) = 0;
+    }
+    h = *(int*)((char*)menu + 0x38);
+    if (h == GetHashValue32(D_004A1500)) {
+        *(int*)((char*)menu + 0x18) = 1;
+    }
+    h = *(int*)((char*)menu + 0x38);
+    if (h == GetHashValue32(D_004A1508)) {
+        *(int*)((char*)menu + 0x18) = 2;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebonusmaterial", func_001955B8);
 

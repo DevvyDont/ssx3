@@ -84,7 +84,27 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetCreate);
 
 INCLUDE_ASM("fe/festatecharselect", func_00182690);
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00182808);
+#ifdef SKIP_ASM
+extern "C" void func_00182870(void* self);
+
+extern "C" int func_00182808(void* self, int a1, unsigned int msg, int value)
+{
+    switch (msg) {
+    case 7:
+    case 8:
+    case 9:
+        return 0x100;
+    case 1:
+        return value < *(int*)((char*)self + 0x78);
+    case 5:
+        func_00182870(self);
+        break;
+    }
+    return 0x101;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00182870);
@@ -104,5 +124,22 @@ extern "C" void func_00182870(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_001828C0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern void* D_0046CE60[];
+
+extern "C" void* func_001828C0(void* self, void* engine, signed char idx)
+{
+    func_0039E2A0(self, engine);
+    *(int*)((char*)self + 0xC) = 0xC;
+    *(void***)((char*)self + 0x8) = D_0046CE60;
+    *(signed char*)((char*)self + 0x44) = idx;
+    *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(int*)((char*)self + 0x4C) = 0;
+    return self;
+}
+#endif
 

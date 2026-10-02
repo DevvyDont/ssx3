@@ -61,7 +61,24 @@ INCLUDE_ASM("fe/feridermanager", func_0019FF00);
 
 INCLUDE_ASM("fe/feridermanager", func_001A0100);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0358);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" void func_002A16B0(void* mgr, int id);
+extern "C" void func_002A1778(void* mgr, int id);
+
+extern "C" void func_001A0358(void* self)
+{
+    if (*(int*)((char*)self + 0xC1C) != 0) {
+        func_002A1778(func_0028B180(), *(int*)self);
+        *(int*)((char*)self + 0xC1C) = 0;
+    } else if (*(int*)((char*)self + 0xC20) != 0) {
+        func_002A16B0(func_0028B180(), *(int*)self);
+        *(int*)((char*)self + 0xC20) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A03C0);
@@ -79,7 +96,29 @@ extern "C" void* func_001A03C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0420);
+#ifdef SKIP_ASM
+extern "C" void func_001A04C8(void* self);
+extern "C" void func_0019E498(void* self, int flags);
+void operator_delete(int* p);
+
+extern "C" void func_001A0420(void* self, int flags)
+{
+    func_001A04C8(self);
+    char* base = (char*)self;
+    if (base != 0) {
+        char* p = base + 0x19C0;
+        while (base != p) {
+            p -= 0xCE0;
+            func_0019E498(p, 0);
+        }
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0498);
