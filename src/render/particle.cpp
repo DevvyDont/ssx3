@@ -105,7 +105,74 @@ extern "C" void func_00371318(void* self, cStream00371318* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00371380);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPtRS1380 {
+    int field_0x0;          // 0x1E4
+    int flagsA;             // 0x1E8, bits 2..6 = layer
+    int flagsB;             // 0x1EC, bits 5..9 = blend
+    int field_0xC;          // 0x1F0
+    short tex;              // 0x1F4
+    short pad;
+};
+
+struct sPtVEntry1380 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sPtCtx1380 {
+    char pad_0x0[0xE84];
+    sPtRS1380* top;             // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
+    sPtVEntry1380* vtable;      // 0x10D8
+};
+
+extern char* D_004A5B80;
+extern sPtCtx1380* D_004A5B80_ctx __asm__("D_004A5B80");
+extern int D_0044B420[];
+
+struct sPtObj1380 {
+    char pad_0x0[0x4];
+    int base;               // 0x4
+    int kind;               // 0x8
+    char pad_0xC[0x4];
+    float frame;            // 0x10
+    char pad_0x14[0x160];
+    int field_0x174;        // 0x174
+    char pad_0x178[0x68];
+    int field_0x1E0;        // 0x1E0
+    sPtRS1380 rs;           // 0x1E4
+};
+
+extern "C" void func_00371380(sPtObj1380* self, int blend)
+{
+    if (self->field_0x174 == 0) {
+        return;
+    }
+    sPtCtx1380* ctx = D_004A5B80_ctx;
+    if (self->field_0x1E0 == 0) {
+        return;
+    }
+    int tex = ctx->texIds[self->base + (int)self->frame];
+    if (tex < 0) {
+        return;
+    }
+    self->rs.flagsA = (self->rs.flagsA & ~0x7C) | ((D_0044B420[self->kind] << 2) & 0x7C);
+    self->rs.flagsB = (self->rs.flagsB & ~0x3E0) | ((blend << 5) & 0x3E0);
+    self->rs.tex = tex;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *ctx->top = self->rs;
+    sPtVEntry1380* vt = ctx->vtable;
+    vt[83].fn((char*)ctx + vt[83].delta, self);
+    ctx->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003714B8);
@@ -189,9 +256,120 @@ extern "C" void cDynamicColourEmitter_reset(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00371688);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPtRS1688 {
+    int field_0x0;          // 0x1E4
+    int flagsA;             // 0x1E8, bits 2..6 = layer
+    int flagsB;             // 0x1EC, bits 5..9 = blend
+    int field_0xC;          // 0x1F0
+    short tex;              // 0x1F4
+    short pad;
+};
 
+struct sPtVEntry1688 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sPtCtx1688 {
+    char pad_0x0[0xE84];
+    sPtRS1688* top;             // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
+    sPtVEntry1688* vtable;      // 0x10D8
+};
+
+extern char* D_004A5B80;
+extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("D_004A5B80");
+extern int D_0044B420[];
+
+struct sPtObj1688 {
+    char pad_0x0[0x4];
+    int base;               // 0x4
+    int kind;               // 0x8
+    char pad_0xC[0x4];
+    float frame;            // 0x10
+    char pad_0x14[0x160];
+    int field_0x174;        // 0x174
+    char pad_0x178[0x68];
+    int field_0x1E0;        // 0x1E0
+    sPtRS1688 rs;           // 0x1E4
+};
+
+extern "C" void func_00371688(sPtObj1688* self, int blend)
+{
+    if (self->field_0x174 == 0) {
+        return;
+    }
+    sPtCtx1688* ctx = D_004A5B80_ctx1688;
+    if (self->field_0x1E0 == 0) {
+        return;
+    }
+    int tex = ctx->texIds[self->base + (int)self->frame];
+    if (tex < 0) {
+        return;
+    }
+    self->rs.flagsA = (self->rs.flagsA & ~0x7C) | ((D_0044B420[self->kind] << 2) & 0x7C);
+    self->rs.flagsB = (self->rs.flagsB & ~0x3E0) | ((blend << 5) & 0x3E0);
+    self->rs.tex = tex;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *ctx->top = self->rs;
+    sPtVEntry1688* vt = ctx->vtable;
+    vt[84].fn((char*)ctx + vt[84].delta, self);
+    ctx->top--;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_003717C0);
+#ifdef SKIP_ASM
+struct sPtCol17C0 {
+    float r, g, b, a;
+} __attribute__((aligned(16)));
+
+struct sPtRGBA17C0 {
+    unsigned char r, g, b, a;
+};
+
+struct sPtObj17C0 {
+    char pad_0x0[0x17C];
+    int idx;                    // 0x17C
+    char pad_0x180[0x50];
+    sPtCol17C0 col;             // 0x1D0
+    char pad_0x1E0[0x24];
+    sPtRGBA17C0* colors;        // 0x204
+};
+
+extern "C" void func_003710D0(void* self, int a1, int a2, int a3);
+
+// PORT: g++ minimum operator (<?).
+static inline float clamp17C0(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_003717C0(sPtObj17C0* self, int a1, int a2, sPtCol17C0* col, int a4)
+{
+    if (col != 0) {
+        self->col = *col;
+    } else {
+        col = &self->col;
+    }
+    self->colors[self->idx].a = (int)clamp17C0(col->a * 255.0f, 0.0f, 255.0f);
+    self->colors[self->idx].r = (int)clamp17C0(col->r * 255.0f, 0.0f, 255.0f);
+    self->colors[self->idx].g = (int)clamp17C0(col->g * 255.0f, 0.0f, 255.0f);
+    self->colors[self->idx].b = (int)clamp17C0(col->b * 255.0f, 0.0f, 255.0f);
+    func_003710D0(self, a1, a2, a4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00371940);
@@ -1044,7 +1222,65 @@ INCLUDE_ASM("render/particle", func_00376768);
 
 INCLUDE_ASM("render/particle", func_00376938);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_00376A70);
+#ifdef SKIP_ASM
+struct sPtVEntryI6A70 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sPtView6A70 {
+    float x, y, w, h;               // 0x6D20 in the first view
+    char pad_0x10[0x220];
+};
+
+struct sPtGfx6A70 {
+    char pad_0x0[0x10D8];
+    sPtVEntryI6A70* vtable;         // 0x10D8
+    int curView;                    // 0x10DC
+    char pad_0x10E0[0x18F0 - 0x10E0];
+    void* keys;                     // 0x18F0
+    char pad_0x18F4[0x5900 - 0x18F4];
+    unsigned short scissor[4];      // 0x5900
+    char pad_0x5908[0x6B94 - 0x5908];
+    int clampMode;                  // 0x6B94
+    float clampTop;                 // 0x6B98
+    float clampBottom;              // 0x6B9C
+    char pad_0x6BA0[0x6D20 - 0x6BA0];
+    sPtView6A70 views[1];           // 0x6D20
+};
+
+extern "C" void func_00376938(void* self, float x, float y, float w, float h);
+extern "C" void func_00364B88(void* table, void* key);
+
+extern "C" void func_00376A70(sPtGfx6A70* self, float x, float y, float w, float h)
+{
+    sPtVEntryI6A70* e = &self->vtable[11];
+    int height = e->fn((char*)self + e->delta);
+    int mode = self->clampMode;
+    if (mode < 3) {
+        if (mode >= 0) {
+            float fh = (float)height;
+            float top = self->clampTop * fh;
+            if (y < top) {
+                y = top;
+            }
+            float bottom = self->clampBottom * fh;
+            if (bottom < h) {
+                h = bottom;
+            }
+        }
+    }
+    self->views[self->curView].x = x;
+    self->views[self->curView].y = y;
+    self->views[self->curView].w = w;
+    self->views[self->curView].h = h;
+    func_00376938(self, x, y, w, h);
+    func_00364B88(self->keys, self->scissor);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00376B90);
@@ -1558,7 +1794,94 @@ extern "C" int func_0037D938(void* self, int idx)
 
 INCLUDE_ASM("render/particle", func_0037D968);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037DBE8);
+#ifdef SKIP_ASM
+struct sPtVecDBE8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPtMtxDBE8 {
+    sPtVecDBE8 r[4];
+};
+
+struct sPtGfxDBE8 {
+    char pad_0x0[0x6B30];
+    sPtMtxDBE8 clipMtx;         // 0x6B30
+    float minX;                 // 0x6B70
+    float minY;                 // 0x6B74
+    float maxZ;                 // 0x6B78
+    float field_0x6B7C;
+    float maxX;                 // 0x6B80
+    float maxY;                 // 0x6B84
+    float minZ;                 // 0x6B88
+    float field_0x6B8C;
+    int clipValid;              // 0x6B90
+};
+
+extern "C" void func_0037D968(void* self);
+
+// PORT: PS2-only VU0 inline asm (matrix * vector).
+static inline sPtVecDBE8 mtxApplyDBE8(sPtMtxDBE8* m, const sPtVecDBE8& v)
+{
+    sPtVecDBE8 out;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf8, %1\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(out)
+        : "m"(v), "r"(m)
+        : "memory");
+    return out;
+}
+
+extern "C" int func_0037DBE8(sPtGfxDBE8* self, const sPtVecDBE8* p)
+{
+    if (self->clipValid == 0) {
+        func_0037D968(self);
+    }
+    sPtVecDBE8 v = mtxApplyDBE8(&self->clipMtx, *p);
+    int code = 0;
+    float w = 1.0f / v.w;
+    v.x *= w;
+    v.y *= w;
+    v.w = w;
+    if (v.x < self->minX) {
+        code |= 2;
+    }
+    if (self->maxX < v.x) {
+        code |= 1;
+    }
+    if (v.y < self->minY) {
+        code |= 8;
+    }
+    if (self->maxY < v.y) {
+        code |= 4;
+    }
+    float z = v.z;
+    if (w < 0.0f) {
+        code ^= 0x2F;
+    } else {
+        if (self->maxZ < z) {
+            code |= 0x20;
+        }
+        if (z < self->minZ) {
+            code |= 0x10;
+        }
+    }
+    return code;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037DD20);
 
@@ -1734,7 +2057,44 @@ extern "C" void func_0037E098(sPartPktQuad* src, void* self, sPartPktQuad* hdr, 
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037E120);
+#ifdef SKIP_ASM
+// Appends a DMA cnt tag (qwc 6), a VIF header and the 4x4 matrix m to the packet at *pp,
+// then the optional sub-packets.
+// PORT: 64-bit `ulong` packet words and PS2-only VU0 asm (lqc2/sqc2 copy).
+extern "C" void func_0037E120(void* self, sPartPktQuad* m, sPartPktQuad* hdr, int a3, void* m2,
+                              sPartPktQuad* src, int flags, char** pp)
+{
+    char* p = *pp;
+    *(cPartQuad128*)p = 0x10000006;
+    *(ulong*)(p + 0x10) = 0x20000000;
+    *(ulong*)(p + 0x18) = 0x6C05800001000101;
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"(m), "r"(p + 0x20)
+        : "memory");
+    *(ulong*)(p + 0x60) = 0;
+    *(ulong*)(p + 0x68) = (ulong)flags << 32;
+    p += 0x70;
+    if (m2 != 0) {
+        func_0037E040(m2, &p);
+    }
+    if (flags & 1) {
+        sPartPktQuad t = m[3];
+        func_0037E098(src, &t, hdr, &p);
+    }
+    *pp = p;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037E238);
 

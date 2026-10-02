@@ -99,7 +99,69 @@ extern "C" int func_00282178(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002821A0);
+#ifdef SKIP_ASM
+struct sBxsThreadHdr;
+extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1);
+extern "C" int func_00272938(void* self, void* src);
+// PORT: the unit declares func_00272CC0(int), but it really takes (self, id).
+void* func_00272CC0_2(void* self, int id) __asm__("func_00272CC0");
+// PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
+int func_00274C10(void* self, int a1);
+void func_00282C88(void* self, void* v);
+
+struct sBxsVEntry21A0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sBXSlot21A0 {
+    void* data;
+    unsigned short uses;
+};
+
+struct sBXThread21A0 {
+    void* owner;    // 0x0
+    int state;      // 0x4
+    int slot;       // 0x8
+    int arg;        // 0xC
+    short pad_10;   // 0x10
+    short f12;      // 0x12
+    int pending;    // 0x14
+    float time;     // 0x18
+    int result;     // 0x1C
+};
+
+extern "C" int func_002821A0(void* self, int idx, int arg)
+{
+    sBXSlot21A0* s = &(*(sBXSlot21A0**)((char*)self + 0x2B0))[idx];
+    sBXThread21A0* t = (sBXThread21A0*)func_00282C38(self, 1);
+    if (s->data == 0) {
+        int one = 1;
+        t->pending = idx;
+        t->state = one;
+        t->f12 = one;
+        sBxsVEntry21A0* e = &(*(sBxsVEntry21A0**)((char*)self + 0x2A8))[7];
+        if (e->fn((char*)self + e->delta, idx) == 0) {
+            t->state = 7;
+            func_00282C88(self, t);
+            return -1;
+        }
+    } else {
+        t->slot = idx;
+        t->state = 2;
+        int id = func_00272938(*(void**)((char*)self + 0x2B8), s->data);
+        void* obj = func_00272CC0_2(*(void**)((char*)self + 0x2B8), id);
+        t->owner = obj;
+        func_00274C10(obj, (int)t);
+        s->uses++;
+    }
+    t->arg = arg;
+    return t->result;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002822A0);
@@ -628,7 +690,56 @@ void* func_00282DB0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282DD0);
+#ifdef SKIP_ASM
+struct sBxsVEntry2DD0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sBxsFade2DD0 {
+    char pad_0x0[0xC];
+    sBxsVEntry2DD0* vtable;     // 0xC
+    char pad_0x10[0x4];
+    int id;                     // 0x14
+    int kind;                   // 0x18
+    float rateA;                // 0x1C
+    float rateB;                // 0x20
+    float rateC;                // 0x24
+    int arg;                    // 0x28
+    int time;                   // 0x2C
+};
+
+// PORT: the unit declares func_00282DD0(void*, int, int, int) returning void*; the body also takes four floats and returns nothing.
+extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int arg, float t, float c, float a, float b) __asm__("func_00282DD0");
+extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int arg, float t, float c, float a, float b)
+{
+    if (self->kind != 9) {
+        sBxsVEntry2DD0* vt = self->vtable;
+        vt[5].fn((char*)self + vt[5].delta, self->id);
+    }
+    if (kind == 9 || a + b + c <= t) {
+        self->kind = 9;
+        self->rateA = 0.0f;
+        self->rateB = 0.0f;
+        self->id = -1;
+        self->rateC = 0.0f;
+        self->time = 0;
+    } else {
+        self->kind = kind;
+        self->arg = arg;
+        self->time = 0;
+        self->id = id;
+        self->rateA = a * 0.01666666753590107f;
+        self->rateB = b * 0.01666666753590107f;
+        self->rateC = c * 0.01666666753590107f;
+        sBxsVEntry2DD0* vt = self->vtable;
+        vt[4].fn((char*)self + vt[4].delta, self->id);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282EF0);

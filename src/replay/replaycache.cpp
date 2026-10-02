@@ -860,7 +860,74 @@ extern "C" void func_002714E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00271510);
+#ifdef SKIP_ASM
+extern "C" int HUFF_encode(void* src, int size, void* dst, int* state);
+
+struct sRcEntry1510 {
+    int field_0x0;          // 0x0
+    char pad_0x4[0x8];
+    void* data;             // 0xC
+};
+
+struct sReplayCache1510 {
+    char pad_0x0[0x48C];
+    sRcEntry1510* entries[(0x638 - 0x48C) / 4];   // 0x48C
+    int field_0x638;        // 0x638
+    char pad_0x63C[0x4];
+    int* out;               // 0x640
+    int field_0x644;        // 0x644
+    int field_0x648;        // 0x648
+    char pad_0x64C[0x8];
+    int cur;                // 0x654
+    int count;              // 0x658
+    char pad_0x65C[0x10];
+    void* pending;          // 0x66C
+    int pendingSize;        // 0x670
+    int* header;            // 0x674
+};
+
+extern "C" void func_00271510(sReplayCache1510* self)
+{
+    if (self->header != 0) {
+        func_00271058(self, (signed char*)self->header, 8);
+        self->header = 0;
+        return;
+    }
+    if (self->pending != 0) {
+        int state = 0;
+        int n = HUFF_encode(self->pending, self->pendingSize, self->out + 1, &state);
+        *self->out = n;
+        func_00271058(self, (signed char*)self->out, n + 4);
+        self->pending = 0;
+        return;
+    }
+    int cur = self->cur;
+    if (cur < self->count) {
+        self->pending = 0;
+        self->header = 0;
+        self->pendingSize = 0;
+        sRcEntry1510* e = self->entries[cur];
+        if (e != 0) {
+            self->pending = e->data;
+            self->header = self->out;
+            self->pendingSize = 0x8000;
+            *self->out = 0x11111112;
+            self->header[1] = e->field_0x0;
+            self->cur++;
+        } else {
+            self->cur = cur + 1;
+            self->field_0x648 = 0;
+            self->field_0x644 = 0;
+        }
+    } else {
+        self->field_0x638++;
+        self->field_0x648 = 0;
+        self->field_0x644 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00271620);
@@ -1755,7 +1822,38 @@ extern "C" void func_002734E0(void* self, int flags)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00273530);
+#ifdef SKIP_ASM
+extern "C" void* func_00272308(void* heap, int size);
+struct sCacheRecord2;
+struct sCacheEntry2;
+extern "C" sCacheEntry2* func_00273860(void* self, sCacheRecord2* rec);
+extern "C" void func_002738F8(void* self);
+
+extern "C" int func_00273530(void* self, unsigned short* data, void* owner, int* flags)
+{
+    *(unsigned short**)((char*)self + 0x8) = data;
+    *(void**)((char*)self + 0xC) = owner;
+    *(unsigned short**)((char*)self + 0x10) = data;
+    if (data[0] != 0) {
+        char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
+        *(void**)((char*)self + 0x1C) = func_00272308(heap + 8, data[1] * 0x24);
+        for (int i = 0; i < (*(unsigned short**)((char*)self + 0x10))[1]; i++) {
+        }
+        *(int*)((char*)self + 0x18) = 0;
+        char* base = *(char**)((char*)self + 0x10);
+        *(char**)((char*)self + 0x14) = base + 4;
+        if (base + 4 != 0 && *(unsigned short*)(base + 8) == 0) do {
+            *flags |= 1;
+            func_00273860(self, *(sCacheRecord2**)((char*)self + 0x14));
+            func_002738F8(self);
+        } while (*(char**)((char*)self + 0x14) != 0 &&
+               *(unsigned short*)(*(char**)((char*)self + 0x14) + 4) == 0);
+    }
+    return **(unsigned short**)((char*)self + 0x10) != 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00273630);
@@ -2120,9 +2218,137 @@ extern "C" void* func_00274518(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002745C0);
+#ifdef SKIP_ASM
+// PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
+void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv");
 
+struct sRcElem45C0 {
+    char pad_0x0[0x3C];
+    sRcElem45C0() { func_00273938(this); }
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sRcHdr45C0 {
+    unsigned char field_0x0;
+    unsigned char count;    // 0x1
+    unsigned short size;    // 0x2
+    int field_0x4;
+    int result;             // 0x8
+};
+
+struct sRcStream45C0 {
+    int field_0x0;          // 0x0
+    sRcHdr45C0* data;       // 0x4
+    char* owner;            // 0x8
+    char pad_0xC[0x4];
+    sRcHdr45C0* hdr;        // 0x10
+    char* ext;              // 0x14
+    sRcElem45C0* elems;     // 0x18
+    int field_0x1C;         // 0x1C
+    char pad_0x20[0x14];
+    int field_0x34;         // 0x34
+    int field_0x38;         // 0x38
+};
+
+// PORT: func_002739B8's third argument receives the owning stream pointer as an int.
+// PORT: the unit declares func_002745C0 as returning void*; it returns the header word.
+extern "C" int func_002745C0_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3) __asm__("func_002745C0");
+extern "C" int func_002745C0_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3)
+{
+    self->field_0x0 = a3;
+    self->owner = owner;
+    self->data = data;
+    self->hdr = data;
+    self->field_0x34 = -1;
+    self->field_0x38 = 0;
+    self->field_0x1C = 0;
+    if (data->size >= 0xD) {
+        self->ext = (char*)data + 0xC;
+    }
+    char* p = (char*)data + self->hdr->size;
+    if (self->hdr->count != 0) {
+        sRcElem45C0** slot = &self->elems;
+        *slot = new (owner + 8) sRcElem45C0[self->hdr->count];
+        for (int i = 0; i < self->hdr->count; i++) {
+            p += func_002739B8(&self->elems[i], p, (int)self);
+        }
+    }
+    return self->hdr->result;
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/replaycache", func_002746F8);
+#ifdef SKIP_ASM
+extern "C" void func_00273970(void* self, int flags);
+void* func_00272510(void* self);
+
+struct sRcElem46F8 {
+    char pad_0x0[0x3C];
+};
+
+struct sRcHdr46F8 {
+    unsigned char field_0x0;
+    unsigned char count;    // 0x1
+};
+
+struct sRcStream46F8 {
+    int field_0x0;          // 0x0
+    void* data;             // 0x4
+    void* owner;            // 0x8
+    int field_0xC;          // 0xC
+    sRcHdr46F8* hdr;        // 0x10
+    char* ext;              // 0x14
+    sRcElem46F8* elems;     // 0x18
+    int field_0x1C;         // 0x1C
+    int field_0x20;         // 0x20
+    float field_0x24;       // 0x24
+    int field_0x28;         // 0x28
+    int field_0x2C;         // 0x2C
+    int field_0x30;         // 0x30
+    int field_0x34;         // 0x34
+    int field_0x38;         // 0x38
+};
+
+extern "C" void func_002746F8(void* p)
+{
+    sRcStream46F8* self = (sRcStream46F8*)p;
+    if (self->data == 0) {
+        return;
+    }
+    func_00274918(self);
+    for (int i = 0; i < self->hdr->count; i++) {
+        func_00273A00(&self->elems[i]);
+    }
+    // delete[] self->elems (element count in the 16-byte array cookie)
+    sRcElem46F8* e = self->elems;
+    if (e != 0) {
+        sRcElem46F8* q = e + *(int*)((char*)e - 0x10);
+        while (self->elems != q) {
+            q--;
+            func_00273970(q, 0);
+        }
+        func_00272510((char*)self->elems - 0x10);
+    }
+    self->field_0x38 = 0;
+    self->field_0x0 = -1;
+    self->data = 0;
+    self->owner = 0;
+    self->field_0xC = 0;
+    self->hdr = 0;
+    self->ext = 0;
+    self->elems = 0;
+    self->field_0x1C = 0;
+    self->field_0x20 = 0;
+    self->field_0x28 = 0;
+    self->field_0x2C = 0;
+    self->field_0x30 = -1;
+    self->field_0x24 = 1.0f;
+    self->field_0x34 = -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274808__FPvf);

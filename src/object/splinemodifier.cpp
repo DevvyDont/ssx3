@@ -115,7 +115,67 @@ extern "C" void func_00359F30(void* self, cStream00359F30* stream)
 
 INCLUDE_ASM("object/splinemodifier", func_00359F88);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035A118);
+#ifdef SKIP_ASM
+class cStream0035A118 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+    virtual int v03();
+};
+
+struct sSmFollow_A118 {
+    unsigned int id;        // 0x48
+    int count;              // 0x4C
+    void* node;             // 0x50
+    float length;           // 0x54
+};
+
+struct cMultiSplineModifier_A118 {
+    void** vtable;          // 0x0
+    int count;              // 0x4
+    char pad_0x8[0x28];
+    int field_0x30;         // 0x30
+    char pad_0x34[0xC];
+    int field_0x40;         // 0x40
+    void** insts;           // 0x44
+    sSmFollow_A118 follow;  // 0x48
+};
+
+extern void* D_0048F168[];
+// PORT: same symbol as the unit's cSpline_readFromReplayFrame(void*, cStream003595D8*).
+extern "C" void cSpline_readFromReplayFrame_A118(void* self, cStream0035A118* stream) __asm__("cSpline_readFromReplayFrame");
+extern "C" void cMultiSplineModifier_allocNodes(void* self);
+extern "C" void cMultiSplineModifier_setupNodes(void* self);
+extern "C" void cMultiSplineModifier_setupOverlapSystem(void* self);
+void* cObjectInterface_getInstanceMan();
+extern "C" void* func_003511D0(void* man, unsigned int id);
+
+extern "C" cMultiSplineModifier_A118* func_0035A118(cMultiSplineModifier_A118* self, cStream0035A118* stream)
+{
+    self->vtable = D_0048F168;
+    sSmFollow_A118* f = &self->follow;
+    self->follow.id = 0xFFFFFFFF;
+    self->follow.node = 0;
+    self->follow.count = 0;
+    self->follow.length = 0;
+    stream->v02((char*)self + 0x4, 0x34);
+    cSpline_readFromReplayFrame_A118(f, stream);
+    self->field_0x40 = stream->v03();
+    cMultiSplineModifier_allocNodes(self);
+    unsigned int id = 0xFFFFFFFF;
+    for (int i = 0; i < self->count; i++) {
+        stream->v02(&id, 4);
+        self->insts[i] = func_003511D0(cObjectInterface_getInstanceMan(), id);
+    }
+    cMultiSplineModifier_setupNodes(self);
+    cMultiSplineModifier_setupOverlapSystem(self);
+    self->field_0x30 = 1;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035A250);
@@ -178,7 +238,43 @@ extern "C" void func_0035A3F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupNodes);
+#ifdef SKIP_ASM
+struct sInstanceStruct;
+void* cObjectInterface_getInstanceMan();
+void cInstanceMan_copyInstance(void* man, sInstanceStruct* inst, void* tmpl);
+extern "C" void func_003E6574(void* dst, void* src, int n);
+
+struct sSplineInstA458 {
+    char pad_0x0[0x8];
+    unsigned int flags;     // 0x8
+    char pad_0xC[0x6C];
+    int field_0x78;         // 0x78
+};
+
+struct sMultiSplineA458 {
+    char pad_0x0[0x4];
+    int count;                      // 0x4
+    char pad_0x8[0x38];
+    void* tmpl;                     // 0x40
+    sSplineInstA458** insts;        // 0x44
+};
+
+extern "C" void cMultiSplineModifier_setupNodes(void* p)
+{
+    sMultiSplineA458* self = (sMultiSplineA458*)p;
+    int i;
+    int keep = self->insts[0]->field_0x78;
+    func_003E6574(self->insts[0], self->tmpl, 0xA0);
+    self->insts[0]->field_0x78 = keep;
+    for (i = 1; i < self->count; i++) {
+        cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)self->insts[i], self->tmpl);
+        self->insts[i]->flags = (self->insts[i]->flags & ~0x40) | 0x20;
+        self->insts[i]->flags &= ~0x100;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035A550);

@@ -160,7 +160,66 @@ extern "C" void func_00367B60(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367BC0);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+extern "C" void func_003663D8(void* self, int id);
+
+struct sGmTex7BC0 {
+    int owned;              // 0x0
+    char pad_0x4[0x8];
+    int kind;               // 0xC
+    char pad_0x10[0xC];
+    void* bufA;             // 0x1C
+    void* bufB;             // 0x20
+    char pad_0x24[0x4];
+    int slotA;              // 0x28
+    int slotB;              // 0x2C
+    int idA;                // 0x30
+    int idB;                // 0x34
+};
+
+struct sGmMan7BC0 {
+    int count;
+    int pad_0x4;
+    sGmTex7BC0* texs[1];    // 0x8
+};
+
+static inline void fill7BC0(int* p, int v)
+{
+    for (int i = 1; i >= 0; i--) {
+        p[i] = v;
+    }
+}
+
+extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
+{
+    char* s = (char*)self;
+    sGmTex7BC0* t = self->texs[id];
+    if (t->slotA != -1) {
+        func_003663D8(t->kind != 9 ? s + 0x1F60 : s + 0x4350, t->idA);
+    }
+    if (t->slotB != -1) {
+        func_003663D8(s + 0x1F60, t->idB);
+    }
+    if (t->owned != 0) {
+        if (t->bufA != 0) {
+            cMemMan_free(t->bufA);
+        }
+        if (t->bufB != 0) {
+            cMemMan_free(t->bufB);
+        }
+    }
+    if (id < 0x5DC) {
+        func_003672C0((sGmPtrTable*)self, id);
+    } else {
+        func_003671C8((cTexSlots3671C8*)self, id);
+    }
+    fill7BC0((int*)(s + 0x1F4C), -1);
+    *(int*)(s + 0x1F54) = -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);

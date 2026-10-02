@@ -62,7 +62,115 @@ extern "C" void func_003581B8(sParticleList* list, int item)
 
 INCLUDE_ASM("object/multiparticle", func_003581F0);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358260);
+#ifdef SKIP_ASM
+struct sMPVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMPBox {
+    sMPVec4 min;
+    sMPVec4 max;
+};
+
+struct sMPModelSet {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+
+struct sMPWorld {
+    char pad_0x0[0x8];
+    sMPModelSet** sets;     // 0x8
+};
+
+extern "C" sMPWorld** func_002D1BD8();
+extern "C" void func_00370888(void* desc, sMPBox* box, const sMPVec4& center);
+
+static inline void* refToPtr58260(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* lookup58260(sMPModelSet* set, unsigned int idx)
+{
+    unsigned int p = set->refs[idx] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr58260(p);
+}
+
+struct sMPModelRef {
+    unsigned int id;
+
+    void* get(sMPWorld* w)
+    {
+        sMPModelSet* set = w->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return lookup58260(set, id >> 8);
+    }
+};
+
+struct sMPModel {
+    char pad_0x0[0x40];
+    sMPVec4 pos;            // 0x40
+    sMPVec4 getPos() { return pos; }
+};
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void vu0AddTo58260(sMPVec4& dst, sMPVec4 b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sMPVec4 vu0Add58260(const sMPVec4& a, const sMPVec4& b)
+{
+    sMPVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sMultiPart58260 {
+    void* owner;            // 0x0
+    int count;              // 0x4
+    void* data;             // 0x8
+    sMPModelRef* refs;      // 0xC
+    void* desc;             // 0x10
+    char pad_0x14[0xC];
+    sMPBox box;             // 0x20
+    sMPVec4 center;         // 0x40
+};
+
+extern "C" void func_00358260(sMultiPart58260* self)
+{
+    for (int i = 0; i < self->count; i++) {
+        sMPModel* m = (sMPModel*)self->refs[i].get(*func_002D1BD8());
+        if (m != 0) {
+            sMPBox b = self->box;
+            vu0AddTo58260(b.min, m->pos);
+            vu0AddTo58260(b.max, m->pos);
+            func_00370888(self->desc, &b, vu0Add58260(m->getPos(), self->center));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358380);
@@ -237,7 +345,64 @@ INCLUDE_ASM("object/multiparticle", func_00358780);
 
 INCLUDE_ASM("object/multiparticle", func_00358998);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358B28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMPRef8B28 {
+    unsigned int id;
+    sMPRef8B28() : id(0xFFFFFFFF) {}
+};
+
+struct sMPMgr8B28 {
+    char pad_0x0[0x18];
+    sMPRef8B28 slots[128];          // 0x18
+};
+
+extern void* D_004A4040;
+extern sMPMgr8B28* D_004A4040_mgr8B28 __asm__("D_004A4040");
+extern char D_004A4048[];
+extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
+extern "C" void* func_003584F0(void* self, void* a1);
+extern "C" void func_00358780(void* self, int idx);
+extern "C" void func_00358998(void* self, int idx);
+
+extern "C" void func_00358B28(sMPRef8B28 key, int add)
+{
+    if (D_004A4040 == 0) {
+        func_003584F0(cMemMan_alloc(0x218, D_004A4048, 0x20000000, 0), (void*)1);
+    }
+    sMPRef8B28 kFree;
+    int idx = -1;
+    for (int i = 0; i < 128; i++) {
+        if (idx == -1 && D_004A4040_mgr8B28->slots[i].id == kFree.id) {
+            idx = i;
+        }
+        if (D_004A4040_mgr8B28->slots[i].id == key.id) {
+            idx = i;
+            goto found;
+        }
+    }
+found:
+    sMPMgr8B28* mgr = D_004A4040_mgr8B28;
+    if (idx != -1) {
+        sMPRef8B28& s = mgr->slots[idx];
+        if (s.id == key.id) {
+            if (add == 0) {
+                return;
+            }
+        } else if (add != 0) {
+            return;
+        }
+        mgr->slots[idx] = key;
+        if (add != 0) {
+            func_00358998(mgr, idx);
+        } else {
+            func_00358780(mgr, idx);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358C30);
@@ -518,7 +683,58 @@ extern "C" void* func_00359270(void* self, void* a, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003592D0);
+#ifdef SKIP_ASM
+extern "C" void func_00341D48(void* p);
+
+struct sVEntry_3592D0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" int func_003592D0(void* self)
+{
+    char* s = (char*)self;
+    *(float*)(s + 0x24) = 10000000000.0f;
+    *(float*)(s + 0x28) = 10000000000.0f;
+    if (*(int*)(s + 0x8) == 0) {
+        float v = *(float*)(s + 0x6C);
+        int t = *(int*)(s + 0xC);
+        if (v > 0.0f) {
+            if (t >= 0) {
+                if (t == 0 && v > 0.0f) {
+                    float r = v - __builtin_fabsf(*(float*)(s + 0x10));
+                    *(float*)(s + 0x6C) = r;
+                    if (r < 0.0f) {
+                        *(float*)(s + 0x6C) = 0.0f;
+                    }
+                }
+                func_00341D48(s);
+                if (*(float*)(s + 0x6C) > 0.0f) {
+                    *(int*)(s + 0x4) = 1;
+                } else {
+                    *(int*)(s + 0x4) = 0;
+                }
+                return 1;
+            }
+        } else {
+            if (t > 0) {
+                *(int*)(s + 0xC) = t - 1;
+            }
+            if (*(int*)(s + 0x8) != 0) {
+                char* obj = s + 0x30;
+                sVEntry_3592D0* e = &(*(sVEntry_3592D0**)(s + 0x3C))[34];
+                e->fn(obj + e->delta, 1);
+                return 0;
+            }
+        }
+        *(unsigned short*)(s + 0x42) |= 1;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_003593D0);

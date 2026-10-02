@@ -1,6 +1,77 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
+#ifdef SKIP_ASM
+struct cBigFile;
+cBigFile* cBigFile_cBigFile(cBigFile* self);
+extern "C" int cBigFile_open(cBigFile* self, const char* name, int memclass);
+extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
+// PORT: the second argument is a pointer passed as int (mangled FPvi).
+void func_00244400(void* self, int buf);
+void func_00244408(void* self, int n);
+extern "C" void* func_0026D5E8(void* self);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char* D_004A28A8;
+extern char* D_004A3418;
+extern int D_004A3410;
+extern char D_00481550[];
+extern char D_004A3420[];
+extern char D_004A3428[];
+
+struct cPlaybackMan_C458 {
+    cBigFile* file;         // 0x0
+    int field_0x4;          // 0x4
+    char pad_0x8[0x8];
+    int field_0x10;         // 0x10
+    char pad_0x14[0x38];
+    int field_0x4C;         // 0x4C
+    int field_0x50;         // 0x50
+    int field_0x54;         // 0x54
+    int field_0x58;         // 0x58
+    char* world;            // 0x5C
+    char* level;            // 0x60
+    int field_0x64;         // 0x64
+    int* buf;               // 0x68
+    void* stream;           // 0x6C
+    int field_0x70;         // 0x70
+    int field_0x74;         // 0x74
+    int field_0x78;         // 0x78
+};
+
+extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int a1)
+{
+    func_0026D5E8((char*)self + 0x14);
+    char* world = *(char**)(D_004A28A8 + 0x84);
+    self->world = world;
+    char* level = *(char**)(world + 0xC);
+    self->level = level;
+    self->field_0x74 = -1;
+    self->field_0x54 = a1;
+    self->field_0x78 = -1;
+    self->field_0x10 = 0;
+    self->field_0x4C = 0;
+    self->field_0x4 = 0;
+    self->field_0x50 = 0;
+    self->field_0x58 = 0;
+    self->field_0x70 = 0;
+    int* info = *(int**)(*(char**)(level + 0x40) + 0xDF0);
+    int n = info[1];
+    self->field_0x64 = info[0];
+    self->buf = (int*)cMemMan_alloc(0x2A4, D_00481550, 0x20000000, 0);
+    self->buf[0] = 0;
+    void* s = cMemMan_alloc(8, D_004A3420, 0x20000000, 0);
+    func_00244400(s, (int)self->buf);
+    func_00244408(s, n);
+    self->stream = s;
+    char name[0x100];
+    sprintf(name, D_004A3418, D_004A3410);
+    cBigFile* bf = cBigFile_cBigFile((cBigFile*)cMemMan_alloc(8, D_004A3428, 0, 0));
+    self->file = bf;
+    cBigFile_open(bf, name, 0);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026C588);
@@ -73,7 +144,66 @@ extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
 
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_initLocation);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026C898);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+extern "C" void func_003DFAF0(int handle);
+
+struct sPbEntryC898 {
+    int field_0x0;
+    void* data;             // 0x4
+    int field_0x8;          // 0x8
+};
+
+struct cPlaybackManC898 {
+    int field_0x0;
+    int* stream;            // 0x4
+    char pad_0x8[0x8];
+    int field_0x10;         // 0x10
+    char pad_0x14[0x38];
+    void* buf4C;            // 0x4C
+    int count;              // 0x50
+    int field_0x54;
+    sPbEntryC898* entries;  // 0x58
+    char pad_0x5C[0x14];
+    int field_0x70;         // 0x70
+    int field_0x74;
+    int handle;             // 0x78
+};
+
+extern "C" void func_0026C898(void* p)
+{
+    cPlaybackManC898* self = (cPlaybackManC898*)p;
+    if (self->handle != -1) {
+        func_003DFAF0(self->handle);
+        self->handle = -1;
+    }
+    if (self->entries != 0) {
+        for (int i = 0; i < self->count; i++) {
+            if (self->entries[i].data != 0) {
+                cMemMan_free(self->entries[i].data);
+                self->entries[i].data = 0;
+            }
+            self->entries[i].field_0x8 = 0;
+        }
+        if (self->entries != 0) {
+            cMemMan_free(self->entries);
+        }
+        self->entries = 0;
+    }
+    if (self->buf4C != 0) {
+        cMemMan_free(self->buf4C);
+        self->buf4C = 0;
+    }
+    self->field_0x10 = 0;
+    if (self->stream != 0) {
+        operator_delete(self->stream);
+        self->stream = 0;
+    }
+    self->field_0x70 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026CA90);

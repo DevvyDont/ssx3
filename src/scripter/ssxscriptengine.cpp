@@ -608,7 +608,36 @@ extern "C" void func_00279888(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002798C0);
+#ifdef SKIP_ASM
+extern "C" int func_00416B18(const char* a, const char* b, int n);
+void* func_0027C078(void* self);
+extern "C" void func_00282150(void* self, void* data, int a2);
+extern "C" void cScriptAnimBankManager_LinkBank(void* mgr, int bank, void* data);
+extern "C" void func_00283580(void* mgr, int bank, void* data, int a3);
+extern char D_004A34C8[];
+extern char D_004A34D0[];
+extern char D_004A34D8[];
+
+extern "C" void func_002798C0(char* self, const char* ext, void* data, int a3, int* kind, int* bank)
+{
+    if (func_00416B18(D_004A34C8, ext, 3) == 0) {
+        char* h = (char*)func_0027C078(data);
+        *(int*)(h + 0x1C) = *(int*)(self + 0xA48);
+        *kind = 0;
+        func_00282150(self, data, *(int*)(h + 0x18));
+    } else if (func_00416B18(D_004A34D0, ext, 3) == 0) {
+        *kind = 1;
+        *bank = *(int*)(self + 0xA48);
+        cScriptAnimBankManager_LinkBank(self + 0xA28, *(int*)(self + 0xA48), data);
+    } else if (func_00416B18(D_004A34D8, ext, 3) == 0) {
+        *kind = 2;
+        *bank = *(int*)(self + 0xA48);
+        func_00283580(self + 0xA38, *(int*)(self + 0xA48), data, a3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002799E0);
@@ -909,7 +938,57 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027AC60);
 
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetScriptFromCategory);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B268);
+#ifdef SKIP_ASM
+void func_00277F08(void* slot);
+extern "C" int func_00275920(void* self, const char* name, int* data, int size);
+extern "C" int func_00317F98(const char* name);
+extern "C" int* func_003E1908(const char* name, int flags);
+extern "C" int func_003E1BB8(const char* name, int* buf, int a2);
+
+struct sSeSlotB268 {
+    int handle;     // 0x0
+    int key;        // 0x4
+    int field_0x8;
+    int temp;       // 0xC
+};
+
+extern "C" void func_0027B268(char* self, int i, const char* name, int flags, int key, int* buf)
+{
+    sSeSlotB268* s = (sSeSlotB268*)(self + (i * 0x10 + 0x628));
+    if (s->handle != 0) {
+        return;
+    }
+    s->key = key;
+    int size = 0;
+    int* data;
+    if (buf != 0) {
+        data = 0;
+        if (func_003E1BB8(name, buf, 0) != 0) {
+            data = buf;
+        }
+    } else {
+        data = func_003E1908(name, flags);
+        if (data == 0) {
+            func_00277F08(s);
+            return;
+        }
+        size = func_00317F98(name);
+    }
+    if (data == 0) {
+        func_00277F08(s);
+        return;
+    }
+    *(int*)(self + 0xA48) = i;
+    s->handle = func_00275920(self + 0x51C, name, data, size);
+    *(int*)(self + 0xA48) = 10;
+    s->temp = 1;
+    if (buf != 0) {
+        s->temp = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B370);
@@ -1866,7 +1945,56 @@ void func_0027D680(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D688);
+#ifdef SKIP_ASM
+extern char D_004FF1A0[];
+
+struct sSeVEntryD688 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// the PC port needs a plain 64-byte copy.
+extern "C" void func_0027D688(char* self, void* anim)
+{
+    if (anim != 0) {
+        int id = func_0027D2F0((sScriptEng0050*)func_0027D2E8(), anim);
+        if (*(void**)(self + 0x14) != 0) {
+            sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
+            vt[5].fn(self + vt[5].delta, *(int*)(self + 0x20));
+        }
+        *(void**)(self + 0x14) = anim;
+        *(int*)(self + 0x20) = id;
+        sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
+        vt[4].fn(self + vt[4].delta, id);
+    } else if (*(void**)(self + 0x14) != 0) {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(self + 0x30), "r"(D_004FF1A0)
+            : "memory");
+        *(int*)(self + 0x70) = 0;
+        *(int*)(self + 0x74) = 0;
+        *(int*)(self + 0x78) = 0;
+        sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
+        vt[5].fn(self + vt[5].delta, *(int*)(self + 0x20));
+        *(void**)(self + 0x14) = 0;
+        *(int*)(self + 0x20) = -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D788__FPvf);
@@ -2248,7 +2376,77 @@ extern "C" void func_00280730(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_002807B0);
+#ifdef SKIP_ASM
+void func_00283440(void*);
+extern "C" void* func_0028B180();
+void func_002A1BD0(void* p);
+extern "C" void func_002AD5F0(void* bank, int id, int a, float f);
+extern "C" void func_00309E50(void* mgr, int a, int b);
+extern "C" void func_0027CC28(void* self, void* out);
+extern void* D_004A3DD8;
+extern int D_004A3B60;
+
+struct sSePair07B0 {
+    int a;
+    int b;
+};
+
+struct sSeSound07B0 {
+    int id;
+    int field_0x4;
+    int field_0x8;
+};
+
+struct sSeInfo07B0 {
+    int v[9];
+    int active;     // 0x24
+    int pad[2];
+};
+
+struct sSeEngine07B0 {
+    char pad_0x0[0x8];
+    void* owner;                // 0x8
+    char pad_0xC[0x10];
+    sSePair07B0 pairs[(0xBC - 0x1C) / 8];   // 0x1C
+    sSeSound07B0 sounds[4];     // 0xBC
+    int pairCount;              // 0xEC
+    int field_0xF0;             // 0xF0
+    int field_0xF4;             // 0xF4
+    int field_0xF8;             // 0xF8
+};
+
+extern "C" void func_002807B0(sSeEngine07B0* self)
+{
+    sSeInfo07B0 info;
+    func_00283440((char*)self + 0xC);
+    for (int i = 0; i < self->pairCount; i++) {
+        func_00309E50(D_004A3DD8, self->pairs[i].b, self->pairs[i].a);
+    }
+    if (self->field_0xF0 != 0) {
+        func_002A1BD0(func_0028B180());
+    }
+    for (int i = 0; i < 4; i++) {
+        int id = self->sounds[i].id;
+        if (id >= 0) {
+            func_002AD5F0(*(char**)*(char**)((char*)func_0028B180() + 0x118) + 0x1D8, id, 1, 0.0f);
+        }
+        sSeSound07B0* s = &self->sounds[i];
+        s->field_0x8 = -1;
+        s->id = -1;
+        s->field_0x4 = 0;
+    }
+    func_0027CC28(self->owner, &info);
+    if (info.active != 0) {
+        D_004A3B60 = 0;
+    }
+    self->pairCount = 0;
+    self->field_0xF0 = 0;
+    self->field_0xF4 = 0;
+    self->field_0xF8 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002808D8);
@@ -2345,7 +2543,46 @@ extern "C" int func_00281190(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002811E8);
+#ifdef SKIP_ASM
+void func_0027D680(void* self, int val);
+extern "C" void func_0027D688(char* self, void* anim);
+
+struct sSeEng11E8 {
+    char pad_0x0[0x8];
+    int count;              // 0x8
+    char pad_0xC[0xC4];
+    char* objs[2];          // 0xD0
+    char pad_0xD8[0x4];
+    int slots[2];           // 0xDC
+};
+
+// PORT: the unit declares func_002811E8(void*, void*) returning void; it returns found/not found.
+extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key) __asm__("func_002811E8");
+extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key)
+{
+    int k = *(int*)(key + 4);
+    for (int i = 0; i < 2; i++) {
+        char* o = self->objs[i];
+        if (o != 0 && *(int*)(o + 4) == k) {
+            if (self->count > 0 && *(int*)(o + 0x14) != 0) {
+                func_0027D688(o, 0);
+                for (int j = 0; j < 2; j++) {
+                    if (self->slots[j] == i) {
+                        self->slots[j] = -1;
+                        break;
+                    }
+                }
+            }
+            func_0027D680(self->objs[i], 0);
+            self->objs[i] = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002812E0);
@@ -2403,7 +2640,55 @@ extern "C" void func_00281370(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281400);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void* func_0027D2E8(void);
+extern "C" void func_0027D170(void* mgr, int id);
+extern "C" void func_0027D688(char* self, void* anim);
+extern "C" void func_00281A50(void* self);
+extern "C" void func_001033F8(void* a, void* b, void* c);
+// PORT: func_00282DB0's mangled signature is (void*, int, int); it also takes four floats (same alias as func_002812E0).
+void* func_00282DB0_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
+    __asm__("func_00282DB0__FPvii");
+// PORT: the unit declares func_00283440(void*); this caller passes a second argument.
+void func_00283440_2(void* self, int a1) __asm__("func_00283440__FPv");
+
+struct sSeEng1400 {
+    char pad_0x0[0x4];
+    int id;                 // 0x4
+    char pad_0x8[0xC8];
+    char* objs[2];          // 0xD0
+    void* fade;             // 0xD8
+    int slots[2];           // 0xDC
+    char pad_0xE4[0x1C];
+    char area[0x10];        // 0x100
+    int pending;            // 0x110
+};
+
+extern "C" void func_00281400(sSeEng1400* self, int a1)
+{
+    func_0027D170(func_0027D2E8(), self->id);
+    for (int i = 0; i < 2; i++) {
+        int s = self->slots[i];
+        if (s >= 0) {
+            func_0027D688(self->objs[s], 0);
+            self->slots[i] = -1;
+        }
+    }
+    if (self->fade != 0) {
+        func_00282DB0_f(self->fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    if (self->pending != 0) {
+        char* lvl = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+        func_001033F8(*(void**)(lvl + 0xA4), self->area, lvl);
+        self->pending = 0;
+    }
+    func_00281A50(self);
+    func_00283440_2(self, a1);
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_002814F8);
 

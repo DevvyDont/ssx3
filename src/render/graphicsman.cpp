@@ -684,7 +684,35 @@ extern "C" void* func_00370018(void* self)
 
 INCLUDE_ASM("render/graphicsman", func_00370058);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_003705E0);
+#ifdef SKIP_ASM
+extern "C" void func_00370058(void* gfx, void* a1, void* desc, void* out, float f);
+
+extern "C" void func_003705E0(char* self, void* a1, char* d)
+{
+    *(int*)(self + 0x180) = *(int*)(d + 0xD0);
+    *(float*)(self + 0x188) = *(float*)(d + 0xD4);
+    *(int*)(self + 0x4) = *(int*)(d + 0xC4);
+    *(int*)(self + 0x8) = *(int*)(d + 0xC8);
+    float t = *(float*)(d + 0x8);
+    float r;
+    if (t < 0.0f) {
+        r = t;
+    } else {
+        r = t + *(float*)(d + 0x14) + *(float*)(d + 0x1C) * 0.5f;
+    }
+    *(float*)(self + 0x0) = r;
+    float x = *(float*)(d + 0x8) >= 0.0f ? *(float*)(d + 0x8) : *(float*)(d + 0x14) + *(float*)(d + 0x1C) * 0.5f;
+    sGfxVec4 v;
+    v.x = *(float*)(d + 0x78);
+    v.y = *(float*)(d + 0x7C);
+    v.z = *(float*)(d + 0x80);
+    v.w = 0.0f;
+    func_0036CBF8(self + 0x10, *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
+    func_00370058(self + 0x10, a1, d, self + 0x160, -1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370758);
@@ -702,7 +730,34 @@ extern "C" void func_00370758(int* self, int flags)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_00370788);
+#ifdef SKIP_ASM
+extern "C" void func_0036D428(void* self, float val);
+
+extern "C" void func_00370788(char* self, float dt)
+{
+    float t = *(float*)(self + 0x0);
+    if (t == 0.0f) {
+        return;
+    }
+    if (t < 0.0f) {
+        func_0036D428(self + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+    } else {
+        func_0036D3E8(self + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        *(float*)(self + 0x0) -= 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        if (*(float*)(self + 0x0) < 0.0f) {
+            *(float*)(self + 0x0) = 0.0f;
+        }
+    }
+    float v = *(float*)(self + 0x184) + *(float*)(self + 0x188) * dt;
+    *(float*)(self + 0x184) = v;
+    if ((int)v >= *(int*)(self + 0x180)) {
+        *(float*)(self + 0x184) = 0.0f;
+    }
+    *(int*)(self + 0xC) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370888);

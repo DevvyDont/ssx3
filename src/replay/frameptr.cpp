@@ -448,7 +448,66 @@ extern "C" void func_0026EF80()
 
 INCLUDE_ASM("replay/frameptr", func_0026EFB8);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F088);
+#ifdef SKIP_ASM
+struct sFpOwner26F428;
+struct cReplayFramePtr_F980;
+extern "C" void func_0026F428(sFpOwner26F428* self);
+extern "C" void func_0026F980(cReplayFramePtr_F980* self);
+void func_0026F498(void* self);
+void operator_delete(int* ptr);
+
+struct sFpVEntryF088 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sFpNodeF088 {
+    sFpVEntryF088* vtable;  // 0x0
+    char pad_0x4[0x34];
+};
+
+struct sFpKeyF088 {
+    char pad_0x0[0xB4];
+    ~sFpKeyF088() {}
+};
+
+extern "C" void func_0026F088(int* self, int flags)
+{
+    char* s = (char*)self;
+    int ok = 0;
+    int v = *self;
+    if (v != 0) {
+        ok = v;
+        ok = ok < 10;
+    }
+    if (ok) {
+        func_0026F980((cReplayFramePtr_F980*)self);
+    }
+    func_0026F498(self);
+    func_0026F428((sFpOwner26F428*)self);
+    if (s + 0x494 != 0) {
+        char* p = s + 0x494 + 0x168;
+        while (s + 0x494 != p) {
+            p -= 0xB4;
+            ((sFpKeyF088*)p)->~sFpKeyF088();
+        }
+    }
+    if (s + 0x2C != 0) {
+        char* p = s + 0x2C + 0x380;
+        while (s + 0x2C != p) {
+            p -= 0x38;
+            sFpVEntryF088* vt = ((sFpNodeF088*)p)->vtable;
+            vt[7].fn(p + vt[7].delta, 0);
+        }
+    }
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F180);
@@ -715,7 +774,39 @@ extern "C" void func_0026FA50(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026FA78);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern int D_00445438[];
+int func_00320C48(void* pad, int button);
+// PORT: func_00320BF0 returns the input axis value as a float ($f0).
+extern "C" float func_00320BF0(void* pad, int axis);
+extern "C" void cGameViewMan_updateAll(void* list);
+
+static inline bool isStateFA78(int* self, int s)
+{
+    return *self == s;
+}
+
+extern "C" void func_0026FA78(int* self)
+{
+    if (!isStateFA78(self, 3)) {
+        return;
+    }
+    void* pad = *(void**)(D_004A28A8 + (self[0x28 / 4] << 2) + 0xB0);
+    if (func_00320C48(pad, 0x6C) != 0) {
+        cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
+    }
+    if (D_00445438[self[0x630 / 4]] != 0xB) {
+        return;
+    }
+    if (func_00320BF0(pad, 0x31) != 0.0f || func_00320BF0(pad, 0x30) != 0.0f ||
+        func_00320BF0(pad, 0x32) != 0.0f || func_00320BF0(pad, 0x33) != 0.0f) {
+        cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026FB88);
 

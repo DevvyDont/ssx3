@@ -35,7 +35,69 @@ INCLUDE_ASM("replay/replay", func_0026DE58);
 
 INCLUDE_ASM("replay/replay", cReplay_restoreObject);
 
+//100%
 INCLUDE_ASM("replay/replay", cReplay_restoreDeadBucket);
+#ifdef SKIP_ASM
+class cStreamRDB {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+struct sRdbModelSet {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+
+struct sRdbWorld {
+    char pad_0x0[0x8];
+    sRdbModelSet** sets;    // 0x8
+};
+
+extern sRdbWorld** D_004A47B8;
+extern char D_00481720[];
+extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
+extern "C" void* func_003506D8(void* self, void* model);
+
+static inline void* refToPtrRDB(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+struct sRdbRef {
+    unsigned int id;
+    sRdbRef() : id(0xFFFFFFFF) {}
+
+    void* get()
+    {
+        sRdbModelSet* set = (*D_004A47B8)->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        unsigned int p = set->refs[id >> 8] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtrRDB(p);
+    }
+};
+
+extern "C" void cReplay_restoreDeadBucket(void* self, cStreamRDB* stream)
+{
+    struct {
+        int count;
+        int pad;
+    } hdr;
+    sRdbRef ref;
+    stream->v02(&hdr, 8);
+    for (int i = 0; i < hdr.count; i++) {
+        stream->v02(&ref, 4);
+        void* mem = cMemMan_alloc(0x1C, D_00481720, 0x20000000, 0);
+        func_003506D8(mem, ref.get());
+    }
+}
+#endif
 
 extern "C" void* func_0026E6A0(void*);
 
@@ -262,7 +324,29 @@ sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replay", func_0026E6E0);
+#ifdef SKIP_ASM
+void func_0026D730(void*, int, int);
+
+struct sReplayDataE6E0 {
+    int v[0xAC / 4];
+};
+
+struct sReplayObjE6E0 {
+    int index;                  // 0x0
+    sReplayDataE6E0 data;       // 0x4
+    void* rider;                // 0xB0
+};
+
+extern "C" void func_0026E6E0(sReplayObjE6E0* self, char* rider, sReplayDataE6E0* src)
+{
+    *(unsigned char*)(rider + 0x1E) |= 1 << self->index;
+    func_0026D730(rider, self->index, 0);
+    self->rider = rider;
+    self->data = *src;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replay", func_0026E7F8__FPv);

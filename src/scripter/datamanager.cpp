@@ -53,7 +53,50 @@ extern "C" void func_002758C0(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275920);
+#ifdef SKIP_ASM
+void* func_00275CF8(void* self);
+extern "C" int BIG_sizeofheader(void* data);
+struct sDmNode5B98;
+extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev);
+extern int D_00450DD4[];
+
+struct sDmVEntry5920 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, void*, int, void*, void*);
+};
+
+struct sDmNode5920 {
+    int field_0x0;
+    int field_0x4;          // 0x4
+    void* data;             // 0x8
+    int size;               // 0xC
+    int refs;               // 0x10
+};
+
+extern "C" sDmNode5920* func_00275920(void* self, int a1, void* data, int size)
+{
+    sDmNode5920* n = (sDmNode5920*)func_00275CF8(self);
+    int saved = D_00450DD4[0];
+    n->data = data;
+    n->refs = 1;
+    n->size = size;
+    D_00450DD4[0] = 0;
+    int big = BIG_sizeofheader(data);
+    D_00450DD4[0] = saved;
+    if (big != 0) {
+        sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
+        vt[4].fn((char*)self + vt[4].delta, a1, data, size, n, &n->field_0x4);
+        func_00275B98(self, (char*)data, (sDmNode5B98*)n);
+    } else {
+        sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
+        vt[2].fn((char*)self + vt[2].delta, a1, data, size, n, &n->field_0x4);
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275A20);
@@ -133,7 +176,58 @@ extern "C" void func_00275B08(sDmTable275B08* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275B98);
+#ifdef SKIP_ASM
+void* func_00275CF8(void* self);
+extern "C" int BIG_sizeofheader(void* data);
+extern "C" char* BIG_locateentryz(void* big, int a1, int index, int* offset, int* size);
+extern int D_00450DD4[];
+
+struct sDmVEntry5B98 {
+    short delta;
+    short index;
+    void (*fn)(void*, char*, char*, int, void*, void*);
+};
+
+struct sDmNode5B98 {
+    int field_0x0;
+    int field_0x4;          // 0x4
+    char* data;             // 0x8
+    int size;               // 0xC
+    int refs;               // 0x10
+    sDmNode5B98* next;      // 0x14
+};
+
+extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
+{
+    int ent[2];
+    ent[0] = 0;
+    ent[1] = 0;
+    int i = 1;
+    char* name = BIG_locateentryz(big, 0, 0, &ent[0], &ent[1]);
+    while (name != 0) {
+        char* sub = big + ent[0];
+        int saved = D_00450DD4[0];
+        D_00450DD4[0] = 0;
+        int r = BIG_sizeofheader(sub);
+        D_00450DD4[0] = saved;
+        if (r != 0) {
+            prev = func_00275B98(self, sub, prev);
+        } else {
+            sDmNode5B98* n = (sDmNode5B98*)func_00275CF8(self);
+            n->data = sub;
+            n->size = ent[1];
+            prev->next = n;
+            prev = n;
+            sDmVEntry5B98* vt = *(sDmVEntry5B98**)((char*)self + 0xC);
+            vt[2].fn((char*)self + vt[2].delta, name, sub, ent[1], prev, &prev->field_0x4);
+        }
+        name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
+    }
+    return prev;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275CD0__FPvT0);
@@ -212,7 +306,55 @@ INCLUDE_ASM("scripter/datamanager", func_00275ED0);
 
 INCLUDE_ASM("scripter/datamanager", func_00276048);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276270);
+#ifdef SKIP_ASM
+extern "C" void func_00276868(void* self, int a1);
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_00277598(void* self, int index);
+extern "C" void func_00277778(void* self);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" int func_00282798(void* self, int a1);
+extern "C" void* func_00283D28(void*);
+extern "C" void* func_00283D70(void* list, int i);
+
+extern "C" int func_00276270(char* self, int a1)
+{
+    if (*(int*)(self + 0xA4) == 1) {
+        func_00277778(self);
+    }
+    if (*(int*)(self + 0xA4) != 0) {
+        return *(int*)(self + 0xA4);
+    }
+    *(int*)(self + 0xB4) = a1;
+    void* list = self + 0xC;
+    if (func_00283D28(list) == 0) {
+        return 0;
+    }
+    int idx = func_00277450(self, 0, 0);
+    if (idx < 0) {
+        func_00276868(self, 1);
+        return *(int*)(self + 0xA4);
+    }
+    func_00277598(self, idx);
+    char* e = (char*)func_00283D70(list, 0);
+    if (func_00277DD8(self, e) == 0) {
+        if (func_00282798(*(void**)self, *(int*)(e + 0xC)) == 1) {
+            *(int*)(self + 0xA4) = 1;
+        } else {
+            *(int*)(self + 0xA4) = 2;
+        }
+    } else {
+        if (*(int*)(e + 0xC) < 0) {
+            *(int*)(self + 0xA4) = 1;
+        } else {
+            *(int*)(self + 0xA4) = 2;
+        }
+    }
+    *(int*)(self + 0xBC) = func_00277450(self, idx + 1, 0);
+    return *(int*)(self + 0xA4);
+}
+#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00276388);
 
@@ -229,7 +371,62 @@ void* func_002766B0(void* self, int a1)
 
 INCLUDE_ASM("scripter/datamanager", func_002766D0);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276868);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern char D_004A34A0[];
+int GetHashValue32(char* s);
+void* func_00230698(void* self, int a1);
+extern "C" void func_002E4578(void* p);
+extern "C" void func_002EA820(void* p);
+extern "C" void* func_0039F9D8(void* table, int hash);
+extern "C" void func_00277598(void* self, int index);
+extern "C" void* func_00277C08(void*, int, int);
+
+struct sDmVEntry6868 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" void func_00276868(void* p, int a1)
+{
+    char* self = (char*)p;
+    if (*(int*)(self + 0xA8) != 0) {
+        func_00277C08(self, 0, 1);
+    }
+    if (*(int*)(self + 0xC4) != 0) {
+        *(int*)(self + 0xC4) = 1;
+        func_00277C08(self, 0, 0);
+    }
+    if (*(int*)(self + 0x4) != 0 && *(int*)(self + 0xA4) == 3) {
+        void* gm = *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64);
+        if (a1 != 0) {
+            func_002EA820(gm);
+            if (*(int*)(self + 0xB0) != 0) {
+                func_002E4578(func_00230698(*(void**)(D_004A28A8 + 0x84), 0));
+            }
+        }
+        char* table = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18;
+        char* o = (char*)func_0039F9D8(table, GetHashValue32(D_004A34A0));
+        if (o != 0) {
+            sDmVEntry6868* e = &(*(sDmVEntry6868**)(o + 0x8))[24];
+            e->fn(o + e->delta, 1, 0);
+        }
+    }
+    func_00277598(self, 5);
+    *(int*)(self + 0xBC) = -1;
+    *(int*)(self + 0xA4) = 0;
+    *(int*)(self + 0xC8) = 0;
+    *(int*)(self + 0xB0) = 0;
+    *(int*)(self + 0xB8) = 0;
+    *(int*)(self + 0xAC) = 0;
+    *(int*)(self + 0xC0) = 0;
+    *(int*)(self + 0xC4) = 0;
+    *(int*)(self + 0xB4) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276998);
@@ -299,7 +496,50 @@ void* func_00276CA8(void* self)
 
 INCLUDE_ASM("scripter/datamanager", func_00276CC8);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276F48);
+#ifdef SKIP_ASM
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_00277800(void* self);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" int func_00282540(void* self, int id);
+extern "C" void func_00283818(void* p);
+extern "C" void* func_00283D70(void* list, int i);
+
+extern "C" void func_00276F48(char* self)
+{
+    if (*(int*)(self + 0xA4) != 3) {
+        return;
+    }
+    if (*(int*)(self + 0xC8) != 0) {
+        return;
+    }
+    void* list = self + 0xC;
+    char* e = (char*)func_00283D70(list, 0);
+    if (!(*(int*)(e + 0x8) & 1)) {
+        return;
+    }
+    *(int*)(self + 0xC8) = 1;
+    if (*(int*)(self + 0xBC) < 0) {
+        func_00277450(self, 1, 1);
+        return;
+    }
+    int idx = func_00277450(self, *(int*)(self + 0xBC), 1);
+    if (idx != *(int*)(self + 0xBC)) {
+        char* e2 = (char*)func_00283D70(list, *(int*)(self + 0xBC));
+        if (func_00277DD8(self, e2) == 0) {
+            func_00282540(*(void**)self, *(int*)(e2 + 0xC));
+            *(int*)(e2 + 0xC) = -1;
+        } else if (*(int*)(e2 + 0xC) >= 0) {
+            func_00283818(*(char**)self + 0x500);
+        }
+        *(int*)(self + 0xBC) = idx;
+    }
+    if (idx >= 0) {
+        func_00277800(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277060);
@@ -537,7 +777,36 @@ extern "C" int func_00277DD8(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277DE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+struct sDmCfg7DE8 {
+    unsigned int flags;
+    int v[(0x288 - 4) / 4];
+};
+
+struct sDmEnt7DE8 {
+    int v[7];
+};
+
+extern sDmCfg7DE8 D_00535610;
+extern sDmEnt7DE8 D_004823DC[];
+extern sDmEnt7DE8 D_0048247C[];
+
+extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    sDmCfg7DE8 cfg = D_00535610;
+    if ((cfg.flags & 0x300000) != 0x200000) {
+        return &D_0048247C[*key];
+    }
+    return &D_004823DC[*key];
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277F08__FPv);
@@ -555,7 +824,53 @@ INCLUDE_ASM("scripter/datamanager", func_00277F20);
 
 INCLUDE_ASM("scripter/datamanager", func_002780B8);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00278210);
+#ifdef SKIP_ASM
+extern "C" void* func_003E1908(const char* name, int flags);
+extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size);
+extern char* D_004A3494;
+extern char* D_004A3498;
+
+struct sDmScript8210 {
+    int field_0x0;
+    int field_0x4;
+    int offset;             // 0x8
+};
+
+struct sDmEngine8210 {
+    char pad_0x0[0x52C];
+    int* hdr;                   // 0x52C
+    sDmScript8210* scripts;     // 0x530
+    char* base;                 // 0x534
+    char pad_0x538[0x1C];
+    int field_0x554;            // 0x554
+    char pad_0x558[0xC8];
+    int field_0x620;            // 0x620
+};
+
+// PORT: script offsets are rebased into pointers held in int.
+extern "C" void func_00278210(sDmEngine8210* self)
+{
+    int* hdr = (int*)func_003E1908(D_004A3494, 0);
+    self->hdr = hdr;
+    self->scripts = (sDmScript8210*)(hdr + 1);
+    char* base = (char*)func_003E1908(D_004A3498, 0);
+    self->base = base;
+    if (base != 0) {
+        for (int i = 0; i < *self->hdr; i++) {
+            self->scripts[i].offset = (int)self->base + self->scripts[i].offset;
+        }
+    } else {
+        for (int i = 0; i < *self->hdr; i++) {
+            self->scripts[i].offset = 0;
+        }
+    }
+    self->field_0x554 = 0;
+    self->field_0x620 = 0;
+    cBXScriptEngine_SetupBXEngine(self, *self->hdr, 10, 0x4000);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00278308);

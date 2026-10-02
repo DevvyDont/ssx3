@@ -1,8 +1,86 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("path/pathsys", cPathSys_resolvePaths);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" int func_0026A180(void* path, char* data);
+extern char D_00481438[];
+extern void* D_00481448[];
 
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sPathB310 {
+    char pad_0x0[0x34];
+    void** vtable;          // 0x34
+    int field_0x38;         // 0x38
+    sPathB310() { vtable = D_00481448; }
+};
+
+struct sPathSysB310 {
+    char pad_0x0[0x10];
+    int count;              // 0x10
+    sPathB310* paths;       // 0x14
+};
+
+extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* p)
+{
+    int count;
+    sPathB310** slot = &self->paths;
+    char* start = p;
+    func_0026BA68(&count, p);
+    p += 4;
+    self->count = count;
+    *slot = new (operator_new_tag(count * sizeof(sPathB310), D_00481438, 0, 0)) sPathB310[count];
+    for (int i = 0; i < self->count; i++) {
+        p += func_0026A180(&self->paths[i], p);
+    }
+    return p - start;
+}
+#endif
+
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B410);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" int func_0026A180(void* path, char* data);
+extern char D_004A3408[];
+extern void* D_00481478[];
+
+struct sPathB410 {
+    char pad_0x0[0x34];
+    void** vtable;          // 0x34
+    int field_0x38;         // 0x38
+    int field_0x3C;         // 0x3C
+    sPathB410() { vtable = D_00481478; }
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+
+struct sPathSysB410 {
+    char pad_0x0[0x8];
+    int count;              // 0x8
+    sPathB410* paths;       // 0xC
+};
+
+extern "C" int func_0026B410(sPathSysB410* self, char* p)
+{
+    int count;
+    sPathB410** slot = &self->paths;
+    char* start = p;
+    func_0026BA68(&count, p);
+    p += 4;
+    self->count = count;
+    *slot = new (operator_new_tag(count * sizeof(sPathB410), D_004A3408, 0, 0)) sPathB410[count];
+    for (int i = 0; i < self->count; i++) {
+        p += func_0026A180(&self->paths[i], p);
+    }
+    return p - start;
+}
+#endif
 
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B508);
