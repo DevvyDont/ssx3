@@ -2,7 +2,26 @@
 
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewNonBindTexID);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_003671C8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+struct cTexSlots3671C8 {
+    int unk_0x0;
+    int count;
+    void* slots[2000];
+    void* freeHead;
+};
+
+extern "C" void func_003671C8(cTexSlots3671C8* self, int id)
+{
+    operator_delete((int*)self->slots[id]);
+    self->slots[id] = self->freeHead;
+    self->freeHead = &self->slots[id];
+    self->count--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367230);
@@ -14,7 +33,20 @@ extern "C" void func_00367230(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewBindTexID);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00492078[];
+
+extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id)
+{
+    char* tex = (char*)self + 8;
+    void** slot = (void**)(tex + (id << 2));
+    *slot = cMemMan_alloc(0x58, D_00492078, 0x21000000, 0);
+    *(int*)self += 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_003672C0);
@@ -87,7 +119,18 @@ extern "C" void func_00367B60(void* self, int i)
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367BC0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);
+#ifdef SKIP_ASM
+extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
+                             int a8, int a9, int a10, int a11);
+extern char D_004A4068[];
+
+extern "C" int func_00367CD0(void* self, int a, int b, int c)
+{
+    return func_00367440(self, 0, D_004A4068, a, b, 0, c, 0, 0, 3, 0, -1);
+}
+#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
 

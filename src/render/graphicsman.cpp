@@ -529,9 +529,49 @@ extern "C" void func_00370AA8(void* self, sGmSerObj* out)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_00370AF8);
+#ifdef SKIP_ASM
+class cStream00370AF8 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void func_0036D500(void* a, void* b);
+
+extern "C" void func_00370AF8(void* self, cStream00370AF8* stream)
+{
+    struct {
+        float a;
+        float b;
+        int c;
+    } buf;
+    stream->v02(&buf, 0xC);
+    *(float*)((char*)self + 0x0) = buf.a;
+    *(float*)((char*)self + 0x18) = buf.b;
+    func_0036D500((char*)self + 0x10, (char*)self + 0x160);
+    *(int*)((char*)self + 0xC) = buf.c;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_00370B60);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00370C08);
+#ifdef SKIP_ASM
+extern "C" void func_00370CF8(void* self, int flag);
+void operator_delete(int* ptr);
+extern void* D_00493118[];
+
+extern "C" void func_00370C08(void* self, int flags)
+{
+    *(void***)((char*)self + 0x1F8) = D_00493118;
+    func_00370CF8(self, 1);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 

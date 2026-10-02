@@ -131,7 +131,26 @@ extern "C" void func_00358F90(void* self, void* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358FD0);
+#ifdef SKIP_ASM
+extern "C" void func_00341FE8(void*);
+extern "C" void func_00359030(void*);
+
+extern "C" void func_00358FD0(void* self, int msg)
+{
+    if (msg == 0x82) {
+        if (*(unsigned short*)((char*)self + 0x14) == 0) {
+            *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x38);
+            func_00359030(self);
+            *(char*)((char*)self + 0x14) = 1;
+            *(float*)((char*)self + 0x4) = *(float*)((char*)self + 0x8);
+        }
+    } else {
+        func_00341FE8((char*)self + 0x18);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00359030);
 
@@ -148,7 +167,24 @@ extern "C" void func_003590C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003590F0);
+#ifdef SKIP_ASM
+struct sVEntry003590F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00342150(void* self, void* stream);
+
+extern "C" void func_003590F0(void* self, void* obj)
+{
+    func_00342150((char*)self + 0x18, obj);
+    sVEntry003590F0* vt = *(sVEntry003590F0**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00359140);
 
@@ -168,7 +204,27 @@ extern "C" void* func_00359228(void* self, int a, int b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00359270);
+#ifdef SKIP_ASM
+struct sVEntry00359270 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_00341C80(void* self, void* a, void* stream);
+extern void* D_0048EA70[];
+
+extern "C" void* func_00359270(void* self, void* a, void* stream)
+{
+    func_00341C80(self, a, stream);
+    *(void***)((char*)self + 0x3C) = D_0048EA70;
+    sVEntry00359270* vt = *(sVEntry00359270**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x6C, 4);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_003592D0);
 

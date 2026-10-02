@@ -6,9 +6,53 @@ typedef int cQuad128 __attribute__((mode(TI)));
 
 INCLUDE_ASM("object/railmodifier", cRailModifier_buildXform);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035C4E0);
+#ifdef SKIP_ASM
+struct sBox0035C4E0 {
+    float min[4];
+    float max[4];
+} __attribute__((aligned(16)));
 
+struct sObj0035C4E0 {
+    char pad_0x00[0x10];
+    sBox0035C4E0 box;
+    char pad_0x30[0x14];
+    int id;
+};
+
+extern "C" void func_0035C040(void* self);
+extern "C" void* func_002D1BE0();
+extern "C" void func_003291E0(void* world, int type, int id, sBox0035C4E0* box, sBox0035C4E0* old);
+
+extern "C" void func_0035C4E0(sObj0035C4E0* self)
+{
+    sBox0035C4E0* box = &self->box;
+    sBox0035C4E0 old = self->box;
+    func_0035C040(self);
+    func_003291E0(func_002D1BE0(), 2, self->id, box, &old);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035C540);
+#ifdef SKIP_ASM
+class cStream0035C540 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+    virtual void v03(void* buf, int size);
+    virtual void v04(void* buf, int size);
+    virtual void v05(void* p);
+};
+
+extern "C" void func_0035C540(void* self, cStream0035C540* stream)
+{
+    stream->v01((char*)self + 0x10, 0x30);
+    stream->v05(*(void**)((char*)self + 0x40));
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035C5A0);
 
@@ -310,7 +354,25 @@ INCLUDE_ASM("object/railmodifier", func_0035F410);
 
 INCLUDE_ASM("object/railmodifier", func_0035F598);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F688);
+#ifdef SKIP_ASM
+class cStream0035F688 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+    virtual void v03(void* buf, int size);
+    virtual void v04(void* buf, int size);
+    virtual void v05(void* p);
+};
+
+extern "C" void func_0035F688(void* self, cStream0035F688* stream)
+{
+    stream->v01((char*)self + 0x0, 0x18);
+    stream->v05(*(void**)((char*)self + 0x18));
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035F6E8);
 
@@ -1325,7 +1387,22 @@ void* func_00360C78(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00360C98);
+#ifdef SKIP_ASM
+extern "C" void func_00345760(void* self);
+void operator_delete(int*);
+extern void* D_00491340[];
+
+extern "C" void func_00360C98(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00491340;
+    func_00345760(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360CE8__FPv);
@@ -1403,7 +1480,22 @@ int func_00360D38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00360D40);
+#ifdef SKIP_ASM
+extern "C" void func_0035B6D0(void* self);
+void operator_delete(int*);
+extern void* D_00491200[];
+
+extern "C" void func_00360D40(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00491200;
+    func_0035B6D0(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360D90__FPv);
@@ -1519,7 +1611,29 @@ extern "C" int func_00361098(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003610E0);
+#ifdef SKIP_ASM
+struct sVEntry003610E0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sElem003610E0 {
+    char data[0x40];
+};
+
+extern "C" sElem003610E0* func_003610E0(void* self, int i)
+{
+    char* obj = (char*)self + 0x14;
+    if (*(unsigned short*)((char*)self + 0x26) & 1) {
+        sVEntry003610E0* vt = *(sVEntry003610E0**)((char*)self + 0x20);
+        vt[51].fn(obj + vt[51].delta);
+    }
+    return &(*(sElem003610E0**)((char*)self + 0x44))[i];
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361150__FPv);
@@ -1632,7 +1746,22 @@ extern "C" void func_00361340(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361400);
+#ifdef SKIP_ASM
+extern "C" void func_0034DBA8(void* self, int flags);
+void operator_delete(int*);
+extern void* D_004908F8[];
+
+extern "C" void func_00361400(void* self, int flags)
+{
+    *(void***)((char*)self + 0x50) = D_004908F8;
+    func_0034DBA8((char*)self + 0x30, 0);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361458__FPv);
@@ -1933,7 +2062,28 @@ extern "C" int func_003617B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361800);
+#ifdef SKIP_ASM
+struct sVEntry00361800 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sElem00361800 {
+    char data[0x40];
+};
+
+extern "C" sElem00361800* func_00361800(void* self, int i)
+{
+    if (*(unsigned short*)((char*)self + 0x12) & 1) {
+        sVEntry00361800* vt = *(sVEntry00361800**)((char*)self + 0xC);
+        vt[51].fn((char*)self + vt[51].delta);
+    }
+    return &(*(sElem00361800**)((char*)self + 0x74))[i];
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00361858);
 
@@ -2691,7 +2841,21 @@ void func_00361F90(void* self)
 
 INCLUDE_ASM("object/railmodifier", func_00361F98);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362008);
+#ifdef SKIP_ASM
+extern "C" int func_00424880(int ch);
+extern "C" void* func_00423AA0(int ch, int id);
+
+extern "C" void* func_00362008(void* self, int ch)
+{
+    func_00424880(ch);
+    int* p = (int*)((char*)self + (ch << 2));
+    int id = *p;
+    *p = -1;
+    return func_00423AA0(ch, id);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362120);
@@ -2856,7 +3020,33 @@ extern "C" void func_00362230(void* buf)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00362340);
+#ifdef SKIP_ASM
+extern "C" void func_00362120(void*);
+extern "C" void func_00362230(void*);
+
+struct sIntcStats00362340 {
+    char pad_0x00[0x80];
+    int count;
+};
+extern sIntcStats00362340 D_005059D8;
+
+extern "C" int func_00362340(void)
+{
+    char buf[0x100];
+    func_00362120(buf);
+    sIntcStats00362340* stats = &D_005059D8;
+    if (*(int*)0x10003C00 & 0x400) {
+        *(volatile int*)0x10003C10 = 8;
+    }
+    stats->count++;
+    func_00362230(buf);
+    // PORT: PS2-only: re-enable interrupts (EI).
+    __asm__ __volatile__("sync.l\n\tei");
+    return 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_003623A8);
@@ -3269,7 +3459,22 @@ INCLUDE_ASM("object/railmodifier", func_003669F0);
 
 INCLUDE_ASM("object/railmodifier", func_00366CE0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00366E30);
+#ifdef SKIP_ASM
+extern "C" void func_003663D8(void* self, int id);
+
+extern "C" void func_00366E30(void* self, int i)
+{
+    char* e = (*(char***)((char*)self + 0x23E8))[i];
+    if (*(int*)(e + 0x30) >= 0) {
+        func_003663D8(self, *(int*)(e + 0x30));
+    }
+    if (*(int*)(e + 0x34) >= 0) {
+        func_003663D8(self, *(int*)(e + 0x34));
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00366E90);
 
@@ -3284,7 +3489,22 @@ void func_00366FE0(void* self, int val)
 
 INCLUDE_ASM("object/railmodifier", func_00366FE8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00367078);
+#ifdef SKIP_ASM
+extern "C" void func_00366618(void* list);
+
+extern "C" void func_00367078(void* self)
+{
+    func_00366618((char*)self + 0x4350);
+    func_00366618((char*)self + 0x1F60);
+    int* a = (int*)((char*)self + 0x1F4C);
+    for (int i = 1; i >= 0; i--) {
+        a[i] = -1;
+    }
+    *(int*)((char*)self + 0x1F54) = -1;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003670E0);
 

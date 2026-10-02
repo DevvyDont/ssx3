@@ -12,7 +12,23 @@ INCLUDE_ASM("object/splinemodifier", func_00359CF8);
 
 INCLUDE_ASM("object/splinemodifier", func_00359EB8);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_00359F30);
+#ifdef SKIP_ASM
+class cStream00359F30 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_00345538(void* self, cStream00359F30* stream);
+
+extern "C" void func_00359F30(void* self, cStream00359F30* stream)
+{
+    stream->v01((char*)self + 0x10, 0x50);
+    func_00345538((char*)self + 0xD8, stream);
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_00359F88);
 

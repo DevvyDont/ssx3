@@ -10,7 +10,23 @@ INCLUDE_ASM("render/font", func_003919E8);
 
 INCLUDE_ASM("render/font", cFont_downloadTexture);
 
+//100%
 INCLUDE_ASM("render/font", func_00391C48);
+#ifdef SKIP_ASM
+struct sMat00391C48 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+extern sMat00391C48 D_00500CA0;
+extern "C" void func_004186C8(sMat00391C48* m);
+extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m);
+
+extern "C" void func_00391C48(void* self, float x, float y)
+{
+    func_004186C8(&D_00500CA0);
+    func_00391CB0(self, x, y, &D_00500CA0);
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00391CB0);
 
@@ -714,7 +730,21 @@ void* func_00394C88(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00394C98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_00491FA0[];
+
+extern "C" void func_00394C98(void* self, int n)
+{
+    *(int*)((char*)self + 0x8) = n;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = n + 0x32;
+    *(void**)((char*)self + 0x4) = operator_new_tag((n + 0x32) * 4, D_00491FA0, 0, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00394CE8);
@@ -938,7 +968,33 @@ void* func_003953B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003953B8);
+#ifdef SKIP_ASM
+extern "C" void func_003956B0(void* self);
+
+// Fetch the current (combined) matrix into out and return out.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void* func_003953B8(void* out, void* self)
+{
+    func_003956B0(self);
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(out), "r"((char*)self + 0x58A0)
+        : "memory");
+    return out;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00395420__FPv);

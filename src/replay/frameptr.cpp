@@ -102,7 +102,29 @@ extern "C" void func_0026EA20(void* self, void* dst, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EA68);
+#ifdef SKIP_ASM
+class cStream26EA68 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+// Peek the next frame header's id without consuming it.
+extern "C" short func_0026EA68(cStream26EA68* self)
+{
+    struct {
+        short id;
+        short size;
+    } hdr;
+    int pos = *(int*)((char*)self + 0xC);
+    self->v02(&hdr, 4);
+    *(int*)((char*)self + 0xC) = pos;
+    return hdr.id;
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EAB8);
 
@@ -133,7 +155,26 @@ extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026ED28);
+#ifdef SKIP_ASM
+extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
+{
+    struct {
+        unsigned int id;
+        unsigned short type;
+    } rec;
+    rec.id = 0xFFFFFFFF;
+    void* p = *(void**)((char*)obj + 0x18);
+    if (p != 0) {
+        rec.id = *(unsigned int*)((char*)p + 0x78);
+        rec.type = *(unsigned short*)((char*)p + 0x8);
+    } else {
+        rec.type = 0;
+    }
+    out->vt[1].fn((char*)out + out->vt[1].delta, &rec, 8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026ED88__FPv);
@@ -239,7 +280,33 @@ extern "C" void func_0026F7B8(int* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F7F8);
+#ifdef SKIP_ASM
+struct sFrameDesc26F7F8 {
+    short type;
+    char a;
+    char b;
+};
+
+extern "C" void* func_0026D760(void* self, sFrameDesc26F7F8* desc);
+// PORT: func_0026D740 is mangled with one parameter (__FPv) but is called here
+// with (self, block); bind the 2-arg form to the symbol.
+void func_0026D740_2(void* self, void* block) __asm__("func_0026D740__FPv");
+
+extern "C" void func_0026F7F8(void* self)
+{
+    if (*(void**)((char*)self + 0x3D0) == 0) {
+        sFrameDesc26F7F8 desc;
+        desc.type = 1;
+        desc.a = 0;
+        desc.b = 0;
+        void* block = func_0026D760(self, &desc);
+        *(void**)((char*)self + 0x3D0) = block;
+        func_0026D740_2(self, block);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F850);

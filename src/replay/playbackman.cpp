@@ -21,7 +21,32 @@ void func_0026CBB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026CBB8);
+#ifdef SKIP_ASM
+struct sPbBytes4;
+extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src);
+
+struct sFrameDesc26CBB8 {
+    short type;
+    char a;
+    char b;
+};
+
+extern "C" void func_0026CBB8(void* self)
+{
+    if (*(int*)((char*)self + 0x10) == 0) {
+        int one = 1;
+        sFrameDesc26CBB8 desc;
+        desc.type = one;
+        desc.a = 0;
+        desc.b = 0;
+        func_0026D7D0(*(void**)(*(char**)((char*)self + 0x5C) + 0x28), (char*)self + 0x14,
+                      (sPbBytes4*)&desc);
+        *(int*)((char*)self + 0x10) = one;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026CC18);
@@ -54,7 +79,27 @@ void func_0026CDD0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026CDF8);
+#ifdef SKIP_ASM
+extern "C" void func_0026CD20(void* self);
+void func_0026CDD0(void* self);
+
+extern "C" void func_0026CDF8(void* self)
+{
+    switch (*(int*)((char*)self + 0x70)) {
+    case 0:
+    default:
+        break;
+    case 1:
+        func_0026CD20(self);
+        break;
+    case 2:
+        func_0026CDD0(self);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", func_0026CE50);
 

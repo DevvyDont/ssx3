@@ -16,7 +16,26 @@ void* cBezierMan_construct()
 
 INCLUDE_ASM("render/bezierman", func_0038AF30);
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038B0F8);
+#ifdef SKIP_ASM
+void func_0038D660(void*);
+void cMemMan_free(void*);
+
+extern "C" void func_0038B0F8(void* self)
+{
+    func_0038D660(self);
+    if (*(void**)((char*)self + 0x440) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x440));
+    }
+    if (*(void**)((char*)self + 0x444) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x444));
+    }
+    if (*(void**)((char*)self + 0x448) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x448));
+    }
+}
+#endif
 
 extern "C" void* func_003739D0(void*);
 

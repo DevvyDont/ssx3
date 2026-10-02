@@ -30,7 +30,32 @@ INCLUDE_ASM("render/particle", func_00370DC8);
 
 INCLUDE_ASM("render/particle", func_003710D0);
 
+//100%
 INCLUDE_ASM("render/particle", func_003712B8);
+#ifdef SKIP_ASM
+class cStream003712B8 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+};
+
+extern "C" void func_003712B8(void* self, cStream003712B8* stream)
+{
+    struct {
+        float a;
+        float b;
+        int c;
+        int d;
+        int e;
+    } buf;
+    buf.a = *(float*)((char*)self + 0x0);
+    buf.b = *(float*)((char*)self + 0x28);
+    buf.d = *(int*)((char*)self + 0x170);
+    buf.c = *(int*)((char*)self + 0x174);
+    buf.e = *(int*)((char*)self + 0x17C);
+    stream->v01(&buf, 0x14);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00371318);
 
@@ -179,7 +204,26 @@ INCLUDE_ASM("render/particle", func_00372520);
 
 INCLUDE_ASM("render/particle", func_003725B0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00372660);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+void operator_delete(int* ptr);
+extern void* D_00493068[];
+extern void* D_00488680[];
+
+extern "C" void func_00372660(void* self, int flags)
+{
+    *(void***)self = D_00493068;
+    if (*(void**)((char*)self + 0x8) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x8));
+    }
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003726C8);
 
@@ -555,7 +599,26 @@ extern "C" int func_003762F8(sPartTexCache* self, int width, int height, unsigne
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00376468);
+#ifdef SKIP_ASM
+struct sVEntry00376468 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+extern "C" void* func_00376468(void* self)
+{
+    sVEntry00376468* vt = *(sVEntry00376468**)((char*)self + 0x10D8);
+    int i = ((int (*)(void*))vt[123].fn)((char*)self + vt[123].delta);
+    if (i >= 0) {
+        vt = *(sVEntry00376468**)((char*)self + 0x10D8);
+        return ((void* (*)(void*, int))vt[4].fn)((char*)self + vt[4].delta, i);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003764C0);
 
@@ -782,7 +845,20 @@ extern "C" void func_0037C8A0(void* self)
 
 INCLUDE_ASM("render/particle", func_0037C8C0);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037CAF8);
+#ifdef SKIP_ASM
+extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
+                             int a8, int a9, int a10, int a11);
+
+extern "C" int func_0037CAF8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
+                              int a8, int a9, int a10, int a11)
+{
+    int i = func_00367440(*(void**)((char*)self + 0x18F4), a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+    *(int*)((char*)self + (i << 2) + 0x3838) = 1;
+    return i;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037CB50);
@@ -869,7 +945,27 @@ extern "C" void func_0037CBE8(void* self, void* out, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037CC30);
+#ifdef SKIP_ASM
+struct sVEntry0037CC30 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00367B60(void* mgr, int id);
+
+extern "C" void func_0037CC30(void* self, void* item)
+{
+    if (*(int*)((char*)item + 0x4) != -1) {
+        func_00367B60(*(void**)((char*)self + 0x18F4), *(int*)((char*)item + 0x4));
+        sVEntry0037CC30* vt = *(sVEntry0037CC30**)((char*)self + 0x10D8);
+        vt[50].fn((char*)self + vt[50].delta, *(int*)((char*)item + 0x4));
+        *(int*)((char*)item + 0x4) = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037CC98);
 
@@ -1174,7 +1270,23 @@ extern "C" int func_003825C0(int cause, void* arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003825F8);
+#ifdef SKIP_ASM
+extern "C" void func_00423DD0(int sema);
+
+extern "C" void func_003825F8(void* self)
+{
+    int t = ++*(int*)((char*)self + 0x5ABC);
+    if (*(int*)((char*)self + 0x5A8C) == 4) {
+        if (t >= *(int*)((char*)self + 0x5AB8)) {
+            *(int*)((char*)self + 0x5A8C) = 5;
+            *(int*)((char*)self + 0x5ABC) = 0;
+            func_00423DD0(*(int*)((char*)self + 0x5AC8));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00382650);
@@ -1194,7 +1306,21 @@ extern "C" int func_00382650(int cause, void* arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00382688);
+#ifdef SKIP_ASM
+extern "C" void func_00423DD0(int sema);
+
+extern "C" void func_00382688(void* self)
+{
+    if (*(volatile int*)((char*)self + 0x5A8C) == 1) {
+        *(volatile int*)((char*)self + 0x5A8C) = 2;
+        func_00423DD0(*(int*)((char*)self + 0x5AC8));
+    } else if (*(volatile int*)((char*)self + 0x5A8C) == 3) {
+        *(volatile int*)((char*)self + 0x5A8C) = 4;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003826E0);
@@ -1335,7 +1461,21 @@ extern "C" void func_00385260(int* self, int flags)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_00385290);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+extern void* D_00493208[];
+
+extern "C" void func_00385290(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00493208;
+    if (*(void**)((char*)self + 0x19C) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x19C));
+    }
+    func_00385260((int*)self, flags);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003852E8);
 

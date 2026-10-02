@@ -47,7 +47,27 @@ void func_00354808_impl(void* self, int flags)
 
 INCLUDE_ASM("object/objnode", func_00354850);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", cSortObjNode_cSortObjNode);
+#ifdef SKIP_ASM
+struct sVEntryCSortObjNode {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern void* D_00491E00[];
+extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream);
+
+extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a, void* stream)
+{
+    cTypeObjNode_cTypeObjNode(self, a, stream);
+    *(void***)((char*)self + 0xC) = D_00491E00;
+    sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x14, 4);
+    return self;
+}
+#endif
 
 extern void* D_00491E00[];
 extern "C" void* func_00354808(void*);

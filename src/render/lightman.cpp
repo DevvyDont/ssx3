@@ -53,9 +53,45 @@ void func_0038DC68(void* self)
 
 INCLUDE_ASM("render/lightman", func_0038DC70);
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038DEE8);
+#ifdef SKIP_ASM
+class cObj0038DEE8 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void* v01(int a);
+    virtual void* v02(int a);
+};
 
+// PORT: the unit defines func_0038DC50(void*) (an empty stub), but this caller
+// passes (void*, int, float); bind the 3-arg call by asm label.
+void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
+
+extern "C" void func_0038DEE8(cObj0038DEE8* obj, int a, int b, float f)
+{
+    func_0038DC50_3(obj->v02(a), b, f);
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/lightman", func_0038DF38);
+#ifdef SKIP_ASM
+class cObj0038DF38 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void* v01(int a);
+    virtual void* v02(int a);
+};
+
+// PORT: the unit defines func_0038DC58(void*) (an empty stub), but this caller
+// passes (void*, int, int, float); bind the 4-arg call by asm label.
+void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv");
+
+extern "C" void func_0038DF38(cObj0038DF38* obj, int a, int b, int c, float f)
+{
+    func_0038DC58_4(obj->v02(a), b, c, f);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038DF98);
 
@@ -71,7 +107,19 @@ INCLUDE_ASM("render/lightman", func_0038F300);
 
 INCLUDE_ASM("render/lightman", func_0038F460);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/lightman", func_0038F4F8);
+#ifdef SKIP_ASM
+extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags);
+extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
+
+extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
+{
+    int r = func_0038F460(self, addr, size, 0);
+    func_00371D10(addr, r, size >> 4, flags);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038F598);
 

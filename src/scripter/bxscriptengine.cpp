@@ -40,11 +40,77 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002821A0);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_002822A0);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282338);
+#ifdef SKIP_ASM
+extern "C" void* func_00282CB0(void* self, int a1);
+extern "C" void func_00272B58(void* cache, void* data);
 
+extern "C" void func_00282338(void* self, int a1)
+{
+    char* e = (char*)func_00282CB0(self, a1);
+    char* obj = *(char**)e;
+    if (obj != 0 && *(int*)(obj + 0x20) != 0 && *(int*)(e + 0x20) == 1) {
+        func_00272B58(*(void**)((char*)self + 0x2B8), *(void**)obj);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_00282390);
+#ifdef SKIP_ASM
+extern "C" void func_00282338(void* self, int id);
 
+struct sScriptSlot282390 {
+    int active;
+    char pad_0x04[0x18];
+    int id;
+    int pad_0x20;
+};
+
+struct sScriptEngine282390 {
+    char pad_0x000[0x2C0];
+    sScriptSlot282390 slots[16];
+};
+
+extern "C" void func_00282390(sScriptEngine282390* self)
+{
+    for (int i = 0; i < 16; i++) {
+        sScriptSlot282390* s = &self->slots[i];
+        if (s->active != 0) {
+            func_00282338(self, s->id);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002823F0);
+#ifdef SKIP_ASM
+extern "C" void func_00282540(void* self, int id);
+
+struct sScriptSlot2823F0 {
+    int active;
+    char pad_0x04[0x18];
+    int id;
+    int state;
+};
+
+struct sScriptEngine2823F0 {
+    char pad_0x000[0x2C0];
+    sScriptSlot2823F0 slots[16];
+};
+
+extern "C" void func_002823F0(sScriptEngine2823F0* self)
+{
+    for (int i = 0; i < 16; i++) {
+        sScriptSlot2823F0* s = &self->slots[i];
+        if (s->state != 0) {
+            func_00282540(self, s->id);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282450);
@@ -86,7 +152,24 @@ extern "C" void func_002826D8(void* self, int a1)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282720);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282798);
+#ifdef SKIP_ASM
+extern "C" void* func_00282CB0(void* self, int a1);
+extern "C" void func_00282908(void* self, void* script);
+
+extern "C" int func_00282798(void* self, int a1)
+{
+    char* s = (char*)func_00282CB0(self, a1);
+    if (s == 0) {
+        return 0;
+    }
+    if (*(int*)(s + 0x4) == 1) {
+        func_00282908(self, s);
+    }
+    return *(int*)(s + 0x4);
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282838);
 
@@ -149,7 +232,28 @@ extern "C" void func_002829D0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282A18);
+#ifdef SKIP_ASM
+struct sVEntry282A18 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, int);
+};
+
+extern "C" void func_00282540(void* self, int id);
+
+extern "C" void func_00282A18(void* self, void* msg)
+{
+    char* s = *(char**)((char*)msg + 0xC);
+    sVEntry282A18* vt = *(sVEntry282A18**)((char*)self + 0x2A8);
+    vt[11].fn((char*)self + vt[11].delta, msg, *(int*)(s + 0x8), *(int*)(s + 0xC));
+    *(int*)(s + 0x4) = 2;
+    if (*(short*)(s + 0x10) != 0) {
+        func_00282540(self, *(int*)(s + 0x1C));
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282A80);
 
@@ -261,7 +365,27 @@ extern "C" void* func_00282CB0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282CD0);
+#ifdef SKIP_ASM
+void* func_00283200(void* self, int type);
+extern void* D_00482060[];
+
+extern "C" void* func_00282CD0(void* self)
+{
+    func_00283200(self, 2);
+    *(void***)((char*)self + 0xC) = D_00482060;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0x14) = -1;
+    *(int*)((char*)self + 0x18) = 9;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282D30);
 
