@@ -4,7 +4,27 @@ INCLUDE_ASM("mem/memstd", MEMCLASS_create);
 
 INCLUDE_ASM("mem/memstd", MEMCLASS_link);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00251F68);
+#ifdef SKIP_ASM
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+typedef char* func_00251F68_va_list;
+#define func_00251F68_va_start(ap)                                       \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
+extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
+extern "C" void func_003E5D30(int, char*);
+
+extern "C" void func_00251F68(const char* fmt, ...)
+{
+    char buf[0x200];
+    func_00251F68_va_list ap;
+    func_00251F68_va_start(ap);
+    func_004186C8(buf, fmt, ap);
+    func_003E5D30(2, buf);
+}
+#endif
 
 extern const char D_004800A8[];
 void func_00251F68();
@@ -78,7 +98,23 @@ extern "C" int func_00252660(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002526B8);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
+extern void* D_00538B00[16];
+
+extern "C" void* func_002526B8(void* block, int size)
+{
+    void* r;
+    MUTEX_lock(D_00538B00);
+    r = cMemMan_internalResizeBlock(block, size);
+    MUTEX_unlock(D_00538B00);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_00252980);
 
@@ -187,9 +223,37 @@ INCLUDE_ASM("mem/memstd", func_00253890);
 
 INCLUDE_ASM("mem/memstd", func_00253938);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002539E0);
+#ifdef SKIP_ASM
+int func_003AE938(void*);
 
+extern "C" void func_002539E0(void* self)
+{
+    void* p = *(void**)((char*)self + 0x38);
+    if (p != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
+        && *(int*)((char*)self + 0x8) == 0) {
+        func_003AE938(p);
+        *(int*)((char*)self + 0x8) = 1;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("mem/memstd", func_00253A40);
+#ifdef SKIP_ASM
+void func_003AE958(void*);
+
+extern "C" void func_00253A40(void* self)
+{
+    void* p = *(void**)((char*)self + 0x38);
+    if (p != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
+        && *(int*)((char*)self + 0x8) != 0) {
+        func_003AE958(p);
+        *(int*)((char*)self + 0x8) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00253AA0);
@@ -306,7 +370,32 @@ void* func_00254DA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00254DC0);
+#ifdef SKIP_ASM
+struct sMemStdVEntry {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void func_003B0680(void*, void*);
+
+extern "C" void func_00254DC0(void* self)
+{
+    void* o;
+    sMemStdVEntry* vt;
+    do {
+        o = *(void**)((char*)self + 0x8);
+        vt = *(sMemStdVEntry**)((char*)o + 0x10D8);
+    } while (vt[18].fn((char*)o + vt[18].delta) == 0);
+    void* p = *(void**)((char*)self + 0xC);
+    if (p != 0) {
+        func_003B0680(*(void**)((char*)self + 0x0), p);
+        *(void**)((char*)self + 0xC) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_00254E60);
 

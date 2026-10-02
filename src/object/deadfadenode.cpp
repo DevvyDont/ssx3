@@ -19,9 +19,43 @@ extern "C" void* func_00350B98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350BE0);
+#ifdef SKIP_ASM
+extern char D_00491980[];
+void cMemMan_free(void*);
+extern "C" void func_0034FBF0(void* self, int flags);
 
+extern "C" void func_00350BE0(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_00491980;
+    void* p = *(void**)((char*)self + 0x38);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    func_0034FBF0(self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/deadfadenode", func_00350C38);
+#ifdef SKIP_ASM
+// PORT: the project names this func_002D1CC0__FPv (one void* arg), but it is a
+// pass-through wrapper and this caller passes two args (prototype mismatch).
+void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
+
+extern "C" void func_00350C38(void* self)
+{
+    float t;
+    *(float*)((char*)self + 0x30) += *(float*)((char*)self + 0x34);
+    t = *(float*)((char*)self + 0x28);
+    if (t > 0.0f) {
+        *(float*)((char*)self + 0x28) = t - *(float*)((char*)self + 0x2C);
+    } else {
+        func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350C90);

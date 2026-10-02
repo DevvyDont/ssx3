@@ -45,5 +45,20 @@ INCLUDE_ASM("object/animnode", func_0034EC58);
 
 INCLUDE_ASM("object/animnode", func_0034ED88);
 
+//100%
 INCLUDE_ASM("object/animnode", func_0034EE68);
+#ifdef SKIP_ASM
+extern void* D_0048F858[];
+extern "C" void func_0034F048(void* self);
+extern "C" void func_003553C0(void* self, int flags);
+void operator_delete(int*);
+
+extern "C" void func_0034EE68(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_0048F858;
+    func_0034F048(self);
+    operator_delete(*(int**)((char*)self + 0x74));
+    func_003553C0(self, flags);
+}
+#endif
 

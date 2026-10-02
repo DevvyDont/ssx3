@@ -8,7 +8,25 @@ INCLUDE_ASM("object/flexrailnode", func_00348D98);
 
 INCLUDE_ASM("object/flexrailnode", func_00348FA0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", func_003490B0);
+#ifdef SKIP_ASM
+extern char D_0048FF30[];
+void cMemMan_free(void*);
+extern "C" void func_00348C48(void* self);
+extern "C" void func_00347F90(void* self, int flags);
+
+extern "C" void func_003490B0(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_0048FF30;
+    func_00348C48(self);
+    void* p = *(void**)((char*)self + 0x70);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    func_00347F90(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_00349110);
@@ -177,7 +195,25 @@ INCLUDE_ASM("object/flexrailnode", func_00349B48);
 
 INCLUDE_ASM("object/flexrailnode", func_00349DB0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", func_00349EB8);
+#ifdef SKIP_ASM
+extern char D_0048FD90[];
+void cMemMan_free(void*);
+extern "C" void func_00348C48(void* self);
+extern "C" void func_00347F90(void* self, int flags);
+
+extern "C" void func_00349EB8(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_0048FD90;
+    func_00348C48(self);
+    void* p = *(void**)((char*)self + 0x70);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    func_00347F90(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_00349F18);
@@ -266,7 +302,21 @@ extern "C" void* func_0034AE68(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034AEA0);
+#ifdef SKIP_ASM
+extern char D_0048FC10[];
+extern "C" void* func_002D1CB0(void);
+extern "C" void func_0034C600(void* set, void* arg);
+extern "C" void func_0034FBF0(void* self, int flags);
+
+extern "C" void func_0034AEA0(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_0048FC10;
+    func_0034C600(func_002D1CB0(), *(void**)((char*)self + 0x18));
+    func_0034FBF0(self, flags);
+}
+#endif
 
 extern "C" void* func_0034FE90(void* self);
 

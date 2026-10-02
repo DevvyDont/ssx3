@@ -1,6 +1,26 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_cInstanceNode);
+#ifdef SKIP_ASM
+struct sInstNodeCtorVEntry {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+
+extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
+extern char D_00491C80[];
+
+extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream)
+{
+    cSortObjNode_cSortObjNode(self, a1, stream);
+    *(void**)((char*)self + 0xC) = D_00491C80;
+    sInstNodeCtorVEntry* vt = *(sInstNodeCtorVEntry**)stream;
+    *(int*)((char*)self + 0x18) = vt[4].fn((char*)stream + vt[4].delta, self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/instancenode", func_0034FBF0);
 
@@ -63,7 +83,29 @@ void* func_0034FE00(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instancenode", func_0034FE28);
+#ifdef SKIP_ASM
+struct sInstNodeDtorVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern char D_0048E738[];
+extern "C" void* func_003506D8(void* mem, int v);
+
+extern "C" void func_0034FE28(void* self)
+{
+    int v = *(int*)((char*)self + 0x18);
+    if (self != 0) {
+        sInstNodeDtorVEntry* vt = *(sInstNodeDtorVEntry**)((char*)self + 0xC);
+        vt[1].fn((char*)self + vt[1].delta, 3);
+    }
+    func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FE90);

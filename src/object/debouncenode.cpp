@@ -2,7 +2,30 @@
 
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00342D88);
+#ifdef SKIP_ASM
+struct sDebounceVEntry2D88 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" int func_00342D88(void* self)
+{
+    int n = *(int*)((char*)self + 0x2C);
+    if (n > 0) {
+        n--;
+        *(int*)((char*)self + 0x2C) = n;
+        if (n == 0) {
+            sDebounceVEntry2D88* vt = *(sDebounceVEntry2D88**)((char*)self + 0xC);
+            vt[34].fn((char*)self + vt[34].delta, 1);
+            return 0;
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00342DD8);
 
@@ -23,7 +46,27 @@ INCLUDE_ASM("object/debouncenode", func_00342FA8);
 
 INCLUDE_ASM("object/debouncenode", func_00343010);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_003430D0);
+#ifdef SKIP_ASM
+struct sDebounceVEntry30D0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
+extern char D_00490570[];
+
+extern "C" void* func_003430D0(void* self, void* unused, void* stream)
+{
+    cInstanceNode_cInstanceNode(self, unused, stream);
+    *(void**)((char*)self + 0xC) = D_00490570;
+    sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x2C);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343130);
 
@@ -76,9 +119,43 @@ extern "C" void func_00343718(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343768);
+#ifdef SKIP_ASM
+extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+extern char D_004903F0[];
 
+extern "C" void* func_00343768(void* self, void* a1, void* a2, void* a3)
+{
+    func_0034FB00(self, a1, 7, a2);
+    *(void**)((char*)self + 0xC) = D_004903F0;
+    *(int*)((char*)self + 0x1C) = *(short*)((char*)a3 + 0x4);
+    *(int*)((char*)self + 0x20) = 0;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/debouncenode", func_003437C0);
+#ifdef SKIP_ASM
+struct sDebounceVEntry37C0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
+extern char D_004903F0[];
+
+extern "C" void* func_003437C0(void* self, void* unused, void* stream)
+{
+    cInstanceNode_cInstanceNode(self, unused, stream);
+    *(void**)((char*)self + 0xC) = D_004903F0;
+    sDebounceVEntry37C0* vt = *(sDebounceVEntry37C0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x8);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00343820);
@@ -145,7 +222,23 @@ extern "C" void func_00343BC0(sDebounceBlock* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343C08);
+#ifdef SKIP_ASM
+struct sDebounceElem3C08 {
+    char data[0x1F4];
+};
+
+extern "C" void func_00344898(void* elem, void* arg);
+
+extern "C" void func_00343C08(sDebounceElem3C08* self, void* arg)
+{
+    int i;
+    for (i = 0; i < 5; i++) {
+        func_00344898(&self[i], arg);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343C60);
 
@@ -246,7 +339,18 @@ extern "C" void func_00344FC0(void* self, cDebounceStream* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344FF8);
+#ifdef SKIP_ASM
+extern "C" void func_003443A8(void* self);
+
+extern "C" void func_00344FF8(void* self, cDebounceStream* s)
+{
+    s->v02(self, 0x10C);
+    func_00344800(self);
+    func_003443A8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00345048);

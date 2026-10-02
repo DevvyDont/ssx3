@@ -20,7 +20,33 @@ INCLUDE_ASM("object/flagset", func_0034C4B8);
 
 INCLUDE_ASM("object/flagset", func_0034C548);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034C600);
+#ifdef SKIP_ASM
+struct sFlagSetElem_C600 {
+    char pad0[0x5C];
+    int active; // 0x5C
+    char pad60[0x188 - 0x60];
+};
+
+struct sFlagSet_C600 {
+    char pad0[0x20];
+    sFlagSetElem_C600 elems[15]; // 0x20
+};
+
+extern "C" int func_0034B168(void* elem, void* arg);
+
+extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
+{
+    int i;
+    sFlagSetElem_C600* e = self->elems;
+    for (i = 0; i < 15; i++, e++) {
+        if (e->active != 0 && func_0034B168(e, arg) != 0) {
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034C668);
 
@@ -52,9 +78,51 @@ extern "C" void func_0034C7F8(sFlagSetOwner* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034C848);
+#ifdef SKIP_ASM
+struct sFlagSetElem_C848 {
+    char data[0x188];
+};
 
+struct sFlagSet_C848 {
+    char pad0[0x20];
+    sFlagSetElem_C848 elems[15]; // 0x20
+};
+
+extern "C" void func_0034C2E0(void* elem, void* arg);
+
+extern "C" void func_0034C848(sFlagSet_C848* self, void* arg)
+{
+    int i;
+    for (i = 0; i < 15; i++) {
+        func_0034C2E0(&self->elems[i], arg);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034C898);
+#ifdef SKIP_ASM
+struct sFlagSetElem_C898 {
+    char data[0x188];
+};
+
+struct sFlagSet_C898 {
+    char pad0[0x20];
+    sFlagSetElem_C898 elems[15]; // 0x20
+};
+
+extern "C" void func_0034C378(void* elem, void* arg);
+
+extern "C" void func_0034C898(sFlagSet_C898* self, void* arg)
+{
+    int i;
+    for (i = 0; i < 15; i++) {
+        func_0034C378(&self->elems[i], arg);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034CAB8);
 
@@ -64,7 +132,25 @@ INCLUDE_ASM("object/flagset", func_0034CBE8);
 
 INCLUDE_ASM("object/flagset", func_0034CC80);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034CDE8);
+#ifdef SKIP_ASM
+extern "C" void func_0034D6F0(void* self, float dt);
+
+extern "C" void func_0034CDE8(void* self, int on, float dt)
+{
+    func_0034D6F0(self, dt);
+    if (on) {
+        if (*(int*)((char*)self + 0x38) == 0) {
+            *(int*)((char*)self + 0x38) = 4;
+        }
+    } else {
+        if (*(int*)((char*)self + 0x3C) == 0) {
+            *(int*)((char*)self + 0x3C) = 4;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034CE48);
 

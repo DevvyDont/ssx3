@@ -158,5 +158,22 @@ extern "C" void func_00355260(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00355280);
+#ifdef SKIP_ASM
+extern void* D_00491028[];
+extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+
+extern "C" void* func_00355280(void* self, void* a1, int type, void* a3)
+{
+    func_0034FB00(self, a1, type, a3);
+    *(void***)((char*)self + 0xC) = D_00491028;
+    *(float*)((char*)self + 0x24) = 1.0f;
+    *(unsigned short*)((char*)self + 0x12) |= 1;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    return self;
+}
+#endif
 

@@ -118,7 +118,26 @@ INCLUDE_ASM("object/flexbridgenode", func_003475D8);
 
 INCLUDE_ASM("object/flexbridgenode", func_00347B80);
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00347D38);
+#ifdef SKIP_ASM
+struct sFlexBridgeVEntry7D38 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void func_003545D8(void* p, void* stream);
+
+extern "C" void func_00347D38(void* self, void* stream)
+{
+    func_0034FE90(self, stream);
+    func_003545D8((char*)self + 0x50, stream);
+    sFlexBridgeVEntry7D38* vt = *(sFlexBridgeVEntry7D38**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
+}
+#endif
 
 INCLUDE_ASM("object/flexbridgenode", func_00347D90);
 
@@ -126,7 +145,26 @@ INCLUDE_ASM("object/flexbridgenode", func_00347EA8);
 
 INCLUDE_ASM("object/flexbridgenode", func_00347F90);
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00348008);
+#ifdef SKIP_ASM
+struct sFlexBridgeVEntry8008 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00348058(void* self);
+
+extern "C" void func_00348008(void* self)
+{
+    sFlexBridgeVEntry8008* vt1 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);
+    vt1[47].fn((char*)self + vt1[47].delta);
+    sFlexBridgeVEntry8008* vt2 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);
+    vt2[48].fn((char*)self + vt2[48].delta);
+    func_00348058(self);
+}
+#endif
 
 INCLUDE_ASM("object/flexbridgenode", func_00348058);
 

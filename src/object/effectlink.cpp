@@ -148,7 +148,30 @@ extern "C" void func_00346258(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_003462A0);
+#ifdef SKIP_ASM
+struct sEffVec4_62A0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sEffMtx_62A0 {
+    sEffVec4_62A0 r[4];
+};
+
+extern "C" void func_0034FED8(void* a, int b, sEffMtx_62A0* out);
+extern "C" void func_002D1D10(sEffVec4_62A0* pos, void* p, int n, float a, float b);
+
+extern "C" void func_003462A0(void* self)
+{
+    sEffMtx_62A0 m;
+    void* p = (char*)self + 0x10;
+    func_0034FED8(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &m);
+    sEffVec4_62A0 v = m.r[3];
+    func_002D1D10(&v, p, *(int*)((char*)self + 0x24),
+                  *(float*)((char*)self + 0x20), *(float*)((char*)self + 0x30));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/effectlink", func_00346300);

@@ -270,9 +270,65 @@ extern "C" void func_00353188(tModifierBlock* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_003531D0);
+#ifdef SKIP_ASM
+struct sModBlockDtorVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
 
+struct sModBlockLink {
+    sModBlockLink* next;          // 0x0
+    int field_0x4;
+    sModBlockDtorVEntry* vt;      // 0x8
+};
+
+extern "C" void func_003531D0(void* self)
+{
+    sModBlockLink* head = *(sModBlockLink**)((char*)self + 0x10);
+    if (head != 0) {
+        sModBlockLink* p = head;
+        do {
+            sModBlockLink* next = p->next;
+            if (p != 0) {
+                p->vt[1].fn((char*)p + p->vt[1].delta, 3);
+            }
+            p = next;
+        } while (p != 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353228);
+#ifdef SKIP_ASM
+struct sModBlockVEntry3228 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sModBlockLink3228 {
+    sModBlockLink3228* next;      // 0x0
+    int field_0x4;
+    sModBlockVEntry3228* vt;      // 0x8
+};
+
+extern "C" void func_00353228(void* self)
+{
+    sModBlockLink3228* head = *(sModBlockLink3228**)((char*)self + 0x10);
+    if (head != 0) {
+        sModBlockLink3228* p = head;
+        do {
+            sModBlockLink3228* next = p->next;
+            p->vt[3].fn((char*)p + p->vt[3].delta);
+            p = next;
+        } while (p != 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/modifierblock", func_00353278);
 
@@ -360,7 +416,23 @@ void* func_00353DA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353DB8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+
+extern "C" void func_00353DB8(void* self, int flags)
+{
+    void* p = *(void**)((char*)self + 0x24);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/modifierblock", func_00353E08);
 
