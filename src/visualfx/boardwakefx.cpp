@@ -65,7 +65,38 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2260);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E23E0);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E24D0);
+#ifdef SKIP_ASM
+extern "C" void func_00371688(void* self, int mode);
+
+struct func_002E24D0_sWake {
+    char pad_0x000[0x174];
+    void* field_0x174;
+    char pad_0x178[0x1E0 - 0x178];
+    int field_0x1E0;
+    char pad_0x1E4[0x210 - 0x1E4];
+};
+
+struct func_002E24D0_sFx {
+    void* owner;                    // 0x0
+    char pad_0x04[0x24];
+    func_002E24D0_sWake* wakes;     // 0x28
+};
+
+extern "C" void func_002E24D0(func_002E24D0_sFx* self)
+{
+    if (*(int*)((char*)self->owner + 0xB18) != 0) {
+        int i;
+        for (i = 0; i < 10; i++) {
+            func_002E24D0_sWake* w = &self->wakes[i];
+            if (w->field_0x174 != 0 && w->field_0x1E0 > 0) {
+                func_00371688(w, 7);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
@@ -195,7 +226,19 @@ extern "C" void func_002E2FA8(sWakeFx* self, int v, int i)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
+#ifdef SKIP_ASM
+extern "C" void func_002E2FA8(sWakeFx* self, int v, int i);
+
+extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int unused, int i)
+{
+    int n;
+    for (n = 0; n < count; n++) {
+        func_002E2FA8(self, vals[n], i);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3060);
 

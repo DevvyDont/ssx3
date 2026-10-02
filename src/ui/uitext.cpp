@@ -104,7 +104,32 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id)
 
 INCLUDE_ASM("ui/uitext", func_003A1030);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1148);
+#ifdef SKIP_ASM
+extern "C" void* func_0039FB30(void* self, int a1, int a2);
+extern "C" void* func_003977E8(void* self);
+extern "C" void func_003A1310(void* self, char a1);
+extern void* D_00494278[];
+
+extern "C" void* func_003A1148(void* self, int a1, int a2)
+{
+    char* s = (char*)self;
+    func_0039FB30(self, a1, a2);
+    *(void***)(s + 0x8) = D_00494278;
+    *(unsigned char*)(s + 0x74) &= 0xC6;
+    func_003977E8(s + 0x8C);
+    *(int*)(s + 0xB8) = 0;
+    *(int*)(s + 0xBC) = 0;
+    *(int*)(s + 0xC0) = 0;
+    *(short*)(s + 0xC4) = 0;
+    *(short*)(s + 0xC6) = 0;
+    *(short*)(s + 0xC8) = 0;
+    *(int*)(s + 0xCC) = 0;
+    func_003A1310(self, 0);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A11B8);
 
@@ -140,7 +165,47 @@ extern "C" void func_003A1310(void* self, char a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1360);
+#ifdef SKIP_ASM
+extern "C" void func_003A1CF0(void* self, void* a1);
+
+class func_003A1360_cVirtA {
+public:
+    char pad[0x4];
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void* v04(int);
+};
+
+class func_003A1360_cVirtB {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int);
+};
+
+extern "C" void func_003A1360(void* self)
+{
+    int id = *(int*)((char*)self + 0xC0);
+    if (id != 0) {
+        func_003A1360_cVirtA* a = *(func_003A1360_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5C) + 0xD0) + 0x10) + 0x10);
+        if (a != 0) {
+            void* r = a->v04(id);
+            if (r != 0) {
+                func_003A1CF0(self, r);
+            }
+            ((func_003A1360_cVirtB*)self)->v05(1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A13E0);
 
@@ -169,7 +234,45 @@ extern "C" void func_003A1CF0(void* self, void* a1)
 
 INCLUDE_ASM("ui/uitext", func_003A1D30);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1F18);
+#ifdef SKIP_ASM
+extern "C" void func_003A1D30(void*, void*);
+
+class func_003A1F18_cVirtA {
+public:
+    char pad[0x4];
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void* v04(int);
+};
+
+class func_003A1F18_cVirtB {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int);
+};
+
+extern "C" void func_003A1F18(void* self, int id)
+{
+    *(int*)((char*)self + 0xC0) = id;
+    func_003A1F18_cVirtA* a = *(func_003A1F18_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5C) + 0xD0) + 0x10) + 0x10);
+    if (a != 0) {
+        void* r = a->v04(id);
+        if (r != 0) {
+            func_003A1D30(self, r);
+        }
+        ((func_003A1F18_cVirtB*)self)->v05(1);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A1F90);
 
@@ -186,7 +289,44 @@ extern "C" int func_003A2068(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A3280);
+#ifdef SKIP_ASM
+extern "C" void* func_0039FB30(void* self, int a1, int a2);
+extern void* D_004941B8[];
+
+struct func_003A3280_s {
+    char pad0[0x8];
+    void** vtbl; // 0x8
+    char padC[0x74 - 0xC];
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int mid : 15;
+    unsigned int hi : 15;
+    int unk78;
+    int unk7C;
+    int unk80;
+    int unk84;
+    int unk88;
+    int unk8C;
+};
+
+extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
+{
+    func_0039FB30(self, a1, a2);
+    self->vtbl = D_004941B8;
+    self->b0 = 0;
+    self->b1 = 0;
+    self->hi = 0;
+    self->unk78 = 0;
+    self->unk7C = 0;
+    self->unk80 = 0;
+    self->unk84 = 0;
+    self->unk88 = 0;
+    self->unk8C = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A32F0);
 

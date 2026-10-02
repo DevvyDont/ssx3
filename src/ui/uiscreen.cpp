@@ -146,7 +146,22 @@ extern "C" void func_0039CBE0(cUIScreen* self, void* p1, void* p2, void* p3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CC38);
+#ifdef SKIP_ASM
+extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
+{
+    sFrameEntry* e = (sFrameEntry*)((char*)self->list + 4);
+    unsigned int i;
+    for (i = 0; i < (unsigned int)self->list->count; i++) {
+        if (e->label == *(int*)((char*)p2 + 4)) {
+            cUIScreen_playFrame(self, e->field_0x8, 1);
+            return;
+        }
+        e = (sFrameEntry*)((char*)e + e->stride);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039CCA8);
 
@@ -201,7 +216,51 @@ void func_0039CD98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CDA0);
+#ifdef SKIP_ASM
+class func_0039CDA0_cVirtA {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual int v16(void*, int);
+};
+
+class func_0039CDA0_cVirtB {
+public:
+    char pad[0x4];
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03(void*, int);
+};
+
+extern "C" void func_0039CDA0(void* self, void* p1, int* msg)
+{
+    func_0039CDA0_cVirtA* a = *(func_0039CDA0_cVirtA**)((char*)self + 0xD0);
+    if (a->v16(self, msg[1]) == 0) {
+        func_0039CDA0_cVirtB* b = **(func_0039CDA0_cVirtB***)((char*)*(void**)((char*)self + 0xD0) + 0x10);
+        if (b != 0) {
+            b->v03(self, msg[1]);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CE20);
@@ -339,9 +398,55 @@ void* func_0039E288(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E2A0);
+#ifdef SKIP_ASM
+extern "C" void* func_003977E8(void* self);
+extern void* D_004946C8[];
 
+extern "C" void* func_0039E2A0(void* self, int a1)
+{
+    char* s = (char*)self;
+    *(void**)(s + 0x4) = s;
+    *(void**)(s + 0x0) = s;
+    *(void***)(s + 0x8) = D_004946C8;
+    *(int*)(s + 0xC) = 0;
+    *(int*)(s + 0x10) = a1;
+    *(signed char*)(s + 0x14) = -1;
+    *(signed char*)(s + 0x15) = 0xF;
+    *(short*)(s + 0x1C) = 0x218;
+    *(int*)(s + 0x20) = 0;
+    func_003977E8(s + 0x24);
+    *(int*)(s + 0x40) = 0;
+    *(signed char*)(s + 0x44) = -1;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E318);
+#ifdef SKIP_ASM
+extern "C" void* func_003977E8(void* self);
+extern void* D_004946C8[];
+
+extern "C" void* func_0039E318(void* self, int a1, int a2)
+{
+    char* s = (char*)self;
+    *(void**)(s + 0x4) = s;
+    *(void**)(s + 0x0) = s;
+    *(void***)(s + 0x8) = D_004946C8;
+    *(int*)(s + 0xC) = 0;
+    *(int*)(s + 0x10) = a1;
+    *(signed char*)(s + 0x14) = -1;
+    *(signed char*)(s + 0x15) = 0xF;
+    *(short*)(s + 0x1C) = 0x218;
+    *(int*)(s + 0x20) = a2;
+    func_003977E8(s + 0x24);
+    *(int*)(s + 0x40) = 0;
+    *(signed char*)(s + 0x44) = -1;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039E390);
 

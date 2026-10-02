@@ -423,9 +423,54 @@ extern "C" void* func_002F0390(void)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/renderstateman", func_002F03C8);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_002F0368(void* self);
+extern "C" void func_002D6410(void* self);
+extern char D_00487568[];
+extern void* D_00487D50[];
+extern void* D_00488648[];
 
+extern "C" void* func_002F03C8(void* self)
+{
+    func_002F0368(self);
+    *(void***)((char*)self + 0x4) = D_00487D50;
+    void** p = (void**)cMemMan_alloc(4, D_00487568, 0, 0);
+    *p = D_00488648;
+    func_002D6410(p);
+    *(void***)self = p;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0438);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern void* D_00487D50[];
+extern void* D_00487D78[];
+
+class func_002F0438_cVirt {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(int);
+};
+
+extern "C" void func_002F0438(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00487D50;
+    func_002F0438_cVirt* o = *(func_002F0438_cVirt**)self;
+    if (o != 0) {
+        o->v01(3);
+    }
+    *(void***)((char*)self + 0x4) = D_00487D78;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F04B0);

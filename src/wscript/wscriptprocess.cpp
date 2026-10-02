@@ -308,7 +308,36 @@ extern "C" void* func_00308228(void* self)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308278);
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308328);
+#ifdef SKIP_ASM
+class func_00308328_cProcess {
+public:
+    int state;                   // 0x0
+    char pad_0x04[0x40 - 0x4];
+    // vptr at 0x40; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00308328(func_00308328_cProcess* self)
+{
+    switch (self->state) {
+    case 0:
+        break;
+    case 1:
+        self->state = 2;
+        self->v05();
+        break;
+    case 2:
+        self->v05();
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_003083A0);
 
@@ -589,7 +618,27 @@ void* func_00308B78_impl(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308BE0);
+#ifdef SKIP_ASM
+extern "C" int func_003A6C08(void* self, int i);
+extern "C" void* func_003A6C38(void* self, int i);
+extern "C" void cWScriptMan_addProcess(void* self, int section, void* def, int flags);
+
+struct func_00308BE0_sDef {
+    char pad[0x40];
+};
+
+extern "C" void func_00308BE0(void* self, int section)
+{
+    int n = func_003A6C08(*(void**)((char*)self + 0x28C), section);
+    func_00308BE0_sDef* defs = (func_00308BE0_sDef*)func_003A6C38(*(void**)((char*)self + 0x28C), section);
+    int i;
+    for (i = 0; i < n; i++) {
+        cWScriptMan_addProcess(self, section, &defs[i], 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00308C60);
 
@@ -608,7 +657,26 @@ extern "C" void func_00308F38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308F70);
+#ifdef SKIP_ASM
+extern "C" void func_0030B0E8(void* list, int section);
+extern "C" void func_00224DF0(void* obj, int flags);
+
+extern "C" void func_00308F70(void* self, int section)
+{
+    func_0030B0E8((char*)self + 0x2B4, section);
+    func_0030B0E8((char*)self + 0x2B8, section);
+    func_0030B0E8((char*)self + 0x2BC, section);
+    int off = section << 2;
+    char* base = (char*)self + 0x3CC;
+    void** slot = (void**)(base + off);
+    if (*slot != 0) {
+        func_00224DF0(*slot, 3);
+        *slot = 0;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptprocess", func_00308FE0);

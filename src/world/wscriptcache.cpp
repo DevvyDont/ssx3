@@ -383,7 +383,24 @@ void* func_003AED20(void* self, void* a1, int a2)
 
 INCLUDE_ASM("world/wscriptcache", func_003AED40);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AEE30);
+#ifdef SKIP_ASM
+extern "C" void func_003B7838(void* a);
+extern void* (*D_00509434[])(void*);
+
+extern "C" void func_003AEE30(void* self, int flags)
+{
+    if (*(void**)((char*)self + 0x4) != 0) {
+        func_003B7838(*(void**)((char*)self + 0xC));
+        D_00509434[0](*(void**)((char*)self + 0x4));
+        *(void**)((char*)self + 0x4) = 0;
+    }
+    if (flags & 1) {
+        D_00509434[0](self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AEE98);
@@ -425,7 +442,34 @@ extern "C" int func_003AEEF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AEFA8);
+#ifdef SKIP_ASM
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B7B48(int id, void* out);
+extern "C" int func_003B7C40(int id, void* out);
+
+struct func_003AEFA8_sInfo {
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    int field_0xC;
+};
+
+extern "C" int func_003AEFA8(void* self)
+{
+    func_003AEFA8_sInfo b;
+    func_003AEFA8_sInfo a;
+    func_003B58A0();
+    if (func_003B7B48(*(int*)((char*)self + 0xC), &a) >= 0 && func_003B7C40(a.field_0x4, &b) >= 0) {
+        func_003B58D8();
+        return b.field_0x8 == 0;
+    }
+    func_003B58D8();
+    return 0;
+}
+#endif
 
 extern void* D_00456890[];
 
@@ -442,7 +486,33 @@ void* func_003B0410(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0430);
+#ifdef SKIP_ASM
+void* func_003B0738(void* self);
+extern void* D_004568A8[];
+
+struct func_003B0430_sKey {
+    int v[4];
+};
+
+struct func_003B0430_sObj {
+    int field_0x0;
+    func_003B0430_sKey key;   // 0x4
+    int field_0x14;
+    void** vtable;            // 0x18
+};
+
+extern "C" func_003B0430_sObj* func_003B0430(func_003B0430_sObj* self, func_003B0430_sKey* key)
+{
+    self->vtable = D_004568A8;
+    func_003B0738(&self->key);
+    self->key = *key;
+    self->field_0x14 = 0;
+    self->field_0x0 = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B04A0);
@@ -528,7 +598,42 @@ extern "C" float func_003B05C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0600);
+#ifdef SKIP_ASM
+class func_003B0600_cVirt {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03(int);
+};
+
+struct func_003B0600_sObj {
+    int loaded;                                    // 0x0
+    void* arg;                                     // 0x4
+    void (*load)(func_003B0600_sObj*, void*, func_003B0600_sObj*); // 0x8
+    char pad_0xC[0x8];
+    func_003B0600_cVirt* obj;                      // 0x14
+};
+
+extern "C" int func_003B0600(void* p, int a1)
+{
+    func_003B0600_sObj* self = (func_003B0600_sObj*)p;
+    if (self->obj == 0) {
+        if (self->loaded == 0) {
+            self->load(self, self->arg, self);
+        }
+    }
+    int r;
+    if (self->obj != 0) {
+        r = self->obj->v03(a1);
+    } else {
+        r = 0;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B0680);
@@ -751,7 +856,38 @@ extern "C" float func_003B0FA8()
 
 INCLUDE_ASM("world/wscriptcache", func_003B0FB8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B1050);
+#ifdef SKIP_ASM
+extern "C" void* func_003B0FB8(void* self);
+extern "C" int func_00402B38(void* sema);
+
+class func_003B1050_cCache {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(void*);
+};
+
+extern "C" void* func_003B1050(func_003B1050_cCache* self, unsigned int limit)
+{
+    void* item = 0;
+    do {
+        if (item != 0) {
+            self->v06(item);
+        }
+        if (func_00402B38((char*)self + 0x30) != 0) {
+            return 0;
+        }
+        item = func_003B0FB8(self);
+    } while (*(unsigned int*)((char*)self + 0x10) < limit);
+    return item;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B10D0);

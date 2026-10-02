@@ -96,7 +96,24 @@ extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5A70);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5AF0);
+#ifdef SKIP_ASM
+extern "C" void func_002F5B68(void* self, void* a1, void* a2, void** out, int count);
+extern "C" void func_0038A6A8(void* a, void* b, void* c);
+
+extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int count)
+{
+    void* buf[32];
+    int i;
+    func_002F5B68(self, a1, a2, buf, count);
+    for (i = 0; i < count; i++) {
+        if (buf[i] != 0) {
+            func_0038A6A8(a3, a1, buf[i]);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5B68);
 

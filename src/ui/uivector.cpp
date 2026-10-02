@@ -155,7 +155,26 @@ extern "C" void func_003A4868(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4888);
+#ifdef SKIP_ASM
+extern "C" void* func_00397948(void*);
+extern void* D_00494C98[];
+extern void* D_00494CC0[];
+
+extern "C" void func_003A4888(void* self, int flags)
+{
+    *(void***)((char*)self + 0x18) = D_00494C98;
+    func_00397948(self);
+    *(void***)((char*)self + 0x14) = D_00494CC0;
+    func_003A4868((char*)self + 0xC);
+    *(void***)((char*)self + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A49E8);

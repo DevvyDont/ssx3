@@ -70,7 +70,31 @@ INCLUDE_ASM("world/worldview", func_003A98C8);
 
 INCLUDE_ASM("world/worldview", func_003A9958);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A99D8);
+#ifdef SKIP_ASM
+extern "C" void func_003A8F10(void* world, unsigned int i);
+struct func_003A99D8_sEntry { int state; int field_0x4; };
+struct func_003A99D8_sView { void* world; cWorldViewSectionList* mSections; };
+extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
+{
+    cWorldViewSectionList* list = self->mSections;
+    if (list != 0 && i < (unsigned int)list->mNumSections) {
+        int off = i << 3;
+        char* base = (char*)self + 0x14;
+        func_003A99D8_sEntry* e = (func_003A99D8_sEntry*)(base + off);
+        int st = e->state;
+        if (st == 5) {
+            e->state = 6;
+            func_003A8F10(self->world, i);
+            return 1;
+        } else if (st == 6) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003A9A98);
@@ -297,7 +321,37 @@ extern "C" int func_003AA960(void* self, void* list)
 
 INCLUDE_ASM("world/worldview", func_003AAA08);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AABD8);
+#ifdef SKIP_ASM
+// PORT: func_003AD230__FPv is declared (void*) but takes a flags int and returns a float.
+float func_003AD230_f(int flags) __asm__("func_003AD230__FPv");
+
+struct func_003AABD8_sObj {
+    char pad_0x00[0xC];
+    int flags;          // 0xC
+    char pad_0x10[0xC];
+    float pos[3];       // 0x1C
+    float min[3];       // 0x28
+    float max[3];       // 0x34
+    int field_0x40;
+    int field_0x44;
+};
+
+extern "C" int func_003AABD8(void* self, func_003AABD8_sObj* obj)
+{
+    float r = func_003AD230_f(obj->flags & 0x70);
+    obj->field_0x44 = 0;
+    obj->field_0x40 = 0;
+    obj->min[0] = obj->pos[0] - r;
+    obj->min[1] = obj->pos[1] - r;
+    obj->min[2] = obj->pos[2] - r;
+    obj->max[0] = obj->pos[0] + r;
+    obj->max[1] = obj->pos[1] + r;
+    obj->max[2] = obj->pos[2] + r;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AAC50);
 
@@ -369,7 +423,41 @@ extern "C" int func_003ABF20(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003ABF50);
+#ifdef SKIP_ASM
+extern "C" void func_003ABFC0(void* self, void* item, void* list);
+
+struct func_003ABF50_sEntry {
+    int field_0x0;
+    void* item;     // 0x4
+    int field_0x8;
+    int field_0xC;
+};
+
+struct func_003ABF50_sList {
+    int field_0x0;
+    int count;                       // 0x4
+    func_003ABF50_sEntry* entries;   // 0x8
+};
+
+// PORT: the unit declares func_003ABF50 as returning void (func_003ABF20 calls it that way),
+// but the body returns 1; bind the int-returning body to the symbol with an asm label.
+int func_003ABF50_impl(void* self, func_003ABF50_sList* list) __asm__("func_003ABF50");
+
+int func_003ABF50_impl(void* self, func_003ABF50_sList* list)
+{
+    int n = list->count;
+    func_003ABF50_sEntry* e = list->entries;
+    int i;
+    for (i = 0; i < n; i++, e++) {
+        if (e->item != 0) {
+            func_003ABFC0(self, e->item, list);
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003ABFC0);
 

@@ -35,7 +35,44 @@ INCLUDE_ASM("ui/uistatestack", func_0039F4C0);
 
 INCLUDE_ASM("ui/uistatestack", func_0039F600);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039F698);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList*);
+
+struct func_0039F698_node {
+    char pad0[0x4];
+    func_0039F698_node* next; // 0x4
+    char pad8[0x1C - 0x8];
+    unsigned int b0 : 1;
+    unsigned int b1 : 5;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+};
+
+static inline void func_0039F698_setId(func_0039F698_node* n, int v) { n->id = v; }
+static inline void func_0039F698_setB7(func_0039F698_node* n, int v) { n->b7 = v; }
+
+extern "C" func_0039F698_node* func_0039F698(cList* list)
+{
+    func_0039F698_node* n = (func_0039F698_node*)cList_first(list);
+    if (n != 0) {
+        if (n->b0) {
+            do {
+                if (n->id < 6) {
+                    func_0039F698_setId(n, 7);
+                    func_0039F698_setB7(n, 1);
+                }
+                n = n->next;
+            } while (n->b0);
+        }
+        return n;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F718);
 
@@ -166,9 +203,51 @@ extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FC48);
+#ifdef SKIP_ASM
+extern "C" void func_003A4868(void* self);
+void operator_delete(int* ptr);
+extern void* D_00494CC0[];
 
+class func_0039FC48_cVirt {
+public:
+    char pad[0x10];
+    // vptr at 0x10; slot N at vtable offset N*8
+    virtual void v01(int);
+};
+
+extern "C" void func_0039FC48(void* self, int flags)
+{
+    *(void**)((char*)self + 0x8) = D_00494BD8;
+    func_0039FC48_cVirt* o = *(func_0039FC48_cVirt**)((char*)self + 0xC);
+    if (o != 0) {
+        o->v01(3);
+    }
+    *(void***)((char*)self + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FCC8);
+#ifdef SKIP_ASM
+extern "C" void func_0039FD38(void* self);
+extern "C" void func_00397468(void* self, int mode, unsigned short v);
+
+extern "C" void func_0039FCC8(void* self, void* anim, unsigned char mode, unsigned short v)
+{
+    if (*(void**)((char*)self + 0xC) != anim) {
+        func_0039FD38(self);
+    }
+    *(unsigned char*)((char*)self + 0x10) = mode;
+    *(void**)((char*)self + 0xC) = anim;
+    func_00397468(anim, *(unsigned char*)((char*)self + 0x10), v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FD38);

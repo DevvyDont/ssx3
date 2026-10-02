@@ -2,7 +2,27 @@
 
 INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A6E20);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_003A6ED8(void* self);
+extern "C" void func_003A6F38(void* self);
+
+extern "C" void func_003A6E20(void* self, int flags)
+{
+    void* buf = *(void**)((char*)self + 0xCC);
+    if (buf != 0 && *(int*)((char*)self + 0xC0) != 0 && *(unsigned char*)((char*)self + 0xBC) == 0xFF) {
+        cMemMan_free(buf);
+    }
+    func_003A6ED8(self);
+    func_003A6F38(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/streamman", func_003A6E98);

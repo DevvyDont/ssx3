@@ -280,7 +280,29 @@ extern "C" void* func_002C3FA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C3FE0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_002523A8(void* p);
+extern "C" void func_002C6360(void* self);
+extern void* D_00486F78[];
+extern void* D_004871E8[];
+
+extern "C" void func_002C3FE0(void* self, int flags)
+{
+    *(void***)self = D_00486F78;
+    func_002C6360(self);
+    void* p = *(void**)((char*)self + 0x30);
+    if (p != 0) {
+        func_002523A8(p);
+    }
+    *(void***)self = D_004871E8;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C4050);
 
@@ -372,7 +394,23 @@ void func_002C4408(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4410);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_002C48C0(void*, int);
+extern char D_004A3948[];
+
+extern "C" void func_002C4410(void* self)
+{
+    char* name = (char*)self + 0xB9;
+    *(int*)((char*)self + 0x3C) = 0;
+    strcpy(name, (char*)self + *(int*)((char*)self + 0x1C) * 0x78 + 0x1B0);
+    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    func_002C48C0(self, 0x36);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4480);
@@ -455,9 +493,44 @@ extern "C" void func_002C4578(void* self, unsigned short* name)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C45D0);
+#ifdef SKIP_ASM
+// PORT: func_002C2580 takes (dst, src); the unit declares it with one arg
+char* func_002C2580_impl(char* dst, unsigned short* src) __asm__("func_002C2580");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_002C48C0(void*, int);
+extern char D_004A3948[];
 
+extern "C" void func_002C45D0(void* self, unsigned short* wname, int a2, int a3)
+{
+    char* name = (char*)self + 0xB9;
+    func_002C2580_impl(name, wname);
+    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    *(int*)((char*)self + 0x2C) = a2;
+    *(int*)((char*)self + 0x20) = a3;
+    func_002C48C0(self, 0x15);
+}
+#endif
+
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4648);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_002C48C0(void*, int);
+extern char D_004A3948[];
+
+extern "C" void func_002C4648(void* self, const char* src, int a2, int a3)
+{
+    char* name = (char*)self + 0xB9;
+    strcpy(name, src);
+    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    *(int*)((char*)self + 0x2C) = a2;
+    *(int*)((char*)self + 0x20) = a3;
+    func_002C48C0(self, 0x15);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C46C0);
@@ -551,7 +624,24 @@ void* func_002C4768(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4788);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_002C48C0(void*, int);
+extern char D_004A3948[];
+
+extern "C" void func_002C4788(void* self, char* src, int a2, int a3)
+{
+    char* name = (char*)self + 0xB9;
+    strcpy(name, src);
+    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    *(int*)((char*)self + 0x2C) = a2;
+    *(int*)((char*)self + 0x20) = a3;
+    func_002C48C0(self, 0x1B);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C4800);
@@ -1102,7 +1192,34 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6848);
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C68C8);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C68F0);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char* s);
+
+struct func_002C68F0_sName {
+    char name[0x78];
+};
+
+struct func_002C68F0_sTree {
+    char pad_0x00[0x14];
+    int count;                          // 0x14
+    char pad_0x18[0x1B0 - 0x18];
+    func_002C68F0_sName names[1];       // 0x1B0
+};
+
+extern "C" int func_002C68F0(func_002C68F0_sTree* self)
+{
+    int n = 0;
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (strlen(self->names[i].name) != 0) {
+            n++;
+        }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6968);

@@ -111,7 +111,27 @@ cListNode* cList_first(cList* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/list", func_00397870);
+#ifdef SKIP_ASM
+extern "C" cListNode* func_00397870(cList* list, int count)
+{
+    cListNode* n = cList_first(list);
+    for (; count > 0; count--) {
+        if (n == 0) {
+            return 0;
+        }
+        if (cListNode_isSentinel(n)) {
+            break;
+        }
+        n = n->prev;
+    }
+    if (n != 0 && !cListNode_isSentinel(n)) {
+        return n;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/list", cList_addToFront__FP5cListP9cListNode);
@@ -152,7 +172,30 @@ void func_00397930(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/list", func_00397948);
+#ifdef SKIP_ASM
+class func_00397948_cVirt {
+public:
+    void* next;                  // 0x0
+    func_00397948_cVirt* prev;   // 0x4
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01(int);
+};
+
+extern "C" void func_00397948(void* self)
+{
+    func_00397948_cVirt* n = *(func_00397948_cVirt**)((char*)self + 0x4);
+    while (n->prev != n) {
+        func_00397948_cVirt* p = n->prev;
+        if (n != 0) {
+            n->v01(3);
+        }
+        n = p;
+    }
+    func_00397930(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/list", func_003979C0);
@@ -169,7 +212,58 @@ extern "C" int func_003979C0(cList* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/list", func_003979F8);
+#ifdef SKIP_ASM
+class func_003979F8_cVirt {
+public:
+    void* next;                  // 0x0
+    func_003979F8_cVirt* prev;   // 0x4
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(void*);
+};
 
+extern "C" int func_003979F8(void* self, void* arg)
+{
+    func_003979F8_cVirt* n = *(func_003979F8_cVirt**)((char*)self + 0x4);
+    while (n->prev != n) {
+        func_003979F8_cVirt* p = n->prev;
+        int r = n->v02(arg);
+        if (r != 0) {
+            return r;
+        }
+        n = p;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/list", func_00397A68);
+#ifdef SKIP_ASM
+class func_00397A68_cVirt {
+public:
+    void* next;                  // 0x0
+    func_00397A68_cVirt* prev;   // 0x4
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03(void*);
+};
+
+extern "C" int func_00397A68(void* self, void* arg)
+{
+    func_00397A68_cVirt* n = *(func_00397A68_cVirt**)((char*)self + 0x4);
+    while (n->prev != n) {
+        func_00397A68_cVirt* p = n->prev;
+        int r = n->v03(arg);
+        if (r != 0) {
+            return r;
+        }
+        n = p;
+    }
+    return 0;
+}
+#endif
 

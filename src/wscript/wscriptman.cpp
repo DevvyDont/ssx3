@@ -164,7 +164,23 @@ extern "C" void func_00309AA0(void* self, cWScriptListNode* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309B00);
+#ifdef SKIP_ASM
+int func_0030B260(void* self, void* a1);
+extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node);
+
+extern "C" void func_00309B00(void* self, cWScriptListNode* node)
+{
+    cWScriptListHead* list = (cWScriptListHead*)((char*)self + 0x2B8);
+    if (func_0030B428(list, node) != 0) {
+        func_0030B2D0(list, node);
+        func_0030B260((char*)self + 0x2B4, node);
+    }
+    *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_00309B70);
@@ -188,7 +204,36 @@ INCLUDE_ASM("wscript/wscriptman", func_00309C88);
 
 INCLUDE_ASM("wscript/wscriptman", func_00309D20);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_00309DD0);
+#ifdef SKIP_ASM
+// cLunoValue (luno/lunovm): { word0, word1, type }
+struct func_00309DD0_sValue {
+    int word0;
+    int word1;
+    int type;
+};
+
+void* func_00226620(void* self);
+extern "C" func_00309DD0_sValue* func_00225248(void* table, func_00309DD0_sValue* key);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+
+extern "C" int func_00309DD0(void* self, int idx, int value)
+{
+    int off = idx << 2;
+    char* base = (char*)self + 0x3CC;
+    void** slot = (void**)(base + off);
+    if (*slot != 0) {
+        func_00309DD0_sValue key;
+        key.type = 3;
+        *(int*)func_00226620(&key) = value;
+        int r = func_00225248(*slot, &key)->type == 5;
+        func_00225B90(&key, 2);
+        return r;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_00309E50);
 
@@ -409,7 +454,35 @@ void* func_0030B058(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B068);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+class func_0030B068_cNode {
+public:
+    char pad_0x00[0x18];
+    func_0030B068_cNode* next;   // 0x18
+    char pad_0x1C[0x5C - 0x1C];
+    // vptr at 0x5C; slot N at vtable offset N*8
+    virtual void v01(int);
+};
+
+extern "C" void func_0030B068(func_0030B068_cNode** self, int flags)
+{
+    func_0030B068_cNode* n = *self;
+    while (n != 0) {
+        func_0030B068_cNode* cur = n;
+        n = n->next;
+        if (cur != 0) {
+            cur->v01(3);
+        }
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B0E8);
 
@@ -686,9 +759,64 @@ int func_0030B898(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B8C0);
+#ifdef SKIP_ASM
+class func_0030B8C0_cNode {
+public:
+    char pad_0x00[0x18];
+    func_0030B8C0_cNode* next;   // 0x18
+    char pad_0x1C[0x5C - 0x1C];
+    // vptr at 0x5C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int v03();
+};
 
+extern "C" int func_0030B8C0(void* self)
+{
+    int n = 0;
+    func_0030B8C0_cNode* node;
+    for (node = *(func_0030B8C0_cNode**)((char*)self + 0x2B8); node != 0; node = node->next) {
+        if (node->v03() != 0 && *(int*)((char*)node + 0x60) == 2) {
+            n++;
+        }
+    }
+    return n != 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B928);
+#ifdef SKIP_ASM
+struct cWScriptIdTable;
+extern "C" void func_0030C390(cWScriptIdTable* self);
+
+// same layout as cWScriptIdTable (defined later in the unit)
+struct func_0030B928_sSlot {
+    unsigned int id;     // 0x0
+    int arg;             // 0x4
+    int b;               // 0x8
+    unsigned int entries[64];
+};
+
+extern "C" void func_0030B928(void* self, unsigned int id, int arg)
+{
+    func_0030B928_sSlot* s = (func_0030B928_sSlot*)((char*)self + 0x2C0);
+    int i;
+    for (i = 0; i < 1; i++, s++) {
+        if (s->id == id) {
+            return;
+        }
+        if (s->id == 0xFFFFFFFF) {
+            func_0030C390((cWScriptIdTable*)s);
+            s->id = id;
+            s->arg = arg;
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030B9A0);
 
@@ -1020,5 +1148,31 @@ extern "C" void* func_0030D4B8(void* self)
 
 INCLUDE_ASM("wscript/wscriptman", func_0030D540);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D840);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern char D_00489C70[];
+
+struct func_0030D840_sPool {
+    int count;      // 0x0
+    int field_0x4;  // 0x4
+    int field_0x8;  // 0x8
+    void* items;    // 0xC
+    char pad_0x10[0x60 - 0x10];
+    int field_0x60; // 0x60
+};
+
+extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int a2)
+{
+    self->field_0x4 = a2;
+    self->count = count;
+    self->items = operator_new_tag(count * 0x58, D_00489C70, 0, 0);
+    func_003E6448(self->items, 0, self->count * 0x58);
+    self->field_0x8 = 0;
+    self->field_0x60 = 0;
+}
+#endif
 

@@ -83,9 +83,51 @@ INCLUDE_ASM("world/worldcache", func_003A7878);
 
 INCLUDE_ASM("world/worldcache", func_003A7A20);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7AA8);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void func_003A76C0(void* self, int flags);
 
+struct func_003A7AA8_sElem {
+    char pad[0x14];
+};
+
+extern "C" void func_003A7AA8(func_003A7AA8_sElem* self, int flags)
+{
+    if (self != 0) {
+        func_003A7AA8_sElem* p = self + 3;
+        while (self != p) {
+            p--;
+            func_003A76C0(p, 0);
+        }
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldMemoryMan_activateSectionMem);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* func_003A77B0(void* self, int section, int index);
+extern char D_00494DE8[];
+
+struct cWorldMemoryMan_sSection {
+    char pad[0x14];
+};
+
+// PORT: the section pointer is passed as int (the callee's mangled name is __FPvii).
+extern "C" void cWorldMemoryMan_activateSectionMem(void* self, int index, int section)
+{
+    void** mem = (void**)((char*)self + 0x3C);
+    void** slot = &mem[index];
+    *slot = func_003A77B0(cMemMan_alloc(0x14, D_00494DE8, 0x20000000, 0),
+                          (int)((cWorldMemoryMan_sSection*)self + section), index);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7B98);
@@ -450,7 +492,31 @@ INCLUDE_ASM("world/worldcache", func_003A9188);
 
 INCLUDE_ASM("world/worldcache", func_003A9258);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A9558);
+#ifdef SKIP_ASM
+extern "C" void func_003A84C8(void* cache, unsigned short id);
+
+struct func_003A9558_sNode {
+    char pad_0x00[0x50];
+    func_003A9558_sNode* left;   // 0x50
+    func_003A9558_sNode* right;  // 0x54
+    unsigned short* section;     // 0x58
+};
+
+extern "C" void func_003A9558(void** self, func_003A9558_sNode* node)
+{
+    if (node->section != 0) {
+        func_003A84C8(*self, node->section[1]);
+    }
+    if (node->left != 0) {
+        func_003A9558(self, node->left);
+    }
+    if (node->right != 0) {
+        func_003A9558(self, node->right);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A95C0);
 
