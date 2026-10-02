@@ -180,7 +180,68 @@ extern "C" void func_00182420(void* self)
 
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetCreate);
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00182690);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001474A8(void* iface, int rider, int id);
+extern "C" void func_0039F190(void*, int);
+extern char D_004C66A8[];
+extern char D_004C66B8[];
+
+struct sVEK182690a {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+struct sVEK182690b {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00182690(void* self, void* menu, unsigned int msg)
+{
+    if (menu == 0)
+        return;
+    switch (msg) {
+    case 2: {
+        sVEK182690a* vt = *(sVEK182690a**)((char*)menu + 8);
+        vt[21].fn((char*)menu + vt[21].delta, D_004C66A8);
+        break;
+    }
+    case 1: {
+        int sel = *(int*)((char*)menu + 0x18) + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
+        sVEK182690a* vt = *(sVEK182690a**)((char*)menu + 8);
+        vt[21].fn((char*)menu + vt[21].delta, D_004C66B8);
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x50), *(const char**)((char*)self + (sel << 2) + 0x16C));
+        break;
+    }
+    case 6:
+        *(int*)((char*)self + 0x70) = 0;
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        break;
+    case 5: {
+        int sel = *(int*)((char*)menu + 0x18) + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
+        if (sel == 0)
+            *(int*)((char*)self + 0x70) = 0;
+        else
+            *(int*)((char*)self + 0x70) = *(int*)((char*)self + (sel << 2) + 0x7C);
+        char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_001474A8(pl, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x70));
+        sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
+        vt[1].fn(pl + vt[1].delta);
+        *(int*)((char*)self + 0x74) = 1;
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00182808);

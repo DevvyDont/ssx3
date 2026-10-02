@@ -652,9 +652,125 @@ extern "C" void func_001D0B00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updatePageNumber);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void func_003A0E90(void* text, void* p);
+extern char D_00467060[];
+extern char D_004A1EF8[];
+extern char D_004A1F00[];
+extern char D_004A1408[];
 
+struct sVEK1D0BC8a {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+struct sVEK1D0BC8b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cFEStateRewardGalleryBase_updatePageNumber(void* self)
+{
+    if (*(void**)((char*)self + 0x904) == 0)
+        return;
+    char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x10);
+    if (obj != 0) {
+        sVEK1D0BC8a* vt = *(sVEK1D0BC8a**)(obj + 4);
+        char* thisp = obj + vt[4].delta;
+        unsigned short* fmt = vt[4].fn(thisp, GetHashValue32(D_00467060));
+        if (fmt != 0) {
+            unsigned short buf[100];
+            int per = *(int*)((char*)self + 0x58);
+            int pages = (*(int*)((char*)self + 0x60) + per - 1) / per;
+            func_002C26D0(buf, fmt, (*(int*)((char*)self + 0x64) + per - 1) / per + 1, pages);
+            func_003A0E90(*(void**)((char*)self + 0x904), buf);
+            char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1EF8));
+            if (o != 0) {
+                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(o + 8);
+                vt2[9].fn(o + vt2[9].delta, pages > 1);
+            }
+            o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F00));
+            if (o != 0) {
+                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(o + 8);
+                vt2[9].fn(o + vt2[9].delta, pages > 1);
+            }
+            return;
+        }
+    }
+    cUIText_setAsciiString(*(cUIText**)((char*)self + 0x904), D_004A1408);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D0D30);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" const char* func_00198AF0(void* a0);
+// PORT: func_00198AF0 really takes the int value to format; bound by asm label
+extern "C" const char* func_00198AF0_i(int v) __asm__("func_00198AF0");
+extern char D_004A1408[];
+
+struct sVEK1D0D30a {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+struct sVEK1D0D30b {
+    short delta;
+    short index;
+    const char* (*fn)(void*, void*);
+};
+struct sVEK1D0D30c {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+struct sVEK1D0D30d {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+extern "C" void func_001D0D30(void* self)
+{
+    char* grid = *(char**)((char*)self + 0x8FC);
+    if (grid == 0) {
+        if (*(cUIText**)((char*)self + 0x908) != 0)
+            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x908), D_004A1408);
+        if (*(cUIText**)((char*)self + 0x90C) != 0)
+            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x90C), D_004A1408);
+        return;
+    }
+    int idx = *(int*)((char*)self + 0x64) * *(int*)((char*)self + 0x5C) + *(int*)(grid + 0x18);
+    sVEK1D0D30a* vt = *(sVEK1D0D30a**)((char*)self + 8);
+    void* item = vt[34].fn((char*)self + vt[34].delta, idx);
+    if (*(cUIText**)((char*)self + 0x908) != 0) {
+        sVEK1D0D30b* vt2 = *(sVEK1D0D30b**)((char*)self + 8);
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x908), vt2[37].fn((char*)self + vt2[37].delta, item));
+    }
+    if (*(cUIText**)((char*)self + 0x90C) != 0) {
+        sVEK1D0D30c* vt3 = *(sVEK1D0D30c**)((char*)self + 8);
+        int price = vt3[35].fn((char*)self + vt3[35].delta, item);
+        if (price > 0) {
+            sVEK1D0D30d* vt4 = *(sVEK1D0D30d**)((char*)self + 8);
+            if (vt4[38].fn((char*)self + vt4[38].delta, idx) == 0) {
+                cUIText_setAsciiString(*(cUIText**)((char*)self + 0x90C), func_00198AF0_i(price));
+                return;
+            }
+        }
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x90C), D_004A1408);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D0E78);
@@ -693,7 +809,72 @@ extern "C" void func_001D0EB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D0F30);
+#ifdef SKIP_ASM
+extern char D_004C6808[];
+
+struct sVEK1D0F30a {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEK1D0F30b {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sVEK1D0F30c {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_001D0F30(void* self)
+{
+    char* icon = *(char**)((char*)self + 0x8F8);
+    if (icon != 0) {
+        if (*(char**)((char*)self + 0x8FC) != 0) {
+            sVec3_F168 a;
+            sVec3_F168 b;
+            func_003A0290(*(char**)((char*)self + 0x8FC), &a);
+            func_003A0290(*(char**)((char*)self + 0x8F8), &b);
+            b.y = a.y + *(float*)((char*)self + 0x74);
+            b.x = a.x + *(float*)((char*)self + 0x70);
+            *(sVec3_F168*)(*(char**)((char*)self + 0x8F8) + 0x44) = b;
+            char* o = *(char**)((char*)self + 0x8F8);
+            sVEK1D0F30a* vt = *(sVEK1D0F30a**)(o + 8);
+            vt[9].fn(o + vt[9].delta, 1);
+        } else {
+            sVEK1D0F30a* vt = *(sVEK1D0F30a**)(icon + 8);
+            vt[9].fn(icon + vt[9].delta, 0);
+        }
+    }
+    char* grid = *(char**)((char*)self + 0x8FC);
+    if (grid == 0)
+        return;
+    int idx = *(int*)((char*)self + 0x64) * *(int*)((char*)self + 0x5C) + *(int*)(grid + 0x18);
+    sVEK1D0F30b* vt = *(sVEK1D0F30b**)((char*)self + 8);
+    if (vt[38].fn((char*)self + vt[38].delta, idx) != 0) {
+        sVEK1D0F30b* vt2 = *(sVEK1D0F30b**)((char*)self + 8);
+        int r = vt2[26].fn((char*)self + vt2[26].delta, idx);
+        if (r < 0) {
+            sVEK1D0F30b* vt3 = *(sVEK1D0F30b**)((char*)self + 8);
+            int t = vt3[27].fn((char*)self + vt3[27].delta, idx);
+            char* g = *(char**)((char*)self + 0x8FC);
+            *(int*)(g + 0x78) = -1;
+            *(int*)(g + 0x7C) = t;
+        } else {
+            char* g = *(char**)((char*)self + 0x8FC);
+            *(int*)(g + 0x78) = r;
+            *(int*)(g + 0x7C) = 0;
+        }
+    }
+    char* g = *(char**)((char*)self + 0x8FC);
+    sVEK1D0F30c* vt4 = *(sVEK1D0F30c**)(g + 8);
+    vt4[11].fn(g + vt4[11].delta, D_004C6808);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D10A8);
@@ -1454,7 +1635,62 @@ extern "C" void func_001D2150(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D2198);
+#ifdef SKIP_ASM
+extern "C" int func_0019E238(void* self, int bank, int i);
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern void* D_004A28A8;
+
+struct sSelfK1D2198 {
+    char pad_0x0[0x48];
+    char* a48[3];   // 0x48
+    char* a54[3];   // 0x54
+    int f60;
+    int bank;       // 0x64
+    int f68;
+    int slot;       // 0x6C
+    int handle;     // 0x70
+    int kind;       // 0x74
+};
+struct sVEK1D2198 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001D2198(void* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    if (func_0019E238(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C)) == 0)
+        return;
+    sData001CFFF8* data = func_0019E2B0(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
+    char* e = (char*)data + data->tbl[0].off;
+    short a = *(short*)(e + 4);
+    short b = *(short*)(e + 6);
+    if (b < a)
+        *(int*)((char*)self + 0x74) = 1;
+    else if (a < b)
+        *(int*)((char*)self + 0x74) = 2;
+    else
+        *(int*)((char*)self + 0x74) = 0;
+    sEntry001CFFF8 ent;
+    func_003B3D00(data, 0, &ent);
+    ent.name[4] = 0;
+    *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)D_004A289C)->v46(e, &ent, 0, 1, -1);
+    func_0019DC20(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
+    *(int*)((char*)self + 0x6C) = -1;
+    sSelfK1D2198* s = (sSelfK1D2198*)self;
+    char* o = s->a48[s->kind];
+    if (o != 0 && s->a54[s->kind] != 0) {
+        *(int*)(o + 0x78) = s->handle;
+        *(int*)(o + 0x7C) = 0;
+        char* o2 = s->a54[s->kind];
+        sVEK1D2198* vt = *(sVEK1D2198**)(o2 + 8);
+        vt[9].fn(o2 + vt[9].delta, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001D22F0);
 

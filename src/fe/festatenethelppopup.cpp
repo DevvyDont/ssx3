@@ -268,7 +268,53 @@ extern "C" void* func_001DABD0(void* self, int* info)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DACB8);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+// PORT: the member ctors return self, but this caller treats them as void
+void func_001DAAC8_v(void* self, int* info) __asm__("func_001DAAC8");
+void func_001DABD0_v(void* self, int* info) __asm__("func_001DABD0");
+extern "C" void* func_002CCF08(void* self);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0046D530[];
+extern char D_00467AA8[];
+extern char D_00467A70[];
+extern char D_00467A98[];
+
+
+extern "C" void* func_001DACB8(void* self, int* info, int* a2, int* a3)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0046D530;
+    func_001DAAC8_v((char*)self + 0x130, a2);
+    func_001DABD0_v((char*)self + 0x2E8, a3);
+    *(int*)((char*)self + 0x4E0) = *info;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x4E4), D_00467AA8);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x500), (void*)0xE);
+    char* p = (char*)self + 0x518;
+    for (int i = 3; i != -1; i--) {
+        func_002CCF08(p);
+        p += 0x24;
+    }
+    cSubMenuItem_cSubMenuItem((char*)self + 0x5A8, (char*)self + 0x130, D_00467A70);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x5C4, (char*)self + 0x2E8, D_00467A98);
+    cMenu_addItem(self, (char*)self + 0x4E4, -1);
+    cMenu_addItem(self, (char*)self + 0x500, -1);
+    int j;
+    for (j = 0; j < 4; j++) {
+        cMenu_addItem(self, (char*)self + 0x518 + j * 0x24, -1);
+    }
+    cMenu_addItem(self, (char*)self + 0x5A8, -1);
+    cMenu_addItem(self, (char*)self + 0x5C4, -1);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DAE20);

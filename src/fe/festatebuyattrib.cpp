@@ -203,7 +203,67 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateExperienceDisplay);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_0046F080[];
+extern char D_004A2350[];
+
+struct sBuyAttribK1F50B0 {
+    char pad_0x0[0x48];
+    void* screen;   // 0x48
+    int pts[7];     // 0x4C
+    int lvl[7];     // 0x68
+    int add[7];     // 0x84
+};
+struct sVec3K1F50B0 { float x, y, z; };
+struct sVEK1F50B0a {
+    short delta;
+    short index;
+    void (*fn)(void*, sVec3K1F50B0*);
+};
+struct sVEK1F50B0b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* p)
+{
+    sBuyAttribK1F50B0* self = (sBuyAttribK1F50B0*)p;
+    char name[0x20];
+    int i;
+    for (i = 0; i < 7; i++) {
+        sprintf(name, D_0046F080, i);
+        char* o = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (o != 0) {
+            sVec3K1F50B0 v;
+            v.y = 12.0f;
+            v.x = (float)self->pts[i] * 3.3636362552642822f;
+            v.z = 0.0f;
+            sVEK1F50B0a* vt = *(sVEK1F50B0a**)(o + 8);
+            vt[21].fn(o + vt[21].delta, &v);
+            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(o + 8);
+            vt2[9].fn(o + vt2[9].delta, 1);
+        }
+        sprintf(name, D_004A2350, i);
+        o = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (o != 0) {
+            sVec3K1F50B0 v;
+            v.x = (float)(self->add[i] + self->pts[i]) * 3.3636362552642822f;
+            v.y = 12.0f;
+            v.z = 0.0f;
+            sVEK1F50B0a* vt = *(sVEK1F50B0a**)(o + 8);
+            vt[21].fn(o + vt[21].delta, &v);
+            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(o + 8);
+            vt2[9].fn(o + vt2[9].delta, 1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateTotalCost);
@@ -376,7 +436,61 @@ extern "C" void func_001F5650(void* self, void* item, int msg)
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onInputBegin);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5A38);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern char D_0046F1A8[];
+extern char D_0046F1B8[];
+extern char D_0046F1C8[];
+extern char D_0046F1E0[];
+extern char D_0046F1F0[];
+extern char D_0046F200[];
+
+struct sVEK1F5A38 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001F5A38(void* self)
+{
+    cUIState_hideObjSafe(self, D_0046F1A8);
+    cUIState_hideObjSafe(self, D_0046F1B8);
+    cUIState_hideObjSafe(self, D_0046F1C8);
+    cUIState_hideObjSafe(self, D_0046F1E0);
+    int show = 1;
+    switch (*(int*)((char*)self + 0x48)) {
+    case 0:
+        cUIState_showObjSafe(self, D_0046F1A8);
+        show = 0;
+        break;
+    case 1:
+        cUIState_showObjSafe(self, D_0046F1B8);
+        break;
+    case 2:
+        cUIState_showObjSafe(self, D_0046F1C8);
+        break;
+    case 3:
+        cUIState_showObjSafe(self, D_0046F1E0);
+        show = 0;
+        break;
+    }
+    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046F1F0));
+    if (o != 0) {
+        sVEK1F5A38* vt = *(sVEK1F5A38**)(o + 8);
+        vt[9].fn(o + vt[9].delta, show);
+    }
+    o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046F200));
+    if (o != 0) {
+        sVEK1F5A38* vt = *(sVEK1F5A38**)(o + 8);
+        vt[9].fn(o + vt[9].delta, show);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupMenuFocus);
 

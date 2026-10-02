@@ -19,7 +19,70 @@ extern "C" void cFEStateProfileSelect_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateprofile", func_0018EB40);
+#ifdef SKIP_ASM
+extern "C" void func_0039F400(void* self, void* state);
+
+struct sColorK18EB40 {
+    float r, g, b, a;
+    sColorK18EB40(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+class cUIObjK18EB40 {
+public:
+    int f0, f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void setColor(const sColorK18EB40& c);
+};
+struct sVEK18EB40b {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+
+extern "C" void func_0018EB40(void* self, char* menu, unsigned int msg)
+{
+    if (menu == 0)
+        return;
+    switch (msg) {
+    case 5: {
+        ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
+        char* g = **(char***)((char*)self + 0x10);
+        sVEK18EB40b* vt = *(sVEK18EB40b**)(g + 4);
+        void* r = vt[4].fn(g + vt[4].delta, self, *(int*)(menu + 0x18));
+        if (r != 0)
+            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, r);
+        break;
+    }
+    case 6: {
+        char* g = **(char***)((char*)self + 0x10);
+        sVEK18EB40b* vt = *(sVEK18EB40b**)(g + 4);
+        void* r = vt[5].fn(g + vt[5].delta, self, *(int*)(menu + 0x18));
+        if (r != 0)
+            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, r);
+        break;
+    }
+    case 1: {
+        ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 0.0f, 1.0f, 0.0f));
+        break;
+    }
+    case 2: {
+        ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 1.0f, 1.0f));
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateprofile", func_0018ECA0);
@@ -202,7 +265,47 @@ extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateprofile", func_0018EF70);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A15E0[];
+extern int D_004A15E8;
+extern char D_004A15D0[];
+extern char D_004A15D8[];
+extern char D_004A1458[];
+extern char D_004A1460[];
+struct cUIObj_EF70 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int on);
+};
+
+extern "C" void func_0018EF70(void* self, int on)
+{
+    if (*(int*)((char*)self + 0x234) == on)
+        return;
+    int off = on ^ 1;
+    ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15E0)))->setVisible(off);
+    if (D_004A15E8 != 2) {
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D0)))->setVisible(off);
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setVisible(off);
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1460)))->setVisible(off);
+    } else {
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D8)))->setVisible(off);
+    }
+    *(int*)((char*)self + 0x234) = on;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateprofile", func_0018F0B8);
@@ -459,7 +562,70 @@ extern "C" void func_0018F9D8(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateprofile", func_0018FAF0);
+#ifdef SKIP_ASM
+struct cAppMan;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" void cBENewRaceInterface_setGameEvent(void* iface, int ev);
+extern "C" int func_00146D98(void* iface, int a1);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* func_00232720(void* self);
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern "C" void* func_00194738(void* self, void* engine);
+extern "C" void func_0039F400(void* self, void* state);
+extern "C" void func_0039F4C0(void* self, void* state);
+extern void* D_004A28A8;
+extern int D_004A11B8;
+extern int D_004A19D8;
+extern int D_00535C08[];
+extern char D_0045CE60[];
+extern char D_0045E290[];
+
+struct sVEK18FAF0a {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+struct sVEK18FAF0b {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0018FAF0(void* self)
+{
+    if (*(int*)((char*)self + 0x1AC) == 0) {
+        int sel = *(int*)((char*)self + 0x27C);
+        if (sel == 0) {
+            char* g = **(char***)((char*)self + 0x10);
+            sVEK18FAF0a* vt = *(sVEK18FAF0a**)(g + 4);
+            void* r = vt[5].fn(g + vt[5].delta, self, *(int*)((char*)self + 0x1BC));
+            if (r != 0)
+                func_0039F4C0(*(char**)((char*)self + 0x10) + 0x18, r);
+        } else if (sel == 1) {
+            char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+            void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
+            cBENewRaceInterface_setGameMode(race, 4);
+            cBENewRaceInterface_setGameEvent(race, 0xC);
+            int x = func_00146D98(pl, 0);
+            D_004A11B8 = 1;
+            D_00535C08[0] = x;
+            sVEK18FAF0b* vt = *(sVEK18FAF0b**)(race + 0xC);
+            vt[1].fn(race + vt[1].delta);
+            cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+        } else if (sel == 2) {
+            D_004A19D8 = 0;
+            void* st = func_00194738(cMemMan_alloc(0x4C, D_0045E290, 0, 0), *(void**)((char*)self + 0x10));
+            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, st);
+        }
+    }
+    *(int*)((char*)self + 0x1AC) = 1;
+}
+#endif
 
 extern "C" void* func_001D58B8(void*);
 

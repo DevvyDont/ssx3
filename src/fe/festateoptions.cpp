@@ -104,7 +104,69 @@ extern "C" int func_00188C68(void* self, void* menu, unsigned int key, int index
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00188D08);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_0045DD40[];
+extern char D_0045DD50[];
+extern char D_0045DD20[];
+extern char D_004A1530[];
+
+struct sVEK188D08a {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sVEK188D08b {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+static inline int IsK188D08(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+extern "C" void func_00188D08(void* self, char* popup, int event)
+{
+    switch (event) {
+    case 0x15: {
+        void* scr = *(void**)(popup + 0x40);
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(scr, GetHashValue32(D_0045DD40));
+        if (text != 0) {
+            cUIText_setUnicodeStringByID(text, GetHashValue32(D_0045DD50));
+        }
+        break;
+    }
+    case 0x16:
+        if (IsK188D08(*(int*)(popup + 0xC), D_0045DD20)) {
+            void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1530));
+            sVEK188D08a* vt = *(sVEK188D08a**)(popup + 8);
+            if (vt[23].fn(popup + vt[23].delta, 0)) {
+                if (o != 0) {
+                    *(int*)((char*)self + 0x48) = 1;
+                    *(int*)((char*)self + 0x4C) = 1;
+                    sVEK188D08b* vt2 = *(sVEK188D08b**)((char*)self + 8);
+                    vt2[19].fn((char*)self + vt2[19].delta, o, 5);
+                }
+            } else {
+                if (o != 0) {
+                    *(int*)((char*)self + 0x48) = 0;
+                    *(int*)((char*)self + 0x4C) = 1;
+                    sVEK188D08b* vt2 = *(sVEK188D08b**)((char*)self + 8);
+                    vt2[19].fn((char*)self + vt2[19].delta, o, 6);
+                }
+            }
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00188E58);
@@ -519,7 +581,51 @@ extern "C" int func_0018CDB0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018CDC0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_001474E8(void* iface, int a1);
+extern "C" int func_00147618(void* iface, int a1);
+extern "C" int func_0039A768(void* self, int key, unsigned char* out);
+extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void func_0018CF50(void* self, int on);
+extern char D_004A1568[];
+extern char D_004A1570[];
+extern char D_004A15C8[];
+extern char D_004A1578[];
+
+extern "C" void func_0018CDC0(void* self)
+{
+    void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
+    unsigned char vals[4];
+    void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1568));
+    if (o != 0) {
+        func_0039A768(o, func_001474E8(np, 0), &vals[0]);
+        func_0039A7A8(o, vals[0]);
+    }
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1570));
+    if (o != 0) {
+        func_0039A768(o, func_001474E8(np, 1), &vals[1]);
+        func_0039A7A8(o, vals[1]);
+    }
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C8));
+    if (o != 0) {
+        func_0039A768(o, func_00147618(np, 0), &vals[2]);
+        func_0039A7A8(o, vals[2]);
+        func_0018CF50(self, func_00147618(np, 0) == 0);
+    }
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1578));
+    if (o != 0) {
+        func_0039A768(o, func_00147618(np, 1), &vals[3]);
+        func_0039A7A8(o, vals[3]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018CF50);
@@ -837,7 +943,33 @@ extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 
 INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018E178);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A15E0[];
+extern char D_004A15D0[];
+extern char D_004A15D8[];
+extern char D_004A1458[];
+extern char D_004A1460[];
+
+extern "C" void func_0018E178(void* self, int on)
+{
+    if (*(int*)((char*)self + 0x234) == on)
+        return;
+    int off = on ^ 1;
+    ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15E0)))->setVisible(off);
+    if (*(int*)((char*)self + 0x22C) != 0) {
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D0)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1460)))->setVisible(off);
+    } else {
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D8)))->setVisible(off);
+    }
+    *(int*)((char*)self + 0x234) = on;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018E2C0);

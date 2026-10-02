@@ -1,6 +1,62 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern signed char D_004A2C38;
+extern char D_0047BDD8[];
+extern char D_0047BDE8[];
+extern char D_0047BE00[];
+extern char D_0047BE10[];
+extern char D_0047BE20[];
+extern char D_0047BE30[];
+
+extern "C" void cFELoadHintState_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BDD8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    int n = D_004A2C38 + 1;
+    if (n == 12) {
+        D_004A2C38++;
+        n = D_004A2C38 + 1;
+    }
+    char title[0x40];
+    char body[0x40];
+    sprintf(title, D_0047BDE8, n);
+    sprintf(body, D_0047BE00, n);
+    D_004A2C38 = (D_004A2C38 + 1) % 15;
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BE10));
+    if (text != 0) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(title));
+    }
+    text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BE20));
+    if (text != 0) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(body));
+    }
+    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BE30));
+    if (o != 0) {
+        char* p = *(char**)((char*)self + 0x48);
+        if (p != 0) {
+            int q = *(int*)(p + 0x10);
+            if (q != 0) {
+                *(int*)(o + 0x78) = q;
+                *(int*)(o + 0x7C) = 0;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245AE0);
@@ -261,9 +317,116 @@ void* func_00245F30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245F50);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_004A2AD8[];
+extern char D_004A2AC0[];
+extern char D_004A2AC8[];
+extern char D_004A2AD0[];
+extern char D_0047B8F8[];
+extern char D_0047B930[];
+extern char D_0047B968[];
 
+struct sVEK245F50 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00245F50(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A2AD8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AC0));
+    if (text != 0) {
+        if (*(signed char*)((char*)self + 0x48) == 0)
+            cUIText_setAsciiString(text, D_0047B8F8);
+        else
+            cUIText_setAsciiString(text, D_0047B930);
+    }
+    cUIText* text2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AC8));
+    if (text2 != 0) {
+        cUIText_setUnicodeStringByID(text2, GetHashValue32(D_0047B968));
+    }
+    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AD0));
+    if (o != 0) {
+        sVEK245F50* vt = *(sVEK245F50**)(o + 8);
+        vt[9].fn(o + vt[9].delta, 0);
+        sVEK245F50* vt2 = *(sVEK245F50**)(o + 8);
+        vt2[8].fn(o + vt2[8].delta, 1);
+    }
+    *(int*)((char*)self + 0x4C) = 300;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00246098);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void* func_0039E510(void* self);
+extern void* D_004A5B80;
+extern char D_004A2AC0[];
+extern char D_004A2AC8[];
+extern char D_004A2AD0[];
+extern char D_0047B8F8[];
+extern char D_0047B930[];
+extern char D_0047B968[];
+
+struct sVEK246098 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00246098(void* self)
+{
+    if (*(int*)((char*)self + 0x4C) != 0) {
+        if (--*(int*)((char*)self + 0x4C) == 0) {
+            if (*(signed char*)((char*)self + 0x48) == 0) {
+                *(signed char*)((char*)self + 0x48) = 1;
+                cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AC0));
+                if (text != 0) {
+                    if (*(signed char*)((char*)self + 0x48) == 0)
+                        cUIText_setAsciiString(text, D_0047B8F8);
+                    else
+                        cUIText_setAsciiString(text, D_0047B930);
+                }
+                cUIText* text2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AC8));
+                if (text2 != 0) {
+                    cUIText_setUnicodeStringByID(text2, GetHashValue32(D_0047B968));
+                }
+                char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AD0));
+                if (o != 0) {
+                    sVEK246098* vt = *(sVEK246098**)(o + 8);
+                    vt[9].fn(o + vt[9].delta, 0);
+                    sVEK246098* vt2 = *(sVEK246098**)(o + 8);
+                    vt2[8].fn(o + vt2[8].delta, 1);
+                }
+                char* g = (char*)D_004A5B80;
+                sVEK246098* vt3 = *(sVEK246098**)(g + 0x10D8);
+                vt3[8].fn(g + vt3[8].delta, 0);
+            }
+        }
+    }
+    func_0039E510(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_002461E0);

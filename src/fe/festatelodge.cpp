@@ -140,7 +140,51 @@ extern "C" void func_001F4108(void* self, char* popup, int event)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" void* func_0014EEC8(void* self, int player, int index);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern char D_0046EF50[];
+extern char D_0046EF60[];
+extern char D_0046EF70[];
+extern char D_0046EF80[];
+extern char D_0046EF90[];
+extern char D_0046EFA0[];
+extern char D_0046EFB0[];
+extern char D_0046EFC0[];
+
+extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(void* self, void* w)
+{
+    int h = *(int*)((char*)w + 0x38);
+    if (h == GetHashValue32(D_0046EF50)) {
+        *(int*)((char*)w + 0x18) = 9;
+    }     else if (h == GetHashValue32(D_0046EF60)) {
+        *(int*)((char*)w + 0x18) = 10;
+    }     else if (h == GetHashValue32(D_0046EF70)) {
+        *(int*)((char*)w + 0x18) = 11;
+    }     else if (h == GetHashValue32(D_0046EF80)) {
+        *(int*)((char*)w + 0x18) = 12;
+    }     else if (h == GetHashValue32(D_0046EF90)) {
+        *(int*)((char*)w + 0x18) = 13;
+    }     else if (h == GetHashValue32(D_0046EFA0)) {
+        *(int*)((char*)w + 0x18) = 14;
+    }     else if (h == GetHashValue32(D_0046EFB0)) {
+        *(int*)((char*)w + 0x18) = 15;
+    } else if (h == GetHashValue32(D_0046EFC0)) {
+        void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
+        signed char cid = cBENewPlayerInterface_getRiderCharID(np, func_00146E98(np, 0));
+        cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatelodge", func_001F4380);
