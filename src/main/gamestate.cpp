@@ -1,6 +1,62 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/gamestate", cGFGateState_gainFocus);
+#ifdef SKIP_ASM
+extern "C" void cAI_setAIState(void*, int);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cBE_setState(int state);
+extern "C" void func_0039F840(void* list);
+extern "C" void func_00233AA0(void* self);
+extern "C" void func_0026F228(void* p);
+extern "C" void* func_0028B180(void);
+extern "C" void func_00258968(void* p);
+extern "C" void func_002300F0(void* self);
+extern "C" void func_0026F7B8(void* p);
+void func_0029C418(void* p);
+extern "C" void func_0029C420(void* p, int a1);
+extern "C" void func_00234BE8(void* self, int a1);
+int GetHashValue32(char* s);
+extern char* D_004A2C68;
+extern char* D_004A2EEC;
+extern void* D_004A28A8;
+extern int D_00534B30[];
+extern signed char D_00535C10[];
+extern char D_0047C038[];
+
+struct sRace_234AD0 {
+    char pad[0x8C];
+    int f8C;
+};
+
+extern "C" void cGFGateState_gainFocus(void* self)
+{
+    (*(sRace_234AD0**)(D_004A2C68 + 0xC))->f8C = 0;
+    if (D_004A2EEC != 0) {
+        func_00258968(D_004A2EEC);
+    }
+    cBE_setState(0);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0) {
+        func_002300F0(D_004A2C68);
+    }
+    func_0026F228(*(void**)(D_004A2C68 + 0x28));
+    func_0026F7B8(*(void**)(D_004A2C68 + 0x28));
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int mode = D_00535C10[0];
+    if (mode >= 4 && mode <= 6) {
+        func_00233AA0(self);
+        return;
+    }
+    cAI_setAIState(*(void**)(D_004A2C68 + 0xC), 4);
+    func_0029C418(func_0028B180());
+    func_0029C420(func_0028B180(), 3);
+    func_00234BE8(self, GetHashValue32(D_0047C038));
+    func_0039F840(*(char**)(D_004A2C68 + 0x48) + 0x18);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00234BE8);
@@ -122,7 +178,71 @@ extern "C" void* func_00234EF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00234F40);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0026F228(void* p);
+extern "C" void func_00278CD8(void* a);
+extern "C" void func_002790A0(void* a, int b);
+extern "C" void func_00278B98(void* a);
+extern "C" void func_0012AB20(void* self);
+extern "C" void func_0012AC48(void* self);
+extern "C" int func_00145D38(void* self, int index, int bit);
+extern "C" void func_0027AAF8(void* a, int b);
+extern "C" void* func_0028B180(void);
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+extern char* D_004A2C68;
+extern signed char D_00535C11[];
+
+struct sVEntry_234F40 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sState_234F40 {
+    int pad0[4];
+    int f10;
+    int f14;
+    int f18;
+};
+
+extern "C" void func_00234F40(sState_234F40* self)
+{
+    self->f18 = 0;
+    func_0026F228(*(void**)(D_004A2C68 + 0x28));
+    func_002790A0(D_004A28A4, 0);
+    func_00278CD8(D_004A28A4);
+    func_00278B98(D_004A28A4);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    self->f14 = 0;
+    int m = D_00535C11[0];
+    func_0012AB20(*(void**)(D_004A2C68 + 0xC));
+    func_0012AC48(*(void**)(D_004A2C68 + 0xC));
+    if (m == 0) {
+        int t = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78) + 0x1BC);
+        if (t >= 14 && t <= 16) {
+            void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+            char* sub = *(char**)(*(char**)(*(char**)(D_004A2C68 + 0xC) + 0x40) + 0x18) + 0x6C0;
+            sVEntry_234F40* vt = *(sVEntry_234F40**)sub;
+            if (func_00145D38(iface, vt[7].fn(sub + vt[7].delta), t) != 0) {
+                char* g = (char*)func_0028B180();
+                *(int*)(g + 0x5790) = 0;
+                *(int*)(g + 0x578C) = 1;
+                *(int*)(g + 0x6254) = 1;
+                self->f14 = 1;
+            }
+        }
+    } else {
+        func_0027AAF8(D_004A28A4, 0);
+    }
+    self->f10 = 0;
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00235080);
 
@@ -173,7 +293,66 @@ extern "C" void func_002357F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00235868);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00308F38(void* a);
+extern "C" void func_00308C60(void* a);
+extern "C" void func_0026F228(void* p);
+extern "C" void func_0026F7B8(void* p);
+extern "C" void func_00145DD0(void* iface, int a1, int a2, int a3);
+extern "C" void func_00238510(void* gm, int a1, int a2);
+
+struct sRace_235868 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+};
+extern sRace_235868 D_00535BC8_r235868 __asm__("D_00535BC8");
+
+struct sSlot_235868 {
+    char pad[0x50];
+};
+struct sTbl_235868 {
+    char pad[0x250];
+    struct { int f0; char pad[0x4C]; } slot[2];
+};
+
+static inline int otherSide_235868(char* p)
+{
+    return *(int*)(p + 0xB0) == 0;
+}
+
+extern "C" void func_00235868(void* self)
+{
+    func_00308F38(D_004A3DD8);
+    func_00308C60(D_004A3DD8);
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    func_0026F228(*(void**)(D_004A2C68 + 0x28));
+    func_0026F7B8(*(void**)(D_004A2C68 + 0x28));
+    *(int*)((char*)self + 0x14) = 0;
+    sRace_235868* r = &D_00535BC8_r235868;
+    if (r->flag49 == 0) {
+        void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_00145DD0(player, 0, 0, *func_00144BC0(race));
+    }
+    int m = r->mode48;
+    if (m == 5) {
+        goto restart;
+    }
+    if (m == 6) {
+    restart:
+        func_00238510(*(void**)((char*)D_004A28A8 + 0xC0), 0, 0);
+    }
+    char* g = *(char**)((char*)D_004A28A8 + 0x84);
+    char* x = *(char**)(g + 0x84);
+    if (*(int*)(x + 0x10) == 1) {
+        sTbl_235868* t = **(sTbl_235868***)(g + 0x10);
+        t->slot[otherSide_235868(*(char**)(x + 4))].f0 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00235990);
@@ -287,7 +466,48 @@ extern "C" void func_00235FD0(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00236058);
+#ifdef SKIP_ASM
+extern "C" void func_0030B7F8(void* self);
+extern "C" void cGameModeMan_initGameMode(void* gm, int mode);
+extern "C" void func_00230180(void* self);
+extern "C" void func_0011DE60(void* self, int a1, int a2);
+extern "C" void func_0011DF18(void* self, int notify);
+void* func_00230698(void* self, int id);
+// PORT: func_002E4CE8 is the wake pool's allocator; it ignores the size the caller passes
+extern "C" void* func_002E4CE8_sz(int size) __asm__("func_002E4CE8");
+void* func_002E4D70(void* self);
+extern "C" void func_002E4370(void* self, int a1, int a2, void* a3, float f0, float f1, int a4, int a5, float f2);
+extern void* D_004880C0[];
+
+struct sColor_236058 {
+    float r, g, b, a;
+};
+
+extern "C" void func_00236058(void* self)
+{
+    void* gm = *(void**)((char*)D_004A28A8 + 0xC0);
+    func_0030B7F8(D_004A3DD8);
+    float one = 1.0f;
+    cGameModeMan_initGameMode(gm, 0xC);
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xA);
+    func_00230180(*(void**)((char*)D_004A28A8 + 0x84));
+    func_0011DE60(*(void**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
+    func_0011DF18(*(void**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18), 1);
+    void* r = func_00230698(*(void**)((char*)D_004A28A8 + 0x84), 0);
+    char* o = (char*)func_002E4CE8_sz(0x14);
+    sColor_236058 c;
+    c.r = one;
+    c.g = one;
+    c.b = one;
+    c.a = one;
+    func_002E4D70(o);
+    *(void***)o = D_004880C0;
+    *(sColor_236058*)(o + 4) = c;
+    func_002E4370(r, 1, 0, o, 0.0f, 0.0f, 0, 0, one);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00236198);
@@ -837,9 +1057,129 @@ extern "C" void func_002370A0(sObj_func_002370A0* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00237140);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_003E6448(void* dst, int value, int size);
+// PORT: func_00244400__FPvi takes the 0x2A4-byte block as an int (pointer in int)
+void func_00244400(void* self, int a1);
+void func_00244408(void* self, int a1);
+extern char D_0047C078[];
+extern char D_0047C088[];
+extern char D_0047C098[];
 
+struct sRec_237140 {
+    int type;
+    char pad[0x60];
+};
+
+struct sEntry_237140 {
+    sRec_237140* recs;
+    int f4;
+    int f8;
+    int fC;
+    int* f10;
+    void* f14;
+};
+
+struct sOwner_237140 {
+    int f0;
+    int count;
+    int pad8[2];
+    int n;
+    sEntry_237140 entries[1];
+};
+
+static inline void* initObj_237140(void* o, int a, int b)
+{
+    func_00244400(o, a);
+    func_00244408(o, b);
+    return o;
+}
+
+extern "C" void* func_00237140(sOwner_237140* self, int* a1)
+{
+    sEntry_237140* e = &self->entries[self->n++];
+    e->recs = (sRec_237140*)operator_new_tag(self->count * 100, D_0047C078, 0, 0);
+    func_003E6448(e->recs, 0, self->count * 100);
+    for (int i = 0; i < self->count; i++) {
+        e->recs[i].type = 0x18;
+    }
+    e->f4 = 0;
+    e->f8 = self->f0;
+    e->fC = a1[0];
+    e->f10 = (int*)cMemMan_alloc(0x2A4, D_0047C088, 0, 0);
+    *e->f10 = 0;
+    void* o = initObj_237140(cMemMan_alloc(8, D_0047C098, 0, 0), (int)e->f10, a1[1]);
+    e->f14 = o;
+    return o;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamestate", func_00237280);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_003E6448(void* dst, int value, int size);
+// PORT: func_00244400__FPvi takes the 0x2A4-byte block as an int (pointer in int)
+void func_00244400(void* self, int a1);
+void func_00244408(void* self, int a1);
+extern char D_0047C078[];
+extern char D_0047C088[];
+extern char D_0047C098[];
+
+struct sRec_237280 {
+    int type;
+    char pad[0x60];
+};
+
+struct sEntry_237280 {
+    sRec_237280* recs;
+    int f4;
+    int f8;
+    int fC;
+    int* f10;
+    void* f14;
+};
+
+struct sOwner_237280 {
+    int f0;
+    int count;
+    int pad8[2];
+    int n;
+    sEntry_237280 entries[1];
+};
+
+static inline void* initObj_237280(void* o, int a, int b)
+{
+    func_00244400(o, a);
+    func_00244408(o, b);
+    return o;
+}
+
+extern "C" void* func_00237280(sOwner_237280* self, int a1)
+{
+    sEntry_237280* e = &self->entries[self->n++];
+    e->recs = (sRec_237280*)operator_new_tag(self->count * 100, D_0047C078, 0, 0);
+    func_003E6448(e->recs, 0, self->count * 100);
+    for (int i = 0; i < self->count; i++) {
+        e->recs[i].type = 0x18;
+    }
+    e->f4 = 0;
+    e->f8 = self->f0;
+    e->fC = 0;
+    e->f10 = (int*)cMemMan_alloc(0x2A4, D_0047C088, 0, 0);
+    *e->f10 = 0;
+    void* o = initObj_237280(cMemMan_alloc(8, D_0047C098, 0, 0), (int)e->f10, a1);
+    e->f14 = o;
+    return o;
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_002373B8);
 

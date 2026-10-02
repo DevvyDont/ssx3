@@ -209,7 +209,44 @@ extern "C" void* func_003458C0(void* self, int a1, int owner)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_003459A8);
+#ifdef SKIP_ASM
+void* operator_new1(int size);
+extern "C" void func_00370AF8(void* self, void* stream);
+extern char D_004FF1A0[];
+
+struct sEffectLinkVEntry_3459A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_003459A8(void* self, void* stream)
+{
+    char* s = (char*)self;
+    func_003457C8(self, stream);
+    *(void***)(s + 0x8) = D_004912B0;
+    func_00370018(s + 0x50);
+    sEffectLinkVEntry_3459A8* e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+    e->fn((char*)stream + e->delta, s + 0x1E4, 4);
+    if (*(int*)(s + 0x1E4) == 0) {
+        void* buf = operator_new1(0xD8);
+        *(void**)(s + 0x1E0) = buf;
+        e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+        e->fn((char*)stream + e->delta, buf, 0xD8);
+        e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+        e->fn((char*)stream + e->delta, s + 0x10, 0x40);
+        func_003705E0(s + 0x50, s + 0x10, *(int*)(s + 0x1E0));
+        func_00370AF8(s + 0x50, stream);
+    } else {
+        vu0CopyMatrix003458C0(s + 0x10, D_004FF1A0);
+        *(int*)(s + 0x1E0) = 0;
+    }
+    D_004A3FF8++;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00345AD0);
@@ -360,7 +397,44 @@ extern "C" sEff00345C90* func_00345C90(sEff00345C90* self, sTarget00345C90* t, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345D80);
+#ifdef SKIP_ASM
+void* operator_new1(int size);
+struct cStream00371318;
+extern "C" void func_00371318(void* self, cStream00371318* stream);
+extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
+
+struct sEffectLinkVEntry_345D80 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" sEff00345C90* func_00345D80(sEff00345C90* self, void* stream)
+{
+    func_003457C8(self, stream);
+    self->vt = D_00491268;
+    void* data = &self->bone;
+    func_00370B60(self->sub60);
+    self->subVt = D_00491370;
+    sEffectLinkVEntry_345D80* vt = *(sEffectLinkVEntry_345D80**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, data, 0x50);
+    if (self->f18 == 0) {
+        void* t = operator_new1(0xD8);
+        self->target = (sTarget00345C90*)t;
+        sEffectLinkVEntry_345D80* vt2 = *(sEffectLinkVEntry_345D80**)stream;
+        vt2[2].fn((char*)stream + vt2[2].delta, t, 0xD8);
+        func_00370DC8(self->sub60, self->target, -1.0f);
+        func_00371318(self->sub60, (cStream00371318*)stream);
+        func_003710D0(self->sub60, &self->worldA, &self->worldB, 1, 0.01666666753590107f);
+    } else {
+        self->target = 0;
+    }
+    D_004A3FFC++;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00345E88);
@@ -708,5 +782,73 @@ extern "C" void* func_003464E0(void* self, void* a1, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00346568);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void cMemMan_free(void* ptr);
+extern "C" void* func_002D1BE0();
+extern "C" void func_00353DB8(void* self, int flags);
+extern "C" void func_0034FBF0(void* self, int flags);
+
+struct sVec4_346568 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_346568 {
+    sVec4_346568 min;
+    sVec4_346568 max;
+};
+
+struct sInst_346568 {
+    char pad_0x00[0x60];
+    float min[3];
+    float max[3];
+};
+
+extern "C" void func_003291E0(void* world, int type, void* id, sBox_346568* box, sBox_346568* old);
+
+struct sRVEntry_346568 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+struct sRCtx_346568 {
+    char pad[0x10D8];
+    sRVEntry_346568* vt;
+};
+extern sRCtx_346568* D_004A5B80_346568 __asm__("D_004A5B80");
+
+extern "C" void func_00346568(char* self, int flags)
+{
+    *(void***)(self + 0xC) = D_00490270;
+    if (*(void**)(self + 0x84) != 0) {
+        cMemMan_free(*(void**)(self + 0x84));
+    }
+    if (*(void**)(self + 0x80) != 0) {
+        cMemMan_free(*(void**)(self + 0x80));
+    }
+    if (*(void**)(self + 0x7C) != 0) {
+        cMemMan_free(*(void**)(self + 0x7C));
+    }
+    sBox_346568* box = (sBox_346568*)(self + 0x90);
+    D_004A5B80_346568->vt[77].fn((char*)D_004A5B80_346568 + D_004A5B80_346568->vt[77].delta, *(void**)(self + 0x78));
+    sBox_346568 old = *(sBox_346568*)(self + 0x90);
+    sInst_346568* inst = *(sInst_346568**)(self + 0x18);
+    sVec4_346568 t;
+    t.x = inst->min[0];
+    t.y = inst->min[1];
+    t.z = inst->min[2];
+    t.w = 1.0f;
+    *(sVec4_346568*)(self + 0x90) = t;
+    t.x = inst->max[0];
+    t.y = inst->max[1];
+    t.z = inst->max[2];
+    t.w = 1.0f;
+    *(sVec4_346568*)(self + 0xA0) = t;
+    func_003291E0(func_002D1BE0(), 0, inst, box, &old);
+    func_00353DB8(self + 0x50, 2);
+    func_0034FBF0(self, flags);
+}
+#endif
 

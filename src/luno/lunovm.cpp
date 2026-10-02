@@ -143,7 +143,45 @@ extern "C" void func_00224F30(cLunoTableRef* ref)
 }
 #endif
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00224F68);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern char D_00479870[];
+extern char D_00479890[];
+
+struct cLunoNode_224F68 {
+    cLunoValue key;
+    cLunoValue val;
+    cLunoNode_224F68* next;
+    void* vt;
+    cLunoNode_224F68()
+    {
+        vt = D_00479890;
+        key.type = 0;
+        key.word0 = 0;
+        val.type = 0;
+        val.word0 = 0;
+        next = 0;
+    }
+    ~cLunoNode_224F68() {}
+};
+
+extern "C" void func_00224F68(cLunoTableRef* ref)
+{
+    if (ref->table->nodes != 0) {
+        cLunoTableEntry* p = ref->table->nodes + *(int*)((char*)ref->table->nodes - 0x10);
+        while (ref->table->nodes != p) {
+            p--;
+            p->vtable[1].func((char*)p + p->vtable[1].delta, 0);
+        }
+        cMemMan_free((char*)ref->table->nodes - 0x10);
+    }
+    cLunoTableEntry** slot = &ref->table->nodes;
+    *slot = (cLunoTableEntry*)new (D_00479870, 0xA0000000, 0) cLunoNode_224F68[ref->table->modulus + 1];
+}
+#endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00225068);

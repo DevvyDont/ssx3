@@ -37,7 +37,92 @@ extern "C" void func_0034EF08(cFloatingNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/floatingnode", func_0034EF40);
+#ifdef SKIP_ASM
+struct sBox_F048;
+extern "C" void* func_002D1BE0();
+extern "C" void func_003291E0(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+extern "C" void func_003568B0(void* self);
+
+struct sFlVec4_34EF40 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFlBox_34EF40 {
+    sFlVec4_34EF40 min;
+    sFlVec4_34EF40 max;
+};
+
+struct sFlInfo_34EF40 {
+    sFlBox_34EF40 box;
+    float radius;
+};
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sFlVec4_34EF40 vu0Sub_34EF40(const sFlVec4_34EF40& a, const sFlVec4_34EF40& b)
+{
+    sFlVec4_34EF40 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sFlVec4_34EF40 vu0Add_34EF40(const sFlVec4_34EF40& a, const sFlVec4_34EF40& b)
+{
+    sFlVec4_34EF40 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sFlVEntry_34EF40 {
+    short delta;
+    short index;
+    char* (*fn)(void*);
+};
+
+static inline sFlVec4_34EF40 nodePos_34EF40(char* self)
+{
+    sFlVEntry_34EF40* vt = *(sFlVEntry_34EF40**)(self + 0xC);
+    return *(sFlVec4_34EF40*)(vt[24].fn(self + vt[24].delta) + 0x30);
+}
+
+extern "C" void func_0034EF40(char* self)
+{
+    sFlInfo_34EF40* info = *(sFlInfo_34EF40**)(self + 0x78);
+    if (info != 0) {
+        sFlBox_34EF40 nb;
+        sFlBox_34EF40 old = info->box;
+        float r = info->radius;
+        sFlVec4_34EF40 ext;
+        ext.x = r;
+        ext.y = r;
+        ext.z = r;
+        ext.w = 0.0f;
+        nb.min = vu0Sub_34EF40(nodePos_34EF40(self), ext);
+        nb.max = vu0Add_34EF40(nodePos_34EF40(self), ext);
+        (*(sFlInfo_34EF40**)(self + 0x78))->box = nb;
+        void* id = *(void**)(self + 0x18);
+        func_003291E0(func_002D1BE0(), 0, id, (sBox_F048*)&nb, (sBox_F048*)&old);
+    } else {
+        func_003568B0(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/floatingnode", func_0034F048);

@@ -1,6 +1,48 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
+#ifdef SKIP_ASM
+extern void* D_0048E5F0[];
+extern char D_0048E550[];
+extern "C" void* func_0032C508(void* p);
+extern "C" float func_0032C590(void* self);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+
+struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
+
+extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2)
+{
+    *(void***)((char*)self + 0x50) = D_0048E5F0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    if (a2 != 0) {
+        *(int*)self = 0;
+    } else {
+        *(int*)self = 1;
+    }
+    *(void**)((char*)self + 0x64) = a1;
+    *(void**)((char*)self + 0x60) = a1;
+    sSphV4 c = *(sSphV4*)((char*)a1 + 0x80);
+    float r = func_0032C590(a1);
+    sSphV4 t;
+    *(sSphV4*)((char*)self + 0x40) = c;
+    t.x = c.x + r;
+    t.y = c.y + r;
+    t.z = c.z + r;
+    t.w = 1.0f;
+    *(sSphV4*)((char*)self + 0x20) = t;
+    t.x = c.x - r;
+    t.y = c.y - r;
+    t.z = c.z - r;
+    t.w = 1.0f;
+    *(sSphV4*)((char*)self + 0x30) = t;
+    void* p = cMemMan_alloc(0x140, D_0048E550, 0, 0);
+    func_0032C508(p);
+    *(void**)((char*)self + 0x68) = p;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003304E8);
@@ -418,13 +460,80 @@ extern "C" float func_00340A18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00340B18);
+#ifdef SKIP_ASM
+struct sOctCollect {
+    void** arr;
+    int* count;
+};
+
+extern "C" void func_00340B18(void* self, sOctCollect* out)
+{
+    void** p;
+    for (p = *(void***)((char*)self + 0x28); p != 0; p = (void**)*p) {
+        out->arr[(*out->count)++] = p;
+    }
+    if (*(void**)((char*)self + 0x0)) func_00340B18(*(void**)((char*)self + 0x0), out);
+    if (*(void**)((char*)self + 0x4)) func_00340B18(*(void**)((char*)self + 0x4), out);
+    if (*(void**)((char*)self + 0x8)) func_00340B18(*(void**)((char*)self + 0x8), out);
+    if (*(void**)((char*)self + 0xC)) func_00340B18(*(void**)((char*)self + 0xC), out);
+    if (*(void**)((char*)self + 0x10)) func_00340B18(*(void**)((char*)self + 0x10), out);
+    if (*(void**)((char*)self + 0x14)) func_00340B18(*(void**)((char*)self + 0x14), out);
+    if (*(void**)((char*)self + 0x18)) func_00340B18(*(void**)((char*)self + 0x18), out);
+    if (*(void**)((char*)self + 0x1C)) func_00340B18(*(void**)((char*)self + 0x1C), out);
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00340DC0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/worldsphtree", func_00340FA0);
+#ifdef SKIP_ASM
+extern "C" void func_00335960(void* ctx, void* obj);
+extern "C" void func_00335B90(void* ctx, void* obj);
 
+extern "C" void func_00340FA0(void* self, void* ctx)
+{
+    void** p;
+    for (p = *(void***)((char*)self + 0x24); p != 0; p = (void**)*p) {
+        func_00335960(ctx, p);
+    }
+    for (p = *(void***)((char*)self + 0x20); p != 0; p = (void**)*p) {
+        func_00335B90(ctx, p);
+    }
+    if (*(void**)((char*)self + 0x0)) func_00340FA0(*(void**)((char*)self + 0x0), ctx);
+    if (*(void**)((char*)self + 0x4)) func_00340FA0(*(void**)((char*)self + 0x4), ctx);
+    if (*(void**)((char*)self + 0x8)) func_00340FA0(*(void**)((char*)self + 0x8), ctx);
+    if (*(void**)((char*)self + 0xC)) func_00340FA0(*(void**)((char*)self + 0xC), ctx);
+    if (*(void**)((char*)self + 0x10)) func_00340FA0(*(void**)((char*)self + 0x10), ctx);
+    if (*(void**)((char*)self + 0x14)) func_00340FA0(*(void**)((char*)self + 0x14), ctx);
+    if (*(void**)((char*)self + 0x18)) func_00340FA0(*(void**)((char*)self + 0x18), ctx);
+    if (*(void**)((char*)self + 0x1C)) func_00340FA0(*(void**)((char*)self + 0x1C), ctx);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/worldsphtree", func_003410C0);
+#ifdef SKIP_ASM
+extern "C" void func_00336D40(void* ctx, void* obj);
+
+extern "C" void func_003410C0(void* self, void* ctx)
+{
+    void** p;
+    for (p = *(void***)((char*)self + 0x20); p != 0; p = (void**)*p) {
+        func_00336D40(ctx, p);
+    }
+    if (*(void**)((char*)self + 0x0)) func_003410C0(*(void**)((char*)self + 0x0), ctx);
+    if (*(void**)((char*)self + 0x4)) func_003410C0(*(void**)((char*)self + 0x4), ctx);
+    if (*(void**)((char*)self + 0x8)) func_003410C0(*(void**)((char*)self + 0x8), ctx);
+    if (*(void**)((char*)self + 0xC)) func_003410C0(*(void**)((char*)self + 0xC), ctx);
+    if (*(void**)((char*)self + 0x10)) func_003410C0(*(void**)((char*)self + 0x10), ctx);
+    if (*(void**)((char*)self + 0x14)) func_003410C0(*(void**)((char*)self + 0x14), ctx);
+    if (*(void**)((char*)self + 0x18)) func_003410C0(*(void**)((char*)self + 0x18), ctx);
+    if (*(void**)((char*)self + 0x1C)) func_003410C0(*(void**)((char*)self + 0x1C), ctx);
+}
+#endif
 
 extern "C" void* func_003400D8(int, int);
 
@@ -589,7 +698,62 @@ extern "C" void func_00341CF0(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341D48);
+#ifdef SKIP_ASM
+struct sWrapFloat_1E48;
+struct sBounceFloat_1EC0;
+struct sClampFloat_1F38;
+extern "C" void func_00341E48(sWrapFloat_1E48* s);
+extern "C" void func_00341EC0(sBounceFloat_1EC0* s);
+extern "C" void func_00341F38(sClampFloat_1F38* s);
+extern "C" int func_0034EBA0(void* p);
+
+struct sVEntry_00341D48 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" int func_00341D48(void* self)
+{
+    *(float*)((char*)self + 0x24) = 10000000000.0f;
+    *(float*)((char*)self + 0x28) = 10000000000.0f;
+    if (*(int*)((char*)self + 0x8) != 0) {
+        return 1;
+    }
+    if (*(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) >= 0) {
+        if (*(int*)((char*)self + 0xC) > 0) {
+            *(int*)((char*)self + 0xC) -= 1;
+        } else {
+            *(float*)((char*)self + 0x24) = *(float*)((char*)self + 0x1C);
+            switch (*(short*)self) {
+            case 2:
+                func_00341EC0((sBounceFloat_1EC0*)self);
+                break;
+            case 1:
+                func_00341E48((sWrapFloat_1E48*)self);
+                break;
+            default:
+                func_00341F38((sClampFloat_1F38*)self);
+                break;
+            }
+            if (func_0034EBA0((char*)self + 0x1C) == 0) {
+                return 0;
+            }
+        }
+    }
+    char* obj = (char*)self + 0x30;
+    *(unsigned short*)((char*)self + 0x42) |= 1;
+    *(float*)((char*)self + 0x20) = *(float*)((char*)self + 0x1C);
+    if (*(int*)((char*)self + 0x8) == 0) {
+        return 1;
+    }
+    sVEntry_00341D48* vt = *(sVEntry_00341D48**)((char*)self + 0x3C);
+    vt[0x22].fn(obj + vt[0x22].delta, 1);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341E48);
@@ -946,5 +1110,54 @@ extern "C" void func_00342BA0(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342C08);
+#ifdef SKIP_ASM
+extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
+extern "C" void func_00355F10(void* self, void* a1);
+extern void* D_004906F0[];
+
+struct sNode_342C08 {
+    int pad00[2];
+    unsigned int flags;
+};
+
+struct sDef_342C08 {
+    int f00;
+    float time;
+    int f08;
+    int mode;
+};
+
+struct sSelf_342C08 {
+    int pad00[3];
+    void** vt;
+    int pad10[2];
+    sNode_342C08* node;
+    int pad1C[4];
+    int t2C;
+    int t30;
+};
+
+extern "C" void* func_00342C08(sSelf_342C08* self, void* a1, void* a2, sDef_342C08* def, void* a4)
+{
+    func_00355280(self, a1, 0, a2);
+    self->vt = D_004906F0;
+    self->t2C = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
+    self->t30 = def->f08;
+    func_00355F10(self, a4);
+    if (def->mode == 0) {
+        self->node->flags &= 0xFFFFFFF0;
+    } else if (def->mode == 1) {
+        self->node->flags |= 1;
+        self->node->flags = (self->node->flags & ~2u) | 4;
+    } else {
+        sNode_342C08* n = self->node;
+        if ((n->flags & 3) == 3) {
+            n->flags = (n->flags & ~2u) | 4;
+        }
+    }
+    return self;
+}
+#endif
 

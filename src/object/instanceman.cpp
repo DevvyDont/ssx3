@@ -86,7 +86,54 @@ extern "C" void func_003513D0(void* self)
 
 INCLUDE_ASM("object/instanceman", func_00351508);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00351538);
+#ifdef SKIP_ASM
+struct sImRange;
+struct sImRangeTable;
+extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x);
+
+struct sImSeg_351538 {
+    float a, b, c, d;
+    float lo;
+    float hi;
+};
+
+struct sImCurve_351538 {
+    int count;
+    sImSeg_351538* segs;
+};
+
+static inline bool inRange_351538(sImSeg_351538* e, float x)
+{
+    return e->lo <= x && x < e->hi;
+}
+
+// PORT: the unit declares func_00351538(void*) for its caller; the body also reads t from $f12
+void func_00351538_impl(char* self, float t) __asm__("func_00351538");
+
+void func_00351538_impl(char* self, float t)
+{
+    sImCurve_351538** curves = *(sImCurve_351538***)(*(char**)(self + 0x40) + 0x20);
+    int* cur = (int*)self;
+    unsigned int mask = 1;
+    float* out = (float*)(self + 0x44);
+    for (int i = 0; i < 16; i++) {
+        sImCurve_351538* c = *curves;
+        if (*(unsigned int*)(*(char**)(self + 0x40) + 0x18) & mask) {
+            sImSeg_351538* e = &c->segs[*cur];
+            if (!inRange_351538(e, t)) {
+                e = (sImSeg_351538*)func_00351A80((sImRangeTable*)c, cur, t);
+            }
+            *out = ((e->a * t + e->b) * t + e->c) * t + e->d;
+            curves++;
+            cur++;
+        }
+        mask <<= 1;
+        out++;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/instanceman", func_00351660);
 

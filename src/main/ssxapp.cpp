@@ -192,7 +192,49 @@ extern "C" void func_00228238(void* self)
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_initload);
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_initLocale);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_00195880(void* self);
+extern "C" void func_00195B70(void* self);
+extern char D_0047A978[];
+
+struct sOptions_228A78 {
+    unsigned int pad0 : 22;
+    unsigned int language : 3;
+    unsigned int pad25 : 7;
+    int data[0x284 / 4];
+};
+extern sOptions_228A78 D_00535610_228A78 __asm__("D_00535610");
+
+struct sVEntry_228A78 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline int optLanguage_228A78(sOptions_228A78 o)
+{
+    return o.language;
+}
+
+extern "C" void cSSXApp_initLocale(void* self)
+{
+    if (*(void**)((char*)self + 0x8C) == 0) {
+        *(void**)((char*)self + 0x8C) = func_00195880(cMemMan_alloc(0xC0, D_0047A978, 0, 0));
+    }
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    char* loc = *(char**)((char*)self + 0x8C);
+    sVEntry_228A78* vt = *(sVEntry_228A78**)(loc + 4);
+    char* thisp = loc + vt[3].delta;
+    void (**pfn)(void*, int) = &vt[3].fn;
+    (*pfn)(thisp, optLanguage_228A78(D_00535610_228A78));
+    func_00195B70(*(void**)((char*)self + 0x8C));
+}
+#endif
 
 extern "C" void func_002B4B48(void* self);
 extern "C" void func_00284C28();
@@ -625,7 +667,46 @@ extern "C" void func_0022A408(void* self, sList_A408* list, int count)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022A4A8);
+#ifdef SKIP_ASM
+struct sNode_22A4A8 {
+    sNode_22A4A8* next;
+    int f4;
+    int type;
+};
+
+struct sItem_22A4A8 {
+    char* list;
+    int arg;
+};
+
+extern "C" void func_0022A270(void* self, sNode_22A4A8* node, int arg);
+
+struct sWorld_22A4A8 {
+    char pad[0x7AB8];
+    int f7AB8;
+    char pad7ABC[0x7BC0 - 0x7ABC];
+    int count;
+    sNode_22A4A8* nodes[1];
+};
+
+extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
+{
+    for (; n > 0; n--, items++) {
+        for (sNode_22A4A8* p = *(sNode_22A4A8**)(items->list + 0x28); p != 0; p = p->next) {
+            if (p->type == 7) {
+                func_0022A270(self, p, items->arg);
+            } else if (p->type == 8) {
+                self->nodes[self->count++] = p;
+            }
+        }
+    }
+    if (self->f7AB8 != 0) {
+        func_0022A270(self, 0, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022A5A0);
 

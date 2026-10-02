@@ -10,7 +10,62 @@ struct sGameEntry {
 };
 extern sGameEntry D_00442168[];
 
+//100%
 INCLUDE_ASM("main/game", cGame_renderModels);
+#ifdef SKIP_ASM
+struct sRState_C078 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+};
+
+struct sRVEntry_C078 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int, int, int);
+};
+
+struct sRCtx_C078 {
+    char pad0[0x24];
+    int cur;
+    char pad28[0xE84 - 0x28];
+    sRState_C078* top;
+    char padE88[0xF50 - 0xE88];
+    int tbl[(0x10D8 - 0xF50) / 4];
+    sRVEntry_C078* vt;
+};
+
+extern sRCtx_C078* D_004A289C;
+
+static inline int curLayer_C078(sRCtx_C078* c)
+{
+    return c->tbl[c->cur];
+}
+
+extern "C" void cGame_renderModels(void* self, void* world)
+{
+    *(short*)((char*)D_004A289C->top + 0x12) = curLayer_C078(D_004A289C);
+    sRCtx_C078* ctx = D_004A289C;
+    ctx->top->f4 = (ctx->top->f4 & ~0xF80) | 0x880;
+    ctx->top->f0 |= 0x30;
+    int flag = 0xC00;
+    if (*(unsigned int*)(*(char**)((char*)self + 0x84) + 0x10) >= 2) {
+        flag = 0x400;
+    }
+    int n = *(int*)((char*)world + 0x209C);
+    int* items = (int*)((char*)world + 0x20A0);
+    for (int i = 0; i < n; i++) {
+        D_004A289C->vt[0x60].fn((char*)D_004A289C + D_004A289C->vt[0x60].delta, items[i], 0, 0, flag);
+    }
+    int n2 = *(int*)((char*)world + 0x40A0);
+    items = (int*)((char*)world + 0x40A4);
+    for (int i = 0; i < n2; i++) {
+        D_004A289C->vt[0x60].fn((char*)D_004A289C + D_004A289C->vt[0x60].delta, items[i], 0, 0, flag | 0x20);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022C1B0);
 
@@ -164,7 +219,46 @@ INCLUDE_ASM("main/game", func_0022CEA8);
 
 INCLUDE_ASM("main/game", func_0022D088);
 
+//100%
 INCLUDE_ASM("main/game", func_0022D278);
+#ifdef SKIP_ASM
+struct sGroup_D278 {
+    int f0;
+    int count;
+    int a;
+    int b;
+    int ids[6];
+};
+extern sGroup_D278 D_00442488_D278[] __asm__("D_00442488");
+extern "C" int func_0022E078(void* self, int id);
+
+// PORT: the unit declares func_0022D278(void*) for its callers; the body reads a1, bound by asm label
+int func_0022D278_impl(void* self, int idx) __asm__("func_0022D278");
+
+int func_0022D278_impl(void* self, int idx)
+{
+    int ok = 1;
+    for (int i = 0; i < D_00442488_D278[idx].count; i++) {
+        if (func_0022E078(self, D_00442488_D278[idx].ids[i]) == 0) {
+            ok = 0;
+            break;
+        }
+    }
+    int a = D_00442488_D278[idx].a;
+    if (a >= 0 && D_00442168[a].field_0x4 >= 0) {
+        if (func_0022E078(self, a) == 0) {
+            ok = 0;
+        }
+    }
+    int b = D_00442488_D278[idx].b;
+    if (b >= 0 && D_00442168[b].field_0x4 >= 0) {
+        if (func_0022E078(self, b) == 0) {
+            ok = 0;
+        }
+    }
+    return ok;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", func_0022D390);

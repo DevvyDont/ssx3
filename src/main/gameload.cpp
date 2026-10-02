@@ -100,7 +100,64 @@ extern "C" void func_002300F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_00230180);
+#ifdef SKIP_ASM
+extern "C" void func_0022E7C8(void* self);
+extern "C" void func_0026F228(void* self);
+extern "C" void func_002789E0(void* self);
+extern "C" void func_0015DB58(void);
+extern "C" void func_00229498(void* self);
+extern "C" void func_00343BC0(void* self);
+extern "C" void func_00357B38(void* self);
+extern "C" void* func_0039F9D8(void* list, int hash);
+extern "C" void func_00287108(void* self);
+extern "C" void* func_0028B180(void);
+int GetHashValue32(char* s);
+extern char D_004A2AB0[];
+
+struct sVEntry_230180a {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEntry_230180b {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" void func_00230180(void* self)
+{
+    void* bm = &D_004A5988_bm;
+    func_0026CA90(*(void**)((char*)self + 0x34));
+    func_00309030(*(void**)((char*)self + 0x30));
+    func_00354C98(bm, 1);
+    cBucketMan_purgeBucket(bm, 1);
+    cBucketMan_purgeBucket(bm, 8);
+    char* o = *(char**)((char*)self + 0xC);
+    sVEntry_230180a* vt = *(sVEntry_230180a**)(o + 0xCC);
+    vt[5].fn(o + vt[5].delta, 3);
+    func_002D9B40();
+    func_0022E7C8(*(void**)((char*)self + 0x84));
+    cWorld_resetMap(*(void**)((char*)self + 0x10));
+    func_0026F228(*(void**)((char*)self + 0x28));
+    func_002789E0(D_004A28A4);
+    func_0015DB58();
+    func_00229498(*(void**)((char*)self + 0x38));
+    func_00343BC0(*(void**)((char*)self + 0x3C));
+    func_00357B38(*(void**)((char*)self + 0x40));
+    void* list = *(char**)((char*)self + 0x48) + 0x18;
+    char* r = (char*)func_0039F9D8(list, GetHashValue32(D_004A2AB0));
+    if (r != 0) {
+        sVEntry_230180b* vt2 = *(sVEntry_230180b**)(r + 8);
+        vt2[24].fn(r + vt2[24].delta, 7, 0);
+    }
+    func_00309F18(D_004A3DD8);
+    func_00308C60(*(void**)((char*)self + 0x30));
+    func_00287108(func_0028B180());
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/gameload", cGame_restart);

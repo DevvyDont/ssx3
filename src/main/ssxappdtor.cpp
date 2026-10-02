@@ -989,7 +989,69 @@ extern "C" void func_00245248(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002452D8);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0039E2A0(void* self, void* owner);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_0047B9C0[];
+extern char D_004A2AC8[];
+extern void* D_0047DA58[];
+
+struct sUIObj_2452D8 {
+    int f0;
+    int f4;
+    void** vt;
+    char pad[0x3C];
+    char flag48;
+    char pad49[7];
+};
+
+struct sRVEntry_2452D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sRCtx_2452D8 {
+    char pad[0x10D8];
+    sRVEntry_2452D8* vt;
+};
+extern sRCtx_2452D8* D_004A5B80;
+
+static inline int isHash_2452D8(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
+{
+    sUIObj_2452D8* o = new (D_0047B9C0, 0, 0) sUIObj_2452D8;
+    func_0039E2A0(o, *(void**)((char*)owner + 0x10));
+    o->vt = D_0047DA58;
+    o->flag48 = flag;
+    return o;
+}
+
+extern "C" void func_002452D8(void* self, char* msg, int type)
+{
+    if (msg == 0) {
+        return;
+    }
+    if (type != 5) {
+        return;
+    }
+    if (isHash_2452D8(*(int*)(msg + 0x38), D_004A2AC8)) {
+        sUIObj_2452D8* o = newUIObj_2452D8(self, 0);
+        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, o);
+        D_004A5B80->vt[8].fn((char*)D_004A5B80 + D_004A5B80->vt[8].delta, 1);
+    } else {
+        sUIObj_2452D8* o = newUIObj_2452D8(self, 1);
+        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, o);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002453E0);

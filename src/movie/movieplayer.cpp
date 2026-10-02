@@ -57,7 +57,66 @@ extern "C" int func_0023C8D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8F0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_00152948__FPv ignores its argument; this caller passes none.
+int func_00152948_r() __asm__("func_00152948__FPv");
+extern "C" int func_00152BA8();
+extern "C" void* func_0023D570(void* self, int mode);
+extern "C" void func_002C2540(void*, void*);
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
+extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern char D_004A2C80[];
+
+struct sMovieVEntry_23C8F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0023C8F0(void* self, int mode)
+{
+    char desc[0x200];
+    char name[0x200];
+    char fmt[0x200];
+    char* s = (char*)self;
+    *(int*)(s + 0xB4) = mode;
+    func_0023D570(self, 1);
+    *(int*)(s + 0xFC) = -1;
+    *(int*)(s + 0xBC) = 0;
+    int m = *(int*)(s + 0xB4);
+    if (m == 0) {
+        *(int*)(s + 0xEC) = 4;
+        char* o = *(char**)(s + 0x434);
+        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
+        vt[19].fn(o + vt[19].delta, 0x80000);
+    } else if (m == 1) {
+        *(int*)(s + 0xEC) = 6;
+        cBE_getInterface_Fv(cBE_getBE(), 5);
+        int v = func_00152BA8();
+        char* o = *(char**)(s + 0x434);
+        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
+        vt[19].fn(o + vt[19].delta, v);
+    } else {
+        *(int*)(s + 0xEC) = 1;
+        cBE_getInterface_Fv(cBE_getBE(), 5);
+        int v = func_00152948_r();
+        char* o = *(char**)(s + 0x434);
+        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
+        vt[19].fn(o + vt[19].delta, v);
+    }
+    func_002C2540(fmt, D_004A2C80);
+    func_00241AA0_r(desc, 0x200);
+    func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
+    func_002C26D0_v(s + 0x1B4, fmt, desc, name);
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023CA28);
@@ -116,7 +175,66 @@ void func_0023CAA0_impl(void* self, int a)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023CAE8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_00152948__FPv ignores its argument; this caller passes none.
+int func_00152948_r() __asm__("func_00152948__FPv");
+extern "C" int func_00152BA8();
+extern "C" void* func_0023D570(void* self, int mode);
+extern "C" void func_002C2540(void*, void*);
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
+extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern char D_004A2C80[];
+
+struct sMovieVEntry_23CAE8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0023CAE8(void* self, int mode, int a2)
+{
+    char desc[0x200];
+    char name[0x200];
+    char fmt[0x200];
+    char* s = (char*)self;
+    *(int*)(s + 0xB4) = mode;
+    func_0023D570(self, 1);
+    *(int*)(s + 0xFC) = a2;
+    *(int*)(s + 0xBC) = 1;
+    int m = *(int*)(s + 0xB4);
+    if (m == 0) {
+        *(int*)(s + 0xEC) = 4;
+        char* o = *(char**)(s + 0x434);
+        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
+        vt[19].fn(o + vt[19].delta, 0x80000);
+    } else if (m == 1) {
+        *(int*)(s + 0xEC) = 6;
+        cBE_getInterface_Fv(cBE_getBE(), 5);
+        int v = func_00152BA8();
+        char* o = *(char**)(s + 0x434);
+        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
+        vt[19].fn(o + vt[19].delta, v);
+    } else {
+        *(int*)(s + 0xEC) = 1;
+        cBE_getInterface_Fv(cBE_getBE(), 5);
+        int v = func_00152948_r();
+        char* o = *(char**)(s + 0x434);
+        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
+        vt[19].fn(o + vt[19].delta, v);
+    }
+    func_002C2540(fmt, D_004A2C80);
+    func_00241AA0_r(desc, 0x200);
+    func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
+    func_002C26D0_v(s + 0x1B4, fmt, desc, name);
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023CC20);
@@ -142,7 +260,50 @@ void* func_0023CC58(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023CC78);
+#ifdef SKIP_ASM
+extern "C" void func_002C2540(void*, void*);
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern "C" void* func_002C2508(void* dst, void* src);
+int GetHashValue32(char* s);
+extern void* D_004A28A8;
+extern char D_004A2C88[];
+extern char D_0047C138[];
+
+struct sLocVEntry_23CC78 {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+extern "C" void func_0023CC78(void* self, int n, char* dst)
+{
+    char name[0x100];
+    char fmt[0x200];
+    switch (*(int*)((char*)self + 0xB4)) {
+    case 0:
+        func_002C2540(fmt, D_004A2C88);
+        func_00241D40_r(self, *(int*)((char*)self + 0xB4), name, 0x80);
+        func_002C26D0_v(dst, fmt, name, n + 1);
+        break;
+    case 2: {
+        char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+        sLocVEntry_23CC78* vt = *(sLocVEntry_23CC78**)(loc + 4);
+        char* thisp = loc + vt[4].delta;
+        func_002C2508(dst, vt[4].fn(thisp, GetHashValue32(D_0047C138)));
+        break;
+    }
+    case 1:
+        func_002C2540(fmt, D_004A2C88);
+        func_00241D40_r(self, *(int*)((char*)self + 0xB4), name, 0x80);
+        func_002C26D0_v(dst, fmt, name, n + 1);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_setTitleString);
 
@@ -945,7 +1106,122 @@ extern "C" void func_0023F4F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023F578);
+#ifdef SKIP_ASM
+extern "C" void func_0023CC20(void* self);
+extern "C" void func_00241180(void* self, int a1);
+
+class cMovieDecoder_23F578 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual int isPlaying();          // slot 42 (0x150)
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual int isFinished();         // slot 73 (0x248)
+};
+struct sMovieVEntry1_23F578 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0023F578(char* self)
+{
+    *(int*)(self + 0x108) -= 1;
+    *(float*)(self + 0x10C) = (float)*(int*)(self + 0xE4) / (float)*(int*)(self + 0xF0);
+    if ((*(cMovieDecoder_23F578**)(self + 0x434))->isFinished() != 0) {
+        func_00241180(self, 1);
+        return;
+    }
+    if ((*(cMovieDecoder_23F578**)(self + 0x434))->isPlaying() == 1) {
+        int a = *(int*)(self + 0xE4);
+        int b = *(int*)(self + 0xF0);
+        if (a < b) {
+            if ((*(int (**)(int))(self + 4))(b - a) == 0) {
+                func_00241180(self, 1);
+            }
+        } else {
+            func_0023CC20(self);
+            (*(void (**)())(self + 8))();
+            sMovieVEntry1_23F578* vt1 = *(sMovieVEntry1_23F578**)(self + 0x748);
+            vt1[1].fn(self + vt1[1].delta, 0x12);
+        }
+    } else {
+        if ((*(cMovieDecoder_23F578**)(self + 0x434))->isFinished() != 0) {
+            func_00241180(self, 1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023F698);
 
@@ -1074,7 +1350,108 @@ extern "C" void func_0023FD08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023FD40);
+#ifdef SKIP_ASM
+extern "C" void func_0023EA30(void* self, int v);
+extern "C" void func_0023EA90(void* self);
+
+class cMovieDecoder_23FD40 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int isBusy();                      // slot 11 (0x58)
+    virtual void v12();
+    virtual void v13();
+    virtual void play(int a, void* b);          // slot 14 (0x70)
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual int isReady();                     // slot 53 (0x1A8)
+};
+
+struct sMovieVEntry_23FD40 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void setState_23FD40(char* self, int s)
+{
+    sMovieVEntry_23FD40* vt = *(sMovieVEntry_23FD40**)(self + 0x748);
+    vt[1].fn(self + vt[1].delta, s);
+}
+
+extern "C" void func_0023FD40(char* self)
+{
+    if ((*(cMovieDecoder_23FD40**)(self + 0x434))->isBusy() != 0) {
+        return;
+    }
+    if (*(int*)(self + 0x338) == 0 && (*(cMovieDecoder_23FD40**)(self + 0x434))->isReady() == 0) {
+        setState_23FD40(self, 4);
+        return;
+    }
+    if ((*(int (**)())(self + 0x6C))() != 0) {
+        func_0023EA30(self, 0);
+        return;
+    }
+    if ((*(int (**)())(self + 0x84))() != 0) {
+        func_0023EA90(self);
+        return;
+    }
+    if ((*(int (**)())(self + 0x68))() != 0) {
+        (*(cMovieDecoder_23FD40**)(self + 0x434))->play(*(int*)(self + 0xF8), self + 0x234);
+        setState_23FD40(self, 0x19);
+        return;
+    }
+    if ((*(int (**)())(self + 0x70))() != 0) {
+        setState_23FD40(self, 0xD);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023FE70);
@@ -1297,7 +1674,122 @@ extern "C" void func_00240800(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00240860);
+#ifdef SKIP_ASM
+class cMovieDecoder_240860 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void setVolume(int v);  // slot 5 (0x28)
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int isBusy();  // slot 11 (0x58)
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual int isFinished();  // slot 73 (0x248)
+};
+
+struct sMovieVEntry_240860 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void setState_240860(char* self, int s)
+{
+    sMovieVEntry_240860* vt = *(sMovieVEntry_240860**)(self + 0x748);
+    vt[1].fn(self + vt[1].delta, s);
+}
+
+extern "C" void func_00240860(char* self)
+{
+    cMovieDecoder_240860* d = *(cMovieDecoder_240860**)(self + 0x434);
+    if (*(int*)(self + 0x108) > 0) {
+        if (d->isBusy() == 0) {
+            if ((*(cMovieDecoder_240860**)(self + 0x434))->isFinished() != 0) {
+                setState_240860(self, 0x1C);
+                return;
+            }
+            (*(cMovieDecoder_240860**)(self + 0x434))->setVolume(*(int*)(self + 0x428));
+        }
+        *(int*)(self + 0x108) -= 1;
+    } else {
+        if (d->isBusy() != 0) {
+            return;
+        }
+        if ((*(cMovieDecoder_240860**)(self + 0x434))->isFinished() != 0) {
+            setState_240860(self, 0x1C);
+        } else {
+            setState_240860(self, 0x1B);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00240960);
@@ -1457,7 +1949,121 @@ extern "C" void func_00240CC0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00240D90);
+#ifdef SKIP_ASM
+class cMovieDecoder_240D90 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void seek(int i);  // slot 10 (0x50)
+    virtual int isBusy();  // slot 11 (0x58)
+    virtual void v12();
+    virtual int getCount();  // slot 13 (0x68)
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual int canSeek(int i);  // slot 65 (0x208)
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual int isFinished();  // slot 73 (0x248)
+};
+
+struct sMovieVEntry_240D90 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void setState_240D90(char* self, int s)
+{
+    sMovieVEntry_240D90* vt = *(sMovieVEntry_240D90**)(self + 0x748);
+    vt[1].fn(self + vt[1].delta, s);
+}
+
+extern "C" void func_00240D90(char* self)
+{
+    *(int*)(self + 0x108) -= 1;
+    if ((*(cMovieDecoder_240D90**)(self + 0x434))->isBusy() != 0) {
+        return;
+    }
+    if (*(int*)(self + 0x108) > 0) {
+        return;
+    }
+    if ((*(cMovieDecoder_240D90**)(self + 0x434))->isFinished() != 0) {
+        setState_240D90(self, 0x2D);
+        return;
+    }
+    if (*(int*)(self + 0x438) < (*(cMovieDecoder_240D90**)(self + 0x434))->getCount()) {
+        if ((*(cMovieDecoder_240D90**)(self + 0x434))->canSeek(*(int*)(self + 0x438)) != 0) {
+            (*(cMovieDecoder_240D90**)(self + 0x434))->seek(*(int*)(self + 0x438));
+        }
+        *(int*)(self + 0x438) += 1;
+    } else {
+        setState_240D90(self, 0x2E);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00240EB0);
@@ -1716,9 +2322,211 @@ extern "C" void func_00241380(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241400);
+#ifdef SKIP_ASM
+class cMovieDecoder_241400 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual int hasChapter(int i);  // slot 52 (0x1A0)
+};
 
+extern "C" void func_0023FAE0(void* self);
+void func_0023FB18(void* self, int val);
+
+static inline int nextChapter_241400(char* self, int i)
+{
+    if (i < *(int*)(self + 0x424) - 1) {
+        return i + 1;
+    }
+    if (*(int*)(self + 0x100) != 0) {
+        return 0;
+    }
+    return i;
+}
+
+extern "C" void func_00241400(char* self)
+{
+    int i = *(int*)(self + 0x428);
+    if (*(int*)(self + 0x424) == -1) {
+        return;
+    }
+    while (i = nextChapter_241400(self, i), (*(cMovieDecoder_241400**)(self + 0x434))->hasChapter(i) == 0) {
+        if (i == *(int*)(self + 0x424) - 1 || *(int*)(self + 0x100) != 0) {
+            if (i == *(int*)(self + 0x428)) {
+                break;
+            }
+            if (*(int*)(self + 0x100) != 1) {
+                break;
+            }
+        }
+    }
+    if (*(int*)(self + 0x100) == 0 && i == *(int*)(self + 0x424) - 1 && (*(cMovieDecoder_241400**)(self + 0x434))->hasChapter(i) == 0) {
+        i = *(int*)(self + 0x428);
+        if ((*(cMovieDecoder_241400**)(self + 0x434))->hasChapter(i) == 0) {
+            i = 0;
+        }
+    }
+    if (*(int*)(self + 0x428) != i) {
+        func_0023FB18(self, i);
+        func_0023FAE0(self);
+    }
+    *(int*)(self + 0xE0) = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241540);
+#ifdef SKIP_ASM
+class cMovieDecoder_241540 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual int hasChapter(int i);  // slot 52 (0x1A0)
+};
+
+extern "C" void func_0023FAE0(void* self);
+void func_0023FB18(void* self, int val);
+
+static inline int prevChapter_241540(char* self, int i)
+{
+    if (i > 0) {
+        return i - 1;
+    }
+    if (*(int*)(self + 0x100) != 0) {
+        return *(int*)(self + 0x424) - 1;
+    }
+    return i;
+}
+
+extern "C" void func_00241540(char* self)
+{
+    int i = *(int*)(self + 0x428);
+    if (*(int*)(self + 0x424) == -1) {
+        return;
+    }
+    while (i = prevChapter_241540(self, i), (*(cMovieDecoder_241540**)(self + 0x434))->hasChapter(i) == 0) {
+        if (i == 0 || *(int*)(self + 0x100) != 0) {
+            if (i == *(int*)(self + 0x428)) {
+                break;
+            }
+            if (*(int*)(self + 0x100) != 1) {
+                break;
+            }
+        }
+    }
+    if (*(int*)(self + 0x100) == 0 && i == 0 && (*(cMovieDecoder_241540**)(self + 0x434))->hasChapter(0) == 0) {
+        i = *(int*)(self + 0x428);
+        if ((*(cMovieDecoder_241540**)(self + 0x434))->hasChapter(i) == 0) {
+            i = 0;
+        }
+    }
+    if (*(int*)(self + 0x428) != i) {
+        func_0023FB18(self, i);
+        func_0023FAE0(self);
+    }
+    *(int*)(self + 0xE0) = 0;
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceDisplayString);
 

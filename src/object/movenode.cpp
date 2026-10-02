@@ -542,7 +542,82 @@ extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355F10);
+#ifdef SKIP_ASM
+extern "C" void func_00356020(cMoveNode* self, cMoveNode* other);
+
+struct sMat44_355F10 {
+    float m[16];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMatrix_355F10(void* dst, void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct sNodeVEntryI_355F10 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sNodeVEntryP_355F10 {
+    short delta;
+    short index;
+    char* (*fn)(void*);
+};
+struct sNodeVEntryD_355F10 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sNodeVEntryV_355F10 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00355F10(cMoveNode* self, void* srcv)
+{
+    char* src = (char*)srcv;
+    if (src == 0) {
+        return;
+    }
+    sNodeVEntryI_355F10* vi = *(sNodeVEntryI_355F10**)(src + 0xC);
+    if (vi[16].fn(src + vi[16].delta) != 0) {
+        func_00356020(self, (cMoveNode*)src);
+    }
+    sNodeVEntryP_355F10* vp = *(sNodeVEntryP_355F10**)(src + 0xC);
+    char* m = vp[24].fn(src + vp[24].delta);
+    if (m == *(char**)((char*)self + 0x18) + 0x10) {
+        sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
+        vd[1].fn(src + vd[1].delta, 3);
+        return;
+    }
+    sMat44_355F10 copy;
+    vu0CopyMatrix_355F10(&copy, m);
+    int keep = *(int*)(*(char**)((char*)self + 0x18) + 8);
+    sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
+    vd[1].fn(src + vd[1].delta, 3);
+    *(int*)(*(char**)((char*)self + 0x18) + 8) = keep;
+    func_00355918(self, &copy);
+    *(int*)((char*)self + 0x28) = 1;
+    sNodeVEntryV_355F10* vv = *(sNodeVEntryV_355F10**)((char*)self + 0xC);
+    vv[50].fn((char*)self + vv[50].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00356020);
@@ -566,7 +641,57 @@ INCLUDE_ASM("object/movenode", func_003560C0);
 
 INCLUDE_ASM("object/movenode", func_00356128);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356198);
+#ifdef SKIP_ASM
+int func_0034FCE0(void* self);
+extern "C" int func_00352ED0(void* block);
+extern "C" void func_00352F08(void* block);
+
+struct sMnVEntryI_356198 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMnVEntryV_356198 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sMnVEntryVi_356198 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00356198(void* selfv)
+{
+    cMoveNode* self = (cMoveNode*)selfv;
+    char* s = (char*)selfv;
+    if (*(int*)(s + 0x20) > 0) {
+        *(int*)(s + 0x20) -= 1;
+    }
+    sMnVEntryI_356198* vi = *(sMnVEntryI_356198**)(s + 0xC);
+    if (vi[20].fn(s + vi[20].delta) != 0) {
+        sMnVEntryI_356198* vi2 = *(sMnVEntryI_356198**)(s + 0xC);
+        if (vi2[23].fn(s + vi2[23].delta) <= 0 && func_0034FCE0(self) == 0) {
+            sMnVEntryV_356198* vv = *(sMnVEntryV_356198**)(s + 0xC);
+            vv[35].fn(s + vv[35].delta);
+            return;
+        }
+    }
+    func_003556F8(self);
+    sMnVEntryI_356198* vi3 = *(sMnVEntryI_356198**)(s + 0xC);
+    if (vi3[15].fn(s + vi3[15].delta) != 0) {
+        func_00355748(self);
+        if (self->field_0x1C != 0 && func_00352ED0(self->field_0x1C) != 0) {
+            func_00352F08(self->field_0x1C);
+            sMnVEntryVi_356198* vw = *(sMnVEntryVi_356198**)(s + 0xC);
+            vw[34].fn(s + vw[34].delta, 1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00356298);
 
@@ -1041,7 +1166,107 @@ extern "C" void* func_00357090(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357108);
+#ifdef SKIP_ASM
+struct sMnVec4_357108 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMnMtx_357108 {
+    sMnVec4_357108 r[4];
+};
+
+extern "C" void func_0034FED8(void* model, int bone, sMnMtx_357108* out);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMtx_357108(void* dst, void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (matrix * vector).
+static inline sMnVec4_357108 vu0MtxApply_357108(sMnMtx_357108* m, sMnVec4_357108* v)
+{
+    sMnVec4_357108 out;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf8, %1\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(out)
+        : "m"(*v), "r"(m)
+        : "memory");
+    return out;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sMnVec4_357108 vu0Add_357108(const sMnVec4_357108& a, const sMnVec4_357108& b)
+{
+    sMnVec4_357108 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sMnVec4_357108 vel_357108(char* self)
+{
+    return *(sMnVec4_357108*)(self + 0x80);
+}
+
+struct sMnVEntryI_357108 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMnVEntryM_357108 {
+    short delta;
+    short index;
+    sMnMtx_357108* (*fn)(void*, int);
+};
+
+extern "C" void func_00357108(char* self)
+{
+    char* o = *(char**)(*(char**)(self + 0xA0) + 0xC);
+    if (o != 0) {
+        sMnVEntryI_357108* vi = *(sMnVEntryI_357108**)(o + 0xC);
+        if (vi[26].fn(o + vi[26].delta) != 0) {
+            sMnVEntryM_357108* vm = *(sMnVEntryM_357108**)(o + 0xC);
+            vu0CopyMtx_357108(self + 0x50, vm[29].fn(o + vm[29].delta, *(int*)(self + 0x90)));
+        } else {
+            func_0034FED8(*(void**)(self + 0xA0), *(int*)(self + 0x90), (sMnMtx_357108*)(self + 0x50));
+        }
+        *(sMnVec4_357108*)(self + 0x80) = vu0Add_357108(vel_357108(self), vu0MtxApply_357108((sMnMtx_357108*)(self + 0x50), (sMnVec4_357108*)(self + 0x30)));
+    }
+    *(int*)(self + 0x44) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357210);
@@ -1165,7 +1390,111 @@ extern "C" void* func_00357358(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003573F8);
+#ifdef SKIP_ASM
+extern "C" float func_002D1C70();
+extern "C" void* func_002D1B58(int id);
+
+struct sMnVec4_3573F8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sMnVec4_3573F8 vu0Sub_3573F8(const sMnVec4_3573F8& a, const sMnVec4_3573F8& b)
+{
+    sMnVec4_3573F8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_3573F8(const sMnVec4_3573F8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sMnVec4_3573F8 vu0Scale_3573F8(const sMnVec4_3573F8& v, float s)
+{
+    sMnVec4_3573F8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst += v).
+static inline void vu0AddTo_3573F8(sMnVec4_3573F8& dst, const sMnVec4_3573F8& v)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(v));
+}
+
+struct sMnMover_3573F8 {
+    char pad0[0x10];
+    sMnVec4_3573F8 pos;
+    char pad20[0x24];
+    int target;
+    float speed;
+    float time;
+    int moved;
+    int arrived;
+};
+
+extern "C" void func_003573F8(sMnMover_3573F8* self)
+{
+    if (self->target < 0) {
+        return;
+    }
+    self->time += func_002D1C70();
+    sMnVec4_3573F8 d = vu0Sub_3573F8(*(sMnVec4_3573F8*)func_002D1B58(self->target), self->pos);
+    float len = vu0Length_3573F8(d);
+    if (len < 50.0f) {
+        self->arrived = 1;
+    } else {
+        sMnVec4_3573F8 step = vu0Scale_3573F8(d, self->speed / len * self->time);
+        if (len < vu0Length_3573F8(step)) {
+            self->arrived = 1;
+            step = d;
+        }
+        vu0AddTo_3573F8(self->pos, step);
+    }
+    self->moved = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357528);
@@ -1650,7 +1979,42 @@ extern "C" void* func_00357DD8(void* mem, void* a1, void* a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00357E80);
+#ifdef SKIP_ASM
+extern "C" void func_00370AF8(void* self, void* stream);
+
+struct sMnSerVEntry_357E80 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+static inline void read_357E80(void* stream, void* dst, int n)
+{
+    sMnSerVEntry_357E80* vt = *(sMnSerVEntry_357E80**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, dst, n);
+}
+
+extern "C" void* func_00357E80(void* mem, void* stream)
+{
+    sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
+    sQuad_7DD8* ab = &self->a;
+    read_357E80(stream, self, 4);
+    read_357E80(stream, &self->field_0x4, 4);
+    void* buf = cMemMan_alloc(0xD8, D_0048EA10, 0x20000000, 0);
+    self->data = buf;
+    read_357E80(stream, buf, 0xD8);
+    cMultiParticle_setupMultiParticle(self);
+    func_00370AF8(self->desc, stream);
+    read_357E80(stream, &self->pos, 0x10);
+    read_357E80(stream, ab, 0x20);
+    if (self->field_0x4 > 0) {
+        read_357E80(stream, (void*)self->field_0xc, self->field_0x4 * 4);
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357FA0);

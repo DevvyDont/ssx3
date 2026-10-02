@@ -1,6 +1,60 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_update);
+#ifdef SKIP_ASM
+struct cAppMan;
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_00231F80(void* fade);
+extern "C" int func_00326CA0(void* pads, int port);
+extern "C" char* func_00326CC8(void* pads, int port);
+extern void* D_004A28A8;
+extern char* D_004A28A0;
+extern char D_0047B8C8[];
+extern void* D_0047D8F0[];
+
+struct sModule_232348 {
+    void** vt;
+    int f4;
+    int f8;
+};
+
+struct sPreStart_232348 {
+    int f0;
+    float t;
+    sModule_232348* next;
+};
+
+extern "C" void cPreStartScreen_update(sPreStart_232348* self)
+{
+    func_00231F80(*(void**)((char*)D_004A28A8 + 0xA4));
+    float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+    *f += 0.0833333358168602f;
+    if (*f > 1.0f) {
+        *f = 1.0f;
+    }
+    if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+        sModule_232348* m = (sModule_232348*)cMemMan_alloc(0xC, D_0047B8C8, 0x100, 0);
+        cAppMan* app = (cAppMan*)D_004A28A8;
+        m->vt = D_0047D8F0;
+        m->f4 = 0;
+        m->f8 = 0;
+        self->next = m;
+        // PORT: setNextModule takes the module pointer as an unsigned int
+        cAppMan_setNextModule(app, (unsigned int)m);
+    }
+    self->t += 0.01666666753590107f;
+    if (*(int*)(D_004A28A0 + 0x2EE8) > 0) {
+        self->t += 0.15000000596046448f;
+        if (func_00326CA0(D_004A28A0, 0) >= 11) {
+            if (*(float*)(func_00326CC8(D_004A28A0, 0) + 0x20) != 0.0f && *(float*)(func_00326CC8(D_004A28A0, 0) + 0x28) != 0.0f) {
+                self->next->f4 = 1;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232488);

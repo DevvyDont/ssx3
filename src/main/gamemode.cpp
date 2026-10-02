@@ -322,7 +322,82 @@ extern "C" void func_00239D50(void* self, cGameModeStream* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00239D88);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
+extern "C" int func_001454F8(void* iface, int a1);
+extern "C" int func_001474C8(void* iface, int player);
+
+struct sGM_239D88 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int a18[10];
+    int a40[10];
+    int f68;
+    int f6C;
+    int f70;
+    int f74;
+    int f78;
+    int f7C;
+    int f80;
+    int f84;
+    int f88;
+    int f8C;
+    int f90;
+    int f94;
+    int f98;
+    int f9C;
+};
+
+struct sVEntry_239D88 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00239D88(void* self)
+{
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    sGM_239D88* gm = (sGM_239D88*)D_004A2C70;
+    gm->f80 = 0;
+    gm->f84 = 0;
+    gm->f94 = 0;
+    gm->f90 = 0;
+    gm->f9C = 0;
+    gm->f10 = 0;
+    gm->f14 = 0;
+    gm->f98 = 1;
+    gm->f68 = -1;
+    gm->f6C = -1;
+    gm->f0 = 3;
+    gm->f70 = 3;
+    gm->f74 = 3;
+    gm->f88 = 1;
+    int t = func_001454F8(race, 3);
+    sGM_239D88* gm2 = (sGM_239D88*)D_004A2C70;
+    gm2->f7C = 0;
+    gm2->f8C = 0;
+    gm2->f78 = t * 60;
+    func_00416210(gm2->a18, -1, 0x28);
+    sVEntry_239D88* e = &(*(sVEntry_239D88**)self)[4];
+    e->fn((char*)self + e->delta);
+    ((sGM_239D88*)D_004A2C70)->a18[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
+    ((sGM_239D88*)D_004A2C70)->a18[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
+    ((sGM_239D88*)D_004A2C70)->a40[0] = func_001474C8(player, 0);
+    ((sGM_239D88*)D_004A2C70)->a40[1] = func_001474C8(player, 1);
+    *(short*)((char*)self + 0x4) = 0;
+    *(short*)((char*)self + 0x6) = 0;
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_00239EC8);
 
@@ -419,7 +494,75 @@ extern "C" void func_0023B070(void* self, cGameModeStream* s)
 
 INCLUDE_ASM("main/gamemode", func_0023B0A8);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023B170);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
+extern "C" int func_00146E98(void* iface, int a1);
+
+struct sGM_23B170 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int a18[10];
+    int a40[10];
+    int f68;
+    int f6C;
+    int f70;
+    int f74;
+    int f78;
+    int f7C;
+    int f80;
+    int f84;
+    int f88;
+    int f8C;
+    int f90;
+    int f94;
+    int f98;
+    int f9C;
+};
+
+struct sVEntry_23B170 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0023B170(void* self)
+{
+    int one = 1;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    sGM_23B170* gm = (sGM_23B170*)D_004A2C70;
+    gm->f0 = one;
+    gm->f98 = one;
+    gm->f10 = 0;
+    gm->f14 = 0;
+    func_00416210(gm->a18, -1, 0x28);
+    int p = func_00146E98(iface, 0);
+    ((sGM_23B170*)D_004A2C70)->a18[p] = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+    sVEntry_23B170* e = &(*(sVEntry_23B170**)self)[4];
+    e->fn((char*)self + e->delta);
+    sGM_23B170* gm2 = (sGM_23B170*)D_004A2C70;
+    gm2->f70 = one;
+    gm2->f74 = one;
+    gm2->f9C = one;
+    gm2->f78 = 0;
+    gm2->f7C = 0;
+    gm2->f80 = 0;
+    gm2->f84 = 0;
+    gm2->f88 = 0;
+    gm2->f8C = 0;
+    gm2->f90 = 0;
+    gm2->f94 = 0;
+    gm2->f6C = -1;
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_0023B268);
 

@@ -619,7 +619,60 @@ void func_00254400(void* self, float f0, float f1)
 
 INCLUDE_ASM("mem/memstd", func_00254410);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002547B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_00480270[];
+extern void* D_004802B0[];
+extern void* (*D_00509434[])(void*);
+
+struct sRVEntry_2547B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sRCtx_2547B8 {
+    char pad[0x10D8];
+    sRVEntry_2547B8* vt;
+};
+extern sRCtx_2547B8* D_004A5B80_2547B8 __asm__("D_004A5B80");
+
+struct sTexCache_2547B8 {
+    void* owner;
+    void** vt;
+    int f8;
+    void* fC;
+    int f10;
+    int** texs;
+    int count;
+};
+
+extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
+{
+    self->vt = D_00480270;
+    for (int i = 0; i < self->count; i++) {
+        int* t = self->texs[i];
+        if (t != 0) {
+            D_004A5B80_2547B8->vt[50].fn((char*)D_004A5B80_2547B8 + D_004A5B80_2547B8->vt[50].delta, *t);
+            *t = -1;
+            D_00509430.free(t);
+        }
+    }
+    if (self->texs != 0) {
+        cMemMan_free(self->texs);
+    }
+    self->texs = 0;
+    if (self->fC != 0) {
+        func_003B0680(self->owner, self->fC);
+        self->fC = 0;
+    }
+    self->vt = D_004802B0;
+    if (flags & 1) {
+        D_00509434[0](self);
+    }
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_002548D0);
 

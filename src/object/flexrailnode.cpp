@@ -604,7 +604,34 @@ extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034B038);
+#ifdef SKIP_ASM
+extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
+
+struct sFlagDef_34B038 {
+    int v[0x58 / 4];
+};
+
+struct sFlagSet_34B038 {
+    sFlagDef_34B038 def;
+    int f58;
+    int count;
+    char pad60[0x94 - 0x60];
+    void* meshes[1];
+};
+
+extern "C" void func_0034B038(sFlagSet_34B038* self, sFlagDef_34B038* def, char* mesh)
+{
+    if (self->count == 0) {
+        self->def = *def;
+        self->f58 = **(int**)(mesh + 0x80);
+        cFlagSet_CreateMesh(self, mesh);
+    }
+    self->meshes[self->count] = mesh;
+    self->count++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034B168);

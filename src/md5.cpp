@@ -31,8 +31,58 @@ void md5_init(md5_ctx* ctx)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("md5", md5_append);
 #ifdef SKIP_ASM
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+extern "C" void md5_process(md5_ctx* ctx, const unsigned char* data);
+
+// Same layout as md5_ctx, viewed as the reference md5.c's md5_state_t.
+struct md5_state_append {
+    unsigned int count[2];
+    unsigned int abcd[4];
+    unsigned char buf[64];
+};
+
+extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes)
+{
+    md5_state_append* pms = (md5_state_append*)ctx;
+    const unsigned char* p = data;
+    int left = nbytes;
+    int offset = (pms->count[0] >> 3) & 63;
+    unsigned int nbits = (unsigned int)(nbytes << 3);
+
+    if (nbytes <= 0) {
+        return;
+    }
+
+    pms->count[1] += nbytes >> 29;
+    pms->count[0] += nbits;
+    if (pms->count[0] < nbits) {
+        pms->count[1]++;
+    }
+
+    if (offset) {
+        int copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
+
+        // PORT: pointer-in-int; the target adds offset to the state pointer before the buf offset (pms->buf + offset)
+        func_0041605C((unsigned char*)(offset + (int)pms) + 0x18, p, copy);
+        if (offset + copy < 64) {
+            return;
+        }
+        p += copy;
+        left -= copy;
+        md5_process(ctx, pms->buf);
+    }
+
+    for (; left >= 64; p += 64, left -= 64) {
+        md5_process(ctx, p);
+    }
+
+    if (left) {
+        func_0041605C(pms->buf, p, left);
+    }
+}
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name

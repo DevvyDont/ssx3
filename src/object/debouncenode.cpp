@@ -93,7 +93,43 @@ void* func_00342E78(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00342E98);
+#ifdef SKIP_ASM
+int func_0034FCC0(void* self);
+extern "C" void* func_00350F60(void* self, void* parent);
+extern const char D_0048E748[];
+
+extern "C" void func_00342E98(void* self, int check)
+{
+    if (check != 0 && func_0034FCC0(self) != 0) {
+        return;
+    }
+    if (*(int*)((char*)self + 0x2C) >= 0) {
+        int mode = *(int*)((char*)self + 0x30);
+        if (mode == 0) {
+            void* parent = *(void**)((char*)self + 0x18);
+            if (self != 0) {
+                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+                vt[1].fn((char*)self + vt[1].delta, 3);
+            }
+            func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), parent);
+        } else if (mode == 3) {
+            void* parent = *(void**)((char*)self + 0x18);
+            if (self != 0) {
+                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+                vt[1].fn((char*)self + vt[1].delta, 3);
+            }
+            func_00350F60(cMemMan_alloc(0x1C, D_0048E748, 0x20000000, 0), parent);
+        } else {
+            if (self != 0) {
+                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+                vt[1].fn((char*)self + vt[1].delta, 3);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00342FA8);
