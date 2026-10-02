@@ -353,7 +353,78 @@ extern "C" void func_00187318(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00187360);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern void* D_004A14B8;
+extern char D_0045DCE8[];
+extern char D_0045DCD8[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00152BA8();
+extern "C" void* func_00227F80(void* p);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+
+struct sVtI_00187360 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sVtS_00187360 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+struct sVtB_00187360 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+struct sVtV_00187360 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sLocal_00187360 {
+    int v[8];
+};
+
+extern "C" void func_00187360(void)
+{
+    unsigned short buf[0x320];
+    sLocal_00187360 loc;
+    void* mp = func_00227F80(D_004A28A8);
+    cBE_getInterface_Fv(cBE_getBE(), 5);
+    *(int*)((char*)D_004A14B8 + 0x19C) = 0x14;
+    char* sf = *(char**)((char*)mp + 0x434);
+    sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
+    int size = sfvt[22].fn(sf + sfvt[22].delta, func_00152BA8());
+    func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVtS_00187360* vt = *(sVtS_00187360**)(o + 4);
+    unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045DCE8));
+    func_002C26D0(buf, fmt, &loc, size);
+    D_004A14B8_K186C98->v36(buf, 0, 0, 0, 0, 0);
+    char* box = *(char**)((char*)D_004A14B8 + 0x218);
+    sVtB_00187360* bvt = *(sVtB_00187360**)(box + 8);
+    char* bthis = box + bvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVtI_00187360* vt2 = *(sVtI_00187360**)(o2 + 4);
+    char* o2this = o2 + vt2[4].delta;
+    int id = vt2[4].fn(o2this, GetHashValue32(D_0045DCD8));
+    bvt[26].fn(bthis, id, 1);
+    char* box2 = *(char**)((char*)D_004A14B8 + 0x218);
+    sVtV_00187360* bvt2 = *(sVtV_00187360**)(box2 + 8);
+    bvt2[25].fn(box2 + bvt2[25].delta, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_001874E8);
@@ -424,7 +495,76 @@ extern "C" void func_001876A8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_001877B0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern void* D_004A14B8;
+extern int D_004A14BC;
+extern int D_004A14B4;
+extern char D_004A14C0[];
+extern char D_004A14C8[];
+extern char D_0045DD00[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00152BA8();
+extern "C" void* func_00227F80(void* p);
+extern "C" void func_0023CAA0(void* mp, int a);
+extern "C" void func_0023C8F0(void* mp, int mode);
+extern "C" void func_002C2540(void*, void*);
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
+extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
+extern "C" void func_0039FCC8(void* obj, void* anim, int a, int b, int c);
+extern "C" void func_001D9308(void*, int);
+
+struct sVtEnt_001877B0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001877B0(void)
+{
+    unsigned short name[0x14];
+    unsigned short desc[0x10];
+    unsigned short fmt[8];
+    int five = 5;
+    D_004A14BC = five;
+    *(int*)((char*)D_004A14B8 + 0x1C0) = five;
+    cBE_getInterface_Fv(cBE_getBE(), 5);
+    void* mp = func_00227F80(D_004A28A8);
+    *(int*)((char*)D_004A14B8 + 0x1BC) = 0;
+    D_004A14BC = five;
+    func_0023CAA0(mp, func_00152BA8());
+    func_0023C8F0(mp, 1);
+    void* s1 = D_004A14B8;
+    int t = D_004A14B4;
+    *(int*)((char*)mp + 0xF8) = t;
+    *(int*)((char*)s1 + 0x1C4) = t;
+    *(int*)((char*)s1 + 0x1BC) = 0;
+    sVtEnt_001877B0* vt = *(sVtEnt_001877B0**)((char*)mp + 0x748);
+    vt[1].fn((char*)mp + vt[1].delta, 0x35);
+    func_00241D40_r(mp, 1, name, 0x14);
+    func_002C2540(fmt, D_004A14C8);
+    func_00241AA0_r(desc, 0x10);
+    func_002C26D0((unsigned short*)((char*)D_004A14B8 + 0x11C), fmt, desc, name);
+    func_001D9308(D_004A14B8, 1);
+    void* st = D_004A14B8;
+    *(int*)((char*)st + 0x1A8) = 1;
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(D_004A14C0));
+    if (obj) {
+        void* bank = (char*)*(void**)((char*)D_004A14B8 + 0x10) + 0x50;
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_0045DD00));
+        if (anim)
+            func_0039FCC8(obj, anim, 9, 0, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187920);

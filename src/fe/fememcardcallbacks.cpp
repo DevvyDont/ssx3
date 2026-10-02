@@ -188,13 +188,145 @@ extern "C" void func_001D69E0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D6AD0);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_00464608[];
+extern char D_0045F7E0[];
 
+extern "C" void func_001D6AD0(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464608)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0xA;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    mvt[26].fn(mthis, str2, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D6C28);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_00464628[];
+extern char D_0045F7E0[];
+
+extern "C" void func_001D6C28(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    *(int*)((char*)D_004A2028 + 0x19C) = 0xB;
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464628)), name);
+    char* fe = (char*)D_004A2028;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    mvt[26].fn(mthis, str2, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D6D88);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7010);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_004677E8[];
+extern char D_0045F7E0[];
+
+struct sFEMC_001D7010 {
+    char pad[0x19C];
+    int f19C;
+};
+
+extern "C" void func_001D7010(void)
+{
+    unsigned short name[0x100];
+    unsigned short name2[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* sf = *(char**)(mp + 0x434);
+    sVEntryV001D69E0* sfvt = *(sVEntryV001D69E0**)sf;
+    sfvt[14].fn(sf + sfvt[14].delta, *(int*)(mp + 0xF8), name2);
+    ((sFEMC_001D7010*)D_004A2028)->f19C = 0xC;
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677E8)), name);
+    char* fe = (char*)D_004A2028;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 1, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    mvt[26].fn(mthis, str2, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7190);
@@ -346,13 +478,164 @@ extern "C" void func_001D7548(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmDelete);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_00467830[];
+
+struct sVEntryI_001D7688 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+extern "C" void cFEMemCard_callbackConfirmDelete(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    char* sf = *(char**)(mp + 0x434);
+    sVEntryI_001D7688* sfvt = *(sVEntryI_001D7688**)sf;
+    if (sfvt[13].fn(sf + sfvt[13].delta) > 0) {
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        *(int*)((char*)D_004A2028 + 0x19C) = 3;
+        char* sf2 = *(char**)(mp + 0x434);
+        sVEntryV001D69E0* sfvt2 = *(sVEntryV001D69E0**)sf2;
+        sfvt2[14].fn(sf2 + sfvt2[14].delta, *(int*)(mp + 0xF8), name);
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+        func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467830)), name);
+        char* fe = (char*)D_004A2028;
+        sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+        vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
+        char* m = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+        mvt[25].fn(m + mvt[25].delta, 1);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+    } else {
+        char* fe = (char*)D_004A2028;
+        if (*(int*)(fe + 0x1C0) == 4) {
+            *(int*)(fe + 0x1A8) = 0;
+            *(int*)(fe + 0x1E0) = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D77E8);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7998);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_00467848[];
+extern char D_0045F7E0[];
 
+struct sVEntryI_001D7998 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+extern "C" void func_001D7998(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    *(int*)((char*)D_004A2028 + 0x19C) = 0x13;
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467848));
+    char* sf = *(char**)(mp + 0x434);
+    sVEntryI_001D7998* sfvt = *(sVEntryI_001D7998**)sf;
+    int n = sfvt[23].fn(sf + sfvt[23].delta);
+    func_002C26D0(buf, fmt, name, n);
+    char* fe = (char*)D_004A2028;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 3, 1, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    mvt[26].fn(mthis, str2, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7B18);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_00467848[];
+extern char D_0045F7E0[];
+
+struct sVEntryI_001D7B18 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+struct sLocal_001D7B18 {
+    int v[8];
+};
+
+extern "C" void func_001D7B18(void)
+{
+    unsigned short buf[0x320];
+    sLocal_001D7B18 name;
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    *(int*)((char*)D_004A2028 + 0x19C) = 0x13;
+    func_00241DC8(mp, &name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467848));
+    char* sf = *(char**)(mp + 0x434);
+    sVEntryI_001D7B18* sfvt = *(sVEntryI_001D7B18**)sf;
+    int n = sfvt[23].fn(sf + sfvt[23].delta);
+    func_002C26D0(buf, fmt, &name, n);
+    char* fe = (char*)D_004A2028;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 3, 1, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    mvt[26].fn(mthis, str2, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileExists);
@@ -378,9 +661,92 @@ extern "C" void cFEMemCard_callbackFileExists(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7D70);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_00467878[];
+extern char D_0045F7E0[];
 
+extern "C" void func_001D7D70(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467878)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0x18;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    mvt[26].fn(mthis, str2, 0);
+    *(int*)((char*)D_004A2028 + 0x1C0) = 1;
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDeleteDone);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_002C2508(void* dst, void* src);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_00467898[];
+extern char D_0045F7E0[];
+
+extern "C" int cFEMemCard_callbackDeleteDone(void)
+{
+    if (*(int*)((char*)D_004A2028 + 0x204) == 0) {
+        void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
+        func_002C2508(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_00467898)));
+        char* fe = (char*)D_004A2028;
+        *(int*)(fe + 0x19C) = 7;
+        sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
+        vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
+        char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+        void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        char* m = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+        mvt[26].fn(m + mvt[26].delta, str2, 0);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+    }
+    char* fe = (char*)D_004A2028;
+    if (*(int*)(fe + 0x1C0) == 4) {
+        *(int*)(fe + 0x1C0) = 1;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8020);
@@ -533,7 +899,68 @@ extern "C" void func_001D8358(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D83A8);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_003A0D00(void* self, unsigned short* str);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_004678B0[];
+extern char D_004678C8[];
+
+struct sVEntryI_001D83A8 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+static inline void SetMode_001D83A8(char* fe, int mode)
+{
+    if (*(int*)(fe + 0x214) != mode) {
+        *(int*)(fe + 0x214) = mode;
+        sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+        vt[35].fn(fe + vt[35].delta, mode);
+    }
+}
+
+extern "C" void func_001D83A8(void)
+{
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    *(int*)((char*)D_004A2028 + 0x1C0) = 1;
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(mp + 0x748);
+    mvt[1].fn(mp + mvt[1].delta, 2);
+    char* sf = *(char**)(mp + 0x434);
+    sVEntryI_001D83A8* sfvt = *(sVEntryI_001D83A8**)sf;
+    int busy = sfvt[53].fn(sf + sfvt[53].delta);
+    if (busy) {
+        SetMode_001D83A8((char*)D_004A2028, 3);
+    } else {
+        SetMode_001D83A8((char*)D_004A2028, 1);
+        char* st = (char*)D_004A2028;
+        void* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(D_004678B0));
+        if (obj) {
+            unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+            func_002C2508(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004678C8)));
+            func_003A0D00(obj, buf);
+            sVEntryV001D69E0* bvt = *(sVEntryV001D69E0**)((char*)obj + 8);
+            bvt[9].fn((char*)obj + bvt[9].delta, 1);
+            if (buf != 0) {
+                cMemMan_free(buf);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8530);
 
@@ -991,7 +1418,60 @@ extern "C" sMemCardPopupK1D99C8* func_001D99C8(sMemCardPopupK1D99C8* self, void*
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9A80);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+void func_001C57C0(void* self, int a1, int a2);
+// PORT: func_001C5DD8 takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
+void func_001C5DD8_self(void* self) __asm__("func_001C5DD8");
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void func_002C2540(void*, void*);
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_004A1408[];
+
+// PORT: the unit declares the string pointer as int; a6 is unused
+extern "C" void func_001D9A80(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+{
+    void* str = (void*)a1;
+    char* s = (char*)self;
+    char* sub = s + 0xBC;
+    func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+    func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+    *(int*)(s + 0xBC) = 2;
+    *(int*)(s + 0x14C) = a4;
+    *(int*)(s + 0x168) = 0;
+    *(int*)(s + 0x154) = 0;
+    *(int*)(s + 0x164) = 0;
+    char* p;
+    if (str) {
+        func_002C2508(s + 0x360, str);
+        p = s + 0x360;
+    } else {
+        p = s + 0x360;
+        func_002C2540(p, D_004A1408);
+    }
+    func_002C2508(p, str);
+    if (a3) {
+        *(int*)(s + 0xBF8) = 0;
+        *(int*)(sub + 0x98) = 1;
+        *(int*)(sub + 0) = 0;
+    } else if (a2) {
+        *(int*)(s + 0xBF8) = 1;
+        *(int*)(sub + 0) = 1;
+        *(int*)(sub + 0x98) = a5;
+    } else {
+        *(int*)(s + 0xBF8) = 2;
+        *(int*)(sub + 0x98) = a5;
+    }
+    *(char**)(sub + 8) = p;
+    *(int*)(sub + 4) = 1;
+    if (*(int*)(s + 0x40)) {
+        func_001C5DD8_self(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9BD0);

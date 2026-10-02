@@ -1021,7 +1021,24 @@ void* func_001802E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180300);
+#ifdef SKIP_ASM
+extern "C" int func_00180300(void* self)
+{
+    int r = 0;
+    if (func_00320C48(*(int*)((char*)self + 0x18), 0x72) || func_00320C48(*(int*)((char*)self + 0x18), 0x73) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x74) || func_00320C48(*(int*)((char*)self + 0x18), 0x75) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x76) || func_00320C48(*(int*)((char*)self + 0x18), 0x77) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x78) || func_00320C48(*(int*)((char*)self + 0x18), 0x79) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x7A) || func_00320C48(*(int*)((char*)self + 0x18), 0x7B) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x7D) || func_00320C48(*(int*)((char*)self + 0x18), 0x7C) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x90) || func_00320C48(*(int*)((char*)self + 0x18), 0x92) ||
+        func_00320C48(*(int*)((char*)self + 0x18), 0x91) || func_00320C48(*(int*)((char*)self + 0x18), 0x71))
+        r = 1;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180478);
@@ -1175,7 +1192,77 @@ extern "C" int func_001807C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180840);
+#ifdef SKIP_ASM
+struct cDbgKbdTarget {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19(int, int);
+};
+
+struct sDbgKbd {
+    char pad0[0xD0];
+    cDbgKbdTarget* obj;
+    int maxLen;
+    char padD8[0xC];
+    int caps;
+    char padE8[4];
+    char buf[0x80];
+    int cur;
+    int key;
+};
+
+extern "C" void func_00180840(sDbgKbd* self)
+{
+    int k = self->key;
+    if (k >= 0 && k < 10) {
+        self->buf[self->cur] = self->key + '0';
+        if (self->cur + 1 < self->maxLen)
+            self->cur = self->cur + 1;
+    } else if (k >= 10 && k < 36) {
+        int c = !self->caps ? 'a' : 'A';
+        self->buf[self->cur] = c + (self->key - 10);
+        if (self->cur + 1 < self->maxLen)
+            self->cur = self->cur + 1;
+        self->buf[self->cur] = 0;
+    } else if (k == 36) {
+        if (self->cur > 0)
+            self->cur = self->cur - 1;
+        self->buf[self->cur] = 0;
+    } else if (k == 37) {
+        if (self->cur + 1 < self->maxLen)
+            self->cur = self->cur + 1;
+        self->buf[self->cur] = 0;
+    } else if (k == 38) {
+        self->buf[self->cur] = ' ';
+        if (self->cur + 1 < self->maxLen)
+            self->cur = self->cur + 1;
+    }
+    if (self->key == 39)
+        self->obj->v19(0, 13);
+    else
+        self->obj->v19(0, 12);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_001809B0);
