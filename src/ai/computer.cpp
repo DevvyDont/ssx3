@@ -128,7 +128,17 @@ INCLUDE_ASM("ai/computer", func_0010EB30);
 
 INCLUDE_ASM("ai/computer", func_0010F1C0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", func_0010F280);
+#ifdef SKIP_ASM
+extern "C" float func_00119BB0(int);
+extern "C" void func_0010E098(void*, int, float);
+
+extern "C" void func_0010F280(void* self)
+{
+    func_0010E098(self, 1, func_00119BB0(*(int*)((char*)self + 0x790)));
+}
+#endif
 
 extern "C" void* func_0011A0E0(int);
 
@@ -280,7 +290,18 @@ float func_00113130(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00113138);
+#ifdef SKIP_ASM
+extern "C" void cAirPredictor_reset(char* self);
+
+extern "C" void* func_00113138(void* self)
+{
+    *(unsigned int*)((char*)self + 0x30) = 0xFFFFFFFF;
+    cAirPredictor_reset((char*)self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_00113170);

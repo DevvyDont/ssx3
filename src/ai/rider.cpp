@@ -136,7 +136,18 @@ extern "C" void cRider_updateOrientationImplicit(char* self)
 
 INCLUDE_ASM("ai/rider", func_0011E150);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011EB60);
+#ifdef SKIP_ASM
+extern "C" void func_003123C0(void*, int);
+extern "C" void func_00312490(void*);
+
+extern "C" void func_0011EB60(void* self, float value)
+{
+    func_003123C0(*(void**)((char*)self + 0x784), *(int*)((char*)self + 0xB1C));
+    func_00312490(*(void**)((char*)self + 0x784));
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011EB98);
 
@@ -269,7 +280,18 @@ extern "C" void func_00120E30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120E50);
+#ifdef SKIP_ASM
+extern "C" void func_00332DB8(void*, void*);
+extern "C" void func_00122088(void*);
+
+extern "C" void func_00120E50(void* self)
+{
+    func_00332DB8(*(void**)((char*)self + 0x860), (char*)self + 0x400);
+    func_00122088(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00120E88);
@@ -440,9 +462,31 @@ INCLUDE_ASM("ai/rider", func_00122E50);
 
 INCLUDE_ASM("ai/rider", func_00122EE8);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00123128);
+#ifdef SKIP_ASM
+signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+extern "C" int func_00123128(void* self)
+{
+    return cBENewPlayerInterface_getRiderCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(int*)((char*)self + 0x86C));
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/rider", func_00123168);
+#ifdef SKIP_ASM
+extern "C" int func_00147410(void* iface, int riderIndex);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern "C" int func_00123168(void* self)
+{
+    return func_00147410(cBE_getInterface_Fv(cBE_getBE(), 1), *(int*)((char*)self + 0x86C));
+}
+#endif
 
 // Grounded predicate: motion 0, or motion 2 with owner+0x30 == 0.
 //100%

@@ -21,7 +21,18 @@ void* func_001289F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00128A10);
+#ifdef SKIP_ASM
+struct sAiObj128A48;
+extern "C" void func_00128A48(sAiObj128A48* self, int mode);
+
+extern "C" void func_00128A10(void* self)
+{
+    func_001297C8(self, 0);
+    func_00128A48((sAiObj128A48*)self, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00128A48);
@@ -230,17 +241,73 @@ INCLUDE_ASM("ai/ai", func_0012C230);
 
 INCLUDE_ASM("ai/ai", func_0012C408);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012C558);
+#ifdef SKIP_ASM
+struct sAiVEntry12C558 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_0012C558(void* self, void* obj)
+{
+    sAiVEntry12C558* vt = *(sAiVEntry12C558**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012C590);
+#ifdef SKIP_ASM
+struct sAiVEntry12C590 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0012C590(void* self, void* obj)
+{
+    sAiVEntry12C590* vt = *(sAiVEntry12C590**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012C5C8);
 
 INCLUDE_ASM("ai/ai", func_0012C678);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012C9C0);
+#ifdef SKIP_ASM
+struct sVEntry0012C9C0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_0012C9C0(void* self, void* obj)
+{
+    sVEntry0012C9C0* vt = *(sVEntry0012C9C0**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012C9F8);
+#ifdef SKIP_ASM
+struct sVEntry0012C9F8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0012C9F8(void* self, void* obj)
+{
+    sVEntry0012C9F8* vt = *(sVEntry0012C9F8**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012CA30);
 
@@ -274,9 +341,37 @@ INCLUDE_ASM("ai/ai", func_0012E528);
 
 INCLUDE_ASM("ai/ai", func_0012E690);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012E708);
+#ifdef SKIP_ASM
+struct sVEntry0012E708 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_0012E708(void* self, void* obj)
+{
+    sVEntry0012E708* vt = *(sVEntry0012E708**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x80);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012E740);
+#ifdef SKIP_ASM
+struct sVEntry0012E740 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0012E740(void* self, void* obj)
+{
+    sVEntry0012E740* vt = *(sVEntry0012E740**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x80);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012E778);
 
@@ -310,9 +405,37 @@ extern "C" int func_0012F588(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012F5B0);
+#ifdef SKIP_ASM
+struct sVEntry0012F5B0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_0012F5B0(void* self, void* obj)
+{
+    sVEntry0012F5B0* vt = *(sVEntry0012F5B0**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012F5E8);
+#ifdef SKIP_ASM
+struct sVEntry0012F5E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0012F5E8(void* self, void* obj)
+{
+    sVEntry0012F5E8* vt = *(sVEntry0012F5E8**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012F620);
 
@@ -320,9 +443,37 @@ INCLUDE_ASM("ai/ai", func_0012F730);
 
 INCLUDE_ASM("ai/ai", func_0012FB68);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012FBF0);
+#ifdef SKIP_ASM
+struct sVEntry0012FBF0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_0012FBF0(void* self, void* obj)
+{
+    sVEntry0012FBF0* vt = *(sVEntry0012FBF0**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012FC28);
+#ifdef SKIP_ASM
+struct sVEntry0012FC28 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0012FC28(void* self, void* obj)
+{
+    sVEntry0012FC28* vt = *(sVEntry0012FC28**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012FC60__FPv);
@@ -377,9 +528,37 @@ INCLUDE_ASM("ai/ai", func_001313A8);
 
 INCLUDE_ASM("ai/ai", func_00131428);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00131598);
+#ifdef SKIP_ASM
+struct sVEntry00131598 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_00131598(void* self, void* obj)
+{
+    sVEntry00131598* vt = *(sVEntry00131598**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_001315D0);
+#ifdef SKIP_ASM
+struct sVEntry001315D0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001315D0(void* self, void* obj)
+{
+    sVEntry001315D0* vt = *(sVEntry001315D0**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00131608__FPv);
@@ -411,9 +590,37 @@ INCLUDE_ASM("ai/ai", func_001326C8);
 
 INCLUDE_ASM("ai/ai", func_00132770);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00132840);
+#ifdef SKIP_ASM
+struct sVEntry00132840 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_00132840(void* self, void* obj)
+{
+    sVEntry00132840* vt = *(sVEntry00132840**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00132878);
+#ifdef SKIP_ASM
+struct sVEntry00132878 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00132878(void* self, void* obj)
+{
+    sVEntry00132878* vt = *(sVEntry00132878**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_001328B0);
 
@@ -425,9 +632,37 @@ INCLUDE_ASM("ai/ai", func_00132F98);
 
 INCLUDE_ASM("ai/ai", func_00132FB8);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001330B8);
+#ifdef SKIP_ASM
+struct sVEntry001330B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_001330B8(void* self, void* obj)
+{
+    sVEntry001330B8* vt = *(sVEntry001330B8**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_001330F0);
+#ifdef SKIP_ASM
+struct sVEntry001330F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001330F0(void* self, void* obj)
+{
+    sVEntry001330F0* vt = *(sVEntry001330F0**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00133128);
 
@@ -463,17 +698,73 @@ INCLUDE_ASM("ai/ai", func_00136100);
 
 INCLUDE_ASM("ai/ai", func_00136168);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001361F8);
+#ifdef SKIP_ASM
+struct sVEntry001361F8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_001361F8(void* self, void* obj)
+{
+    sVEntry001361F8* vt = *(sVEntry001361F8**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x58);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00136230);
+#ifdef SKIP_ASM
+struct sVEntry00136230 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00136230(void* self, void* obj)
+{
+    sVEntry00136230* vt = *(sVEntry00136230**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x58);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00136268);
 
 INCLUDE_ASM("ai/ai", func_00136508);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001368E8);
+#ifdef SKIP_ASM
+struct sVEntry001368E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_001368E8(void* self, void* obj)
+{
+    sVEntry001368E8* vt = *(sVEntry001368E8**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00136920);
+#ifdef SKIP_ASM
+struct sVEntry00136920 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00136920(void* self, void* obj)
+{
+    sVEntry00136920* vt = *(sVEntry00136920**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
+}
+#endif
 
 extern "C" void cRider_updateOrientationImplicit(void*);
 

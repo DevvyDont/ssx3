@@ -67,7 +67,35 @@ void func_00113998(void* self)
 
 INCLUDE_ASM("ai/airpredictor", func_001139A0);
 
+//100%
 INCLUDE_ASM("ai/airpredictor", func_00113AA0);
+#ifdef SKIP_ASM
+struct sVEntry00113AA0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_00113AA0(void* self, void* obj)
+{
+    sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0xB0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/airpredictor", func_00113AD8);
+#ifdef SKIP_ASM
+struct sVEntry00113AD8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00113AD8(void* self, void* obj)
+{
+    sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0xB0);
+}
+#endif
 

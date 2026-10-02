@@ -106,7 +106,35 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138640);
 
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138960);
 
+//100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138AD8);
+#ifdef SKIP_ASM
+struct sVEntry00138AD8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_00138AD8(void* self, void* obj)
+{
+    sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138B10);
+#ifdef SKIP_ASM
+struct sVEntry00138B10 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00138B10(void* self, void* obj)
+{
+    sVEntry00138B10* vt = *(sVEntry00138B10**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x40);
+}
+#endif
 

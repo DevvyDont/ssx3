@@ -76,9 +76,37 @@ extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001174B0);
+#ifdef SKIP_ASM
+struct sVEntry001174B0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern "C" void func_001174B0(void* self, void* obj)
+{
+    sVEntry001174B0* vt = *(sVEntry001174B0**)obj;
+    vt[1].fn((char*)obj + vt[1].delta, self, 0x1AC);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001174E8);
+#ifdef SKIP_ASM
+struct sVEntry001174E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001174E8(void* self, void* obj)
+{
+    sVEntry001174E8* vt = *(sVEntry001174E8**)obj;
+    vt[2].fn((char*)obj + vt[2].delta, self, 0x1AC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00117520);
@@ -95,7 +123,19 @@ INCLUDE_ASM("ai/ridermetrix", func_00117540);
 
 INCLUDE_ASM("ai/ridermetrix", func_001175B8);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001175F8);
+#ifdef SKIP_ASM
+extern "C" void func_001179E0(void* self, int type);
+
+extern "C" void func_001175F8(void* self)
+{
+    func_001179E0(self, 3);
+    *(int*)((char*)self + 0x9C) = 0;
+    *(int*)((char*)self + 0xA0) = 0;
+    *(float*)((char*)self + 0xA4) = -1.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117638);
 
@@ -258,7 +298,70 @@ extern "C" void func_00119068(void* self_, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001190F0);
+#ifdef SKIP_ASM
+struct sTrickId;
+
+struct sTrickId190F0 {
+    int w0;
+    int w1;
+};
+
+struct sTrickHist190F0 {
+    char pad0[0x8];
+    int u8;                       // 0x8
+    char padC[0x20 - 0xC];
+    int u20;                      // 0x20
+    int u24;
+    int u28;                      // 0x28
+    char pad2C[0x70 - 0x2C];
+    int u70;                      // 0x70
+    char pad74[0x7C - 0x74];
+    int u7C;                      // 0x7C
+    char pad80[0xA8 - 0x80];
+    sTrickId190F0 hist[10];       // 0xA8
+    int histIdx;                  // 0xF8
+};
+
+static inline int func_trickIdEqual(const void* a, const void* b, int size)
+{
+    const unsigned char* p = (const unsigned char*)a;
+    const unsigned char* q = (const unsigned char*)b;
+    while (size--) {
+        if (*p != *q) {
+            return 0;
+        }
+        p++;
+        q++;
+    }
+    return 1;
+}
+
+// sTrickId is defined later in the unit, hence the casts. Don't copy id_ into a typed
+// local: a separate local shifts every register by one.
+extern "C" int func_001190F0(void* self_, sTrickId* id_)
+{
+    sTrickHist190F0* self = (sTrickHist190F0*)self_;
+    int count;
+
+    if (self->u8 != 0 || self->u20 != 0 || self->u70 != 0 || self->u7C != 0 || self->u28 != 0) {
+        return 0;
+    }
+    count = 0;
+    if ((((sTrickId190F0*)id_)->w1 & 0x3F800) != 0x800 && (((sTrickId190F0*)id_)->w0 & 0xFC00000) != 0x400000) {
+        for (int i = 0; i < 10; i++) {
+            if (func_trickIdEqual(id_, &self->hist[i], 8)) {
+                count++;
+            }
+        }
+    }
+    self->hist[self->histIdx] = *(sTrickId190F0*)id_;
+    self->histIdx++;
+    self->histIdx %= 10;
+    return count;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119210);
 
@@ -621,7 +724,28 @@ INCLUDE_ASM("ai/ridermetrix", func_0011A8C8);
 
 INCLUDE_ASM("ai/ridermetrix", func_0011B1A8);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B2C0);
+#ifdef SKIP_ASM
+extern float D_004A6310[2][3][4][2];
+
+extern "C" void func_0011B2C0(void)
+{
+    for (int a = 0; a < 2; a++) {
+        for (int b = 0; b < 3; b++) {
+            for (int c = 0; c < 4; c++) {
+                for (int d = 0; d < 2; d++) {
+                    int va = a ? 0 : 5;
+                    int vb = b ? (b == 1 ? 11 : 0) : 20;
+                    int vc = c ? (c == 1 ? 15 : (c == 2 ? 10 : 0)) : 20;
+                    int vd = d ? 0 : 5;
+                    D_004A6310[a][b][c][d] = 120.0f - (float)(va + vb + vc + vd);
+                }
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011B3F8);
 
