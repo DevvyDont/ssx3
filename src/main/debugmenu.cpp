@@ -197,7 +197,38 @@ extern "C" void func_0024DC68(void* self, int flags)
 
 INCLUDE_ASM("main/debugmenu", func_0024DD70);
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024DFA0);
+#ifdef SKIP_ASM
+extern "C" void func_0024DFA0(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x59C, 2);
+    func_002CA280((char*)self + 0x56C, 2);
+    func_002CA280((char*)self + 0x53C, 2);
+    func_002CA280((char*)self + 0x508, 2);
+    func_002CA280((char*)self + 0x4D4, 2);
+    func_002CA280((char*)self + 0x4A0, 2);
+    func_002CA280((char*)self + 0x46C, 2);
+    func_002CA280((char*)self + 0x438, 2);
+    func_002CA280((char*)self + 0x404, 2);
+    func_002CA280((char*)self + 0x3D0, 2);
+    func_002CA280((char*)self + 0x39C, 2);
+    func_002CA280((char*)self + 0x368, 2);
+    func_002CA280((char*)self + 0x334, 2);
+    func_002CA280((char*)self + 0x300, 2);
+    func_002CA280((char*)self + 0x2CC, 2);
+    func_002CA280((char*)self + 0x298, 2);
+    func_002CA280((char*)self + 0x264, 2);
+    func_002CA280((char*)self + 0x230, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024E0F8);
@@ -228,7 +259,44 @@ extern "C" void func_0024E0F8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024E200);
+#ifdef SKIP_ASM
+static inline void dtorSubMenuItem_24E200(void* p)
+{
+    func_002CAA80((char*)p + 0x18, 2);
+    func_002CA280(p, 2);
+}
+
+extern "C" void func_0024E200(void* self, int flags)
+{
+    func_002CA280((char*)self + 0xFEC, 2);
+    func_002CA280((char*)self + 0xFD0, 2);
+    func_002CA280((char*)self + 0xFAC, 2);
+    func_002CA280((char*)self + 0xF88, 2);
+    func_002CA280((char*)self + 0xF64, 2);
+    func_002CA280((char*)self + 0xF40, 2);
+    dtorSubMenuItem_24E200((char*)self + 0x990);
+    func_002CA280((char*)self + 0x974, 2);
+    func_002CA280((char*)self + 0x950, 2);
+    func_002CA280((char*)self + 0x92C, 2);
+    func_002CA280((char*)self + 0x908, 2);
+    func_002CA280((char*)self + 0x8E4, 2);
+    dtorSubMenuItem_24E200((char*)self + 0x334);
+    func_002CA280((char*)self + 0x300, 2);
+    func_002CA280((char*)self + 0x2CC, 2);
+    func_002CA280((char*)self + 0x298, 2);
+    func_002CA280((char*)self + 0x264, 2);
+    func_002CA280((char*)self + 0x230, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 INCLUDE_ASM("main/debugmenu", func_0024E388);
 

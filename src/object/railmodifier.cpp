@@ -704,7 +704,79 @@ extern "C" void func_0035FB30(void* self, int id, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035FC20);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sRmAxisRot_35FC20 {
+    char pad_0x0[0x10];
+    float angle;        // 0x10
+    char pad_0x14[0xC];
+    float ax, ay, az;   // 0x20
+    char pad_0x2c[0x4];
+    float tx, ty;       // 0x30
+};
+
+struct sRmMtx_35FC20 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("D_004FF1A0");
+
+extern "C" sRmMtx_35FC20* func_0035FC20(sRmAxisRot_35FC20* self, sRmMtx_35FC20* m)
+{
+    float zero = 0.0f;
+    if (self->angle != zero) {
+        float s;
+        float c;
+        func_0031BE50(&s, &c, self->angle);
+        float one = 1.0f;
+        float t = one - c;
+        float tx = t * self->ax;
+        float sy = s * self->ay;
+        float sz = s * self->az;
+        float sx = s * self->ax;
+        float ty = t * self->ay;
+        float tz = t * self->az;
+        m->m[0][0] = tx * self->ax + c;
+        m->m[1][0] = tx * self->ay + sz;
+        m->m[2][0] = tx * self->az - sy;
+        m->m[3][0] = zero;
+        m->m[0][1] = ty * self->ax - sz;
+        m->m[1][1] = ty * self->ay + c;
+        m->m[2][1] = ty * self->az + sx;
+        m->m[3][1] = zero;
+        m->m[0][2] = tz * self->ax + sy;
+        m->m[1][2] = tz * self->ay - sx;
+        m->m[2][2] = tz * self->az + c;
+        m->m[3][2] = zero;
+        m->m[0][3] = zero;
+        m->m[1][3] = zero;
+        m->m[2][3] = zero;
+        m->m[3][3] = one;
+        } else {
+        // PORT: PS2-only VU0 inline asm (4x4 matrix copy, identity -> m).
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(m), "r"(D_004FF1A0_35FC20)
+            : "memory");
+    }
+    m->m[3][0] = self->tx;
+    m->m[3][1] = self->ty;
+    return m;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035FD98);
@@ -3897,7 +3969,45 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003663D8);
+#ifdef SKIP_ASM
+extern "C" void func_003663D8(void* selfp, int idx)
+{
+    sRailNodeMan* self = (sRailNodeMan*)selfp;
+    sRailNode* n = &self->nodes[idx];
+    if (n->field_0x8 != 0x7FFFFFFF) {
+        char* owner = (*(char***)((char*)self + 0x23E8))[n->field_0x8];
+        if ((n->field_0x0 >> 2) & 1) {
+            *(int*)(owner + 0x2C) = -1;
+            *(int*)(owner + 0x34) = -1;
+        } else {
+            *(int*)(owner + 0x28) = -1;
+            *(int*)(owner + 0x30) = -1;
+        }
+    }
+    n->field_0x0 &= ~0x3F;
+    func_00366238(self, idx);
+    func_003660A8(self, idx);
+    for (;;) {
+        int l = n->prev;
+        if (l >= 0 && (self->nodes[l].field_0x0 & 1) == 0) {
+            idx = l;
+            n = &self->nodes[l];
+        } else {
+            int r = n->next;
+            if (r < 0 || (self->nodes[r].field_0x0 & 1)) {
+                return;
+            }
+        }
+        func_00366238(self, idx);
+        func_00366238(self, n->next);
+        n->size += self->nodes[n->next].size;
+        func_00366008(self, n->next);
+        func_003660A8(self, idx);
+    }
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00366548);
 
@@ -4032,7 +4142,59 @@ extern "C" void func_00366E30(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366E90);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void func_00390198(void* self, int w, int h, void* buf, char* src);
+extern char D_004A4060[];
+
+struct sRmTex_366E90 {
+    char pad_0x0[0xC];
+    int state;          // 0xC
+    int size;           // 0x10
+    char pad_0x14[0x4];
+    int bpp;            // 0x18
+    char* data;         // 0x1C
+    char pad_0x20[0x4];
+    int mipCount;           // 0x24
+    char pad_0x28[0x10];
+    unsigned long tex0; // 0x38
+};
+
+extern "C" void func_00366E90(char* self, sRmTex_366E90* tex)
+{
+    int n = 0;
+    char* buf = new (D_004A4060, *(int*)(self + 0x1F58) ^ 0x100, 0) char[tex->size];
+    int tw = (tex->tex0 >> 26) & 0xF;
+    int th = (tex->tex0 >> 30) & 0xF;
+    int bpp = tex->bpp;
+    int w = 1 << tw;
+    int h = 1 << th;
+    char* src = tex->data;
+    if (tex->mipCount >= 0) {
+        do {
+            n++;
+            int bytes = w * h * bpp / 8;
+            if (bytes <= 0xFF) {
+                bytes = 0x100;
+            }
+            func_003E6574(buf, src, bytes);
+            func_00390198(self, w, h, buf, src);
+            src += bytes;
+            w >>= 1;
+            h >>= 1;
+        } while (n <= tex->mipCount);
+    }
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+    tex->state = 10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366FE0__FPvi);

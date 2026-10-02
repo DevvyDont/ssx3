@@ -734,7 +734,83 @@ extern "C" void func_002368A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00236960);
+#ifdef SKIP_ASM
+struct sVec4_236960 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct cRiderObj_236960 {
+    int f0, f4, f8;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual int isBusy();
+};
+
+extern "C" int func_0022D278(void* self, int idx);
+extern "C" void func_0022D088(void* self, int idx, int mode);
+extern "C" sVec4_236960 func_00123F38(void* rider);
+extern "C" void func_003A9658(void* cache, int idx, const sVec4_236960* pos, float radius);
+extern "C" int func_003A9770(void* cache, int idx, sVec4_236960* pos, float* dist);
+extern "C" int func_00279298(void* p);
+extern "C" void func_0027A9F0(void* p);
+extern void* D_004A28A4;
+
+extern "C" void func_00236960(void* self)
+{
+    char* g84 = *(char**)((char*)D_004A28A8 + 0x84);
+    char* game = *(char**)(g84 + 0x78);
+    if (*(int*)(game + 0x1C8) == 0) {
+        return;
+    }
+    int state = *(int*)((char*)self + 0x10);
+    char** cache = *(char***)(g84 + 0x10);
+    int idx = *(int*)(*(char**)(*(char**)(g84 + 0x84) + 4) + 0xB0) == 0;
+    switch (state) {
+    case 0:
+        if (func_0022D278(game, *(int*)(game + 0x1BC)) != 0) {
+            char* r = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40);
+            sVec4_236960 pos = func_00123F38(*(void**)(r + 0x18));
+            char* e = *cache + idx * 0x50;
+            *(int*)(e + 0x250) = 1;
+            func_003A9658(*cache + 0x10, idx, &pos, 45000.0f);
+            *(int*)((char*)self + 0x10) = 1;
+        }
+        break;
+    case 1: {
+        sVec4_236960 v;
+        float dist;
+        func_003A9770(*cache + 0x10, idx, &v, &dist);
+        if (dist < 20000.0f) {
+            break;
+        }
+        char* o = (char*)func_00230698(*(void**)((char*)D_004A28A8 + 0x84), 0);
+        if (((cRiderObj_236960*)(o + 0x10))->isBusy() != 0) {
+            break;
+        }
+        if (*(int*)(o + 0x44) != 0) {
+            break;
+        }
+        if (func_00279298(D_004A28A4) != 0) {
+            break;
+        }
+        func_0027A9F0(D_004A28A4);
+        *(int*)(game + 0x1C8) = 0;
+        func_0022D088(game, *(int*)(game + 0x1BC), 7);
+        *(int*)((char*)self + 0x10) = 2;
+        break;
+    }
+    case 2:
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00236AF0__FPv);

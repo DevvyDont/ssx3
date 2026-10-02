@@ -137,7 +137,58 @@ void func_00351538_impl(char* self, float t)
 
 INCLUDE_ASM("object/instanceman", func_00351660);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00351800);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void* func_00351538(void* self);
+
+struct sImInst_351800 {
+    char pad_0x0[0x44];
+    float t[3];         // 0x44
+    float rot[3];       // 0x50
+    char pad_0x5c[0x34];
+    float m[4][4];      // 0x90
+};
+
+extern "C" void func_00351800(sImInst_351800* self)
+{
+    func_00351538(self);
+    float r[3];
+    float sc[3][2];
+    r[0] = -self->rot[0] * 0.01745329424738884f;
+    r[1] = -self->rot[1] * 0.01745329424738884f;
+    r[2] = -self->rot[2] * 0.01745329424738884f;
+    func_0031BE50(&sc[0][0], &sc[0][1], r[0]);
+    func_0031BE50(&sc[1][0], &sc[1][1], r[1]);
+    func_0031BE50(&sc[2][0], &sc[2][1], r[2]);
+    float sx = sc[0][0];
+    float sy = sc[1][0];
+    float cx = sc[0][1];
+    float sz = sc[2][0];
+    float cz = sc[2][1];
+    float cy = sc[1][1];
+    float sxsy = sx * sy;
+    float cxsy = cx * sy;
+    float cxsz = cx * sz;
+    self->m[0][0] = cy * cz;
+    self->m[0][1] = -cy * sz;
+    self->m[0][2] = sy;
+    self->m[0][3] = 0.0f;
+    self->m[1][0] = sxsy * cz + cxsz;
+    self->m[1][1] = cx * cz - sxsy * sz;
+    self->m[1][2] = -sx * cy;
+    self->m[1][3] = 0.0f;
+    self->m[2][0] = sx * sz - cxsy * cz;
+    self->m[2][1] = cxsz * sy + sx * cz;
+    self->m[2][2] = cx * cy;
+    self->m[2][3] = 0.0f;
+    self->m[3][0] = self->t[0];
+    self->m[3][1] = self->t[1];
+    self->m[3][2] = self->t[2];
+    self->m[3][3] = 1.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00351948);

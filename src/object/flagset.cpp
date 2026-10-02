@@ -247,7 +247,77 @@ extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034C668);
+#ifdef SKIP_ASM
+struct sFlagSetElem_C668 {
+    char pad0[0x5C];
+    int active; // 0x5C
+    char pad60[0x188 - 0x60];
+};
+
+struct sFlagSet_C668 {
+    char pad0[0x10];
+    float level;    // 0x10
+    float base;     // 0x14
+    float delta;    // 0x18
+    float t;        // 0x1C
+    sFlagSetElem_C668 elems[15]; // 0x20
+};
+
+extern "C" int func_002D1BA0();
+extern "C" void func_0034B818(void* elem);
+unsigned int BXrand();
+extern char* D_004A5B64;
+
+// Uniform float in [0, 1) built from the random mantissa bits.
+static inline float randf_34C668()
+{
+    union {
+        int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+extern "C" void func_0034C668(sFlagSet_C668* self)
+{
+    float amp = 0.15f;
+    switch (func_002D1BA0()) {
+    case 1:
+        break;
+    case 2:
+        amp = 0.3f;
+        break;
+    case 3:
+        amp = 0.45f;
+        break;
+    }
+    float one = 1.0f;
+    self->t += one / (float)*(int*)(D_004A5B64 + 0x10);
+    if (one <= self->t) {
+        self->t -= one;
+        self->base += self->delta;
+        float lo = -amp;
+        self->delta = lo + (amp - lo) * randf_34C668();
+        if (self->base + self->delta < 0.0f) {
+            self->delta = -self->base;
+        }
+        if (one < self->base + self->delta) {
+            self->delta = one - self->base;
+        }
+    }
+    self->level = self->base + self->delta * self->t;
+    int i;
+    for (i = 0; i < 15; i++) {
+        sFlagSetElem_C668* e = &self->elems[i];
+        if (e->active != 0) {
+            func_0034B818(e);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034C7F8);
@@ -354,7 +424,86 @@ extern "C" void func_0034CB80(void* self, int flags)
 
 INCLUDE_ASM("object/flagset", func_0034CBE8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034CC80);
+#ifdef SKIP_ASM
+class cFlagObj_CC80 {
+public:
+    int f0, f4, f8;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual int isA(int type);
+};
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_0034CAB8(void* self, int a1, void* obj, void* pos, int flag, float force);
+extern "C" void func_0034CDE8(void* self, int flag, float force);
+extern char D_004A4018[];
+
+// PORT: SN abs.s asm helper (PS2 FPU).
+static inline float fabs_34CC80(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_0034CC80(char* self, char* obj, int flag)
+{
+    if (*(int*)(self + 0x40) == 0) {
+        return;
+    }
+    if (obj == 0) {
+        return;
+    }
+    float force;
+    if (*(float*)(self + 0x34) < 0.0f) {
+        force = *(float*)(self + 0x30) * 0.4f;
+    } else {
+        force = *(float*)(self + 0x30) * -0.4f;
+    }
+    cFlagObj_CC80* o = *(cFlagObj_CC80**)(obj + 0xC);
+    if (o != 0) {
+        if (o->isA(9) == 0) {
+            return;
+        }
+        if (!(0.25f <= fabs_34CC80(force))) {
+            return;
+        }
+        if (flag != 0) {
+            char* p = *(char**)(self + 0x104);
+            if (p == 0) {
+                return;
+            }
+            void* q = *(void**)(p + 0xC);
+            if (q == 0) {
+                return;
+            }
+            func_0034CDE8(q, flag, force);
+        } else {
+            char* p = *(char**)(self + 0x108);
+            if (p == 0) {
+                return;
+            }
+            void* q = *(void**)(p + 0xC);
+            if (q == 0) {
+                return;
+            }
+            func_0034CDE8(q, 0, force);
+        }
+    } else if (0.25f <= fabs_34CC80(force)) {
+        void* m = cMemMan_alloc(0x10C, D_004A4018, 0x20000000, 0);
+        func_0034CAB8(m, 1, obj, self + 0x1C, flag, force);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034CDE8);
@@ -376,7 +525,66 @@ extern "C" void func_0034CDE8(void* self, int on, float dt)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034CE48);
+#ifdef SKIP_ASM
+extern "C" void func_0034CC80(char* self, char* obj, int flag);
+extern "C" void func_0034CF98(void* self);
+
+struct sFlagVE_34CE48 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+// PORT: SN abs.s asm helper (PS2 FPU).
+static inline float fabs_34CE48(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_0034CE48(char* self)
+{
+    if (*(int*)(self + 0x38) > 0) {
+        if (--*(int*)(self + 0x38) == 0) {
+            func_0034CC80(self, *(char**)(self + 0x104), 1);
+        }
+    }
+    if (*(int*)(self + 0x3C) > 0) {
+        if (--*(int*)(self + 0x3C) == 0) {
+            func_0034CC80(self, *(char**)(self + 0x108), 0);
+        }
+    }
+    char* osc = self + 0x1C;
+    *(float*)(self + 0x2C) += *(float*)(self + 0x34);
+    if (*(float*)(self + 0x30) < 0.01f && fabs_34CE48(*(float*)(osc + 0x10)) < 0.01f) {
+        sFlagVE_34CE48* vt = *(sFlagVE_34CE48**)(self + 0xC);
+        vt[34].fn(self + vt[34].delta, 1);
+        return;
+    }
+    if (0.0f <= *(float*)(self + 0x34)) {
+        if (*(float*)(self + 0x2C) >= *(float*)(self + 0x30)) {
+            float a = *(float*)(self + 0x30);
+            *(float*)(self + 0x2C) = a;
+            float h = a * 0.5f;
+            *(float*)(self + 0x30) = h;
+            *(float*)(self + 0x34) = -h * 0.1f;
+        }
+    } else {
+        float a = *(float*)(self + 0x30);
+        float na = -a;
+        if (*(float*)(self + 0x2C) <= na) {
+            *(float*)(self + 0x2C) = na;
+            float h = a * 0.5f;
+            *(float*)(self + 0x30) = h;
+            *(float*)(self + 0x34) = h * 0.1f;
+        }
+    }
+    func_0034CF98(self);
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034CF98);
 

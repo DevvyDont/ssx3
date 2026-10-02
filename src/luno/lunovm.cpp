@@ -288,7 +288,64 @@ extern "C" void func_00225BE8(cLunoValue* self, sVEntry00224C00** stream, int ba
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", func_00225CA0);
+#ifdef SKIP_ASM
+struct sLunoPair_225CA0 {
+    int word0;
+    int word1;
+};
+
+// PORT: func_00224DA0 forwards a size argument to constructTable (unit declares 1 arg).
+extern "C++" cLunoTableRef* func_00224DA0_sz(cLunoTableRef* self, int size) __asm__("func_00224DA0");
+// Non-POD (user copy ctor) so the local is BLKmode and shares the block-scoped slot.
+struct cLunoRefTmp_225CA0 {
+    cLunoTable* table;
+    cLunoRefTmp_225CA0() {}
+    cLunoRefTmp_225CA0(const cLunoRefTmp_225CA0&);
+};
+extern "C" void func_002259A8(cLunoTableRef* self, sVEntry00224C00** stream, int base);
+
+static inline int lunoReadInt_225CA0(sVEntry00224C00** stream)
+{
+    int v;
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &v, 4);
+    return v;
+}
+
+extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int base)
+{
+    int type = lunoReadInt_225CA0(stream);
+    if (type == 5) {
+        sLunoPair_225CA0 tmp;
+        tmp.word0 = 0;
+        tmp.word1 = 0;
+        func_00224C78(&tmp, (sVEntry00224C78**)stream, base);
+        if (self->type == 4) {
+            func_00224DF0((cLunoTableRef*)self, 2);
+        }
+        self->type = 0;
+        self->word0 = 0;
+        *(sLunoPair_225CA0*)self = tmp;
+        self->type = type;
+    } else if (type == 4) {
+        cLunoRefTmp_225CA0 ref;
+        func_00224DA0_sz((cLunoTableRef*)&ref, 0x20);
+        func_002259A8((cLunoTableRef*)&ref, stream, base);
+        if (self->type == type) {
+            func_00224DF0((cLunoTableRef*)self, 2);
+        }
+        self->type = 0;
+        self->word0 = 0;
+        func_00225068((cLunoTableRef*)self, (cLunoTableRef*)&ref);
+        self->type = type;
+        func_00224DF0((cLunoTableRef*)&ref, 2);
+    } else {
+        self->type = type;
+        (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 4);
+    }
+}
+#endif
 
 INCLUDE_ASM("luno/lunovm", func_00225DE8);
 

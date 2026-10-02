@@ -5,7 +5,63 @@ struct cBucketMan {
     char* mBuckets; // 0x4, element size 0x44
 };
 
+//100%
 INCLUDE_ASM("object/bucketman", cBucketMan_init);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern char D_004A4020[];
+extern char D_00491F00[];
+
+struct sBucketList_3549E0 {
+    int f0;
+    sBucketList_3549E0* prev;
+    sBucketList_3549E0* next;
+    void* vt;
+};
+
+struct sBucket_3549E0 {
+    int flags;
+    sBucketList_3549E0 l0;
+    sBucketList_3549E0 l1;
+    sBucketList_3549E0 l2;
+    sBucketList_3549E0 l3;
+    sBucket_3549E0()
+    {
+        l0.vt = D_00491F00;
+        l0.prev = 0;
+        l0.next = 0;
+        l1.vt = D_00491F00;
+        l1.prev = 0;
+        l1.next = 0;
+        l2.vt = D_00491F00;
+        l2.prev = 0;
+        l2.next = 0;
+        l3.vt = D_00491F00;
+        l3.prev = 0;
+        l3.next = 0;
+    }
+    ~sBucket_3549E0() {}
+};
+
+extern "C" void cBucketMan_init(cBucketMan* self, int n)
+{
+    char** slot = &self->mBuckets;
+    *slot = (char*)new (D_004A4020, 0, 0) sBucket_3549E0[n];
+    *(int*)self = n;
+    for (int i = 0; i < *(int*)self; i++) {
+        ((sBucket_3549E0*)self->mBuckets)[i].l0.prev = &((sBucket_3549E0*)self->mBuckets)[i].l1;
+        ((sBucket_3549E0*)self->mBuckets)[i].l0.next = 0;
+        ((sBucket_3549E0*)self->mBuckets)[i].l1.prev = 0;
+        ((sBucket_3549E0*)self->mBuckets)[i].l1.next = &((sBucket_3549E0*)self->mBuckets)[i].l0;
+        ((sBucket_3549E0*)self->mBuckets)[i].l2.prev = &((sBucket_3549E0*)self->mBuckets)[i].l3;
+        ((sBucket_3549E0*)self->mBuckets)[i].l2.next = 0;
+        ((sBucket_3549E0*)self->mBuckets)[i].l3.prev = 0;
+        ((sBucket_3549E0*)self->mBuckets)[i].l3.next = &((sBucket_3549E0*)self->mBuckets)[i].l2;
+        ((sBucket_3549E0*)self->mBuckets)[i].flags = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/bucketman", func_00354B38);

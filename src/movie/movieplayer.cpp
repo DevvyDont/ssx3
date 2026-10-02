@@ -305,7 +305,73 @@ extern "C" void func_0023CC78(void* self, int n, char* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_setTitleString);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void func_0023CC78(void* self, int n, char* dst);
+extern "C" void* func_00147170(void* iface, int id);
+int GetHashValue32(char* s);
+extern void* D_004A28A8;
+extern char D_0047C138[];
+extern char D_0047C150[];
+extern char D_0047C160[];
+
+struct sLocVEntry_23CDB0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+struct sMovieVEntry_23CDB0 {
+    short delta;
+    short index;
+    void (*fn)(void*, char*);
+};
+
+extern "C" void cMCOverlayManager_setTitleString(void* self, int n)
+{
+    char out[0x200];
+    char title[0x200];
+    char fmt[0x200];
+    char name[0x200];
+    func_0023CC78(self, n, title);
+    func_002C2540(fmt, D_0047C150);
+    switch (*(int*)((char*)self + 0xB4)) {
+    case 0: {
+        char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+        sLocVEntry_23CDB0* vt = *(sLocVEntry_23CDB0**)(loc + 4);
+        char* thisp = loc + vt[4].delta;
+        func_002C26D0_v(title, fmt, vt[4].fn(thisp, GetHashValue32(D_0047C160)));
+        func_002C26D0_v(out, title, n);
+        break;
+    }
+    case 1: {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_002C2540(name, func_00147170(iface, *(int*)((char*)self + 0xFC)));
+        func_002C26D0_v(out, fmt, name);
+        break;
+    }
+    default: {
+        char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+        sLocVEntry_23CDB0* vt = *(sLocVEntry_23CDB0**)(loc + 4);
+        char* thisp = loc + vt[4].delta;
+        func_002C2508(title, vt[4].fn(thisp, GetHashValue32(D_0047C138)));
+        func_002C26D0_v(out, fmt, title);
+        break;
+    }
+    }
+    char* o = *(char**)((char*)self + 0x434);
+    sMovieVEntry_23CDB0* mvt = *(sMovieVEntry_23CDB0**)o;
+    mvt[45].fn(o + mvt[45].delta, out);
+    func_002C2508((char*)self + 0x234, out);
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023CF38);
 
@@ -377,7 +443,72 @@ extern "C" void func_0023D618(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023D660);
+#ifdef SKIP_ASM
+extern "C" int func_00241AC0(void* self);
+extern "C" void func_0023E268(void* self);
+extern "C" void func_0023E320(void* self);
+extern "C" void func_0023E498(void* self);
+
+struct sVoidVEntry_23D660 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sIntVEntry_23D660 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sArgVEntry_23D660 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline bool isState_23D660(char* s, int k)
+{
+    return *(int*)(s + 0x130) == k;
+}
+
+extern "C" void func_0023D660(void* self)
+{
+    char* s = (char*)self;
+    char* o = *(char**)(s + 0x434);
+    sVoidVEntry_23D660* vt = *(sVoidVEntry_23D660**)o;
+    vt[3].fn(o + vt[3].delta);
+    if (*(int*)(s + 0x338) != 0) {
+        o = *(char**)(s + 0x434);
+        sIntVEntry_23D660* ivt = *(sIntVEntry_23D660**)o;
+        if (ivt[11].fn(o + ivt[11].delta) != 0) {
+            return;
+        }
+        *(int*)(s + 0x338) = 0;
+    }
+    if (*(int*)(s + 0x424) == -1) {
+        *(int*)(s + 0x424) = func_00241AC0(self);
+    }
+    o = *(char**)(s + 0x434);
+    sIntVEntry_23D660* ivt = *(sIntVEntry_23D660**)o;
+    if (ivt[11].fn(o + ivt[11].delta) == 0) {
+        func_0023D570(self, 0);
+        int ok = !(isState_23D660(s, 0x31) || isState_23D660(s, 0x32) || isState_23D660(s, 0x33) || isState_23D660(s, 0x34) || isState_23D660(s, 0x36));
+        if (ok) {
+            sArgVEntry_23D660* avt = *(sArgVEntry_23D660**)(s + 0x748);
+            avt[1].fn(s + avt[1].delta, 3);
+        }
+    }
+    int st = *(int*)(s + 0x130);
+    if (st == 0x31) {
+        func_0023E268(self);
+    } else if (st == 0x33) {
+        func_0023E498(self);
+    } else if (st == 0x36) {
+        func_0023E320(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023D7D8);
 

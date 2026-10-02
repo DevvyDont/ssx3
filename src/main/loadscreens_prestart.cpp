@@ -458,7 +458,125 @@ extern "C" void* func_00232AE0(void* self, int arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232B28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cWorld_232B28 {
+public:
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44(int);
+};
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+// malloc-like allocation (gcc treats operator new results as unaliased)
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* func_00397B08(void* p);
+extern "C" int cUIEngine_loadFile(void* ui, const char* name);
+extern "C" void* func_00186A08(void* p, void* ui);
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void func_0039F400(void* list, void* item);
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern char D_0047B698[];
+extern char D_0047B9E0[];
+extern char D_0047B9F0[];
+extern char D_0047B978[];
+extern char D_0047BA00[];
+extern char D_0046D1D0[];
+extern char D_0047CA18[];
+
+struct sNode_232B28 {
+    int f0;
+    char f4;
+    void* f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+};
+
+struct sUI_232B28 {
+    int f0;
+    int f4;
+    int f8;
+    sNode_232B28* fC;
+    int f10;
+    int f14;
+    char list[4];
+};
+
+extern "C" void func_00232B28(void* self)
+{
+    ((cWorld_232B28*)D_004A289C)->v44(0x100);
+    void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
+    *(void**)((char*)self + 0xC) = ui;
+    cUIEngine_loadFile(ui, D_0047B9E0);
+    (*(sUI_232B28**)((char*)self + 0xC))->f10 = *(int*)((char*)D_004A28A8 + 0x8C);
+    sNode_232B28* n = (sNode_232B28*)operator new(0x1C, D_0047B9F0, 0x100, 0);
+    n->f4 = 0;
+    n->f8 = D_0046D1D0;
+    n->f18 = 0;
+    n->fC = 0;
+    n->f10 = 0;
+    n->f14 = 0;
+    (*(sUI_232B28**)((char*)self + 0xC))->fC = n;
+    (*(sUI_232B28**)((char*)self + 0xC))->f8 = *(int*)((char*)D_004A28A8 + 0x88);
+    int mode = *(int*)((char*)self + 0x18);
+    if (mode == 0) {
+        void* item = func_00186A08(operator new(0x248, D_0047B978, 0, 0), *(void**)((char*)self + 0xC));
+        func_0039F400(*(char**)((char*)self + 0xC) + 0x18, item);
+    } else if (mode == 2) {
+        void* p = operator new(0x48, D_0047BA00, 0, 0);
+        func_0039E2A0(p, *(void**)((char*)self + 0xC));
+        *(void**)((char*)p + 8) = D_0047CA18;
+        func_0039F400(*(char**)((char*)self + 0xC) + 0x18, p);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00232C98);
 

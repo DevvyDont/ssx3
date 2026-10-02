@@ -213,7 +213,57 @@ extern "C" void func_0022CD18(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022CD40);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+struct cWorldView;
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cWorldView_getNumSections(cWorldView* view);
+extern "C" void* func_003A9820(cWorldView* self, unsigned int i);
+extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" void* func_00144D38(void* iface, int i);
+extern "C" void func_0022E228(void* self);
+
+static inline cWorldView* gameWorldView_22CD40(void* self)
+{
+    return (cWorldView*)(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x10);
+}
+
+extern "C" void func_0022CD40(void* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int i;
+    unsigned int j;
+
+    for (int k = 0; k < 50; k++) {
+        D_00442168[k].field_0x4 = -1;
+        D_00442168[k].field_0x8 = 0;
+    }
+    D_00442168[49].field_0x4 = 0;
+    for (i = 0; i < 50; i++) {
+        for (j = 0; j < (unsigned int)cWorldView_getNumSections(gameWorldView_22CD40(self)); j++) {
+            void* name = func_00144D38(iface, i);
+            if (func_004165A8(name, func_003A9820(gameWorldView_22CD40(self), j)) == 0) {
+                D_00442168[i].field_0x4 = j;
+            }
+        }
+    }
+    *(int*)((char*)self + 0x1B8) = 0;
+    *(int*)((char*)self + 0x1B4) = 0;
+    *(int*)((char*)self + 0x1C0) = 0;
+    *(int*)((char*)self + 0x1C8) = 0;
+    *(int*)((char*)self + 0x1CC) = 0;
+    *(int*)((char*)self + 0x1BC) = 0x16;
+    *(int*)((char*)self + 0x1D0) = 1;
+    func_0022E228(self);
+    *(int*)((char*)self + 0x1AC) = -1;
+    *(int*)((char*)self + 0x1A4) = 0;
+    *(int*)((char*)self + 0x1A8) = 0;
+    *(int*)((char*)self + 0x1C4) = 0;
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022CEA8);
 

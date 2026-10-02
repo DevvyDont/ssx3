@@ -113,7 +113,65 @@ extern "C" void func_00359F30(void* self, cStream00359F30* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_00359F88);
+#ifdef SKIP_ASM
+struct sSmQuad4_359F88 {
+    float x, y, z, w;
+    sSmQuad4_359F88(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
+
+extern void* D_0048F168[];
+extern "C" void func_003451C0(void* ref, int id);
+extern "C" void func_0035A550(void* self, float v);
+extern "C" void func_0035A3F0(void* self);
+extern "C" void cMultiSplineModifier_allocNodes(void* self);
+extern "C" void cMultiSplineModifier_setupNodes(void* self);
+extern "C" void cMultiSplineModifier_setupOverlapSystem(void* self);
+extern "C" void* func_0035AC20(void* self);
+
+extern "C" void* func_00359F88(char* self, char* desc, char* model)
+{
+    *(char**)(self + 0x40) = model;
+    *(void***)self = D_0048F168;
+    *(unsigned int*)(self + 0x48) = 0xFFFFFFFF;
+    *(int*)(self + 0x50) = 0;
+    *(int*)(self + 0x4C) = 0;
+    *(int*)(self + 0x54) = 0;
+    *(int*)(self + 0x18) = 0;
+    *(int*)(self + 0x4) = *(int*)(desc + 0x2C);
+    *(int*)(self + 0x8) = *(int*)(desc + 0x8);
+    *(float*)(self + 0xC) = *(float*)(desc + 0x10) * 0.01745329424738884f;
+    func_003451C0(self + 0x48, *(int*)(desc + 0x4));
+    func_0035A550(self, *(float*)(desc + 0xC));
+    if (*(float*)(desc + 0xC) >= 0.0f) {
+        *(float*)(self + 0x10) = 0.0f;
+    } else {
+        *(float*)(self + 0x10) = *(float*)(self + 0x54);
+    }
+    *(int*)(self + 0x1C) = *(int*)(desc + 0x28) != 0;
+    float zero = 0.0f;
+    *(sSmQuad4_359F88*)(self + 0x20) = sSmQuad4_359F88(*(float*)(desc + 0x18), *(float*)(desc + 0x1C),
+                                                       *(float*)(desc + 0x20), *(float*)(desc + 0x24));
+    if (*(float*)(desc + 0x14) != zero) {
+        *(float*)(self + 0x10) = *(float*)(desc + 0x14);
+    }
+    if (*(float*)(self + 0x10) < zero || *(float*)(self + 0x54) < *(float*)(self + 0x10)) {
+        *(float*)(self + 0x10) = zero;
+    }
+    cMultiSplineModifier_allocNodes(self);
+    func_0035A3F0(self);
+    cMultiSplineModifier_setupNodes(self);
+    func_0035AC20(self);
+    cMultiSplineModifier_setupOverlapSystem(self);
+    if (*(int*)(*(char**)(self + 0x40) + 0x8) & 0x100) {
+        *(int*)(self + 0x34) = 1;
+    } else {
+        *(int*)(self + 0x34) = 0;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035A118);
@@ -479,7 +537,92 @@ INCLUDE_ASM("object/splinemodifier", func_0035AC20);
 
 INCLUDE_ASM("object/splinemodifier", func_0035B200);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035B418);
+#ifdef SKIP_ASM
+struct sSmVec4_35B418 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSmBox_35B418 {
+    char pad_0x0[0x30];
+    sSmVec4_35B418 min;     // 0x30
+    sSmVec4_35B418 max;     // 0x40
+    char pad_0x50[0x10];
+};
+
+struct sSmVE_35B418 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sSmMat_35B418 {
+    sSmVec4_35B418 r[4];
+};
+
+struct sSmVE43_35B418 {
+    short delta;
+    short index;
+    sSmMat_35B418 (*fn)(void*);
+};
+struct sSmVE93_35B418 {
+    short delta;
+    short index;
+    int (*fn)(void*, sSmVec4_35B418*, sSmVec4_35B418*, const sSmMat_35B418&);
+};
+struct sSmVEModel_35B418 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct cMultiSpline_35B418 {
+    sSmVE_35B418* vtable;   // 0x0
+    int count;              // 0x4
+    char pad_0x8[0x14];
+    int follow;             // 0x1C
+    char pad_0x20[0x10];
+    int dirty;              // 0x30
+    char pad_0x34[0x4];
+    int mode;               // 0x38
+    sSmBox_35B418* boxes;   // 0x3C
+    char* model;            // 0x40
+    char** insts;           // 0x44
+};
+
+extern char* D_004A5B80;
+extern "C" void func_00345430(void* a, void* b);
+
+extern "C" void func_0035B418(cMultiSpline_35B418* self)
+{
+    if (self->dirty != 0) {
+        self->vtable[3].fn((char*)self + self->vtable[3].delta);
+    }
+    char* model = *(char**)(self->model + 0xC);
+    char* w = D_004A5B80;
+    for (int i = 1; i < self->count; i++) {
+        sSmVE93_35B418* vt = *(sSmVE93_35B418**)(w + 0x10D8);
+        char* thisp = w + vt[93].delta;
+        sSmBox_35B418* box = &self->boxes[i];
+        sSmVE43_35B418* vt2 = *(sSmVE43_35B418**)(w + 0x10D8);
+        int hit = vt[93].fn(thisp, &box->min, &box->max, vt2[43].fn(w + vt2[43].delta));
+        if (hit != 1) {
+            sSmVEModel_35B418* mvt = *(sSmVEModel_35B418**)(model + 0xC);
+            mvt[33].fn(model + mvt[33].delta, self->insts[i] + 0x10, self->mode);
+            if (hit != 0) {
+                sSmVEModel_35B418* mvt2 = *(sSmVEModel_35B418**)(model + 0xC);
+                mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 0x420);
+            } else {
+                sSmVEModel_35B418* mvt2 = *(sSmVEModel_35B418**)(model + 0xC);
+                mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 0x400);
+            }
+        }
+    }
+    if (self->follow != 0) {
+        func_00345430((char*)self + 0x48, (char*)self + 0x20);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035B5A8);

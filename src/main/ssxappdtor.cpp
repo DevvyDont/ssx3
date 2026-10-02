@@ -1233,7 +1233,64 @@ extern "C" void* func_00245708(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245730);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" int func_00147618(void* iface, int a1);
+extern char D_0047BCD8[];
+extern char D_0047BCE8[];
+extern char D_0047BCF8[];
+extern char D_0047BD08[];
+extern char D_0047BD18[];
+
+class cUIObj_245730 {
+public:
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int on);
+};
+
+extern "C" void func_00245730(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* scr = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BCD8), 0);
+    *(void**)((char*)self + 0x40) = scr;
+    if (scr != 0) {
+        cUIScreen_playFrame(scr, 0, 0);
+    }
+    char* ctrlDefault = D_0047BCE8;
+    char* ctrlPro = D_0047BCF8;
+    int r = func_00147618(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    cUIObj_245730* o;
+    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ctrlDefault));
+    if (o != 0) {
+        o->setVisible(r == 0);
+    }
+    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BD08));
+    if (o != 0) {
+        o->setVisible(r == 0);
+    }
+    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ctrlPro));
+    if (o != 0) {
+        o->setVisible(r != 0);
+    }
+    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BD18));
+    if (o != 0) {
+        o->setVisible(r != 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002458B0__FPv);

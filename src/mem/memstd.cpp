@@ -676,7 +676,106 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
 
 INCLUDE_ASM("mem/memstd", func_002548D0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00254C48);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cWorld_254C48 {
+public:
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49(int a, char* p, int b, int c, int d, int e, int f, int g, int h);
+};
+extern "C" void* func_002548D0(void* self);
+extern cWorld_254C48* D_004A5B80_254C48 __asm__("D_004A5B80");
+
+struct sMesh_254C48 {
+    int f0;
+    int f4;
+    int f8;
+    void* res;
+    char* hdr;
+    char** items;
+    int f18;
+    int rows;
+    int cols;
+    int widths[1];
+};
+
+extern "C" void func_00254C48(sMesh_254C48* self, void* res)
+{
+    if (res != 0) {
+        self->res = res;
+    }
+    char* hdr = *(char**)((char*)res + 4);
+    self->hdr = hdr;
+    char* data;
+    if (*(int*)(hdr + 0xC) & 0x1000) {
+        data = hdr + *(int*)(hdr + 0x10);
+    } else {
+        data = hdr + 0x10;
+    }
+    int k = 0;
+    short stride = *(short*)(self->hdr + 6);
+    for (int i = 0; i < self->rows; i++) {
+        int off = 0;
+        for (int j = 0; j < self->cols; j++) {
+            int* e = ((int**)self->items)[k];
+            D_004A5B80_254C48->v49(e[0], data + ((off << 6) + stride * (i << 6)), e[1], e[2], 0, 0, 0, 0, 0);
+            k++;
+            off += self->widths[j];
+        }
+    }
+    func_002548D0(self);
+}
+#endif
 
 extern "C" void* func_002548D0(void* self);
 

@@ -459,7 +459,70 @@ extern "C" void func_00231320(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_00231348);
+#ifdef SKIP_ASM
+struct cSerObj_00231348 {
+    int f0, f4, f8;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void serialize(void* stream);
+};
+struct cStream_00231348 {
+    virtual void write(void* p, int n);
+};
+
+// PORT: these serializers take (self, stream); their mangled names say (void*).
+void func_00233B90_s(void* p, void* s) __asm__("func_00233B90__FPv");
+void func_00233BD0_s(void* p, void* s) __asm__("func_00233BD0__FPv");
+void func_00234DE0_s(void* p, void* s) __asm__("func_00234DE0__FPv");
+void func_00234EB8_s(void* p, void* s) __asm__("func_00234EB8__FPv");
+void func_002361C8_s(void* p, void* s) __asm__("func_002361C8__FPv");
+void func_00236AF8_s(void* p, void* s) __asm__("func_00236AF8__FPv");
+void func_00236B70_s(void* p, void* s) __asm__("func_00236B70__FPv");
+void func_00236D60_s(void* p, void* s) __asm__("func_00236D60__FPv");
+void func_00236EC8_s(void* p, void* s) __asm__("func_00236EC8__FPv");
+void func_00236FA8_s(void* p, void* s) __asm__("func_00236FA8__FPv");
+extern "C" void func_002340B8(void* p, void* s);
+extern "C" void func_00234990(void* p, void* s);
+extern "C" void func_00235990(void* p, void* s);
+extern "C" void func_00235F48(void* p, void* s);
+extern "C" void func_00236728(void* p, void* s);
+
+extern "C" void func_00231348(void* self, cStream_00231348* stream)
+{
+    (*(cSerObj_00231348**)((char*)self + 0x70))->serialize(stream);
+    (*(cSerObj_00231348**)((char*)self + 0x74))->serialize(stream);
+    stream->write((char*)self + 0x214, 4);
+    stream->write((char*)self + 0x218, 4);
+    stream->write((char*)self + 0x210, 4);
+    stream->write((char*)self + 0x21C, 4);
+    func_00234990((char*)self + 0xB0, stream);
+    func_00236D60_s((char*)self + 0xD0, stream);
+    func_00234DE0_s((char*)self + 0xE0, stream);
+    func_00234EB8_s((char*)self + 0xF0, stream);
+    func_002340B8((char*)self + 0x100, stream);
+    func_00233B90_s((char*)self + 0x118, stream);
+    func_00236EC8_s((char*)self + 0x128, stream);
+    func_00233BD0_s((char*)self + 0x138, stream);
+    func_00236B70_s((char*)self + 0x148, stream);
+    func_00235990((char*)self + 0x158, stream);
+    func_00236AF8_s((char*)self + 0x178, stream);
+    func_00236FA8_s((char*)self + 0x18C, stream);
+    func_00235F48((char*)self + 0x19C, stream);
+    func_00236728((char*)self + 0x1B8, stream);
+    func_002361C8_s((char*)self + 0x1DC, stream);
+}
+#endif
 
 INCLUDE_ASM("main/gameload", func_002314D0);
 

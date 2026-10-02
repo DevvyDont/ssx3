@@ -44,7 +44,56 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00348C48);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+struct sOctCell_8C48 {
+    void* child[8];
+    void* lists[3];
+};
+
+struct sHashCellR_8C48 {
+    char pad_0x0[0x10];
+    sOctCell_8C48* oct;   // 0x10
+};
+
+extern "C" void func_003284B8(sOctCell_8C48* oct, int type, sHashNode_8B90* node, sHashKey_8B90* key, sHashCellR_8C48* cell);
+
+static inline int octEmpty_8C48(sOctCell_8C48* o)
+{
+    if (o->child[0] != 0 || o->child[1] != 0 || o->child[2] != 0 || o->child[3] != 0
+        || o->child[4] != 0 || o->child[5] != 0 || o->child[6] != 0 || o->child[7] != 0) {
+        return 0;
+    }
+    for (int i = 0; i < 3; i++) {
+        if (o->lists[i] != 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+extern "C" void func_00348C48(void* self)
+{
+    sHashCellR_8C48* cell = (sHashCellR_8C48*)func_002D1BE0();
+    sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
+    (*(int*)((char*)cell + 0xA0))++;
+    sHashKey_8B90 key;
+    func_00328F28(&key, (char*)self + 0x30);
+    sHashCellR_8C48* c1 = key.x < 0 ? cell + 4 : cell;
+    sHashCellR_8C48* c2 = key.y < 0 ? c1 + 2 : c1;
+    sHashCellR_8C48* c3 = key.z < 0 ? c2 + 1 : c2;
+    sHashCellR_8C48* c = c3;
+    func_003284B8(c->oct, 2, node, &key, c);
+    if (octEmpty_8C48(c->oct)) {
+        operator_delete((int*)c->oct);
+        c->oct = 0;
+    }
+    operator_delete(*(int**)((char*)self + 0x54));
+    *(void**)((char*)self + 0x54) = 0;
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_00348D98);
 
@@ -446,7 +495,86 @@ extern "C" void func_0034AC10(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034AC88);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+
+struct sFrRailDesc;
+
+struct sFrRailOut_AC88 {
+    char on0, on1, on2, on3;  // 0x0
+    float a[4];               // 0x4
+    float b[4];               // 0x14
+    float c[4];               // 0x24
+    float p[3];               // 0x34
+    float q[4];               // 0x40
+    float r0;                 // 0x50
+    float r1;                 // 0x54
+};
+
+struct sFrRailTriple_AC88 {
+    float a, b, c;
+};
+
+struct sFrRailSrc_AC88 {
+    int f0;
+    int on0, on1, on2;        // 0x4
+    sFrRailTriple_AC88 t[4];  // 0x10
+    float p[3];               // 0x40
+    float q[4];               // 0x4C
+    float r0;                 // 0x5C
+    float r1;                 // 0x60
+    int on3;                  // 0x64
+};
+
+static inline float perSec_34AC88(float x)
+{
+    return x * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+}
+
+extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)
+{
+    sFrRailOut_AC88* d = (sFrRailOut_AC88*)out;
+    sFrRailSrc_AC88* s = (sFrRailSrc_AC88*)src;
+    d->on0 = s->on0 != 0;
+    d->on1 = s->on1 != 0;
+    d->on2 = s->on2 != 0;
+    d->on3 = s->on3 != 0;
+    {
+        float x = s->p[0];
+        float y = s->p[1];
+        float z = s->p[2];
+        d->p[0] = x;
+        d->p[1] = y;
+        d->p[2] = z;
+    }
+    {
+        float x = s->q[0];
+        float y = s->q[1];
+        float z = s->q[2];
+        d->q[0] = x;
+        d->q[1] = y;
+        d->q[2] = z;
+    }
+    d->q[3] = s->q[3];
+    d->r0 = perSec_34AC88(s->r0);
+    d->r1 = perSec_34AC88(s->r1);
+    d->a[0] = perSec_34AC88(s->t[0].a);
+    d->b[0] = s->t[0].b;
+    d->c[0] = s->t[0].c;
+    d->a[1] = perSec_34AC88(s->t[1].a);
+    d->b[1] = s->t[1].b;
+    d->c[1] = s->t[1].c;
+    d->a[2] = perSec_34AC88(s->t[2].a);
+    d->b[2] = s->t[2].b;
+    d->c[2] = s->t[2].c;
+    d->a[3] = perSec_34AC88(s->t[3].a);
+    d->b[3] = s->t[3].b;
+    d->c[3] = s->t[3].c;
+    return out;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", func_0034ADD8);
