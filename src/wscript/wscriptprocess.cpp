@@ -570,7 +570,46 @@ extern "C" void func_00308038(void* self, func_00308038_cStream* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308118);
+#ifdef SKIP_ASM
+class func_00308118_cStream {
+public:
+    // slot N at vtable offset N*8
+    virtual void v01(void* data, int size);
+    virtual void v02(void* data, int size);
+};
+
+extern char* D_004A47B8;
+extern char D_00489888[];
+extern "C" int func_003ACA38(void* map, int id);
+extern "C" void* func_00224DA0(void* mem, int a1);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void func_002259A8(void* obj, func_00308118_cStream* stream, int a2);
+class func_00308798_cObj;
+extern "C" int func_00308798(void* a, func_00308798_cObj* obj);
+
+extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
+{
+    stream->v02(self, 0x10);
+    int x = func_003ACA38(*(void**)(D_004A47B8 + 0x4), *(int*)((char*)self + 0x24));
+    if (*(void**)((char*)self + 0x1C) != 0) {
+        func_00224DF0(*(void**)((char*)self + 0x1C), 3);
+    }
+    *(void**)((char*)self + 0x1C) = 0;
+    int has;
+    stream->v02(&has, 4);
+    if (has) {
+        void* t = func_00224DA0(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
+        *(void**)((char*)self + 0x1C) = t;
+        func_002259A8(t, stream, x);
+    }
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
+        func_00308798(*(char**)((char*)self + 0x14) + i * 0x44, (func_00308798_cObj*)stream);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308228);
@@ -876,7 +915,47 @@ extern "C" int func_00308798(void* a, func_00308798_cObj* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003087D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0030C738(void* p);
+void func_0030B058(void* p);
+extern "C" void func_0030C390(void* p);
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void func_00308988(void* self);
+extern char D_00489C00[];
+extern char* D_004A47B8;
+// D_004A3DD8 is declared `int` later in the unit; it holds the current process.
+extern void* func_003087D0_current __asm__("D_004A3DD8");
+
+extern "C" void* func_003087D0(void* self)
+{
+    *(unsigned int*)((char*)self + 0x2C) = 0xFFFFFFFF;
+    func_0030C738((char*)self + 0x1C4);
+    *(void**)((char*)self + 0x494) = D_00489C00;
+    func_0030B058((char*)self + 0x2B4);
+    func_0030B058((char*)self + 0x2B8);
+    func_0030B058((char*)self + 0x2BC);
+    char* p = (char*)self + 0x2C0;
+    int i;
+    for (i = 0; i != -1; i--) {
+        char* next = p + 0x10C;
+        unsigned int* q = (unsigned int*)(p + 0xC);
+        int j;
+        for (j = 63; j != -1; j--) {
+            *q++ = 0xFFFFFFFF;
+        }
+        func_0030C390(p);
+        p = next;
+    }
+    func_003087D0_current = self;
+    *(char**)((char*)self + 0x28C) = D_004A47B8;
+    func_003E6448((char*)self + 0x3CC, 0, 0xC8);
+    func_00308988(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_003088D8);

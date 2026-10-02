@@ -177,7 +177,66 @@ INCLUDE_ASM("world/worldview", func_003A9E50);
 
 INCLUDE_ASM("world/worldview", func_003AA028);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA2F0);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+struct func_003AA2F0_sEntry {
+    float dist;
+    float scale;
+    short a;
+    short b;
+};
+
+struct func_003AA2F0_sState {
+    int f00;
+    unsigned int flags;
+    unsigned int f08;
+    int f0C;
+    func_003AA2F0_sEntry entries[24];
+};
+
+extern func_003AA2F0_sState D_00508F50;
+
+struct func_003AA2F0_sView {
+    int f00;
+    func_003AA2F0_sState* state;
+    void** vt;
+};
+// splat labels D_00508F50+8 separately
+extern unsigned int D_00508F58[];
+extern int D_004A5A68;
+extern void* D_00495150[];
+
+// PORT: the unit declares this `void`, but the body returns self ($2); bound via asm label.
+func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self) __asm__("func_003AA2F0");
+
+func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
+{
+    self->vt = D_00495150;
+    self->f00 = 0;
+    if (D_004A5A68 == 0) {
+        D_00508F50.f08 = 0xFFFFFFFF;
+        D_004A5A68 = 1;
+    }
+    func_003AA2F0_sState* s = &D_00508F50;
+    self->state = s;
+    func_003E6448(s, 0, sizeof(func_003AA2F0_sState));
+    D_00508F58[0] = 0xFFFFFFFF;
+    s->f0C = -1;
+    D_00508F50.f00 = 0;
+    int i;
+    for (i = 0; i < 24; i++) {
+        s->entries[i].dist = 1000.0f;
+        s->entries[i].scale = 0.5f;
+        s->entries[i].a = 0;
+        s->entries[i].b = -1;
+    }
+    D_00508F50.flags = (((D_00508F50.flags | 1) & ~4) | 2) << 16;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA3F0);

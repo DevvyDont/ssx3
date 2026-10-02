@@ -1,6 +1,90 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_initLightCache);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern char D_00487CD8[];
+
+struct sWLCVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sWLCVec4 D_004FF120;
+
+struct sWLCList {
+    unsigned int head;
+    char pad04[0x100];
+};
+
+struct sWLCBuf {
+    int owner;
+    int count;
+    sWLCList lists[3];
+};
+
+struct sWLCNode {
+    unsigned int id;
+    int priority;
+    char pad08[0xA8];
+    sWLCVec4 v;
+    int fC0;
+    char padC4[0xAC];
+    sWLCNode* next;
+    sWLCNode* prev;
+    char pad178[8];
+};
+
+// Light slot view based at self+0x40*i: id/f14 at +0x10/+0x14; slot i's cache buffer
+// lives at +0x40 (func_002F53B0 views it as slots[i].buf at self+0x40).
+struct sWLCLightHdr {
+    char pad00[0x10];
+    unsigned int id;
+    int f14;
+    char pad18[0x28];
+};
+
+struct sWLCMan {
+    union {
+        int f00;
+        sWLCLightHdr hdr[8];
+    };
+    char pad200[0x10];
+    sWLCNode nodes[32];
+    sWLCNode* heads[32];
+    int count;
+};
+
+extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
+{
+    unsigned int i;
+    for (i = 0; i < 8; i++) {
+        sWLCLightHdr* l = &self->hdr[i];
+        l->id = 0xFFFFFFFF;
+        l->f14 = 0;
+        sWLCBuf* buf = (sWLCBuf*)operator new(0xA14, D_00487CD8, 0x20000000, 0);
+        buf->owner = self->f00;
+        buf->count = 0;
+        buf->lists[0].head = 0xFFFFFFFF;
+        buf->lists[1].head = 0xFFFFFFFF;
+        buf->lists[2].head = 0xFFFFFFFF;
+        *(sWLCBuf**)((char*)l + 0x40) = buf;
+    }
+    for (i = 0; i < 32; i++) {
+        self->nodes[i].priority = 0;
+        self->nodes[i].id = 0xFFFFFFFF;
+        self->nodes[i].v = D_004FF120;
+        self->nodes[i].fC0 = 0;
+        self->nodes[i].next = 0;
+        self->nodes[i].prev = 0;
+    }
+    self->count = 0;
+    for (i = 0; i < 32; i++) {
+        self->heads[i] = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F53B0);

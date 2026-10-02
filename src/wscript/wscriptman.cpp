@@ -673,13 +673,156 @@ extern "C" void func_0030A700(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A728);
+#ifdef SKIP_ASM
+extern "C" void* func_0030B320(void* self, int id);
+extern "C" void func_00307D78(void* obj);
+extern "C" void func_00307E10(void* obj);
+
+extern "C" void func_0030A728(void* self, unsigned int id, int kind)
+{
+    void* obj = *(void**)((char*)self + 0x2A4);
+    switch (kind) {
+    case 1:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B320((char*)self + 0x2B4, id);
+        }
+        if (obj != 0) {
+            func_00309750(self, obj);
+        }
+        break;
+    case 0:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B320((char*)self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            func_00309798(self, obj);
+        }
+        break;
+    case 2:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B320((char*)self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            func_00307E10(obj);
+        }
+        break;
+    case 18:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B320((char*)self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            func_00307D78(obj);
+        }
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A868);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030AC98);
+#ifdef SKIP_ASM
+struct func_00309DD0_sValue;
+void func_00226600(void* self, int a1, int a2);
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void* func_00224DA0(void* mem, int a1);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern char D_004898D8[];
 
+// cLunoValue: { word0, word1, type }
+struct func_0030AC98_sValue {
+    int word0;
+    int word1;
+    int type;
+};
+struct func_0030AC98_sCall {
+    int pad[4];
+};
+
+extern "C" void func_0030AC98(void* self, void* obj, int a2)
+{
+    func_0030AC98_sValue arg;
+    func_0030AC98_sValue ret;
+    func_0030AC98_sCall call;
+    int savedId;
+    void* savedObj = *(void**)((char*)self + 0x2A4);
+    *(void**)((char*)self + 0x2A4) = obj;
+    savedId = *(int*)((char*)self + 0x290);
+    func_00226600(&arg, a2, 0);
+    ret.type = 0;
+    ret.word0 = 0;
+    func_002224A8(&call);
+    void* table = *(void**)(*(char**)((char*)self + 0x2A4) + 0x1C);
+    if (table != 0) {
+        func_002224B8(&call, &arg, table, &ret);
+    } else {
+        table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+        func_002224B8(&call, &arg, table, &ret);
+        if (table != 0) {
+            func_00224DF0(table, 3);
+        }
+    }
+    *(void**)((char*)self + 0x2A4) = savedObj;
+    *(int*)((char*)self + 0x290) = savedId;
+    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030ADA8);
+#ifdef SKIP_ASM
+struct func_00309DD0_sValue;
+void func_00226600(void* self, int a1, int a2);
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void* func_00224DA0(void* mem, int a1);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern char D_004898D8[];
+
+// cLunoValue: { word0, word1, type }
+struct func_0030ADA8_sValue {
+    int word0;
+    int word1;
+    int type;
+};
+struct func_0030ADA8_sCall {
+    int pad[4];
+};
+
+extern "C" void func_0030ADA8(void* self, void* obj, int a2)
+{
+    func_0030ADA8_sValue arg;
+    func_0030ADA8_sValue ret;
+    func_0030ADA8_sCall call;
+    int savedId;
+    void* savedObj = *(void**)((char*)self + 0x2A8);
+    *(void**)((char*)self + 0x2A8) = obj;
+    savedId = *(int*)((char*)self + 0x290);
+    func_00226600(&arg, a2, 0);
+    ret.type = 0;
+    ret.word0 = 0;
+    func_002224A8(&call);
+    void* table = *(void**)(*(char**)(*(char**)((char*)self + 0x2A8) + 0x3C) + 0x1C);
+    if (table != 0) {
+        func_002224B8(&call, &arg, table, &ret);
+    } else {
+        table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+        func_002224B8(&call, &arg, table, &ret);
+        if (table != 0) {
+            func_00224DF0(table, 3);
+        }
+    }
+    *(void**)((char*)self + 0x2A8) = savedObj;
+    *(int*)((char*)self + 0x290) = savedId;
+    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030AEB8);

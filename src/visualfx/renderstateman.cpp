@@ -740,7 +740,71 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF6D0);
 
 INCLUDE_ASM("visualfx/renderstateman", func_002EF950);
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EFF98);
+#ifdef SKIP_ASM
+struct sRSEntry_002EFF98 {
+    int f0;
+    int f4;
+    int f8;
+    int pad[5];
+};
+struct sRSMan_002EFF98 {
+    int f[17];
+    void* vt;
+};
+extern char D_00487DA0[];
+extern sRSEntry_002EFF98* D_004A5B80;
+extern int D_004A45D4;
+extern int D_004A443C;
+extern void* D_004A3B78;
+
+extern "C" void* func_002EFF98(sRSMan_002EFF98* self)
+{
+    self->vt = D_00487DA0;
+    self->f[0] = 0;
+    self->f[1] = 0;
+    self->f[2] = 0;
+    self->f[3] = 0;
+    self->f[4] = 0;
+    self->f[5] = 0;
+    self->f[6] = 0;
+    self->f[7] = 0;
+    self->f[8] = 0;
+    self->f[9] = 0;
+    self->f[10] = 0;
+    self->f[11] = 0;
+    self->f[12] = 0;
+    self->f[13] = 0;
+    self->f[14] = 0;
+    self->f[15] = 0;
+    self->f[16] = 0;
+    D_004A45D4 = 0x37;
+    D_004A443C = 0x30;
+    D_004A3B78 = self;
+    sRSEntry_002EFF98* e = D_004A5B80;
+    e[1].f4 = 0x2E;
+    e[2].f4 = 0x31;
+    e[4].f4 = 0x2F;
+    e[3].f4 = 0x44;
+    e[5].f4 = 0; e[5].f8 = 0;
+    e[6].f4 = 0; e[6].f8 = 0;
+    e[7].f4 = 0; e[7].f8 = 0;
+    e[8].f4 = 0; e[8].f8 = 0;
+    e[9].f4 = 0; e[9].f8 = 0;
+    e[10].f4 = 0; e[10].f8 = 0;
+    e[11].f4 = 0; e[11].f8 = 0;
+    e[12].f4 = 0; e[12].f8 = 0;
+    e[13].f4 = 0; e[13].f8 = 0;
+    e[14].f4 = 0; e[14].f8 = 0;
+    e[15].f4 = 0; e[15].f8 = 0;
+    e[16].f4 = 0; e[16].f8 = 0;
+    e[17].f4 = 0; e[17].f8 = 0;
+    e[18].f4 = 0; e[18].f8 = 0;
+    e[19].f4 = 0; e[19].f8 = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/renderstateman", func_002F00A0);
 

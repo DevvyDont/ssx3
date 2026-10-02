@@ -1,6 +1,49 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00494DC0[];
+extern char D_00494DD8[];
+
+struct sWBABlock {
+    void* data;
+    int size;
+    int f08;
+    int f0C;
+    int used;
+    sWBABlock* next;
+};
+
+struct sWBAlloc {
+    int blockSize;
+    unsigned int count;
+    int numFree;
+    sWBABlock* blocks;
+    sWBABlock* freeList;
+};
+
+extern "C" void cWorldBlockAllocator_init(void* selfp, int count, int blockSize)
+{
+    sWBAlloc* self = (sWBAlloc*)selfp;
+    self->blockSize = blockSize;
+    self->count = count;
+    self->numFree = count;
+    self->blocks = new (D_00494DC0, 0x20000000, 0) sWBABlock[count];
+    unsigned int i;
+    for (i = 0; i < self->count; i++) {
+        self->blocks[i].used = 0;
+        self->blocks[i].size = self->blockSize;
+        self->blocks[i].f08 = 0;
+        self->blocks[i].f0C = 0;
+        self->blocks[i].data = new (D_00494DD8, 0x25000000, 0) char[self->blockSize];
+        self->blocks[i].next = (i < self->count - 1) ? &self->blocks[i + 1] : 0;
+    }
+    self->freeList = self->blocks;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A76C0);
@@ -236,7 +279,49 @@ extern "C" void func_003A7C30(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", cWorldCacheTable_cWorldCacheTable);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern char D_00494E18[];
+
+struct sWCTEntry {
+    int* ptr;
+    int count;
+};
+
+struct sWCTable {
+    int* pool;
+    sWCTEntry entries[28];
+    short* sizes;
+};
+
+extern "C" void* cWorldCacheTable_cWorldCacheTable(void* selfp, void* data)
+{
+    sWCTable* self = (sWCTable*)selfp;
+    self->sizes = (short*)data;
+    func_00416210(self->entries, 0, sizeof(self->entries));
+    int total = 0;
+    for (int i = 0; i < 28; i++) {
+        int n = self->sizes[i];
+        self->entries[i].count = n;
+        total += n;
+    }
+    self->pool = new (D_00494E18, 0, 0) int[total];
+    func_00416210(self->pool, 0, total * 4);
+    int off = 0;
+    int* pool = self->pool;
+    for (int j = 0; j < 28; j++) {
+        if (self->entries[j].count != 0) {
+            self->entries[j].ptr = pool + off;
+            off += self->entries[j].count;
+        }
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A7D80);
@@ -297,7 +382,72 @@ extern "C" void func_003A7E38(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7E98);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void func_003A8330(void* self);
+extern "C" int func_003A9890(void* view, int i);
+extern "C" void func_003A8230(void* self, int i);
+extern "C" void func_003A7D80(int* self, int flags);
+
+struct func_003A7E98_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct func_003A7E98_sObj {
+    int f0;
+    int f4;
+    func_003A7E98_sVEntry* vt;
+};
+
+struct func_003A7E98_sHdr {
+    int f0;
+    int f4;
+    unsigned int count;
+};
+
+struct func_003A7E98_sCache {
+    func_003A7E98_sHdr* hdr;
+    int* f04;
+    void* f08;
+    func_003A7AA8_sElem* f0C;
+    char view[0x3D8];
+    func_003A7E98_sObj* obj;
+};
+
+extern "C" void func_003A7E98(void* p)
+{
+    func_003A7E98_sCache* self = (func_003A7E98_sCache*)p;
+    func_003A8330(self);
+    func_003A7E98_sObj* o = self->obj;
+    if (o != 0) {
+        o->vt[1].fn((char*)o + o->vt[1].delta, 3);
+    }
+    if (self->f04 != 0) {
+        func_003A7D80(self->f04, 3);
+    }
+    if (self->f08 != 0) {
+        unsigned int i;
+        for (i = 0; i < self->hdr->count; i++) {
+            if (func_003A9890(self->view, i) == 0) {
+                func_003A8230(self, i);
+            }
+        }
+        if (self->f08 != 0) {
+            cMemMan_free(self->f08);
+        }
+    }
+    if (self->hdr != 0) {
+        cMemMan_free(self->hdr);
+    }
+    if (self->f0C != 0) {
+        func_003A7AA8(self->f0C, 3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A7F90);

@@ -78,7 +78,91 @@ extern "C" void func_003A67E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/world", cWorld_resetMap);
+#ifdef SKIP_ASM
+struct cWorldView;
+int cWorldView_getNumSections(cWorldView* view);
+int cWorldView_isSectionLoaded(cWorldView* view, int i);
+
+struct sWRMEntry {
+    unsigned int lo : 8;
+    unsigned int ptr : 24;
+};
+
+struct sWRMTable {
+    char pad00[0x1C];
+    sWRMEntry* entries;
+};
+
+struct sWRMObj {
+    int f0;
+    int f4;
+    int f8;
+};
+
+struct sWRMSection {
+    char pad00[0x26];
+    short count;
+    char pad28[0x30];
+};
+
+struct sWRMMap {
+    char pad00[0x14];
+    sWRMSection* sections;
+};
+
+struct sWRMWorld {
+    sWRMMap* map;
+    int f04;
+    sWRMTable** tables;
+    int f0C;
+    char view[4];
+};
+
+static inline sWRMObj* sWRM_toPtr(unsigned int p)
+{
+    return (sWRMObj*)(p << 2);
+}
+
+static inline sWRMObj* sWRM_lookup(sWRMTable* t, unsigned int idx)
+{
+    unsigned int p = t->entries[idx].ptr;
+    if (p == 0) return 0;
+    return sWRM_toPtr(p);
+}
+
+static inline sWRMObj* sWRM_get(sWRMWorld* w, unsigned int id)
+{
+    sWRMTable* t = w->tables[id & 0xFF];
+    if (t == 0) return 0;
+    return sWRM_lookup(t, id >> 8);
+}
+
+extern "C" void cWorld_resetMap(void* selfp)
+{
+    sWRMWorld** self = (sWRMWorld**)selfp;
+    unsigned int ref = 0xFFFFFFFF;
+    unsigned int i;
+    for (i = 0; i < (unsigned int)cWorldView_getNumSections((cWorldView*)(*self)->view); i++) {
+        if (cWorldView_isSectionLoaded((cWorldView*)(*self)->view, i)) {
+            int n = (*self)->map->sections[i].count;
+            unsigned int s = i & 0xFF;
+            ref = (int)ref & ~0xFF;
+            ref |= s;
+            int j;
+            for (j = 0; j < n; j++) {
+                ref = (ref & 0xFF) | (j << 8);
+                sWRMObj* o = sWRM_get(*self, ref);
+                if (o) {
+                    int v = o->f8 & 0xFFFF0000;
+                    o->f8 = v | (v >> 16) | 2;
+                }
+            }
+        }
+    }
+}
+#endif
 
 extern "C" void* func_003A8290(int);
 

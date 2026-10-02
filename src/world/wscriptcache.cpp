@@ -488,7 +488,76 @@ void* func_003AE958(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AE9A0);
+#ifdef SKIP_ASM
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B5F60();
+extern "C" int func_003B7B48(int id, void* out);
+extern "C" int func_003B7C40(int id, void* out);
+extern "C" unsigned int func_003E5008();
+extern "C" void func_0042E508(void* timer);
+
+// PORT: accum is a 64-bit ulong
+struct func_003AE9A0_sTimer {
+    unsigned int last;
+    int pad4;
+    ulong accum;
+    unsigned int rate;
+};
+
+struct func_003AE9A0_sInfo {
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    int field_0xC;
+};
+
+struct func_003AE9A0_sOwner {
+    char pad[0xC];
+    int id;
+};
+
+struct func_003AE9A0_sSync {
+    func_003AE9A0_sOwner* owner;
+    char pad04[0x48];
+    int offset;
+    int last;
+    int enabled;
+    int drift;
+    func_003AE9A0_sTimer* timer;
+};
+
+extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
+{
+    func_003AE9A0_sInfo b;
+    func_003AE9A0_sInfo a;
+    func_003AE9A0_sTimer* t = self->timer;
+    func_0042E508(t);
+    unsigned int ms = (unsigned int)(t->accum * 1000) / func_003E5008();
+    int res = ms - self->offset;
+    if (self->enabled != 0) {
+        func_003B58A0();
+        func_003B7B48(self->owner->id, &a);
+        func_003B7C40(a.field_0x4, &b);
+        func_003B58D8();
+        int d = b.field_0x4 - func_003B5F60();
+        if (self->last < d) {
+            self->last = d;
+            self->drift = self->drift - self->drift / 8 + (d - res);
+            int av = -self->drift;
+            if (av < self->drift) av = self->drift;
+            if (av > 0x108) {
+                self->offset -= self->drift / 8;
+                self->drift = 0;
+                res = ms - self->offset;
+            }
+        }
+    }
+    return res;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003AEAD0);
 
@@ -1049,7 +1118,61 @@ extern "C" int func_003B0B10(void* self, void* a1, void* a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B0B40);
+#ifdef SKIP_ASM
+extern "C" void func_003B06F8(void* req, void* blk);
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void func_004029D0(void* dst, void* src, int size);
+
+struct func_003B0B40_sBlock {
+    int f0;
+    void* data;
+    int size;
+};
+
+struct func_003B0B40_sScript {
+    char pad00[0x14];
+    int count;
+    char pad18[0x10];
+    func_003B06B0_sReq* req;
+    char pad2C[0x4C];
+    void* hdr;
+    char* buf;
+};
+
+// PORT: func_003B06B0 returns the block pointer as int.
+extern "C" void func_003B0B40(void* a, void* b, void* c)
+{
+    func_003B0B40_sScript* self = (func_003B0B40_sScript*)a;
+    void* data = 0;
+    func_003B0B40_sBlock* blk = (func_003B0B40_sBlock*)func_003B06B0(self->req);
+    if (blk != 0) {
+        data = blk->data;
+    }
+    int total;
+    int i;
+    if (data != 0) {
+        i = blk->size;
+        total = (i + 7) & ~0xF;
+        i -= 8;
+        func_003E6574(self->buf, data, i);
+        for (; i < total + 0x10; i += 4) {
+            *(int*)(self->buf + i) = 0;
+        }
+    } else {
+        total = 0x10;
+        for (i = 0; i < 0x10; i += 4) {
+            *(int*)(self->buf + i) = 0xB7010000;
+        }
+    }
+    if (blk != 0) {
+        func_003B06F8(self->req, blk);
+    }
+    self->count++;
+    func_004029D0(b, self->hdr, total);
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B0C58);
 
@@ -1675,7 +1798,36 @@ extern "C" void func_003B2528(int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B2558);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_003B2528 `void`, but it returns func_003B39D8's result
+// (the format's bits per pixel); bound via asm label.
+extern "C" int func_003B2528_bits(int fmt) __asm__("func_003B2528");
+
+extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel)
+{
+    int total = 0;
+    int c = func_003B2528_bits(fmt);
+    int bpp = 0x10;
+    if (c != 0xF) bpp = c;
+    if (w < 1 || w > 0x10000 || h < 1) return 0;
+    if (h > 0x10000) return 0;
+    if (w * h > 1000000000) return 0;
+    if (func_003B3DA8(c) == 0) return 0;
+    int i;
+    for (i = 0; i <= maxLevel; i++) {
+        int lw = w >> i;
+        int lh = h >> i;
+        if (lw <= 0) lw = 1;
+        if (lh <= 0) lh = 1;
+        if (total != 0) total = (total + 0xF) & ~0xF;
+        total += ((lw * bpp + 7) / 8) * lh;
+        if (lw == 1 && lh == 1) break;
+    }
+    return total;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B2688);
@@ -1693,11 +1845,62 @@ extern "C" int func_003B2688(int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B26B8);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_003B2528 `void`, but it returns the format's bits per pixel.
+extern "C" int func_003B2528_bits(int fmt) __asm__("func_003B2528");
+extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel);
+
+extern "C" int func_003B26B8(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2)
+{
+    int c = func_003B2528_bits(fmt);
+    int size = func_003B2558(w, h, fmt, maxLevel);
+    size += 0x10;
+    if (c < 9 && clut != 0) {
+        if (clut == 0xF) clut = 0x10;
+        if (size != 0) size = (size + 0xF) & ~0xF;
+        int n = func_003B2688(c) * clut / 8 + 0x10;
+        size = ((size + 0xF) & ~0xF) + n;
+    }
+    if (extra1 != 0) {
+        int t = size + 8;
+        size = t + extra1;
+    }
+    if (extra2 != 0) {
+        int t = size + 0x10;
+        size = t + extra2;
+    }
+    return size;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B27C8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B2A68);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_003B26B8(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
+extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
+extern void* (*D_0044C454[])(char* name, int size, int a2, int align, int heap);
+extern char D_004956B0[];
+
+extern "C" void* func_003B2A68(unsigned int w, int h, int fmt, int clut, int maxLevel, int heap, int extra1, int extra2)
+{
+    char name[16];
+    void* tex = 0;
+    int size = func_003B26B8(w, h, fmt, clut, maxLevel, extra1, extra2);
+    if (size != 0) {
+        sprintf(name, D_004956B0, w, h, fmt);
+        tex = D_0044C454[0](name, size, 0, 0x10, heap);
+        if (tex != 0) {
+            func_003B27C8(tex, w, h, fmt, clut, maxLevel, extra1, extra2);
+        }
+    }
+    return tex;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B2B68);
