@@ -55,7 +55,56 @@ extern "C" void func_002758C0(void* self, int flags)
 
 INCLUDE_ASM("scripter/datamanager", func_00275920);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275A20);
+#ifdef SKIP_ASM
+void func_00275CD0(void* self, void* node);
+
+struct sDmNode5A20 {
+    int a;              // 0x0
+    int b;              // 0x4
+    int key;            // 0x8
+    int c;              // 0xC
+    int pad_10;         // 0x10
+    sDmNode5A20* next;  // 0x14
+};
+
+class cDataManager5A20 {
+public:
+    int count;          // 0x0
+    void* nodes;        // 0x4
+    void* freeList;     // 0x8
+    // vptr at 0xC
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(int key, int c, int a, int b);
+    virtual void v04();
+    virtual void v05(int key, int c, int a, int b);
+};
+
+// PORT: the unit declares func_00275A20 as returning void; it really returns the entry's key.
+int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry) __asm__("func_00275A20");
+
+int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry)
+{
+    sDmNode5A20* first = entry->next;
+    if (first != 0) {
+        sDmNode5A20* n = first;
+        do {
+            sDmNode5A20* next = n->next;
+            self->v03(n->key, n->c, n->a, n->b);
+            func_00275CD0(self, n);
+            n = next;
+        } while (n != 0);
+        self->v05(entry->key, entry->c, entry->a, entry->b);
+    } else {
+        self->v03(entry->key, entry->c, entry->a, entry->b);
+    }
+    int key = entry->key;
+    func_00275CD0(self, entry);
+    return key;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", func_00275B08);
@@ -214,7 +263,28 @@ extern "C" int func_00276B98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276BD8);
+#ifdef SKIP_ASM
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" int func_00282838(void* self, int a1);
+
+extern "C" int func_00276BD8(void* self)
+{
+    if (*(int*)((char*)self + 0xA4) != 3) return 0;
+    if (*(int*)((char*)self + 0xC4) != 0) return 3;
+    if (*(int*)((char*)self + 0xC8) == 0) {
+        void* list = (char*)self + 0xC;
+        if (*(int*)((char*)func_00283D70(list, 0) + 0x8) & 8) {
+            if (*(int*)((char*)self + 0xB0) == 0) return 2;
+            if (*(int*)((char*)self + 0xB8) - 1 > 0) return 2;
+        } else {
+            if (func_00282838(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) == 0) return 1;
+        }
+    }
+    return *(int*)((char*)self + 0xBC) < 0 ? 5 : 4;
+}
+#endif
 
 extern "C" void* func_00283D28(void*);
 

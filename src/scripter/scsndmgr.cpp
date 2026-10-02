@@ -1,6 +1,42 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_cScriptSoundBankManager);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00482240[];
+extern const char D_00481FB0[];
+
+struct sScSndBank3450 {
+    int id;         // 0x0
+    int index;      // 0x4
+    int a;          // 0x8
+};
+
+struct cScriptSoundBankManager3450 {
+    int flags;                  // 0x0
+    int count;                  // 0x4
+    sScSndBank3450* banks;      // 0x8
+    void* vtable;               // 0xC
+};
+
+extern "C" cScriptSoundBankManager3450* cScriptSoundBankManager_cScriptSoundBankManager(
+    cScriptSoundBankManager3450* self, int flags, int count, int base)
+{
+    self->vtable = D_00482240;
+    self->flags = flags;
+    self->count = count;
+    self->banks = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), D_00481FB0, flags, 0);
+    int idx = base;
+    for (int i = 0; i < self->count; i++) {
+        self->banks[i].id = -1;
+        self->banks[i].index = idx++;
+        self->banks[i].a = 0;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283518);

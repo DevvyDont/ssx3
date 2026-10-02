@@ -1,6 +1,49 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("scripter/videngine", cVidEngine_ReadyVideo);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_002533C8(void* mem);
+extern "C" void func_00253390(void* self);
+extern "C" int func_002534A8(void* p, void* q);
+extern "C" void func_00253418(void* p, int a1);
+extern const char D_00481FC8[];
+
+struct sVidParams38E8 {
+    int file;       // 0x0
+    int f4;         // 0x4
+    int f8;         // 0x8
+    int fC;         // 0xC
+    int f10;        // 0x10
+    int f14;        // 0x14
+    int f18;        // 0x18
+    int f1C;        // 0x1C
+    float f20;      // 0x20
+};
+
+extern "C" int cVidEngine_ReadyVideo(void** self, int file)
+{
+    if (*self != 0) return 0;
+    *self = func_002533C8(cMemMan_alloc(0x44, D_00481FC8, 0x100, 0));
+    sVidParams38E8 p;
+    func_00253390(&p);
+    //S
+    p.file = file;
+    p.f8 = 1;
+    p.f18 = 0x100;
+    p.f1C = 9;
+    p.fC = 0;
+    p.f10 = 0;
+    //E
+    if (func_002534A8(*self, &p) == 0) {
+        if (*self != 0) func_00253418(*self, 3);
+        *self = 0;
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("scripter/videngine", func_002839A8);
 
@@ -117,7 +160,27 @@ extern "C" int func_00283C60(void* self, int a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/videngine", func_00283C80);
+#ifdef SKIP_ASM
+int func_00283C58(void*);
+extern "C" int func_00283C60(void* self, int a1);
+
+struct sVidCmd3C80 {
+    int v[7];
+};
+
+extern "C" int func_00283C80(void* self, sVidCmd3C80* cmd)
+{
+    if (func_00283C58(self) != 0) return 0;
+    ((sVidCmd3C80*)self)[*(int*)((char*)self + 0x90)] = *cmd;
+    *(int*)((char*)self + 0x90) = func_00283C60(self, *(int*)((char*)self + 0x90));
+    if (*(int*)((char*)self + 0x90) == *(int*)((char*)self + 0x8C)) {
+        *(int*)((char*)self + 0x94) = 1;
+    }
+    return 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/videngine", func_00283D28);

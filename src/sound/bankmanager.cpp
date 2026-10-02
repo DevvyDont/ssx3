@@ -274,7 +274,34 @@ void func_0028C8C0(void* self, int val)
 
 INCLUDE_ASM("sound/bankmanager", func_0028C8C8);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028CD48);
+#ifdef SKIP_ASM
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" void func_002B49C0(void* self, int a1);
+extern "C" void func_002B3C28(void* self, int a1);
+extern char D_004A3628[];
+
+struct sBmVtCD48 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef void (*tBmLoadCD48)(void*, void*, int, void*, int);
+typedef int (*tBmSetCD48)(void*, int);
+
+extern "C" void func_0028CD48(void* self)
+{
+    char* mon = (char*)self + 0x118;
+    sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
+    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, D_004A3628, 0xC, func_00287968(self, 1, 0), 1);
+    func_002B49C0(mon, 0x191);
+    sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
+    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 1);
+    func_002B3C28(mon, 0x7F);
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028CDF8);
 
@@ -343,7 +370,48 @@ extern "C" void func_0028D740(void* self, int id, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028D7D8);
+#ifdef SKIP_ASM
+struct sBmVtD7D8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+// PORT: the unit declares func_0028D7D8 as returning void; it really returns 0/1.
+int func_0028D7D8_impl(void* self, void* obj) __asm__("func_0028D7D8");
+
+int func_0028D7D8_impl(void* self, void* obj)
+{
+    int ok = 0;
+    if (obj == 0) {
+        ok = 1;
+        *(int*)((char*)self + 0x62A0) = -1;
+    } else {
+        int none = -1;
+        if (*(int*)((char*)self + 0x62A0) != none) {
+            char* o = (char*)obj + 0x6C0;
+            sVtEnt* e = &(*(sVtEnt**)o)[7];
+            if (e->fn(o + e->delta) == *(int*)((char*)self + 0x62A0)) {
+                *(int*)((char*)self + 0x62A0) = none;
+                ok = 1;
+            }
+        }
+    }
+    if (ok) {
+        int n = *(int*)((char*)self + 0x623C);
+        if (n != 0) {
+            char* mon = (char*)self + 0x118;
+            sBmVtD7D8* vt = *(sBmVtD7D8**)((char*)self + 0x5558);
+            vt[4].fn(mon + vt[4].delta, n + 1);
+            *(int*)((char*)self + 0x623C) = 0;
+            *(int*)((char*)self + 0x6240) = 0;
+        }
+    }
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D898__FPv);
@@ -354,7 +422,42 @@ int func_0028D898(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028D8A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A4318(void* self);
+extern "C" int func_002A4368(void* self);
+extern "C" int func_002A40E0(void* self, int id);
+extern "C" int func_002A4158(void* self, int id);
+extern "C" int func_002A41C8(void* self, int id);
+extern "C" int func_002A4238(void* self, int id);
+
+extern "C" int func_0028D8A0(void* self)
+{
+    int id = *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+    int r;
+    if (func_002A4318(self)) {
+        r = 0;
+    } else if (func_002A4368(self)) {
+        r = 1;
+    } else if (func_002A40E0(self, id)) {
+        r = 0;
+    } else if (func_002A4158(self, id)) {
+        r = 1;
+    } else if (func_002A41C8(self, id)) {
+        r = 2;
+    } else if (func_002A4238(self, id)) {
+        r = 3;
+    } else {
+        r = 4;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D960);
@@ -487,7 +590,42 @@ extern "C" void func_0028F558(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F5B8);
+#ifdef SKIP_ASM
+extern "C" int func_0028B1B0(void);
+extern "C" void func_0029CE28(void* self);
+extern "C" void func_00294F78(void* self, int a1);
+extern "C" void func_002B3D48(void* self, float v);
+extern "C" void func_0028F768(void* self);
+extern "C" void func_002B3C28(void* self, int a1);
+
+struct sBmVtF5B8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+extern "C" void func_0028F5B8(void* self)
+{
+    *(int*)((char*)self + 0x6088) = 0;
+    if (*(int*)((char*)self + 0x5FB4) != 0) return;
+    if (func_0028B1B0() == 0) return;
+    if (*(int*)((char*)self + 0x5818) == 0) {
+        func_0029CE28(self);
+        *(int*)((char*)self + 0x6088) = 1;
+    }
+    func_00294F78(self, 9);
+    if (*(int*)((char*)self + 0x608C) != 2) {
+        char* mon = (char*)self + 0x118;
+        func_002B3D48(mon, 1.0f);
+        func_0028F768(self);
+        sBmVtF5B8* vt = *(sBmVtF5B8**)((char*)self + 0x5558);
+        vt[4].fn(mon + vt[4].delta, 0);
+        func_002B3C28(mon, 0x7F);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F678);
@@ -557,5 +695,30 @@ void* func_0028FC38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028FC58);
+#ifdef SKIP_ASM
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" void func_002B49C0(void* self, int a1);
+extern char D_004A3598[];
+
+struct sBmVtFC58 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef void (*tBmLoadFC58)(void*, void*, int, void*, int);
+typedef int (*tBmSetFC58)(void*, int);
+
+extern "C" void func_0028FC58(void* self)
+{
+    char* mon = (char*)self + 0x118;
+    sBmVtFC58* vt = *(sBmVtFC58**)((char*)self + 0x5558);
+    ((tBmLoadFC58)vt[2].fn)(mon + vt[2].delta, D_004A3598, 0xC, func_00287968(self, 1, 0), 1);
+    func_002B49C0(mon, 0x12D);
+    sBmVtFC58* vt2 = *(sBmVtFC58**)((char*)self + 0x5558);
+    ((tBmSetFC58)vt2[4].fn)(mon + vt2[4].delta, *(int*)((char*)self + 0x6290));
+}
+#endif
 

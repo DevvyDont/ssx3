@@ -259,7 +259,32 @@ extern "C" void func_0026E800(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replay", func_0026E838);
+#ifdef SKIP_ASM
+void func_0026D730(void*, int, int);
+
+extern "C" int func_0026E838(void* self, void* o, int mode)
+{
+    if (mode) {
+        int d = *(int*)((char*)o + 0x9C) - *(int*)((char*)self + 0xA0);
+        if (d == 0) return 0;
+        if (d >= 1000) {
+            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, d);
+            return 1;
+        }
+        float v = *(float*)((char*)o + 0x44);
+        if (v >= 5.0f) {
+            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, (int)(v * 1000.0f));
+            return 1;
+        }
+    }
+    int e = *(int*)((char*)o + 0xA4) - *(int*)((char*)self + 0xA8);
+    if (e == 0) return 0;
+    func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, -e);
+    return 1;
+}
+#endif
 
 extern void* D_00481898[];
 

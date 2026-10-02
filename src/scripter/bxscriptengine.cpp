@@ -1,6 +1,34 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00272788(void* obj, void* buf, int size, int a3, void* out);
+extern char D_00481F48[];
+extern char D_00481F58[];
+extern char D_004A34F0[];
+
+struct sBXSlot {
+    int a;
+    short b;
+};
+
+extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size)
+{
+    *(void**)((char*)self + 0x2BC) = operator_new_tag(size, D_00481F48, 0, 0);
+    *(void**)((char*)self + 0x2B8) = func_00272788(cMemMan_alloc(0x20, D_004A34F0, 0, 0),
+        *(void**)((char*)self + 0x2BC), size, a2, (char*)self + 0x2AC);
+    *(int*)((char*)self + 0x2B4) = count;
+    *(sBXSlot**)((char*)self + 0x2B0) = (sBXSlot*)operator_new_tag(count * 8, D_00481F58, 0, 0);
+    for (int i = 0; i < *(int*)((char*)self + 0x2B4); i++) {
+        (*(sBXSlot**)((char*)self + 0x2B0))[i].a = 0;
+        (*(sBXSlot**)((char*)self + 0x2B0))[i].b = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282020);
@@ -311,7 +339,53 @@ extern "C" void func_002828B8(sScriptEngine2B8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282908);
+#ifdef SKIP_ASM
+extern "C" int func_00272938(void* self, void* src);
+// PORT: the unit declares func_00272CC0(int), but it really takes (self, id).
+void* func_00272CC0_2(void* self, int id) __asm__("func_00272CC0");
+// PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
+int func_00274C10(void* self, int a1);
+void func_00274808(void* self, float t);
+
+struct sBXSlot282908 {
+    void* data;
+    unsigned short uses;
+};
+
+struct sBXThread282908 {
+    void* owner;    // 0x0
+    int state;      // 0x4
+    int slot;       // 0x8
+    int pad_c;      // 0xC
+    short pad_10;   // 0x10
+    short f12;      // 0x12
+    int pending;    // 0x14
+    float time;     // 0x18
+};
+
+extern "C" void func_00282908(void* self, void* script)
+{
+    sBXThread282908* t = (sBXThread282908*)script;
+    int idx = t->pending;
+    sBXSlot282908* s = &(*(sBXSlot282908**)((char*)self + 0x2B0))[idx];
+    if (s->data == 0) return;
+    t->slot = idx;
+    t->pending = -1;
+    t->state = 2;
+    t->f12 = 0;
+    int id = func_00272938(*(void**)((char*)self + 0x2B8), s->data);
+    void* obj = func_00272CC0_2(*(void**)((char*)self + 0x2B8), id);
+    t->owner = obj;
+    func_00274C10(obj, (int)t);
+    if (t->time > 0.0f) {
+        func_00274808(t->owner, t->time);
+        t->time = 0.0f;
+    }
+    s->uses++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002829D0);
@@ -354,7 +428,36 @@ extern "C" void func_00282A18(void* self, void* msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282A80);
+#ifdef SKIP_ASM
+extern "C" int func_0027D578(void* self, int key, void** out, int max);
+
+class cBxsHandler2A80 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual int v05(void* ctx, int arg);
+};
+
+extern "C" cBxsHandler2A80* func_00282A80(void* self, void* ctx, int arg)
+{
+    cBxsHandler2A80* buf[30];
+    cBxsHandler2A80* found = 0;
+    int n = func_0027D578(self, **(int**)((char*)ctx + 0x8), (void**)buf, 30);
+    for (int i = 0; i < n; i++) {
+        cBxsHandler2A80* h = buf[i];
+        if (h->v05(ctx, arg)) {
+            found = h;
+            break;
+        }
+    }
+    return found;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282B40);
@@ -654,7 +757,35 @@ extern "C" void* func_00283088(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_002830C8);
+#ifdef SKIP_ASM
+extern "C" void func_00282FB8(void* self, void* a1);
+int func_002743C8(void* self);
+char* func_0027C098(void* self);
+char* func_0027C2A8(void* self);
+char* func_0027C4B8(void* self);
+char* func_0027C6A0(void* self);
+
+extern "C" void func_002830C8(void* self, void* obj)
+{
+    func_00282FB8(self, obj);
+    switch (func_002743C8(obj)) {
+    case 0:
+        *(int*)((char*)self + 0xC) = *(signed char*)(func_0027C098(obj) + 0x21);
+        break;
+    case 1:
+        *(int*)((char*)self + 0xC) = *(signed char*)(func_0027C2A8(obj) + 0x21);
+        break;
+    case 2:
+        *(int*)((char*)self + 0xC) = *(signed char*)(func_0027C4B8(obj) + 0x21);
+        break;
+    case 3:
+        *(int*)((char*)self + 0xC) = *(signed char*)(func_0027C6A0(obj) + 0x1C);
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", func_00283180);

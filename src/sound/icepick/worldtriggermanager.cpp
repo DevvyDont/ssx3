@@ -77,7 +77,33 @@ extern "C" int func_002B4C08(void* self, int a1, int a2, int a3)
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C38);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5758);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" void func_002A72D8(void* snd, int id, float t);
+extern "C" void func_002AD5F0(void* self, int idx, int a2, float v);
+extern unsigned char D_004A35A8[];
+struct sWorldTrigger70;
+
+extern "C" void func_002B5758(sWorldTrigger70* t)
+{
+    char* self = (char*)t;
+    if (*(int*)((char*)self + 0x38) != 0) {
+        if (*(int*)((char*)self + 0x30) != -9999) {
+            func_002A72D8(func_0028B180(), *(int*)((char*)self + 0x30), 0.25f);
+        }
+    } else if (*(int*)((char*)self + 0x30) != -9999) {
+        func_002AD5F0(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8, *(int*)((char*)self + 0x30), 1, 0.25f);
+    }
+    *(int*)((char*)self + 0x30) = -1;
+    *(unsigned char*)((char*)self + 0x40) = D_004A35A8[0];
+    *(float*)((char*)self + 0x68) = -1.0f;
+    *(int*)((char*)self + 0x60) = 0;
+    *(int*)((char*)self + 0x64) = 0;
+    *(int*)((char*)self + 0x6C) = 0;
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5818);
 
@@ -103,7 +129,39 @@ extern "C" void func_002B5898(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_cWorldTriggerManager);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_002B4B70(void* self);
+extern "C" void cWorldTriggerManager_LoadTriggerInfo(void* self);
+extern const char D_004835A0[];
+
+struct sWorldTrigger58D0 {
+    char pad[0x70];
+};
+
+extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
+{
+    *(int*)((char*)self + 0x324) = 0;
+    *(int*)((char*)self + 0x330) = 0;
+    *(int*)((char*)self + 0x328) = -1;
+    *(int*)((char*)self + 0x32C) = -1;
+    *(int*)((char*)self + 0x334) = 1;
+    int* mem = (int*)operator_new_tag(0x1190, D_004835A0, 0, 0);
+    mem[0] = 40;
+    sWorldTrigger58D0* arr = (sWorldTrigger58D0*)((char*)mem + 0x10);
+    sWorldTrigger58D0* p = arr;
+    for (int i = 39; i != -1; i--, p++) {
+        func_002B4B70(p);
+    }
+    *(sWorldTrigger58D0**)self = arr;
+    *(int*)((char*)self + 0x338) = 0;
+    cWorldTriggerManager_LoadTriggerInfo(self);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5988);
@@ -151,11 +209,55 @@ extern "C" sWorldTrigger70* func_002B5B90(sWorldTrigger70** self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5BC0);
+#ifdef SKIP_ASM
+extern "C" int func_002B4C08(void* self, int a1, int a2, int a3);
+
+extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int a, int b, int c)
+{
+    for (int i = 0; i < 40; i++) {
+        if ((*self)[i].active != 0 && func_002B4C08(&(*self)[i], a, b, c)) {
+            return &(*self)[i];
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5C68);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5D78);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_004165A8(const void* a, const void* b);
+// PORT: func_0029B960__FPv is an empty stub whose caller passes (mgr, name).
+void func_0029B960_2(void* mgr, void* name) __asm__("func_0029B960__FPv");
+extern "C" void func_002B4C38(sWorldTrigger70* t);
+extern "C" void func_002B5758(sWorldTrigger70* t);
+extern unsigned char D_004A35A8[];
+
+extern "C" void func_002B5D78(sWorldTrigger70** self)
+{
+    if (*(int*)((char*)func_0028B180() + 0x5FB0) != 0) return;
+    for (int i = 0; i < 40; i++) {
+        if ((*self)[i].active == 1) {
+            if ((*self)[i].unk34 == 0) {
+                if (func_004165A8((char*)&(*self)[i] + 0x40, D_004A35A8)) {
+                    // PORT: pointer arithmetic through int
+                    func_0029B960_2(func_0028B180(), (char*)(i * 0x70 + *(int*)self) + 0x40);
+                }
+                (*self)[i].active = 0;
+                func_002B5758(&(*self)[i]);
+            } else {
+                func_002B4C38(&(*self)[i]);
+            }
+            (*self)[i].unk34 = 0;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5E68);
@@ -208,7 +310,23 @@ int func_002B6628(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6630);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+extern unsigned char D_004A35A8[];
+
+extern "C" int func_002B6630(sWorldTrigger70** self, int id)
+{
+    int n = 0;
+    for (int i = 0; i < 40; i++) {
+        if ((*self)[i].active == 1 && func_004165A8((char*)&(*self)[i] + 0x40, D_004A35A8)) {
+            if (*(int*)((char*)&(*self)[i] + 0xC) != id) n++;
+        }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B66E8);
