@@ -40,7 +40,7 @@ extern "C" void cScreenPopup_onCreateScreen(void* self)
 }
 #endif
 
-extern "C" void* func_0039E4A0(void*);
+void* func_0039E4A0(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C5B68__FPv);

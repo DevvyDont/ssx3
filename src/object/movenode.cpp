@@ -184,7 +184,8 @@ extern "C" void func_00355600(cMoveNode* self, void* v)
 }
 #endif
 
-void cEffectLink_add(void* link, void* other);
+struct cEffectLink;
+void cEffectLink_add(cEffectLink* link, cEffectLink* other);
 
 //99.74%
 INCLUDE_ASM("object/movenode", cMoveNode_addEffectModifier__FP9cMoveNodePv);
@@ -194,7 +195,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
     if (self->field_0x1C == 0) {
         cMoveNode_addModifierBlock(self);
     }
-    cEffectLink_add((char*)self->field_0x1C + 0x10, effect);
+    cEffectLink_add((cEffectLink*)((char*)self->field_0x1C + 0x10), (cEffectLink*)effect);
 }
 #endif
 

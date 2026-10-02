@@ -17,11 +17,10 @@ void BXsrand(uint seed)
 
 INCLUDE_ASM("bx/bxrandom", BXrand__Fv);
 #ifdef SKIP_ASM
-unsigned int cBxPseudoRng_NextInt(const uint[]);                         /* extern */
 
 void BXrand()
 {
-    cBxPseudoRng_NextInt(D_004FF018);
+    cBxPseudoRng_NextInt((uint*)D_004FF018);
 }
 #endif
 
@@ -33,7 +32,7 @@ extern const uint D_004FF030[];
 
 unsigned int AIrand()
 {
-    return cBxPseudoRng_NextInt(D_004FF030);
+    return cBxPseudoRng_NextInt((uint*)D_004FF030);
 }
 #endif
 

@@ -790,7 +790,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A4A0);
 
-extern "C" void* func_00282BB0(void* self);
+// PORT: the real function is func_00282BB0__FPvT0 (void*, void*); this caller passes only $a0.
+void* func_00282BB0(void* self) __asm__("func_00282BB0__FPvT0");
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A668__FPv);

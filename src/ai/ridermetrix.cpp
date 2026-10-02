@@ -1181,7 +1181,8 @@ extern "C" void func_0029B430(void* audio, int rider, int ubers, int runUbers);
 extern "C" void func_00119EF8(void* self, int kind, int amount);
 extern "C" void func_00117708(void* self, float seconds);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind);
+// PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int abs(int);
 
 // g++ max operator: the target uses max.s, which only `>?` produces

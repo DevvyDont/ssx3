@@ -61,7 +61,7 @@ struct cUIText {
     int field_0xB0;
 };
 
-void cUIText_setAsciiStringPrivate(cUIText* self, const char* str);
+extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str);
 
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_setAsciiString__FP7cUITextPCc);
@@ -109,8 +109,6 @@ public:
     virtual void v24(int);
 };
 
-// NOTE: the unit's C++-linkage declaration cUIText_setAsciiStringPrivate(cUIText*, const char*)
-// is a different overload; this is the extern "C" symbol.
 extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str)
 {
     unsigned short buf[0x200];

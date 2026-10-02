@@ -1,6 +1,6 @@
 #include "common.h"
 
-void cWorldPainterQuery_reset(void* self);
+extern "C" void cWorldPainterQuery_reset(void* self);
 
 //100%
 INCLUDE_ASM("worldpainter/worldpainterman", cWorldPainterMan_reset__FPv);

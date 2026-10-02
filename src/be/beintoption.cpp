@@ -160,7 +160,7 @@ extern "C" void func_0014F648(void* self)
 }
 #endif
 
-int sprintf(char* buf, const char* fmt, ...);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
 extern const char D_0045A6C0[];
 

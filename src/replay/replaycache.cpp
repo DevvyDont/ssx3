@@ -280,7 +280,7 @@ extern "C" void func_002706B8(void* self)
 #endif
 
 extern "C" void func_0026F980(void* self);
-extern "C" void func_0026F4A0(void* self, int arg);
+void func_0026F4A0(void* self, int arg);
 
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_stopAutoReplay__FPv);

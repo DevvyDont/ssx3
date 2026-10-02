@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* func_002EC418(void* self);
+extern "C" void* func_002EC418(void* self);
 extern const char D_004A3B48[];
 
 //99.23%

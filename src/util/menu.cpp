@@ -131,7 +131,8 @@ extern "C" int func_002CA3E8(void** self)
 }
 #endif
 
-extern "C" void* func_002CC260(int);
+// PORT: func_002CC260 is C++ (void*); this caller passes an int handle.
+void* func_002CC260(int) __asm__("func_002CC260__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA408__FPv);
@@ -142,7 +143,8 @@ void* func_002CA408(void* self)
 }
 #endif
 
-extern "C" void* func_002CC280(int);
+// PORT: func_002CC280 is C++ (void*); this caller passes an int handle.
+void* func_002CC280(int) __asm__("func_002CC280__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA428__FPv);
@@ -153,7 +155,8 @@ void* func_002CA428(void* self)
 }
 #endif
 
-extern "C" void* func_002CC2A0(int);
+// PORT: func_002CC2A0 is C++ (void*); this caller passes an int handle.
+void* func_002CC2A0(int) __asm__("func_002CC2A0__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA448__FPv);
@@ -164,7 +167,8 @@ void* func_002CA448(void* self)
 }
 #endif
 
-extern "C" void* func_002CC2C0(int);
+// PORT: func_002CC2C0 is C++ (void*); this caller passes an int handle.
+void* func_002CC2C0(int) __asm__("func_002CC2C0__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA468__FPv);
@@ -1808,14 +1812,15 @@ extern "C" void func_002CF8D8(void* self)
 }
 #endif
 
-void cMenu_addItem(void* menu, void* item);
+// PORT: cMenu_addItem is extern "C" (list, item, index); this caller leaves $a2 as-is.
+void cMenu_addItem2(void* menu, void* item) __asm__("cMenu_addItem");
 
 //100%
 INCLUDE_ASM("util/menu", cExpandMenuItem_addItem__FPvT0);
 #ifdef SKIP_ASM
 void cExpandMenuItem_addItem(void* self, void* item)
 {
-    cMenu_addItem((char*)self + 0x18, item);
+    cMenu_addItem2((char*)self + 0x18, item);
 }
 #endif
 

@@ -4,7 +4,7 @@ extern unsigned int D_004A3E84;
 extern const char D_004A3E88[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-//99.9% - target's gp-rel load has a raw literal offset (no symbol); ours emits a %gp_rel() reloc for the same address, splat won't symbolize target's read to match
+//100%
 INCLUDE_ASM("bx/memman", operator_new1__Fi);
 #ifdef SKIP_ASM
 void* operator_new1(int size)
@@ -13,7 +13,7 @@ void* operator_new1(int size)
 }
 #endif
 
-//99.9%
+//100%
 INCLUDE_ASM("bx/memman", operator_new2__Fi);
 #ifdef SKIP_ASM
 void* operator_new2(int size)
@@ -27,11 +27,12 @@ INCLUDE_ASM("bx/memman", cMemMan_alloc);
 //100%
 INCLUDE_ASM("bx/memman", operator_new__FUi);
 #ifdef SKIP_ASM
-void* cMemMan_alloc(unsigned int size);
+// PORT: the target calls the 4-arg cMemMan_alloc with only $a0 set (a1..a3 left as-is).
+void* cMemMan_alloc1(unsigned int size) __asm__("cMemMan_alloc");
 
 void* operator_new(unsigned int size)
 {
-    return cMemMan_alloc(size);
+    return cMemMan_alloc1(size);
 }
 #endif
 

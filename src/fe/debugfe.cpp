@@ -547,7 +547,8 @@ INCLUDE_ASM("fe/debugfe", func_0017FBF0);
 
 INCLUDE_ASM("fe/debugfe", func_0017FDF0);
 
-extern "C" void* func_00320C48(int, int);
+// PORT: the real function is C++ void* func_00320C48(void* self, int) (bx/execman); these thunks pass an int handle.
+void* func_00320C48(int, int) __asm__("func_00320C48__FPvi");
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017FE80__FPv);

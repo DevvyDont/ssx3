@@ -431,7 +431,8 @@ extern "C" void* func_0011FF48(void* dst, void* self)
 #endif
 
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind);
+// PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBECharacterInterface_getWeight(void* iface, int character);
 extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character, int stat);
 

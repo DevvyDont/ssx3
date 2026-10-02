@@ -103,7 +103,7 @@ void cCameraTriggerList_initHeader(cCameraTriggerList* self)
 }
 #endif
 
-void get_uint(void* buffer, void* dest);
+extern "C" int get_uint(void* buffer, void* dest);
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readCookie__FP18cCameraTriggerListPv);

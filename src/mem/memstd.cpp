@@ -27,8 +27,7 @@ extern "C" void func_00251F68(const char* fmt, ...)
 #endif
 
 extern const char D_004800A8[];
-void func_00251F68();
-void MEM_printclassf(void* thing, const char* fmt, void (*cb)());
+extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const char*, ...));
 
 //100%
 INCLUDE_ASM("mem/memstd", MEM_printclass__FPv);
