@@ -139,7 +139,30 @@ extern "C" void* func_0036A1C0(int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036A1E8);
+#ifdef SKIP_ASM
+extern int D_004A5B88;
+extern void* D_0053AB40[];
+
+class cGmNode_A1E8 {
+public:
+    cGmNode_A1E8* next;
+    virtual ~cGmNode_A1E8();
+};
+
+extern "C" void func_0036A1E8()
+{
+    D_004A5B88 = (D_004A5B88 + 1) % 4;
+    cGmNode_A1E8* n = (cGmNode_A1E8*)D_0053AB40[D_004A5B88];
+    while (n != 0) {
+        cGmNode_A1E8* next = n->next;
+        delete n;
+        n = next;
+    }
+    D_0053AB40[D_004A5B88] = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_0036A290);

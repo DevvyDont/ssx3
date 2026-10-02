@@ -148,9 +148,139 @@ extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EB48);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+struct sRefSet_EB48 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+
+struct sRefWorld_EB48 {
+    char pad_0x0[0x8];
+    sRefSet_EB48** sets;    // 0x8
+};
+
+extern sRefWorld_EB48** D_004A47B8;
+
+extern "C" void* func_003512C0(void* table, unsigned int id);
+
+class cStream_EB48 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+static inline void* refToPtr_EB48(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* lookup_EB48(unsigned int id)
+{
+    sRefSet_EB48* set = (*D_004A47B8)->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    unsigned int p = set->refs[id >> 8] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr_EB48(p);
+}
+
+struct sRefH_EB48 {
+    unsigned int id;
+    sRefH_EB48() : id(0xFFFFFFFF) {}
+};
+
+extern "C" void* func_0026EB48(cStream_EB48* stream)
+{
+    void* r = 0;
+    sRefH_EB48 h;
+    stream->v02(&h, 4);
+    if (~h.id != 0) {
+        r = func_003512C0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x88), h.id);
+        if (r == 0) {
+            void* t = lookup_EB48(h.id);
+            r = t;
+        }
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EC08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sRefSet_EC08 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+
+struct sRefWorld_EC08 {
+    char pad_0x0[0x8];
+    sRefSet_EC08** sets;    // 0x8
+};
+
+// asm-label view: func_0026EB48 declares D_004A47B8 with its own struct type in this unit
+extern sRefWorld_EC08** D_004A47B8_EC08 __asm__("D_004A47B8");
+
+class cStream_EC08 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+struct sRec_EC08 {
+    unsigned int id;
+    unsigned short type;
+    sRec_EC08() : id(0xFFFFFFFF) {}
+};
+
+struct sNode_EC08 {
+    char pad_0x0[0x8];
+    unsigned int flags;     // 0x8
+    void* owner;            // 0xC
+};
+
+static inline void* refToPtr_EC08(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* lookup_EC08(unsigned int id)
+{
+    sRefSet_EC08* set = (*D_004A47B8_EC08)->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    unsigned int p = set->refs[id >> 8] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr_EC08(p);
+}
+
+extern "C" void* func_0026EC08(cStream_EC08* stream, void* owner)
+{
+    sNode_EC08* r = 0;
+    sRec_EC08 rec;
+    stream->v02(&rec, 8);
+    if (~rec.id != 0) {
+        void* t = lookup_EC08(rec.id);
+        r = (sNode_EC08*)t;
+        r->owner = owner;
+        r->flags = (r->flags & 0xFFFF0300) | (rec.type & 0xFCFF);
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026ECD8);

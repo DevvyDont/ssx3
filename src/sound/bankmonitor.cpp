@@ -513,7 +513,57 @@ extern "C" int func_002AE020()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE048);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void REAL_abortmessage();
+extern "C" void func_004175C8();
+extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void* func_002526B8(void* block, int size);
+extern "C" void SYNCTASK_add(int (*fn)(), int a, int b);
+extern int D_004A379C;
+extern void (*D_004A3780)();
+extern void (*D_004A3784)();
+extern void* (*D_004A378C)(void*, int, int);
+extern void* (*D_004A3790)(void*, int);
+extern void* (*D_004A3794)(void*);
+
+struct sBankMonSlot28_E048 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+    int f1C;
+    int f20;
+    int f24;
+};
+// D_004D3EF8's own type is defined later in the unit; bind a same-layout view.
+extern sBankMonSlot28_E048 D_004D3EF8_E048[] __asm__("D_004D3EF8");
+
+extern "C" void func_002AE048(void (*cb)(), int id)
+{
+    for (int i = 0; i < 24; i++) {
+        D_004D3E98[i] = 0;
+        D_004D3EF8_E048[i].f8 = -1;
+        D_004D3EF8_E048[i].f4 = -1;
+        D_004D3EF8_E048[i].f0 = -1;
+        D_004D3EF8_E048[i].f18 = 0;
+    }
+    D_004A3798 = cb;
+    D_004A379C = id;
+    func_003B5910((void*)id);
+    SYNCTASK_add(func_002AE020, 5, 100);
+    D_004A3780 = REAL_abortmessage;
+    D_004A3784 = func_004175C8;
+    D_004A378C = func_00252FA0;
+    D_004A3790 = func_002526B8;
+    D_004A3794 = func_002AE000;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE100);
@@ -716,7 +766,31 @@ extern "C" int func_002AE478(int n, int m)
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE4C0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002AE690);
+#ifdef SKIP_ASM
+extern void* (*D_004A3794)(void*);
+extern "C" void func_003B7838(int id);
+
+extern "C" void func_002AE690(int idx)
+{
+    void* m = D_004D3E98[idx];
+    if (*(signed char*)((char*)m + 0x64) != 0) {
+        int id = func_002AE230(idx, -1);
+        while (id >= 0) {
+            sBankMonSlot28* e = &D_004D3EF8[id];
+            if (D_004A3794 != 0 && e->f14 != 0) {
+                D_004A3794((void*)e->f14);
+            }
+            func_002AE1F0((int*)e);
+            id = func_002AE230(idx, -1);
+        }
+    } else {
+        func_003B7838(*(int*)m);
+    }
+    func_002AE188(m);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE768);
@@ -1119,7 +1193,62 @@ extern "C" int func_002AFA58(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AFA68);
+#ifdef SKIP_ASM
+extern char* D_004A37B4;
+extern "C" void func_002AA910(void* sys, int id, int a, int b, int c);
+extern "C" void func_002B0088(void* self, int a, int b, int c);
+
+struct sBmPair_FA68 {
+    int a;
+    int b;
+};
+
+struct sBmStream_FA68 {
+    int f0;                     // 0x0
+    int f4;                     // 0x4
+    int f8;                     // 0x8
+    char fC;                    // 0xC
+    char pad_0xD[0xCC - 0xD];
+    sBmPair_FA68 pairs[4];      // 0xCC
+    int fEC;                    // 0xEC
+    int fF0;                    // 0xF0
+    char pad_0xF4[0x8C4 - 0xF4];
+    int f8C4;                   // 0x8C4
+    int f8C8;                   // 0x8C8
+    int f8CC;                   // 0x8CC
+    int f8D0;                   // 0x8D0
+    char pad_0x8D4[0x8F4 - 0x8D4];
+    int f8F4;                   // 0x8F4
+    char pad_0x8F8[0x900 - 0x8F8];
+    int f900;                   // 0x900
+};
+
+extern "C" void* func_002AFA68(void* mem, int a1, int a2, int a3, int a4, int a5, int a6)
+{
+    sBmStream_FA68* self = (sBmStream_FA68*)mem;
+    self->f0 = a1;
+    self->f4 = a2;
+    self->f900 = 1;
+    self->f8 = a6;
+    self->fEC = 0;
+    self->fF0 = 0;
+    self->f8C4 = 0;
+    self->f8C8 = 0;
+    self->f8CC = 0;
+    self->f8D0 = 0;
+    self->f8F4 = 0;
+    self->fC = 0;
+    for (int i = 0; i < 4; i++) {
+        self->pairs[i].a = 0;
+        self->pairs[i].b = 0;
+    }
+    func_002AA910(*(void**)D_004A37B4, self->f4, a4, 0, 0x20000);
+    func_002B0088(self, a1, a3, a5);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002AFB38);
 

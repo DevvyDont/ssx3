@@ -332,7 +332,29 @@ extern "C" void* func_00372520(sPtObj_2520* self, void* owner)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003725B0);
+#ifdef SKIP_ASM
+extern float D_004A4230;
+extern float D_004A4234;
+extern float D_004A4238;
+
+extern "C" void* func_003725B0(void* self)
+{
+    if (D_004A4230 != (float)D_004A41E0 || D_004A4234 != (float)D_004A41E4 || D_004A4238 != (float)D_004A41E8) {
+        int i;
+        for (i = 0; i < 0x106; i++) {
+            sPtVert_2520* v = &D_00501440[i];
+            v->r = D_004A41E0;
+            v->g = D_004A41E4;
+            v->b = D_004A41E8;
+        }
+        D_004A4230 = (float)D_004A41E0;
+        D_004A4234 = (float)D_004A41E4;
+        D_004A4238 = (float)D_004A41E8;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00372660);

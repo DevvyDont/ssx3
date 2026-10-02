@@ -1,6 +1,39 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
+#ifdef SKIP_ASM
+extern char* D_004A3614;
+extern char D_00482998[];
+extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+
+class cSndStream_B588 {
+public:
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual int alloc(int size);
+};
+
+// PORT: the unit declares this void* (a caller forwards its $v0), but no value is returned.
+extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag)
+{
+    if (size != 0 || extra != 0) {
+        *(int*)((char*)self + 0x8) = 1;
+        if (extra != 0) {
+            int id = (**(cSndStream_B588***)(D_004A3614 + 0x1D8))->alloc(extra);
+            if (id >= 0) {
+                *(int*)((char*)self + 0xC) = id;
+                *(int*)((char*)self + 0x8) = 2;
+            } else if (id == -3) {
+                size += extra;
+            }
+        }
+        *(int*)((char*)self + 0x14) = size;
+        *(void**)((char*)self + 0x10) = func_00252FA0(D_00482998, size, tag);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B650);
@@ -665,9 +698,87 @@ extern "C" void func_0028F328(void* self, int code)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F3C8);
+#ifdef SKIP_ASM
+extern "C" int func_002B3BC0(void* self, int v);
 
+extern "C" int func_0028F3C8(void* self, int code)
+{
+    void* monitor = (char*)self + 0x118;
+    int r = func_002B3BC0(monitor, code);
+    if (func_002B49E0(monitor) == -1) {
+        if ((unsigned)(code - 10) < 2 || code == 0x12) {
+            if (D_004A3620 == 1) {
+                ((cBankMonitor_F328*)((char*)self + 0x118))->v3(8);
+            }
+            *(int*)((char*)self + 0x530) = 0;
+        }
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F478);
+#ifdef SKIP_ASM
+class cUiObj_F478 {
+public:
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual int v24(int a, int b);
+};
+
+int GetHashValue32(char*);
+extern char D_004A3660[];
+extern char* D_004A28A8;
+extern "C" void func_002B35A0(void* monitor);
+extern "C" float func_00287930(void* self, int a, int b);
+extern "C" cUiObj_F478* func_0039F9D8(void* list, int hash);
+
+extern "C" void func_0028F478(void* self)
+{
+    func_002B35A0((char*)self + 0x118);
+    if (func_00287930(self, 1, 0) > 0.0f) {
+        char* game = *(char**)(D_004A28A8 + 0x84);
+        if (game != 0) {
+            char* owner = *(char**)(game + 0x48);
+            if (owner != 0) {
+                void* list = owner + 0x18;
+                if (list != 0) {
+                    cUiObj_F478* obj = func_0039F9D8(list, GetHashValue32(D_004A3660));
+                    if (obj != 0) {
+                        obj->v24(5, 0);
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F520);

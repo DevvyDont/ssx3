@@ -294,7 +294,50 @@ void cReplay_stopAutoReplay(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270730);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+
+class cRcIdObj_0730 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+
+struct sRcRider_0730 {
+    char pad_0x0[0x18];
+    char* obj;                      // 0x18
+};
+
+struct sRcWorld_0730 {
+    char pad_0x0[0x40];
+    sRcRider_0730* riders[15];      // 0x40
+    int numRiders;                  // 0x7C
+};
+
+static inline sRcWorld_0730* world_0730()
+{
+    return *(sRcWorld_0730**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+}
+
+extern "C" int func_00270730(int id)
+{
+    int i;
+    for (i = 0; i < world_0730()->numRiders; i++) {
+        if (((cRcIdObj_0730*)(world_0730()->riders[i]->obj + 0x6C0))->v07() == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002707E0);
@@ -380,7 +423,37 @@ extern "C" void func_00270970(void* self, int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002709D8);
+#ifdef SKIP_ASM
+extern "C" int func_00270730(int id);
+extern "C" void func_00270B88(void* self, int slot, int id);
+// PORT: the unit defines func_002705A8(void*) (an empty stub), but this caller
+// passes (self, id); bind the 2-arg call by asm label.
+void func_002705A8_2(void* self, int id) __asm__("func_002705A8__FPv");
+extern char* D_004A28A8;
+
+extern "C" void func_002709D8(void* self, int key, int mode)
+{
+    if (*(int*)((char*)self + 0x61C) == 0 && *(int*)((char*)self + 0x620) == 0 &&
+        *(int*)((char*)self + 0x610) == 0 && *(int*)((char*)self + 0x60C) == 0 &&
+        *(int*)((char*)self + 0x0) == 0) {
+        int slot = func_00270730(key);
+        if (slot >= 0) {
+            char* world = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+            char* rider = *(char**)(world + (key << 2) + 0x28);
+            switch (mode) {
+            case 0:
+                func_002705A8_2(self, *(int*)(rider + 0x790) + 0xFC);
+                break;
+            case 1:
+                func_00270B88(self, slot, *(int*)(rider + 0x790) + 0xFC);
+                break;
+            }
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00270AB0);

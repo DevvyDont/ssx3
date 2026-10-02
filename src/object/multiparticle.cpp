@@ -143,7 +143,41 @@ extern "C" void* func_003584F0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358588);
+#ifdef SKIP_ASM
+extern void* D_004A4040;
+extern void* D_0048EDE0[];
+extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
+extern "C" void func_00358780(void* self, int idx);
+
+class func_00358588_cStream {
+public:
+    virtual void v01();
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void* func_00358588(void* self, void* a1, func_00358588_cStream* stream)
+{
+    char* s = (char*)self;
+    int i;
+    int j;
+    cSortObjNode_cSortObjNode(self, a1, stream);
+    *(void***)(s + 0xC) = D_0048EDE0;
+    unsigned int* p = (unsigned int*)(s + 0x18);
+    for (j = 0x7F; j != -1; j--, p++) {
+        *p = 0xFFFFFFFF;
+    }
+    D_004A4040 = self;
+    stream->v02(s + 0x18, 0x200);
+    for (i = 0; i < 0x80; i++) {
+        if (((unsigned int*)(s + 0x18))[i] != 0xFFFFFFFF) {
+            func_00358780(self, i);
+        }
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358668);
@@ -250,7 +284,51 @@ extern "C" void func_00358E50(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358EB8);
+#ifdef SKIP_ASM
+extern "C" void func_00341D48(void* p);
+extern "C" int func_0034EBA0(void* p);
+
+extern "C" int func_00358EB8(void* self)
+{
+    char* s = (char*)self;
+    *(float*)(s + 0x3C) = 10000000000.0f;
+    *(float*)(s + 0x40) = 10000000000.0f;
+    if (*(signed char*)(s + 0x15) == 0) {
+        if (*(signed char*)(s + 0x14) != 0) {
+            int t = *(int*)(s + 0x24);
+            if (t >= 0) {
+                if (t > 0) {
+                    *(int*)(s + 0x24) = t - 1;
+                } else {
+                    float pos = *(float*)(s + 0x4) + *(float*)(s + 0x0);
+                    float max = *(float*)(s + 0xC);
+                    float v = *(float*)(s + 0x34);
+                    *(float*)(s + 0x3C) = v;
+                    *(float*)(s + 0x40) = v;
+                    *(float*)(s + 0x4) = pos;
+                    if (max <= pos) {
+                        *(float*)(s + 0x4) = max;
+                        if (*(signed char*)(s + 0x16) != 0) {
+                            *(signed char*)(s + 0x15) = 1;
+                        }
+                        *(signed char*)(s + 0x14) = 0;
+                    }
+                    if (func_0034EBA0(s + 0x34) == 0) {
+                        return 0;
+                    }
+                }
+            }
+        } else {
+            func_00341D48(s + 0x18);
+            return 1;
+        }
+        *(unsigned short*)(s + 0x5A) |= 1;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358F90);

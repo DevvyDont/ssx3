@@ -500,7 +500,37 @@ extern "C" int func_00279528(void* self, int category, int a, int b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002795D0);
+#ifdef SKIP_ASM
+void* func_0027BD78(void* self);
+void func_0027BD90(void*, void*);
+extern "C" int func_002821A0(void* self, int key, void* node);
+extern char* D_004A28A8;
+
+extern "C" int func_002795D0(void* self, int key, int a, int b, int c)
+{
+    int n = *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x78);
+    if (a < 0 || a >= n) {
+        a = -1;
+    }
+    if (b < 0 || b >= n) {
+        b = -1;
+    }
+    if (c < 0 || c >= n) {
+        c = -1;
+    }
+    int* node = (int*)func_0027BD78(self);
+    node[0] = a;
+    node[1] = b;
+    node[2] = c;
+    int r = func_002821A0(self, key, node);
+    if (r < 0) {
+        func_0027BD90(self, node);
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279720);
@@ -2147,7 +2177,40 @@ extern "C" void* func_002805B8(sScrObj05B8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280640);
+#ifdef SKIP_ASM
+extern void* D_004A28A4;
+extern "C" void func_002AD5F0(void* bank, int id, int a, float f);
+extern "C" int func_002AD550(void* bank, int id, int a);
+extern "C" int func_002B0E28(void* p, int i);
+
+extern "C" void func_00280640(sScrObj05B8* self)
+{
+    char* snd = (char*)func_0028B180();
+    for (int i = 0; i < 4; i++) {
+        sScrTrig05B8* t = &self->trig[i];
+        if (t->id >= 0) {
+            if (t->count != 0) {
+                func_002AD5F0(**(char***)(snd + 0x118) + 0x1D8, t->id, 1, 0.0f);
+                t->target = -1;
+                t->id = -1;
+                t->count = 0;
+            } else if (func_002AD550(**(char***)(snd + 0x118) + 0x1D8, t->id, 1) == 0) {
+                t->target = -1;
+                t->id = -1;
+                t->count = 0;
+            }
+        }
+    }
+    if (self->field_0xF4 != 0) {
+        self->field_0xF4 = 0;
+        if (func_002B0E28(snd + 0x5560, 0) != 0) {
+            func_00279070(D_004A28A4, *(int*)((char*)D_004A28A4 + 0x550), 1, 1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280730);

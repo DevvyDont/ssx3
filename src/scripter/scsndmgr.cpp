@@ -229,5 +229,85 @@ extern "C" void func_002837C8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283818);
+#ifdef SKIP_ASM
+extern "C" void func_00253418(void* p, int flags);
+extern "C" void* func_0028B180();
+extern "C" void func_0029CE70(void* p);
+extern "C" void func_002EA860(void* p);
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_005366E8[];
+extern int D_004428F0[];
+extern char* D_004A28A8;
+
+class cWorld_3818 {
+public:
+    char pad_0x0[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40(int a);
+};
+
+extern cWorld_3818* D_004A289C;
+
+extern "C" void func_00283818(void* self)
+{
+    char* s = (char*)self;
+    if (*(void**)(s + 0x0) != 0) {
+        func_00253418(*(void**)(s + 0x0), 3);
+        if (*(int*)(s + 0x4) != 0) {
+            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            func_0029CE70(func_0028B180());
+            D_004A289C->v40(*(int*)(s + 0x10));
+            if (*(int*)(s + 0x14) != 0) {
+                *(int*)(s + 0x14) = 0;
+                func_002EA860(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64));
+            }
+        }
+    }
+    *(int*)(s + 0x0) = 0;
+    *(int*)(s + 0x4) = 0;
+    *(int*)(s + 0x8) = 0;
+    *(int*)(s + 0xC) = 0;
+}
+#endif
 

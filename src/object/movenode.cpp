@@ -242,7 +242,52 @@ extern "C" void func_00355748(cMoveNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355770);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+extern "C" int func_002D1B30(int);
+void func_0034FE00(void*, int, int, int);
+
+struct cMN_355770_Obj {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual int v09(int);
+    virtual int v10(int a, int b);
+};
+
+struct cMN_355770_VEnt {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+extern "C" void func_00355770(cMoveNode* self, int a1, int a2, int a3)
+{
+    cMN_355770_Obj** p = (cMN_355770_Obj**)self->field_0x1C;
+    if (p != 0) {
+        cMN_355770_Obj* obj = *p;
+        if (obj != 0) {
+            obj->v10(a1, a2);
+            char* o = *(char**)self->field_0x1C;
+            cMN_355770_VEnt* vt = *(cMN_355770_VEnt**)o;
+            if (vt[9].fn(o + vt[9].delta, func_002D1B30(a3)) == 0) {
+                return;
+            }
+        }
+    }
+    if (*(int*)((char*)self + 0x20) <= 0) {
+        *(int*)((char*)self + 0x20) = *(int*)(D_004A5B64 + 0x10) / 2;
+        func_0034FE00(self, a1, a2, a3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00355858);
