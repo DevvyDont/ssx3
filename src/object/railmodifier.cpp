@@ -391,7 +391,57 @@ extern "C" void func_0035F3A8(sRailModSelect* self)
 
 INCLUDE_ASM("object/railmodifier", func_0035F410);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F598);
+#ifdef SKIP_ASM
+struct sRailModSelect;
+extern "C" void func_0035F378(sRailModSelect* self, int i);
+
+struct sRailModSel_F598 {
+    int field_0x0;
+    int field_0x4;
+    float speed;        // 0x8
+    char pad_0xc[0x8];
+    int index;          // 0x14
+    char pad_0x18[0x8];
+    int count;          // 0x20
+};
+
+// PORT: R5900 truncate-to-integer-valued float, kept in FPU registers (no GPR round trip).
+static inline float fTrunc_F598(float x)
+{
+    float r;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=&f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_0035F598(sRailModSel_F598* self, int id, float v)
+{
+    switch (id) {
+    case 300:
+        self->speed = v;
+        break;
+    case 301:
+        if (v >= 0.0f && v < 9.0f) {
+            float c = fTrunc_F598(v);
+            if (c < v) {
+                c += 1.0f;
+            }
+            int n = (int)c;
+            self->index = n;
+            func_0035F378((sRailModSelect*)self, n);
+        }
+        break;
+    case 302:
+        self->index++;
+        if (self->index >= self->count) {
+            self->index = 1;
+        }
+        func_0035F378((sRailModSelect*)self, self->index);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F688);

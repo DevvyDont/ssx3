@@ -133,9 +133,87 @@ INCLUDE_ASM("bx/ps2main", func_0031BCB0);
 
 INCLUDE_ASM("bx/ps2main", func_0031BE50);
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031BF60);
+#ifdef SKIP_ASM
+// sin(x): quadrant reduction by pi/2, then a cos or sin polynomial (Horner form).
+extern "C" float func_0031BF60(float x)
+{
+    float t = x * 0.6366197466850281f;
+    if (x < 0.0f)
+        t -= 0.5f;
+    else
+        t += 0.5f;
+    int q;
+    float fq;
+    // PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
+    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(t), "=r"(q));
+    fq = t;
+    x = x - fq * 1.5707963705062866f;
+    float x2 = x * x;
+    float r;
+    if (q & 1)
+    {
+        r = x2 * 2.480159128026571e-05f;
+        r = (r + -0.0013888890389353037f) * x2;
+        r = (r + 0.0416666679084301f) * x2;
+        r = (r + -0.5f) * x2;
+        r = r + 1.0f;
+    }
+    else
+    {
+        r = x2 * 2.755732339210226e-06f;
+        r = (r + -0.0001984127302421257f) * x2;
+        r = (r + 0.008333333767950535f) * x2;
+        r = (r + -0.1666666716337204f) * x2;
+        r = r * x + x;
+    }
+    if (q & 2)
+        r = -r;
+    return r;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031C040);
+#ifdef SKIP_ASM
+// cos(x): quadrant reduction by pi/2, then a sin or cos polynomial (Horner form).
+extern "C" float func_0031C040(float x)
+{
+    float t = x * 0.6366197466850281f;
+    if (x < 0.0f)
+        t -= 0.5f;
+    else
+        t += 0.5f;
+    int q;
+    float fq;
+    // PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
+    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(t), "=r"(q));
+    fq = t;
+    x = x - fq * 1.5707963705062866f;
+    float x2 = x * x;
+    float r;
+    if (q & 1)
+    {
+        r = x2 * 2.755732339210226e-06f;
+        r = (r + -0.0001984127302421257f) * x2;
+        r = (r + 0.008333333767950535f) * x2;
+        r = (r + -0.1666666716337204f) * x2;
+        r = r * x + x;
+    }
+    else
+    {
+        r = x2 * 2.480159128026571e-05f;
+        r = (r + -0.0013888890389353037f) * x2;
+        r = (r + 0.0416666679084301f) * x2;
+        r = (r + -0.5f) * x2;
+        r = r + 1.0f;
+    }
+    if ((q + 1) & 2)
+        r = -r;
+    return r;
+}
+#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031C128);
 

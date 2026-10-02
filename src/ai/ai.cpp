@@ -1734,7 +1734,45 @@ extern "C" void func_00135B30(void* self, float a, float b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00135BE0);
+#ifdef SKIP_ASM
+extern "C" int func_00114DB8(void* rider);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float aiFloor_135BE0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0, %1\n\tcvt.s.w %0, %0" : "=f"(t) : "f"(x));
+    if (x < t)
+    {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float aiWrap_135BE0(float x)
+{
+    return x - aiFloor_135BE0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+extern "C" int func_00135BE0(void* self)
+{
+    char* s = (char*)self;
+    if (func_00114DB8(*(void**)(s + 0x58)) != 0)
+    {
+    *(float*)(s + 0x20) = aiWrap_135BE0(*(float*)(s + 0x20) + 3.1415927410125732f);
+    *(float*)(s + 0x24) = -*(float*)(s + 0x24);
+    *(float*)(s + 0x2C) = -*(float*)(s + 0x2C);
+    *(float*)(s + 0x18) = -*(float*)(s + 0x18);
+    *(float*)(s + 0x10) = -*(float*)(s + 0x10);
+    cRiderAnimBase_play(*(void**)(*(char**)(s + 0x58) + 0x784), 0x120, 0, -1.0f);
+    return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00135CB0);
 
