@@ -117,7 +117,59 @@ extern "C" void func_0014F458(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F4F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A28A8;
+
+struct sOptBits_0014F4F8
+{
+    unsigned int pad0 : 19;
+    unsigned int i : 1;     // 19
+    unsigned int j : 2;     // 20-21
+    unsigned int k : 3;     // 22-24
+    unsigned int l : 4;     // 25-28
+    unsigned int m : 1;     // 29
+    unsigned int top : 2;   // 30-31
+    unsigned char b4;
+    unsigned char b5;
+    unsigned char b6;
+    unsigned char b7;
+};
+extern sOptBits_0014F4F8 D_00535610_v0014F4F8[] __asm__("D_00535610");
+
+class cBEOptionInterfaceV_0014F4F8
+{
+public:
+    char pad_0x00[0xC];
+    virtual void apply();
+};
+
+extern "C" void func_0014F4F8(void* self)
+{
+    switch (*(int*)(*(char**)((char*)D_004A28A8 + 0x9C) + 0x24))
+    {
+    case 1:
+        D_00535610_v0014F4F8[0].j = 2;
+        break;
+    case 2:
+        D_00535610_v0014F4F8[0].j = 1;
+        break;
+    case 0:
+    default:
+        D_00535610_v0014F4F8[0].j = 0;
+        break;
+    }
+    D_00535610_v0014F4F8[0].k = 0;
+    D_00535610_v0014F4F8[0].i = 0;
+    D_00535610_v0014F4F8[0].m = 0;
+    D_00535610_v0014F4F8[0].l = 9;
+    D_00535610_v0014F4F8[0].b5 = 0;
+    D_00535610_v0014F4F8[0].b6 = 0;
+    ((cBEOptionInterfaceV_0014F4F8*)D_004A120C)->apply();
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintoption", func_0014F600);

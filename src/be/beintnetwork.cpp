@@ -220,7 +220,28 @@ extern "C" void func_0014EBF8(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014ECA0);
+#ifdef SKIP_ASM
+extern "C" void func_00156988(sBEPlayerData* data);
+
+extern "C" void func_0014ECA0(void* self, int idx)
+{
+    func_00156988(&D_004A6CA8[idx]);
+    if (D_00534B38[0] == 0)
+    {
+        D_00535B20[0] = D_00535B20[1];
+    }
+    for (int i = 1; i < 6; i++)
+    {
+        D_00535B20[i] = D_00534A88[i];
+    }
+    sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    a->vtable[2].fn((char*)a + a->vtable[2].delta);
+    sBEIface0014EA90* b = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 6);
+    b->vtable[2].fn((char*)b + b->vtable[2].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EDD8);

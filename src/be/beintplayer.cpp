@@ -815,9 +815,103 @@ extern "C" short func_00147CB8(void* self, int which)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147D20);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern int D_004A6CA8[];
 
+struct sCharRec_147D20 {
+    char pad0[0x280];
+    short b0;       // 0x280
+    short a0;       // 0x282
+    short b1;       // 0x284
+    short a1;       // 0x286
+    char pad288[0xF88 - 0x288];
+};
+
+extern "C" void func_00147D20(void* self, int which)
+{
+    int profile = 0;
+    int c = cBELibrary_getCharacterID(0);
+    short a, b;
+    if (which)
+    {
+        b = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0;
+        a = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0;
+    }
+    else
+    {
+        b = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1;
+        a = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1;
+    }
+    a++;
+    if (a >= 2)
+    {
+        if (b < 2) b++;
+        a = 0;
+    }
+    if (which)
+    {
+        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0 = b;
+        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0 = a;
+    }
+    else
+    {
+        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1 = b;
+        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1 = a;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147E18);
+#ifdef SKIP_ASM
+int cBELibrary_getCharacterID(int);
+extern int D_004A6CA8[];
+
+struct sCharRec_147E18 {
+    char pad0[0x280];
+    short b0;       // 0x280
+    short a0;       // 0x282
+    short b1;       // 0x284
+    short a1;       // 0x286
+    char pad288[0xF88 - 0x288];
+};
+
+extern "C" void func_00147E18(void* self, int which)
+{
+    int profile = 0;
+    int c = cBELibrary_getCharacterID(0);
+    short a, b;
+    if (which)
+    {
+        b = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0;
+        a = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0;
+    }
+    else
+    {
+        b = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1;
+        a = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1;
+    }
+    a--;
+    if (a < -1)
+    {
+        if (b != 0) b--;
+        a = 0;
+    }
+    if (which)
+    {
+        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0 = b;
+        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0 = a;
+    }
+    else
+    {
+        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1 = b;
+        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1 = a;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147F78);

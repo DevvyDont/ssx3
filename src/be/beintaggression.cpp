@@ -98,7 +98,56 @@ INCLUDE_ASM("be/beintaggression", func_00155BF0);
 
 INCLUDE_ASM("be/beintaggression", func_00155E58);
 
+//100%
 INCLUDE_ASM("be/beintaggression", func_001560A0);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern int D_005305E0[];
 
+struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int); };
+
+extern "C" void func_001560A0(void* self, void* stream)
+{
+    int n = D_005305E0[0];
+    sStreamVE_1560A0* vt = *(sStreamVE_1560A0**)stream;
+    vt[1].fn((char*)stream + vt[1].delta, &n, 4);
+    for (int i = 0; i < n; i++)
+    {
+        int profile = cBELibrary_getProfileIndex(i);
+        for (int j = 0; j < 10; j++)
+        {
+            int c = cBELibrary_getCharacterID(i);
+            sStreamVE_1560A0* vt2 = *(sStreamVE_1560A0**)stream;
+            vt2[1].fn((char*)stream + vt2[1].delta, &D_004A6CA8[profile][c].aggression[j], 3);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintaggression", func_001561B0);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int); };
+
+extern "C" void func_001561B0(void* self, void* stream)
+{
+    int n;
+    sStreamVE_1561B0* vt = *(sStreamVE_1561B0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, &n, 4);
+    for (int i = 0; i < n; i++)
+    {
+        int profile = cBELibrary_getProfileIndex(i);
+        for (int j = 0; j < 10; j++)
+        {
+            int c = cBELibrary_getCharacterID(i);
+            sStreamVE_1561B0* vt2 = *(sStreamVE_1561B0**)stream;
+            vt2[2].fn((char*)stream + vt2[2].delta, &D_004A6CA8[profile][c].aggression[j], 3);
+        }
+    }
+}
+#endif
 

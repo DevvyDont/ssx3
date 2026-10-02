@@ -324,7 +324,81 @@ extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314418);
+#ifdef SKIP_ASM
+struct sSeq_00314418;
+extern "C" float func_00313D70_314418(sSeq_00314418* self, int i) __asm__("func_00313D70");
+
+struct sVec4_314418
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSeqTrack_314418
+{
+    char pad0[0x4];
+    int id;         // 0x4
+    float time;     // 0x8
+    char padC[0xC];
+    int flag;       // 0x18
+};
+
+struct sSeq_00314418
+{
+    sSeqTrack_314418 tracks[3];     // 0x00
+    char pad54[0xC];
+    sVec4_314418 a;                 // 0x60
+    sVec4_314418 b;                 // 0x70
+    int c;                          // 0x80
+    int d;                          // 0x84
+    long e;                         // 0x88
+    char pad90[0x38];
+    sSeq_00314418* next;            // 0xC8
+};
+
+struct sSeqState_314418
+{
+    int id;             // 0x00
+    float time;         // 0x04
+    int d;              // 0x08
+    float weight;       // 0x0C
+    long e;             // 0x10
+    char pad18[0x8];
+    sVec4_314418 a;     // 0x20
+    sVec4_314418 b;     // 0x30
+    int c;              // 0x40
+    char pad44[0xC];
+};
+
+// PORT: `long` field is 64-bit (ld/sd).
+extern "C" int func_00314418(void* self, sSeqState_314418* out)
+{
+    int count = 0;
+    sSeq_00314418* n = *(sSeq_00314418**)((char*)self + 0x4);
+    while (n != 0)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (n->tracks[j].flag != 0)
+            {
+                sSeqState_314418* o = &out[count];
+                o->id = n->tracks[j].id;
+                o->time = n->tracks[j].time;
+                o->a = n->a;
+                o->b = n->b;
+                o->c = n->c;
+                o->d = n->d;
+                o->weight = func_00313D70_314418(n, j);
+                o->e = n->e;
+                count++;
+            }
+        }
+        n = n->next;
+    }
+    return count;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_00314518);

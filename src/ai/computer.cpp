@@ -4,7 +4,42 @@ INCLUDE_ASM("ai/computer", cComputer_setIndividualRiderDifficulty);
 
 INCLUDE_ASM("ai/computer", cComputer_updateRiderDifficulty);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010C9A8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144C98(void* iface);
+extern "C" void func_00148AA8(void* iface, int a1, int a2);
+
+struct sVEntry10C9A8 { short delta; short index; int (*fn)(void*); };
+
+static inline int riderV7_10C9A8(char* rider)
+{
+    char* obj = rider + 0x6C0;
+    sVEntry10C9A8* vt = *(sVEntry10C9A8**)obj;
+    return vt[7].fn(obj + vt[7].delta);
+}
+
+extern "C" void func_0010C9A8(void* self)
+{
+    void* s = cBE_getInterface_Fv(cBE_getBE(), 3);
+    void* g = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (func_00144C98(g) == 2)
+    {
+        func_00148AA8(s, riderV7_10C9A8(*(char**)((char*)self + 0x18)), 7);
+    }
+    else if (func_00144C98(g) == 1)
+    {
+        func_00148AA8(s, riderV7_10C9A8(*(char**)((char*)self + 0x18)), 4);
+    }
+    else
+    {
+        func_00148AA8(s, riderV7_10C9A8(*(char**)((char*)self + 0x18)), 1);
+    }
+}
+#endif
 
 extern "C" void cComputer_updateRiderDifficulty(void*);
 
@@ -18,9 +53,92 @@ extern "C" void func_0010CAB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010CAD8);
+#ifdef SKIP_ASM
+extern "C" int func_0010C258(void* self);
+extern "C" int func_0010C320(void* self);
+extern "C" int func_0010C3B8(void* self);
+extern "C" int func_0010CF68(void* self, float t);
+extern "C" int func_0010CD20(void* self, float t);
+extern "C" int func_0010CBE0(void* self, float t);
 
+extern "C" int func_0010CAD8(void* self, float t)
+{
+    int r = -1;
+    int skip = *(int*)((char*)self + 0xE20) != 0 && t < 1.0f;
+    if (!skip && t > 0.75f && t != 100.0f)
+    {
+        if (func_0010C258(self)) r = func_0010CF68(self, t);
+        if (r == -1)
+        {
+            if (func_0010C320(self)) r = func_0010CD20(self, t);
+            if (r == -1)
+            {
+                if (func_0010C3B8(self)) r = func_0010CBE0(self, t);
+            }
+        }
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_0010CBE0);
+#ifdef SKIP_ASM
+unsigned int AIrand();
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" unsigned short func_001500D8(void* self, int a1, int a2);
+extern "C" float func_00120038(void* self);
+extern "C" float func_00312820(char* self, int a1, int frame);
+
+struct sVEntry10CBE0 { short delta; short index; int (*fn)(void*); };
+
+static inline int riderV7_10CBE0(char* rider)
+{
+    char* obj = rider + 0x6C0;
+    sVEntry10CBE0* vt = *(sVEntry10CBE0**)obj;
+    return vt[7].fn(obj + vt[7].delta);
+}
+
+struct sComputer_0010CBE0
+{
+    char pad0[0x18];
+    char* mRider;       // 0x18
+    char pad1C[0xE24 - 0x1C];
+    int fE24;           // 0xE24
+    int fE28;           // 0xE28
+    float fE2C;         // 0xE2C
+    float fE30;         // 0xE30
+    float fE34;         // 0xE34
+    char padE38[0xE7C - 0xE38];
+    int a[15];          // 0xE7C
+};
+
+extern "C" int func_0010CBE0(void* p, float t)
+{
+    sComputer_0010CBE0* self = (sComputer_0010CBE0*)p;
+    self->fE24 = 0;
+    self->fE28 = 0;
+    self->fE30 = t;
+    int idx = AIrand() % 15;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
+    int anim = func_001500D8(iface, riderV7_10CBE0(self->mRider), idx);
+    float spd = func_00120038(self->mRider);
+    float a = func_00312820(*(char**)(self->mRider + 0x784), anim, 2) / spd;
+    float b = func_00312820(*(char**)(self->mRider + 0x784), anim, 1) / spd;
+    if (t < a) return -1;
+    self->fE34 = t - a;
+    self->fE2C = a - b;
+    if (idx != -1 && idx < 15)
+    {
+        self->a[idx]++;
+    }
+    return idx;
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010CD20);
 
@@ -140,7 +258,48 @@ extern "C" int func_0010DEB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010DEF0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+float func_00113128(void* self);
+extern signed char D_00535C11[];
+
+extern "C" float func_0010DEF0(void* self)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
+    int p = func_0010DEB0(self);
+    if (p == 0) return 1.0f;
+    char* r = *(char**)((char*)self + 0x18);
+    if (*(int*)(r + 0xE4) == 0) return 1.0f;
+    if (D_00535C11[0] == 2) return 1.0f;
+    if (*(float*)(r + 0x4D0) < 50000.0f) return 1.0f;
+    float m;
+    float d = func_00113128((void*)p) - *(float*)(*(char**)((char*)self + 0x18) + 0x4D0);
+    char* r2 = *(char**)((char*)self + 0x18);
+    float k = *(float*)(r2 + 0xDC);
+    if (d < k && (*(int*)(r2 + 0xE4) == 2 || *(int*)(r2 + 0xE4) == 3))
+    {
+        m = ((d - k) / k + 1.0f) * 1.100000023841858f;
+    }
+    else
+    {
+        char* r3 = *(char**)((char*)self + 0x18);
+        float k2 = *(float*)(r3 + 0xE0);
+        if (k2 < d && (*(int*)(r3 + 0xE4) == 1 || *(int*)(r3 + 0xE4) == 3))
+        {
+            m = 1.0f / ((d - k2) / k2 + 1.0f);
+            m *= 0.9090908765792847f;
+        }
+        else
+            m = 1.0f;
+    }
+    return m;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010E028);
@@ -454,7 +613,42 @@ INCLUDE_ASM("ai/computer", func_0010F3B8);
 
 INCLUDE_ASM("ai/computer", func_0010F560);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010F878);
+#ifdef SKIP_ASM
+void* cBEAggressionInterface_getThis();
+extern "C" int func_00155B50(void* self, int a, int b);
+
+struct sComputer_0010F878
+{
+    char pad0[0x28];
+    char* mRiders[20];  // 0x28
+    int mCount;         // 0x78
+    int pad7C;          // 0x7C
+    int f80;            // 0x80
+};
+
+extern "C" void func_0010F878(sComputer_0010F878* self)
+{
+    if (self->f80 <= 0) return;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        *(int*)(self->mRiders[i] + 0xF0) = 0;
+        *(int*)(self->mRiders[i] + 0xF8) = -1;
+        for (int j = 0; j < self->mCount; j++)
+        {
+            if (i == j) continue;
+            int a = func_00155B50(cBEAggressionInterface_getThis(), i, j);
+            if (a == 4)
+            {
+                *(int*)(self->mRiders[i] + 0xF0) = 1;
+                *(int*)(self->mRiders[i] + 0xF8) = j;
+            }
+            *(int*)(self->mRiders[i] + 0xFC) = a;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010F998);
 

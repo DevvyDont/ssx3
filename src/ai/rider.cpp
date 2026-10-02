@@ -57,7 +57,53 @@ void cRider_addRiderMetrix(cRider* self)
 
 INCLUDE_ASM("ai/rider", func_0011BBE8);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011BD60);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" char* strcpy(char* dst, const char* src);
+void* func_0011B678(void* self);
+extern "C" void func_00418EF8(void* base, int n, int size, void* (*cmp)(void*));
+
+struct sAnimName_11BD60
+{
+    char name[0x100];
+    int f100;
+    int f104;
+};
+
+struct sAnimNameTable_11BD60
+{
+    sAnimName_11BD60 e[40];
+    int count;      // 0x2940
+};
+
+extern "C" void func_0011BD60(void* self, void** list, int n)
+{
+    for (int i = 0; i < n; i++, list++)
+    {
+        char* name = *(char**)((char*)*list + 0x28);
+        sAnimNameTable_11BD60* t = *(sAnimNameTable_11BD60**)((char*)self + 0x894);
+        if (name == 0) continue;
+        if (*name == 0) continue;
+        int j;
+        for (j = 0; j < t->count; j++)
+        {
+            if (func_004165A8(name, &t->e[j]) == 0) goto next;
+        }
+        {
+            sAnimName_11BD60* e = &t->e[t->count];
+            strcpy(e->name, name);
+            e->f100 = -1;
+            e->f104 = 0;
+            t->count++;
+        }
+    next:;
+    }
+    sAnimNameTable_11BD60* t2 = *(sAnimNameTable_11BD60**)((char*)self + 0x894);
+    func_00418EF8(t2, t2->count, 0x108, func_0011B678);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011BE88);
 
@@ -84,7 +130,47 @@ extern "C" int func_0011C0E0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_0011C138);
+#ifdef SKIP_ASM
+void* func_00314978(void* self);
+void func_00314A18(void* self, int a1);
+extern "C" void func_00314988(int* self, int flags);
+extern "C" void* func_00314C00(void* self, const char* name);
+extern "C" int func_0011BBE8(void* self, char** list);
+extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
+
+struct sMdfArchive_11C138
+{
+    int a[4];
+};
+
+extern "C" void func_0011C138(void* self, int a1)
+{
+    sMdfArchive_11C138 arc;
+    char* list[52];
+    func_00314978(&arc);
+    func_00314A18(&arc, a1);
+    int n = func_0011BBE8(self, list);
+    for (int i = 0; i < n; i++)
+    {
+        char* item = list[i];
+        for (int j = 0; j < 4; j++)
+        {
+            const char* name = ((const char**)(item + 0x18))[j];
+            if (name != 0)
+            {
+                void* part = func_00314C00(&arc, name);
+                if (part != 0)
+                {
+                    cAnimModel_addModelPartLOD(*(void**)((char*)self + 0x780), j, part, 0);
+                }
+            }
+        }
+    }
+    func_00314988((int*)&arc, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_initOnce);
@@ -755,7 +841,73 @@ INCLUDE_ASM("ai/rider", func_00121950);
 
 INCLUDE_ASM("ai/rider", func_00121AA0);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121F30);
+#ifdef SKIP_ASM
+extern void* D_004A289C;
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sVec4_121F30
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVEntryP_121F30 { short delta; short index; void* (*fn)(void*); };
+struct sVEntryF_121F30 { short delta; short index; float (*fn)(void*); };
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
+static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
+{
+    sVec4_121F30 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*v), "r"(m)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00121F30(char* self)
+{
+    void* g = D_004A289C;
+    sVEntryP_121F30* gvt = *(sVEntryP_121F30**)((char*)g + 0x10D8);
+    sVec4_121F30* m = (sVec4_121F30*)gvt[35].fn((char*)g + gvt[35].delta);
+    char* obj = self + 0x6C0;
+    sVEntryP_121F30* vt = *(sVEntryP_121F30**)obj;
+    sVec4_121F30* pos = (sVec4_121F30*)vt[5].fn(obj + vt[5].delta);
+    sVec4_121F30 v = mtxMulVec_121F30(m, pos);
+    float z = v.z;
+    void* g2 = D_004A289C;
+    sVEntryF_121F30* gvt2 = *(sVEntryF_121F30**)((char*)g2 + 0x10D8);
+    float fov = gvt2[29].fn((char*)g2 + gvt2[29].delta);
+    float s, c;
+    func_0031BE50(&s, &c, fov);
+    z = z * (s / c);
+    z = z * 0.009999999776482582f;
+    if (z < 6.0f)
+    {
+        *(int*)(self + 0x898) = 0;
+    }
+    else
+    {
+        int lod = 2;
+        if (z < 10.0f) lod = 1;
+        *(int*)(self + 0x898) = lod;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00122088);
@@ -1028,7 +1180,59 @@ extern "C" void func_00123DA8(void* self, int id, float a, float b, int unused, 
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00123E30);
+#ifdef SKIP_ASM
+extern "C" void func_0027C9B0(int, void*);
+extern "C" void* func_0028B180();
+extern "C" int func_002A1B58(void* self, int msg, int a);
+extern "C" int func_002A1B88(void* self, int type, int a, int b);
+extern "C" void* func_00279F18(void* self, int i, int a2);
+extern void* D_004A28A4;
+
+struct sAnimEvent_123E30
+{
+    int id;
+    signed char* arg;
+};
+
+struct sAnimEventInfo_123E30
+{
+    int pad[4];
+    int count;                      // 0x10
+    sAnimEvent_123E30* events;      // 0x14
+    int pad18[6];
+};
+
+extern "C" void func_00123E30(void* self, int id, float a, float b, int unused, int flags)
+{
+    sAnimEventInfo_123E30 info;
+    if (flags & 0x10)
+    {
+        func_0027C9B0(id, &info);
+        for (int i = 0; i < info.count; i++)
+        {
+            sAnimEvent_123E30* e = &info.events[i];
+            int ev = e->id;
+            if (ev == 0x66) continue;
+            if (ev < 0x64)
+            {
+                func_002A1B58(func_0028B180(), ev, (int)self);
+                *(int*)((char*)self + 0xAC8) = 1;
+            }
+            else
+            {
+                ev -= 0x64;
+                void* snd = func_0028B180();
+                // PORT: id is a handle that is also read as a pointer here.
+                int v = (int)func_00279F18(D_004A28A4, *e->arg, *(int*)(id + 8));
+                func_002A1B88(snd, ev, (int)self, v);
+                *(int*)((char*)self + 0xAC8) = 1;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00123F38);
 
@@ -1112,7 +1316,50 @@ extern "C" void func_001250A8(void* self, sRiderVec4_001250A8* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125108);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern char* D_004A2EEC;
+extern "C" float func_001193E0(void* self);
+extern "C" void func_00162258(void* self);
+extern "C" void func_00238358(void* self, int a1, int a2);
+extern "C" void func_00286EA0(void* self, void* rider);
+extern "C" void* func_0028B180();
+
+struct sVEntry125108 { short delta; short index; int (*fn)(void*); };
+
+static inline void* getC0_125108()
+{
+    return *(void**)((char*)D_004A28A8 + 0xC0);
+}
+
+extern "C" void func_00125108(char* self)
+{
+    char* g = D_004A2EEC;
+    if (g != 0 && *(int*)(self + 0x480) == 0 && *(int*)(self + 0x874) != 0)
+    {
+        if (*(int*)(self + 0x87C) != 0)
+            *(int*)(g + 0xA0) = 1;
+        else
+            *(int*)(g + 0xA4) = 1;
+    }
+    func_001193E0(*(void**)(self + 0x790));
+    *(int*)(self + 0x478) = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0xC) + *(int*)(self + 0x47C);
+    if (*(float*)(self + 0x470) < 0.0f) *(float*)(self + 0x470) = 0.0f;
+    char* obj = self + 0x6C0;
+    sVEntry125108* vt = *(sVEntry125108**)obj;
+    func_00238358(getC0_125108(), vt[7].fn(obj + vt[7].delta), *(int*)(self + 0x790) + 0xFC);
+    unsigned int k = *(unsigned int*)(self + 0x870);
+    if (k < 2)
+    {
+        char* tbl = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+        func_00162258(*(void**)(*(char**)(tbl + (k << 2) + 4) + 0xA8));
+    }
+    func_00286EA0(func_0028B180(), self);
+    if (*(int*)(self + 0x480) == 1) *(int*)(self + 0x100) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00125228);
 

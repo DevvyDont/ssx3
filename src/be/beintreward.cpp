@@ -494,13 +494,177 @@ extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
 
 INCLUDE_ASM("be/beintreward", func_00157F20);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157FD0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001573F0(void* self, int bit, char* bits);
+extern "C" int func_00150928(void* self, int a, int b);
+extern "C" int func_00150B48(void* self, int a, int b, int amount);
+extern "C" int func_001575C0(void* self, int a1, int a2);
+int func_001572B0(void* self);
+extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
 
+struct sRewardDef_157FD0
+{
+    char pad0[0xC];
+    short amount;   // 0xC
+    short padE;
+};
+
+extern "C" void func_00157FD0(void* self, int a1, int a2, int bit, int give)
+{
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    func_001573F0(self, bit, p + 0xF30);
+    if (give)
+    {
+        char* defs = *(char**)((char*)func_0015A478_noargs() + 0x14);
+        int amount = ((sRewardDef_157FD0*)(defs + (bit << 4)))->amount;
+        if (amount > 0) amount *= 10;
+        func_00150B48(econ, a1, a2, amount);
+    }
+    if (func_001575C0(self, a1, a2) == func_001572B0(self))
+    {
+        func_00158618(self, a1, a2, 0x14, 0);
+    }
+    func_00150928(econ, a1, a2);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_001580F8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001573F0(void* self, int bit, char* bits);
+extern "C" int func_00150928(void* self, int a, int b);
+extern "C" int func_00150B48(void* self, int a, int b, int amount);
+extern "C" int func_00157620(void* self, int a1, int a2);
+int func_001572D0(void* self);
+extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
 
+struct sRewardDef_1580F8
+{
+    char pad0[0xC];
+    short amount;   // 0xC
+    short padE;
+};
+
+extern "C" void func_001580F8(void* self, int a1, int a2, int bit, int give)
+{
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    func_001573F0(self, bit, p + 0xF36);
+    if (give)
+    {
+        char* defs = *(char**)((char*)func_0015A478_noargs() + 0x18);
+        int amount = ((sRewardDef_1580F8*)(defs + (bit << 4)))->amount;
+        if (amount > 0) amount *= 10;
+        func_00150B48(econ, a1, a2, amount);
+    }
+    if (func_00157620(self, a1, a2) == func_001572D0(self))
+    {
+        func_00158618(self, a1, a2, 0x11, 0);
+    }
+    func_00150928(econ, a1, a2);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158220);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001573F0(void* self, int bit, char* bits);
+extern "C" int func_00150928(void* self, int a, int b);
+extern "C" int func_00150B48(void* self, int a, int b, int amount);
+extern "C" int func_00157680(void* self, int a1, int a2);
+int func_001572F0(void* self);
+extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
 
+struct sRewardDef_158220
+{
+    char pad0[0xC];
+    short amount;   // 0xC
+    short padE;
+};
+
+extern "C" void func_00158220(void* self, int a1, int a2, int bit, int give)
+{
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    func_001573F0(self, bit, p + 0xF45);
+    if (give)
+    {
+        char* defs = *(char**)((char*)func_0015A478_noargs() + 0x1C);
+        int amount = ((sRewardDef_158220*)(defs + (bit << 4)))->amount;
+        if (amount > 0) amount *= 10;
+        func_00150B48(econ, a1, a2, amount);
+    }
+    if (func_00157680(self, a1, a2) == func_001572F0(self))
+    {
+        func_00158618(self, a1, a2, 0x16, 0);
+    }
+    func_00150928(econ, a1, a2);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158348);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001573F0(void* self, int bit, char* bits);
+extern "C" int func_00150928(void* self, int a, int b);
+extern "C" int func_00150B48(void* self, int a, int b, int amount);
+extern "C" int func_001576E0(void* self, int a1, int a2);
+int func_00157310(void* self);
+extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
+
+struct sRewardDef_158348
+{
+    char pad0[0xC];
+    short amount;   // 0xC
+    short padE;
+};
+
+extern "C" void func_00158348(void* self, int a1, int a2, int bit, int give)
+{
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    func_001573F0(self, bit, p + 0xF53);
+    if (give)
+    {
+        char* defs = *(char**)((char*)func_0015A478_noargs() + 0x20);
+        int amount = ((sRewardDef_158348*)(defs + (bit << 4)))->amount;
+        if (amount > 0) amount *= 10;
+        func_00150B48(econ, a1, a2, amount);
+    }
+    if (func_001576E0(self, a1, a2) == func_00157310(self))
+    {
+        func_00158618(self, a1, a2, 0x13, 0);
+    }
+    func_00150928(econ, a1, a2);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00158470);
@@ -909,7 +1073,44 @@ void* func_00158F30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158F60);
+#ifdef SKIP_ASM
+struct sReward_0015A628;
+extern "C" void func_0015A628(sReward_0015A628* self, int row, int col, int value);
+extern void* D_004C3EF0[];
+extern int D_004A6CA8[];
+
+// PORT: 64-bit `long` flags word (ld/sd).
+struct sCharRec_158F60 {
+    char pad0[0x278];
+    long flags;     // 0x278
+    char pad280[0xF88 - 0x280];
+};
+
+extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
+{
+    sReward_0015A628* q = (sReward_0015A628*)D_004C3EF0;
+    switch (mode)
+    {
+    case 0:
+        break;
+    case 2:
+        if ((int)((*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags >> 13) & 1)
+        {
+            (*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x2000L;
+            func_0015A628(q, row, 2, c * 3 + 2);
+        }
+    case 1:
+        if ((int)((*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags >> 12) & 1)
+        {
+            (*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x1000L;
+            func_0015A628(q, row, 2, c * 3 + 1);
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00159080);

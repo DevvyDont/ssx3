@@ -564,7 +564,40 @@ extern "C" int func_001190F0(void* self_, sTrickId* id_)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119210);
+#ifdef SKIP_ASM
+extern "C" void func_001179E0(void* self, int type);
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+
+struct sGradeStep_119210
+{
+    float threshold;
+    float mult;
+};
+
+extern "C" int func_00119210(void* self, int* idx, sGradeStep_119210* tbl, int type, float x)
+{
+    // PORT: pointer arithmetic through int.
+    sGradeStep_119210* e = (sGradeStep_119210*)(*idx * 8 + (int)tbl);
+    float t = e->threshold;
+    if (t < 0.0f) return 0;
+    if (t <= x)
+    {
+        float m = *(float*)((char*)self + 0x1C4);
+        int v = (int)(e->mult * m + 0.5f);
+        *idx = *idx + 1;
+        func_001179E0(self, 0x1C);
+        func_001179E0(self, 0x1D);
+        func_001179E0(self, 0x1E);
+        func_001179E0(self, 0x1F);
+        func_001179E0(self, 0x20);
+        func_00117B88(self, type, v, (int)t, 1.5f);
+        return v;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00119310);
@@ -721,7 +754,46 @@ extern "C" float func_001195D8(void* self, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119608);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+extern "C" void func_00119EF8(void* self, int kind, int amount);
+
+// View of sGameSettings (defined later in this unit); bound to the same symbol by asm label.
+struct sGameSettings_119608 {
+    char pad_0x00[0x48];
+    signed char eventKind; // 0x48: 4 = free ride
+    signed char gameType;  // 0x49: 0 = Conquer the Mountain
+};
+extern sGameSettings_119608 D_00535BC8_119608 __asm__("D_00535BC8");
+
+extern "C" float func_00119608(void* self, int pts)
+{
+    int v = (int)(pts * *(float*)((char*)self + 0x1C4) + 0.5f);
+    cBE_getInterface(cBE_getBE(), 0);
+    int career = D_00535BC8_119608.eventKind == 4 && D_00535BC8_119608.gameType == 0;
+    if (!career)
+    {
+        func_00117B88(self, 0x23, v, 0, 2.5f);
+        func_00117B88(self, 0x18, v, 0, 0.699999988079071f);
+    }
+    else
+    {
+        int amount = v / 500;
+        if (amount > 20)
+        {
+            amount = 20;
+        }
+        func_00119EF8(self, 1, amount);
+    }
+    *(int*)((char*)self + 0x198) += v;
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00119708);
@@ -1027,7 +1099,44 @@ extern "C" float func_00119C98(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119D40);
+#ifdef SKIP_ASM
+extern "C" void func_00117838(void* self);
+extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
+
+extern "C" float func_00119D40(void* self, int stance, int alternate, int style, int flag)
+{
+    if (style != 0 && *(float*)((char*)self + 0x14) > 0.0f)
+    {
+        *(float*)((char*)self + 0x14) += 0.12999999523162842f;
+    }
+    int saved = *(int*)((char*)self + 0x70);
+    float r = func_0011A228(self, stance, alternate, style, flag, 0);
+    func_00117838(self);
+    *(int*)((char*)self + 0x0) = stance;
+    *(int*)((char*)self + 0x4) = alternate;
+    *(int*)((char*)self + 0xC) = style;
+    *(int*)((char*)self + 0x10) = flag;
+    if (style != 0)
+    {
+        *(int*)((char*)self + 0x20) = style;
+        *(int*)((char*)self + 0x24) = 0;
+    }
+    if (flag != 0)
+    {
+        *(int*)((char*)self + 0x28) = flag;
+        *(int*)((char*)self + 0x2C) = 0;
+    }
+    if (saved != 0)
+    {
+        *(int*)((char*)self + 0x70) = saved;
+        *(int*)((char*)self + 0x5C) = 1;
+        *(int*)((char*)self + 0x6C) = 0;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00119E38);
@@ -1325,11 +1434,102 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A7A8);
+#ifdef SKIP_ASM
+extern "C" int func_00117908(void* self);
+extern "C" int func_00117948(void* self);
+extern "C" void func_001179E0(void* self, int type);
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+
+extern "C" int func_0011A7A8(void* self)
+{
+    int n = func_00117948(self);
+    if (n > 0)
+    {
+        func_001179E0(self, 1);
+        func_00117B88(self, 0x25, n, 0, 1.5f);
+    }
+    if (*(int*)((char*)self + 0xA0) > 0)
+    {
+        func_001179E0(self, 3);
+        func_00117B88(self, 0x27, *(int*)((char*)self + 0xA0), 0, 1.5f);
+    }
+    int total = *(int*)((char*)self + 0x84) + func_00117908(self);
+    if (total > 0)
+    {
+        func_001179E0(self, 2);
+        func_001179E0(self, 0x1D);
+        func_001179E0(self, 0x1C);
+        func_001179E0(self, 0x1E);
+        func_001179E0(self, 0x1F);
+        func_001179E0(self, 0x20);
+        func_00117B88(self, 0x28, total, 0, 1.5f);
+    }
+    func_001179E0(self, 4);
+    return n;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011A8C8);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B1A8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+struct sTrickBonus_11B1A8
+{
+    int grade;              // 0x0
+    int points;             // 0x4
+    unsigned char a;        // 0x8
+    unsigned char b;        // 0x9
+    unsigned char c;        // 0xA
+    unsigned char d;        // 0xB
+    unsigned char e;        // 0xC
+    unsigned char f;        // 0xD
+    unsigned char g;        // 0xE
+    unsigned char pad;      // 0xF
+};
+extern sTrickBonus_11B1A8 D_0043D608[];
+
+struct sTrickBits_11B1A8
+{
+    unsigned int pad0 : 10;
+    unsigned int a : 2;     // bits 10-11
+    unsigned int b : 4;     // bits 12-15
+    unsigned int c : 3;     // bits 16-18
+    unsigned int d : 3;     // bits 19-21
+    unsigned int pad1 : 6;
+    unsigned int e : 4;     // bits 28-31
+    unsigned int pad2 : 3;
+    unsigned int f : 7;     // bits 3-9
+    unsigned int pad3 : 1;
+    unsigned int g : 7;     // bits 11-17
+    unsigned int pad4 : 9;
+    unsigned int grade : 5; // bits 27-31
+};
+
+extern "C" int func_0011B1A8(void* self, sTrickId* id)
+{
+    sTrickBits_11B1A8* t = (sTrickBits_11B1A8*)id;
+    sTrickBonus_11B1A8* e = D_0043D608;
+    for (int i = 0; i < 24; i++, e++)
+    {
+        if (t->a != e->a) continue;
+        if (t->b != e->b) continue;
+        if (t->c != e->c) continue;
+        if (t->d != e->d) continue;
+        if (t->e != e->e) continue;
+        if (t->f != e->f) continue;
+        if (t->g != e->g) continue;
+        func_003E6448(id, 0, 8);
+        t->grade = e->grade;
+        return e->points;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B2C0);

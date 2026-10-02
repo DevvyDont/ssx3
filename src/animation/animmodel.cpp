@@ -428,7 +428,47 @@ extern "C" void func_00310EE0(void* self, cAmStream* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310F18);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
+// as operator new[] so the new-expressions below compute their destination before the call.
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00489D50[];
+
+struct sAnimElem_310F18
+{
+    int a[5];
+};
+
+struct sAnimNode_310F18
+{
+    int used;                   // 0x00
+    sAnimElem_310F18* data;     // 0x04
+    char pad8[0x14];
+    sAnimNode_310F18* prev;     // 0x1C
+    sAnimNode_310F18* next;     // 0x20
+};
+
+// Typed views of the pool tables (declared as int[] later in this unit).
+extern sAnimNode_310F18* D_004FE7A0_310F18[] __asm__("D_004FE7A0");
+extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("D_004FE860");
+
+extern "C" sAnimNode_310F18* func_00310F18(int bank, int n)
+{
+    D_004FE7A0_310F18[bank] = new (D_00489D50, 0x20000000, 0) sAnimNode_310F18[20];
+    for (int i = 0; i < 20; i++)
+    {
+        D_004FE7A0_310F18[bank][i].next = &D_004FE7A0_310F18[bank][i] + 1;
+        D_004FE7A0_310F18[bank][i].prev = &D_004FE7A0_310F18[bank][i] - 1;
+        D_004FE7A0_310F18[bank][i].used = 0;
+        D_004FE7A0_310F18[bank][i].data = new (D_00489D50, 0x20000000, 0) sAnimElem_310F18[n];
+    }
+    D_004FE7A0_310F18[bank][0].prev = &D_004FE7A0_310F18[bank][19];
+    D_004FE7A0_310F18[bank][19].next = D_004FE7A0_310F18[bank];
+    return D_004FE860_310F18[bank] = D_004FE7A0_310F18[bank];
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00311048);
@@ -464,7 +504,52 @@ extern "C" void func_003110D0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00311110);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void cMemMan_free(void*);
+
+struct sAnimNode_311110
+{
+    unsigned char* owner;       // 0x00
+    void* data;                 // 0x04
+    char pad8[0x14];
+    sAnimNode_311110* prev;     // 0x1C
+    sAnimNode_311110* next;     // 0x20
+};
+
+// Typed views of the pool tables (declared as int[] in this unit).
+extern sAnimNode_311110* D_004FE7A0_311110[] __asm__("D_004FE7A0");
+extern sAnimNode_311110* D_004FE860_311110[] __asm__("D_004FE860");
+
+extern "C" void func_00311110(void)
+{
+    for (int bank = 0; bank < 48; bank++)
+    {
+        if (D_004FE7A0_311110[bank] != 0)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                if (D_004FE7A0_311110[bank][i].owner != 0)
+                {
+                    D_004FE7A0_311110[bank][i].owner[5] = 0xFF;
+                }
+                if (D_004FE7A0_311110[bank][i].data != 0)
+                {
+                    cMemMan_free(D_004FE7A0_311110[bank][i].data);
+                }
+            }
+            if (D_004FE7A0_311110[bank] != 0)
+            {
+                cMemMan_free(D_004FE7A0_311110[bank]);
+            }
+            D_004FE7A0_311110[bank] = 0;
+            D_004FE860_311110[bank] = 0;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00311220);

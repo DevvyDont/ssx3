@@ -160,7 +160,66 @@ int func_00150E50(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00151040);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00145630(void* race, int place, int kind);
+
+struct sEconPrize_151040
+{
+    int key;
+    int prize[4];
+};
+extern sEconPrize_151040 D_004405A0[];
+
+extern "C" int func_00151040(void* self, int medal, int key, int place)
+{
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int r = 0;
+    if ((unsigned int)(place - 6) < 6)
+    {
+        switch (medal)
+        {
+        case 0:
+        case 1:
+            r = func_00145630(race, place, 2);
+            break;
+        case 2:
+            r = func_00145630(race, place, 1);
+            break;
+        case 3:
+            r = func_00145630(race, place, 0);
+            break;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 17; i++)
+        {
+            if (D_004405A0[i].key != key) continue;
+            switch (medal)
+            {
+            case 0:
+                r = D_004405A0[i].prize[0] * 100;
+                break;
+            case 1:
+                r = D_004405A0[i].prize[1] * 100;
+                break;
+            case 2:
+                r = D_004405A0[i].prize[2] * 100;
+                break;
+            case 3:
+                r = D_004405A0[i].prize[3] * 100;
+                break;
+            }
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00151178);
@@ -337,7 +396,65 @@ INCLUDE_ASM("be/beintecon", func_00151C90);
 
 INCLUDE_ASM("be/beintecon", func_00151EF0);
 
+//100%
 INCLUDE_ASM("be/beintecon", func_001520E8);
+#ifdef SKIP_ASM
+void* func_0014BDB8(void* self);
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(void* self, int i);
+extern "C" int func_00151EF0(void* self, int id, int on);
+
+struct sEconItem_001520E8
+{
+    short id;
+    unsigned short flags;
+};
+
+struct sEconItems_001520E8
+{
+    char pad[0x288];
+    short* lookup;              // 0x288
+    int count;                  // 0x28C
+    sEconItem_001520E8 items[1];    // 0x290
+};
+
+struct sEconDef_001520E8
+{
+    char pad0[0x4];
+    short id;           // 0x4
+    char pad6[0x2E];
+    int flags;          // 0x34
+};
+
+static inline sEconItem_001520E8* getItem_001520E8(sEconItems_001520E8* self, int id)
+{
+    int idx = self->lookup[id];
+    if (idx >= 0)
+        return &self->items[idx];
+    return 0;
+}
+
+extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
+{
+    void* db = func_0014BDB8(self);
+    int n = func_0014D988(db, *((signed char*)self + 0xBC0));
+    sEconDef_001520E8* d = (sEconDef_001520E8*)func_0014D998(db, *((signed char*)self + 0xBC0));
+    *changed = 0;
+    for (int i = 0; i < n; i++, d++)
+    {
+        if (d->flags & 0x1000)
+        {
+            if (getItem_001520E8(self, d->id)->flags & 0x10)
+            {
+                *changed = 1;
+                if (func_00151EF0(self, d->id, 1) == 0)
+                    return 0;
+            }
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("be/beintecon", func_001521F0);
 

@@ -270,11 +270,155 @@ extern "C" unsigned short func_00150178(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintbagt", func_00150198);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPad20;
+extern sPad20 D_0045AEB8;
+extern "C" int func_0014A0B0(int rider);
+extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
 
+struct sBagtAnim_150198
+{
+    unsigned short anim;
+    unsigned short anim2;
+    unsigned short anim3;
+    unsigned short pad;
+};
+
+struct sBagtCat_150198
+{
+    char pad0[0x10];
+    sBagtAnim_150198* anims;    // 0x10
+};
+// Typed view of D_0045AEB8 (declared as sPad20 in this unit).
+extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("D_0045AEB8");
+
+extern "C" int func_00150198(void* self, int rider, int idx, int second)
+{
+    int ch = func_0014A0B0(rider);
+    if (ch != 0)
+    switch (ch)
+    {
+    case 0x14:
+        if (idx == 4) return 0xA0;
+        break;
+    case 0x18:
+        if (idx == 4) return 0x9F;
+        break;
+    case 0x19:
+        if (idx == 9) return 0xA2;
+        break;
+    case 0x1C:
+        if (idx == 4) return 0xA1;
+        break;
+    }
+    int k = func_0014FEA8(self, rider, idx, second);
+    if (k < 0) return 0x1B6;
+    return D_0045AEB8_150198[idx].anims[k].anim;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintbagt", func_001502C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPad20;
+extern sPad20 D_0045AEB8;
+extern "C" int func_0014A0B0(int rider);
+extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
 
+struct sBagtAnim_1502C8
+{
+    unsigned short anim;
+    unsigned short anim2;
+    unsigned short anim3;
+    unsigned short pad;
+};
+
+struct sBagtCat_1502C8
+{
+    char pad0[0x10];
+    sBagtAnim_1502C8* anims;    // 0x10
+};
+// Typed view of D_0045AEB8 (declared as sPad20 in this unit).
+extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("D_0045AEB8");
+
+extern "C" int func_001502C8(void* self, int rider, int idx, int second)
+{
+    int ch = func_0014A0B0(rider);
+    if (ch != 0)
+    switch (ch)
+    {
+    case 0x14:
+        if (idx == 4) return 0xD2;
+        break;
+    case 0x18:
+        if (idx == 4) return 0xD1;
+        break;
+    case 0x19:
+        if (idx == 9) return 0xD4;
+        break;
+    case 0x1C:
+        if (idx == 4) return 0xD3;
+        break;
+    }
+    int k = func_0014FEA8(self, rider, idx, second);
+    if (k < 0) return 0x1B6;
+    return D_0045AEB8_1502C8[idx].anims[k].anim2;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintbagt", func_001503F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPad20;
+extern sPad20 D_0045AEB8;
+extern "C" int func_0014A0B0(int rider);
+extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
+
+struct sBagtAnim_1503F8
+{
+    unsigned short anim;
+    unsigned short anim2;
+    unsigned short anim3;
+    unsigned short pad;
+};
+
+struct sBagtCat_1503F8
+{
+    char pad0[0x10];
+    sBagtAnim_1503F8* anims;    // 0x10
+};
+// Typed view of D_0045AEB8 (declared as sPad20 in this unit).
+extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("D_0045AEB8");
+
+extern "C" int func_001503F8(void* self, int rider, int idx, int second)
+{
+    int ch = func_0014A0B0(rider);
+    if (ch != 0)
+    switch (ch)
+    {
+    case 0x14:
+        if (idx == 4) return 0x52;
+        break;
+    case 0x18:
+        if (idx == 4) return 0x51;
+        break;
+    case 0x19:
+        if (idx == 9) return 0x54;
+        break;
+    case 0x1C:
+        if (idx == 4) return 0x53;
+        break;
+    }
+    int k = func_0014FEA8(self, rider, idx, second);
+    if (k < 0) return 0;
+    return D_0045AEB8_1503F8[idx].anims[k].anim3;
+}
+#endif
 
 extern void* D_00530600[];
 

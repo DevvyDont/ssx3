@@ -203,7 +203,47 @@ extern "C" void func_003123C0(char* self, int a1, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312490);
+#ifdef SKIP_ASM
+extern "C" int func_001446A0(void* self, int mask);
+
+struct sVEntry00312490 {
+    short delta;
+    short index;
+    void (*fn)(void*, cAnimSequencer*, cAnimSequenceNode*);
+};
+
+struct sSeqRef_00312490 {
+    cAnimSequenceNode* node;
+    cAnimSequencer* seq;
+};
+
+extern "C" void func_00312490(char* self)
+{
+    sSeqRef_00312490 list[32];
+    int n = 0;
+    for (int i = 0; i < 6; i++)
+    {
+        cAnimSequenceNode* node = cAnimSequencer_getSequence(&(*(cAnimSequencer**)(self + 0x50))[i], 0);
+        while (node)
+        {
+            if (func_001446A0((char*)node + 0xB0, 0x3F) != 0)
+            {
+                list[n].node = node;
+                list[n].seq = &(*(cAnimSequencer**)(self + 0x50))[i];
+                n++;
+            }
+            node = *(cAnimSequenceNode**)((char*)node + 0xC8);
+        }
+    }
+    for (int k = 0; k < n; k++)
+    {
+        sVEntry00312490* vt = *(sVEntry00312490**)(self + 0x58);
+        vt[3].fn(self + vt[3].delta, list[k].seq, list[k].node);
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312598);
 
@@ -270,7 +310,39 @@ extern "C" float func_00312820(char* self, int a1, int frame)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
+#ifdef SKIP_ASM
+extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
+extern int D_0048D808[];
+extern char* D_004A3E7C;
+
+struct sVEntry003128E8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+// PORT: the unit declares cRiderAnimBase_play as void for its callers, but it returns the new
+// sequence id (callers in ai/ai read $v0); the int-returning body is bound by asm label.
+int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+
+int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
+{
+    sVEntry003128E8* vt = *(sVEntry003128E8**)(self + 0x58);
+    int id = vt[4].fn(self + vt[4].delta, anim);
+    if (id == 0x207)
+        return 0x1B6;
+    if (blend < 0.0f)
+    {
+        blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
+    }
+    int h = *(int*)(id * 4 + D_004A3E7C + 0x1030);
+    int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
+    return *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, h, flags, D_0048D808[slot], blend);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", func_003129E0);

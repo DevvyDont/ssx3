@@ -365,7 +365,44 @@ extern "C" void* func_001453B8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_001453D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" unsigned int func_00237CD8(void);
+
+struct sPrizeRow_1453D0
+{
+    short key;
+    short kind;
+    short prize[6];
+};
+// Typed view of D_00440B38 (declared later in this unit with another layout).
+extern sPrizeRow_1453D0 D_00440B38_1453D0[] __asm__("D_00440B38");
+
+extern "C" int func_001453D0(void* self, int kind, int place, int mode)
+{
+    int k = 1;
+    if (kind) k = kind;
+    float m = 1.0f;
+    if (mode == 0 && place != 0)
+        m = 0.8999999761581421f;
+    else if (mode == 2 && place != 0)
+        m = 1.2000000476837158f;
+    int key = D_00535C08.value;
+    for (int i = 0; i < 30; i++)
+    {
+        if (D_00440B38_1453D0[i].key == key && D_00440B38_1453D0[i].kind == k)
+        {
+            int base = (int)(D_00440B38_1453D0[i].prize[place] * 100 * m);
+            int r = func_00237CD8() % 200;
+            base += (int)(base * (r - 100) * 0.0005000000237487257f);
+            return base - base % 20;
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_001454F8);
