@@ -42,11 +42,44 @@ INCLUDE_ASM("sound/bankmanager", func_0028B788);
 
 INCLUDE_ASM("sound/bankmanager", func_0028B7E0);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B830);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(void*, void*);
+
+extern "C" int func_0028B830(void* self, void* name)
+{
+    int s = *(int*)self;
+    if (s != 1) {
+        return 0;
+    }
+    if (func_004165A8(name, (char*)self + 0x20) != 0) {
+        s = 0;
+    }
+    return s;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028B878);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemAlloc);
+#ifdef SKIP_ASM
+extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern char D_004829A8[];
+
+// PORT: real body returns the buffer; a later caller in this unit declares it void(void*, int, int)
+void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __asm__("cBankInstance_OnAsyncMainMemAlloc");
+
+void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
+{
+    if (*(int*)((char*)self + 0x8) == 0) {
+        *(void**)((char*)self + 0x10) = func_00252FA0(D_004829A8, size, flags);
+        *(int*)((char*)self + 0x14) = size;
+    }
+    return *(void**)((char*)self + 0x10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B928__FPv);
@@ -320,7 +353,20 @@ extern "C" void func_0028F730(void* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028F768);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028FA98);
+#ifdef SKIP_ASM
+extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+
+extern "C" void func_0028FA98(void* self, float v)
+{
+    int idx = *(int*)((char*)self + 0x62A8);
+    if (idx >= 0) {
+        func_002AD5F0((char*)**(void***)((char*)self + 0x118) + 0x1D8, idx, 1, v);
+        *(int*)((char*)self + 0x62A8) = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028FAE0);
 

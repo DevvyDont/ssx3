@@ -82,7 +82,24 @@ extern "C" int func_00283C60(void* self, int a1)
 
 INCLUDE_ASM("scripter/videngine", func_00283C80);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/videngine", func_00283D28);
+#ifdef SKIP_ASM
+int func_00283C58(void*);
+
+extern "C" int func_00283D28(void* self)
+{
+    int n;
+    if (func_00283C58(self) != 0) {
+        return 5;
+    }
+    n = *(int*)((char*)self + 0x90) - *(int*)((char*)self + 0x8c);
+    if (n < 0) {
+        n += 5;
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283D70);
