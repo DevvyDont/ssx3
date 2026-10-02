@@ -45,9 +45,63 @@ INCLUDE_ASM("fe/ovstatepause", func_001FAFF8);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FB0C0);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut);
+#ifdef SKIP_ASM
+struct cUIText;
+struct sVE_FB180 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_0046FB18[];
+extern char D_0046FB60[];
 
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self)
+{
+    if (*(void**)((char*)self + 0x40) != 0) {
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB18));
+        if (t != 0 && *(int*)((char*)self + 0xA0) != 0) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046FB60));
+        }
+        sVE_FB180* vt = *(sVE_FB180**)((char*)t + 0x8);
+        vt[9].fn((char*)t + vt[9].delta, *(int*)((char*)self + 0xA0));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingReceived);
+#ifdef SKIP_ASM
+struct cUIText;
+struct sVE_FB218 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
+extern char D_0046FB18[];
+extern char D_0046FB88[];
+
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
+{
+    if (*(void**)((char*)self + 0x40) != 0) {
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB18));
+        if (t != 0 && *(int*)((char*)self + 0xA0) != 0) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046FB88));
+        }
+        sVE_FB218* vt = *(sVE_FB218**)((char*)t + 0x8);
+        vt[9].fn((char*)t + vt[9].delta, *(int*)((char*)self + 0xA0));
+        cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FB2B8);
 
@@ -133,9 +187,64 @@ INCLUDE_ASM("fe/ovstatepause", func_001FDF40);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FE4A8);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE5B0);
+#ifdef SKIP_ASM
+class cUIObj_1FE5B0 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_00470188[];
+extern char D_004A20A0[];
 
+extern "C" void func_001FE5B0(void* self, bool on)
+{
+    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(!on);
+    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
+    *(int*)((char*)self + 0x220) = !on;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE648);
+#ifdef SKIP_ASM
+class cUIObj_1FE648 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A2090[];
+extern char D_004A2568[];
+
+extern "C" void func_001FE648(void* self, int a1, bool on)
+{
+    cUIObj_1FE648* a = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
+    ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(!on);
+    *(int*)((char*)self + 0x224) = !on;
+    a->setVisible(!on);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FE6E8);
 
@@ -187,9 +296,64 @@ INCLUDE_ASM("fe/ovstatepause", func_001FECA0);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FF170);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF278);
+#ifdef SKIP_ASM
+class cUIObj_1FF278 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_00470188[];
+extern char D_004A20A0[];
 
+extern "C" void func_001FF278(void* self, bool on)
+{
+    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(!on);
+    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
+    *(int*)((char*)self + 0x220) = !on;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF310);
+#ifdef SKIP_ASM
+class cUIObj_1FF310 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A2090[];
+extern char D_004A2568[];
+
+extern "C" void func_001FF310(void* self, int a1, bool on)
+{
+    cUIObj_1FF310* a = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
+    ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(!on);
+    *(int*)((char*)self + 0x224) = !on;
+    a->setVisible(!on);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
 

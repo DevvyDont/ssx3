@@ -64,13 +64,251 @@ int func_00330778(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00330788);
+#ifdef SKIP_ASM
+struct sWsVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wsLength_330788(const sWsVec4& v)
+{
+    float r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %0, $vi22\n"
+        : "=r"(r)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / s).
+static inline sWsVec4 wsDiv_330788(const sWsVec4& v, float s)
+{
+    sWsVec4 r;
+    int t;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        ".set pop\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" int func_0032CA78(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
+
+extern "C" int func_00330788(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
+{
+    sWsVec4 v;
+    int r = func_0032CA78(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
+    if (r != 0) {
+        float len = wsLength_330788(v);
+        *outLen = len;
+        *outDir = wsDiv_330788(v, len);
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00330828);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wsLength_330828(const sWsVec4& v)
+{
+    float r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %0, $vi22\n"
+        : "=r"(r)
+        : "m"(v));
+    return r;
+}
 
+// PORT: PS2-only VU0 inline asm (v / s).
+static inline sWsVec4 wsDiv_330828(const sWsVec4& v, float s)
+{
+    sWsVec4 r;
+    int t;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        ".set pop\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" int func_00328030(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
+
+extern "C" int func_00330828(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
+{
+    sWsVec4 v;
+    int r = func_00328030(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
+    if (r != 0) {
+        float len = wsLength_330828(v);
+        *outLen = len;
+        *outDir = wsDiv_330828(v, len);
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003308C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wsLength_3308C8(const sWsVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
 
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void wsDivEq_3308C8(sWsVec4& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+struct sWsHit_3308C8 {
+    char pad_0x00[0x10];
+    sWsVec4 dir;      // 0x10
+    char pad_0x20[0x20];
+    float len;            // 0x40
+};
+
+extern "C" int func_0032CB58(void* self, void* other, void* a2, void* a3);
+
+extern "C" int func_003308C8(void* self, void* a1, sWsHit_3308C8* hit)
+{
+    if (func_0032CB58(*(void**)((char*)self + 0x60), a1, &hit->dir, hit) != 0) {
+        float len = wsLength_3308C8(hit->dir);
+        hit->len = len;
+        wsDivEq_3308C8(hit->dir, len);
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00330950);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wsLength_330950(const sWsVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void wsDivEq_330950(sWsVec4& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+struct sWsHit_330950 {
+    char pad_0x00[0x10];
+    sWsVec4 dir;      // 0x10
+    char pad_0x20[0x20];
+    float len;            // 0x40
+};
+
+extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4);
+
+extern "C" int func_00330950(void* self, void* a1, void* a2, sWsHit_330950* hit)
+{
+    if (func_0032C928(*(void**)((char*)self + 0x60), a1, a2, &hit->dir, hit) != 0) {
+        float len = wsLength_330950(hit->dir);
+        hit->len = len;
+        wsDivEq_330950(hit->dir, len);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_003309D8);
 

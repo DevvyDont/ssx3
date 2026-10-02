@@ -99,7 +99,28 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMapPic);
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPopup);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setShowInfo);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_00470AB8[];
+extern char D_00470AC8[];
+extern char D_00470AD8[];
+
+extern "C" void cUITemplate_MAP_setShowInfo(void* self, int show)
+{
+    *(int*)self = show;
+    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x2E8), GetHashValue32(D_00470AB8));
+    if (*(int*)self != 0) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00470AC8));
+    } else {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00470AD8));
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakInfo);
 

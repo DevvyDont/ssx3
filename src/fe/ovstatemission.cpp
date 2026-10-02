@@ -10,7 +10,32 @@ void func_001A3300(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemission", func_001A3308);
+#ifdef SKIP_ASM
+struct cUIScreen;
+int GetHashValue32(char* str);
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" char* func_0039A708(void* self);
+extern "C" void func_0039E4C0(void* self, int a1);
+void func_001A34A8(void* self);
+extern char D_004A19E8[];
+
+extern "C" void func_001A3308(void* self, int a1)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
+    if (obj != 0) {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(func_0039A708(obj)));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+    }
+    func_001A34A8(self);
+    func_0039E4C0(self, a1);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatemission", func_001A33A0);
 

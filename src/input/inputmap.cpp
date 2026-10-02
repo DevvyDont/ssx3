@@ -34,7 +34,31 @@ extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2)
 
 INCLUDE_ASM("input/inputmap", cInputMap_compileMap);
 
+//100%
 INCLUDE_ASM("input/inputmap", cInputMap_purgeMapFile);
+#ifdef SKIP_ASM
+// PORT: operator new with tag args bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void operator_delete(int* p);
+void cMemMan_free(void* p);
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern char D_0048DD30[];
+
+extern "C" void cInputMap_purgeMapFile(void* self)
+{
+    if (*(int**)((char*)self + 0x8) != 0) {
+        operator_delete(*(int**)((char*)self + 0x8));
+    }
+    *(int**)((char*)self + 0x8) = 0;
+    void* p = operator_new_tag(*(int*)((char*)self + 0x10) << 2, D_0048DD30, 0, 0);
+    func_003E6574(p, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
+    if (*(void**)((char*)self + 0x14) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x14));
+    }
+    *(void**)((char*)self + 0x14) = p;
+    *(int*)((char*)self + 0xC) = *(int*)((char*)self + 0x10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputmap", func_00320FA8);
@@ -68,7 +92,28 @@ INCLUDE_ASM("input/inputmap", func_00321298);
 
 INCLUDE_ASM("input/inputmap", func_00321428);
 
+//100%
 INCLUDE_ASM("input/inputmap", func_00321500);
+#ifdef SKIP_ASM
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+typedef char* func_00321500_va_list;
+#define func_00321500_va_start(ap)                                       \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
+extern "C" int sprintf(char* dst, const char* fmt, ...);
+extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
+extern char D_0048DD40[];
+
+extern "C" void func_00321500(void* self, const char* fmt, ...)
+{
+    char buf[0x400];
+    func_00321500_va_list ap;
+    func_00321500_va_start(ap);
+    func_004186C8(buf + sprintf(buf, D_0048DD40, (char*)self + 0xC, *(int*)((char*)self + 0x8C)), fmt, ap);
+    *(int*)((char*)self + 0x94) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputmap", func_00321590);

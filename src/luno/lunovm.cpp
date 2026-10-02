@@ -58,7 +58,24 @@ extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base)
 }
 #endif
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00224C78);
+#ifdef SKIP_ASM
+struct sVEntry00224C78 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00224C78(void* self, sVEntry00224C78** stream, int base)
+{
+    int buf[2];
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[0], 4);
+    *(int*)((char*)self + 0x0) = base + buf[0];
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[1], 4);
+    *(int*)((char*)self + 0x4) = buf[1];
+}
+#endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00224D00);
@@ -297,7 +314,31 @@ extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& a, cons
 }
 #endif
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00226768);
+#ifdef SKIP_ASM
+struct sVEntry00226768 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+extern char D_00479890[];
+
+extern "C" void func_00226768(void* self, int flags)
+{
+    *(void**)((char*)self + 0x1C) = D_00479890;
+    void* obj = *(void**)((char*)self + 0x18);
+    if (obj != 0) {
+        sVEntry00226768* vt = *(sVEntry00226768**)((char*)obj + 0x1C);
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+    }
+    func_00225B90((cLunoValue*)((char*)self + 0xC), 2);
+    func_00225B90((cLunoValue*)self, 2);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_00225DE8(int, int);
 

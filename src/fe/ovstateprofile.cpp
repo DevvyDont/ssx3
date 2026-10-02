@@ -50,9 +50,64 @@ INCLUDE_ASM("fe/ovstateprofile", func_00211380);
 
 INCLUDE_ASM("fe/ovstateprofile", func_00211850);
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00211970);
+#ifdef SKIP_ASM
+class cUIObj_211970 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_00471DB0[];
+extern char D_004A20A0[];
 
+extern "C" void func_00211970(void* self, bool on)
+{
+    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471DB0)))->setVisible(!on);
+    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
+    *(int*)((char*)self + 0x220) = !on;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00211A08);
+#ifdef SKIP_ASM
+class cUIObj_211A08 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A2090[];
+extern char D_004A2568[];
+
+extern "C" void func_00211A08(void* self, int a1, bool on)
+{
+    cUIObj_211A08* a = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
+    ((cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(!on);
+    *(int*)((char*)self + 0x224) = !on;
+    a->setVisible(!on);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00211AA8);
 

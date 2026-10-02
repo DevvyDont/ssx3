@@ -100,9 +100,47 @@ extern "C" void func_00238590(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00238B70);
+#ifdef SKIP_ASM
+extern int D_00536730[];
+extern int D_00536708[];
+extern "C" int func_00245E30(const void* a, const void* b);
+extern "C" int func_00245EC0(const void* a, const void* b);
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
 
+extern "C" void func_00238B70(void* self, int n)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        D_00536730[i] = i;
+        D_00536708[i] = i;
+    }
+    func_00418EF8(D_00536708, n, 4, func_00245E30);
+    func_00418EF8(D_00536730, n, 4, func_00245EC0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamemode", func_00238BF8);
+#ifdef SKIP_ASM
+extern int D_00536730[];
+extern int D_00536708[];
+extern "C" int func_00245E78(const void* a, const void* b);
+extern "C" int func_00245EC0(const void* a, const void* b);
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+
+extern "C" void func_00238BF8(void* self, int n)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        D_00536730[i] = i;
+        D_00536708[i] = i;
+    }
+    func_00418EF8(D_00536708, n, 4, func_00245E78);
+    func_00418EF8(D_00536730, n, 4, func_00245EC0);
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_00238C80);
 
@@ -276,5 +314,21 @@ INCLUDE_ASM("main/gamemode", func_0023C560);
 
 INCLUDE_ASM("main/gamemode", func_0023C618);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023C770);
+#ifdef SKIP_ASM
+extern "C" unsigned int func_00237CD8(void);
+
+extern "C" void func_0023C770(int* arr, unsigned int n)
+{
+    int i;
+    for (i = 0; i < 25; i++) {
+        unsigned int a = func_00237CD8() % n;
+        unsigned int b = func_00237CD8() % n;
+        int t = arr[a];
+        arr[a] = arr[b];
+        arr[b] = t;
+    }
+}
+#endif
 

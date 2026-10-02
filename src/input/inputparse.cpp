@@ -4,7 +4,31 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_lookupModifierName);
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupConfigName);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00321A40);
+#ifdef SKIP_ASM
+struct sEntry_321A40 {
+    char name[0x40];
+    int value;
+};
+struct sTable_321A40 {
+    char pad[0x80E4];
+    int count;
+    sEntry_321A40 entries[1];
+};
+extern "C" int func_0041AA88(const char* a, const char* b);
+
+extern "C" sEntry_321A40* func_00321A40(sTable_321A40* self, const char* name)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (func_0041AA88(name, self->entries[i].name) == 0) {
+            return &self->entries[i];
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00321AD0);
@@ -79,7 +103,31 @@ void* func_00325250(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00325260);
+#ifdef SKIP_ASM
+struct sInputParse_325260 {
+    int pad[2];
+    float v[0x40];
+};
+extern "C" float func_003252F8(void* self, int idx, int sel);
+extern "C" float func_00325430(void* self, int a1);
+
+extern "C" float func_00325260(sInputParse_325260* self, unsigned int id)
+{
+    if (id < 0x40) {
+        return self->v[id];
+    }
+    if (id - 0x40 < 0x20) {
+        return func_00325430(self, id - 0x40);
+    }
+    id -= 0x60;
+    if (id < 0x39C) {
+        return func_003252F8(self, (int)id / 6, (int)id % 6);
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_003252E8);
@@ -367,7 +415,26 @@ extern "C" void func_00326CF0(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326D60);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00326DF0(void* self, int a1, int a2);
+extern char D_004A3FB0[];
+
+extern "C" int func_00326D60(void* p, int n)
+{
+    void** arr = (void**)p;
+    int i;
+    if (n > 2) {
+        n = 2;
+    }
+    for (i = 0; i < n; i++) {
+        arr[i] = func_00326DF0(cMemMan_alloc(0x180, D_004A3FB0, 0x4000000, 0), i, 0);
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326DF0);

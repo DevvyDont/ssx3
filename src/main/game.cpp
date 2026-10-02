@@ -39,9 +39,61 @@ INCLUDE_ASM("main/game", func_0022C410);
 
 INCLUDE_ASM("main/game", cGame_renderPatches);
 
+//100%
 INCLUDE_ASM("main/game", cGame_renderFogVolumes);
+#ifdef SKIP_ASM
+struct sVEntry_renderFog {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, int);
+};
+extern "C" void func_002DBF98(void* r);
 
+extern "C" void cGame_renderFogVolumes(void* self, void* world)
+{
+    void* fog = (char*)world + 0x78B8;
+    int n = *(int*)((char*)world + 0x78B4);
+    if (n != 0) {
+        void* r = *(void**)((char*)self + 0x18);
+        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)r + 0x4);
+        vt[2].fn((char*)r + vt[2].delta, fog, n, 0);
+    }
+    fog = (char*)world + 0x7AC0;
+    n = *(int*)((char*)world + 0x7ABC);
+    if (n != 0) {
+        void* r = *(void**)((char*)self + 0x18);
+        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)r + 0x4);
+        vt[2].fn((char*)r + vt[2].delta, fog, n, 2);
+    }
+    func_002DBF98(*(void**)((char*)self + 0x18));
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/game", cGame_renderLightHalos);
+#ifdef SKIP_ASM
+void func_002E2F98(void* self, int a1);
+extern "C" void func_002E2FF8(void* self, void* list, int n, int mode, int a4);
+extern "C" void func_002E30D0(void* self, int a1);
+
+extern "C" void cGame_renderLightHalos(void* self, void* world, int a2)
+{
+    *(int*)((char*)*(void**)((char*)self + 0x1C) + 0x6494) = 1;
+    func_002E2F98(*(void**)((char*)self + 0x1C), a2);
+    void* p = (char*)world + 0x7BC4;
+    int n = *(int*)((char*)world + 0x7BC0);
+    if (n != 0) {
+        func_002E2FF8(*(void**)((char*)self + 0x1C), p, n, 0, a2);
+    }
+    p = (char*)world + 0x7FC8;
+    n = *(int*)((char*)world + 0x7FC4);
+    if (n != 0) {
+        func_002E2FF8(*(void**)((char*)self + 0x1C), p, n, 2, a2);
+    }
+    func_002E30D0(*(void**)((char*)self + 0x1C), a2);
+    *(int*)((char*)*(void**)((char*)self + 0x1C) + 0x6494) = 0;
+}
+#endif
 
 INCLUDE_ASM("main/game", func_0022C830);
 

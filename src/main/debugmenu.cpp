@@ -415,7 +415,22 @@ void* func_00250070(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_00250090);
+#ifdef SKIP_ASM
+extern "C" void func_00250090(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x25C, 2);
+    func_002CA280((char*)self + 0x22C, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_00250128__FPv);
@@ -477,7 +492,32 @@ void* func_002501C8(void* self)
 
 INCLUDE_ASM("main/debugmenu", cAvalancheMenu_cAvalancheMenu);
 
+//100%
 INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047FFE8[];
+extern char D_0047FFB0[];
+extern char D_004D1C88[];
+extern char D_0047FFD0[];
+
+extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047FFE8;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047FFB0);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x164, D_004D1C88, D_0047FFD0);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_00250A60__FPv);

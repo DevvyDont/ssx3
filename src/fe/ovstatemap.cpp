@@ -180,5 +180,22 @@ INCLUDE_ASM("fe/ovstatemap", func_0020A4E0);
 
 INCLUDE_ASM("fe/ovstatemap", func_0020A6A8);
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A6F0);
+#ifdef SKIP_ASM
+extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
+extern "C" void func_0039FCC8(void* self, void* anim, int mode, int v, int a4);
+
+extern "C" void func_0020A6F0(void* self, char* objName, char* animName)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(objName));
+    if (obj != 0) {
+        void* bank = (char*)*(void**)((char*)self + 0x10) + 0x50;
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
+        if (anim != 0) {
+            func_0039FCC8(obj, anim, 3, 0, 0);
+        }
+    }
+}
+#endif
 

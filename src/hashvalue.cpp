@@ -79,7 +79,29 @@ ulong GetHashValue64(char* str) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("hashvalue", func_00317710);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sHash128_17710 {
+    ulong lo;
+    ulong hi;
+};
+// harness-only: sHash128 is defined later in the unit (func_00317798's block)
+sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str) __asm__("func_00317710");
+
+sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str)
+{
+    md5_ctx ctx;
+    sHash128_17710 h;
+
+    md5_init(&ctx);
+    md5_append(&ctx, str, strlen(str));
+    md5_finish(&ctx, (ulong*)&h);
+    *out = h;
+    return *out;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("hashvalue", func_00317798);
