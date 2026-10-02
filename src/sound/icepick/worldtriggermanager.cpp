@@ -17,7 +17,19 @@ void WORLDTRIGGERMANAGER_Init()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B48);
+#ifdef SKIP_ASM
+extern "C" void func_002B5988(char** self, int flags);
+
+extern "C" void func_002B4B48()
+{
+    if (D_004A52D4 != 0) {
+        func_002B5988((char**)D_004A52D4, 3);
+    }
+    D_004A52D4 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B70);
@@ -105,11 +117,42 @@ extern "C" void func_002B5758(sWorldTrigger70* t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5818);
+#ifdef SKIP_ASM
+extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
+extern "C" int func_002B5818(void* self, int idx, int* type, int* a, int* b, int c, int d)
+{
+    return func_002B63D0(D_004A52D4, idx, type, a, b, c, d);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5838);
+#ifdef SKIP_ASM
+extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
+extern "C" int func_002B5838(void* self, int idx)
+{
+    int type;
+    int a;
+    int b;
+    func_002B63D0(D_004A52D4, idx, &type, &a, &b, 0, 1);
+    return type == 5;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5878);
+#ifdef SKIP_ASM
+extern "C" int func_002B65B0(void* self, int idx, char* dst);
+
+extern "C" int func_002B5878(void* self, int idx, char* dst)
+{
+    return func_002B65B0(D_004A52D4, idx, dst);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5898);

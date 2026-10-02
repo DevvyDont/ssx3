@@ -335,7 +335,26 @@ extern "C" int func_002770C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_002771C8);
+#ifdef SKIP_ASM
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void* func_00282BF0(void* self, int a1);
+extern void* D_004A28A4;
+
+extern "C" int func_002771C8(void* self, void* obj)
+{
+    if (*(int*)((char*)self + 0xA4) != 3) {
+        return 0;
+    }
+    void* e = func_00283D70((char*)self + 0xC, 0);
+    if (func_00277DD8(self, e) != 0) {
+        return 0;
+    }
+    return obj == func_00282BF0(D_004A28A4, *(int*)((char*)e + 0xC));
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277298);

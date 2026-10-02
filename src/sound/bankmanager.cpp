@@ -2,7 +2,38 @@
 
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B650);
+#ifdef SKIP_ASM
+extern "C" void func_0028B528(void*);
+extern "C" void* func_002523A8(void* self);
+extern char* D_004A3614;
+
+class cSndStream_B650 {
+public:
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void stop(int id);
+};
+
+extern "C" void func_0028B650(void* self)
+{
+    func_0028B528(self);
+    int state = *(int*)((char*)self + 0x8);
+    if (state != 0) {
+        if (state == 2) {
+            (**(cSndStream_B650***)(D_004A3614 + 0x1D8))->stop(*(int*)((char*)self + 0xC));
+            *(int*)((char*)self + 0xC) = -1;
+        }
+        func_002523A8(*(void**)((char*)self + 0x10));
+        *(int*)((char*)self + 0x10) = 0;
+        *(int*)((char*)self + 0x14) = 0;
+        *(int*)((char*)self + 0x8) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B730);
@@ -89,7 +120,33 @@ extern "C" int func_0028B830(void* self, void* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B878);
+#ifdef SKIP_ASM
+extern "C" void func_0028B528(void*);
+extern "C" void func_0028B2D0(void* self);
+extern char* D_004A3614;
+
+class cSndStream_B878 {
+public:
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5(int id);
+    virtual void v6(int id);
+};
+
+extern "C" void func_0028B878(void* self)
+{
+    func_0028B528(self);
+    func_0028B2D0(self);
+    *(int*)self = 2;
+    if (*(int*)((char*)self + 0x8) == 2) {
+        (**(cSndStream_B878***)(D_004A3614 + 0x1D8))->v6(*(int*)((char*)self + 0xC));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemAlloc);
@@ -119,7 +176,36 @@ int func_0028B928(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B930);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern char* D_004A3614;
+
+class cSndStream_B930 {
+public:
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5(int id);
+    virtual void v6(int id);
+    virtual void v7();
+};
+
+// PORT: name is passed as int (matches the unit's 6-int caller declaration); d, e unused.
+extern "C" void func_0028B930(void* self, int id, int flag, int name, int d, int e)
+{
+    (**(cSndStream_B930***)(D_004A3614 + 0x1D8))->v7();
+    *(int*)((char*)self + 0x4) = id;
+    if (flag == 0) {
+        *(int*)self = 1;
+    } else {
+        *(int*)self = 0;
+    }
+    strcpy((char*)self + 0x20, (const char*)name);
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
 
@@ -549,7 +635,35 @@ extern "C" void func_0028F2C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F328);
+#ifdef SKIP_ASM
+extern "C" void func_002B3B88(void* self, int a1);
+extern "C" int func_002B49E0(void* monitor);
+extern int D_004A3620;
+
+class cBankMonitor_F328 {
+public:
+    char data[0x5440];
+    virtual void v1();
+    virtual void v2();
+    virtual void v3(int a1);
+};
+
+extern "C" void func_0028F328(void* self, int code)
+{
+    void* monitor = (char*)self + 0x118;
+    func_002B3B88(monitor, code);
+    if (func_002B49E0(monitor) == -1) {
+        if ((unsigned)(code - 10) < 2 || code == 0x12) {
+            if (D_004A3620 == 1) {
+                ((cBankMonitor_F328*)((char*)self + 0x118))->v3(8);
+            }
+            *(int*)((char*)self + 0x530) = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028F3C8);
 
@@ -650,7 +764,17 @@ extern "C" void func_0028F678(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F700);
+#ifdef SKIP_ASM
+extern "C" void func_0028BC58(void* self, int i, void* id, int a3);
+extern void* D_004A3624;
+
+extern "C" void func_0028F700(void* self)
+{
+    func_0028BC58(**(void***)((char*)self + 0x118), 0xD, D_004A3624, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028F730);

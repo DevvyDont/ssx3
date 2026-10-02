@@ -516,7 +516,25 @@ extern "C" void func_0029CE28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029CE70);
+#ifdef SKIP_ASM
+extern "C" void func_002AD300(void* self);
+extern "C" void func_002AD810(void* self);
+extern "C" void func_002B6A68(void* self);
+extern void* D_004A52D4;
+
+extern "C" void func_0029CE70(void* self)
+{
+    if (*(int*)((char*)self + 0x5FB0) != 0) {
+        *(int*)((char*)self + 0x5FB0) = 0;
+        func_002AD300(**(char***)((char*)self + 0x118) + 0x1D8);
+        *(int*)(**(char***)((char*)self + 0x118) + 0x26C) = 0;
+        func_002AD810(**(char***)((char*)self + 0x118) + 0x1D8);
+        func_002B6A68(D_004A52D4);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_0029CED8);
 
@@ -658,7 +676,25 @@ INCLUDE_ASM("sound/soundsys", func_0029ED90);
 
 INCLUDE_ASM("sound/soundsys", func_0029EEE0);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029F000);
+#ifdef SKIP_ASM
+extern "C" void func_00287F00(void* self, int a1, float f0, float f1);
+
+extern "C" void* func_0029F000(void* self, int a1, int type, int a3)
+{
+    if (a1 == 0) {
+        if (type == 2) {
+            func_00287F00(self, 0, 0.9999024868011475f, 0.6499993801116943f);
+        }
+        if (type == 0xB) {
+            return (char*)self + 0x5730;
+        }
+        return func_00287968(self, type, a3);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029F088);
@@ -985,7 +1021,25 @@ INCLUDE_ASM("sound/soundsys", func_002A2638);
 
 INCLUDE_ASM("sound/soundsys", func_002A26F0);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A27D8);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0D8(void* self);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" int func_0029F198(void* self);
+extern "C" void* func_003D8008(int a, int b, int c);
+extern void (*D_004A482C)(void*, int, int);
+
+extern "C" void func_002A27D8(void* self)
+{
+    if (func_0029F0D8(self) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 0x20E6, 0, 0xA, 0, 0, 0.0f) != 0) {
+            int r = func_0029F198(self);
+            D_004A482C(func_003D8008(1, 0, 0x20E6), 1, r);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A2860);
 
@@ -1371,7 +1425,32 @@ extern "C" void func_002A4590(void* self, int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A45C0);
+#ifdef SKIP_ASM
+extern "C" void func_002A4590(void* self, int flag);
+extern "C" void* func_0028B1D8();
+extern "C" int func_002A4078(void* self);
+extern "C" void func_002A4660(void* self, int id, int a, int b, int c);
+extern char* D_004A28A8;
+extern int D_00536730[];
+
+extern "C" void func_002A45C0(void* self)
+{
+    if (**(int**)(D_004A28A8 + 0xC0) == 1) {
+        func_002A4590(self, 0);
+    }
+    int id = D_00536730[0];
+    char* rider = *(char**)((char*)func_0028B1D8() + 0x28);
+    int a;
+    if (func_002A4078(self) != 0) {
+        a = *(int*)(*(char**)(rider + 0x790) + 0x128);
+    } else {
+        a = 0;
+    }
+    func_002A4660(self, id, a, *(int*)(*(char**)(rider + 0x790) + 0x114), *(int*)(rider + 0x480) ^ 1);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A4660);
 
@@ -1610,7 +1689,25 @@ extern "C" void func_002A6808(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A6848);
+#ifdef SKIP_ASM
+extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+extern char** D_004A36F8;
+
+extern "C" void func_002A6848(void* self)
+{
+    float lim = 0.25f;
+    if (lim < *(float*)((char*)self + 0x188)) {
+        *(float*)((char*)self + 0x188) = lim;
+    }
+    *(int*)((char*)self + 0x180) = 0;
+    if (*(int*)((char*)self + 0x174) >= 0) {
+        func_002AD5F0(*D_004A36F8 + 0x1D8, *(int*)((char*)self + 0x174), 2, 0.0f);
+        *(int*)((char*)self + 0x174) = -1;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A69A0);
 

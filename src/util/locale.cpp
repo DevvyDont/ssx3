@@ -258,7 +258,57 @@ INCLUDE_ASM("util/locale", func_00195FF0);
 
 INCLUDE_ASM("util/locale", func_00196148);
 
+//100%
 INCLUDE_ASM("util/locale", func_00196228);
+#ifdef SKIP_ASM
+int GetHashValue32(char*);
+void* func_0039E4A0(void* self);
+extern char D_004A18A8[];
+extern char* D_004A28A8;
+
+class func_00196228_cObj {
+public:
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual int v24(int a, int b);
+};
+
+extern "C" func_00196228_cObj* func_0039F9D8(void* list, int hash);
+
+extern "C" void func_00196228(void* self)
+{
+    if (*(void**)(D_004A28A8 + 0x84) != 0) {
+        func_00196228_cObj* obj = func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        if (obj != 0) {
+            obj->v24(4, 0);
+        }
+    }
+    func_0039E4A0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/locale", func_001962A8);

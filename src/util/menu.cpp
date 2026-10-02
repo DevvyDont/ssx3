@@ -425,7 +425,55 @@ INCLUDE_ASM("util/menu", func_002CAD58);
 
 INCLUDE_ASM("util/menu", func_002CB180);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CB2F8);
+#ifdef SKIP_ASM
+class func_002CB2F8_cObj {
+public:
+    char data[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+};
+
+extern func_002CB2F8_cObj* D_004A289C;
+
+extern "C" void func_002CB2F8()
+{
+    D_004A289C->v32();
+    D_004A289C->v22();
+    *(int*)((char*)D_004A289C + 0xE84) = *(int*)((char*)D_004A289C + 0xE84) - 0x14;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002CB350);
 
@@ -764,7 +812,44 @@ int func_002CC318_impl(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CC350);
+#ifdef SKIP_ASM
+class func_002CC350_cObj {
+public:
+    char data[0x12C];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+struct func_002CC350_sVec2 {
+    float x;
+    float y;
+    func_002CC350_sVec2(float a, float b)
+    {
+        x = a;
+        y = b;
+    }
+};
+
+struct func_002CC350_sStack {
+    int count;
+    func_002CC350_cObj* items[1];
+};
+
+extern "C" void func_002CC350(void* self)
+{
+    func_002CC350_sVec2 scale(0.8500000238418579f, 0.8500000238418579f);
+    char* o = *(char**)((char*)self + 0x58);
+    *(float*)(o + 0x38) = *(float*)(o + 0x30) * scale.x;
+    *(float*)(o + 0x3C) = *(float*)(o + 0x34) * scale.y;
+    func_002CC350_sStack* st = (func_002CC350_sStack*)self;
+    st->items[st->count - 1]->v05();
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CC3B8);
@@ -1527,7 +1612,22 @@ extern "C" void* func_002CE368(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", cAngleMenuItem_render);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_00413AF8(float f);
+// PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+extern char D_004A39C8[];
+
+extern "C" void cAngleMenuItem_render(void* self, int a1)
+{
+    char buf[0x70];
+    sprintf(buf, D_004A39C8, func_00413AF8(**(float**)((char*)self + 0x18) * 57.2957763671875f));
+    func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CE418);
@@ -2005,21 +2105,111 @@ extern "C" float func_002D1928(int n, float x)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D19B8);
+#ifdef SKIP_ASM
+extern "C" int func_0030A060(void* self, int a, int b, int c);
+extern void* D_004A3DD8;
 
+extern "C" int func_002D19B8(int a, int b, int c)
+{
+    return func_0030A060(D_004A3DD8, a, b, c);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D19E8);
+#ifdef SKIP_ASM
+extern "C" int func_0030A598(void* self, int id);
+extern "C" void func_0030A5C0(void* self, int id);
+extern void* D_004A3DD8;
 
+extern "C" int func_002D19E8(int id)
+{
+    if (func_0030A598(D_004A3DD8, id) != 0) {
+        func_0030A5C0(D_004A3DD8, id);
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1A30);
+#ifdef SKIP_ASM
+extern "C" int func_0030A2E8(void* self, int id);
+extern "C" void func_0030A548(void* self, int id);
+extern void* D_004A3DD8;
 
+extern "C" int func_002D1A30(int id)
+{
+    if (func_0030A2E8(D_004A3DD8, id) != 0) {
+        func_0030A548(D_004A3DD8, id);
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1AC8);
+#ifdef SKIP_ASM
+extern "C" int func_0030A688(void* self, int id);
+extern void* D_004A3DD8;
 
+extern "C" int func_002D1AC8(int id)
+{
+    return func_0030A688(D_004A3DD8, id);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1AF0);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_002D1AF0()
+{
+    return *(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x78);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1B08);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+
+extern "C" void* func_002D1B08(int i)
+{
+    char* base = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    char* p = *(char**)(base + (i << 2) + 0x28);
+    return p ? p + 0x6C0 : 0;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002D1B30);
 
+//100%
 INCLUDE_ASM("util/menu", func_002D1B58);
+#ifdef SKIP_ASM
+class func_002D1B58_cObj {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual int v05();
+};
+
+extern char* D_004A28A8;
+
+extern "C" void func_002D1B58(int i)
+{
+    char* base = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    char* p = *(char**)(base + (i << 2) + 0x28);
+    ((func_002D1B58_cObj*)(p + 0x6C0))->v05();
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1BA0);
@@ -2035,21 +2225,95 @@ extern "C" int func_002D1BA0()
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D1BD8);
+#ifdef SKIP_ASM
+extern void* D_004A47B8;
 
+extern "C" void* func_002D1BD8()
+{
+    return D_004A47B8;
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1BE0);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_002D1BE0()
+{
+    return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x20);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1BF0);
+#ifdef SKIP_ASM
+extern "C" int func_001032C0(void* self, int a);
+extern char* D_004A28A8;
 
+extern "C" int func_002D1BF0(int a)
+{
+    return func_001032C0(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0xA4), a);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1C20);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_002D1C20(int i)
+{
+    char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    return *(char**)(riders + (i << 2) + 4) + 0x20;
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1C58);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_002D1C58()
+{
+    return *(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84) + 0x14);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1C70);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" float func_002D1C70()
+{
+    return *(float*)(D_004A28A8 + 0x14);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1C98);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_002D1C98()
+{
+    return *(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x8);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/menu", func_002D1CB0);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+
+extern "C" void* func_002D1CB0()
+{
+    return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x70);
+}
+#endif
 
 extern "C" void* func_002FC2C0(void* self);
 

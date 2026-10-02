@@ -294,7 +294,42 @@ void func_0026D168(void* self)
 
 INCLUDE_ASM("replay/playbackman", func_0026D178);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D228);
+#ifdef SKIP_ASM
+struct sPbChunk_D2B0;
+struct sPbStream_D2B0;
+
+struct sPbChunk_D228 {
+    unsigned int n : 12;
+    unsigned int key : 20;
+    int data;
+};
+
+struct sPbStream_D228 {
+    int count;              // 0x0
+    int index;              // 0x4
+    int offset;             // 0x8
+    sPbChunk_D228* chunks;  // 0xC
+};
+
+extern char* D_004A28A8;
+
+extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
+{
+    sPbStream_D228* self = (sPbStream_D228*)stream;
+    sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
+    if (self->count >= 0x1000) {
+        char* p = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x28);
+        *(int*)(p + 0x610) = 1;
+        *(int*)(p + 0x614) = 0xB4;
+        return;
+    }
+    self->chunks[self->count] = *chunk;
+    self->chunks[self->count].n = 1;
+    self->count++;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026D2B0);

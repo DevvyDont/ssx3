@@ -589,7 +589,24 @@ extern "C" void* func_00282CD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282D30);
+#ifdef SKIP_ASM
+// PORT: the callee also forwards four float args ($f12-$f15); bound to its (void*, int, int) symbol.
+void* func_00282DB0_f4(void* self, int a1, int a2, float f0, float f1, float f2, float f3) __asm__("func_00282DB0__FPvii");
+
+extern "C" void func_00282D30(void* self, float dt)
+{
+    int id = *(int*)((char*)self + 0x14);
+    if (id >= 0) {
+        float t = *(float*)((char*)self + 0x2C) + dt * 0.01666666753590107f;
+        *(float*)((char*)self + 0x2C) = t;
+        if (*(float*)((char*)self + 0x1C) + *(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x24) - 0.009999999776482582f <= t) {
+            func_00282DB0_f4(self, id, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282DA8__FPvi);
@@ -799,7 +816,22 @@ extern "C" void func_00283180(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002831B0);
+#ifdef SKIP_ASM
+// PORT: func_0027A668 is declared (void*) but takes (self, idx).
+void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
+extern void* D_004A28A4;
+
+extern "C" int func_002831B0(void* self, void* arg, int n)
+{
+    if (n >= 4) {
+        return 0;
+    }
+    return *(int*)((char*)func_0027A668_2(D_004A28A4, *(int*)((char*)arg + 0x8)) + 0xC) ==
+           *(int*)(*(char**)((char*)self + 0x10) + 0xF8);
+}
+#endif
 
 extern void* D_00482558[];
 

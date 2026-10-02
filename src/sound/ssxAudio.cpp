@@ -1,8 +1,42 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_Init);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" char* func_00284C68(void* mem, int a1, int a2, int a3, int a4);
+void func_002ADBF0(void*);
+extern const char D_004828B0[];
+extern char* D_004A3500;
 
+extern "C" void SSXAUDIO_Init(int a)
+{
+    if (D_004A3500 == 0) {
+        D_004A3500 = func_00284C68(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, a);
+    }
+    func_002ADBF0(**(char***)(D_004A3500 + 0x118) + 0x1D8);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00284C28);
+#ifdef SKIP_ASM
+class func_00284C28_cObj {
+public:
+    char data[0x1D4];
+    virtual void v01(int flags);
+};
+
+extern char* D_004A3500;
+
+extern "C" void func_00284C28()
+{
+    if (D_004A3500 != 0) {
+        (**(func_00284C28_cObj***)(D_004A3500 + 0x118))->v01(3);
+    }
+    D_004A3500 = 0;
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00284C68);
 
@@ -146,7 +180,37 @@ extern "C" void func_00286CA8(sSsxAudioBanks* self, unsigned int id, int on)
 
 INCLUDE_ASM("sound/ssxAudio", func_00286D18);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00286E20);
+#ifdef SKIP_ASM
+extern "C" void func_00285BE0(void* self, int a1);
+void func_002B6900(void* self);
+extern "C" void func_002929D8(void* self);
+extern "C" void* func_0028B1C8();
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_002A39E0(void* self);
+extern signed char D_00535C11[];
+extern void* D_004A52D4;
+
+extern "C" void func_00286E20(void* self)
+{
+    func_00285BE0(self, 6);
+    func_002B6900(D_004A52D4);
+    func_002929D8(self);
+    *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)func_0028B1C8() + 0xC) + 0x8);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int mode = D_00535C11[0];
+    if (mode == 1) {
+        goto load;
+    }
+    if (mode == 2) {
+    load:
+        func_002A39E0(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00286EA0);
 
@@ -173,7 +237,25 @@ INCLUDE_ASM("sound/ssxAudio", func_002871B0);
 
 INCLUDE_ASM("sound/ssxAudio", func_002872A8);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002873D8);
+#ifdef SKIP_ASM
+// PORT: real arity is (self, n); the unit declares func_002873D8(void*) for its callers.
+// PORT: g++ `<?` (min) operator, removed in GCC 4.3.
+static inline float clamp_73D8(float f, float lo, float hi)
+{
+    if (f >= lo) {
+        return f <? hi;
+    }
+    return lo;
+}
+
+extern "C" float func_002873D8_impl(void* self, int n) __asm__("func_002873D8");
+extern "C" float func_002873D8_impl(void* self, int n)
+{
+    return clamp_73D8(n * 0.09090909361839294f, 0.0f, 1.0f);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287410);
@@ -364,11 +446,46 @@ extern "C" void func_00287F00(void* self, int a1, float f0, float f1)
 
 INCLUDE_ASM("sound/ssxAudio", func_00287FC8);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288370);
+#ifdef SKIP_ASM
+extern "C" float func_00288370(void* self, int i, int pct)
+{
+    if (pct >= 0) {
+        return pct * 0.009999999776482582f;
+    }
+    if (*(int*)((char*)self + 0x6410) != 0) {
+        return *(float*)((char*)self + (i << 2) + 0x6440);
+    }
+    return *(float*)((char*)self + (i << 2) + 0x63E4);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_002883B0);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002887A8);
+#ifdef SKIP_ASM
+struct sAudioFade_87A8 {
+    char pad[0x63E4];
+    float cur[12];     // 0x63E4
+    float rate[11];    // 0x6414
+    float target[11];  // 0x6440
+};
+
+extern "C" void func_002887A8(sAudioFade_87A8* self, int i, int smooth, float target, float time)
+{
+    self->target[i] = target;
+    float cur = self->cur[i];
+    if (target != cur) {
+        if (smooth != 0) {
+            self->rate[i] = (target - cur) / time * 0.01666666753590107f;
+        }
+    } else {
+        self->rate[i] = 0.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_002887F8);
 
@@ -518,7 +635,20 @@ INCLUDE_ASM("sound/ssxAudio", func_00289470);
 
 INCLUDE_ASM("sound/ssxAudio", func_00289520);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289650);
+#ifdef SKIP_ASM
+// PORT: func_00289680 is defined (void*) but this caller passes (system, msg).
+void func_00289680_2(void* self, void* msg) __asm__("func_00289680__FPv");
+extern char* D_004A3500;
+
+extern "C" void func_00289650(void* msg)
+{
+    if (*(int*)msg == 3) {
+        func_00289680_2(D_004A3500, msg);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289680__FPv);
@@ -757,5 +887,48 @@ INCLUDE_ASM("sound/ssxAudio", func_00289DF0);
 
 INCLUDE_ASM("sound/ssxAudio", func_0028A058);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_0028A148);
+#ifdef SKIP_ASM
+extern "C" void func_0028A230(void*);
+void cMemMan_free(void*);
+void operator_delete(int*);
+extern char D_00483B10[];
+extern void* D_004A3610;
+
+struct sAudioSys_A148 {
+    char pad0[0x190];
+    void* buf190;       // 0x190
+    char pad194[0xC];
+    void* buf1A0;       // 0x1A0
+    char pad1A4[0xC];
+    void* buf1B0;       // 0x1B0
+    char pad1B4[0xC];
+    void* buf1C0;       // 0x1C0
+    char pad1C4[0x10];
+    void* vtbl;         // 0x1D4
+};
+
+extern "C" void func_0028A148(sAudioSys_A148* self, int flags)
+{
+    self->vtbl = D_00483B10;
+    func_0028A230(self);
+    D_004A3610 = 0;
+    if (self->buf1C0 != 0) {
+        cMemMan_free(self->buf1C0);
+    }
+    if (self->buf1B0 != 0) {
+        cMemMan_free(self->buf1B0);
+    }
+    if (self->buf1A0 != 0) {
+        cMemMan_free(self->buf1A0);
+    }
+    if (self->buf190 != 0) {
+        cMemMan_free(self->buf190);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 

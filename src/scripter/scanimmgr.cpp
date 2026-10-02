@@ -152,7 +152,35 @@ extern "C" void* func_00275718(sAnimList* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/scanimmgr", func_00275760);
+#ifdef SKIP_ASM
+extern "C" void func_00311110(void** tbl);
+extern "C" void func_003112C8(void* self, int flags);
+void cMemMan_free(void*);
+extern void** D_004A3DF8;
+
+extern "C" void func_00275760(void* self, sAnimEntry* e)
+{
+    void** tbl = D_004A3DF8;
+    void** slot = &tbl[*(unsigned char*)&e->unk4];
+    void* obj = *slot;
+    *slot = 0;
+    func_00311110(tbl);
+    if (obj != 0) {
+        func_003112C8(obj, 3);
+    }
+    if (e->unkC != 0 && e->unk10 != 0) {
+        cMemMan_free((void*)e->unk10);
+    }
+    //PSTART
+    e->id = -1;
+    e->unkC = 0;
+    e->data = 0;
+    e->unk10 = 0;
+    //PEND
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/scanimmgr", func_002757F0);

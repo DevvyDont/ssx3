@@ -643,7 +643,20 @@ void* func_002ABC80(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABCA0);
+#ifdef SKIP_ASM
+extern "C" float func_002ABCA0(float a, float b)
+{
+    float f = a / b;
+    if (f < -894.0799560546875f) {
+        f = -894.0799560546875f;
+    } else if (894.0799560546875f < f) {
+        f = 894.0799560546875f;
+    }
+    return (f + 8000.0f) * 0.0001250000059371814f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002ABCE8__FPvii);

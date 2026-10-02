@@ -249,7 +249,21 @@ extern "C" void func_00270658(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270670);
+#ifdef SKIP_ASM
+extern "C" void func_0026F980(void* self);
+extern "C" void func_001173B8(void* p);
+extern char* D_004A28A8;
+
+extern "C" void func_00270670(void* self)
+{
+    if (*(int*)((char*)self + 0x620) != 0) {
+        func_0026F980(self);
+        func_001173B8(*(void**)(*(char**)(*(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18) + 0x790));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002706B8);
@@ -653,7 +667,44 @@ extern "C" void func_00271058(void* self, signed char* data, int size)
 
 INCLUDE_ASM("replay/replaycache", func_002710A8);
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00271228);
+#ifdef SKIP_ASM
+struct sReplayCache;
+extern "C" int func_002712F8(sReplayCache* self);
+extern "C" void func_0012BAF0(void* self, int* dst);
+extern char* D_004A28A8;
+
+struct sReplayHdr_1228 {
+    int magic;   // 0x0
+    int count;   // 0x4
+    int a;       // 0x8
+    int b;       // 0xC
+    int c;       // 0x10
+    int d;       // 0x14
+    int mode;    // 0x18
+    int pad;     // 0x1C
+    int data[2]; // 0x20
+};
+
+extern "C" void func_00271228(void* self)
+{
+    sReplayHdr_1228* hdr = *(sReplayHdr_1228**)((char*)self + 0x640);
+    hdr->count = func_002712F8((sReplayCache*)self);
+    char* g = D_004A28A8;
+    hdr->a = *(int*)((char*)self + 0x18);
+    hdr->b = *(int*)((char*)self + 0x610);
+    hdr->c = *(int*)((char*)self + 0x3C8);
+    hdr->d = *(int*)((char*)self + 0x3CC);
+    int mode = *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0x7C);
+    hdr->magic = 0xABCD0002;
+    hdr->mode = mode;
+    func_0012BAF0(*(void**)(*(char**)(g + 0x84) + 0xC), hdr->data);
+    *(int*)((char*)self + 0x644) = 0;
+    *(int*)((char*)self + 0x648) = 0;
+    *(int*)((char*)self + 0x638) = *(int*)((char*)self + 0x638) + 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002712C0);
@@ -934,7 +985,21 @@ extern "C" void func_002723A8(sRcHeap* h, void* p)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00272488);
+#ifdef SKIP_ASM
+extern "C" void* func_00272308(void* heap, int size);
+extern int D_004A3488;
+
+// PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
+extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
+extern "C" void* func_00272488_impl(int size, void* heap)
+{
+    void** p = (void**)func_00272308(heap, size + D_004A3488);
+    *p = heap;
+    return (char*)p + D_004A3488;
+}
+#endif
 
 extern "C" void* func_00272488(void* self);
 
@@ -947,7 +1012,19 @@ void* func_002724C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002724E8);
+#ifdef SKIP_ASM
+extern int D_004A3488;
+
+// PORT: returns void; the unit declares func_002724E8 as returning void*.
+extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
+extern "C" void func_002724E8_impl(void* p)
+{
+    char* h = (char*)p - D_004A3488;
+    func_002723A8(*(sRcHeap**)h, h);
+}
+#endif
 
 extern "C" void* func_002724E8(void* self);
 
