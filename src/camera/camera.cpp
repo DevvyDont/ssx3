@@ -1439,7 +1439,14 @@ extern "C" void* func_001673A0(void* self, void* a1)
 
 INCLUDE_ASM("camera/camera", func_001673F8);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167D88);
+#ifdef SKIP_ASM
+extern "C" float func_00167D88(void)
+{
+    return 0.1f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167D98);
