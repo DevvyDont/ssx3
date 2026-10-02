@@ -72,7 +72,19 @@ INCLUDE_ASM("world/worldcache", func_003A7E38);
 
 INCLUDE_ASM("world/worldcache", func_003A7E98);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7F90);
+#ifdef SKIP_ASM
+extern "C" void func_003A7E98(void* self);
+
+extern "C" void func_003A7F90(void* self)
+{
+    func_003A7E98(self);
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x3EC) = 0;
+    *(int*)((char*)self + 0x3E8) = 0;
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", cWorldCache_init);
 
@@ -80,7 +92,20 @@ INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
 
 INCLUDE_ASM("world/worldcache", func_003A8230);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8290);
+#ifdef SKIP_ASM
+extern "C" void func_003A9258(void* p);
+extern "C" void cWorldCache_updatePages(void* self);
+extern "C" void func_003A7098(void* p);
+
+extern "C" void func_003A8290(void* self)
+{
+    func_003A9258((char*)self + 0x10);
+    cWorldCache_updatePages(self);
+    func_003A7098((char*)self + 0x300);
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A82C8);
 
@@ -148,7 +173,100 @@ INCLUDE_ASM("world/worldcache", func_003A8F80);
 
 INCLUDE_ASM("world/worldcache", func_003A8FB8);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A9000);
+#ifdef SKIP_ASM
+struct sWCQuad {
+    float v[4];
+} __attribute__((aligned(16)));
+
+struct sWCNode {
+    sWCQuad min;
+    sWCQuad max;
+    char pad20[0x30];
+    int left;
+    int right;
+    int leaf;
+    char pad5C[4];
+};
+
+struct sWCLeaf {
+    char pad00[0x44];
+};
+
+struct sWCSect {
+    char pad00[0x1C];
+    int node;
+    char pad20[0x38];
+};
+
+struct sWCHdr {
+    char pad00[8];
+    unsigned int numSects;
+    unsigned int numNodes;
+    char pad10[0x40];
+};
+
+struct sWCPair {
+    int a;
+    int b;
+};
+
+struct sWorldCacheMap {
+    int id;
+    sWCHdr* hdr;
+    sWCSect* sects;
+    sWCNode* nodes;
+    sWCLeaf* leaves;
+    sWCPair pairs[65];
+    char pad21C[4];
+    sWCQuad min;
+    sWCQuad max;
+};
+
+// PORT: offsets in the loaded data are rewritten in place as pointers (pointer in int)
+extern "C" int func_003A9000(sWorldCacheMap* self, sWCHdr* hdr, int id)
+{
+    unsigned int i;
+
+    char* p;
+    self->id = id;
+    self->hdr = hdr;
+    self->sects = (sWCSect*)((char*)hdr + 0x50);
+    p = (char*)self->sects + hdr->numSects * 0x58;
+    p = (char*)(((unsigned int)p + 0xF) & 0xFFFFFFF0);
+    self->nodes = (sWCNode*)p;
+    self->leaves = (sWCLeaf*)(p + hdr->numNodes * 0x60);
+
+    for (i = 0; i < self->hdr->numSects; i++) {
+        self->sects[i].node = (int)&self->nodes[self->sects[i].node];
+        self->pairs[i].a = 0;
+        self->pairs[i].b = 0;
+    }
+
+    for (i = 0; i < self->hdr->numNodes; i++) {
+        if (self->nodes[i].left >= 0) {
+            self->nodes[i].left = (int)&self->nodes[self->nodes[i].left];
+        } else {
+            self->nodes[i].left = 0;
+        }
+        if (self->nodes[i].right >= 0) {
+            self->nodes[i].right = (int)&self->nodes[self->nodes[i].right];
+        } else {
+            self->nodes[i].right = 0;
+        }
+        if (self->nodes[i].leaf >= 0) {
+            self->nodes[i].leaf = (int)&self->leaves[self->nodes[i].leaf];
+        } else {
+            self->nodes[i].leaf = 0;
+        }
+    }
+
+    self->min = ((sWCNode*)self->sects[0].node)->min;
+    self->max = ((sWCNode*)self->sects[0].node)->max;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A9180__FPv);

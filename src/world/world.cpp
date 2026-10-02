@@ -32,7 +32,27 @@ INCLUDE_ASM("world/world", func_003A6948);
 
 INCLUDE_ASM("world/world", func_003A6AE0);
 
+//100%
 INCLUDE_ASM("world/world", func_003A6B78);
+#ifdef SKIP_ASM
+struct func_003A6B78_sEntry {
+    short type;
+    char pad2[6];
+    void* data;
+};
+
+struct func_003A6B78_sTable {
+    char pad[4];
+    func_003A6B78_sEntry* entries;
+};
+
+extern "C" int func_003AD120(func_003A6B78_sEntry* e, void* obj, int i);
+
+extern "C" int func_003A6B78(void* self, void* obj, int i)
+{
+    return func_003AD120(&(*(func_003A6B78_sTable**)((char*)self + 0x4))->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/world", func_003A6BA8);
@@ -147,5 +167,15 @@ int func_003A6D00(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/world", func_003A6D18);
+#ifdef SKIP_ASM
+extern "C" int func_003ADC50(func_003A6BA8_sEntry* e, unsigned int i);
+
+extern "C" int func_003A6D18(void* self, unsigned int* handle)
+{
+    unsigned int h = *handle;
+    return func_003ADC50(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[h & 0xFF], h >> 8);
+}
+#endif
 

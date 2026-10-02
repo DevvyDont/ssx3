@@ -14,7 +14,22 @@ void* cLensFxMan_construct()
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002EC418);
+#ifdef SKIP_ASM
+extern "C" void func_002E2E18(void* self);
+extern void* D_00487F00[];
+
+// PORT: asm label because the unit's forward declaration above has C++ linkage;
+// fix that declaration to extern "C" and this can be a plain extern "C" definition.
+void* func_002EC418_impl(void* self) __asm__("func_002EC418");
+void* func_002EC418_impl(void* self)
+{
+    func_002E2E18(self);
+    *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
+    return self;
+}
+#endif
 
 extern void* D_00487F00[];
 extern "C" void* func_002E3060(void*);
@@ -95,7 +110,38 @@ INCLUDE_ASM("visualfx/lensfx", func_002ED048);
 
 INCLUDE_ASM("visualfx/lensfx", func_002ED1D0);
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ED338);
+#ifdef SKIP_ASM
+struct sLerpV4 {
+    float x, y, z, w;
+    sLerpV4() {}
+    sLerpV4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+static inline sLerpV4 operator*(const sLerpV4& a, float s)
+{
+    return sLerpV4(a.x * s, a.y * s, a.z * s, a.w * s);
+}
+
+static inline sLerpV4 operator+(const sLerpV4& a, const sLerpV4& b)
+{
+    return sLerpV4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
+}
+
+struct sLensLerp {
+    char pad00[0x28];
+    sLerpV4 a;
+    sLerpV4 b;
+};
+
+extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* a, const sLerpV4* b, float t)
+{
+    float s = 1.0f - t;
+    self->a = sLerpV4(self->a.x * s, self->a.y * s, self->a.z * s, self->a.w * s) + *a * t;
+    self->b = sLerpV4(self->b.x * s, self->b.y * s, self->b.z * s, self->b.w * s) + *b * t;
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002ED490);
 

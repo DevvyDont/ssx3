@@ -101,7 +101,18 @@ INCLUDE_ASM("visualfx/renderstateman", func_002F00A0);
 
 INCLUDE_ASM("visualfx/renderstateman", func_002F0368);
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0390);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_002F03C8(void* self);
+extern char D_00487B88[];
+
+extern "C" void* func_002F0390(void)
+{
+    return func_002F03C8(cMemMan_alloc(8, D_00487B88, 0, 0));
+}
+#endif
 
 INCLUDE_ASM("visualfx/renderstateman", func_002F03C8);
 
@@ -133,5 +144,16 @@ extern "C" void func_002F04E0(func_002F04B0_cObj** self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0510);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cPSPVisualEffectsMan_cPSPVisualEffectsMan(void* self);
+extern char D_00487BA0[];
+
+extern "C" void* func_002F0510(void)
+{
+    return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(0x48, D_00487BA0, 0, 0));
+}
+#endif
 

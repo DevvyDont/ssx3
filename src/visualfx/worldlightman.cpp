@@ -161,9 +161,30 @@ void func_002F6908(void* self)
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F6910);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6A58);
+#ifdef SKIP_ASM
+class func_002F6A58_cObj {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual int v01(void* dst, int size);
+    virtual int v02(void* src, int size);
+};
 
+extern "C" void func_002F6A58(void* self, func_002F6A58_cObj* stream)
+{
+    stream->v01((char*)self + 4, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6A90);
+#ifdef SKIP_ASM
+extern "C" void func_002F6A90(void* self, func_002F6A58_cObj* stream)
+{
+    stream->v02((char*)self + 4, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6AC8);
@@ -223,7 +244,20 @@ extern "C" int func_002F7BE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BF0);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
+
+extern "C" void func_002F7BF0(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C20__FPv);
@@ -249,13 +283,65 @@ void func_002F7C30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7F00);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F7F00(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7F30);
+#ifdef SKIP_ASM
+extern void* D_00488308[];
+void operator_delete(int*);
 
+extern "C" void func_002F7F30(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00488308;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7F60);
+#ifdef SKIP_ASM
+extern void* D_00488308[];
+void operator_delete(int*);
 
+extern "C" void func_002F7F60(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00488308;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7F90);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
+
+extern "C" void func_002F7F90(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FF0__FPv);
@@ -266,15 +352,80 @@ int func_002F7FF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8000);
+#ifdef SKIP_ASM
+extern void* D_004880E0[];
+extern "C" void func_002E4D30(void* p);
 
+extern "C" void func_002F8000(void* self, int flags)
+{
+    *(void***)self = D_004880E0;
+    if (flags & 1) {
+        func_002E4D30(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8030);
+#ifdef SKIP_ASM
+extern void* D_004880E0[];
+extern "C" void func_002E4D30(void* p);
 
+extern "C" void func_002F8030(void* self, int flags)
+{
+    *(void***)self = D_004880E0;
+    if (flags & 1) {
+        func_002E4D30(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F80D8);
+#ifdef SKIP_ASM
+extern void* D_004880E0[];
+extern "C" void func_002E4D30(void* p);
 
+extern "C" void func_002F80D8(void* self, int flags)
+{
+    *(void***)self = D_004880E0;
+    if (flags & 1) {
+        func_002E4D30(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8108);
+#ifdef SKIP_ASM
+extern void* D_004880E0[];
+extern "C" void func_002E4D30(void* p);
 
+extern "C" void func_002F8108(void* self, int flags)
+{
+    *(void***)self = D_004880E0;
+    if (flags & 1) {
+        func_002E4D30(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8138);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
+
+extern "C" void func_002F8138(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8168__FPv);
@@ -284,7 +435,20 @@ void func_002F8168(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8188);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
+
+extern "C" void func_002F8188(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_003546C8(void* self);
 
@@ -297,21 +461,125 @@ void* func_002F81B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81F0);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F81F0(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8220);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F8220(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8250);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F8250(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8280);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F8280(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F82B0);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F82B0(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F82E0);
+#ifdef SKIP_ASM
+extern void* D_00488680[];
+void operator_delete(int*);
 
+extern "C" void func_002F82E0(void* self, int flags)
+{
+    *(void***)self = D_00488680;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8310);
+#ifdef SKIP_ASM
+extern void* D_00487DA0[];
+void operator_delete(int*);
 
+extern "C" void func_002F8310(void* self, int flags)
+{
+    *(void***)((char*)self + 0x44) = D_00487DA0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8340);
+#ifdef SKIP_ASM
+extern void* D_00487D78[];
+void operator_delete(int*);
+
+extern "C" void func_002F8340(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00487D78;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void* func_002F6B88(int, int);
 

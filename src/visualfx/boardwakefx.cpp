@@ -67,7 +67,61 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E23E0);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E24D0);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
+#ifdef SKIP_ASM
+#define S28(off) (*(int*)((char*)*(void**)((char*)self + 0x28) + (off)))
+
+extern "C" void func_002E2550(void* self)
+{
+    int mode = *(int*)((char*)*(void**)self + 0x898);
+    *(int*)((char*)self + 0x128) = mode;
+    switch (mode) {
+    case 0:
+        S28(0xBC4) = 1;
+        S28(0xDD4) = 1;
+        S28(0x174) = 1;
+        {
+            int v = 0;
+            if (*(int*)((char*)self + 0x124) != 0 || *(int*)((char*)*(void**)self + 0xAC4) != 0)
+                v = 1;
+            S28(0x9B4) = v;
+        }
+        S28(0x384) = *(int*)((char*)self + 0x124);
+        S28(0x594) = *(int*)((char*)self + 0x124);
+        S28(0x7A4) = *(int*)((char*)self + 0x124);
+        S28(0xFE4) = *(int*)((char*)self + 0x124);
+        S28(0x11F4) = *(int*)((char*)self + 0x124);
+        S28(0x1404) = *(int*)((char*)self + 0x124);
+        break;
+    case 1:
+        S28(0xBC4) = 1;
+        S28(0xDD4) = 1;
+        S28(0x174) = 1;
+        S28(0x384) = *(int*)((char*)self + 0x124);
+        S28(0x594) = *(int*)((char*)self + 0x124);
+        S28(0x7A4) = *(int*)((char*)self + 0x124);
+        S28(0xFE4) = *(int*)((char*)self + 0x124);
+        S28(0x11F4) = *(int*)((char*)self + 0x124);
+        S28(0x9B4) = 0;
+        S28(0x1404) = 0;
+        break;
+    default:
+        S28(0xBC4) = 1;
+        S28(0xDD4) = *(int*)((char*)self + 0x124);
+        S28(0x384) = 0;
+        S28(0x174) = 0;
+        S28(0x594) = 0;
+        S28(0x7A4) = 0;
+        S28(0xFE4) = 0;
+        S28(0x9B4) = 0;
+        S28(0x11F4) = 0;
+        S28(0x1404) = 0;
+        break;
+    }
+}
+#undef S28
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E26B8);
 
@@ -145,7 +199,18 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3060);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E30D0);
+#ifdef SKIP_ASM
+extern "C" void func_002E3338(void* self, int i);
+extern "C" void func_002E3478(void* self, int i);
+
+extern "C" void func_002E30D0(void* self, int i)
+{
+    func_002E3338(self, i);
+    func_002E3478(self, i);
+}
+#endif
 
 extern "C" void* func_002E3130(void* self);
 
@@ -186,7 +251,16 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4370);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E44F0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4540);
+#ifdef SKIP_ASM
+extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
+
+extern "C" void func_002E4540(void* self, int a1, int a3, int a5, float f2)
+{
+    func_002E4370(self, a1, 0, a3, 0.0f, 0.0f, 1, a5, f2);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4578);
 
@@ -232,7 +306,18 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E47E8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4B98);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4C60);
+#ifdef SKIP_ASM
+void func_00283440(void*);
+extern "C" void func_002E4578(void* self);
+
+extern "C" void func_002E4C60(void* self)
+{
+    func_00283440((char*)self + 0x10);
+    func_002E4578(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);

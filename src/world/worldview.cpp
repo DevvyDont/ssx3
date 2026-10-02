@@ -104,7 +104,38 @@ INCLUDE_ASM("world/worldview", func_003AA438);
 
 INCLUDE_ASM("world/worldview", func_003AA520);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA5C8);
+#ifdef SKIP_ASM
+class func_003AA5C8_cObj {
+public:
+    char pad00[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual int v15(void* a1);
+};
+
+// PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
+extern "C" int func_003AA5C8(func_003AA5C8_cObj* self, void* a1)
+{
+    *(int*)((char*)a1 + 0x8) += (int)a1;
+    self->v15(a1);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AA608);
 
@@ -295,5 +326,17 @@ INCLUDE_ASM("world/worldview", func_003AC358);
 
 INCLUDE_ASM("world/worldview", func_003AC508);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AC7C8);
+#ifdef SKIP_ASM
+extern "C" void cWScriptCache_init(void* self, int a1);
+
+extern "C" void* func_003AC7C8(void* self, int a1)
+{
+    *(int*)((char*)self + 0x0) = a1;
+    *(int*)((char*)self + 0x4) = 0;
+    cWScriptCache_init(self, 1);
+    return self;
+}
+#endif
 
