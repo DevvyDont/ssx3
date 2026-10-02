@@ -1,6 +1,39 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initCommon);
+#ifdef SKIP_ASM
+void func_0031D790(void* self);
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_0048DB38[];
+
+struct sCubicSplineFlags {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int f3 : 8;
+    unsigned int count : 8;
+};
+
+struct sCubicSpline {
+    sCubicSplineFlags flags;
+    float f4;
+    void* data;
+};
+
+// PORT: binds the real 2-arg body; the unit declares a 1-arg prototype used by callers
+extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int n) __asm__("cCubicSplineInterpolant_initCommon");
+extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int n)
+{
+    if (self->data != 0) {
+        func_0031D790(self);
+    }
+    self->flags.count = n - 1;
+    self->data = operator_new_tag(self->flags.count * 0x14, D_0048DB38, 0, 0);
+    self->flags.b1 = 1;
+    self->flags.f3 = 0;
+}
+#endif
 
 extern "C" void cCubicSplineInterpolant_initCommon(void* self);
 

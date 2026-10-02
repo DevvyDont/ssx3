@@ -117,9 +117,58 @@ void* func_0015CD60(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/cameracontroller", cManualCameraController_cManualCameraController);
+#ifdef SKIP_ASM
+extern void* D_0045B8D8[];
+extern char D_0045B230[];
+extern char D_0045B240[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cCameraController_cCameraController(void* self, int a1);
+extern "C" void* func_0015FD08(void* self);
+extern "C" void* func_0015FFB0(void* self);
+extern "C" void func_0015CF80(void* self, int msg);
 
+extern "C" void* cManualCameraController_cManualCameraController(void* self, int a1)
+{
+    cCameraController_cCameraController(self, a1);
+    *(void***)((char*)self + 0x14) = D_0045B8D8;
+    *(int*)((char*)self + 0x0) = 1;
+    *(void**)((char*)self + 0x18) = func_0015FD08(cMemMan_alloc(0x40, D_0045B230, 0x20000000, 0));
+    *(void**)((char*)self + 0x1C) = func_0015FFB0(cMemMan_alloc(0x40, D_0045B240, 0x20000000, 0));
+    func_0015CF80(self, 0x51);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CE10);
+#ifdef SKIP_ASM
+extern void* D_0045B8D8[];
+extern "C" void func_0015CC10(void* self, int flags);
+
+struct sCamCtrlVEDtor {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0015CE10(void* self, int flags)
+{
+    *(void***)((char*)self + 0x14) = D_0045B8D8;
+    char* a = *(char**)((char*)self + 0x18);
+    if (a != 0) {
+        sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(a + 0x10);
+        vt[1].fn(a + vt[1].delta, 3);
+    }
+    char* b = *(char**)((char*)self + 0x1C);
+    if (b != 0) {
+        sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(b + 0x10);
+        vt[1].fn(b + vt[1].delta, 3);
+    }
+    func_0015CC10(self, flags);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", func_0015CE98);

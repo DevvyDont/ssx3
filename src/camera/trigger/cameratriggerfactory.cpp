@@ -18,7 +18,19 @@ extern "C" int get_cCTActionSwitchCam(void* reader, void* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSpline);
+#ifdef SKIP_ASM
+extern "C" int get_cCTActionSpline(void* reader, void* dst)
+{
+    *(int*)dst = 2;
+    int n = get_float(reader, (char*)dst + 0xC);
+    n += get_float(reader, (char*)dst + 0x10);
+    n += get_float(reader, (char*)dst + 0x14);
+    n += get_float(reader, (char*)dst + 0x18);
+    return n + get_float(reader, (char*)dst + 0x1C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionNone__FPvPi);
@@ -699,7 +711,36 @@ void func_00178BA8(void* self, void* other)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178BB0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178E90);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+
+struct sCamVEntryIntA {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sCamVEntryVoidA {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00178E90(void* self, int id)
+{
+    char* obj = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
+    if (id == vt[7].fn(obj + vt[7].delta))
+    {
+        func_00166C60(self, id);
+        func_00166550(self, 100.0f, 100.0f);
+        sCamVEntryVoidA* vt2 = *(sCamVEntryVoidA**)((char*)self + 0x10);
+        vt2[5].fn((char*)self + vt2[5].delta);
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178F58);
 

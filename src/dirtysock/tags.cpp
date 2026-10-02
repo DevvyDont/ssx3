@@ -42,11 +42,47 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetNumber);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFlags);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
+extern char D_004965C0[];
+
+extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name, int value)
+{
+    char temp[256 + 32];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    const char* flags = D_004965C0;
+    for (; (value != 0) && (*flags != 0); value >>= 1, flags++) {
+        if (value & 1) {
+            *data++ = *flags;
+        }
+    }
+    *data = 0;
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetAddress);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFourCC);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
+
+extern "C" int cDirtysock_tag_TagFieldSetFourCC(char* record, int len, char* name, int value)
+{
+    char temp[256 + 32];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    for (; value != 0; value <<= 8) {
+        if (value > 0x20FFFFFF) {
+            *data++ = (char)(value >> 24);
+        }
+    }
+    *data = 0;
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetString);
 
