@@ -167,7 +167,20 @@ extern "C" void func_0039CE20(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CE48);
+#ifdef SKIP_ASM
+extern "C" void func_00398638(void*, int);
+
+extern "C" void func_0039CE48(void* self)
+{
+    func_00398638((char*)self + 0x40, 0);
+    void* p = *(void**)((char*)self + 0xd0);
+    if (p != 0) {
+        ((sUIFlags1C*)((char*)p + 0x1c))->mode = 6;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CE90__FPv);
@@ -290,7 +303,27 @@ void* func_0039E4A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E4C0);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList*);
+
+struct sVEntry39E4C0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_0039E4C0(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        sVEntry39E4C0* vt = *(sVEntry39E4C0**)((char*)self + 8);
+        vt[0xD].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039E508__FPv);
@@ -339,5 +372,24 @@ extern "C" void func_0039E758(void* self, cListNode* node)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiscreen", func_0039E868);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+extern "C" void func_0039D778(void*);
+
+extern "C" void func_0039E868(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            func_0039D778(n);
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
 

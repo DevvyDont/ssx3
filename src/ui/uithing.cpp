@@ -20,7 +20,21 @@ unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
 
 INCLUDE_ASM("ui/uithing", func_0039FFA0);
 
+//100%
 INCLUDE_ASM("ui/uithing", func_003A0000);
+#ifdef SKIP_ASM
+extern "C" void func_003975E0(void*, void*, unsigned char, unsigned short);
+extern "C" void func_003974B0(void*, unsigned char);
+
+extern "C" void func_003A0000(void* self, unsigned short ev)
+{
+    void* a = *(void**)((char*)self + 0xC);
+    if (a != 0) {
+        func_003975E0(a, self, *(unsigned char*)((char*)self + 0x10), ev);
+        func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uithing", func_003A0048);
 

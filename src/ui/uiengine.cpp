@@ -33,7 +33,25 @@ extern "C" void func_00398018(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398038);
+#ifdef SKIP_ASM
+struct sVEntry398038 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0039F100(void*);
+
+extern "C" void func_00398038(void* self)
+{
+    void* obj = *(void**)((char*)self + 0xC);
+    sVEntry398038* vt = *(sVEntry398038**)((char*)obj + 8);
+    vt[0x2E].fn((char*)obj + vt[0x2E].delta);
+    func_0039F100((char*)self + 0x18);
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00398078);
 

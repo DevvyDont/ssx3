@@ -59,7 +59,21 @@ INCLUDE_ASM("visualfx/avalanche", func_002D7EF8);
 
 INCLUDE_ASM("visualfx/avalanche", func_002D81B0);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D8258);
+#ifdef SKIP_ASM
+extern char D_004A3AD0[];
+extern char D_004A3AD8[];
+extern char D_004A3AE0[];
+extern "C" void func_002D83B8(int, char*);
+
+extern "C" void func_002D8258(void)
+{
+    func_002D83B8(1, D_004A3AD0);
+    func_002D83B8(1, D_004A3AD8);
+    func_002D83B8(0, D_004A3AE0);
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D82A0);
 

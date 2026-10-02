@@ -2,7 +2,24 @@
 
 INCLUDE_ASM("util/locale", cFELocale_addFile);
 
+//100%
 INCLUDE_ASM("util/locale", func_00195A50);
+#ifdef SKIP_ASM
+extern "C" void func_002C6D70(void*, int);
+
+struct s195A50Arr {
+    void* items[4];
+};
+
+extern "C" void func_00195A50(void* self, signed char i)
+{
+    s195A50Arr* arr = (s195A50Arr*)((char*)self + 8);
+    if (arr->items[i] != 0) {
+        func_002C6D70(arr->items[i], 3);
+        arr->items[i] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("util/locale", func_00195AA0);
 

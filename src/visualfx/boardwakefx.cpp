@@ -249,7 +249,22 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E42D0);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4370);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E44F0);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_002E4370 as void; this caller returns its int result.
+extern "C" int func_002E4370_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2) __asm__("func_002E4370");
+
+extern "C" int func_002E44F0(void* self, int a1, int a2, float f)
+{
+    if (*(int*)((char*)self + 0x44) == 0) {
+        return func_002E4370_i(self, a1, 0, a2, 0.0f, 0.0f, 0, 0, f);
+    }
+    *(int*)((char*)self + 0x50) = a2;
+    *(float*)((char*)self + 0x5C) = f;
+    return 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4540);

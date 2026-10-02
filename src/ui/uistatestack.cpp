@@ -126,7 +126,25 @@ INCLUDE_ASM("ui/uistatestack", func_0039FC48);
 
 INCLUDE_ASM("ui/uistatestack", func_0039FCC8);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FD38);
+#ifdef SKIP_ASM
+struct sVEntry39FD38 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0039FD38(void* self)
+{
+    void* obj = *(void**)((char*)self + 0xC);
+    if (obj != 0) {
+        sVEntry39FD38* vt = *(sVEntry39FD38**)((char*)obj + 0x10);
+        vt[1].fn((char*)obj + vt[1].delta, 3);
+        *(void**)((char*)self + 0xC) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039FE00);
 

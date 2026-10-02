@@ -16,7 +16,23 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA480);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA670);
+#ifdef SKIP_ASM
+extern void* D_00487F30[];
+extern "C" void* func_00354648(void* self);
+extern "C" void func_002EAA28(void* self);
+
+extern "C" void* func_002EA670(void* self)
+{
+    func_00354648(self);
+    *(void***)((char*)self + 0xC) = D_00487F30;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    func_002EAA28(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA6B8);
 

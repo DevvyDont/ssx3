@@ -62,11 +62,44 @@ extern "C" void func_0039A7A8(void* self, int a1)
 
 INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryByAsciiString);
 
+//100%
 INCLUDE_ASM("ui/uilistbox", func_0039A8D8);
+#ifdef SKIP_ASM
+struct sVEntry39A8D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0039A8D8(void* self, int count)
+{
+    *(char*)((char*)self + 0x318) = count;
+    *(char*)((char*)self + 0x319) = 0;
+    *(int*)((char*)self + 0x74) |= 0x10;
+    void* obj = *(void**)(*(char**)((char*)self + 0x5C) + 0xD0);
+    sVEntry39A8D8* vt = *(sVEntry39A8D8**)((char*)obj + 8);
+    vt[0x13].fn((char*)obj + vt[0x13].delta, self, 9);
+}
+#endif
 
 INCLUDE_ASM("ui/uilistbox", func_0039A928);
 
+//100%
 INCLUDE_ASM("ui/uilistbox", func_0039AAC0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039FE00(void* self);
+extern "C" char func_003979C0(void*);
+extern "C" void func_0039AB00(void* self, char a1);
+
+extern "C" void func_0039AAC0(void* self)
+{
+    func_0039FE00(self);
+    char v = func_003979C0((char*)self + 0x74);
+    *(char*)((char*)self + 0x97) = v;
+    *(char*)((char*)self + 0x96) = v;
+    func_0039AB00(self, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039AB00);

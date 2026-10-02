@@ -8,7 +8,20 @@ INCLUDE_ASM("ui/uimenu", func_0039B000);
 
 INCLUDE_ASM("ui/uimenu", func_0039B6A0);
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039B760);
+#ifdef SKIP_ASM
+extern "C" char func_003979C0(void*);
+
+extern "C" void func_0039B760(void* self, char a1)
+{
+    *(char*)((char*)self + 0x95) = 0;
+    *(char*)((char*)self + 0x96) = a1;
+    *(int*)((char*)self + 0x90) |= 4;
+    *(char*)((char*)self + 0x97) = func_003979C0((char*)self + 0x74);
+    *(char*)((char*)self + 0x98) = 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039B7B0);
 

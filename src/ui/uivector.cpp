@@ -20,7 +20,21 @@ INCLUDE_ASM("ui/uivector", func_003A3808);
 
 INCLUDE_ASM("ui/uivector", func_003A39F8);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A3D28);
+#ifdef SKIP_ASM
+extern "C" void func_003975E0(void*, void*, unsigned char, unsigned short);
+extern "C" void func_003974B0(void*, unsigned char);
+
+extern "C" void func_003A3D28(void* self, unsigned short ev)
+{
+    void* a = *(void**)((char*)self + 0xC);
+    if (a != 0) {
+        func_003975E0(a, self, *(unsigned char*)((char*)self + 0x10), ev);
+        func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A3D70);
@@ -272,7 +286,24 @@ extern "C" void func_003A4CD0(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4D00);
+#ifdef SKIP_ASM
+struct sVEntry3A4D00 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+
+extern "C" void* func_003A4D00(void* self, void* obj)
+{
+    sVEntry3A4D00* vt = *(sVEntry3A4D00**)((char*)obj + 8);
+    if (vt[0xF].fn((char*)obj + vt[0xF].delta, *(void**)((char*)self + 4)) == 0) {
+        return 0;
+    }
+    return obj;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4D40);
@@ -385,7 +416,22 @@ extern "C" void* func_003A5338(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A54B8);
+#ifdef SKIP_ASM
+extern void* D_00494868[];
+extern "C" void func_0039BE70(void* self);
+// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+// destructor taking (self, flags). Bound to the same symbol with an asm label.
+extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+
+extern "C" void func_003A54B8(void* self, int flags)
+{
+    *(void***)((char*)self + 8) = D_00494868;
+    func_0039BE70(self);
+    func_0039FC48_dtor(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5500__FPv);
@@ -407,7 +453,22 @@ extern "C" void* func_003A5508(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5658);
+#ifdef SKIP_ASM
+extern void* D_00494798[];
+extern "C" void func_0039A670(void* self);
+// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+// destructor taking (self, flags). Bound to the same symbol with an asm label.
+extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+
+extern "C" void func_003A5658(void* self, int flags)
+{
+    *(void***)((char*)self + 8) = D_00494798;
+    func_0039A670(self);
+    func_0039FC48_dtor(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A56A0__FPv);
@@ -566,7 +627,22 @@ int func_003A5B40(void* self)
 
 INCLUDE_ASM("ui/uivector", func_003A5B48);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5DA8);
+#ifdef SKIP_ASM
+extern void* D_00494588[];
+extern "C" void cUIText_deleteText(void* self);
+// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+// destructor taking (self, flags). Bound to the same symbol with an asm label.
+extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+
+extern "C" void func_003A5DA8(void* self, int flags)
+{
+    *(void***)((char*)self + 8) = D_00494588;
+    cUIText_deleteText(self);
+    func_0039FC48_dtor(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5DF0__FPv);
