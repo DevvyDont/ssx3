@@ -40,7 +40,24 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A638);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A798);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A9B8);
+#ifdef SKIP_ASM
+extern "C" void func_0019AB78(void* self);
+extern "C" void func_0019AA08(void* self);
+extern "C" void func_0019A798(void* self);
+
+extern "C" void func_0019A9B8(void* self)
+{
+    bool b = *(int*)((char*)self + 0xC8) == 1;
+    if (b) {
+        func_0019AB78(self);
+    } else {
+        func_0019AA08(self);
+    }
+    func_0019A798(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 
@@ -143,7 +160,23 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C7E8);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C880);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C8F8(void* self, void* item);
+
+extern "C" void* func_0019C880(void* self)
+{
+    char* item = *(char**)((char*)self + 0x1F40);
+    *(void**)((char*)self + 0x1F40) = func_0019C8F8(self, item);
+    *(short*)(item + 0xE) = -1;
+    char* head = *(char**)((char*)self + 0x1F40);
+    if (head != 0) {
+        *(short*)(head + 0xC) = -1;
+    }
+    return item;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8D0);

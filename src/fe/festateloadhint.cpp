@@ -29,7 +29,23 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onCreateScreen);
 
 INCLUDE_ASM("fe/festateloadhint", func_00245C60);
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_00245CD0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget);
+extern signed char D_00535C11[];
+
+extern "C" void func_00245CD0(void* self, void* widget)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] != 2) {
+        cFELoadState_widgetCreateQP(self, widget);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245D28);
@@ -44,7 +60,24 @@ extern "C" void* func_00245D28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0047BFA0[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+extern "C" void cFELoadStateInLodge_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BFA0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245DB8__FPv);

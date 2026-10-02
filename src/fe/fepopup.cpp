@@ -51,7 +51,29 @@ INCLUDE_ASM("fe/fepopup", func_001C7258);
 
 INCLUDE_ASM("fe/fepopup", func_001C7388);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C75C8);
+#ifdef SKIP_ASM
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+
+extern "C" void func_001C75C8(void* self, void* menu, int idx, int max)
+{
+    int lo;
+    idx = idx + 1;
+    if (max == -1) {
+        lo = 0;
+        max = 1;
+    } else {
+        lo = 1;
+    }
+    if (idx < lo) {
+        idx = lo;
+    } else if (idx > max) {
+        idx = max;
+    }
+    cUIMenu_setSelectedByIndex(menu, idx);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C7620);
 
@@ -375,7 +397,21 @@ INCLUDE_ASM("fe/fepopup", func_001CA598);
 
 INCLUDE_ASM("fe/fepopup", cScreenPopup_checkAndFixTextEntry);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA8A0);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_001CA8A0(void* self)
+{
+    func_003E6448((char*)self + 0x14, 0, 8);
+    func_003E6448((char*)self + 0xC, 0, 8);
+    func_003E6448((char*)self + 0x1C, 0, 8);
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuySongByCredit);
 
@@ -387,13 +423,49 @@ INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuyBolt);
 
 INCLUDE_ASM("fe/fepopup", func_001CABA8);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CAC30);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004662C8[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+extern "C" void func_001CAC30(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004662C8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onWidgetCreate);
 
 INCLUDE_ASM("fe/fepopup", func_001CAED8);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CAF00);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A14E8[];
+
+extern "C" void func_001CAF00(void* self, void* item, int event)
+{
+    if (item != 0) {
+        if (event == 5) {
+            int h = *(int*)((char*)item + 0x38);
+            if (h == GetHashValue32(D_004A14E8)) {
+                *(int*)((char*)self + 0x6C) = 1;
+            } else {
+                *(int*)((char*)self + 0x6C) = 0;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_initBuyTrick);
 
@@ -401,9 +473,45 @@ INCLUDE_ASM("fe/fepopup", func_001CAFC0);
 
 INCLUDE_ASM("fe/fepopup", func_001CB030);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CB138);
+#ifdef SKIP_ASM
+extern void* D_0046BEC8[];
+void cMemMan_free(void* ptr);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_0039E390(void* self, int flags);
 
+extern "C" void func_001CB138(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_0046BEC8;
+    void* p = *(void**)((char*)self + 0x428);
+    if (p != 0) {
+        cMemMan_free(p);
+        *(void**)((char*)self + 0x428) = 0;
+    }
+    cBXString__cBXString((char*)self + 0x424, 2);
+    func_0039E390(self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_00466388[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+extern "C" void cKeyboardPopup_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00466388), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CB208);
 
@@ -469,13 +577,70 @@ INCLUDE_ASM("fe/fepopup", func_001CBF20);
 
 INCLUDE_ASM("fe/fepopup", func_001CBFC0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CC090);
+#ifdef SKIP_ASM
+extern "C" int func_001CE560(void*, int, int);
 
+extern "C" void func_001CC090(void* self)
+{
+    int i = *(int*)((char*)self + 0x140) - 0x38;
+    while (!func_001CE560(self, i, 0)) {
+        i += 0xE;
+    }
+    *(int*)((char*)self + 0x140) = i;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CC0E0);
+#ifdef SKIP_ASM
+extern "C" int func_001CE560(void*, int, int);
 
+extern "C" void func_001CC0E0(void* self, int start)
+{
+    int i;
+    if (start == -1) {
+        i = *(int*)((char*)self + 0x140) + 0x38;
+    } else {
+        i = start;
+    }
+    while (!func_001CE560(self, i, 0)) {
+        i -= 0xE;
+    }
+    *(int*)((char*)self + 0x140) = i;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CC140);
+#ifdef SKIP_ASM
+extern "C" int func_001CE560(void*, int, int);
 
+extern "C" void func_001CC140(void* self)
+{
+    int i = *(int*)((char*)self + 0x140) - 0xE;
+    while (!func_001CE560(self, i, 0)) {
+        i -= 0xE;
+    }
+    *(int*)((char*)self + 0x140) = i;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CC190);
+#ifdef SKIP_ASM
+extern "C" int func_001CE560(void*, int, int);
+
+extern "C" void func_001CC190(void* self)
+{
+    int i = *(int*)((char*)self + 0x140) + 0xE;
+    while (!func_001CE560(self, i, 0)) {
+        i += 0xE;
+    }
+    *(int*)((char*)self + 0x140) = i;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CC1E0);
 
@@ -491,13 +656,52 @@ INCLUDE_ASM("fe/fepopup", func_001CC8D8);
 
 INCLUDE_ASM("fe/fepopup", func_001CCC30);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CCE98);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char* s);
+
+struct sPwd_CCE98 {
+    char pad[0xF4];
+    char buf[1];
+};
+
+extern "C" void func_001CCE98(sPwd_CCE98* self, char* str)
+{
+    int n = strlen(str);
+    int i;
+    for (i = 0; i < n; i++) {
+        self->buf[i] = '*';
+    }
+    self->buf[n] = 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CCF00);
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setStatic);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CD020);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_00466580[];
+
+extern "C" void func_001CD020(void* self, int id)
+{
+    if (*(void**)((char*)self + 0x40) == 0) {
+        *(int*)((char*)self + 0x42C) = id;
+    } else {
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00466580));
+        if (text != 0) {
+            cUIText_setUnicodeStringByID(text, id);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CD088);
@@ -535,7 +739,21 @@ extern "C" void func_001CD0B0(void* self, int v)
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_getObjName);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CD2F0);
+#ifdef SKIP_ASM
+extern "C" void func_001CCC30(void* self);
+extern "C" void func_0039E4C0(void* self, int a1);
+
+extern "C" void func_001CD2F0(void* self, int a1)
+{
+    if (*(int*)((char*)self + 0x134) == *(int*)((char*)self + 0x60)) {
+        *(int*)((char*)self + 0x134) = *(int*)((char*)self + 0x134) - 1;
+    }
+    func_001CCC30(self);
+    func_0039E4C0(self, a1);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainTransition);
 
@@ -561,11 +779,47 @@ extern "C" void func_001CE3C8(void* self, int i, int v, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CE408);
+#ifdef SKIP_ASM
+extern "C" void func_001CE408(void* self, bool on)
+{
+    int i;
+    for (i = 0xF; i < 0x19; i++) {
+        func_001CE3C8(self, i, !on, 1);
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CE468);
+#ifdef SKIP_ASM
+extern "C" void func_001CE468(void* self, int v)
+{
+    int i;
+    for (i = 0; i < 0xE; i++) {
+        func_001CE3C8(self, i, v, 2);
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CE4C8);
+#ifdef SKIP_ASM
+struct sVec3_CE4C8 { float x, y, z; };
+
+extern "C" void* func_003A04F0(void* self);
+
+extern "C" void func_001CE4C8(void* self, void* obj)
+{
+    sVec3_CE4C8 v = *(sVec3_CE4C8*)((char*)obj + 0x50);
+    char* p = (char*)func_003A04F0(obj);
+    float x = *(float*)(p + 0x30) * v.x;
+    float y = *(float*)(p + 0x34) * v.y;
+    *(float*)(p + 0x38) = x;
+    *(float*)(p + 0x3C) = y;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001CE520);

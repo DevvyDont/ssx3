@@ -149,7 +149,19 @@ INCLUDE_ASM("fe/festateoptions", func_0018C658);
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C8B8);
+#ifdef SKIP_ASM
+extern "C" void func_0018D108(void* self, int idx, float x, float y);
+void* func_0039E4A0(void* self);
+
+extern "C" void* func_0018C8B8(void* self)
+{
+    func_0018D108(self, 0, 0.0f, 0.0f);
+    func_0018D108(self, 1, 0.0f, 0.0f);
+    return func_0039E4A0(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018C910);
 
@@ -190,7 +202,24 @@ extern "C" void* func_0018D240(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0045E0C0[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E0C0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetCreate);
 

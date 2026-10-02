@@ -86,7 +86,25 @@ extern "C" void func_001D86B0(void* self)
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8700);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8BE0);
+#ifdef SKIP_ASM
+extern "C" void func_001D9308(void*, int);
+
+extern "C" void func_001D8BE0(void* self)
+{
+    *(int*)((char*)self + 0x1A8) = 0;
+    *(int*)((char*)self + 0x1F0) = 0;
+    *(int*)((char*)self + 0x1EC) = 0;
+    *(int*)((char*)self + 0x1B0) = 0;
+    *(int*)((char*)self + 0x1E4) = 1;
+    func_001D9308(self, 0);
+    *(int*)((char*)self + 0x1C0) = 2;
+    *(int*)((char*)self + 0x1E0) = 0;
+    *(int*)((char*)self + 0x1E8) = 0;
+    *(int*)((char*)self + 0x1DC) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8C38__FPv);
@@ -199,7 +217,30 @@ extern "C" int func_001D97E0(void* self, void* list, int idx, int back)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9818);
+#ifdef SKIP_ASM
+struct sVEntry001D9818 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void* func_0039E4C0(void* self);
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004678B0[];
+
+extern "C" void func_001D9818(void* self)
+{
+    func_0039E4C0(self);
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004678B0));
+    if (obj != 0) {
+        sVEntry001D9818* vt = *(sVEntry001D9818**)((char*)obj + 8);
+        vt[9].fn((char*)obj + vt[9].delta, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9878__FPv);
