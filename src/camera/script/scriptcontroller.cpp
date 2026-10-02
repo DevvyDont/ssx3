@@ -6,7 +6,38 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_001690D0);
 
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addCamera);
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_001692D8);
+#ifdef SKIP_ASM
+struct sScrAlgoNode {
+    int key;              // 0x0
+    char pad_0x04[0x10];
+    sScrAlgoNode* next;   // 0x14
+};
+
+struct sScrAlgoList {
+    sScrAlgoNode* head;   // 0x0
+    int count;            // 0x4
+};
+
+extern "C" void func_0015CA50(sScrAlgoList* list, sScrAlgoNode* node);
+
+extern "C" void func_001692D8(void* self, void* algo)
+{
+    if (*(int*)((char*)self + 0x18) != 0) {
+        sScrAlgoList* list = *(sScrAlgoList**)((char*)self + 0x8);
+        for (sScrAlgoNode* n = list->head; n != 0; n = n->next) {
+            int k = *(int*)((char*)algo + 0x1C);
+            if (n->key == k) {
+                func_0015CA50(list, n);
+                break;
+            }
+        }
+        if (list->count <= 0)
+            *(int*)((char*)self + 0x18) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169340);

@@ -1,6 +1,24 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("camera/cameracontroller", cCameraController_cCameraController);
+#ifdef SKIP_ASM
+extern void* D_0045B938[];
+extern char D_0045B220[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* func_0015C930(void* self);
+
+extern "C" void* cCameraController_cCameraController(void* self, int a1)
+{
+    *(void***)((char*)self + 0x14) = D_0045B938;
+    *(void**)((char*)self + 0x8) = func_0015C930(cMemMan_alloc(8, D_0045B220, 0x20000000, 0));
+    *(int*)((char*)self + 0x10) = a1;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CC10);
@@ -22,9 +40,71 @@ extern "C" void func_0015CC10(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CC70);
+#ifdef SKIP_ASM
+struct sCamCtrlNode {
+    void* obj;          // 0x0
+    char pad_0x04[0x10];
+    sCamCtrlNode* next; // 0x14
+};
 
+struct sCamCtrlVE {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+void* func_0015E030(void* self);
+extern "C" void func_002F41A8(void* p);
+
+// PORT: the unit declares func_0015CC70(void* self), but the body takes a
+// second argument (callers pass it in $5); the real body is bound by asm label.
+void func_0015CC70_impl(void* self, int a) __asm__("func_0015CC70");
+
+void func_0015CC70_impl(void* self, int a)
+{
+    for (sCamCtrlNode* n = **(sCamCtrlNode***)((char*)self + 0x8); n != 0; n = n->next)
+    {
+        void* obj = n->obj;
+        sCamCtrlVE* vt = *(sCamCtrlVE**)((char*)obj + 0x10);
+        vt[3].fn((char*)obj + vt[3].delta, a);
+    }
+    func_0015E030(*(void**)((char*)self + 0x10));
+    func_002F41A8(*(void**)((char*)self + 0x10));
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CCF0);
+#ifdef SKIP_ASM
+struct sCamCtrlNodeB {
+    void* obj;           // 0x0
+    char pad_0x04[0x10];
+    sCamCtrlNodeB* next; // 0x14
+};
+
+struct sCamCtrlVE0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+void* func_0015E030(void* self);
+extern "C" void func_002F41A8(void* p);
+
+extern "C" void func_0015CCF0(void* self)
+{
+    for (sCamCtrlNodeB* n = **(sCamCtrlNodeB***)((char*)self + 0x8); n != 0; n = n->next)
+    {
+        void* obj = n->obj;
+        sCamCtrlVE0* vt = *(sCamCtrlVE0**)((char*)obj + 0x10);
+        vt[4].fn((char*)obj + vt[4].delta);
+    }
+    func_0015E030(*(void**)((char*)self + 0x10));
+    func_002F41A8(*(void**)((char*)self + 0x10));
+}
+#endif
 
 extern "C" void* func_0015CB08(int);
 

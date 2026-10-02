@@ -2,7 +2,23 @@
 
 INCLUDE_ASM("dirtysock/tagsunk", cDirtysock_tag_TagFieldSetUnk);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", cDirtysock_tag_TagFieldGetUnk);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int cDirtysock_tag_TagFieldGetString(const char* tag, char* buf, int size);
+
+// PORT: variable-length array (GNU extension in C++).
+extern "C" void cDirtysock_tag_TagFieldGetUnk(const char* tag, char* dst, int size)
+{
+    char buf[size + 1];
+    cDirtysock_tag_TagFieldGetString(tag, buf, size + 1);
+    if (buf[0] == '`')
+        strcpy(dst, buf + 1);
+    else
+        strcpy(dst, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00259390__FPv);
@@ -332,7 +348,25 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025DF00);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025DF98);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_0025E0C8);
+#ifdef SKIP_ASM
+extern char D_004A2F58[];
+extern "C" int cDirtysock_tag_TagFieldSetNumber(char* buf, int size, const char* key, int value);
+extern "C" void func_0025B608(void* self, int a1, int tag, void* cb, int a4, float f);
+extern "C" void func_00268DD8(void* self, void* a1, int a2);
+
+extern "C" void func_0025E0C8(void* self, int value)
+{
+    if (*(int*)self != 0) {
+        char buf[0x100];
+        buf[0] = 0;
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A2F58, value);
+        // PORT: function pointer passed through func_0025B608's int parameter.
+        func_0025B608(self, 0xE, 0x6E657773, buf, (int)func_00268DD8, 20.0f);
+    }
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025E138);
 
@@ -413,7 +447,28 @@ extern "C" int func_0025F1B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F1E0);
+#ifdef SKIP_ASM
+extern char D_004A2ED0[];
+// PORT: the unit declares func_003EE560 with one parameter; this caller passes (list, index).
+void* func_003EE560_2(void* list, int idx) __asm__("func_003EE560");
+
+extern "C" char* func_0025F1E0(void* self, int idx, int* outFlag)
+{
+    if (*(int*)self == 0) {
+        return 0;
+    }
+    char* p = (char*)func_003EE560_2(*(void**)((char*)self + 0x60), idx);
+    if (p != 0) {
+        if (outFlag != 0) {
+            *outFlag = (*(int*)(p + 0x4) >> 21) & 1;
+        }
+        return p + 8;
+    }
+    return D_004A2ED0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F248);
@@ -534,7 +589,27 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00260C68);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00260E50);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00260F10);
+#ifdef SKIP_ASM
+extern "C" void cBXString_Reset(void* self);
+
+extern "C" void func_00260F10(void* self)
+{
+    cBXString_Reset((char*)self + 0x260);
+    cBXString_Reset((char*)self + 0x264);
+    cBXString_Reset((char*)self + 0x268);
+    cBXString_Reset((char*)self + 0x26C);
+    cBXString_Reset((char*)self + 0x270);
+    *(int*)((char*)self + 0x298) = 1;
+    *(int*)((char*)self + 0x29C) = 1;
+    *(int*)((char*)self + 0x288) = 1;
+    *(int*)((char*)self + 0x294) = 0;
+    *(int*)((char*)self + 0x28C) = 1;
+    *(int*)((char*)self + 0x290) = 0x7C1;
+    *(int*)((char*)self + 0x2A0) = 0;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00260F80);
 
@@ -685,9 +760,39 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00261EF8);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002620D8);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262280);
+#ifdef SKIP_ASM
+extern "C" int func_00262400(void* self, int a1);
+extern "C" int func_00262598(void* self);
 
+extern "C" int func_00262280(void* self)
+{
+    int n = 0;
+    for (int i = 0; i < func_00262598(self); i++) {
+        if (func_00262400(self, i) == 0)
+            n++;
+    }
+    return n;
+}
+#endif
+
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002622F0);
+#ifdef SKIP_ASM
+extern "C" int func_00262400(void* self, int a1);
+extern "C" int func_00262598(void* self);
+
+extern "C" int func_002622F0(void* self)
+{
+    int n = 0;
+    for (int i = 0; i < func_00262598(self); i++) {
+        if (func_00262400(self, i) != 0)
+            n++;
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262360);
@@ -889,7 +994,20 @@ extern "C" int func_00262A08(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262A38);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(void*, void*);
+
+extern "C" int func_00262A38(void* self, void* name)
+{
+    for (void*** it = *(void****)((char*)self + 0xAC); it != *(void****)((char*)self + 0xB0); it++) {
+        if (func_004165A8(**it, name) == 0)
+            return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00262AF0);
 
@@ -1051,7 +1169,29 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264030);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00264098);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002640C0);
+#ifdef SKIP_ASM
+extern "C" void* func_003E6448(void* dst, int value, int size);
+
+extern "C" void* func_002640C0(void* self, int a1, int a2, int a3)
+{
+    *(int*)((char*)self + 0x0) = 1;
+    *(int*)((char*)self + 0x120) = a1;
+    *(int*)((char*)self + 0x124) = a2;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x118) = 0;
+    *(int*)((char*)self + 0x11C) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x128) = a3;
+    func_003E6448((char*)self + 0x10, 0, 0x80);
+    *(int*)((char*)self + 0x90) = 0;
+    *(int*)((char*)self + 0x94) = 0;
+    func_003E6448((char*)self + 0x98, 0, 0x80);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00264138);
 
@@ -1134,7 +1274,38 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265568);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00265688);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265700);
+#ifdef SKIP_ASM
+struct sTagMsg265700 {
+    int type;          // 0x0
+    int state;         // 0x4
+    unsigned int id;   // 0x8
+    int pad[2];
+};
+
+extern "C" void func_00264BE8(void* self, void* msg, int size);
+
+extern "C" void func_00265700(void* self)
+{
+    sTagMsg265700 msg;
+    int type;
+    int state = *(int*)self;
+    if (state == 12)
+        return;
+    if (*(int*)((char*)self + 0x124) != 0) {
+        if (state == 9)
+            *(int*)self = 7;
+        type = 12;
+    } else {
+        type = 13;
+    }
+    msg.type = type;
+    msg.state = *(int*)self;
+    msg.id = 0xFFFFFFFF;
+    func_00264BE8(self, &msg, sizeof(msg));
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00265768);
 
@@ -1753,7 +1924,24 @@ extern "C" void func_00268210(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268240);
+#ifdef SKIP_ASM
+extern char D_00480488[];
+extern void* D_004811F0[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+
+extern "C" void* func_00268240(void* self)
+{
+    int* p = (int*)cMemMan_alloc(0x10, D_00480488, 0x20000000, 0);
+    int b = *(int*)((char*)self + 0xC);
+    p[0] = 0x102;
+    p[2] = 0x746F6F79;
+    *(void***)((char*)p + 0x4) = D_004811F0;
+    p[3] = b;
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002682A8);
@@ -1792,7 +1980,22 @@ extern "C" void func_00268398(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002683F0);
+#ifdef SKIP_ASM
+extern void* D_004811B0[];
+
+extern "C" void* func_002683F0(void* self)
+{
+    int* p = (int*)cMemMan_alloc(0x10, D_00480488, 0x20000000, 0);
+    const char* s = *(const char**)((char*)self + 0xC);
+    p[2] = 0x646F776E;
+    *(void***)((char*)p + 0x4) = D_004811B0;
+    p[0] = 0x102;
+    cBXString_cBXString2((char*)p + 0xC, s);
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268460);
@@ -1831,7 +2034,23 @@ extern "C" void func_00268588(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002685E0);
+#ifdef SKIP_ASM
+extern void* D_00481170[];
+
+extern "C" void* func_002685E0(void* self)
+{
+    int* p = (int*)cMemMan_alloc(0x10, D_00480488, 0x20000000, 0);
+    int b = *(int*)((char*)self + 0xC);
+    const char* s = *(const char**)((char*)self + 0x8);
+    *(void***)((char*)p + 0x4) = D_00481170;
+    p[0] = 0xE5;
+    cBXString_cBXString2((char*)p + 0x8, s);
+    p[3] = b;
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268658);
@@ -1885,7 +2104,25 @@ extern "C" void func_002686F0(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268720);
+#ifdef SKIP_ASM
+extern void* D_00481130[];
+
+extern "C" void* func_00268720(void* self)
+{
+    int* p = (int*)cMemMan_alloc(0x14, D_00480488, 0x20000000, 0);
+    int a = *(int*)((char*)self + 0x8);
+    int b = *(int*)((char*)self + 0xC);
+    int c = *(int*)((char*)self + 0x10);
+    p[0] = 0xFC;
+    *(void***)((char*)p + 0x4) = D_00481130;
+    p[2] = a;
+    p[3] = b;
+    p[4] = c;
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268790);

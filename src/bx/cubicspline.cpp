@@ -137,7 +137,23 @@ void func_0031FF38(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FF60);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+extern "C" void func_0031FF60(void* self, unsigned int base, unsigned int size)
+{
+    unsigned int start = (base + 0xF) & 0xFFFFFFF0;
+    *(unsigned int*)((char*)self + 0x4) = start;
+    *(unsigned int*)((char*)self + 0x0) = start;
+    *(unsigned int*)((char*)self + 0xC) = (size - (start - base)) & 0xFFFFFFF0;
+    func_003E6448((void*)start, 0, 0x378);
+    *(unsigned int*)((char*)self + 0x4) += 0x380;
+    *(unsigned int*)((char*)self + 0xC) -= 0x380;
+    *(unsigned int*)((char*)self + 0x8) = *(unsigned int*)((char*)self + 0x4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FFD8);

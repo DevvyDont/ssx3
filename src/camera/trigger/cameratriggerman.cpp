@@ -34,9 +34,48 @@ void func_0016CA10(void* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_purge);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_loadTriggers);
+#ifdef SKIP_ASM
+struct sCamTrigMan {
+    char** triggers; // 0x0
+    int count;       // 0x4
+};
 
+extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* file);
+
+extern "C" int cCameraTriggerMan_loadTriggers(sCamTrigMan* self, const char* file)
+{
+    int err = cCameraTriggerList_loadFromFile(self, file);
+    if (err != 0)
+        return err;
+    for (int i = 0; i < self->count; i++)
+        *(int*)(self->triggers[i] + 0x20) = 0;
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_streamIn);
+#ifdef SKIP_ASM
+struct sCamTrigManB {
+    char** triggers; // 0x0
+    int count;       // 0x4
+};
+
+extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
+void cCameraTriggerMan_setInGameTriggers(void* self);
+
+extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
+{
+    cCameraTriggerMan_cleanupOnExit(self);
+    cCameraTriggerList_loadFromBuffer(self, stream);
+    sCamTrigManB* m = (sCamTrigManB*)self;
+    for (int i = 0; i < m->count; i++)
+        *(int*)(m->triggers[i] + 0x20) = 0;
+    cCameraTriggerMan_setInGameTriggers(self);
+}
+#endif
 
 extern void* D_004C5830[];
 extern "C" void* func_0016CEF0(void*, void*, int);

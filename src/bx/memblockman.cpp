@@ -186,7 +186,37 @@ extern "C" void func_0031AA18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AA58);
+#ifdef SKIP_ASM
+extern "C" void* func_00423DE0(int);
+extern "C" int func_00423DF0(int);
+
+struct sMemBlkVEntryA {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMemBlkVEntryB {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0031AA58(void* self)
+{
+    *(int*)((char*)self + 0x1C) = 1;
+    sMemBlkVEntryA* vt = *(sMemBlkVEntryA**)((char*)self + 0x8);
+    vt[11].fn((char*)self + vt[11].delta);
+    func_00423DE0(*(int*)((char*)self + 0x18));
+    *(int*)((char*)self + 0x1C) = 0;
+    while (func_00423DF0(*(int*)((char*)self + 0x18)) == *(int*)((char*)self + 0x18))
+    {
+    }
+    sMemBlkVEntryB* vt2 = *(sMemBlkVEntryB**)((char*)self + 0x8);
+    vt2[12].fn((char*)self + vt2[12].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AAC8);
@@ -266,7 +296,28 @@ extern "C" void func_0031AC08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AC60);
+#ifdef SKIP_ASM
+struct sMemJobVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0031AC60(void* self)
+{
+    while (func_00423DE0(*(int*)((char*)self + 0x14044)), *(int*)((char*)self + 0x20) == 0)
+    {
+        void* obj = *(void* volatile*)((char*)self + 0x14048);
+        sMemJobVEntry* vt = *(sMemJobVEntry**)obj;
+        vt[2].fn((char*)obj + vt[2].delta);
+        *(void* volatile*)((char*)self + 0x14048) = 0;
+    }
+    func_00423CD0(*(int*)((char*)self + 0x10));
+    func_00423CC0();
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031ACD8);

@@ -652,7 +652,27 @@ extern "C" int func_0026A090(sBXRangeList* self, sBXRange* out, int maxOut, floa
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A0B8);
+#ifdef SKIP_ASM
+extern "C" float func_0026AC48(void* self);
+extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi);
+
+extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
+{
+    float lo;
+    float hi;
+    if (a >= 0.0f)
+        lo = self->field_0x38 - a;
+    else
+        lo = 0.0f;
+    if (b < 0.0f)
+        hi = func_0026AC48(self);
+    else
+        hi = self->field_0x38 - b;
+    return func_0026AC88(self, lo, hi);
+}
+#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A180);
 
@@ -931,9 +951,51 @@ void func_0026ADA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
+#ifdef SKIP_ASM
+// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
+void func_0026BA68_2(void* dst, void* src) __asm__("func_0026BA68");
+extern "C" int func_0026B410(void* self, char* p);
+extern "C" int cPathSys_resolvePaths(void* self, char* p);
+extern "C" int func_0026B7D8(void* self, char* p);
+extern "C" void func_0026B880(void* self, char* p);
 
+extern "C" void func_0026ADF0(void* self)
+{
+    int header;
+    char* p = *(char**)((char*)self + 0x48);
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x0) = 0;
+    func_0026BA68_2(&header, p);
+    p += 4;
+    p += func_0026B410(self, p);
+    p += cPathSys_resolvePaths(self, p);
+    p += func_0026B7D8(self, p);
+    func_0026B880(self, p);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF00);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+
+extern "C" void func_0026AF00(void* self)
+{
+    if (*(void**)((char*)self + 0xC) != 0)
+        cMemMan_free(*(void**)((char*)self + 0xC));
+    *(void**)((char*)self + 0xC) = 0;
+    if (*(void**)((char*)self + 0x14) != 0)
+        cMemMan_free(*(void**)((char*)self + 0x14));
+    *(void**)((char*)self + 0x14) = 0;
+    if (*(void**)((char*)self + 0x48) != 0 && *(int*)((char*)self + 0x4C) != 0)
+        cMemMan_free(*(void**)((char*)self + 0x48));
+    *(void**)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF70);

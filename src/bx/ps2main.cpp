@@ -21,7 +21,40 @@ INCLUDE_ASM("bx/ps2main", func_0031B178);
 
 INCLUDE_ASM("bx/ps2main", func_0031B310);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/ps2main", func_0031B6C8);
+#ifdef SKIP_ASM
+extern "C" float func_0031B178(void* m);
+extern "C" void func_0031B310(void* m);
+
+// Matrix inverse: adjoint (func_0031B310) scaled by 1/determinant (func_0031B178).
+// PORT: PS2-only VU0 inline asm (4x4 matrix times scalar, in place).
+extern "C" void func_0031B6C8(void* m)
+{
+    float det = func_0031B178(m);
+    func_0031B310(m);
+    float s = 1.0f / det;
+    int t;
+    __asm__ __volatile__(
+        "mfc1      %0, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "qmtc2.ni  %0, $vf3\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulx.xyzw $vf8, $vf4, $vf3x\n"
+        "vmulx.xyzw $vf9, $vf5, $vf3x\n"
+        "vmulx.xyzw $vf10, $vf6, $vf3x\n"
+        "vmulx.xyzw $vf11, $vf7, $vf3x\n"
+        "sqc2      $vf8, 0x0(%1)\n"
+        "sqc2      $vf9, 0x10(%1)\n"
+        "sqc2      $vf10, 0x20(%1)\n"
+        "sqc2      $vf11, 0x30(%1)\n"
+        : "=&r"(t)
+        : "r"(m), "f"(s)
+        : "memory");
+}
+#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031B748);
 

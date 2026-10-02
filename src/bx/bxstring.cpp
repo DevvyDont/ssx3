@@ -48,13 +48,54 @@ extern "C" void cBXString_Resize(cBXString* self, int size)
 
 INCLUDE_ASM("bx/bxstring", func_003181E8);
 
+//100%
 INCLUDE_ASM("bx/bxstring", cBXString__cBXString);
+#ifdef SKIP_ASM
+extern char D_0048DCD4[];
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" void cBXString__cBXString(cBXString* self, int flags)
+{
+    int s = *(int*)self;
+    if ((char*)s != D_0048DCD4)
+    {
+        int rc = *(int*)(s - 0xC) - 1;
+        *(int*)(s - 0xC) = rc;
+        if (rc <= 0)
+        {
+            void* h = (void*)(*(int*)self - 0xC);
+            if (h != 0)
+                cMemMan_free(h);
+        }
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 INCLUDE_ASM("bx/bxstring", cBXString_cBXString2);
 
 INCLUDE_ASM("bx/bxstring", func_00318350);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_InitFromCString);
+#ifdef SKIP_ASM
+extern char D_0048DCD4[];
+
+// PORT: pointer held in int to get the target's negative store offset.
+extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str)
+{
+    cBXString_Resize(self, len);
+    if (*(char**)self != D_0048DCD4)
+    {
+        func_0041605C(*(char**)self, str, len);
+        *(int*)(*(int*)self - 8) = len;
+        (*(char**)self)[len] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/bxstring", cBXString_operatorE);
 
@@ -122,7 +163,24 @@ extern "C" cBXString* func_003189A0(cBXString* self, char** other)
 
 INCLUDE_ASM("bx/bxstring", func_003189D0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318A88);
+#ifdef SKIP_ASM
+extern char D_0048DCD4[];
+
+// PORT: pointer held in int to get the target's negative store offset.
+extern "C" void func_00318A88(cBXString* self, int len)
+{
+    func_00318120(self);
+    if (len == -1)
+        len = strlen(*(char**)self);
+    if (*(char**)self != D_0048DCD4)
+    {
+        *(int*)(*(int*)self - 8) = len;
+        (*(char**)self)[len] = 0;
+    }
+}
+#endif
 
 extern "C" char* strchr(char* str, int ch);
 
@@ -158,7 +216,25 @@ int cBXString_FindFirstOf(cBXString* self, char ch)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318D28);
+#ifdef SKIP_ASM
+extern unsigned char D_00499C81[];
+static inline int to_upper(int c) { if (D_00499C81[c] & 2) return c - 0x20; return c; }
+// In-place upper-case; D_00499C81 is the ctype table (+1), bit 2 = lower-case.
+// PORT: pointer held in int to get the target's negative load offset.
+extern "C" void func_00318D28(cBXString* self)
+{
+    func_00318120(self);
+    char* p = self->str;
+    int i = *(int*)((int)p - 8);
+    while (--i >= 0)
+    {
+        *p = to_upper(*p);
+        p++;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318E68);
