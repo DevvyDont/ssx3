@@ -255,7 +255,28 @@ extern "C" void func_003A7D80(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7DD0);
+#ifdef SKIP_ASM
+extern "C" void func_003A8F80(void* self);
+extern "C" void cStreamMan_cStreamMan(void* self);
+extern char* D_004A5B64;
+
+extern "C" void* func_003A7DD0(void* self)
+{
+    func_003A8F80((char*)self + 0x10);
+    cStreamMan_cStreamMan((char*)self + 0x300);
+    char* app = D_004A5B64;
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x3EC) = 0;
+    *(int*)((char*)self + 0x3E8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x1BF0) = (int)((float)*(int*)(app + 0x10) * 0.10000000149011612f);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A7E38);
@@ -379,9 +400,59 @@ extern "C" void func_003A82C8(func_003A82C8_sCache* self)
 
 INCLUDE_ASM("world/worldcache", func_003A8330);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8448);
+#ifdef SKIP_ASM
+struct sWCSlot {
+    int state;   // 0x0
+    int f4;      // 0x4
+    int f8;      // 0x8
+    float fC;    // 0xC
+    int time;    // 0x10
+    int f14;     // 0x14
+};
 
+struct sWCSlots {
+    char pad[0x3F0];
+    sWCSlot slot[256];   // 0x3F0
+    int timeBase;        // 0x1BF0
+};
+
+extern char* D_004A5B64;
+
+extern "C" void func_003A8448(sWCSlots* self, int i, float f)
+{
+    self->slot[i].time = *(int*)(D_004A5B64 + 0x1C);
+    self->slot[i].fC = f;
+    self->slot[i].f4 = 0;
+    switch (self->slot[i].state) {
+    case 0:
+        self->slot[i].state = 1;
+        break;
+    case 1:
+    case 2:
+    case 3:
+        break;
+    case 4:
+        self->slot[i].state = 3;
+        break;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/worldcache", func_003A84C8);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+
+// PORT: callers declare (void*, unsigned short); the body never masks the id
+extern "C" void func_003A84C8_i(sWCSlots* self, int i) __asm__("func_003A84C8");
+extern "C" void func_003A84C8_i(sWCSlots* self, int i)
+{
+    self->slot[i].f4 = 0;
+    self->slot[i].time = *(int*)(D_004A5B64 + 0x1C) - self->timeBase;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A84F8);

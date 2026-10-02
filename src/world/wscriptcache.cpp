@@ -37,7 +37,32 @@ extern "C" void cWScriptCache_init(void* self, int count)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AC8F0);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+void operator_delete(int*);
+extern "C" void func_003ACA70(int* self, int flags);
+extern int D_004A4810;
+
+// PORT: array cookie arithmetic through int (pointer in int).
+extern "C" void func_003AC8F0(int* self, int flags)
+{
+    char* old = *(char**)((char*)self + 0x4);
+    if (old != 0) {
+        char* p = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
+        while (*(char**)((char*)self + 0x4) != p) {
+            p -= 0xC;
+            func_003ACA70((int*)p, 0);
+        }
+        cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
+    }
+    D_004A4810 = 0;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ACA10);
@@ -102,7 +127,28 @@ extern "C" void func_003ACA70(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ACC50);
+#ifdef SKIP_ASM
+struct sWSCItemFields {
+    short type;   // 0x0
+    short owned;  // 0x2
+    int pad4;
+    int value;    // 0x8
+};
+
+extern "C" void func_003ACCD8(sWScriptCacheItem* e, void* world, int index);
+extern void* D_004A47B8;
+
+extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value)
+{
+    sWSCItemFields* f = (sWSCItemFields*)e;
+    f->value = value;
+    f->owned = 1;
+    f->type = 2;
+    func_003ACCD8(e, D_004A47B8, index);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ACC90);
@@ -126,11 +172,46 @@ INCLUDE_ASM("world/wscriptcache", func_003ACCD8);
 
 INCLUDE_ASM("world/wscriptcache", func_003AD120);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AD188);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_003AD188(void)
+{
+    return *(void**)(D_004A28A8 + 0x84);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AD198);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
 
+extern "C" void* func_003AD198(void)
+{
+    return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x8C);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AD1A8);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void func_002F5998(void* lights);
+extern "C" void func_00122658(void* self);
+
+extern "C" void func_003AD1A8(void)
+{
+    func_002F5998(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x90));
+    char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    if (riders != 0) {
+        for (int i = 0; i < *(int*)(riders + 0x78); i++) {
+            func_00122658(*(void**)(riders + 0x28 + i * 4));
+        }
+    }
+}
+#endif
 
 extern "C" void* func_002E27E8(void* self);
 

@@ -30,7 +30,28 @@ extern "C" void func_002D5598(unsigned char* rgb, float r, float g, float b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/angerfx", func_002D55C0);
+#ifdef SKIP_ASM
+extern float D_004A3A38;
+
+// PORT: <? (g++ min operator)
+extern "C" void func_002D55C0(unsigned char* p, float r, float g, float b)
+{
+    float zero = 0.0f;
+    float one = 1.0f;
+    r *= D_004A3A38;
+    g *= D_004A3A38;
+    b *= D_004A3A38;
+    float cr, cg, cb;
+    if (r >= zero) cr = r <? one; else cr = zero;
+    if (g >= zero) cg = g <? one; else cg = zero;
+    if (b >= zero) cb = b <? one; else cb = zero;
+    p[3] = (int)(cr * 255.0f);
+    p[4] = (int)(cg * 255.0f);
+    p[5] = (int)(cb * 255.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5658);

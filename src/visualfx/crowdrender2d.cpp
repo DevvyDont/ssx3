@@ -57,11 +57,35 @@ void* cCrowdRender2D_constructCrowdAnim2D(void* param) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_cCrowdAnim2D__FPvT0);
 #ifdef SKIP_ASM
+struct sCrowdAnim2D {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+    void* f1C;
+};
+
+extern int D_00445DD0[];
+extern char* D_004A5B64;
+
 void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
 {
-
+    sCrowdAnim2D* a = (sCrowdAnim2D*)memory;
+    a->f1C = param_1;
+    a->f8 = 4;
+    a->f4 = 0;
+    a->fC = 0;
+    a->f10 = D_00445DD0[0];
+    a->f0 = 0;
+    a->f18 = *(int*)(D_004A5B64 + 0x1C);
+    a->f14 = 3;
+    return a;
 }
 #endif
 

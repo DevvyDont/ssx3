@@ -152,7 +152,24 @@ extern "C" void func_003A7010(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A7058);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+
+static inline int imax(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+extern "C" void func_003A7058(void* self, int rate)
+{
+    rate = imax(0x8000, rate);
+    char* app = D_004A5B64;
+    *(int*)((char*)self + 0xD8) = rate;
+    *(float*)((char*)self + 0xDC) = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
+}
+#endif
 
 INCLUDE_ASM("world/streamman", func_003A7098);
 

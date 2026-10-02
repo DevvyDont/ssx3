@@ -193,7 +193,24 @@ extern "C" void func_002D9660(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D96E0);
+#ifdef SKIP_ASM
+extern "C" void func_002D9A80(void);
+extern "C" void func_002D8258(void);
+extern "C" void func_002D87D0(void);
+extern void* D_004A3AB0;
+
+extern "C" void func_002D96E0(void)
+{
+    func_002D9A80();
+    for (void* p = D_004A3AB0; p != 0; p = *(void**)((char*)p + 0x8)) {
+        func_002D9660(p);
+    }
+    func_002D8258();
+    func_002D87D0();
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9738);
 
@@ -286,7 +303,32 @@ INCLUDE_ASM("visualfx/avalanche", func_002D9CB0);
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_readFromReplayFrame);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9FB8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void cAvalanche_resolveDataPointers(void);
+extern void* D_004A3AB4;
+extern int D_004A3AB8;
+extern int D_004A3AC4;
+
+extern "C" void func_002D9FB8(void* data)
+{
+    func_002D9B40(data);
+    if (D_004A3AB4 != 0 && D_004A3AB8 != 0) {
+        cMemMan_free(D_004A3AB4);
+    }
+    D_004A3AB4 = data;
+    D_004A3AB8 = 0;
+    if (*(int*)data != 0x2BEEF00) {
+        D_004A3AB4 = 0;
+        D_004A3AC4 = 1;
+    } else {
+        D_004A3AC4 = 0;
+        cAvalanche_resolveDataPointers();
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_resolveDataPointers);
 

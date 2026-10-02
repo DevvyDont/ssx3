@@ -304,7 +304,32 @@ extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int unused, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3060);
+#ifdef SKIP_ASM
+struct sBWVEntry2 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+extern void* D_004886B0[];
+extern char* D_004A5B80;
+extern int D_004A3B18;
+void operator_delete(int* p);
+
+extern "C" void func_002E3060(void* self, int flags)
+{
+    char* obj = D_004A5B80;
+    *(void***)((char*)self + 0x649C) = D_004886B0;
+    sBWVEntry2* e = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
+    e->fn(obj + e->delta, 0, 0);
+    D_004A3B18 = 0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E30D0);
@@ -338,7 +363,16 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E3478);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3578);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3668);
+#ifdef SKIP_ASM
+extern char* D_004A289C;
+
+extern "C" void func_002E3668(void)
+{
+    *(char**)(D_004A289C + 0xE84) -= 0x14;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3680);
 
@@ -385,7 +419,38 @@ extern "C" void* func_002E4228(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E42D0);
+#ifdef SKIP_ASM
+struct sBWVEntry1 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern char* D_004A5B80;
+extern "C" void func_002E4578(void* self);
+extern "C" void func_002832D8(void* self);
+extern "C" void func_00283228(void* self, int flags);
+extern "C" void func_003546C8(void* self, int flags);
+
+extern "C" void func_002E42D0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x1C) = D_00488100;
+    *(void***)((char*)self + 0xC) = D_00488158;
+    char* m = (char*)self + 0x10;
+    func_002E4578(self);
+    if (*(int*)((char*)self + 0x7C) != 0) {
+        char* obj = D_004A5B80;
+        sBWVEntry1* e = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
+        e->fn(obj + e->delta, (char*)self + 0x68);
+        *(int*)((char*)self + 0x7C) = 0;
+    }
+    func_002832D8(m);
+    func_00283228(m, 0);
+    func_003546C8(self, flags);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4370);
 
@@ -501,7 +566,30 @@ extern "C" void func_002E4CB0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4CE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sWakePoolEntry {
+    char data[0x64];
+};
+
+extern int D_00538850[];
+// same object as the unit's later `extern sWakeSlot D_005382C0[]` (0x64-byte slots)
+extern sWakePoolEntry D_wakePool[] __asm__("D_005382C0");
+extern sWakePoolEntry* D_004A3B1C;
+
+extern "C" sWakePoolEntry* func_002E4CE8(void)
+{
+    for (int i = 0; i < 4; i++) {
+        if (D_00538850[i] == 0) {
+            D_00538850[i] = 1;
+            return &D_wakePool[i];
+        }
+    }
+    return D_004A3B1C;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4D30);

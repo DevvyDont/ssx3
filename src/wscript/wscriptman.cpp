@@ -943,13 +943,87 @@ extern "C" void func_0030B520(void* self, cWScriptPair* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B540);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void func_0026CDF8(void* p);
+extern "C" void func_0026F228(void* p);
 
+extern "C" void func_0030B540(void* self)
+{
+    func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    *(int*)((char*)self + 0x2AC) = 1;
+    *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B658);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void func_0026CDF8(void* p);
+void func_0026CBB0(void* self);
+extern "C" void func_0026F228(void* p);
+extern "C" void func_0026F7B8(int* self);
+extern "C" void func_001235F8(void* self);
 
+extern "C" void func_0030B658(void* self)
+{
+    func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026CBB0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    func_0026F7B8(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
+    *(int*)((char*)self + 0x2AC) = 3;
+    *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
+    *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B6F8);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void func_0026CDF8(void* p);
+extern "C" void func_0026F228(void* p);
+extern "C" void func_0026F7B8(int* self);
 
+extern "C" void func_0030B6F8(void* self)
+{
+    func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    func_0026F7B8(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    *(int*)((char*)self + 0x2AC) = 2;
+    *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B758);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" void func_0026CDF8(void* p);
+void func_0026CBB0(void* self);
+extern "C" void func_0026F228(void* p);
+extern "C" void func_0026F7B8(int* self);
+extern "C" void func_001235F8(void* self);
+
+extern "C" void func_0030B758(void* self)
+{
+    func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026CBB0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    func_0026F7B8(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
+    *(int*)((char*)self + 0x2AC) = 4;
+    *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
+    *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B7F8);

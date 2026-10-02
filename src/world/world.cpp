@@ -2,7 +2,44 @@
 
 INCLUDE_ASM("world/world", cWorld_cWorld);
 
+//100%
 INCLUDE_ASM("world/world", func_003A6740);
+#ifdef SKIP_ASM
+struct sWorldVEntry0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern char* D_004A5B80;
+extern int D_004A47B8;
+extern "C" void func_003A7E38(int* self, int flags);
+extern "C" void func_003AC8F0(void* self, int flags);
+extern "C" void func_002BB140(void* self, int flags);
+extern "C" void func_0032DE20(void);
+void operator_delete(int* p);
+
+extern "C" void func_003A6740(void** self, int flags)
+{
+    char* obj = D_004A5B80;
+    sWorldVEntry0* e = &(*(sWorldVEntry0**)(obj + 0x10D8))[107];
+    e->fn(obj + e->delta);
+    if (self[0] != 0) {
+        func_003A7E38((int*)self[0], 3);
+    }
+    if (self[1] != 0) {
+        func_003AC8F0(self[1], 3);
+    }
+    if (self[2] != 0) {
+        func_002BB140(self[2], 3);
+    }
+    func_0032DE20();
+    D_004A47B8 = 0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 extern "C" void cWorld_resetMap(void*);
 

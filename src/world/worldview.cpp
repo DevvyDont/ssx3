@@ -522,7 +522,26 @@ extern "C" int func_003AABD8(void* self, func_003AABD8_sObj* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AAC50);
+#ifdef SKIP_ASM
+extern "C" int func_003AAC50(void* self, void* obj)
+{
+    if (*(int*)((char*)obj + 0xC) & 0x100) {
+        return 0;
+    }
+    int t = *(int*)((char*)obj + 0x10);
+    if (t < 3) {
+        if (t > 0) {
+            if (*(float*)((char*)obj + 0x1C) > 5000.0f) {
+                *(float*)((char*)obj + 0x1C) = 5000.0f;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AACA8);
 
@@ -562,7 +581,19 @@ extern "C" void func_003AADE8(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AAE40);
+#ifdef SKIP_ASM
+extern char*** D_004A47B8;
+
+extern "C" void func_003AAE40(void* self, int a1)
+{
+    char*** w = D_004A47B8;
+    *(int*)((char*)self + 0xC) = a1;
+    *(char****)self = w;
+    *(int*)((char*)self + 0x10) = *(short*)(**w + 0x2A);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AAE60__FPv);

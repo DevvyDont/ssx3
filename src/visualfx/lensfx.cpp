@@ -286,7 +286,26 @@ extern "C" void func_002EDFD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE010);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_0038ABF8(void* self, int i);
+extern int D_004A43C4;
+
+extern "C" void* func_002EE010_r(void* self) __asm__("func_002EE010");
+extern "C" void* func_002EE010_r(void* self)
+{
+    if (*(int*)((char*)self + 4) != 0x123400) {
+        if (*(signed char*)self == 0) {
+            return func_0038ABF8(D_005047F8, D_004A43C4);
+        }
+        func_002EDFD0(self);
+        return func_0038ABF8(D_005047F8, *(int*)self);
+    }
+    return func_0038ABF8(D_005047F8, *(int*)self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE070);
@@ -502,7 +521,21 @@ extern "C" float func_002EE400(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE448);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
+
+extern "C" float func_002EE448(int i)
+{
+    if (D_004A3B60 == 0) {
+        sLensFxSlot* s = &D_004FA370[i];
+        sLensFxObj* obj = *s->p20;
+        return *obj->vt[43].fn((char*)obj + obj->vt[43].delta) * (1.0f - *(float*)((char*)s + 0x24));
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE4C0);
@@ -556,7 +589,21 @@ extern "C" float func_002EE5B8(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE600);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
+
+extern "C" float func_002EE600(int i)
+{
+    if (D_004A3B60 == 0) {
+        sLensFxSlot* s = &D_004FA370[i];
+        sLensFxObj* obj = *s->p20;
+        return *obj->vt[51].fn((char*)obj + obj->vt[51].delta);
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE660);

@@ -203,17 +203,107 @@ extern "C" float func_002EEB28(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEB70);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
 
+extern "C" float func_002EEB70(int i)
+{
+    if (D_004A3B60 == 0) {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
+        sRSMVEntry* vt = o->vt;
+        return *vt[20].fn((char*)o + vt[20].delta);
+    }
+    return 1.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEBD0);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
 
+extern "C" float func_002EEBD0(int i)
+{
+    if (D_004A3B60 == 0) {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
+        sRSMVEntry* vt = o->vt;
+        return *vt[21].fn((char*)o + vt[21].delta);
+    }
+    return 1.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEC30);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
 
+extern "C" float func_002EEC30(int i)
+{
+    if (D_004A3B60 == 0) {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
+        sRSMVEntry* vt = o->vt;
+        return *vt[22].fn((char*)o + vt[22].delta);
+    }
+    return 1.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEC90);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
 
+extern "C" float func_002EEC90(int i)
+{
+    if (D_004A3B60 == 0) {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
+        sRSMVEntry* vt = o->vt;
+        return *vt[23].fn((char*)o + vt[23].delta);
+    }
+    return 0.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EECF0);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
 
+extern "C" float func_002EECF0(int i)
+{
+    if (D_004A3B60 == 0) {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
+        sRSMVEntry* vt = o->vt;
+        return *vt[24].fn((char*)o + vt[24].delta);
+    }
+    return 0.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EED50);
+#ifdef SKIP_ASM
+extern int D_004A3B60;
+
+extern "C" float func_002EED50(int i)
+{
+    if (D_004A3B60 == 0) {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
+        sRSMVEntry* vt = o->vt;
+        return *vt[25].fn((char*)o + vt[25].delta);
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEDB0);
@@ -369,11 +459,65 @@ extern "C" float func_002EF0A0(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF0E8);
+#ifdef SKIP_ASM
+extern int D_004A3B64;
+extern int D_004A55B0;
 
+extern "C" void* func_002EF0E8(int i)
+{
+    if (D_004A3B64 != 0) {
+        return &D_004A55B0;
+    }
+    {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = *e->p1C;
+        sRSMVEntry* vt = o->vt;
+        return vt[37].fn((char*)o + vt[37].delta);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF140);
+#ifdef SKIP_ASM
+extern int D_004A3B64;
+extern int D_004A55B0;
 
+extern "C" void* func_002EF140(int i)
+{
+    if (D_004A3B64 != 0) {
+        return &D_004A55B0;
+    }
+    {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = *e->p1C;
+        sRSMVEntry* vt = o->vt;
+        return vt[38].fn((char*)o + vt[38].delta);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF198);
+#ifdef SKIP_ASM
+extern int D_004A3B64;
+extern int D_004A55B0;
+
+extern "C" void* func_002EF198(int i)
+{
+    if (D_004A3B64 != 0) {
+        return &D_004A55B0;
+    }
+    {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = *e->p1C;
+        sRSMVEntry* vt = o->vt;
+        return vt[39].fn((char*)o + vt[39].delta);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF248);
@@ -544,9 +688,36 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF368);
+#ifdef SKIP_ASM
+extern void* D_004A3B5C;
+extern int D_004A4444;
 
+extern "C" void func_002EF368(void* p)
+{
+    D_004A3B5C = p;
+    D_004A4444 = p != 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF378);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern int D_004A3B64;
+extern int D_004A55B0;
+
+extern "C" void func_002EF378(const char* name)
+{
+    if (name == 0) {
+        D_004A3B64 = 0;
+    } else {
+        strcpy((char*)&D_004A55B0, name);
+        D_004A3B64 = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/renderstateman", func_002EF3B0);
 
@@ -573,7 +744,20 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EFF98);
 
 INCLUDE_ASM("visualfx/renderstateman", func_002F00A0);
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0368);
+#ifdef SKIP_ASM
+extern void* D_00487D78[];
+extern void* D_004A3B80;
+
+extern "C" void* func_002F0368(void* self)
+{
+    *(int*)self = 0;
+    *(void***)((char*)self + 0x4) = D_00487D78;
+    D_004A3B80 = self;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0390);
