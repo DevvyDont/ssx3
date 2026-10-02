@@ -205,9 +205,85 @@ INCLUDE_ASM("fe/ovstatemap", func_0020A088);
 
 INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A380);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A20D0[];
+extern void* D_004A28A8;
+extern "C" void func_002EA820(void* self);
+extern "C" void* func_0039F9D8(void* list, int hash);
+struct sVEntry0020A380 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
 
+struct sSelf0020A380 {
+    char pad[0x10];
+    char* mgr;
+    char pad14[0x3C];
+    int pdaOn;
+};
+
+extern "C" void func_0020A380(sSelf0020A380* self)
+{
+    self->pdaOn = 0;
+    char* game = *(char**)((char*)D_004A28A8 + 0x84);
+    if (game != 0) {
+        char* p = *(char**)(game + 0x64);
+        int mode = *(int*)(p + 0x10);
+        if (mode != 0) {
+            func_002EA820(p);
+            if (mode == 1 || mode == 3) {
+                self->pdaOn = 1;
+            }
+        }
+    }
+    char* obj = (char*)func_0039F9D8(self->mgr + 0x18, GetHashValue32(D_004A20D0));
+    if (obj != 0) {
+        sVEntry0020A380* e = &(*(sVEntry0020A380**)(obj + 8))[24];
+        e->fn(obj + e->delta, 3, 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A430);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A20D0[];
+extern void* D_004A28A8;
+extern "C" void func_002EA860(void* self);
+extern "C" void* func_0039F9D8(void* list, int hash);
+extern "C" void func_0020D190();
+void* func_0039E4A0(void* self);
+struct sVEntry0020A430 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" void func_0020A430(void* self)
+{
+    if (*(int*)((char*)self + 0x50) != 0) {
+        char* game = *(char**)((char*)D_004A28A8 + 0x84);
+        if (game != 0) {
+            func_002EA860(*(void**)(game + 0x64));
+            *(int*)((char*)self + 0x50) = 0;
+        }
+    }
+    char* obj = (char*)func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A20D0));
+    if (obj != 0) {
+        sVEntry0020A430* e = &(*(sVEntry0020A430**)(obj + 8))[24];
+        e->fn(obj + e->delta, 4, 0);
+    }
+    if (*(int*)((char*)self + 0x54) != 0) {
+        func_0020D190();
+    }
+    func_0039E4A0(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatemap", func_0020A4E0);
 

@@ -139,7 +139,52 @@ extern "C" void func_00197DB8(void* self)
 
 INCLUDE_ASM("fe/messagecenter", func_00197E70);
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_00198118);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" int USTR_length(unsigned short* s);
+void cMemMan_free(void* p);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void func_003A0E90(void* text, void* p);
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_004605D8[];
+extern char D_00460688[];
+extern char* D_004A28A8;
+
+struct sVtEntry_00198118 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sMsgCenter_00198118 {
+    char pad_0x0[0x158];
+    ulong mask;     // 0x158
+    char pad_0x160[0x84];
+    void* text;     // 0x1E4
+};
+
+extern "C" void func_00198118(void* p)
+{
+    sMsgCenter_00198118* self = (sMsgCenter_00198118*)p;
+    char* db = *(char**)(D_004A28A8 + 0x8C);
+    sVtEntry_00198118* vt = *(sVtEntry_00198118**)(db + 4);
+    unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
+    unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, D_00460688, 0x100, 0);
+    int n = 0;
+    int j;
+    for (j = 0; j < 64; j++) {
+        n += (int)((self->mask >> j) & 1);
+    }
+    func_002C26D0(buf, fmt, n);
+    func_003A0E90(self->text, buf);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHelpText);
 

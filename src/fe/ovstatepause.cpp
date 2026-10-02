@@ -66,7 +66,57 @@ int func_001FAF08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FAF10);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* func_0020E900(void* self);
+extern "C" void func_001FAFF8(void* self, bool on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self);
+extern void* D_004A2EEC;
+extern char D_0046FB18[];
+
+class cUIObj_1FAF10 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int v);
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void func_001FAF10(void* self)
+{
+    func_0020E900(self);
+    char* p = (char*)D_004A2EEC;
+    if (p != 0 && *(int*)((char*)self + 0x9C) != 0) {
+        int timedOut = *(int*)(p + 0x138) <= 0 && *(int*)(p + 0x13C) == 0;
+        if (timedOut) {
+            *(int*)(p + 0x9C) = 0;
+            cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(self);
+        } else {
+            if (*(int*)(p + 0x13C) == 0) {
+                return;
+            }
+            int received = *(int*)(p + 0x80) != 0 && *(int*)(p + 0xA0) == 0 && *(int*)(p + 0x24) == 0;
+            if (received) {
+                cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(self);
+            } else {
+                ((cUIObj_1FAF10*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB18)))->setVisible(0);
+            }
+        }
+        func_001FAFF8(self, 1);
+        *(int*)((char*)self + 0x9C) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FAFF8);
@@ -199,7 +249,36 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FB2B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void cGame_exit(void* game, int a);
+extern "C" void func_0012B340(void* p);
+// func_0039F190 returns its last list node in $v0; the unit declares it void.
+void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+extern void* D_004A28A8;
+extern int D_004A2A50;
+extern int D_004A2A54;
+extern int D_005366E8[];
+extern int D_004428F0[];
+
+extern "C" void func_001FB2B8(void* self, void* item, int msg)
+{
+    func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+    *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
+    switch (*(int*)((char*)item + 0x18)) {
+    case 4:
+        func_0012B340(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        break;
+    case 0:
+    default:
+        cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 0);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible);
@@ -245,7 +324,39 @@ INCLUDE_ASM("fe/ovstatepause", func_001FB588);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FB6B8);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FBBD8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int idx);
+extern "C" void func_0020A6F0(void* self, char* text, char* label);
+extern "C" void func_0039E4C0(void* self);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A2170[];
+extern char D_0046E4E8[];
+extern signed char D_00535C11[];
+extern void* D_004A2EEC;
+
+extern "C" void func_001FBBD8(void* self)
+{
+    char buf[32];
+    func_0039E4C0(self);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    sprintf(buf, D_004A2170, func_00146E98(iface, 0) + 1);
+    func_0020A6F0(self, buf, D_0046E4E8);
+    if (D_00535C11[0] == 2) {
+        sprintf(buf, D_004A2170, func_00146E98(iface, 1) + 1);
+        func_0020A6F0(self, buf, D_0046E4E8);
+    }
+    char* p = (char*)D_004A2EEC;
+    if (p != 0) {
+        *(int*)(p + 0x64) = 0x4B0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FBCC8);

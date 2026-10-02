@@ -1,6 +1,34 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A14B0[];
+extern char D_0045DC50[];
+extern unsigned int D_004A2594;
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* owner);
+
+extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A14B0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DC50), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    void* main = *(void**)((char*)self + 0x40);
+    D_004A2594 = 0;
+    cUITemplate_MAP_onCreateScreen((char*)self + 0x48, main, self);
+}
+#endif
 
 extern "C" void* func_002009D0(void*);
 

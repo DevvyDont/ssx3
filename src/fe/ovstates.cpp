@@ -25,9 +25,109 @@ extern "C" void cFEStateTitle_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstates", func_001947F8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0045DB90[];
+extern char D_004A17D0[];
+extern int D_004A17C0;
 
+class cUIObj_1947F8 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06(int v);
+    virtual void v07(int v);
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" int func_001947F8(void* self)
+{
+    if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
+        cUIObj_1947F8* o = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
+        if (o != 0) {
+            o->v07(1);
+        }
+        o = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D0));
+        if (o != 0) {
+            o->setVisible(1);
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstates", func_001948A8);
+#ifdef SKIP_ASM
+extern "C" void func_0039E510(void* self);
+extern void* D_004A28A8;
+extern int D_004A19CC;
+
+struct sItem_1948A8 {
+    char pad[0xC];
+    int active;
+    char pad2[0xC];
+};
+struct sList_1948A8 {
+    int count;
+    sItem_1948A8 items[1];
+};
+
+struct sApp_1948A8 {
+    char pad[0xB0];
+    sList_1948A8** lists[2];
+};
+struct sSelf_1948A8 {
+    char pad[0x48];
+    int timer;
+};
+
+static inline int isActive_1948A8(sList_1948A8* l, int j)
+{
+    if (j < l->count) {
+        return l->items[j].active;
+    }
+    return 0;
+}
+
+extern "C" void func_001948A8(sSelf_1948A8* self)
+{
+    func_0039E510(self);
+    self->timer += 1;
+    if (self->timer > 0x708) {
+        self->timer = 0;
+        D_004A19CC |= 4;
+        return;
+    }
+    int found = 0;
+    int i;
+    for (i = 0; i < 2; i++) {
+        sList_1948A8* l = *((sApp_1948A8*)D_004A28A8)->lists[i];
+        int n = l->count;
+        if (n != 0) {
+            int j;
+            for (j = 0; j < n; j++) {
+                if (isActive_1948A8(l, j)) {
+                    found = 1;
+                    break;
+                }
+            }
+            if (found) {
+                self->timer = 0;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstates", func_00194980__FPv);

@@ -6,7 +6,91 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233640);
 
 INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233930);
+#ifdef SKIP_ASM
+struct cGame00233930 {
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50(int id);
+};
+
+extern void* D_004A289C;
+extern "C" void func_00397B70(void* self, int a1);
+extern "C" void func_0036A020(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028FA98(void* self, float f);
+
+extern "C" void func_00233930(void* self)
+{
+    ((cGame00233930*)D_004A289C)->v19();
+    int id = *(int*)((char*)self + 0x18);
+    if (id >= 0) {
+        ((cGame00233930*)D_004A289C)->v50(id);
+    }
+    void* o = *(void**)((char*)self + 0xC);
+    if (o != 0) {
+        func_00397B70(o, 3);
+    }
+    int i;
+    for (i = 0; i < 2; i++) {
+        int h = *(int*)((char*)self + 0x10 + i * 4);
+        if (h != 0) {
+            ((cGame00233930*)D_004A289C)->v50(h);
+        }
+    }
+    func_0036A020(D_004A289C);
+    func_0028FA98(func_0028B180(), 1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_002339F8);
@@ -223,7 +307,36 @@ extern "C" void func_00233C50(void* self)
 
 INCLUDE_ASM("fe/festateloadscreen", func_00233CD8);
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00234008);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sLoadScreen00234008 {
+    int state;
+    int pad4[3];
+    int mode;
+};
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+void func_00162290_v(void* self) __asm__("func_00162290__FPv");
+extern "C" int func_00278F68(void* self, int i, int a, int b);
+void func_00278DE8(void* self, int val);
+
+extern "C" void func_00234008(sLoadScreen00234008* self)
+{
+    int n = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x10);
+    int i;
+    for (i = 0; i < n; i++) {
+        char* list = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+        char* item = *(char**)(list + (i << 2) + 4);
+        func_00162290_v(*(void**)(item + 0xA8));
+    }
+    self->mode = 2;
+    func_00278F68(D_004A28A4, 0, 1, 0);
+    func_00278DE8(D_004A28A4, 1);
+    self->state = 7;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", func_002340B8);

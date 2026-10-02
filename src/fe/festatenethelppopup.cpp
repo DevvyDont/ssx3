@@ -41,7 +41,29 @@ extern "C" int func_001D9E20(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001D9E68);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" float func_00320BF0(void* self, int id);
+extern "C" void func_0039F190(void*, int);
+
+extern "C" void func_001D9E68(void* self)
+{
+    int i;
+    int found = 0;
+    for (i = 0; i < 2; i++) {
+        int** p = *(int***)((char*)D_004A28A8 + (i << 2) + 0xB0);
+        int ok = *p != 0 && **p != 0;
+        if (ok && func_00320BF0(p, 0x99) != 0.0f) {
+            found = 1;
+        }
+    }
+    if (found == 0) {
+        func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001D9F30__FPv);

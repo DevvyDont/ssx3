@@ -67,7 +67,40 @@ extern "C" void func_0020EB08(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
+extern "C" int func_00398380(void* bank, int name);
+extern "C" int func_003983F0(void* bank, int hash);
+extern void* D_004A28A8;
+extern int D_004A2764;
+extern int D_004A2768;
+extern char D_004A21F0[];
+struct sTex_20EB50 {
+    int name;
+    int f4;
+    int f8;
+    int handle;
+};
+extern sTex_20EB50 D_004C8C58[];
+
+extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
+{
+    if (D_004A2768 == 0) {
+        char* res = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+        int i;
+        for (i = 0; i < 11; i++) {
+            D_004C8C58[i].handle = func_00398380(res + 0x58, D_004C8C58[i].name);
+        }
+        void* bank = *(void**)(res + 8);
+        D_004A2764 = func_003983F0(bank, GetHashValue32(D_004A21F0));
+        D_004A2768 = 1;
+    }
+    func_0020EC18(self, a, r);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EC18);
 
@@ -152,7 +185,66 @@ extern "C" void func_00210608(void)
 
 INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210820);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sQuad_210820 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+class cPosObj_210820 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual sQuad_210820* v05();
+};
+struct sZone_210820 {
+    float sx, sy, ox, oy, f10;
+};
+struct sSlot_210820 {
+    int active;
+    int zone;
+    int b, c, d, e;
+};
+extern sSlot_210820 D_slots210820[6] __asm__("D_004C8BC8");
+extern char* D_004A2754;
+extern void* D_004A28A8;
+
+static inline float subx_210820(sZone_210820* z, sQuad_210820& p)
+{
+    return p.x - z->ox;
+}
+static inline float suby_210820(sZone_210820* z, sQuad_210820& p)
+{
+    return p.y - z->oy;
+}
+
+static inline float sx_210820(sZone_210820* z)
+{
+    return z->sx;
+}
+static inline float sy_210820(sZone_210820* z)
+{
+    return z->sy;
+}
+
+extern "C" float func_00210820(int idx)
+{
+    sZone_210820* zones = (sZone_210820*)D_004A2754;
+    char* world = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    char* rider = *(char**)(world + (idx << 2) + 0x28);
+    sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->v05();
+    float dy = suby_210820(&zones[D_slots210820[idx].zone], pos);
+    float dx = subx_210820(&zones[D_slots210820[idx].zone], pos);
+    float r = dy * sy_210820(&zones[D_slots210820[idx].zone]) + dx * sx_210820(&zones[D_slots210820[idx].zone]);
+    if (D_slots210820[idx].active) {
+        D_slots210820[idx].e = 0;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_002108F8);
@@ -213,7 +305,36 @@ extern "C" int func_00210B58(void* self, int ok)
 
 INCLUDE_ASM("fe/ovstatetrophy", func_00210BD8);
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A2EEC;
+extern char* D_net210D20 __asm__("D_004A2EEC");
+extern "C" void* func_0020E900(void* self);
+extern "C" void* func_0039F698(void* list);
+extern "C" int func_00258160(int a, char* name, int len);
+extern "C" void func_00210BD8(void* self, char* name, int a);
+
+extern "C" void func_00210D20(void* self)
+{
+    func_0020E900(self);
+    char* p = D_net210D20;
+    if (p != 0) {
+        int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
+        if (ok) {
+            func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+            *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
+        }
+    }
+    if (*(int*)((char*)self + 0x40) != 0) {
+        char* name = (char*)self + 0x9C;
+        if (func_00258160(D_004A2EEC, name, 0x41) != 0) {
+            func_00210BD8(self, name, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);

@@ -214,7 +214,90 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D4918);
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4A20);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4B20);
+#ifdef SKIP_ASM
+struct cGame001D4B20 {
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50(int id);
+};
+
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern "C" void func_0019DC20(void* self, int bank, int i);
+struct sSelf001D4B20 {
+    char pad[0x50];
+    int bank;
+    char pad54[0xC];
+    int snd[5];
+    int tex[5];
+};
+
+extern "C" void func_001D4B20(sSelf001D4B20* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    int i;
+    for (i = 0; i < 5; i++) {
+        if (self->snd[i] >= 0) {
+            ((cGame001D4B20*)D_004A289C)->v50(self->snd[i]);
+        }
+        self->snd[i] = -1;
+        if (self->tex[i] >= 0) {
+            func_0019DC20(mgr, self->bank, self->tex[i]);
+        }
+        self->tex[i] = -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4BC8);
@@ -497,7 +580,49 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5488);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D58B8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+void cMemMan_free(void* p);
+extern "C" void func_00152700(void* iface);
+extern "C" void func_00152728(void* iface);
+extern "C" void func_0020A430(void* self);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_0023C860(void* self);
+extern "C" void func_0023D5E8(void* self);
+extern "C" void func_002410A0(void* self);
+
+extern "C" void func_001D58B8(void* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
+    if (*(int*)((char*)self + 0x1BC) == 1 && *(int*)((char*)self + 0x228) == 2 && *(int*)((char*)self + 0x1B4) == 0) {
+        func_00152728(iface);
+        *(int*)((char*)self + 0x1D4) = 0;
+        *(int*)((char*)self + 0x1D0) = 0;
+        *(int*)((char*)self + 0x228) = 0;
+    }
+    func_00152700(iface);
+    char* app = (char*)func_00227F80(D_004A28A8);
+    if (*(int*)(app + 0x434) != 0) {
+        func_002410A0(app);
+        func_0023D5E8(app);
+        func_0023C860(app);
+    }
+    if (*(int*)((char*)self + 0x228) == 1) {
+        *(int*)((char*)self + 0x228) = 0;
+        if (*(void**)((char*)self + 0x1D4) != 0) {
+            cMemMan_free(*(void**)((char*)self + 0x1D4));
+        }
+        *(int*)((char*)self + 0x1D4) = 0;
+        *(int*)((char*)self + 0x1D0) = 0;
+    }
+    func_0020A430(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D59A0);
 

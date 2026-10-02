@@ -261,7 +261,44 @@ void* func_0018C198(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C1B8);
+#ifdef SKIP_ASM
+struct sVE_18C1B8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+int GetHashValue32(char* str);
+extern char D_0045DD20[];
+extern int D_004A14D8;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0014F600(void* self);
+extern "C" void func_0018C478(void* self);
+
+extern "C" void func_0018C1B8(void* self, void* widget, int msg)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (msg) {
+    case 0x15:
+        break;
+    case 0x16: {
+        int h = *(int*)((char*)widget + 0xC);
+        if (h == GetHashValue32(D_0045DD20)) {
+            sVE_18C1B8* e = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
+            if (e->fn((char*)widget + e->delta, 2) != 0) {
+                func_0014F600(iface);
+                func_0018C478(self);
+                D_004A14D8 = 1;
+            }
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C270);
@@ -490,7 +527,87 @@ extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018DDD0);
+#ifdef SKIP_ASM
+struct cList0018DDD0 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual int v54(int a);
+};
+extern "C" void* func_00227F80(void* app);
+extern void* D_004A28A8;
+
+extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
+{
+    char* app = (char*)func_00227F80(D_004A28A8);
+    switch (msg) {
+    case 8:
+        if (*(int*)((char*)self + 0x22C) != 0 && (*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) != 0) {
+            return 0x101;
+        }
+    case 6:
+        if ((*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) == 0) {
+            return 0x100;
+        }
+        break;
+    case 9:
+        return 0x100;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
 

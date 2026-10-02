@@ -164,13 +164,254 @@ int func_001CFDD0_find(sRewardTable_FDD0* self, char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001CFE60);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+struct sVE_FE60 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
 
+extern "C" void func_001CFE60(void* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    sVE_FE60* vt = *(sVE_FE60**)((char*)self + 8);
+    if (vt[25].fn((char*)self + vt[25].delta) != 0) {
+        sVE_FE60* e = &(*(sVE_FE60**)((char*)self + 8))[25];
+        *(int*)((char*)self + 0x8EC) = func_0019DA10(mgr, *(int*)((char*)self + 0x50), e->fn((char*)self + e->delta), 9, 1, 0);
+        *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~8) | 4;
+    } else {
+        *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) | 8) & ~4;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001CFF10);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" int func_0019E238(void* self, int bank, int i);
+struct sSelf001CFFF8;
+struct sData001CFFF8;
+extern "C" sData001CFFF8* func_0019E2B0(void* self, int bank, int i);
+extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data);
+struct sVE_FF10 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sVE_FF10i {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
 
+extern "C" void func_001CFF10(void* self)
+{
+    if (((*(int*)((char*)self + 0x48) >> 3) & 1) == 0) {
+        char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+        if (func_0019E238(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)) != 0) {
+            func_001CFFF8((sSelf001CFFF8*)self, func_0019E2B0(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)));
+            func_0019DC20(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC));
+            *(int*)((char*)self + 0x8EC) = -1;
+            *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~4) | 8;
+            if ((*(int*)((char*)self + 0x48) >> 1) & 1) {
+                *(int*)((char*)self + 0x8FC) = *(int*)((char*)self + 0x924);
+                sVE_FF10* e = &(*(sVE_FF10**)((char*)self + 8))[40];
+                e->fn((char*)self + e->delta);
+                sVE_FF10i* e2 = &(*(sVE_FF10i**)((char*)self + 8))[33];
+                e2->fn((char*)self + e2->delta, 0);
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001CFFF8);
+#ifdef SKIP_ASM
+struct cGame001CFFF8 {
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual int v46(void* name, void* entry, int a, int b, int c);
+};
 
+extern void* D_004A289C;
+extern "C" void func_003B3D00(void* data, int i, void* entry);
+struct sEntry001CFFF8 {
+    char name[5];
+    int handle;
+};
+struct sDataEnt001CFFF8 {
+    int off;
+    int f4;
+};
+struct sData001CFFF8 {
+    int f0;
+    int f4;
+    int count;
+    int fC;
+    int f10;
+    sDataEnt001CFFF8 tbl[1];
+};
+struct sSelf001CFFF8 {
+    char pad[0x78];
+    int count;
+    sEntry001CFFF8 entries[1];
+};
+
+extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data)
+{
+    if (data == 0) {
+        self->count = 0;
+        return;
+    }
+    self->count = data->count;
+    int i;
+    for (i = 0; i < self->count; i++) {
+        func_003B3D00(data, i, &self->entries[i]);
+        self->entries[i].name[4] = 0;
+        self->entries[i].handle = ((cGame001CFFF8*)D_004A289C)->v46((char*)data + data->tbl[i].off, &self->entries[i], 0, 1, -1);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D00C0);
+#ifdef SKIP_ASM
+struct cGame001D00C0 {
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50(int id);
+};
+
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern "C" void func_0019DC20(void* self, int bank, int i);
+struct sEntry001D00C0 {
+    char name[5];
+    int handle;
+};
+struct sSelf001D00C0 {
+    char pad[0x78];
+    int count;
+    sEntry001D00C0 entries[1];
+};
+
+extern "C" void func_001D00C0(sSelf001D00C0* self)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i].handle >= 0) {
+            ((cGame001D00C0*)D_004A289C)->v50(self->entries[i].handle);
+        }
+        self->entries[i].handle = -1;
+        self->entries[i].name[0] = 0;
+    }
+    int h = *(int*)((char*)self + 0x8EC);
+    if (h >= 0) {
+        func_0019DC20(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70, *(int*)((char*)self + 0x50), h);
+        *(int*)((char*)self + 0x8EC) = -1;
+    }
+    *(int*)((char*)self + 0x48) &= ~8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D0180);

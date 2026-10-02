@@ -60,7 +60,58 @@ void* func_001F7298(void* self)
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F72B8);
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F72E0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern int D_004A19C4;
+extern "C" void cGame_exit(void* game, int a);
+extern "C" void func_0039F190(void*, int);
+struct sFlag001F72E0 {
+    int f0;
+    int f4;
+    int active;
+};
+struct sGame001F72E0 {
+    char pad[0x200];
+    sFlag001F72E0* flag;
+};
+struct sSelf001F72E0 {
+    char pad[0x10];
+    char* mgr;
+    char pad14[0x40];
+    int done;
+};
+
+extern "C" void func_001F72E0(sSelf001F72E0* self, void* widget, int msg)
+{
+    if (widget != 0) {
+        switch (msg) {
+        case 5:
+            (*(sGame001F72E0**)((char*)D_004A28A8 + 0x84))->flag->active = 1;
+            switch (*(int*)((char*)widget + 0x18)) {
+            case 0:
+                {
+                    void* game = *(void**)((char*)D_004A28A8 + 0x84);
+                    D_004A19C4 = 0x27;
+                    cGame_exit(game, 0);
+                }
+                break;
+            case 1:
+                self->done = 1;
+                func_0039F190(self->mgr + 0x18, 1);
+                break;
+            }
+            break;
+        case 6:
+            self->done = 1;
+            (*(sGame001F72E0**)((char*)D_004A28A8 + 0x84))->flag->active = 1;
+            func_0039F190(self->mgr + 0x18, 1);
+            break;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onCreateScreen);

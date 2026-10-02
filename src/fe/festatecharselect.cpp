@@ -1,6 +1,47 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
+#ifdef SKIP_ASM
+struct sVec4_181148 { float x, y, z, w; } __attribute__((aligned(16)));
+struct sCam_181148 { char pad[0x10]; float fov; };
+int GetHashValue32(char* str);
+extern char D_0045D600[];
+extern void* D_004A28A8;
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0019E538(void* self, int a1);
+
+extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D600), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    sCam_181148* cam = *(sCam_181148**)((char*)D_004A28A8 + 0x7C);
+    sVec4_181148 pos;
+    pos.x = 0.0f;
+    pos.y = 200.0f;
+    pos.z = 0.0f;
+    pos.w = 1.0f;
+    sVec4_181148 at;
+    at.x = 0.0f;
+    at.y = 0.0f;
+    at.z = 0.0f;
+    at.w = 1.0f;
+    func_0015E050((char*)cam + 0x10, &pos, &at);
+    cam->fov = 0.4363323450088501f;
+    func_0019E538(func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    *(int*)((char*)self + 0x80) = 1;
+    *(float*)((char*)self + 0x5C) = -1.0f;
+    *(int*)((char*)self + 0x58) = 0;
+    *(int*)((char*)self + 0x60) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00181238);
