@@ -175,7 +175,25 @@ INCLUDE_ASM("fe/feasyncfile", func_001A66A8);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A6978);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A6C40);
+#ifdef SKIP_ASM
+extern char D_00461590[];
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+
+extern "C" void func_001A6C40(void* self, int idx)
+{
+    if (*(void**)((char*)self + 0x40) != 0 && idx >= 0) {
+        void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00461590));
+        if (menu != 0) {
+            cUIMenu_setSelectedByIndex(menu, idx);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A6CA0);
 
@@ -2730,7 +2748,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C4BD8);
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4CD8);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
 extern "C" void* func_001C4CD8(void* self, int msg)
 {
