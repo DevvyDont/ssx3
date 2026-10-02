@@ -144,7 +144,32 @@ extern "C" void func_0013A8F8(void* self, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013A968);
+#ifdef SKIP_ASM
+extern "C" void func_0013A968(void* self, float v)
+{
+    if (v < -2222.22216796875f)
+    {
+        cRiderAnimBase_play_i(*(void**)(*(char**)((char*)self + 0x4) + 0x784), 0x3F, 0, -1.0f);
+        *(int*)(*(char**)((char*)self + 0x4) + 0x2DC) = 0;
+    }
+    else
+    {
+        char* r = *(char**)((char*)self + 0x4);
+        float pi = 3.1415929794311523f;
+        float a = *(float*)(r + 0x2DC);
+        if (a < -pi)
+            cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x42, 0, -1.0f);
+        else if (a > pi)
+            cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x43, 0, -1.0f);
+        else if (v < -1250.0f)
+            cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x3E, 0, -1.0f);
+        else
+            cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x3D, 0, -1.0f);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013AA48);
 
@@ -280,7 +305,69 @@ extern "C" void func_0013C618(void* self, void* obj)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C650);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C7A8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" int func_001298C8();
+
+struct sHpVec4_13C7A8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sHpEntry_13C7A8 {
+    char pad0[0x14];
+    float m14;
+    float m18;
+    char pad1C[0xB0 - 0x1C];
+};
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_13C7A8(sHpVec4_13C7A8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+struct sHpCtl_13C7A8 {
+    int m0;
+    float m4;
+    float m8;
+    int mC;
+    int m10;
+    int m14;
+    char* mRider;
+};
+
+extern "C" void func_0013C7A8(sHpCtl_13C7A8* self)
+{
+    self->m0 = 0;
+    char* r = self->mRider;
+    sHpEntry_13C7A8* tbl = *(sHpEntry_13C7A8**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44);
+    sHpEntry_13C7A8* e = &tbl[*(int*)(r + 0x438)];
+    float k = *(float*)(*(char**)(r + 0x780) + 0x140);
+    self->m4 = k * e->m14;
+    self->m8 = k * e->m18;
+    *(sHpVec4_13C7A8*)(r + 0x390) = *(sHpVec4_13C7A8*)(r + 0x370);
+    self->mC = 0;
+    int t = func_001298C8();
+    self->m10 = t;
+    int d = t - self->m14;
+    float f;
+    if (d > 0x28)
+        f = (d - 0x28) * 0.010000000707805157f + 0.699999988079071f;
+    else
+        f = 0.699999988079071f;
+    vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), f <? 1.0f);
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C878);
 

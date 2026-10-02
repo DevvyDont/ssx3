@@ -367,7 +367,51 @@ extern "C" void* func_001453B8(void* self, int a1)
 
 INCLUDE_ASM("be/beintnewrace", func_001453D0);
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_001454F8);
+#ifdef SKIP_ASM
+extern "C" int func_00145600(void* self, int a1, int a2);
+extern int D_004A11BC;
+
+struct sRaceLookup_00440B38
+{
+    short key;
+    short kind;
+    char pad_0x04[0xA];
+    short value;
+};
+extern sRaceLookup_00440B38 D_00440B38[];
+
+extern "C" int func_001454F8(void* self, int kind)
+{
+    char* g = (char*)&D_00535BC8;
+    unsigned char mode = *(unsigned char*)(g + 0x4A);
+    if (mode >= 6 && mode < 12)
+    {
+        return func_00145600(self, (signed char)mode, kind);
+    }
+    if (kind == 0)
+    {
+        kind = 1;
+    }
+    int key = *(int*)(g + 0x40);
+    for (int i = 0; i < 30; i++)
+    {
+        if (D_00440B38[i].key == key && D_00440B38[i].kind == kind)
+        {
+            return D_00440B38[i].value;
+        }
+    }
+    for (int i = 0; i < 30; i++)
+    {
+        if (D_00440B38[i].key == D_004A11BC && D_00440B38[i].kind == kind)
+        {
+            return D_00440B38[i].value;
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_001455D0);

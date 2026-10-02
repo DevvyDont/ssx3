@@ -600,7 +600,46 @@ extern "C" int func_00154368(void* self, int owner)
 
 INCLUDE_ASM("be/beintmission", func_001543E0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintmission", func_001544D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_001543E0(void* self, int owner);
+
+// View of D_0043D950[].owner (offset 0x54); splat labels that address D_0043D9A4.
+struct sMissionOwnerView_001544D0
+{
+    int owner;
+    char pad_0x04[0x60];
+};
+extern sMissionOwnerView_001544D0 D_0043D9A4[];
+
+// One character's economy block (0xF88 bytes); mission flag words start at 0x118.
+struct sEconFlags_001544D0
+{
+    char pad_0x00[0x118];
+    unsigned int flags[88];
+    char pad_0x278[0xF88 - 0x118 - 88 * 4];
+};
+extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("D_004A6CA8");
+
+extern "C" int func_001544D0(void* self, int profile, int character, int owner)
+{
+    if (*(void**)((char*)D_004A28A8 + 0x84) != 0)
+    {
+        return func_001543E0(self, owner);
+    }
+    int n = 0;
+    for (int i = 0; i < 88; i++)
+    {
+        if (D_0043D9A4[D_0043EE10[i].group].owner == owner)
+        {
+            n += (D_004A6CA8_flags[profile][character].flags[i] >> 3) & 1;
+        }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00154588);

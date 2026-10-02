@@ -537,7 +537,54 @@ INCLUDE_ASM("ai/computer", func_00111630);
 
 INCLUDE_ASM("ai/computer", func_00111728);
 
+//100%
 INCLUDE_ASM("ai/computer", func_00111890);
+#ifdef SKIP_ASM
+extern "C" void func_002DCF28(void*);
+extern "C" void func_002DAA78(void*);
+extern "C" void func_002E8560(void*);
+extern "C" void func_002E6640(void*);
+void func_002EADC0(void*);
+extern "C" void func_002EF6A0(void*);
+extern "C" void func_002D4BE0(void*);
+extern "C" void func_002E3930(void*);
+extern "C" void func_002DF3B0(void*);
+extern "C" void func_002F1148(void*);
+void func_002F64E8(void*);
+// PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
+void cWorldPainterMan_reset_noarg() __asm__("cWorldPainterMan_reset__FPv");
+void* func_002306A8(void* self, int i);
+extern void* D_004A28A8;
+
+struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
+
+extern "C" void func_00111890(void* self)
+{
+    char* s = (char*)self;
+    func_002DCF28(s + 0x3B0);
+    func_002DAA78(s + 0x470);
+    func_002E8560(s + 0x520);
+    func_002E6640(s + 0x610);
+    func_002EADC0(s + 0x9C0);
+    func_002EF6A0(s + 0xAD0);
+    func_002D4BE0(s + 0xAF0);
+    func_002E3930(s + 0xB00);
+    func_002DF3B0(s + 0xB40);
+    func_002F1148(s + 0xC70);
+    func_002F64E8(s + 0xD20);
+    cWorldPainterMan_reset_noarg();
+    int id = *(int*)(*(char**)(s + 0x18) + 0x870);
+    if (id >= 0)
+    {
+        char* obj = (char*)func_002306A8(*(void**)((char*)D_004A28A8 + 0x84), id);
+        if (obj != 0)
+        {
+            sVEntry00111890* vt = *(sVEntry00111890**)(obj + 0xC);
+            vt[14].fn(obj + vt[14].delta);
+        }
+    }
+}
+#endif
 
 extern "C" void* func_002E23E0(void*);
 

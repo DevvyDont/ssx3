@@ -125,7 +125,69 @@ extern "C" int func_0011D640(void* self)
 
 INCLUDE_ASM("ai/rider", func_0011D660);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_0011DD98);
+#ifdef SKIP_ASM
+extern "C" void* func_0026B5E0(void*, int, int);
+extern char D_004D33A0[];
+extern "C" float func_00115B08(void* self);
+
+struct sVec4_0011DD98
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// The unit declares func_0011D660 later with its own vector type; bind it by asm label.
+void func_0011D660_11DD98(void* self, sVec4_0011DD98* a, sVec4_0011DD98* b, int n, float t) __asm__("func_0011D660");
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_0011DD98 vu0Scale_11DD98(const sVec4_0011DD98& v, float s)
+{
+    sVec4_0011DD98 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+extern "C" void func_0011DD98(void* self)
+{
+    float* p = (float*)func_0026B5E0(D_004D33A0, 2, *(int*)((char*)self + 0x86C));
+    sVec4_0011DD98 dir;
+    sVec4_0011DD98 pos;
+    dir.x = p[5];
+    dir.y = p[6];
+    dir.z = p[7];
+    dir.w = 0.0f;
+    pos.x = p[2];
+    pos.y = p[3];
+    pos.z = p[4];
+    pos.w = 1.0f;
+    vu0AddEq_11DD98(pos, vu0Scale_11DD98(dir, func_00115B08(self)));
+    func_0011D660_11DD98(self, &pos, &dir, 0x11F, 2999.942626953125f);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_0011DE60);
@@ -171,7 +233,59 @@ extern "C" void func_0011DE60(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011DF18);
+#ifdef SKIP_ASM
+extern "C" char* func_00311B20(void*, int);
+extern "C" void func_00111890(void* self);
+extern "C" void func_003099F8(void* self);
+extern void* D_004A3DD8;
+
+struct sVec4_0011DF18
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVEntryA_0011DF18 { short delta; short index; int (*fn)(void*); };
+struct sVEntryB_0011DF18 { short delta; short index; void (*fn)(void*, int); };
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_0011DF18 vu0Scale_11DF18(const sVec4_0011DF18& v, float s)
+{
+    sVec4_0011DF18 r;
+    int t;
+    __asm__ __volatile__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+extern "C" void func_0011DF18(void* self, int notify)
+{
+    char* s = (char*)self;
+    sVec4_0011DF18 v = *(sVec4_0011DF18*)(s + 0x1B0);
+    *(int*)(func_00311B20(*(void**)(s + 0x784), 2) + 0x90) = 0;
+    sVec4_0011DF18 t = vu0Scale_11DF18(v, 833.3333740234375f);
+    *(sVec4_0011DF18*)(s + 0x1E0) = t;
+    *(float*)(s + 0x1E8) = 0.0f;
+    func_00111890(*(void**)(s + 0x77C));
+    if (notify != 0)
+    {
+        char* sub = s + 0x6C0;
+        sVEntryA_0011DF18* vtA = *(sVEntryA_0011DF18**)sub;
+        char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x4) + 0xA0);
+        sVEntryB_0011DF18* vtB = *(sVEntryB_0011DF18**)(obj + 0x14);
+        char* objB = obj + vtB[3].delta;
+        vtB[3].fn(objB, vtA[7].fn(sub + vtA[7].delta));
+    }
+    func_003099F8(D_004A3DD8);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011DFE0);
 
@@ -563,7 +677,50 @@ void* func_001217F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121818);
+#ifdef SKIP_ASM
+extern void* D_004A3DD8;
+extern "C" void func_0030A060(void* mgr, void* a, void* b, void* c);
+void func_00125AD0(void* self);
+extern "C" void func_00112338(void* self);
+extern "C" void func_001125C0(void* self);
+extern "C" int func_00125228(void* self);
+extern "C" void func_00117C28(void* metrix);
+
+struct sVEntry00121818 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
+
+extern "C" void func_00121818(void* self)
+{
+    char* s = (char*)self;
+    char* h = *(char**)(s + 0xA30);
+    if (h != 0)
+    {
+        char* obj = *(char**)(h + 0xC);
+        if (obj != 0)
+        {
+            sVEntry00121818* vt = *(sVEntry00121818**)(obj + 0xC);
+            vt[40].fn(obj + vt[40].delta, s + 0xA60, s + 0x9E0, s + 0x6C0);
+        }
+        else
+        {
+            func_0030A060(D_004A3DD8, s + 0xA60, s + 0x9E0, s + 0x6C0);
+        }
+    }
+    func_00125AD0(self);
+    if (*(int*)(s + 0xAC4) == 0)
+    {
+        func_00112338(self);
+    }
+    func_001125C0(self);
+    func_00125228(self);
+    if (*(int*)(s + 0xAC4) == 0)
+    {
+        func_00117C28(*(void**)(s + 0x790));
+    }
+    func_00120E30(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001218D0);
@@ -740,7 +897,28 @@ extern "C" void func_00122CF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122D78);
+#ifdef SKIP_ASM
+float func_00113130(void* self);
+
+struct sVEntry00122D78 { short delta; short index; int (*fn)(void*); };
+
+extern "C" int func_00122D78(void* self)
+{
+    char* s = (char*)self;
+    char* sub = s + 0x6C0;
+    int n = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0xC);
+    float rate = (func_00113130(self) - *(float*)(s + 0x4D0)) / (float)n;
+    sVEntry00122D78* vt = *(sVEntry00122D78**)sub;
+    if (rate < 30.0f - (float)vt[7].fn(sub + vt[7].delta))
+    {
+        sVEntry00122D78* vt2 = *(sVEntry00122D78**)sub;
+        rate = 30.0f - (float)vt2[7].fn(sub + vt2[7].delta);
+    }
+    return n + (int)(*(float*)(s + 0x4D0) / rate);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00122E50);
@@ -1058,7 +1236,38 @@ void func_001278E0(void* self, float val)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001278E8);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_001474E8(void* iface, int id);
+extern "C" void func_00125B18(void* p, int a, int b);
+
+struct sVEntry001278E8 { short delta; short index; int (*fn)(void*); };
+
+static inline bool riderInRange_1278E8(int v)
+{
+    return v != 0 && v < 10;
+}
+
+extern "C" void func_001278E8(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0xDF4) != 0)
+    {
+        int flag = 0;
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        char* sub = *(char**)(s + 0x18) + 0x6C0;
+        sVEntry001278E8* vt = *(sVEntry001278E8**)sub;
+        if (func_001474E8(iface, vt[7].fn(sub + vt[7].delta)) != 0)
+        {
+            flag = !riderInRange_1278E8(**(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+        }
+        func_00125B18(s + 0xDFC, *(int*)(s + 0xDF4), flag);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00127998);
 

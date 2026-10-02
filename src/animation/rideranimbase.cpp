@@ -233,7 +233,42 @@ extern "C" float func_00312790(char* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312820);
+#ifdef SKIP_ASM
+struct sVEntry00312820 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sAnimKey00312820 {
+    unsigned short value;
+    unsigned short pad;
+};
+
+extern "C" float func_00312820(char* self, int a1, int frame)
+{
+    sVEntry00312820* vt = *(sVEntry00312820**)(self + 0x58);
+    int id = vt[4].fn(self + vt[4].delta, a1);
+    if (id == 0x207)
+        return 0.0f;
+    unsigned int h = *(unsigned int*)(id * 4 + D_004A3E7C + 0x1030);
+    char* clip = *(char**)((char*)D_004A3DF8 + ((h & 0xFF) << 2));
+    char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
+    float r;
+    if (frame < *(unsigned short*)(q + 0x12))
+    {
+        sAnimKey00312820* keys = *(sAnimKey00312820**)(clip + 0x10);
+        r = keys[*(unsigned short*)(q + 0x10) + frame].value * 0.03333333507180214f;
+    }
+    else
+    {
+        r = -1.0f;
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 

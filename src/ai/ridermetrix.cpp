@@ -169,7 +169,48 @@ extern "C" void func_001175F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117638);
+#ifdef SKIP_ASM
+extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
+
+// PORT: g++ <? (min) operator, removed in GCC 4.3.
+static inline float rmClamp_117638(float v, float lo, float hi)
+{
+    if (v >= lo)
+        return v <? hi;
+    return lo;
+}
+
+static inline bool rmIsState_117638(char* p, int st)
+{
+    return *(int*)p == st;
+}
+
+// PORT: g++ <? (min) operator, removed in GCC 4.3.
+extern "C" void func_00117638(void* self, int points)
+{
+    char* s = (char*)self;
+    if (points > 0)
+    {
+        int n = *(int*)(s + 0x9C) + 1;
+        *(int*)(s + 0x9C) = n;
+        float m = ((float)n + 10.0f) * 0.05000000074505806f;
+        float k = rmClamp_117638(m, 0.5f, 2.0f);
+        *(float*)(s + 0xA4) = -1.0f;
+        *(int*)(s + 0xA0) += (int)(points * k);
+        char* r = *(char**)(s + 0x1B0);
+        if (r != 0)
+        {
+            int v = 0;
+            char* p = r + 0x1D4;
+            if (!rmIsState_117638(p, 0x34))
+                v = *(int*)(r + 0x1E8);
+            func_001171A8(p, 3, v, n, 0.0f);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_001176F8);
@@ -618,7 +659,43 @@ extern "C" float func_00119448(char* self, float value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001194C0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_0028B180();
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+extern "C" int func_00238510(void* mgr, int id, int a2);
+extern "C" void func_002A3CE8(void* snd, void* rider, int a2);
+
+struct sVEntry001194C0 { short delta; short index; int (*fn)(void*); };
+
+static inline bool rmRiderFlags_1194C0(char* r)
+{
+    return *(int*)(r + 0x874) != 0 && *(int*)(r + 0x87C) != 0;
+}
+
+extern "C" float func_001194C0(char* self, int a1)
+{
+    char* sub = *(char**)(self + 0x1AC) + 0x6C0;
+    sVEntry001194C0* vt = *(sVEntry001194C0**)sub;
+    if (vt[8].fn(sub + vt[8].delta) != 0)
+    {
+        void* mgr = *(void**)((char*)D_004A28A8 + 0xC0);
+        char* sub2 = *(char**)(self + 0x1AC) + 0x6C0;
+        sVEntry001194C0* vt2 = *(sVEntry001194C0**)sub2;
+        if (func_00238510(mgr, vt2[7].fn(sub2 + vt2[7].delta), a1) != 0)
+        {
+            func_00117B88(self, 0x29, a1, 0, 2.5f);
+            if (rmRiderFlags_1194C0(*(char**)(self + 0x1AC)))
+            {
+                func_002A3CE8(func_0028B180(), *(void**)(self + 0x1AC), 1);
+            }
+        }
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_001195A8);
@@ -646,7 +723,35 @@ extern "C" float func_001195D8(void* self, int value)
 
 INCLUDE_ASM("ai/ridermetrix", func_00119608);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119708);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_00150528(void* iface, int id);
+int func_00150540(void* iface, int id);
+
+extern "C" float func_00119708(char* self, int id)
+{
+    float zero = 0.0f;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
+    float a = func_00150528(iface, id) * 9.999999747378752e-05f;
+    float b = func_00150540(iface, id) * 1.6666666624587378e-06f;
+    *(float*)(self + 0x14) += a;
+    *(float*)(self + 0x3C) = b;
+    if (*(float*)(self + 0x40) < zero)
+    {
+        *(float*)(self + 0x40) = zero;
+    }
+    if (id >= 0x23)
+    {
+        *(int*)(self + 0x5C) = 1;
+    }
+    func_001176F8(self);
+    return zero;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_001197D8);
@@ -1002,7 +1107,41 @@ extern "C" float func_0011A110(void* self, int amount)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A168);
+#ifdef SKIP_ASM
+struct sTrickId;
+extern "C" int func_0011A8C8(void* self, sTrickId* id, int stance, int alternate, int style, int flag);
+extern "C" int func_0011B1A8(void* self, sTrickId* id);
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+extern "C" void* func_0028B180();
+extern "C" void func_0029B7E0(void* audio, int rider);
+extern "C" int func_001190F0(void* self, sTrickId* id);
+extern "C" void func_00118FF8(void* self, sTrickId* id, int repeat);
+
+// Same layout as sTrickId, which the unit defines after this function.
+struct sTrickIdA168 {
+    int w0;
+    int w1;
+};
+
+extern "C" void func_0011A168(void* self, int stance, int alternate, int style, int flag)
+{
+    sTrickIdA168 idv;
+    sTrickId* id = (sTrickId*)&idv;
+    if (func_0011A8C8(self, id, stance, alternate, style, flag) != 0)
+    {
+        int pts = func_0011B1A8(self, id);
+        if (pts > 0)
+        {
+            *(float*)((char*)self + 0x14) += pts * 9.999999747378752e-05f;
+            func_00117B88(self, 0x32, pts, 0, 1.5f);
+            func_0029B7E0(func_0028B180(), *(int*)((char*)self + 0x1AC));
+        }
+        func_00118FF8(self, id, func_001190F0(self, id) > 0);
+    }
+}
+#endif
 
 // 8-byte packed trick identity built by func_0011A8C8
 struct sTrickId {

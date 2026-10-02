@@ -53,7 +53,37 @@ extern "C" int func_00314D60(int* a, int* b)
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D98);
 
+//100%
 INCLUDE_ASM("animation/mdfarchive", func_00314DD8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char* D_0048CFC0[];
+extern unsigned int* D_004A3E78;
+extern "C" int func_00314D60(int* a, int* b);
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(int*, int*));
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+struct sMdfHashTable_00314DD8
+{
+    unsigned int hash[0x206];
+    int order[0x206];
+    char map[0x818];
+};
+
+extern "C" void func_00314DD8(sMdfHashTable_00314DD8* self)
+{
+    for (int i = 0; i < 0x206; i++)
+    {
+        int h = GetHashValue32(D_0048CFC0[i]);
+        self->order[i] = i;
+        self->hash[i] = h;
+    }
+    D_004A3E78 = self->hash;
+    func_00418EF8(self->order, 0x206, 4, func_00314D60);
+    D_004A3E78 = 0;
+    func_00416210(self->map, -1, 0x818);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/mdfarchive", func_00314E88);

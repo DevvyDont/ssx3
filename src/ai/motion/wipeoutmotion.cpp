@@ -76,7 +76,48 @@ extern "C" void func_00136D40(char* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136DE0);
+#ifdef SKIP_ASM
+extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
+{
+    sVec4WM r;
+    int t;
+    __asm__ __volatile__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00136DE0(char* self, sVec4WM* a, sVec4WM* b)
+{
+    *(sVec4WM*)(self + 0x30) = *b;
+    *(sVec4WM*)(*(char**)(self + 0x40) + 0x1E0) = *a;
+    if (*(int*)self == 0)
+    {
+        sVec4WM* n = (sVec4WM*)(*(char**)(self + 0x40) + 0x370);
+        float d = vu0DotWM(*n, *a);
+        sVec4WM t = vu0ScaleMemWM_136DE0(*n, d);
+        sVec4WM* p = (sVec4WM*)(*(char**)(self + 0x40) + 0x1E0);
+        vu0SubWM(*p, *p, t);
+    }
+    else
+    {
+        char* r = *(char**)(self + 0x40);
+        cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, 3333.33349609375f);
+    }
+    *(int*)(self + 0x4) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136E98);

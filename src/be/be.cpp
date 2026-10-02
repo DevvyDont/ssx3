@@ -1,6 +1,50 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("be/be", cBE_getBE);
+#ifdef SKIP_ASM
+struct sBEInterface;
+extern sBEInterface* D_005308A8[];
+extern int D_004A11F4;
+extern void* D_004A11F8;
+extern int* D_004A11EC;
+extern int D_004A11F0;
+extern int* D_004A1250;
+extern char D_004A1200[];
+extern char D_0045A638[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00149860(void* mem);
+void* cBEPreRaceState_getState(void* self);
+void* cBERaceState_getState(void* self);
+void* cBEPostRaceState_getState(void* self);
+
+class cBEStateV_getBE
+{
+public:
+    char pad_0x00[0x4];
+    virtual void v1();
+    virtual void v2();
+    virtual void leave();
+    virtual void enter();
+};
+
+extern "C" void* cBE_getBE()
+{
+    if (D_004A11EC == 0)
+    {
+        D_004A11EC = (int*)cMemMan_alloc(4, D_004A1200, 0, 0);
+        D_004A11F8 = func_00149860(cMemMan_alloc(1, D_0045A638, 0, 0));
+        D_005308A8[0] = (sBEInterface*)cBEPreRaceState_getState((void*)0);
+        D_005308A8[1] = (sBEInterface*)cBERaceState_getState((void*)1);
+        D_005308A8[2] = (sBEInterface*)cBEPostRaceState_getState((void*)2);
+        D_004A11F4 = 0;
+        ((cBEStateV_getBE*)D_005308A8[0])->enter();
+        D_004A11F0 = 1;
+        D_004A1250 = D_004A11EC;
+    }
+    return D_004A11EC;
+}
+#endif
 
 struct sBEInterfaceVTable {
     char pad_0x00[0x8];
