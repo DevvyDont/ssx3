@@ -1528,12 +1528,10 @@ extern "C" void func_0012F620(void* self)
     if (a < b) a = b;
     *(float*)((char*)self + 0x4) = a;
     float ang = aiAtan2_12F620(*(float*)(r + 0x220), *(float*)(r + 0x1F0));
-    // PERM_START
     *(float*)((char*)self + 0x0) = ang;
     *(int*)((char*)self + 0x8) = 1;
     *(int*)((char*)self + 0xC) = 1;
     *(int*)((char*)self + 0x10) = -1;
-    // PERM_END
     char* r1 = *(char**)((char*)self + 0x14);
     *(int*)(r1 + 0x2AC) = 0;
     *(float*)(r1 + 0x2A8) = 0.03333333507180214f;
