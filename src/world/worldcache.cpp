@@ -652,7 +652,85 @@ INCLUDE_ASM("world/worldcache", func_003A88A8);
 
 INCLUDE_ASM("world/worldcache", cWorldCache_addBxStreamDataTest);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8CD0);
+#ifdef SKIP_ASM
+struct sWCEntry8CD0 {
+    unsigned char id;           // 0x0
+    unsigned char lo;           // 0x1
+    unsigned short hi;          // 0x2
+};
+
+struct sWCList8CD0 {
+    int f0;
+    int f4;
+    int count;                  // 0x8
+    sWCEntry8CD0* entries;      // 0xC
+};
+
+struct sWCGroup8CD0 {
+    sWCList8CD0* list;          // 0x0
+    char pad4[0x14];
+};
+
+struct sWCVt8CD0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, unsigned int, int);
+};
+
+struct sWCObj8CD0 {
+    int f0;
+    int f4;
+    sWCVt8CD0* vt;              // 0x8
+};
+
+struct sWCSlot8CD0 {
+    int f0;
+    int* bits;                  // 0x4
+};
+
+struct sWorldCache8CD0 {
+    int f0;
+    sWCSlot8CD0* deflt;         // 0x4
+    sWCSlot8CD0** tables;       // 0x8
+    char padC[0x3E8 - 0xC];
+    sWCObj8CD0* obj;            // 0x3E8
+    char pad3EC[0xC];
+    sWCGroup8CD0 groups[1];     // 0x3F8
+};
+
+extern int D_004A47D0;
+
+// PORT: a4 is a pointer carried in an int (compared against &D_004A47D0, then shifted).
+extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned int key, int a4)
+{
+    sWCSlot8CD0* tbl;
+    sWCList8CD0* list;
+    unsigned int hi = key >> 8;
+    if ((key & 0xFF) == 0xFF) {
+        tbl = self->deflt;
+    } else {
+        tbl = self->tables[key & 0xFF];
+    }
+    list = self->groups[group].list;
+    list->entries[list->count].id = id;
+    list->entries[list->count].lo = key;
+    list->entries[list->count].hi = key >> 8;
+    list->count++;
+    if (a4 == (int)&D_004A47D0) {
+        sWCObj8CD0* o = self->obj;
+        o->vt[3].fn((char*)o + o->vt[3].delta, id, key, 0);
+    } else {
+        sWCObj8CD0* o = self->obj;
+        a4 = o->vt[3].fn((char*)o + o->vt[3].delta, id, key, a4);
+    }
+    {
+        sWCSlot8CD0* e = &tbl[id];
+        e->bits[hi] = (unsigned char)e->bits[hi] | ((a4 >> 2) << 8);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A8E20);
 

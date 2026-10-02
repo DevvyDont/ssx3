@@ -249,7 +249,61 @@ extern "C" int func_002F6168(void* self, func_002F6168_sVec3* p, func_002F6168_s
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6238);
+#ifdef SKIP_ASM
+// g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
+struct sVtEnt6238 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sVt9_6238 {
+    sVtEnt6238 e[9];
+} __attribute__((aligned(8)));
+
+struct sVt22_6238 {
+    sVtEnt6238 e[22];
+} __attribute__((aligned(8)));
+
+extern const sVt9_6238 D_004886E0;
+extern const sVt22_6238 D_00488728;
+extern char D_00459B90[];
+
+extern "C" void cRider_cRider(void* self);
+void* func_002F64F0(void* self);
+
+// PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
+// (cRider at +0x10): vtable copies with delta fixups when not in charge.
+extern "C" void* func_002F6238(void* self, int inChrg)
+{
+    sVt9_6238 t1;
+    sVt22_6238 t2;
+    if (inChrg) {
+        *(void**)self = (char*)self + 0x10;
+        cRider_cRider((char*)self + 0x10);
+    }
+    *(void**)(*(char**)self + 0x6E8) = (void*)&D_004886E0;
+    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488728;
+    if (inChrg == 0) {
+        int vc;
+        t1 = D_004886E0;
+        *(void**)(*(char**)self + 0x6E8) = &t1;
+        {
+            char* vbo = *(char**)self - 0x10;
+            vc = (char*)self - vbo;
+        }
+        t1.e[1].delta = D_004886E0.e[1].delta + vc;
+        t2 = D_00488728;
+        *(void**)(*(char**)self + 0x6C0) = &t2;
+        t2.e[1].delta = D_00488728.e[1].delta + vc;
+    }
+    func_002F64F0(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F6388);
 
@@ -282,7 +336,70 @@ void func_002F6908(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6910);
+#ifdef SKIP_ASM
+struct sWLCode6910 {
+    char pad0[4];
+    signed char state;          // 0x4
+    unsigned char step;         // 0x5
+    signed char count;          // 0x6
+    unsigned char flags;        // 0x7
+};
+
+extern signed char D_00445E30[];
+extern int D_004A3BC0;
+extern "C" void func_002F6B28(void* self);
+extern "C" int func_002F6B38(void* self);
+
+extern "C" void func_002F6910(sWLCode6910* self)
+{
+    int r = func_002F6B38(self);
+    func_002F6B28(self);
+    if (r == 0) {
+        self->flags &= ~1;
+        return;
+    }
+    if (self->flags & 1) {
+        return;
+    }
+    self->flags |= 1;
+    switch (self->state) {
+    case -1:
+        if (r & 0x40) {
+            self->state = 0;
+            self->count = 0;
+            self->step = 0;
+            self->flags = 0;
+        }
+        break;
+    case 0:
+        if (r & 0x10) {
+            self->count++;
+        } else if (r & 0x20) {
+            if (self->count == D_00445E30[(signed char)self->step]) {
+                self->count = 0;
+                self->step++;
+                if (self->step == 9) {
+                    self->step = 0;
+                    self->count = 0;
+                    self->state = 1;
+                }
+            } else {
+                self->state = -1;
+            }
+        }
+        break;
+    case 1:
+        if (r == 0x60) {
+            D_004A3BC0 = 8;
+        } else if (r & 0x40) {
+            self->flags ^= 2;
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6A58);

@@ -1181,7 +1181,68 @@ extern "C" int func_002C55C0(void* self, int a1)
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C55D8);
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6128);
+#ifdef SKIP_ASM
+struct sQTVt6128 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sQTVtI6128 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sQTEnt6128 {
+    int f0;                     // 0x00 (self + 0x1A4)
+    int f4;                     // 0x04
+    int f8;                     // 0x08
+    char padC[0x52 - 0xC];
+    char name[0x78 - 0x52];     // 0x52 (self + 0x1F6)
+};
+
+struct sQT6128 {
+    sQTVt6128* vt;              // 0x000
+    char pad4[0x1A0];
+    sQTEnt6128 ents[1];         // 0x1A4
+};
+
+extern char D_00486490[];
+extern char D_004864A0[];
+extern char D_004864B8[];
+extern char D_004864D0[];
+
+static inline unsigned short* qtLoc6128(char* key)
+{
+    char* obj = *(char**)(D_004A28A8 + 0x8C);
+    func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
+    char* thisp = obj + vt[4].delta;
+    return vt[4].fn(thisp, GetHashValue32(key));
+}
+
+extern "C" void func_002C6128(sQT6128* self, int i, unsigned short* dst)
+{
+    unsigned short buf[64];
+    if (self->vt[53].fn((char*)self + self->vt[53].delta) == 0) {
+        func_002C2508(buf, qtLoc6128(D_00486490));
+    } else if (self->vt[55].fn((char*)self + self->vt[55].delta) == 0) {
+        func_002C2508(buf, qtLoc6128(D_004864A0));
+    } else if (self->ents[i].f0 != 0 || self->ents[i].f4 != 0) {
+        func_002C2508(buf, qtLoc6128(D_004864B8));
+    } else if (self->ents[i].f8 != 0) {
+        func_002C2508(buf, qtLoc6128(D_004864D0));
+    } else if (((sQTVtI6128*)self->vt)[67].fn((char*)self + self->vt[67].delta, i) == 0) {
+        func_002C2508(buf, qtLoc6128(D_00486490));
+    } else {
+        func_002C2540(buf, self->ents[i].name);
+    }
+    buf[32] = 0;
+    func_002C2508(dst, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6280);

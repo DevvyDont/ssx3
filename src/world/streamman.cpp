@@ -171,7 +171,83 @@ extern "C" void func_003A7058(void* self, int rate)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A7098);
+#ifdef SKIP_ASM
+struct sStreamMan7098 {
+    void* f0;                   // 0x00
+    char pad4[0x84];
+    void* cache;                // 0x88
+    int f8C;                    // 0x8C
+    int active;                 // 0x90
+    int f94;                    // 0x94
+    char pad98[0x14];
+    int pending;                // 0xAC
+    void* fB0;                  // 0xB0
+    int fB4;                    // 0xB4
+    char padB8[0x1C];
+    int fD4;                    // 0xD4
+    int fD8;                    // 0xD8
+    float fDC;                  // 0xDC
+    float fE0;                  // 0xE0
+    int fE4;                    // 0xE4
+};
+
+extern char* D_004A5B64;
+void* func_003A7218(void* self, int a1, int a2, int a3);
+extern "C" int func_003A7238(void* self, void* a, void* b);
+extern "C" void func_003A8650(void* self, int a1);
+extern "C" unsigned char* func_003E12E0(void* cache);
+extern "C" void func_003E13E8(void* cache, void* p);
+extern "C" int func_003E1530(void* cache);
+
+extern "C" void func_003A7098(sStreamMan7098* self)
+{
+    unsigned char* p;
+    if (self->active == 0) {
+        return;
+    }
+    if (self->pending != 0) {
+        if (func_003A7238(self, &self->fB0, &self->fB4) == 0) {
+            return;
+        }
+    }
+    if (self->fD4 != 0) {
+        int t = *(int*)(D_004A5B64 + 0x18);
+        if (self->fE4 != t) {
+            self->fE0 -= (float)(t - self->fE4);
+            self->fE4 = t;
+        }
+        if (0.0f < self->fE0) {
+            return;
+        }
+    }
+    p = func_003E12E0(self->cache);
+    while (p != 0) {
+        int size;
+        self->fE0 = self->fDC;
+        size = (p[7] << 24) | (p[6] << 16) | (p[5] << 8) | p[4];
+        // PORT: the payload pointer is passed as an int.
+        self->fB0 = func_003A7218(self, self->f8C, size - 8, (int)(p + 8));
+        func_003E13E8(self->cache, p);
+        self->fB4 = self->f8C;
+        if (func_003A7238(self, &self->fB0, &self->fB4) == 0) {
+            self->pending = 1;
+            return;
+        }
+        if (self->fD4 != 0) {
+            break;
+        }
+        p = func_003E12E0(self->cache);
+    }
+    if (func_003E1530(self->cache) == 0) {
+        return;
+    }
+    func_003A8650(self->f0, self->f94);
+    self->active = 0;
+    self->f94 = -1;
+}
+#endif
 
 extern "C" void* func_003B47F8(int);
 

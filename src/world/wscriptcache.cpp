@@ -392,7 +392,83 @@ extern "C" void* func_003ADE08(void* self, int a1, int a2, int a3, int a4, int a
 
 INCLUDE_ASM("world/wscriptcache", func_003ADEC8);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AE300);
+#ifdef SKIP_ASM
+struct sWSVtE300 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+// Memory interface record filled by func_003DE928 (size field first).
+struct sWSMemIfE300 {
+    int size;                   // 0x0
+    int f4;                     // 0x4
+    void* (*release)(void*);    // 0x8
+    int pad[5];
+};
+
+extern void* (*D_00509434[])(void*);
+extern "C" void func_003AEE30(void* self, int flags);
+extern "C" int func_003DE928(sWSMemIfE300* mi);
+extern "C" void func_003E0A28(void* p);
+
+extern "C" void func_003AE300(char* self, int flags)
+{
+    char* o = *(char**)(self + 0x64);
+    if (o != 0) {
+        sWSVtE300* vt = *(sWSVtE300**)(o + 0x18);
+        vt[1].fn(o + vt[1].delta, 3);
+        *(void**)(self + 0x64) = 0;
+    }
+    if (*(void**)(self + 0x0) != 0) {
+        func_003AEE30(*(void**)(self + 0x0), 3);
+        *(void**)(self + 0x0) = 0;
+    }
+    if (*(void**)(self + 0x5C) != 0) {
+        D_00509434[0](*(void**)(self + 0x5C));
+        *(void**)(self + 0x5C) = 0;
+    }
+    func_003E0A28(*(void**)(self + 0x30));
+    *(void**)(self + 0x30) = 0;
+    if (*(int*)(self + 0x14) != 0) {
+        func_003E0A28(*(void**)(self + 0x34));
+        *(void**)(self + 0x34) = 0;
+    }
+    {
+        void* p = *(void**)(self + 0x20);
+        if (p != 0) {
+            sWSMemIfE300 mi;
+            mi.size = 0x20;
+            func_003DE928(&mi);
+            mi.release(p);
+            *(void**)(self + 0x20) = 0;
+        }
+    }
+    {
+        void* p = *(void**)(self + 0x28);
+        if (p != 0) {
+            sWSMemIfE300 mi;
+            mi.size = 0x20;
+            func_003DE928(&mi);
+            mi.release(p);
+            *(void**)(self + 0x28) = 0;
+        }
+    }
+    if (*(void**)(self + 0x4) != 0) {
+        D_00509434[0](*(void**)(self + 0x4));
+        *(void**)(self + 0x4) = 0;
+    }
+    if (*(void**)(self + 0x8) != 0) {
+        D_00509434[0](*(void**)(self + 0x8));
+        *(void**)(self + 0x8) = 0;
+    }
+    if (flags & 1) {
+        D_00509434[0](self);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003AE450);
 
@@ -1584,7 +1660,83 @@ extern "C" void func_003B1CC0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B1D58);
+#ifdef SKIP_ASM
+struct sWSTables1D58 {
+    char pad0[0x10];
+    void* a10[64];              // 0x010
+    void* a110[64];             // 0x110
+    void* a210[64];             // 0x210
+    void* a310[64];             // 0x310
+    void* p410;                 // 0x410
+    void* p414;                 // 0x414
+    void* p418;                 // 0x418
+    void* p41C;                 // 0x41C
+};
+
+extern unsigned char D_0044C218[];
+
+
+extern "C" void func_003B1D58(void)
+{
+    sD_0050A088* gd = &D_0050A088;
+    {
+        void* p = func_003B1300(1);
+        ((sWSTables1D58*)gd->ptr)->p410 = p;
+        if (p != 0) {
+            int i;
+            for (i = 0; i < 64; i++) {
+                void* q = func_003B1300(8);
+                int k = D_0044C218[i];
+                sWSTables1D58* g = ((sWSTables1D58*)D_0050A088.ptr);
+                g->a10[k] = q;
+                g->a210[k] = q;
+            }
+        }
+    }
+    {
+        void* p = func_003B1300(1);
+        ((sWSTables1D58*)D_0050A088.ptr)->p414 = p;
+        if (p != 0) {
+            int i;
+            for (i = 0; i < 64; i++) {
+                void* q = func_003B1300(8);
+                int k = D_0044C218[i];
+                sWSTables1D58* g = ((sWSTables1D58*)D_0050A088.ptr);
+                g->a110[k] = q;
+                g->a310[k] = q;
+            }
+        }
+    }
+    {
+        void* p = func_003B1300(1);
+        ((sWSTables1D58*)D_0050A088.ptr)->p418 = p;
+        if (p != 0) {
+            int i;
+            for (i = 0; i < 64; i++) {
+                void* q = func_003B1300(8);
+                int k = D_0044C218[i];
+                sWSTables1D58* g = ((sWSTables1D58*)D_0050A088.ptr);
+                g->a210[k] = q;
+            }
+        }
+    }
+    {
+        void* p = func_003B1300(1);
+        ((sWSTables1D58*)D_0050A088.ptr)->p41C = p;
+        if (p != 0) {
+            int i;
+            for (i = 0; i < 64; i++) {
+                void* q = func_003B1300(8);
+                int k = D_0044C218[i];
+                sWSTables1D58* g = ((sWSTables1D58*)D_0050A088.ptr);
+                g->a310[k] = q;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003B1EE0);
 
@@ -1625,7 +1777,53 @@ extern "C" void func_003B1FC8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B20B8);
+#ifdef SKIP_ASM
+extern void* D_00509570[];
+extern void* D_00509580[];
+extern int D_00509584[];
+extern int D_00509588[];
+extern void* D_0050958C[];
+extern void* D_00509590[];
+extern void* D_00509594[];
+extern int D_00509598[];
+extern void* D_0050959C[];
+extern void* D_005095A0[];
+extern void* D_005095A4[];
+extern void* D_005095A8[];
+extern void* D_005095AC[];
+extern void* D_005095B0[];
+extern void* D_005095B4[];
+extern void* D_005095B8[];
+
+extern "C" void func_003B20B8(void)
+{
+    D_00509570[0] = func_003B1300(4);
+    D_00509570[1] = func_003B1300(4);
+    D_00509570[2] = func_003B1300(4);
+    D_00509570[3] = func_003B1300(4);
+    D_00509580[0] = func_003B1300(2);
+    D_00509584[0] = (int)func_003B1300(2);
+    D_00509588[0] = (int)func_003B1300(1);
+    D_0050958C[0] = func_003B1300(1);
+    D_00509590[0] = func_003B1300(1);
+    *(void**)((char*)D_0050A088.ptr + 0x428) = func_003B1300(1);
+    D_00509594[0] = func_003B1300(1);
+    *(void**)((char*)D_0050A088.ptr + 0x42C) = func_003B1300(1);
+    D_00509598[0] = (int)func_003B1300(1);
+    D_0050959C[0] = func_003B1300(1);
+    D_005095A0[0] = func_003B1300(1);
+    D_005095A4[0] = func_003B1300(1);
+    if (D_005095A4[0] != 0) {
+        D_005095A8[0] = func_003B1300(1);
+        D_005095AC[0] = func_003B1300(3);
+        D_005095B0[0] = func_003B1300(1);
+        D_005095B4[0] = func_003B1300(7);
+        D_005095B8[0] = func_003B1300(8);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B2230);

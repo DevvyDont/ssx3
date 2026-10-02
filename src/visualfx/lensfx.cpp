@@ -254,7 +254,43 @@ extern "C" void func_002ECFA0(void)
 
 INCLUDE_ASM("visualfx/lensfx", func_002ED048);
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ED1D0);
+#ifdef SKIP_ASM
+struct sLerpV4_D1D0 {
+    float x, y, z, w;
+    sLerpV4_D1D0() {}
+    sLerpV4_D1D0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+static inline sLerpV4_D1D0 operator*(const sLerpV4_D1D0& a, float s)
+{
+    return sLerpV4_D1D0(a.x * s, a.y * s, a.z * s, a.w * s);
+}
+
+static inline sLerpV4_D1D0 operator+(const sLerpV4_D1D0& a, const sLerpV4_D1D0& b)
+{
+    return sLerpV4_D1D0(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
+}
+
+struct sLensLerp_D1D0 {
+    char pad00[0x28];
+    sLerpV4_D1D0 a;
+    sLerpV4_D1D0 b;
+};
+
+extern "C" void func_002ED1D0(sLensLerp_D1D0* self, const sLerpV4_D1D0* a, const sLerpV4_D1D0* b, int full)
+{
+    float t = 0.8999999761581421f;
+    float s;
+    if (full) {
+        t = 1.0f;
+    }
+    s = 1.0f - t;
+    self->a = sLerpV4_D1D0(self->a.x * s, self->a.y * s, self->a.z * s, self->a.w * s) + *a * t;
+    self->b = sLerpV4_D1D0(self->b.x * s, self->b.y * s, self->b.z * s, self->b.w * s) + *b * t;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ED338);

@@ -404,7 +404,93 @@ extern "C" void func_00309E50(void* self, int idx, int value)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_00309F18);
+#ifdef SKIP_ASM
+struct cWorldView;
+int cWorldView_getNumSections(cWorldView* view);
+
+struct sWSSection9F18 {
+    short type;                 // 0x0
+    short pad2;
+    int f4;
+    int f8;
+};
+
+struct sWSWorld9F18 {
+    char* view;                 // 0x0 (cWorldView at +0x10)
+    struct {
+        int f0;
+        sWSSection9F18* sections;   // 0x4
+    }* info;                    // 0x4
+};
+
+struct sWSMan9F18 {
+    int f0;                     // 0x000
+    char pad4[0x288];
+    sWSWorld9F18* world;        // 0x28C
+    int f290;                   // 0x290
+    int f294;                   // 0x294
+    int f298;                   // 0x298
+    char pad29C[0x8];
+    int f2A4;                   // 0x2A4
+    int f2A8;                   // 0x2A8
+    char pad2AC[0x14];
+    char tables[1][0x10C];      // 0x2C0
+};
+
+struct cWScriptIdTable;
+extern "C" void func_0030C390(cWScriptIdTable* self);
+extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void func_002D9B40(void);
+extern "C" int func_003A6BA8(void* world, int i);
+extern "C" int* func_003A6BD8(void* world, int i);
+
+static inline bool wsIsType3_9F18(sWSSection9F18* s)
+{
+    return s->type == 3;
+}
+
+extern "C" void func_00309F18(sWSMan9F18* self)
+{
+    int i;
+    int saved;
+    int n;
+    func_002D9B40();
+    {
+        int k;
+        for (k = 0; k < 1; k++) {
+            func_0030C390((cWScriptIdTable*)self->tables[k]);
+        }
+    }
+    saved = self->f0;
+    self->f0 = -1;
+    self->f290 = 0;
+    self->f294 = 0;
+    self->f298 = 0;
+    self->f2A4 = 0;
+    self->f2A8 = 0;
+    n = cWorldView_getNumSections((cWorldView*)(self->world->view + 0x10));
+    for (i = 0; i < n; i++) {
+        if (wsIsType3_9F18(&self->world->info->sections[i])) {
+            int* p = func_003A6BD8(self->world, i);
+            if (p != 0) {
+                int cnt = func_003A6BA8(self->world, i);
+                int j;
+                for (j = 0; j < cnt; j++, p++) {
+                    func_00309C88(self, p);
+                }
+            }
+        }
+    }
+    self->f290 = 0;
+    self->f294 = 0;
+    self->f298 = 0;
+    self->f2A4 = 0;
+    self->f2A8 = 0;
+    self->f0 = saved;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030A060);
 
@@ -1425,7 +1511,71 @@ extern "C" void func_0030BAC8(func_0030BAC8_sMan* self, int id, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030BB10);
+#ifdef SKIP_ASM
+struct sWSVtVBB10 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sWSManBB10 {
+    char pad0[0x28C];
+    char* world;                // 0x28C
+    char pad290[0x28];
+    void* list2B8;              // 0x2B8
+    void* list2BC;              // 0x2BC
+    char tables[1][0x10C];      // 0x2C0
+    void* objs[50];             // 0x3CC
+};
+
+class func_0030C6C8_cObj;
+extern "C" int func_0030C6C8(void* a, func_0030C6C8_cObj* obj);
+extern "C" void func_0030BC80(void* self, void** list, void* stream);
+extern "C" int func_003ACA38(void* a, int id);
+extern "C" void func_002257E0(void* obj, void* stream, int a2);
+
+extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
+{
+    int count;
+    int j;
+    {
+        sWSVtVBB10* e = &(*(sWSVtVBB10**)stream)[1];
+        e->fn((char*)stream + e->delta, self, 0x28C);
+    }
+    {
+        int k;
+        for (k = 0; k < 1; k++) {
+            func_0030C6C8(self->tables[k], (func_0030C6C8_cObj*)stream);
+        }
+    }
+    func_0030BC80(self, &self->list2B8, stream);
+    func_0030BC80(self, &self->list2BC, stream);
+    count = 0;
+    {
+        int i;
+        for (i = 0; i < 50; i++) {
+            if (self->objs[i] != 0) {
+                count++;
+            }
+        }
+    }
+    {
+        sWSVtVBB10* e = &(*(sWSVtVBB10**)stream)[1];
+        e->fn((char*)stream + e->delta, &count, 4);
+    }
+    for (j = 0; j < 50; j++) {
+        if (self->objs[j] != 0) {
+            sWSVtVBB10* e = &(*(sWSVtVBB10**)stream)[1];
+            int r;
+            e->fn((char*)stream + e->delta, &j, 4);
+            r = func_003ACA38(*(void**)(self->world + 4), j);
+            func_002257E0(self->objs[j], stream, r);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030BC80);

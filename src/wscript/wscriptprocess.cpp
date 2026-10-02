@@ -1135,9 +1135,121 @@ extern "C" void func_00308BE0(void* self, int section)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308C60);
+#ifdef SKIP_ASM
+struct sWSPDef8C60 {
+    char pad[0x54];
+};
 
+extern char* D_004A28A8;
+extern signed char D_00535C10[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0026C898(void* pb);
+extern "C" int func_003A6C68(void* world, int i);
+extern "C" void* func_003A6C98(void* world, int i);
+extern "C" void cWScriptMan_addProcess1(void* self, int section, void* def, int id, int flags);
+extern "C" char* func_00144BC0(void* iface);
+extern "C" void cPlaybackMan_initLocation(void* pb, void* loc);
+extern "C" void func_00308DB8(void* self);
+
+static inline void* wsPlayback8C60()
+{
+    return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34);
+}
+
+extern "C" void func_00308C60(void* self)
+{
+    void* iface;
+    func_0026C898(wsPlayback8C60());
+    iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C10[0] == 4 && *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) == 1) {
+        int i = 0;
+        int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+        for (; i < n; i++) {
+            int cnt = func_003A6C68(*(void**)((char*)self + 0x28C), i);
+            sWSPDef8C60* defs = (sWSPDef8C60*)func_003A6C98(*(void**)((char*)self + 0x28C), i);
+            int j;
+            for (j = 0; j < cnt; j++) {
+                cWScriptMan_addProcess1(self, i, &defs[j], (i << 16) + i, 0);
+            }
+        }
+        cPlaybackMan_initLocation(wsPlayback8C60(), func_00144BC0(iface) + 0x34);
+    }
+    func_00308DB8(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308DB8);
+#ifdef SKIP_ASM
+// cLunoValue: { word0, word1, type }
+struct sWSPValue8DB8 {
+    int word0;
+    int word1;
+    int type;
+};
+
+struct sWSPCall8DB8 {
+    int pad[4];
+};
+
+struct sWSPDef8DB8 {
+    int f0;                     // 0x00
+    char pad4[0x48];
+    int f4C;                    // 0x4C
+    char pad50[0x4];
+};
+
+struct func_00309DD0_sValue;
+extern const char D_004898D8[];
+extern "C" int func_003A6C68(void* world, int i);
+extern "C" void* func_003A6C98(void* world, int i);
+// PORT: the unit declares func_00309B70 as (int); its body takes (self, id) and returns an int.
+extern "C" int func_00309B70_2(void* self, int id) __asm__("func_00309B70");
+void func_00226600(void* self, int a1, int a2);
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+
+extern "C" void func_00308DB8(void* self)
+{
+    int i = 0;
+    int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+    for (; i < n; i++) {
+        int cnt = func_003A6C68(*(void**)((char*)self + 0x28C), i);
+        sWSPDef8DB8* defs = (sWSPDef8DB8*)func_003A6C98(*(void**)((char*)self + 0x28C), i);
+        int j;
+        for (j = 0; j < cnt; j++) {
+            if (defs[j].f0 != *(int*)((char*)self + 0x2A0)) {
+                void* table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+                int h = func_00309B70_2(self, defs[j].f4C);
+                if (h != 0) {
+                    sWSPValue8DB8 arg;
+                    sWSPValue8DB8 ret;
+                    sWSPCall8DB8 call;
+                    func_00226600(&arg, h, 0);
+                    ret.type = 0;
+                    ret.word0 = 0;
+                    func_002224A8(&call);
+                    func_002224B8(&call, &arg, table, &ret);
+                    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+                }
+                if (table != 0) {
+                    func_00224DF0(table, 3);
+                }
+            }
+        }
+    }
+    *(int*)((char*)self + 0x290) = 0;
+    *(int*)((char*)self + 0x294) = 0;
+    *(int*)((char*)self + 0x298) = 0;
+    *(int*)((char*)self + 0x2A4) = 0;
+    *(int*)((char*)self + 0x2A8) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308F38);
