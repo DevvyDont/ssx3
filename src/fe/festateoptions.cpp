@@ -27,7 +27,37 @@ INCLUDE_ASM("fe/festateoptions", func_00188980);
 
 INCLUDE_ASM("fe/festateoptions", func_00188C58);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00188C68);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* func_00397870(void* list, int index);
+extern char D_004A1530[];
+
+extern "C" int func_00188C68(void* self, void* menu, unsigned int key, int index)
+{
+    if (key < 10) {
+        if (key >= 8) {
+            return 0x100;
+        }
+    }
+    if (key == 6) {
+        int h = *(int*)((char*)func_00397870((char*)menu + 0x74, index) + 0x38);
+        if (h == GetHashValue32(D_004A1530)) {
+            goto check;
+        }
+    }
+    if (key == 7) {
+    check:
+        int r = 0x101;
+        if (*(int*)((char*)self + 0x4C) == 0) {
+            r = 1;
+        }
+        return r;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_00188D08);
 
@@ -283,7 +313,40 @@ INCLUDE_ASM("fe/festateoptions", func_0018E2C0);
 
 INCLUDE_ASM("fe/festateoptions", func_0018E368);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018E478);
+#ifdef SKIP_ASM
+extern "C" void func_0039F4C0(void* list, void* item);
+
+struct sVEntry0018E478 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0018E478(void* self)
+{
+    if (*(int*)((char*)self + 0x1AC) == 0) {
+        int mode = *(int*)((char*)self + 0x1BC) == 1;
+        if (*(int*)((char*)self + 0x1E4) == 1) {
+            mode = 0;
+        }
+        if (*(int*)((char*)self + 0x1B4) == 0) {
+            mode = 0;
+        }
+        if (*(int*)((char*)self + 0x230) != 0) {
+            mode = 2;
+        }
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry0018E478* vt = *(sVEntry0018E478**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, mode);
+        if (r != 0) {
+            func_0039F4C0(*(char**)((char*)self + 0x10) + 0x18, r);
+        }
+    }
+    *(int*)((char*)self + 0x1AC) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018E510);
 

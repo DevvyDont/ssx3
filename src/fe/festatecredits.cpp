@@ -18,7 +18,34 @@ extern "C" void func_001863B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecredits", func_001863E8);
+#ifdef SKIP_ASM
+struct sVEntry001863E8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_001863E8(void* self, void* pad)
+{
+    sVEntry001863E8* e = &(*(sVEntry001863E8**)((char*)pad + 8))[17];
+    if (e->fn((char*)pad + e->delta)) {
+        if (*(int*)((char*)self + 0x64) >= -7) {
+            *(int*)((char*)self + 0x64) -= 1;
+        }
+        return 1;
+    }
+    e = &(*(sVEntry001863E8**)((char*)pad + 8))[18];
+    if (e->fn((char*)pad + e->delta)) {
+        if (*(int*)((char*)self + 0x64) < 8) {
+            *(int*)((char*)self + 0x64) += 1;
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecredits", func_00186478);

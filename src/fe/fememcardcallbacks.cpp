@@ -196,7 +196,26 @@ extern "C" int func_001D93D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93E8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
+extern "C" void func_0039FCC8(void* obj, void* anim, int a, int b, int c);
+
+extern "C" void func_001D93E8(void* self, char* objName, char* animName)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(objName));
+    if (obj != 0) {
+        void* bank = (char*)*(void**)((char*)self + 0x10) + 0x50;
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
+        if (anim != 0) {
+            func_0039FCC8(obj, anim, 3, 0, 1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerDisplayState);
 

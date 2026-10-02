@@ -48,5 +48,35 @@ INCLUDE_ASM("fe/festatebigradio", func_001941B0);
 
 INCLUDE_ASM("fe/festatebigradio", func_00194440);
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00194498);
+#ifdef SKIP_ASM
+struct sColor4_4498 {
+    float x, y, z, w;
+};
+
+struct sVEntry00194498a {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sVEntry00194498b {
+    short delta;
+    short index;
+    void (*fn)(void*, sColor4_4498*);
+};
+
+extern "C" void func_00194498(void* self)
+{
+    sVEntry00194498a* vt = *(sVEntry00194498a**)((char*)self + 8);
+    vt[8].fn((char*)self + vt[8].delta, 1);
+    sColor4_4498 c = *(sColor4_4498*)((char*)self + 0x1C);
+    if (c.x > 0.5f) {
+        c.x = 0.5f;
+        sVEntry00194498b* vt2 = *(sVEntry00194498b**)((char*)self + 8);
+        vt2[11].fn((char*)self + vt2[11].delta, &c);
+    }
+}
+#endif
 

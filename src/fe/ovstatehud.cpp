@@ -168,7 +168,18 @@ INCLUDE_ASM("fe/ovstatehud", func_001EC1F0);
 
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onRender2D);
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F10F8);
+#ifdef SKIP_ASM
+extern "C" float func_0021E750(void* self, int align, int flags, float pos, float size, float scale);
+extern "C" float func_0021E7A8(void* self, int align, float pos, float size, float scale);
+
+extern "C" void func_001F10F8(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags)
+{
+    out[0] = func_0021E750(self, alignX, flags, pos[0], size[0], scale[0]);
+    out[1] = func_0021E7A8(self, alignY, pos[1], size[1], scale[1]);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F1190);
 
@@ -246,5 +257,31 @@ extern "C" void func_001F36D8(void* self, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F3700);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00147318(void* self, int a1);
+extern "C" void func_001A1CB8(void* self, int a1, int val);
+extern void* D_00473AA8[];
+
+extern "C" void* func_001F3700(void* self)
+{
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 0x27;
+    *(void***)((char*)self + 0x8) = D_00473AA8;
+    int idx = func_00147318(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    *(signed char*)((char*)self + 0x44) = 0;
+    void* p = **(void***)((char*)self + 0x10);
+    if (p != 0) {
+        unsigned char mask = 1 << idx;
+        func_001A1CB8(p, 0, mask);
+        *(unsigned char*)((char*)self + 0x15) = mask;
+    }
+    return self;
+}
+#endif
 

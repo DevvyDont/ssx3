@@ -171,7 +171,55 @@ INCLUDE_ASM("fe/festateloadscreen", func_00234750);
 
 INCLUDE_ASM("fe/festateloadscreen", func_00234910);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", func_00234990);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_00233AF0 as `void* (void*)`; the body also uses $a1 (obj).
+void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
 
+struct sVEntry_func_00234990 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00234990(void* self, void* stream)
+{
+    func_00233AF0_2(self, stream);
+    sVEntry_func_00234990* e = &(*(sVEntry_func_00234990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00234990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00234990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 4);
+    e = &(*(sVEntry_func_00234990**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", func_00234A30);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_00233B28 as `void* (void*)`; the body also uses $a1 (obj).
+void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+
+struct sVEntry_func_00234A30 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00234A30(void* self, void* stream)
+{
+    func_00233B28_2(self, stream);
+    sVEntry_func_00234A30* e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
+    e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
+    e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 4);
+    e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
+}
+#endif
 

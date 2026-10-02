@@ -23,7 +23,28 @@ extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7210);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A23E0[];
+extern char D_004A23E8[];
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0039E4C0(void* self, void* a1);
+
+extern "C" void func_001F7210(void* self, void* a1)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23E0));
+    if (obj != 0) {
+        *(int*)((char*)obj + 0x18) = 0;
+    }
+    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23E8));
+    if (obj != 0) {
+        *(int*)((char*)obj + 0x18) = 1;
+    }
+    func_0039E4C0(self, a1);
+}
+#endif
 
 extern "C" void* func_0020A430(void*);
 

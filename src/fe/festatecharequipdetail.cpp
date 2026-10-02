@@ -228,7 +228,27 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019BEE8);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C7E8);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
+extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int a1, int a2, int a3);
+extern "C" void func_0039F290(void* list, void* item);
+extern char D_00460790[];
+
+extern "C" void func_0019C7E8(void* self, void* item)
+{
+    void* popup = func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
+    int price = *(short*)((char*)item + 0xE);
+    int id = *(int*)((char*)item + 0x14);
+    if (price > 0) {
+        price *= 10;
+    }
+    cBuyPopupInfo_initBuyBolt((int*)((char*)popup + 0x48), id, price, *(int*)((char*)self + 0xC0));
+    func_0039F290(*(char**)((char*)self + 0x10) + 0x18, popup);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C880);
@@ -418,7 +438,35 @@ extern "C" int func_0019D3B0(void* self, int bank)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D428);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+
+struct sEquipSlot_D428 {
+    int state;
+    char name[0x100];
+    int value;
+    char pad108[0x18];
+};
+struct sEquipRow_D428 {
+    sEquipSlot_D428 slots[0x100];
+};
+struct sEquipTable_D428 {
+    sEquipRow_D428 rows[1];
+};
+
+extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name)
+{
+    for (int i = 0; i < 256; i++) {
+        sEquipSlot_D428* s = &self->rows[bank].slots[i];
+        if (s->name[0] != 0 && func_004165A8(self->rows[bank].slots[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D4B8);
 

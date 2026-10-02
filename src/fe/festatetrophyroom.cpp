@@ -66,7 +66,41 @@ extern "C" void func_001D4760(void* self)
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D47A0);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4890);
+#ifdef SKIP_ASM
+extern "C" void setChallengeStats(void* widget, signed char rider, int a2, int a3, int a4, int index);
+
+// Real virtual class so g++ emits the vcall itself (vptr at +8, after 8 bytes of data).
+class cTrophyWidget_4890 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+extern "C" void func_001D4890(void* self, int index)
+{
+    cTrophyWidget_4890* widget = *(cTrophyWidget_4890**)((char*)self + 0x4C);
+    if (widget != 0) {
+        if (index == 0) {
+            widget->show(0);
+        } else {
+            widget->show(1);
+            setChallengeStats(*(void**)((char*)self + 0x4C), *(signed char*)((char*)self + 0x44),
+                              *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
+                              *(int*)((char*)self + 0x58), index - 1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4918);
 
@@ -74,7 +108,29 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D4A20);
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4B20);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4BC8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern void* D_004695E8[];
+
+extern "C" void* func_001D4BC8(void* self, int a1, signed char idx, int a3)
+{
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 0x2E;
+    *(void***)((char*)self + 0x8) = D_004695E8;
+    *(signed char*)((char*)self + 0x44) = idx;
+    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(int*)((char*)self + 0x4C) = a3;
+    *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onCreateScreen);

@@ -47,7 +47,33 @@ extern "C" void func_0019F548(void* self, sQuadRM* src)
 
 INCLUDE_ASM("fe/feridermanager", func_0019F780);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F878);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+
+struct sRiderName_F878 {
+    int id;
+    char name[8];
+};
+
+struct sRiderTable_F878 {
+    char pad_0x0[0x18];
+    int count;
+    sRiderName_F878 entries[1];
+};
+
+extern "C" int func_0019F878(sRiderTable_F878* self, const char* name)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (func_004165A8(name, self->entries[i].name) == 0) {
+            return self->entries[i].id;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019F908);
 

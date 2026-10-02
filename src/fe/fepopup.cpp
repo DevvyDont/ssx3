@@ -221,7 +221,33 @@ INCLUDE_ASM("fe/fepopup", func_001C7C20);
 
 INCLUDE_ASM("fe/fepopup", func_001C7EB0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C8050);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void func_003A0E90(cUIText* text, void* p);
+extern char D_004A1408[];
+
+extern "C" void func_001C8050(void* self, cUIText* text, int* info)
+{
+    switch (info[0]) {
+    case 1:
+        func_003A0E90(text, (void*)info[1]);
+        break;
+    case 2:
+        cUIText_setAsciiString(text, (const char*)info[1]);
+        break;
+    case 3:
+        cUIText_setUnicodeStringByID(text, info[1]);
+        break;
+    case 0:
+        cUIText_setAsciiString(text, D_004A1408);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001C80E8);
 
@@ -494,13 +520,79 @@ extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int cred
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuySong);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004661B8[];
+extern char D_004661E0[];
+
+extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3)
+{
+    int three = 3;
+    int h = GetHashValue32(D_004661B8);
+    self[4] = a1;
+    self[5] = three;
+    self[3] = 2;
+    self[6] = h;
+    h = GetHashValue32(D_004661E0);
+    self[1] = a3;
+    self[7] = three;
+    self[0] = a2;
+    self[2] = -1;
+    self[8] = h;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CAA18);
 
+//100%
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuyBolt);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004662B8[];
+extern char D_004661F8[];
 
+extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int a1, int a2, int a3)
+{
+    int three = 3;
+    int h = GetHashValue32(D_004662B8);
+    self[4] = a1;
+    self[5] = three;
+    self[3] = 2;
+    self[6] = h;
+    h = GetHashValue32(D_004661F8);
+    self[1] = a3;
+    self[7] = three;
+    self[0] = a2;
+    self[2] = -1;
+    self[8] = h;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001CABA8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_001CA8A0(void* self);
+extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern void* D_0046CB08[];
+
+extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx)
+{
+    func_0039E318(self, engine, owner);
+    *(void***)((char*)self + 0x8) = D_0046CB08;
+    func_001CA8A0((char*)self + 0x48);
+    *(signed char*)((char*)self + 0x44) = idx;
+    *(int*)((char*)self + 0xC) = 7;
+    void* p = **(void***)((char*)self + 0x10);
+    if (p != 0) {
+        *(char*)((char*)self + 0x15) = func_001A1CD0(p, idx);
+    }
+    func_001CA8A0((char*)self + 0x48);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CAC30);
@@ -688,13 +780,81 @@ INCLUDE_ASM("fe/fepopup", func_001CB9B0);
 
 INCLUDE_ASM("fe/fepopup", func_001CBB70);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CBC48);
+#ifdef SKIP_ASM
+// PORT: func_001CE560's third parameter is an int* out-param; the unit declares it (void*, int, int).
+int func_001CE560_out(void* self, int idx, int* out) __asm__("func_001CE560");
+extern "C" void func_001CC190(void* self);
+
+extern "C" int func_001CBC48(void* self, int a1)
+{
+    int val;
+    int state = *(int*)((char*)self + 0x140);
+    if (state == 4) {
+        if (func_001CE560_out(self, 0x10, &val)) {
+            *(int*)((char*)self + 0x140) = 0x10;
+        } else {
+            if (val) {
+                *(int*)((char*)self + 0x144) = a1 == 0;
+            }
+            func_001CC190(self);
+        }
+        return 1;
+    } else if (state == 5) {
+        if (func_001CE560_out(self, 0x12, &val)) {
+            *(int*)((char*)self + 0x140) = 0x12;
+        } else {
+            if (val) {
+                *(int*)((char*)self + 0x144) = a1 == 0;
+            }
+            func_001CC190(self);
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CBCE8);
 
 INCLUDE_ASM("fe/fepopup", func_001CBDB0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CBF20);
+#ifdef SKIP_ASM
+// PORT: func_001CE560's third parameter is an int* out-param; the unit declares it (void*, int, int).
+int func_001CE560_out(void* self, int idx, int* out) __asm__("func_001CE560");
+extern "C" void func_001CC140(void* self);
+
+extern "C" int func_001CBF20(void* self, int a1)
+{
+    int val;
+    int state = *(int*)((char*)self + 0x140);
+    if (state == 0x4C) {
+        if (func_001CE560_out(self, 0x42, &val)) {
+            *(int*)((char*)self + 0x140) = 0x42;
+        } else {
+            if (val) {
+                *(int*)((char*)self + 0x144) = a1 == 0;
+            }
+            func_001CC140(self);
+        }
+        return 1;
+    } else if (state == 0x4F) {
+        if (func_001CE560_out(self, 0x42, &val)) {
+            *(int*)((char*)self + 0x140) = 0x42;
+        } else {
+            if (val) {
+                *(int*)((char*)self + 0x144) = a1 == 0;
+            }
+            func_001CC140(self);
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CBFC0);
 
@@ -798,7 +958,34 @@ extern "C" void func_001CC7C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CC848);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+struct sPwd_CCE98;
+extern "C" void func_001CCE98(sPwd_CCE98* self, char* str);
+extern "C" void func_001CC8D8(void* self, int a1);
+extern "C" void func_001CCC30(void* self);
+extern char D_00466530[];
+
+extern "C" void func_001CC848(void* self, int a1)
+{
+    func_001CC8D8(self, a1);
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00466530));
+    if (text != 0) {
+        if (*(int*)((char*)self + 0x70) != 0) {
+            func_001CCE98((sPwd_CCE98*)self, (char*)self + 0xB4);
+            cUIText_setAsciiString(text, (char*)self + 0xF4);
+        } else {
+            cUIText_setAsciiString(text, (char*)self + 0xB4);
+        }
+    }
+    func_001CCC30(self);
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CC8D8);
 

@@ -25,7 +25,36 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onWidgetCreate);
 
 INCLUDE_ASM("fe/festaterewards", func_001CFD18);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001CFDD0);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+
+struct sRewardName_FDD0 {
+    char name[8];
+    int id;
+};
+
+struct sRewardTable_FDD0 {
+    char pad_0x0[0x78];
+    int count;
+    sRewardName_FDD0 entries[1];
+};
+
+// PORT: the unit declares func_001CFDD0 as `void (void*, char*)`, but the body returns the id.
+int func_001CFDD0_find(sRewardTable_FDD0* self, char* name) __asm__("func_001CFDD0");
+
+int func_001CFDD0_find(sRewardTable_FDD0* self, char* name)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (func_004165A8(self->entries[i].name, name) == 0) {
+            return self->entries[i].id;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", func_001CFE60);
 
@@ -180,7 +209,33 @@ extern "C" void func_001D11A8(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D11F8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_001572B0(void* self);
+extern "C" void* func_0015A478();
+
+struct sRewardList_11F8 {
+    char pad_0x0[0x68];
+    int count;
+    char pad_0x6C[0xA24 - 0x6C];
+    int base;
+    int items[1];
+};
+
+extern "C" void func_001D11F8(sRewardList_11F8* self)
+{
+    int n = func_001572B0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    self->count = 0;
+    self->base = *(int*)((char*)func_0015A478() + 0x14);
+    for (int i = 0; i < n; i++) {
+        self->items[self->count++] = self->base + i * 16;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D1290);
@@ -241,7 +296,33 @@ extern "C" void func_001D1340(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1390);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_001572D0(void* self);
+extern "C" void* func_0015A478();
+
+struct sRewardList_1390 {
+    char pad_0x0[0x68];
+    int count;
+    char pad_0x6C[0xA24 - 0x6C];
+    int base;
+    int items[1];
+};
+
+extern "C" void func_001D1390(sRewardList_1390* self)
+{
+    int n = func_001572D0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    self->count = 0;
+    self->base = *(int*)((char*)func_0015A478() + 0x18);
+    for (int i = 0; i < n; i++) {
+        self->items[self->count++] = self->base + i * 16;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D1428);
@@ -302,7 +383,33 @@ extern "C" void func_001D14D8(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1528);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_001572F0(void* self);
+extern "C" void* func_0015A478();
+
+struct sRewardList_1528 {
+    char pad_0x0[0x68];
+    int count;
+    char pad_0x6C[0xA24 - 0x6C];
+    int base;
+    int items[1];
+};
+
+extern "C" void func_001D1528(sRewardList_1528* self)
+{
+    int n = func_001572F0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    self->count = 0;
+    self->base = *(int*)((char*)func_0015A478() + 0x1C);
+    for (int i = 0; i < n; i++) {
+        self->items[self->count++] = self->base + i * 16;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D15C0);
@@ -363,7 +470,33 @@ extern "C" void func_001D1670(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D16C0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_00157330(void* self);
+extern "C" void* func_0015A478();
+
+struct sRewardList_16C0 {
+    char pad_0x0[0x68];
+    int count;
+    char pad_0x6C[0xA24 - 0x6C];
+    int base;
+    int items[1];
+};
+
+extern "C" void func_001D16C0(sRewardList_16C0* self)
+{
+    int n = func_00157330(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    self->count = 0;
+    self->base = *(int*)((char*)func_0015A478() + 0x24);
+    for (int i = 0; i < n; i++) {
+        self->items[self->count++] = self->base + i * 16;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D1758);
@@ -424,7 +557,33 @@ extern "C" void func_001D1808(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1858);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_00157310(void* self);
+extern "C" void* func_0015A478();
+
+struct sRewardList_1858 {
+    char pad_0x0[0x68];
+    int count;
+    char pad_0x6C[0xA24 - 0x6C];
+    int base;
+    int items[1];
+};
+
+extern "C" void func_001D1858(sRewardList_1858* self)
+{
+    int n = func_00157310(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    self->count = 0;
+    self->base = *(int*)((char*)func_0015A478() + 0x20);
+    for (int i = 0; i < n; i++) {
+        self->items[self->count++] = self->base + i * 16;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D18F0);
@@ -458,7 +617,33 @@ extern "C" void* func_001D1928(void* self, void* engine, signed char idx, int a3
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1990);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_00157370(void* self);
+extern "C" void* func_0015A478();
+
+struct sRewardList_1990 {
+    char pad_0x0[0x68];
+    int count;
+    char pad_0x6C[0xA24 - 0x6C];
+    int base;
+    int items[1];
+};
+
+extern "C" void func_001D1990(sRewardList_1990* self)
+{
+    int n = func_00157370(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    self->count = 0;
+    self->base = *(int*)((char*)func_0015A478() + 0x28);
+    for (int i = 0; i < n; i++) {
+        self->items[self->count++] = self->base + i * 16;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D1A28);
@@ -493,7 +678,30 @@ INCLUDE_ASM("fe/festaterewards", func_001D1AA0);
 
 INCLUDE_ASM("fe/festaterewards", func_001D1B68);
 
+//100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_00467140[];
+extern char D_004A1398[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+
+extern "C" void cFEStatePreviewReward_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467140), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1398));
+    if (obj != 0) {
+        *(int*)((char*)obj + 0x90) |= 8;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetCreate);
 

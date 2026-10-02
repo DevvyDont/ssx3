@@ -167,7 +167,29 @@ INCLUDE_ASM("fe/festateloadhint", func_00245F50);
 
 INCLUDE_ASM("fe/festateloadhint", func_00246098);
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", func_002461E0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00186A08(void* self, void* engine);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_004A2AC8[];
+extern char D_0047B978[];
+
+extern "C" void func_002461E0(void* self, void* item, int msg)
+{
+    if (item != 0) {
+        if (msg == 5) {
+            int hash = *(int*)((char*)item + 0x38);
+            if (hash == GetHashValue32(D_004A2AC8)) {
+                void* state = func_00186A08(cMemMan_alloc(0x248, D_0047B978, 0, 0), *(void**)((char*)self + 0x10));
+                func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, state);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00246268);

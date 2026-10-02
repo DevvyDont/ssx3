@@ -85,7 +85,33 @@ extern "C" void func_001DF440(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF4E8);
+#ifdef SKIP_ASM
+extern void* D_0046AF68[];
+// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
+extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+
+struct sVEntry001DF4E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001DF4E8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_0046AF68;
+    if ((char*)self + 0x6D0 != 0) {
+        char* p = (char*)self + 0x6D0 + 0x68;
+        while ((char*)self + 0x6D0 != p) {
+            p -= 0x34;
+            sVEntry001DF4E8* vt = *(sVEntry001DF4E8**)(p + 0x30);
+            vt[1].fn(p + vt[1].delta, 0);
+        }
+    }
+    func_001A85D0_dtor(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF578__FPv);
@@ -775,11 +801,65 @@ extern "C" void cFEPopupSelectMultiplayerMode_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void func_0039B760(void* self, int a1);
+extern char D_00460020[];
+extern char D_004A13A0[];
+extern char D_004A14F8[];
+
+extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
+{
+    int h1 = *(int*)((char*)item + 0x38);
+    if (h1 == GetHashValue32(D_00460020)) {
+        *(int*)((char*)item + 0x14) |= 1;
+        func_0039B760(item, 2);
+        *(int*)((char*)item + 0x14) |= 0x80;
+        return;
+    }
+    int h2 = *(int*)((char*)item + 0x38);
+    if (h2 == GetHashValue32(D_004A13A0)) {
+        *(int*)((char*)item + 0x18) = 0;
+        return;
+    }
+    int h3 = *(int*)((char*)item + 0x38);
+    if (h3 == GetHashValue32(D_004A14F8)) {
+        *(int*)((char*)item + 0x18) = 1;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E03F8);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0470);
+#ifdef SKIP_ASM
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+
+extern "C" int func_001E0470(void* self, void* menu, unsigned int key, int idx)
+{
+    switch (key) {
+    default:
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        if (key < 6) {
+            return 0x101;
+        }
+        break;
+    case 2:
+        cUIMenu_setSelectedByIndex(menu, idx - 1);
+    case 3:
+        cUIMenu_setSelectedByIndex(menu, idx + 1);
+        break;
+    }
+    return 0x101;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E04F8__FPv);
@@ -1880,7 +1960,32 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E12F0);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E1458);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E14C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_001E3A30(void* self);
+void func_001E1548(void* self);
+
+struct sEntry14_14C0 {
+    int type;
+    char pad_0x4[0x14 - 0x4];
+};
+extern sEntry14_14C0 D_00441630_14C0[] __asm__("D_00441630");
+
+extern "C" void func_001E14C0(int type)
+{
+    int i;
+    for (i = 0; i < 0x3D; i++) {
+        if (func_001E3A30((void*)i) == 0) {
+            int t = D_00441630_14C0[i].type;
+            if (t == type || t == 5) {
+                func_001E1548((void*)i);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1548__FPv);
@@ -2181,7 +2286,39 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3E30);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E3EC0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E4168);
+#ifdef SKIP_ASM
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" unsigned char func_001E3680(int id);
+extern "C" void func_001E50C8(void* self, int a1, int a2);
+
+struct sVEntry001E4168 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001E4168(void* self)
+{
+    int state = *(int*)((char*)self + 0x18);
+    if (state == 0) {
+        goto reset;
+    }
+    if (state == 1) {
+    reset:
+        cUIMenu_setSelectedByIndex(*(void**)((char*)self + 0x144), func_001E3680(0x25));
+        void* menu = *(void**)((char*)self + 0x144);
+        sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
+        vt[7].fn((char*)menu + vt[7].delta, 1);
+        func_001E50C8(self, 0x25, -1);
+    } else {
+        void* menu = *(void**)((char*)self + 0x144);
+        sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
+        vt[7].fn((char*)menu + vt[7].delta, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E4200);
 
@@ -2272,7 +2409,32 @@ extern "C" void func_001E50C8(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E5148);
+#ifdef SKIP_ASM
+extern "C" void func_001E31B8(int idx);
+extern "C" int func_001E2BB8(int a0, int a1);
+// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
+unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+extern "C" void func_001E48B0(void*);
+extern "C" void func_001E4758(void*);
+extern "C" void func_001E4658(void*);
+
+extern "C" void func_001E5148(void* self, int idx)
+{
+    func_001E31B8(idx);
+    int cur = *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95);
+    int n = func_001E2BB8(4, 1);
+    n += func_001E33E8_noarg();
+    if (cur >= n) {
+        cur--;
+    }
+    *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95) = cur;
+    func_001E48B0(self);
+    func_001E4758(self);
+    func_001E4658(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E51D0);
