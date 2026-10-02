@@ -213,7 +213,55 @@ extern "C" int func_001F7590(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F75A0);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+void func_0029D6D0(void* self);
+extern "C" void func_0030B540(void* self);
+extern "C" void func_0030B658(void* self);
+extern "C" void func_0030B6F8(void* self);
+extern "C" int func_0030B8C0(void* self);
+extern void* D_004A3DD8;
+extern int D_004A26FC;
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_005366E8[];
+extern int D_004428F0[];
+
+struct sMgr_75A0 {
+    char pad[0x2A0];
+    int f2A0;
+};
+
+extern "C" void func_001F75A0(void* self, void* item, int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5:
+        if (*(int*)((char*)item + 0x18) == 0) {
+            if (func_0030B8C0(D_004A3DD8) != 0) {
+                func_0030B6F8(D_004A3DD8);
+            } else {
+                ((sMgr_75A0*)D_004A3DD8)->f2A0 = *(int*)((char*)self + 0x9C);
+                func_0030B540(D_004A3DD8);
+            }
+            D_004A26FC = 3;
+            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            func_0029D6D0(func_0028B180());
+            break;
+        }
+    case 6:
+        ((sMgr_75A0*)D_004A3DD8)->f2A0 = *(int*)((char*)self + 0x9C);
+        func_0030B658(D_004A3DD8);
+        D_004A26FC = 3;
+        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F76B8);

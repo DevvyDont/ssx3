@@ -168,7 +168,56 @@ extern "C" void func_0020D190(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D1D8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* t, int id);
+extern "C" void func_0020A380(void* self);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern int D_004A2860[2];
+extern char* D_00441D10[];
+extern char D_0046E510[];
+extern char D_0046E4C0[];
+
+class cUIObj_20D1D8 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void func_0020D1D8(void* self)
+{
+    func_0020A380(self);
+    char* list = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E510));
+    *(int*)(list + 0x90) |= 8;
+    for (int i = 0; i < 5; i++) {
+        char buf[32];
+        sprintf(buf, D_0046E4C0, i);
+        cUIObj_20D1D8* o = (cUIObj_20D1D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        if (o != 0) {
+            if (i < 1) {
+                int v = D_004A2860[i];
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00441D10[v]));
+                *(int*)((char*)o + 0x18) = v;
+            } else {
+                o->setVisible(0);
+                o->setEnabled(1);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D308);

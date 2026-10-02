@@ -210,9 +210,132 @@ extern "C" void func_001D4890(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4918);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" char* func_00156A90(void* self, int a1, int a2);
+extern "C" char* func_00156AE0(void* self, int a1, int a2);
+extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+extern void* D_004A28A8;
 
+struct sTrophyRoom_4918 {
+    char pad[0x50];
+    int bank;
+    int f54;
+    int f58;
+    int count;
+    char pad60[0x14];
+    int ids[5];
+};
+
+extern "C" void func_001D4918(sTrophyRoom_4918* self)
+{
+    void* pi = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* snd = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(func_00156A90(pi, self->f54, self->f58) + 4), 0xA, 1, 0);
+    self->count = 1;
+    for (int i = 0; i < 4; i++) {
+        int id = *(int*)(func_00156AE0(pi, self->f58, i) + 4);
+        if (id != 0) {
+            self->ids[i + 1] = func_0019DA10(snd, self->bank, id, 0xA, 1, 0);
+            self->count++;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4A20);
+#ifdef SKIP_ASM
+extern "C" int func_0019E238(void* self, int bank, int i);
+extern "C" char* func_0019E2B0(void* self, int bank, int i);
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void func_001D47A0(void* self, int index);
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern char D_004A1FF8[];
+
+struct cGame_4A20 {
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual int playSound(void* data, char* name, int a3, int a4, int a5);
+};
+
+struct sSelf_4A20 {
+    char pad[0x50];
+    int bank;
+    char pad54[0x8];
+    int count;
+    int snd[5];
+    int tex[5];
+    char pad88[0x14];
+    int f9C;
+};
+
+extern "C" void func_001D4A20(void* p)
+{
+    sSelf_4A20* self = (sSelf_4A20*)p;
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    int i;
+    for (i = 0; i < 5; i++) {
+        if (self->tex[i] >= 0 && func_0019E238(mgr, self->bank, self->tex[i]) != 0) {
+            char* d = func_0019E2B0(mgr, self->bank, self->tex[i]);
+            self->snd[i] = ((cGame_4A20*)D_004A289C)->playSound(d + *(int*)(d + 0x14), D_004A1FF8, 0, 1, -1);
+            func_0019DC20(mgr, self->bank, self->tex[i]);
+            self->tex[i] = -1;
+            self->count--;
+            func_001D47A0(self, self->f9C);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4B20);
@@ -463,7 +586,47 @@ extern "C" void func_001D50E0(void* self, cUIText* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5138);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" int func_001BF228(void* self, int msg);
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void func_0025C610(void* mgr);
+extern "C" void* func_0025CD50(void*, int);
+extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern char D_0045FF28[];
+extern char D_00534B30[];
+
+extern "C" int func_001D5138(void* self, int msg)
+{
+    switch (msg) {
+    case 0xC9:
+        func_0025C610(D_004A3028);
+        break;
+    case 0xD4:
+        func_0025CD50(D_004A3028, *(int*)((char*)D_004A3028 + 0x80));
+        break;
+    case 0x101:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
+        break;
+    case 0x111: {
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        char* g = D_00534B30;
+        func_0025FD50(D_004A3028, *(int*)(g + 4), *(int*)(g + 8) == 0, *(int*)(g + 8) != 0, g + 0x330, g + 0x3DC);
+        break;
+    }
+    default:
+        return func_001BF228(self, msg);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5240);

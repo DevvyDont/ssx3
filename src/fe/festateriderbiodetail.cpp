@@ -4,7 +4,35 @@ INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_onCreateScreen);
 
 INCLUDE_ASM("fe/festateriderbiodetail", func_00190A08);
 
+//100%
 INCLUDE_ASM("fe/festateriderbiodetail", func_00190CD8);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+
+struct sNames_0CD8 {
+    char* name[10];
+};
+extern sNames_0CD8 D_0045E470;
+extern char D_004A1670[];
+
+extern "C" void func_00190CD8(void* self)
+{
+    sNames_0CD8 names = D_0045E470;
+    char buf[32];
+    for (int i = 0; i < 10; i++) {
+        sprintf(buf, D_004A1670, names.name[i]);
+        if (i == *(int*)((char*)self + 0x48)) {
+            cUIState_showObjSafe(self, names.name[i]);
+            cUIState_showObjSafe(self, buf);
+        } else {
+            cUIState_hideObjSafe(self, names.name[i]);
+            cUIState_hideObjSafe(self, buf);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillDNAInfo);
 

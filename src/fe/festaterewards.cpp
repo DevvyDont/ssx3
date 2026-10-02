@@ -521,7 +521,49 @@ extern "C" void func_001D0320(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showReward);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player);
+extern "C" void func_001D20D8(void* self, int kind, void* data);
+extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
+extern "C" void func_001D2598(void* self, const char* a, const char* b);
+extern "C" void func_0039F290(void* stack, void* state);
+extern char D_00466F78[];
+extern char D_004601D8[];
+
+struct sVE_03F8 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
+{
+    void* p = 0;
+    sVE_03F8* vt = *(sVE_03F8**)((char*)self + 8);
+    void* data = vt[34].fn((char*)self + vt[34].delta);
+    switch (*(int*)((char*)self + 0x4C)) {
+    case 3:
+    case 4:
+    case 5:
+    case 7:
+        p = func_001D1AA0(cMemMan_alloc(0x78, D_00466F78, 0, 0), *(void**)((char*)self + 0x10), self,
+                          *(signed char*)((char*)self + 0x44));
+        func_001D20D8(p, *(int*)((char*)self + 0x4C), data);
+        break;
+    case 6:
+        p = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
+                          *(signed char*)((char*)self + 0x44));
+        func_001D2598(p, *(const char**)((char*)data + 4), 0);
+        break;
+    }
+    if (p != 0) {
+        func_0039F290((char*)*(void**)((char*)self + 0x10) + 0x18, p);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D0510);

@@ -1,6 +1,52 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_00182DB8(void* self);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern "C" void func_001A0570(void* self, int a1, int a2);
+extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+extern "C" int func_001577A0(void* self, int a1, int a2);
+extern void* D_004A28A8;
+extern char D_0045D870[];
+
+struct sVE_32A8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D870), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_00182DB8(self);
+    void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    int charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
+    sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
+    vt[2].fn((char*)pi + vt[2].delta);
+    func_001A0570(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    func_0028F140(func_0028B180(), 1);
+    *(int*)((char*)self + 0x50) = 1;
+    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44), charID) == 0) {
+        *(int*)((char*)self + 0x50) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateriderbio", func_001833D0);
 
@@ -47,7 +93,51 @@ extern "C" void func_001835C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_001835F8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00147138(void* self, int a1, const char* name);
+extern "C" void func_001474A8(void* self, int a1, int a2);
+extern "C" void func_001831D0(void* self, int a1);
+extern "C" unsigned int strlen(const char* s);
+extern char D_0045D780[];
+
+struct sVE_35F8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void func_001835F8(void* self, void* item, int msg)
+{
+    void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    if (msg == 0x16) {
+        if (Is_001835F8(*(int*)((char*)item + 0xC), D_0045D780)) {
+            int v = *(int*)((char*)item + 0x70);
+            if (*(int*)((char*)item + 0x74) != 0) {
+                void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
+                func_001474A8(pi2, *(signed char*)((char*)self + 0x44), v);
+                sVE_35F8* vt = *(sVE_35F8**)((char*)pi2 + 0xC);
+                vt[1].fn((char*)pi2 + vt[1].delta);
+            }
+        } else if (*(int*)((char*)item + 0xC) == 0) {
+            char* name = (char*)item + 0x74;
+            if (*(int*)((char*)item + 0x5C) != 0 && strlen(name) != 0) {
+                func_00147138(pi, *(signed char*)((char*)self + 0x44), name);
+                sVE_35F8* vt = *(sVE_35F8**)((char*)pi + 0xC);
+                vt[1].fn((char*)pi + vt[1].delta);
+            }
+        }
+        func_001831D0(self, 1);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateriderbio", func_00183710);
 
@@ -73,9 +163,95 @@ extern "C" void* func_00183A98(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_00183B08);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0045D900[];
+extern char D_0045D910[];
+extern char D_0045D920[];
+extern char D_0045D930[];
 
+class cUIObj_183B08 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void func_00183B08(void* self)
+{
+    cUIObj_183B08* a = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D900));
+    if (a != 0) {
+        a->setVisible(0);
+    }
+    cUIObj_183B08* b = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D910));
+    if (b != 0) {
+        b->setVisible(1);
+    }
+    cUIObj_183B08* c = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D920));
+    if (c != 0) {
+        c->setVisible(1);
+    }
+    cUIObj_183B08* d = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D930));
+    if (d != 0) {
+        d->setVisible(0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_00183C08);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0045D900[];
+extern char D_0045D910[];
+extern char D_0045D920[];
+extern char D_0045D930[];
+
+class cUIObj_183C08 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void func_00183C08(void* self)
+{
+    cUIObj_183C08* a = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D900));
+    if (a != 0) {
+        a->setVisible(1);
+    }
+    cUIObj_183C08* b = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D910));
+    if (b != 0) {
+        b->setVisible(0);
+    }
+    cUIObj_183C08* c = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D920));
+    if (c != 0) {
+        c->setVisible(0);
+    }
+    cUIObj_183C08* d = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D930));
+    if (d != 0) {
+        d->setVisible(1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateriderbio", func_00183D08);

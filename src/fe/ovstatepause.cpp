@@ -2,7 +2,68 @@
 
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FA100);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_00194498(void* obj);
+extern void* D_004A28A8;
+extern int D_00534B30[];
+extern char D_00535BC8[];
+extern char D_004A24E0[];
+extern char D_0046F970[];
+extern char D_004A24A8[];
+extern char D_004A24E8[];
+
+class cUIObj_FA100 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+static inline bool isField_FA100(signed char* g, int off, int v)
+{
+    return g[off] == v;
+}
+
+extern "C" void func_001FA100(void* self)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0 || !isField_FA100((signed char*)D_00535BC8, 0x49, 2)) {
+        cUIObj_FA100* a = (cUIObj_FA100*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E0));
+        if (a != 0) {
+            a->setEnabled(1);
+        }
+        void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046F970));
+        if (b != 0) {
+            func_00194498(b);
+        }
+        void* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24A8));
+        if (c != 0) {
+            func_00194498(c);
+        }
+    }
+    if (!isField_FA100((signed char*)D_00535BC8, 0x48, 4)) {
+        void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E8));
+        if (d != 0) {
+            func_00194498(d);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FA238);
 
@@ -318,9 +379,95 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self,
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FB458);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0046FB48[];
+extern char D_0046FAD8[];
+extern char D_0046FB00[];
 
+struct sColor_FB458 {
+    float r, g, b, a;
+    sColor_FB458(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+class cUIObj_FB458 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual int setColor(const sColor_FB458& c);
+};
+
+extern "C" void func_001FB458(void* self, int on)
+{
+    cUIObj_FB458* t = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB48));
+    cUIObj_FB458* a = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FAD8));
+    cUIObj_FB458* b = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB00));
+    if (on) {
+        t->setColor(sColor_FB458(1.0f, 1.0f, 1.0f, 1.0f));
+    } else {
+        t->setColor(sColor_FB458(1.0f, 0.0f, 0.0f, 0.0f));
+    }
+    a->setVisible(on);
+    b->setVisible(on);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FB588);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0046FA90[];
+extern char D_0046FAC8[];
+extern char D_0046FAE8[];
+
+struct sColor_FB588 {
+    float r, g, b, a;
+    sColor_FB588(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+class cUIObj_FB588 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual int setColor(const sColor_FB588& c);
+};
+
+extern "C" void func_001FB588(void* self, int on)
+{
+    cUIObj_FB588* t = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FA90));
+    cUIObj_FB588* a = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FAC8));
+    cUIObj_FB588* b = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FAE8));
+    if (on) {
+        t->setColor(sColor_FB588(1.0f, 1.0f, 1.0f, 1.0f));
+    } else {
+        t->setColor(sColor_FB588(1.0f, 0.0f, 0.0f, 0.0f));
+    }
+    a->setVisible(on);
+    b->setVisible(on);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FB6B8);
 
@@ -392,7 +539,45 @@ extern "C" void func_001FBCE0(void* self)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FBD20);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FC768);
+#ifdef SKIP_ASM
+extern "C" void func_0039E4C0(void* self);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0020A6F0(void* self, char* text, char* label);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+extern "C" void func_002A31C0(void* self);
+extern void* D_004A28A8;
+extern signed char D_00535C11[];
+extern char D_0046E4E8[];
+extern char D_004A2508[];
+extern char D_004A2510[];
+extern char D_004A2518[];
+extern char D_0046FDF8[];
+extern char D_0046FDD8[];
+
+extern "C" void func_001FC768(void* self)
+{
+    func_0039E4C0(self);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int* mode = *(int**)((char*)D_004A28A8 + 0xC0);
+    func_0020A6F0(self, D_004A2508, D_0046E4E8);
+    if (*mode == 2) {
+        func_0020A6F0(self, D_0046FDF8, D_0046E4E8);
+    } else {
+        func_0020A6F0(self, D_004A2510, D_0046E4E8);
+    }
+    if (D_00535C11[0] == 2) {
+        func_0020A6F0(self, D_004A2518, D_0046E4E8);
+        func_0020A6F0(self, D_0046FDD8, D_0046E4E8);
+    }
+    func_00294F78(func_0028B180(), 0xE);
+    func_002A31C0(func_0028B180());
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatepause", func_001FC878);
 
@@ -554,7 +739,41 @@ extern "C" void func_001FDF00(void* self)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FDF40);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE4A8);
+#ifdef SKIP_ASM
+class cUIObj_1FE4A8 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A2090[];
+extern char D_004A2568[];
+extern char D_00470188[];
+extern char D_004A20A0[];
+
+extern "C" void func_001FE4A8(void* self, bool on)
+{
+    if (*(int*)((char*)self + 0x22C) != on) {
+        int off = !on;
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(off);
+        *(int*)((char*)self + 0x22C) = on;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE5B0);
@@ -680,7 +899,41 @@ extern "C" void func_001FEC60(void* self)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FECA0);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF170);
+#ifdef SKIP_ASM
+class cUIObj_1FF170 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A2090[];
+extern char D_004A2568[];
+extern char D_00470188[];
+extern char D_004A20A0[];
+
+extern "C" void func_001FF170(void* self, bool on)
+{
+    if (*(int*)((char*)self + 0x22C) != on) {
+        int off = !on;
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(off);
+        *(int*)((char*)self + 0x22C) = on;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF278);
@@ -743,7 +996,52 @@ extern "C" void func_001FF310(void* self, int a1, bool on)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0020A380(void* self);
+extern "C" void func_001FF7B8(void* self, int a1, int a2);
+extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern char D_004703C8[];
+extern char D_0046E378[];
+extern char D_0046E818[];
+extern char D_004A2570[];
+extern char D_004A2578[];
+
+extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004703C8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    void* engine2 = *(void**)((char*)self + 0x10);
+    void* bg = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(D_0046E378), 0);
+    if (bg != 0) {
+        cUIScreen_playFrame(bg, 0, 0);
+    }
+    func_0020A380(self);
+    *(int*)((char*)self + 0x9C) = 0;
+    func_001FF7B8(self, 0, -1);
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E818));
+    if (menu != 0) {
+        *(int*)(menu + 0x14) &= ~0x80;
+        if (*(unsigned char*)(menu + 0x96) < *(int*)((char*)self + 0x9C)) {
+            func_0039B760(menu, *(int*)((char*)self + 0x9C));
+        } else {
+            *(int*)(menu + 0x90) |= 8;
+        }
+    }
+    cUIState_hideObjSafe(self, D_004A2570);
+    cUIState_hideObjSafe(self, D_004A2578);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF6D0);

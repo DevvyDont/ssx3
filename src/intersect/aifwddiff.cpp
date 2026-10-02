@@ -1,6 +1,47 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_00340970(void* self);
+extern char D_0048E4F8[];
+extern char D_0048E508[];
+
+struct sCacheEntry_7890 {
+    unsigned int key;
+    sCacheEntry_7890* next;
+    sCacheEntry_7890* prev;
+    char pad[0x1CD0 - 0xC];
+};
+struct sCache_7890 {
+    sCacheEntry_7890* entries;  // 0x0
+    sCacheEntry_7890* lru;      // 0x4
+    sCacheEntry_7890** buckets; // 0x8
+    int count;                  // 0xC
+};
+
+extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
+{
+    sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), D_0048E4F8, 0, 0);
+    sCacheEntry_7890* p = mem;
+    for (int k = n - 1; k != -1; k--, p++) {
+        func_00340970(p);
+    }
+    self->entries = mem;
+    for (int i = 0; i < n; i++) {
+        self->entries[i].next = &self->entries[i] + 1;
+        self->entries[i].prev = &self->entries[i] - 1;
+        self->entries[i].key = 0xFFFFFFFF;
+    }
+    self->entries[0].prev = self->entries + n - 1;
+    self->entries[n - 1].next = self->entries;
+    self->count = n * 2 + 13;
+    self->lru = self->entries;
+    self->buckets = (sCacheEntry_7890**)operator_new_tag(self->count * 4, D_0048E508, 0x80000000, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_003279D0);
@@ -198,9 +239,124 @@ extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* s
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327DA8);
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327F18);
+#ifdef SKIP_ASM
+extern "C" int func_0032DF28(void* self);
+extern "C" int func_0032CDB0(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
 
+struct sSphere_27F18 {
+    float pos[4];
+    float radius;
+    int pad[3];
+};
+struct sShape_27F18 {
+    char pad[0x10];
+    float pos[4];           // 0x10
+    float radius;           // 0x20
+    int pad24[2];
+    int count;              // 0x2C
+    sSphere_27F18 subs[1];  // 0x30
+};
+
+extern "C" int func_00327F18(void* self, sShape_27F18* shape, int a2, int a3)
+{
+    void* m = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)m + 8) != 0) {
+        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = func_0032DF28(m);
+    }
+    if (func_0032CDB0(self, shape->pos, (char*)self + 0x80, 0, 0, a2, a3, shape->radius) == 0) {
+        return 0;
+    }
+    if (shape->count == 0) {
+        return 1;
+    }
+    for (int i = 0; i < shape->count; i++) {
+        if (func_0032CDB0(self, shape->subs[i].pos, (char*)self + 0x80, 0, 0, a2, a3, shape->subs[i].radius) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328030);
+#ifdef SKIP_ASM
+extern "C" float func_0032C590(void* self);
+extern "C" int func_0032CA78(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6);
+
+struct sVec4_28030 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_28030 vu0Sub_28030(const sVec4_28030& a, const sVec4_28030& b)
+{
+    sVec4_28030 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_28030(const sVec4_28030& a, const sVec4_28030& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
+{
+    sVec4_28030 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+extern "C" int func_00328030(void* self, sVec4_28030* p, void* a2, void* a3, sVec4_28030* dir, void* a5, void* a6)
+{
+    float dot;
+    {
+        sVec4_28030 d = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *p);
+        dot = vu0Dot_28030(*dir, d);
+    }
+    if (func_0032C590(self) < __builtin_fabsf(dot)) {
+        return 0;
+    }
+    if (dot < 0.0f) {
+        sVec4_28030 nd = vu0Scale_28030(*dir, -1.0f);
+        return func_0032CA78(self, p, a2, a3, &nd, a5, a6);
+    }
+    return func_0032CA78(self, p, a2, a3, dir, a5, a6);
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00328360);
 

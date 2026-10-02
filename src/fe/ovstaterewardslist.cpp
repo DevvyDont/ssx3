@@ -21,7 +21,67 @@ extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200288);
+#ifdef SKIP_ASM
+extern "C" void func_0039F400(void* list, void* item);
+
+struct sColor_200288 {
+    float r, g, b, a;
+    sColor_200288(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+class cUIObj_200288 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual int setColor(const sColor_200288& c);
+};
+
+struct sVEntry_200288 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00200288(void* self, cUIObj_200288* item, int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5: {
+        item->setColor(sColor_200288(1.0f, 1.0f, 0.0f, 0.0f));
+        void* r = 0;
+        if (*(int*)((char*)item + 0x18) == 1) {
+            void* obj = **(void***)((char*)self + 0x10);
+            sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
+            r = vt[4].fn((char*)obj + vt[4].delta, self, 1);
+        }
+        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        break;
+    }
+    case 6: {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
 

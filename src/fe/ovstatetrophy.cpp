@@ -19,7 +19,67 @@ extern "C" void cOVStateTrophy_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_0020E9A0);
+#ifdef SKIP_ASM
+extern "C" void func_0039F400(void* list, void* item);
+
+struct sColor_20E9A0 {
+    float r, g, b, a;
+    sColor_20E9A0(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+class cUIObj_20E9A0 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual int setColor(const sColor_20E9A0& c);
+};
+
+struct sVEntry_20E9A0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0020E9A0(void* self, cUIObj_20E9A0* item, int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5: {
+        item->setColor(sColor_20E9A0(1.0f, 1.0f, 0.0f, 0.0f));
+        void* r = 0;
+        if (*(int*)((char*)item + 0x18) == 1) {
+            void* obj = **(void***)((char*)self + 0x10);
+            sVEntry_20E9A0* vt = *(sVEntry_20E9A0**)((char*)obj + 4);
+            r = vt[4].fn((char*)obj + vt[4].delta, self, 1);
+        }
+        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        break;
+    }
+    case 6: {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry_20E9A0* vt = *(sVEntry_20E9A0**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EAA0);
@@ -102,7 +162,51 @@ extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EC18);
+#ifdef SKIP_ASM
+extern int D_004A2764;
+extern int D_004A2768;
+extern float D_004C8CA0[];
+
+struct sVec2_20EC18 {
+    float x, y;
+    sVec2_20EC18(float x_, float y_) : x(x_), y(y_) {}
+};
+struct sTrophyBox_20EC18 {
+    sVec2_20EC18 pos;     // 0x00
+    float top;            // 0x08
+    float bottom;         // 0x0C
+    float cx;             // 0x10
+    float y14;            // 0x14
+    float y18;            // 0x18
+    float s1C;            // 0x1C
+    sRect20EAA0 rect;     // 0x20
+    float s30;            // 0x30
+};
+
+// PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
+extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r)
+{
+    float h;
+    if (D_004A2768 != 0) {
+        char* tex = (char*)D_004A2764;
+        h = (float)*(int*)(tex + 0x14) * *(float*)(tex + 0x34) * 0.666700005531311f;
+    } else {
+        h = 30.0f;
+    }
+    float m = D_004C8CA0[0];
+    ((sTrophyBox_20EC18*)self)->pos = sVec2_20EC18(r->x + r->w * 0.5f, (r->y + r->h) - h);
+    ((sTrophyBox_20EC18*)self)->top = r->y;
+    ((sTrophyBox_20EC18*)self)->bottom = r->y + r->h - h - m;
+    ((sTrophyBox_20EC18*)self)->cx = r->x + r->w * 0.5f;
+    ((sTrophyBox_20EC18*)self)->y14 = r->y + m;
+    ((sTrophyBox_20EC18*)self)->y18 = ((sTrophyBox_20EC18*)self)->bottom;
+    ((sTrophyBox_20EC18*)self)->s1C = (((sTrophyBox_20EC18*)self)->bottom - ((sTrophyBox_20EC18*)self)->top - m) * 9.999999747378752e-05f;
+    ((sTrophyBox_20EC18*)self)->rect = *r;
+    ((sTrophyBox_20EC18*)self)->s30 = ((sTrophyBox_20EC18*)self)->rect.h * 9.999999747378752e-05f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_0020ED20);

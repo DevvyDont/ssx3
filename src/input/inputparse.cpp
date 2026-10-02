@@ -191,7 +191,54 @@ extern "C" float func_00325430(void* self, int a1)
 
 INCLUDE_ASM("input/inputparse", func_00325450);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00325F48);
+#ifdef SKIP_ASM
+void cMemMan_free(void* ptr);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+extern "C" char* func_0041ACC0(const char* s, int c);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
+// PORT: func_00326078 is declared (void*, int, int) later in the unit; this caller passes two strings.
+void func_00326078_s(void* self, char* dir, char* file) __asm__("func_00326078");
+extern char D_0048E3B8[];
+
+struct sParseBuf_5F48 {
+    int size;
+    int cap;
+    char* data;
+};
+
+extern "C" void* func_00325F48(sParseBuf_5F48* self, char* path, int* outSize)
+{
+    char dir[128];
+    char file[32];
+    self->size = 0;
+    self->cap = 0x800;
+    self->data = (char*)operator_new_tag(0x800, D_0048E3B8, 0, 0);
+    char* p = func_0041ACC0(path, '/');
+    if (p != 0) {
+        p++;
+        int n = p - path;
+        strncpy(dir, path, n);
+        dir[n] = 0;
+        strcpy(file, p);
+    } else {
+        dir[0] = 0;
+        strcpy(file, path);
+    }
+    func_00326078_s(self, dir, file);
+    void* out = operator_new_tag(self->size, path, 0x100, 0);
+    func_0041605C(out, self->data, self->size);
+    if (self->data != 0) {
+        cMemMan_free(self->data);
+    }
+    *outSize = self->size;
+    return out;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326078);

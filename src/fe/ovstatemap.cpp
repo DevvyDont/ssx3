@@ -1,6 +1,93 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct sSelf0020A380;
+extern "C" void func_0020A380(sSelf0020A380* self);
+extern "C" int func_001A3BF0(void* mgr);
+extern "C" void func_00208F10(void* self);
+extern "C" void cOVState_MAP_setupPopup(void* self);
+extern "C" void cOVState_MAP_setupPlayerIndicator(void* self);
+extern "C" void cOVState_MAP_setupLocalSessionList(void* self);
+extern void* D_004A28A8;
+extern char D_004717F8[];
+extern char D_004A25A8[];
+
+class cUIObj_86A8 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+struct sMap_86A8 {
+    char pad_0x0[0x10];
+    void* engine;       // 0x10
+    char pad_0x14[0xA8];
+    int fBC;            // 0xBC
+    int fC0;            // 0xC0
+    int fC4;            // 0xC4
+    char pad_0xC8[0x8];
+    cUIObj_86A8* obj;   // 0xD0
+    void* screen;       // 0xD4
+    char pad_0xD8[0x4];
+    int fDC;            // 0xDC
+    int fE0;            // 0xE0
+    int a[8];           // 0xE4
+    int b[8];           // 0x104
+    char pad_0x124[0x60];
+    int c[8];           // 0x184
+    int d[8];           // 0x1A4
+    char pad_0x1C4[0x8];
+    float scale;        // 0x1CC
+    float speed;        // 0x1D0
+};
+
+extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
+{
+    void* engine = self->engine;
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004717F8), 0);
+    self->screen = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380((sSelf0020A380*)self);
+    self->fC4 = func_001A3BF0(*(void**)((char*)D_004A28A8 + 0x11C));
+    self->fDC = 0;
+    self->fBC = 0;
+    self->scale = 1.0f;
+    self->speed = 0.1599999964237213f;
+    cUIObj_86A8* o = (cUIObj_86A8*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A25A8));
+    self->obj = o;
+    if (o != 0) {
+        o->setVisible(0);
+    }
+    self->fC0 = 0;
+    self->fE0 = 0;
+    for (int i = 0; i < 8; i++) {
+        self->a[i] = 0;
+        self->b[i] = 0;
+        self->c[i] = 0;
+        self->d[i] = 0;
+    }
+    func_00208F10(self);
+    cOVState_MAP_setupPopup(self);
+    cOVState_MAP_setupPlayerIndicator(self);
+    cOVState_MAP_setupLocalSessionList(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_002087E8__FPv);
@@ -201,7 +288,52 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 
 INCLUDE_ASM("fe/ovstatemap", func_00209E78);
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A088);
+#ifdef SKIP_ASM
+class cUIObj_A088 {
+public:
+    int pad[2];
+    virtual ~cUIObj_A088();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+struct sMap_A088 {
+    char pad_0x0[0xE0];
+    cUIObj_A088* cursor;    // 0xE0
+    cUIObj_A088* a[8];      // 0xE4
+    cUIObj_A088* b[8];      // 0x104
+};
+
+extern "C" void func_0020A088(void* p)
+{
+    sMap_A088* self = (sMap_A088*)p;
+    if (self->cursor != 0) {
+        self->cursor->setVisible(0);
+        delete self->cursor;
+        self->cursor = 0;
+    }
+    for (int i = 0; i < 8; i++) {
+        if (self->a[i] != 0) {
+            self->a[i]->setVisible(0);
+            delete self->a[i];
+            self->a[i] = 0;
+        }
+        if (self->b[i] != 0) {
+            self->b[i]->setVisible(0);
+            delete self->b[i];
+            self->b[i] = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
 

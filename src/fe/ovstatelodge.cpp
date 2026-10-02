@@ -37,7 +37,48 @@ extern "C" void func_001D28F8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+extern char D_00467228[];
+extern char D_004A1F08[];
+extern char D_004A1F10[];
+extern char D_004A1F18[];
+extern char D_004A14F8[];
+extern char D_004A1500[];
+extern char D_004A1508[];
+
+extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467228), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F08));
+    if (a != 0) {
+        cUIText_setAsciiString(a, D_004A14F8);
+    }
+    cUIText* b = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F10));
+    if (b != 0) {
+        cUIText_setAsciiString(b, D_004A1500);
+    }
+    cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F18));
+    if (c != 0) {
+        cUIText_setAsciiString(c, D_004A1508);
+    }
+    func_0028F140(func_0028B180(), 7);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D2A90);
@@ -120,7 +161,53 @@ extern "C" void func_001D32E0(void* self)
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D3340);
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3780);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern void* D_00469788[];
+
+struct sLodge_3780 {
+    char pad_0x0[0x48];
+    int slots[4];       // 0x48
+    int grid[6][5];     // 0x58
+    int fD0;            // 0xD0
+    char pad_0xD4[0x8];
+    int charID;         // 0xDC
+    int fE0;            // 0xE0
+};
+
+extern "C" void* func_001D3780(void* self, int a1, int a2, int a3)
+{
+    signed char idx = a2;
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 0x2C;
+    *(void***)((char*)self + 0x8) = D_00469788;
+    *(signed char*)((char*)self + 0x44) = idx;
+    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    sLodge_3780* s = (sLodge_3780*)self;
+    s->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    s->fE0 = a3;
+    for (int i = 3; i >= 0; i--) {
+        s->slots[i] = 0;
+    }
+    for (int j = 0; j < 5; j++) {
+        s->grid[0][j] = 0;
+        s->grid[1][j] = 0;
+        s->grid[2][j] = 0;
+        s->grid[3][j] = 0;
+        s->grid[4][j] = 0;
+        s->grid[5][j] = 0;
+    }
+    s->fD0 = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onCreateScreen);
@@ -230,5 +317,62 @@ extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D3F80);
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D4268);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern "C" void func_001D4918(void* self);
+extern void* D_004696B8[];
+
+struct sVE_4268 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sTrophy_4268 {
+    char pad_0x0[0x48];
+    int f48;            // 0x48
+    char pad_0x4C[0x4];
+    int charID;         // 0x50
+    int f54;            // 0x54
+    int bank;           // 0x58
+    int count;          // 0x5C
+    int snd[5];         // 0x60
+    int tex[5];         // 0x74
+    char pad_0x88[0x14];
+    int f9C;            // 0x9C
+};
+
+extern "C" void* func_001D4268(void* self, int a1, int a2, int a3, int a4)
+{
+    signed char idx = a2;
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 0x2D;
+    *(void***)((char*)self + 0x8) = D_004696B8;
+    *(signed char*)((char*)self + 0x44) = idx;
+    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    sTrophy_4268* s = (sTrophy_4268*)self;
+    s->f48 = 0;
+    void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    s->charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
+    sVE_4268* vt = *(sVE_4268**)((char*)pi + 0xC);
+    vt[2].fn((char*)pi + vt[2].delta);
+    s->f54 = a3;
+    s->bank = a4;
+    s->count = 0;
+    for (int i = 0; i < 5; i++) {
+        s->snd[i] = -1;
+        s->tex[i] = -1;
+    }
+    s->f9C = -1;
+    func_001D4918(self);
+    return self;
+}
+#endif
 

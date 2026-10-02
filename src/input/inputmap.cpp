@@ -32,7 +32,43 @@ extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputmap", cInputMap_compileMap);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+extern "C" void func_003E6574(void* dst, void* src, int size);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" int cInputMapParser_compileStatement(void* parser, char* src, int* dst, int room, int a4);
+extern char D_0048DD20[];
+
+struct sInputMap_0E18 {
+    int f0;
+    int* offsets;   // 0x4
+    void* parser;   // 0x8
+    int cap;        // 0xC
+    int used;       // 0x10
+    int* code;      // 0x14
+};
+
+extern "C" void cInputMap_compileMap(sInputMap_0E18* self, int idx, char* src)
+{
+    if (self->cap - self->used < 0x100) {
+        int newCap = self->cap + 0x400;
+        int* buf = (int*)operator_new_tag(newCap * 4, D_0048DD20, 0x100, 0);
+        if (self->code != 0) {
+            func_003E6574(buf, self->code, self->cap * 4);
+            if (self->code != 0) {
+                cMemMan_free(self->code);
+            }
+        }
+        self->code = buf;
+        self->cap = newCap;
+    }
+    self->offsets[idx] = self->used;
+    self->used += cInputMapParser_compileStatement(self->parser, src, self->code + self->used, self->cap - self->used, 5);
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputmap", cInputMap_purgeMapFile);

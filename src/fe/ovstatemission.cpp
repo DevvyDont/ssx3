@@ -63,7 +63,58 @@ extern "C" void func_001A3308(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemission", func_001A33A0);
+#ifdef SKIP_ASM
+struct cUIScreen;
+int GetHashValue32(char* str);
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" char* func_0039A708(void* self);
+extern "C" void func_0039F400(void* list, void* item);
+void func_001A34A8(void* self);
+
+struct sVEntry_33A0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001A33A0(void* self, void* item, unsigned int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5: {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
+        void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 6: {
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 9: {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(func_0039A708(item)));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+        func_001A34A8(self);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemission", func_001A34A0__FPv);

@@ -205,7 +205,72 @@ extern "C" void* func_00194A60(void* self)
 
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovstates", func_00194BF0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_00194498(void* obj);
+extern int D_004A29EC;
+extern char D_00460040[];
+extern char D_004A17D8[];
+
+struct sColor_194BF0 {
+    float r, g, b, a;
+};
+
+class cUIObj_194BF0 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual void setColor(const sColor_194BF0& c);
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void setSelected(int v);
+};
+
+extern "C" void func_00194BF0(void* self)
+{
+    cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00460040));
+    if (obj != 0) {
+        if (*(signed char*)((char*)self + 0x55) < 2) {
+            func_00194498(obj);
+        } else if ((*(unsigned char*)((char*)self + 0x1D) & 0x3F) == 5) {
+            obj->setSelected(0);
+            obj->setEnabled(0);
+            sColor_194BF0 c = *(sColor_194BF0*)((char*)obj + 0x1C);
+            c.r = 1.0f;
+            obj->setColor(c);
+        }
+    }
+    if (D_004A29EC == 0) {
+        void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D8));
+        if (o != 0) {
+            func_00194498(o);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetCreate);

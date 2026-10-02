@@ -6,7 +6,54 @@ INCLUDE_ASM("fe/messagecenter", func_00197500);
 
 INCLUDE_ASM("fe/messagecenter", func_001977D0);
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_001979D8);
+#ifdef SKIP_ASM
+extern "C" void func_001988D8(void* self, int idx);
+extern "C" void func_00197B88(void* self);
+extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int a1);
+extern "C" void func_001985B0(void* self);
+extern "C" void func_001985F0(void* self);
+extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
+extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
+
+struct sMsgCenter_979D8 {
+    char pad_0x0[0x1C];
+    int flags;        // 0x1C
+    char pad_0x20[0x2C];
+    int list[64];     // 0x4C
+    int count;        // 0x14C
+    int top;          // 0x150
+    char pad_0x154[0x1C];
+    char* menu;       // 0x170
+};
+
+extern "C" void func_001979D8(sMsgCenter_979D8* self, void* item, int msg)
+{
+    switch (msg) {
+    case 0x15:
+        if (*(int*)((char*)item + 0xC) != 7) {
+            self->flags &= ~8;
+        }
+        break;
+    case 0x16:
+        if (((self->flags >> 3) & 1) == 0) {
+            self->flags |= 8;
+        }
+        if (*(int*)((char*)item + 0xC) == 7 && *(int*)((char*)item + 0x6C) != 0) {
+            int song = self->list[self->top + *(int*)(*(char**)(self->menu + 0xA0) + 0x18)];
+            func_001988D8(self, song);
+            func_00197B88(self);
+            cFEStateRequestLine_updateHilightedSongInfo(self, song);
+            func_001985B0(self);
+            func_001985F0(self);
+            cFEStateRequestLine_updateButtonsText(self, song);
+            cFEStateRequestLine_updateHelpText(self, song);
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00197AD8);
@@ -103,7 +150,81 @@ extern "C" void func_00197BC8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_00197CA0);
+#ifdef SKIP_ASM
+class cMsgWidget_97CA0 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+// PORT: 64-bit `long` masks (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
+struct sMsgCenter_97CA0 {
+    char pad_0x0[0x4C];
+    int list[64];   // 0x4C
+    int count;      // 0x14C
+    int top;        // 0x150
+    char pad_0x154[0x4];
+    ulong newMask;  // 0x158
+    ulong readMask; // 0x160
+    char pad_0x168[0x2C];
+    cMsgWidget_97CA0* icons[8]; // 0x194
+    char pad_0x1B4[0x50];
+    int colNew;     // 0x204
+    int colRead;    // 0x208
+    int colOther;   // 0x20C
+};
+
+static inline void setColors_97CA0(cMsgWidget_97CA0* w, int a, int b)
+{
+    *(int*)((char*)w + 0x78) = a;
+    *(int*)((char*)w + 0x7C) = b;
+}
+
+static inline int isNew_97CA0(sMsgCenter_97CA0* s, int id)
+{
+    return (int)((s->newMask >> id) & 1);
+}
+
+static inline int isRead_97CA0(sMsgCenter_97CA0* s, int id)
+{
+    return (int)((s->readMask >> id) & 1);
+}
+
+static inline void setVisible_97CA0(cMsgWidget_97CA0* w, int v)
+{
+    w->show(v);
+}
+
+extern "C" void func_00197CA0(void* self)
+{
+    sMsgCenter_97CA0* s = (sMsgCenter_97CA0*)self;
+    int i;
+    for (i = 0; i < 8; i++) {
+        setVisible_97CA0(s->icons[i], 0);
+        int idx = s->top + i;
+        if (idx < s->count) {
+            int id = s->list[idx];
+            setVisible_97CA0(s->icons[i], 1);
+            if (isNew_97CA0(s, id)) {
+                setColors_97CA0(s->icons[i], -1, s->colNew);
+            } else if (isRead_97CA0(s, id)) {
+                setColors_97CA0(s->icons[i], -1, s->colRead);
+            } else {
+                setColors_97CA0(s->icons[i], -1, s->colOther);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00197DB8);
@@ -291,7 +412,47 @@ extern "C" void func_001988D8(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_00198988);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
+extern "C" void* func_00198A88(void* self, int i);
+// PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
+int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
+extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3);
+extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int credit);
+extern "C" void func_0039F290(void* stack, void* state);
+extern char D_00460790[];
+
+// PORT: 64-bit `long` mask (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
+struct sMsgCenter_98988 {
+    char pad_0x0[0x10];
+    char* engine;       // 0x10
+    char pad_0x14[0x30];
+    signed char rider;  // 0x44
+    char pad_0x45[0x11B];
+    ulong mask;         // 0x160
+    int price;          // 0x168
+};
+
+extern "C" void func_00198988(sMsgCenter_98988* self, int idx)
+{
+    char* popup = (char*)func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), self->engine, self, self->rider);
+    int n = 0;
+    for (int i = 0; i < 64; i++) {
+        n += (int)((self->mask >> i) & 1);
+    }
+    int song = (int)func_00198A88(self, idx);
+    if (n >= 6) {
+        int cost = func_00198AE8_2(self, idx);
+        cBuyPopupInfo_initBuySong((int*)(popup + 0x48), song, cost, self->price);
+    } else {
+        cBuyPopupInfo_initBuySongByCredit(popup + 0x48, song, 6 - n);
+    }
+    func_0039F290(self->engine + 0x18, popup);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00198A88);

@@ -36,7 +36,45 @@ INCLUDE_ASM("fe/festateruleselect", func_00192088);
 
 INCLUDE_ASM("fe/festateruleselect", func_00192240);
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00192380);
+#ifdef SKIP_ASM
+extern "C" int func_0039A738(void* self);
+extern "C" void func_00192088(void* self, int idx, int a2);
+extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
+extern int D_004410C8[];
+
+struct sRuleSel_2380 {
+    char pad[0x51];
+    unsigned char count[15];
+};
+
+extern "C" void func_00192380(sRuleSel_2380* self, void* item)
+{
+    int mask = D_004410C8[*(int*)((char*)item + 0x18)] << 1;
+    if (func_0039A738(item) == 0) {
+        for (int i = 1; i < 15; i++) {
+            int bit = 1 << i;
+            if ((bit & mask) == 0) {
+                int v = self->count[i] - 1;
+                self->count[i] = v;
+                if ((signed char)v <= 0) {
+                    self->count[i] = 0;
+                }
+            }
+        }
+    } else {
+        for (int i = 1; i < 15; i++) {
+            int bit = 1 << i;
+            if ((bit & mask) == 0) {
+                self->count[i] += 1;
+                func_00192088(self, i, 0);
+            }
+        }
+    }
+    cFEStateRuleSelect_updateMenuColor(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
 

@@ -434,7 +434,51 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032DB40);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032DC10);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032DE20);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+extern void** D_004A3FC8;
+extern void* D_004A3FCC;
+extern int D_004A3FD0;
+extern void** D_004A3FD8;
+extern void* D_004A3FDC;
+extern int D_004A3FE0;
+
+extern "C" void func_0032DE20(void)
+{
+    if (D_004A3FC8 != 0) {
+        for (int i = 0; i < D_004A3FD0; i++) {
+            if (D_004A3FC8[i] != 0) {
+                cMemMan_free(D_004A3FC8[i]);
+            }
+        }
+        if (D_004A3FC8 != 0) {
+            cMemMan_free(D_004A3FC8);
+        }
+        D_004A3FC8 = 0;
+    }
+    if (D_004A3FCC != 0) {
+        cMemMan_free(D_004A3FCC);
+        D_004A3FCC = 0;
+    }
+    if (D_004A3FD8 != 0) {
+        for (int i = 0; i < D_004A3FE0; i++) {
+            if (D_004A3FD8[i] != 0) {
+                cMemMan_free(D_004A3FD8[i]);
+            }
+        }
+        if (D_004A3FD8 != 0) {
+            cMemMan_free(D_004A3FD8);
+        }
+        D_004A3FD8 = 0;
+    }
+    if (D_004A3FDC != 0) {
+        cMemMan_free(D_004A3FDC);
+        D_004A3FDC = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032DF28);
 
@@ -583,7 +627,101 @@ extern "C" void func_0032E4B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E4D0);
+#ifdef SKIP_ASM
+// PORT: this caller passes a tolerance in $f12 that the unit's 4-arg func_0032B6A8 never reads;
+// bind the 5-arg form to the same symbol.
+extern "C" int func_0032B6A8_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float tol) __asm__("func_0032B6A8");
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_E4D0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sSphereVec4 vu0Sub_E4D0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sSphereVec4 vu0Add_E4D0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// segment origin(0x60)+t*dir(0x70) against the plane through *p with normal *n
+extern "C" int func_0032E4D0(void* self, sSphereVec4* p, sSphereVec4* b, sSphereVec4* c, sSphereVec4* n,
+                             sSphereVec4* hit, sSphereVec4* outN, float* outT)
+{
+    sSphereVec4* origin = (sSphereVec4*)((char*)self + 0x60);
+    sSphereVec4* dir = (sSphereVec4*)((char*)self + 0x70);
+    float denom = vu0Dot_E4D0(*dir, *n);
+    if (__builtin_fabsf(denom) < 1.000000013351432e-10f) {
+        return 0;
+    }
+    float t;
+    {
+        sSphereVec4 d = vu0Sub_E4D0(*p, *origin);
+        t = vu0Dot_E4D0(d, *n) / denom;
+    }
+    *outT = t;
+    if (t < 0.0f || 1.0f < t) {
+        return 0;
+    }
+    *hit = vu0Add_E4D0(*origin, vu0Scale_E4D0(*dir, t));
+    *outN = *n;
+    return func_0032B6A8_tol(p, b, c, hit, 9.999999747378752e-05f);
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032E5E8);
 
@@ -1228,7 +1366,66 @@ extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b)
 
 INCLUDE_ASM("intersect/riderspheretree", func_00330128);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_00330250);
+#ifdef SKIP_ASM
+// PORT: func_00330128 is defined as (out, a, b, p) returning out; this caller uses it as a by-value
+// struct return (hidden out pointer in $4), so bind that view to the same symbol.
+sSphereVec4 func_00330128_v(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p) __asm__("func_00330128");
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sSphereVec4 vu0Sub_30250(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_30250(const sSphereVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// does the sphere at self+0x60 (radius self+0x70) touch any edge of triangle a,b,c?
+extern "C" int func_00330250(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c)
+{
+    sSphereVec4 pt;
+    sSphereVec4 tri[3];
+    tri[0] = *a;
+    tri[1] = *b;
+    tri[2] = *c;
+    for (int i = 0; i < 3; i++) {
+        pt = func_00330128_v(&tri[i], &tri[(i + 1) % 3], (sSphereVec4*)((char*)self + 0x60));
+        float dist = vu0Length_30250(vu0Sub_30250(*(sSphereVec4*)((char*)self + 0x60), pt));
+        if (dist < *(float*)((char*)self + 0x70)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_00330360);
