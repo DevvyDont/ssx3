@@ -2,7 +2,16 @@
 
 INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358120);
+#ifdef SKIP_ASM
+extern "C" void func_00370788(void* self, float dt);
+
+extern "C" void func_00358120(void* self)
+{
+    func_00370788(*(void**)((char*)self + 0x10), 0.01666666753590107f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358140);
@@ -109,13 +118,86 @@ extern "C" void func_003584B8(void* self, func_003584B8_cObj* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003584F0);
+#ifdef SKIP_ASM
+extern void* D_004A4040;
+extern void* D_0048EDE0[];
+extern "C" void* func_00354850(void* self, void* a1, int type);
+
+extern "C" void* func_003584F0(void* self, void* a1)
+{
+    char* s = (char*)self;
+    int i;
+    func_00354850(self, a1, 0x12);
+    *(void***)(s + 0xC) = D_0048EDE0;
+    unsigned int* p = (unsigned int*)(s + 0x18);
+    for (i = 0x7F; i != -1; i--, p++) {
+        *p = 0xFFFFFFFF;
+    }
+    D_004A4040 = self;
+    for (i = 0; i < 0x80; i++) {
+        ((unsigned int*)(s + 0x18))[i] = 0xFFFFFFFF;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00358588);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358668);
+#ifdef SKIP_ASM
+extern void* D_004A4040;
+extern void* D_0048EDE0[];
+extern "C" void func_00358998(void* self, int idx);
+// PORT: func_00354920__FPv is the ObjNode deleting dtor; it takes (self, flags).
+extern void* func_00354920_dtor(void* self, int flags) __asm__("func_00354920__FPv");
 
+extern "C" void func_00358668(void* self, int flags)
+{
+    char* s = (char*)self;
+    int i;
+    *(void***)(s + 0xC) = D_0048EDE0;
+    for (i = 0; i < 0x80; i++) {
+        if (((unsigned int*)(s + 0x18))[i] != 0xFFFFFFFF) {
+            func_00358998(self, i);
+        }
+    }
+    D_004A4040 = 0;
+    func_00354920_dtor(self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358700);
+#ifdef SKIP_ASM
+extern void* D_004A4040;
+extern "C" void func_00358998(void* self, int idx);
+
+struct sMpSlot_8700 {
+    unsigned char kind;
+    unsigned char pad[3];
+};
+
+struct sMpMgr_8700 {
+    char pad[0x18];
+    sMpSlot_8700 slots[128];
+};
+
+extern "C" void func_00358700(int kind)
+{
+    int i;
+    if (D_004A4040 != 0) {
+        for (i = 0; i < 0x80; i++) {
+            sMpMgr_8700* m = (sMpMgr_8700*)D_004A4040;
+            if (((unsigned int*)((char*)m + 0x18))[i] != 0xFFFFFFFF && m->slots[i].kind == kind) {
+                func_00358998(m, i);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/multiparticle", func_00358780);
 
@@ -360,7 +442,21 @@ extern "C" void* func_00359270(void* self, void* a, void* stream)
 
 INCLUDE_ASM("object/multiparticle", func_003592D0);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003593D0);
+#ifdef SKIP_ASM
+// PORT: func_00341FE8 really takes (self, id, value); the unit declares it (void*).
+extern "C" void func_00341FE8_set(void* self, int id, float v) __asm__("func_00341FE8");
+
+extern "C" void func_003593D0(void* self, int id, float v)
+{
+    if (id == 0x8C) {
+        *(float*)((char*)self + 0x6C) += v * 0.03333333507180214f;
+    } else {
+        func_00341FE8_set(self, id, v);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00359410);

@@ -325,7 +325,41 @@ extern "C" void func_00343A18(void* self, void* stream)
 
 INCLUDE_ASM("object/debouncenode", func_00343A68);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343B28);
+#ifdef SKIP_ASM
+extern int D_004A3FF0;
+void operator_delete(int*);
+void* func_00344348(void* self);
+
+struct sDebounceElem_343B28 {
+    char data[0x1F4];
+};
+
+struct sDebounce_343B28 {
+    sDebounceElem_343B28 elems[5];
+};
+
+extern "C" void func_00343B28(void* self, int flags)
+{
+    sDebounce_343B28* d = (sDebounce_343B28*)self;
+    int i;
+    for (i = 0; i < 5; i++) {
+        func_00344348(&d->elems[i]);
+    }
+    D_004A3FF0 = 0;
+    if (d->elems != 0) {
+        sDebounceElem_343B28* p = d->elems + 5;
+        while (d->elems != p) {
+            p--;
+            func_00344348(p);
+        }
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00343BC0);
@@ -540,7 +574,22 @@ void* func_00344348(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344368);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+extern "C" void func_003443A8(void* self);
+
+extern "C" void func_00344368(void* self, int a1)
+{
+    char* s = (char*)self;
+    char* g = D_004A5B64;
+    *(int*)(s + 0x4) = a1;
+    *(int*)(s + 0x1DC) = 0;
+    *(float*)(s + 0x1E4) = 1.0f / (float)*(int*)(g + 0x10);
+    func_003443A8(self);
+}
+#endif
 
 INCLUDE_ASM("object/debouncenode", func_003443A8);
 

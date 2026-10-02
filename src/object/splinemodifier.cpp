@@ -56,7 +56,16 @@ extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_00359688);
+#ifdef SKIP_ASM
+// PORT: callers declare func_00359688(void* self); the body also takes the speed in $f12.
+extern "C" void func_00359688_impl(void* self, float speed) __asm__("func_00359688");
+extern "C" void func_00359688_impl(void* self, float speed)
+{
+    *(float*)((char*)self + 0x48) = speed * 27.77777862548828f;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_00359698);
 
@@ -171,7 +180,14 @@ extern "C" void func_0035A3F0(void* self)
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupNodes);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035A550);
+#ifdef SKIP_ASM
+extern "C" void func_0035A550(void* self, float speed)
+{
+    *(float*)((char*)self + 0x14) = speed * 27.77777862548828f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035A560);

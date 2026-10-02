@@ -224,7 +224,28 @@ extern "C" void func_0026ED98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EDD8);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern int D_00445438[];
+extern "C" void func_00161FA0(void* self, int mode);
+
+struct sRiderList_EDD8 {
+    int count;
+    char* riders[1];
+};
+
+extern "C" void func_0026EDD8(void* self)
+{
+    sRiderList_EDD8* list = *(sRiderList_EDD8**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    int n = list->count;
+    int i;
+    for (i = 0; i < n; i++) {
+        func_00161FA0(*(void**)(list->riders[i] + 0xA8), D_00445438[*(int*)((char*)self + 0x630)]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EE68);
@@ -240,7 +261,35 @@ extern "C" void func_0026EE68(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EEA0);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern void* D_004C5830[];
+void cCameraTriggerMan_setInGameTriggers(void* self);
+extern "C" void func_0015DFD8(void* self, int mode);
+extern "C" void func_00161F50(void* cam);
+
+struct sRiderList_EEA0 {
+    int count;
+    char* riders[1];
+};
+
+extern "C" void func_0026EEA0(void* self)
+{
+    cCameraTriggerMan_setInGameTriggers(D_004C5830);
+    sRiderList_EEA0* list = *(sRiderList_EEA0**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    int n = list->count;
+    int i;
+    for (i = 0; i < n; i++) {
+        char* r = list->riders[i];
+        void* cam = *(void**)(r + 0xA8);
+        func_0015DFD8(r, 2);
+        func_00161F50(cam);
+    }
+    *(int*)((char*)self + 0x630) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EF30);
@@ -252,7 +301,20 @@ extern "C" void func_0026EF30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EF80);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern void* D_004C5830[];
+void cCameraTriggerMan_setInGameTriggers(void* self);
+extern "C" void func_0015DFD8(void* self, int mode);
+
+extern "C" void func_0026EF80()
+{
+    cCameraTriggerMan_setInGameTriggers(D_004C5830);
+    func_0015DFD8(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84) + 0x4), 2);
+}
+#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026EFB8);
 

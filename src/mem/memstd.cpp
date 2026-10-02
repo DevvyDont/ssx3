@@ -52,7 +52,28 @@ void MEM_print()
 
 INCLUDE_ASM("mem/memstd", MEM_printclassf);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00252248);
+#ifdef SKIP_ASM
+extern int D_004A2E74;
+extern "C" int func_003E6240(void* p, int size, int flags);
+
+extern "C" int func_00252248(void* self)
+{
+    int ok = 0;
+    if (func_003E6240(self, 0x18, 0) != 0) {
+        unsigned short m = *(unsigned short*)self;
+        if (m == 0x4246 || m == 0x4253) {
+            ok = 1;
+        } else {
+            D_004A2E74 = 1;
+        }
+    } else {
+        D_004A2E74 = 1;
+    }
+    return ok;
+}
+#endif
 
 INCLUDE_ASM("mem/memstd", func_002522B0);
 
@@ -217,7 +238,31 @@ INCLUDE_ASM("mem/memstd", func_002534A8);
 
 INCLUDE_ASM("mem/memstd", func_002535F8);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002536C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A2E9C;
+extern int D_004A5B80;
+extern "C" int func_003AE450(void* p, int a, int b);
+extern "C" void* func_00254368(void* a0, int a1, int a2, int a3);
+int func_003AE938(void*);
+int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
+
+extern "C" void func_002536C8(void* self)
+{
+    char* s = (char*)self;
+    *(int*)(s + 0x0) = 0;
+    *(int*)(s + 0x4) = 0;
+    *(int*)(s + 0xC) = 0;
+    *(int*)(s + 0xC) = func_003AE450(*(void**)(s + 0x38), 1, 0x21);
+    *(int*)(s + 0x40) = 1;
+    func_003AE938(*(void**)(s + 0x38));
+    *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), D_004A5B80, *(int*)(s + 0x30));
+    func_003AE958_i(*(void**)(s + 0x38));
+    D_004A2E9C++;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253860);

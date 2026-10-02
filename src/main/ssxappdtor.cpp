@@ -451,7 +451,20 @@ extern "C" void func_002441C8(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244240);
+#ifdef SKIP_ASM
+extern int D_004428F0[];
+extern int D_005366E8[];
+extern int D_004A2A50;
+extern int D_004A2A54;
+
+extern "C" void func_00244240(int id)
+{
+    D_004A2A50 = D_004428F0[id];
+    D_005366E8[D_004A2A54] = id;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002443C0);
@@ -1037,7 +1050,30 @@ extern "C" void func_00245418(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002454F8);
+#ifdef SKIP_ASM
+extern char D_004A2BC8[];
+extern char D_004A2BD0[];
+extern char* D_004A5B64;
+extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
+extern "C" void func_003A0E90(void* text, void* p);
+
+extern "C" int func_002454F8(void* self, int refresh)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    if (obj != 0) {
+        char buf[0xD0];
+        func_002C27C0(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        func_003A0E90(obj, buf);
+    }
+    if (refresh != 0) {
+        func_00246CF8(self, 0);
+        func_00246CF8(self, 1);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245598);
@@ -1101,7 +1137,26 @@ void func_00245690(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245698);
+#ifdef SKIP_ASM
+extern char D_004A2BC8[];
+extern char D_004A2BD0[];
+extern char* D_004A5B64;
+extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
+extern "C" void func_003A0E90(void* text, void* p);
+
+extern "C" int func_00245698(void* self)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    if (obj != 0) {
+        char buf[0xD0];
+        func_002C27C0(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        func_003A0E90(obj, buf);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245708);
@@ -1126,7 +1181,26 @@ void func_002458B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002458B8);
+#ifdef SKIP_ASM
+extern char D_004A2BC8[];
+extern char D_004A2BD0[];
+extern char* D_004A5B64;
+extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
+extern "C" void func_003A0E90(void* text, void* p);
+
+extern "C" int func_002458B8(void* self)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    if (obj != 0) {
+        char buf[0xD0];
+        func_002C27C0(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        func_003A0E90(obj, buf);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245928);

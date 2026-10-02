@@ -157,7 +157,37 @@ extern "C" void func_003715B0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_reset);
+#ifdef SKIP_ASM
+struct sRGBA_1600 {
+    unsigned char r, g, b, a;
+};
+
+// Function-local static `sRGBA black(0,0,0,0)` and its init guard, spelled out
+// as the globals splat named.
+extern unsigned char D_004A5998;
+extern unsigned char D_004A5999;
+extern unsigned char D_004A599A;
+extern unsigned char D_004A599B;
+extern int D_004A599C;
+
+extern "C" void cDynamicColourEmitter_reset(void* self)
+{
+    int i;
+    cBaseClass_DynamicEmitter_reset(self);
+    for (i = 0; i < *(int*)((char*)self + 0x178); i++) {
+        if (D_004A599C == 0) {
+            D_004A5998 = 0;
+            D_004A5999 = 0;
+            D_004A599A = 0;
+            D_004A599B = 0;
+            D_004A599C = 1;
+        }
+        (*(sRGBA_1600**)((char*)self + 0x204))[i] = *(sRGBA_1600*)&D_004A5998;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00371688);
 
@@ -246,7 +276,61 @@ void* func_00372500(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00372520);
+#ifdef SKIP_ASM
+extern int D_004A422C;
+extern int D_004A41E0;
+extern int D_004A41E4;
+extern int D_004A41E8;
+extern void* D_00493068[];
+
+struct sPtVert_2520 {
+    float x;        // 0x0
+    float y;        // 0x4
+    float z;        // 0x8
+    int w;          // 0xC
+    int r;          // 0x10
+    int g;          // 0x14
+    int b;          // 0x18
+    int a;          // 0x1C
+    char pad[0x10];
+};
+extern sPtVert_2520 D_00501440[];
+
+struct sPtObj_2520 {
+    void** vt;      // 0x0
+    void* owner;    // 0x4
+    int f8;         // 0x8
+};
+
+extern "C" void* func_00372520(sPtObj_2520* self, void* owner)
+{
+    int i;
+    self->owner = owner;
+    self->vt = D_00493068;
+    self->f8 = 0;
+    if (D_004A422C == 0) {
+        sPtVert_2520* v = D_00501440;
+        for (i = 0; i < 0x106; i++, v++) {
+            v->a = 0xFF;
+            v->r = D_004A41E0;
+            v->g = D_004A41E4;
+            v->b = D_004A41E8;
+            v->z = 1.0f;
+            v->w = 0;
+            v->x = 0.0f;
+            if (i & 1) {
+                v->y = 1.0f;
+            } else {
+                v->y = 0.0f;
+            }
+        }
+        D_004A422C = 1;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003725B0);
 
@@ -273,7 +357,53 @@ extern "C" void func_00372660(void* self, int flags)
 
 INCLUDE_ASM("render/particle", func_003726C8);
 
+//100%
 INCLUDE_ASM("render/particle", func_00372AA0);
+#ifdef SKIP_ASM
+extern int D_004A423C;
+extern int D_004A4208;
+extern int D_004A420C;
+extern int D_004A4210;
+extern int D_004A4214;
+extern void* D_00493038[];
+
+struct sPtVert_2AA0 {
+    float x;        // 0x0
+    float y;        // 0x4
+    float z;        // 0x8
+    int w;          // 0xC
+    int r;          // 0x10
+    int g;          // 0x14
+    int b;          // 0x18
+    int a;          // 0x1C
+    char pad[0x10];
+};
+extern sPtVert_2AA0 D_00504560[];
+
+struct sPtObj_2AA0 {
+    void** vt;      // 0x0
+};
+
+extern "C" void* func_00372AA0(sPtObj_2AA0* self)
+{
+    int i;
+    self->vt = D_00493038;
+    if (D_004A423C == 0) {
+        for (i = 0; i < 8; i++) {
+            D_00504560[i].a = D_004A4214;
+            D_00504560[i].r = D_004A4208;
+            D_00504560[i].g = D_004A420C;
+            D_00504560[i].b = D_004A4210;
+            D_00504560[i].z = 1.0f;
+            D_00504560[i].w = 0;
+            D_00504560[i].x = 0.0f;
+            D_00504560[i].y = 0.0f;
+        }
+        D_004A423C = 1;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00372B30);
 
@@ -506,9 +636,36 @@ extern "C" void func_00374B38(sPartLists* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00374C90);
+#ifdef SKIP_ASM
+extern void* D_004A4248;
+extern void* D_00493820[];
 
+extern "C" void* func_00374C90(void* self)
+{
+    *(void***)((char*)self + 0x4) = D_00493820;
+    D_004A4248 = self;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00374CA8);
+#ifdef SKIP_ASM
+extern void* D_004A4248;
+extern void* D_00493820[];
+void operator_delete(int* ptr);
+
+extern "C" void func_00374CA8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x4) = D_00493820;
+    D_004A4248 = 0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00374CE0);
@@ -526,7 +683,95 @@ extern "C" void func_00374CE0(void* self, int a1, int a2, int a3, int a4, int a5
 
 INCLUDE_ASM("render/particle", func_00374D00);
 
+//100%
 INCLUDE_ASM("render/particle", func_00375890);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+
+struct sPtVec4_5890 {
+    float x, y, z, w;
+    sPtVec4_5890(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+};
+
+class cGfxMan_5890 {
+public:
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67(const sPtVec4_5890& pos, void* a, void* b, int tex, float scale);
+};
+
+extern "C" void func_00375890(void* self)
+{
+    char* s = (char*)self;
+    ((cGfxMan_5890*)D_004A5B80)->v67(sPtVec4_5890(*(float*)(s + 0xC), *(float*)(s + 0x10), *(float*)(s + 0x14), 1.0f),
+                                     s + 0x90, s + 0xD0, *(int*)(s + 0x170), 1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003758F8__FPv);
@@ -540,9 +785,57 @@ void* func_003758F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00375918);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern "C" void func_00367B60(void* mgr, int id);
+void operator_delete(int* ptr);
 
+struct sPtVEntry_5918 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00375918(void* self, int flags)
+{
+    char* s = (char*)self;
+    int tex = *(int*)(s + 0x170);
+    if (tex >= 0) {
+        func_00367B60(*(void**)(D_004A5B80 + 0x18F4), tex);
+        char* mgr = D_004A5B80;
+        sPtVEntry_5918* vt = *(sPtVEntry_5918**)(mgr + 0x10D8);
+        vt[50].fn(mgr + vt[50].delta, *(int*)(s + 0x170));
+        *(int*)(s + 0x170) = -1;
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00375990);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+
+struct sPtVEntry_5990 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int, int);
+};
+
+extern "C" void func_00375990(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0x170) < 0) {
+        char* mgr = D_004A5B80;
+        sPtVEntry_5990* vt = *(sPtVEntry_5990**)(mgr + 0x10D8);
+        *(int*)(s + 0x170) = vt[52].fn(mgr + vt[52].delta, *(int*)(s + 0x174), *(int*)(s + 0x178), 2);
+    }
+}
+#endif
 
 extern void* D_00493000[];
 
@@ -2055,7 +2348,34 @@ extern "C" sPartVec4* func_00389810(sPartVec4* v, float s)
 
 INCLUDE_ASM("render/particle", func_00389840);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389C38);
+#ifdef SKIP_ASM
+struct sParticleEntryA0;
+extern "C" sParticleEntryA0* func_0038ABF8(void* self, int i);
+extern "C" void func_00389CB8(sPartVec4* self, void* p, float s);
+extern int D_004A43C4;
+
+struct sPartLib_9C38 {
+    int f0;
+    int count;      // 0x4
+    void* items;    // 0x8
+};
+extern sPartLib_9C38 D_005047F8;
+extern sPartVec4 D_00504810;
+
+extern "C" void func_00389C38(sPartVec4* self, void* p)
+{
+    func_00389260(self);
+    sPartLib_9C38* lib = &D_005047F8;
+    if (lib->count > 0) {
+        func_00389590(self, (sPartVec4*)func_0038ABF8(lib, D_004A43C4), &D_00504810, 1.0f);
+    }
+    if (p != 0) {
+        func_00389CB8(self, p, 1.0f);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00389CB8);
 

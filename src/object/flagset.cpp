@@ -2,7 +2,35 @@
 
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034B7B8);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+void cMemMan_free(void*);
+
+struct sFlagSetVEntryB7B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_0034B7B8(void* self)
+{
+    char* s = (char*)self;
+    void* h = *(void**)(s + 0x60);
+    if (h != 0) {
+        char* mgr = D_004A5B80;
+        sFlagSetVEntryB7B8* vt = *(sFlagSetVEntryB7B8**)(mgr + 0x10D8);
+        vt[77].fn(mgr + vt[77].delta, h);
+        *(void**)(s + 0x60) = 0;
+    }
+    void* m = *(void**)(s + 0x74);
+    if (m != 0) {
+        cMemMan_free(m);
+        *(void**)(s + 0x74) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034B818);
 
@@ -297,7 +325,32 @@ extern "C" void func_0034C898(sFlagSet_C898* self, void* arg)
 
 INCLUDE_ASM("object/flagset", func_0034CAB8);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034CB80);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern void* D_0048FA00[];
+extern "C" void func_0034FBF0(void* self, int flags);
+
+struct sFlagSetVEntryCB80 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern "C" void func_0034CB80(void* self, int flags)
+{
+    char* s = (char*)self;
+    *(void***)(s + 0xC) = D_0048FA00;
+    void* h = *(void**)(s + 0x40);
+    if (h != 0) {
+        char* mgr = D_004A5B80;
+        sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
+        vt[77].fn(mgr + vt[77].delta, h);
+    }
+    func_0034FBF0(self, flags);
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034CBE8);
 
@@ -329,7 +382,46 @@ INCLUDE_ASM("object/flagset", func_0034CF98);
 
 INCLUDE_ASM("object/flagset", func_0034D1E8);
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034D650);
+#ifdef SKIP_ASM
+extern "C" void func_0034D6F0(void* self, float dt);
+
+struct sFsVec4_D650 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float fsDot_D650(const sFsVec4_D650& a, const sFsVec4_D650& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" void func_0034D650(void* self, void* obj)
+{
+    char* s = (char*)self;
+    char* o = (char*)obj;
+    if (*(float*)(s + 0x30) >= 1.0f) return;
+    float d = fsDot_D650(*(sFsVec4_D650*)(o + 0x20), *(sFsVec4_D650*)(o + 0x10));
+    func_0034D6F0(self, d * 0.0010000000474974513f * *(float*)(o + 0x30));
+    if (*(int*)(s + 0x38) == 0) *(int*)(s + 0x38) = 4;
+    if (*(int*)(s + 0x3C) == 0) *(int*)(s + 0x3C) = 4;
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034D6F0);
 

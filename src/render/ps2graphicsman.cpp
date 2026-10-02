@@ -382,7 +382,22 @@ extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
 
 INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_003695D8);
+#ifdef SKIP_ASM
+extern void* D_004A5B80;
+extern void* D_00493950[];
+void operator_delete(int* ptr);
+
+extern "C" void func_003695D8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10D8) = D_00493950;
+    D_004A5B80 = 0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369610);

@@ -49,11 +49,87 @@ extern "C" void func_00345760(cEffectLink* link)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345798);
+#ifdef SKIP_ASM
+extern int D_004A3FF4;
+extern void* D_004912F8[];
 
+struct sEffectLinkObj_5798 {
+    cEffectLink link;  // 0x0
+    void** vt;         // 0x8
+    int value;         // 0xC
+};
+
+extern "C" void* func_00345798(void* self, int a1)
+{
+    sEffectLinkObj_5798* o = (sEffectLinkObj_5798*)self;
+    o->link.next = 0;
+    o->link.prev = 0;
+    o->vt = D_004912F8;
+    o->value = a1;
+    D_004A3FF4++;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/effectlink", func_003457C8);
+#ifdef SKIP_ASM
+extern int D_004A3FF4;
+extern void* D_004912F8[];
 
+struct sEffectLinkObj_57C8 {
+    cEffectLink link;  // 0x0
+    void** vt;         // 0x8
+    int value;         // 0xC
+};
+
+struct sEffVEntry57C8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void* func_003457C8(void* p, void* obj)
+{
+    sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)p;
+    self->link.next = 0;
+    self->link.prev = 0;
+    self->vt = D_004912F8;
+    sEffVEntry57C8* vt = *(sEffVEntry57C8**)obj;
+    self->value = vt[3].fn((char*)obj + vt[3].delta);
+    D_004A3FF4++;
+    return p;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/effectlink", func_00345828);
+#ifdef SKIP_ASM
+extern int D_004A3FF4;
+extern void* D_004912F8[];
+extern void* D_00491340[];
+void operator_delete(int*);
+
+struct sEffectLinkObj_5828 {
+    cEffectLink link;  // 0x0
+    void** vt;         // 0x8
+    int value;         // 0xC
+};
+
+extern "C" void func_00345828(void* self, int flags)
+{
+    sEffectLinkObj_5828* o = (sEffectLinkObj_5828*)self;
+    o->vt = D_004912F8;
+    D_004A3FF4--;
+    o->vt = D_00491340;
+    func_00345760(&o->link);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00345890);
@@ -75,9 +151,50 @@ INCLUDE_ASM("object/effectlink", func_003458C0);
 
 INCLUDE_ASM("object/effectlink", func_003459A8);
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345AD0);
+#ifdef SKIP_ASM
+extern int D_004A3FF8;
+extern void* D_004912B0[];
+void operator_delete(int*);
+extern "C" void func_00370758(int* self, int flags);
+extern "C" void func_00345828(void* self, int flags);
 
+extern "C" void func_00345AD0(void* self, int flags)
+{
+    char* s = (char*)self;
+    *(void***)(s + 0x8) = D_004912B0;
+    int* buf = *(int**)(s + 0x1E0);
+    if (buf != 0) {
+        operator_delete(buf);
+    }
+    D_004A3FF8--;
+    func_00370758((int*)(s + 0x50), 2);
+    func_00345828(self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/effectlink", func_00345B40);
+#ifdef SKIP_ASM
+extern "C" void func_00370788(void* self, float dt);
+
+extern "C" void func_00345B40(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0x1E4) == 0) {
+        void* t = s + 0x50;
+        if (*(float*)(s + 0x50) < 0.0f) {
+            func_00370788(t, 0.01666666753590107f);
+        } else {
+            func_00370788(t, 0.01666666753590107f);
+            if (*(float*)(s + 0x50) <= 0.0f) {
+                *(int*)(s + 0x1E4) = 1;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00345BC8);
@@ -122,7 +239,28 @@ INCLUDE_ASM("object/effectlink", func_00345C90);
 
 INCLUDE_ASM("object/effectlink", func_00345D80);
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00345E88);
+#ifdef SKIP_ASM
+extern int D_004A3FFC;
+extern void* D_00491268[];
+void operator_delete(int*);
+extern "C" void func_00370C08(void* self, int flags);
+extern "C" void func_00345828(void* self, int flags);
+
+extern "C" void func_00345E88(void* self, int flags)
+{
+    char* s = (char*)self;
+    *(void***)(s + 0x8) = D_00491268;
+    int* buf = *(int**)(s + 0x260);
+    if (buf != 0) {
+        operator_delete(buf);
+    }
+    D_004A3FFC--;
+    func_00370C08(s + 0x60, 2);
+    func_00345828(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00345EF8);
@@ -230,11 +368,100 @@ extern "C" void func_003460A0(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00346120);
+#ifdef SKIP_ASM
+extern int D_004A4000;
+extern void* D_00491220[];
+extern "C" void* func_00345798(void* self, int a1);
 
+struct sEffQuat_6120 {
+    float x, y, z, w;
+    sEffQuat_6120(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+} __attribute__((aligned(16)));
+
+struct sEffObj_6120 {
+    cEffectLink link;   // 0x0
+    void** vt;          // 0x8
+    int value;          // 0xC
+    sEffQuat_6120 q;    // 0x10
+    float f20;          // 0x20
+    int f24;            // 0x24
+    int f28;            // 0x28
+    int f2C;            // 0x2C
+    int f30;            // 0x30
+};
+
+struct sEffSrc_6120 {
+    int f0;     // 0x0
+    int f4;     // 0x4
+    int f8;     // 0x8
+    float w;    // 0xC
+    float x;    // 0x10
+    float y;    // 0x14
+    float z;    // 0x18
+    float f1C;  // 0x1C
+    int f20;    // 0x20
+};
+
+extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int a2)
+{
+    func_00345798(self, a2);
+    self->vt = D_00491220;
+    self->f24 = src->f4;
+    self->f28 = src->f8;
+    self->q = sEffQuat_6120(src->x, src->y, src->z, src->w);
+    self->f20 = src->f1C;
+    self->f2C = src->f20;
+    self->f30 = 0;
+    D_004A4000++;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/effectlink", func_003461C0);
+#ifdef SKIP_ASM
+extern int D_004A4000;
+extern void* D_00491220[];
+extern "C" void* func_003457C8(void* p, void* obj);
 
+struct sEffVEntry61C0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_003461C0(void* self, void* stream)
+{
+    func_003457C8(self, stream);
+    *(void***)((char*)self + 0x8) = D_00491220;
+    sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x30);
+    D_004A4000++;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/effectlink", func_00346228);
+#ifdef SKIP_ASM
+extern int D_004A4000;
+extern void* D_00491220[];
+extern "C" void func_00345828(void* self, int flags);
+
+struct sEffectLinkObj_6228 {
+    cEffectLink link;  // 0x0
+    void** vt;         // 0x8
+};
+
+extern "C" void func_00346228(void* self, int flags)
+{
+    ((sEffectLinkObj_6228*)self)->vt = D_00491220;
+    D_004A4000--;
+    func_00345828(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_00346258);

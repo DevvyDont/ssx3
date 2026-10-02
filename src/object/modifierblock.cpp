@@ -797,7 +797,38 @@ extern "C" void func_00353DB8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353E08);
+#ifdef SKIP_ASM
+extern "C" void cSpring_setupNodes(void* self);
+
+struct sSpringDesc_3E08 {
+    float f0, f4, f8, fC, f10, f14, f18;
+    int count;      // 0x1C
+};
+
+struct sSpring_3E08 {
+    int count;      // 0x0
+    float f4, f8, fC, f10, f14, f18, f1C;
+    float seg;      // 0x20
+};
+
+extern "C" void func_00353E08(void* self, sSpringDesc_3E08* d, float len)
+{
+    sSpring_3E08* s = (sSpring_3E08*)self;
+    int n = d->count;
+    s->count = n;
+    s->f4 = d->f0;
+    s->f8 = d->f4;
+    s->fC = d->f8;
+    s->f10 = d->fC;
+    s->f14 = d->f10;
+    s->f18 = d->f14 * 9.999999974752427e-07f;
+    s->f1C = d->f18;
+    s->seg = len / (float)(n - 1);
+    cSpring_setupNodes(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353E80);

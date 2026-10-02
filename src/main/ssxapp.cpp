@@ -70,7 +70,28 @@ extern "C" void cSSXApp_startGameLoad(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00228238);
+#ifdef SKIP_ASM
+extern int D_004A203C;
+extern char D_0047A818[];
+extern "C" void* func_001A1CE8(void* p);
+extern "C" void* func_0017F7B8(void* p);
+
+extern "C" void func_00228238(void* self)
+{
+    D_004A203C = 0;
+    if (*(int*)((char*)self + 0x60) != 0) {
+        void* m = func_001A1CE8(cMemMan_alloc(0xB5AE0, D_0047A818, 0, 0));
+        *(void**)((char*)self + 0x7C) = m;
+        cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
+    } else {
+        void* m = func_0017F7B8(cMemMan_alloc(0x238, D_0047A818, 0, 0));
+        *(void**)((char*)self + 0x80) = m;
+        cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_initload);
 
@@ -113,7 +134,29 @@ INCLUDE_ASM("main/ssxapp", initOnline);
 
 INCLUDE_ASM("main/ssxapp", func_00229180);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229278);
+#ifdef SKIP_ASM
+extern "C" void func_00229398(void* self);
+extern int D_004A2A00;
+void operator_delete(int* p);
+void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
+
+extern "C" void func_00229278(void* self, int flags)
+{
+    func_00229398(self);
+    int* p = *(int**)((char*)self + 4);
+    D_004A2A00 = 0;
+    operator_delete(p);
+    int* r = *(int**)self;
+    if (r != 0) {
+        cCrowdRender2D__cCrowdRender2D(r, 3);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_002292E0);

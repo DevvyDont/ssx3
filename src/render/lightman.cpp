@@ -137,7 +137,26 @@ INCLUDE_ASM("render/lightman", func_0038EC40);
 
 INCLUDE_ASM("render/lightman", func_0038EE78);
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F2A8);
+#ifdef SKIP_ASM
+extern float D_004A4458;
+
+struct sLmCell_F2A8 {
+    char data[0x40];
+};
+extern sLmCell_F2A8 D_00504D80[];
+
+extern "C" sLmCell_F2A8* func_0038F2A8(float* pos)
+{
+    float d2 = pos[0] * pos[0] + pos[1] * pos[1];
+    float d;
+    // PORT: sqrt.s (sqrtf without errno check)
+    __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
+    int i = (int)(D_004A4458 * d);
+    return &D_00504D80[i % 8];
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038F300);
 
@@ -262,9 +281,30 @@ extern "C" void func_0038F6A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F708);
+#ifdef SKIP_ASM
+extern int D_004A5B84;
+extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
 
+extern "C" int func_0038F708(unsigned int madr, int size, int flags)
+{
+    func_00371D10(madr, D_004A5B84, size >> 4, flags);
+    return D_004A5B84;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/lightman", func_0038F738);
+#ifdef SKIP_ASM
+extern int D_004A5B84;
+extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
+
+extern "C" void func_0038F738(unsigned int madr, int size, int flags)
+{
+    func_00371DD8(D_004A5B84, madr, size >> 4, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F768);
@@ -337,19 +377,102 @@ INCLUDE_ASM("render/lightman", func_0038FC48);
 
 INCLUDE_ASM("render/lightman", func_00390198);
 
+//100%
 INCLUDE_ASM("render/lightman", func_00390458);
+#ifdef SKIP_ASM
+extern float D_004A45E4;
+extern float D_004A45E8;
+extern float D_004A45EC;
+extern float D_004A45F0;
+extern float D_004A45F4;
+extern float D_004A45F8;
+
+struct sLmEntry_0458 {
+    float v[6];
+};
+
+struct sLmOwner_0458 {
+    char pad[0x6CA4];
+    sLmEntry_0458 entries[1];
+};
+
+extern "C" void func_00390458(void* self, int idx)
+{
+    char* e = (char*)&((sLmOwner_0458*)self)->entries[idx];
+    *(float*)(e + 0x0) = D_004A45E4;
+    *(float*)(e + 0x4) = D_004A45E8;
+    *(float*)(e + 0x8) = D_004A45EC;
+    *(float*)(e + 0xC) = D_004A45F0;
+    *(float*)(e + 0x10) = D_004A45F4;
+    *(float*)(e + 0x14) = D_004A45F8;
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_003904A0);
 
 INCLUDE_ASM("render/lightman", func_003905E8);
 
+//100%
 INCLUDE_ASM("render/lightman", func_00390C20);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern int D_004A44C0;
+extern int D_004A44C8;
+
+struct sLmVEntry_0C20 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00390C20()
+{
+    char* mgr = D_004A5B80;
+    sLmVEntry_0C20* vt = *(sLmVEntry_0C20**)(mgr + 0x10D8);
+    vt[16].fn(mgr + vt[16].delta, D_004A44C0);
+    if (D_004A44C8 != 0) {
+        D_004A44C8 = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_00390C60);
 
+//100%
 INCLUDE_ASM("render/lightman", func_00390EC8);
+#ifdef SKIP_ASM
+extern int D_004A460C;
+extern int D_004A4698;
+extern int D_004A469C;
+extern float D_004A46B0;
+extern int D_004A46B4;
 
+extern "C" void func_00390EC8(float t)
+{
+    if (D_004A460C != 0) {
+        D_004A4698 = 0;
+        D_004A469C = 0;
+        D_004A46B0 = t;
+        D_004A46B4 = (int)(t * 0.0018072288949042559f);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/lightman", func_00390EF8);
+#ifdef SKIP_ASM
+extern int D_004A460C;
+extern int D_004A46B4;
+
+extern "C" int func_00390EF8()
+{
+    if (D_004A460C != 0 && D_004A46B4 == 0) {
+        D_004A46B4 = -1;
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_00390F20);
 

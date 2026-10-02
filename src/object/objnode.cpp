@@ -98,7 +98,32 @@ void func_00354808_impl(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/objnode", func_00354850);
+#ifdef SKIP_ASM
+extern int D_004A5B78;
+extern int D_004A5B7C;
+extern void* D_00491E00[];
+
+static inline int objNextId_4850(int* c)
+{
+    return (*c)++;
+}
+
+extern "C" void* func_00354850(void* self, void* a1, int type)
+{
+    int id;
+    func_00354720(self, a1, type);
+    *(void***)((char*)self + 0xC) = D_00491E00;
+    if (type == 6) {
+        id = objNextId_4850(&D_004A5B7C);
+    } else {
+        id = objNextId_4850(&D_004A5B78);
+    }
+    *(int*)((char*)self + 0x14) = id;
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", cSortObjNode_cSortObjNode);

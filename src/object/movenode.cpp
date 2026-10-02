@@ -244,7 +244,16 @@ extern "C" void func_00355748(cMoveNode* self)
 
 INCLUDE_ASM("object/movenode", func_00355770);
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355858);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+
+extern "C" void func_00355858(void* self, float secs)
+{
+    *(int*)((char*)self + 0x20) = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00355878__FPvT0);
@@ -328,7 +337,21 @@ extern "C" void func_003559F8(cMoveNode* self, void* a1, float f0, float f1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00355A78);
+#ifdef SKIP_ASM
+extern int D_004A3AC4;
+extern char D_0048E928[];
+extern "C" void* func_00357750(void* self, void* src);
+extern "C" void func_003554B0(cMoveNode* self, void* mod);
+
+extern "C" void func_00355A78(cMoveNode* self)
+{
+    if (D_004A3AC4 == 0) {
+        func_003554B0(self, func_00357750(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), *(void**)((char*)self + 0x18)));
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00355AD0);
@@ -1027,7 +1050,42 @@ extern "C" void func_00357278(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003572E0);
+#ifdef SKIP_ASM
+extern char D_0048F420[];
+
+extern "C" void* func_003572E0(void* self, void* a1, void* mat, float f40, float speed)
+{
+    char* s = (char*)self;
+    *(void**)self = D_0048F420;
+    *(void**)(s + 0xA0) = a1;
+    *(float*)(s + 0x40) = f40;
+    *(float*)(s + 0x48) = speed * 27.77777862548828f;
+    *(int*)(s + 0x44) = -1;
+    *(int*)(s + 0x4C) = 0;
+    *(int*)(s + 0x54) = 0;
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, mat -> self+0x60).
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(s + 0x60), "r"(mat)
+        : "memory");
+    *(int*)(s + 0x50) = 1;
+    sMoveQuad v = *(sMoveQuad*)(s + 0x90);
+    *(sMoveQuad*)(s + 0x10) = v;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357358);
@@ -1295,9 +1353,44 @@ void* func_003579A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003579C8);
+#ifdef SKIP_ASM
+extern void* D_004A4028;
 
+extern "C" void* func_003579C8(void* self)
+{
+    int i;
+    D_004A4028 = self;
+    for (i = 0; i < 4; i++) {
+        ((void**)self)[i] = 0;
+    }
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/movenode", func_00357A00);
+#ifdef SKIP_ASM
+extern void* D_004A4028;
+extern "C" void func_00357FA0(void* p, int flags);
+void operator_delete(int* ptr);
+
+extern "C" void func_00357A00(void* self, int flags)
+{
+    int i;
+    for (i = 0; i < 4; i++) {
+        void* p = ((void**)self)[i];
+        if (p != 0) {
+            func_00357FA0(p, 3);
+        }
+    }
+    D_004A4028 = 0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357A78);

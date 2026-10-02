@@ -413,7 +413,64 @@ extern "C" void func_0035F688(void* self, cStream0035F688* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F6E8);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+
+struct sRmQuad_F6E8 {
+    float x, y, z, w;
+    sRmQuad_F6E8(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+} __attribute__((aligned(16)));
+
+struct sRmDesc_F6E8 {
+    int f0;         // 0x0
+    int f4;         // 0x4
+    float f8;       // 0x8
+    float fC;       // 0xC
+    float f10;      // 0x10
+    float f14;      // 0x14
+    float f18;      // 0x18
+    float f1C;      // 0x1C
+    float f20;      // 0x20
+    float f24;      // 0x24
+    float f28;      // 0x28
+    float f2C;      // 0x2C
+};
+
+struct sRmState_F6E8 {
+    int f0;             // 0x0
+    int f4;             // 0x4
+    float f8;           // 0x8
+    float fC;           // 0xC
+    int f10;            // 0x10
+    float f14;          // 0x14
+    char pad_0x18[0x8];
+    sRmQuad_F6E8 q;     // 0x20
+    float f30;          // 0x30
+    float f34;          // 0x34
+    float f38;          // 0x38
+    float f3C;          // 0x3C
+    int f40;            // 0x40
+};
+
+extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* d)
+{
+    self->f40 = 1;
+    self->f0 = d->f4;
+    self->f30 = d->f8;
+    self->f34 = d->fC;
+    self->f8 = d->f18;
+    self->fC = d->f1C;
+    self->f4 = 0;
+    self->f10 = 0;
+    self->f14 = d->f20 * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+    self->q = sRmQuad_F6E8(d->f24, d->f28, d->f2C, 0.0f);
+    self->f38 = d->f10;
+    self->f3C = d->f14;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F788);

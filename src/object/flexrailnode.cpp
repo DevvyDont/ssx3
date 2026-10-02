@@ -534,7 +534,43 @@ extern "C" void* func_0034AF20(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034AF38);
+#ifdef SKIP_ASM
+extern int D_004A4010;
+extern void* D_0048FBF8[];
+
+struct sFlexRail_AF38 {
+    char pad_0x0[0x60];
+    int f60;            // 0x60
+    char pad_0x64[0x10];
+    int f74;            // 0x74
+    char pad_0x78[0x18];
+    int f90;            // 0x90
+    int slots[60];      // 0x94
+    void** vt;          // 0x184
+};
+
+extern "C" void* func_0034AF38(void* self)
+{
+    sFlexRail_AF38* s = (sFlexRail_AF38*)self;
+    int i;
+    func_0034AF20(self);
+    s->f60 = 0;
+    s->f74 = 0;
+    s->vt = D_0048FBF8;
+    for (i = 0; i < 60; i++) {
+        s->slots[i] = 0;
+    }
+    int id = D_004A4010;
+    s->f90 = id;
+    D_004A4010 = id + 1;
+    if (D_004A4010 >= 2) {
+        D_004A4010 = 0;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AFB8);

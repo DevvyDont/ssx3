@@ -62,13 +62,56 @@ void func_0038B178(void* self)
 
 INCLUDE_ASM("render/bezierman", func_0038B190);
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038B338);
+#ifdef SKIP_ASM
+extern int D_004A44D4;
+
+struct sBezVEntry_B338 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, void*, void*, void*, int);
+};
+
+extern "C" void func_0038B338(void* self, void* a, void* b, void* c, void* d)
+{
+    if (D_004A44D4 == 0) {
+        sBezVEntry_B338* vt = *(sBezVEntry_B338**)((char*)self + 0x4);
+        vt[22].fn((char*)self + vt[22].delta, a, b, c, d, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("render/bezierman", func_0038B370);
 
 INCLUDE_ASM("render/bezierman", func_0038C788);
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038CA08);
+#ifdef SKIP_ASM
+extern void* D_004A5B80;
+extern "C" unsigned int func_0037DF88(void* self, void* a1, void* a2);
+
+struct sBezVec4_CA08 {
+    float x, y, z, w;
+};
+
+extern "C" void func_0038CA08(void* self, void* obj)
+{
+    char* o = (char*)obj;
+    sBezVec4_CA08 a;
+    sBezVec4_CA08 b;
+    a.x = *(float*)(o + 0x158);
+    a.y = *(float*)(o + 0x15C);
+    a.z = *(float*)(o + 0x160);
+    a.w = 1.0f;
+    b.x = *(float*)(o + 0x164);
+    b.y = *(float*)(o + 0x168);
+    b.z = *(float*)(o + 0x16C);
+    b.w = 1.0f;
+    func_0037DF88(D_004A5B80, &a, &b);
+}
+#endif
 
 INCLUDE_ASM("render/bezierman", func_0038CA70);
 

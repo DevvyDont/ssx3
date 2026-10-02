@@ -8,7 +8,49 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_AddBlendedMatrix);
 
 INCLUDE_ASM("render/graphicsman", func_00369A78);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00369C28);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+extern "C" void SYNCTASK_run(int a);
+extern "C" void func_003E5398(int a);
+
+struct sGmVEntryI_9C28 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+class cGmApp_9C28 {
+public:
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+};
+
+extern "C" void func_00369C28(void* self)
+{
+    for (;;) {
+        sGmVEntryI_9C28* vt = *(sGmVEntryI_9C28**)((char*)self + 0x10D8);
+        if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
+        (*(cGmApp_9C28**)(D_004A5B64 + 0x8))->v11();
+        SYNCTASK_run(0);
+        func_003E5398(0);
+        (*(cGmApp_9C28**)(D_004A5B64 + 0x8))->v12();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00369CB0);
@@ -81,7 +123,21 @@ int func_0036A1B0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036A1C0);
+#ifdef SKIP_ASM
+extern int D_004A5B88;
+extern void* D_0053AB40[];
+
+// PORT: the unit declares this (int) returning void*; the arg is a list node pointer.
+extern "C" void* func_0036A1C0(int n)
+{
+    void** node = (void**)n;
+    void** head = &D_0053AB40[D_004A5B88];
+    *node = *head;
+    *head = node;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036A1E8);
 
@@ -214,7 +270,42 @@ extern "C" void func_0036AA60(void* self, int x, int y, char** pp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036ABA0);
+#ifdef SKIP_ASM
+extern float D_004A432C;
+extern float D_004A4330;
+extern int D_004A4334;
+extern float D_004A4338;
+
+struct sGmQuad_ABA0 {
+    int v[4];
+};
+extern sGmQuad_ABA0 D_00504720;
+
+struct sGmEntry_ABA0 {
+    float x;            // 0x0
+    float y;            // 0x4
+    int z;              // 0x8
+    float w;            // 0xC
+    sGmQuad_ABA0 q;     // 0x10
+};
+
+struct sGmOwner_ABA0 {
+    char pad[0x6C64];
+    sGmEntry_ABA0 entries[1];
+};
+
+extern "C" void func_0036ABA0(void* self, int idx)
+{
+    char* e = (char*)&((sGmOwner_ABA0*)self)->entries[idx];
+    *(float*)(e + 0x0) = D_004A432C;
+    *(float*)(e + 0x4) = D_004A4330;
+    *(int*)(e + 0x8) = D_004A4334;
+    *(float*)(e + 0xC) = D_004A4338;
+    *(sGmQuad_ABA0*)(e + 0x10) = D_00504720;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036AC00);
 
@@ -228,7 +319,38 @@ INCLUDE_ASM("render/graphicsman", func_0036C188);
 
 INCLUDE_ASM("render/graphicsman", func_0036C398);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036C740);
+#ifdef SKIP_ASM
+extern float D_004A43D4;
+extern float D_004A43D8;
+extern float D_004A43DC;
+extern float D_004A43E0;
+extern float D_004A43E4;
+extern float D_004A43F0;
+extern float D_004A43F4;
+
+struct sGmEntry_C740 {
+    float v[7];
+};
+
+struct sGmOwner_C740 {
+    char pad[0x6CD4];
+    sGmEntry_C740 entries[1];
+};
+
+extern "C" void func_0036C740(void* self, int idx)
+{
+    char* e = (char*)&((sGmOwner_C740*)self)->entries[idx];
+    *(float*)(e + 0x0) = D_004A43D4;
+    *(float*)(e + 0x4) = D_004A43D8;
+    *(float*)(e + 0x8) = D_004A43DC;
+    *(float*)(e + 0xC) = D_004A43E0;
+    *(float*)(e + 0x10) = D_004A43E4;
+    *(float*)(e + 0x14) = D_004A43F0;
+    *(float*)(e + 0x18) = D_004A43F4;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036C790);
 

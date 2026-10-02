@@ -52,7 +52,26 @@ extern "C" void func_00392908(void* self, const char* str, float x, float y)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003929F8);
+#ifdef SKIP_ASM
+extern void* D_004A3E90;
+extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
+extern "C" void cBXString__cBXString(void* self, int flags);
+
+struct sBXStr_29F8 {
+    char* p;
+};
+
+extern "C" void func_003929F8(void* self, const char* fmt, void* ap, float x, float y)
+{
+    sBXStr_29F8 s;
+    s.p = (char*)D_004A3E90;
+    func_003191C0(&s, fmt, ap);
+    func_00392908(self, s.p, x, y);
+    cBXString__cBXString(&s, 2);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392A60);
@@ -66,7 +85,26 @@ extern "C" void func_00392A60(void* self, const char* str, float x, float y)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00392B40);
+#ifdef SKIP_ASM
+extern void* D_004A3E90;
+extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
+extern "C" void cBXString__cBXString(void* self, int flags);
+
+struct sBXStr_2B40 {
+    char* p;
+};
+
+extern "C" void func_00392B40(void* self, const char* fmt, void* ap, float x, float y)
+{
+    sBXStr_2B40 s;
+    s.p = (char*)D_004A3E90;
+    func_003191C0(&s, fmt, ap);
+    func_00392A60(self, s.p, x, y);
+    cBXString__cBXString(&s, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00392BA8);
@@ -181,7 +219,20 @@ void func_00392DE8(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00392DF0);
+#ifdef SKIP_ASM
+extern "C" float func_0031BF60(float a);
+
+extern "C" void* func_00392DF0(void* self)
+{
+    int i;
+    for (i = 0; i < 0x280; i++) {
+        ((float*)self)[i] = func_0031BF60((float)i * 0.01227184571325779f);
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00393048);
 
@@ -1304,7 +1355,15 @@ int func_00396108(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00396110);
+#ifdef SKIP_ASM
+extern "C" void func_00396110(void* self, float range)
+{
+    *(float*)((char*)self + 0x194) = range;
+    *(float*)((char*)self + 0x198) = 32767.0f / range;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00396128);
