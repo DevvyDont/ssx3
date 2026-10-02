@@ -124,7 +124,72 @@ extern "C" int func_00321108(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputmap", func_00321298);
+#ifdef SKIP_ASM
+struct sBtn_00321298 {
+    float value;    // 0x00
+    int pressed;    // 0x04
+    int released;   // 0x08
+    int down;       // 0x0C
+    int repeat;     // 0x10
+    int timer;      // 0x14
+    int settle;     // 0x18
+};
+struct sBtnSet_00321298 {
+    int count;
+    sBtn_00321298 b[1];
+};
+
+extern "C" void func_00321298(sBtnSet_00321298* self, int n, float* vals)
+{
+    if (self->count < n) {
+        func_003E6448(&self->b[self->count], 0, (n - self->count) * sizeof(sBtn_00321298));
+    }
+    self->count = n;
+    for (int i = 0; i < n; i++) {
+        self->b[i].value = vals[i];
+        if (self->b[i].settle < 3) {
+            self->b[i].pressed = 0;
+            self->b[i].settle++;
+            self->b[i].released = 0;
+        } else {
+            int on = self->b[i].value > 0.0f;
+            if (on == self->b[i].down) {
+                self->b[i].pressed = 0;
+                self->b[i].released = 0;
+            } else {
+                self->b[i].down = on;
+                if (on) {
+                    self->b[i].pressed = 1;
+                    self->b[i].released = 0;
+                } else {
+                    self->b[i].pressed = 0;
+                    self->b[i].released = 1;
+                }
+                self->b[i].settle = 0;
+            }
+        }
+        if (self->b[i].down) {
+            if (self->b[i].timer == 0) {
+                self->b[i].repeat = 1;
+                self->b[i].timer = 0x18;
+            } else {
+                self->b[i].timer--;
+                if (self->b[i].timer <= 0) {
+                    self->b[i].repeat = 1;
+                    self->b[i].timer = 0xC;
+                } else {
+                    self->b[i].repeat = 0;
+                }
+            }
+        } else {
+            self->b[i].repeat = 0;
+            self->b[i].timer = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("input/inputmap", func_00321428);
 

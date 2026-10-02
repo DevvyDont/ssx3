@@ -88,7 +88,45 @@ extern "C" void func_00184780(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_trickVisible);
+#ifdef SKIP_ASM
+extern char D_0045D9F8[];
+extern char D_0045DA08[];
+extern char D_0045DA18[];
+extern char D_0045D960[];
+extern char D_0045D970[];
+extern char D_0045D980[];
+
+extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
+{
+    void* screen = cList_first((cList*)((char*)self + 0x24));
+    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9F8));
+    if (w) {
+        w->v09(on);
+    }
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045DA08));
+    if (w) {
+        w->v09(on);
+    }
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045DA18));
+    if (w) {
+        w->v09(on);
+    }
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D960));
+    if (w) {
+        w->v09(on);
+    }
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D970));
+    if (w) {
+        w->v09(on);
+    }
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D980));
+    if (w) {
+        w->v09(on);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatestore", func_001849B0);
 

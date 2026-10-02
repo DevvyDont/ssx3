@@ -1336,7 +1336,78 @@ extern "C" int func_0032FE40(void* self, void* a, void* b, void* box)
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032FE78);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032FFA0);
+#ifdef SKIP_ASM
+extern "C" int func_00330360(void* self, sSphereVec4* plane, sSphereVec4* p, float* out);
+extern "C" int func_00330250(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sSphereVec4 sphereScale_32FFA0(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void sphereScaleEq_32FFA0(sSphereVec4& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sSphereVec4 sphereSub_32FFA0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" int func_0032FFA0(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
+                             sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
+{
+    sSphereVec4 d = *plane;
+    float t;
+    if (func_00330360(self, plane, a, &t) == 0) {
+        return 0;
+    }
+    if (t < 0.0f) {
+        t = -t;
+        sphereScaleEq_32FFA0(d, -1.0f);
+    }
+    sSphereVec4 p = sphereSub_32FFA0(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FFA0(d, t));
+    *outPos = p;
+    if (func_0032B6A8_tol(a, b, c, outPos, 9.999999747378752e-05f) != 0 || func_00330250(self, a, b, c) != 0) {
+        *outDir = d;
+        *outDist = *(float*)((char*)self + 0x70) - t;
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_003300F8);

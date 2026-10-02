@@ -789,11 +789,148 @@ extern "C" void func_001D58B8(void* self)
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D59A0);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5C28);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern int D_004A19B8;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00152728(void* iface);
+extern "C" void* func_00227F80(void* app);
+extern "C" int func_0014E048(void* be);
+void* func_0014E0C0(void* self, int a1);
+extern "C" void func_00241200(void* self, char* a, int n);
+extern "C" int func_003E62D0(void* buf, int size, int seed);
+extern "C" void* memcpy(void*, const void*, unsigned int);
+
+struct sTrophyRoom_001D5C28 {
+    char pad0[0x1BC];
+    int mode;           // 0x1BC
+    char pad1C0[0x10];
+    char* cur;          // 0x1D0
+    void* buf;          // 0x1D4
+    char pad1D8[0x28];
+    int pending;        // 0x200
+    char pad204[0x24];
+    int state;          // 0x228
+};
+// PORT: D_004A2028 holds the trophy room state pointer.
+extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("D_004A2028");
+
+extern "C" int func_001D5C28(int size)
+{
+    sTrophyRoom_001D5C28* g = D_004A2028_tr;
+    int mode = g->mode;
+    if (mode != 1) {
+        return 1;
+    }
+    if (g->pending != 0) {
+        g->pending = 0;
+        char* base = g->cur;
+        int crc = func_003E62D0(g->cur, func_0014E048(cBE_getBE()) - 4, 0xFBEA);
+        D_004A2028_tr->cur += func_0014E048(cBE_getBE()) - 4;
+        int stored = 0;
+        memcpy(&stored, D_004A2028_tr->cur, 4);
+        D_004A2028_tr->cur += 4;
+        if (crc != stored) {
+            func_00152728(cBE_getInterface_Fv(cBE_getBE(), 5));
+            D_004A2028_tr->buf = 0;
+            D_004A2028_tr->cur = 0;
+            D_004A2028_tr->state = 0;
+            return 0;
+        }
+        D_004A19B8 = mode;
+        func_0014E0C0(cBE_getBE(), (int)base);
+    }
+    if (size > 0) {
+        if (size > 0x4000) {
+            size = 0x4000;
+        }
+        func_00241200(func_00227F80(D_004A28A8), D_004A2028_tr->cur, size);
+        D_004A2028_tr->cur += size;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5DF0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_00227F80(void* app);
+extern "C" int func_0014E048(void* be);
+// PORT: func_00152948__FPv ignores its argument; this caller passes none.
+int func_00152948_r() __asm__("func_00152948__FPv");
+extern "C" int func_00152BA8();
+extern "C" void func_0023CA28(void* self, int a, int b, int c);
+
+struct sMoviePlayer_001D5DF0 {
+    char pad0[0xF8];
+    int fF8;            // 0xF8
+};
+
+struct sTrophyRoom_001D5DF0 {
+    char pad0[0x1B0];
+    int f1B0;           // 0x1B0
+    int f1B4;           // 0x1B4
+    char pad1B8[0x4];
+    int mode;           // 0x1BC
+    char pad1C0[0x4];
+    int size;           // 0x1C4
+    char pad1C8[0x8];
+    int cur;            // 0x1D0
+    int buf;            // 0x1D4
+    char pad1D8[0x28];
+    int pending;        // 0x200
+    char pad204[0x24];
+    int state;          // 0x228
+};
+// PORT: D_004A2028 holds the trophy room state pointer.
+extern sTrophyRoom_001D5DF0* D_004A2028_tr5 __asm__("D_004A2028");
+extern "C" int func_00152688(void* iface);
+extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size);
+
+extern "C" void func_001D5DF0()
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
+    sMoviePlayer_001D5DF0* app = (sMoviePlayer_001D5DF0*)func_00227F80(D_004A28A8);
+    sTrophyRoom_001D5DF0* g = D_004A2028_tr5;
+    g->f1B0 = 1;
+    g->f1B4 = 0;
+    app->fF8 = g->size;
+    int mode = g->mode;
+    switch (mode) {
+    case 2: {
+        int n = func_00152948_r();
+        cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
+        func_0023CA28(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
+        break;
+    }
+    case 1: {
+        D_004A2028_tr5->state = 2;
+        int b = func_00152688(iface);
+        sTrophyRoom_001D5DF0* t = D_004A2028_tr5;
+        t->buf = t->cur = b;
+        func_0023CA28(app, t->size, t->cur, func_0014E048(cBE_getBE()));
+        D_004A2028_tr5->pending = mode;
+        break;
+    }
+    case 0: {
+        int n = func_00152BA8();
+        cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
+        func_0023CA28(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5F38__FPv);

@@ -48,7 +48,40 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_001833D0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_00186518(void* self, int a1);
+extern char D_0045D888[];
+extern char D_0045D898[];
+extern char D_0045D8A8[];
+extern char D_0045D8B8[];
+extern char D_0045D8C8[];
+
+struct sVtEnt_001833D0 { short delta; short index; void (*fn)(void*, int); };
+
+static inline void showObj_001833D0(void* self, char* name, int id)
+{
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+    if (obj != 0) {
+        sVtEnt_001833D0* vt = *(sVtEnt_001833D0**)((char*)obj + 8);
+        vt[9].fn((char*)obj + vt[9].delta, 1);
+        *(int*)((char*)obj + 0x18) = id;
+    }
+}
+
+extern "C" void func_001833D0(void* self, int a1)
+{
+    showObj_001833D0(self, D_0045D888, 5);
+    showObj_001833D0(self, D_0045D898, 6);
+    showObj_001833D0(self, D_0045D8A8, 7);
+    showObj_001833D0(self, D_0045D8B8, 8);
+    showObj_001833D0(self, D_0045D8C8, 9);
+    func_00186518(self, a1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateriderbio", func_00183550);

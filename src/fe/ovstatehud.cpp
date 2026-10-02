@@ -187,7 +187,44 @@ INCLUDE_ASM("fe/ovstatehud", func_001F1338);
 
 INCLUDE_ASM("fe/ovstatehud", func_001F14B0);
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F16C0);
+#ifdef SKIP_ASM
+struct sColor_001F16C0 {
+    float r, g, b, a;
+};
+struct sHudElemDef_001F16C0 {
+    char pad[0x20];
+    signed char align;      // 0x20
+    signed char flags;      // 0x21
+    char pad22[2];
+};
+extern "C" void cOVStateHUD1P_renderTime(void* self, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11);
+
+extern "C" void func_001F16C0(void* self, int a1, int a2, int a3, int a4, int a5, sHudElemDef_001F16C0* defs, int idx, int a8, float* scaleMul, float* posOff, sColor_001F16C0* color)
+{
+    float pos[4];
+    float scale[4];
+    sColor_001F16C0 col;
+    sHudElemDef_001F16C0* e = &defs[idx];
+    func_001E91F8(e, pos);
+    func_001E9290(e, scale);
+    if (scaleMul != 0) {
+        scale[0] *= scaleMul[0];
+        scale[1] *= scaleMul[1];
+    }
+    if (posOff != 0) {
+        pos[0] += posOff[0];
+        pos[1] += posOff[1];
+    }
+    if (color == 0) {
+        func_001E91A8(e, &col);
+    } else {
+        col = *color;
+    }
+    cOVStateHUD1P_renderTime(self, a1, a2, a3, a4, a5, pos, scale, &col, defs[idx].align, defs[idx].flags, a8);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderTime);
 

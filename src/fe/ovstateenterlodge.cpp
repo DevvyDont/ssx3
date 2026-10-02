@@ -335,7 +335,53 @@ extern "C" int func_001F77F0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7800);
+#ifdef SKIP_ASM
+extern "C" void func_0020AB50(int id);
+// PORT: func_0039F190 returns the last node; the unit declares it void.
+void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern char D_0046E050[];
+
+extern "C" void func_001F7800(void* self, void* item, int msg)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5: {
+        int v = *(int*)((char*)item + 0x18);
+        if (v == 0) {
+            ((sMgr_75A0*)D_004A3DD8)->f2A0 = *(int*)((char*)self + 0x9C);
+            func_0030B6F8(D_004A3DD8);
+            func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            func_0029D6D0(func_0028B180());
+            return;
+        }
+        if (v == 2) {
+            func_0020AB50(0x1D);
+            return;
+        }
+        break;
+    }
+    case 6: {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0046E050));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame & 0xFFFF, 1);
+        }
+        break;
+    }
+    default:
+        return;
+    }
+    func_0030B658(D_004A3DD8);
+    func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+}
+#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7958);
 

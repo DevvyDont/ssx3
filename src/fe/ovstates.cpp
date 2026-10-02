@@ -203,7 +203,58 @@ extern "C" void* func_00194A60(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_003E6448(void* p, int v, int n);
+extern "C" void func_00266CD8();
+extern "C" void func_00261008();
+extern "C" void func_0025B688();
+extern "C" void func_00256C50();
+extern "C" void func_00255898();
+extern char D_00460030[];
+extern char D_005308B8[];
+extern int D_00534B30[];
+
+struct sVEnt0_00194AA8 { short delta; short index; void (*fn)(void*); };
+struct sVEnt1_00194AA8 { short delta; short index; void (*fn)(void*, unsigned char); };
+struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
+
+extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00460030), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_003E6448(D_005308B8, 0, 0x20);
+    *(int*)((char*)self + 0x48) = 0;
+    *(char*)((char*)self + 0x54) = 0;
+    func_00266CD8();
+    func_00261008();
+    func_0025B688();
+    func_00256C50();
+    func_00255898();
+    void* iface = cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    D_00534B30[0] = 0;
+    sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
+    vt0[1].fn((char*)iface + vt0[1].delta);
+    func_0028F140(func_0028B180(), 1);
+    char* obj = *(char**)(*(char**)((char*)self + 0x10) + 0xC);
+    *(unsigned char*)((char*)self + 0x55) = 0;
+    for (int i = 0; i < 2; i++) {
+        sVEnt1_00194AA8* vt1 = *(sVEnt1_00194AA8**)(obj + 8);
+        vt1[44].fn(obj + vt1[44].delta, i);
+        sVEnt2_00194AA8* vt2 = *(sVEnt2_00194AA8**)(obj + 8);
+        if (vt2[45].fn(obj + vt2[45].delta) != 0) {
+            (*(unsigned char*)((char*)self + 0x55))++;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstates", func_00194BF0);

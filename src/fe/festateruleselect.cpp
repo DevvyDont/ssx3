@@ -125,7 +125,50 @@ extern "C" void func_00192740(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_001927B0);
+#ifdef SKIP_ASM
+extern "C" int func_0039A738(void* self);
+extern "C" int func_00192948(void* self, int idx);
+
+struct sColor_001927B0 {
+    float r, g, b, a;
+    sColor_001927B0(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+struct sVEnt_001927B0 { short delta; short index; void (*fn)(void*, const sColor_001927B0&); };
+struct sObj_001927B0 { int pad[2]; sVEnt_001927B0* vt; };
+struct sRuleSel_001927B0 { void* owner; int f4; sObj_001927B0* items[8]; };
+
+extern "C" void func_001927B0(sRuleSel_001927B0* self)
+{
+    void* owner = self->owner;
+    if (owner == 0) {
+        return;
+    }
+    int sel = *(signed char*)((char*)owner + 0x95);
+    for (int i = 0; i < 8; i++) {
+        if (self->items[i] == 0) {
+            continue;
+        }
+        if (func_00192948(self, i) == 0) {
+            continue;
+        }
+        if (i == sel) {
+            sObj_001927B0* o = self->items[i];
+            sVEnt_001927B0* e = &o->vt[11];
+            e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (func_0039A738(self->items[i])) {
+            sObj_001927B0* o = self->items[i];
+            sVEnt_001927B0* e = &o->vt[11];
+            e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
+        } else {
+            sObj_001927B0* o = self->items[i];
+            sVEnt_001927B0* e = &o->vt[11];
+            e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192918);

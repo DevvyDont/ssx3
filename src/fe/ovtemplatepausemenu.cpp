@@ -2,9 +2,106 @@
 
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8448);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char* D_00441C30[];
+extern char D_0046F840[];
 
+struct sVec3_001F8448 {
+    float x, y, z;
+};
+struct sVEnt_001F8448 { short delta; short index; void (*fn)(void*, int); };
+
+extern "C" int func_001F8448(void* self)
+{
+    char buf[64];
+    if (*(int*)((char*)self + 0xD4) != 0) {
+        *(int*)((char*)self + 0xD4) = 0;
+        for (int i = 0; i < 14; i++) {
+            sprintf(buf, D_0046F840, D_00441C30[i]);
+            char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf));
+            if (obj != 0) {
+                sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
+                vt[9].fn(obj + vt[9].delta, 0);
+            }
+        }
+        for (int i = 0; i < 8; i++) {
+            if (i < *(int*)((char*)self + 0xBC)) {
+                sprintf(buf, D_0046F840, D_00441C30[((int*)((char*)self + 0x9C))[i]]);
+                char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf));
+                if (obj != 0) {
+                    sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
+                    vt[9].fn(obj + vt[9].delta, 1);
+                    sVec3_001F8448 v;
+                    v.x = 0.0f;
+                    v.z = 0.0f;
+                    v.y = (float)i * 40.0f;
+                    *(sVec3_001F8448*)(obj + 0x44) = v;
+                }
+            }
+        }
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F85C0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_0039E4C0(void* self, int a1);
+extern unsigned char D_004A2468;
+extern char D_004A2138[];
+extern char D_004C8AE8[];
+extern char D_004C8AF8[];
+extern char D_004C8B08[];
+extern char D_004C8B18[];
+
+struct sVEnt_001F85C0 { short delta; short index; void (*fn)(void*, void*); };
+
+static inline void setColor_001F85C0(char* obj, void* c)
+{
+    sVEnt_001F85C0* vt = *(sVEnt_001F85C0**)(obj + 8);
+    vt[11].fn(obj + vt[11].delta, c);
+}
+
+extern "C" void func_001F85C0(void* self, int a1)
+{
+    char buf[32];
+    char* obj;
+    int* sel = (int*)((char*)self + 0x9C);
+    char* flags = (char*)self + 0xD8;
+    int i = 0;
+    while (i < 8 && (sprintf(buf, D_004A2138, i),
+                     obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf)),
+                     i < *(int*)((char*)self + 0xBC))) {
+        if (obj != 0) {
+            if (i == D_004A2468) {
+                if (*(int*)(flags + (*sel << 2)) != 0) {
+                    setColor_001F85C0(obj, D_004C8AF8);
+                } else {
+                    setColor_001F85C0(obj, D_004C8AE8);
+                }
+            } else {
+                if (*(int*)(flags + (*sel << 2)) != 0) {
+                    setColor_001F85C0(obj, D_004C8B18);
+                } else {
+                    setColor_001F85C0(obj, D_004C8B08);
+                }
+            }
+        }
+        sel++;
+        i++;
+    }
+    func_0039E4C0(self, a1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8720__FPv);

@@ -286,7 +286,68 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPlayerIndicator);
 
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_00209E78);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_00471850[];
+
+class cUIObj_9E78 {
+public:
+    int pad[2];
+    virtual ~cUIObj_9E78();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+struct sMap_9E78 {
+    char pad_0x0[0xC0];
+    int count;              // 0xC0
+    char pad_0xC4[0x10];
+    void* screen;           // 0xD4
+    char pad_0xD8[0x8];
+    cUIObj_9E78* cursor;    // 0xE0
+    cUIObj_9E78* a[8];      // 0xE4
+    cUIObj_9E78* b[8];      // 0x104
+};
+
+extern "C" void func_00209E78(void* p)
+{
+    sMap_9E78* self = (sMap_9E78*)p;
+    if (self->cursor != 0) {
+        self->cursor->setVisible(1);
+    }
+    void* list = *(void**)((char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471850)) + 0xA0);
+    int sel = 1;
+    if (list != 0) {
+        sel = *(int*)((char*)list + 0x18);
+    }
+    for (int i = 0; i < self->count; i++) {
+        int cur = sel - 1;
+        if (i == cur) {
+            if (self->a[i] != 0) {
+                self->a[i]->setVisible(0);
+            }
+            if (self->b[i] != 0) {
+                self->b[i]->setVisible(1);
+            }
+        } else {
+            if (self->a[i] != 0) {
+                self->a[i]->setVisible(1);
+            }
+            if (self->b[i] != 0) {
+                self->b[i]->setVisible(0);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A088);

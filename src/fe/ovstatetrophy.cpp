@@ -407,7 +407,58 @@ extern "C" int func_00210B58(void* self, int ok)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210BD8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void* cBXString_Concat(void* self, const char* str);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_003A19F8(void* text, char* str);
+extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern void* D_004A28A8;
+extern char D_0046E808[];
+extern char D_00534FB8[];
+extern char D_00534FC8[];
+extern char D_004A2710[];
+
+struct sBXString_00210BD8 {
+    char* str;
+    sBXString_00210BD8() {}
+    sBXString_00210BD8(const sBXString_00210BD8& o);
+};
+
+extern "C" void func_00210BD8(void* self, char* name, int a)
+{
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E808));
+    if (obj == 0) {
+        return;
+    }
+    unsigned short c8 = *(unsigned short*)(obj + 0xC8);
+    unsigned short c4 = *(unsigned short*)(obj + 0xC4);
+    unsigned short c6 = *(unsigned short*)(obj + 0xC6);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (a != 0) {
+        sBXString_00210BD8 s;
+        cBXString_cBXString2(&s, D_00534FB8);
+        cBXString_Concat(&s, D_004A2710);
+        cBXString_Concat(&s, name);
+        func_003A19F8(obj, s.str);
+        cBXString__cBXString(&s, 2);
+    } else {
+        sBXString_00210BD8 s;
+        cBXString_cBXString2(&s, D_00534FC8);
+        cBXString_Concat(&s, D_004A2710);
+        cBXString_Concat(&s, name);
+        func_003A19F8(obj, s.str);
+        cBXString__cBXString(&s, 2);
+    }
+    func_001A83D8(obj, 0x1E, 8, c8, c4, c6, 0, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
@@ -453,7 +504,55 @@ extern "C" void func_00210DD0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
+#ifdef SKIP_ASM
+extern int D_004A2EEC;
+extern char D_004A2560[];
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void func_0020A6A8(void* self);
+extern "C" void func_00258C50(int a, char* name);
+// PORT: func_0039F190 returns the last node it touched; bound with its value return.
+void* func_0039F190_r(void* list, int a1) __asm__("func_0039F190");
+extern "C" int strlen(const char* s);
+
+extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
+{
+    if (*(int*)((char*)self + 0x40) == 0) {
+        return;
+    }
+    switch (key) {
+    case 6:
+        if (*(int*)((char*)self + 0xE0) == 0) {
+            func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+            *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
+        }
+        break;
+    case 5:
+        if (*(int*)((char*)self + 0xE0) == 0) {
+            // PORT: func_00210F40's unit definition takes these string pointers as int.
+            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 0x3D);
+            func_001CE3C8(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
+        }
+        break;
+    case 0xD: {
+        char* name = (char*)self + 0x9C;
+        if (func_00258160(D_004A2EEC, name, 0x41) != 0) {
+            func_00210BD8(self, name, 0);
+        }
+        char* p = *(char**)((char*)self + 0xE0) + 0x74;
+        if (strlen(p) != 0) {
+            func_00258C50(D_004A2EEC, p);
+            func_00210BD8(self, p, 1);
+        }
+        break;
+    }
+    default:
+        func_0020A6A8(self);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);

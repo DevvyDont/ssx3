@@ -237,7 +237,52 @@ extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* s
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327DA8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int n);
+
+extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
+{
+    if (buf == 0) {
+        return 0;
+    }
+    self->blk.d[0] = a2;
+    self->blk.d[1] = 0;
+    self->blkp = &self->blk;
+    self->blk.d[4] = 1;
+    int len0;
+    int len1;
+    func_003E6574(&len0, buf, 4);
+    func_003E6574(&len1, buf + 4, 4);
+    func_003E6574((char*)self->blkp + 0x8, buf + 0x8, 4);
+    func_003E6574((char*)self->blkp + 0xC, buf + 0xC, 4);
+    func_003E6574((char*)self->blkp + 0x14, buf + 0x10, 0xC);
+    func_003E6574((char*)self->blkp + 0x2C, buf + 0x1C, 0xC);
+    func_003E6574((char*)self->blkp + 0x38, buf + 0x28, 0x24);
+    func_003E6574((char*)self->blkp + 0x5C, buf + 0x4C, 0x24);
+    char* p = buf + 0x70;
+    *(char**)((char*)self->blkp + 0x20) = p;
+    p += (*(int*)((char*)self->blkp + 0xC) + 1) * 0xC;
+    *(char**)((char*)self->blkp + 0x24) = p;
+    p += len1;
+    p += len0;
+    char* b = (char*)self->blkp;
+    if (*(int*)(b + 0x8) != 0) {
+        *(char**)(b + 0x28) = 0;
+    } else {
+        *(char**)(b + 0x28) = *(char**)(b + 0x24);
+    }
+    sQuad_27CC8 v;
+    char* c = (char*)self->blkp;
+    v.x = *(float*)(c + 0x14);
+    v.y = *(float*)(c + 0x18);
+    v.z = *(float*)(c + 0x1C);
+    v.w = 1.0f;
+    self->q = v;
+    return p - buf;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327F18);
@@ -358,7 +403,71 @@ extern "C" int func_00328030(void* self, sVec4_28030* p, void* a2, void* a3, sVe
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328360);
+#ifdef SKIP_ASM
+struct sCell_00328360 {
+    int level;
+    int x, y, z;
+};
+struct sBox_00328360 {
+    float minx, miny, minz, pad;
+    float maxx, maxy, maxz;
+};
+
+extern "C" int func_00328360(sCell_00328360* c, sBox_00328360* b)
+{
+    union {
+        int i;
+        float f;
+    } s;
+    s.i = (c->level + 0x7F) << 23;
+    float scale = s.f;
+    float x0 = ((float)c->x - 0.2f) * scale;
+    if (b->maxx < x0) {
+        return 1;
+    }
+    float y0 = ((float)c->y - 0.2f) * scale;
+    if (b->maxy < y0) {
+        return 1;
+    }
+    float z0 = ((float)c->z - 0.2f) * scale;
+    if (b->maxz < z0) {
+        return 1;
+    }
+    float x1 = ((float)(c->x + 1) + 0.2f) * scale;
+    if (x1 < b->minx) {
+        return 1;
+    }
+    float y1 = ((float)(c->y + 1) + 0.2f) * scale;
+    if (y1 < b->miny) {
+        return 1;
+    }
+    float z1 = ((float)(c->z + 1) + 0.2f) * scale;
+    if (z1 < b->minz) {
+        return 1;
+    }
+    if (x1 < b->maxx) {
+        return 2;
+    }
+    if (y1 < b->maxy) {
+        return 2;
+    }
+    if (z1 < b->maxz) {
+        return 2;
+    }
+    if (b->minx < x1) {
+        return 2;
+    }
+    if (b->miny < y1) {
+        return 2;
+    }
+    if (b->miny < y1) {
+        return 2;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_003284B8);
 

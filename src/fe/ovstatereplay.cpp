@@ -51,7 +51,77 @@ INCLUDE_ASM("fe/ovstatereplay", func_0020DF10);
 
 INCLUDE_ASM("fe/ovstatereplay", func_0020DF38);
 
+//100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onUpdate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void func_0020E900(void* self);
+extern "C" void func_0026FA78(void* p);
+extern "C" void cOVState_REPLAY_setupCameraName(void* self);
+extern "C" void cOVState_REPLAY_setupTicker(void* self);
+extern void* D_004A28A8;
+extern char D_00471C30[];
+extern char D_00471BB0[];
+extern char D_00471BA0[];
+extern char D_004A2728[];
+
+struct sVec3_0020E530 {
+    float x, y, z;
+};
+
+struct sReplay_0020E530 {
+    char pad_0x0[0x40];
+    void* screen;       // 0x40
+    char pad_0x44[0x58];
+    int paused;         // 0x9C
+    char pad_0xA0[0x4];
+    int pos;            // 0xA4
+    int speed;          // 0xA8
+    int start;          // 0xAC
+    int end;            // 0xB0
+};
+
+extern "C" void cOVState_REPLAY_onUpdate(void* p)
+{
+    sReplay_0020E530* self = (sReplay_0020E530*)p;
+    func_0020E900(self);
+    self->pos += self->speed;
+    if (self->pos <= self->start) {
+        self->pos = self->start;
+        self->speed = 0;
+    } else if (self->pos >= self->end) {
+        self->pos = self->end;
+        self->speed = 0;
+    }
+    if (self->pos == self->start) {
+        cUIState_showObjSafe(self, D_00471C30);
+        cUIState_hideObjSafe(self, D_00471BB0);
+    } else if (self->pos == self->end) {
+        cUIState_hideObjSafe(self, D_00471C30);
+        cUIState_showObjSafe(self, D_00471BB0);
+    } else {
+        cUIState_hideObjSafe(self, D_00471C30);
+        cUIState_hideObjSafe(self, D_00471BB0);
+    }
+    char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2728));
+    sVec3_0020E530 v = *(sVec3_0020E530*)(obj + 0x44);
+    v.y = (float)self->pos;
+    *(sVec3_0020E530*)(obj + 0x44) = v;
+    if (self->paused != 0) {
+        cUIState_showObjSafe(self, D_00471BA0);
+    } else {
+        cUIState_hideObjSafe(self, D_00471BA0);
+    }
+    if (self->paused == 0) {
+        func_0026FA78(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+    }
+    cOVState_REPLAY_setupCameraName(self);
+    cOVState_REPLAY_setupTicker(self);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupCameraName);
 

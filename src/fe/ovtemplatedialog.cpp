@@ -21,7 +21,65 @@ INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8F8);
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020AB50);
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CA10);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0020AB50(int state);
+extern "C" void func_00258C00(void* net);
+extern "C" void func_00258790(void* net, int a1);
+extern "C" int func_0030B8C0(void* self);
+extern void* D_004A28A8;
+extern void* D_004A3DD8;
+extern char* D_004A2EEC;
+extern char D_004A2468;
+extern int D_00534B30[];
+extern char D_00535BC8[];
+
+static inline bool notMode4_0020CA10(signed char* g)
+{
+    return g[0x48] != 4;
+}
+
+extern "C" void func_0020CA10(void)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0) {
+        char* net = D_004A2EEC;
+        if (net != 0) {
+            char* game = *(char**)((char*)D_004A28A8 + 0x84);
+            if (game != 0 && *(int*)(game + 0x224) != 0) {
+                func_00258C00(net);
+            }
+            func_00258790(D_004A2EEC, 1);
+            char* n = D_004A2EEC;
+            *(int*)(n + 0x68) = 0xE10;
+            *(int*)(n + 0x64) = 0x708;
+        }
+        func_0020AB50(6);
+    } else if (func_0030B8C0(D_004A3DD8) != 0) {
+        func_0020AB50(2);
+    } else {
+        signed char* g = (signed char*)D_00535BC8;
+        if (g[0x49] == 0 && notMode4_0020CA10(g)) {
+            func_0020AB50(1);
+        } else if (*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x214) == 0xB) {
+            func_0020AB50(4);
+        } else {
+            signed char* g2 = (signed char*)D_00535BC8;
+            if (g2[0x48] == 4) {
+                func_0020AB50(3);
+            } else {
+                func_0020AB50(5);
+            }
+        }
+    }
+    D_004A2468 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CBA0);

@@ -530,7 +530,62 @@ extern "C" void func_002122E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* app);
+extern "C" int func_0023C898(void* mp);
+extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
+extern "C" void func_0039FCC8(void* obj, void* anim, int a2, int a3, int a4);
+extern "C" void func_0039FD38(void* obj);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_004A2770[];
+extern char D_00471E48[];
+extern char D_00471E58[];
+
+class cUIObj_2360 {
+public:
+    int pad[2];
+    virtual ~cUIObj_2360();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
+{
+    void* mp = func_00227F80(D_004A28A8);
+    int v = *(int*)((char*)self + 0x1A8);
+    if (v == *(int*)((char*)self + 0x230)) {
+        return;
+    }
+    *(int*)((char*)self + 0x230) = v;
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2770));
+    if (obj == 0) {
+        return;
+    }
+    if (*(int*)((char*)self + 0x1A8) != 0 && func_0023C898(mp) == 0 && *(int*)((char*)self + 0x1C0) != 6) {
+        void* bank = *(char**)((char*)self + 0x10) + 0x50;
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_00471E48));
+        if (anim != 0) {
+            func_0039FCC8(obj, anim, 9, 0, 0);
+        }
+        cUIObj_2360* t = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
+        t->setVisible(1);
+        cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_00471E58));
+    } else {
+        func_0039FD38(obj);
+        ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38)))->setVisible(0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_002124C8);
@@ -546,5 +601,55 @@ extern "C" void func_002124C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212508);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern int D_004A11B8;
+extern int D_00535C08[];
+extern char D_00471E70[];
+extern char D_00471E80[];
+extern char D_00471E90[];
+struct cAppMan;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cGame_exit(void* game, int a);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00194738(void* self, void* mgr);
+extern "C" void* func_001F3700(void* self, void* mgr);
+void* func_00232720(void* self);
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" void cBENewRaceInterface_setGameEvent(void* iface, int ev);
+extern "C" int func_00146D98(void* self, int index);
+extern "C" void func_0039F400(void* list, void* item);
+
+struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
+
+extern "C" void func_00212508(void* self)
+{
+    func_001D58B8(self);
+    int s = *(int*)((char*)self + 0x22C);
+    if (s == 1) {
+        cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 0);
+    } else if (s == 6) {
+        void* m = func_00194738(cMemMan_alloc(0x4C, D_00471E70, 0, 0), *(void**)((char*)self + 0x10));
+        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, m);
+    } else if (s == 7) {
+        void* m = func_001F3700(cMemMan_alloc(0x58, D_00471E80, 0, 0), *(void**)((char*)self + 0x10));
+        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, m);
+    } else if (s == 0) {
+        void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+        void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+        cBENewRaceInterface_setGameMode(race, 4);
+        cBENewRaceInterface_setGameEvent(race, 0xC);
+        D_00535C08[0] = func_00146D98(player, 0);
+        D_004A11B8 = 1;
+        sVEnt_00212508* vt = *(sVEnt_00212508**)((char*)race + 0xC);
+        vt[1].fn((char*)race + vt[1].delta);
+        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_00471E90, 0x100, 0)));
+    }
+}
+#endif
 

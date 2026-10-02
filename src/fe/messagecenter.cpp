@@ -307,7 +307,75 @@ extern "C" void func_00198118(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHelpText);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+int func_00198AE8(void* self);
+extern char D_004606B0[];
+extern char D_004606C8[];
+extern char D_004606E0[];
+extern char D_004606F8[];
+extern char D_00460710[];
+extern char D_00460720[];
+extern signed char D_00535C11[];
+
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sReqLine_001981F8 {
+    char pad_0x0[0x158];
+    ulong done;     // 0x158
+    ulong sel;      // 0x160
+    int count;      // 0x168
+    int f16C;       // 0x16C
+    char pad_0x170[0x78];
+    cUIText* text;  // 0x1E8
+};
+
+static inline int countSel_001981F8(sReqLine_001981F8* self)
+{
+    int n = 0;
+    for (int i = 0; i < 64; i++) {
+        n += (self->sel >> i) & 1;
+    }
+    return n;
+}
+
+extern "C" void cFEStateRequestLine_updateHelpText(void* p, int idx)
+{
+    sReqLine_001981F8* self = (sReqLine_001981F8*)p;
+    if (self->text == 0) {
+        return;
+    }
+    int on = (self->sel >> idx) & 1;
+    if (on) {
+        ulong bit = (ulong)1 << idx;
+        int only = (self->done & ~bit) == 0;
+        if (only) {
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606B0));
+        } else {
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606C8));
+        }
+    } else if (self->f16C != 0) {
+        if (self->count >= func_00198AE8(self) || countSel_001981F8(self) < 6) {
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606E0));
+        } else {
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606F8));
+        }
+    } else {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 0) {
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_00460710));
+        } else {
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_00460720));
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateButtonsText);
 

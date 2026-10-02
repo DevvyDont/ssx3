@@ -364,7 +364,76 @@ INCLUDE_ASM("intersect/worldsphtree", func_003342D0);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00334458);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00334680);
+#ifdef SKIP_ASM
+struct sBox_00334680 {
+    sWsVec4 min;
+    sWsVec4 max;
+};
+extern "C" void func_0035C698(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void func_00348290(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void func_00335128(void* obj, sBox_00334680* box, sWsVec4* pos, int* cnt, float* dist, int a5);
+
+// PORT: PS2-only VU0 inline asm (in-place vector subtract).
+static inline void wsSubEq_334680(sWsVec4& a, const sWsVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+extern "C" int func_00334680(char* self, sWsVec4* pos, int a2, int mask, float r)
+{
+    sBox_00334680 box;
+    sWsVec4 ext;
+    int cnt;
+    float dist;
+    float zero = 0.0f;
+    cnt = 0;
+    dist = zero;
+    box.min = *pos;
+    box.max = *pos;
+    ext.x = r;
+    ext.y = r;
+    ext.z = r;
+    ext.w = zero;
+    wsSubEq_334680(box.min, ext);
+    wsAddEq_334680(box.max, ext);
+    for (unsigned int i = 0; i < *(unsigned int*)(self + 0x210); i++) {
+        char* o = ((char**)(self + 0x214))[i];
+        int type = *(int*)(o + 8);
+        if (type == 2) {
+            func_0035C698(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
+        } else if (type == 3) {
+            func_00348290(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
+        } else if (type == 1) {
+            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & mask) {
+                func_00335128(o, &box, pos, &cnt, &dist, a2);
+            }
+        }
+    }
+    return cnt;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00334800);
@@ -871,7 +940,57 @@ extern "C" void func_00341FC8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341FE8);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+extern "C" void func_00356B08(void* p);
+
+extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float v)
+{
+    if (msg == 0x64) {
+        *(int*)((char*)self + 0xC) = (int)(v * (float)*(int*)(D_004A5B64 + 0x10));
+    } else if (msg == 0x65) {
+        v = v * 0.03333333507180214f;
+        if (self->min <= v && v <= self->max) {
+            self->value = v;
+        }
+    } else if (msg == 0x66) {
+        v = v * 0.03333333507180214f;
+        self->speed = v / (float)*(int*)(D_004A5B64 + 0x10);
+    } else if (msg == 0x67) {
+        v = v * 0.03333333507180214f;
+        float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
+        if (lim < v) {
+            v = lim;
+        }
+        if (v < 0.0f) {
+            v = 0.0f;
+        }
+        self->max = v;
+        if (v < self->value) {
+            self->value = v;
+        }
+    } else if (msg == 0x68) {
+        v = v * 0.03333333507180214f;
+        float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
+        if (lim < v) {
+            v = lim;
+        }
+        if (v < 0.0f) {
+            v = 0.0f;
+        }
+        self->min = v;
+        if (self->value < v) {
+            self->value = v;
+        }
+    } else if (msg == 0x69) {
+        *(short*)self = 0;
+    } else {
+        func_00356B08((char*)self + 0x30);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342150);
@@ -891,7 +1010,86 @@ extern "C" void func_00342150(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003421A0);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+extern void* D_004908F8[];
+extern "C" void func_0034D9B0(void* p, int a1, int a2, void* obj, int a4);
+extern "C" float func_00351508(void* inst);
+
+struct sSphCtl_003421A0 {
+    int f00;            // 0x00
+    int f04;            // 0x04
+    float f08;          // 0x08
+    float f0C;          // 0x0C
+    float f10;          // 0x10
+    float f14;          // 0x14
+    float f18;          // 0x18
+    float f1C;          // 0x1C
+    float f20;          // 0x20
+    float f24;          // 0x24
+    int f28;            // 0x28
+    int f2C;            // 0x2C
+    char pad30[0x20];
+    void** vt;          // 0x50
+    char pad54[2];
+    unsigned short flags; // 0x56
+    char pad58[0x20];
+    void* inst;         // 0x78
+};
+
+struct sFloat_003421A0 {
+    float v;
+};
+
+static inline void setRate_003421A0(sFloat_003421A0* dst, float v, float dflt)
+{
+    float r;
+    if (v >= 0.0f) {
+        r = v * 0.03333333507180214f;
+    } else {
+        r = dflt;
+    }
+    dst->v = r;
+}
+
+static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info)
+{
+    float r;
+    if (v < 0.0f) {
+        r = *(float*)(info + 0x14);
+    } else {
+        r = v * 0.03333333507180214f;
+    }
+    dst->v = r;
+}
+
+extern "C" void* func_003421A0(sSphCtl_003421A0* self, int a1, char* obj, char* def)
+{
+    func_0034D9B0((char*)self + 0x30, a1, 4, obj, 0);
+    self->vt = D_004908F8;
+    float t = 0.0f;
+    char* info = *(char**)(obj + 0x80);
+    if (self->inst != 0) {
+        t = func_00351508(self->inst);
+    }
+    setRate_003421A0((sFloat_003421A0*)&self->f10, *(float*)(def + 0x20), t);
+    setRateMax_003421A0((sFloat_003421A0*)&self->f14, *(float*)(def + 0x24), info);
+    self->f0C = *(float*)(def + 0x8);
+    self->f08 = *(float*)(def + 0x4) * 9.999999974752427e-07f;
+    self->f18 = *(float*)(def + 0xC) * 0.03333333507180214f / (float)*(int*)(D_004A5B64 + 0x10);
+    self->f2C = *(int*)(def + 0x1C);
+    self->f24 = *(float*)(def + 0x14) * 0.03333333507180214f;
+    self->f1C = *(float*)(def + 0x18);
+    self->f20 = *(float*)(def + 0x10);
+    self->flags |= 1;
+    self->f00 = 0;
+    self->f04 = 0;
+    self->f28 = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003422E8);
@@ -915,7 +1113,94 @@ extern "C" void* func_003422E8(void* self, int a1, sVEntry003422E8** stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342358);
+#ifdef SKIP_ASM
+extern "C" float func_002D1C70();
+extern "C" int func_0034EBA0(void* p);
+
+struct sSphCtl_00342358 {
+    float force;        // 0x00
+    float step;         // 0x04
+    float gain;         // 0x08
+    float bounce;       // 0x0C
+    float min;          // 0x10
+    float max;          // 0x14
+    float maxStep;      // 0x18
+    float damping;      // 0x1C
+    float stiffness;    // 0x20
+    float rest;         // 0x24
+    float vel;          // 0x28
+    int f2C;            // 0x2C
+    float pos;          // 0x30
+    float pos34;        // 0x34
+    float prev;         // 0x38
+    float pos3C;        // 0x3C
+    char pad40[0x16];
+    unsigned short flags; // 0x56
+};
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_00342358(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" int func_00342358(sSphCtl_00342358* s)
+{
+    s->prev = s->pos;
+    float dt = func_002D1C70();
+    float force = s->gain * s->force;
+    if (s->gain < 0.0f) {
+        force = -force;
+    }
+    float vel = s->vel;
+    float maxStep = s->maxStep;
+    float step = vel * dt;
+    float acc = -s->stiffness * (s->pos - s->rest);
+    acc += force;
+    acc += -s->damping * vel;
+    s->step = step;
+    if (maxStep < absf_00342358(step)) {
+        if (step < 0.0f) {
+            s->step = -maxStep;
+        } else {
+            s->step = maxStep;
+        }
+    }
+    float pos = s->pos + s->step;
+    float nv = s->vel + acc * dt;
+    s->pos = pos;
+    s->pos3C = pos;
+    s->vel = nv;
+    if (pos < s->min) {
+        s->pos = s->min;
+        if (absf_00342358(nv) > 0.1f) {
+            s->vel = nv * s->bounce;
+        } else {
+            s->step = 0.0f;
+            s->vel = 0.0f;
+        }
+    } else if (s->max < pos) {
+        s->pos = s->max;
+        if (absf_00342358(nv) > 0.1f) {
+            s->vel = nv * s->bounce;
+        } else {
+            s->step = 0.0f;
+            s->vel = 0.0f;
+        }
+    }
+    s->force = 0.0f;
+    s->pos34 = s->pos;
+    if (func_0034EBA0(&s->pos) == 0) {
+        return 0;
+    }
+    s->flags |= 1;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003424D0);
@@ -1029,7 +1314,53 @@ extern "C" void* func_00342808(void* self, sVEntry00342808** stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342880);
+#ifdef SKIP_ASM
+extern "C" int func_002D1AF0();
+extern "C" void** func_002D1B08(int i);
+
+struct sVEnt_00342880 { short delta; short index; void* fn; };
+typedef void (*Fn0_00342880)(void*);
+typedef void (*Fn1_00342880)(void*, void*);
+typedef int (*Test_00342880)(void*, int);
+
+extern "C" void func_00342880(sSph_342768* self)
+{
+    self->refs = 0;
+    if (self->type == 0) {
+        self->refs = 1;
+    }
+    int t = self->t2C;
+    if (t > 0) {
+        t--;
+        self->t2C = t;
+        if (t > 0) {
+            self->refs = 1;
+        }
+    }
+    sVEnt_00342880* vt = (sVEnt_00342880*)self->vt;
+    ((Fn0_00342880)vt[9].fn)((char*)self + vt[9].delta);
+    if (self->type == 1 || self->t2C <= 0) {
+        for (int i = 0; i < func_002D1AF0(); i++) {
+            void** obj = func_002D1B08(i);
+            sVEnt_00342880* ovt = (sVEnt_00342880*)*obj;
+            if (((Test_00342880)ovt[3].fn)((char*)obj + ovt[3].delta, self->a40) != 0) {
+                self->refs = 1;
+                if (self->f24 < 0.0f) {
+                    sVEnt_00342880* v = (sVEnt_00342880*)self->vt;
+                    ((Fn1_00342880)v[8].fn)((char*)self + v[8].delta, obj);
+                } else {
+                    sVEnt_00342880* v = (sVEnt_00342880*)self->vt;
+                    ((Fn1_00342880)v[7].fn)((char*)self + v[7].delta, obj);
+                }
+            }
+        }
+    }
+    sVEnt_00342880* v2 = (sVEnt_00342880*)self->vt;
+    ((Fn0_00342880)v2[10].fn)((char*)self + v2[10].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003429E0);

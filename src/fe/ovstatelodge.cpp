@@ -241,7 +241,59 @@ void* func_001D3C60(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3C80);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int id);
+extern "C" void func_001D3F80(void* self, int id);
+extern "C" void func_0039F400(void* list, void* item);
+
+struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int); };
+struct sVEntB_001D3C80 { short delta; short index; void (*fn)(void*, int); };
+struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
+
+extern "C" void func_001D3C80(void* self, void* item, unsigned int key)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (key) {
+    case 5:
+        if (func_00157BF0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+                          *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), *(int*)((char*)item + 0x18)) != 0) {
+            void* obj = **(void***)((char*)self + 0x10);
+            sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
+            void* r = vt[4].fn((char*)obj + vt[4].delta, self, (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18));
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    case 6: {
+        int id = (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18);
+        for (int i = 0; i < 4; i++) {
+            sItem_001D3C80* o = ((sItem_001D3C80**)((char*)self + 0x48))[i];
+            if (o != 0) {
+                o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+            }
+        }
+        void* obj = **(void***)((char*)self + 0x10);
+        sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
+        void* r = vt[5].fn((char*)obj + vt[5].delta, self, id);
+        if (r != 0) {
+            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 1:
+        cFEStatePeakRoom_updateHelpText(self, *(int*)((char*)item + 0x18));
+        func_001D3F80(self, *(int*)((char*)item + 0x18));
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3E08);
