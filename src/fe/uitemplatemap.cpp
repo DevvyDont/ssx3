@@ -2,13 +2,94 @@
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onCreateScreen);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_002009D0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_00144BC0(void* iface);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+int GetHashValue32(char* str);
+extern char D_00470600[];
+extern unsigned int D_004A2594;
+static inline int isLabel2009D0(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+// PORT: the unit declares func_002009D0(void*); the body also takes the menu in $5.
+extern "C" void func_002009D0_r(void* self, void* menu) __asm__("func_002009D0");
 
+extern "C" void func_002009D0_r(void* self, void* menu)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (isLabel2009D0(*(int*)((char*)menu + 0x38), D_00470600)) {
+        if (D_004A2594 < 2) {
+            cUIMenu_setSelectedByIndex(menu, 2);
+        } else {
+            cUIMenu_setSelectedByIndex(menu, 2 - *(unsigned char*)((char*)func_00144BC0(iface) + 0x54));
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00200A70);
+#ifdef SKIP_ASM
+extern "C" void cUITemplate_MAP_setupMenuFocus(void* self, int focus);
+extern "C" void cUITemplate_MAP_setupMenus(void* self);
+extern "C" void func_00207430(void* self);
+extern "C" void cUITemplate_MAP_setShowInfo(void* self, int show);
+extern int D_004A259C;
+// PORT: the unit declares func_00200A70(void*); the body also takes a flag in $5.
+extern "C" int func_00200A70_r(void* self, int on) __asm__("func_00200A70");
 
+extern "C" int func_00200A70_r(void* self, int on)
+{
+    if (on != 0) {
+        cUITemplate_MAP_setupMenuFocus(self, D_004A259C);
+        cUITemplate_MAP_setupMenus(self);
+        func_00207430(self);
+        cUITemplate_MAP_setShowInfo(self, *(int*)self);
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00200AC0);
+#ifdef SKIP_ASM
+extern "C" void cUITemplate_MAP_setupMenuFocus(void* self, int focus);
+extern "C" void* func_0028B180(void);
+extern "C" void func_0028F5B8(void* mgr);
+extern int D_004A259C;
 
+extern "C" void func_00200AC0(void* self)
+{
+    cUITemplate_MAP_setupMenuFocus(self, D_004A259C);
+    func_0028F5B8(func_0028B180());
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00200AF0);
+#ifdef SKIP_ASM
+extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
+extern "C" void func_0020D190(void);
+extern "C" void* func_0028B180(void);
+extern "C" void func_0028F678(void* mgr, int a);
+extern void* D_004A28A8;
+extern unsigned int D_004A2594;
+
+extern "C" void func_00200AF0(void* self)
+{
+    cFEAsyncManager_UnloadFEAsyncFile(*(void**)((char*)D_004A28A8 + 0x11C), *(int*)((char*)self + 0x2D8));
+    if (D_004A2594 == 1 || D_004A2594 == 3 || D_004A2594 == 4) {
+        func_0020D190();
+    }
+    func_0028F678(func_0028B180(), 0);
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", func_00200B50);
 

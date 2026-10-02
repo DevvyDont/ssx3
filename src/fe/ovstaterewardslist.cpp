@@ -25,5 +25,21 @@ INCLUDE_ASM("fe/ovstaterewardslist", func_00200288);
 
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
 
+//100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_002006B8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_00144BC0(void* iface);
+extern unsigned int D_004A2594;
+extern int D_004A25A4;
+
+extern "C" void func_002006B8(void)
+{
+    if (D_004A2594 >= 2) {
+        D_004A25A4 = *(int*)((char*)func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
+    }
+}
+#endif
 

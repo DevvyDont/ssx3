@@ -139,7 +139,29 @@ extern "C" void func_00327C00(void* self, void* a1, void* a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
+#ifdef SKIP_ASM
+extern "C" void func_00327C68(void* self, void* a)
+{
+    float* p = (float*)((char*)a + 0x650);
+    int n = 0x50;
+    do {
+        p[0] = 10000000000.0f;
+        p[4] = 10000000000.0f;
+        p[8] = 10000000000.0f;
+        p += 16;
+    } while (n-- > 0);
+    p = (float*)((char*)a + 0x1A90);
+    n = 8;
+    do {
+        p[0] = 10000000000.0f;
+        p[4] = 10000000000.0f;
+        p[8] = 10000000000.0f;
+        p += 16;
+    } while (n-- > 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327CC8);

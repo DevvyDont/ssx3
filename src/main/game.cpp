@@ -218,7 +218,32 @@ extern "C" void func_0022DE98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022DF50);
+#ifdef SKIP_ASM
+class cBEIface22DF50 {
+public:
+    int pad[3];
+    virtual void v01();
+};
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00231250(void* gm, int state, int a, int b);
+void func_00231278(void* gm, int state);
+extern int D_00535C08[];
+extern int D_004A11B8;
+
+extern "C" void func_0022DF50(void* self)
+{
+    func_00231250(*(void**)((char*)self + 0x1B0), 0xB, 0, 1);
+    cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    D_00535C08[0] = *(int*)((char*)self + 0x1BC);
+    D_004A11B8 = 1;
+    iface->v01();
+    func_00231278(*(void**)((char*)self + 0x1B0), 0xA);
+}
+#endif
 
 extern "C" void* func_002312D8(int);
 
@@ -231,7 +256,36 @@ void* func_0022DFD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022DFF0);
+#ifdef SKIP_ASM
+class cRace22DFF0 {
+public:
+    char pad[0xCC];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int);
+};
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void* iface);
+extern "C" void cSectionMan_setSky(void* self, int sky);
+extern "C" void func_00231250(void* gm, int state, int a, int b);
+extern void* D_004A28A8;
+
+extern "C" void func_0022DFF0(void* self)
+{
+    cSectionMan_setSky(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    if (*(int*)((char*)self + 0x1CC) != 0) {
+        *(int*)((char*)self + 0x1CC) = 0;
+        (*(cRace22DFF0**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC))->v05(3);
+    }
+    func_00231250(*(void**)((char*)self + 0x1B0), 0xA, 0, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022E078);

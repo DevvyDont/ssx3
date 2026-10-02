@@ -378,7 +378,18 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032CDB0);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032D028);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D440);
+#ifdef SKIP_ASM
+// PORT: this caller passes a tolerance in $f12 that the unit's 4-arg func_0032B6A8 never reads;
+// bind the 5-arg form to the same symbol.
+extern "C" int func_0032B6A8_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float tol) __asm__("func_0032B6A8");
+
+extern "C" int func_0032D440(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
+{
+    return func_0032B6A8_tol(a, b, c, d, 9.999999747378752e-05f);
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032D470);
 

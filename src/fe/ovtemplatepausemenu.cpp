@@ -178,5 +178,29 @@ extern "C" void func_001F9080(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F90E8);
+#ifdef SKIP_ASM
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" int func_00231AB8(void* game);
+extern void* D_004A28A8;
+extern int D_004781C0[];
+extern int D_004A2868[2];
+
+extern "C" void func_001F90E8(void* self)
+{
+    int* items = D_004781C0;
+    *(int*)((char*)self + 0xBC) = 3;
+    if (func_00231AB8(*(void**)((char*)D_004A28A8 + 0x84)) == 0) {
+        items = D_004A2868;
+        *(int*)((char*)self + 0xBC) = 2;
+    }
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+        ((int*)((char*)self + 0x9C))[i] = items[i];
+    }
+    *(int*)((char*)self + 0x110) = 6;
+    cOVTemplate_PauseMenu_onCreateScreen(self);
+}
+#endif
 

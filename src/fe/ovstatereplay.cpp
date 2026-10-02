@@ -23,5 +23,17 @@ void* func_0020E8E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatereplay", func_0020E900);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void func_00231840(void* game, int a);
+extern "C" void func_0039E510(void* self);
+
+extern "C" void func_0020E900(void* self)
+{
+    func_00231840(*(void**)((char*)D_004A28A8 + 0x84), 1);
+    func_0039E510(self);
+}
+#endif
 

@@ -788,7 +788,58 @@ extern "C" void func_00342718(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342768);
+#ifdef SKIP_ASM
+struct sVec4_342768 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sSphDef_342768 {
+    int f00;
+    short type;
+    short pad06;
+    float time;
+    float f0C;
+    float f10;
+    float x, y, z;
+};
+struct sSph_342768 {
+    int refs;
+    void** vt;
+    int pad08[2];
+    sVec4_342768 pos;
+    float f20;
+    float f24;
+    int t28;
+    int t2C;
+    int type;
+    int pad34[3];
+    int a40;
+};
+extern void* D_00490898[];
+extern char* D_004A5B64;
+
+extern "C" void* func_00342768(sSph_342768* self, sSphDef_342768* def, int a2)
+{
+    self->refs = 1;
+    self->vt = D_00490898;
+    self->a40 = a2;
+    int type = def->type;
+    self->type = type;
+    int t = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
+    self->t28 = t;
+    sVec4_342768 v;
+    v.x = def->x;
+    v.y = def->y;
+    v.z = def->z;
+    v.w = 0.0f;
+    self->pos = v;
+    self->f20 = def->f10 * 100.0f;
+    self->f24 = def->f0C;
+    self->t2C = type == 1 ? t : 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342808);

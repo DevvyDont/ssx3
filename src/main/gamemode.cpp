@@ -2,7 +2,29 @@
 
 INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_002380E8);
+#ifdef SKIP_ASM
+class cMode2380E8 {
+public:
+    virtual ~cMode2380E8();
+};
+void operator_delete(int*);
+extern void* D_00536668[];
+extern int* D_004A2C6C;
+
+extern "C" void func_002380E8(void)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        delete (cMode2380E8*)D_00536668[i];
+    }
+    if (D_004A2C6C != 0) {
+        operator_delete(D_004A2C6C);
+    }
+    D_004A2C6C = 0;
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
 
@@ -194,7 +216,23 @@ INCLUDE_ASM("main/gamemode", func_00239938);
 
 INCLUDE_ASM("main/gamemode", func_00239AA0);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00239CE0);
+#ifdef SKIP_ASM
+struct sScoreTable239CE0 {
+    int f0;
+    int tbl[8][10];
+};
+extern char* D_004A2C70;
+
+extern "C" int func_00239CE0(sScoreTable239CE0* self, int col, int row)
+{
+    if (*(int*)D_004A2C70 < row) {
+        return 0;
+    }
+    return self->tbl[row][col];
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_00239D18);
@@ -226,7 +264,36 @@ INCLUDE_ASM("main/gamemode", func_00239D88);
 
 INCLUDE_ASM("main/gamemode", func_00239EC8);
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023A070);
+#ifdef SKIP_ASM
+extern char* D_004A2C70;
+extern void* D_004A28A8;
+
+extern "C" int func_0023A070(char* self, int player, int secs)
+{
+    short* score = (short*)(self + 4);
+    short* mine = (short*)((char*)score + (player << 1));
+    short s = ++*mine;
+    int other = 0;
+    if (player == 0) {
+        other = 1;
+    }
+    if (*(short*)((char*)score + (other << 1)) >= s) {
+        return 0;
+    }
+    char* m = D_004A2C70;
+    if (*(int*)(m + 8) == 1) {
+        unsigned int t = *(unsigned int*)(m + 0x78);
+        if (t < *(unsigned int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 8)) {
+            return 0;
+        }
+        *(unsigned int*)(m + 0x78) = secs * 60 + t;
+        return 1;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_0023A108);
 
