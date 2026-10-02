@@ -123,13 +123,126 @@ extern "C" void func_0010E028(void* self, int mode, float t)
 
 INCLUDE_ASM("ai/computer", func_0010E098);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010E228);
+#ifdef SKIP_ASM
+struct sVEntry0010E228 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
 
+extern "C" void* func_0028B180();
+extern "C" void func_00298488(void* snd, void* a, void* b);
+extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+void* cBEAggressionInterface_getThis();
+extern "C" void func_00155BF0(void* agg, int a, int b, int c);
+
+extern "C" void func_0010E228(void* a, void* b)
+{
+    func_00298488(func_0028B180(), a, b);
+    func_002A0A30(func_0028B180(), b, a, 1, 0);
+    void* agg = cBEAggressionInterface_getThis();
+    char* ob = (char*)b + 0x6C0;
+    sVEntry0010E228* eb = &(*(sVEntry0010E228**)ob)[7];
+    int rb = eb->fn(ob + eb->delta);
+    char* oa = (char*)a + 0x6C0;
+    sVEntry0010E228* ea = &(*(sVEntry0010E228**)oa)[7];
+    func_00155BF0(agg, rb, ea->fn(oa + ea->delta), 0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_0010E2E8);
+#ifdef SKIP_ASM
+struct sVEntry0010E2E8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
 
+extern "C" void* func_0028B180();
+extern "C" void func_00298488(void* snd, void* a, void* b);
+extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+void* cBEAggressionInterface_getThis();
+extern "C" void func_00155BF0(void* agg, int a, int b, int c);
+
+extern "C" void func_0010E2E8(void* a, void* b)
+{
+    func_00298488(func_0028B180(), a, b);
+    func_002A0A30(func_0028B180(), b, a, 1, 1);
+    void* agg = cBEAggressionInterface_getThis();
+    char* ob = (char*)b + 0x6C0;
+    sVEntry0010E2E8* eb = &(*(sVEntry0010E2E8**)ob)[7];
+    int rb = eb->fn(ob + eb->delta);
+    char* oa = (char*)a + 0x6C0;
+    sVEntry0010E2E8* ea = &(*(sVEntry0010E2E8**)oa)[7];
+    func_00155BF0(agg, rb, ea->fn(oa + ea->delta), 1);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_0010E3A8);
+#ifdef SKIP_ASM
+struct sVEntry0010E3A8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
 
+extern "C" void* func_0028B180();
+extern "C" void func_00298138(void* snd, void* a, void* b);
+extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+void* cBEAggressionInterface_getThis();
+extern "C" void func_00155BF0(void* agg, int a, int b, int c);
+
+extern "C" void func_0010E3A8(void* a, void* b)
+{
+    func_00298138(func_0028B180(), b, a);
+    func_002A0A30(func_0028B180(), b, a, 0, 0);
+    void* agg = cBEAggressionInterface_getThis();
+    char* ob = (char*)b + 0x6C0;
+    sVEntry0010E3A8* eb = &(*(sVEntry0010E3A8**)ob)[7];
+    int rb = eb->fn(ob + eb->delta);
+    char* oa = (char*)a + 0x6C0;
+    sVEntry0010E3A8* ea = &(*(sVEntry0010E3A8**)oa)[7];
+    func_00155BF0(agg, rb, ea->fn(oa + ea->delta), 2);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", func_0010E468);
+#ifdef SKIP_ASM
+struct sVEntry0010E468 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void* func_0028B180();
+extern "C" void func_00298138(void* snd, void* a, void* b);
+extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+extern "C" void func_00298D00(void* snd, void* obj);
+void* cBEAggressionInterface_getThis();
+extern "C" void func_00155BF0(void* agg, int a, int b, int c);
+extern "C" float func_00119400(char* self);
+extern "C" void func_0010E098(void*, int, float);
+
+extern "C" void func_0010E468(void* a, void* b)
+{
+    func_00298138(func_0028B180(), b, a);
+    func_002A0A30(func_0028B180(), b, a, 0, 1);
+    func_00298D00(func_0028B180(), b);
+    void* agg = cBEAggressionInterface_getThis();
+    char* ob = (char*)b + 0x6C0;
+    sVEntry0010E468* eb = &(*(sVEntry0010E468**)ob)[7];
+    int rb = eb->fn(ob + eb->delta);
+    char* oa = (char*)a + 0x6C0;
+    sVEntry0010E468* ea = &(*(sVEntry0010E468**)oa)[7];
+    func_00155BF0(agg, rb, ea->fn(oa + ea->delta), 3);
+    func_0010E098(b, 2, func_00119400(*(char**)((char*)b + 0x790)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010E558);
@@ -301,7 +414,38 @@ INCLUDE_ASM("ai/computer", func_0010F878);
 
 INCLUDE_ASM("ai/computer", func_0010F998);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010FC30);
+#ifdef SKIP_ASM
+struct sVEntry0010FC30 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sAi0010FC30
+{
+    char pad0[0x28];
+    char* mRiders[20];
+    int mCount;
+};
+
+extern "C" int func_0010FC30(sAi0010FC30* self, int team)
+{
+    int n = 0;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        char* obj = self->mRiders[i] + 0x6C0;
+        sVEntry0010FC30* e = &(*(sVEntry0010FC30**)obj)[9];
+        if (e->fn(obj + e->delta))
+        {
+            if (*(int*)(self->mRiders[i] + 0xAB8) == team)
+                n++;
+        }
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010FCD8);
 

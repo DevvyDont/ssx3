@@ -1,6 +1,44 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("animation/mdfarchive", cMdfArchive_getModelPartByIndex);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_003E6574(void*, void*, int);
+extern "C" void func_003B47F8(void* src, void* dst);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_0048A5D0[];
+
+struct sMdfPart_00314CB0
+{
+    char name[0x10];
+    int dataOffset;
+    int dataSize;
+    char pad_0x18[0x48];
+};
+
+struct sMdfArchive_00314CB0
+{
+    int f0;
+    int f4;
+    sMdfPart_00314CB0* parts;
+    char* data;
+};
+
+extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int i)
+{
+    char name[0x40];
+    sprintf(name, D_0048A5D0, &self->parts[i]);
+    char* p = (char*)operator_new_tag(self->parts[i].dataSize + 0x60, name, 0x3000000, 0);
+    func_003E6574(p, &self->parts[i], 0x60);
+    if (self->parts[i].dataSize)
+    {
+        func_003B47F8(self->data + self->parts[i].dataOffset, p + 0x60);
+    }
+    return p;
+}
+#endif
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D60);
 
@@ -57,7 +95,32 @@ extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void*
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/mdfarchive", func_00314F30);
+#ifdef SKIP_ASM
+struct sMdfHandle_00314F30
+{
+    unsigned int kind : 8;
+    unsigned int index : 24;
+};
+
+static inline void SetKind_00314F30(sMdfHandle_00314F30* h, int v) { h->kind = v; }
+static inline void SetIndex_00314F30(sMdfHandle_00314F30* h, int v) { h->index = v; }
+
+// PORT: func_00314EF0's value slot receives the handle struct by value here.
+void func_00314EF0_handle(sMdfIndex_00314E88* self, unsigned int hash, sMdfHandle_00314F30 value) __asm__("func_00314EF0");
+
+extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
+{
+    sMdfHandle_00314F30 h;
+    for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
+    {
+        SetKind_00314F30(&h, kind);
+        SetIndex_00314F30(&h, i);
+        func_00314EF0_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), h);
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/mdfarchive", func_00314FE8);
 

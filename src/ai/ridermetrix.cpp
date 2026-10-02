@@ -192,7 +192,53 @@ extern "C" void func_00117708(void* self, float seconds)
 
 INCLUDE_ASM("ai/ridermetrix", func_00117718);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117838);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_00117838(void* p)
+{
+    char* self = (char*)p;
+    *(int*)(self + 0x14) = 0;
+    *(float*)(self + 0x18) = 1.0f;
+    *(int*)(self + 0x1C) = 0;
+    *(int*)(self + 0x0) = 0;
+    *(int*)(self + 0x4) = 0;
+    *(int*)(self + 0x8) = 0;
+    *(int*)(self + 0xC) = 0;
+    *(int*)(self + 0x10) = 0;
+    *(int*)(self + 0x20) = 0;
+    *(float*)(self + 0x24) = -1.0f;
+    *(int*)(self + 0x28) = 0;
+    *(float*)(self + 0x2C) = -1.0f;
+    *(float*)(self + 0x30) = -1.0f;
+    *(int*)(self + 0x34) = 0;
+    *(int*)(self + 0x38) = 0;
+    *(int*)(self + 0x3C) = 0;
+    *(float*)(self + 0x40) = -1.0f;
+    *(int*)(self + 0x44) = 0;
+    *(int*)(self + 0x48) = 0;
+    *(int*)(self + 0x4C) = 0;
+    *(int*)(self + 0x50) = 0;
+    *(int*)(self + 0x54) = 0;
+    *(int*)(self + 0x58) = 0;
+    *(int*)(self + 0x5C) = 0;
+    *(int*)(self + 0x70) = 0;
+    *(float*)(self + 0x6C) = -1.0f;
+    *(int*)(self + 0x74) = 0;
+    *(float*)(self + 0x78) = -1.0f;
+    *(int*)(self + 0x7C) = 0;
+    *(int*)(self + 0x80) = 0;
+    *(int*)(self + 0x84) = 0;
+    *(int*)(self + 0x88) = 0;
+    *(int*)(self + 0x8C) = 0;
+    *(int*)(self + 0x90) = 0;
+    *(int*)(self + 0x94) = 0;
+    *(int*)(self + 0x98) = 0;
+    func_003E6448(self + 0x60, 0, 0xC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00117900__FPv);
@@ -547,7 +593,38 @@ INCLUDE_ASM("ai/ridermetrix", func_00119608);
 
 INCLUDE_ASM("ai/ridermetrix", func_00119708);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_001197D8);
+#ifdef SKIP_ASM
+extern "C" void func_00119068(void* self_, int value);
+
+// PORT: g++ >? (max) operator.
+extern "C" float func_001197D8(void* p, int v)
+{
+    char* self = (char*)p;
+    func_00119068(self, v);
+    if (v >= 0x23)
+    {
+        (*(int*)(self + 0x54))++;
+        if (*(int*)(*(char**)(self + 0x1AC) + 0x2F4) >= 6)
+            (*(int*)(self + 0x58))++;
+    }
+    else if (v >= 0x13)
+    {
+        (*(int*)(self + 0x50))++;
+    }
+    else
+    {
+        (*(int*)(self + 0x4C))++;
+    }
+    float t = *(float*)(self + 0x40);
+    *(float*)(self + 0x48) = t >? *(float*)(self + 0x48);
+    *(int*)(self + 0x5C) = 0;
+    *(float*)(self + 0x40) = -1.0f;
+    *(float*)(self + 0x44) += t;
+    return 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119898);
 
@@ -636,7 +713,32 @@ extern "C" float func_00119A38(void* self)
 
 INCLUDE_ASM("ai/ridermetrix", func_00119AD8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00119B08);
+#ifdef SKIP_ASM
+extern "C" int func_0011A7A8(void* self);
+extern "C" int func_00117948(void* self);
+
+extern "C" float func_00119B08(void* self, int flag)
+{
+    if (flag)
+    {
+        (*(int*)((char*)self + 0x12C))++;
+        func_00117B88(self, 0x2D, 0, 0, 1.5f);
+    }
+    else
+    {
+        (*(int*)((char*)self + 0x124))++;
+    }
+    float r = 0.0f;
+    *(int*)((char*)self + 0x1A0) += func_0011A7A8(self);
+    if (func_00117948(self) > 0)
+        r = -0.25f;
+    func_00117838(self);
+    func_001175F8(self);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
 
@@ -658,11 +760,63 @@ extern "C" float func_00119C38(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00119C98);
+#ifdef SKIP_ASM
+extern "C" void func_0011A168(void* self, int a, int b, int c, int d);
+
+extern "C" float func_00119C98(void* self, int v)
+{
+    func_0011A168(self, 0, 0, 0, 0);
+    float r = 0.0f;
+    if (*(float*)((char*)self + 0x14) > r)
+    {
+        *(int*)((char*)self + 0x0) = v;
+        *(float*)((char*)self + 0x34) = r;
+        *(float*)((char*)self + 0x38) = r;
+        *(int*)((char*)self + 0x4) = 0;
+        *(int*)((char*)self + 0xC) = 0;
+        *(int*)((char*)self + 0x10) = 0;
+        *(float*)((char*)self + 0x40) = -1.0f;
+        *(int*)((char*)self + 0x8) = 1;
+        func_003E6448((char*)self + 0x60, 0, 0xC);
+    }
+    func_001176F8(self);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119D40);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119E38);
+#ifdef SKIP_ASM
+extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
+
+extern "C" float func_00119E38(void* self, int a, int b)
+{
+    float r = 0.0f;
+    int v20 = *(int*)((char*)self + 0x20);
+    int v28 = *(int*)((char*)self + 0x28);
+    if (*(int*)((char*)self + 0x70))
+    {
+        *(float*)((char*)self + 0x34) = r;
+        *(float*)((char*)self + 0x24) = -1.0f;
+        *(int*)((char*)self + 0x20) = 0;
+    }
+    else
+    {
+        r = func_0011A228(self, 0, 0, 0, 0, 1);
+        func_00117838(self);
+    }
+    *(int*)((char*)self + 0xC) = v20;
+    *(int*)((char*)self + 0x10) = v28;
+    *(int*)((char*)self + 0x4) = b;
+    *(int*)((char*)self + 0x0) = a;
+    *(int*)((char*)self + 0x30) = 0;
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119EF8);
 

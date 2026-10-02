@@ -338,7 +338,37 @@ extern "C" void func_00146E10(void* self, int index, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00146E98);
+#ifdef SKIP_ASM
+int cBENewPlayerInterface_getPlayerID(int index);
+
+struct sPlayerSlot_00146E98
+{
+    int state;          // 0x0 (0xC in sPlayerCharEntry)
+    char pad_0x04[0x18];
+};
+
+extern sPlayerSlot_00146E98 D_00534FEC[];
+
+extern "C" int func_00146E98(void* self, int second)
+{
+    int n = 0;
+    for (int i = 0; i < 6; i++)
+    {
+        int id = cBENewPlayerInterface_getPlayerID(i);
+        if (D_00534FEC[id].state >= 0)
+        {
+            if (second == 0)
+                return i;
+            if (n == 1)
+                return i;
+            n++;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("be/beintplayer", func_00146F88);
 
@@ -690,9 +720,49 @@ extern "C" void* func_00147908(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147980);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBENewPlayerInterface_getPlayerID(int index);
+extern int D_004A6CA8[];
 
+extern "C" int func_00147980(void* self, int index, int bit)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    int c = D_00534FE0[id].mCharID;
+    int off = profile * 0x9B50 + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    p = p + (bit / 32) * 4;
+    int mask = 1 << bit;
+    return (*(unsigned int*)(p + 0xF08) & mask) != 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147A30);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBENewPlayerInterface_getPlayerID(int index);
+extern int D_004A6CA8[];
+
+extern "C" void func_00147A30(void* self, int index, int bit, int on)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    int c = D_00534FE0[id].mCharID;
+    int off = profile * 0x9B50 + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    p += 0xF08;
+    int w = bit / 32;
+    int b = bit - w * 32;
+    if (on)
+        *(unsigned int*)(p + (w << 2)) |= 1 << b;
+    else
+        *(unsigned int*)(p + (w << 2)) &= ~(1 << b);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147CB8);
@@ -1027,7 +1097,21 @@ extern "C" signed char func_001488F0(void* self, int rider)
 
 INCLUDE_ASM("be/beintplayer", func_00148950);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintplayer", func_00148AA8);
+#ifdef SKIP_ASM
+extern "C" void func_00148AA8(void* self, int rider, int value)
+{
+    int v = value * 5;
+    func_00148470(self, rider, v);
+    func_00148610(self, rider, v);
+    func_001483A0(self, rider, v);
+    func_001486E0(self, rider, v);
+    func_001487B0(self, rider, v);
+    func_00148880(self, rider, v);
+    func_00148540(self, rider, v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148B78);
@@ -1100,7 +1184,56 @@ extern "C" signed char func_00148D58(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintplayer", func_00148D80);
+#ifdef SKIP_ASM
+int cBENewPlayerInterface_isMissionMan(int index);
 
+struct sCharStat_005308D8
+{
+    signed char v[15];
+};
+extern sCharStat_005308D8 D_005308D8[];
+
+extern "C" float func_00148D80(void* self, int rider, int value)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    if (cBENewPlayerInterface_isMissionMan(rider))
+        return 0.5f;
+    int v;
+    if (value > 0)
+        v = value;
+    else
+        v = D_00535538[profile].e[c].v[3] / 5;
+    return (float)v / (float)D_005308D8[c].v[0xB];
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintplayer", func_00148E68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBENewPlayerInterface_isMissionMan(int index);
+
+struct sCharStat_00148E68
+{
+    signed char v[15];
+};
+extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("D_005308D8");
+
+extern "C" float func_00148E68(void* self, int rider, int value)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    if (cBENewPlayerInterface_isMissionMan(rider))
+        return 0.5f;
+    int v;
+    if (value > 0)
+        v = value;
+    else
+        v = D_00535538[profile].e[c].v[3] / 5;
+    return (float)v / (float)D_005308D8_00148E68[c].v[0xB];
+}
+#endif
 

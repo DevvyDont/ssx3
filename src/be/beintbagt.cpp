@@ -137,7 +137,37 @@ extern "C" int func_0014FE08(void* self, int rider, int idx, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014FEA8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern char D_00530EC0_raw[] __asm__("D_00530EC0");
+struct sPad20;
+extern sPad20 D_0045AEB8;
+
+extern "C" int func_0014FEA8(void* self, int rider, int idx, int second)
+{
+    char* t = (char*)&D_0045AEB8 + idx * 0x14;
+    if (*(unsigned short*)(t + 0xC) == 0)
+        return -1;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int r;
+    if (second)
+    {
+        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 0x13EC);
+        r = (unsigned char)p[1];
+    }
+    else
+    {
+        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 0x13EC);
+        r = (unsigned char)p[0];
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("be/beintbagt", func_0014FF90);
 

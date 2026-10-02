@@ -195,7 +195,30 @@ extern "C" void func_0014EBD8(void* self, const char* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EBF8);
+#ifdef SKIP_ASM
+struct sCharEntry_0014EBF8
+{
+    char pad_0x00[0x11];
+    signed char charID; // 0x11
+    char pad_0x12[0x2];
+    int w[2];
+};
+
+extern sCharEntry_0014EBF8 D_00535B20[];
+extern sCharEntry_0014EBF8 D_00534A88[];
+extern "C" void func_00156950(sBEPlayerData* data, int charID);
+
+extern "C" void func_0014EBF8(void* self, int idx)
+{
+    func_00156950(&D_004A6CA8[idx], D_00535B20[idx].charID);
+    for (int i = 0; i < 6; i++)
+    {
+        D_00534A88[i] = D_00535B20[i];
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintnetwork", func_0014ECA0);
 

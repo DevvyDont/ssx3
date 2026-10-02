@@ -86,7 +86,49 @@ INCLUDE_ASM("ai/rider", func_0011D660);
 
 INCLUDE_ASM("ai/rider", func_0011DD98);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_0011DE60);
+#ifdef SKIP_ASM
+extern "C" void* func_0026B5E0(void*, int, int);
+extern char D_004D33A0[];
+extern "C" void func_00119368(void* metrix, int flag);
+// PORT: prototype mismatch. The unit defines func_0011FEC8/func_0011FE78 with one
+// param, but their bodies forward $5 to func_00111538/func_001112B8 (int arg).
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+
+struct sVec4_0011DE60
+{
+    float x, y, z, w;
+};
+
+extern "C" void func_0011D660(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, int n, float t);
+
+extern "C" void func_0011DE60(void* self, int a1, int a2)
+{
+    float* p = (float*)func_0026B5E0(D_004D33A0, a2, a1);
+    sVec4_0011DE60 pos;
+    sVec4_0011DE60 dir;
+    float px = p[2];
+    float py = p[3];
+    float pz = p[4];
+    pos.x = px;
+    pos.y = py;
+    pos.z = pz;
+    pos.w = 1.0f;
+    float dx = p[5];
+    float dy = p[6];
+    float dz = p[7];
+    dir.x = dx;
+    dir.y = dy;
+    dir.z = dz;
+    dir.w = 1.0f;
+    func_00119368(*(void**)((char*)self + 0x790), 1);
+    func_0011FEC8_impl(self, 0);
+    func_0011FE78_impl(self, 0);
+    func_0011D660(self, &pos, &dir, 5, 0.0f);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011DF18);
 
@@ -407,7 +449,33 @@ extern "C" void func_00121728(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121750);
+#ifdef SKIP_ASM
+extern "C" void func_001114A0(void* p);
+extern "C" void func_00310530(void* model, void* v);
+
+struct sVec4_00121750
+{
+    float x, y, z, w;
+};
+extern sVec4_00121750 D_004FF120;
+
+static inline int VecChanged_00121750(char* self, const sVec4_00121750& b)
+{
+    return *(float*)(self + 0x9D0) != b.x || *(float*)(self + 0x9D4) != b.y
+        || *(float*)(self + 0x9D8) != b.z || *(float*)(self + 0x9DC) != b.w;
+}
+
+extern "C" void func_00121750(char* self)
+{
+    func_001114A0(*(void**)(self + 0x77C));
+    if (VecChanged_00121750(self, D_004FF120))
+    {
+        func_00310530(*(void**)(self + 0x780), self + 0x9D0);
+    }
+}
+#endif
 
 extern "C" void* func_003103F0(int);
 
@@ -636,7 +704,32 @@ INCLUDE_ASM("ai/rider", func_00123E30);
 
 INCLUDE_ASM("ai/rider", func_00123F38);
 
+//100%
 INCLUDE_ASM("ai/rider", func_001241C0);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sQuat_001241C0
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_001241C0(void* self, sQuat_001241C0* out, float rx, float ry, float rz)
+{
+    sQuat_001241C0 q;
+    float sz, cz, sy, cy, sx, cx;
+    func_0031BE50(&sz, &cz, rz * 0.5f);
+    func_0031BE50(&sy, &cy, ry * 0.5f);
+    func_0031BE50(&sx, &cx, rx * 0.5f);
+    float cc = cy * cx;
+    float ss = sy * sx;
+    q.w = cz * cc + sz * ss;
+    q.x = sz * cc - cz * ss;
+    q.y = cz * sy * cx + sz * cy * sx;
+    q.z = cz * cy * sx - sz * sy * cx;
+    *out = q;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_001242B0);
 

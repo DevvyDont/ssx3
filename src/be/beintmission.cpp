@@ -116,7 +116,48 @@ extern "C" int func_00153520(void* self, int rider, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+struct sEconRecord_001535C0
+{
+    int id;
+    signed char count; // 0x4
+    char pad_0x05[0x7];
+};
+
+// One character's economy block (0xF88 bytes); 10 per profile (0x9B50).
+struct sEconChar_001535C0
+{
+    sEconRecord_001535C0 records[22];
+    char pad[0xF88 - 22 * 12];
+};
+
+extern sMissionEntry_0043D950 D_0043D950[];
+extern sEconChar_001535C0 D_004A6CA8_econ[][10] __asm__("D_004A6CA8");
+
+extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int character = cBELibrary_getCharacterID(rider);
+    int sum = 0;
+    for (int i = 0; i < 1; i++)
+    {
+        for (int j = 0; j < 22; j++)
+        {
+            if (D_0043D950[j].owner == owner)
+            {
+                sum += D_004A6CA8_econ[profile][character].records[i + j].count;
+            }
+        }
+    }
+    return sum;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00153688);
@@ -157,7 +198,25 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
 
 INCLUDE_ASM("be/beintmission", func_00153708);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001538E8);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern int D_005305F0[];
+extern char D_004A6CAC[];
+
+extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int off = profile * 0x9B50 + c * 0xF88 + D_005305F0[0] * 12;
+    char* p = D_004A6CAC + (idx * 12 + off);
+    p = p + (bit / 32) * 4;
+    int mask = 1 << bit;
+    return (*(unsigned int*)(p + 4) & mask) != 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00153B00);
 
@@ -614,7 +673,55 @@ void func_001547E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001547E8);
+#ifdef SKIP_ASM
+struct sSerVEntry_001547E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+extern char D_004A6CAC[];
+
+extern "C" void func_001547E8(void* self, void* stream)
+{
+    int c = cBELibrary_getCharacterID(0);
+    char* base = D_004A6CAC;
+    int off = c * 0xF88;
+    sSerVEntry_001547E8* e = &(*(sSerVEntry_001547E8**)stream)[1];
+    e->fn((char*)stream + e->delta, base + off, 0x114);
+    e = &(*(sSerVEntry_001547E8**)stream)[1];
+    char* base2 = base + 0x114;
+    e->fn((char*)stream + e->delta, base2 + off, 0x160);
+    e = &(*(sSerVEntry_001547E8**)stream)[1];
+    e->fn((char*)stream + e->delta, (char*)self + 8, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00154898);
+#ifdef SKIP_ASM
+struct sSerVEntry_00154898 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern char D_004A6CAC[];
+
+extern "C" void func_00154898(void* self, void* stream)
+{
+    int c = cBELibrary_getCharacterID(0);
+    char* base = D_004A6CAC;
+    int off = c * 0xF88;
+    sSerVEntry_00154898* e = &(*(sSerVEntry_00154898**)stream)[2];
+    e->fn((char*)stream + e->delta, base + off, 0x114);
+    e = &(*(sSerVEntry_00154898**)stream)[2];
+    char* base2 = base + 0x114;
+    e->fn((char*)stream + e->delta, base2 + off, 0x160);
+    e = &(*(sSerVEntry_00154898**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 8, 4);
+}
+#endif
 

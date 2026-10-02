@@ -291,7 +291,33 @@ extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
 
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145108);
+#ifdef SKIP_ASM
+extern "C" void func_00145108(void* self, int mode)
+{
+    sRaceInterfaceGlobal* g = &D_00535BC8;
+    *((char*)g + 0x49) = mode;
+    switch (mode)
+    {
+    case 0:
+        cBENewRaceInterface_setNumberHumans(self, 1);
+        cBENewRaceInterface_setNumberAI(self, 0);
+        break;
+    case 1:
+        cBENewRaceInterface_setNumberHumans(self, 1);
+        if (g->field_0x3C < 0)
+            cBENewRaceInterface_setNumberAI(self, 0);
+        if (g->field_0x3C >= 6)
+            cBENewRaceInterface_setNumberAI(self, 5);
+        break;
+    case 2:
+        cBENewRaceInterface_setNumberHumans(self, 2);
+        cBENewRaceInterface_setNumberAI(self, 0);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 
@@ -425,7 +451,29 @@ extern "C" int func_001456A0(void* self, int idx, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145750);
+#ifdef SKIP_ASM
+void* cBENewPlayerInterface_getThis();
+signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
+extern "C" int func_00146E98(void* self, int a1);
+
+extern "C" int func_00145750(void* self)
+{
+    void* players = cBENewPlayerInterface_getThis();
+    int c = cBENewPlayerInterface_getRiderCharID(players, func_00146E98(cBENewPlayerInterface_getThis(), 0));
+    switch (func_00144C78(self, D_00535C08.value))
+    {
+    case 0:
+        return c == 3 ? 5 : 3;
+    case 1:
+        return c == 7 ? 4 : 7;
+    case 2:
+        return c == 8 ? 6 : 8;
+    }
+    return 3;
+}
+#endif
 
 INCLUDE_ASM("be/beintnewrace", func_00145870);
 

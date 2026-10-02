@@ -58,7 +58,52 @@ extern "C" void func_00152430(void* self, int bit, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/bedbprofile", func_00152460);
+#ifdef SKIP_ASM
+struct sScoreStat_00152460
+{
+    int a;
+    unsigned int value;
+};
+
+struct sCharProfile_00152460
+{
+    char pad0[0xAD0];
+    sScoreStat_00152460 stats[0x1A];  // 0xAD0
+};
+
+static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned int value)
+{
+    switch (stat)
+    {
+    case 0:
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+        return value < s->value;
+    default:
+        return s->value < value;
+    }
+}
+
+extern "C" int func_00152460(sCharProfile_00152460* self, int a, int stat, unsigned int value)
+{
+    int type = cBELibrary_getScoreType(a, stat);
+    if (type == 0x1A)
+        return 0;
+    if (value == 0)
+        return 0;
+    sScoreStat_00152460* s = &self->stats[type];
+    if (s->value == 0 || IsBetter_00152460(stat, s, value))
+    {
+        s->value = value;
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/bedbprofile", func_00152528);
 

@@ -119,7 +119,43 @@ extern "C" cAnimSequenceNode* func_00311B20(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeHeadingOffset);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sRabQuat_00311B48
+{
+    float x, y, z, w;
+    sRabQuat_00311B48() {}
+    sRabQuat_00311B48(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct sRabXform_00311B48
+{
+    sRabQuat_00311B48 pos;
+    sRabQuat_00311B48 rot;
+};
+
+extern sRabQuat_00311B48 D_004FF130;
+extern sRabQuat_00311B48 D_004FF160;
+extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_00311B48* xf);
+
+static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sRabQuat_00311B48(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle)
+{
+    sRabXform_00311B48 xf;
+    xf.pos = D_004FF130;
+    xf.rot = AxisAngle_00311B48(D_004FF160, -angle);
+    cRiderAnimBase_changeOrientationOffset(self, &xf);
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeOrientationOffset);
 
@@ -139,7 +175,33 @@ extern "C" void func_00311E88(char* self, int i, float v)
 
 INCLUDE_ASM("animation/rideranimbase", func_00311F00);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_003123C0);
+#ifdef SKIP_ASM
+struct sVEntry003123C0 {
+    short delta;
+    short index;
+    void (*fn)(void*, cAnimSequencer*, cAnimSequenceNode*, float);
+};
+
+extern "C" void func_00312598(void* self, int a1);
+
+extern "C" void func_003123C0(char* self, int a1, float t)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        cAnimSequenceNode* node = cAnimSequencer_getSequence(&(*(cAnimSequencer**)(self + 0x50))[i], 0);
+        while (node)
+        {
+            cAnimSequenceNode* next = *(cAnimSequenceNode**)((char*)node + 0xC8);
+            sVEntry003123C0* vt = *(sVEntry003123C0**)(self + 0x58);
+            vt[2].fn(self + vt[2].delta, &(*(cAnimSequencer**)(self + 0x50))[i], node, t);
+            node = next;
+        }
+    }
+    func_00312598(self, a1);
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312490);
 
@@ -153,7 +215,23 @@ INCLUDE_ASM("animation/rideranimbase", func_00312820);
 
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", func_003129E0);
+#ifdef SKIP_ASM
+extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
+extern int D_0048D808[];
+
+extern "C" void func_003129E0(char* self, int anim, int a2, float blend)
+{
+    int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
+    if (blend < 0.0f)
+    {
+        blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
+    }
+    *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, a2, 1, D_0048D808[slot], blend);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00312AA0__FPvi);
@@ -185,7 +263,31 @@ extern "C" int func_00312AE8(void* self, int i)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", func_00312B18);
+#ifdef SKIP_ASM
+struct cAnimSequence;
+void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
+extern "C" void func_003145F8(void* seq, void* node);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+
+extern "C" int func_00312B18(void* self, cAnimSequencer* seq, char* node, int anim)
+{
+    float w = *(float*)(node + 0x94);
+    float target = *(float*)(node + 0x9C);
+    float weight = *(float*)(node + 0x98);
+    func_003145F8(seq, node);
+    cRiderAnimBase_play(self, anim, 0, -1.0f);
+    char* s = (char*)cAnimSequencer_getSequence(seq, 0);
+    *(float*)(s + 0x98) = w;
+    *(float*)(s + 0x94) = w;
+    if (target != 0.0f)
+    {
+        cAnimSequence_fadeWeight((cAnimSequence*)s, weight, target);
+    }
+    return anim;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", func_00312BD0);
