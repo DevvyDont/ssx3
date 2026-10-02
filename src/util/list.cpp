@@ -47,9 +47,37 @@ extern "C" void cListNode_removeFromList(cListNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/list", func_00397788);
+#ifdef SKIP_ASM
+class func_00397788_cVirt {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(void*);
+};
 
+extern "C" int func_00397788(void* a, func_00397788_cVirt* obj)
+{
+    return obj->v02(a);
+}
+#endif
+
+//100%
 INCLUDE_ASM("util/list", func_003977B8);
+#ifdef SKIP_ASM
+class func_003977B8_cVirt {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(void*);
+};
+
+extern "C" int func_003977B8(void* a, func_003977B8_cVirt* obj)
+{
+    return obj->v02(a);
+}
+#endif
 
 INCLUDE_ASM("util/list", func_003977E8);
 

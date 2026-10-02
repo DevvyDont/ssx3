@@ -87,7 +87,75 @@ extern "C" void func_00397468(void* self, int mode, unsigned short v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uianimation", func_003974B0);
+#ifdef SKIP_ASM
+struct func_003974B0_sData {
+    short pad0;
+    unsigned short count;
+};
+
+struct func_003974B0_sAnim {
+    func_003974B0_sData* data;
+    char pad4[6];
+    short frame;
+    short padc;
+    signed char dir;
+};
+
+extern "C" void func_003974B0(func_003974B0_sAnim* self, unsigned char flags)
+{
+    func_003974B0_sData* data = self->data;
+    int mode;
+    if (data == 0) {
+        return;
+    }
+    mode = flags & 7;
+    if (mode == 0) {
+        return;
+    }
+    switch (mode) {
+    case 2:
+        self->frame--;
+        if (self->frame < 0) {
+            if (flags & 8) {
+                self->frame = data->count - 1;
+            } else {
+                self->frame = 0;
+            }
+        }
+        break;
+    case 1:
+        self->frame++;
+        if (self->frame >= data->count) {
+            if (!(flags & 8)) {
+                self->frame = data->count - 1;
+            } else {
+                self->frame = 0;
+            }
+        }
+        break;
+    case 3:
+        if (self->dir == 0) {
+            self->frame++;
+        } else {
+            self->frame--;
+        }
+        if (self->dir == 0) {
+            if (self->frame >= self->data->count) {
+                self->dir = 1;
+                self->frame = self->data->count - 1;
+                return;
+            }
+        }
+        if (self->dir == 1 && self->frame < 0) {
+            self->dir = 0;
+            self->frame = 0;
+        }
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uianimation", func_003975E0);
 

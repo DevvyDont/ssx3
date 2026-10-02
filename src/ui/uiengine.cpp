@@ -134,7 +134,17 @@ void func_00398A60(void* a, void* b)
 
 INCLUDE_ASM("ui/uiengine", func_00398A78);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", func_00399730);
+#ifdef SKIP_ASM
+extern "C" void func_00399730(void* self, int id)
+{
+    void* a = *(void**)((char*)self + 0x5C);
+    void* b = *(void**)((char*)a + 0xD0);
+    void* c = *(void**)((char*)b + 0x10);
+    *(s398380Item**)((char*)self + 0x7C) = func_00398380((char*)c + 0x58, id);
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00399768);
 

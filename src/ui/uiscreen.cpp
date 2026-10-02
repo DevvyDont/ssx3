@@ -246,7 +246,16 @@ INCLUDE_ASM("ui/uiscreen", func_0039DE68);
 
 INCLUDE_ASM("ui/uiscreen", func_0039DF28);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039DFB0);
+#ifdef SKIP_ASM
+extern "C" void func_0039DFB0(void* self)
+{
+    func_0039FE00(self);
+    *(int*)((char*)self + 0x78) = 10;
+    *(int*)((char*)self + 0x80) = 100;
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039DFE8);
 
@@ -293,7 +302,27 @@ void func_0039E508(void* self)
 
 INCLUDE_ASM("ui/uiscreen", func_0039E510);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E688);
+#ifdef SKIP_ASM
+class func_0039E688_cVirt {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int);
+};
+
+extern "C" void func_0039E688(void* self, func_0039E688_cVirt* obj)
+{
+    obj->v07(1);
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039E6B8);
 

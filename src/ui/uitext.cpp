@@ -137,7 +137,18 @@ INCLUDE_ASM("ui/uitext", func_003A19F8);
 
 INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeString);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1CF0);
+#ifdef SKIP_ASM
+extern "C" void func_003A18C0(void*, void*);
+extern "C" void func_003A1D30(void*, void*);
+
+extern "C" void func_003A1CF0(void* self, void* a1)
+{
+    func_003A18C0(self, a1);
+    func_003A1D30(self, a1);
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A1D30);
 
@@ -162,5 +173,31 @@ INCLUDE_ASM("ui/uitext", func_003A3280);
 
 INCLUDE_ASM("ui/uitext", func_003A32F0);
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A3398);
+#ifdef SKIP_ASM
+struct func_003A3398_sColor {
+    float r;
+    float g;
+    float b;
+    float a;
+};
+
+extern "C" void func_003A3398(void* self, func_003A3398_sColor* c)
+{
+    func_003A3398_sColor tmp = *c;
+    unsigned int i;
+    *(func_003A3398_sColor*)((char*)self + 0x1C) = *c;
+    if (*(func_003A3398_sColor**)((char*)self + 0x7C) == 0) {
+        return;
+    }
+    tmp.r = (int)(c->r * 255.0f);
+    tmp.g = (int)(c->g * 255.0f);
+    tmp.b = (int)(c->b * 255.0f);
+    tmp.a = (int)(c->a * 255.0f);
+    for (i = 0; i < *(unsigned int*)((char*)self + 0x74) >> 17; i++) {
+        (*(func_003A3398_sColor**)((char*)self + 0x7C))[i] = tmp;
+    }
+}
+#endif
 

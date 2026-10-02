@@ -30,7 +30,19 @@ INCLUDE_ASM("sound/ssxAudio", func_00285BF8);
 
 INCLUDE_ASM("sound/ssxAudio", func_00285D98);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00285F48);
+#ifdef SKIP_ASM
+extern "C" void func_002A7718(void*);
+extern "C" void func_002AD3C0(void*);
+
+extern "C" void func_00285F48(void* self)
+{
+    func_002A7718(self);
+    void* inner = **(void***)((char*)self + 0x118);
+    func_002AD3C0((char*)inner + 0x1D8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00285F80);
@@ -84,17 +96,54 @@ INCLUDE_ASM("sound/ssxAudio", func_00287410);
 
 INCLUDE_ASM("sound/ssxAudio", func_00287488);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287520);
+#ifdef SKIP_ASM
+extern "C" float func_002873D8(void*);
+extern "C" void func_00287700(void*, float, int);
+
+extern "C" void func_00287520(void* self)
+{
+    func_00287700(self, func_002873D8(self), 4);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00287558);
 
 INCLUDE_ASM("sound/ssxAudio", func_002875D0);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00287670);
+#ifdef SKIP_ASM
+extern "C" float func_00287920(void* self, int a1);
 
+extern "C" int func_00287670(void* self)
+{
+    return (int)(func_00287920(self, 1) * 11.0f);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002876A0);
+#ifdef SKIP_ASM
+extern "C" float func_00287920(void* self, int a1);
 
+extern "C" int func_002876A0(void* self)
+{
+    return (int)(func_00287920(self, 5) * 11.0f);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002876D0);
+#ifdef SKIP_ASM
+extern "C" float func_00287920(void* self, int a1);
+
+extern "C" int func_002876D0(void* self)
+{
+    return (int)(func_00287920(self, 4) * 11.0f);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00287700);
 
@@ -170,7 +219,20 @@ INCLUDE_ASM("sound/ssxAudio", func_00288B40);
 
 INCLUDE_ASM("sound/ssxAudio", func_00288C08);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288CE8);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B1C0();
+extern "C" int func_0028B1F8();
+
+extern "C" int func_00288CE8()
+{
+    if (*(int*)((char*)func_0028B1C0() + 0x84) != 0) {
+        return func_0028B1F8();
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00288D18);
 

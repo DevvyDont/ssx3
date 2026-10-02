@@ -96,7 +96,21 @@ extern "C" void func_003A3E38(void* self, func_003A3E38_sVec3* off)
 
 INCLUDE_ASM("ui/uivector", func_003A3F48);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A47A8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern void* D_00494CE8[];
+
+extern "C" void func_003A47A8(int* self, int flags)
+{
+    *(void***)self = D_00494CE8;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A47F8);
 
@@ -242,13 +256,62 @@ extern "C" void func_003A4CB0(void* self, sVec3* in)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4CD0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern void* D_00494CE8[];
+
+extern "C" void func_003A4CD0(int* self, int flags)
+{
+    *(void***)self = D_00494CE8;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A4D00);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4D40);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
 
+extern void* D_00494CE8[];
+
+extern "C" void func_003A4D40(int* self, int flags)
+{
+    *(void***)self = D_00494CE8;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uivector", func_003A4D70);
+#ifdef SKIP_ASM
+class func_003A4D70_cVirt {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int);
+};
+
+extern "C" int func_003A4D70(void* self, func_003A4D70_cVirt* obj)
+{
+    obj->v07(*(int*)((char*)self + 0x4));
+    return 0;
+}
+#endif
 
 extern void* D_00494AA8[];
 extern "C" void* func_0039FC48(void*);
@@ -283,7 +346,21 @@ int func_003A50F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A51A0);
+#ifdef SKIP_ASM
+class func_003A51A0_cVirt {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(void*);
+};
+
+extern "C" int func_003A51A0(void* a, func_003A51A0_cVirt* obj)
+{
+    return obj->v02(a);
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A51D0);
 

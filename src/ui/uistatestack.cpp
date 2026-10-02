@@ -38,7 +38,89 @@ extern "C" void* func_0039FAE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FB30);
+#ifdef SKIP_ASM
+struct func_0039FB30_sVec3 {
+    float x;
+    float y;
+    float z;
+};
+
+extern func_0039FB30_sVec3 D_004FF0D8;
+extern char D_00494BD8[];
+
+struct func_0039FB30_sFlags {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int b8 : 5;
+    unsigned int align : 6;
+};
+
+struct func_0039FB30_sUIObj {
+    void* prev;
+    void* next;
+    void* vtbl;
+    int unkC;
+    char unk10;
+    func_0039FB30_sFlags flags;
+    int unk18;
+    float color[4];
+    func_0039FB30_sVec3 pos;
+    int unk38;
+    int unk3C;
+    int unk40;
+    func_0039FB30_sVec3 rot;
+    func_0039FB30_sVec3 scale;
+    int unk5C;
+    func_0039FB30_sVec3 offs;
+    int unk6C;
+    int unk70;
+};
+
+extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a1, int a2)
+{
+    self->vtbl = D_00494BD8;
+    self->flags.b0 = 1;
+    self->flags.b7 = 0;
+    self->flags.b8 = 0;
+    self->flags.b5 = 0;
+    self->flags.b4 = 0;
+    self->flags.b2 = 0;
+    self->flags.b1 = 1;
+    self->flags.b3 = 1;
+    self->flags.b6 = 1;
+    self->flags.align = 9;
+    self->next = self;
+    self->prev = self;
+    self->unkC = 0;
+    self->unk10 = 0;
+    self->unk18 = 0;
+    self->color[0] = 1.0f;
+    self->color[1] = 1.0f;
+    self->color[2] = 1.0f;
+    self->color[3] = 1.0f;
+    self->pos = D_004FF0D8;
+    self->unk40 = a2;
+    self->unk38 = 0;
+    self->unk3C = 0;
+    self->rot = D_004FF0D8;
+    self->scale.x = 1.0f;
+    self->scale.y = 1.0f;
+    self->scale.z = 1.0f;
+    self->unk5C = a1;
+    self->offs = D_004FF0D8;
+    self->unk6C = 4;
+    self->unk70 = 6;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039FC48);
 

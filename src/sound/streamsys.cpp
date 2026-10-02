@@ -84,7 +84,19 @@ INCLUDE_ASM("sound/streamsys", func_002AA7F0);
 
 INCLUDE_ASM("sound/streamsys", func_002AA910);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AAB98);
+#ifdef SKIP_ASM
+extern "C" void func_002A9E78(void*, int);
+
+extern "C" void func_002AAB98(void* self, int i, int val)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        func_002A9E78(e, val);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AABD0);
 
@@ -92,13 +104,49 @@ INCLUDE_ASM("sound/streamsys", func_002AAC28);
 
 INCLUDE_ASM("sound/streamsys", func_002AAD78);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AAE08);
+#ifdef SKIP_ASM
+extern "C" int func_002AA428(void*);
 
+extern "C" int func_002AAE08(void* self, int i)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        return func_002AA428(e);
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AAE40);
+#ifdef SKIP_ASM
+extern "C" void func_002AAE40(void* self, int i)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        func_002AA408(e);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AAE78);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AB028);
+#ifdef SKIP_ASM
+extern "C" int func_002AA1B8(void*);
+
+extern "C" int func_002AB028(void* self, int i)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        return func_002AA1B8(e);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB0D0);
@@ -112,7 +160,20 @@ extern "C" void func_002AB0D0(void* self, int i, int val)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AB150);
+#ifdef SKIP_ASM
+extern "C" int func_002AA210(void*);
+
+extern "C" int func_002AB150(void* self, int i)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        return func_002AA210(e);
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB188__FPvi);
