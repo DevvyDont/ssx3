@@ -24,7 +24,45 @@ extern "C" void cCamera_resetChaseControllerSwitches(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", cCamera_cCamera);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_0015D698(void* self);
+extern "C" void* func_00176D68(void* self);
+extern "C" void* cManualCameraController_cManualCameraController(void* self, void* cam);
+extern "C" void* func_001619A8(void* self, int idx, int a);
+extern "C" void* cScriptCameraController_cScriptCameraController(void* self, int idx, void* cam);
+extern void* D_0045B888[];
+extern const char D_0045B748[];
+extern const char D_0045B760[];
+extern const char D_0045B778[];
+// PORT: cQuad128 (the unit's 128-bit TImode typedef) is a 16-byte register copy.
+extern cQuad128 D_004FF160;
+extern cQuad128 D_004FF130;
+
+extern "C" void* cCamera_cCamera(void* self, int idx)
+{
+    func_0015D698(self);
+    *(void***)((char*)self + 0x90) = D_0045B888;
+    func_00176D68((char*)self + 0xC0);
+    *(void**)((char*)self + 0xA4) = cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, D_0045B748, 0, 0), self);
+    *(void**)((char*)self + 0xA8) = func_001619A8(cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
+    *(void**)((char*)self + 0xAC) = cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, D_0045B778, 0, 0), idx, self);
+    *(int*)((char*)self + 0xB0) = -1;
+    *(int*)((char*)self + 0xB4) = 0;
+    *(int*)((char*)self + 0x454) = 0;
+    *(int*)((char*)self + 0x458) = 0;
+    *(int*)((char*)self + 0x45C) = 0;
+    *(int*)((char*)self + 0x450) = 0;
+    *(int*)((char*)self + 0x460) = 0;
+    *(cQuad128*)((char*)self + 0x470) = D_004FF160;
+    *(cQuad128*)((char*)self + 0x490) = D_004FF130;
+    *(int*)((char*)self + 0x4A4) = 1;
+    *(int*)((char*)self + 0x4A0) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015DD88);
@@ -61,7 +99,99 @@ extern "C" void func_0015DD88(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", cCamera_init);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0015CF80(void* self, int msg);
+extern "C" void func_00161A60(void* self, int* p);
+struct sCam162060;
+extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend);
+void func_00162310(void* self, int val);
+void* func_0015E030(void* self);
+extern void* D_004A28A8;
+extern const char D_0045B790[];
+extern void* D_0045B7A8[];
+
+struct sCamCtrl_15DE60
+{
+    char pad_0x00[0xC];
+    int viewport;   // 0xC
+};
+
+struct sCamera_15DE60
+{
+    char pad_0x00[0xC];
+    float f0C;      // 0xC
+    float f10;      // 0x10
+    float f14;      // 0x14
+    int index;      // 0x18
+    char pad_0x1C[0xA4 - 0x1C];
+    sCamCtrl_15DE60* manual;   // 0xA4
+    sCamCtrl_15DE60* chase;    // 0xA8
+    sCamCtrl_15DE60* script;   // 0xAC
+    int fB0;        // 0xB0
+    int fB4;        // 0xB4
+    char pad_0xB8[0x454 - 0xB8];
+    int f454;       // 0x454
+    int f458;       // 0x458
+    int f45C;       // 0x45C
+    int f460;       // 0x460
+};
+
+struct sCamWorld_15DE60
+{
+    char pad_0x00[0xC];
+    char* riders;   // 0xC
+};
+
+struct sApp_15DE60
+{
+    char pad_0x00[0x84];
+    sCamWorld_15DE60* world;   // 0x84
+    char pad_0x88[0xB0 - 0x88];
+    int viewports[4];          // 0xB0
+};
+
+struct sRiderRef_15DE60
+{
+    void** vt;
+    int rider;
+};
+
+extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, float c)
+{
+    self->f0C = a;
+    self->f10 = b;
+    self->f14 = c;
+    self->index = idx;
+    self->f460 = 0;
+    self->manual->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[0];
+    func_0015CF80(self->manual, 0x51);
+    self->chase->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[idx];
+    sRiderRef_15DE60* p = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
+    p->vt = D_0045B7A8;
+    p->rider = *(int*)(((sApp_15DE60*)D_004A28A8)->world->riders + (idx << 2) + 0x28);
+    func_00161A60(self->chase, (int*)p);
+    func_00162060((sCam162060*)self->chase, 0x4C, 0, 1.0f);
+    func_00162310((char*)self + 0xC0, (int)p);
+    func_0015E030(self);
+    self->f454 = 0;
+    self->f458 = 0;
+    self->f45C = 0;
+    switch (idx) {
+    case 0:
+        self->fB0 = 0;
+        break;
+    case 1:
+        self->fB0 = 1;
+        break;
+    }
+    self->fB4 = 0;
+    self->script->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[0];
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015DF98);
@@ -123,7 +253,63 @@ INCLUDE_ASM("camera/camera", func_0015E460);
 
 INCLUDE_ASM("camera/camera", func_0015E668);
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015EC98);
+#ifdef SKIP_ASM
+struct sVec4_15EC98
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_003A9658(void* self, unsigned int i, sVec4_15EC98* v, float f);
+extern "C" int func_003A96E0(void* self, int i, sVec4_15EC98* outPos, float* outT);
+extern void* D_004A28A8;
+
+struct sCacheSlot_15EC98
+{
+    int active;
+    char pad[0x4C];
+};
+
+struct sWorld_15EC98
+{
+    char pad[0x250];
+    sCacheSlot_15EC98 slots[2];
+};
+extern char** D_004A47B8;
+
+// PORT: g++ min operator (<?), removed in GCC 4.3.
+static inline float clamp_15EC98(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo)
+        r = v <? hi;
+    else
+        r = lo;
+    return r;
+}
+
+extern "C" void func_0015EC98(char* self)
+{
+    float r;
+    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x10) == 1)
+        r = *(float*)(self + 0x8);
+    else
+        r = clamp_15EC98(*(float*)(self + 0x8), 0.0f, 15000.0f);
+    float r15 = r * 1.5f;
+    float far = clamp_15EC98(r * 0.6666666865348816f, 15000.0f, 30000.0f);
+    char** sys = D_004A47B8;
+    ((sWorld_15EC98*)*sys)->slots[*(int*)(self + 0xB0)].active = 1;
+    func_003A9658(*sys + 0x10, *(int*)(self + 0xB0), (sVec4_15EC98*)(self + 0x20), r15);
+    *(int*)(self + 0xB4) = 0;
+    sVec4_15EC98 pos;
+    float t;
+    if (func_003A96E0(*sys + 0x10, *(int*)(self + 0xB0), &pos, &t)) {
+        if (far <= t || r <= t)
+            *(int*)(self + 0xB4) = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015EDC8);
@@ -501,9 +687,117 @@ extern "C" void* func_0015FFF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00160028);
+#ifdef SKIP_ASM
+int BXrand();
 
+struct sShake_160028
+{
+    float x;        // 0x0
+    float y;        // 0x4
+    float pad8;
+    float nx;       // 0xC
+    float ny;       // 0x10
+    float pad14;
+    float amount;   // 0x18
+    float pad1C;
+    float timer;    // 0x20
+    float pad24;
+    float period;   // 0x28
+};
+
+// Uniform float in [0, 1) built from the random mantissa bits.
+static inline float randf_160028()
+{
+    union {
+        int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+extern "C" void func_00160028(sShake_160028* self, float amount)
+{
+    self->amount = amount;
+    if (amount != 0.0f) {
+        if (self->timer > self->period) {
+            self->x = self->nx;
+            self->y = self->ny;
+            self->nx = (randf_160028() - 0.5f) * 2.0f;
+            self->ny = (randf_160028() - 0.5f) * 2.0f;
+            self->timer = 0.0f;
+        } else {
+            self->timer = self->timer + 0.01666666753590107f;
+        }
+    } else {
+        self->x = 0.0f;
+        self->y = 0.0f;
+        self->nx = 0.0f;
+        self->ny = 0.0f;
+        self->timer = 0.0f;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/camera", func_00160130);
+#ifdef SKIP_ASM
+int BXrand();
+
+struct sRollShake_160130
+{
+    float pad0[2];
+    float cur;      // 0x8
+    float pad0C[2];
+    float next;     // 0x14
+    float pad18;
+    float amount;   // 0x1C
+    float pad20;
+    float timer;    // 0x24
+    float pad28;
+    float period;   // 0x2C
+};
+
+// Uniform float in [0, 1) built from the random mantissa bits.
+static inline float randf_160130()
+{
+    union {
+        int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+// PORT: abs.s via inline asm (as an SDK math-header fabsf would).
+static inline float fabs_160130(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_00160130(sRollShake_160130* self, float amount)
+{
+    self->amount = amount;
+    if (amount != 0.0f) {
+        if (self->timer > self->period) {
+            self->cur = self->next;
+            while (fabs_160130(self->cur - self->next) < 0.5f)
+                self->next = (randf_160130() - 0.5f) * 2.0f;
+            self->timer = 0.0f;
+        } else {
+            self->timer = self->timer + 0.01666666753590107f;
+        }
+    } else {
+        self->timer = 0.0f;
+        self->next = 0.0f;
+        self->cur = 0.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00160228);
 
@@ -931,7 +1225,68 @@ extern "C" void func_00161A60(void* self, int* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00161AB0);
+#ifdef SKIP_ASM
+struct sCam162138;
+extern "C" void func_00161EF0(void* self, int v);
+extern "C" void func_001621A8(sCam162138* self);
+extern "C" void func_00162218(sCam162138* self);
+int func_0011FE98(void*);
+
+struct sCamVec4_161AB0
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+class cCamRider_161AB0
+{
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual sCamVec4_161AB0 getVelocity();
+};
+
+// PORT: VU0 macro-mode vector length; the PC port needs plain C.
+static inline float vlength_161AB0(const sCamVec4_161AB0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern "C" void func_00161AB0(char* self)
+{
+    int mode = 0x3D;
+    if (*(int*)(self + 0x1C) != mode && *(int*)(self + 0x18) != 0x4A)
+        func_00161EF0(self, mode);
+    *(int*)(self + 0x1C) = mode;
+    float speed = vlength_161AB0((*(cCamRider_161AB0**)(self + 0x20))->getVelocity()) * 0.035999998450279236f;
+    int boarding = func_0011FE98(*(void**)(*(char**)(self + 0x20) + 4)) == 5;
+    if (*(int*)(self + 0x3C) == 0) {
+        if (boarding) {
+            *(int*)(self + 0x3C) = 1;
+            func_001621A8((sCam162138*)self);
+        }
+    } else if (speed > 35.0f) {
+        *(int*)(self + 0x3C) = 0;
+        func_00162218((sCam162138*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00161BB8);
 

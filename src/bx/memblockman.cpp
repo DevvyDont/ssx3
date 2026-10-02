@@ -162,11 +162,137 @@ int func_00319D18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", cMemBlockMan_initialize);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* func_003200E8(void* p);
+void* func_00320120(void* p);
+void* func_00320158(void* p);
+void* func_00320190(void* p);
+void* func_003201D8(void* p);
+void* func_00320220(void* p);
+void* func_00320270(void* p);
+extern const char D_0048DA18[];
+extern const char D_0048DA28[];
+extern const char D_0048DA38[];
+extern const char D_0048DA48[];
+extern const char D_0048DA58[];
+extern const char D_0048DA68[];
+extern const char D_0048DA78[];
+extern void* D_004A5B60;
+extern void* D_004A5B50;
+extern void* D_004A5B5C;
+extern void* D_004A5B6C;
+extern void* D_004A5B74;
+extern void* D_004A5B68;
+extern void* D_004A5B58;
+extern int D_004A3EC8;
 
+extern "C" void cMemBlockMan_initialize(void)
+{
+    D_004A5B60 = func_003200E8(cMemMan_alloc(0x804, D_0048DA18, 0x1000000, 0));
+    D_004A5B50 = func_00320120(cMemMan_alloc(0x2004, D_0048DA28, 0x2000000, 0));
+    D_004A5B5C = func_00320158(cMemMan_alloc(0x6004, D_0048DA38, 0x3000000, 0));
+    D_004A5B6C = func_00320190(cMemMan_alloc(0x32004, D_0048DA48, 0x4000000, 0));
+    D_004A5B74 = func_003201D8(cMemMan_alloc(0x25804, D_0048DA58, 0x5000000, 0));
+    D_004A5B68 = func_00320220(cMemMan_alloc(0x20004, D_0048DA68, 0x6000000, 0));
+    D_004A5B58 = func_00320270(cMemMan_alloc(0x20004, D_0048DA78, 0x7000000, 0));
+    D_004A3EC8 = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/memblockman", func_00319E48);
+#ifdef SKIP_ASM
+extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top);
+// PORT: the pool allocators are bound with their real (pool, align) arity; the
+// symbols are named __FPv upstream.
+void* func_003202C0_impl(void* pool, unsigned int align) __asm__("func_003202C0__FPv");
+void* func_003202F8_impl(void* pool, unsigned int align) __asm__("func_003202F8__FPv");
+void* func_00320330_impl(void* pool, unsigned int align) __asm__("func_00320330__FPv");
+void* func_00320368_impl(void* pool, unsigned int align) __asm__("func_00320368__FPv");
+void* func_003203B8_impl(void* pool, unsigned int align) __asm__("func_003203B8__FPv");
+void* func_00320408_impl(void* pool, unsigned int align) __asm__("func_00320408__FPv");
+void* func_00320448_impl(void* pool, unsigned int align) __asm__("func_00320448__FPv");
+extern void* D_004A5B60;
+extern void* D_004A5B50;
+extern void* D_004A5B5C;
+extern void* D_004A5B6C;
+extern void* D_004A5B74;
+extern void* D_004A5B68;
+extern void* D_004A5B58;
+extern int D_004A3EC8;
 
+// PORT: binds the real 2-arg body; the unit declares a 1-arg prototype used by callers
+extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align) __asm__("func_00319E48");
+extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align)
+{
+    size = size > align ? size : align;
+    if (D_004A3EC8) {
+        size = size + (-(size & 3) & 3);
+        if (size <= 8)
+            return func_003202C0_impl(D_004A5B60, align);
+        if (size <= 0x10)
+            return func_003202F8_impl(D_004A5B50, align);
+        if (size <= 0x20)
+            return func_00320330_impl(D_004A5B5C, align);
+        if (size <= 0x40)
+            return func_00320368_impl(D_004A5B6C, align);
+        if (size <= 0x80)
+            return func_003203B8_impl(D_004A5B74, align);
+        if (size <= 0x100)
+            return func_00320408_impl(D_004A5B68, align);
+        if (size <= 0x200)
+            return func_00320448_impl(D_004A5B58, align);
+    } else
+        size = 0x201;
+    return func_00319A90(size, align > 7 ? align : 8, 0, 0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/memblockman", func_00319F68);
+#ifdef SKIP_ASM
+void func_00320488(void* pool, void** p);
+void func_00320498(void* pool, void** p);
+void func_003204A8(void* pool, void** p);
+void func_003204B8(void* pool, void** p);
+void func_003204D0(void* pool, void** p);
+void func_003204E8(void* pool, void** p);
+void func_00320500(void* pool, void** p);
+extern void* D_004A5B60;
+extern void* D_004A5B50;
+extern void* D_004A5B5C;
+extern void* D_004A5B6C;
+extern void* D_004A5B74;
+extern void* D_004A5B68;
+extern void* D_004A5B58;
+
+template <unsigned int N>
+inline bool inPool_319F68(void* pool, void* p)
+{
+    return (unsigned int)((char*)p - (char*)pool) < N;
+}
+
+extern "C" void func_00319F68(void* p)
+{
+    if (inPool_319F68<0x800>(D_004A5B60, p))
+        func_00320488(D_004A5B60, (void**)p);
+    else if (inPool_319F68<0x2000>(D_004A5B50, p))
+        func_00320498(D_004A5B50, (void**)p);
+    else if (inPool_319F68<0x6000>(D_004A5B5C, p))
+        func_003204A8(D_004A5B5C, (void**)p);
+    else if (inPool_319F68<0x32000>(D_004A5B6C, p))
+        func_003204B8(D_004A5B6C, (void**)p);
+    else if (inPool_319F68<0x25800>(D_004A5B74, p))
+        func_003204D0(D_004A5B74, (void**)p);
+    else if (inPool_319F68<0x20000>(D_004A5B68, p))
+        func_003204E8(D_004A5B68, (void**)p);
+    else if (inPool_319F68<0x20000>(D_004A5B58, p))
+        func_00320500(D_004A5B58, (void**)p);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A088);

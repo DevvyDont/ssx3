@@ -129,7 +129,38 @@ extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjLine);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTBoundObjLineK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 2;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    n += get_t3Vector_n(reader, (char*)obj + 0x2C);
+    n += get_t3Vector_n(reader, (char*)obj + 0x38);
+    return n;
+}
+#endif
 
 struct sBoundObjVTable {
     char pad_0x00[0x8];

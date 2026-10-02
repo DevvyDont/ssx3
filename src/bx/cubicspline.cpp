@@ -138,13 +138,158 @@ void func_0031E260(void* self)
 
 INCLUDE_ASM("bx/cubicspline", func_0031E2D8);
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031E6D8);
+#ifdef SKIP_ASM
+extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit long param
+// PORT: libgcc 64-bit helpers called by name so the relocations match
+// (__divdi3 / __muldi3 in the retail ELF's unnamed libgcc copy).
+extern "C" long func_0040FCB0(long a, long b);
+extern "C" long func_004114D0(long a, long b);
+
+struct sChunk_31E6D8
+{
+    unsigned int prev_size;
+    unsigned int size;
+};
+
+struct sMState_31E6D8
+{
+    char pad_0x00[0x30];
+    sChunk_31E6D8* top;         // 0x30
+    char pad_0x34[0x35C - 0x34];
+    unsigned int pagesize;      // 0x35C
+    char pad_0x360[0x8];
+    unsigned int sbrked_mem;    // 0x368
+};
+
+extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av)
+{
+    long top_size;
+    long extra;
+    long released;
+    char* current_brk;
+    char* new_brk;
+    unsigned int pagesz;
+
+    pagesz = av->pagesize;
+    top_size = av->top->size & ~3;
+    extra = func_004114D0(func_0040FCB0(top_size - pad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
+    if (extra > 0) {
+        current_brk = (char*)func_0031FFD8(ms, 0);
+        if (current_brk == (char*)av->top + top_size) {
+            func_0031FFD8(ms, -extra);
+            new_brk = (char*)func_0031FFD8(ms, 0);
+            if (new_brk != (char*)0xFFFFFFFF) {
+                released = current_brk - new_brk;
+                if (released != 0) {
+                    av->sbrked_mem -= released;
+                    av->top->size = (top_size - released) | 1;
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031E818);
 
 INCLUDE_ASM("bx/cubicspline", func_0031ED60);
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031EEE8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+void func_0031E260(void* av);
+
+// dlmalloc 2.7 malloc_consolidate()
+struct sMChunk_31EEE8
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+    sMChunk_31EEE8* fd;          // 0x8
+    sMChunk_31EEE8* bk;          // 0xC
+};
+
+struct sMState_31EEE8
+{
+    unsigned int max_fast;              // 0x0
+    sMChunk_31EEE8* fastbins[11];       // 0x4
+    sMChunk_31EEE8* top;                // 0x30
+    sMChunk_31EEE8* last_remainder;     // 0x34
+    sMChunk_31EEE8* bins[4];            // 0x38
+};
+
+extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
+{
+    sMChunk_31EEE8** fb;
+    sMChunk_31EEE8** maxfb;
+    sMChunk_31EEE8* p;
+    sMChunk_31EEE8* nextp;
+    sMChunk_31EEE8* unsorted_bin;
+    sMChunk_31EEE8* first_unsorted;
+    sMChunk_31EEE8* nextchunk;
+    unsigned int size;
+    unsigned int nextsize;
+    unsigned int prevsize;
+    int nextinuse;
+    sMChunk_31EEE8* bck;
+    sMChunk_31EEE8* fwd;
+
+    if (av->max_fast != 0) {
+        av->max_fast &= ~2U;
+        unsorted_bin = (sMChunk_31EEE8*)((char*)&av->bins[1 << 1] - 8);
+        maxfb = &av->fastbins[(av->max_fast >> 3) - 2];
+        fb = &av->fastbins[0];
+        do {
+            if ((p = *fb) != 0) {
+                *fb = 0;
+                do {
+                    nextp = p->fd;
+                    size = p->size & ~1U;
+                    nextchunk = (sMChunk_31EEE8*)((char*)p + size);
+                    nextsize = nextchunk->size & ~3U;
+                    if (!(p->size & 1)) {
+                        prevsize = p->prev_size;
+                        size += prevsize;
+                        p = (sMChunk_31EEE8*)((char*)p - (long)prevsize);
+                        fwd = p->fd;
+                        bck = p->bk;
+                        fwd->bk = bck;
+                        bck->fd = fwd;
+                    }
+                    if (nextchunk != av->top) {
+                        nextinuse = ((sMChunk_31EEE8*)((char*)nextchunk + nextsize))->size & 1;
+                        nextchunk->size = nextsize;
+                        if (!nextinuse) {
+                            size += nextsize;
+                            fwd = nextchunk->fd;
+                            bck = nextchunk->bk;
+                            fwd->bk = bck;
+                            bck->fd = fwd;
+                        }
+                        first_unsorted = unsorted_bin->fd;
+                        unsorted_bin->fd = p;
+                        first_unsorted->bk = p;
+                        p->size = size | 1;
+                        p->bk = unsorted_bin;
+                        p->fd = first_unsorted;
+                        ((sMChunk_31EEE8*)((char*)p + size))->prev_size = size;
+                    } else {
+                        size += nextsize;
+                        p->size = size | 1;
+                        av->top = p;
+                    }
+                } while ((p = nextp) != 0);
+            }
+        } while (fb++ != maxfb);
+    } else {
+        func_0031E260(av);
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
 

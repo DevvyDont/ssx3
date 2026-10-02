@@ -74,7 +74,75 @@ extern "C" void func_0017D260(void* self, void* ev)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D298);
+#ifdef SKIP_ASM
+extern void* D_0046D350[];
+extern int D_004A3E90;
+extern void* D_004A4E90;
+extern "C" void* func_002CC018(void* self);
+extern "C" void* func_001DA988(void* self, void* a, void* b);
+extern "C" void* func_001DACB8(void* self, void* a, void* b, void* c);
+extern "C" void* func_001DAE20(void* self, void* a);
+extern "C" void* func_001DAF08(void* self, void* a, void* b);
+extern "C" void* func_001DB028(void* self, void* a);
+extern "C" void* __sti__all_in_one_main_cpp(void* self, void* a, void* b);
+extern "C" void* func_001DB2B0(void* self, void* a);
+
+// Owner reference handed to each debug sub-menu (a one-pointer functor).
+struct sDbgOwner17D298 {
+    void* owner;
+};
+
+extern "C" void* func_0017D298(char* self)
+{
+    *(void***)self = D_0046D350;
+    *(int*)(self + 0x4) = 0;
+    func_002CC018(self + 0x8);
+    sDbgOwner17D298 o0;
+    o0.owner = self;
+    sDbgOwner17D298 o1;
+    o1.owner = self;
+    func_001DA988(self + 0x70, &o0, &o1);
+    func_0017D200(self + 0x604);
+    sDbgOwner17D298 o2;
+    o2.owner = self;
+    sDbgOwner17D298 o3;
+    o3.owner = self;
+    sDbgOwner17D298 o4;
+    o4.owner = self;
+    func_001DACB8(self + 0x74C, &o2, &o3, &o4);
+    sDbgOwner17D298 o5;
+    o5.owner = self;
+    func_001DAE20(self + 0xD2C, &o5);
+    sDbgOwner17D298 o6;
+    o6.owner = self;
+    sDbgOwner17D298 o7;
+    o7.owner = self;
+    func_001DAF08(self + 0x1044, &o6, &o7);
+    sDbgOwner17D298 o8;
+    o8.owner = self;
+    func_001DB028(self + 0x1534, &o8);
+    sDbgOwner17D298 o9;
+    o9.owner = self;
+    sDbgOwner17D298 o10;
+    o10.owner = self;
+    __sti__all_in_one_main_cpp(self + 0x18C0, &o9, &o10);
+    sDbgOwner17D298 o11;
+    o11.owner = self;
+    func_001DB2B0(self + 0x1AAC, &o11);
+    int g = D_004A3E90;
+    char* app = (char*)D_004A28A8;
+    *(int*)(self + 0x1C04) = g;
+    *(int*)(self + 0x1C08) = g;
+    *(int*)(self + 0x1C0C) = g;
+    *(int*)(self + 0x60) = *(int*)(*(char**)(app + 0x80) + 0x18);
+    *(int*)(self + 0x64) = *(int*)(app + 0xB0);
+    *(int*)(self + 0x68) = *(int*)(*(char**)(app + 0x80) + 0x20);
+    D_004A4E90 = self;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017D3B0);
 

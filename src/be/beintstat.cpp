@@ -361,7 +361,61 @@ extern "C" void func_001499A8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintstat", func_00149A88);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_002C2580(char* buf, int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_001567B8(void* p, int v);
+extern "C" void* func_00147F78(void);
+int GetHashValue32(char*);
+void* cBENewPlayerInterface_getThis();
+void* cBEBAGTInterface_getThis();
+extern char* D_004A28A8;
+extern char D_0045A268[];
+extern char D_00535B20[];
+extern char D_004A6CA8[];
+
+struct sVEntry_149A88
+{
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+struct sRiderEntry_149A88
+{
+    char name[0x10];
+    unsigned f0 : 1;
+    unsigned f1 : 1;
+    unsigned pad : 6;
+    unsigned char c11;
+};
+
+static inline void vreset_149A88(char* o)
+{
+    sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 0xC);
+    vt[2].fn(o + vt[2].delta);
+}
+
+extern "C" void func_00149A88(void* self, signed char idx)
+{
+    char buf[64];
+    sRiderEntry_149A88* e = (sRiderEntry_149A88*)(D_00535B20 + idx * 0x1C);
+    func_00416210(e, 0, 0x1C);
+    e->f1 = 1;
+    e->c11 = 4;
+    char* o = *(char**)(D_004A28A8 + 0x8C);
+    sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
+    func_002C2580(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045A268)));
+    sprintf((char*)e, buf, idx + 1);
+    func_001567B8(D_004A6CA8 + idx * 0x9B50, 1);
+    vreset_149A88((char*)cBENewPlayerInterface_getThis());
+    vreset_149A88((char*)func_00147F78());
+    vreset_149A88((char*)cBEBAGTInterface_getThis());
+}
+#endif
 
 INCLUDE_ASM("be/beintstat", func_00149BB8);
 

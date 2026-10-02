@@ -92,7 +92,43 @@ extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetAddress);
+#ifdef SKIP_ASM
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
+
+extern "C" int cDirtysock_tag_TagFieldSetAddress(char* record, int len, char* name, unsigned int addr)
+{
+    int i;
+    unsigned char bytes[4];
+    char temp[256 + 32];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+
+    bytes[3] = (unsigned char)addr;
+    addr >>= 8;
+    bytes[2] = (unsigned char)addr;
+    addr >>= 8;
+    bytes[1] = (unsigned char)addr;
+    addr >>= 8;
+    bytes[0] = (unsigned char)addr;
+    for (i = 0; i < 4; i++) {
+        unsigned char c = bytes[i];
+        if (i > 0)
+            *data++ = '.';
+        if (c >= 10) {
+            if (c >= 100) {
+                *data++ = '0' + c / 100;
+                c %= 100;
+            }
+            *data++ = '0' + c / 10;
+            c %= 10;
+        }
+        *data++ = '0' + c;
+    }
+    *data = 0;
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFourCC);
@@ -338,5 +374,35 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetCrypt);
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetTime);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", func_003EDD70);
+#ifdef SKIP_ASM
+extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int dflt);
+
+// TagFieldGetDate-style accessor: split a time tag into calendar fields.
+extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset)
+{
+    sDsTmK2 tm;
+    sDsTmK2* t;
+    unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
+    if (secs < 2)
+        return -1;
+    t = func_003EAEB8(&tm, secs + offset);
+    if (t == 0)
+        return -1;
+    if (year)
+        *year = t->tm_year + 1900;
+    if (month)
+        *month = t->tm_mon + 1;
+    if (day)
+        *day = t->tm_mday;
+    if (hour)
+        *hour = t->tm_hour;
+    if (min)
+        *min = t->tm_min;
+    if (sec)
+        *sec = t->tm_sec;
+    return 0;
+}
+#endif
 

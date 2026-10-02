@@ -131,7 +131,55 @@ INCLUDE_ASM("bx/ps2main", func_0031BB30);
 
 INCLUDE_ASM("bx/ps2main", func_0031BCB0);
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031BE50);
+#ifdef SKIP_ASM
+// sincos(x): quadrant reduction by pi/2, sin polynomial, cos = sqrt(1 - sin^2).
+extern "C" void func_0031BE50(float* sout, float* cout, float x)
+{
+    float t = x * 0.6366197466850281f;
+    if (x < 0.0f)
+        t -= 0.5f;
+    else
+        t += 0.5f;
+    int q;
+    float fq;
+    // PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
+    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(t), "=r"(q));
+    fq = t;
+    x = x - fq * 1.5707963705062866f;
+    float x2 = x * x;
+    float r;
+    r = x2 * 2.755732339210226e-06f;
+    r = (r + -0.0001984127302421257f) * x2;
+    r = (r + 0.008333333767950535f) * x2;
+    r = (r + -0.1666666716337204f) * x2;
+    r = (r + 1.0f) * x;
+    float c2 = 1.0f - r * r;
+    float c;
+    // PORT: sqrt.s (sqrtf without errno check)
+    __asm__("sqrt.s %0, %1" : "=f"(c) : "f"(c2));
+    switch (q & 3)
+    {
+    case 0:
+        *sout = r;
+        *cout = c;
+        break;
+    case 1:
+        *sout = c;
+        *cout = -r;
+        break;
+    case 2:
+        *sout = -r;
+        *cout = -c;
+        break;
+    case 3:
+        *sout = -c;
+        *cout = r;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031BF60);

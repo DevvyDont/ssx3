@@ -228,7 +228,45 @@ extern "C" void func_00156810(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beprepoststate", func_00156858);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int n);
+extern int D_004A11E8;
+
+struct sEnt_156858
+{
+    short id;
+    unsigned short flags;
+};
+
+struct sProfile_156858
+{
+    char pad[0x288];
+    short* index;       // 0x288
+};
+
+extern "C" void func_00156858(char* dst, char* src)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        char* d = dst + i * 0xF88;
+        short* index = ((sProfile_156858*)d)->index;
+        func_003E6574(d, src + i * 0xF88, 0xF88);
+        ((sProfile_156858*)d)->index = index;
+        int j;
+        for (j = 0; j < D_004A11E8; j++)
+            index[j] = -1;
+        sEnt_156858* e = (sEnt_156858*)(dst + i * 0xF88 + 0x290);
+        int n;
+        for (n = 0; n < 0x20D; n++, e++) {
+            short k = e->id;
+            if (k >= 0)
+                index[k] = n;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beprepoststate", func_00156950);
