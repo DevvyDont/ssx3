@@ -388,7 +388,64 @@ extern "C" void func_0035ED90(sRmBody* self, const sRmVec4* b)
 
 INCLUDE_ASM("object/railmodifier", func_0035EDC8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F0B8);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+int BXrand();
+extern "C" void func_0035F218(void* self);
+
+struct sRailTimer {
+    int f0;
+    int f4;
+    float f8;
+    float fC;
+    int f10;
+    int f14;
+    void* f18;
+    int f1C;
+    int f20;
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ftrunc_0035F0B8(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+extern "C" sRailTimer* func_0035F0B8(sRailTimer* self, void* def, void* owner)
+{
+    char* d = (char*)def;
+    float one = 1.0f;
+    self->f18 = owner;
+    self->f14 = 0;
+    self->f1C = 0;
+    self->f20 = 0;
+    self->f0 = *(int*)(d + 0x4);
+    float rate = *(float*)(d + 0x10) * (one / (float)*(int*)(D_004A5B64 + 0x10));
+    self->f8 = rate;
+    self->f10 = *(int*)(d + 0xC);
+    self->fC = rate;
+    self->f4 = 0;
+    int n = *(int*)(d + 0x8);
+    if ((float)n < *(float*)&self->f4) {
+        union { int i; float f; } u;
+        u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+        float x = (u.f - one) * 8.0f;
+        float t = ftrunc_0035F0B8(x);
+        if (t < x) {
+            t += one;
+        }
+        self->f14 = (int)t;
+    } else {
+        self->f14 = n;
+    }
+    func_0035F218(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F1A8);

@@ -1450,7 +1450,92 @@ extern "C" void func_002CD578(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD5A0);
+#ifdef SKIP_ASM
+// PORT: func_002CA408/func_002CA428 return a float (axis value, $f0); the unit declares them void*.
+float func_002CA408_f(void* self) __asm__("func_002CA408__FPv");
+float func_002CA428_f(void* self) __asm__("func_002CA428__FPv");
+
+struct sVEntry002CD5A0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_002CD5A0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+extern "C" int func_002CD5A0(void* self)
+{
+    char* s = (char*)self;
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) != 0) {
+        return r;
+    }
+    if (r != 0) {
+        return r;
+    }
+    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    int dir;
+    if (d <= -0.1f || d >= 0.1f) {
+        dir = 1;
+        if (d < 0.0f) {
+            dir = -1;
+        }
+    } else {
+        dir = 0;
+    }
+    if (dir == *(int*)(s + 0x24)) {
+        *(int*)(s + 0x20) += 1;
+    } else {
+        *(int*)(s + 0x20) = 0;
+        *(int*)(s + 0x24) = dir;
+        *(float*)(s + 0x28) = (float)dir;
+    }
+    if (dir != 0) {
+        int n = *(int*)(s + 0x20);
+        d *= 0.1f;
+        d *= (float)(n * n / 0x120);
+        float div = 1.0f;
+        if (func_002CA488(self) != 0 && func_002CA4A8(self) != 0) {
+            div = 50.0f;
+        } else if (func_002CA488(self) != 0) {
+            div = 20.0f;
+        } else if (func_002CA4A8(self) != 0) {
+            div = 5.0f;
+        }
+        d = d / div;
+        *(float*)(s + 0x28) += d;
+        d = *(float*)(s + 0x28);
+        signed char* p = *(signed char**)(s + 0x18);
+        int cur = *p;
+        int v = (int)ffloor_002CD5A0((float)cur + d);
+        int lo = *(signed char*)(s + 0x1C);
+        int hi = *(signed char*)(s + 0x1D);
+        if (v < lo) {
+            v = lo;
+        }
+        if (hi < v) {
+            v = hi;
+        }
+        *(float*)(s + 0x28) = d + (float)(cur - v);
+        *p = v;
+        char* menu = *(char**)s;
+        sVEntry002CD5A0* e = &(*(sVEntry002CD5A0**)(menu + 0x12C))[4];
+        e->fn(menu + e->delta, self);
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CD7B8);
@@ -1528,7 +1613,92 @@ extern "C" void func_002CD9B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD9D8);
+#ifdef SKIP_ASM
+// PORT: func_002CA408/func_002CA428 return a float (axis value, $f0); the unit declares them void*.
+float func_002CA408_f(void* self) __asm__("func_002CA408__FPv");
+float func_002CA428_f(void* self) __asm__("func_002CA428__FPv");
+
+struct sVEntry002CD9D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_002CD9D8(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+extern "C" int func_002CD9D8(void* self)
+{
+    char* s = (char*)self;
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) != 0) {
+        return r;
+    }
+    if (r != 0) {
+        return r;
+    }
+    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    int dir;
+    if (d <= -0.1f || d >= 0.1f) {
+        dir = 1;
+        if (d < 0.0f) {
+            dir = -1;
+        }
+    } else {
+        dir = 0;
+    }
+    if (dir == *(int*)(s + 0x28)) {
+        *(int*)(s + 0x24) += 1;
+    } else {
+        *(int*)(s + 0x24) = 0;
+        *(int*)(s + 0x28) = dir;
+        *(float*)(s + 0x2C) = (float)dir;
+    }
+    if (dir != 0) {
+        int n = *(int*)(s + 0x24);
+        d *= 0.1f;
+        d *= (float)(n * n / 0x120);
+        float div = 1.0f;
+        if (func_002CA488(self) != 0 && func_002CA4A8(self) != 0) {
+            div = 50.0f;
+        } else if (func_002CA488(self) != 0) {
+            div = 20.0f;
+        } else if (func_002CA4A8(self) != 0) {
+            div = 5.0f;
+        }
+        d = d / div;
+        *(float*)(s + 0x2C) += d;
+        d = *(float*)(s + 0x2C);
+        int* p = *(int**)(s + 0x18);
+        int cur = *p;
+        int v = (int)ffloor_002CD9D8((float)cur + d);
+        int lo = *(int*)(s + 0x1C);
+        int hi = *(int*)(s + 0x20);
+        if (v < lo) {
+            v = lo;
+        }
+        if (hi < v) {
+            v = hi;
+        }
+        *(float*)(s + 0x2C) = d + (float)(cur - v);
+        *p = v;
+        char* menu = *(char**)s;
+        sVEntry002CD9D8* e = &(*(sVEntry002CD9D8**)(menu + 0x12C))[4];
+        e->fn(menu + e->delta, self);
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CDBF0);

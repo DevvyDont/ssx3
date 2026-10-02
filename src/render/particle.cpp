@@ -46,7 +46,145 @@ extern "C" void cBaseClass_DynamicEmitter_reset(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00370DC8);
+#ifdef SKIP_ASM
+int BXrand();
+
+extern "C" void func_0036CBF8(void* sys, int count, int a2, sVec4A* v, float a, float b, float c);
+extern "C" void func_00370058(void* sys, void* a1, void* def, void* a3, float f);
+extern char D_004FF1A0[];
+
+struct sGsState_00370DC8 {
+    int w0;
+    unsigned int a : 2;
+    unsigned int pad2 : 18;
+    unsigned int b : 2;
+    unsigned int c : 1;
+    unsigned int pad23 : 9;
+    unsigned int pad0_ : 10;
+    unsigned int d : 19;
+    unsigned int pad29 : 3;
+    int w3;
+    int w4;
+};
+
+extern sGsState_00370DC8 D_00501420;
+
+
+class cEmitter_00370DC8 {
+public:
+    float start;            // 0x0
+    int f4;                 // 0x4
+    int f8;                 // 0x8
+    int fC;                 // 0xC
+    float f10;              // 0x10
+    float f14;              // 0x14
+    char pad18[0x8];
+    char sys[0x150];        // 0x20
+    int active;             // 0x170
+    int f174;               // 0x174
+    int count;              // 0x178
+    int f17C;               // 0x17C
+    char f180[0x30];        // 0x180
+    char v1B0[0x10];        // 0x1B0
+    char v1C0[0x10];        // 0x1C0
+    char v1D0[0x10];        // 0x1D0
+    int f1E0;               // 0x1E0
+    sGsState_00370DC8 gs;   // 0x1E4
+    virtual void v01(int a);
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+
+    void setA(int v) { gs.a = v; }
+    void setB(int v) { gs.b = v; }
+    void setC(int v) { gs.c = v; }
+    void setD(int v) { gs.d = v; }
+};
+
+static inline float randf_00370DC8()
+{
+    union { int i; float f; } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float fceil_00370DC8(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (t < x) {
+        t += 1.0f;
+    }
+    return t;
+}
+
+static inline float life_00370DC8(char* def)
+{
+    float t = *(float*)(def + 0x8);
+    if (t >= 0.0f) {
+        return t;
+    }
+    return *(float*)(def + 0x14) + *(float*)(def + 0x1C) * 0.5f;
+}
+
+static inline float start_00370DC8(char* def)
+{
+    float t = *(float*)(def + 0x8);
+    if (t < 0.0f) {
+        return t;
+    }
+    return t + *(float*)(def + 0x14) + *(float*)(def + 0x1C) * 0.5f;
+}
+
+extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
+{
+    int n = *(int*)(def + 0xD0);
+    self->fC = n;
+    self->f14 = *(float*)(def + 0xD4);
+    if (n >= 2) {
+        float fn = (float)n;
+        self->f10 = fn * randf_00370DC8();
+    } else {
+        self->f10 = 0.0f;
+    }
+    self->f4 = *(int*)(def + 0xC4);
+    self->f8 = *(int*)(def + 0xC8);
+    self->start = start_00370DC8(def);
+    int changed = 0;
+    float frames = life_00370DC8(def) * 60.0f;
+    if (self->count != (int)fceil_00370DC8(frames)) {
+        self->count = (int)fceil_00370DC8(frames);
+        changed = 1;
+    }
+    *(sVec4A*)self->v1B0 = D_004FF120;
+    *(sVec4A*)self->v1C0 = D_004FF120;
+    *(sVec4A*)self->v1D0 = D_004FF120;
+    float l = life_00370DC8(def);
+    sVec4A v;
+    v.x = *(float*)(def + 0x78);
+    v.y = *(float*)(def + 0x7C);
+    v.z = *(float*)(def + 0x80);
+    v.w = 0.0f;
+    func_0036CBF8(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &v, l,
+                  *(float*)(def + 0x20), *(float*)(def + 0xC));
+    func_00370058(self->sys, D_004FF1A0, def, self->f180, f);
+    if (changed) {
+        self->v01(0);
+        self->v05();
+        self->v02();
+    }
+    self->active = 1;
+    self->gs = D_00501420;
+    self->setC(1);
+    self->setB(0);
+    self->setA(2);
+    self->setD(0);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003710D0);
 

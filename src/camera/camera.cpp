@@ -651,7 +651,118 @@ void func_0015FD48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015FD50);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+// PORT: func_00320BF0 returns a float (input axis value, $f0).
+extern "C" float func_00320BF0(int pad, int axis);
+extern "C" float func_0031BF60(float x);
+extern "C" float func_0031C040(float x);
+
+struct sVec_0015FD50 {
+    float x, y, z, w;
+    sVec_0015FD50() {}
+    sVec_0015FD50(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+    sVec_0015FD50& operator+=(const sVec_0015FD50& b);
+} __attribute__((aligned(16)));
+
+struct sFreeCam_0015FD50 {
+    char pad0[0x20];
+    sVec_0015FD50 pos;  // 0x20
+    float pitch;        // 0x30
+    float yaw;          // 0x34
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_0015FD50 fcScale_0015FD50(const sVec_0015FD50& v, float s)
+{
+    sVec_0015FD50 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add, in place).
+inline sVec_0015FD50& sVec_0015FD50::operator+=(const sVec_0015FD50& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(*this)
+        : "m"(*this), "m"(b)
+        : "memory");
+    return *this;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_0015FD50 fcAdd_0015FD50(const sVec_0015FD50& a, const sVec_0015FD50& b)
+{
+    sVec_0015FD50 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline float fcClamp_0015FD50(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_0015FD50(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+// PORT: g++ `>?` / `<?` (max/min) operators.
+extern "C" void func_0015FD50(sFreeCam_0015FD50* self)
+{
+    int pad = *(int*)(*(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x4) + 0xA4) + 0xC);
+    float speed = func_00320BF0(pad, 0x34);
+    float ry = func_00320BF0(pad, 0x31);
+    float rx = func_00320BF0(pad, 0x30);
+    float mf = func_00320BF0(pad, 0x32);
+    float ms = func_00320BF0(pad, 0x33);
+    float rs = speed >? 2.0f;
+    float pitch = fcClamp_0015FD50(self->pitch + rs * (ry * 0.6283185482025146f) * 0.01666666753590107f,
+                                   -1.5707963705062866f, 1.5707963705062866f);
+    float yaw = self->yaw + rs * (rx * 0.6283185482025146f) * 0.01666666753590107f;
+    yaw -= ffloor_0015FD50(yaw * 0.15915493667125702f) * 6.2831854820251465f;
+    sVec_0015FD50 fwd(func_0031C040(pitch) * func_0031C040(yaw), func_0031C040(pitch) * func_0031BF60(yaw),
+                      func_0031BF60(pitch), 0.0f);
+    sVec_0015FD50 right(func_0031BF60(yaw), -func_0031C040(yaw), 0.0f, 0.0f);
+    sVec_0015FD50 pos = fcAdd_0015FD50(sVec_0015FD50(self->pos), fcScale_0015FD50(fwd, speed * (mf * 25.0f)));
+    pos += fcScale_0015FD50(right, speed * (ms * -25.0f));
+    self->pitch = pitch;
+    self->yaw = yaw;
+    self->pos = pos;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_0015FFB0);

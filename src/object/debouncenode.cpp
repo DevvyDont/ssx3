@@ -1034,7 +1034,65 @@ extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00345248);
+#ifdef SKIP_ASM
+struct sDebKey5248 {
+    char pad_0x00[0x60];
+    sDebKey5248* prev;  // 0x60
+    sDebKey5248* next;  // 0x64
+    char pad_0x68[0x1C];
+    float t0;           // 0x84
+};
+
+struct sDebTrack5248 {
+    int field_0x0;
+    int index;          // 0x4
+    sDebKey5248* key;   // 0x8
+    float length;       // 0xC
+
+    void back()
+    {
+        sDebKey5248* p = key->prev;
+        index--;
+        key = p;
+    }
+    void forward()
+    {
+        sDebKey5248* n = key->next;
+        index++;
+        key = n;
+    }
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ftrunc_00345248(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+extern "C" void func_00345248(sDebTrack5248* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+{
+    float len = self->length;
+    float q = t / len;
+    float f = ftrunc_00345248(q);
+    if (q < f) {
+        f -= 1.0f;
+    }
+    t -= f * len;
+    while (t < self->key->t0 && self->key->prev != 0) {
+        self->back();
+    }
+    sDebKey5248* next = self->key->next;
+    while (next != 0 && next->t0 <= t) {
+        self->forward();
+        next = self->key->next;
+    }
+    func_00345048((sDebCurve*)self->key, t, pos, vel, acc);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00345430);

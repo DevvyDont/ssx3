@@ -82,7 +82,70 @@ extern "C" void func_00234BE8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", cGFGateState_update);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int GetHashValue32(char* str);
+extern "C" int func_00270280(void* p);
+extern "C" void func_00234BE8(void* self, int a1);
+extern "C" void* func_0039F9D8(void* list, int hash);
+extern "C" void* func_0028B180(void);
+extern "C" void func_0029C7B0(void* p);
+void func_0028C8C0(void* self, int val);
+extern "C" void func_00233AA0(void* self);
+extern "C" void func_0029C420(void* p, int secs);
+extern char* D_004A2C68;
+extern signed char D_00535C10[];
+extern char D_0047C048[];
+extern char D_004A2AB0[];
+
+struct sVEntry00234C68 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_00234C68(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+extern "C" void cGFGateState_update(void* self)
+{
+    if (func_00270280(*(void**)(D_004A2C68 + 0x28)) != 0) {
+        return;
+    }
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C10[0] == 4) {
+        return;
+    }
+    if (*(int*)(*(char**)(D_004A2C68 + 0xC) + 0x1C) <= 0) {
+        func_00234BE8(self, GetHashValue32(D_0047C048));
+        char* obj = (char*)func_0039F9D8(*(char**)(D_004A2C68 + 0x48) + 0x18, GetHashValue32(D_004A2AB0));
+        if (obj != 0) {
+            sVEntry00234C68* e = &(*(sVEntry00234C68**)(obj + 8))[24];
+            e->fn(obj + e->delta, 6, 0);
+        }
+        func_0029C7B0(func_0028B180());
+        func_0028C8C0(func_0028B180(), 0x78);
+        func_00233AA0(self);
+    }
+    int frames = *(int*)(*(char**)(D_004A2C68 + 0xC) + 0x1C);
+    float secs = frames / 60;
+    if (frames % 60 == 0) {
+        func_0029C420(func_0028B180(), (int)ffloor_00234C68(secs));
+    }
+}
+#endif
 
 extern "C" void* func_00233AF0(void* self);
 

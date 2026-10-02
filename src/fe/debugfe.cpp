@@ -501,7 +501,84 @@ extern "C" void func_0017E558(sDebugFEState17E558* self)
 
 INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017F2D0);
+#ifdef SKIP_ASM
+extern "C" float func_0031BF60(float x);
+
+struct sVec2_17F2D0 {
+    float x, y;
+    sVec2_17F2D0() {}
+    sVec2_17F2D0(float ax, float ay) : x(ax), y(ay) {}
+    sVec2_17F2D0& operator+=(const sVec2_17F2D0& o)
+    {
+        x += o.x;
+        y += o.y;
+        return *this;
+    }
+    sVec2_17F2D0& operator+=(float s)
+    {
+        x += s;
+        y += s;
+        return *this;
+    }
+    sVec2_17F2D0& operator*=(float s)
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    }
+};
+
+struct sFirefly_17F2D0 {
+    sVec2_17F2D0 pos;        // 0x0
+    sVec2_17F2D0 phase;      // 0x8
+    sVec2_17F2D0 trail[64];  // 0x10
+    int head;                // 0x210
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_17F2D0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float wrap_17F2D0(float x)
+{
+    return x - ffloor_17F2D0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+extern "C" void func_0017F2D0(void* p)
+{
+    sFirefly_17F2D0* self = (sFirefly_17F2D0*)p;
+    for (int i = 0; i < 2; i++) {
+        sVec2_17F2D0 v(func_0031BF60(self->phase.x), func_0031BF60(self->phase.y));
+        v += 1.899999976158142f;
+        v *= 0.03200000151991844f;
+        {
+            sVec2_17F2D0 d;
+            d.x = 0.004999999888241291f;
+            d.y = 0.008999999612569809f;
+            self->phase.x += d.x;
+            self->phase.y += d.y;
+        }
+        self->pos += v;
+        self->phase.x = wrap_17F2D0(self->phase.x);
+        self->phase.y = wrap_17F2D0(self->phase.y);
+        self->pos.x = wrap_17F2D0(self->pos.x);
+        self->pos.y = wrap_17F2D0(self->pos.y);
+        self->head = (self->head + 1) % 64;
+        sVec2_17F2D0 pt(func_0031BF60(self->pos.x) * 20.0f + 550.0f,
+                        func_0031BF60(self->pos.y) * 20.0f + 420.0f);
+        self->trail[self->head] = pt;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017F500);
 

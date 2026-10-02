@@ -2621,9 +2621,32 @@ extern "C" float func_001360C8(void* self, int* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00136100);
+#ifdef SKIP_ASM
+// PORT: g++ `>?` (max) operator. aiWrap_135BE0 uses the FPU-only cvt.w.s/cvt.s.w asm helper.
+extern "C" float func_00136100(void* self)
+{
+    float d = __builtin_fabsf(aiWrap_135BE0(*(float*)((char*)self + 0x18))) * 0.31830987334251404f - 0.5f;
+    d = d >? 0.0f;
+    return d * 2.0f;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00136168);
+#ifdef SKIP_ASM
+// PORT: g++ `>?` (max) operator. aiWrap_135BE0 uses the FPU-only cvt.w.s/cvt.s.w asm helper.
+extern "C" float func_00136168(void* self)
+{
+    float d = __builtin_fabsf(aiWrap_135BE0(*(float*)((char*)self + 0x1C))) * 0.6366197466850281f;
+    if (d > 1.0f)
+        d = 2.0f - d;
+    d = d - 0.25f;
+    d = d >? 0.0f;
+    return d * 1.3333333730697632f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001361F8);

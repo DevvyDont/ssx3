@@ -166,7 +166,111 @@ extern "C" void func_0010D170(sComputer_0010D170* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010D1A0);
+#ifdef SKIP_ASM
+int func_0011FE98(void* self);
+int func_0011FEE8(void* self);
+extern "C" float func_0031C228(float x);
+
+struct sVec_0010D1A0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRider_0010D1A0 {
+    char pad0[0x1B0];
+    sVec_0010D1A0 vel;  // 0x1B0
+    char pad1C0[0x4C8 - 0x1C0];
+    float speed;        // 0x4C8
+    float heading;      // 0x4CC
+    char pad4D0[0x788 - 0x4D0];
+    char* board;        // 0x788
+
+    sVec_0010D1A0 getVel() { return vel; }
+};
+
+struct sComputer_0010D1A0 {
+    char pad0[0x18];
+    sRider_0010D1A0* rider;  // 0x18
+    char pad1C[0xE70 - 0x1C];
+    int dir;                 // 0xE70
+    int stuckTime;           // 0xE74
+    int wrongTime;           // 0xE78
+};
+
+static inline float atan2_0010D1A0(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f) {
+            return y;
+        }
+        if (y >= 0.0f) {
+            return 1.5707963705062866f;
+        }
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f) {
+            a += 3.1415927410125732f;
+        } else {
+            a -= 3.1415927410125732f;
+        }
+    }
+    return a;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_0010D1A0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float wrap_0010D1A0(float x)
+{
+    return x - ffloor_0010D1A0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
+{
+    float ang = atan2_0010D1A0(self->rider->getVel().y, self->rider->getVel().x);
+    float d = wrap_0010D1A0(self->rider->heading - ang);
+    if (self->dir < 0) {
+        if (__builtin_fabsf(d) > 1.047197699546814f) {
+            self->wrongTime++;
+        } else {
+            self->wrongTime = 0;
+        }
+    } else {
+        self->wrongTime = 0;
+    }
+    int wrong = self->wrongTime >= 0x3D;
+    if (func_0011FE98(self->rider) == 2) {
+        wrong = 0;
+        self->stuckTime++;
+    } else if (func_0011FE98(self->rider) == 4 && self->wrongTime > 0) {
+        return 1;
+    } else if (func_0011FE98(self->rider) == 1 || self->rider->speed < 1000.0f) {
+        self->stuckTime = 0;
+        wrong = 0;
+        if (func_0011FE98(self->rider) == 1 && *(float*)(self->rider->board + 0xA0) > 30.0f) {
+            return 1;
+        }
+    } else {
+        self->stuckTime++;
+    }
+    int stuck = wrong || self->stuckTime >= 0xDF;
+    if (func_0011FEE8(self->rider) != 8) {
+        stuck = stuck && self->dir < 0;
+    }
+    return stuck;
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010D410);
 

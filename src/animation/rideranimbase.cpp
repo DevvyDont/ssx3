@@ -437,7 +437,113 @@ INCLUDE_ASM("animation/rideranimbase", func_003130A8);
 
 INCLUDE_ASM("animation/rideranimbase", func_00313508);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_003135B0);
+#ifdef SKIP_ASM
+struct sAnimEvents_00313868;
+struct sAnimEvents_00313938;
+extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to);
+extern "C" void func_00313938(sAnimEvents_00313938* self, float time);
+extern "C" void func_003139A8(sAnimEvents_00313938* self);
+
+struct sTrack_003135B0 {
+    int field_0x0;
+    float time;     // 0x4
+    float speed;    // 0x8
+    float length;   // 0xC
+    char pad10[0x8];
+    int loop;       // 0x18
+};
+
+// PORT: ulong is 64-bit here
+struct sRab_003135B0 {
+    int field_0x0;
+    sTrack_003135B0 tracks[3];  // 0x4
+    char pad58[0x90 - 0x58];
+    float scale;                // 0x90
+    char pad94[0xB8 - 0x94];
+    ulong triggered;            // 0xB8
+    int fC0;                    // 0xC0
+    int fC4;                    // 0xC4
+};
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+
+static inline float ffloor_003135B0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
+{
+    func_00313868((sAnimEvents_00313868*)self, from, to);
+}
+
+extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
+{
+    float t0 = self->tracks[i].time;
+    float len = self->tracks[i].length;
+    float t = t0 + self->tracks[i].speed * self->scale * dt;
+    if (i == 0) {
+        self->triggered = 0;
+        self->fC0 = 0;
+        if (self->fC4 != 0) {
+            func_00313938((sAnimEvents_00313938*)self, t0);
+            self->fC4 = 0;
+        }
+    }
+    if (self->tracks[i].loop == 0) {
+        if (t <= 0.0f) {
+            t = 0.0f;
+            if (i == 0) {
+                func_003139A8((sAnimEvents_00313938*)self);
+            }
+        } else if (len <= t) {
+            t = len;
+            if (i == 0) {
+                func_003139A8((sAnimEvents_00313938*)self);
+            }
+        }
+        if (i == 0) {
+            fire_003135B0(self, t0, t);
+        }
+    } else if (t < 0.0f || len <= t) {
+        int n = (int)ffloor_003135B0(t / len);
+        t -= len * (float)n;
+        if (i == 0) {
+            func_003139A8((sAnimEvents_00313938*)self);
+            if (n >= 2) {
+                fire_003135B0(self, 0.0f, len);
+            } else if (n < -1) {
+                fire_003135B0(self, len, 0.0f);
+            } else if (n == 1) {
+                if (t0 <= t) {
+                    fire_003135B0(self, 0.0f, len);
+                } else {
+                    fire_003135B0(self, t0, len);
+                    fire_003135B0(self, 0.0f, t);
+                }
+            } else if (n == -1) {
+                if (t <= t0) {
+                    fire_003135B0(self, len, 0.0f);
+                } else {
+                    fire_003135B0(self, t0, 0.0f);
+                    fire_003135B0(self, len, t);
+                }
+            }
+        }
+    } else if (i == 0) {
+        fire_003135B0(self, t0, t);
+    }
+    self->tracks[i].time = t;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00313800);

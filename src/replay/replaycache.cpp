@@ -2516,7 +2516,29 @@ extern "C" int func_00274C70(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00274D08);
+#ifdef SKIP_ASM
+extern "C" int func_00274C70(void* self);
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ftrunc_00274D08(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+extern "C" int func_00274D08(void* self)
+{
+    float x = ((float)func_00274C70(self) - *(float*)((char*)self + 0x28)) / *(float*)((char*)self + 0x24);
+    float c = ftrunc_00274D08(x);
+    if (c < x) {
+        c += 1.0f;
+    }
+    return (int)c;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274D70);

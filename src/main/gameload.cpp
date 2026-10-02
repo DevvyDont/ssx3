@@ -557,7 +557,26 @@ extern "C" void* func_00231D18(void* self)
 
 INCLUDE_ASM("main/gameload", func_00231D60);
 
+//100%
 INCLUDE_ASM("main/gameload", func_00231F80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float floorf_231F80(float x)
+{
+    float f;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(f) : "f"(x));
+    if (x < f) {
+        f -= 1.0f;
+    }
+    return f;
+}
+
+extern "C" void func_00231F80(float* t)
+{
+    *t += 0.01666666753590107f;
+    *t -= floorf_231F80(*t);
+}
+#endif
 
 INCLUDE_ASM("main/gameload", func_00231FC0);
 
