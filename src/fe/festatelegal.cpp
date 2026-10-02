@@ -46,5 +46,28 @@ extern "C" void func_00187CB8(void* self)
 
 INCLUDE_ASM("fe/festatelegal", func_00187D38);
 
+//100%
 INCLUDE_ASM("fe/festatelegal", func_001887A0);
+#ifdef SKIP_ASM
+struct sFlowState_887A0 {
+    signed char count;
+    char* states;
+};
+// NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
+extern sFlowState_887A0 D_004A4E80;
+extern void* D_0046C7C0[];
+extern "C" void* func_0039E2A0(void* self);
+extern "C" void func_001A0708(void* self, int a1, int a2);
+
+extern "C" void* func_001887A0(void* self, int a1, int reset)
+{
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 0x18;
+    *(void***)((char*)self + 0x8) = D_0046C7C0;
+    if (reset != 0) {
+        func_001A0708(&D_004A4E80, 0x18, 0);
+    }
+    return self;
+}
+#endif
 

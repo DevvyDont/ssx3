@@ -2,7 +2,34 @@
 
 INCLUDE_ASM("replay/replay", cReplay_restoreFrame);
 
+//100%
 INCLUDE_ASM("replay/replay", cReplay_restoreBucket);
+#ifdef SKIP_ASM
+class cStreamRB {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+
+extern "C" void cReplay_restoreObject(void* self, void* bucket, cStreamRB* stream);
+extern "C" void func_00354C98(void* mgr, void* bucket);
+extern char D_004A5988;
+
+extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* stream)
+{
+    struct {
+        int count;
+        int pad;
+    } hdr;
+    int i;
+    stream->v02(&hdr, 8);
+    for (i = 0; i < hdr.count; i++) {
+        cReplay_restoreObject(self, bucket, stream);
+    }
+    func_00354C98(&D_004A5988, bucket);
+}
+#endif
 
 INCLUDE_ASM("replay/replay", func_0026DE58);
 

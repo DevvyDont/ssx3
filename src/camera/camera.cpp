@@ -787,7 +787,30 @@ INCLUDE_ASM("camera/camera", func_00161728);
 
 INCLUDE_ASM("camera/camera", func_00161848);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00161950);
+#ifdef SKIP_ASM
+struct func_00161950_flags {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+};
+
+extern int D_004A4DD0[2];
+
+extern "C" void func_00161950(void* self, int i)
+{
+    *(int*)((char*)self + 0x1C) = 0x3D;
+    *(int*)((char*)self + 0x38) = 0;
+    ((func_00161950_flags*)((char*)self + 0x30))->b1 = 0; ((func_00161950_flags*)((char*)self + 0x30))->b0 = 0; ((func_00161950_flags*)((char*)self + 0x30))->b2 = 0;
+    *(int*)((char*)self + 0x3C) = 0;
+    *(int*)((char*)self + 0x40) = 0;
+    *(int*)((char*)self + 0x2C) = 0x3D;
+    *(int*)((char*)self + 0x24) = D_004A4DD0[i];
+    *(int*)((char*)self + 0x28) = 0x3D;
+    *(int*)((char*)self + 0x34) = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_001619A8);
@@ -863,7 +886,21 @@ extern "C" void func_00161E58(void* self, void* algo, float w)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00161EF0);
+#ifdef SKIP_ASM
+extern int D_004A4DD0[2];
+extern "C" void* func_0015D050(void*, int, int);
+
+extern "C" void func_00161EF0(void* self, int v)
+{
+    *(int*)((char*)self + 0x24) = v;
+    D_004A4DD0[*(int*)(*(char**)(*(char**)((char*)self + 0x20) + 0x4) + 0x870)] = v;
+    if ((*(int*)((char*)self + 0x30) & 7) == 0) {
+        func_0015D050(self, v, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00161F50);

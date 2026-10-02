@@ -33,9 +33,54 @@ INCLUDE_ASM("be/be", func_0014DE28);
 
 INCLUDE_ASM("be/be", cBE_setState);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/be", func_0014DF08);
+#ifdef SKIP_ASM
+class cBEReplayStream {
+public:
+    virtual void write(void* data, int size);
+    virtual void read(void* data, int size);
+};
 
+class cBEReplayIface {
+public:
+    char pad_0x00[0xC];
+    virtual void v1();
+    virtual void v2();
+    virtual void writeToReplayFrame(cBEReplayStream* s);
+    virtual void readFromReplayFrame(cBEReplayStream* s);
+};
+
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern "C" void func_0014DF08(void* self, cBEReplayStream* s)
+{
+    s->write(&D_004A11F4, 4);
+    for (int i = 0; i < 14; i++)
+    {
+        if (cBE_getInterface_Fv(self, i))
+            cBE_getInterface_Fv(self, i)->writeToReplayFrame(s);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/be", cBE_readFromReplayFrame);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* s)
+{
+    s->read(&D_004A11F4, 4);
+    for (int i = 0; i < 14; i++)
+    {
+        if (cBE_getInterface_Fv(self, i))
+            cBE_getInterface_Fv(self, i)->readFromReplayFrame(s);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/be", func_0014E048);

@@ -37,7 +37,23 @@ INCLUDE_ASM("main/gameload", cGame_exit);
 
 INCLUDE_ASM("main/gameload", func_002305C8);
 
+//100%
 INCLUDE_ASM("main/gameload", func_00230640);
+#ifdef SKIP_ASM
+extern "C" void func_003550A0(void* mgr, int id);
+struct sGp2898 { int a, b; };
+extern sGp2898 D_004A5988; // target: raw $gp+0x2898 (splat doesn't symbolize it)
+extern int D_004428D8[];
+
+extern "C" void func_00230640(void)
+{
+    int i;
+    sGp2898* mgr = &D_004A5988;
+    for (i = 0; i < 6; i++) {
+        func_003550A0(mgr, D_004428D8[i]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00230698__FPvi);

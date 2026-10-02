@@ -1047,7 +1047,57 @@ extern "C" void func_001D1FB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001D1FF0);
+#ifdef SKIP_ASM
+struct cUIScreen;
+int GetHashValue32(char* str);
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0039F190(void* self, int a1);
+extern char D_0045DC60[];
+struct sVE_1FF0a {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sVE_1FF0b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sDefObj_1FF0 {
+    sVE_1FF0b* vt;
+};
+// $gp-relative default object (target has raw `addiu $3,$28,0x2968`, no symbol)
+extern sDefObj_1FF0 D_004A5A58;
+
+extern "C" int func_001D1FF0(void* self, void* obj)
+{
+    sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);
+    if (vt[6].fn((char*)obj + vt[6].delta) != 0) {
+    sDefObj_1FF0* p = *(sDefObj_1FF0**)(*(char**)((char*)self + 0x10) + 0x14);
+    if (p == 0) {
+        p = &D_004A5A58;
+    }
+    if (p != 0) {
+        p->vt[2].fn((char*)p + p->vt[2].delta, 3);
+    }
+    int i;
+    for (i = 0; i < 3; i++) {
+        char* o = ((char**)((char*)self + 0x48))[i];
+        if (o != 0) {
+            sVE_1FF0b* vt2 = *(sVE_1FF0b**)(o + 8);
+            vt2[9].fn(o + vt2[9].delta, 0);
+        }
+    }
+    cUIScreen_playFrame(*(void**)((char*)self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0045DC60)), 1);
+    func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D20D8);

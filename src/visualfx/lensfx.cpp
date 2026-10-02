@@ -426,7 +426,19 @@ extern "C" float func_002EE2B0(int i)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EE2F8);
+#ifdef SKIP_ASM
+extern "C" void func_002EE010(void* p);
+
+// $gp-relative object at gp+0x24C0 (no symbol in the target)
+extern int D_004A55B0;
+
+extern "C" void func_002EE2F8(void)
+{
+    func_002EE010(&D_004A55B0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002EE318);

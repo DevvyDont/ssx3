@@ -22,5 +22,23 @@ extern "C" void func_003545D8(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/spring", func_00354648);
+#ifdef SKIP_ASM
+extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
+extern void* D_00491F00[16];
+extern char D_004A5988;
+
+struct cObjNode {
+    char pad_0x00[0xC];
+    void* field_0xC;
+};
+
+extern "C" cObjNode* func_00354648(cObjNode* self, void* param2)
+{
+    self->field_0xC = D_00491F00;
+    cBucketMan_add(&D_004A5988, self, param2);
+    return self;
+}
+#endif
 

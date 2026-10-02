@@ -85,9 +85,60 @@ extern "C" void func_001864B0(void* self, void* item, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecredits", func_00186518);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList* list);
+int GetHashValue32(char* str);
+extern char D_004A1398[];
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" signed char func_001A06F0(void* self, int a1);
+extern "C" void func_0039E4C0(void* self, void* a1);
+// NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
+struct sFlowState_865A8 {
+    signed char count;
+    char* states;
+};
+extern sFlowState_865A8 D_004A4E80;
 
+extern "C" void func_00186518(void* self, void* a1)
+{
+    void* screen = cList_first((cList*)((char*)self + 0x24));
+    if (screen != 0) {
+        void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1398));
+        if (menu != 0) {
+            cUIMenu_setSelectedByIndex(menu, func_001A06F0(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
+        }
+    }
+    func_0039E4C0(self, a1);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecredits", func_001865A8);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList* list);
+int GetHashValue32(char* str);
+extern char D_004A1398[];
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_001A0708(void* self, int a1, int a2);
+// NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
+extern sFlowState_865A8 D_004A4E80;
+
+extern "C" void func_001865A8(void* self)
+{
+    void* screen = cList_first((cList*)((char*)self + 0x24));
+    if (screen != 0) {
+        void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1398));
+        if (obj != 0) {
+            func_001A0708(&D_004A4E80, *(signed char*)((char*)self + 0xC), *(signed char*)((char*)obj + 0x95));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecredits", func_00186610);

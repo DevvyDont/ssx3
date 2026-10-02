@@ -20,7 +20,21 @@ cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/objnode", func_003546C8);
+#ifdef SKIP_ASM
+extern "C" void func_00354E48(void* mgr, void* node);
+void operator_delete(int*);
+
+extern "C" void func_003546C8(void* self, int flags)
+{
+    *(void***)((char*)self + 0xC) = D_00491F00;
+    func_00354E48(&D_004A5988, self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/objnode", func_00354720);

@@ -119,7 +119,25 @@ extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327C00);
+#ifdef SKIP_ASM
+extern "C" void func_00391418(void* t, void* a);
+extern "C" void func_00327C68(void* self, void* a);
+extern "C" void func_003914F8(void* t);
+extern "C" void func_00391480(void* t, void* a);
+struct sGp2930 { int a, b; };
+extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
+
+extern "C" void func_00327C00(void* self, void* a1, void* a2)
+{
+    sGp2930* t = &D_004A5A20;
+    func_00391418(t, (char*)a1 + 0x40);
+    func_00327C68(self, a2);
+    func_003914F8(t);
+    func_00391480(t, (char*)a2 + 0x10);
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
 
