@@ -6,7 +6,50 @@ INCLUDE_ASM("fe/feridermanager", func_0019E7F0);
 
 INCLUDE_ASM("fe/feridermanager", cFERider_init);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019EBA0);
+#ifdef SKIP_ASM
+struct sVE_EBA0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+extern "C" void func_0030D540(void* p, int flags);
+extern "C" void func_0019EC68(void* self);
+
+extern "C" void func_0019EBA0(void* self)
+{
+    void* p = *(void**)((char*)self + 0x8);
+    if (p != 0) {
+        func_0030D540(p, 3);
+    }
+    char* o = *(char**)((char*)self + 0xC);
+    if (o != 0) {
+        sVE_EBA0* vt = *(sVE_EBA0**)(o + 0x58);
+        vt[1].fn(o + vt[1].delta, 3);
+    }
+    o = *(char**)((char*)self + 0xC74);
+    if (o != 0) {
+        sVE_EBA0* vt = *(sVE_EBA0**)(o + 0xC4);
+        vt[1].fn(o + vt[1].delta, 3);
+    }
+    o = *(char**)((char*)self + 0xC70);
+    if (o != 0) {
+        sVE_EBA0* vt = *(sVE_EBA0**)(o + 0xA4);
+        vt[1].fn(o + vt[1].delta, 3);
+    }
+    *(void**)((char*)self + 0x8) = 0;
+    *(void**)((char*)self + 0xC) = 0;
+    *(void**)((char*)self + 0xC70) = 0;
+    *(void**)((char*)self + 0xC74) = 0;
+    func_0019EC68(self);
+    *(int*)((char*)self + 0x0) = -1;
+    *(int*)((char*)self + 0x4) = -1;
+    *(int*)((char*)self + 0xCC8) = 0;
+    *(int*)((char*)self + 0xC78) = 0;
+    *(int*)((char*)self + 0xCD4) = -1;
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019EC68);
 

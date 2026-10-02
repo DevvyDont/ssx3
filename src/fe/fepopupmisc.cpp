@@ -2029,9 +2029,80 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2A08);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E2B38);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2BB8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_001E3A30(void* self);
 
+struct sEntry14_2BB8 {
+    int type;
+    int f4;
+    int count;
+    int fC;
+    int f10;
+};
+extern sEntry14_2BB8 D_00441630_2BB8[] __asm__("D_00441630");
+
+extern "C" int func_001E2BB8(int type, int all)
+{
+    int total = 0;
+    int i;
+    for (i = 0; i < 0x3D; i++) {
+        sEntry14_2BB8* e = &D_00441630_2BB8[i];
+        if (e->type == type) {
+            if (all != 0 || (e->f10 != 0 && func_001E3A30((void*)i) != 0)) {
+                total += e->count;
+            } else {
+                total += 1;
+            }
+        }
+    }
+    return total;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_001E3A30(void* self);
+
+struct sEntry14_2C80 {
+    int type;
+    int first;
+    int count;
+    int fC;
+    int f10;
+};
+extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
+
+extern "C" int func_001E2C80(int type, int idx, int mode)
+{
+    int base = 0;
+    int result = -1;
+    int i;
+    for (i = 0; i < 0x3D; i++) {
+        sEntry14_2C80* e = &D_00441630_2C80[i];
+        if (e->type == type) {
+            int n;
+            if (mode == 0 || e->f10 == 0 || func_001E3A30((void*)i) != 0) {
+                n = e->count;
+            } else {
+                n = 1;
+            }
+            n += base;
+            if (idx < n) {
+                result = e->first + (idx - base);
+                goto done;
+            }
+            base = n;
+        }
+    }
+done:
+    return result;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2D58);
@@ -2088,9 +2159,60 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2EA0);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E2FE0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E3100);
+#ifdef SKIP_ASM
+extern "C" int func_001E2D58(int v, int i);
+unsigned int BXrand();
 
+extern "C" unsigned char func_001E3100(int i)
+{
+    unsigned char r = 0xFF;
+    if (func_001E2D58(3, i)) {
+        r = BXrand() % 10;
+    } else if (func_001E2D58(5, i)) {
+        r = BXrand() % 11;
+    } else if (func_001E2D58(8, i)) {
+        r = BXrand() % 4;
+    } else if (func_001E2D58(4, i)) {
+        r = BXrand() % 10;
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E31B8);
+#ifdef SKIP_ASM
+struct sPopupListEntry_31B8 {
+    int id;
+    unsigned char field_0x4;
+    char pad_0x5[3];
+};
+struct sPopupList_31B8 {
+    sPopupListEntry_31B8 entries[25];
+    int mask;
+    unsigned char count;
+};
+// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
+extern "C" sPopupList_31B8* func_001E39F8_list31B8() __asm__("func_001E39F8");
+
+extern "C" void func_001E31B8(int idx)
+{
+    sPopupList_31B8* t = func_001E39F8_list31B8();
+    int i;
+    for (i = idx; i < t->count - 1; i++) {
+        t->entries[i] = t->entries[i + 1];
+        int bit = 1 << (i + 1);
+        if (t->mask & bit) {
+            t->mask |= 1 << i;
+        } else {
+            t->mask &= ~(1 << i);
+        }
+    }
+    t->count--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3268);
@@ -2122,7 +2244,44 @@ extern "C" void func_001E3268(int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E32C8);
+#ifdef SKIP_ASM
+struct sPopupEntry18_32C8 {
+    int field_0x0;
+    int field_0x4;
+    char pad_0x8[0x18 - 0x8];
+};
+extern sPopupEntry18_32C8 D_004C6C08_32C8[] __asm__("D_004C6C08");
+struct sPopupListEntry_32C8 {
+    int id;
+    unsigned char field_0x4;
+    char pad_0x5[3];
+};
+struct sPopupList_32C8 {
+    sPopupListEntry_32C8 entries[25];
+    int mask;
+    unsigned char count;
+};
+// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
+extern "C" sPopupList_32C8* func_001E39F8_list32C8() __asm__("func_001E39F8");
+extern "C" void func_001E31B8(int idx);
+
+extern "C" void func_001E32C8(int type)
+{
+    int n = 0;
+    int j = 0;
+    sPopupList_32C8* t = func_001E39F8_list32C8();
+    for (; n < t->count; n++) {
+        sPopupEntry18_32C8* a = &D_004C6C08_32C8[t->entries[j].id];
+        if (type == a->field_0x4) {
+            func_001E31B8(j);
+        } else {
+            j++;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3388);
@@ -2557,7 +2716,55 @@ extern "C" void func_001E5780(void* self, int idx)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E5800);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPopupEntry18_5800 {
+    int field_0x0;
+    int field_0x4;
+    char pad_0x8[0x18 - 0x8];
+};
+extern sPopupEntry18_5800 D_004C6C08_5800[] __asm__("D_004C6C08");
+struct sEntry14_5800 {
+    int type;
+    char pad_0x4[0x14 - 0x4];
+};
+extern sEntry14_5800 D_00441630_5800[] __asm__("D_00441630");
+extern "C" void func_001E3268(int id);
+struct sVE5800 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001E5800(void* self, void* a1, unsigned int msg)
+{
+    switch (msg) {
+    case 7: {
+        int id = *(int*)((char*)self + 0x68);
+        sPopupEntry18_5800* a = &D_004C6C08_5800[id];
+        sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
+        if (b->type == 4) {
+            return;
+        }
+        func_001E3268(id);
+    }
+    case 5: {
+        char* o = *(char**)((char*)self + 0x20);
+        sVE5800* vt = *(sVE5800**)(o + 8);
+        vt[17].fn(o + vt[17].delta, self, 0x14);
+        break;
+    }
+    case 6: {
+        char* o = *(char**)((char*)self + 0x20);
+        sVE5800* vt = *(sVE5800**)(o + 8);
+        vt[17].fn(o + vt[17].delta, self, 0x14);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5A18);
@@ -2610,7 +2817,33 @@ extern "C" int func_001E6630(void* self, int a1, int a2)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E6640);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E6668);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0046E520[];
+extern char D_0046E378[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0020A380(void* self);
+
+extern "C" void func_001E6668(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E520), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E378), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+    *(int*)((char*)self + 0x9C) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E6718);
 
@@ -2770,7 +3003,37 @@ extern "C" void func_001E8ED0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8F00);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0046E9C0[];
+extern char D_0046E378[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0020A380(void* self);
+void func_001E8FC0(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+
+extern "C" void func_001E8F00(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E9C0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E378), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_001E8FC0(self);
+    func_0020A380(self);
+    func_00294F78(func_0028B180(), 0xE);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8FC0__FPv);

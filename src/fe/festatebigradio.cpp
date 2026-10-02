@@ -38,7 +38,32 @@ INCLUDE_ASM("fe/festatebigradio", func_00193DE0);
 
 INCLUDE_ASM("fe/festatebigradio", func_00193F38);
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00194080);
+#ifdef SKIP_ASM
+struct cUIScreen;
+int GetHashValue32(char* str);
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern char D_004A1790[];
+extern char D_004A1798[];
+
+static inline int get6F8_4080(void* p) { return *(int*)((char*)p + 0x6F8); }
+extern "C" void func_00194080(void* self)
+{
+    if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_004A1790));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+    } else if (get6F8_4080(self) == 0 && *(int*)((char*)self + 0x72C) != 0) {
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_004A1798));
+        if (frame != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebigradio", func_00194138);
 

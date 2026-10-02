@@ -123,7 +123,34 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D8D68);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8DE0);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9258);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A1600[];
+extern "C" unsigned char func_0039B7B0(void* menu, unsigned char start);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+
+extern "C" void func_001D9258(void* self)
+{
+    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1600));
+    if (menu != 0) {
+        void* item = *(void**)((char*)menu + 0xA0);
+        int idx = *(unsigned char*)((char*)menu + 0x95);
+        if (item == 0 || ((*(int*)((char*)item + 0x14) >> 5) & 1)) {
+            idx = func_0039B7B0(menu, 0);
+        }
+        if (idx != 0xFF) {
+            cUIMenu_setSelectedByIndex(menu, idx);
+            *(int*)((char*)self + 0x1C4) = idx;
+        } else {
+            cUIMenu_setSelectedByIndex(menu, 0);
+            *(int*)((char*)self + 0x1C4) = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9308);
 
@@ -300,7 +327,39 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D99C8);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9A80);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9BD0);
+#ifdef SKIP_ASM
+extern "C" void* func_002C2508(void* dst, void* src);
+void func_001C57A0(void* slots, int idx, int data);
+// PORT: func_001C5DD8 takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
+void func_001C5DD8_self(void* self) __asm__("func_001C5DD8");
+
+extern "C" void func_001D9BD0(void* self, void* src, int mode)
+{
+    void* slots = (char*)self + 0xBC;
+    if (mode == 0) {
+        void* d = (char*)self + 0x9A0;
+        func_002C2508(d, src);
+        func_001C57A0(slots, 0, (int)d); // PORT: pointer passed as int
+    } else if (mode == 1) {
+        if (*(int*)((char*)self + 0xBF8) >= 2) {
+            void* d = (char*)self + 0xA68;
+            func_002C2508(d, src);
+            func_001C57A0(slots, 1, (int)d);
+        }
+    } else {
+        void* d = (char*)self + 0xB30;
+        *(int*)((char*)self + 0xBF8) = 3;
+        *(int*)((char*)self + 0xBC) = 3;
+        func_002C2508(d, src);
+        func_001C57A0(slots, 2, (int)d);
+    }
+    if (*(int*)((char*)self + 0x40) != 0) {
+        func_001C5DD8_self(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9CA8);

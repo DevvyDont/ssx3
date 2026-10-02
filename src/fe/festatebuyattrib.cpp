@@ -1,8 +1,73 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0046EFF8[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00150928(void* iface, int a1, int charID);
+extern "C" void cFEStateBuyAttrib_updateTotalCost(void* self);
+extern "C" void cFEStateBuyAttrib_updateLevels(void* self);
+extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self);
+extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
+extern "C" void cFEStateBuyAttrib_updateBank(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
 
+extern "C" void cFEStateBuyAttrib_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046EFF8), 0);
+    *(void**)((char*)self + 0x48) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    *(int*)((char*)self + 0xA4) = func_00150928(iface, 0, cBELibrary_getCharacterID(0));
+    *(int*)((char*)self + 0xA8) = 0;
+    *(int*)((char*)self + 0xA0) = 0;
+    cFEStateBuyAttrib_updateTotalCost(self);
+    cFEStateBuyAttrib_updateLevels(self);
+    cFEStateBuyAttrib_updateCostPerLevel(self);
+    cFEStateBuyAttrib_updateExperienceDisplay(self);
+    cFEStateBuyAttrib_updateBank(self);
+    func_0028F140(func_0028B180(), 3);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetCreate);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_0046F008[];
+extern char D_0046F020[];
+extern char D_0046F040[];
+extern char D_004A2320[];
+extern char D_004A2328[];
+
+static inline int IsHash_4910(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void cFEStateBuyAttrib_onWidgetCreate(void* self, void* widget)
+{
+    if (IsHash_4910(*(int*)((char*)widget + 0x38), D_0046F008)) {
+        cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(D_0046F020));
+    } else if (IsHash_4910(*(int*)((char*)widget + 0x38), D_0046F040)) {
+        *(void**)((char*)self + 0xAC) = widget;
+    } else if (IsHash_4910(*(int*)((char*)widget + 0x38), D_004A2320)) {
+        *(int*)((char*)widget + 0x18) = 0;
+    } else if (IsHash_4910(*(int*)((char*)widget + 0x38), D_004A2328)) {
+        *(int*)((char*)widget + 0x18) = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F49D0);
@@ -61,7 +126,45 @@ INCLUDE_ASM("fe/festatebuyattrib", func_001F4C30);
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateLevels);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateCostPerLevel);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" const char* func_00198AF0(int value);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_00150E50(void* iface, int level);
+extern char D_004A2348[];
+struct sVE4FC0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
+{
+    char buf[32];
+    int i;
+    int* levels = (int*)((char*)self + 0x68);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    for (i = 0; i < 7; i++, levels++) {
+        sprintf(buf, D_004A2348, i);
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x48), GetHashValue32(buf));
+        if (text != 0) {
+            cUIText_setAsciiString(text, func_00198AF0(func_00150E50(iface, *levels - 1)));
+            if (*levels >= 0xB) {
+                sVE4FC0* vt = *(sVE4FC0**)((char*)text + 8);
+                vt[9].fn((char*)text + vt[9].delta, 0);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateExperienceDisplay);
 
@@ -123,7 +226,43 @@ extern "C" void* func_001F54B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0046F168[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_001F6F30(void* self);
+extern "C" void func_001F5A38(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+
+extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F168), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    *(int*)((char*)self + 0x4C) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    *(int*)((char*)self + 0x54) = 0;
+    *(int*)((char*)self + 0x58) = 0;
+    *(int*)((char*)self + 0x5C) = 0;
+    *(int*)((char*)self + 0x64) = 0;
+    *(int*)((char*)self + 0x60) = 0;
+    *(int*)((char*)self + 0x68) = 0;
+    *(int*)((char*)self + 0x70) = 0;
+    *(int*)((char*)self + 0x6C) = 0;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    func_001F6F30(self);
+    func_001F5A38(self);
+    func_0028F140(func_0028B180(), 8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F55C0);

@@ -250,7 +250,35 @@ INCLUDE_ASM("fe/festateoptions", func_0018CDC0);
 
 INCLUDE_ASM("fe/festateoptions", func_0018CF50);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018D058);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E510(void* self);
+extern "C" void func_0018D108(void* self, int idx, float x, float y);
+
+extern "C" void func_0018D058(void* self)
+{
+    func_0039E510(self);
+    if (*(unsigned char*)((char*)self + 0x50) & 1) {
+        if (*(int*)((char*)self + 0x48) > 0) {
+            *(int*)((char*)self + 0x48) -= 1;
+        } else {
+            *(int*)((char*)self + 0x48) = 0;
+            *(unsigned char*)((char*)self + 0x50) &= ~1;
+            func_0018D108(self, 0, 0.0f, 0.0f);
+        }
+    }
+    if (*(unsigned char*)((char*)self + 0x50) & 2) {
+        if (*(int*)((char*)self + 0x4C) > 0) {
+            *(int*)((char*)self + 0x4C) -= 1;
+        } else {
+            *(int*)((char*)self + 0x4C) = 0;
+            *(unsigned char*)((char*)self + 0x50) &= ~2;
+            func_0018D108(self, 1, 0.0f, 0.0f);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018D108);
 
@@ -289,7 +317,36 @@ extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0045E0D0[];
+extern char D_0045E0E0[];
+extern char D_0045E0F0[];
+extern char D_0045E100[];
+extern char D_004A1508[];
+extern char D_004A1500[];
+
+static inline int IsHash_D2E8(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
+{
+    if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0D0)) {
+        *(int*)((char*)widget + 0x18) = 0;
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0E0)) {
+        *(int*)((char*)widget + 0x18) = 2;
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0F0)) {
+        *(int*)((char*)widget + 0x18) = 1;
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E100)) {
+        *(int*)((char*)widget + 0x18) = 3;
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_004A1508)) {
+        *(int*)((char*)widget + 0x18) = 0x300;
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_004A1500)) {
+        *(int*)((char*)widget + 0x18) = 0x200;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018D3C0);
 
@@ -309,7 +366,37 @@ INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
 
 INCLUDE_ASM("fe/festateoptions", func_0018E178);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018E2C0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A1458[];
+extern char D_004A1460[];
+struct cUIObj_E2C0 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setActive(int on);
+};
+
+extern "C" void func_0018E2C0(void* self, bool on)
+{
+    if (*(int*)((char*)self + 0x22C) != 0) {
+        int off = !on;
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setActive(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1460)))->setActive(off);
+    }
+    *(int*)((char*)self + 0x220) = !on;
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018E368);
 

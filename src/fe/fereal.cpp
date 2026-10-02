@@ -1,6 +1,38 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/fereal", cFECustom_cFECustom);
+#ifdef SKIP_ASM
+struct sVE0720 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_0039E2A0(void* self, void* owner);
+extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
+extern char D_00460B90[];
+extern void* D_0046D810[];
+extern sVE0720 D_0046BB88[];
+
+extern "C" void* cFECustom_cFECustom(void* self, void* owner)
+{
+    *(void**)((char*)self + 0x0) = owner;
+    *(void**)((char*)self + 0x10) = 0;
+    *(void***)((char*)self + 0x4) = D_0046D810;
+    char* o = (char*)cMemMan_alloc(0x50, D_00460B90, 0, 0);
+    func_0039E2A0(o, *(void**)((char*)self + 0x0));
+    *(int*)(o + 0x48) = 0;
+    *(int*)(o + 0x4C) = 0;
+    *(sVE0720**)(o + 0x8) = D_0046BB88;
+    *(void**)((char*)self + 0x10) = o;
+    if (o != 0) {
+        D_0046BB88[4].fn(o + D_0046BB88[4].delta);
+        cUIStateStack_pushExplicit((char*)*(void**)((char*)self + 0x0) + 0x18, *(void**)((char*)self + 0x10));
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fereal", func_001A07C8);

@@ -37,7 +37,38 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_00199420);
 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetCreate);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199870);
+#ifdef SKIP_ASM
+extern "C" void func_0019BE80(void* self);
+extern "C" void func_0019BBA0(void* self);
+struct sEquipDetail;
+extern "C" int func_0019B458(sEquipDetail* self, int idx);
+extern "C" void func_0019B618(void* self, int a1, int a2);
+
+extern "C" void func_00199870(void* self, void* widget, int msg)
+{
+    switch (msg) {
+    case 0x15:
+        if (*(int*)((char*)widget + 0xC) != 7) {
+            *(int*)((char*)self + 0x1C) &= ~8;
+        }
+        break;
+    case 0x16:
+        if (((*(int*)((char*)self + 0x1C) >> 3) & 1) == 0) {
+            *(int*)((char*)self + 0x1C) |= 8;
+        }
+        if (*(int*)((char*)widget + 0xC) == 7 && *(int*)((char*)widget + 0x6C) != 0) {
+            func_0019BE80(self);
+            func_0019BBA0(self);
+            if (func_0019B458((sEquipDetail*)self, *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95))) {
+                func_0019B618(self, 0, 1);
+            }
+        }
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onUpdate);
 
@@ -88,9 +119,107 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019AB78);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AFD0);
+#ifdef SKIP_ASM
+struct sEquipEntry_AFD0 {
+    unsigned short f0;
+    unsigned short flags;
+};
+struct sEquipDb_AFD0 {
+    char pad_0x0[0x288];
+    short* map;     // 0x288
+    char pad_0x28c[4];
+    sEquipEntry_AFD0 entries[1];  // 0x290
+};
+struct sEquipItem_AFD0 {
+    int f0;
+    short id;       // 0x4
+    char pad_0x6[0x34 - 0x6];
+    int flags;      // 0x34
+};
+extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
 
+static inline sEquipEntry_AFD0* getEntry_AFD0(sEquipDb_AFD0* db, int id)
+{
+    short idx = db->map[id];
+    if (idx >= 0) {
+        return &db->entries[idx];
+    }
+    return 0;
+}
+
+extern "C" int func_0019AFD0(void* self, int a1, sEquipDb_AFD0* db, int a3)
+{
+    sEquipItem_AFD0* items[528];
+    int n = func_0014D7E8(a1, *(int*)((char*)self + 0xBC), a3, items, -1, 1);
+    int i;
+    for (i = 0; i < n; i++) {
+        sEquipItem_AFD0* it = items[i];
+        if (it->flags & 4) {
+            if (getEntry_AFD0(db, it->id)->flags & 2) {
+                if (!(it->flags & 0x20)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B098);
+#ifdef SKIP_ASM
+struct sEquipEntry_B098 {
+    unsigned short f0;
+    unsigned short flags;
+};
+struct sEquipDb_B098 {
+    char pad_0x0[0x288];
+    short* map;     // 0x288
+    char pad_0x28c[4];
+    sEquipEntry_B098 entries[1];  // 0x290
+};
+struct sEquipItem_B098 {
+    short f0;
+    signed char slot;   // 0x2
+    char f3;
+    short id;       // 0x4
+    char pad_0x6[0x34 - 0x6];
+    int flags;      // 0x34
+};
+extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
+
+static inline sEquipEntry_B098* getEntry_B098(sEquipDb_B098* db, int id)
+{
+    short idx = db->map[id];
+    if (idx >= 0) {
+        return &db->entries[idx];
+    }
+    return 0;
+}
+
+extern "C" int func_0019B098(void* self, int a1, sEquipDb_B098* db, int a3)
+{
+    sEquipItem_B098* items[528];
+    int n = func_0014D7E8(a1, *(int*)((char*)self + 0xBC), a3, items, -1, 1);
+    int i;
+    for (i = 0; i < n; i++) {
+        sEquipItem_B098* it = items[i];
+        if (it->flags & 4) {
+            if (!(getEntry_B098(db, it->id)->flags & 2)) {
+                if (it->slot == *(int*)((char*)self + 0xCC)) {
+                    if (!(it->flags & 0x20)) {
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B180);
 
@@ -311,7 +440,45 @@ extern "C" int func_0019C920(void* self, int a1)
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C938);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CA70);
+#ifdef SKIP_ASM
+struct sNode_CA70 {
+    int key;
+    short f4;
+    short f6;
+    short f8;
+    short fA;
+    short prev;
+    short next;
+};
+extern "C" void* func_0019C8D0(void* self, void* item);
+extern "C" void* func_0019C8F8(void* self, void* item);
+extern "C" int func_0019C920(void* self, int a1);
+
+extern "C" void func_0019CA70(void* self, void* nodep)
+{
+    sNode_CA70* node = (sNode_CA70*)nodep;
+    if (node != 0) {
+        int h = node->key % 400;
+        if (node->prev < 0) {
+            *(void**)((char*)self + (h << 2) + 0x1900) = func_0019C8F8(self, node);
+        } else {
+            ((sNode_CA70*)func_0019C8D0(self, node))->next = node->next;
+        }
+        if (node->next >= 0) {
+            ((sNode_CA70*)func_0019C8F8(self, node))->prev = node->prev;
+        }
+        node->key = -1;
+        node->fA = -1;
+        node->f8 = -1;
+        node->prev = -1;
+        // PORT: free-list head pointer passed as int (unit declares func_0019C920(void*, int))
+        node->next = func_0019C920(self, *(int*)((char*)self + 0x1F40));
+        *(sNode_CA70**)((char*)self + 0x1F40) = node;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB38);
@@ -372,7 +539,40 @@ extern "C" int func_0019CBE0(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CC30);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
+
+extern "C" void func_0019CA70(void* self, void* node);
+struct sNode_CC30 {
+    int key;
+    short f4;
+    short mask;
+    short f8;
+    short val;
+    short prev;
+    short next;
+};
+
+extern "C" void func_0019CC30(void* self, int bit, int a2, int val)
+{
+    sNode_CC30* p = (sNode_CC30*)func_0019C938(self, bit, a2, val != -1);
+    if (p != 0) {
+        if (val < 0) {
+            if ((p->mask >> bit) & 1) {
+                p->mask &= ~(1 << bit);
+                if (p->mask == 0 && p->f8 < 0) {
+                    func_0019CA70(self, p);
+                }
+            }
+        } else {
+            p->val = val;
+            p->mask |= 1 << bit;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CCE8);
@@ -391,7 +591,39 @@ extern "C" int func_0019CCE8(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CD38);
+#ifdef SKIP_ASM
+extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
+extern "C" void func_0019CA70(void* self, void* node);
+struct sNode_CD38 {
+    int key;
+    short mask;
+    short f6;
+    short val;
+    short fA;
+    short prev;
+    short next;
+};
+
+extern "C" void func_0019CD38(void* self, int bit, int a2, int val)
+{
+    sNode_CD38* p = (sNode_CD38*)func_0019C938(self, bit, a2, val != -1);
+    if (p != 0) {
+        if (val < 0) {
+            if ((p->mask >> bit) & 1) {
+                p->mask &= ~(1 << bit);
+                if (p->mask == 0 && p->fA < 0) {
+                    func_0019CA70(self, p);
+                }
+            }
+        } else {
+            p->val = val;
+            p->mask |= 1 << bit;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CDF0);
 
@@ -468,7 +700,52 @@ extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D4B8);
+#ifdef SKIP_ASM
+extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
+void cMemMan_free(void* ptr);
+struct sEquipSlot_D4B8 {
+    int state;
+    char name[0x100];
+    void* data;     // 0x104
+    int handle;     // 0x108
+    int pending;    // 0x10C
+    int f110;
+    int f114;
+    int size;       // 0x118
+    int f11C;
+};
+struct sEquipRow_D4B8 {
+    sEquipSlot_D4B8 slots[0x100];
+};
+struct sEquipTable_D4B8 {
+    sEquipRow_D4B8 rows[1];
+};
+
+extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i)
+{
+    int status;
+    sEquipSlot_D4B8* s = &self->rows[bank].slots[i];
+    if (s->state == 2) {
+        if (s->pending != 0) {
+            ASYNCFILE_release(s->handle, 0, &status);
+        }
+    }
+    *(int*)((char*)self + 0xB4000) -= s->size;
+    if (s->data != 0) {
+        cMemMan_free(s->data);
+    }
+    s->data = 0;
+    s->size = 0;
+    s->state = 0;
+    s->name[0] = 0;
+    s->handle = 0;
+    s->pending = 0;
+    s->f114 = 0;
+    s->f110 = -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D578);
 
@@ -478,7 +755,56 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019D8B8);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DA10);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DC20);
+#ifdef SKIP_ASM
+extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
+extern "C" int func_003DF980(int handle);
+struct sEquipSlot_DC20 {
+    int state;
+    char name[0x100];
+    void* data;     // 0x104
+    int handle;     // 0x108
+    int pending;    // 0x10C
+    int f110;
+    int timer;      // 0x114
+    int size;       // 0x118
+    int f11C;
+};
+struct sEquipRow_DC20 {
+    sEquipSlot_DC20 slots[0x100];
+};
+struct sEquipTable_DC20 {
+    sEquipRow_DC20 rows[1];
+};
+extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* slot);
+struct sEquipTable_D4B8;
+extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
+
+extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
+{
+    int status;
+    sEquipSlot_DC20* s = &self->rows[bank].slots[i];
+    if (--s->timer > 0) {
+        return;
+    }
+    if (s->state == 2) {
+        if (func_003DF980(s->handle) != 1) {
+            return;
+        }
+        ASYNCFILE_release(s->handle, 0, &status);
+        func_0019D000(self, bank, s);
+        s->pending = 0;
+        s->state = 0;
+        *(int*)((char*)self + 0xB4004) -= 1;
+    }
+    if (s->data == 0) {
+        func_0019D4B8((sEquipTable_D4B8*)self, bank, i);
+    } else {
+        s->state = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DD10);
 

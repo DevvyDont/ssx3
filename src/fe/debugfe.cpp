@@ -591,7 +591,73 @@ extern "C" int func_001807C8(void* self)
 
 INCLUDE_ASM("fe/debugfe", func_00180840);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_001809B0);
+#ifdef SKIP_ASM
+struct sStr10 { char c[10]; };
+extern sStr10 D_0045D550;
+extern char D_004A1350[];
+extern char D_0045D560[];
+extern char D_004A1358[];
+extern char D_004A1360[];
+extern "C" char* func_004162D0(char*, const char*);
 
+extern "C" void func_001809B0(void* self, int c, char* dst)
+{
+    char buf[2];
+    *(sStr10*)dst = D_0045D550;
+    if (c < 10) {
+        buf[0] = c + '0';
+        buf[1] = 0;
+        func_004162D0(dst, buf);
+    } else if (c < 36) {
+        buf[0] = c + 'A' - 10;
+        buf[1] = 0;
+        func_004162D0(dst, buf);
+    } else if (c == 36) {
+        func_004162D0(dst, D_004A1350);
+    } else if (c == 37) {
+        func_004162D0(dst, D_0045D560);
+    } else if (c == 38) {
+        func_004162D0(dst, D_004A1358);
+    } else if (c == 39) {
+        func_004162D0(dst, D_004A1360);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/debugfe", func_00180A90);
+#ifdef SKIP_ASM
+struct sStr8 { char c[8]; };
+extern char D_004A1368[];
+extern char D_004A1350[];
+extern char D_0045D560[];
+extern char D_004A1358[];
+extern char D_004A1360[];
+extern "C" char* func_004162D0(char*, const char*);
+
+extern "C" void func_00180A90(void* self, int c, char* dst)
+{
+    char buf[2];
+    *(sStr8*)dst = *(sStr8*)D_004A1368;
+    if (c < 10) {
+        buf[0] = c + '0';
+        buf[1] = 0;
+        func_004162D0(dst, buf);
+    } else if (c < 36) {
+        buf[0] = c + 'A' - 10;
+        buf[1] = 0;
+        func_004162D0(dst, buf);
+    } else if (c == 36) {
+        func_004162D0(dst, D_004A1350);
+    } else if (c == 37) {
+        func_004162D0(dst, D_0045D560);
+    } else if (c == 38) {
+        func_004162D0(dst, D_004A1358);
+    } else if (c == 39) {
+        func_004162D0(dst, D_004A1360);
+    }
+}
+#endif
 

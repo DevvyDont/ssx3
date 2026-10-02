@@ -88,7 +88,39 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initCreateScreen);
 
 INCLUDE_ASM("fe/festateprofile", func_00190670);
 
+//100%
 INCLUDE_ASM("fe/festateprofile", func_00190768);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0045E318[];
+extern char D_0045E348[];
+extern char D_004A15D0[];
+extern char D_004A1458[];
+struct cUIObj_0768 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setActive(int on);
+};
+
+extern "C" void func_00190768(void* self)
+{
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E318)))->setActive(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E348)))->setActive(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D0)))->setActive(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setActive(1);
+    *(int*)((char*)self + 0x220) = 1;
+    *(int*)((char*)self + 0x224) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateprofile", func_00190858);

@@ -145,11 +145,79 @@ INCLUDE_ASM("fe/festatenethelppopup", func_001DA988);
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DAAC8);
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DABD0);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* func_002CCF08(void* self);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0046D5E0[];
+extern char D_00467A98[];
+
+extern "C" void* func_001DABD0(void* self, int* info)
+{
+    char* p = (char*)self + 0x168;
+    int i = 3;
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0046D5E0;
+    *(int*)((char*)self + 0x130) = *info;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A98);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
+    for (; i != -1; i--) {
+        func_002CCF08(p);
+        p += 0x24;
+    }
+    cMenu_addItem(self, (char*)self + 0x134, -1);
+    cMenu_addItem(self, (char*)self + 0x150, -1);
+    int j;
+    for (j = 0; j < 4; j++) {
+        cMenu_addItem(self, (char*)self + 0x168 + j * 0x24, -1);
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DACB8);
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DAE20);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* func_002CCF08(void* self);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0046D4D8[];
+extern char D_00467AB8[];
+
+extern "C" void* func_001DAE20(void* self, int* info)
+{
+    char* p = (char*)self + 0x168;
+    int i = 11;
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0046D4D8;
+    *(int*)((char*)self + 0x130) = *info;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467AB8);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
+    for (; i != -1; i--) {
+        func_002CCF08(p);
+        p += 0x24;
+    }
+    cMenu_addItem(self, (char*)self + 0x134, -1);
+    cMenu_addItem(self, (char*)self + 0x150, -1);
+    int j;
+    for (j = 0; j < 12; j++) {
+        cMenu_addItem(self, (char*)self + 0x168 + j * 0x24, -1);
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DAF08);
 

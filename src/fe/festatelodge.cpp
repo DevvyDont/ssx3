@@ -1,6 +1,36 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A2318[];
+extern int D_00441B14[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_001474C8(void* iface, int player);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+
+extern "C" void cFEStateLodge_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A2318), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    *(int*)((char*)self + 0x48) = func_001474C8(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    D_00441B14[0] = 0;
+    func_0028F140(func_0028B180(), 1);
+    *(int*)((char*)self + 0x4C) = 0;
+    *(int*)((char*)self + 0x50) = 0x12;
+    *(int*)((char*)self + 0x54) = 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetCreate);
 
@@ -28,7 +58,34 @@ extern "C" void* func_001F3FF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_0046EF20[];
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
+extern "C" int func_001577A0(void* self, int a1, int a2);
+
+extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046EF20), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    *(int*)((char*)self + 0x48) = 1;
+    int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44), charID) == 0) {
+        *(int*)((char*)self + 0x48) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F4108);
 
