@@ -222,15 +222,80 @@ INCLUDE_ASM("be/beintreward", func_00157468);
 
 INCLUDE_ASM("be/beintreward", func_00157518);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001575C0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
+extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+extern "C" int func_001575C0(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x3C), (signed char*)(p + 0xF30));
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157620);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
+extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+extern "C" int func_00157620(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x40), (signed char*)(p + 0xF36));
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157680);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
+extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+extern "C" int func_00157680(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x44), (signed char*)(p + 0xF45));
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001576E0);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
+extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+extern "C" int func_001576E0(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x48), (signed char*)(p + 0xF53));
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157740);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+void* func_0015A478_noargs() __asm__("func_0015A478");
+extern "C" int func_00157390(void* self, int count, signed char* bits);
+
+extern "C" int func_00157740(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x4C), (signed char*)(p + 0xF52));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001577A0);
