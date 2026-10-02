@@ -216,7 +216,40 @@ extern "C" void func_00398638(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_003986B0);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+extern "C" void* func_0039FF60(void* self, int a1);
+
+struct func_003986B0_sVEntry {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+extern "C" void* func_003986B0(void* self, int id)
+{
+    if (func_0039FF60(self, id) != 0) {
+        return self;
+    }
+    void* n = cList_first((cList*)((char*)self + 0x74));
+    if (n != 0) {
+        do {
+            func_003986B0_sVEntry* e = &(*(func_003986B0_sVEntry**)((char*)n + 8))[14];
+            void* r = e->fn((char*)n + e->delta, id);
+            if (r != 0) {
+                return r;
+            }
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", func_00398738);
@@ -297,7 +330,34 @@ extern "C" void func_003987F8(void* self, int a1)
 
 INCLUDE_ASM("ui/uiengine", func_00398868);
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398910);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+extern "C" void func_003A0000(void* self, unsigned short ev);
+
+struct func_00398910_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, unsigned short);
+};
+
+extern "C" void func_00398910(void* self, unsigned short ev)
+{
+    void* n = cList_first((cList*)((char*)self + 0x74));
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            func_00398910_sVEntry* vt = *(func_00398910_sVEntry**)((char*)n + 8);
+            vt[19].fn((char*)n + vt[19].delta, ev);
+            n = *(void**)((char*)n + 4);
+        }
+    }
+    func_003A0000(self, ev);
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00398998);
 

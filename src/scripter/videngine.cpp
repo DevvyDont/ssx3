@@ -160,5 +160,25 @@ extern "C" int func_00283DA0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/videngine", func_00283DC0);
+#ifdef SKIP_ASM
+extern "C" int func_00283DA0(void* self);
+extern "C" int func_00283C60(void* self, int a1);
+
+struct sVidEntry1C { int v[7]; };
+
+extern "C" int func_00283DC0(void* self, sVidEntry1C* out)
+{
+    if (func_00283DA0(self) != 0) {
+        return 0;
+    }
+    *(int*)((char*)self + 0x94) = 0;
+    if (out != 0) {
+        *out = ((sVidEntry1C*)self)[*(int*)((char*)self + 0x8c)];
+    }
+    *(int*)((char*)self + 0x8c) = func_00283C60(self, *(int*)((char*)self + 0x8c));
+    return 1;
+}
+#endif
 

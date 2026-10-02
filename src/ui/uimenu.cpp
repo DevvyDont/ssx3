@@ -71,7 +71,35 @@ extern "C" void func_0039BAD0(func_0039BAD0_s* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039BB50);
+#ifdef SKIP_ASM
+struct func_0039BB50_sFlags {
+    unsigned int pad0 : 6;
+    unsigned int on : 1;
+};
+
+struct func_0039BB50_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0039BB50(void* self, int on)
+{
+    ((func_0039BB50_sFlags*)((char*)self + 0x14))->on = (on != 0);
+    void* a = *(void**)((char*)self + 0x78);
+    if (a != 0) {
+        func_0039BB50_sVEntry* vt = *(func_0039BB50_sVEntry**)((char*)a + 8);
+        vt[9].fn((char*)a + vt[9].delta, on);
+    }
+    void* b = *(void**)((char*)self + 0x7C);
+    if (b != 0) {
+        func_0039BB50_sVEntry* vt = *(func_0039BB50_sVEntry**)((char*)b + 8);
+        vt[9].fn((char*)b + vt[9].delta, on);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039BBD8);
 
@@ -158,7 +186,29 @@ extern "C" void func_0039BE70(void* self)
 
 INCLUDE_ASM("ui/uimenu", func_0039BED8);
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039C130);
+#ifdef SKIP_ASM
+struct func_0039C130_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
+
+extern "C" void func_0039C130(void* self, float x, float y)
+{
+    void* a = *(void**)((char*)self + 0x78);
+    if (a != 0) {
+        func_0039C130_sVEntry* e = &(*(func_0039C130_sVEntry**)((char*)a + 8))[17];
+        e->fn((char*)a + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
+    }
+    void* b = *(void**)((char*)self + 0x7C);
+    if (b != 0) {
+        func_0039C130_sVEntry* e = &(*(func_0039C130_sVEntry**)((char*)b + 8))[17];
+        e->fn((char*)b + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039C1C8);
@@ -204,7 +254,34 @@ extern "C" void func_0039C1C8(void* self, unsigned short ev)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039C240);
+#ifdef SKIP_ASM
+extern "C" void func_0039FC48(void* self, int flags);
+extern void* D_00494408[];
+
+struct func_0039C240_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0039C240(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00494408;
+    void* a = *(void**)((char*)self + 0x74);
+    if (a != 0) {
+        func_0039C240_sVEntry* vt = *(func_0039C240_sVEntry**)((char*)a + 8);
+        vt[1].fn((char*)a + vt[1].delta, 3);
+    }
+    void* b = *(void**)((char*)self + 0x78);
+    if (b != 0) {
+        func_0039C240_sVEntry* vt = *(func_0039C240_sVEntry**)((char*)b + 8);
+        vt[1].fn((char*)b + vt[1].delta, 3);
+    }
+    func_0039FC48(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039C2C8);
@@ -217,9 +294,60 @@ extern "C" void func_0039C2C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039C300);
+#ifdef SKIP_ASM
+struct func_0039C300_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float);
+};
 
+extern "C" void func_0039C300(void* self, float x, float y)
+{
+    void* a = *(void**)((char*)self + 0x74);
+    if (a != 0 && *(void**)((char*)self + 0x78) != 0) {
+        float px = x + *(float*)((char*)self + 0x44);
+        float py = y + *(float*)((char*)self + 0x48);
+        func_0039C300_sVEntry* vt = *(func_0039C300_sVEntry**)((char*)a + 8);
+        vt[17].fn((char*)a + vt[17].delta, px, py);
+        void* b = *(void**)((char*)self + 0x78);
+        func_0039C300_sVEntry* vt2 = *(func_0039C300_sVEntry**)((char*)b + 8);
+        vt2[17].fn((char*)b + vt2[17].delta, px, py);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039C398);
+#ifdef SKIP_ASM
+extern "C" void func_003975E0(void* anim, void* thing, unsigned char flags, unsigned short ev);
+extern "C" void func_003974B0(void* anim, unsigned char flags);
+
+struct func_0039C398_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, unsigned short);
+};
+
+extern "C" void func_0039C398(void* self, unsigned short ev)
+{
+    if (*(void**)((char*)self + 0xC) != 0) {
+        func_003975E0(*(void**)((char*)self + 0xC), self, *(unsigned char*)((char*)self + 0x10), ev);
+        func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+    }
+    void* a = *(void**)((char*)self + 0x78);
+    if (a != 0) {
+        func_0039C398_sVEntry* vt = *(func_0039C398_sVEntry**)((char*)a + 8);
+        vt[19].fn((char*)a + vt[19].delta, ev);
+    }
+    void* b = *(void**)((char*)self + 0x74);
+    if (b != 0) {
+        func_0039C398_sVEntry* vt = *(func_0039C398_sVEntry**)((char*)b + 8);
+        vt[19].fn((char*)b + vt[19].delta, ev);
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039C428);
 

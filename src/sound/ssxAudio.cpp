@@ -144,7 +144,26 @@ extern "C" void func_00287410(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287488);
+#ifdef SKIP_ASM
+extern "C" float func_002873D8(void*);
+// PORT: func_00287700's real parameter order is (self, int, float); the unit declares (self, float, int).
+void func_00287700_if(void*, int, float) __asm__("func_00287700");
+
+extern "C" void func_00287488(void* self)
+{
+    float v = func_002873D8(self);
+    func_00287700_if(self, 5, v);
+    func_00287700_if(self, 3, v);
+    func_00287700_if(self, 6, v);
+    func_00287700_if(self, 7, v);
+    if (*(int*)((char*)self + 0x62B4) != 0) {
+        func_00287700_if(self, 9, v);
+        func_00287700_if(self, 10, v);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287520);
@@ -176,7 +195,24 @@ extern "C" void func_00287558(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002875D0);
+#ifdef SKIP_ASM
+extern "C" void func_00287700(void*, float, int);
+extern "C" float func_00287920(void* self, int a1);
+
+extern "C" void func_002875D0(void* self, int on)
+{
+    if (on != 0) {
+        func_00287700(self, func_00287920(self, 5), 9);
+        func_00287700(self, func_00287920(self, 5), 10);
+    } else {
+        func_00287700(self, 0.0f, 9);
+        func_00287700(self, 0.0f, 10);
+    }
+    *(int*)((char*)self + 0x62B4) = on;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00287670);
@@ -266,7 +302,33 @@ INCLUDE_ASM("sound/ssxAudio", func_002887F8);
 
 INCLUDE_ASM("sound/ssxAudio", func_00288940);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288A20);
+#ifdef SKIP_ASM
+extern "C" int func_0028B1B0(void);
+extern "C" int func_00288940(void* self, int id);
+// PORT: callers pass self, but func_00288CE8's body takes no arguments (the unit declares it ()).
+int func_00288CE8_self(void* self) __asm__("func_00288CE8");
+
+struct sAudVtEnt { short delta; short index; int (*fn)(void*); };
+
+extern "C" int func_00288A20(void* self, void* obj)
+{
+    if (func_0028B1B0() == 0) {
+        return 0;
+    }
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        return *(int*)((char*)obj + 0x870);
+    }
+    if (func_00288CE8_self(self) == 1) {
+        return 0;
+    }
+    char* o = (char*)obj + 0x6C0;
+    sAudVtEnt* e = &(*(sAudVtEnt**)o)[5];
+    return func_00288940(self, e->fn(o + e->delta));
+}
+#endif
 
 extern "C" void* func_0028B210(int);
 

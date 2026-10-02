@@ -105,7 +105,28 @@ extern "C" void func_002B5898(void* self)
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_cWorldTriggerManager);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5988);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+
+extern "C" void func_002B5988(char** self, int flags)
+{
+    char* base = *self;
+    if (base != 0) {
+        char* p = base + *(int*)(base - 0x10) * 0x70;
+        while (*self != p) {
+            p -= 0x70;
+            func_002B4BE0((int*)p, 0);
+        }
+        cMemMan_free(*self - 0x10);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_LoadTriggerInfo);
 
@@ -206,7 +227,29 @@ extern "C" int func_002B66E8(sWorldTrigger70** self, int a1, int a2, sWorldTrigg
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6740);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B1C8(void);
+extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, int* o3);
+extern "C" int func_002B67D8(void* self, unsigned int i);
+
+extern "C" int func_002B6740(void* self, void* obj)
+{
+    int ids[4];
+    func_002B8190(*(void**)((char*)func_0028B1C8() + 0x4C), obj, &ids[0], &ids[1], &ids[2], &ids[3]);
+    if (func_002B67D8(self, ids[0])) {
+        return 1;
+    }
+    if (func_002B67D8(self, ids[1])) {
+        return 1;
+    }
+    if (func_002B67D8(self, ids[2])) {
+        return 1;
+    }
+    return func_002B67D8(self, ids[3]) != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B67D8);

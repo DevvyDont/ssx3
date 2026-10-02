@@ -6,7 +6,34 @@ INCLUDE_ASM("ui/uilistbox", func_0039A4B0);
 
 INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByStringID);
 
+//100%
 INCLUDE_ASM("ui/uilistbox", func_0039A670);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+
+struct func_0039A670_sItem {
+    void* data;
+    char pad[0x10];
+};
+
+extern "C" void func_0039A670(void* self)
+{
+    if (*(int*)((char*)self + 0x74) & 0x10) {
+        if (*(void**)((char*)self + 0x9C) != 0) {
+            cMemMan_free(*(void**)((char*)self + 0x9C));
+        }
+    } else {
+        for (int i = 0; i < *(unsigned char*)((char*)self + 0x318); i++) {
+            func_0039A670_sItem* it = (func_0039A670_sItem*)((char*)self + 0x9C) + i;
+            if (it->data != 0) {
+                cMemMan_free(it->data);
+            }
+        }
+    }
+    *(unsigned char*)((char*)self + 0x319) = 0;
+    *(unsigned char*)((char*)self + 0x318) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A708);

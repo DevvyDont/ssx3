@@ -125,7 +125,21 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
 
 INCLUDE_ASM("sound/bankmanager", func_0028BB10);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BC58);
+#ifdef SKIP_ASM
+extern "C" void func_0028A728(void* self, int i);
+extern "C" void func_0028B320(void* bank, void* id, int a3);
+
+extern "C" void func_0028BC58(void* self, int i, void* id, int a3)
+{
+    int off = i * 0x60;
+    if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + off, id) == 0) {
+        func_0028A728(self, i);
+        func_0028B320((char*)*(void**)((char*)self + 0xACC) + off, id, a3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028BCE8);
@@ -138,7 +152,22 @@ extern "C" void func_0028BCE8(void* self, int i)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BD10);
+#ifdef SKIP_ASM
+extern "C" void func_0028A728(void* self, int i);
+extern "C" void func_0028A558(void* self, int i, void* id, int a3, int a4);
+
+struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
+
+extern "C" void func_0028BD10(void* self, int i, void* id, int a3)
+{
+    if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + i * 0x60, id) == 0) {
+        func_0028A728(self, i);
+        func_0028A558(self, i, id, (*(sBankInst60**)((char*)self + 0xACC))[i].f8, a3);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BDA8);
@@ -253,11 +282,66 @@ INCLUDE_ASM("sound/bankmanager", func_0028CF98);
 
 INCLUDE_ASM("sound/bankmanager", func_0028D488);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028D5A0);
+#ifdef SKIP_ASM
+extern "C" int func_002B49E0(void* monitor);
+extern "C" int func_002A1E20(void* self, int id);
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+
+extern "C" void func_0028D5A0(void* self, int id)
+{
+    int cur;
+    int type;
+    int want;
+    if (*(int*)((char*)self + 0x6284) == 0x17) {
+        return;
+    }
+    cur = func_002B49E0((char*)self + 0x118);
+    type = func_002A1E20(self, id);
+    if (type == 1) {
+        want = 0x65;
+    } else if (type == 2) {
+        want = 0x66;
+    } else {
+        want = 0x67;
+    }
+    if (want != cur) {
+        func_0028CF98(self, 0, 0, type, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028D630);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028D740);
+#ifdef SKIP_ASM
+extern "C" void func_0028D7D8(void* self, void* a1);
+
+struct sVtEnt { short delta; short index; int (*fn)(void*); };
+
+extern "C" void func_0028D740(void* self, int id, void* obj)
+{
+    int ok;
+    if (*(int*)((char*)self + 0x6240) == id) {
+        return;
+    }
+    ok = 0;
+    if (*(int*)((char*)self + 0x62A0) != -1) {
+        char* o = (char*)obj + 0x6C0;
+        sVtEnt* e = &(*(sVtEnt**)o)[7];
+        ok = e->fn(o + e->delta) == *(int*)((char*)self + 0x62A0);
+    }
+    if (ok) {
+        if (*(int*)((char*)self + 0x623C) == id) {
+            *(int*)((char*)self + 0x6240) = id;
+            return;
+        }
+        func_0028D7D8(self, obj);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028D7D8);
 
@@ -405,7 +489,28 @@ extern "C" void func_0028F558(void* self, int id)
 
 INCLUDE_ASM("sound/bankmanager", func_0028F5B8);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F678);
+#ifdef SKIP_ASM
+extern "C" void func_0029CE70(void* self);
+extern "C" int func_002A3F90(void* self);
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028FA98(void* self, float v);
+
+extern "C" void func_0028F678(void* self, int a1)
+{
+    if (*(int*)((char*)self + 0x6088) != 0) {
+        func_0029CE70(self);
+        *(int*)((char*)self + 0x6088) = 0;
+    }
+    if (*(int*)((char*)self + 0x62A8) >= 0) {
+        func_0028FA98(self, 1.0f);
+        if (a1 != 0 && func_002A3F90(self) != 0) {
+            func_0028CF98(self, 0, 0, -1, 0);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028F700);
 

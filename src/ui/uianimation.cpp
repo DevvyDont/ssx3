@@ -1,6 +1,31 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ui/uianimation", cUIAnimationBank_getAnimationByHashName);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data);
+extern const char D_004A4768[];
+
+struct sUIAnimEntry {
+    int f0;
+    int f4;
+    int hash;
+    int size;
+};
+
+extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, int hash)
+{
+    sUIAnimEntry* e = (sUIAnimEntry*)(*self + 1);
+    for (unsigned int i = 0; i < **self; i++) {
+        if (e->hash == hash) {
+            return cUIAnimation_cUIAnimation(cMemMan_alloc(0x14, D_004A4768, 0x100, 0), e);
+        }
+        e = (sUIAnimEntry*)((char*)e + e->size);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uianimation", func_003971C8);
@@ -66,7 +91,29 @@ void func_00397298(void* self, int val)
 
 INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
 
+//100%
 INCLUDE_ASM("ui/uianimation", func_003973A8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern void* D_00494D08[];
+
+extern "C" void func_003973A8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_00494D08;
+    char* base = *(char**)((char*)self + 0x4);
+    if (base != 0) {
+        char* p = base + *(int*)(base - 0x10) * 4;
+        while (*(char**)((char*)self + 0x4) != p) {
+            p -= 4;
+        }
+        cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uianimation", func_00397468);
