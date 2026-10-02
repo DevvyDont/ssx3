@@ -2021,7 +2021,55 @@ extern "C" int func_0037DBE8(sPtGfxDBE8* self, const sPtVecDBE8* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037DD20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPtVecDD20 {
+    float x, y, z, w;
+    float& X() { return x; }
+    float& Y() { return y; }
+    float& Z() { return z; }
+} __attribute__((aligned(16)));
+
+struct sPtGfxDD20 {
+    char pad_0x0[0x5A30];
+    unsigned int width;         // 0x5A30
+    unsigned int height;        // 0x5A34
+    char pad_0x5A38[0x6B90 - 0x5A38];
+    int clipValid;              // 0x6B90
+};
+
+// func_0037DEE0 is defined later in this unit with its own vector type; bind a view.
+extern "C" sPtVecDD20 func_0037DEE0_DD20(void* self, const sPtVecDD20* p) __asm__("func_0037DEE0");
+
+static inline int clampDD20(int n)
+{
+    int hi = 0xFFFFFF;
+    int r;
+    if (n >= 0) {
+        r = n;
+        if (r > hi) {
+            r = hi;
+        }
+    } else {
+        r = 0;
+    }
+    return r;
+}
+
+extern "C" sPtVecDD20 func_0037DD20(sPtGfxDD20* self, const sPtVecDD20* p)
+{
+    if (self->clipValid == 0) {
+        func_0037D968(self);
+    }
+    sPtVecDD20 v = func_0037DEE0_DD20(self, p);
+    v.X() = (float)(int)(v.X() - (2048.0f - (float)(self->width >> 1)));
+    v.Y() = (float)(int)(v.Y() - (2048.0f - (float)(self->height >> 1)));
+    v.Z() = (float)clampDD20((int)v.Z());
+    return v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037DE88);

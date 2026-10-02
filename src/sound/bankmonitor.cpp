@@ -1291,7 +1291,62 @@ extern "C" void* func_002AFA68(void* mem, int a1, int a2, int a3, int a4, int a5
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AFB38);
+#ifdef SKIP_ASM
+extern "C" void func_002AABD0(void* self, int i);
+extern "C" void func_002AF900(int* self, int flags);
+extern char* D_004A37B4;
+extern int D_004A37B8;
+
+struct sBmVoiceFB38 {
+    void* handle;           // 0x0
+    int active;             // 0x4
+};
+
+struct sBmPairFB38 {
+    void* p[2];
+};
+
+struct sBankMonFB38 {
+    int field_0x0;
+    int id;                         // 0x4
+    char pad_0x8[0xC4];
+    sBmVoiceFB38 voices[(0xEC - 0xCC) / 8];   // 0xCC
+    int voiceCount;                 // 0xEC
+    int streamCount;                // 0xF0
+    int* streams[(0x8D4 - 0xF4) / 4];         // 0xF4
+    sBmPairFB38 pairs[1];           // 0x8D4
+};
+
+extern "C" void func_002AFB38(void* selfp, int flags)
+{
+    sBankMonFB38* self = (sBankMonFB38*)selfp;
+    int i;
+    for (i = 0; i < self->streamCount; i++) {
+        if (self->streams[i] != 0) {
+            func_002AF900(self->streams[i], 3);
+        }
+    }
+    D_004A37B8 -= self->streamCount;
+    for (i = 0; i < self->voiceCount; i++) {
+        for (int j = 0; j < 2; j++) {
+            if (self->pairs[i].p[j] != 0) {
+                func_002523A8(self->pairs[i].p[j]);
+            }
+        }
+        if (self->voices[i].active != 0) {
+            func_002523A8(self->voices[i].handle);
+            self->voices[i].active = 0;
+            self->voices[i].handle = 0;
+        }
+    }
+    func_002AABD0(*(void**)D_004A37B4, self->id);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AFC88);
@@ -1442,7 +1497,65 @@ INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B07F8);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B0AE8);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void func_002AA648(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern char* D_004A37B4;
+extern void* D_00483870[];
+extern void* D_00483B48[];
+
+struct sBmonVEntry0AE8 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmonVtblA0AE8 {
+    sBmonVEntry0AE8 e[4];
+} __attribute__((aligned(8)));
+struct sBmonVtblB0AE8 {
+    sBmonVEntry0AE8 e[7];
+} __attribute__((aligned(8)));
+extern const sBmonVtblA0AE8 D_004838A0;
+extern const sBmonVtblB0AE8 D_004838C0;
+
+// PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
+extern "C" void func_002B0AE8(char* self, int flags)
+{
+    *(void***)(self + 0x1BC) = D_00483870;
+    *(const sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0;
+    *(void***)(**(char***)self + 0xAB0) = D_00483B48;
+    *(const sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &D_004838C0;
+    if (flags == 0) {
+        sBmonVtblA0AE8 t1 = D_004838A0;
+        *(sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &t1;
+        char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x1C0;
+        int d1 = self - base1;
+        t1.e[1].delta = D_004838A0.e[1].delta + d1;
+        sBmonVtblB0AE8 t2 = D_004838C0;
+        *(sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &t2;
+        char* base2 = **(char***)self - 0x1C8;
+        int d2 = self - base2;
+        t2.e[1].delta = D_004838C0.e[1].delta + d2;
+    }
+    if (*(void**)(self + 4) != 0) {
+        cMemMan_free(*(void**)(self + 4));
+    }
+    D_004A37B4 = 0;
+    if (flags & 2) {
+        func_002AA648(*(void**)self, 0);
+        func_0028BB10(**(void***)self, 0);
+        func_002ADEE8(*(void**)(**(char***)self + 0x1D8), 0);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B0C78);

@@ -2,7 +2,83 @@
 
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Load);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278590);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void func_00275B08(void* self);
+extern "C" void func_00275D90(int* self, int flags);
+extern "C" void func_00278A98(void* self);
+extern "C" void func_00278CD8(void* self);
+extern "C" void func_0027B410(void* self, int idx);
+extern "C" void func_0027BF90(void* self);
+extern "C" void func_002823F0(void* self);
+extern "C" void func_002832D8(void* self);
+extern "C" void func_00283818(void* p);
+extern "C" void func_002EF368(int);
+
+struct sSseObj8590 {
+    char data[0xCC];
+};
+
+struct sSseEngine8590 {
+    char pad_0x0[0x500];
+    char snd[0x1C];                 // 0x500
+    char anims[0x544 - 0x51C];      // 0x51C
+    void* buf;                      // 0x544
+    int field_0x548;                // 0x548
+    sSseObj8590* objsA;             // 0x54C
+    char pad_0x550[0x624 - 0x550];
+    sSseObj8590* objsB;             // 0x624
+    char pad_0x628[0x6D0 - 0x628];
+    char rigs[2][0x120];            // 0x6D0
+    char pad_0x910[0xC];
+    char rigC[0x1C];                // 0x91C
+    char rigD[0x1C];                // 0x938
+};
+
+extern "C" void func_00278590(sSseEngine8590* self)
+{
+    func_00278A98(self);
+    func_002823F0(self);
+    for (int i = 0; i < 2; i++) {
+        func_002832D8(self->rigs[i]);
+    }
+    func_002832D8(self->rigC);
+    func_002832D8(self->rigD);
+    func_00278CD8(self);
+    for (int i = 0; i < 10; i++) {
+        func_0027B410(self, i);
+    }
+    func_00275B08(self->anims);
+    func_00283818(self->snd);
+    if (self->objsA != 0) {
+        sSseObj8590* q = self->objsA + ((int*)self->objsA)[-4];
+        while (self->objsA != q) {
+            q--;
+            func_00275D90((int*)q, 0);
+        }
+        cMemMan_free((char*)self->objsA - 0x10);
+    }
+    if (self->buf != 0) {
+        cMemMan_free(self->buf);
+    }
+    if (self->objsB != 0) {
+        sSseObj8590* q = self->objsB + ((int*)self->objsB)[-4];
+        while (self->objsB != q) {
+            q--;
+            func_00275D90((int*)q, 0);
+        }
+        cMemMan_free((char*)self->objsB - 0x10);
+    }
+    func_002EF368(0);
+    func_0027BF90(self);
+    self->objsA = 0;
+    self->buf = 0;
+    self->field_0x548 = 0;
+    self->objsB = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278710__FPv);
@@ -907,7 +983,56 @@ extern "C" void func_0027A7F0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A860);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00278E50(void* self, int i, int a, int b, int c, int d, int f, int g);
+extern "C" void func_00278F38(void* self, int i);
+extern "C" int func_00278F68(void* self, int i, int a, int b);
+extern "C" void* func_0028B180();
+extern "C" void func_0028E8C0(void* self, int id, int a2);
+extern char* D_004A28A8;
+struct sSseGame_A860 {
+    char pad_0x0[0xF44];
+    int field_0xF44;        // 0xF44
+};
+extern sSseGame_A860* D_004A289C_A860 __asm__("D_004A289C");
+
+static inline int sseWorldMode_A860()
+{
+    return *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C);
+}
+
+extern "C" void func_0027A860(void* self, int online, int intro)
+{
+    if (online) {
+        if (intro) {
+            func_00278E50(self, 1, 0x12, 1, 1, -1, -1, -1);
+        }
+        func_00278E50(self, 1, 0x13, 0, 0, -1, -1, -1);
+        if (sseWorldMode_A860() == 1) {
+            func_00278E50(self, 1, 0x14, 8, 0, -1, -1, -1);
+        } else {
+            func_00278E50(self, 1, 0x15, 8, 0, -1, -1, -1);
+        }
+    } else {
+        if (intro) {
+            func_00278E50(self, 1, 0xC, 1, 1, -1, -1, -1);
+        }
+        func_00278E50(self, 1, 0xD, 0, 1, -1, -1, -1);
+        D_004A289C_A860->field_0xF44 = 1;
+        if (sseWorldMode_A860() == 1) {
+            func_00278E50(self, 1, 0xE, 8, 1, -1, -1, -1);
+        } else {
+            func_00278E50(self, 1, 0xF, 8, 0, -1, -1, -1);
+        }
+    }
+    func_00278F38(self, 1);
+    func_00278F68(self, 1, 0, 1);
+    func_0028E8C0(func_0028B180(), 0x14, 1);
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A9F0);
 
@@ -932,7 +1057,49 @@ extern "C" int func_0027AA80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027AAF8);
+#ifdef SKIP_ASM
+extern "C" void func_00278E50(void* self, int i, int a, int b, int c, int d, int f, int g);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern void* D_004A28A4;
+extern char* D_004A28A8;
+extern signed char D_00535C11[];
+extern int* D_00445488[];
+extern int D_00534B30[];
+extern int D_00481E80[];
+
+extern "C" void func_0027AAF8(void* self, int state)
+{
+    switch (state) {
+    case 0: {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        int* tbl = D_00445488[D_00535C11[0]];
+        cBE_getInterface_Fv(*(void**)(D_004A28A8 + 0x78), 7);
+        if (D_00534B30[0] != 0) {
+            tbl = D_00481E80;
+        }
+        if (tbl != 0 && tbl[0] >= 0) {
+            do {
+                func_00278E50(D_004A28A4, 0, tbl[0], tbl[1], 0, -1, -1, -1);
+                tbl += 2;
+            } while (tbl[0] >= 0);
+        }
+        break;
+    }
+    case 1:
+    case 2:
+        func_00278E50(D_004A28A4, 0, 5, 0, 0, -1, -1, -1);
+        break;
+    case 3:
+        func_00278E50(D_004A28A4, 0, 4, 3, 0, -1, -1, -1);
+        func_00278E50(D_004A28A4, 0, 5, 0, 0, -1, -1, -1);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027AC60);
 
@@ -1345,7 +1512,36 @@ int func_0027C4B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C510);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cScriptObjC510 {
+public:
+    int unk_0x0;
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual float* v04();
+};
+
+// Same symbol as the unit's func_002742C8 (cScriptObj002742C8*), viewed with a float getter.
+cScriptObjC510* func_002742C8_C510(void* self, int a1) __asm__("func_002742C8__FPvi");
+
+extern "C" void func_0027C510(void* self, float* out)
+{
+    out[0] = *func_002742C8_C510(self, 0)->v04();
+    out[1] = *func_002742C8_C510(self, 1)->v04();
+    out[2] = *func_002742C8_C510(self, 2)->v04();
+    out[3] = *func_002742C8_C510(self, 3)->v04();
+    out[4] = *func_002742C8_C510(self, 4)->v04();
+    out[5] = *func_002742C8_C510(self, 5)->v04();
+    out[6] = *func_002742C8_C510(self, 6)->v04();
+    out[7] = *func_002742C8_C510(self, 7)->v04();
+    out[8] = *func_002742C8_C510(self, 8)->v04();
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6A0__FPv);
@@ -1356,7 +1552,36 @@ int func_0027C6A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cScriptObjC6F8 {
+public:
+    int unk_0x0;
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual float* v04();
+};
+
+// Same symbol as the unit's func_002742C8 (cScriptObj002742C8*), viewed with a float getter.
+cScriptObjC6F8* func_002742C8_C6F8(void* self, int a1) __asm__("func_002742C8__FPvi");
+
+extern "C" void func_0027C6F8(void* self, float* out)
+{
+    out[0] = *func_002742C8_C6F8(self, 0)->v04();
+    out[1] = *func_002742C8_C6F8(self, 1)->v04();
+    out[2] = *func_002742C8_C6F8(self, 2)->v04();
+    out[3] = *func_002742C8_C6F8(self, 3)->v04();
+    out[4] = *func_002742C8_C6F8(self, 4)->v04();
+    out[5] = *func_002742C8_C6F8(self, 5)->v04();
+    out[6] = *func_002742C8_C6F8(self, 6)->v04();
+    out[7] = *func_002742C8_C6F8(self, 7)->v04();
+    out[8] = *func_002742C8_C6F8(self, 8)->v04();
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C888__FPv);

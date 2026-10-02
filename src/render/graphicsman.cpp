@@ -424,7 +424,31 @@ extern "C" void func_0036CBF8(char* self, int w, int h, float x, float y, float 
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036CCB8);
+#ifdef SKIP_ASM
+int BXrand();
+
+static inline float randf_0036CCB8(float a, float b)
+{
+    union { int i; float f; } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return a + (b - a) * (u.f - 1.0f);
+}
+
+extern "C" void func_0036CCB8(char* self)
+{
+    *(float*)(self + 0x38) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x3C) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x40) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x44) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x48) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x50) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x54) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x58) = randf_0036CCB8(1.0f, 2.0f);
+    *(float*)(self + 0x5C) = randf_0036CCB8(1.0f, 2.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE00);

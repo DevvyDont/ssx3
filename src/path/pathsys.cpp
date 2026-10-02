@@ -184,7 +184,72 @@ extern "C" sPathEntry* func_0026B5E0(sPathEntryList* list, int type, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B680);
+#ifdef SKIP_ASM
+struct sPathVec3 {
+    float x, y, z;
+    sPathVec3() {}
+    sPathVec3(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+static inline sPathVec3 operator-(const sPathVec3& a, const sPathVec3& b)
+{
+    return sPathVec3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+struct sPathNearEntry {
+    int id;             // 0x0
+    int type;           // 0x4
+    sPathVec3 pos;      // 0x8
+    char pad_0x14[0x14];
+};
+
+struct sPathNearList {
+    int count;                  // 0x0
+    sPathNearEntry* entries;    // 0x4
+};
+
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00154630(void* self, int value, int id);
+extern char* D_004A28A8;
+
+// PORT: sqrt.s helper
+static inline float pathSqrt(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float pathLen(const sPathVec3& v)
+{
+    return pathSqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+extern "C" int func_0026B680(sPathNearList* list, sPathVec3* pos)
+{
+    int i;
+    float best = 10000000.0f;
+    int bestId = -1;
+    for (i = 0; i < list->count; i++) {
+        if (list->entries[i].type == 2 && list->entries[i].id != 0) {
+            if (func_00154630(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
+                              *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x78) + 0x1BC)) != 0) {
+                sPathVec3 d = list->entries[i].pos - *pos;
+                float dist = pathLen(d);
+                if (dist < best) {
+                    best = dist;
+                    bestId = list->entries[i].id;
+                }
+            }
+        }
+    }
+    return bestId;
+}
+#endif
 
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B7D8);

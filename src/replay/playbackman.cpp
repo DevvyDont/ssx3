@@ -756,7 +756,99 @@ extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026D818);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cPbStream {
+public:
+    virtual void write(void* data, int size);
+};
+
+class cPbObjSys {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void save(cPbStream* s);
+};
+
+class cPbWorld {
+public:
+    char data[0xCC];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void save(cPbStream* s);
+};
+
+struct sPbApp {
+    char pad_0x0[0x84];
+    cPbObjSys* objs;        // 0x84
+};
+
+struct sPbTime {
+    int v[6];
+};
+
+int func_0026E9C0(void* self);
+void* func_003178E0(void* self);
+extern "C" void* cBE_getBE();
+extern "C" void func_0014DF08(void* self, cPbStream* s);
+extern "C" void func_002D9CB0(cPbStream* s);
+extern "C" void func_0030BB10(void* self, cPbStream* s);
+extern "C" void func_00229E20(void* self, cPbStream* s);
+extern "C" void func_003441A8(void* self, cPbStream* s);
+extern "C" void func_00357CA8(void* self, cPbStream* s);
+extern "C" void func_0026D988(void* self, cPbStream* s, int a);
+extern "C" void func_0026DA88(void* self, cPbStream* s);
+extern "C" void func_00103480(void* self, cPbStream* s);
+
+extern int D_004A5B78;
+extern int D_004A5B7C;
+extern sPbApp* D_004A28A8_D818 __asm__("D_004A28A8");
+extern void* D_004A3DD8;
+extern void* D_004A2A00_D818 __asm__("D_004A2A00");
+extern void* D_004A3FF0;
+extern void* D_004A4028;
+
+static inline cPbWorld* pbWorld(cPbObjSys* o)
+{
+    return *(cPbWorld**)((char*)o + 0xC);
+}
+
+extern "C" void func_0026D818(void* self, void* stream)
+{
+    cPbStream* out = (cPbStream*)stream;
+    sPbTime t;
+    int id;
+    func_0026E9C0(out);
+    func_003178E0(&t);
+    out->write(&t, 0x18);
+    id = D_004A5B78;
+    out->write(&id, 4);
+    id = D_004A5B7C;
+    out->write(&id, 4);
+    func_0014DF08(cBE_getBE(), out);
+    D_004A28A8_D818->objs->save(out);
+    pbWorld(D_004A28A8_D818->objs)->save(out);
+    func_002D9CB0(out);
+    func_0030BB10(D_004A3DD8, out);
+    func_00229E20(D_004A2A00_D818, out);
+    func_003441A8(D_004A3FF0, out);
+    func_00357CA8(D_004A4028, out);
+    func_0026D988(self, out, 1);
+    func_0026DA88(self, out);
+    func_00103480(*(void**)((char*)pbWorld(D_004A28A8_D818->objs) + 0xA4), out);
+}
+#endif
 
 INCLUDE_ASM("replay/playbackman", func_0026D988);
 

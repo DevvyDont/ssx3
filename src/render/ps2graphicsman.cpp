@@ -332,7 +332,69 @@ extern "C" void func_00368138(void* self, ulong** pkt)
 
 INCLUDE_ASM("render/ps2graphicsman", func_00368170);
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_003684F0);
+#ifdef SKIP_ASM
+struct sPs2UpTex {
+    char pad_0x00[0xC];
+    unsigned int psm;       // 0xC
+    char pad_0x10[0x10];
+    int addr;               // 0x20
+    char pad_0x24[0x8];
+    int dbp;                // 0x2C
+};
+
+struct sPs2UpMgr {
+    char pad_0x0[0x8];
+    sPs2UpTex* texs[1];     // 0x8
+};
+
+// PORT: 64-bit `ulong` GIF/DMA packet words.
+extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif)
+{
+    sPs2UpTex* tex = self->texs[idx];
+    ulong* p = *gif;
+    ulong* d = *dma;
+    int w;
+    int h;
+    int qwc;
+    if (tex->psm - 0xB < 2) {
+        w = 8;
+        h = 2;
+        qwc = 0x10;
+    } else {
+        w = 0x10;
+        h = 0x10;
+        qwc = 0x40;
+    }
+    p[0] = 0x10000006;
+    p[1] = 0;
+    p[2] = ((ulong)0x10000000 << 32) | 4;
+    p[3] = 0xE;
+    p[4] = ((ulong)tex->dbp << 32) | ((ulong)1 << 48);
+    p[5] = 0x50;
+    p[6] = 0;
+    p[7] = 0x51;
+    p[8] = w | ((ulong)h << 32);
+    p[9] = 0x52;
+    p[10] = 0;
+    p[11] = 0x53;
+    p[12] = qwc | ((ulong)2 << 58);
+    p[13] = 0;
+    p[14] = 0x30000000 | qwc | ((ulong)tex->addr << 32);
+    p[15] = 0;
+    p[16] = 0x10000002;
+    p[17] = 0;
+    p[18] = ((ulong)0x10000000 << 32) | 0x8001;
+    p[19] = 0xE;
+    p[20] = 0;
+    p[21] = 0x3F;
+    func_00368138(self, &d);
+    p += 22;
+    *dma = d;
+    *gif = p;
+}
+#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00368660);
 

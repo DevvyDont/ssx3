@@ -240,9 +240,145 @@ extern "C" void func_0028B930(void* self, int id, int flag, int name, int d, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
+#ifdef SKIP_ASM
+extern "C" void* cBankMonitor_cBankMonitor(void* self, int a1, int heap);
+extern "C" void* func_0028A058(void* self);
+extern "C" void* func_0028B248(void* self);
+extern "C" void* func_002ADE88(void* self, int heap);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char* D_004A3614;
+extern const char D_004829B8[];
+extern void* D_00483B48[];
+extern void* D_00483AD8[];
 
+struct sBmVEntry {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmVtbl {
+    sBmVEntry e[4];
+} __attribute__((aligned(8)));
+extern const sBmVtbl D_00483AB8;
+
+struct sBmBank {
+    char pad_0x0[0x60];
+    sBmBank() { func_0028B248(this); }
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sBankManager {
+    char pad_0x0[0x1D4];
+    void** vtbl;                // 0x1D4
+    char* monitor;              // 0x1D8
+    char pad_0x1DC[0xAB0 - 0x1DC];
+    void** vtbl2;               // 0xAB0
+    char pad_0xAB4[0xAC8 - 0xAB4];
+    int count;                  // 0xAC8
+    sBmBank* banks;             // 0xACC
+    char embedded[0x4];         // 0xAD0
+};
+
+extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embedded, int count, int heap)
+{
+    if (embedded) {
+        self->monitor = self->embedded;
+        func_002ADE88(self->embedded, heap);
+    }
+    func_0028A058(self);
+    cBankMonitor_cBankMonitor(&self->monitor, 0, heap);
+    *(const sBmVtbl**)(self->monitor + 4) = &D_00483AB8;
+    if (!embedded) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
+        sBmVtbl vt = D_00483AB8;
+        *(sBmVtbl**)(self->monitor + 4) = &vt;
+        char* base = self->monitor - 0xAD0;
+        int d = (char*)self - base;
+        vt.e[1].delta = D_00483AB8.e[1].delta + d;
+    }
+    self->count = count;
+    self->vtbl2 = D_00483B48;
+    self->vtbl = D_00483AD8;
+    sBmBank** slot = &self->banks;
+    *slot = new (D_004829B8, 0, 0) sBmBank[count];
+    D_004A3614 = (char*)self;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028BB10);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_0028A148(void* self, int flags);
+extern "C" void func_0028B278(void* self, int flags);
+extern "C" void func_002ACE40(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern char* D_004A3614;
+extern void* D_00483B48[];
+extern void* D_00483AD8[];
+
+struct sBmVEntryBB10 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmVtblBB10 {
+    sBmVEntryBB10 e[4];
+} __attribute__((aligned(8)));
+extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
+
+struct sBmBankBB10 {
+    char pad_0x0[0x60];
+};
+
+struct sBankManagerBB10 {
+    char pad_0x0[0x1D4];
+    void** vtbl;                // 0x1D4
+    char* monitor;              // 0x1D8
+    char pad_0x1DC[0xAB0 - 0x1DC];
+    void** vtbl2;               // 0xAB0
+    char pad_0xAB4[0xAC8 - 0xAB4];
+    int count;                  // 0xAC8
+    sBmBankBB10* banks;         // 0xACC
+};
+
+extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
+{
+    self->vtbl2 = D_00483B48;
+    self->vtbl = D_00483AD8;
+    *(const sBmVtblBB10**)(self->monitor + 4) = &D_00483AB8_BB10;
+    if (flags == 0) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
+        sBmVtblBB10 vt = D_00483AB8_BB10;
+        *(sBmVtblBB10**)(self->monitor + 4) = &vt;
+        char* base = self->monitor - 0xAD0;
+        int d = (char*)self - base;
+        vt.e[1].delta = D_00483AB8_BB10.e[1].delta + d;
+    }
+    D_004A3614 = 0;
+    if (self->banks != 0) {
+        sBmBankBB10* q = self->banks + ((int*)self->banks)[-4];
+        while (self->banks != q) {
+            q--;
+            func_0028B278(q, 0);
+        }
+        cMemMan_free((char*)self->banks - 0x10);
+    }
+    func_002ACE40(&self->monitor, 0);
+    func_0028A148(self, 0);
+    if (flags & 2) {
+        func_002ADEE8(self->monitor, 0);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BC58);
@@ -378,7 +514,54 @@ extern "C" void func_0028BF38(void* self, int i, int a, int b, int c, int d, int
 
 INCLUDE_ASM("sound/bankmanager", func_0028BF78);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028C2D0);
+#ifdef SKIP_ASM
+extern "C" int func_0028B1B0(void);
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028D488(void* self);
+extern "C" void func_002B4070(void* monitor);
+extern "C" int func_002B49E0(void* monitor);
+extern "C" int func_002B4AF0(void* monitor);
+
+static inline void bmRestartC2D0(char* self)
+{
+    if (func_0028B1B0() == 0) {
+        return;
+    }
+    if (*(int*)(self + 0x530) == 0) {
+        return;
+    }
+    char* mon = self + 0x118;
+    int st = func_002B49E0(mon);
+    if ((unsigned int)(st - 1) < 3) {
+        return;
+    }
+    if (func_002B4AF0(mon) != 0 && st != 0x12D) {
+        return;
+    }
+    func_0028D488(self);
+    func_0028CF98(self, 0, 0, -1, 0);
+}
+
+// PORT: 64-bit `long` key.
+extern "C" void func_0028C2D0(char* self, long key)
+{
+    if (*(long*)(self + 0x6098) != key) {
+        *(long*)(self + 0x6098) = key;
+        int state = *(int*)(self + 0x608C);
+        if (state == 1 || state == 3) {
+            func_002B4070(self + 0x118);
+            bmRestartC2D0(self);
+        }
+    } else {
+        int state = *(int*)(self + 0x608C);
+        if (state == 1 || state == 3) {
+            bmRestartC2D0(self);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028C430);
 

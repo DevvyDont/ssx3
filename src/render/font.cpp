@@ -28,9 +28,132 @@ extern "C" void func_00391C48(void* self, float x, float y)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00391CB0);
+#ifdef SKIP_ASM
+struct sFontRS1CB0 {
+    int field_0x0;          // 0x0
+    int field_0x4;          // 0x4
+    int flags;              // 0x8, bits 5..9 = alpha level
+    int field_0xC;          // 0xC
+    short tex;              // 0x10
+    short pad;
+};
 
+struct sFontVEntry1CB0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, sMat00391C48*, void*, float, float, float, float, float, float, float);
+};
+
+struct sFontCtx1CB0 {
+    char pad_0x0[0xE84];
+    sFontRS1CB0* top;           // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sFontVEntry1CB0* vtable;    // 0x10D8
+};
+
+extern sFontCtx1CB0* D_004A5B80;
+
+struct sFontPos1CB0 {
+    float x, y, z, w;
+    sFontPos1CB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+static inline int fontGetTex(void* s)
+{
+    return *(int*)((char*)s + 0x60);
+}
+
+extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m)
+{
+    sFontCtx1CB0* g = D_004A5B80;
+    char* s = (char*)self;
+    g->top->tex = fontGetTex(self);
+    sFontPos1CB0 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
+                     y + *(float*)(s + 0x1C) * *(float*)(s + 0x3C), 0.0f, 0.0f);
+    if (*(float*)(s + 0x28) != 0.0f || *(float*)(s + 0x2C) != 0.0f) {
+        sFontRS1CB0* top = g->top;
+        int saved = (unsigned)(top->flags & 0x3E0) >> 5;
+        int a = saved - 1;
+        if (a < 0) a = 0;
+        top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
+        sFontVEntry1CB0* vt = g->vtable;
+        vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x50,
+                  pos.x + *(float*)(s + 0x28), pos.y + *(float*)(s + 0x2C),
+                  *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+        sFontRS1CB0* top2 = g->top;
+        top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
+    }
+    sFontVEntry1CB0* vt = g->vtable;
+    vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x40, pos.x, pos.y,
+              *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/font", func_00391E30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sFontRS1E30 {
+    int field_0x0;          // 0x0
+    int field_0x4;          // 0x4
+    int flags;              // 0x8, bits 5..9 = alpha level
+    int field_0xC;          // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sFontVEntry1E30 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, void*, void*, float, float, float, float, float, float, float);
+};
+
+struct sFontCtx1E30 {
+    char pad_0x0[0xE84];
+    sFontRS1E30* top;           // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sFontVEntry1E30* vtable;    // 0x10D8
+};
+
+extern sFontCtx1E30* D_004A5B80_1E30 __asm__("D_004A5B80");
+
+struct sFontPos1E30 {
+    float x, y, z, w;
+    sFontPos1E30(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+static inline int fontGetTex1E30(void* s)
+{
+    return *(int*)((char*)s + 0x60);
+}
+
+extern "C" void func_00391E30(void* self, float x, float y, void* m)
+{
+    sFontCtx1E30* g = D_004A5B80_1E30;
+    char* s = (char*)self;
+    g->top->tex = fontGetTex1E30(self);
+    sFontPos1E30 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
+                     y + *(float*)(s + 0x1C) * *(float*)(s + 0x3C), 0.0f, 0.0f);
+    if (*(float*)(s + 0x28) != 0.0f || *(float*)(s + 0x2C) != 0.0f) {
+        sFontRS1E30* top = g->top;
+        int saved = (unsigned)(top->flags & 0x3E0) >> 5;
+        int a = saved - 1;
+        if (a < 0) a = 0;
+        top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
+        sFontVEntry1E30* vt = g->vtable;
+        vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x50,
+                  pos.x + *(float*)(s + 0x28), pos.y + *(float*)(s + 0x2C),
+                  *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+        sFontRS1E30* top2 = g->top;
+        top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
+    }
+    sFontVEntry1E30* vt = g->vtable;
+    vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x40, pos.x, pos.y,
+              *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+}
+#endif
 
 INCLUDE_ASM("render/font", func_00391FB0);
 
@@ -1314,7 +1437,87 @@ extern "C" void func_00395D28(void* self, void* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00395D60);
+#ifdef SKIP_ASM
+struct sFontRotMat {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
+extern "C" void func_00395D60(void* self, float* axis, float angle)
+{
+    sFontRotMat r;
+    float s;
+    float c;
+    char* top = *(char**)((char*)self + 0x13e4);
+    func_0031BE50(&s, &c, angle);
+    float t = 1.0f - c;
+    float x = axis[0];
+    float y = axis[1];
+    float z = axis[2];
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[3][3] = 1.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(top), "r"(&r)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+#endif
 
 extern "C" void* func_003826E0(void* self);
 

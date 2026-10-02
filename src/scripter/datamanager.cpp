@@ -302,9 +302,133 @@ extern "C" void func_00275D90(int* self, int flags)
 
 INCLUDE_ASM("scripter/datamanager", func_00275DD8);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275ED0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_002776E0(void* self);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" int func_002797A0(void* eng, int a1, int a2, int a3, int a4);
+extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" int func_00283BB8(void* self);
+int func_00283C58(void* self);
+extern "C" int func_00283C80(void* list, void* cmd);
+extern "C" void* func_00283D70(void* list, int i);
+// The unit declares func_00283D28 as returning void*, but it returns the list's count.
+int func_00283D28_count(void* list) __asm__("func_00283D28");
 
+struct sDmCmd5ED0 {
+    int a1;         // 0x0
+    int id;         // 0x4
+    int a2;         // 0x8
+    int field_0xC;  // 0xC
+    int a4;         // 0x10
+    int a5;         // 0x14
+    int a6;         // 0x18
+};
+
+extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int a5, int a6)
+{
+    if (func_00283C58(self + 0xC) != 0) {
+        return 0;
+    }
+    sDmCmd5ED0 cmd;
+    cmd.a1 = a1;
+    cmd.id = -1;
+    cmd.a2 = a2;
+    cmd.field_0xC = -1;
+    cmd.a4 = a4;
+    cmd.a5 = a5;
+    cmd.a6 = a6;
+    if (lookup != 0) {
+        int id = func_002797A0(*(void**)self, a1, a4, a5, a6);
+        if (id < 0) {
+            return 0;
+        }
+        cmd.id = id;
+    }
+    void* list = self + 0xC;
+    func_00283C80(list, &cmd);
+    if (*(int*)(self + 0xA4) == 0) {
+        return 1;
+    }
+    if (*(int*)(self + 0xBC) >= 0) {
+        return 1;
+    }
+    *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+    if (*(int*)(self + 0xA4) == 3) {
+        int ok;
+        if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
+            ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+        } else {
+            ok = func_00283BB8((char*)*(void**)self + 0x500);
+        }
+        if (ok) {
+            func_002776E0(self);
+        }
+    }
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276048);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_002776E0(void* self);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" int func_00283BB8(void* self);
+int func_00283C58(void* self);
+extern "C" int func_00283C80(void* list, void* cmd);
+extern "C" void* func_00283D70(void* list, int i);
+// The unit declares func_00283D28 as returning void*, but it returns the list's count.
+int func_00283D28_count(void* list) __asm__("func_00283D28");
+
+struct sDmCmd6048 {
+    int type;       // 0x0
+    int a1;         // 0x4
+    int a2;         // 0x8
+    int id;         // 0xC
+    int a3;         // 0x10
+    int a4;         // 0x14
+    int a5;         // 0x18
+};
+
+extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
+{
+    if (func_00283C58(self + 0xC) == 0) {
+        void* list = self + 0xC;
+        sDmCmd6048 cmd;
+        cmd.type = 0x1C;
+        cmd.id = -1;
+        cmd.a2 = a2;
+        cmd.a1 = a1;
+        cmd.a3 = a3;
+        cmd.a4 = a4;
+        cmd.a5 = a5;
+        func_00283C80(list, &cmd);
+        if (*(int*)(self + 0xA4) != 0 && *(int*)(self + 0xBC) < 0) {
+        *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+        if (*(int*)(self + 0xA4) == 3) {
+            int ok;
+            if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
+                ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+            } else {
+                ok = func_00283BB8((char*)*(void**)self + 0x500);
+            }
+            if (ok) {
+                func_002776E0(self);
+            }
+        }
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276270);
@@ -695,7 +819,71 @@ extern "C" void func_00277400(void* self, int a1, void* obj)
 
 INCLUDE_ASM("scripter/datamanager", func_00277450);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277598);
+#ifdef SKIP_ASM
+struct sDmEnt7DE8;
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
+extern "C" int func_00282540(void* self, int id);
+extern "C" void func_00283818(void* p);
+extern "C" int func_00283BB8(void* self);
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" int func_00283DA0(void* self);
+extern "C" int func_00283DC0(void* self, void* out);
+extern "C" void* func_0028B180();
+
+struct sDmCmd7598 {
+    int category;   // 0x0
+    int key;        // 0x4
+    int flags;      // 0x8
+    int id;         // 0xC
+    int a;          // 0x10
+    int b;          // 0x14
+    int c;          // 0x18
+};
+
+struct sDmSndVEntry7598 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00277598(void* selfp, int n)
+{
+    char* self = (char*)selfp;
+    while (n != 0) {
+        if (func_00283DA0(self + 0xC) != 0) {
+            return;
+        }
+        sDmCmd7598 cmd = *(sDmCmd7598*)func_00283D70(self + 0xC, 0);
+        if (cmd.id >= 0) {
+            if (func_00277DD8(self, &cmd) == 0) {
+                func_00282540(*(void**)self, cmd.id);
+            } else {
+                if (*(int*)(*(char**)self + 0x504) != 0) {
+                    int* ent = (int*)func_00277DE8(self, (int*)&cmd);
+                    int snd;
+                    if (func_00283BB8(*(char**)self + 0x500) != 0) {
+                        snd = ent[6];
+                    } else {
+                        snd = ent[5];
+                    }
+                    if (snd >= 0) {
+                        char* o = (char*)func_0028B180();
+                        sDmSndVEntry7598* vt = *(sDmSndVEntry7598**)(o + 0x5558);
+                        char* sys = o + 0x118;
+                        vt[4].fn(sys + vt[4].delta, snd);
+                    }
+                }
+                func_00283818(*(char**)self + 0x500);
+            }
+        }
+        func_00283DC0(self + 0xC, 0);
+        n--;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_002776E0);
@@ -762,7 +950,71 @@ extern "C" void func_00277800(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277838);
+#ifdef SKIP_ASM
+void* func_00230698(void* self, int a1);
+extern "C" void func_00276868(void* self, int a1);
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_00277598(void* self, int index);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void func_00279720(void* self, int val, int key, int b, int c);
+extern "C" int func_002839A8(void* self);
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" float func_002E4678(void* self);
+extern "C" void func_002EA780(void* self, float t);
+extern char* D_004A28A8;
+
+struct sDmCmd7838 {
+    int category;   // 0x0
+    int key;        // 0x4
+    int flags;      // 0x8
+    int id;         // 0xC
+};
+
+struct sDmEngVEntry7838 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+extern "C" void func_00277838(void* selfp)
+{
+    char* self = (char*)selfp;
+    if (*(int*)(self + 0xBC) > 0) {
+        *(int*)(self + 0xC8) = 0;
+        func_00277598(self, *(int*)(self + 0xBC));
+        *(int*)(self + 0xC0) = 0;
+        *(int*)(self + 0xBC) = -1;
+        sDmCmd7838* cmd = (sDmCmd7838*)func_00283D70(self + 0xC, 0);
+        if (func_00277DD8(self, cmd) == 0) {
+            func_00279720(*(void**)self, *(int*)(self + 0x8), cmd->id, 0, (cmd->flags >> 3) & 1);
+            char* eng = *(char**)self;
+            sDmEngVEntry7838* vt = *(sDmEngVEntry7838**)(eng + 0x2A8);
+            vt[6].fn(eng + vt[6].delta, cmd->id);
+        } else {
+            func_002839A8(*(char**)self + 0x500);
+        }
+        if (*(int*)(self + 0xB0) != 0) {
+            *(int*)(self + 0xAC) = 1;
+        }
+        *(int*)(self + 0xBC) = func_00277450(self, 1, 0);
+    } else {
+        int wasOn = *(int*)(self + 0xB0);
+        func_00276868(self, 0);
+        if (*(int*)(self + 0x4) != 0) {
+            void* app = *(void**)(D_004A28A8 + 0x84);
+            void* fade = *(void**)((char*)app + 0x64);
+            char* p = (char*)func_00230698(app, 0);
+            if (wasOn != 0 && *(int*)(p + 0x44) != 0) {
+                func_002EA780(fade, func_002E4678(p));
+            } else {
+                func_002EA780(fade, 0.5f);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00277980);
 

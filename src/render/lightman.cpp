@@ -408,7 +408,38 @@ extern "C" void func_00390458(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_003904A0);
+#ifdef SKIP_ASM
+extern int D_004A45D8;
+extern int D_004A45DC;
+extern void* D_004A4474;
+
+extern "C" void func_003905E8(void* self, int idx, int* mark);
+// PORT: func_0038F668 is declared void in this unit, but it returns its tail call's
+// value and this caller uses it; bind an int-returning view to the same symbol.
+extern "C" int func_0038F668_r(void* self, int end, int arg) __asm__("func_0038F668");
+extern "C" void func_00368138(void* self, void* pkt);
+
+extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
+{
+    if (D_004A45D8 == 0) {
+        return;
+    }
+    if (D_004A45DC != 0) {
+        func_00390458(self, idx);
+    }
+    float* e = ((sLmOwner_0458*)self)->entries[idx].v;
+    if (e[0] == 1.0f && e[1] == 1.0f && e[2] == 1.0f && e[3] == 0.0f && e[4] == 0.0f && e[5] == 0.0f) {
+        return;
+    }
+    void* ring = D_004A4474;
+    int mark = func_0038F460(ring, *addr, -1, 0);
+    func_003905E8(self, idx, &mark);
+    *addr = func_0038F668_r(ring, mark, 4);
+    func_00368138(*(void**)((char*)self + 0x18F4), pkt);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_003905E8);
 

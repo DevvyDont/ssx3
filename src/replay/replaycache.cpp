@@ -196,7 +196,74 @@ extern "C" void func_00270378(sReplay00270378* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002703F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0026DB88(void* self, void* frame);
+extern "C" void func_001620D0(void* self);
+extern "C" void cGameViewMan_updateAll(void* list);
+void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
+extern char* D_004A28A8;
+void func_0026F4A0(void* self, int arg);
+
+struct sRcVEntry03F0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sReplay002703F0 {
+    char pad_0x000[0x3CC];
+    int end;                // 0x3CC
+    void* tail;             // 0x3D0
+    char pad_0x3D4[0x484 - 0x3D4];
+    int pos;                // 0x484
+    void* frame;            // 0x488
+    void* streams[2];       // 0x48C
+    char pad_0x494[0x61C - 0x494];
+    int loop;               // 0x61C
+};
+
+extern "C" void func_002703F0(sReplay002703F0* self, int reset)
+{
+    int i;
+    if (reset) {
+        self->frame = func_0026E448_2(self, self->pos);
+    }
+    void* f = self->frame;
+    if (f != 0 && f == self->tail) {
+        self->frame = *(void**)((char*)f + 0x18);
+    }
+    if (reset) {
+        self->pos = *(int*)((char*)self->frame + 0x30);
+        for (i = 0; i < 2; i++) {
+            if (self->streams[i] != 0) {
+                func_0026D4D8(self->streams[i], self->pos);
+            }
+        }
+        func_0026DB88(self, self->frame);
+        return;
+    }
+    if (self->pos >= self->end) {
+        if (self->loop != 0) {
+            func_002702F8((sReplay002702F8*)self, 0);
+            func_002703F0(self, 1);
+            void* list = *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+            char* obj = *(char**)(*(char**)((char*)list + 0x4) + 0xA8);
+            func_001620D0(obj);
+            sRcVEntry03F0* vt = *(sRcVEntry03F0**)(obj + 0x14);
+            vt[4].fn(obj + vt[4].delta);
+            cGameViewMan_updateAll(list);
+        } else {
+            self->pos = self->end;
+            func_0026F4A0(self, 3);
+        }
+    } else {
+        self->pos++;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270538);
@@ -842,7 +909,87 @@ extern "C" void func_00271348(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00271380);
+#ifdef SKIP_ASM
+extern "C" int HUFF_encode(void* src, int size, void* dst, int* state);
+extern "C" void func_00271058(void* self, signed char* data, int size);
+// PORT: cReplayFramePtr_getFrameBlock is mangled with no parameters (__Fv) but is
+// called with (frame, n); bind the 2-arg form to the symbol.
+void cReplayFramePtr_getFrameBlock_2(void* frame, int n) __asm__("cReplayFramePtr_getFrameBlock__Fv");
+
+struct sRcFrame1380 {
+    char pad_0x0[0x4];
+    void* data;             // 0x4
+    char pad_0x8[0x8];
+    int size;               // 0x10
+    sRcFrame1380* next;     // 0x14
+    char pad_0x18[0x8];
+    int f20;                // 0x20
+    int f24;                // 0x24
+    int f28;                // 0x28
+    int f2C;                // 0x2C
+    int f30;                // 0x30
+    int f34;                // 0x34
+};
+
+struct sReplayCache1380 {
+    char pad_0x0[0x3D0];
+    sRcFrame1380* tail;     // 0x3D0
+    char pad_0x3D4[0x638 - 0x3D4];
+    int field_0x638;        // 0x638
+    char pad_0x63C[0x4];
+    int* out;               // 0x640
+    int field_0x644;        // 0x644
+    int field_0x648;        // 0x648
+    char pad_0x64C[0x10];
+    sRcFrame1380* frame;    // 0x65C
+    void* pending;          // 0x660
+    int pendingSize;        // 0x664
+    int frames;             // 0x668
+};
+
+extern "C" void func_00271380(sReplayCache1380* self)
+{
+    if (self->pending != 0) {
+        int state = 0;
+        int n = HUFF_encode(self->pending, self->pendingSize, self->out + 1, &state);
+        *self->out = n;
+        func_00271058(self, (signed char*)self->out, n + 4);
+        self->pending = 0;
+        return;
+    }
+    if (self->frame != 0) {
+        self->frames++;
+        cReplayFramePtr_getFrameBlock_2(self->frame, 1);
+        int* hdr = self->out;
+        hdr[0] = 0x11111113;
+        hdr[2] = self->frame->f30;
+        hdr[3] = self->frame->f34;
+        hdr[1] = self->frame->size;
+        hdr[9] = 0x11111111;
+        hdr[5] = self->frame->f20;
+        hdr[6] = self->frame->f24;
+        hdr[7] = self->frame->f28;
+        hdr[8] = self->frame->f2C;
+        hdr[7] = self->frame->f28;
+        hdr[8] = self->frame->f2C;
+        func_00271058(self, (signed char*)hdr, 0x28);
+        sRcFrame1380* f = self->frame;
+        self->pending = f->data;
+        self->pendingSize = f->size;
+        sRcFrame1380* next = f->next;
+        self->frame = next;
+        if (next != 0 && next == self->tail) {
+            self->frame = next->next;
+        }
+        return;
+    }
+    self->field_0x644 = 0;
+    self->field_0x648 = 0;
+    self->field_0x638++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002714E0);
@@ -1281,7 +1428,53 @@ extern "C" int func_002726A8(sRcTrack25F0* self, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00272788);
+#ifdef SKIP_ASM
+extern "C" void* func_00274518(void* self);
+// PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
+void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv");
+
+struct sRcItem2788 {
+    int field_0x0;              // 0x0
+    unsigned int index;         // 0x4
+    char body[0x48];            // 0x8
+    sRcItem2788* next;          // 0x50
+    sRcItem2788* prev;          // 0x54
+    sRcItem2788() { func_00274518(body); }
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sRcPool2788 {
+    int tag;                    // 0x0
+    unsigned int count;         // 0x4
+    char heap[0xC];             // 0x8
+    sRcItem2788* items;         // 0x14
+    sRcItem2788* free;          // 0x18
+    int used;                   // 0x1C
+};
+
+extern "C" sRcPool2788* func_00272788(sRcPool2788* self, void* a1, void* a2, unsigned int count, int tag)
+{
+    func_002722E0(self->heap, a1, a2);
+    self->tag = tag;
+    self->count = count;
+    self->items = 0;
+    self->free = 0;
+    sRcItem2788** slot = &self->items;
+    *slot = new (self->heap) sRcItem2788[count];
+    for (unsigned int i = 0; i < self->count; i++) {
+        self->items[i].index = i;
+        self->items[i].next = &self->items[i + 1];
+        self->items[i].prev = &self->items[i - 1];
+    }
+    self->items[0].prev = 0;
+    self->items[self->count - 1].next = 0;
+    self->used = 0;
+    self->free = self->items;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002728D0);
@@ -2555,7 +2748,55 @@ extern "C" int func_00274D70(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00274DE0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002751A0);
+#ifdef SKIP_ASM
+extern "C" int func_00274100(void* track, float prev, float time, float speed, int jump);
+extern "C" int func_00274D70(void* self);
+
+class cRcListener51A0 {
+public:
+    virtual void v01();
+    virtual void v02(void* src, float time, float speed);
+};
+
+struct sRcAnim51A0 {
+    char pad_0x0[0x10];
+    unsigned char* hdr;     // 0x10, hdr[1] = track count
+    char pad_0x14[0x4];
+    char* tracks;           // 0x18, 0x3C bytes each
+    char pad_0x1C[0xC];
+    float time;             // 0x28
+};
+
+extern "C" int func_002751A0(sRcAnim51A0* self, float time, float prev, float speed)
+{
+    int changed = 0;
+    int jump = 0;
+    self->time = time;
+    if (speed > 1.0f) {
+        jump = 1;
+    } else {
+        int ti = (int)time;
+        int pi = (int)prev;
+        if ((float)ti != time) {
+            jump = pi != ti;
+        }
+    }
+    for (int i = 0; i < self->hdr[1]; i++) {
+        int c = 0;
+        if (func_00274100(self->tracks + i * 0x3C, prev, self->time, speed, jump) != 0 || changed != 0) {
+            c = 1;
+        }
+        changed = c;
+    }
+    cRcListener51A0* l = (cRcListener51A0*)func_00274D70(self);
+    if (l != 0) {
+        l->v02(self, self->time, speed);
+    }
+    return changed;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002752F0__FPv);
