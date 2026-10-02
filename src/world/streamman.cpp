@@ -19,9 +19,47 @@ extern "C" int func_003A6E98(void* self, const char* name, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A6ED8);
+#ifdef SKIP_ASM
+extern "C" void func_003A7058(void* self, int size);
 
+extern "C" void func_003A6ED8(void* self)
+{
+    *(int*)((char*)self + 0x94) = -1;
+    *(int*)((char*)self + 0xD4) = 1;
+    *(int*)((char*)self + 0x98) = 0;
+    *(char*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x90) = 0;
+    *(int*)((char*)self + 0xC0) = 0;
+    *(int*)((char*)self + 0xCC) = 0;
+    *(int*)((char*)self + 0xD0) = 0;
+    *(int*)((char*)self + 0xC8) = 0;
+    *(int*)((char*)self + 0xC4) = 0;
+    *(int*)((char*)self + 0xAC) = 0;
+    *(int*)((char*)self + 0xB0) = 0;
+    *(int*)((char*)self + 0xB4) = 0;
+    func_003A7058(self, 0x19000);
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/streamman", func_003A6F38);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void func_003E0A28(int h);
+
+extern "C" void func_003A6F38(void* self)
+{
+    func_003E0A28(*(int*)((char*)self + 0x88));
+    if (*(void**)((char*)self + 0x84) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x84));
+    }
+    if (*(void**)((char*)self + 0x8C) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x8C));
+    }
+}
+#endif
 
 INCLUDE_ASM("world/streamman", func_003A6F88);
 

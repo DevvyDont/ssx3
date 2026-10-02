@@ -62,7 +62,43 @@ extern "C" int func_0039BD38(void* a, func_0039BD38_cVirt* obj)
 
 INCLUDE_ASM("ui/uimenu", func_0039BD68);
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039BE10);
+#ifdef SKIP_ASM
+class func_0039BE10_cVirt {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+};
+
+extern "C" void func_0039BE10(void* self)
+{
+    func_0039BE10_cVirt* a = *(func_0039BE10_cVirt**)((char*)self + 0x78);
+    if (a != 0) {
+        a->v16();
+    }
+    func_0039BE10_cVirt* b = *(func_0039BE10_cVirt**)((char*)self + 0x7C);
+    if (b != 0) {
+        b->v16();
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039BE70);
 

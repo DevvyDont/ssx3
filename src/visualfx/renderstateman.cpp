@@ -341,7 +341,19 @@ extern "C" float func_002EEFF0(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF038);
+#ifdef SKIP_ASM
+extern sRSMEntry D_004FA370[];
+
+extern "C" float func_002EF038(int i)
+{
+    sRSMEntry* e = &D_004FA370[i];
+    sRSMObj* o = **(sRSMObj***)((char*)e + 0x18);
+    sRSMVEntry* vt = o->vt;
+    return *vt[36].fn((char*)o + vt[36].delta) * (1.0f - *(float*)((char*)e + 0x24));
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF0A0);

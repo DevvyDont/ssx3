@@ -2,7 +2,24 @@
 
 INCLUDE_ASM("ui/uitext", cUIText_render2D);
 
+//100%
 INCLUDE_ASM("ui/uitext", cUIText_deleteText);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+
+extern "C" void cUIText_deleteText(void* self)
+{
+    *(int*)((char*)self + 0xA8) = 0;
+    if (*(void**)((char*)self + 0xAC) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0xAC));
+        *(void**)((char*)self + 0xAC) = 0;
+    }
+    if (*(void**)((char*)self + 0xB4) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0xB4));
+        *(void**)((char*)self + 0xB4) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", cUIText_getNumTextLines);
 

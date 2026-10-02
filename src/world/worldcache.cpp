@@ -59,7 +59,25 @@ extern "C" void func_003A77D0(void* self, int flags)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7818);
+#ifdef SKIP_ASM
+void func_003A7790(void* self, void* item);
+
+extern "C" void func_003A7818(void* self)
+{
+    if (*(void**)((char*)self + 0xC) != 0) {
+        void* next;
+        do {
+            void* item = *(void**)((char*)self + 0xC);
+            next = *(void**)((char*)item + 0x14);
+            func_003A7790(*(void**)self, item);
+            *(void**)((char*)self + 0xC) = next;
+            *(int*)((char*)self + 0x8) = *(int*)((char*)self + 0x8) - 1;
+        } while (next != 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A7878);
 
@@ -85,17 +103,81 @@ extern "C" void func_003A7B98(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", cHullPage_cHullPage);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00494E00[];
 
+extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data)
+{
+    *(unsigned short**)self = data;
+    unsigned short n = *data;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x4) = n;
+    *(void**)((char*)self + 0xC) = operator_new_tag(n * 4, D_00494E00, 0x20000000, 0);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7C30);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+extern "C" void func_003A7C30(int* self, int flags)
+{
+    *(int*)((char*)self + 0x4) = 0;
+    if (*(void**)((char*)self + 0xC) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0xC));
+    }
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", cWorldCacheTable_cWorldCacheTable);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7D80);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+
+extern "C" void func_003A7D80(int* self, int flags)
+{
+    if (*(void**)self != 0) {
+        cMemMan_free(*(void**)self);
+    }
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A7DD0);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7E38);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void func_003A7E98(void* self);
+extern "C" void func_003A6E20(void* p, int flags);
+extern "C" void func_003A8FB8(void* p, int flags);
+
+extern "C" void func_003A7E38(int* self, int flags)
+{
+    func_003A7E98(self);
+    func_003A6E20((char*)self + 0x300, 2);
+    func_003A8FB8((char*)self + 0x10, 2);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A7E98);
 
@@ -117,7 +199,22 @@ INCLUDE_ASM("world/worldcache", cWorldCache_init);
 
 INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A8230);
+#ifdef SKIP_ASM
+extern "C" void func_003A7B98(void* self, int i);
+extern "C" void func_003A7D80(int* self, int flags);
+
+extern "C" void func_003A8230(void* self, int i)
+{
+    func_003A7B98(*(void**)((char*)self + 0xC), i);
+    int* e = (*(int***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        func_003A7D80(e, 3);
+    }
+    (*(int***)((char*)self + 0x8))[i] = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8290);
@@ -134,7 +231,40 @@ extern "C" void func_003A8290(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A82C8);
+#ifdef SKIP_ASM
+int func_003A9AB0(void*);
+
+struct func_003A82C8_sEntry {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+};
+
+struct func_003A82C8_sCache {
+    char pad[0x3EC];
+    unsigned int count;   // 0x3EC
+    func_003A82C8_sEntry entries[1]; // 0x3F0
+};
+
+extern "C" void func_003A82C8(func_003A82C8_sCache* self)
+{
+    unsigned int i;
+    self->count = func_003A9AB0((char*)self + 0x10);
+    for (i = 0; i < self->count; i++) {
+        self->entries[i].a = 0;
+        self->entries[i].b = 0;
+        self->entries[i].c = 0;
+        self->entries[i].e = 0;
+        self->entries[i].f = 0;
+        self->entries[i].d = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A8330);
 

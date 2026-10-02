@@ -303,9 +303,41 @@ INCLUDE_ASM("world/worldview", func_003AAC50);
 
 INCLUDE_ASM("world/worldview", func_003AACA8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldview", func_003AAD98);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_003AA2F0(void* self);
+extern char D_00494F70[];
+extern void* D_00495090[];
 
+extern "C" void* func_003AAD98()
+{
+    void* p = cMemMan_alloc(0x14, D_00494F70, 0, 0);
+    func_003AA2F0(p);
+    *(void***)((char*)p + 0x8) = D_00495090;
+    return p;
+}
+#endif
+
+//100%
 INCLUDE_ASM("world/worldview", func_003AADE8);
+#ifdef SKIP_ASM
+void func_003AAE60(void*);
+void operator_delete(int*);
+extern void* D_00495090[];
+extern void* D_00495150[];
+
+extern "C" void func_003AADE8(int* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00495090;
+    func_003AAE60(self);
+    *(void***)((char*)self + 0x8) = D_00495150;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AAE40);
 

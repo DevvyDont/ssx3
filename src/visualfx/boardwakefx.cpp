@@ -440,7 +440,22 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6008);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E62C8);
+#ifdef SKIP_ASM
+void func_002E4F10(void*);
+
+extern "C" void func_002E62C8(void* self)
+{
+    int i;
+    void** p = (void**)((char*)self + 0x10);
+    for (i = 0; i < 12; i++) {
+        if (p[i] != 0) {
+            func_002E4F10(p[i]);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6320);
 

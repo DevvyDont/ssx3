@@ -44,7 +44,22 @@ extern "C" void func_002D5658(unsigned char* p, float r, float g, float b, float
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/angerfx", func_002D56B0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_003715B0(void* p, int a1);
+extern "C" void func_003714F8(void* p, int a1);
+
+extern "C" void func_002D56B0(int* self, int flags)
+{
+    func_003715B0((char*)self + 0xD0, 1);
+    func_003714F8((char*)self + 0xD0, 2);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5718);

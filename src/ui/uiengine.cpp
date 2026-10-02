@@ -127,9 +127,60 @@ INCLUDE_ASM("ui/uiengine", func_00398638);
 
 INCLUDE_ASM("ui/uiengine", func_003986B0);
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398738);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
 
+struct func_00398738_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00398738(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x74));
+    if (n != 0) {
+        do {
+            func_00398738_sVEntry* vt = *(func_00398738_sVEntry**)((char*)n + 8);
+            vt[0x10].fn((char*)n + vt[0x10].delta);
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ui/uiengine", func_00398798);
+#ifdef SKIP_ASM
+extern void* D_00494BB8[];
+extern void* D_00494CE8[];
+
+struct func_00398798_sFunctor {
+    void** vt;
+    int arg;
+};
+
+extern "C" int func_003979F8(void* list, func_00398798_sFunctor* fn);
+
+extern "C" int func_00398798(void* self, int a1)
+{
+    if ((*(int*)((char*)self + 0x14) >> 5) & 1) {
+        return 0;
+    }
+    func_00398798_sFunctor f;
+    f.vt = D_00494CE8;
+    f.vt = D_00494BB8;
+    f.arg = a1;
+    int r = func_003979F8((char*)self + 0x74, &f);
+    f.vt = D_00494CE8;
+    return r != 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_003987F8);
 
@@ -168,7 +219,27 @@ INCLUDE_ASM("ui/uiengine", func_00399768);
 
 INCLUDE_ASM("ui/uiengine", func_00399820);
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00399920);
+#ifdef SKIP_ASM
+void* func_0039FF50(void*);
+
+struct func_00399920_sEntry {
+    int a;
+    int b;
+    int c;
+};
+
+extern "C" int func_00399920(void* self)
+{
+    void* o = func_0039FF50(self);
+    if (o != 0) {
+        func_00399920_sEntry* t = *(func_00399920_sEntry**)((char*)o + 0x8);
+        return t[(*(unsigned char*)((char*)self + 0x74) & 3) + 1].a;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uiengine", func_00399970);
 

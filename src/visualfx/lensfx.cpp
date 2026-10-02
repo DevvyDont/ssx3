@@ -85,7 +85,33 @@ extern "C" void func_002ECAF0(sLensFx* self)
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECB28);
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECBC0);
+#ifdef SKIP_ASM
+struct func_002ECBC0_sEntry {
+    int id;
+    int b;
+    int c;
+};
+
+struct func_002ECBC0_sMgr {
+    char pad[0x10];
+    func_002ECBC0_sEntry entries[15];
+};
+
+extern "C" int func_002ECC28(void* self, int a1, int a2);
+
+extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int a1, int a2)
+{
+    int i;
+    for (i = 0; i < 15; i++) {
+        if (self->entries[i].id != -1 && self->entries[i].b == a2 && self->entries[i].c == a1) {
+            return i;
+        }
+    }
+    return func_002ECC28(self, a1, a2);
+}
+#endif
 
 INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
 
@@ -395,7 +421,18 @@ extern "C" float func_002EE4C0(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE508);
+#ifdef SKIP_ASM
+extern sLensFxSlot D_004FA370[];
+
+extern "C" float func_002EE508(int i)
+{
+    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxObj* obj = *s->p20;
+    return *obj->vt[45].fn((char*)obj + obj->vt[45].delta) * (1.0f - *(float*)((char*)s + 0x24));
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE570);

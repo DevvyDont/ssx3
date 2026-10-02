@@ -93,7 +93,20 @@ INCLUDE_ASM("visualfx/avalanche", cAvalanche_addAvalancheNode);
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9538);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D9660);
+#ifdef SKIP_ASM
+extern "C" void tAvalancheNode_calculate(void* node, void* self);
+
+extern "C" void func_002D9660(void* self)
+{
+    void* n = *(void**)((char*)self + 0x4);
+    while (n != 0) {
+        tAvalancheNode_calculate(n, self);
+        n = *(void**)((char*)n + 0xF4);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D96E0);
 

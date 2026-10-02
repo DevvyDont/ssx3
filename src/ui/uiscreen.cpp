@@ -77,7 +77,27 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getPrimaryThread);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+extern "C" void* cUIScreen_getPrimaryThread(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x18));
+    if (n != 0) {
+        for (; !cListNode_isSentinel((cListNode*)n); n = *(void**)((char*)n + 4)) {
+            if ((*(int*)((char*)n + 0x10) >> 25) & 1) {
+                return n;
+            }
+        }
+    }
+    return 0;
+}
+#endif
 
 extern "C" void* cUIScreen_getPrimaryThread(void* self);
 void cUIThread_deleteThread(void* self);
@@ -130,7 +150,40 @@ INCLUDE_ASM("ui/uiscreen", func_0039CC38);
 
 INCLUDE_ASM("ui/uiscreen", func_0039CCA8);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039CD30);
+#ifdef SKIP_ASM
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0039FD38(void* self);
+
+class func_0039CD30_cVirt {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13(int, void*);
+};
+
+extern "C" void func_0039CD30(void* self, int a1, int* msg)
+{
+    func_0039CD30_cVirt* obj = (func_0039CD30_cVirt*)cUIScreen_getObjectByHashName(self, msg[1]);
+    if (obj != 0) {
+        func_0039FD38(obj);
+        obj->v13(msg[2], msg + 3);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CD90__FPv);

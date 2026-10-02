@@ -1,6 +1,29 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushExplicit);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void cList_addToEnd(cList*, cListNode*);
+
+class cUIStateStack_pushExplicit_cState {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+};
+
+extern "C" void cUIStateStack_pushExplicit(void* self, cUIStateStack_pushExplicit_cState* state)
+{
+    *(int*)((char*)state + 0x1C) |= 0x60;
+    state->v04();
+    cList_addToEnd((cList*)((char*)self + 0x1C), (cListNode*)state);
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F290);
 
@@ -24,7 +47,28 @@ INCLUDE_ASM("ui/uistatestack", func_0039F8C8);
 
 INCLUDE_ASM("ui/uistatestack", func_0039F9D8);
 
+//100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_getCurrentState);
+#ifdef SKIP_ASM
+struct cList;
+void* cList_first(cList*);
+struct cListNode;
+int cListNode_isSentinel(cListNode*);
+
+extern "C" void* cUIStateStack_getCurrentState(void* self)
+{
+    void* n = cList_first((cList*)self);
+    if (n != 0) {
+        while (!cListNode_isSentinel((cListNode*)n)) {
+            if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
+                return n;
+            }
+            n = *(void**)((char*)n + 4);
+        }
+    }
+    return 0;
+}
+#endif
 
 struct cList;
 void* cList_first(cList*);

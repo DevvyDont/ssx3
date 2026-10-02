@@ -4,9 +4,36 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance);
 
 INCLUDE_ASM("sound/streamsys", func_002A9DF0);
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002A9E78);
+#ifdef SKIP_ASM
+extern "C" int BXFILE_exists(const char* name);
+extern "C" int func_003E1EC8(const char* name, int a1);
 
+// PORT: second parameter is a const char* passed as int (unit declares func_002A9E78(void*, int)).
+extern "C" void func_002A9E78(void* self, int name)
+{
+    if (BXFILE_exists((const char*)name) != 0) {
+        strcpy((char*)self + 0x14, (const char*)name);
+        *(int*)((char*)self + 0x74) = func_003E1EC8((char*)self + 0x14, *(int*)((char*)self + 0x7C));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/streamsys", func_002A9ED8);
+#ifdef SKIP_ASM
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" void func_003B7F60(int h, int a, int b);
+
+extern "C" void func_002A9ED8(void* self, int a, int b)
+{
+    func_003B58A0();
+    func_003B7F60(*(int*)((char*)self + 0x8), a, b);
+    func_003B58D8();
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9F30__FPvi);
@@ -54,7 +81,29 @@ int func_002AA020_impl(void* self, void* out)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AA068);
+#ifdef SKIP_ASM
+extern "C" void func_002AA020(void*, void*);
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B7C40(int h, int a1);
+
+// PORT: returns int and takes (self, int, out); later callers in this unit declare it void(void*, sStatus*, int)
+int func_002AA068_impl(void* self, int a1, int* out) __asm__("func_002AA068");
+
+int func_002AA068_impl(void* self, int a1, int* out)
+{
+    int buf[4];
+    int* p = out ? out : buf;
+    int r;
+    func_002AA020(self, p);
+    func_003B58A0();
+    r = func_003B7C40(p[1], a1);
+    func_003B58D8();
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AA108);
@@ -151,7 +200,20 @@ extern "C" void func_002AAB98(void* self, int i, int val)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AABD0);
+#ifdef SKIP_ASM
+extern "C" void func_002A9DF0(void* e, int a1);
+
+extern "C" void func_002AABD0(void* self, int i)
+{
+    void* e = (*(void***)((char*)self + 0x8))[i];
+    if (e != 0) {
+        func_002A9DF0(e, 3);
+    }
+    (*(void***)((char*)self + 0x8))[i] = 0;
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AAC28);
 
@@ -325,7 +387,27 @@ extern "C" void func_002ABB38(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002ABB80);
+#ifdef SKIP_ASM
+extern "C" int func_002ABA40(void* self);
+extern "C" void func_002ABB38(void* self);
+
+extern "C" int func_002ABB80(void* self)
+{
+    if (*(int*)self == 0) {
+        return 1;
+    }
+    if (*(int*)((char*)self + 0x9C) == 0) {
+        return 0;
+    }
+    if (func_002ABA40(self) == 0) {
+        return 0;
+    }
+    func_002ABB38(self);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002ABC18);
@@ -436,7 +518,23 @@ INCLUDE_ASM("sound/streamsys", func_002AC868);
 
 INCLUDE_ASM("sound/streamsys", func_002ACAC8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002ACB30);
+#ifdef SKIP_ASM
+extern "C" int func_002ABB80(void* self);
+extern "C" void func_002ABE78(void* self, int a1);
+extern "C" void func_003B9DC8(int h);
+
+extern "C" void func_002ACB30(void* self)
+{
+    if (func_002ABB80(self) == 0) {
+        func_002ABE78(self, 0x1000);
+        if (*(int*)self == 2) {
+            func_003B9DC8(*(int*)((char*)self + 0x4));
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002ACB80);
 

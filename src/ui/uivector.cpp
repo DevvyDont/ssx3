@@ -126,7 +126,23 @@ extern "C" void func_003A47A8(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A47F8);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_003A4868(void* self);
+
+extern void* D_00494CC0[];
+
+extern "C" void func_003A47F8(int* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 extern "C" void cListNode_removeFromList(void*);
 
@@ -393,7 +409,26 @@ extern "C" int func_003A51A0(void* a, func_003A51A0_cVirt* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A51D0);
+#ifdef SKIP_ASM
+class func_003A51D0_cFunctor {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02(void*);
+};
+
+extern "C" void* func_00397A68(void* list, func_003A51D0_cFunctor* fn);
+
+extern "C" void* func_003A51D0(void* self, func_003A51D0_cFunctor* fn)
+{
+    if (fn->v02(self) != 0) {
+        return self;
+    }
+    return func_00397A68((char*)self + 0x74, fn);
+}
+#endif
 
 INCLUDE_ASM("ui/uivector", func_003A52A0);
 
@@ -625,7 +660,23 @@ int func_003A5B40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5B48);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_003A4868(void* self);
+
+extern void* D_00494CC0[];
+
+extern "C" void func_003A5B48(int* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5DA8);
