@@ -370,7 +370,37 @@ INCLUDE_ASM("animation/animmodel", func_00310640);
 
 INCLUDE_ASM("animation/animmodel", func_00310948);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310C48);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+
+struct sAmItem50 {
+    char name[0x50];
+};
+
+struct sAmGroup58 {
+    int pad0;
+    int first;
+    char pad8[0x30];
+    sAmItem50* items;
+    char pad3C[0x8];
+    int count;
+    char pad48[0x10];
+};
+
+extern "C" int func_00310C48(void* self, int idx, const char* name)
+{
+    sAmGroup58* g = &(*(sAmGroup58**)((char*)self + 0xC))[(*(int**)((char*)self + 0x1C))[idx]];
+    sAmItem50* items = g->items;
+    for (int i = 0; i < g->count; i++)
+    {
+        if (func_004165A8(&items[i], name) == 0)
+            return g->first + i;
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("animation/animmodel", func_00310CE8);
 

@@ -1,10 +1,89 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void func_003142E8(void* self);
+extern "C" void func_00311A50(void* self);
+extern char D_0048D7D8[];
+extern const char D_0048A4E0[];
 
+extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self)
+{
+    *(int*)((char*)self + 0x54) = 0;
+    *(void**)((char*)self + 0x58) = D_0048D7D8;
+    *(void**)((char*)self + 0x50) = operator_new_tag(0x30, D_0048A4E0, 0, 0);
+    for (int i = 0; i < 6; i++)
+    {
+        func_003142E8(*(char**)((char*)self + 0x50) + (i << 3));
+    }
+    func_00311A50(self);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311958);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+void operator_delete(int* p);
+extern "C" void func_00314668(void* self);
+extern char D_0048D7D8[];
 
+extern "C" void func_00311958(void* self, int flags)
+{
+    *(void**)((char*)self + 0x58) = D_0048D7D8;
+    for (int i = 0; i < 6; i++)
+    {
+        func_00314668(*(char**)((char*)self + 0x50) + (i << 3));
+    }
+    void* p = *(void**)((char*)self + 0x50);
+    if (p)
+        cMemMan_free(p);
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311A50);
+#ifdef SKIP_ASM
+extern "C" void func_00314668(void* self);
+
+struct sRabQuad32 {
+    int w[8];
+} __attribute__((aligned(16)));
+
+extern sRabQuad32 D_004FF230;
+
+struct sRiderAnimBase {
+    int mAnims[6];      // 0x00
+    int m18;            // 0x18
+    float m1C;          // 0x1C
+    long m20;           // 0x20 PORT: 64-bit long (sd)
+    int pad28[2];       // 0x28
+    sRabQuad32 m30;     // 0x30
+    char* mSequencers;  // 0x50
+};
+
+extern "C" void func_00311A50(void* p)
+{
+    sRiderAnimBase* self = (sRiderAnimBase*)p;
+    for (int i = 0; i < 6; i++)
+    {
+        func_00314668(self->mSequencers + (i << 3));
+        self->mAnims[i] = 0x1B6;
+    }
+    //START
+    self->m18 = 0;
+    self->m1C = 1.0f;
+    self->m30 = D_004FF230;
+    self->m20 = -1;
+    //END
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311AE8);

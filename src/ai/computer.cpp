@@ -187,7 +187,24 @@ extern "C" void func_0010E7D0(void* self, float amount)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", func_0010E830);
+#ifdef SKIP_ASM
+int func_0011FE98(void* self);
+extern "C" float func_00119448(char* self, float value);
+extern "C" void func_0010E098(void*, int, float);
+extern "C" void* func_0028B180();
+extern "C" void func_0029CED8(void*, int, void*, float);
+
+extern "C" void func_0010E830(void* self, float value)
+{
+    if (func_0011FE98(self) == 1 || func_0011FE98(self) == 4)
+    {
+        func_0010E098(self, 4, func_00119448(*(char**)((char*)self + 0x790), value));
+        func_0029CED8(func_0028B180(), 2, self, value);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", func_0010E8B8);

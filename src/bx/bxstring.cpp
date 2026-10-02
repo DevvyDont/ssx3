@@ -97,7 +97,32 @@ extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* 
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_operatorE);
+#ifdef SKIP_ASM
+extern char D_0048DCD4[];
+
+// PORT: pointers held in int to get the target's negative header offsets
+// (refcount at -0xC, length at -8).
+extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* other)
+{
+    if (*(char**)self != *(char**)other)
+    {
+        if ((*(int*)(*(int*)self - 0xC) < 0 && *(char**)self != D_0048DCD4) ||
+            *(int*)(*(int*)other - 0xC) < 0)
+        {
+            cBXString_InitFromCString(self, *(int*)(*(int*)other - 8), *(char**)other);
+        }
+        else
+        {
+            cBXString_Reset(self);
+            *(char**)self = *(char**)other;
+            (*(int*)(*(int*)self - 0xC))++;
+        }
+    }
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_cBXString4);
@@ -118,7 +143,24 @@ extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318540);
+#ifdef SKIP_ASM
+extern "C" void cBXString_Realloc(cBXString* self, int size);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+
+// Builds the string from two pieces: (len1, s1) followed by (len2, s2).
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2)
+{
+    int total = len1 + len2;
+    if (total != 0)
+    {
+        cBXString_Realloc(self, total);
+        func_0041605C(*(char**)self, s1, len1);
+        func_0041605C(*(char**)self + len1, s2, len2);
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/bxstring", func_003185C8);
 

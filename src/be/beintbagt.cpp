@@ -89,17 +89,91 @@ extern "C" void func_0014FC40(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014FD80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern char D_00530EC0_raw[] __asm__("D_00530EC0");
 
+extern "C" int func_0014FD80(void* self, int rider, int idx, int value)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int off = idx * 6 + c * 0x1FE + profile * 0x13EC;
+    char* p = D_00530EC0_raw + off;
+    p[1] = value;
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014FE08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+struct sBagtEntry {
+    unsigned char b0;
+    unsigned char b1;
+    unsigned short flags;  // 0x2
+    unsigned short flags2; // 0x4
+};
+
+struct sBagtEntries {
+    sBagtEntry e[85];
+};
+
+extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
+
+extern "C" int func_0014FE08(void* self, int rider, int idx, int bit)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    D_00530EC0_e[profile][c].e[idx].flags &= ~(1 << bit);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("be/beintbagt", func_0014FEA8);
 
 INCLUDE_ASM("be/beintbagt", func_0014FF90);
 
+//100%
 INCLUDE_ASM("be/beintbagt", func_0014FFB8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
 
+extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
+
+extern "C" int func_0014FFB8(void* self, int rider, int idx, int bit)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return (D_00530EC0_e[profile][c].e[idx].flags >> bit) & 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintbagt", func_00150048);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
+
+extern "C" int func_00150048(void* self, int rider, int idx, int bit)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return (D_00530EC0_e[profile][c].e[idx].flags2 >> bit) & 1;
+}
+#endif
 
 struct sPad20 { char x; int pad[4]; };
 extern sPad20 D_0045AEB8;

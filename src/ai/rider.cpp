@@ -525,7 +525,24 @@ INCLUDE_ASM("ai/rider", func_00122CF0);
 
 INCLUDE_ASM("ai/rider", func_00122D78);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122E50);
+#ifdef SKIP_ASM
+float func_00113130(void* self);
+
+extern "C" int func_00122E50(void* self)
+{
+    int n = *(int*)(*(char**)((char*)self + 0x790) + 0x198) + 1;
+    float t = func_00113130(self) - *(float*)((char*)self + 0x4D0);
+    if (t < 1.0f)
+        t = 1.0f;
+    float r = (float)n / t;
+    float d = *(float*)((char*)self + 0x4D0) - 1000.0f;
+    if (d < 0.0f)
+        d = 0.0f;
+    return n + (int)(d * r);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00122EE8);
 
@@ -596,7 +613,24 @@ INCLUDE_ASM("ai/rider", func_00123640);
 
 INCLUDE_ASM("ai/rider", func_00123B48);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00123DA8);
+#ifdef SKIP_ASM
+extern "C" void func_0027C9B0(int, void*);
+extern "C" void func_00124788(void*, void*, float, float, int);
+extern "C" void func_00125448(void*, void*, float, float, int);
+
+extern "C" void func_00123DA8(void* self, int id, float a, float b, int unused, int flags)
+{
+    int buf[12];
+    if (*(int*)((char*)self + 0xAC4))
+    {
+        func_0027C9B0(id, buf);
+        func_00124788(self, buf, a, b, flags);
+        func_00125448(self, buf, a, b, flags);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00123E30);
 

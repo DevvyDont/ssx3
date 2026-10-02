@@ -330,7 +330,21 @@ extern "C" int func_001578A0(void* self, int a, int b)
 
 INCLUDE_ASM("be/beintreward", func_00157920);
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157A78);
+#ifdef SKIP_ASM
+extern "C" int func_00157BF0(void* self, int a, int b, int c, int i);
+
+extern "C" int func_00157A78(void* self, int a, int b, int c)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        if (func_00157BF0(self, a, b, c, i) == 0)
+            return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00157B08);
@@ -626,9 +640,47 @@ extern "C" int func_00158960(void* self, int b, int c, int d, int e)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_001589B0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00153708(void* iface, int a, int b, int c);
 
+extern "C" int func_001589B0(void* self, int a, int b, int kind)
+{
+    int v = func_00153708(cBE_getInterface_Fv(cBE_getBE(), 0xA), a, b, kind);
+    int* t = D_0045AFE8 + kind * 4;
+    for (int i = 0; i < 4; i++)
+    {
+        if (v >= t[i])
+            return i;
+    }
+    return -1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00158A50);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_001544D0(void* iface, int a, int b, int c);
+
+extern "C" int func_00158A50(void* self, int a, int b, int kind)
+{
+    int v = func_001544D0(cBE_getInterface_Fv(cBE_getBE(), 0xA), a, b, kind);
+    int* t = D_0045B018 + kind * 4;
+    for (int i = 0; i < 4; i++)
+    {
+        if (v >= t[i])
+            return i;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsMedal);
@@ -647,7 +699,21 @@ extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158BE0);
+#ifdef SKIP_ASM
+int cBERewardInterface_isBetterMedal(void* self, int a, int b);
+
+extern "C" void* func_00158BE0(void* self, int a, int b)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getEarningsMedal(self, a, b, i)))
+            return D_0045B048[i];
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("be/beintreward", func_00158C80);
 
@@ -856,7 +922,32 @@ void* func_0015A478(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A488);
+#ifdef SKIP_ASM
+extern "C" void func_0015A510(void* self);
+
+struct sRewardStrings_0015A488 {
+    char pad_0x000[0x174];
+    char* mStrings[10]; // 0x174
+};
+
+extern "C" void* func_0015A488(sRewardStrings_0015A488* self)
+{
+    for (int i = 0; i < 10; i++)
+        self->mStrings[i] = 0;
+    char* base = (char*)self;
+    self->mStrings[0] = base + 0x146;
+    self->mStrings[2] = base + 0x170;
+    self->mStrings[3] = base + 0x147;
+    self->mStrings[4] = base + 0x14D;
+    self->mStrings[5] = base + 0x15C;
+    self->mStrings[7] = base + 0x169;
+    self->mStrings[8] = base + 0x16D;
+    func_0015A510(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A510);

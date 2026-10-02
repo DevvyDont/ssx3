@@ -122,7 +122,24 @@ void cBENewRaceInterface_setNumberMission(void* self, int mission)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00144B20);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char*, const char*);
+extern char D_0043E6EC[];
+
+extern "C" void func_00144B20(void* self, const char* name)
+{
+    char* base = (char*)&D_0043D984;
+    char* g = (char*)&D_00535BC8;
+    strcpy(base + *(int*)(g + 0x40) * 0x64, name);
+    char* p1 = base + 0x10;
+    strcpy(p1 + *(int*)(g + 0x40) * 0x64, name);
+    char* p2 = base - 0x30;
+    strcpy(p2 + *(int*)(g + 0x40) * 0x64, name);
+    strcpy(D_0043E6EC, name);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144BC0);

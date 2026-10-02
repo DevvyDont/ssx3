@@ -85,7 +85,33 @@ extern "C" void func_0014E9C0(void* self, int a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintnetwork", func_0014E9F8);
+#ifdef SKIP_ASM
+extern "C" void func_001567B8(void* self, int arg);
+// PORT: func_0014EB08 is defined (void) in this unit but called with self here.
+void func_0014EB08_self(void* self) __asm__("func_0014EB08");
+
+struct sRiderEntry_0014E9F8 {
+    int w[7];
+};
+
+extern char D_004BA348[];
+extern int D_00534B38[];
+extern sRiderEntry_0014E9F8 D_00535B3C;
+
+extern "C" void func_0014E9F8(void* self)
+{
+    func_001567B8(D_004BA348, 0);
+    if (D_00534B38[0] == 0)
+    {
+        sRiderEntry_0014E9F8* e = &D_00535B3C;
+        e[0] = e[-1];
+        func_0014E9C0(self, 0, 1);
+    }
+    func_0014EB08_self(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EA90);

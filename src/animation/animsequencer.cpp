@@ -429,7 +429,37 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_003147F0);
+#ifdef SKIP_ASM
+class cAsStream {
+public:
+    virtual void serialize(void* data, int size);
+};
+
+struct sSeqNode_003147F0 {
+    char pad_0x00[0xC8];
+    sSeqNode_003147F0* next; // 0xC8
+};
+
+struct sSequencer_003147F0 {
+    int mCount;                        // 0x0
+    sSeqNode_003147F0* mFirstSequence; // 0x4
+};
+
+extern "C" void func_00313DD0(void* node, cAsStream* s);
+
+extern "C" void func_003147F0(sSequencer_003147F0* self, cAsStream* s)
+{
+    s->serialize(self, 4);
+    sSeqNode_003147F0* n = self->mFirstSequence;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_00313DD0(n, s);
+        n = n->next;
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314880);
 
@@ -519,5 +549,35 @@ void func_00314AA0_impl(void* self, char* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314C00);
+#ifdef SKIP_ASM
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
+
+struct sMdfPart60 {
+    char name[0x60];
+};
+
+struct sMdfHeader {
+    int pad0;
+    short count; // 0x4
+};
+
+struct sMdfArchive {
+    int pad0;
+    sMdfHeader* header; // 0x4
+    sMdfPart60* parts;  // 0x8
+};
+
+extern "C" void* func_00314C00(sMdfArchive* self, const char* name)
+{
+    for (int i = 0; i < self->header->count; i++)
+    {
+        if (func_0041AA88(name, self->parts[i].name) == 0)
+            return cMdfArchive_getModelPartByIndex(self, i);
+    }
+    return 0;
+}
+#endif
 

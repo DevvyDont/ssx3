@@ -293,9 +293,51 @@ extern "C" int func_00117A58(void* self_, int type)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00117AE8);
+#ifdef SKIP_ASM
+struct sMetrixSlotAE8 {
+    char pad_0x00[0x9C];
+};
 
+extern "C" void func_00117048(void* slot, int a, const char* b, float c, int d);
+
+// PORT: returns the slot index, but the unit's later declaration (used by
+// cRiderMetrix_evAutoResetSurface) says void; bind the int-returning body here.
+int func_00117AE8_impl(void* self, int a, const char* b, float c, int d) __asm__("func_00117AE8");
+
+int func_00117AE8_impl(void* self, int a, const char* b, float c, int d)
+{
+    if (*(sMetrixSlotAE8**)((char*)self + 0x1B0) == 0)
+        return -1;
+    int idx = func_00117A58(self, a);
+    func_00117048(&(*(sMetrixSlotAE8**)((char*)self + 0x1B0))[idx], a, b, c, d);
+    return idx;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00117B88);
+#ifdef SKIP_ASM
+struct sMetrixSlotB88 {
+    char pad_0x00[0x9C];
+};
+
+extern "C" void func_001170A8(void* slot, int type, int value, float duration, int arg);
+
+// PORT: returns the slot index, but the unit's later declarations say void;
+// bind the int-returning body here.
+int func_00117B88_impl(void* self, int type, int value, int arg, float duration) __asm__("func_00117B88");
+
+int func_00117B88_impl(void* self, int type, int value, int arg, float duration)
+{
+    if (*(sMetrixSlotB88**)((char*)self + 0x1B0) == 0)
+        return -1;
+    int idx = func_00117A58(self, type);
+    func_001170A8(&(*(sMetrixSlotB88**)((char*)self + 0x1B0))[idx], type, value, duration, arg);
+    return idx;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117C28);
 
@@ -537,7 +579,26 @@ float func_00119938(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119958);
+#ifdef SKIP_ASM
+extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
+
+extern "C" float func_00119958(void* self, int v)
+{
+    float s24 = *(float*)((char*)self + 0x24);
+    float s30 = *(float*)((char*)self + 0x30);
+    (*(int*)((char*)self + 0x54))++;
+    (*(int*)((char*)self + 0x74))++;
+    float r = func_0011A228(self, 0, 0, 0, 0, 0);
+    func_00117838(self);
+    *(int*)((char*)self + 0xC) = v;
+    *(int*)((char*)self + 0x20) = v;
+    *(float*)((char*)self + 0x24) = s24;
+    *(float*)((char*)self + 0x30) = s30;
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_001199F8);
@@ -553,7 +614,25 @@ extern "C" float func_001199F8(char* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119A38);
+#ifdef SKIP_ASM
+extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
+
+extern "C" float func_00119A38(void* self)
+{
+    float s24 = *(float*)((char*)self + 0x24);
+    float s30 = *(float*)((char*)self + 0x30);
+    int v = *(int*)((char*)self + 0x20);
+    float r = func_0011A228(self, 0, 0, v, 0, s30 >= 0.0f);
+    func_00117838(self);
+    *(int*)((char*)self + 0xC) = v;
+    *(int*)((char*)self + 0x20) = v;
+    *(float*)((char*)self + 0x24) = s24;
+    *(float*)((char*)self + 0x30) = s30;
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119AD8);
 

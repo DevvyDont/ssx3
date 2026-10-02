@@ -307,11 +307,93 @@ extern "C" int func_0012ACF8(sAiObj12ACF8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012AE38);
+#ifdef SKIP_ASM
+struct sAiMissionVEntry { short delta; short index; void (*fn)(void*, int); };
 
+struct sAiMission
+{
+    char pad0[0x14];
+    int m14;
+    char pad18[0x30];
+    void* mListA[5];
+    void* mListB[5];
+    void* mListC[2];
+    int mTotal;
+    int pad7C;
+    int mCountA;
+    int mCountB;
+    int mCountC;
+    int m8C;
+    int m90;
+};
+
+extern "C" void func_0012AE38(void* p)
+{
+    sAiMission* self = (sAiMission*)p;
+    for (int i = 0; i < self->mCountA; i++)
+    {
+        void* m = self->mListA[i];
+        if (m)
+        {
+            char* obj = *(char**)((char*)m + 0x18) + 0x6C0;
+            sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
+            vt[1].fn(obj + vt[1].delta, 3);
+        }
+        self->mListA[i] = 0;
+    }
+    self->mTotal -= self->mCountA;
+    self->mCountA = 0;
+    self->m14 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012AED0);
+#ifdef SKIP_ASM
+extern "C" void func_0012AED0(void* p)
+{
+    sAiMission* self = (sAiMission*)p;
+    for (int i = 0; i < self->mCountB; i++)
+    {
+        void* m = self->mListB[i];
+        if (m)
+        {
+            char* obj = *(char**)((char*)m + 0x18) + 0x6C0;
+            sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
+            vt[1].fn(obj + vt[1].delta, 3);
+        }
+        self->mListB[i] = 0;
+    }
+    self->mTotal -= self->mCountB;
+    self->mCountB = 0;
+    self->m8C = 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/ai", cAI_purgeMissionRiders);
+#ifdef SKIP_ASM
+extern "C" void cAI_purgeMissionRiders(void* p)
+{
+    sAiMission* self = (sAiMission*)p;
+    for (int i = 0; i < self->mCountC; i++)
+    {
+        void* m = self->mListC[i];
+        if (m)
+        {
+            char* obj = *(char**)((char*)m + 0x18) + 0x6C0;
+            sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
+            vt[1].fn(obj + vt[1].delta, 3);
+        }
+        self->mListC[i] = 0;
+    }
+    self->mTotal -= self->mCountC;
+    self->mCountC = 0;
+    self->m90 = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012B000);

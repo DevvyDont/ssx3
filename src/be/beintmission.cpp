@@ -72,9 +72,49 @@ extern "C" int func_00153390(void* self, int owner)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153498);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern int D_005305F0[];
+// Byte view of the profile table; the unit declares D_004A6CA8 later with a struct type.
+extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
 
+extern "C" int func_00153498(void* self, int rider, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int off = (idx + D_005305F0[0]) * 12 + c * 0xF88 + profile * 0x9B50;
+    char* p = D_004A6CA8_raw + off;
+    return *(signed char*)(p + 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153520);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+// Byte view of the profile table; the unit declares D_004A6CA8 later with a struct type.
+extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+
+extern "C" int func_00153520(void* self, int rider, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int sum = 0;
+    int off = idx * 12 + c * 0xF88 + profile * 0x9B50;
+    char* p = D_004A6CA8_raw + off;
+    for (int i = 0; i < 1; i++)
+    {
+        sum += *(signed char*)(p + i * 12 + 4);
+    }
+    return sum;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak);
 
@@ -385,7 +425,25 @@ extern "C" int func_001542A0(void* self, int group)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintmission", func_001542E0);
+#ifdef SKIP_ASM
+extern "C" int func_00153D78(void* self, int id);
+
+extern "C" int func_001542E0(void* self, int group)
+{
+    int n = 0;
+    for (int i = 0; i < 88; i++)
+    {
+        if (D_0043EE10[i].group == group)
+        {
+            if (func_00153D78(self, D_0043EE10[i].id))
+                n++;
+        }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00154368);
