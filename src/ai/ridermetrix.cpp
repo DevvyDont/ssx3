@@ -993,8 +993,8 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
             *(sTrickId*)((char*)self + 0x190) = id;
         }
 
-        spin = func_roundDegrees((int)(*(float*)((char*)self + 0x34) * 57.29578f));
-        flip = func_roundDegrees((int)(*(float*)((char*)self + 0x38) * 57.29578f));
+        spin = func_roundDegrees((int)(*(float*)((char*)self + 0x34) * 57.295776f));
+        flip = func_roundDegrees((int)(*(float*)((char*)self + 0x38) * 57.295776f));
         *(int*)((char*)self + 0xfc) += abs(spin);
         *(int*)((char*)self + 0x100) += abs(flip);
         *(float*)((char*)self + 0x144) += *(float*)((char*)self + 0x44);
