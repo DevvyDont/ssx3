@@ -124,7 +124,44 @@ INCLUDE_ASM("fe/festatebuyattrib", func_001F4A90);
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4C30);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateLevels);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A2338[];
+extern char D_004A2340[];
+
+struct sBuyAttribK1F4EA8 {
+    char pad_0x0[0x48];
+    void* screen;   // 0x48
+    int pts[7];     // 0x4C
+    int lvl[7];     // 0x68
+};
+
+extern "C" void cFEStateBuyAttrib_updateLevels(void* p)
+{
+    sBuyAttribK1F4EA8* self = (sBuyAttribK1F4EA8*)p;
+    char name[0x20];
+    char text[0x10];
+    int i;
+    for (i = 0; i < 7; i++) {
+        int lvl = self->pts[i] / 5;
+        if (self->lvl[i] < lvl)
+            self->lvl[i] = lvl;
+        int rem = self->pts[i] - lvl * 5;
+        sprintf(name, D_004A2338, i);
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (t != 0) {
+            sprintf(text, D_004A2340, lvl, rem * 2);
+            cUIText_setAsciiString(t, text);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateCostPerLevel);

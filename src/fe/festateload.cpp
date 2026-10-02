@@ -132,7 +132,106 @@ extern "C" void func_001869D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateload", func_00186A08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_001D53B0(void* self, void* a1, int a2);
+extern "C" void* func_00227F80(void* p);
+extern void* D_004A28A8;
+extern void* D_0046B570[];
+// D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
+extern void* D_004A14B8_K186A08 __asm__("D_004A14B8");
+extern int D_004A14B4;
+extern int D_004A14BC;
+extern "C" void func_00186F90();
+extern "C" void func_00187148();
+extern "C" void func_00187180();
+extern "C" void func_00187230();
+extern "C" void func_001871A8();
+extern "C" void func_00186C98();
+extern "C" void func_00186D60();
+extern "C" void func_00186F40();
+extern "C" void func_00187360();
+
+struct sFEStateLoadK186A08 {
+    char pad_0x0[0x8];
+    void** vtbl;        // 0x8
+    int fC;             // 0xC
+    char pad_0x10[0x19C - 0x10];
+    int f19C;           // 0x19C
+    char pad_0x1A0[0x204 - 0x1A0];
+    int f204;           // 0x204
+    char pad_0x208[0x22C - 0x208];
+    int f22C;           // 0x22C
+    int f230;           // 0x230
+    int f234;           // 0x234
+    int f238;           // 0x238
+    int f23C;           // 0x23C
+    int f240;           // 0x240
+    int f244;           // 0x244
+};
+
+struct sMemCardK186A08 {
+    char pad_0x0[0x38];
+    void* cb38;         // 0x38
+    void* cb3C;         // 0x3C
+    char pad_0x40[0x8];
+    void* cb48;         // 0x48
+    char pad_0x4C[0x10];
+    void* cb5C;         // 0x5C
+    char pad_0x60[0x30];
+    void* cb90;         // 0x90
+    void* cb94;         // 0x94
+    char pad_0x98[0xC];
+    void* cbA4;         // 0xA4
+    char pad_0xA8[0x4];
+    void* cbAC;         // 0xAC
+    void* cbB0;         // 0xB0
+    char pad_0xB4[0x11C - 0xB4];
+    int f11C;           // 0x11C
+    int f120;           // 0x120
+    int f124;           // 0x124
+    int f128;           // 0x128
+    int f12C;           // 0x12C
+};
+
+extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* engine)
+{
+    func_001D53B0(self, engine, 2);
+    int one = 1;
+    self->vtbl = D_0046B570;
+    D_004A14B8_K186A08 = self;
+    D_004A14B4 = 0;
+    D_004A14BC = 0;
+    self->f204 = one;
+    self->fC = one;
+    self->f23C = one;
+    self->f230 = 0;
+    self->f234 = 0;
+    self->f240 = 0;
+    self->f244 = 0;
+    self->f19C = 0x1A;
+    self->f22C = -1;
+    self->f238 = -1;
+    sMemCardK186A08* mc = (sMemCardK186A08*)func_00227F80(D_004A28A8);
+    mc->f12C = one;
+    mc->f124 = one;
+    mc->f120 = one;
+    mc->cbA4 = (void*)func_00186F90;
+    mc->cb38 = (void*)func_00187148;
+    mc->cb94 = (void*)func_00187180;
+    mc->cbAC = (void*)func_00187230;
+    mc->cb90 = (void*)func_001871A8;
+    mc->cb48 = (void*)func_00186C98;
+    mc->cb3C = (void*)func_00186D60;
+    mc->cbB0 = (void*)func_00186F40;
+    mc->cb5C = (void*)func_00187360;
+    mc->f128 = 0;
+    mc->f11C = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateload", func_00186B18);

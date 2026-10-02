@@ -74,7 +74,33 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetCreate);
 
 INCLUDE_ASM("fe/festatebigradio", func_001938F8);
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00193C00);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+void func_001DA510(void* self, int i, int a, int b);
+void func_001DA528(void* self, int val);
+void func_001DA530(void* self, int i, int value);
+extern char D_0045FDE8[];
+extern char D_0045FE00[];
+extern char D_0045FE20[];
+extern char D_0045FE40[];
+extern char D_0045FE60[];
+extern char D_0045FE80[];
+extern char D_0045FE98[];
+
+extern "C" void func_00193C00(void* self, void* popup)
+{
+    func_001DA528(popup, 4);
+    *(int*)((char*)popup + 0x54) = GetHashValue32(D_0045FDE8);
+    func_001DA530(popup, 0, GetHashValue32(D_0045FE00));
+    func_001DA530(popup, 1, GetHashValue32(D_0045FE20));
+    func_001DA510(popup, 0, GetHashValue32(D_0045FE40), 4);
+    func_001DA510(popup, 1, GetHashValue32(D_0045FE60), 3);
+    func_001DA510(popup, 2, GetHashValue32(D_0045FE80), 0);
+    func_001DA510(popup, 3, GetHashValue32(D_0045FE98), 1);
+}
+#endif
 
 INCLUDE_ASM("fe/festatebigradio", func_00193CF8);
 

@@ -1,10 +1,148 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_004677B8[];
+extern char D_0045F7E0[];
+void func_001D8C38(void* self);
 
+struct sVEntryS1D66B0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, ...);
+};
+
+struct sVEntryVS1D66B0 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+extern "C" void cFEMemCard_callbackSaveSuccess(void)
+{
+    func_001D8C38(D_004A2028);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x1F0) = 0;
+    if (*(int*)(fe + 0x208) == 0) {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntryS1D66B0* ovt = *(sVEntryS1D66B0**)(o + 4);
+        void* str = ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677B8));
+        char* fe2 = (char*)D_004A2028;
+        *(int*)(fe2 + 0x19C) = 5;
+        sVEntryVS1D66B0* vt = *(sVEntryVS1D66B0**)(fe2 + 8);
+        vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
+        char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntryS1D66B0* o2vt = *(sVEntryS1D66B0**)(o2 + 4);
+        void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        char* m = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryVS1D66B0* mvt = *(sVEntryVS1D66B0**)(m + 8);
+        mvt[26].fn(m + mvt[26].delta, str2, 0);
+    } else {
+        sVEntryVS1D66B0* vt = *(sVEntryVS1D66B0**)(fe + 8);
+        vt[40].fn(fe + vt[40].delta);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackReadSuccess);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_004677D0[];
+extern char D_0045F7E0[];
+extern "C" void func_001D9308(void*, int);
 
+struct sVEntryR1D67C8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, ...);
+};
+
+struct sVEntryVR1D67C8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+extern "C" void cFEMemCard_callbackReadSuccess(void)
+{
+    func_001D9308(D_004A2028, 0);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x1B4) = 1;
+    *(int*)(fe + 0x1A8) = 0;
+    if (*(int*)(fe + 0x204) == 0) {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntryR1D67C8* ovt = *(sVEntryR1D67C8**)(o + 4);
+        void* str = ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677D0));
+        char* fe2 = (char*)D_004A2028;
+        *(int*)(fe2 + 0x19C) = 6;
+        sVEntryVR1D67C8* vt = *(sVEntryVR1D67C8**)(fe2 + 8);
+        vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
+        char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntryR1D67C8* o2vt = *(sVEntryR1D67C8**)(o2 + 4);
+        void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        char* m = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryVR1D67C8* mvt = *(sVEntryVR1D67C8**)(m + 8);
+        mvt[26].fn(m + mvt[26].delta, str2, 0);
+    } else {
+        sVEntryVR1D67C8* vt = *(sVEntryVR1D67C8**)(fe + 8);
+        vt[40].fn(fe + vt[40].delta);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D68E8);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_004642F8[];
+
+struct sVEntryK1D68E8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, ...);
+};
+
+struct sVEntryVK1D68E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+extern "C" void func_001D68E8(void)
+{
+    unsigned short name[0x28];
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    char* s = *(char**)(mp + 0x434);
+    sVEntryVK1D68E8* svt = *(sVEntryVK1D68E8**)s;
+    svt[14].fn(s + svt[14].delta, *(int*)(mp + 0xF8), name);
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntryK1D68E8* ovt = *(sVEntryK1D68E8**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004642F8)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 1;
+    sVEntryVK1D68E8* vt = *(sVEntryVK1D68E8**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D69E0);
@@ -58,7 +196,36 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D6D88);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7010);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7190);
+#ifdef SKIP_ASM
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern char D_00467800[];
+
+extern "C" void func_001D7190(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    void* app = D_004A28A8;
+    *(int*)((char*)D_004A2028 + 0x19C) = 0xD;
+    char* o = *(char**)((char*)app + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467800)), name);
+    char* fe = (char*)D_004A2028;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    mvt[25].fn(m + mvt[25].delta, 1);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D72A8);
@@ -88,11 +255,96 @@ extern "C" void func_001D72A8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7318);
+#ifdef SKIP_ASM
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern char D_00464330[];
 
+extern "C" void func_001D7318(void)
+{
+    unsigned short name[0x100];
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464330)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0xE;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    mvt[25].fn(m + mvt[25].delta, 1);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmFormatDone);
+#ifdef SKIP_ASM
+extern char D_00467818[];
+extern char D_0045F7E0[];
 
+extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
+{
+    void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    func_00227F80(D_004A28A8);
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
+    func_002C2508(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_00467818)));
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0x10;
+    sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
+    vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(o2 + 4);
+    void* str = vt4[4].fn(o2 + vt4[4].delta, GetHashValue32(D_0045F7E0));
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(m + 8);
+    vt3[26].fn(m + vt3[26].delta, str, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7548);
+#ifdef SKIP_ASM
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern char D_004644F0[];
+extern char D_0045F7E0[];
+
+extern "C" void func_001D7548(void)
+{
+    unsigned short name[0x100];
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644F0)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0x11;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    mvt[26].fn(m + mvt[26].delta, str2, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmDelete);
 
@@ -102,13 +354,67 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D7998);
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7B18);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileExists);
+#ifdef SKIP_ASM
+extern char D_00467860[];
+extern char D_0045F7E0[];
+
+extern "C" void cFEMemCard_callbackFileExists(void)
+{
+    void* app = D_004A28A8;
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0x17;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    char* o = *(char**)((char*)app + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    vt[36].fn(fe + vt[36].delta, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467860)), 1, 0, 0, 0, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    mvt[26].fn(m + mvt[26].delta, o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0)), 0);
+    *(int*)((char*)D_004A2028 + 0x1C0) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7D70);
 
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDeleteDone);
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8020);
+#ifdef SKIP_ASM
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern char D_00464640[];
+extern char D_0045F7E0[];
+
+extern "C" int func_001D8020(void)
+{
+    unsigned short name[0x100];
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464640)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0x8;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    mvt[26].fn(m + mvt[26].delta, str2, 0);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8160);
@@ -165,7 +471,45 @@ extern "C" void func_001D8160(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8240);
+#ifdef SKIP_ASM
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_003A0D00(void* self, unsigned short* str);
+extern char D_004678B0[];
+extern char D_004678C8[];
+
+struct sVEntryK1D8240 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001D8240(void)
+{
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x1C0) = 1;
+    if (*(int*)(fe + 0x214) != 1) {
+        *(int*)(fe + 0x214) = 1;
+        sVEntryK1D8240* vt = *(sVEntryK1D8240**)(fe + 8);
+        vt[35].fn(fe + vt[35].delta, 1);
+    }
+    char* st = (char*)D_004A2028;
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(D_004678B0));
+    if (obj) {
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+        func_002C2508(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004678C8)));
+        func_003A0D00(obj, buf);
+        sVEntryK1D8240* vt = *(sVEntryK1D8240**)(obj + 8);
+        vt[9].fn(obj + vt[9].delta, 1);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8358);
@@ -272,7 +616,51 @@ void func_001D8C38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onInputBegin);
+#ifdef SKIP_ASM
+struct cUIScreen;
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+int GetHashValue32(char* str);
+extern char D_00467940[];
+extern char D_00467950[];
+
+struct sVEntryK1D8C50 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
+{
+    int handled = 0;
+    if (*(int*)((char*)self + 0x1A8) == 1)
+        return 0;
+    sVEntryK1D8C50* vt = *(sVEntryK1D8C50**)((char*)input + 8);
+    if (vt[19].fn((char*)input + vt[19].delta)) {
+        handled = 1;
+        *(int*)((char*)self + 0x1FC) = handled;
+        if (*(void**)((char*)self + 0x40)) {
+            unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_00467940));
+            if (frame != 0xFFFF)
+                cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+        }
+    } else {
+        sVEntryK1D8C50* vt2 = *(sVEntryK1D8C50**)((char*)input + 8);
+        if (vt2[20].fn((char*)input + vt2[20].delta)) {
+            handled = 1;
+            *(int*)((char*)self + 0x1F8) = handled;
+            if (*(void**)((char*)self + 0x40)) {
+                unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_00467950));
+                if (frame != 0xFFFF)
+                    cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            }
+        }
+    }
+    return handled;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8D68);

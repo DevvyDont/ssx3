@@ -391,11 +391,87 @@ extern "C" void func_001874E8(void* self)
 
 INCLUDE_ASM("fe/fememcard", func_00187580);
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_001876A8);
+#ifdef SKIP_ASM
+extern void* D_004A14B8;
+extern "C" void func_00241E18(void*, unsigned short*, int);
+extern "C" void func_003A0D00(void* self, unsigned short* str);
+
+struct sVtEntK1876A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001876A8(void)
+{
+    void* st = D_004A14B8;
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(D_0045DC80));
+    void* mp = func_00227F80(D_004A28A8);
+    int e = *(int*)((char*)mp + 0x130);
+    if (e == 0x1F || e == 0x21 || e == 0x20 || e == 0x22 || e == 0x31 || e == 0x32 || e == 0x33
+        || e == 0x35 || e == 0x36 || e == 0x34 || e == 2 || e == 3 || e == 6) {
+        unsigned short buf[0x320];
+        func_00241E18(mp, buf, 0x320);
+        func_003A0D00(obj, buf);
+        sVtEntK1876A8* vt = *(sVtEntK1876A8**)((char*)obj + 8);
+        vt[9].fn((char*)obj + vt[9].delta, 1);
+    } else {
+        sVtEntK1876A8* vt = *(sVtEntK1876A8**)((char*)obj + 8);
+        vt[9].fn((char*)obj + vt[9].delta, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fememcard", func_001877B0);
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00187920);
+#ifdef SKIP_ASM
+extern char D_0045DD00[];
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_00152948__FPv ignores its argument; this caller passes none.
+int func_00152948_K187920() __asm__("func_00152948__FPv");
+extern "C" void func_0023CAA0(void* mp, int a);
+extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
+extern "C" void func_0039FCC8(void* obj, void* anim, int a, int b, int c);
+extern "C" void func_001D9308(void*, int);
+
+struct sVtEntK187920 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00187920(void)
+{
+    int two = 2;
+    D_004A14BC = 4;
+    *(int*)((char*)D_004A14B8 + 0x1C0) = 5;
+    cBE_getInterface_Fv(cBE_getBE(), 5);
+    void* mp = func_00227F80(D_004A28A8);
+    void* s1 = D_004A14B8;
+    *(int*)((char*)s1 + 0x1BC) = two;
+    *(int*)((char*)s1 + 0x1C4) = 0;
+    func_0023CAA0(mp, func_00152948_K187920());
+    func_0023C8F0(mp, 2);
+    sVtEntK187920* vt = *(sVtEntK187920**)((char*)mp + 0x748);
+    vt[1].fn((char*)mp + vt[1].delta, 0x35);
+    void* st = D_004A14B8;
+    *(int*)((char*)st + 0x1BC) = two;
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(D_004A14C0));
+    if (obj) {
+        void* bank = (char*)*(void**)((char*)D_004A14B8 + 0x10) + 0x50;
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_0045DD00));
+        if (anim)
+            func_0039FCC8(obj, anim, 9, 0, 0);
+    }
+    func_001D9308(D_004A14B8, 1);
+    *(int*)((char*)D_004A14B8 + 0x1A8) = 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fememcard", func_00187A38);
 

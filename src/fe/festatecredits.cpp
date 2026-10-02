@@ -1,6 +1,48 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_0045DB80[];
+extern char D_0045DB90[];
+extern char D_0045DBA0[];
+extern char D_0045DBB0[];
+
+struct sVEntryK185A98 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cFEStateCredits_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DB80), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
+    if (o != 0)
+        *(int*)(o + 0x90) |= 8;
+    char* t = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBA0));
+    *(void**)((char*)self + 0x58) = t;
+    if (t != 0) {
+        sVEntryK185A98* vt = *(sVEntryK185A98**)(t + 8);
+        vt[9].fn(t + vt[9].delta, 0);
+    }
+    t = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBB0));
+    *(void**)((char*)self + 0x58) = t;
+    if (t != 0) {
+        sVEntryK185A98* vt = *(sVEntryK185A98**)(t + 8);
+        vt[9].fn(t + vt[9].delta, 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
 

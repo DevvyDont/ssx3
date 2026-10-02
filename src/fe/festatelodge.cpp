@@ -87,7 +87,58 @@ extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F4108);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00147138(void* self, int a1, const char* name);
+extern "C" void func_001474A8(void* self, int a1, int a2);
+extern "C" int strlen(const char* s);
+extern char D_0046EF40[];
+
+struct sVEntryK1F4108 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline int IsK1F4108(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+static inline void commitK1F4108(void* np)
+{
+    sVEntryK1F4108* vt = *(sVEntryK1F4108**)((char*)np + 0xC);
+    vt[1].fn((char*)np + vt[1].delta);
+}
+
+extern "C" void func_001F4108(void* self, char* popup, int event)
+{
+    void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
+    if (event != 0x16)
+        return;
+    if (IsK1F4108(*(int*)(popup + 0xC), D_0046EF40)) {
+        int v = *(int*)(popup + 0x70);
+        if (*(int*)(popup + 0x74) != 0) {
+            void* np2 = cBE_getInterface_Fv(cBE_getBE(), 1);
+            func_001474A8(np2, *(signed char*)((char*)self + 0x44), v);
+            commitK1F4108(np2);
+        }
+    } else if (*(int*)(popup + 0xC) == 0) {
+        if (*(int*)(popup + 0x5C) != 0) {
+            char* name = popup + 0x74;
+            if (strlen(name) != 0) {
+                func_00147138(np, *(signed char*)((char*)self + 0x44), name);
+                commitK1F4108(np);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetCreate);
 

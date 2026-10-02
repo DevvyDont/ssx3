@@ -51,7 +51,57 @@ extern "C" void func_0019EBA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019EC68);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" int func_0019CBE0(void* self, int a1, int a2);
+extern "C" int func_0019CCE8(void* self, int a1, int a2);
+extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
+extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern void* D_004A28A8;
+extern void* D_004A1968;
+
+struct sItemEC68 {
+    short id;
+    short pad;
+};
+struct sItemListEC68 {
+    char pad_0x0[0x28C];
+    int count;              // 0x28C
+    sItemEC68 items[1];     // 0x290
+};
+
+extern "C" void func_0019EC68(void* p)
+{
+    int* self = (int*)p;
+    if (self[1] < 0)
+        return;
+    if (self[0] < 0)
+        return;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    sItemListEC68* list = (sItemListEC68*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->count;
+    int i;
+    for (i = 0; i < n; i++) {
+        int r = func_0019CCE8(D_004A1968, self[1], list->items[i].id);
+        if (r >= 0) {
+            func_0019DC20(mgr, self[0], r);
+            func_0019CD38(D_004A1968, self[1], list->items[i].id, -1);
+        }
+        r = func_0019CBE0(D_004A1968, self[1], list->items[i].id);
+        if (r >= 0) {
+            func_0019DC20(mgr, self[0], r);
+            func_0019CC30(D_004A1968, self[1], list->items[i].id, -1);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019ED80);
 
@@ -59,7 +109,37 @@ INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 
 INCLUDE_ASM("fe/feridermanager", func_0019F138);
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F2D0);
+#ifdef SKIP_ASM
+struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
+struct sHalfF2D0 { sQuadF2D0 a, b; };
+extern sQuadF2D0 D_004FF130;
+extern sQuadF2D0 D_004FF220;
+extern "C" void func_00310200(void* model, void* pose);
+extern "C" void func_003103F0(void* model);
+
+extern "C" void func_0019F2D0(void* self)
+{
+    sHalfF2D0 p[2];
+    if (*(int*)((char*)self + 0xCCC) != 0) {
+        p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
+        p[1] = *(sHalfF2D0*)((char*)self + 0xC30);
+        func_00310200(*(void**)((char*)self + 0x8), p);
+        func_003103F0(*(void**)((char*)self + 0x8));
+    } else {
+        p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
+        p[1] = *(sHalfF2D0*)((char*)self + 0xC50);
+        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCAC)] = D_004FF130;
+        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCAC)] = D_004FF220;
+        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCB0)] = D_004FF130;
+        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCB0)] = D_004FF220;
+        func_00310200(*(void**)((char*)self + 0x8), p);
+        func_003103F0(*(void**)((char*)self + 0x8));
+    }
+    *(int*)((char*)self + 0x14) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F3E8);
@@ -88,7 +168,66 @@ extern "C" void func_0019F548(void* self, sQuadRM* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F780);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" int func_0014D448(void* self, int g, int key);
+extern "C" void func_0030EB60(void* model);
+extern "C" void func_0030EC18(void* model, int i, int param);
+
+struct sItemF780 {
+    short id;
+    unsigned short flags;
+};
+struct sItemListF780 {
+    char pad_0x0[0x28C];
+    int count;              // 0x28C
+    sItemF780 items[1];     // 0x290
+};
+struct sBoneEntF780 {
+    char f0;
+    char f1;
+    char pad_0x2[0xE];
+    char f10;
+    char pad_0x11[0x38 - 0x11];
+};
+struct sBoneDbF780 {
+    int f0;
+    sBoneEntF780* entries;  // 0x4
+};
+
+static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
+{
+    if (i < 0)
+        return 0;
+    return &db->entries[i];
+}
+
+extern "C" void func_0019F780(int* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+    sBoneDbF780* db = (sBoneDbF780*)func_0014BDB8_noarg();
+    sItemListF780* list = (sItemListF780*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->count;
+    sItemF780* it = list->items;
+    func_0030EB60(*(void**)((char*)self + 0x8));
+    int i;
+    for (i = 0; i < n; i++) {
+        if (it[i].flags & 0x10) {
+            sBoneEntF780* e = getEntK19F780(db, func_0014D448(db, self[0], it[i].id));
+            if (e->f10 >= 0)
+                func_0030EC18(*(void**)((char*)self + 0x8), e->f10, e->f1);
+        }
+    }
+    **(int**)((char*)self + 0xC74) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F878);

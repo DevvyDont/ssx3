@@ -57,5 +57,46 @@ void* func_001955E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebonusmaterial", func_00195600);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
+extern "C" void func_001D2598(void* self, const char* a, const char* b);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_004601D8[];
+extern const char* D_00441128[];
+
+struct sVEntryK195600 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_00195600(void* self, void* item, unsigned int event)
+{
+    if (item == 0)
+        return;
+    switch (event) {
+    case 4:
+        break;
+    case 5: {
+        void* p = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
+                                *(signed char*)((char*)self + 0x44));
+        func_001D2598(p, D_00441128[*(int*)((char*)item + 0x18)], 0);
+        func_0039F290(*(char**)((char*)self + 0x10) + 0x18, p);
+        break;
+    }
+    case 6: {
+        char* o = **(char***)((char*)self + 0x10);
+        sVEntryK195600* vt = *(sVEntryK195600**)(o + 4);
+        void* r = vt[5].fn(o + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (r != 0)
+            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, r);
+        break;
+    }
+    }
+}
+#endif
 

@@ -2,9 +2,93 @@
 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cFEStateCharEquip);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199148);
+#ifdef SKIP_ASM
+struct sEquipTable_DC20;
+extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
+extern "C" void func_0019A498(void* self);
+extern "C" void func_0039E390(void* self, int flags);
+extern void* D_004A28A8;
+extern void* D_004A289C;
+extern void* D_0046A548[];
+extern void* D_0046D0D0[];
 
+struct sVEntryK199148 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void releaseK199148(int id)
+{
+    if (id >= 0) {
+        char* g = (char*)D_004A289C;
+        sVEntryK199148* vt = *(sVEntryK199148**)(g + 0x10D8);
+        vt[50].fn(g + vt[50].delta, id);
+    }
+}
+
+extern "C" void func_00199148(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_0046A548;
+    if (*(int*)((char*)self + 0xA64) >= 0) {
+        func_0019DC20((sEquipTable_DC20*)(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+                      *(int*)((char*)self + 0xA64));
+        *(int*)((char*)self + 0xA64) = -1;
+    }
+    releaseK199148(*(int*)((char*)self + 0xA68));
+    *(int*)((char*)self + 0xA68) = -1;
+    func_0019A498(self);
+    releaseK199148(*(int*)((char*)self + 0xA70));
+    releaseK199148(*(int*)((char*)self + 0xA74));
+    *(int*)((char*)self + 0xA70) = -1;
+    *(int*)((char*)self + 0xA74) = -1;
+    *(void***)((char*)self + 0x8) = D_0046D0D0;
+    func_0039E390(self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_00311A50(void* self);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void func_0019BFE8(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* self, int a1);
+extern void* D_004A28A8;
+extern char D_004607E8[];
+
+extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004607E8), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    char* r = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+    *(int*)(r + 0xC2C) = 0x11;
+    *(int*)(r + 0xCCC) = 0;
+    int ok = *(unsigned int*)r < 10 && *(int*)(r + 0xCB8) != 0 && *(int*)(r + 0xCB4) != 0;
+    if (ok) {
+        void* anim = *(void**)(r + 0xC);
+        if (anim != 0) {
+            func_00311A50(anim);
+            cRiderAnimBase_play(anim, 0x1B2, 0, -1.0f);
+        }
+    }
+    *(int*)((char*)self + 0xAA4) = 0;
+    *(int*)((char*)self + 0xAAC) = 0;
+    *(float*)((char*)self + 0xAA8) = -1.0f;
+    func_0019BFE8(self);
+    func_0028F140(func_0028B180(), 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199350);
@@ -97,7 +181,58 @@ extern "C" void func_00199870(void* self, void* widget, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onUpdate);
+#ifdef SKIP_ASM
+struct cList;
+struct sEquipTable;
+int GetHashValue32(char* str);
+void* cList_first(cList* list);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0039E510(void* self);
+extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+extern "C" void func_0019A9B8(void* self);
+extern "C" void func_0019A638(void* self);
+extern "C" void func_0019BFE8(void* self);
+extern "C" void* func_001A0548(void* self, int a1);
+extern void* D_004A28A8;
+extern char D_004608A0[];
+
+struct sVEntryK199938 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cFEStateCharEquip_onUpdate(void* self)
+{
+    func_0039E510(self);
+    if (*(int*)((char*)self + 0xA60) == 0
+        && func_0019E238((sEquipTable*)(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+                         *(int*)((char*)self + 0xA64))) {
+        *(int*)((char*)self + 0xA60) = 1;
+        func_0019A9B8(self);
+    }
+    void* screen = cList_first((cList*)((char*)self + 0x24));
+    char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004608A0));
+    if (obj != 0) {
+        char* r = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+        int on = 0;
+        int mode1 = *(int*)((char*)self + 0xC8) == 1;
+        if (mode1) {
+            if (*(int*)((char*)self + 0xA6C) >= 0 || *(int*)((char*)self + 0x95C) > 0)
+                on = 1;
+        } else {
+            on = *(int*)(r + 0xCC8);
+            on ^= 1;
+        }
+        sVEntryK199938* vt = *(sVEntryK199938**)(obj + 8);
+        vt[9].fn(obj + vt[9].delta, on);
+    }
+    func_0019A638(self);
+    func_0019BFE8(self);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199A38);
 
@@ -251,7 +386,56 @@ extern "C" void func_0019A498(void* self)
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A4E8);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A638);
+#ifdef SKIP_ASM
+struct sEquipTable;
+struct sEquipTable_DC20;
+extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
+extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+// PORT: func_0019E2B0 returns a pointer through int (the unit defines it as int).
+extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
+extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
+extern "C" void func_0019A9B8(void* self);
+extern void* D_004A28A8;
+extern void* D_004A289C;
+extern char D_004A1960[];
+
+struct sVEntryK19A638 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, char*, int, int, int);
+};
+
+extern "C" void func_0019A638(void* self)
+{
+    int mode1 = *(int*)((char*)self + 0xC8) == 1;
+    if (!mode1)
+        return;
+    if (*(int*)((char*)self + 0x95C) > 0) {
+        if (--*(int*)((char*)self + 0x95C) == 0) {
+            *(int*)((char*)self + 0xA6C) = func_0019DA10(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70,
+                                                         *(int*)((char*)self + 0xBC), (char*)self + 0x960, 9, 1, 0);
+            *(int*)((char*)self + 0x95C) = -1;
+        }
+    } else if (*(int*)((char*)self + 0xA6C) >= 0) {
+        char* tbl = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+        if (func_0019E238((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C))) {
+            char* e = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
+            if (e != 0) {
+                char* g = (char*)D_004A289C;
+                sVEntryK19A638* vt = *(sVEntryK19A638**)(g + 0x10D8);
+                *(int*)((char*)self + 0xA70) = vt[46].fn(g + vt[46].delta, e + *(int*)(e + 0x14), D_004A1960, 0, 1, -1);
+            } else {
+                *(int*)((char*)self + 0xA70) = -1;
+            }
+            func_0019DC20((sEquipTable_DC20*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
+            *(int*)((char*)self + 0xA6C) = -1;
+            func_0019A9B8(self);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A798);
 
@@ -276,7 +460,56 @@ extern "C" void func_0019A9B8(void* self)
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AB78);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+// PORT: the unit declares func_00198AF0(void*), but it formats an int price; bind an int view.
+extern "C" const char* func_00198AF0_price(int price) __asm__("func_00198AF0");
+
+struct sVEntryK19AB78 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void showK19AB78(void* o, int on)
+{
+    sVEntryK19AB78* vt = *(sVEntryK19AB78**)((char*)o + 8);
+    vt[9].fn((char*)o + vt[9].delta, on);
+}
+
+extern "C" void func_0019AB78(void* self)
+{
+    char* menu = *(char**)((char*)self + 0x5C);
+    if (menu == 0)
+        return;
+    int sel = *(unsigned char*)(menu + 0x95);
+    char* item = 0;
+    if (sel >= 0 && sel < *(int*)((char*)self + 0x958))
+        item = *(char**)((char*)self + (sel << 2) + 0x124);
+    if (*(void**)((char*)self + 0x88) != 0) {
+        showK19AB78(*(void**)((char*)self + 0x88), 0);
+        if (item != 0 && *(int*)((char*)self + 0xA70) >= 0) {
+            char* o = *(char**)((char*)self + 0x88);
+            *(int*)(o + 0x78) = *(int*)((char*)self + 0xA70);
+            *(int*)(o + 0x7C) = 0;
+            showK19AB78(*(void**)((char*)self + 0x88), 1);
+        }
+    }
+    if (*(void**)((char*)self + 0x68) != 0) {
+        showK19AB78(*(void**)((char*)self + 0x68), 0);
+        if (item != 0 && !(*(int*)(item + 0x34) & 0x20)) {
+            int price = *(short*)(item + 0xE);
+            if (price > 0)
+                price *= 10;
+            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x68), func_00198AF0_price(price));
+            showK19AB78(*(void**)((char*)self + 0x68), 1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
@@ -490,7 +723,78 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019B618);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B7E0);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BA60);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+
+struct sVEntryK19BA60 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void showK19BA60(void* o, int on)
+{
+    sVEntryK19BA60* vt = *(sVEntryK19BA60**)((char*)o + 8);
+    vt[9].fn((char*)o + vt[9].delta, on);
+}
+
+struct sCharEquipK19BA60 {
+    char pad_0x0[0x5C];
+    char* menu;             // 0x5C
+    char pad_0x60[0x8C - 0x60];
+    cUIText* texts[6];      // 0x8C
+    char* icons[6];         // 0xA4
+    int bank;               // 0xBC
+    int money;              // 0xC0
+    char pad_0xC4[0x124 - 0xC4];
+    char* items[1];         // 0x124
+};
+
+extern "C" void func_0019BA60(void* p, int i)
+{
+    sCharEquipK19BA60* self = (sCharEquipK19BA60*)p;
+    char* menu = self->menu;
+    int top = 0;
+    if (menu != 0)
+        top = *(unsigned char*)(menu + 0x98);
+    char* item = self->items[top + i];
+    cUIText* text = self->texts[i];
+    char* icon = self->icons[i];
+    int tex;
+    if (*(int*)(item + 0x34) & 0x20) {
+        tex = *(int*)((char*)self + 0xAA0);
+    } else {
+        int price = *(short*)(item + 0xE);
+        if (price > 0)
+            price *= 10;
+        if (self->money < price)
+            tex = *(int*)((char*)self + 0xA94);
+        else
+            tex = *(int*)((char*)self + 0xA90);
+    }
+    if (text != 0) {
+        if (*(int*)(item + 0x34) & 0x20)
+            cUIText_setUnicodeStringByID(text, GetHashValue32(*(char**)(item + 0x14)));
+        else
+            cUIText_setAsciiString(text, *(char**)(item + 0x14));
+        showK19BA60(text, 1);
+    }
+    if (icon != 0) {
+        if (tex != 0) {
+            showK19BA60(icon, 1);
+            *(int*)(icon + 0x7C) = tex;
+            *(int*)(icon + 0x78) = -1;
+        } else {
+            showK19BA60(icon, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BBA0);
@@ -581,7 +885,56 @@ extern "C" void func_0019BC90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BD48);
+#ifdef SKIP_ASM
+extern int D_004A18D8;
+extern char D_004C66E8[];
+extern char D_004C66F8[];
+
+struct sVec3K19BD48 {
+    float x, y, z;
+    sVec3K19BD48(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+struct sVEntryK19BD48 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sVEntryIK19BD48 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0019BD48(void* self, int delta)
+{
+    if (*(void**)((char*)self + 0x74) == 0)
+        return;
+    float t = (float)(*(int*)((char*)self + 0xC4) + delta - 1500) / (float)(D_004A18D8 - 1500);
+    if (t > 1.0f)
+        t = 1.0f;
+    else if (t < 0.0f)
+        t = 0.0f;
+    if (D_004A18D8 < *(int*)((char*)self + 0xC4) + delta) {
+        char* o = *(char**)((char*)self + 0x74);
+        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(o + 8);
+        vt[11].fn(o + vt[11].delta, D_004C66E8);
+    } else {
+        char* o = *(char**)((char*)self + 0x74);
+        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(o + 8);
+        vt[11].fn(o + vt[11].delta, D_004C66F8);
+    }
+    {
+        char* o = *(char**)((char*)self + 0x74);
+        sVEntryIK19BD48* vt = *(sVEntryIK19BD48**)(o + 8);
+        vt[9].fn(o + vt[9].delta, 1);
+    }
+    *(sVec3K19BD48*)(*(char**)((char*)self + 0x74) + 0x50) = sVec3K19BD48(1.0f, -t, 1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BE80);
@@ -600,7 +953,55 @@ extern "C" void func_0019BE80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BEE8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" int func_0014AFB0(void* self, int a1, int a2, int id, int locked);
+extern "C" void func_0014AEA8(void* self, int a1, int a2);
+
+struct sItemK19BEE8 {
+    short id;
+    unsigned short flags;
+};
+struct sItemListK19BEE8 {
+    char pad_0x0[0x288];
+    short* map;                 // 0x288
+    int count;                  // 0x28C
+    sItemK19BEE8 items[1];      // 0x290
+};
+
+static inline sItemK19BEE8* getItemK19BEE8(sItemListK19BEE8* l, int id)
+{
+    int idx = l->map[id];
+    if (idx >= 0)
+        return &l->items[idx];
+    return 0;
+}
+
+extern "C" int func_0019BEE8(void* self)
+{
+    if (*(int*)((char*)self + 0x958) <= 0)
+        return 0;
+    char* item = *(char**)((char*)self + (*(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95) << 2) + 0x124);
+    if (!(*(int*)(item + 0x34) & 4))
+        return 0;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+    sItemListK19BEE8* list = (sItemListK19BEE8*)func_0014AD28(iface, *(signed char*)((char*)self + 0x44),
+                                                              *(int*)((char*)self + 0xBC));
+    sItemK19BEE8* e = getItemK19BEE8(list, *(short*)(item + 4));
+    int mask = 4;
+    if (func_0014AFB0(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC), *(short*)(item + 4),
+                      (e->flags & mask) == 0)) {
+        func_0014AEA8(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC));
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
 
@@ -685,7 +1086,56 @@ extern "C" int func_0019C920(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C938);
+#ifdef SKIP_ASM
+struct sNodeK19C938 {
+    int key;
+    short f4;
+    short f6;
+    short f8;
+    short fA;
+    short prev;   // 0xC
+    short next;   // 0xE
+};
+
+extern "C" void* func_0019C880(void* self);
+extern "C" void* func_0019C8F8(void* self, void* item);
+// PORT: func_0019C920 takes the node pointer as an int.
+extern "C" int func_0019C920(void* self, int a1);
+
+extern "C" void* func_0019C938(void* self, int hi, int lo, int create)
+{
+    int key = (hi << 16) | lo;
+    int b = key % 400;
+    sNodeK19C938* prev = 0;
+    sNodeK19C938* n = *(sNodeK19C938**)((char*)self + (b << 2) + 0x1900);
+    while (*(void**)((char*)self + 0x1F40) != 0 || n != 0) {
+        if (n == 0) {
+            if (create) {
+                n = (sNodeK19C938*)func_0019C880(self);
+                n->prev = func_0019C920(self, (int)prev);
+                if (prev != 0) {
+                    n->prev = func_0019C920(self, (int)prev);
+                    prev->next = func_0019C920(self, (int)n);
+                } else {
+                    n->prev = -1;
+                    *(sNodeK19C938**)((char*)self + (b << 2) + 0x1900) = n;
+                }
+                n->next = -1;
+            }
+            break;
+        }
+        if (n->key == key)
+            break;
+        prev = n;
+        n = (sNodeK19C938*)func_0019C8F8(self, prev);
+    }
+    if (n != 0)
+        n->key = key;
+    return n;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CA70);
@@ -990,7 +1440,60 @@ extern "C" void func_0019CF40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D000);
+#ifdef SKIP_ASM
+struct sEquipTable_DC20;
+struct sEquipSlot_DC20;
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* ptr);
+extern "C" int func_003B4818(void* data);
+extern "C" void func_003B47F8(void* src, void* dst);
+extern "C" void func_0019D578(sEquipTable_DC20* self, int bank, int size);
+extern "C" void func_0019D738(sEquipTable_DC20* self, int bank, int size);
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern char D_004609D8[];
+extern char D_00538B00[];
+
+struct sSlotK19D000 {
+    int state;
+    char name[0x100];
+    void* data;     // 0x104
+    int handle;     // 0x108
+    int pending;    // 0x10C
+    int f110;
+    int timer;      // 0x114
+    int size;       // 0x118
+};
+
+extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* p)
+{
+    sSlotK19D000* slot = (sSlotK19D000*)p;
+    if (slot == 0)
+        return;
+    if (slot->data == 0)
+        return;
+    int size = func_003B4818(slot->data);
+    if (size <= 0)
+        return;
+    func_0019D578(self, bank, size);
+    void* buf = operator_new_tag(size, D_004609D8, 0x60000000, 0);
+    while (buf == 0) {
+        MUTEX_lock(D_00538B00);
+        MUTEX_unlock(D_00538B00);
+        func_0019D738(self, bank, size);
+        buf = operator_new_tag(size, D_004609D8, 0x60000000, 0);
+    }
+    func_003B47F8(slot->data, buf);
+    if (slot->data != 0)
+        cMemMan_free(slot->data);
+    slot->data = buf;
+    *(int*)((char*)self + 0xB4000) += size - slot->size;
+    slot->size = size;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D140);
 
@@ -1163,9 +1666,81 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DD10);
+#ifdef SKIP_ASM
+extern void* D_004A196C;
+extern "C" int func_0041AA88(const char* a, const char* b);
 
+struct sSlotK19DD10 {
+    int state;
+    char name[0x10C];
+    int type;           // 0x110
+    int f114;
+    int f118;
+    int f11C;           // 0x11C
+};
+struct sRowK19DD10 {
+    sSlotK19DD10 slots[0x100];
+};
+
+extern "C" int func_0019DD10(const int* a, const int* b)
+{
+    int ka = *a;
+    sRowK19DD10* row = (sRowK19DD10*)D_004A196C + (ka >> 16);
+    sSlotK19DD10* sa = &row->slots[ka & 0xFFFF];
+    sSlotK19DD10* sb = &row->slots[*b & 0xFFFF];
+    if (sa->state == 3 && sa->type == 8 && sa->f11C == 0) {
+        if (sb->state == 3 && sb->type == 8 && sb->f11C == 0)
+            return func_0041AA88(sa->name, sb->name);
+        return -1;
+    }
+    if (sb->state == 3 && sb->type == 8 && sb->f11C == 0) {
+        if (sa->state == 3 && sa->type == 8 && sa->f11C == 0)
+            return func_0041AA88(sa->name, sb->name);
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DE18);
+#ifdef SKIP_ASM
+extern void* D_004A196C;
+extern "C" int func_0041AA88(const char* a, const char* b);
+
+struct sSlotK19DE18 {
+    int state;
+    char name[0x10C];
+    int type;           // 0x110
+    int f114;
+    int f118;
+    int f11C;           // 0x11C
+};
+struct sRowK19DE18 {
+    sSlotK19DE18 slots[0x100];
+};
+
+extern "C" int func_0019DE18(const int* a, const int* b)
+{
+    int ka = *a;
+    sRowK19DE18* row = (sRowK19DE18*)D_004A196C + (ka >> 16);
+    sSlotK19DE18* sa = &row->slots[ka & 0xFFFF];
+    sSlotK19DE18* sb = &row->slots[*b & 0xFFFF];
+    if (sa->state == 3 && sa->type == 0xB && sa->f11C == 0) {
+        if (sb->state == 3 && sb->type == 0xB && sb->f11C == 0)
+            return func_0041AA88(sa->name, sb->name);
+        return -1;
+    }
+    if (sb->state == 3 && sb->type == 0xB && sb->f11C == 0) {
+        if (sa->state == 3 && sa->type == 0xB && sa->f11C == 0)
+            return func_0041AA88(sa->name, sb->name);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DF20);
 

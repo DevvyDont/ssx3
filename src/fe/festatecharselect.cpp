@@ -85,7 +85,43 @@ extern "C" int func_001812A8(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00181308);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_00181EF0(void* self);
+extern "C" void func_0039E4C0(void* self, int a1);
+extern void* D_004A28A8;
+extern signed char D_00440F68[];
+extern char D_004A1398[];
+
+extern "C" void func_00181308(void* self, int a1)
+{
+    int i = 0;
+    int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    for (; i < 10; i++) {
+        if (D_00440F68[i] == id) {
+            void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1398));
+            if (menu != 0)
+                cUIMenu_setSelectedByIndex(menu, i);
+            break;
+        }
+    }
+    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
+    char* r = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+    *(int*)(r + 0xCCC) = 0;
+    func_00181EF0(self);
+    func_0039E4C0(self, a1);
+}
+#endif
 
 extern "C" void* func_0039E6B8(void* self);
 
