@@ -17,21 +17,93 @@ struct sBEInterface {
 extern sBEInterface* D_005308A8[];
 extern int D_004A11F4;
 
-//95.88%
+//100%
 INCLUDE_ASM("be/be", cBE_getInterface__Fv);
 #ifdef SKIP_ASM
-void* cBE_getInterface()
+class cBEInterfaceV_getInterface
 {
-    sBEInterface* iface = D_005308A8[D_004A11F4];
-    return iface->vtable->fn((char*)iface + iface->vtable->field_0x8);
+public:
+    char pad_0x00[0x4];
+    virtual void* getInterface(int kind);
+};
+
+// PORT: callers pass (be, kind); the mangled name __Fv is a guess. The kind is forwarded
+// to the current state's virtual getInterface.
+void* cBE_getInterface_impl(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+void* cBE_getInterface_impl(void* be, int kind)
+{
+    return ((cBEInterfaceV_getInterface*)D_005308A8[D_004A11F4])->getInterface(kind);
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/be", func_0014DD98);
+#ifdef SKIP_ASM
+class cBEStateV_0014DD98
+{
+public:
+    char pad_0x00[0x4];
+    virtual void v1();
+    virtual void shutdown();
+};
+extern void* D_004A11F8;
+extern int* D_004A11EC;
+extern int D_004A11F0;
+extern "C" void func_001499A8(void* p, int a);
+void operator_delete(int* ptr);
 
+extern "C" void func_0014DD98(void)
+{
+    if (D_004A11F8)
+        func_001499A8(D_004A11F8, 3);
+    ((cBEStateV_0014DD98*)D_005308A8[0])->shutdown();
+    ((cBEStateV_0014DD98*)D_005308A8[1])->shutdown();
+    ((cBEStateV_0014DD98*)D_005308A8[2])->shutdown();
+    operator_delete(D_004A11EC);
+    D_004A11EC = 0;
+    D_004A11F0 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/be", func_0014DE28);
+#ifdef SKIP_ASM
+extern void* D_004A11F8;
+extern "C" void func_00149A88(void* p, char c);
+extern "C" void func_0014FC40(char c);
 
+extern "C" void func_0014DE28(void* self, char c)
+{
+    if (D_004A11F8)
+        func_00149A88(D_004A11F8, c);
+    func_0014FC40(c);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/be", cBE_setState);
+#ifdef SKIP_ASM
+class cBEStateV_setState
+{
+public:
+    char pad_0x00[0x4];
+    virtual void v1();
+    virtual void v2();
+    virtual void leave();
+    virtual void enter();
+};
+
+extern "C" void cBE_setState(int state)
+{
+    if (D_004A11F4 != state)
+    {
+        ((cBEStateV_setState*)D_005308A8[D_004A11F4])->leave();
+        D_004A11F4 = state;
+        ((cBEStateV_setState*)D_005308A8[state])->enter();
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/be", func_0014DF08);

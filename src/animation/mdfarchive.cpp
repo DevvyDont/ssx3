@@ -40,7 +40,16 @@ extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/mdfarchive", func_00314D60);
+#ifdef SKIP_ASM
+extern unsigned int* D_004A3E78;
+
+extern "C" int func_00314D60(int* a, int* b)
+{
+    return D_004A3E78[*a] < D_004A3E78[*b] ? -1 : 1;
+}
+#endif
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D98);
 
@@ -122,5 +131,17 @@ extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/mdfarchive", func_00314FE8);
+#ifdef SKIP_ASM
+extern void* D_004A5950;
+
+extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
+{
+    for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
+    {
+        func_00314EF0(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), D_004A5950);
+    }
+}
+#endif
 

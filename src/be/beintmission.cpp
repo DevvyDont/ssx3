@@ -220,9 +220,69 @@ extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
 
 INCLUDE_ASM("be/beintmission", func_00153B00);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153C88);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMissionDefView_00153C88
+{
+    int id;
+    int f4;
+    char pad_0x08[0x1C];
+};
+extern sMissionDefView_00153C88 D_0043EE10_v00153C88[] __asm__("D_0043EE10");
+extern void* D_004A28A8;
+extern "C" int func_00154240(void* self, int id);
 
+class cMissionObj_00153C88
+{
+public:
+    char pad_0x00[0x4];
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4(int a);
+};
+
+extern "C" void func_00153C88(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    ((cMissionObj_00153C88*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153C88[i].f4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintmission", func_00153D28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMissionDefView_00153D28
+{
+    int id;
+    int f4;
+    int f8;
+    int fC;
+    char pad_0x10[0x14];
+};
+extern sMissionDefView_00153D28 D_0043EE10_v00153D28[] __asm__("D_0043EE10");
+extern void* D_004A28A8;
+extern "C" int func_00154240(void* self, int id);
+
+class cMissionObj_00153D28
+{
+public:
+    char pad_0x00[0x4];
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4(int a);
+};
+
+extern "C" void func_00153D28(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    ((cMissionObj_00153D28*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153D28[i].fC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00153D78);

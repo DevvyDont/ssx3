@@ -28,9 +28,79 @@ void* cBEPostRaceState_getState(void* self)
 
 INCLUDE_ASM("be/beprepoststate", func_00156390);
 
+//100%
 INCLUDE_ASM("be/beprepoststate", func_001564B0);
+#ifdef SKIP_ASM
+extern void* D_004A11C0;
+extern void* D_004A1208;
+extern void* D_004A11C4;
+extern void* D_004A120C;
+extern void* D_004A121C;
+extern void* D_004A1204;
+extern void* D_004A11C8;
+extern void* D_004A1210;
+extern void* D_004A1214;
+extern void* D_004A124C;
+extern void* D_004A1264;
 
+struct sBEIface_001564B0
+{
+    char pad_0x00[8];
+    int active;
+};
+
+extern "C" void func_001564B0(void)
+{
+    ((sBEIface_001564B0*)D_004A11C0)->active = 0;
+    ((sBEIface_001564B0*)D_004A1208)->active = 0;
+    ((sBEIface_001564B0*)D_004A11C4)->active = 0;
+    ((sBEIface_001564B0*)D_004A120C)->active = 0;
+    ((sBEIface_001564B0*)D_004A121C)->active = 0;
+    ((sBEIface_001564B0*)D_004A1204)->active = 0;
+    ((sBEIface_001564B0*)D_004A11C8)->active = 0;
+    ((sBEIface_001564B0*)D_004A1210)->active = 0;
+    ((sBEIface_001564B0*)D_004A1214)->active = 0;
+    ((sBEIface_001564B0*)D_004A124C)->active = 0;
+    ((sBEIface_001564B0*)D_004A1264)->active = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beprepoststate", func_00156510);
+#ifdef SKIP_ASM
+extern void* D_004A11C0;
+extern void* D_004A1208;
+extern void* D_004A11C4;
+extern void* D_004A120C;
+extern void* D_004A121C;
+extern void* D_004A1204;
+extern void* D_004A11C8;
+extern void* D_004A1210;
+extern void* D_004A1214;
+extern void* D_004A124C;
+extern void* D_004A1264;
+
+struct sBEIface_00156510
+{
+    char pad_0x00[8];
+    int active;
+};
+
+extern "C" void func_00156510(void)
+{
+    ((sBEIface_00156510*)D_004A11C0)->active = 1;
+    ((sBEIface_00156510*)D_004A1208)->active = 1;
+    ((sBEIface_00156510*)D_004A11C4)->active = 1;
+    ((sBEIface_00156510*)D_004A120C)->active = 1;
+    ((sBEIface_00156510*)D_004A121C)->active = 1;
+    ((sBEIface_00156510*)D_004A1204)->active = 1;
+    ((sBEIface_00156510*)D_004A11C8)->active = 1;
+    ((sBEIface_00156510*)D_004A1210)->active = 1;
+    ((sBEIface_00156510*)D_004A1214)->active = 1;
+    ((sBEIface_00156510*)D_004A124C)->active = 1;
+    ((sBEIface_00156510*)D_004A1264)->active = 1;
+}
+#endif
 
 extern void* D_0045AC18[16];
 extern void* D_004A1258;
@@ -52,9 +122,83 @@ void* cBEPreRaceState_getState(void* self)
 
 INCLUDE_ASM("be/beprepoststate", func_001565C8);
 
+//100%
 INCLUDE_ASM("be/beprepoststate", func_001566E8);
+#ifdef SKIP_ASM
+extern void* D_004A11B4;
+extern void* D_004A11C0;
+extern void* D_004A1208;
+extern void* D_004A11C4;
+extern void* D_004A120C;
+extern void* D_004A121C;
+extern void* D_004A1204;
+extern void* D_004A11C8;
+extern void* D_004A1210;
+extern void* D_004A1214;
+extern void* D_004A124C;
+extern void* D_004A1264;
 
+struct sBEIface_001566E8
+{
+    char pad_0x00[8];
+    int active;
+};
+
+extern "C" void func_001566E8(void)
+{
+    ((sBEIface_001566E8*)D_004A11B4)->active = 0;
+    ((sBEIface_001566E8*)D_004A11C0)->active = 0;
+    ((sBEIface_001566E8*)D_004A1208)->active = 0;
+    ((sBEIface_001566E8*)D_004A11C4)->active = 0;
+    ((sBEIface_001566E8*)D_004A120C)->active = 0;
+    ((sBEIface_001566E8*)D_004A121C)->active = 0;
+    ((sBEIface_001566E8*)D_004A1204)->active = 0;
+    ((sBEIface_001566E8*)D_004A11C8)->active = 0;
+    ((sBEIface_001566E8*)D_004A1210)->active = 0;
+    ((sBEIface_001566E8*)D_004A1214)->active = 0;
+    ((sBEIface_001566E8*)D_004A124C)->active = 0;
+    ((sBEIface_001566E8*)D_004A1264)->active = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beprepoststate", func_00156750);
+#ifdef SKIP_ASM
+extern void* D_004A11B4;
+extern void* D_004A11C0;
+extern void* D_004A1208;
+extern void* D_004A11C4;
+extern void* D_004A120C;
+extern void* D_004A121C;
+extern void* D_004A1204;
+extern void* D_004A11C8;
+extern void* D_004A1210;
+extern void* D_004A1214;
+extern void* D_004A124C;
+extern void* D_004A1264;
+
+struct sBEIface_00156750
+{
+    char pad_0x00[8];
+    int active;
+};
+
+extern "C" void func_00156750(void)
+{
+    ((sBEIface_00156750*)D_004A11B4)->active = 1;
+    ((sBEIface_00156750*)D_004A11C0)->active = 1;
+    ((sBEIface_00156750*)D_004A1208)->active = 1;
+    ((sBEIface_00156750*)D_004A11C4)->active = 1;
+    ((sBEIface_00156750*)D_004A120C)->active = 1;
+    ((sBEIface_00156750*)D_004A121C)->active = 1;
+    ((sBEIface_00156750*)D_004A1204)->active = 1;
+    ((sBEIface_00156750*)D_004A11C8)->active = 1;
+    ((sBEIface_00156750*)D_004A1210)->active = 1;
+    ((sBEIface_00156750*)D_004A1214)->active = 1;
+    ((sBEIface_00156750*)D_004A124C)->active = 1;
+    ((sBEIface_00156750*)D_004A1264)->active = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beprepoststate", func_001567B8);
@@ -86,7 +230,30 @@ extern "C" void func_00156810(void* self)
 
 INCLUDE_ASM("be/beprepoststate", func_00156858);
 
+//100%
 INCLUDE_ASM("be/beprepoststate", func_00156950);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int n);
+extern signed char D_004A125C;
+extern char D_004C4090[];
 
+extern "C" void func_00156950(char* base, int idx)
+{
+    D_004A125C = idx;
+    func_003E6574(D_004C4090, base + idx * 0xF88, 0xF88);
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beprepoststate", func_00156988);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574(void* dst, void* src, int n);
+extern signed char D_004A125C;
+extern char D_004C4090[];
+
+extern "C" void func_00156988(char* base)
+{
+    func_003E6574(base + D_004A125C * 0xF88, D_004C4090, 0xF88);
+}
+#endif
 

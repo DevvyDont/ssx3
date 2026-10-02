@@ -249,11 +249,35 @@ float func_00117900(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117908);
+#ifdef SKIP_ASM
+extern "C" int func_00117908(void* self)
+{
+    int v = (int)(*(float*)((char*)self + 0x1C) * 10000.0f + 5.0f);
+    return v - v % 10;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117948);
+#ifdef SKIP_ASM
+extern "C" int func_00117948(void* self)
+{
+    int v = (int)(*(float*)((char*)self + 0x1C4) * *(float*)((char*)self + 0x14) * 10000.0f + 5.0f);
+    return v - v % 10;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117990);
+#ifdef SKIP_ASM
+extern "C" int func_00117990(void* self)
+{
+    int v = (int)(*(float*)((char*)self + 0x1C4) * *(float*)((char*)self + 0x18) * *(float*)((char*)self + 0x14) * 10000.0f + 5.0f);
+    return v - v % 10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_001179E0);
@@ -389,7 +413,23 @@ INCLUDE_ASM("ai/ridermetrix", func_00117C28);
 
 INCLUDE_ASM("ai/ridermetrix", func_00117FE0);
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00118FF8);
+#ifdef SKIP_ASM
+struct sTrickId;
+extern "C" void gGenTrickName(char* buf, sTrickId* id, int size);
+extern "C" void func_00117AE8(void* self, int a, const char* b, float c, int d);
+extern "C" void func_00309918(void* self, void* d);
+extern void* D_004A3DD8;
+
+extern "C" void func_00118FF8(void* self, sTrickId* id, int repeat)
+{
+    char buf[0x100];
+    gGenTrickName(buf, id, 0xFF);
+    func_00117AE8(self, 0, buf, 3.0f, repeat);
+    func_00309918(D_004A3DD8, id);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00119068);
@@ -514,7 +554,22 @@ extern "C" int func_00119310(void* self, int points)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119368);
+#ifdef SKIP_ASM
+extern "C" int func_0011A7A8(void* self);
+
+extern "C" float func_00119368(void* self, int a1)
+{
+    *(int*)((char*)self + 0x1A4) += func_0011A7A8(self);
+    func_00117838(self);
+    func_001175F8(self);
+    *(int*)((char*)self + 0x120) += 1;
+    if (!a1)
+        return *(float*)(*(char**)((char*)self + 0x1AC) + 0x2F8) * -0.10000000149011612f;
+    return *(float*)(*(char**)((char*)self + 0x1AC) + 0x2F8) * -0.699999988079071f;
+}
+#endif
 
 extern "C" void func_00117718(void*);
 
@@ -626,9 +681,52 @@ extern "C" float func_001197D8(void* p, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119898);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (float absolute value).
+static inline float metrixAbs_00119898(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
 
+// PORT: g++ `>?` (max) operator. Prototype mismatch: the unit declares
+// `void* func_00119898(void*)` for an existing caller, but the body takes a float in $f12.
+float func_00119898_impl(void* self, float x) __asm__("func_00119898");
+
+float func_00119898_impl(void* self, float x)
+{
+    *(float*)((char*)self + 0x14) -= metrixAbs_00119898(*(float*)((char*)self + 0x34)) * 0.015915492549538612f;
+    *(float*)((char*)self + 0x34) = x;
+    *(float*)((char*)self + 0x14) += metrixAbs_00119898(x) * 0.015915492549538612f;
+    *(float*)((char*)self + 0x14) = *(float*)((char*)self + 0x14) >? 0.0f;
+    return 0.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_001198D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (float absolute value).
+static inline float metrixAbs_001198D8(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `>?` (max) operator.
+extern "C" float func_001198D8(void* self, float x)
+{
+    *(float*)((char*)self + 0x14) -= metrixAbs_001198D8(*(float*)((char*)self + 0x38)) * 0.028647884726524353f;
+    *(float*)((char*)self + 0x38) = x;
+    *(float*)((char*)self + 0x14) += metrixAbs_001198D8(x) * 0.028647884726524353f;
+    *(float*)((char*)self + 0x14) = *(float*)((char*)self + 0x14) >? 0.0f;
+    return 0.0f;
+}
+#endif
 
 extern "C" void* func_00119898(void*);
 
@@ -711,7 +809,18 @@ extern "C" float func_00119A38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119AD8);
+#ifdef SKIP_ASM
+// PORT: prototype mismatch (see func_00119898).
+float func_00119898_impl(void* self, float x) __asm__("func_00119898");
+
+extern "C" float func_00119AD8(void* self, int a1)
+{
+    *(int*)((char*)self + 0x28) = a1;
+    return func_00119898_impl(self, *(float*)((char*)self + 0x34) + 3.1415927410125732f);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00119B08);
@@ -740,9 +849,36 @@ extern "C" float func_00119B08(void* self, int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
+#ifdef SKIP_ASM
+extern "C" float func_00119BB0(void* self, int a1)
+{
+    float r;
+    if (a1)
+    {
+        func_00117B88(self, 0x21, 0, 0, 1.5f);
+        r = 0.10000000149011612f;
+    }
+    else
+        r = 0.0f;
+    return r;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00119BF0);
+#ifdef SKIP_ASM
+extern "C" float func_00119BF0(void* self, int a1)
+{
+    *(int*)((char*)self + 0x7C) = a1;
+    *(float*)((char*)self + 0x30) = -1.0f;
+    *(int*)((char*)self + 0x78) = 0;
+    *(float*)((char*)self + 0x14) += 0.04999999701976776f;
+    func_001176F8(self);
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00119C38);

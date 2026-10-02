@@ -209,7 +209,29 @@ INCLUDE_ASM("animation/rideranimbase", func_00312598);
 
 INCLUDE_ASM("animation/rideranimbase", func_00312660);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312790);
+#ifdef SKIP_ASM
+struct sVEntry00312790 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+extern char* D_004A3E7C;
+extern char** D_004A3DF8;
+
+extern "C" float func_00312790(char* self, int a1)
+{
+    sVEntry00312790* vt = *(sVEntry00312790**)(self + 0x58);
+    int id = vt[4].fn(self + vt[4].delta, a1);
+    if (id == 0x207)
+        return 0.0f;
+    unsigned int h = *(unsigned int*)(id * 4 + D_004A3E7C + 0x1030);
+    char* clip = *(char**)((char*)D_004A3DF8 + ((h & 0xFF) << 2));
+    char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
+    return (*(unsigned short*)(q + 0xC) - 1) * 0.03333333507180214f;
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312820);
 

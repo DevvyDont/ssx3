@@ -129,7 +129,31 @@ extern "C" int cBELibrary_getScoreType(int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014ABE0);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0045A408[];
+extern void* D_0045AE88[16];
+extern void* D_004A11C8;
+
+struct cBELibraryInterface_0014ABE0 {
+    char pad_0x00[8];
+    int field_0x8;
+    void* vtable;
+};
+
+extern "C" void* func_0014ABE0(void)
+{
+    if (D_004A11C8 == 0) {
+        cBELibraryInterface_0014ABE0* mem = (cBELibraryInterface_0014ABE0*)cMemMan_alloc(0x10, D_0045A408, 0, 0);
+        mem->field_0x8 = 0;
+        mem->vtable = D_0045AE88;
+        D_004A11C8 = mem;
+    }
+    return D_004A11C8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AC30);

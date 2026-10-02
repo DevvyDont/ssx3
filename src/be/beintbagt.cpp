@@ -18,7 +18,7 @@ struct cBEBAGTInterface {
 };
 extern void* D_004A1210;
 
-//83.17% - delay-slot scheduling of the vtable store vs. the vtable-fn call not reproduced
+//100%
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
 #ifdef SKIP_ASM
 void* cBEBAGTInterface_getThis()
@@ -26,8 +26,11 @@ void* cBEBAGTInterface_getThis()
     if (D_004A1210 == 0) {
         cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, D_0045A6D8, 0, 0);
         D_004A1210 = mem;
-        mem->vtable = &D_0045ACD8;
-        D_0045ACD8.fn((char*)mem + D_0045ACD8.field_0x10);
+        sVTableBAGT* vt = &D_0045ACD8;
+        short d = vt->field_0x10;
+        void (*fn)(void*) = vt->fn;
+        mem->vtable = vt;
+        fn((char*)mem + d);
         ((cBEBAGTInterface*)D_004A1210)->field_0x8 = 0;
     }
     return D_004A1210;

@@ -131,7 +131,48 @@ extern "C" void func_00313C08(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313C50);
+#ifdef SKIP_ASM
+extern void** D_004A3DF8;
+
+struct sSeqEntry_00313C50
+{
+    int anim;
+    int t;
+    float w;
+    float len;
+    float speed;
+    int active;
+    int f18;
+};
+
+struct sSeq_00313C50
+{
+    int f0;
+    sSeqEntry_00313C50 e[5];
+    char pad90[0xC4 - 0x90];
+    int dirty;
+};
+
+extern "C" void func_00313C50(void* self, int i, int anim)
+{
+    sSeq_00313C50* s = (sSeq_00313C50*)self;
+    (s->e + i)->anim = anim;
+    char* clip = *(char**)((char*)D_004A3DF8 + ((anim & 0xFF) << 2));
+    char* q = (char*)(((unsigned)anim >> 8) * 0x14 + *(int*)(clip + 0x8));
+    s->e[i].len = (*(unsigned short*)(q + 0xC) - 1) * 0.03333333507180214f;
+    if (s->e[i].active == 0)
+    {
+        s->e[i].t = 0;
+        s->e[i].w = 1.0f;
+        s->e[i].speed = 1.0f;
+        s->e[i].active = 1;
+        s->e[i].f18 = 0;
+        s->dirty = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313CF0);

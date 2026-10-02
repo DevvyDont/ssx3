@@ -12,7 +12,7 @@ struct cBEOptionInterface {
     void* vtable;
 };
 
-//92.24% - post-call register/global-reload scheduling not fully reproduced
+//100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
 #ifdef SKIP_ASM
 void* cBEOptionInterface_getThis()
@@ -21,8 +21,8 @@ void* cBEOptionInterface_getThis()
         cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, D_0045A6B0, 0, 0);
         mem->vtable = D_0045ADC8;
         D_004A120C = mem;
+        mem->field_0x8 = 0;
         func_0014F418(mem);
-        ((cBEOptionInterface*)D_004A120C)->field_0x8 = 0;
     }
     return D_004A120C;
 }
@@ -74,13 +74,91 @@ extern "C" void func_0014F418(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F458);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sOptBits_0014F458
+{
+    unsigned int a : 4;
+    unsigned int b : 4;
+    unsigned int c : 4;
+    unsigned int d : 2;
+    unsigned int e : 2;
+    unsigned int f : 1;
+    unsigned int g : 1;
+    unsigned int h : 1;
+    unsigned int rest0 : 13;
+    unsigned int w1a : 2;
+    unsigned int rest1 : 30;
+};
+extern sOptBits_0014F458 D_00535610_v0014F458[] __asm__("D_00535610");
+
+class cBEOptionInterfaceV_0014F458
+{
+public:
+    char pad_0x00[0xC];
+    virtual void apply();
+};
+
+extern "C" void func_0014F458(void* self)
+{
+    sOptBits_0014F458* o = D_00535610_v0014F458;
+    o->a = 0xA;
+    o->b = 0xA;
+    o->c = 0xA;
+    o->d = 0;
+    o->e = 0;
+    o->f = 1;
+    o->g = 1;
+    o->h = 1;
+    o->w1a = 1;
+    ((cBEOptionInterfaceV_0014F458*)D_004A120C)->apply();
+}
+#endif
 
 INCLUDE_ASM("be/beintoption", func_0014F4F8);
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F600);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sOptBits_0014F600
+{
+    unsigned int pad : 30;
+    unsigned int top : 2;
+};
+extern sOptBits_0014F600 D_00535610_v0014F600[] __asm__("D_00535610");
 
+class cBEOptionInterfaceV_0014F600
+{
+public:
+    char pad_0x00[0xC];
+    virtual void apply();
+};
+
+extern "C" void func_0014F600(void* self)
+{
+    D_00535610_v0014F600[0].top = 0;
+    ((cBEOptionInterfaceV_0014F600*)D_004A120C)->apply();
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F648);
+#ifdef SKIP_ASM
+class cBEOptionInterfaceV_0014F648
+{
+public:
+    char pad_0x00[0xC];
+    virtual void apply();
+};
+
+extern "C" void func_0014F648(void* self)
+{
+    ((cBEOptionInterfaceV_0014F648*)D_004A120C)->apply();
+}
+#endif
 
 int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
@@ -113,7 +191,29 @@ extern "C" char* func_0014F6A8(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintoption", func_0014F6E8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void func_003DCB20(char* dst, void* src);
+
+struct sVEntry_0014F6E8
+{
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+extern "C" void func_0014F6E8(void* self, int i)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_0014F6E8* vt = *(sVEntry_0014F6E8**)(obj + 0x4);
+    char* o2 = obj + vt[4].delta;
+    int h = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);
+    void* text = vt[4].fn(o2, h);
+    func_003DCB20(D_00535617[i], text);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintoption", func_0014F758);

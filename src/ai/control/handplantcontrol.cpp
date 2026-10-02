@@ -97,7 +97,18 @@ extern "C" void func_001399A8(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001399E0);
+#ifdef SKIP_ASM
+extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
+
+extern "C" void func_001399E0(void* self, int state)
+{
+    *(int*)self = state == 5;
+    char* r = *(char**)((char*)self + 0x4);
+    cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, 3333.33349609375f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139A18__FPv);
@@ -113,7 +124,25 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00139C88);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013A7B0);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013A8F8);
+#ifdef SKIP_ASM
+// PORT: cRiderAnimBase_play is declared void elsewhere; callers here match only with an int return.
+extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+
+extern "C" void func_0013A8F8(void* self, float v)
+{
+    if (v < -2222.22216796875f)
+    {
+        cRiderAnimBase_play_i(*(void**)(*(char**)((char*)self + 0x4) + 0x784), 0x41, 0, -1.0f);
+        *(int*)(*(char**)((char*)self + 0x4) + 0x2DC) = 0;
+    }
+    else
+    {
+        cRiderAnimBase_play_i(*(void**)(*(char**)((char*)self + 0x4) + 0x784), 0x40, 0, -1.0f);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013A968);
 
@@ -151,7 +180,46 @@ extern "C" void func_0013ACE8(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013AD20);
+#ifdef SKIP_ASM
+extern "C" void cRider_updateOrientationImplicit(void*);
+extern "C" void cRider_doLeanPoseAdjust(void* self, void* q);
+struct sQuadHP_0013AD20 { float x, y, z, w; } __attribute__((aligned(16)));
+
+extern "C" void func_0013AD20(void* self)
+{
+    char* s = (char*)self;
+    char* r = *(char**)(s + 0x50);
+    cRider_doLeanPoseAdjust(r, r + 0x110);
+    cRider_updateOrientationImplicit(*(void**)(s + 0x50));
+    char* a = *(char**)(s + 0x50);
+    // G1
+    *(float*)(a + 0x1F8) = 0.0f;
+    *(float*)(a + 0x1F0) = 0.0f;
+    *(float*)(a + 0x1F4) = 0.0f;
+    // E1
+    char* b = *(char**)(s + 0x50);
+    *(float*)(b + 0x210) = 0.0f;
+    *(float*)(b + 0x208) = 0.0f;
+    *(float*)(b + 0x20C) = 0.0f;
+    char* c = *(char**)(s + 0x50);
+    *(float*)(c + 0x258) = 0.0f;
+    *(float*)(c + 0x250) = 0.0f;
+    *(float*)(c + 0x254) = 0.0f;
+    *(int*)(s + 0x10) = 0;
+    *(int*)(s + 0x14) = 0;
+    *(int*)(s + 0x18) = 0;
+    *(int*)(*(char**)(s + 0x50) + 0x2DC) = 0;
+    char* d = *(char**)(s + 0x50);
+    *(float*)(d + 0x260) = 0.05000000447034836f;
+    *(int*)(d + 0x264) = 0;
+    *(int*)(s + 0x20) = 0;
+    *(int*)(s + 0x1C) = 0;
+    *(sQuadHP_0013AD20*)(s + 0x30) = *(sQuadHP_0013AD20*)(*(char**)(s + 0x50) + 0x110);
+    *(int*)(s + 0x40) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013ADC0);
 
@@ -163,7 +231,20 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013BFA8);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C140);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C5A0);
+#ifdef SKIP_ASM
+extern "C" void func_0013C5A0(void* self)
+{
+    char* a = *(char**)((char*)self + 0x50);
+    *(float*)(a + 0x25C) = *(float*)(a + 0x264) = -0.25f;
+    *(float*)(a + 0x260) = 0.0f;
+    char* b = *(char**)((char*)self + 0x50);
+    *(float*)(b + 0x264) = 1.0f;
+    *(float*)(b + 0x260) = 0.03333333507180214f;
+    *(int*)(*(char**)((char*)self + 0x50) + 0x5AC) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C5E0);
@@ -215,7 +296,28 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013D818);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F178);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F410);
+#ifdef SKIP_ASM
+extern "C" int func_001298C8();
+
+extern "C" void func_0013F410(void* self)
+{
+    char* a = *(char**)((char*)self + 0x18);
+    *(int*)(a + 0x2C4) = 0;
+    *(float*)(a + 0x2C0) = 0.05000000447034836f;
+    char* b = *(char**)((char*)self + 0x18);
+    *(float*)(b + 0x20C) = 0.05000000447034836f;
+    *(int*)(b + 0x210) = 0;
+    char* c = *(char**)((char*)self + 0x18);
+    *(float*)(c + 0x2CC) = 1.6666667461395264f;
+    *(int*)(c + 0x2D0) = 0;
+    if (*(int*)((char*)self + 0x14) == -1)
+        *(int*)((char*)self + 0x14) = func_001298C8() - 500;
+    else
+        *(int*)((char*)self + 0x14) = func_001298C8();
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F488);
 

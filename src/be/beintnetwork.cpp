@@ -222,7 +222,24 @@ extern "C" void func_0014EBF8(void* self, int idx)
 
 INCLUDE_ASM("be/beintnetwork", func_0014ECA0);
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014EDD8);
+#ifdef SKIP_ASM
+extern const char D_0045A280[];
+extern void* D_0045AD38[16];
+extern void* D_004A1208;
+
+extern "C" void* func_0014EDD8(void)
+{
+    if (D_004A1208 == 0) {
+        cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
+        mem->field_0x8 = 0;
+        mem->vtable = D_0045AD38;
+        D_004A1208 = mem;
+    }
+    return D_004A1208;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EE28);

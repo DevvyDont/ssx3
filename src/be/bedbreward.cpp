@@ -117,11 +117,44 @@ void func_0015C7D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C830);
+#ifdef SKIP_ASM
+extern int* D_004A1258;
+void operator_delete(int* ptr);
 
+extern "C" void func_0015C830(void)
+{
+    operator_delete(D_004A1258);
+    D_004A1258 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C870);
+#ifdef SKIP_ASM
+extern int* D_004A122C;
+void operator_delete(int* ptr);
 
+extern "C" void func_0015C870(void)
+{
+    operator_delete(D_004A122C);
+    D_004A122C = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C8B0);
+#ifdef SKIP_ASM
+extern int* D_004A1254;
+void operator_delete(int* ptr);
+
+extern "C" void func_0015C8B0(void)
+{
+    operator_delete(D_004A1254);
+    D_004A1254 = 0;
+}
+#endif
 
 extern "C" void* func_0015B028(int, int);
 

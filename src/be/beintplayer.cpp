@@ -789,7 +789,42 @@ INCLUDE_ASM("be/beintplayer", func_00147D20);
 
 INCLUDE_ASM("be/beintplayer", func_00147E18);
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147F78);
+#ifdef SKIP_ASM
+struct sVTablePlayer_00147F78
+{
+    char pad_0x00[0x10];
+    short delta;
+    char pad_0x12[2];
+    void (*fn)(void*);
+};
+struct cBEIface_00147F78
+{
+    char pad_0x00[8];
+    int field_0x8;
+    void* vtable;
+};
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0045A280[];
+extern sVTablePlayer_00147F78 D_0045AD68;
+extern void* D_004A11C4;
+
+extern "C" void* func_00147F78(void)
+{
+    if (D_004A11C4 == 0) {
+        cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
+        D_004A11C4 = mem;
+        sVTablePlayer_00147F78* vt = &D_0045AD68;
+        short d = vt->delta;
+        void (*fn)(void*) = vt->fn;
+        mem->vtable = vt;
+        mem->field_0x8 = 0;
+        fn((char*)mem + d);
+    }
+    return D_004A11C4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147FD8);

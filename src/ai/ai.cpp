@@ -189,7 +189,16 @@ extern "C" void func_00129768(void* self, int state)
 
 INCLUDE_ASM("ai/ai", func_001297C8);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001298C8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+
+extern "C" int func_001298C8()
+{
+    return *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x8);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 
@@ -249,7 +258,22 @@ extern "C" int func_0012A250(sAiObj12A250* self)
 
 INCLUDE_ASM("ai/ai", func_0012A340);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012A490);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" int func_0022E0E0(void* self);
+void func_0026ADA0(void* self);
+extern char D_004D33A0[];
+
+extern "C" void func_0012A490(void)
+{
+    if (func_0022E0E0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78)) < 0x16)
+    {
+        func_0026ADA0(D_004D33A0);
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012AB20);
 
@@ -482,7 +506,32 @@ extern "C" void func_0012B180(sAiObj128A48* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012B200);
+#ifdef SKIP_ASM
+extern void** D_004A3DF8;
+extern void* D_004A3E7C;
+extern "C" void func_00314FE8(void*, void*);
+extern "C" void func_00311110(void*);
+extern "C" void func_003112C8(void*, int);
+
+extern "C" void func_0012B200(void* self)
+{
+    int i;
+    for (i = 0; i < 1; i++)
+    {
+        void* p = *(void**)((char*)D_004A3DF8 + ((unsigned char)i << 2));
+        if (p != 0)
+        {
+            func_00314FE8(D_004A3E7C, p);
+            void** t = D_004A3DF8;
+            *(void**)((char*)t + ((unsigned char)i << 2)) = 0;
+            func_00311110(t);
+            func_003112C8(p, 3);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", cAI_loadAnims);
 
@@ -635,11 +684,58 @@ extern "C" void func_0012BF68(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012C028);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
 
+extern "C" int func_0012C028(void* self)
+{
+    int r = 0;
+    char* s = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    if (*(int*)s == 5)
+    {
+        r = *(int*)(*(char**)((char*)self + 0x14) + 0xB30) <= (int)(*(int*)(s + 0xC) * 0.01666666753590107f);
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012C078);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
 
+extern "C" int func_0012C078(void* self)
+{
+    if (**(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) == 5)
+        return 1;
+    if (*(float*)(*(char**)((char*)self + 0x14) + 0x470) >= 0.0f)
+        return 1;
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012C0C0);
+#ifdef SKIP_ASM
+// PORT: cRiderAnimBase_play returns a value here (the target uses v1 after the call); the unit declares it void.
+extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+struct sAiBits0012C0C0
+{
+    int pad : 12;
+    int v : 6;
+};
+
+extern "C" void func_0012C0C0(void* self, void* a1)
+{
+    if (((sAiBits0012C0C0*)a1)->v * 0.032258063554763794f > 0.0f)
+    {
+        cRiderAnimBase_play_i(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2, 0, -1.0f);
+        *(int*)self = 3;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012C130);
 
@@ -833,7 +929,20 @@ extern "C" void func_0012E740(void* self, void* obj)
 
 INCLUDE_ASM("ai/ai", func_0012E778);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012E980);
+#ifdef SKIP_ASM
+extern "C" void func_0012EE30(void*, void*);
+extern char D_0043D788[];
+
+extern "C" void func_0012E980(void* self)
+{
+    char* p = *(char**)self;
+    *(float*)(p + 0x200) = 0.03333333507180214f;
+    *(int*)(p + 0x204) = 0;
+    func_0012EE30(self, D_0043D788);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012E9B0__FPv);
@@ -899,7 +1008,26 @@ INCLUDE_ASM("ai/ai", func_0012F620);
 
 INCLUDE_ASM("ai/ai", func_0012F730);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012FB68);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
+extern "C" void func_00311E88(void*, int, float);
+extern "C" char* func_00311B20(void*, int);
+
+extern "C" void func_0012FB68(void* self, int a1)
+{
+    if (a1)
+    {
+        if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1) == 3 ||
+            func_00311AE8(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1) == 0xD)
+        {
+            func_00311E88(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0, 0.10000000149011612f);
+            *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1) + 0x90) = 1.0f;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012FBF0);
@@ -949,7 +1077,21 @@ void func_0012FC60(void* self)
 
 INCLUDE_ASM("ai/ai", func_0012FC80);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012FE98);
+#ifdef SKIP_ASM
+extern "C" void func_0012FE98(void* self)
+{
+    char* a = *(char**)((char*)self + 0x14);
+    *(int*)(a + 0x330) = 0;
+    char* b = *(char**)((char*)self + 0x14);
+    *(float*)(b + 0x278) = 0.01666666753590107f;
+    *(int*)(b + 0x27C) = 0;
+    char* c = *(char**)((char*)self + 0x14);
+    *(float*)(c + 0x26C) = 0.03333333507180214f;
+    *(int*)(c + 0x270) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012FEC8);
 
@@ -1001,7 +1143,29 @@ extern "C" void func_00131348(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_001313A8);
+#ifdef SKIP_ASM
+extern "C" void func_001313A8(void* self)
+{
+    char* r = *(char**)((char*)self + 0x14);
+    if (*(float*)(r + 0x280) < -0.5f)
+    {
+        *(float*)(r + 0x288) = -1.0f;
+        *(float*)(r + 0x284) = *(float*)(r + 0x300) * 0.02500000223517418f;
+    }
+    else if (*(float*)(r + 0x280) > 0.5f)
+    {
+        *(float*)(r + 0x288) = 1.0f;
+        *(float*)(r + 0x284) = *(float*)(r + 0x300) * 0.02500000223517418f;
+    }
+    else
+    {
+        *(float*)(r + 0x288) = 0.0f;
+        *(float*)(r + 0x284) = *(float*)(r + 0x300) * 0.02500000223517418f;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00131428);
 
@@ -1049,15 +1213,71 @@ void func_00131608(void* self)
 
 INCLUDE_ASM("ai/ai", func_00131620);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00131C30);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
+extern "C" void func_00311E88(void*, int, float);
+extern "C" char* func_00311B20(void*, int);
 
+extern "C" void func_00131C30(void* self, int a1)
+{
+    if (a1 != 4)
+    {
+        if (func_00311AE8(*(void**)(*(char**)self + 0x784), 1) == 3 ||
+            func_00311AE8(*(void**)(*(char**)self + 0x784), 1) == 0xD)
+        {
+            func_00311E88(*(void**)(*(char**)self + 0x784), 0, 0.10000000149011612f);
+            *(float*)(func_00311B20(*(void**)(*(char**)self + 0x784), 1) + 0x90) = 1.0f;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00131CC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 
+extern "C" int func_00131CC0(void* self)
+{
+    if (func_0011FE98(*(void**)self) == 1)
+    {
+        func_0011FEC8_impl(*(void**)self, 4);
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00131D08);
+#ifdef SKIP_ASM
+extern "C" void func_00131D08(void* self)
+{
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)(*(char**)((char*)self + 0x8) + 0x360) = 0;
+    *(int*)((char*)self + 0x4) = -1;
+    char* r = *(char**)((char*)self + 0x8);
+    *(float*)(r + 0x200) = 0.06666667014360428f;
+    *(int*)(r + 0x204) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00131D30);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00132048);
+#ifdef SKIP_ASM
+extern "C" void func_00132048(void* self)
+{
+    char* r = *(char**)((char*)self + 0x8);
+    *(float*)(r + 0x23C) = 0.06666667014360428f;
+    *(int*)(r + 0x240) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00132060);
 
@@ -1164,7 +1384,18 @@ INCLUDE_ASM("ai/ai", func_001329B0);
 
 INCLUDE_ASM("ai/ai", func_00132A30);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00132F98);
+#ifdef SKIP_ASM
+extern "C" void func_00132F98(void* self)
+{
+    char* a = *(char**)((char*)self + 0x14);
+    *(int*)(a + 0x32C) = 0;
+    char* b = *(char**)((char*)self + 0x14);
+    *(float*)(b + 0x248) = 0.05000000447034836f;
+    *(int*)(b + 0x24C) = 0;
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00132FB8);
 
@@ -1270,7 +1501,18 @@ extern "C" int func_00135F30(void* self)
 
 INCLUDE_ASM("ai/ai", func_00135F70);
 
+//100%
 INCLUDE_ASM("ai/ai", func_001360C8);
+#ifdef SKIP_ASM
+extern "C" float func_001360C8(void* self, int* out)
+{
+    int b = *(float*)((char*)self + 0x50) == 1.0000000150474662e+30f;
+    *out = b;
+    if (b)
+        return 0.0f;
+    return *(float*)((char*)self + 0x50);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00136100);
 

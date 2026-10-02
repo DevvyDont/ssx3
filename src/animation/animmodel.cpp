@@ -430,7 +430,23 @@ extern "C" void func_00310EE0(void* self, cAmStream* s)
 
 INCLUDE_ASM("animation/animmodel", func_00310F18);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00311048);
+#ifdef SKIP_ASM
+extern void* D_004A3DF8;
+extern "C" void func_00416210(void* dst, int c, int n);
+// PORT: prototype mismatch. func_003110D0 is defined later in the unit as (void), but this
+// caller passes the model in $4.
+void func_003110D0_1(void* self) __asm__("func_003110D0");
+
+extern "C" void* func_00311048(void* self)
+{
+    D_004A3DF8 = self;
+    func_00416210(self, 0, 0x3FC);
+    func_003110D0_1(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_003110D0);

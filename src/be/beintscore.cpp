@@ -15,21 +15,23 @@ struct cBEScoreInterface {
     int field_0x1C;
 };
 
-//86.17% - post-call register/global-reload scheduling not fully reproduced
+//100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getThis__Fv);
 #ifdef SKIP_ASM
+// PORT: the unit declares func_001549A8 as returning void; the body returns self.
+void* func_001549A8_impl(void* self) __asm__("func_001549A8");
+
 void* cBEScoreInterface_getThis()
 {
     if (D_004A1248 == 0) {
-        cBEScoreInterface* mem = (cBEScoreInterface*)cMemMan_alloc(0x230, D_0045A858, 0, 0);
-        D_004A1248 = mem;
-        func_001549A8(mem);
-        cBEScoreInterface* mem2 = (cBEScoreInterface*)D_004A1248;
-        mem2->field_0x1C = -1;
-        mem2->field_0x8 = 0;
-        mem2->field_0x10 = 0;
-        mem2->field_0x14 = 0;
-        mem2->field_0x18 = -1;
+        void* mem = cMemMan_alloc(0x230, D_0045A858, 0, 0);
+        cBEScoreInterface* s = (cBEScoreInterface*)func_001549A8_impl(mem);
+        D_004A1248 = s;
+        s->field_0x8 = 0;
+        s->field_0x10 = 0;
+        s->field_0x14 = 0;
+        s->field_0x18 = -1;
+        s->field_0x1C = -1;
     }
     return D_004A1248;
 }
@@ -156,9 +158,52 @@ extern "C" int func_00155130(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00155190);
+#ifdef SKIP_ASM
+struct sScoreEntryB_00155190
+{
+    int value;
+    int idx;
+    char pad[0xC];
+};
+struct sScoreSlot_00155190
+{
+    char data[0x88];
+};
+extern sScoreSlot_00155190 D_00530990[];
+extern void* D_004A1244;
 
+extern "C" void* func_00155190(void* self, int i)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    sScoreEntryB_00155190* t = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    if (t == 0)
+        return D_004A1244;
+    return &D_00530990[t[i].idx];
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintscore", func_00155208);
+#ifdef SKIP_ASM
+struct sScoreEntryB_00155208
+{
+    int value;
+    int idx;
+    char f8[0xC];
+};
+extern void* D_004A1244;
+
+extern "C" void* func_00155208(void* self, int i)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    sScoreEntryB_00155208* t = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    if (t != 0)
+        return t[i].f8;
+    return D_004A1244;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintscore", func_00155270);

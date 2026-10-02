@@ -52,7 +52,39 @@ INCLUDE_ASM("ai/computer", func_0010D1A0);
 
 INCLUDE_ASM("ai/computer", func_0010D410);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010D870);
+#ifdef SKIP_ASM
+extern "C" float func_0010D870(void* self, int a1, int a2, int a3)
+{
+    short s = *(short*)((char*)self + 0xE00);
+    if (s == 0)
+    {
+        if (!a1)
+            return 0.0f;
+    }
+    else if (s == 1)
+    {
+        if (!a2)
+            return 0.0f;
+    }
+    else if (s == 2)
+    {
+        if (!a3)
+            return 0.0f;
+    }
+    else if ((a1 == a2) != a3)
+        return 0.0f;
+    int n = 4;
+    if (a1)
+        n--;
+    if (a2)
+        n--;
+    if (a3)
+        n--;
+    return n * 33.29999923706055f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010D8F8);
@@ -94,7 +126,19 @@ INCLUDE_ASM("ai/computer", func_0010DA10);
 
 INCLUDE_ASM("ai/computer", func_0010DBF0);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010DEB0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+
+extern "C" int func_0010DEB0(void* self)
+{
+    int i = func_0010D8F8(self);
+    if (i < 0)
+        return 0;
+    return *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + (i << 2) + 0x28);
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_0010DEF0);
 

@@ -8,7 +8,27 @@ INCLUDE_ASM("ai/rider", cRider_cRider);
 
 INCLUDE_ASM("ai/rider", func_0011B978);
 
+//100%
 INCLUDE_ASM("ai/rider", cRider_addFocusBox);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00457960[];
+extern void* D_004A28A8;
+extern "C" void func_001033B0(void* self, void* box);
+
+struct sRider_addFocusBox
+{
+    char pad[0x78C];
+    void* mFocusBox;
+};
+
+extern "C" void cRider_addFocusBox(sRider_addFocusBox* self)
+{
+    void* box = cMemMan_alloc(0x10, D_00457960, 0, 0);
+    self->mFocusBox = box;
+    func_001033B0(*(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0xA4), box);
+}
+#endif
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00117248(void* mem);
@@ -41,7 +61,28 @@ INCLUDE_ASM("ai/rider", func_0011BD60);
 
 INCLUDE_ASM("ai/rider", func_0011BE88);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011C0E0);
+#ifdef SKIP_ASM
+struct sRiderVE_0011C0E0
+{
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+extern void* D_004A289C;
+
+extern "C" int func_0011C0E0(void* self)
+{
+    if (*(int*)((char*)self + 0x888) != -1)
+    {
+        void* g = D_004A289C;
+        sRiderVE_0011C0E0* vt = *(sRiderVE_0011C0E0**)((char*)g + 0x10D8);
+        return *(int*)((char*)self + 0x888) < vt[114].fn((char*)g + vt[114].delta);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011C138);
 
@@ -306,7 +347,19 @@ extern "C" float func_00120038(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120090);
+#ifdef SKIP_ASM
+extern "C" void func_00120090(void* self, float x)
+{
+    float cur = *(float*)((char*)self + 0x300);
+    if (x + 0.00083333341171965f < cur)
+        x = cur - 0.00083333341171965f;
+    else if (cur < x - 0.00083333341171965f)
+        x = cur + 0.00083333341171965f;
+    *(float*)((char*)self + 0x300) = x;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_001200D0);
 
@@ -327,7 +380,29 @@ extern "C" void func_00120D58(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120D90);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
+
+static inline float riderApproach_00120D90(float v, float t, float s)
+{
+    if (v > t + s)
+        return v - s;
+    if (v < t - s)
+        return v + s;
+    return t;
+}
+
+extern "C" void func_00120D90(void* self)
+{
+    int a = func_00311AE8(*(void**)((char*)self + 0x784), 2);
+    if (a >= 0x14 && a <= 0x1A)
+        *(float*)((char*)self + 0x318) = riderApproach_00120D90(*(float*)((char*)self + 0x318), 0.0f, 0.05000000447034836f);
+    else
+        *(float*)((char*)self + 0x318) = riderApproach_00120D90(*(float*)((char*)self + 0x318), 1.0f, 0.05000000447034836f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00120E30);
@@ -490,7 +565,33 @@ void* func_001217F8(void* self)
 
 INCLUDE_ASM("ai/rider", func_00121818);
 
+//100%
 INCLUDE_ASM("ai/rider", func_001218D0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" int func_0022E0E0(void* self, int a1);
+extern "C" void func_002ED490(void* obj, float a, float b, float c);
+extern "C" void func_00392D18(void* p);
+
+struct sRiderVE_001218D0
+{
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+extern "C" void func_001218D0(void* self)
+{
+    char* s = (char*)self;
+    if (~*(int*)(s + 0x430) != 0)
+        *(int*)(s + 0x434) = func_0022E0E0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78), (unsigned char)*(int*)(s + 0x430));
+    char* obj = s + 0x6C0;
+    sRiderVE_001218D0* vt = *(sRiderVE_001218D0**)obj;
+    func_002ED490(vt[7].fn(obj + vt[7].delta), *(float*)(s + 0x460), *(float*)(s + 0x464), -99999.0f);
+    char* p = *(char**)(s + 0x77C);
+    func_00392D18(p ? p + 0xD30 : 0);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00121950);
 
@@ -498,7 +599,19 @@ INCLUDE_ASM("ai/rider", func_00121AA0);
 
 INCLUDE_ASM("ai/rider", func_00121F30);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122088);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void func_002F5B68(void* a, void* q, int b, void* c, int d);
+
+extern "C" void func_00122088(void* self)
+{
+    cQuad128 q;
+    func_0011FF48(&q, self);
+    func_002F5B68(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x90), &q, *(int*)((char*)self + 0x860), (char*)self + 0x794, 8);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_001220D8);
 
@@ -576,7 +689,16 @@ extern "C" float* func_00122C28(float* out, void* rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122C98);
+#ifdef SKIP_ASM
+extern "C" int func_00122C98(void* self)
+{
+    float v = *(float*)((char*)self + 0x5B4);
+    float k = 0.9250819683074951f;
+    return v >= k || v < -k;
+}
+#endif
 
 extern "C" int func_001231A8(void* self);
 
@@ -589,7 +711,34 @@ void* func_00122CD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122CF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A28A8;
+extern "C" int func_00101A10(void* self, int character);
+extern "C" int func_00122C98(void* self);
+float func_0011A0C0_2(void* self, int state) __asm__("func_0011A0C0__FPv");
+
+extern "C" void func_00122CF0(void* self)
+{
+    char* s = (char*)self;
+    int old = *(int*)(s + 0x5B0);
+    int r = func_00101A10(*(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0xA8), *(int*)(s + 0x86C));
+    *(int*)(s + 0x5B0) = r;
+    if (r == 0)
+    {
+        if (func_00122CD0(self) != 0)
+        {
+            if (func_00122C98(self))
+                *(int*)(s + 0x5B0) = 1;
+        }
+    }
+    int cur = *(int*)(s + 0x5B0);
+    if (old != cur)
+        func_0011A0C0_2(*(void**)(s + 0x790), cur);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00122D78);
 
@@ -735,9 +884,54 @@ INCLUDE_ASM("ai/rider", func_001242B0);
 
 INCLUDE_ASM("ai/rider", func_00124788);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125038);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+void* func_00230698(void* self, int id);
+extern "C" void func_002E4578(void* p);
 
+extern "C" void func_00125038(void* self)
+{
+    void* w = *(void**)((char*)D_004A28A8 + 0x84);
+    if (*(void**)((char*)w + 0x84) != 0 && *(int*)((char*)self + 0x870) >= 0)
+    {
+        if (*(int*)((char*)func_00230698(w, *(int*)((char*)self + 0x870)) + 0x78) == 1)
+            func_002E4578(func_00230698(*(void**)((char*)D_004A28A8 + 0x84), *(int*)((char*)self + 0x870)));
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/rider", func_001250A8);
+#ifdef SKIP_ASM
+extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
+
+struct sRiderVec4_001250A8
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void riderAddEq_001250A8(sRiderVec4_001250A8& a, const sRiderVec4_001250A8& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b));
+}
+
+extern "C" void func_001250A8(void* self, sRiderVec4_001250A8* v)
+{
+    sRiderVec4_001250A8* p = (sRiderVec4_001250A8*)((char*)self + 0x1E0);
+    riderAddEq_001250A8(*p, *v);
+    if (func_0011FE98(self) == 1)
+        cAirPredictor_startLaunchIntoAir(*(void**)((char*)self + 0x788), (char*)self + 0x110, p, 3333.33349609375f);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00125108);
 
