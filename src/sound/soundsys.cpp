@@ -741,9 +741,90 @@ extern "C" int func_00295028(void* vself, int a, int b)
 
 INCLUDE_ASM("sound/soundsys", func_00295208);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00295628);
+#ifdef SKIP_ASM
+static inline int ring5628Full(sSnd5028Sys* s)
+{
+    return (s->ring.head + 1) % s->ring.cap == s->ring.tail;
+}
+static inline int ring5628Pop(sSnd5028Sys* s)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (ring5028Empty(s)) return -1;
+    int v = r->data[r->tail];
+    if (++s->ring.tail >= s->ring.cap) s->ring.tail = 0;
+    return v;
+}
+static inline void ring5628Push(sSnd5028Sys* s, int v)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (ring5628Full(s)) return;
+    r->data[r->head] = v;
+    if (++s->ring.head >= s->ring.cap) s->ring.head = 0;
+}
 
+// PORT: the event pointer is stored in an int ring slot.
+extern "C" void func_00295628(void* vself, void* evt, int h, int t, int a, int idx)
+{
+    sSnd5028Sys* self = (sSnd5028Sys*)vself;
+    if (ring5628Full(self)) {
+        ring5628Pop(self);
+        func_002AD5F0(*self->mgr + 0x1D8, ring5628Pop(self), 1, 0.0f);
+        ring5628Pop(self);
+        ring5628Pop(self);
+        ring5628Pop(self);
+    }
+    ring5628Push(self, (int)evt);
+    ring5628Push(self, h);
+    ring5628Push(self, t);
+    ring5628Push(self, a);
+    ring5628Push(self, idx);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_00295950);
+#ifdef SKIP_ASM
+static inline int ring5950Full(sSnd5028Sys* s)
+{
+    return (s->ring.head + 1) % s->ring.cap == s->ring.tail;
+}
+static inline int ring5950Pop(sSnd5028Sys* s)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (ring5028Empty(s)) return -1;
+    int v = r->data[r->tail];
+    if (++s->ring.tail >= s->ring.cap) s->ring.tail = 0;
+    return v;
+}
+static inline void ring5950Push(sSnd5028Sys* s, int v)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (ring5950Full(s)) return;
+    r->data[r->head] = v;
+    if (++s->ring.head >= s->ring.cap) s->ring.head = 0;
+}
+
+extern "C" void func_00295950(void* vself, int evt, int h, int idx)
+{
+    sSnd5028Sys* self = (sSnd5028Sys*)vself;
+    int n = ring5028Count(self);
+    for (int i = 0; i < n; i++) {
+        int e = ring5950Pop(self);
+        int v1 = ring5950Pop(self);
+        int v2 = ring5950Pop(self);
+        int v3 = ring5950Pop(self);
+        int v4 = ring5950Pop(self);
+        if (evt == e && idx == v4) v2 = h;
+        ring5950Push(self, e);
+        ring5950Push(self, v1);
+        ring5950Push(self, v2);
+        ring5950Push(self, v3);
+        ring5950Push(self, v4);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00296088);
@@ -863,7 +944,148 @@ extern "C" void func_00297438(void* self, void* obj)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002974A0);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSnd74A0Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd74A0E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd74A0Sub {
+    char pad0[4];
+    sSnd74A0Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd74A0Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd74A0E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd74A0Mgr {
+    char pad0[0x1D8];
+    sSnd74A0Sub sub;         // 0x1D8
+};
+struct sSnd74A0Sys {
+    sSnd74A0Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd74A0Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_74A0_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_74A0_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+extern "C" void func_002A9988(void* self, float a, float b);
+extern "C" int func_00288940(void* self, sSndVec4* pos);
+
+static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
+{
+    sSnd74A0Sys* self = (sSnd74A0Sys*)vself;
+    sSnd74A0Mgr* m = self->mgr;
+    sSnd74A0Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd74A0Mgr* m2 = *self->p118;
+    sSnd74A0Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_74A0_MAX(0, SND_74A0_MIN(s2->vals[s2->cur], 0x7F));
+    sSnd74A0Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+}
+
+
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+
+extern "C" void func_002974A0(void* self, char* evt, int n)
+{
+    if (n == 0) return;
+    if (n == 0x66 && *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
+    if (*(int*)((char*)self + 0x62A8) >= 0) return;
+    if (func_00295028(self, (int)evt, 0) != 0) return;
+    int pri = 0x50;
+    sSndVec4 pos = *(sSndVec4*)(evt + 0x40);
+    int type = 2;
+    int b;
+    if (n < 100) {
+        b = n;
+    } else if (n < 150) {
+        b = n - 100;
+        type = 8;
+    } else if (n < 200) {
+        b = n - 150;
+        type = 9;
+    } else {
+        b = n - 200;
+        type = 4;
+    }
+    snd74A0AddVoice(self, type, b, 5);
+    sSnd74A0Mgr** pp;
+    int r;
+    sSnd74A0Sys* sys = (sSnd74A0Sys*)self;
+    sSnd74A0Mgr* m3 = *sys->p118;
+    m3->sub.tgt[m3->sub.cur] = &pos;
+    sSnd74A0Mgr* m4 = *sys->p118;
+    m4->sub.p34[m4->sub.cur] = 1;
+    func_002A9988(&(*sys->p118)->sub, 300.0f, -1.0f);
+    pp = sys->p118;
+    r = func_00288940(sys, &pos);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    sSnd74A0Mgr* m5 = *sys->p118;
+    m5->sub.p78[m5->sub.cur] = pri;
+    int h = func_002906B8(self);
+    func_00295628(self, evt, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_00297950);
 
@@ -957,11 +1179,225 @@ extern "C" void func_002980B0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00298138);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSnd8138Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd8138E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd8138Sub {
+    char pad0[4];
+    sSnd8138Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd8138Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd8138E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd8138Mgr {
+    char pad0[0x1D8];
+    sSnd8138Sub sub;         // 0x1D8
+};
+struct sSnd8138Sys {
+    sSnd8138Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd8138Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+extern "C" int func_00288A20(void* self, void* obj);
+
+static inline bool snd8138Active(void* o)
+{
+    return *(int*)((char*)o + 0x874) && *(int*)((char*)o + 0x87C);
+}
+
+static inline int snd8138AddVoice(void* vself, void* obj, int a, int b, int type)
+{
+    sSnd8138Sys* self = (sSnd8138Sys*)vself;
+    sSnd8138Mgr* m = self->mgr;
+    sSnd8138Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd8138Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    sSnd8138Mgr* m2 = *self->p118;
+    m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+    pp = self->p118;
+    r = func_00288A20(self, obj);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" void func_00298138(void* self, void* obj, void* obj2)
+{
+    if (!snd8138Active(obj) && !snd8138Active(obj2)) {
+        return;
+    }
+    if (func_00295028(self, 5, 0) != 0) {
+        return;
+    }
+    int h = snd8138AddVoice(self, obj, 0, 0x5A, 5);
+    func_00295628(self, (void*)5, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_00298488);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002989A8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSnd89A8Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd89A8E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd89A8Sub {
+    char pad0[4];
+    sSnd89A8Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd89A8Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd89A8E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd89A8Mgr {
+    char pad0[0x1D8];
+    sSnd89A8Sub sub;         // 0x1D8
+};
+struct sSnd89A8Sys {
+    sSnd89A8Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd89A8Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+extern "C" int func_00288A20(void* self, void* obj);
+extern "C" void func_002A9988(void* self, float a, float b);
+
+static inline int snd89A8AddVoice(void* vself, void* obj, int a, int b, int type)
+{
+    sSnd89A8Sys* self = (sSnd89A8Sys*)vself;
+    sSnd89A8Mgr* m = self->mgr;
+    sSnd89A8Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd89A8Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
+    pp = self->p118;
+    r = func_00288A20(self, obj);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    sSnd89A8Mgr* m2 = *self->p118;
+    m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+    return func_002906B8(self);
+}
+
+extern "C" void func_002989A8(void* self, void* obj)
+{
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (!ok) {
+        return;
+    }
+    if (func_00295028(self, 6, 0) != 0) {
+        return;
+    }
+    int h = snd89A8AddVoice(self, obj, 0, 0x36, 5);
+    func_00295628(self, (void*)6, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00298D00);
@@ -1016,7 +1452,122 @@ INCLUDE_ASM("sound/soundsys", func_00299368);
 
 INCLUDE_ASM("sound/soundsys", func_00299638);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002997B8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSnd97B8Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd97B8E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd97B8Sub {
+    char pad0[4];
+    sSnd97B8Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd97B8Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd97B8E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd97B8Mgr {
+    char pad0[0x1D8];
+    sSnd97B8Sub sub;         // 0x1D8
+};
+struct sSnd97B8Sys {
+    sSnd97B8Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd97B8Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_97B8_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_97B8_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static inline int snd97B8AddVoice(void* vself, int a, int b, int type)
+{
+    sSnd97B8Sys* self = (sSnd97B8Sys*)vself;
+    sSnd97B8Mgr* m = self->mgr;
+    sSnd97B8Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd97B8Mgr* m2 = *self->p118;
+    sSnd97B8Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_97B8_MAX(0, SND_97B8_MIN(s2->vals[s2->cur], 0x7F));
+    sSnd97B8Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" int func_00288AE0(void* self);
+extern "C" void* func_0028B1C8();
+extern "C" int func_00270280(void* p);
+extern int D_004A2A50;
+
+extern "C" void func_002997B8(void* self, void* obj)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (!ok) {
+        return;
+    }
+    int c = 1;
+    int pos = *(float*)((char*)obj + 0x470) >= 0.0f;
+    if (pos) c = 0;
+    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
+    if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) c = 0;
+    if (c) {
+        snd97B8AddVoice(self, 0, 0x69, 9);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00299B70);
@@ -1115,7 +1666,135 @@ extern "C" void func_00299B70(void* self, void* obj)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00299E28);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSnd9E28Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd9E28E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd9E28Sub {
+    char pad0[4];
+    sSnd9E28Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd9E28Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd9E28E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd9E28Mgr {
+    char pad0[0x1D8];
+    sSnd9E28Sub sub;         // 0x1D8
+};
+struct sSnd9E28Sys {
+    sSnd9E28Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd9E28Mgr** p118;      // 0x118
+};
+
+static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
+{
+    sSnd9E28Sys* self = (sSnd9E28Sys*)vself;
+    sSnd9E28Mgr* m = self->mgr;
+    sSnd9E28Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd9E28Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern signed char D_00535C10[];
+extern "C" int func_002A4290(void* self);
+extern "C" void* func_0028B1C8();
+extern "C" void* func_0028B1D8();
+// func_00285D98 returns a rider pointer here (the unit declares it int).
+void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" int func_00288AE0(void* self);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+extern "C" void func_002A0560(void* self, void* a, void* b);
+
+extern "C" void func_00299E28(void* self, void* obj, void* a, void* b, int lim, int n)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C10[0] != 0 && func_002A4290(self) == 0) {
+        return;
+    }
+    if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) {
+        return;
+    }
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (!ok && func_00285D98_p(self, -1) != obj) {
+        return;
+    }
+    int cnt = *(int*)((char*)func_0028B1D8() + 0x7C);
+    if (cnt + *(int*)((char*)func_0028B1D8() + 0x80) < 2) {
+        return;
+    }
+    if (n == 0 && func_00295028(self, 1, 0) == 0 && func_00288AE0(self) == 0) {
+        int h = snd9E28AddVoice(self, 0, 0x6D, 9);
+        func_00295628(self, (void*)1, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 200, 0, 0);
+    }
+    if (n < lim) {
+        if (a != 0) {
+            func_002A0560(self, obj, a);
+        }
+    } else {
+        if (b != 0) {
+            func_002A0560(self, b, obj);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029A220);
@@ -1318,7 +1997,116 @@ extern "C" void func_0029A530(void* self, void* obj)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029A7D8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSndA7D8Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndA7D8E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndA7D8Sub {
+    char pad0[4];
+    sSndA7D8Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndA7D8Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndA7D8E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndA7D8Mgr {
+    char pad0[0x1D8];
+    sSndA7D8Sub sub;         // 0x1D8
+};
+struct sSndA7D8Sys {
+    sSndA7D8Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndA7D8Mgr** p118;      // 0x118
+};
+
+static inline int sndA7D8AddVoice(void* vself, int a, int b, int type)
+{
+    sSndA7D8Sys* self = (sSndA7D8Sys*)vself;
+    sSndA7D8Mgr* m = self->mgr;
+    sSndA7D8Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndA7D8Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" int func_00288AE0(void* self);
+extern "C" void func_003B58A0();
+extern "C" int func_003B8AB8(int id);
+extern "C" void func_003B58D8();
+extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+
+extern "C" void func_0029A7D8(void* self, void* obj, int n)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        int v = n % 100;
+        if (v < *(int*)((char*)self + 0x5FA8)) {
+            func_003B58A0();
+            int busy = func_003B8AB8(*(int*)((char*)self + 0x5FAC)) != 0;
+            func_003B58D8();
+            if (!busy) {
+                func_002AD5F0(**(char***)((char*)self + 0x118) + 0x1D8, *(int*)((char*)self + 0x5FAC), 1, 0.0f);
+            }
+            *(int*)((char*)self + 0x5FAC) = sndA7D8AddVoice(self, 0, 0x4D, 9);
+        }
+        *(int*)((char*)self + 0x5FA8) = v;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029AB08);
@@ -1616,11 +2404,323 @@ void func_0029B960(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029B968);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
 
+struct sSndB968Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndB968E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndB968Sub {
+    char pad0[4];
+    sSndB968Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndB968Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndB968E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndB968Mgr {
+    char pad0[0x1D8];
+    sSndB968Sub sub;         // 0x1D8
+};
+struct sSndB968Sys {
+    sSndB968Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndB968Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_B968_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_B968_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static inline int sndB968AddVoice(void* vself, void* obj, int a, int b, int type)
+{
+    sSndB968Sys* self = (sSndB968Sys*)vself;
+    sSndB968Mgr* m = self->mgr;
+    sSndB968Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndB968Mgr* m2 = *self->p118;
+    sSndB968Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_B968_MAX(0, SND_B968_MIN(s2->vals[s2->cur], 0x7F));
+    sSndB968Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    sSndB968Mgr* m3 = *self->p118;
+    m3->sub.tgt[m3->sub.cur] = (char*)obj + 0x110;
+    pp = self->p118;
+    r = func_00288A20(self, obj);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" void func_0029B968(void* self, void* obj)
+{
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        sndB968AddVoice(self, obj, 0, 0x50, 5);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029BCF8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
 
+struct sSndBCF8Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndBCF8E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndBCF8Sub {
+    char pad0[4];
+    sSndBCF8Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndBCF8Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndBCF8E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndBCF8Mgr {
+    char pad0[0x1D8];
+    sSndBCF8Sub sub;         // 0x1D8
+};
+struct sSndBCF8Sys {
+    sSndBCF8Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndBCF8Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_BCF8_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_BCF8_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static inline int sndBCF8AddVoice(void* vself, void* obj, int a, int b, int type)
+{
+    sSndBCF8Sys* self = (sSndBCF8Sys*)vself;
+    sSndBCF8Mgr* m = self->mgr;
+    sSndBCF8Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndBCF8Mgr* m2 = *self->p118;
+    sSndBCF8Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_BCF8_MAX(0, SND_BCF8_MIN(s2->vals[s2->cur], 0x7F));
+    sSndBCF8Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    sSndBCF8Mgr* m3 = *self->p118;
+    m3->sub.tgt[m3->sub.cur] = (char*)obj + 0x110;
+    pp = self->p118;
+    r = func_00288A20(self, obj);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" void func_0029BCF8(void* self, void* obj)
+{
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        sndBCF8AddVoice(self, obj, 0, 0x51, 5);
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029C088);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSndC088Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndC088E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndC088Sub {
+    char pad0[4];
+    sSndC088Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndC088Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndC088E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndC088Mgr {
+    char pad0[0x1D8];
+    sSndC088Sub sub;         // 0x1D8
+};
+struct sSndC088Sys {
+    sSndC088Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndC088Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_C088_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_C088_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static inline int sndC088AddVoice(void* vself, void* obj, int a, int b, int type)
+{
+    sSndC088Sys* self = (sSndC088Sys*)vself;
+    sSndC088Mgr* m = self->mgr;
+    sSndC088Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndC088Mgr* m2 = *self->p118;
+    sSndC088Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_C088_MAX(0, SND_C088_MIN(s2->vals[s2->cur], 0x7F));
+    sSndC088Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    sSndC088Mgr* m3 = *self->p118;
+    m3->sub.tgt[m3->sub.cur] = (char*)obj + 0x110;
+    pp = self->p118;
+    r = func_00288A20(self, obj);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" void func_0029C088(void* self, void* obj)
+{
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        sndC088AddVoice(self, obj, 0, 0x52, 5);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029C418__FPv);
@@ -1630,7 +2730,123 @@ void func_0029C418(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029C420);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSndC420Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndC420E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndC420Sub {
+    char pad0[4];
+    sSndC420Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndC420Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndC420E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndC420Mgr {
+    char pad0[0x1D8];
+    sSndC420Sub sub;         // 0x1D8
+};
+struct sSndC420Sys {
+    sSndC420Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndC420Mgr** p118;      // 0x118
+};
+
+static inline int sndC420AddVoice(void* vself, char* mon, int a, int b, int type)
+{
+    sSndC420Sys* self = (sSndC420Sys*)vself;
+    sSndC420Mgr* m = self->mgr;
+    sSndC420Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndC420Mgr** pp = *(sSndC420Mgr***)mon;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002B49E0(void*);
+extern "C" void func_002B3D48(void*, float);
+extern "C" void func_0028D488(void* self);
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_002B3A70(void*);
+
+extern "C" void func_0029C420(void* self, int mode)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    char* mon = (char*)self + 0x118;
+    sndC420AddVoice(self, mon, 0, 0x4E, 5);
+    if (mode == 3) {
+        int st = func_002B49E0((char*)self + 0x118);
+        if (st == 0xC9 || st == 1 || st == 2 || st == 3) {
+            if (*(int*)((char*)self + 0x627C) != 0) {
+                func_002B3D48((char*)self + 0x118, 2.0f);
+            }
+        }
+    }
+    if (mode == 1) {
+        int st = func_002B49E0((char*)self + 0x118);
+        if (*(int*)((char*)self + 0x530) == 0 || st == 0xC9 || st == 1 || st == 2 || st == 3) {
+            if (*(int*)((char*)self + 0x627C) != 0) {
+                func_0028D488(self);
+                func_0028CF98(self, 0, 0, -1, 0);
+                func_002B3A70((char*)self + 0x118);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_0029C7B0);
 
@@ -1714,7 +2930,123 @@ extern "C" void func_0029CE70(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029CED8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSndCED8Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndCED8E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndCED8Sub {
+    char pad0[4];
+    sSndCED8Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndCED8Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndCED8E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndCED8Mgr {
+    char pad0[0x1D8];
+    sSndCED8Sub sub;         // 0x1D8
+};
+struct sSndCED8Sys {
+    sSndCED8Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndCED8Mgr** p118;      // 0x118
+};
+
+static inline int sndCED8AddVoice(void* vself, int a, int b, int type)
+{
+    sSndCED8Sys* self = (sSndCED8Sys*)vself;
+    sSndCED8Mgr* m = self->mgr;
+    sSndCED8Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndCED8Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" void func_002A3EB8(void* self, void* obj, int n);
+
+extern "C" void func_0029CED8(void* self, int kind, void* obj, float x)
+{
+    if (obj != 0) {
+        bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+        if (!ok) {
+            return;
+        }
+    }
+    int id = 0x74;
+    if (kind == 0) {
+        id = 0x70;
+    } else if (kind == 1) {
+        id = 0x71;
+    } else if (kind == 2) {
+        id = 0x75;
+    } else if (kind == 3) {
+        id = 0x76;
+    }
+    sndCED8AddVoice(self, 0, id, 9);
+    if (kind == 2) {
+        if (x == 2.0f) {
+            func_002A3EB8(self, obj, 1);
+        } else if (x == 3.0f) {
+            func_002A3EB8(self, obj, 2);
+        } else if (x == 5.0f) {
+            func_002A3EB8(self, obj, 4);
+        } else if (x == 10.0f) {
+            func_002A3EB8(self, obj, 8);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029D290);
@@ -2150,9 +3482,240 @@ extern "C" void func_0029E578(void* self, void* a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029E590);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
 
+struct sSndE590Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndE590E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndE590Sub {
+    char pad0[4];
+    sSndE590Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndE590Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndE590E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndE590Mgr {
+    char pad0[0x1D8];
+    sSndE590Sub sub;         // 0x1D8
+};
+struct sSndE590Sys {
+    sSndE590Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndE590Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_E590_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_E590_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static inline int sndE590AddVoice(void* vself, int a, int b, int type, unsigned short pitch)
+{
+    sSndE590Sys* self = (sSndE590Sys*)vself;
+    sSndE590Mgr* m = self->mgr;
+    sSndE590Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndE590Mgr* m2 = *self->p118;
+    sSndE590Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_E590_MAX(0, SND_E590_MIN(s2->vals[s2->cur], 0x7F));
+    sSndE590Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    sSndE590Mgr* m3 = *self->p118;
+    *(unsigned short*)((char*)&m3->sub.ch[m3->sub.cur] + 0xC) = pitch;
+    return func_002906B8(self);
+}
+
+
+extern "C" int func_00288AE0(void* self);
+
+static inline char* sndE590Tbl(void* self)
+{
+    return (char*)self + 0x6080;
+}
+
+extern "C" void func_0029E590(void* self, void* obj, float x)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        int idx = *(int*)((char*)obj + 0x870);
+        float prev = *(float*)(sndE590Tbl(self) + (idx << 2));
+        unsigned short pitch = (int)((x <? prev) * 5.0f) * 0x50 + 0x1000;
+        sndE590AddVoice(self, 0, 0x5F, 9, pitch);
+        *(float*)(sndE590Tbl(self) + (idx << 2)) = x;
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029E970);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sSndE970Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndE970E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndE970Sub {
+    char pad0[4];
+    sSndE970Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndE970Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndE970E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndE970Mgr {
+    char pad0[0x1D8];
+    sSndE970Sub sub;         // 0x1D8
+};
+struct sSndE970Sys {
+    sSndE970Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndE970Mgr** p118;      // 0x118
+};
+
+extern "C" int func_00288A20(void* self, void* obj);
+
+#define SND_E970_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_E970_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static inline int sndE970AddVoice(void* vself, int a, int b, int type)
+{
+    sSndE970Sys* self = (sSndE970Sys*)vself;
+    sSndE970Mgr* m = self->mgr;
+    sSndE970Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndE970Mgr* m2 = *self->p118;
+    sSndE970Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_E970_MAX(0, SND_E970_MIN(s2->vals[s2->cur], 0x7F));
+    sSndE970Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+extern "C" int func_00288AE0(void* self);
+
+static inline char* sndE970Tbl(void* self)
+{
+    return (char*)self + 0x6080;
+}
+
+extern "C" void func_0029E970(void* self, void* obj)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (ok) {
+        int idx = *(int*)((char*)obj + 0x870);
+        if (*(float*)(sndE970Tbl(self) + (idx << 2)) == 1.0f) {
+            return;
+        }
+        sndE970AddVoice(self, 0, 0x60, 9);
+        *(float*)(sndE970Tbl(self) + (idx << 2)) = 1.0f;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029ED18);
@@ -2530,7 +4093,91 @@ extern "C" void func_0029FCC8(void* self, void* vrider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029FF80);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0A0(void* self);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int* func_00144BC0(void*);
+extern "C" void* func_0028B1E8();
+extern "C" int func_00288B40(void* self, int which, float f);
+extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
+extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" int func_00123128(void*);
+// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
+int func_0029F330_i(void* self) __asm__("func_0029F330");
+// func_00285D98 returns a rider pointer here (the unit declares it int).
+void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+extern void (*D_004A482C)(void*, int, int);
+extern float D_004A36D8;
+
+class cSsFF80Obj {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual int v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual int v09();
+};
+struct sSsFF80RiderA {
+    char pad0[0x470];
+    float f470;
+    char pad474[0x6C0 - 0x474];
+};
+struct sSsFF80Rider : public sSsFF80RiderA, public cSsFF80Obj {
+    char pad6C4[0x87C - 0x6C4];
+    int f87C;
+};
+
+extern "C" void func_0029FF80(void* self, sSsFF80Rider* rider, int alt)
+{
+    if (func_0029F0A0(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    int pos = rider->f470 >= 0.0f;
+    if (pos) return;
+    int chk = 0;
+    if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
+    if (chk && func_00285D98_p(self, -1) != rider) return;
+    int r = func_0029F330_i(rider);
+    if (func_00288B40(self, rider->v05(), D_004A36D8) < 0) return;
+    if (alt != 0) {
+        int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        if (sel == 1) {
+            if (func_002B1458((char*)self + 0x5560, 0, 0x2090, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 0x2090), 1, r);
+            }
+        } else if (sel == 2) {
+            if (func_002B1458((char*)self + 0x5560, 0, 0x209B, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 0x209B), 1, r);
+            }
+        } else {
+            if (func_002B1458((char*)self + 0x5560, 0, 0x209D, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 0x209D), 1, r);
+            }
+        }
+    } else {
+        int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        if (sel == 1) {
+            if (func_002B1458((char*)self + 0x5560, 0, 0x2082, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 0x2082), 1, r);
+            }
+        } else if (sel == 2) {
+            if (func_002B1458((char*)self + 0x5560, 0, 0x209A, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 0x209A), 1, r);
+            }
+        } else {
+            if (func_002B1458((char*)self + 0x5560, 0, 0x209C, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 0x209C), 1, r);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A02D8);
@@ -2612,7 +4259,107 @@ extern "C" void func_002A02D8(void* self, sSs02D8Rider* rider)
 
 INCLUDE_ASM("sound/soundsys", func_002A0560);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A0A30);
+#ifdef SKIP_ASM
+extern "C" int func_0029F0A0(void* self);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_00123168(void*);
+extern "C" int func_00288B40(void* self, int which, float f);
+extern "C" int func_002B0E28(void* self, int i);
+// func_002B1458 with the float argument in its real position (same registers).
+int func_002B1458_f(void* self, int a, int b, int c, int d, float f, int e, int refresh) __asm__("func_002B1458");
+extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" int func_00123128(void*);
+extern "C" void func_0029F660(void* self, void* rider, int a, int b);
+// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
+int func_0029F330_i(void* self) __asm__("func_0029F330");
+void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+// PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
+extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+extern float D_004A36D8;
+extern void* D_004A28A4;
+static inline int sndA30Mode(int m)
+{
+    return *(int*)((char*)D_004A28A4 + 0x550) == m;
+}
+
+class cSs0A30Obj {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual int v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual int v09();
+};
+struct sSs0A30RiderA {
+    char pad0[0x470];
+    float f470;
+    char pad474[0x6C0 - 0x474];
+};
+struct sSs0A30Rider : public sSs0A30RiderA, public cSs0A30Obj {
+    char pad6C4[0x87C - 0x6C4];
+    int f87C;
+};
+struct sSs1820Rider;
+extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b);
+
+extern "C" void func_002A0A30(void* self, sSs0A30Rider* a, sSs0A30Rider* b, int p7, int p8)
+{
+    if (func_0029F0A0(self) == 0) return;
+    if (!sndA30Mode(2)) return;
+    if (func_00288AE0(self) != 0) return;
+    if (func_00123168(a) != 0) return;
+    if (func_00123168(b) != 0) return;
+    int posA = a->f470 >= 0.0f;
+    if (posA) return;
+    int posB = b->f470 >= 0.0f;
+    if (posB) return;
+    int chkA = 0;
+    if (a->v09() != 0 || a->f87C == 0) chkA = 1;
+    int chkB = 0;
+    if (b->v09() != 0 || b->f87C == 0) chkB = 1;
+    void* pl = func_00285D98_p(self, -1);
+    if (chkA && chkB && a != pl && b != pl) return;
+    func_0029F660(self, b, 0, 1);
+    char* snd = (char*)self + 0x5560;
+    if (func_002B0E28(snd, 0) == 0) return;
+    int okB = func_00288B40(self, b->v05(), D_004A36D8) >= 0;
+    int okA = func_00288B40(self, a->v05(), D_004A36D8) >= 0;
+    if (!okB && !okA) return;
+    int rA = func_0029F330_i(a);
+    int rB = func_0029F330_i(b);
+    if (p8 != 0) return;
+    if (p7 != 0) return;
+    int sel = func_002A1820(self, (sSs1820Rider*)a, (sSs1820Rider*)b);
+    if (sel == 2) {
+        if (func_002B1458_f(snd, 0, 0x208F, (int)b, func_00123128(b), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 0x208F), 2, rB, 3);
+        }
+        if (func_002B1458_f(snd, 0, 0x208A, (int)a, func_00123128(a), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 0x208A), 2, rA, 3);
+        }
+    } else if (sel == 1) {
+        if (func_002B1458_f(snd, 0, 0x207E, (int)b, func_00123128(b), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 0x207E), 2, rB, 3);
+        }
+        if (func_002B1458_f(snd, 0, 0x208A, (int)a, func_00123128(a), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 0x208A), 2, rA, 3);
+        }
+    } else if (sel == 0) {
+        if (func_002B1458_f(snd, 0, 0x2078, (int)b, func_00123128(b), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 0x2078), 2, rB, 3);
+        }
+        if (func_002B1458_f(snd, 0, 0x208E, (int)a, func_00123128(a), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 0x208E), 2, rA, 3);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A0E70);

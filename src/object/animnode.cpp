@@ -125,7 +125,218 @@ extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out)
 
 INCLUDE_ASM("object/animnode", func_0034E698);
 
+//100%
 INCLUDE_ASM("object/animnode", func_0034E798);
+#ifdef SKIP_ASM
+struct sVec4_E798 {
+    float x, y, z, w;
+    sVec4_E798() {}
+    sVec4_E798(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct sVec3_E798 {
+    float x, y, z;
+};
+
+struct sRow_E798 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_E798 {
+    sRow_E798 r[4];
+};
+
+struct sDelta_E798 {
+    sVec4_E798 pos;
+    sVec4_E798 rot;
+};
+
+struct sBone_E798 {
+    int parent;
+    int f4;
+    int active;
+    int fC;
+};
+
+struct sVE_E798 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+extern sVec4_E798 D_004FF120;
+extern char* D_004A5B64;
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void func_00351660(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
+
+// PORT: PS2-only VU0 inline asm (vector times-assign scalar).
+static inline void vu0ScaleEq_E798(sVec4_E798& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline sVec4_E798 vu0MulMat_E798(const sMat_E798* m, const sVec4_E798& v)
+{
+    sVec4_E798 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_E798 vu0Sub_E798(const sVec4_E798& a, const sVec4_E798& b)
+{
+    sVec4_E798 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_E798 vu0Add_E798(const sVec4_E798& a, const sVec4_E798& b)
+{
+    sVec4_E798 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec4_E798 vu0Cross_E798(const sVec4_E798& a, const sVec4_E798& b)
+{
+    sVec4_E798 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void vu0AddEq_E798(sVec4_E798& a, const sVec4_E798& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+static inline sVec4_E798 boneE798Pos(char* self, int i)
+{
+    return *(sVec4_E798*)&(*(sMat_E798**)(self + 0x44))[i].r[3];
+}
+
+extern "C" void func_0034E798(char* self)
+{
+    char* obj = self + 0x14;
+    if (*(unsigned short*)(self + 0x26) & 1) {
+        sVE_E798* vt = *(sVE_E798**)(self + 0x20);
+        ((void (*)(void*))vt[51].fn)(obj + vt[51].delta);
+    }
+    char* info = *(char**)(*(char**)(obj + 0x18) + 0x80);
+    int k = 0;
+    sBone_E798* ent = *(sBone_E798**)(info + 8);
+    for (int i = 0; i < *(int*)(info + 4); i++, ent++) {
+        ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = D_004FF120;
+        ((sDelta_E798*)*(char**)(self + 0x4C))[i].rot = D_004FF120;
+        float d2r = 0.01745329424738884f;
+        if (ent->active == 0) continue;
+        char* node = *(char**)(self + 0x48) + k * 0xD0;
+        k++;
+        sVE_E798* vt = *(sVE_E798**)(self + 0x20);
+        float t = ((float (*)(void*))vt[53].fn)(self + vt[53].delta);
+        sVec4_E798 pos;
+        sVec4_E798 rotv;
+        func_00351660(node, &pos, &rotv, *(float*)(self + 4));
+        sVec4_E798 rot;
+        rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
+        vu0ScaleEq_E798(pos, t * (float)*(int*)(D_004A5B64 + 0x10));
+        vu0ScaleEq_E798(rotv, t * (float)*(int*)(D_004A5B64 + 0x10) * d2r);
+        sMat_E798 m;
+        {
+            sVec3_E798 e;
+            e.x = rot.x;
+            e.y = rot.y;
+            e.z = rot.z;
+            float s1, c1, s2, c2;
+            func_0031BE50(&s1, &c1, e.y);
+            func_0031BE50(&s2, &c2, e.z);
+            m.r[0].x = c1 * c2;
+            m.r[0].y = -c1 * s2;
+            m.r[0].z = s1;
+            m.r[0].w = 0.0f;
+            m.r[1].x = s2;
+            m.r[1].y = c2;
+            m.r[1].z = 0.0f;
+            m.r[1].w = 0.0f;
+            m.r[2].x = 0.0f;
+            m.r[2].y = 0.0f;
+            m.r[2].z = 1.0f;
+            m.r[2].w = 0.0f;
+            m.r[3].x = 0.0f;
+            m.r[3].y = 0.0f;
+            m.r[3].z = 0.0f;
+            m.r[3].w = 1.0f;
+        }
+        rotv = vu0MulMat_E798(&m, rotv);
+        pos = vu0MulMat_E798(&(*(sMat_E798**)(self + 0x44))[i], pos);
+        rotv = vu0MulMat_E798(&(*(sMat_E798**)(self + 0x44))[i], rotv);
+        if (ent->parent >= 0) {
+            sVec4_E798 d = vu0Sub_E798(boneE798Pos(self, i), boneE798Pos(self, ent->parent));
+            vu0AddEq_E798(rotv, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot);
+            vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].pos,
+                                           vu0Cross_E798(d, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot)));
+        }
+        ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = pos;
+        vu0AddEq_E798(((sDelta_E798*)*(char**)(self + 0x4C))[i].rot, rotv);
+    }
+    *(int*)(self + 0x10) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/animnode", func_0034EBA0);

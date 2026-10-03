@@ -172,7 +172,107 @@ extern "C" void func_001835F8(void* self, void* item, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateriderbio", func_00183710);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
+extern "C" char* func_00147170(void* iface, int rider);
+extern "C" int func_001577A0(void* self, int a1, int a2);
+extern "C" void* func_00182220(void* mem, void* engine, void* owner, int rider, int cid);
+extern "C" void func_001831D0(void* self, int a1);
+extern "C" void* func_001887A0(void* mem, void* engine, int a2);
+extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void func_001CB418(void* self, const char* str);
+extern "C" void func_001CD088(void* self, int v);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void func_001CE408(void* self, int v);
+extern "C" void func_0039F290(void* stack, void* state);
+extern "C" void func_0039F400(void* stack, void* state);
+extern const char D_0045D8D8[];
+extern const char D_0045D8E8[];
+extern const char D_0045D698[];
+
+struct sVE_3710 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+struct sBits_3710 {
+    unsigned lo : 8;
+    unsigned mode : 6;
+    unsigned hi : 18;
+};
+
+extern "C" void func_00183710(char* self, char* item, unsigned int msg)
+{
+    if (item == 0) return;
+    switch (msg) {
+    case 5: {
+        int sub = *(int*)(item + 0x18);
+        if (sub == 8) {
+            char* w = (char*)func_001CB030(cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
+            *(int*)(w + 0x140) = 0x37;
+            func_001CD088(w, 8);
+            func_001CE3C8(w, 0x4B, 1, 2);
+            *(int*)(w + 0x58) = 1;
+            func_001CE408(w, 1);
+            func_001CE3C8(w, 0xE, 0, 2);
+            func_001CE3C8(w, 0x27, 0, 2);
+            func_001CE3C8(w, 0x28, 0, 2);
+            func_001CE3C8(w, 0x34, 0, 2);
+            func_001CE3C8(w, 0x1A, 0, 2);
+            func_001CE3C8(w, 0x19, 0, 2);
+            func_001CE3C8(w, 0x35, 0, 2);
+            func_001CE3C8(w, 0x40, 0, 2);
+            func_001CE3C8(w, 0x41, 0, 2);
+            func_001CE3C8(w, 0x42, 0, 2);
+            func_0039F290(*(char**)(self + 0x10) + 0x18, w);
+            func_001CB418(w, func_00147170(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
+            func_001831D0(self, 0);
+        } else if (sub == 6) {
+            int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
+            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), cid) > 0) {
+                char* w = (char*)func_00182220(cMemMan_alloc(0x1E4, D_0045D8E8, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
+                *(unsigned char*)(w + 0x15) = func_001A1CD0(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
+                func_0039F290(*(char**)(self + 0x10) + 0x18, w);
+                func_001831D0(self, 0);
+            }
+        } else {
+            char* obj = **(char***)(self + 0x10);
+            sVE_3710* vt = *(sVE_3710**)(obj + 4);
+            void* r = vt[4].fn(obj + vt[4].delta, self, sub);
+            if (r != 0) {
+                func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            }
+        }
+        func_001831D0(self, 0);
+        break;
+    }
+    case 6: {
+        char* obj = **(char***)(self + 0x10);
+        sVE_3710* vt = *(sVE_3710**)(obj + 4);
+        void* r = vt[5].fn(obj + vt[5].delta, self, *(int*)(item + 0x18));
+        if (r != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            func_001831D0(self, 0);
+        }
+        break;
+    }
+    case 7: {
+        char* w = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(void**)(self + 0x10), 1);
+        ((sBits_3710*)(w + 0x1C))->mode = 1;
+        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, w, 0, 0);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateriderbio", func_00183A98);

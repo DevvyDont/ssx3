@@ -83,7 +83,28 @@ extern "C" void func_00200288(void* self, cUIObj_200288* item, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
+#ifdef SKIP_ASM
+struct sRewardDesc_0388 {
+    int w[0x6C / 4];
+};
+extern sRewardDesc_0388 D_004781D0[][4];
+extern sRewardDesc_0388 D_004786E0[][5];
+extern sRewardDesc_0388 D_00478D38[][8];
+
+extern "C" sRewardDesc_0388 func_00200388(int a, int b, int kind)
+{
+    if (kind == 0) {
+        return D_004781D0[a][b];
+    } else if (kind == 1) {
+        return D_004786E0[a][b];
+    } else if (kind == 2) {
+        return D_00478D38[a][b];
+    }
+    return D_004781D0[0][0];
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_002006B8);

@@ -66,7 +66,105 @@ void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/airpredictor", func_00113648);
+#ifdef SKIP_ASM
+extern sQuadR D_004FF130;
+extern sQuadR D_004FF140;
+extern sQuadR D_004FF160;
+extern "C" void func_00113200(char* self);
+
+struct sVec4_3648
+{
+    float x, y, z, w;
+    sVec4_3648() {}
+} __attribute__((aligned(16)));
+
+// func_001139A0 is defined later in the unit (with its own vector type).
+float func_001139A0_3648(char* self, sVec4_3648* pos, sVec4_3648* vel, sVec4_3648* outPos, sVec4_3648* outVel) __asm__("func_001139A0");
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_3648 vu0Scale_3648(const sVec4_3648& v, float s)
+{
+    sVec4_3648 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4_3648 vu0Add_3648(const sVec4_3648& a, const sVec4_3648& b)
+{
+    sVec4_3648 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" void func_00113648(char* self, sQuad* a, sQuad* b, float dt)
+{
+    if (*(float*)(self + 0x98) > 60.0f) {
+        if (*(int*)(self + 0xAC) == 2) {
+            *(int*)(self + 0xAC) = 3;
+            *(sQuadR*)(self + 0x0) = D_004FF130;
+            *(sQuadR*)(self + 0x10) = D_004FF140;
+            *(sQuadR*)(self + 0x20) = D_004FF160;
+            *(int*)(self + 0x90) = 0xD;
+        } else {
+            cAirPredictor_initLaunch(self, a, b);
+            *(int*)(self + 0xAC) = 2;
+        }
+    } else {
+        if (*(int*)(self + 0xAC) == 1 && *(float*)(self + 0x98) - *(float*)(self + 0xA0) < -0.2f) {
+            cAirPredictor_initLaunch(self, a, b);
+        }
+        int st = *(int*)(self + 0xAC);
+        if (st == 0) {
+            func_00113200(self);
+            while (*(int*)(self + 0xAC) == 0 && *(float*)(self + 0x98) < *(float*)(self + 0xA0) + dt) {
+                func_00113200(self);
+            }
+        } else if (st == 2) {
+            func_00113200(self);
+            while (*(int*)(self + 0xAC) == 2 && *(float*)(self + 0x98) < *(float*)(self + 0xA0) + dt) {
+                func_00113200(self);
+            }
+        }
+    }
+    float t = *(float*)(self + 0xA0) - *(float*)(self + 0xA4) + dt;
+    while (t >= 0.01666666753590107f) {
+        t -= 0.01666666753590107f;
+        func_001139A0_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80));
+        *(float*)(self + 0xA4) += 0.01666666753590107f;
+    }
+    if (t > 0.009999999776482582f) {
+        sVec4_3648 p;
+        sVec4_3648 v;
+        func_001139A0_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &p, &v);
+        float k = t * 59.999996185302734f;
+        *(sVec4_3648*)a = vu0Add_3648(vu0Scale_3648(p, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
+        *(sVec4_3648*)b = vu0Add_3648(vu0Scale_3648(v, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
+        ((float*)a)[3] = 1.0f;
+    } else {
+        *(sQuad*)a = *(sQuad*)(self + 0x70);
+        *(sQuad*)b = *(sQuad*)(self + 0x80);
+    }
+    *(float*)(self + 0xA0) += dt;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/airpredictor", func_00113998__FPv);

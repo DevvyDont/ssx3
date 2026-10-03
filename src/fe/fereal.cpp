@@ -386,7 +386,151 @@ extern "C" int func_001A2208(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fereal", func_001A27A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_00231D18(void* self);
+extern "C" void* func_002533C8(void* mem);
+extern "C" void* func_0028B180();
+extern "C" void func_002B3A70(void* p);
+extern "C" void func_002B3A98(void* p);
+extern "C" void func_00253390(void* self);
+extern "C" int func_002534A8(void* p, void* q);
+extern "C" int func_00253860(void* self);
+extern "C" void func_00253938(void* self);
+extern "C" void func_00253418(void* p, int a1);
+int func_00289DE0(void* self);
+void* func_00320C48(void* self, int a1);
+extern "C" void func_00398038(void* self);
+extern "C" void func_0019D250(void* p);
+extern "C" void func_001A0608(void* p);
+extern "C" void func_001A39F0(void* p);
+extern "C" void func_00263828(void* p);
+extern "C" void func_00263CF0(void* p);
+extern "C" void func_0025AC50(void* p);
+extern const char D_00461320[];
+extern int D_004A19CC;
+extern int D_004A19D0;
+extern int D_004A19E0;
+extern int D_004A19E4;
+extern int D_00441248[];
+extern int D_0044124C[];
+extern int D_00441250[];
+extern int D_00441254[];
+extern unsigned int D_00535610[];
+extern void* D_004A28A8;
+extern int D_004A29EC;
+extern void* D_004A3028;
+
+struct sVidInfo_27A0 {
+    int a;
+    int b;
+    int c;
+    int pad[9];
+};
+struct sVE_27A0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_001A27A0(char* self)
+{
+    if (*(int*)(self + 0xB5ADC) != 0) return;
+    func_00231D18(self);
+    if (*(void**)(self + 0xB5AD4) == 0) {
+        if (D_004A19CC != 0) {
+            *(void**)(self + 0xB5AD4) = func_002533C8(cMemMan_alloc(0x44, D_00461320, 0x100, 0));
+            func_002B3A70((char*)func_0028B180() + 0x118);
+            sVidInfo_27A0 info;
+            func_00253390(&info);
+            int f = D_004A19CC;
+            *(int*)(self + 0xB5AD8) = 0;
+            if (f & 1) {
+                info.a = D_00441248[0];
+                D_004A19CC = f & 0xFFFFFFFE;
+                D_004A19D0 = 1;
+            } else if (f & 2) {
+                info.a = D_0044124C[0];
+                D_004A19CC = f & 0xFFFFFFFD;
+                D_004A19D0 = 2;
+            } else if (f & 4) {
+                cBE_getInterface_Fv(cBE_getBE(), 4);
+                if (((D_00535610[0] >> 22) & 7) == 0 && func_00289DE0(func_0028B180()) != 0) {
+                    info.b = D_004A19E0;
+                    info.a = D_00441250[0];
+                } else {
+                    info.b = D_004A19E4;
+                    info.a = D_00441254[0];
+                }
+                D_004A19CC &= 0xFFFFFFFB;
+                D_004A19D0 = 4;
+                *(int*)(self + 0xB5AD8) = 1;
+            }
+            info.c = 1;
+            func_002534A8(*(void**)(self + 0xB5AD4), &info);
+            func_00253860(*(void**)(self + 0xB5AD4));
+        }
+        if (*(void**)(self + 0xB5AD4) == 0) goto noh;
+    }
+    {
+    int done = **(int**)(self + 0xB5AD4);
+    if (done == 0) {
+        func_00253938(*(void**)(self + 0xB5AD4));
+        if (*(int*)(self + 0xB5AD8) != 0) {
+            for (int i = 0; i < 2; i++) {
+                void** p = *(void***)((char*)D_004A28A8 + (i << 2) + 0xB0);
+                int ok = *p != 0 && **(int**)p != 0;
+                if (ok) {
+                    if (func_00320C48(p, 0x70) != 0 || func_00320C48(p, 0x7A) != 0) {
+                        done = 1;
+                        goto out;
+                    }
+                }
+            }
+        }
+    out:
+        if (done == 0) return;
+    }
+    if (*(void**)(self + 0xB5AD4) != 0) {
+        func_00253418(*(void**)(self + 0xB5AD4), 3);
+    }
+    int f = D_004A19CC;
+    *(int*)(self + 0xB5ADC) = 1;
+    *(void**)(self + 0xB5AD4) = 0;
+    *(int*)(self + 0xB5AD8) = 0;
+    if (f == 0) {
+        func_002B3A98((char*)func_0028B180() + 0x118);
+    }
+    return;
+    }
+noh:
+        if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+            func_00398038(*(void**)(self + 0xC));
+        } else {
+            *(int*)(self + 8) = 1;
+        }
+        sVE_27A0* vt = *(sVE_27A0**)(self + 0xA0);
+        char* obj = self + 0x10;
+        vt[3].fn(obj + vt[3].delta);
+        func_0019D250(self + 0x1A70);
+        func_001A0608(self + 0xB0);
+        if (*(void**)((char*)D_004A28A8 + 0x11C) != 0) {
+            func_001A39F0(*(void**)((char*)D_004A28A8 + 0x11C));
+        }
+        if (D_004A29EC != 0) {
+            func_00263828(self + 0xB5AB0);
+            func_00263CF0(self + 0xB5ABC);
+            if (D_004A3028 != 0) {
+                func_0025AC50(D_004A3028);
+            }
+        }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fereal", cRealFE_loadCharAnimations);
