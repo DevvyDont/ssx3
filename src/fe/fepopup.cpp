@@ -241,7 +241,46 @@ extern "C" void func_001C5DD8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C5F20);
+#ifdef SKIP_ASM
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct sColor_5F20 { float a, r, g, b; };
+struct sVEntry_5F20 {
+    short delta;
+    short index;
+    void (*fn)(void*, sColor_5F20*);
+};
+extern char D_004A1C50[];
+extern char D_004A1C58[];
+extern char D_004A15E0[];
+
+static inline void SetAlpha_5F20(char* o, float t)
+{
+    if (o != 0) {
+        sColor_5F20 c = *(sColor_5F20*)(o + 0x1C);
+        c.a = t;
+        sVEntry_5F20* vt = *(sVEntry_5F20**)(o + 8);
+        vt[11].fn(o + vt[11].delta, &c);
+    }
+}
+
+extern "C" void func_001C5F20(void* self, float t)
+{
+    char* s = (char*)self;
+    SetAlpha_5F20(*(char**)(s + 0x70), t);
+    SetAlpha_5F20(*(char**)(s + 0x74), t);
+    SetAlpha_5F20(*(char**)(s + 0x78), t);
+    SetAlpha_5F20(*(char**)(s + 0x7C), t);
+    SetAlpha_5F20(*(char**)(s + 0x88), t);
+    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A1C50)), t);
+    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A1C58)), t);
+    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A15E0)), t);
+    for (int i = 0; i < 5; i++) {
+        SetAlpha_5F20(((char**)(s + 0x90))[i], t);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cScreenPopup_FillObjectPointers);
 
@@ -314,7 +353,97 @@ extern "C" void func_001C6B08(void* self, void* info)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C6D30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cUIText;
+struct sVec3_6D30 { float x, y, z; };
+class cUIObj_6D30 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+struct sPopup_6D30 {
+    char pad[0x80];
+    cUIObj_6D30* o80;
+    cUIObj_6D30* o84;
+    cUIObj_6D30* o88;
+    cUIObj_6D30* o8C;
+};
+extern sVec3_6D30 D_004FF0D8_6D30 __asm__("D_004FF0D8");
+extern "C" void func_001C80E8(void* self, void* dst, int* info);
+extern "C" void func_001C8050(void* self, cUIText* text, int* info);
+extern "C" void func_001C8628(void* self, void* obj, void* out);
+extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
+extern "C" void func_001C9B68(void* self, float* size, float* item);
+
+extern "C" int func_001C6D30(void* self, void* infop)
+{
+    int* info = (int*)infop;
+    sPopup_6D30* p = (sPopup_6D30*)self;
+    float size[4];
+    if (info[0] == -1) {
+        sVec3_6D30 pos = D_004FF0D8_6D30;
+        float w = 0.0f;
+        if (p->o84 != 0) {
+            float item[4];
+            int* it = info + 5;
+            func_001C8050(self, (cUIText*)p->o84, it);
+            func_001C8628(self, p->o84, size);
+            func_001C8320(self, (cUIText*)p->o84, it, item);
+            w = item[2];
+            pos = *(sVec3_6D30*)((char*)p->o84 + 0x44);
+            p->o84->setEnabled(0);
+            p->o84->setVisible(1);
+        }
+        if (p->o80 != 0) {
+            func_001C80E8(self, (char*)self + 0x2B0, info + 7);
+            sVec3_6D30 v = pos;
+            v.x = v.x + w + 10.0f;
+            *(sVec3_6D30*)((char*)p->o80 + 0x44) = v;
+            func_001C9B68(self, (float*)((char*)self + 0x260), size);
+            p->o80->setEnabled(0);
+            p->o80->setVisible(1);
+        }
+        if (p->o88 != 0) {
+            p->o88->setEnabled(0);
+            p->o88->setVisible(1);
+        }
+        if (p->o8C != 0) {
+            p->o8C->setVisible(1);
+        }
+        info[0] = 1;
+        return 1;
+    }
+    if (p->o88 != 0) {
+        p->o88->setEnabled(1);
+        p->o88->setVisible(0);
+    }
+    if (p->o84 != 0) {
+        p->o84->setEnabled(1);
+        p->o84->setVisible(0);
+    }
+    if (p->o80 != 0) {
+        p->o80->setEnabled(1);
+        p->o80->setVisible(0);
+    }
+    if (p->o8C != 0) {
+        p->o8C->setVisible(0);
+    }
+    func_001C8628(self, p->o80, size);
+    func_001C9B68(self, (float*)((char*)self + 0x260), size);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C7040);
@@ -602,7 +731,74 @@ extern "C" void func_001C7738(void* self, sColor_7738* color)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C78C0);
+#ifdef SKIP_ASM
+struct sVec3_78C0 { float x, y, z; };
+// PORT: SN soft-float helpers called by name (fptodp / dpsub / dptofp); on PC: y = (float)((double)(...) - 7.5)
+extern "C" double func_00413AF8(float f);
+extern "C" double func_00411F70(double a, double b);
+extern "C" float func_004127A8(double d);
+
+extern "C" void func_001C78C0(void* self, sVec3_78C0 v, float a, float b)
+{
+    char* s = (char*)self;
+    float y = 0.0f;
+    switch (*(int*)(s + 0x31C)) {
+    case 0:
+        if (*(char**)(s + 0x48) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x188);
+            y = *(float*)(s + 0x1BC) + b + v.y * 0.5f - 5.0f;
+            p.x += a;
+            p.y = y;
+            *(sVec3_78C0*)(*(char**)(s + 0x48) + 0x44) = p;
+        }
+        if (*(char**)(s + 0x4C) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x194);
+            p.y = y;
+            p.x += a;
+            *(sVec3_78C0*)(*(char**)(s + 0x4C) + 0x44) = p;
+        }
+        break;
+    case 1:
+        if (*(char**)(s + 0x58) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x23C);
+            y = func_004127A8(func_00411F70(func_00413AF8(*(float*)(s + 0x1BC) + b + v.y * 0.5f), 7.5));
+            p.x += a;
+            p.y = y;
+            *(sVec3_78C0*)(*(char**)(s + 0x58) + 0x44) = p;
+        }
+        if (*(char**)(s + 0x5C) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x248);
+            p.y = y;
+            p.x += a;
+            *(sVec3_78C0*)(*(char**)(s + 0x5C) + 0x44) = p;
+        }
+        if (*(char**)(s + 0x50) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x224);
+            p.y = y;
+            p.x += a;
+            *(sVec3_78C0*)(*(char**)(s + 0x50) + 0x44) = p;
+        }
+        if (*(char**)(s + 0x54) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x230);
+            p.y = y;
+            p.x += a;
+            *(sVec3_78C0*)(*(char**)(s + 0x54) + 0x44) = p;
+        }
+        if (*(char**)(s + 0x60) != 0) {
+            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x254);
+            p.y = y;
+            p.x += a;
+            *(sVec3_78C0*)(*(char**)(s + 0x60) + 0x44) = p;
+        }
+        break;
+    case 2:
+        *(float*)(s + 0x27C) = *(float*)(s + 0x278) = 1.0f;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C7BE0);
@@ -616,7 +812,68 @@ extern "C" float func_001C7BE0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001C7C20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sVec3_7C20 { float x, y, z; };
+extern "C" float func_001C7BE0(void* self);
+void func_001C7620_7C20(void* self, sVec3_7C20 v) __asm__("func_001C7620");
+void func_001C78C0_7C20(void* self, sVec3_7C20 v, float a, float b) __asm__("func_001C78C0");
+
+extern "C" void func_001C7C20(void* self)
+{
+    char* s = (char*)self;
+    float x = func_001C7BE0(self) + *(float*)(s + 0x26C);
+    float y = *(float*)(s + 0x270);
+    func_001C7620_7C20(self, *(sVec3_7C20*)(s + 0x260));
+    func_001C78C0_7C20(self, *(sVec3_7C20*)(s + 0x260), *(float*)(s + 0x26C), y);
+    char* p = *(char**)(s + 0x6C);
+    if (p != 0) {
+        sVec3_7C20 v = *(sVec3_7C20*)(p + 0x44);
+        v.x += *(float*)(s + 0x26C);
+        v.y += y;
+        *(sVec3_7C20*)(p + 0x44) = v;
+    }
+    p = *(char**)(s + 0x70);
+    if (p != 0) {
+        sVec3_7C20 v = *(sVec3_7C20*)(p + 0x44);
+        v.x += *(float*)(s + 0x26C);
+        v.y += y;
+        *(sVec3_7C20*)(p + 0x44) = v;
+    }
+    if (*(char**)(s + 0x74) != 0) {
+        sVec3_7C20 v = *(sVec3_7C20*)(*(char**)(s + 0x74) + 0x44);
+        if (*(int*)(s + 0x2CC) != 0) {
+            v.x = x + 320.0f;
+        } else {
+            v.x += x;
+        }
+        v.y += y;
+        *(sVec3_7C20*)(*(char**)(s + 0x74) + 0x44) = v;
+    }
+    if (*(char**)(s + 0x7C) != 0) {
+        sVec3_7C20 v = *(sVec3_7C20*)(*(char**)(s + 0x7C) + 0x44);
+        if (*(int*)(s + 0x2CC) != 0) {
+            v.x = x + 320.0f;
+        } else {
+            v.x += x;
+        }
+        v.y += y;
+        *(sVec3_7C20*)(*(char**)(s + 0x7C) + 0x44) = v;
+    }
+    if (*(char**)(s + 0x78) != 0) {
+        sVec3_7C20 v = *(sVec3_7C20*)(*(char**)(s + 0x78) + 0x44);
+        if (*(int*)(s + 0x2CC) != 0) {
+            v.x = x + 320.0f;
+        } else {
+            v.x += x;
+        }
+        v.y += y;
+        *(sVec3_7C20*)(*(char**)(s + 0x78) + 0x44) = v;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C7EB0);
@@ -2840,7 +3097,76 @@ extern "C" void func_001CC848(void* self, int a1)
 
 INCLUDE_ASM("fe/fepopup", func_001CC8D8);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CCC30);
+#ifdef SKIP_ASM
+struct sVec3_CC30 { float x, y, z; };
+struct sRect_CC30 {
+    float x, y, w, h;
+    void Measure(char* f, const char* str, int flag)
+    {
+        func_00391FB0(f, str, this, flag, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    }
+};
+struct sVEntry_CC30 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+extern "C" void func_001CE4C8(void* self, void* obj);
+extern "C" char* strncpy(char* dst, const char* src, int n);
+extern char D_00466570[];
+
+extern "C" void func_001CCC30(void* self)
+{
+    sVec3_CC30 pos;
+    char* s = (char*)self;
+
+    void* text = cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466530));
+    char* t = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466530));
+    if (t != 0) {
+        sVEntry_CC30* vt = *(sVEntry_CC30**)(t + 8);
+        vt[20].fn(t + vt[20].delta, s + 0x3F4);
+        *(sVec3_CC30*)(s + 0x3E8) = *(sVec3_CC30*)(t + 0x44);
+    }
+    *(float*)(s + 0x410) = *(float*)(s + 0x3F8) + *(float*)(s + 0x3EC) - *(float*)(s + 0x404) - 2.0f;
+    unsigned char c = *(s + *(int*)(s + 0x134) + 0x74);
+    char tc = *(s + *(int*)(s + 0x134) + 0x74);
+    pos = *(sVec3_CC30*)(s + 0x400);
+    if (tc != 0) {
+        sRect_CC30 size;
+        char ch[2];
+        ch[1] = 0;
+        if (*(int*)(s + 0x70) != 0) {
+            ch[0] = '*';
+        } else {
+            ch[0] = c;
+        }
+        func_001CE4C8(self, text);
+        char* f = (char*)func_003A04F0(text);
+        size.Measure(f, ch, ch[0] == ' ');
+        pos.x = size.w;
+    }
+    t = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466570));
+    sVEntry_CC30* vt = *(sVEntry_CC30**)(t + 8);
+    vt[21].fn(t + vt[21].delta, &pos);
+    char buf[0x40];
+    if (*(int*)(s + 0x70) != 0) {
+        func_001CCE98((sPwd_CCE98*)self, s + 0xB4);
+        strncpy(buf, s + 0xF4, *(int*)(s + 0x134) - *(int*)(s + 0x138));
+    } else {
+        strncpy(buf, s + 0xB4, *(int*)(s + 0x134) - *(int*)(s + 0x138));
+    }
+    buf[*(int*)(s + 0x134) - *(int*)(s + 0x138)] = 0;
+    func_001CE4C8(self, text);
+    char* f = (char*)func_003A04F0(text);
+    sRect_CC30 size;
+    size.Measure(f, buf, 1);
+    sVec3_CC30 p = *(sVec3_CC30*)(s + 0x40C);
+    p.x = size.w + *(float*)(s + 0x3E8);
+    *(sVec3_CC30*)(t + 0x44) = p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CCE98);
@@ -2997,7 +3323,102 @@ extern "C" void func_001CD2F0(void* self, int a1)
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainTransition);
 
+//100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_redrawScreen);
+#ifdef SKIP_ASM
+static inline bool Neg_D708(bool b) { return !b; }
+static inline bool Shift_D708(char* s) { return *(bool*)(s + 0x6C); }
+struct cUIText;
+struct sVEntry_D708 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+extern "C" int cKeyboardPopup_getObjName(void* self, int i, char* out, int mode);
+extern "C" void cKeyboardPopup_SetNameForKey(void* self, cUIText* text, int i);
+extern "C" void func_001CE520(void* self);
+extern signed char D_00441390[];
+extern signed char D_004413E8[];
+extern char D_004C67B8[];
+extern char D_004C67C8[];
+extern char D_004C67E8[];
+extern char D_004C67F8[];
+
+extern "C" void cKeyboardPopup_redrawScreen(void* self)
+{
+    char* s = (char*)self;
+    char name[0x20];
+    char ch[2];
+    if (*(void**)(s + 0x40) == 0) {
+        return;
+    }
+    ch[1] = 0;
+    for (int i = 0; i < 0x54; i++) {
+        if (cKeyboardPopup_getObjName(self, i, name, 0) == 0) {
+            continue;
+        }
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(name));
+        if (D_00441390[i] == '@' || D_00441390[i] == ' ') {
+            cKeyboardPopup_SetNameForKey(self, text, i);
+        } else {
+            int caps = *(int*)(s + 0x68) != 0;
+            bool upper;
+            if (Shift_D708(s)) {
+                upper = Neg_D708(caps);
+            } else {
+                upper = caps;
+            }
+            if (i >= 0xF && i < 0x1B) {
+                upper = !Shift_D708(s);
+            }
+            func_001CE520(self);
+            if (upper) {
+                ch[0] = D_00441390[i];
+            } else {
+                ch[0] = D_004413E8[i];
+            }
+            if (text != 0) {
+                cUIText_setAsciiString(text, ch);
+                if (func_001CE560(self, i, 0) == 0) {
+                    sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+                    vt[11].fn((char*)text + vt[11].delta, D_004C67B8);
+                } else {
+                    sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+                    vt[11].fn((char*)text + vt[11].delta, D_004C67C8);
+                }
+            }
+        }
+        cKeyboardPopup_getObjName(self, i, name, 1);
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(name));
+        if (o != 0) {
+            if (*(int*)(s + 0x43C) == 1) {
+                if (i >= 0 && i < 0xE) {
+                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
+                    vt[9].fn(o + vt[9].delta, (void*)0);
+                } else {
+                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
+                    vt[9].fn(o + vt[9].delta, (void*)1);
+                }
+            } else {
+                {
+                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
+                    vt[11].fn(o + vt[11].delta, D_004C67F8);
+                }
+                {
+                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
+                    vt[9].fn(o + vt[9].delta, (void*)1);
+                }
+            }
+        }
+    }
+    cKeyboardPopup_getObjName(self, *(int*)(s + 0x140), name, 1);
+    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(name));
+    if (o != 0) {
+        sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
+        vt[11].fn(o + vt[11].delta, D_004C67E8);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_SetNameForKey);
 

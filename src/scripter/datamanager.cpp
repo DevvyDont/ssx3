@@ -707,7 +707,107 @@ void* func_00276CA8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", func_00276CC8);
+#ifdef SKIP_ASM
+void* func_00230698(void* self, int a1);
+extern "C" void func_00276388(void* self, int a1, int a2);
+extern "C" void func_00277778(void* self);
+extern "C" void func_00277800(void* self);
+extern "C" void func_00277838(void* self);
+extern "C" void func_00277980(void* self);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void func_00282720(void* self, int a1);
+extern "C" int func_00282798(void* self, int a1);
+extern "C" int func_00282838(void* self, int a1);
+extern "C" int func_002839A8(void* self);
+extern "C" int func_00283BB8(void* self);
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" void func_002E4578(void* p);
+extern char* D_004A28A8;
+
+extern "C" void func_00276CC8(char* self)
+{
+    if (*(int*)(self + 0xA4) == 1) {
+        func_00277778(self);
+        return;
+    }
+    if (*(int*)(self + 0xA4) == 2) {
+        int v = *(int*)(self + 0xB4);
+        if (v != 0) {
+            func_00276388(self, v == 1, 0);
+            *(int*)(self + 0xB4) = 0;
+        }
+    }
+    if (*(int*)(self + 0xA4) != 3) {
+        return;
+    }
+    if (*(int*)(self + 0xC4) != 0) {
+        return;
+    }
+    if (*(int*)(self + 0xB0) != 0) {
+        char* item = (char*)func_00283D70(self + 0xC, 0);
+        char* obj = (char*)func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+        if (*(int*)(self + 0xB8) != 0) {
+            if (--*(int*)(self + 0xB8) == 0) {
+                if (*(int*)(self + 0xAC) == 0) {
+                    func_00277800(self);
+                    return;
+                }
+                if (func_00277DD8(self, item) == 0) {
+                    func_00282720(*(void**)self, *(int*)(item + 0xC));
+                } else {
+                    func_002839A8(*(char**)self + 0x500);
+                }
+            }
+        }
+        if (*(int*)(obj + 0x44) == 0 && *(int*)(self + 0xB8) == 0) {
+            *(int*)(self + 0xAC) = 0;
+            *(int*)(self + 0xB0) = 0;
+        }
+    }
+    if (*(int*)(self + 0xA8) != 0) {
+        void* list = self + 0xC;
+        char* item = (char*)func_00283D70(list, *(int*)(self + 0xBC));
+        int ok;
+        if (func_00277DD8(self, item) == 0) {
+            ok = func_00282798(*(void**)self, *(int*)((char*)func_00283D70(list, *(int*)(self + 0xBC)) + 0xC)) == 2;
+        } else {
+            ok = *(int*)(item + 0xC) >= 0;
+        }
+        if (ok) {
+            func_00277C08(self, 0, 1);
+            func_00277838(self);
+        }
+        return;
+    }
+    if (*(int*)(self + 0xC8) != 0) {
+        if (--*(int*)(self + 0xC8) == 0) {
+            if (*(int*)(self + 0xB0) != 0) {
+                func_002E4578(func_00230698(*(void**)(D_004A28A8 + 0x84), 0));
+                *(int*)(self + 0xAC) = 0;
+                *(int*)(self + 0xB0) = 0;
+                *(int*)(self + 0xB8) = 0;
+            }
+            func_00277800(self);
+            return;
+        }
+    }
+    char* item = (char*)func_00283D70(self + 0xC, 0);
+    int done = 0;
+    if (func_00277DD8(self, item) == 0) {
+        if (func_00282798(*(void**)self, *(int*)(item + 0xC)) == 2 || func_00282838(*(void**)self, *(int*)(item + 0xC)) != 0) {
+            done = 1;
+        }
+    } else if (func_00283BB8(*(char**)self + 0x500) != 0) {
+        func_00277980(self);
+        done = 1;
+    }
+    if (done) {
+        func_00277800(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276F48);
@@ -1105,7 +1205,100 @@ extern "C" void func_00277838(void* selfp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277980);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* func_00230698(void* self, int a1);
+char* func_0027C070(void* obj);
+extern "C" int func_00277DD8(void* self, void* a1);
+struct sDmEnt7DE8;
+extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
+extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" void func_002E4578(void* p);
+extern "C" int func_0027A4A0(void* self, int a1, int a2);
+extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
+extern "C" void func_002E44F0(void* snd, int a1, int h, float t);
+extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
+extern char* D_004A28A8;
+extern void* D_004A28A4;
+
+struct sDmFade_7980 {
+    char pad_0x0[0x10];
+    signed char cat;        // 0x10
+    signed char key;        // 0x11
+    short tIn;              // 0x12
+    short tHold;            // 0x14
+    short tOut;             // 0x16
+};
+
+struct sDmEnt_7980 {
+    int v0;
+    int cat;                // 0x4
+    int key;                // 0x8
+    float t;                // 0xC
+};
+
+// The unit declares func_00277980 as void; it returns whether it handled the update.
+int func_00277980_impl(char* self) __asm__("func_00277980");
+
+int func_00277980_impl(char* self)
+{
+    if (*(int*)(self + 0xB0) != 0) {
+        if (*(int*)(self + 0xAC) != 0) {
+            func_002E4578(func_00230698(*(void**)(D_004A28A8 + 0x84), 0));
+            return 0;
+        }
+        return 1;
+    }
+    char* item = (char*)func_00283D70(self + 0xC, 0);
+    if (func_00277DD8(self, item) == 0) {
+        sDmFade_7980* f = (sDmFade_7980*)func_0027C070(func_00282BF0(D_004A28A4, *(int*)(item + 0xC)));
+        void* snd = func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+        if (*(int*)((char*)snd + 0x44) != 0) {
+            func_002E4578(snd);
+        }
+        if (f->tIn + f->tHold + f->tOut > 0) {
+            if (f->cat != 7) {
+                int h = func_0027A4A0(*(void**)self, f->cat, f->key);
+                if (h == 0) {
+                    return 0;
+                }
+                int h2 = func_0027A4A0(*(void**)self, f->cat, f->key);
+                func_002E4370(snd, 2, h, h2, 0, 0, (float)f->tIn * 0.01666666753590107f, (float)f->tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f);
+                *(int*)(self + 0xB8) = f->tIn + f->tHold;
+            } else {
+                int h = func_0027A4A0(D_004A28A4, 7, f->key);
+                func_002E4540(snd, 2, h, 0, (float)f->tIn * 0.01666666753590107f);
+                *(int*)(self + 0xB8) = 0;
+            }
+            if (*(int*)(self + 0xB8) > 0) {
+                *(int*)(self + 0xAC) = 0;
+                *(int*)(self + 0xB0) = 1;
+            }
+        }
+    } else {
+        sDmEnt_7980* e = (sDmEnt_7980*)func_00277DE8(self, (int*)item);
+        void* snd = func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+        if (*(int*)((char*)snd + 0x44) != 0) {
+            func_002E4578(snd);
+        }
+        if (0.0f < e->t) {
+            if (e->cat != 7) {
+                int h = func_0027A4A0(*(void**)self, e->cat, e->key);
+                func_002E44F0(snd, 2, h, e->t);
+                *(int*)(self + 0xB8) = 0;
+            } else {
+                int h = func_0027A4A0(D_004A28A4, 7, e->key);
+                func_002E4540(snd, 2, h, 0, e->t);
+                *(int*)(self + 0xB8) = 0;
+            }
+        }
+    }
+    return *(int*)(self + 0xB0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277C08);

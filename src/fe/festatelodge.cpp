@@ -100,11 +100,202 @@ extern "C" void cFEStateLodge_onWidgetCreate(void* self, void* w)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F3A38);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
+extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern void* D_004A28A8;
+extern int D_00441AF8[];
+extern char D_0046EEA8[];
+extern char D_0046EEC0[];
+extern char D_0046EED0[];
+extern char D_0046EEF0[];
+extern char D_0046E050[];
+
+struct sVE_1F3A38s {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+struct sVE_1F3A38p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001F3A38(char* self, char* w, int event)
+{
+    if (w == 0) {
+        return;
+    }
+    if (event != 5) {
+        return;
+    }
+    if (D_00441AF8[*(int*)(w + 0x18)] == 0) {
+        return;
+    }
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    if (*(int*)(w + 0x18) == 0 && *(int*)(self + 0x4C) == 0) {
+        char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
+        unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EEA8));
+        void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
+        void* o = func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+        *(int*)(self + 0x50) = 0x10;
+        func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+        return;
+    }
+    int k = *(int*)(w + 0x18);
+    if (k == 6 && *(int*)(self + 0x4C) == 0) {
+        char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
+        unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EED0));
+        void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
+        void* o = func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+        *(int*)(self + 0x50) = k;
+        func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+        return;
+    }
+    if (k == 8) {
+        *(int*)(**(char***)(self + 0x10) + 0xC) = 0x27;
+        void* p = cMemMan_alloc(0x280, D_0046EEF0, 0, 0);
+        void* o = func_0018ECA0(p, *(void**)(self + 0x10), 3, 1 << *(signed char*)(self + 0x14));
+        func_0039F400(*(char**)(self + 0x10) + 0x18, o);
+        return;
+    }
+    cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0046E050)), 1);
+    char* obj = **(char***)(self + 0x10);
+    sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
+    void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
+    if (r != 0) {
+        func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F3CC8);
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F3CF0);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
+extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
+extern "C" void func_0039F190(void* list, int a1);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F4C0(void* list, void* item);
+extern "C" void cUIStateStack_pushSpecial(void* list, void* item, int a2, int a3);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern void* D_004A28A8;
+extern char D_0046EDC0[];
+extern char D_0046E050[];
+extern char D_0046EEC0[];
+extern char D_0046EEF0[];
+extern char D_0046EF08[];
+
+struct sVE_1F3CF0s {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+struct sVE_1F3CF0p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sVE_1F3CF0o {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001F3CF0(char* self, char* msg, unsigned int id)
+{
+    switch (id) {
+    case 0xF:
+        *(int*)(self + 0x54) = 1;
+        if (*(int*)(self + 0x50) == 6 || *(int*)(self + 0x50) == 0x10 || *(int*)(self + 0x50) == 0x11) {
+            func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        }
+        break;
+    case 0x10:
+        *(int*)(self + 0x54) = 0;
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        switch (*(int*)(self + 0x50)) {
+        case 0x10: {
+            *(int*)(self + 0x4C) = 1;
+            sVE_1F3CF0o* vt = *(sVE_1F3CF0o**)(self + 8);
+            vt[19].fn(self + vt[19].delta, cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046EDC0)), 5);
+            break;
+        }
+        case 0x11: {
+            *(int*)(self + 0x4C) = 1;
+            cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0046E050)), 1);
+            char* obj = **(char***)(self + 0x10);
+            sVE_1F3CF0p* vt = *(sVE_1F3CF0p**)(obj + 4);
+            void* r = vt[4].fn(obj + vt[4].delta, self, 6);
+            if (r != 0) {
+                func_0039F4C0(*(char**)(self + 0x10) + 0x18, r);
+            }
+            break;
+        }
+        }
+        break;
+    case 0x15:
+        break;
+    case 0x16:
+        if (*(int*)(msg + 0xC) != 0) {
+            break;
+        }
+        if (*(int*)(self + 0x54) == 0) {
+            break;
+        }
+        switch (*(int*)(self + 0x50)) {
+        case 0x10: {
+            void* p = cMemMan_alloc(0x280, D_0046EEF0, 0x100, 0);
+            char* o = (char*)func_0018ECA0(p, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
+            *(int*)(o + 0x27C) = 1;
+            *(int*)(o + 0x1C) = (*(int*)(o + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, o, 0, 1);
+            break;
+        }
+        case 0x11: {
+            void* p = cMemMan_alloc(0x280, D_0046EEF0, 0x100, 0);
+            char* o = (char*)func_0018ECA0(p, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
+            *(int*)(o + 0x27C) = 2;
+            *(int*)(o + 0x1C) = (*(int*)(o + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, o, 0, 1);
+            break;
+        }
+        case 6: {
+            char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVE_1F3CF0s* vt = *(sVE_1F3CF0s**)(mgr + 4);
+            unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EF08));
+            void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
+            void* o = func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+            *(int*)(self + 0x50) = 0x11;
+            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+            break;
+        }
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatelodge", func_001F3FF8);

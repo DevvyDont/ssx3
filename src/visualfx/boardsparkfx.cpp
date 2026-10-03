@@ -245,5 +245,107 @@ INCLUDE_ASM("visualfx/boardsparkfx", func_002DAA78);
 
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DABC8);
 
+//100%
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DB478);
+#ifdef SKIP_ASM
+extern "C" void func_00371688(void* self, int a1);
+
+struct sRS_B478 {
+    int v[5];
+};
+struct sRenderCtx_B478 {
+    char pad[0xE84];
+    sRS_B478* top;
+};
+extern sRenderCtx_B478* D_004A289C;
+extern char* D_004A5B80;
+
+struct sVec2_B478 {
+    float x, y;
+    sVec2_B478(float ax, float ay) : x(ax), y(ay) {}
+};
+struct sVec4_B478 {
+    float x, y, z, w;
+    sVec4_B478(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+// Function-local statics `uv0(0,0)`, `uv1(1,1)`, `col(1,1,1,1)` and their init guards, spelled out
+// as the globals splat named.
+extern float D_004A54D0;
+extern float D_004A54D4;
+extern int D_004A54D8;
+extern float D_004A54E0;
+extern float D_004A54E4;
+extern int D_004A54E8;
+extern int D_004A54EC;
+extern sVec4_B478 D_004D57A0;
+
+struct sVE_B478a {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVE_B478b {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, sVec2_B478*, const sVec2_B478*, const sVec2_B478*, const sVec4_B478*);
+};
+
+static inline void push_B478(sRenderCtx_B478* ctx)
+{
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+}
+
+static inline void pop_B478(sRenderCtx_B478* ctx)
+{
+    ctx->top--;
+}
+
+extern "C" void func_002DB478(char* self)
+{
+    char* o = *(char**)(self + 0x20);
+    if (*(int*)(o + 0x1E0) > 0) {
+        func_00371688(o, 7);
+    }
+    if (*(int*)(self + 0x70) != 0) {
+        push_B478(D_004A289C);
+        *D_004A289C->top = *(sRS_B478*)(self + 0x7C);
+        char* ctx = (char*)D_004A289C;
+        sVE_B478a* vt = *(sVE_B478a**)(ctx + 0x10D8);
+        vt[82].fn(ctx + vt[82].delta, *(int*)(self + 0x28));
+        pop_B478(D_004A289C);
+    }
+    if (*(int*)(self + 0x74) != 0) {
+        push_B478(D_004A289C);
+        *D_004A289C->top = *(sRS_B478*)(self + 0x90);
+        if (D_004A54D8 == 0) {
+            D_004A54D8 = 1;
+            D_004A54D0 = 0.0f;
+            D_004A54D4 = 0.0f;
+        }
+        if (D_004A54E8 == 0) {
+            D_004A54E8 = 1;
+            D_004A54E0 = 1.0f;
+            D_004A54E4 = 1.0f;
+        }
+        if (D_004A54EC == 0) {
+            D_004A54EC = 1;
+            D_004D57A0.x = 1.0f;
+            D_004D57A0.y = 1.0f;
+            D_004D57A0.z = 1.0f;
+            D_004D57A0.w = 1.0f;
+        }
+        sVec2_B478* uv0 = (sVec2_B478*)&D_004A54D0;
+        sVec2_B478* uv1 = (sVec2_B478*)&D_004A54E0;
+        for (int i = 0; i < 3; i++) {
+            sVec2_B478 size(((float*)(self + 0x60))[i], ((float*)(self + 0x60))[i]);
+            char* ctx = D_004A5B80;
+            sVE_B478b* vt = *(sVE_B478b**)(ctx + 0x10D8);
+            vt[78].fn(ctx + vt[78].delta, self + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
+        }
+        pop_B478(D_004A289C);
+    }
+}
+#endif
 

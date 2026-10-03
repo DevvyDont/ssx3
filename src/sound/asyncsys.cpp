@@ -47,7 +47,146 @@ extern "C" void func_0028A230(cAsyncSys* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028A298);
+#ifdef SKIP_ASM
+extern "C" int func_003DF748(char* name, int a1, int a2);
+extern "C" int func_003DF690(char* name, int a1);
+
+struct sRing_A298 {
+    int size;
+    int* data;
+    int head;
+    int tail;
+};
+
+struct sVE_A298 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int, int);
+};
+
+class cAsync_A298 {
+public:
+    char data[0x1D4];
+    // vptr at 0x1D4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void notify(int id);
+};
+
+struct sAsync_A298 {
+    int result;             // 0x0
+    int busy;               // 0x4
+    int slot;               // 0x8
+    char names[6][0x40];    // 0xC
+    char pad18C[0x18C - 0xC - 6 * 0x40];
+    sRing_A298 q18C;        // 0x18C
+    sRing_A298 q19C;        // 0x19C
+    sRing_A298 q1AC;        // 0x1AC
+    sRing_A298 q1BC;        // 0x1BC
+    void* buf;              // 0x1CC
+    int bufSize;            // 0x1D0
+    sVE_A298* vt;           // 0x1D4
+};
+
+extern "C" void func_0028A298(void* self)
+{
+    sAsync_A298* s = (sAsync_A298*)self;
+    if (s->busy != 0) {
+        return;
+    }
+    sRing_A298* q0 = &s->q18C;
+    if (s->q18C.head == s->q18C.tail) {
+        return;
+    }
+    s->busy = 1;
+    ((cAsync_A298*)self)->notify(q0->data[q0->tail]);
+    int kind;
+    {
+        sRing_A298* q = &s->q1AC;
+        if (s->q1AC.head == s->q1AC.tail) {
+            kind = -1;
+        } else {
+            kind = q->data[q->tail];
+        }
+    }
+    switch (kind) {
+    case 0: {
+        int idx;
+        sRing_A298* q = &s->q19C;
+        if (s->q19C.head == s->q19C.tail) {
+            idx = -1;
+        } else {
+            idx = q->data[q->tail];
+        }
+        s->result = func_003DF748(s->names[idx], (int)s->buf, s->bufSize);
+        break;
+    }
+    case 2: {
+        int idx;
+        sRing_A298* q = &s->q19C;
+        if (s->q19C.head == s->q19C.tail) {
+            idx = -1;
+        } else {
+            idx = q->data[q->tail];
+        }
+        s->result = func_003DF748(s->names[idx], (int)s->buf, s->bufSize);
+        break;
+    }
+    case 1: {
+        int idx;
+        {
+            sRing_A298* q = &s->q19C;
+            if (s->q19C.head == s->q19C.tail) {
+                idx = -1;
+            } else {
+                idx = q->data[q->tail];
+            }
+        }
+        char* name = s->names[idx];
+        int a, c;
+        // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
+        sVE_A298* vt = s->vt;
+        char* thisp = (char*)s + vt[3].delta;
+        int (**pf)(void*, int, int, int) = &vt[3].fn;
+        if (s->q18C.head == s->q18C.tail) {
+            a = -1;
+        } else {
+            a = q0->data[q0->tail];
+        }
+        sRing_A298* q3 = &s->q1BC;
+        if (s->q1BC.head == s->q1BC.tail) {
+            c = -1;
+        } else {
+            c = q3->data[q3->tail];
+        }
+        int r = (*pf)(thisp, a, -1, c);
+        sVE_A298* vt2 = s->vt;
+        char* thisp2 = (char*)s + vt2[4].delta;
+        int (**pf2)(void*, int, int, int) = &vt2[4].fn;
+        int b;
+        if (s->q18C.head == s->q18C.tail) {
+            b = -1;
+        } else {
+            b = q0->data[q0->tail];
+        }
+        int r2 = ((int (*)(void*, int))*pf2)(thisp2, b);
+        if (r != 0) {
+            s->result = func_003DF748(name, r, r2);
+        } else {
+            int d;
+            if (s->q1BC.head == s->q1BC.tail) {
+                d = -1;
+            } else {
+                d = q3->data[q3->tail];
+            }
+            s->result = func_003DF690(name, d);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/asyncsys", func_0028A558);

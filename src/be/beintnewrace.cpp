@@ -289,7 +289,92 @@ extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
+#ifdef SKIP_ASM
+extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
+extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
+extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int a1);
+extern "C" void func_00147828(int a0);
+int cBENewPlayerInterface_isMissionMan(int a0);
+void* cBENewPlayerInterface_getThis();
+
+// Allowed game modes per game type (one byte per mode).
+struct sModeRow_144DF0 {
+    signed char allowed[0x43];
+};
+extern sModeRow_144DF0 D_0043E700[];
+
+struct sVE_144DF0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline char* Race_144DF0()
+{
+    return (char*)&D_00535BC8;
+}
+
+extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
+{
+    sModeRow_144DF0 row = D_0043E700[*((signed char*)Race_144DF0() + 0x49)];
+    int humans = 1;
+    int ai = 5;
+    if (*((signed char*)Race_144DF0() + 0x49) == 2) {
+        humans = 2;
+        ai = 4;
+    }
+    if (row.allowed[mode] != 1) {
+        return 0;
+    }
+    if (mode == 4) {
+        *((signed char*)Race_144DF0() + 0x48) = mode;
+        cBENewRaceInterface_setNumberHumans(self, 1);
+        cBENewRaceInterface_setNumberAI(self, 0);
+        cBENewRaceInterface_setNumberMission(self, 1);
+        char* p = (char*)cBENewPlayerInterface_getThis();
+        func_00147828(1);
+        sVE_144DF0* vt = *(sVE_144DF0**)(p + 0xC);
+        vt[1].fn(p + vt[1].delta);
+    } else if (*((signed char*)Race_144DF0() + 0x48) == 4) {
+        cBENewRaceInterface_setNumberHumans(self, humans);
+        cBENewRaceInterface_setNumberAI(self, 0);
+        cBENewRaceInterface_setNumberMission(self, 0);
+        char* p = (char*)cBENewPlayerInterface_getThis();
+        if (cBENewPlayerInterface_isMissionMan(1) != 0) {
+            cBENewPlayerInterface_resetFromMissionMan(p, 1);
+            sVE_144DF0* vt = *(sVE_144DF0**)(p + 0xC);
+            vt[1].fn(p + vt[1].delta);
+        }
+    }
+    *((signed char*)Race_144DF0() + 0x48) = mode;
+    if (mode == 3 || mode == 5 || mode == 6) {
+        cBENewRaceInterface_setNumberHumans(self, humans);
+        unsigned char ev = *((unsigned char*)Race_144DF0() + 0x4A);
+        if (ev >= 4 && ev <= 5 && *((signed char*)Race_144DF0() + 0x49) != 2) {
+            cBENewRaceInterface_setNumberAI(self, 1);
+        } else {
+            cBENewRaceInterface_setNumberAI(self, 0);
+        }
+        cBENewRaceInterface_setNumberMission(self, 0);
+    }
+    if (mode == 0) {
+        cBENewRaceInterface_setNumberHumans(self, humans);
+        cBENewRaceInterface_setNumberAI(self, ai);
+        cBENewRaceInterface_setNumberMission(self, 0);
+    }
+    if (mode == 1) {
+        cBENewRaceInterface_setNumberHumans(self, humans);
+        cBENewRaceInterface_setNumberAI(self, 1);
+        cBENewRaceInterface_setNumberMission(self, 0);
+    }
+    if (mode == 5) {
+        cBENewRaceInterface_setGameEvent(self, 4);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00145108);

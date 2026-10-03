@@ -247,7 +247,193 @@ void func_0038D660(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038D690);
+#ifdef SKIP_ASM
+struct sVec3_D690 { float x, y, z; };
+struct sQuad_D690 { long lo; long hi; } __attribute__((aligned(16)));
+struct sRS_D690 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+struct sEnt_D690 {
+    sRS_D690 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+struct sRing_D690 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_D690 ents[1];              // 0x80
+};
+struct sGfx_D690 {
+    char pad_0x0[0xC4];
+    float detailScale;              // 0xC4
+    char pad_0xC8[0xE84 - 0xC8];
+    sRS_D690* top;                  // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sRing_D690* ring;               // 0x18F0
+};
+extern float D_004A4348;
+extern void* D_004A4474;
+extern sGfx_D690* D_004A5B80_D690 __asm__("D_004A5B80");
+extern char D_1460[];
+extern "C" char* func_0038F460(void* self, unsigned int addr, int size, int flags);
+extern "C" unsigned int func_0038F668(void* self, char* end, int arg);
 
+static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
+{
+    sQuad_D690* d = (sQuad_D690*)*pp;
+    sQuad_D690* end = d + n;
+    while (d != end) {
+        *d++ = *src++;
+    }
+    *pp = (char*)d;
+}
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int.
+extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle)
+{
+    char* s = (char*)self;
+    char* o = (char*)obj;
+    if ((*(int*)(o + 0xC) & 0x800000) == 0) {
+        return;
+    }
+    sVec3_D690 d;
+    d.z = *(float*)(o + 0x160) - *(float*)(o + 0x16C);
+    sGfx_D690* gfx = D_004A5B80_D690;
+    d.x = *(float*)(o + 0x158) - *(float*)(o + 0x164);
+    d.y = *(float*)(o + 0x15C) - *(float*)(o + 0x168);
+    int n = (int)((d.x * d.x + d.y * d.y + d.z * d.z) * (D_004A4348 * 3.3333333249174757e-07f) * gfx->detailScale);
+    if (*(int*)((char*)patch + 8) < 2) {
+        n /= 2;
+    }
+    if (n <= 0) {
+        return;
+    }
+    unsigned int buf = *handle;
+    char* p = func_0038F460(D_004A4474, buf, -1, 0);
+    ((long*)p)[0] = 0x10000018;
+    ((long*)p)[1] = 0;
+    ((long*)p)[2] = 0;
+    ((long*)p)[3] = (long)0x6C168000 << 32;
+    *(int*)(s + 0x43C) = n;
+    p += 0x20;
+    CopyQuads_D690(&p, (sQuad_D690*)(o + 0x40), 16);
+    CopyQuads_D690(&p, (sQuad_D690*)(s + 0x3E0), 4);
+    CopyQuads_D690(&p, (sQuad_D690*)(s + 0x420), 2);
+    ((long*)p)[0] = (long)(((unsigned int)D_1460 >> 3) | 0x14000000) << 32;
+    ((long*)p)[1] = (long)0x11000000 << 32;
+    p += 0x10;
+    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    *handle = next;
+    sRing_D690* ring = gfx->ring;
+    sRS_D690* rs = gfx->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_D690* e = (sEnt_D690*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    *handle += 0x10;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/bezierman", func_0038D968);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sRS_D968 {
+    int field_0x0;
+    int flagsA;
+    int flagsB;
+    int field_0xC;
+    short tex;
+    short pad;
+};
+struct sCtx_D968 {
+    char pad_0x0[0x64];
+    int texSel;                                 // 0x64
+    char pad_0x68[0xE84 - 0x68];
+    sRS_D968* top;                              // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x6B90 - 0xF50) / 4];           // 0xF50
+    int field_0x6B90;                           // 0x6B90
+};
+struct sBezPatch_D968 {
+    void* obj;
+    int extra;
+    int kind;
+    unsigned short tex;
+    short pad;
+};
+struct sBezMixPatch_D968 {
+    void* obj;
+    int extra;
+    int kind;
+    unsigned short tex;
+    short pad;
+    unsigned char types[4];
+};
+struct sBezMan_D968 {
+    char pad_0x0[0x4A60];
+    int n8;                         // 0x4A60
+    sBezPatch_D968 list8[50];       // 0x4A64
+    int nMix;                       // 0x4D84
+    sBezMixPatch_D968 mix[75];      // 0x4D88
+};
+extern int D_004A44E0;
+extern sCtx_D968* D_004A5B80_D968 __asm__("D_004A5B80");
+extern "C" void func_0037D968(sCtx_D968* ctx);
+extern "C" void* func_0038F708(void* obj, int a1, int a2);
+extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle);
+
+extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* a1)
+{
+    if (D_004A44E0 != 0) {
+        return;
+    }
+    sCtx_D968* ctx = D_004A5B80_D968;
+    ctx->top[1] = ctx->top[0];
+    sRS_D968* t = ctx->top;
+    ctx->top = t + 1;
+    int tex = ctx->texIds[ctx->texSel];
+    t[1].tex = tex;
+    ctx->top->flagsA = (ctx->top->flagsA & ~0x7C) | 0x54;
+    ctx->top->flagsB = (ctx->top->flagsB & ~0x3E0) | 0x80;
+    ctx->top->flagsA = (ctx->top->flagsA & 0xFE7FFFFF) | 0x800000;
+    ctx->top->flagsA = (ctx->top->flagsA & 0xFFCFFFFF) | 0x300000;
+    ctx->top->flagsA = (ctx->top->flagsA & 0xFFF00FFF) | 0x5C000;
+    ctx->top->flagsA = (ctx->top->flagsA & 0xFFBFFFFF) | 0x400000;
+    if (ctx->field_0x6B90 == 0) {
+        func_0037D968(ctx);
+    }
+    ctx->top->field_0x0 = (ctx->top->field_0x0 & ~0x3C0) | 0x100;
+    ctx->top->field_0xC = ctx->top->field_0xC & 0xC0000000;
+    ctx->top->flagsA = (ctx->top->flagsA & ~3) | 2;
+    ctx->top->flagsB = ctx->top->flagsB & 0xE00003FF;
+    for (int i = 0; i < self->n8; i++) {
+        sBezPatch_D968* e = &self->list8[i];
+        func_0038D690(self, func_0038F708(e->obj, 0x1B0, 2), e, a1);
+    }
+    for (int i = 0; i < self->nMix; i++) {
+        sBezMixPatch_D968* e = &self->mix[i];
+        if (e->kind > 0) {
+            func_0038D690(self, func_0038F708(e->obj, 0x1B0, 2), e, a1);
+        }
+    }
+    ctx->top--;
+}
+#endif
 
