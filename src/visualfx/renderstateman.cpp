@@ -738,7 +738,255 @@ extern "C" void func_002EF6A0(void* self)
 
 INCLUDE_ASM("visualfx/renderstateman", func_002EF6D0);
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF950);
+#ifdef SKIP_ASM
+struct sRsVec4_EF950 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRsColor_EF950 {
+    float x, y, z, w;
+    sRsColor_EF950() {}
+    sRsColor_EF950(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+};
+
+struct sRsVertUV_EF950 {
+    float x, y, z, w;
+    sRsVertUV_EF950() {}
+} __attribute__((aligned(16)));
+
+struct sRsVert_EF950 {
+    sRsVertUV_EF950 uv;     // 0x00
+    int r, g, b, a;         // 0x10
+    sRsVec4_EF950 pos;      // 0x20
+};
+
+struct sRsState_EF950 {
+    int f0;                 // 0x0
+    int flagsA;             // 0x4
+    int flagsB;             // 0x8
+    int fC;                 // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sRsVEnt_EF950 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sRsVert_EF950*, int);
+};
+
+struct sRsCtx_EF950 {
+    char pad0[0xE84];
+    sRsState_EF950* top;        // 0xE84
+    char pad1[0x1044 - 0xE88];
+    int tex1044;                // 0x1044
+    int pad1048;
+    int tex104C;                // 0x104C
+    char pad2[0x10D8 - 0x1050];
+    sRsVEnt_EF950* vtable;      // 0x10D8
+};
+
+struct sRsSeg_EF950 {
+    sRsVec4_EF950 p0;
+    sRsVec4_EF950 p1;
+};
+
+struct sTrail_EF950 {
+    char* rider;                // 0x0
+    sRsSeg_EF950* ring;         // 0x4
+    int head;                   // 0x8
+    int count;                  // 0xC
+    float start;                // 0x10
+    int len;                    // 0x14
+};
+
+extern sRsCtx_EF950* D_004A289C;
+extern sRsState_EF950 D_00501420[];
+extern int D_004A4720;
+extern float D_004A3B74;
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sRsVec4_EF950 rsScale_EF950(const sRsVec4_EF950& v, float s)
+{
+    sRsVec4_EF950 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sRsVec4_EF950 rsAdd_EF950(const sRsVec4_EF950& a, const sRsVec4_EF950& b)
+{
+    sRsVec4_EF950 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sRsVec4_EF950 rsSub_EF950(const sRsVec4_EF950& a, const sRsVec4_EF950& b)
+{
+    sRsVec4_EF950 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline int rsTex1044_EF950(sRsCtx_EF950* ctx)
+{
+    return ctx->tex1044;
+}
+
+static inline int rsTex104C_EF950(sRsCtx_EF950* ctx)
+{
+    return ctx->tex104C;
+}
+
+static inline void rsPush_EF950(sRsCtx_EF950* ctx)
+{
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+}
+
+static inline void rsPop_EF950(sRsCtx_EF950* ctx)
+{
+    ctx->top--;
+}
+
+static inline void rsSetA_EF950(sRsCtx_EF950* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+}
+
+static inline void rsSetB_EF950(sRsCtx_EF950* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
+}
+
+static inline sRsVec4_EF950 rsRow_EF950(char* base, int idx, int off)
+{
+    return *(sRsVec4_EF950*)(base + (idx << 6) + off);
+}
+
+static inline void rsVert_EF950(sRsVert_EF950* v, float u, float w, const sRsColor_EF950& c, const sRsVec4_EF950& p)
+{
+    v->r = (int)(c.y * 255.0f);
+    v->g = (int)(c.z * 255.0f);
+    v->b = (int)(c.w * 255.0f);
+    v->a = (int)(c.x * 128.0f);
+    v->uv.z = 1.0f;
+    v->pos = p;
+    v->uv.x = u;
+    v->uv.y = w;
+}
+
+extern "C" void func_002EF950(sTrail_EF950* self)
+{
+    if (self->count < 2) {
+        return;
+    }
+    rsPush_EF950(D_004A289C);
+    *D_004A289C->top = D_00501420[0];
+    int glow = 0;
+    float alpha = 0.3f;
+    float start = 0.0f;
+    if (D_004A4720 != 0 || 0.0f < *(float*)(self->rider + 0x2EC)) {
+        glow = 1;
+        alpha = 1.0f;
+        *(short*)((char*)D_004A289C->top + 0x10) = rsTex1044_EF950(D_004A289C);
+        D_004A289C->top->f0 &= ~0xC;
+        start = self->start;
+    } else {
+        sRsCtx_EF950* c = D_004A289C;
+        c->top->f0 |= 0xC;
+        *(short*)((char*)c->top + 0x10) = rsTex104C_EF950(c);
+    }
+    sRsCtx_EF950* ctx = D_004A289C;
+    rsSetA_EF950(ctx, 0x400000, 22, 1);
+    rsSetA_EF950(ctx, 0x1800000, 23, 0);
+    rsSetA_EF950(ctx, 0x300000, 20, 0);
+    rsSetA_EF950(ctx, 0xFF000, 12, 0x14);
+    rsSetA_EF950(ctx, 0x3, 0, 0);
+    rsSetB_EF950(ctx, 0x1FFFFC00, 10, 0);
+    rsSetB_EF950(ctx, 0x3E0, 5, 8);
+    rsSetA_EF950(ctx, 0x7C, 2, 7);
+    sRsVert_EF950 v1[52];
+    sRsVert_EF950 v2[52];
+    char* rider = self->rider;
+    float uvy = start;
+    float invSq = 1.0f / (float)((self->len - 1) * (self->len - 1));
+    sRsVec4_EF950 off = rsScale_EF950(rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x30), *(int*)(rider + 0x89C), 0x30), 0.7f);
+    float dv = 1.0f / (float)self->count;
+    float t = 0.0f;
+    int nverts = 0;
+    sRsColor_EF950 color;
+    color.x = 1.0f;
+    color.y = 1.0f;
+    color.z = 1.0f;
+    color.w = 1.0f;
+    sRsVec4_EF950 A;
+    sRsVec4_EF950 B;
+    rider = self->rider;
+    sRsVec4_EF950 col = rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x34), *(int*)(rider + 0x8A4), 0x20);
+    float size = 15.0f;
+    if (glow) {
+        float k = D_004A3B74;
+        color = sRsColor_EF950(1.0f, k, k, k);
+        size = 37.5f;
+    }
+    sRsVec4_EF950 half = rsScale_EF950(col, size * 0.5f);
+    int j = self->head;
+    int k = 0;
+    for (int i = 0; i < self->count; i++) {
+        if (j < 0) {
+            j = 24;
+        }
+        color.x = alpha * (1.0f - t * t * invSq);
+        if (color.x < 0.0f) {
+            color.x = 0.0f;
+        }
+        A = rsAdd_EF950(self->ring[j].p0, off);
+        B = rsAdd_EF950(self->ring[j].p1, off);
+        rsVert_EF950(&v1[k], 0.0f, uvy, color, rsSub_EF950(A, half));
+        rsVert_EF950(&v2[k], 0.0f, uvy, color, rsSub_EF950(B, half));
+        k++;
+        rsVert_EF950(&v1[k], 1.0f, uvy, color, rsAdd_EF950(A, half));
+        rsVert_EF950(&v2[k], 1.0f, uvy, color, rsAdd_EF950(B, half));
+        k++;
+        uvy += dv;
+        nverts += 2;
+        j--;
+        t += 1.0f;
+    }
+    sRsCtx_EF950* o = D_004A289C;
+    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v1, 0);
+    o = D_004A289C;
+    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v2, 0);
+    rsPop_EF950(D_004A289C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EFF98);

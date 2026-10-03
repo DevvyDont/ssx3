@@ -604,7 +604,155 @@ extern "C" float func_00336850(void* self, char* q, sHit_00336850* out, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_003369D8);
+#ifdef SKIP_ASM
+struct sQuad_369D8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sHit_003369D8 {
+    sQuad_369D8 p;          // 0x00
+    sQuad_369D8 n;          // 0x10
+    float pad20[8];         // 0x20
+    float dist;             // 0x40
+    int pad44[3];
+    char* obj;              // 0x50
+    char* tri;              // 0x54
+    int pad58[10];
+    sHit_003369D8() {}
+} __attribute__((aligned(16)));
+
+struct sQuery_369D8 {
+    void* seg;              // 0x00
+    sHit_003369D8* hits;    // 0x04
+    int max;                // 0x08
+    int* count;             // 0x0C
+    int f10;                // 0x10
+    void* f14;              // 0x14
+};
+
+struct sCell_369D8 {
+    int f0, f4, f8, fC;
+    void* node;             // 0x10
+};
+
+extern "C" void* func_0032E100(void* seg, const sQuad_369D8& a, const sQuad_369D8& b, int n, float r);
+struct sCtx_369D8 {
+    float* pos;             // 0x0
+    char flags[8];          // 0x4
+};
+
+struct sTrav_369D8 {
+    int count;              // 0x0
+    sCtx_369D8 ctx;         // 0x4
+};
+
+extern "C" void func_0033DBE8(char* flag, sQuery_369D8* q, sQuery_369D8* q2, sCtx_369D8* ctx, void* node, sCell_369D8* cell);
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_003369D8(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `<?` (min) operator.
+static inline float clamp_003369D8(float v, float lo, float hi)
+{
+    if (v >= lo) return v <? hi;
+    return lo;
+}
+
+static inline int isBetter_003369D8(sHit_003369D8* a, sHit_003369D8* b)
+{
+    if (a->obj != 0) {
+        if (b->obj == 0) {
+            return 1;
+        }
+        return *(unsigned int*)(a->obj + 0x78) < *(unsigned int*)(b->obj + 0x78);
+    }
+    if (b->obj != 0) {
+        return 0;
+    }
+    return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
+}
+
+static inline void visit_003369D8(sCell_369D8* c, char* flag, sQuery_369D8* q, sCtx_369D8* p)
+{
+    func_0033DBE8(flag, q, q, p, c->node, c);
+}
+
+extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
+{
+    char seg[0xB0];
+    float lo = pos[2] - 100000.0f;
+    float hi = pos[2] + 100000.0f;
+    float t = clamp_003369D8((pos[2] + 20.0f - lo) / (hi - lo), 0.0f, 1.0f);
+    {
+        sQuad_369D8 a;
+        a.x = pos[0];
+        a.y = pos[1];
+        a.z = lo;
+        a.w = 1.0f;
+        sQuad_369D8 b;
+        b.x = pos[0];
+        b.y = pos[1];
+        b.z = hi;
+        b.w = 1.0f;
+        func_0032E100(seg, a, b, 2, t);
+    }
+    sHit_003369D8 hits[64];
+    sQuery_369D8 q;
+    q.seg = seg;
+    q.hits = hits;
+    q.max = 0x40;
+    sTrav_369D8 tr;
+    q.count = &tr.count;
+    q.f10 = 0;
+    q.f14 = *(void**)((char*)self + 0xA4);
+    tr.count = 0;
+    tr.ctx.pos = pos;
+    sCtx_369D8* ctx = &tr.ctx;
+    sCell_369D8* c0 = &self[0];
+    sCell_369D8* c1 = &self[1];
+    sCell_369D8* c2 = &self[2];
+    sCell_369D8* c3 = &self[3];
+    sCell_369D8* c4 = &self[4];
+    sCell_369D8* c5 = &self[5];
+    sCell_369D8* c6 = &self[6];
+    sCell_369D8* c7 = &self[7];
+    if (self[0].node) visit_003369D8(c0, &tr.ctx.flags[0], &q, ctx);
+    if (self[1].node) visit_003369D8(c1, &tr.ctx.flags[1], &q, ctx);
+    if (self[2].node) visit_003369D8(c2, &tr.ctx.flags[2], &q, ctx);
+    if (self[3].node) visit_003369D8(c3, &tr.ctx.flags[3], &q, ctx);
+    if (self[4].node) visit_003369D8(c4, &tr.ctx.flags[4], &q, ctx);
+    if (self[5].node) visit_003369D8(c5, &tr.ctx.flags[5], &q, ctx);
+    if (self[6].node) visit_003369D8(c6, &tr.ctx.flags[6], &q, ctx);
+    if (self[7].node) visit_003369D8(c7, &tr.ctx.flags[7], &q, ctx);
+    if (tr.count == 0) {
+        return 0;
+    }
+    float ref = pos[2];
+    int best = 0;
+    float bestDiff = absf_003369D8(hits[0].p.z - ref);
+    for (int i = 1; i < tr.count; i++) {
+        float d = absf_003369D8((hits + i)->p.z - ref);
+        if (d < bestDiff) {
+            bestDiff = d;
+            best = i;
+        } else if (d == bestDiff) {
+            if (isBetter_003369D8(hits + i, hits + best)) {
+                best = i;
+            }
+        }
+    }
+    *outP = (hits + best)->p;
+    *outN = (hits + best)->n;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00336D40);
 

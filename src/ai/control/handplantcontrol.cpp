@@ -519,7 +519,297 @@ extern "C" float func_0013D028(void* self, float* v, float a, float b, float c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D1B8);
+#ifdef SKIP_ASM
+extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
+extern void* D_004FF120[];
+
+struct sHit_13D1B8 {
+    sVec4HP pos;            // 0x00
+    sVec4HP normal;         // 0x10
+    sVec4HP v20;            // 0x20
+    float pad30[4];         // 0x30
+    float dist;             // 0x40
+    int pad44[2];           // 0x44
+    int m4C;                // 0x4C
+    char* obj;              // 0x50
+    char* tri;              // 0x54
+    int pad58[5];           // 0x58
+    float m6C;              // 0x6C
+    float m70;              // 0x70
+    int pad74[3];           // 0x74
+    sHit_13D1B8() {}
+} __attribute__((aligned(16)));
+
+extern "C" int func_00333EF8(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
+extern sVec4HP D_004FF160;
+extern sVec4HP D_004FF120_v __asm__("D_004FF120");
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4HP vu0Scale_13D1B8(const sVec4HP& v, float s)
+{
+    sVec4HP r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4HP vu0Add_13D1B8(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4HP vu0Sub_13D1B8(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_13D1B8(const sVec4HP& a, const sVec4HP& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product, by-value first operand).
+static inline float vu0DotV_13D1B8(sVec4HP a, const sVec4HP& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4HP vu0Normalize_13D1B8(const sVec4HP& v)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec4HP vu0Cross_13D1B8(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_13D1B8(const sVec4HP& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_13D1B8(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+
+// Non-POD by-value vector (user copy ctor => passed by invisible reference, no callee copy).
+struct sVec4P_13D1B8 {
+    float x, y, z, w;
+    sVec4P_13D1B8(const sVec4HP& v) { *(sVec4HP*)this = v; }
+    sVec4P_13D1B8(const sVec4P_13D1B8& v) { *(sVec4HP*)this = *(const sVec4HP*)&v; }
+} __attribute__((aligned(16)));
+
+static inline sVec4HP vu0SubV_13D1B8(sVec4P_13D1B8 a, const sVec4HP& b)
+{
+    return vu0Sub_13D1B8(*(sVec4HP*)&a, b);
+}
+
+static inline int isBetter_13D1B8(sHit_13D1B8* a, sHit_13D1B8* b)
+{
+    if (a->obj != 0) {
+        if (b->obj == 0) {
+            return 1;
+        }
+        return *(unsigned int*)(a->obj + 0x78) < *(unsigned int*)(b->obj + 0x78);
+    }
+    if (b->obj != 0) {
+        return 0;
+    }
+    return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
+}
+
+struct sVEnt_13D1B8 { short delta; short index; void (*fn)(void*, void*); };
+
+#define RIDER (*(char**)((char*)self + 0x18))
+#define RV(off) (*(sVec4HP*)(RIDER + (off)))
+
+extern "C" int func_0013D1B8(void* self, sHit_13D1B8* out, float* dist)
+{
+    RV(0x380) = RV(0x370);
+    sVec4HP pos = vu0Add_13D1B8(RV(0x110), vu0Scale_13D1B8(RV(0x3B0), *(float*)(*(char**)(RIDER + 0x780) + 0x140) * (*(float*)(RIDER + 0x1F0) * 45.0f)));
+    sVec4HP a = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(0x370), -100.0f));
+    sVec4HP b = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(0x370), 200.0f));
+    char seg[0xB0];
+    func_0032E100(seg, a, b, 2, 0.5f);
+    sHit_13D1B8 hits[64];
+    int n = func_00333EF8(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
+    if (n == 0) {
+        RV(0x370) = D_004FF160;
+        RV(0x3D0) = D_004FF120_v;
+        RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
+        RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
+        *(int*)(RIDER + 0x438) = 0;
+        *dist = 0.0f;
+        return 0;
+    }
+    int best = 0;
+    float up0 = vu0Dot_13D1B8(hits[0].normal, RV(0x370));
+    float bestDiff = absf_13D1B8(hits[0].dist - 0.5f);
+    int ok = up0 >= 0.3f;
+    for (int i = 1; i < n; i++) {
+        float d = absf_13D1B8(hits[i].dist - 0.5f);
+        float up = vu0Dot_13D1B8(hits[i].normal, RV(0x370));
+        if (!ok) {
+            if (up >= 0.3f) {
+                bestDiff = d;
+                best = i;
+                ok = 1;
+                continue;
+            }
+        } else if (up < 0.3f) {
+            continue;
+        }
+        if (d < bestDiff) {
+            bestDiff = d;
+            best = i;
+        } else if (d == bestDiff) {
+            if (isBetter_13D1B8(&hits[i], &hits[best])) {
+                best = i;
+            }
+        }
+    }
+    *out = hits[best];
+    if (out->tri != 0) {
+        *(int*)(RIDER + 0x430) = *(int*)(out->tri + 0x150);
+        *(float*)(RIDER + 0xAAC) = out->m6C;
+        *(float*)(RIDER + 0xAB0) = out->m70;
+        *(short*)(RIDER + 0x2D4) = *(short*)(out->tri + 0xA);
+    } else {
+        *(unsigned int*)(RIDER + 0x430) = 0xFFFFFFFF;
+    }
+    if (out->obj != 0) {
+        char* h = *(char**)(out->obj + 0xC);
+        if (h) {
+            sVEnt_13D1B8* vt = *(sVEnt_13D1B8**)(h + 0xC);
+            vt[42].fn(h + vt[42].delta, out);
+        }
+    }
+    *(int*)(RIDER + 0x438) = out->m4C;
+    if (*(int*)(RIDER + 0x438) == -1) {
+        *(int*)(RIDER + 0x438) = 0;
+    }
+    RV(0x370) = out->normal;
+    RV(0x460) = out->pos;
+    RV(0x3D0) = out->v20;
+    RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
+    RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
+    sVec4HP delta = vu0Sub_13D1B8(pos, out->pos);
+    *(float*)(RIDER + 0x454) = vu0Dot_13D1B8(delta, RV(0x370));
+    *dist = vu0Length_13D1B8(vu0Sub_13D1B8(delta, vu0Scale_13D1B8(RV(0x370), *(float*)(RIDER + 0x454))));
+    return 1;
+}
+#undef RV
+#undef RIDER
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D818);
 
