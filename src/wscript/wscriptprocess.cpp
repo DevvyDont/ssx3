@@ -1,6 +1,59 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_cWScriptProcess);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+// PORT: func_00309B70 takes (self, id) (wscriptman); the unit declares one int param.
+extern "C" int func_00309B70_2(void* self, int id) __asm__("func_00309B70");
+struct func_00308278_sObj;
+struct func_00308278_sDef;
+extern "C" void func_00308278(func_00308278_sObj* self, void* owner, func_00308278_sDef* def);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00489B70[];
+extern char D_00489850[];
+
+struct sElem_307598 {
+    char pad[0x44];
+    // PORT: the element constructor is func_00308228 (defined below as an extern "C" function).
+    sElem_307598() __asm__("func_00308228");
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sDef_307598 {
+    int f0;
+    int count;          // 0x4
+    char* elemDefs;     // 0x8
+    int a[3];           // 0xC
+    int b[10];          // 0x18
+};
+
+extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a2, sDef_307598* def)
+{
+    *(void**)((char*)self + 0x5C) = D_00489B70;
+    func_003E6448((char*)self + 0x28, 0, 0xC);
+    *(int*)((char*)self + 0x24) = a2;
+    *(void**)((char*)self + 0x10) = man;
+    *(int*)((char*)self + 0x20) = def->f0;
+    *(int*)((char*)self + 0x1C) = 0;
+    for (int i = 0; i < 3; i++)
+        ((int*)((char*)self + 0x28))[i] = func_00309B70_2(*(void**)((char*)self + 0x10), def->a[i]);
+    for (int j = 0; j < 10; j++)
+        ((int*)((char*)self + 0x34))[j] = func_00309B70_2(*(void**)((char*)self + 0x10), def->b[j]);
+    int n = def->count;
+    *(int*)((char*)self + 0x4) = n;
+    sElem_307598** pv = (sElem_307598**)((char*)self + 0x14);
+    *pv = new (D_00489850, 0x20000000, 0) sElem_307598[n];
+    char* ed = def->elemDefs;
+    for (int k = 0; k < *(int*)((char*)self + 0x4); k++, ed += 0x38)
+        func_00308278((func_00308278_sObj*)&(*(sElem_307598**)((char*)self + 0x14))[k], self, (func_00308278_sDef*)ed);
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x8) = *(int*)((char*)self + 0x4);
+    *(int*)((char*)self + 0x18) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307738);
@@ -1343,5 +1396,99 @@ extern "C" void func_00309030(void* self)
 
 INCLUDE_ASM("wscript/wscriptprocess", func_00309118);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptprocess", func_00309270);
+#ifdef SKIP_ASM
+class func_003077F8_cProc;
+struct cWScriptProcList;
+extern "C" void func_003077F8(func_003077F8_cProc* self);
+extern "C" void func_003078C0(void* proc, void* cmd);
+extern "C" void func_00307A10(cWScriptProcList* self, int a1);
+extern "C" void func_00309118(void* self);
+extern "C" void func_00309750(void* self, void* p);
+extern "C" void* func_0030B208(void* self);
+int func_0030B260(void* self, void* a1);
+
+struct sRefSet_309270 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+struct sRefWorld_309270 {
+    char pad_0x0[0x8];
+    sRefSet_309270** sets;  // 0x8
+};
+
+struct sCmd_309270 {
+    unsigned int flags;
+    unsigned int id;
+    int f8;
+};
+struct sCmdList_309270 {
+    int count;
+    sCmd_309270 e[32];
+};
+
+static inline void* refToPtr_309270(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* toObj_309270(unsigned int p)
+{
+    if (p == 0)
+        return 0;
+    return refToPtr_309270(p);
+}
+
+static inline void* lookup_309270(sRefWorld_309270* w, unsigned int id)
+{
+    sRefSet_309270* set = w->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    return toObj_309270(set->refs[id >> 8] >> 8);
+}
+
+extern "C" void func_00309270(void* self)
+{
+    func_00309118(self);
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    void* p;
+    while ((p = func_0030B208((char*)self + 0x2BC)) != 0) {
+        func_0030B260((char*)self + 0x2B4, p);
+        func_00309750(self, p);
+    }
+    sCmdList_309270 list = *(sCmdList_309270*)((char*)self + 0x40);
+    *(int*)((char*)self + 0x40) = 0;
+    for (int i = 0; i < list.count; i++) {
+        sCmd_309270* c = &list.e[i];
+        if ((unsigned short)c->flags == 0)
+            *(void**)((char*)self + 0x290) = lookup_309270(**(sRefWorld_309270***)((char*)self + 0x28C), c->id);
+        char* next = *(char**)((char*)self + 0x2B8);
+        while (next != 0) {
+            char* proc = next;
+            next = *(char**)(proc + 0x18);
+            *(char**)((char*)self + 0x2A4) = proc;
+            if (c->flags & 0x20000)
+                func_003078C0(proc, c);
+            if (c->flags & 0x10000)
+                func_00307A10((cWScriptProcList*)proc, (int)c);
+        }
+        *(int*)((char*)self + 0x290) = 0;
+        *(int*)((char*)self + 0x2A4) = 0;
+    }
+    char* next = *(char**)((char*)self + 0x2B8);
+    while (next != 0) {
+        char* proc = next;
+        next = *(char**)(proc + 0x18);
+        *(char**)((char*)self + 0x2A4) = proc;
+        func_003077F8((func_003077F8_cProc*)proc);
+    }
+    *(int*)((char*)self + 0x2A4) = 0;
+}
+#endif
 

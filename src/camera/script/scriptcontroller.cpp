@@ -360,7 +360,121 @@ extern "C" void func_00169D80(cScriptCtlVirt2* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169DB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
+float* func_0027C2A8(void* cam);
+extern "C" void func_0027C300(void* cam, void* out);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void func_00160028(void* self, float v);
+extern "C" void func_00160130(void* self, float v);
+
+struct sVec4_169DB0 {
+    float x, y, z, w;
+    sVec4_169DB0() {}
+    sVec4_169DB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+static inline sVec4_169DB0 mtxMulVec_169DB0(char* m, const sVec4_169DB0& v)
+{
+    sVec4_169DB0 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_169DB0 Scale_169DB0(const sVec4_169DB0& v, float s)
+{
+    sVec4_169DB0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_169DB0 Sub_169DB0(const sVec4_169DB0& a, const sVec4_169DB0& b)
+{
+    sVec4_169DB0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sScrCam_169DB0 {
+    float roll;             // 0x0
+    float x4;               // 0x4
+    float x8;               // 0x8
+    char padC[0x14];
+    sVec4_169DB0 pos;       // 0x20
+    sVec4_169DB0 target;    // 0x30
+    float pitch;            // 0x40
+    float yaw;              // 0x44
+    float x48;              // 0x48
+    float ox, oy, oz;       // 0x4C
+    float dist;             // 0x58
+    float r5C;              // 0x5C
+    float r60;              // 0x60
+    float r64;              // 0x64
+    float r68;              // 0x68
+    float r6C;              // 0x6C
+    float r70;              // 0x70
+};
+
+extern "C" void func_00169DB0(char* p)
+{
+    sScrCam_169DB0* self = (sScrCam_169DB0*)p;
+    char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
+    float* f = func_0027C2A8(cam);
+    char* m = *(char**)(p + 0x14) + 0x30;
+    self->x4 = f[0];
+    self->x8 = f[1];
+    func_0027C300(cam, &self->ox);
+    self->x4 = f[0];
+    self->x8 = f[1];
+    self->roll = self->r68 * 0.01745329424738884f;
+    char* g = *(char**)(p + 0x14);
+    self->yaw = self->r60 * 0.01745329424738884f + *(float*)(g + 0x78);
+    self->x48 = self->r5C * 0.01745329424738884f + *(float*)(g + 0x74);
+    self->pitch = self->r64 * 0.01745329424738884f + *(float*)(g + 0x70);
+    self->pos = mtxMulVec_169DB0(m, sVec4_169DB0(self->ox, self->oy, self->oz, 1.0f));
+    float s0, c0, s1, c1;
+    func_0031BE50(&s0, &c0, self->yaw);
+    func_0031BE50(&s1, &c1, self->x48);
+    sVec4_169DB0 d(c1 * c0, c1 * s0, s1, 0.0f);
+    self->target = Sub_169DB0(self->pos, Scale_169DB0(d, self->dist));
+    func_00160028(p + 0x74, self->r6C);
+    func_00160130(p + 0x74, self->r70);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169F88);
 

@@ -333,7 +333,104 @@ extern "C" int func_002355B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_002355C0);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void cBE_setState(int state);
+extern "C" void cAI_setAIState(void*, int);
+extern "C" int func_0027AA80(void* a);
+extern "C" void func_00158E30(void* iface);
+extern "C" void func_00309030(void* a);
+extern "C" void func_00309F18(void* a);
+extern "C" int func_00144BE0(void* race);
+extern "C" int func_00144CC0(void* race, int a);
+extern "C" void func_00146E10(void* player, int a, int b);
+extern "C" void func_001F36D8(void* hud, int a);
+extern "C" int func_00278F68(void* self, int i, int a, int b);
+extern "C" void* func_0028B180(void);
+extern "C" void func_002B3A98(void* p);
+extern "C" void func_002A4B68(void* p);
+extern char* D_004A2C68;
+extern void* D_004A3DD8;
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+
+struct sRace_2355C0 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+};
+extern sRace_2355C0 D_00535BC8_r2355C0 __asm__("D_00535BC8");
+
+struct sRaceMan_2355C0 {
+    char pad0[0x14];
+    int f14;
+};
+
+struct sVE_2355C0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline int inRange_2355C0(int t)
+{
+    return t >= 14 && t <= 16;
+}
+
+static inline int isMode2_2355C0(void* s)
+{
+    return *(int*)((char*)s + 0x550) == 2;
+}
+
+extern "C" void func_002355C0(void* self)
+{
+    *(int*)((char*)self + 0x1C) = 0;
+    if (func_0027AA80(D_004A28A4))
+        *(int*)((char*)self + 0x1C) = 1;
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    func_00158E30(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    sRace_2355C0* r = &D_00535BC8_r2355C0;
+    int flag = r->flag49;
+    int mode = r->mode48;
+    if (flag == 0 && !inRange_2355C0(*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78) + 0x1BC))) {
+        *(int*)((char*)self + 0x4) = 0;
+        *(int*)((char*)self + 0x0) = 4;
+    } else {
+        *(int*)((char*)self + 0x0) = 1;
+        *(int*)((char*)self + 0x4) = flag == 0;
+    }
+    if (mode == 4)
+        cAI_setAIState(*(void**)(D_004A2C68 + 0xC), 3);
+    cBE_setState(0);
+    func_00309030(D_004A3DD8);
+    func_00309F18(D_004A3DD8);
+    if (func_00144CC0(race, func_00144BE0(race)) == 1) {
+        char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_00146E10(player, 0, func_00144BE0(race));
+        sVE_2355C0* vt = *(sVE_2355C0**)(player + 0xC);
+        vt[1].fn(player + vt[1].delta);
+    }
+    (*(sRaceMan_2355C0**)(D_004A2C68 + 0xC))->f14 = mode != 4;
+    func_001F36D8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 0);
+    if (flag) {
+        *(int*)((char*)self + 0x0) = 1;
+        *(int*)((char*)self + 0x4) = 0;
+        if (isMode2_2355C0(D_004A28A4)) {
+            func_00278F68(D_004A28A4, 1, 0, 1);
+            if (isMode2_2355C0(D_004A28A4))
+                func_00278F68(D_004A28A4, 0, 0, 1);
+        }
+    } else if (*(int*)((char*)self + 0x14)) {
+        func_00278F68(D_004A28A4, 1, 1, 0);
+    }
+    func_002B3A98((char*)func_0028B180() + 0x118);
+    func_002A4B68(func_0028B180());
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_002357F8);
@@ -465,9 +562,220 @@ extern "C" void func_00235A18(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00235AA0);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void cBE_setState(int state);
+extern "C" void func_0030B7F8(void* self);
+extern "C" void func_00230180(void* self);
+extern "C" void func_0012AB20(void* self);
+extern "C" void func_0012AC48(void* self);
+extern "C" void func_002790A0(void* a, int b);
+extern "C" void func_0027AAF8(void* a, int b);
+// PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
+extern "C" int func_00278F38(void* self, int i);
+extern "C" void func_0027A860(void* a, int b, int c);
+extern "C" void func_001F36C0(void* a, int b);
+extern "C" void cGameModeMan_restartHeat(void* gm);
+extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id);
+extern "C" void func_001473D0(void* player, int i, int v);
+extern char* D_004A2C68;
+extern void* D_004A3DD8;
+extern void* D_004A28A8;
+extern void* D_004A28A4;
 
+struct sRace_235AA0 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+};
+extern sRace_235AA0 D_00535BC8_r235AA0 __asm__("D_00535BC8");
+
+struct sVE_235AA0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sGM_235AA0 {
+    char pad0[0x10];
+    int total;      // 0x10
+    int humans;     // 0x14
+    int chars[10];  // 0x18
+    int boards[10]; // 0x40
+};
+
+extern "C" void func_00235AA0(void* self)
+{
+    cBE_setState(0);
+    func_0030B7F8(D_004A3DD8);
+    char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    sGM_235AA0* gm = *(sGM_235AA0**)((char*)D_004A28A8 + 0xC0);
+    cGameModeMan_restartHeat(gm);
+    func_00230180(*(void**)((char*)D_004A28A8 + 0x84));
+    sRace_235AA0* r = &D_00535BC8_r235AA0;
+    int m = r->mode48;
+    if (m == 5)
+        goto bail;
+    if (m == 6)
+        goto bail;
+    if (r->flag49 != 0) {
+    bail:
+        *(int*)((char*)self + 0x10) = 3;
+        return;
+    }
+    int n = gm->total - gm->humans;
+    int base = *(int*)(*(char**)(D_004A2C68 + 0xC) + 0x7C);
+    int i = 0;
+    cBENewRaceInterface_setNumberAI(race, n);
+    {
+        sVE_235AA0* vt = *(sVE_235AA0**)(race + 0xC);
+        vt[1].fn(race + vt[1].delta);
+    }
+    for (; i < n; i++) {
+        cBENewPlayerInterface_setRiderCharID(player, i + base, gm->chars[base + i]);
+        func_001473D0(player, i + base, gm->boards[base + i]);
+    }
+    {
+        sVE_235AA0* vt = *(sVE_235AA0**)(player + 0xC);
+        vt[1].fn(player + vt[1].delta);
+    }
+    func_0012AB20(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+    if (n >= 2)
+        func_0012AC48(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+    *(int*)((char*)self + 0x18) = 0;
+    sRace_235AA0* r2 = &D_00535BC8_r235AA0;
+    if (r2->mode48 == 0) {
+        void* sc = D_004A28A4;
+        *(int*)((char*)self + 0x18) = 1;
+        func_0027A860(sc, 1, 0);
+    }
+    func_002790A0(D_004A28A4, 0);
+    func_0027AAF8(D_004A28A4, *(int*)((char*)gm + 0x98) ? 3 : 2);
+    func_00278F38(D_004A28A4, 0);
+    func_001F36C0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 3);
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamestate", func_00235CC8);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+struct sVec4_236960;
+struct sVec4_235CC8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRaceMan_235CC8 {
+    char pad0[0x14];
+    int f14;
+};
+
+struct sCacheTbl_235CC8 {
+    char pad[0x250];
+    struct { int f0; char pad[0x4C]; } slot[2];
+};
+
+struct cRiderObj_235CC8 {
+    int f0, f4, f8;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual int isBusy();
+};
+
+extern "C" int func_0012ABD0(void* p);
+extern "C" void func_0012B030(void* p);
+extern "C" void func_0012B000(void* p);
+extern "C" void func_00128958(void* p);
+extern "C" int func_0012A180(void* p);
+void func_001289F0(void* p);
+extern "C" void func_001296F8(void* p);
+extern "C" sVec4_235CC8 func_00122C28(void* rider);
+extern "C" void func_003A9658(void* cache, int idx, const sVec4_236960* pos, float radius);
+extern "C" int func_003A9770(void* cache, int idx, sVec4_236960* pos, float* dist);
+extern "C" int func_002791D8(void* p, int a);
+extern "C" int func_00279298(void* p);
+extern "C" void func_0027A9F0(void* p);
+extern "C" void func_00233AA0(void* self);
+void* func_00230698(void* self, int id);
+extern char* D_004A2C68;
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+extern int D_00535C04[];
+
+extern "C" void func_00235CC8(void* self)
+{
+    *(int*)((char*)self + 0x14) += 1;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    char* g84 = *(char**)((char*)D_004A28A8 + 0x84);
+    int state = *(int*)((char*)self + 0x10);
+    char** cache = *(char***)(g84 + 0x10);
+    int idx = *(int*)(*(char**)(*(char**)(g84 + 0x84) + 4) + 0xB0) == 0;
+    switch (state) {
+    case 0:
+        if (func_0012ABD0(*(void**)(g84 + 0xC))) {
+            func_0012B030(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+            if (D_00535C04[0] >= 2)
+                func_0012B000(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+            func_00128958(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+            *(int*)((char*)self + 0x10) = 1;
+        }
+        break;
+    case 1:
+        if (func_0012A180(*(void**)(g84 + 0xC))) {
+            func_001289F0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+            (*(sRaceMan_235CC8**)(D_004A2C68 + 0xC))->f14 = 1;
+            ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
+            char* r = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40);
+            sVec4_235CC8 pos = func_00122C28(*(void**)(r + 0x18));
+            func_003A9658(*cache + 0x10, idx, (const sVec4_236960*)&pos, 45000.0f);
+            *(int*)((char*)self + 0x10) = 2;
+        } else {
+            func_001296F8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+        }
+        break;
+    case 2:
+        if (*(int*)((char*)self + 0x18) != 0) {
+            sVec4_235CC8 v;
+            float dist;
+            func_003A9770(*cache + 0x10, idx, (sVec4_236960*)&v, &dist);
+            if (dist < 20000.0f)
+                break;
+            if (*(int*)((char*)self + 0x14) < 120)
+                break;
+            if (func_002791D8(D_004A28A4, 0) == 1)
+                break;
+            char* o = (char*)func_00230698(*(void**)((char*)D_004A28A8 + 0x84), 0);
+            if (func_00279298(D_004A28A4) != 0)
+                break;
+            if (((cRiderObj_235CC8*)(o + 0x10))->isBusy() != 0)
+                break;
+            if (*(int*)(o + 0x44) != 0)
+                break;
+            func_0027A9F0(D_004A28A4);
+        }
+        *(int*)((char*)self + 0x10) = 3;
+        break;
+    case 3:
+        func_00233AA0(self);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00235F20);
@@ -624,7 +932,67 @@ extern "C" void* func_00236208(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00236250);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void cAI_setAIState(void*, int);
+extern "C" int* func_00144BC0(void* iface);
+extern "C" void func_00230180(void* self);
+extern "C" void func_0030B7F8(void* self);
+extern "C" void func_0011D390(void* rider);
+extern "C" void func_00278E50(void* self, int i, int a, int b, int c, int d, int f, int g);
+// PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
+extern "C" int func_00278F38(void* self, int i);
+extern "C" int func_00278F68(void* self, int i, int a, int b);
+extern char* D_004A2C68;
+extern void* D_004A3DD8;
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+extern int D_004A11BC;
+
+static inline int isOne_6250(int m)
+{
+    return m == 1;
+}
+
+extern "C" void func_00236250(void* self, int mode)
+{
+    func_0030B7F8(D_004A3DD8);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    cAI_setAIState(*(void**)(D_004A2C68 + 0xC), 3);
+    *(int*)(*(char**)(*(char**)(*(char**)(D_004A2C68 + 0xC) + 0x40) + 0x18) + 0x2F8) = 0;
+    *(int*)((char*)self + 0x18) = 0x17;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = mode;
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    if (mode == 1) {
+        *(int*)((char*)self + 0x8) = mode;
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        *(int*)((char*)self + 0x18) = D_004A11BC;
+    }
+    if (*(int*)((char*)self + 0x18) == *func_00144BC0(iface))
+        func_00230180(*(void**)((char*)D_004A28A8 + 0x84));
+    int m = *(int*)((char*)self + 0x14);
+    if (m == 0) {
+        func_00278E50(D_004A28A4, 1, 0x16, 3, 0, -1, -1, -1);
+        func_00278E50(D_004A28A4, 1, 0x17, 1, 0, -1, -1, -1);
+        func_00278F38(D_004A28A4, 1);
+        func_00278F68(D_004A28A4, 1, 1, 0);
+    } else if (m >= 0) {
+        if (m < 4) {
+            if (!isOne_6250(m))
+                func_00278E50(D_004A28A4, 1, 0xB, 3, 0, -1, -1, -1);
+            func_00278F38(D_004A28A4, 1);
+            func_0011D390(*(void**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18));
+            func_00278F68(D_004A28A4, 1, *(int*)((char*)self + 0x14) == 2, 0);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("main/gamestate", func_00236418);
 

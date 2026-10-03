@@ -142,7 +142,74 @@ extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_initLocation);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_C6E8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_0026D628(void* self);
+extern "C" void func_0026E950(void* self, void* buf, int a2);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" int func_00154278(void* iface);
+extern "C" unsigned int func_00154588(void* iface, int i);
+extern char D_00481570[];
+extern char D_00481580[];
+extern char D_00481590[];
+
+struct sPbEntry_C6E8 {
+    unsigned int id;
+    void* buf;      // 0x4
+    int size;       // 0x8
+};
+
+struct cPlaybackMan_C6E8 {
+    void* file;                 // 0x0
+    unsigned int* hdr;          // 0x4
+    char name[8];               // 0x8
+    int field_0x10;             // 0x10
+    char pad_0x14[0x38];
+    void* field_0x4C;           // 0x4C
+    int count2;                 // 0x50
+    int count;                  // 0x54
+    sPbEntry_C6E8* entries;     // 0x58
+    char pad_0x5c[0x18];
+    int cur;                    // 0x74
+    int handle;                 // 0x78
+};
+
+// PORT: entry addresses formed as i*12 + (int)entries (pointer held in int) for the index-first addu.
+extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* name)
+{
+    strcpy(self->name, name);
+    self->field_0x10 = 0;
+    self->cur = -1;
+    self->handle = -1;
+    self->field_0x4C = operator_new_tag(0x14000, D_00481570, 0, 0);
+    func_0026D628((char*)self + 0x14);
+    func_0026E950((char*)self + 0x14, self->field_0x4C, 0);
+    unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, D_00481580, 0, 0);
+    self->hdr = hdr;
+    func_003E6448(hdr, 0, 0x1C22C);
+    int n = self->count;
+    hdr[0] = 0xDBAC0101;
+    hdr[1] = 0x1C200;
+    self->entries = (sPbEntry_C6E8*)operator_new_tag(n * 12, D_00481590, 0x20000000, 0);
+    for (int i = 0; i < self->count; i++) {
+        ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->id = 0xFFFFFFFF;
+        ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->buf = 0;
+        ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->size = 0;
+    }
+    void* iface = cBE_getInterface_C6E8(cBE_getBE(), 10);
+    self->count2 = func_00154278(iface);
+    for (int j = 0; j < self->count2; j++)
+        ((sPbEntry_C6E8*)(j * 12 + (int)self->entries))->id = func_00154588(iface, j);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026C898);

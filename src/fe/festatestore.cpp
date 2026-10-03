@@ -128,7 +128,91 @@ extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatestore", func_001849B0);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+int GetHashValue32(char* str);
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_001A0508(void* self, int a1, int a2, int a3);
+extern "C" void func_001A0570(void* self, int a1, int a2);
+extern "C" void func_0015E050(void* cam, void* a, void* b);
+extern "C" void* func_00398380(void* list, int hash);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* p, int a);
+extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
+extern "C" void func_00184780(void* self, int on);
+extern void* D_004A28A8;
+extern char D_0045DA28[];
+extern char D_0045DA38[];
+extern char D_0045DA48[];
+extern char D_0045DA58[];
+
+struct sVec4_1849B0 {
+    float x, y, z, w;
+};
+
+struct sVE_1849B0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_001849B0(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DA28), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0)
+        cUIScreen_playFrame(screen, 0, 0);
+    char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, *(signed char*)((char*)self + 0x44));
+    {
+        sVE_1849B0* vt = *(sVE_1849B0**)(player + 0xC);
+        vt[2].fn(player + vt[2].delta);
+    }
+    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    func_001A0570(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    char* m = *(char**)((char*)D_004A28A8 + 0x7C);
+    sVec4_1849B0 a;
+    sVec4_1849B0 b;
+    float z = 80.0f;
+    float w = 1.0f;
+    float y = 660.0f;
+    a.x = 0.0f;
+    a.y = y;
+    a.z = z;
+    a.w = w;
+    b.x = 0.0f;
+    b.y = 0.0f;
+    b.z = z;
+    b.w = w;
+    func_0015E050(m + 0x10, &a, &b);
+    *(float*)(m + 0x10) = 0.4363323450088501f;
+    {
+        char* e = *(char**)((char*)self + 0x10);
+        int h = GetHashValue32(D_0045DA38);
+        *(void**)((char*)self + 0x58) = func_00398380(e + 0x58, h);
+    }
+    {
+        char* e = *(char**)((char*)self + 0x10);
+        int h = GetHashValue32(D_0045DA48);
+        *(void**)((char*)self + 0x54) = func_00398380(e + 0x58, h);
+    }
+    {
+        char* e = *(char**)((char*)self + 0x10);
+        int h = GetHashValue32(D_0045DA58);
+        *(void**)((char*)self + 0x5C) = func_00398380(e + 0x58, h);
+    }
+    func_0028F140(func_0028B180(), 5);
+    cFEStateUberTrick_costVisible(self, 0);
+    func_00184780(self, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatestore", func_00184B70);
@@ -247,7 +331,77 @@ extern "C" void func_00184F40(void* self, void* item, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetCreate);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern char D_004A1468[];
+extern char D_004A1470[];
+extern char D_004A1478[];
+extern char D_004A1480[];
+extern char D_0045DA88[];
+extern char D_0045DA98[];
+extern char D_004A1488[];
+extern char D_004A1490[];
+extern char D_004A1498[];
+extern char D_0045DAA8[];
+extern char D_004A14A0[];
+extern char D_0045DAB8[];
+extern char D_004A14A8[];
+extern char D_0045DAC8[];
+extern char D_0045DA18[];
+
+static inline int Is_185080(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
+{
+    cUIText* text = (cUIText*)widget;
+    for (int i = 0; i < 6; i++) {
+        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1468)) {
+            cUIText_setAsciiString(text, D_004A1470);
+            *(int*)((char*)widget + 0x18) = 1;
+            return;
+        }
+        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1478)) {
+            cUIText_setAsciiString(text, D_004A1480);
+            *(int*)((char*)widget + 0x18) = 3;
+            return;
+        }
+        if (Is_185080(*(int*)((char*)widget + 0x38), D_0045DA88)) {
+            cUIText_setAsciiString(text, D_0045DA98);
+            *(int*)((char*)widget + 0x18) = 2;
+            return;
+        }
+        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1488)) {
+            cUIText_setAsciiString(text, D_004A1490);
+            *(int*)((char*)widget + 0x18) = 0;
+            return;
+        }
+        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1498)) {
+            cUIText_setAsciiString(text, D_0045DAA8);
+            *(int*)((char*)widget + 0x18) = 4;
+            return;
+        }
+        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A14A0)) {
+            cUIText_setAsciiString(text, D_0045DAB8);
+            *(int*)((char*)widget + 0x18) = 9;
+            return;
+        }
+    }
+    if (Is_185080(*(int*)((char*)widget + 0x38), D_004A14A8)) {
+        *(int*)((char*)widget + 0x18) = -1;
+    } else if (Is_185080(*(int*)((char*)widget + 0x38), D_0045DAC8)) {
+        *(void**)((char*)self + 0x4C) = widget;
+    } else if (Is_185080(*(int*)((char*)widget + 0x38), D_0045DA18)) {
+        *(void**)((char*)self + 0x50) = widget;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatestore", func_00185268);
 

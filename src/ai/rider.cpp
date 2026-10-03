@@ -6,7 +6,88 @@ typedef int cQuad128 __attribute__((mode(TI)));
 
 INCLUDE_ASM("ai/rider", cRider_cRider);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011B978);
+#ifdef SKIP_ASM
+struct sVE_11B978 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+extern "C" void* func_0028B180();
+// PORT: func_00289AF8 takes (mgr, rider); the mangled name says one void* param.
+void func_00289AF8_impl(void* mgr, void* rider) __asm__("func_00289AF8__FPv");
+extern "C" void func_002832D8(void* p);
+extern "C" void func_00283228(void* p, int flags);
+extern "C" void func_0030D540(void* p, int flags);
+extern "C" void func_00329970(void* p, int flags);
+extern "C" void func_00113170(void* p, int flags);
+extern "C" void func_001033F8(void* a, void* p);
+extern "C" void func_00117290(void* p, int flags);
+extern "C" void func_00375918(void* p, int flags);
+void operator_delete(int* p);
+extern void* D_004A28A8;
+extern void* D_00459C18[];
+extern char D_00459B90[];
+extern void* D_00459BD0[];
+extern void* D_00482018[];
+extern void* D_00481FD8[];
+extern void* D_00459CC8[];
+
+static inline void vdel_11B978(char* o, int off)
+{
+    sVE_11B978* vt = *(sVE_11B978**)(o + off);
+    vt[1].fn(o + vt[1].delta, 3);
+}
+
+extern "C" void func_0011B978(char* self, int flags)
+{
+    *(void***)(self + 0x6E8) = D_00459BD0;
+    *(void**)(self + 0x6D0) = D_00459B90;
+    *(void***)(self + 0x6C0) = D_00459C18;
+    func_00289AF8_impl(func_0028B180(), self);
+    func_002832D8(self + 0x6DC);
+    char* o = *(char**)(self + 0x784);
+    if (o != 0)
+        vdel_11B978(o, 0x58);
+    void* p = *(void**)(self + 0x780);
+    if (p != 0)
+        func_0030D540(p, 3);
+    p = *(void**)(self + 0xAA0);
+    if (p != 0)
+        func_00329970(p, 3);
+    operator_delete(*(int**)(self + 0xAC0));
+    operator_delete(*(int**)(self + 0xABC));
+    p = *(void**)(self + 0x788);
+    if (p != 0)
+        func_00113170(p, 3);
+    void* box = *(void**)(self + 0x78C);
+    if (box != 0)
+        func_001033F8(*(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0xA4), box);
+    operator_delete(*(int**)(self + 0x78C));
+    p = *(void**)(self + 0x790);
+    if (p != 0)
+        func_00117290(p, 3);
+    operator_delete(*(int**)(self + 0x860));
+    operator_delete(*(int**)(self + 0x868));
+    operator_delete(*(int**)(self + 0x864));
+    o = *(char**)(self + 0x890);
+    if (o != 0)
+        vdel_11B978(o, 0xC4);
+    o = *(char**)(self + 0x88C);
+    if (o != 0)
+        vdel_11B978(o, 0xA4);
+    p = *(void**)(self + 0xAA8);
+    if (p != 0)
+        func_00375918(p, 3);
+    *(void***)(self + 0x6E8) = D_00482018;
+    *(void***)(self + 0x6D0) = D_00481FD8;
+    func_00283228(self + 0x6DC, 0);
+    *(void***)(self + 0x6C0) = D_00459CC8;
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_addFocusBox);
@@ -105,7 +186,86 @@ extern "C" void func_0011BD60(void* self, void** list, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011BE88);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" char* strcpy(char* dst, const char* src);
+void* func_0011B678(void* self);
+extern "C" void func_00418EF8(void* base, int n, int size, void* (*cmp)(void*));
+extern "C" int func_0014AC30(int c);
+extern "C" int func_0014A0B0(int c);
+extern "C" int func_0014AC50(int c);
+extern "C" int func_0014B988(void* iface, int b, int a, void* item, char* out);
+
+struct sAnimName_11BE88
+{
+    char name[0x100];
+    int f100;
+    int f104;
+};
+
+struct sAnimNameTable_11BE88
+{
+    sAnimName_11BE88 e[40];
+    int start;      // 0x2940
+    int count;      // 0x2944
+};
+
+extern "C" void func_0011BE88(void* self, void** list, int n)
+{
+    void* iface = cBE_getInterface(cBE_getBE(), 9);
+    int a = func_0014AC30(*(int*)((char*)self + 0x86C));
+    if (func_0014A0B0(*(int*)((char*)self + 0x86C))) {
+        for (int i = 0; i < n; i++) {
+            char* name = *(char**)((char*)list[i] + 0x2C);
+            sAnimNameTable_11BE88* t = *(sAnimNameTable_11BE88**)((char*)self + 0x894);
+            if (name == 0) continue;
+            if (*name == 0) continue;
+            int j;
+            int end = t->count + t->start;
+            for (j = t->start; j < end; j++) {
+                if (func_004165A8(name, &t->e[j]) == 0) goto next;
+            }
+            {
+                sAnimName_11BE88* e = &t->e[end];
+                strcpy(e->name, name);
+                e->f100 = -1;
+                e->f104 = 0;
+                t->count++;
+            }
+        next:;
+        }
+    } else {
+        int b = func_0014AC50(*(int*)((char*)self + 0x86C));
+        for (int i = 0; i < n; i++) {
+            char buf[0x100];
+            if (func_0014B988(iface, b, a, list[i], buf) == 0) continue;
+            char* name = buf;
+            sAnimNameTable_11BE88* t = *(sAnimNameTable_11BE88**)((char*)self + 0x894);
+            if (*name == 0) continue;
+            int j;
+            int end = t->count + t->start;
+            for (j = t->start; j < end; j++) {
+                if (func_004165A8(name, &t->e[j]) == 0) goto next2;
+            }
+            {
+                sAnimName_11BE88* e = &t->e[end];
+                strcpy(e->name, name);
+                e->f100 = -1;
+                e->f104 = 0;
+                t->count++;
+            }
+        next2:;
+        }
+    }
+    sAnimNameTable_11BE88* t2 = *(sAnimNameTable_11BE88**)((char*)self + 0x894);
+    func_00418EF8(&t2->e[t2->start], t2->count, 0x108, func_0011B678);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011C0E0);
@@ -1099,9 +1259,160 @@ extern "C" void func_00122088(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_001220D8);
+#ifdef SKIP_ASM
+struct sVE_20D8 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+struct sXf_20D8 {
+    float m[40];
+} __attribute__((aligned(16)));
+struct sV3_20D8 {
+    float x, y, z;
+    sV3_20D8() {}
+    sV3_20D8(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+struct sPt_20D8 { float x, y, z; };
+struct sQ_20D8 { float v[4]; };
+struct sPath_20D8 {
+    float x, y, z;
+    int n;
+    sPt_20D8 pts[5];
+    int pad;
+    sQ_20D8 q[5];
+};
+extern "C" void func_00389260(void* p);
+extern "C" void* func_002EDFB8(void* p);
+extern "C" float func_002EEFA8(void* p);
+extern "C" void* func_0011FF48(void* dst, void* self);
+extern "C" void func_00389CB8(void* m, void* q, float f);
+extern "C" void func_0038A6A8(void* m, void* q, void* p);
+extern "C" void func_00389558(void* m, sV3_20D8* v);
+extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
 
+extern "C" void func_001220D8(void* selfp)
+{
+    char* self = (char*)selfp;
+    sQ_20D8 q;
+    func_00389260(self + 0x7C0);
+    {
+        char* obj = self + 0x6C0;
+        sVE_20D8* vt = *(sVE_20D8**)obj;
+        *(sXf_20D8*)(self + 0x7C0) = *(sXf_20D8*)func_002EDFB8(vt[7].fn(obj + vt[7].delta));
+    }
+    func_0011FF48(&q, self);
+    char* m = self + 0x7C0;
+    {
+        char* obj = self + 0x6C0;
+        sVE_20D8* vt = *(sVE_20D8**)obj;
+        func_00389CB8(m, &q, func_002EEFA8(vt[7].fn(obj + vt[7].delta)));
+    }
+    for (int i = 0; i < 8; i++) {
+        void* p = ((void**)(self + 0x794))[i];
+        if (p != 0)
+            func_0038A6A8(self + 0x7C0, &q, p);
+    }
+    char* x = *(char**)(self + 0x77C);
+    sPath_20D8* t = x ? (sPath_20D8*)(x + 0xD30) : 0;
+    if (t != 0) {
+        {
+            sV3_20D8 v(t->x, t->y, t->z);
+            func_00389558(self + 0x7C0, &v);
+        }
+        for (int j = 0; j < t->n; j++) {
+            sQ_20D8* qq = &t->q[j];
+            sV3_20D8 v(t->pts[j].x, t->pts[j].y, t->pts[j].z);
+            func_00389520(self + 0x7C0, qq, &v);
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/rider", func_00122278);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C version.
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern char D_828[];
+
+struct sMat_122278 { float m[16]; };
+struct sQ128_122278 { float v[4]; } __attribute__((aligned(16)));
+struct sVE_122278 {
+    short delta;
+    short index;
+    void* fn;
+};
+typedef sMat_122278 (*GetMatFn_122278)(void*);
+typedef int (*TestFn_122278)(void*, void*, void*, sMat_122278*);
+
+static inline int inFrustum_122278(sQ128_122278* v)
+{
+    char* inst = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x8C);
+    int mask = *(int*)(inst + 0x110);
+    for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
+        int bit = 1 << i;
+        if (mask & bit) {
+            sQ128_122278* m = (sQ128_122278*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            int r;
+            __asm__ __volatile__(
+                ".set push\n"
+                ".set noreorder\n"
+                "lqc2      $vf1, %1\n"
+                "lqc2      $vf2, %2\n"
+                "lqc2      $vf3, %3\n"
+                "lqc2      $vf4, %4\n"
+                "lqc2      $vf5, %5\n"
+                "lqc2      $vf6, %6\n"
+                "ctc2.ni   %7, $vi27\n"
+                "vnop\n"
+                "vnop\n"
+                "vcallmsr  $vi27\n"
+                "cfc2.i    %0, $vi1\n"
+                ".set pop\n"
+                : "=&r"(r)
+                : "m"(m[0]), "m"(m[1]), "m"(m[2]), "m"(m[3]), "m"(m[4]), "m"(*v), "r"((int)D_828 >> 3)
+                : "memory");
+            int ok = r == 1;
+            if (ok)
+                return 1;
+        }
+    }
+    return 0;
+}
+
+static inline int test_122278(char* a, char* b)
+{
+    char* g = (char*)D_004A289C;
+    sVE_122278* vt = *(sVE_122278**)(g + 0x10D8);
+    char* obj = g + vt[93].delta;
+    sMat_122278 m = ((GetMatFn_122278)vt[43].fn)(g + vt[43].delta);
+    return ((TestFn_122278)vt[93].fn)(obj, a, b, &m);
+}
+
+extern "C" int func_00122278(char* self)
+{
+    if (*(int*)(self + 0x884) == 0 || *(int*)(self + 0x880) != 7 || *(int*)(self + 0xAD0) != 0) {
+        *(int*)(self + 0xB18) = 0;
+        return 0;
+    }
+    *(int*)(self + 0xB18) = test_122278(self + 0x400, self + 0x410) != 1;
+    if (*(int*)(self + 0x150) != 0) {
+        if (*(int*)(self + 0xB18) == 0) {
+            char* s = *(char**)(self + 0x77C);
+            *(int*)(self + 0xB18) = test_122278(s + 0x80, s + 0x90) != 1;
+        }
+    }
+    if (*(int*)(self + 0x150) == 0) {
+        if (inFrustum_122278((sQ128_122278*)(self + 0x420)))
+            *(int*)(self + 0xB18) = 0;
+    }
+    return *(int*)(self + 0xB18);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00122448);
@@ -1587,7 +1898,58 @@ extern "C" void func_00125108(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125228);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sVE_125228 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+extern "C" void* cBE_getBE();
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00125108(char* self);
+extern "C" void* func_0028B180();
+extern "C" void func_002A3C00(void* a, void* self, int n);
+extern "C" unsigned int func_004139F8(float f);
+extern void* D_004A28A8;
+extern signed char D_00535C10[];
+extern int D_005308D0[];
+
+extern "C" int func_00125228(void* selfp)
+{
+    char* self = (char*)selfp;
+    char* obj = self + 0x6C0;
+    sVE_125228* vt = *(sVE_125228**)obj;
+    if (vt[8].fn(obj + vt[8].delta)) {
+        float h = *(float*)(self + 0x470);
+        float zero = 0.0f;
+        int done = h >= zero;
+        if (!done) {
+            cBE_getInterface(cBE_getBE(), 0);
+            if (D_00535C10[0] == 4)
+                return *(float*)(self + 0x470) >= zero;
+            char* g = (char*)D_004A28A8;
+            char* p = *(char**)(g + 0xC0);
+            if (*(int*)(p + 0x88) != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
+                int t = *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0xC);
+                int secs = func_004139F8((float)*(unsigned int*)(p + 0x78) * 0.01666666753590107f);
+                if (secs * 60 < t) {
+                    *(int*)(self + 0x480) = 1;
+                    func_00125108(self);
+                    func_002A3C00(func_0028B180(), self, 2);
+                    goto end;
+                }
+            }
+            if (*(int*)(self + 0x480) == 1 && *(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x214) == 4)
+                func_00125108(self);
+        }
+    }
+end:
+    return *(float*)(self + 0x470) >= 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_quitEvent);
@@ -1769,7 +2131,102 @@ extern "C" void func_00125B18(void* p, int a, int on)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_00125C70);
+#ifdef SKIP_ASM
+// g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
+struct sVtEnt_125C70 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sVt9_125C70 {
+    sVtEnt_125C70 e[9];
+} __attribute__((aligned(8)));
+struct sVt22_125C70 {
+    sVtEnt_125C70 e[22];
+} __attribute__((aligned(8)));
+extern const sVt9_125C70 D_00458360;
+extern const sVt22_125C70 D_004583A8;
+extern char D_00459B90[];
+extern char D_00458338[];
+extern void* D_004A28A8;
+extern "C" void cRider_cRider(void* self);
+extern "C" void func_0010FCD8(void* self, int inChrg);
+extern "C" void* cReplay_addCache(void* p);
+
+// PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
+// (cRider at +0xE10): vtable copies with delta fixups when not in charge.
+extern "C" void* func_00125C70(char* self, int inChrg)
+{
+    sVt9_125C70 t1;
+    sVt22_125C70 t2;
+    if (inChrg) {
+        char* vb = self + 0xE10;
+        *(void**)(self + 0xD20) = vb;
+        *(void**)(self + 0xC70) = vb;
+        *(void**)(self + 0xB40) = vb;
+        *(void**)(self + 0xB00) = vb;
+        *(void**)(self + 0xAF0) = vb;
+        *(void**)(self + 0xAD0) = vb;
+        *(void**)(self + 0x9C0) = vb;
+        *(void**)(self + 0x610) = vb;
+        *(void**)(self + 0x520) = vb;
+        *(void**)(self + 0x470) = vb;
+        *(void**)(self + 0x3B0) = vb;
+        *(void**)(self + 0x3A0) = vb;
+        *(void**)(self + 0x398) = vb;
+        *(void**)(self + 0x384) = vb;
+        *(void**)(self + 0x364) = vb;
+        *(void**)(self + 0x358) = vb;
+        *(void**)(self + 0x340) = vb;
+        *(void**)(self + 0x2B8) = vb;
+        *(void**)(self + 0x2A4) = vb;
+        *(void**)(self + 0x288) = vb;
+        *(void**)(self + 0x224) = vb;
+        *(void**)(self + 0x200) = vb;
+        *(void**)(self + 0x1F0) = vb;
+        *(void**)(self + 0x1E4) = vb;
+        *(void**)(self + 0x1C0) = vb;
+        *(void**)(self + 0x1B0) = vb;
+        *(void**)(self + 0x100) = vb;
+        *(void**)(self + 0xA0) = vb;
+        *(void**)(self + 0x70) = vb;
+        *(void**)(self + 0x24) = vb;
+        *(void**)(self + 0x18) = vb;
+        cRider_cRider(vb);
+    }
+    func_0010FCD8(self, 0);
+    *(void**)(*(char**)(self + 0x18) + 0x6E8) = (void*)&D_00458360;
+    *(void**)(*(char**)(self + 0x18) + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)(self + 0x18) + 0x6C0) = (void*)&D_004583A8;
+    if (inChrg == 0) {
+        int vc;
+        t1 = D_00458360;
+        *(void**)(*(char**)(self + 0x18) + 0x6E8) = &t1;
+        {
+            char* vbo = *(char**)(self + 0x18) - 0xE10;
+            vc = self - vbo;
+        }
+        t1.e[1].delta = D_00458360.e[1].delta + vc;
+        t2 = D_004583A8;
+        *(void**)(*(char**)(self + 0x18) + 0x6C0) = &t2;
+        t2.e[1].delta = D_004583A8.e[1].delta + vc;
+        t2.e[16].delta = D_004583A8.e[16].delta + vc;
+        t2.e[17].delta = D_004583A8.e[17].delta + vc;
+        t2.e[18].delta = D_004583A8.e[18].delta + vc;
+        t2.e[19].delta = D_004583A8.e[19].delta + vc;
+        t2.e[20].delta = D_004583A8.e[20].delta + vc;
+    }
+    *(void**)(self + 0xDE8) = D_00458338;
+    *(int*)(self + 0xDF4) = 0;
+    *(int*)(self + 0xDFC) = 0;
+    *(int*)(self + 0xE00) = 0;
+    *(int*)(*(char**)(self + 0x18) + 0x874) = 1;
+    *(void**)(self + 0xDF8) = cReplay_addCache(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+    return self;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00125EB8);
 

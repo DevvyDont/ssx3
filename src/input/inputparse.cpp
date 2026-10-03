@@ -33,7 +33,63 @@ extern "C" int cInputMapParser_lookupModifierName(void* self, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupConfigName);
+#ifdef SKIP_ASM
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int func_0041AB78(const char* a, const char* b, int n);
+extern char D_004A3F18[];
+extern char D_004A3F20[];
+extern char D_004A3F28[];
+
+extern "C" int cInputMapParser_lookupConfigName(void* self, char* name)
+{
+    if (func_0041AA88(name, D_004A3F18) == 0)
+        return 0;
+    if (func_0041AB78(name, D_004A3F20, 3) == 0) {
+        int d = name[3] - '0';
+        if ((unsigned char)d < 10) {
+            int n = d;
+            char* p = name + 4;
+            while ((unsigned)(*p - '0') < 10) {
+                n = n * 10 + (*p++ - '0');
+            }
+            int alpha = 0;
+            if ((unsigned)(*p - 'a') < 26 || (unsigned)(*p - 'A') < 26) {
+                alpha = 1;
+            }
+            if (!alpha) {
+                if (*p != '_' && n < 8) {
+                    return n + 1;
+                }
+            }
+        }
+    }
+    if (func_0041AB78(name, D_004A3F28, 6) != 0) {
+        return -1;
+    }
+    int d = name[6] - '0';
+    if ((unsigned char)d >= 10) {
+        return -1;
+    }
+    int n = d;
+    char* p = name + 7;
+    while ((unsigned)(*p - '0') < 10) {
+        n = n * 10 + (*p++ - '0');
+    }
+    int alpha = 0;
+    if ((unsigned)(*p - 'a') < 26 || (unsigned)(*p - 'A') < 26) {
+        alpha = 1;
+    }
+    if (alpha) {
+        return -1;
+    }
+    if (*p != '_' && n < 23) {
+        return n + 9;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00321A40);
@@ -300,7 +356,66 @@ extern "C" void* func_003233B8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", func_00323540);
+#ifdef SKIP_ASM
+extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void func_00321638(void* self, void* node);
+extern "C" void* func_003215F8(void* self);
+extern "C" void* func_003236D8(void* self);
+
+struct sAndNode_00323540 {
+    int type;
+    union {
+        float value;
+        sAndNode_00323540* a;
+    };
+    sAndNode_00323540* b;
+};
+
+extern "C" void* func_00323540(void* self)
+{
+    sAndNode_00323540* left = (sAndNode_00323540*)func_003236D8(self);
+    if (left == 0) {
+        return 0;
+    }
+    int isFalse = 0;
+    if (left->type == 4 && left->value == 0.0f) {
+        isFalse = 1;
+    }
+    while (*(int*)((char*)self + 0x98) == 0xD) {
+        cInputMapParser_readToken(self);
+        sAndNode_00323540* right = (sAndNode_00323540*)func_003236D8(self);
+        if (right == 0) {
+            func_00321638(self, left);
+            return 0;
+        }
+        if (isFalse) {
+            func_00321638(self, right);
+        } else if (right->type == 4) {
+            if (right->value == 0.0f) {
+                func_00321638(self, left);
+                left = right;
+                isFalse = 1;
+            } else {
+                func_00321638(self, right);
+                if (left->type == 4)
+                    left->value = 1.0f;
+            }
+        } else if (left->type == 4) {
+            func_00321638(self, left);
+            left = right;
+        } else {
+            sAndNode_00323540* n = (sAndNode_00323540*)func_003215F8(self);
+            n->a = left;
+            n->b = right;
+            n->type = 7;
+            left = n;
+        }
+    }
+    return left;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", func_003236D8);
 
@@ -470,7 +585,68 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileStatement);
 
 INCLUDE_ASM("input/inputparse", func_00324678);
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00324EC8);
+#ifdef SKIP_ASM
+extern "C" void func_00321500(void* self, const char* fmt, ...);
+extern "C" int func_00324678(void* self, void* node, int* src, void* code, int cap, int a5);
+extern char D_0048E240[];
+extern char D_0048E228[];
+
+struct sInsn_00324EC8 {
+    unsigned int op : 6;
+    unsigned int dst : 6;
+    unsigned int src : 10;
+    unsigned int arg : 10;
+};
+struct sCodeGen_00324EC8 {
+    char pad0[0x108EC];
+    int freeRegs[63];  // 0x108EC
+    int numFree;                // 0x109E8
+};
+
+extern "C" int func_00324EC8(sCodeGen_00324EC8* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int a6)
+{
+    int src = -1;
+    int n1 = func_00324678(self, *(void**)((char*)node + 4), &src, code, cap, a6);
+    if (n1 < 0) {
+        return -1;
+    }
+    code += n1;
+    cap -= n1;
+    int arg = -1;
+    int n2 = func_00324678(self, *(void**)((char*)node + 8), &arg, code, cap, a6);
+    if (n2 < 0) {
+        return -1;
+    }
+    code += n2;
+    cap -= n2;
+    if ((unsigned int)arg < 0x40) {
+        self->freeRegs[self->numFree++] = arg;
+    }
+    if ((unsigned int)src < 0x40) {
+        self->freeRegs[self->numFree++] = src;
+    }
+    if (*dst < 0) {
+        if (self->numFree > 0) {
+            *dst = self->freeRegs[--self->numFree];
+        }
+        if (*dst < 0) {
+            func_00321500(self, D_0048E240);
+            return -1;
+        }
+    }
+    if (cap <= 0) {
+        func_00321500(self, D_0048E228);
+        return -1;
+    }
+    code->op = op;
+    code->dst = *dst;
+    code->src = src;
+    code->arg = arg;
+    return n1 + n2 + 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_003250D8);
@@ -680,7 +856,64 @@ extern "C" void func_00326078(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", func_00326150);
+#ifdef SKIP_ASM
+struct sParseStream;
+extern "C" void func_00326360(void* self, char c);
+extern "C" void func_00326478(void* self, sParseStream* s);
+extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* s, int a2, int a3);
+extern "C" void func_003264B0(void* self, sParseStream* s, int a2, int a3);
+extern "C" void func_003265C0(void* self, sParseStream* s, int a2, int a3);
+
+static inline int isWS_326150(int c)
+{
+    return c == ' ' || c == '\t' || c == '\r';
+}
+
+extern "C" int func_00326150(void* self, sParseStream* s, int a2, int a3)
+{
+    int ch;
+    for (;;) {
+        ch = *(int*)((char*)self + 0xC);
+        if (!isWS_326150(ch))
+            break;
+        func_00326360(self, (char)*(int*)((char*)self + 0xC));
+        func_00326478(self, s);
+        if (*(int*)((char*)self + 0xC) < 0)
+            return 0;
+    }
+    if (ch == '#') {
+        func_00326478(self, s);
+        cInputPreProcessor_readCmdLine(self, s, a2, a3);
+        return *(int*)((char*)self + 0xC) >= 0;
+    }
+    if (ch == '/') {
+        func_00326478(self, s);
+        int c = *(int*)((char*)self + 0xC);
+        if (c == '/') {
+            func_003265C0(self, s, a2, a3);
+            return *(int*)((char*)self + 0xC) >= 0;
+        }
+        if (c == '*') {
+            func_00326478(self, s);
+            func_003264B0(self, s, a2, a3);
+            return *(int*)((char*)self + 0xC) >= 0;
+        }
+        func_00326360(self, '/');
+    }
+    while (*(int*)((char*)self + 0xC) >= 0) {
+        func_00326360(self, (char)*(int*)((char*)self + 0xC));
+        if (*(int*)((char*)self + 0xC) == '\n') {
+            *(int*)((char*)s + 0xC) += 1;
+            func_00326478(self, s);
+            break;
+        }
+        func_00326478(self, s);
+    }
+    return *(int*)((char*)self + 0xC) >= 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326308);

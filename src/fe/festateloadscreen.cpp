@@ -1,6 +1,123 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_load);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_3438(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00397B08(void* mem);
+extern "C" void cUIEngine_loadFile(void* engine, const char* name);
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void func_00233640(void* self, int type);
+extern "C" void func_0039F400(void* list, void* screen);
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern int D_004A19C4;
+extern signed char D_00535C11[];
+extern char D_0047B698[];
+extern char D_0047BFB0[];
+extern char D_0047BFC0[];
+extern char D_0047BFD0[];
+extern char D_0047BFE8[];
+extern char D_0047C000[];
+extern void* D_0046D1D0[];
+extern void* D_0047C538[];
+extern void* D_0047C6D8[];
+extern void* D_0047C608[];
+
+struct sVE_233438 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sEngine_233438 {
+    char pad0[0x8];
+    int f8;
+    void* fC;
+    int f10;
+};
+
+struct sObj_233438 {
+    int f0;
+    char f4;
+    void** vt;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+};
+
+static inline char* newScreenA_233438(void* self)
+{
+    char* p = (char*)cMemMan_alloc(0x48, D_0047BFD0, 0, 0);
+    func_0039E2A0(p, *(void**)((char*)self + 0xC));
+    *(void***)(p + 8) = D_0047C538;
+    return p;
+}
+
+static inline char* newScreenB_233438(void* self)
+{
+    char* p = (char*)cMemMan_alloc(0x4C, D_0047BFE8, 0, 0);
+    func_0039E2A0(p, *(void**)((char*)self + 0xC));
+    *(int*)(p + 0x48) = 0;
+    *(void***)(p + 8) = D_0047C6D8;
+    return p;
+}
+
+static inline char* newScreenC_233438(void* self)
+{
+    char* p = (char*)cMemMan_alloc(0x4C, D_0047C000, 0, 0);
+    func_0039E2A0(p, *(void**)((char*)self + 0xC));
+    *(int*)(p + 0x48) = 0;
+    *(void***)(p + 8) = D_0047C608;
+    return p;
+}
+
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
+extern "C" void cFELoadScreen_load(void* self)
+{
+    {
+        char* g = (char*)D_004A289C;
+        sVE_233438* vt = *(sVE_233438**)(g + 0x10D8);
+        vt[44].fn(g + vt[44].delta, 0x100);
+    }
+    void* eng = func_00397B08(cMemMan_alloc(0x70, D_0047B698, 0x100, 0));
+    *(void**)((char*)self + 0xC) = eng;
+    cUIEngine_loadFile(eng, D_0047BFB0);
+    (*(sEngine_233438**)((char*)self + 0xC))->f8 = *(int*)((char*)D_004A28A8 + 0x88);
+    (*(sEngine_233438**)((char*)self + 0xC))->f10 = *(int*)((char*)D_004A28A8 + 0x8C);
+    {
+        sObj_233438* o = new (D_0047BFC0, 0x100, 0) sObj_233438;
+        o->f4 = 0;
+        o->vt = D_0046D1D0;
+        o->f18 = 0;
+        o->fC = 0;
+        o->f10 = 0;
+        o->f14 = 0;
+        (*(sEngine_233438**)((char*)self + 0xC))->fC = o;
+    }
+    char* gm = *(char**)((char*)D_004A28A8 + 0xC0);
+    cBE_getInterface_3438(cBE_getBE(), 0);
+    char* screen;
+    if (D_004A19C4 == 0x27) {
+        screen = newScreenA_233438(self);
+    } else if (*(int*)(gm + 0x9C) == 0 || D_00535C11[0] == 0) {
+        screen = newScreenB_233438(self);
+        *(void**)(screen + 0x48) = self;
+        func_00233640(self, 1);
+    } else {
+        screen = newScreenC_233438(self);
+        *(void**)(screen + 0x48) = self;
+        func_00233640(self, 2);
+    }
+    func_0039F400(*(char**)((char*)self + 0xC) + 0x18, screen);
+    *(int*)((char*)self + 0x18) = -1;
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_00233640);
 
@@ -399,11 +516,188 @@ extern "C" void* func_00234188(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_002341D0);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_41D0(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void cBE_setState(int state);
+extern "C" void cAI_setAIState(void*, int);
+extern "C" void func_001F36D8(void* hud, int a);
+extern "C" void func_0026F228(void* p);
+extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id);
+extern "C" void func_001473D0(void* player, int i, int v);
+extern "C" void func_002790A0(void* self, int i);
+extern "C" void func_0027AAF8(void* a, int b);
+// PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
+extern "C" int func_00278F38(void* self, int i);
+extern void* D_004A2C68;
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+extern signed char D_00535C10[];
+
+struct sVE_2341D0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sGM_2341D0 {
+    char pad0[0x10];
+    int total;      // 0x10
+    int humans;     // 0x14
+    int chars[10];  // 0x18
+    int boards[10]; // 0x40
+};
+
+static inline int isMode4_2341D0()
+{
+    return D_00535C10[0] == 4;
+}
+
+extern "C" void func_002341D0(void* self, int mode)
+{
+    int i = 0;
+    char* race = (char*)cBE_getInterface_41D0(cBE_getBE(), 0);
+    char* player = (char*)cBE_getInterface_41D0(cBE_getBE(), 1);
+    cAI_setAIState(*(void**)((char*)D_004A2C68 + 0xC), 3);
+    func_001F36D8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 0);
+    cBE_setState(0);
+    sGM_2341D0* gm = *(sGM_2341D0**)((char*)D_004A28A8 + 0xC0);
+    func_0026F228(*(void**)((char*)D_004A2C68 + 0x28));
+    int n = gm->total - gm->humans;
+    int base = *(int*)(*(char**)((char*)D_004A2C68 + 0xC) + 0x7C);
+    cBENewRaceInterface_setNumberAI(race, n);
+    {
+        sVE_2341D0* vt = *(sVE_2341D0**)(race + 0xC);
+        vt[1].fn(race + vt[1].delta);
+    }
+    for (; i < n; i++) {
+        cBENewPlayerInterface_setRiderCharID(player, i + base, gm->chars[base + i]);
+        func_001473D0(player, i + base, gm->boards[base + i]);
+    }
+    {
+        sVE_2341D0* vt = *(sVE_2341D0**)(player + 0xC);
+        vt[1].fn(player + vt[1].delta);
+    }
+    switch (mode) {
+    case 0:
+        break;
+    case 2:
+        func_002790A0(D_004A28A4, 0);
+        func_0027AAF8(D_004A28A4, 1);
+        func_00278F38(D_004A28A4, 0);
+        break;
+    case 1:
+        if (!isMode4_2341D0()) {
+            func_002790A0(D_004A28A4, 0);
+            func_0027AAF8(D_004A28A4, 0);
+            func_00278F38(D_004A28A4, 0);
+        }
+        break;
+    }
+    *(int*)((char*)self + 0x1C) = 0;
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_002343B0);
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00234750);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_4750(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void cBE_setState(int state);
+extern "C" void cAI_setAIState(void*, int);
+void* cBEAggressionInterface_getThis();
+extern "C" void func_002790A0(void* self, int i);
+extern "C" void func_00128958(void* p);
+void func_001289F0(void* p);
+extern "C" void func_00128A10(void* p);
+extern "C" void func_0026F7B8(void* p);
+extern "C" void func_00128A48(void* p, int a);
+extern "C" void func_00308F38(void* a);
+extern "C" void func_00308C60(void* a);
+extern "C" void func_00129160(void* p);
+extern "C" void func_00155E58(void* p);
+extern void* D_004A2C68;
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+extern void* D_004A3DD8;
+
+struct sRace_234750 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+};
+extern sRace_234750 D_00535BC8_r234750 __asm__("D_00535BC8");
+
+struct sRaceMan_234750 {
+    char pad0[0x8C];
+    int f8C;
+};
+
+struct sVE_234750 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sTbl_234750 {
+    char pad[0x250];
+    struct { int f0; char pad[0x4C]; } slot[2];
+};
+
+static inline int otherSide_234750(char* p)
+{
+    return *(int*)(p + 0xB0) == 0;
+}
+
+extern "C" void func_00234750(void* self)
+{
+    func_002790A0(D_004A28A4, 1);
+    cBE_getInterface_4750(cBE_getBE(), 0);
+    sRace_234750* r = &D_00535BC8_r234750;
+    int mode = r->mode48;
+    if (mode == 0) {
+        func_00128958(*(void**)((char*)D_004A2C68 + 0xC));
+        func_001289F0(*(void**)((char*)D_004A2C68 + 0xC));
+    } else {
+        func_00128A10(*(void**)((char*)D_004A2C68 + 0xC));
+        func_0026F7B8(*(void**)((char*)D_004A2C68 + 0x28));
+    }
+    if (mode != 4) {
+        char* o = *(char**)((char*)D_004A2C68 + 0xC);
+        sVE_234750* vt = *(sVE_234750**)(o + 0xCC);
+        vt[5].fn(o + vt[5].delta, 3);
+        *(int*)(*(char**)((char*)D_004A2C68 + 0xC) + 0x14) = 1;
+    }
+    func_00128A48(*(void**)((char*)D_004A2C68 + 0xC), 0);
+    if (mode == 5 || mode == 0)
+        func_00128A48(*(void**)((char*)D_004A2C68 + 0xC), 1);
+    else if (mode != 4)
+        func_00128A48(*(void**)((char*)D_004A2C68 + 0xC), 2);
+    func_00308F38(D_004A3DD8);
+    func_00308C60(D_004A3DD8);
+    (*(sRaceMan_234750**)((char*)D_004A2C68 + 0xC))->f8C = 0;
+    cAI_setAIState(*(void**)((char*)D_004A2C68 + 0xC), 3);
+    cBE_setState(1);
+    func_00129160(*(void**)((char*)D_004A2C68 + 0xC));
+    sRace_234750* r2 = &D_00535BC8_r234750;
+    if (r2->flag49 != 0)
+        func_00155E58(cBEAggressionInterface_getThis());
+    *(int*)((char*)self + 0x14) = 0;
+    char* g = *(char**)((char*)D_004A28A8 + 0x84);
+    char* x = *(char**)(g + 0x84);
+    if (*(int*)(x + 0x10) == 1) {
+        sTbl_234750* t = **(sTbl_234750***)(g + 0x10);
+        t->slot[otherSide_234750(*(char**)(x + 4))].f0 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_00234910);

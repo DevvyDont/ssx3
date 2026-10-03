@@ -2,7 +2,83 @@
 
 INCLUDE_ASM("mem/memstd", MEMCLASS_create);
 
+//100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_link);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+// PORT: debugmenu defines MEM_initblock with a short flags parameter; this caller passes the int unconverted.
+extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
+extern char D_004A2E50[];
+extern char D_004A2E40[];
+
+struct sMemNode_251D50 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    char* end;
+    void* fC;
+    sMemNode_251D50* next;
+    sMemNode_251D50* prev;
+};
+
+struct sMemClass_251D50 {
+    char pad0[0xC];
+    char* last;                 // 0xC
+    sMemNode_251D50 head;       // 0x10
+    int f28;
+    int align;                  // 0x2C
+    int hdr;                    // 0x30
+    int flags;                  // 0x34
+};
+
+extern void* D_004D2438[];
+
+extern "C" int MEMCLASS_link(int id, char* mem, int size)
+{
+    sMemClass_251D50* cls = (sMemClass_251D50*)D_004D2438[id & 0x3F];
+    char buf[0x100];
+    int hdr = cls->hdr;
+    int align = cls->align;
+    char* end = mem + size;
+    char* data = mem;
+    data += hdr + 0x10;
+    data += align + 0x2F;
+    data = (char*)((int)data & -align);
+    end -= hdr + 0x30;
+    int flags = cls->flags;
+    sMemNode_251D50* blk = (sMemNode_251D50*)(data - 0x10);
+    char* last = cls->last;
+    sprintf(buf, D_004A2E50, cls);
+    MEM_initblock(last, buf, 0, hdr, flags | 0x8000, *(void**)(last + 0xC), mem);
+    MEM_initblock(mem, buf, 0, hdr, flags | 0x8000, last, blk);
+    MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
+    sprintf(buf, D_004A2E40, cls);
+    MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
+    cls->last = end;
+    sMemNode_251D50* q = &cls->head;
+    sMemNode_251D50* p = q;
+    int sz = *(char**)(data - 8) - (char*)blk;
+    if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+        do
+            p = p->prev;
+        while (blk < p);
+        q = p->next;
+    } else {
+        do
+            q = q->next;
+        while (q < blk);
+        p = q->prev;
+    }
+    blk->size = sz;
+    blk->next = q;
+    blk->prev = p;
+    p->next = blk;
+    q->prev = blk;
+    blk->tag = 0x4246;
+    blk->flags |= 0x4000;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00251F68);
@@ -49,7 +125,81 @@ void MEM_print()
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", MEM_printclassf);
+#ifdef SKIP_ASM
+int func_00252658(void* self);
+extern "C" int func_00252660(void* p);
+struct sMemBlock002522B0;
+extern "C" int func_002522B0(sMemBlock002522B0* blk);
+extern "C" int func_003E62D0(void* p, int size, int seed);
+extern char D_004800E0[];
+extern char D_00480140[];
+extern char D_00480198[];
+extern char D_004801B0[];
+extern char D_004801C0[];
+extern char* D_004801E8[];
+extern char D_004A2E58[];
+extern char D_004A2E60[];
+extern char D_004A2E68[];
+extern char D_004A2E70[];
+
+struct sMemNode_252010 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    char* next;
+    void* fC;
+};
+
+struct sMemClass_252010 {
+    char pad0[0x8];
+    sMemNode_252010* first;     // 0x8
+};
+
+extern void* D_004D2438[];
+
+// PORT: thing is a memory class id (masked with 0x3F) passed through a void* parameter.
+extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const char*, ...))
+{
+    int total = 0;
+    int crc = 0;
+    cb(D_004800E0);
+    cb(D_00480140);
+    sMemClass_252010* cls = (sMemClass_252010*)D_004D2438[(int)thing & 0x3F];
+    if (cls == 0) {
+        cb(D_00480198);
+        return;
+    }
+    for (sMemNode_252010* blk = cls->first; blk != 0; blk = (sMemNode_252010*)blk->next) {
+        char* data = (char*)blk + 0x10;
+        char* n1 = (char*)func_00252658(data);
+        if (n1 == 0)
+            n1 = D_004A2E58;
+        char* n2 = (char*)func_00252660(data);
+        if (n2 == 0)
+            n2 = D_004A2E58;
+        if (blk->flags & 0x4000) {
+            int sz = blk->size;
+            if (sz > 0x10 && !(blk->flags & 0x8000))
+                crc = func_003E62D0((char*)blk + 0x18, sz - 0x18, 0xFBEA);
+            total += sz;
+            int st = func_002522B0((sMemBlock002522B0*)blk);
+            cb(fmt, D_004A2E60, D_004801B0, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
+        } else {
+            int sz = blk->size;
+            crc = 0;
+            if (sz != 0 && !(blk->flags & 0x8000))
+                crc = func_003E62D0(data, sz, 0xFBEA);
+            int st = func_002522B0((sMemBlock002522B0*)blk);
+            cb(fmt, D_004A2E68, n1, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], n2);
+        }
+        cb(D_004A2E70);
+    }
+    cb(D_004801C0, total, total);
+    cb(D_00480140);
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00252248);

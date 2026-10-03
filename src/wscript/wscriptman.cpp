@@ -1605,7 +1605,79 @@ extern "C" void func_0030BC80(void* self, void** list, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030BD20);
+#ifdef SKIP_ASM
+class cStream_30BD20 {
+public:
+    virtual void v01();
+    virtual void Read(void* dst, int size);
+};
+
+struct sWSMan_30BD20 {
+    char pad0[0x28C];
+    char* world;                // 0x28C
+    char pad290[0x28];
+    void* list2B8;              // 0x2B8
+    void* list2BC;              // 0x2BC
+    char tables[1][0x10C];      // 0x2C0
+    void* objs[50];             // 0x3CC
+};
+
+struct cWScriptListHead;
+extern "C" void* func_0030B208(void* self);
+int func_0030B260(void* self, void* a1);
+extern "C" int func_003ACA38(void* a, int id);
+class func_0030C700_cObj;
+extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj);
+class func_0030BEE8_cStream;
+extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream);
+extern "C" void func_00224F68(void* obj);
+extern "C" void func_002259A8(void* obj, cStream_30BD20* stream, int a2);
+
+extern "C" void func_0030BD20(sWSMan_30BD20* self, cStream_30BD20* stream)
+{
+    stream->Read(self, 0x28C);
+    {
+        int k;
+        for (k = 0; k < 1; k++) {
+            func_0030C700(self->tables[k], (func_0030C700_cObj*)stream);
+        }
+    }
+    void* p;
+    while ((p = func_0030B208(&self->list2B8)) != 0) {
+        *(int*)p = 0;
+        func_0030B260((char*)self + 0x2B4, p);
+    }
+    while ((p = func_0030B208(&self->list2BC)) != 0) {
+        *(int*)p = 0;
+        func_0030B260((char*)self + 0x2B4, p);
+    }
+    func_0030BEE8(self, (cWScriptListHead*)&self->list2B8, (func_0030BEE8_cStream*)stream);
+    func_0030BEE8(self, (cWScriptListHead*)&self->list2BC, (func_0030BEE8_cStream*)stream);
+    {
+        int i;
+        for (i = 0; i < 50; i++) {
+            if (self->objs[i] != 0) {
+                func_00224F68(self->objs[i]);
+            }
+        }
+    }
+    int count;
+    stream->Read(&count, 4);
+    for (int j = 0; j < count; j++) {
+        int id;
+        stream->Read(&id, 4);
+        int r = func_003ACA38(*(void**)(self->world + 4), id);
+        func_002259A8(self->objs[id], stream, r);
+    }
+    *(int*)((char*)self + 0x290) = 0;
+    *(int*)((char*)self + 0x294) = 0;
+    *(int*)((char*)self + 0x298) = 0;
+    *(int*)((char*)self + 0x2A4) = 0;
+    *(int*)((char*)self + 0x2A8) = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030BEE8);
@@ -1702,7 +1774,104 @@ extern "C" int func_0030C468(void* entry)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C4A8);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_C4A8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" int func_001538E8(void* iface, int a, int b, int c);
+extern "C" void* func_003506D8(void* mem, void* obj);
+extern char D_004896B8[];
+
+struct sRefSet_C4A8 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+struct sRefWorld_C4A8 {
+    char pad_0x0[0x8];
+    sRefSet_C4A8** sets;    // 0x8
+};
+extern sRefWorld_C4A8** D_004A47B8_C4A8 __asm__("D_004A47B8");
+
+struct sRace_C4A8 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+};
+extern sRace_C4A8 D_00535BC8_rC4A8 __asm__("D_00535BC8");
+
+struct sVE_C4A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sEntry_C4A8 {
+    int id;
+    int f4;
+    int count;
+    unsigned int ids[1];
+};
+
+static inline void* refToPtr_C4A8(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* toObj_C4A8(unsigned int p)
+{
+    if (p == 0)
+        return 0;
+    return refToPtr_C4A8(p);
+}
+
+static inline void* lookup_C4A8(unsigned int id)
+{
+    sRefSet_C4A8* set = (*D_004A47B8_C4A8)->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    return toObj_C4A8(set->refs[id >> 8] >> 8);
+}
+
+static inline void respawn_C4A8(unsigned int id)
+{
+    char* obj = (char*)lookup_C4A8(id);
+    char* o = *(char**)(obj + 0xC);
+    if (o != 0) {
+        sVE_C4A8* vt = *(sVE_C4A8**)(o + 0xC);
+        vt[1].fn(o + vt[1].delta, 3);
+    }
+    func_003506D8(cMemMan_alloc(0x1C, D_004896B8, 0x20000000, 0), obj);
+}
+
+// PORT: a1 is really an unsigned int* id list and a2 its count (the unit declares both int).
+extern "C" void func_0030C4A8(void* ep, int a1, int a2)
+{
+    sEntry_C4A8* e = (sEntry_C4A8*)ep;
+    unsigned int* ids = (unsigned int*)a1;
+    void* iface = cBE_getInterface_C4A8(cBE_getBE(), 10);
+    if (a2 <= 0)
+        return;
+    sRace_C4A8* r = &D_00535BC8_rC4A8;
+    for (int n = a2; n != 0; n--, ids++) {
+        unsigned int id = *ids;
+        if (~id == 0)
+            continue;
+        ((unsigned int*)((char*)e + 0xC))[e->count] = id;
+        cBE_getInterface_C4A8(cBE_getBE(), 0);
+        if (r->flag49 == 0) {
+            if (func_001538E8(iface, 0, e->count, e->id))
+                respawn_C4A8(*ids);
+        } else {
+            respawn_C4A8(*ids);
+        }
+        e->count++;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C6C8);
