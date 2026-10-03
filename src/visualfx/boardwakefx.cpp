@@ -1,6 +1,88 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_cBoardWakeFX);
+#ifdef SKIP_ASM
+// g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
+struct sVtEntBW {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sVt9_BW {
+    sVtEntBW e[9];
+} __attribute__((aligned(8)));
+
+struct sVt22_BW {
+    sVtEntBW e[22];
+} __attribute__((aligned(8)));
+
+extern const sVt9_BW D_00488DA8;
+extern const sVt22_BW D_00488DF0;
+extern char D_00459B90[];
+extern char D_00487968[];
+extern char D_00487980[];
+extern "C" void cRider_cRider(void* self);
+struct sWakeDCF28;
+extern "C" void func_002DCF28(sWakeDCF28* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+
+struct sWakePtBW {
+    float v[4];
+    sWakePtBW() {}
+};
+
+struct sWakeStripBW {
+    int hdr[8];
+    sWakePtBW pts[5];
+    sWakeStripBW() {}
+};
+
+struct sWakeElemBW {
+    char data[0x30];
+    sWakeElemBW() {}
+};
+
+// PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
+// (cRider at +0xC0): vtable copies with delta fixups when not in charge.
+extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg)
+{
+    sVt9_BW t1;
+    sVt22_BW t2;
+    if (inChrg) {
+        *(void**)self = (char*)self + 0xC0;
+        cRider_cRider((char*)self + 0xC0);
+    }
+    *(void**)(*(char**)self + 0x6E8) = (void*)&D_00488DA8;
+    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488DF0;
+    if (inChrg == 0) {
+        int vc;
+        t1 = D_00488DA8;
+        *(void**)(*(char**)self + 0x6E8) = &t1;
+        {
+            char* vbo = *(char**)self - 0xC0;
+            vc = (char*)self - vbo;
+        }
+        t1.e[1].delta = D_00488DA8.e[1].delta + vc;
+        t2 = D_00488DF0;
+        *(void**)(*(char**)self + 0x6C0) = &t2;
+        t2.e[1].delta = D_00488DF0.e[1].delta + vc;
+    }
+    sWakeStripBW*& strips = *(sWakeStripBW**)((char*)self + 0xC);
+    strips = new (D_00487968, 0, 0) sWakeStripBW[32];
+    sWakeElemBW** rows = (sWakeElemBW**)((char*)self + 0x10);
+    rows[0] = new (D_00487980, 0, 0) sWakeElemBW[160];
+    for (int i = 1; i < 5; i++) {
+        rows[i] = *(sWakeElemBW**)((char*)self + 0x10) + i * 32;
+    }
+    *(int*)((char*)self + 0xB4) = -1;
+    func_002DCF28((sWakeDCF28*)self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DCDA0);
 
@@ -1494,7 +1576,60 @@ extern "C" void func_002E62C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6320);
+#ifdef SKIP_ASM
+extern const sVt9_3680 D_00488550;
+extern const sVt22_3680 D_00488598;
+extern char D_00487B08[];
+extern "C" void func_002E6640(void* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sWakeSeg_6320 {
+    char data[0x1C];
+    sWakeSeg_6320() {}
+};
+
+struct sWakePt_6320 {
+    char data[0x20];
+    sWakePt_6320() {}
+};
+
+// PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
+// (cRider at +0x3B0): vtable copies with delta fixups when not in charge.
+extern "C" void* func_002E6320(void* self, int inChrg)
+{
+    sVt9_3680 t1;
+    sVt22_3680 t2;
+    if (inChrg) {
+        *(void**)self = (char*)self + 0x3B0;
+        cRider_cRider((char*)self + 0x3B0);
+    }
+    *(void**)(*(char**)self + 0x6E8) = (void*)&D_00488550;
+    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488598;
+    if (inChrg == 0) {
+        int vc;
+        t1 = D_00488550;
+        *(void**)(*(char**)self + 0x6E8) = &t1;
+        {
+            char* vbo = *(char**)self - 0x3B0;
+            vc = (char*)self - vbo;
+        }
+        t1.e[1].delta = D_00488550.e[1].delta + vc;
+        t2 = D_00488598;
+        *(void**)(*(char**)self + 0x6C0) = &t2;
+        t2.e[1].delta = D_00488598.e[1].delta + vc;
+    }
+    new ((char*)self + 0x50) sWakeSeg_6320[30];
+    sWakePt_6320*& pts = *(sWakePt_6320**)((char*)self + 0x3AC);
+    pts = new (D_00487B08, 0, 0) sWakePt_6320[20];
+    func_002E6640(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
 

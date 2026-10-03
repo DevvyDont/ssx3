@@ -458,7 +458,74 @@ INCLUDE_ASM("animation/rideranimbase", func_00312C20);
 
 INCLUDE_ASM("animation/rideranimbase", func_003130A8);
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00313508);
+#ifdef SKIP_ASM
+struct sAnimSlot_00313508
+{
+    char pad0[0x14];
+    int active;      // 0x14
+    char pad18[0x4];
+    sAnimSlot_00313508() {}
+};
+
+struct sRiderAnim_00313508
+{
+    int owner;                      // 0x0
+    sAnimSlot_00313508 slots[3];    // 0x4
+    char pad58[0x8];
+    sRabQuad32 pair;                // 0x60
+    int u80;                        // 0x80
+    int u84;                        // 0x84
+    long u88;                       // 0x88
+    float f90;                      // 0x90
+    float value;                    // 0x94
+    float target;                   // 0x98
+    float remaining;                // 0x9C
+    int notify;                     // 0xA0
+    int uA4;                        // 0xA4
+    int uA8;                        // 0xA8
+    void* head;                     // 0xAC
+    ulong active;                   // 0xB0
+    ulong triggered;                // 0xB8
+    int dirty;                      // 0xC0
+    int uC4;                        // 0xC4
+    sRiderAnim_00313508(int owner);
+};
+
+inline void* operator new(unsigned int, void* p) { return p; }
+
+// PORT: long/ulong are 64-bit here
+inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
+{
+    owner = o;
+    for (int i = 2; i >= 0; i--)
+    {
+        slots[i].active = 0;
+    }
+    pair = D_004FF230;
+    u88 = -1;
+    u80 = 0;
+    u84 = 0;
+    f90 = 1.0f;
+    remaining = 0.0f;
+    value = 1.0f;
+    target = 1.0f;
+    notify = 0;
+    uA4 = 0;
+    uA8 = 0;
+    triggered = 0;
+    active = 0;
+    head = 0;
+    dirty = 0;
+    uC4 = 0;
+}
+
+extern "C" sRiderAnim_00313508* func_00313508(sRiderAnim_00313508* self, int owner)
+{
+    return new (self) sRiderAnim_00313508(owner);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_003135B0);

@@ -187,7 +187,204 @@ extern "C" void func_001A2190(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fereal", func_001A2208);
+#ifdef SKIP_ASM
+extern "C" int func_00231D60(void* self);
+extern "C" void func_00253890(void* h, int a1);
+extern "C" void func_00398018(void* ui);
+extern "C" void func_001A0598(void* p);
+extern "C" void func_00397DF8(void* ui);
+extern "C" void func_00285BF8(void* snd, int a1, float t);
+extern "C" void* func_0028B180();
+extern void* D_004A289C;
+extern int D_004A19CC;
+extern char D_004FF1A0[];
+
+struct sFeGs {
+    int w0;                         // 0x0
+    unsigned int g0 : 2;            // 0x4
+    unsigned int g2 : 5;
+    unsigned int g7 : 5;
+    unsigned int g12 : 8;
+    unsigned int g20 : 2;
+    unsigned int g22 : 1;
+    unsigned int g23 : 2;
+    unsigned int g25 : 7;
+    unsigned int a0 : 5;            // 0x8
+    unsigned int alpha : 5;
+    unsigned int a10 : 22;
+    int wC;                         // 0xC
+    short tex;                      // 0x10
+    short pad;
+
+    void setG2(int v) { g2 = v; }
+    void setG12(int v) { g12 = v; }
+    void setG20(int v) { g20 = v; }
+    void setG22(int v) { g22 = v; }
+    void setG23(int v) { g23 = v; }
+    void setAlpha(int v) { alpha = v; }
+};
+
+extern sFeGs D_00501420;
+
+struct sFeVE {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sFeWorld {
+    char pad_0x0[0xE84];
+    sFeGs* top;                     // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sFeVE* vt;                      // 0x10D8
+};
+
+struct sFePos {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFeVert {
+    float u, v, q, f0C;             // 0x00
+    int r, g, b, a;                 // 0x10
+    sFePos pos;                     // 0x20
+    sFeVert() {}
+};
+
+static inline sFeWorld* feW() { return (sFeWorld*)D_004A289C; }
+
+static inline void feCall(int slot)
+{
+    char* g = (char*)D_004A289C;
+    sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+    ((void (*)(void*))vt[slot].fn)(g + vt[slot].delta);
+}
+
+static inline unsigned int feCallU(int slot)
+{
+    char* g = (char*)D_004A289C;
+    sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+    return ((unsigned int (*)(void*))vt[slot].fn)(g + vt[slot].delta);
+}
+
+extern "C" int func_001A2208(void* self)
+{
+    if (feCallU(17) == 0) {
+        return 0;
+    }
+    if (*(int*)((char*)self + 0xB5ADC) != 0) {
+        *(int*)((char*)self + 0xB5ADC) -= 1;
+    }
+    if (func_00231D60(self) != 0) {
+        feCall(20);
+        return 1;
+    }
+    void* h = *(void**)((char*)self + 0xB5AD4);
+    if (h != 0) {
+        func_00253890(h, 0);
+        feCall(20);
+        return 1;
+    }
+    if (D_004A19CC != 0) {
+        float w = (float)feCallU(10);
+        float hgt = (float)feCallU(11);
+        feCall(21);
+        feCall(31);
+        {
+            sFeWorld* w = feW();
+            w->top[1] = w->top[0];
+            w->top++;
+        }
+        {
+            char* g = (char*)D_004A289C;
+            sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+            ((void (*)(void*, int, int, float, float, float, float, float, float))vt[26].fn)(
+                g + vt[26].delta, 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
+        }
+        {
+            char* g = (char*)D_004A289C;
+            sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+            ((void (*)(void*, void*))vt[34].fn)(g + vt[34].delta, D_004FF1A0);
+        }
+        feW()->top->setAlpha(9);
+        sFeVert v[4];
+        for (int i = 0; i < 4; i++) {
+            v[i].a = 0x80;
+            v[i].r = 0;
+            v[i].g = 0;
+            v[i].b = 0;
+            v[i].q = 1.0f;
+        }
+        sFePos p;
+        p.x = 0.0f;
+        p.y = 0.0f;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        v[0].pos = p;
+        p.x = 0.0f;
+        p.y = w;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        v[1].pos = p;
+        p.x = 0.0f;
+        p.y = 0.0f;
+        p.z = hgt;
+        p.w = 1.0f;
+        v[2].pos = p;
+        p.x = 0.0f;
+        p.y = w;
+        p.z = hgt;
+        p.w = 1.0f;
+        v[3].pos = p;
+        *(short*)(*(char**)((char*)D_004A289C + 0xE84) + 0x10) = -1;
+        {
+            char* g = (char*)D_004A289C;
+            sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)(g + vt[71].delta, 4, v, 0);
+        }
+        feCall(22);
+        feCall(32);
+        feW()->top--;
+        feCall(20);
+        return 1;
+    }
+    feCall(21);
+    feCall(31);
+    {
+        char* g = (char*)D_004A289C;
+        sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+        ((void (*)(void*, float, float, float))vt[25].fn)(g + vt[25].delta,
+            *(float*)((char*)self + 0x10), *(float*)((char*)self + 0x14), *(float*)((char*)self + 0x18));
+    }
+    {
+        char* g = (char*)D_004A289C;
+        sFeVE* vt = *(sFeVE**)(g + 0x10D8);
+        ((void (*)(void*, void*))vt[34].fn)(g + vt[34].delta, (char*)self + 0x50);
+    }
+    {
+        sFeWorld* w = feW();
+        w->top[1] = w->top[0];
+        w->top++;
+    }
+    *feW()->top = D_00501420;
+    feW()->top->setG22(0);
+    feW()->top->setG23(1);
+    feW()->top->setG20(3);
+    feW()->top->setG12(0xD);
+    feW()->top->setAlpha(0x15);
+    feW()->top->setG2(5);
+    func_00398018(*(void**)((char*)self + 0xC));
+    func_001A0598((char*)self + 0xB0);
+    feW()->top--;
+    feCall(32);
+    feCall(22);
+    func_00397DF8(*(void**)((char*)self + 0xC));
+    feCall(20);
+    func_00285BF8(func_0028B180(), 0, 0.019999999552965164f);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/fereal", func_001A27A0);
 

@@ -1004,7 +1004,63 @@ void func_00394D48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00394D50);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+struct sFontTexKey {
+    char block[0x10];       // 0x0
+    short ids[2];           // 0x10
+    sFontTexKey()
+    {
+        for (unsigned int i = 0; i < 2; i++) {
+            ids[i] = -1;
+        }
+        func_00416210(block, 0, 0x10);
+    }
+};
+
+struct sFontGlyph80 {
+    sFontTexKey key;        // 0x0
+    char pad_0x14[0x6C];
+};
+
+struct sFontGlyph18 {
+    sFontTexKey key;        // 0x0
+    int field_0x14;
+};
+
+struct sFontEmpty24 {
+    int a;
+    sFontEmpty24() {}
+};
+
+struct sFontEmptyC {
+    int a;
+    sFontEmptyC() {}
+};
+
+struct sFontCache {
+    char pad_0x0[0x80];
+    sFontGlyph80 glyphs[0xA28];     // 0x80
+    int field_0x51480;
+    sFontGlyph18 small[0x400];      // 0x51484
+    sFontEmpty24 e1[0x800];         // 0x57484
+    char pad_0x59484[0x69CA8 - 0x59484];
+    sFontTexKey key;                // 0x69CA8
+    sFontEmptyC e2[0xC];            // 0x69CBC
+    sFontCache() {}
+};
+
+inline void* operator new(unsigned int, void* p) { return p; }
+
+extern "C" void* func_00394D50(void* self)
+{
+    new (self) sFontCache;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00394ED0);
@@ -1077,7 +1133,31 @@ void* func_00395268(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00395288);
+#ifdef SKIP_ASM
+extern "C" void* func_003691F8(void* self);
+extern void* D_00493260[];
+
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sRenderSlot5288 {
+    float v[4];
+    sRenderSlot5288() {}
+};
+
+extern "C" void* func_00395288(void* self)
+{
+    func_003691F8(self);
+    *(void***)((char*)self + 0x10D8) = D_00493260;
+    new ((char*)self + 0x10E0) sRenderSlot5288[12];
+    new ((char*)self + 0x11A0) sRenderSlot5288[8];
+    new ((char*)self + 0x1220) sRenderSlot5288[2];
+    new ((char*)self + 0x1240) sRenderSlot5288[2];
+    new ((char*)self + 0x1260) sRenderSlot5288[4];
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00395318__FPv);
