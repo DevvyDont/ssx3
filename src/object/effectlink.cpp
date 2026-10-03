@@ -751,7 +751,82 @@ extern "C" void func_00346300(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/effectlink", func_00346350);
+#ifdef SKIP_ASM
+struct sEffV3_346350 {
+    float x, y, z;
+    sEffV3_346350() {}
+};
+struct sEffV2_346350 {
+    float u, v;
+    sEffV2_346350() {}
+};
+struct sEffV4_346350 {
+    float x, y, z, w;
+    sEffV4_346350() {}
+};
+
+struct sEffVE_346350 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, sEffV3_346350*, sEffV2_346350*, sEffV4_346350*);
+};
+
+extern "C" void* func_0034FB00(void* self, int a1, int a2, int a3);
+void func_00353DA8(void* self);
+extern "C" void func_00353E08(void* self, int a1, float len);
+extern "C" void func_00346D38(void* self);
+extern char* D_004A5B80;
+extern "C" void cFlexBridgeNode_setupGrid(void* self);
+extern "C" void func_003475D8(void*);
+extern void* D_00490270[];
+
+// PORT: SN sqrt.s asm helper (PS2 FPU).
+static inline float sqrtf_346350(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct sEffFlags_346350 {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+};
+
+extern "C" void* func_00346350(void* self, int a1, int a2, int a3)
+{
+    func_0034FB00(self, a1, 5, a2);
+    *(void***)((char*)self + 0xC) = D_00490270;
+    func_00353DA8((char*)self + 0x50);
+    *(int*)((char*)self + 0x44) = 12;
+    *(float*)((char*)self + 0x40) = 100.0f;
+    sEffV3_346350 pts[4];
+    sEffV2_346350 uv[4];
+    sEffV4_346350 col[4];
+    sEffVE_346350* vt = *(sEffVE_346350**)(D_004A5B80 + 0x10D8);
+    vt[97].fn(D_004A5B80 + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
+    sEffV3_346350 d;
+    d.x = pts[1].x - pts[0].x;
+    d.y = pts[1].y - pts[0].y;
+    d.z = pts[1].z - pts[0].z;
+    func_00353E08((char*)self + 0x50, a3, sqrtf_346350(d.x * d.x + d.y * d.y + d.z * d.z));
+    cFlexBridgeNode_setupGrid(self);
+    func_00346D38(self);
+    func_003475D8(self);
+    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    *f = (*f & 0xFFFFFFFD) | 4;
+    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    *f = (*f & 0xFFFFFFDF) | 0x40;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_003464E0);

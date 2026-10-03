@@ -1,6 +1,142 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern char D_0048E850[];
+unsigned int BXrand();
+extern "C" void func_0034BCA0(void* self, void* verts);
+
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+
+struct sFsV3_CM {
+    float x, y, z;
+    sFsV3_CM() {}
+    sFsV3_CM(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+struct sFsV2_CM {
+    float x, y;
+    sFsV2_CM() {}
+    sFsV2_CM(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sFsCol_CM {
+    float a, r, g, b;
+    sFsCol_CM() {}
+};
+
+inline sFsV3_CM operator+(const sFsV3_CM& a, const sFsV3_CM& b) { return sFsV3_CM(a.x + b.x, a.y + b.y, a.z + b.z); }
+inline sFsV3_CM operator*(const sFsV3_CM& a, float s) { return sFsV3_CM(a.x * s, a.y * s, a.z * s); }
+inline sFsV2_CM operator+(const sFsV2_CM& a, const sFsV2_CM& b) { return sFsV2_CM(a.x + b.x, a.y + b.y); }
+inline sFsV2_CM operator*(const sFsV2_CM& a, float s) { return sFsV2_CM(a.x * s, a.y * s); }
+
+// Uniform float in [0, 1) built from the random mantissa bits.
+static inline float randf_CM()
+{
+    union {
+        int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+struct sFsVE_CM {
+    short delta;
+    short index;
+    void* (*fn)(void*, int, int, unsigned int);
+};
+
+struct sFsQuadVE_CM {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, sFsV3_CM*, sFsV2_CM*, sFsCol_CM*);
+};
+
+struct sFsMeshVE_CM {
+    short delta;
+    short index;
+    void (*fn)(void*, sFsV3_CM*, sFsCol_CM*, sFsV2_CM*);
+};
+
+struct sFsMesh_CM {
+    int pad0;
+    sFsMeshVE_CM* vt;   // 0x4
+};
+
+struct sFlagElem_CM {
+    char pad0[0x1C];
+    float windX;            // 0x1C
+    float windY;            // 0x20
+    char pad24[0x3C];
+    sFsMesh_CM* mesh;       // 0x60
+    int cols;               // 0x64
+    int rows;               // 0x68
+    float colScale;         // 0x6C
+    float rowScale;         // 0x70
+    sFsV3_CM* verts;        // 0x74
+    float phase[4];         // 0x78
+    float u;                // 0x88
+    float v;                // 0x8C
+};
+
+extern "C" void cFlagSet_CreateMesh(void* p, void* item)
+{
+    sFlagElem_CM* self = (sFlagElem_CM*)p;
+    int i;
+    for (i = 0; i < 4; i++) {
+        self->phase[i] = randf_CM();
+    }
+    self->u = 0.0f;
+    self->v = 0.0f;
+    char* mgr = D_004A5B80;
+    sFsV2_CM quv[4];
+    sFsCol_CM qcol[4];
+    sFsV3_CM pos[4];
+    sFsQuadVE_CM* vt = *(sFsQuadVE_CM**)(mgr + 0x10D8);
+    vt[97].fn(mgr + vt[97].delta, item, 0, pos, quv, qcol);
+    if (self->windX < 0.01f && self->windY < 0.01f) {
+        self->cols = 8;
+        self->rows = 2;
+    } else {
+        self->cols = 8;
+        self->rows = 5;
+    }
+    self->colScale = (float)(self->cols - 1);
+    self->rowScale = (float)(self->rows - 1);
+    sFsVE_CM* e = &(*(sFsVE_CM**)(mgr + 0x10D8))[76];
+    self->mesh = (sFsMesh_CM*)e->fn(mgr + e->delta, self->cols, self->rows, 0x60000000u);
+    if (self->mesh == 0) {
+        return;
+    }
+    int n = self->cols * self->rows;
+    sFsV3_CM** pv = &self->verts;
+    *pv = new (D_0048E850, 0x20000000, 0) sFsV3_CM[n];
+    sFsV2_CM uv[50];
+    sFsCol_CM col[50];
+    int idx = 0;
+    for (int r = 0; r < self->rows; r++) {
+        for (int c = 0; c < self->cols; c++) {
+            float fc = (float)c / self->colScale;
+            float fr = (float)r / self->rowScale;
+            self->verts[idx] = (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
+            uv[idx] = (quv[0] * (1.0f - fc) + quv[1] * fc) * (1.0f - fr) + (quv[2] * (1.0f - fc) + quv[3] * fc) * fr;
+            col[idx].a = 1.0f;
+            col[idx].r = (qcol[0].r * (1.0f - fc) + qcol[1].r * fc) * (1.0f - fr) + (qcol[2].r * (1.0f - fc) + qcol[3].r * fc) * fr;
+            col[idx].g = (qcol[0].g * (1.0f - fc) + qcol[1].g * fc) * (1.0f - fr) + (qcol[2].g * (1.0f - fc) + qcol[3].g * fc) * fr;
+            col[idx].b = (qcol[0].b * (1.0f - fc) + qcol[1].b * fc) * (1.0f - fr) + (qcol[2].b * (1.0f - fc) + qcol[3].b * fc) * fr;
+            idx++;
+        }
+    }
+    sFsV3_CM verts[50];
+    func_0034BCA0(self, verts);
+    sFsMesh_CM* m = self->mesh;
+    m->vt[6].fn((char*)m + m->vt[6].delta, verts, col, uv);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034B7B8);
@@ -32,7 +168,88 @@ extern "C" void func_0034B7B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034B818);
+#ifdef SKIP_ASM
+extern int D_004A4240;
+extern "C" void* func_002D1CB0();
+extern "C" int func_002D1C98();
+extern "C" void func_0034BCA0(void* self, void* verts);
+
+struct sFlagVert_B818 {
+    float x, y, z;
+    sFlagVert_B818() {}
+};
+
+struct sFlagVEntry_B818 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sFlagMesh_B818 {
+    int pad0;
+    sFlagVEntry_B818* vt;   // 0x4
+};
+
+struct sFlagElem_B818 {
+    char pad0[0x4];
+    float speed[4];         // 0x4
+    char pad14[0x38];
+    float blend;            // 0x4C
+    float scrollU;          // 0x50
+    float scrollV;          // 0x54
+    char pad58[0x4];
+    int active;             // 0x5C
+    sFlagMesh_B818* mesh;   // 0x60
+    char pad64[0x14];
+    float phase[4];         // 0x78
+    float u;                // 0x88
+    float v;                // 0x8C
+    int parity;             // 0x90
+};
+
+extern "C" void func_0034B818(void* elem)
+{
+    sFlagElem_B818* self = (sFlagElem_B818*)elem;
+    if (D_004A4240 == 0) {
+        return;
+    }
+    if (self->active == 0) {
+        return;
+    }
+    if (self->mesh == 0) {
+        return;
+    }
+    char* wind = (char*)func_002D1CB0();
+    float k = self->blend;
+    float t = k + *(float*)(wind + 0x10) * (1.0f - k);
+    int i;
+    for (i = 0; i < 4; i++) {
+        self->phase[i] += self->speed[i] * t;
+        if (1.0f <= self->phase[i]) {
+            self->phase[i] -= 1.0f;
+        }
+    }
+    if (func_002D1C98() % 2 == self->parity) {
+        sFlagVert_B818 verts[50];
+        func_0034BCA0(self, verts);
+        sFlagMesh_B818* m = self->mesh;
+        sFlagVEntry_B818* e = &m->vt[3];
+        e->fn((char*)m + e->delta, verts);
+    }
+    if (0.001f < self->scrollU || 0.001f < self->scrollV) {
+        self->u += self->scrollU;
+        if (1.0f < self->u) {
+            self->u -= 1.0f;
+        }
+        self->v += self->scrollV;
+        if (1.0f < self->v) {
+            self->v -= 1.0f;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034B9B0);
 
@@ -393,7 +610,56 @@ extern "C" void func_0034C898(sFlagSet_C898* self, void* arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034CAB8);
+#ifdef SKIP_ASM
+struct sFlagBlock_CAB8 {
+    unsigned int w[4];
+};
+
+struct sFlagElem_CAB8 {
+    float v[4];
+    sFlagElem_CAB8() {}
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+
+struct sFlagSet_CAB8 {
+    char pad0[0xC];
+    void** vtable;              // 0xC
+    char pad10[0xC];
+    sFlagBlock_CAB8 block;      // 0x1C
+    int field_0x2c;             // 0x2C
+    int field_0x30;             // 0x30
+    int field_0x34;             // 0x34
+    int field_0x38;             // 0x38
+    int field_0x3c;             // 0x3C
+};
+
+extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
+extern "C" void func_0034D1E8(void* self);
+extern "C" void func_0034D6F0(void* self, float dt);
+extern void* D_0048FA00[];
+
+// PORT: the unit declares this as void (callers ignore the result); bound by asm label.
+extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt) __asm__("func_0034CAB8");
+extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
+{
+    func_0034FB00(self, a1, 9, obj);
+    self->block.w[0] = 0xFFFFFFFF;
+    self->vtable = D_0048FA00;
+    new ((char*)self + 0x40) sFlagElem_CAB8[16];
+    self->block = *desc;
+    self->field_0x30 = 0;
+    self->field_0x2c = 0;
+    self->field_0x34 = 0;
+    self->block.w[0] = 0xFFFFFFFF;
+    func_0034D1E8(self);
+    func_0034D6F0(self, dt);
+    self->field_0x38 = 4;
+    self->field_0x3c = 4;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034CB80);
@@ -422,7 +688,37 @@ extern "C" void func_0034CB80(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034CBE8);
+#ifdef SKIP_ASM
+extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
+extern "C" void func_0034D1E8(void* self);
+extern void* D_0048FA00[];
+
+struct sFlagSetVEntry_CBE8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sFlagElem_CBE8 {
+    float v[4];
+    sFlagElem_CBE8() {}
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+
+extern "C" void* func_0034CBE8(void* self, void* a1, void* stream)
+{
+    cInstanceNode_cInstanceNode(self, a1, stream);
+    *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFF;
+    *(void***)((char*)self + 0xC) = D_0048FA00;
+    new ((char*)self + 0x40) sFlagElem_CBE8[16];
+    sFlagSetVEntry_CBE8* e = &(*(sFlagSetVEntry_CBE8**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 0x24);
+    func_0034D1E8(self);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", func_0034CC80);
@@ -586,9 +882,218 @@ extern "C" void func_0034CE48(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034CF98);
+#ifdef SKIP_ASM
+extern float D_0044AFD0[];
 
+struct sFsVec4_CF98 {
+    float x, y, z, w;
+    sFsVec4_CF98() {}
+    sFsVec4_CF98(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sFsVec3_CF98 {
+    float x, y, z;
+    sFsVec3_CF98() {}
+    sFsVec3_CF98(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+// PORT: VU0 macro-mode vector scale in place (v *= s).
+static inline void fsScaleIn_CF98(sFsVec4_CF98& v, float s)
+{
+    __asm__(
+        "mfc1       $2, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "qmtc2.ni   $2, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2       $vf5, 0x0(%1)\n"
+        : "=m"(v)
+        : "r"(&v), "f"(s)
+        : "$2");
+}
+
+// PORT: VU0 macro-mode vector scale (a * s).
+static inline sFsVec4_CF98 fsScale_CF98(const sFsVec4_CF98& a, float s)
+{
+    sFsVec4_CF98 r;
+    __asm__(
+        "mfc1       $2, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "qmtc2.ni   $2, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2       $vf5, %0\n"
+        : "=m"(r)
+        : "r"(&a), "f"(s)
+        : "$2");
+    return r;
+}
+
+static inline sFsVec3_CF98 fsAdd_CF98(const sFsVec3_CF98& a, const sFsVec4_CF98& b)
+{
+    return sFsVec3_CF98(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+struct sFlagVEntry_CF98 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sFlagMesh_CF98 {
+    int pad0;
+    sFlagVEntry_CF98* vt;   // 0x4
+};
+
+struct sFlagSet_CF98 {
+    char pad0[0x20];
+    int mode;               // 0x20
+    float scale;            // 0x24
+    char pad28[0x4];
+    float wind;             // 0x2C
+    char pad30[0x10];
+    sFlagMesh_CF98* mesh;   // 0x40
+    sFsVec3_CF98 top[8];    // 0x44
+    sFsVec3_CF98 bottom[8]; // 0xA4
+};
+
+extern "C" void func_0034CF98(void* p)
+{
+    sFlagSet_CF98* self = (sFlagSet_CF98*)p;
+    if (self->mesh == 0) {
+        return;
+    }
+    float s = self->wind * self->scale;
+    sFsVec4_CF98 dir(200.0f, 0.0f, 0.0f, 0.0f);
+    fsScaleIn_CF98(dir, s);
+    sFsVec4_CF98 offs[8];
+    sFsVec4_CF98* o = offs;
+    for (int i = 0; i < 8; i++) {
+        *o++ = fsScale_CF98(dir, D_0044AFD0[i]);
+    }
+    sFsVec3_CF98 pts[16];
+    if (self->mode == 1) {
+        for (int i = 0; i < 8; i++) {
+            pts[i] = fsAdd_CF98(self->top[i], offs[i]);
+            pts[i + 8] = fsAdd_CF98(self->bottom[i], offs[i]);
+        }
+    } else {
+        for (int i = 0; i < 8; i++) {
+            pts[i] = fsAdd_CF98(self->top[i], offs[i]);
+            pts[i + 8] = self->bottom[i];
+        }
+    }
+    sFlagMesh_CF98* m = self->mesh;
+    sFlagVEntry_CF98* e = &m->vt[3];
+    e->fn((char*)m + e->delta, pts);
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/flagset", func_0034D1E8);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern "C" void func_0034CF98(void* self);
+
+struct sFsV3_D1E8 {
+    float x, y, z;
+    sFsV3_D1E8() {}
+    sFsV3_D1E8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+struct sFsV2_D1E8 {
+    float x, y;
+    sFsV2_D1E8() {}
+    sFsV2_D1E8(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sFsCol_D1E8 {
+    float a, r, g, b;
+    sFsCol_D1E8() {}
+};
+
+inline sFsV3_D1E8 operator+(const sFsV3_D1E8& a, const sFsV3_D1E8& b) { return sFsV3_D1E8(a.x + b.x, a.y + b.y, a.z + b.z); }
+inline sFsV3_D1E8 operator-(const sFsV3_D1E8& a, const sFsV3_D1E8& b) { return sFsV3_D1E8(a.x - b.x, a.y - b.y, a.z - b.z); }
+inline sFsV3_D1E8 operator*(const sFsV3_D1E8& a, float s) { return sFsV3_D1E8(a.x * s, a.y * s, a.z * s); }
+inline sFsV2_D1E8 operator+(const sFsV2_D1E8& a, const sFsV2_D1E8& b) { return sFsV2_D1E8(a.x + b.x, a.y + b.y); }
+inline sFsV2_D1E8 operator-(const sFsV2_D1E8& a, const sFsV2_D1E8& b) { return sFsV2_D1E8(a.x - b.x, a.y - b.y); }
+inline sFsV2_D1E8 operator*(const sFsV2_D1E8& a, float s) { return sFsV2_D1E8(a.x * s, a.y * s); }
+
+struct sFsVE_D1E8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, int, int, unsigned int);
+};
+
+struct sFsQuadVE_D1E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int, sFsV3_D1E8*, sFsV2_D1E8*, sFsCol_D1E8*);
+};
+
+struct sFsMeshVE_D1E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, sFsV3_D1E8*, sFsCol_D1E8*, sFsV2_D1E8*);
+};
+
+struct sFsMesh_D1E8 {
+    int pad0;
+    sFsMeshVE_D1E8* vt;   // 0x4
+};
+
+struct sFsNode_D1E8 {
+    char pad0[0x8];
+    unsigned int flags;   // 0x8
+};
+
+struct sFlagSet_D1E8 {
+    char pad0[0x18];
+    sFsNode_D1E8* node;     // 0x18
+    char pad1C[0x24];
+    sFsMesh_D1E8* mesh;     // 0x40
+    sFsV3_D1E8 top[8];      // 0x44
+    sFsV3_D1E8 bottom[8];   // 0xA4
+    void* obj104;           // 0x104
+    void* obj108;           // 0x108
+};
+
+extern "C" void func_0034D1E8(void* p)
+{
+    sFlagSet_D1E8* self = (sFlagSet_D1E8*)p;
+    self->obj104 = 0;
+    self->obj108 = 0;
+    self->node->flags = (self->node->flags & ~2u) | 4;
+    char* mgr = D_004A5B80;
+    sFsVE_D1E8* e = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
+    self->mesh = (sFsMesh_D1E8*)e->fn(mgr + e->delta, 8, 2, 0x60000000u);
+    sFsV3_D1E8 pos[4];
+    sFsV2_D1E8 quv[4];
+    sFsCol_D1E8 qcol[4];
+    sFsQuadVE_D1E8* vt = *(sFsQuadVE_D1E8**)(mgr + 0x10D8);
+    vt[97].fn(mgr + vt[97].delta, self->node, 0, pos, quv, qcol);
+    sFsV2_D1E8 uv[16];
+    sFsCol_D1E8 col[16];
+    for (int i = 0; i < 8; i++) {
+        float t = (float)i;
+        self->top[i] = pos[0] + (pos[1] - pos[0]) * t * 0.1428571492433548f;
+        self->bottom[i] = pos[2] + (pos[3] - pos[2]) * t * 0.1428571492433548f;
+        uv[i] = quv[0] + (quv[1] - quv[0]) * t * 0.1428571492433548f;
+        uv[i + 8] = quv[2] + (quv[3] - quv[2]) * t * 0.1428571492433548f;
+        col[i].a = 1.0f;
+        col[i].r = qcol[0].r + (qcol[1].r - qcol[0].r) * t * 0.1428571492433548f;
+        col[i].g = qcol[0].g + (qcol[1].g - qcol[0].g) * t * 0.1428571492433548f;
+        col[i].b = qcol[0].b + (qcol[1].b - qcol[0].b) * t * 0.1428571492433548f;
+        col[i + 8].a = 1.0f;
+        col[i + 8].r = qcol[2].r + (qcol[3].r - qcol[2].r) * t * 0.1428571492433548f;
+        col[i + 8].g = qcol[2].g + (qcol[3].g - qcol[2].g) * t * 0.1428571492433548f;
+        col[i + 8].b = qcol[2].b + (qcol[3].b - qcol[2].b) * t * 0.1428571492433548f;
+    }
+    sFsMesh_D1E8* m = self->mesh;
+    m->vt[6].fn((char*)m + m->vt[6].delta, pos, col, uv);
+    func_0034CF98(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034D650);

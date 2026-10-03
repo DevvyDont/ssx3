@@ -1,6 +1,243 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_cBoardSparkFX);
+#ifdef SKIP_ASM
+// g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
+struct sVtEntBS {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sVt9_BS {
+    sVtEntBS e[9];
+} __attribute__((aligned(8)));
+
+struct sVt22_BS {
+    sVtEntBS e[22];
+} __attribute__((aligned(8)));
+
+extern const sVt9_BS D_00488CB0;
+extern const sVt22_BS D_00488CF8;
+extern char D_00459B90[];
+extern char D_00487588[];
+extern char D_00487598[];
+extern char D_004875A8[];
+
+extern "C" void cRider_cRider(void* self);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_003714B8(void* self);
+void* func_002F7A68(void* self);
+extern "C" void func_0036CCB8(void* self);
+extern "C" void func_0036CE00(void* self, float a, float b, float c);
+extern "C" void func_0036CE28(void* self, float a, float b);
+extern "C" void func_0036D008(void* self);
+extern "C" void func_0036D3D8(void* self, float val);
+extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void func_002DAA78(void* self);
+
+struct sBsVec4 {
+    float x, y, z, w;
+    sBsVec4() {}
+};
+
+extern "C" void func_0036CBF8(void* sys, int w, int h, float x, float y, float s, sBsVec4* v);
+
+struct sBsIds {
+    short id[2];
+    sBsIds()
+    {
+        for (unsigned int i = 0; i < 2; i++) {
+            id[i] = -1;
+        }
+    }
+};
+
+struct sBsSlot {
+    char data[0x10];
+    sBsIds ids;
+    sBsSlot() { func_00416210(data, 0, 0x10); }
+    void* operator new(unsigned int, void* p) { return p; }
+};
+
+struct sBsElem {
+    float v[4];
+    sBsElem() {}
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+
+struct sBsParams {
+    int mode;           // 0x00
+    int f04;            // 0x04
+    float f08;          // 0x08
+    float f0C;          // 0x0C
+    float f10;          // 0x10
+    float f14;          // 0x14
+    float f18;          // 0x18
+    float f1C[13];      // 0x1C
+    float f50;          // 0x50
+    float f54;          // 0x54
+    float f58;          // 0x58
+    float f5C;          // 0x5C
+    float f60;          // 0x60
+    float f64;          // 0x64
+    float f68;          // 0x68
+    float f6C;          // 0x6C
+    float f70;          // 0x70
+    float f74;          // 0x74
+    float f78;          // 0x78
+    float f7C;          // 0x7C
+    float f80;          // 0x80
+    float f84;          // 0x84
+    float f88;          // 0x88
+    float f8C;          // 0x8C
+    float f90;          // 0x90
+    float f94;          // 0x94
+    float f98;          // 0x98
+    float f9C;          // 0x9C
+    float fA0;          // 0xA0
+    float fA4[8];       // 0xA4
+    int count;          // 0xC4
+    int fC8;            // 0xC8
+    float fCC;          // 0xCC
+    int fD0;            // 0xD0
+    float fD4;          // 0xD4
+};
+
+struct sBsVE {
+    short delta;
+    short index;
+    void (*fn)(void*, sBsParams*, float);
+};
+
+struct sBsEmitter {
+    char pad0[0x58];
+    float rate;         // 0x58
+    char pad5C[0x1F8 - 0x5C];
+    sBsVE* vt;          // 0x1F8
+};
+
+struct cBoardSparkFX {
+    char* vbase;            // 0x00
+    char pad04[0x1C];
+    sBsEmitter* emitter;    // 0x20
+    sBsParams* params;      // 0x24
+    void* gfx;              // 0x28
+    char pad2C[0x40];
+    int active;             // 0x6C
+    char pad70[0xC];
+    sBsSlot slotA;          // 0x7C
+    sBsSlot slotB;          // 0x90
+};
+
+// PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
+// (cRider at +0xB0): vtable copies with delta fixups when not in charge.
+extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
+{
+    sVt9_BS t1;
+    sVt22_BS t2;
+    if (inChrg) {
+        self->vbase = (char*)self + 0xB0;
+        cRider_cRider((char*)self + 0xB0);
+    }
+    *(const void**)(self->vbase + 0x6E8) = &D_00488CB0;
+    *(void**)(self->vbase + 0x6D0) = D_00459B90;
+    *(const void**)(self->vbase + 0x6C0) = &D_00488CF8;
+    if (inChrg == 0) {
+        int vc;
+        t1 = D_00488CB0;
+        *(void**)(self->vbase + 0x6E8) = &t1;
+        {
+            char* vbo = self->vbase - 0xB0;
+            vc = (char*)self - vbo;
+        }
+        t1.e[1].delta = D_00488CB0.e[1].delta + vc;
+        t2 = D_00488CF8;
+        *(void**)(self->vbase + 0x6C0) = &t2;
+        t2.e[1].delta = D_00488CF8.e[1].delta + vc;
+    }
+    new ((char*)self + 0x2C) sBsElem[3];
+    self->active = 1;
+    new (&self->slotA) sBsSlot;
+    new (&self->slotB) sBsSlot;
+    float zero = 0.0f;
+    self->emitter = (sBsEmitter*)func_003714B8(cMemMan_alloc(0x210, D_00487588, 0, 0));
+    self->params = (sBsParams*)cMemMan_alloc(0xD8, D_00487598, 0, 0);
+    self->gfx = func_002F7A68(cMemMan_alloc(0x150, D_004875A8, 0, 0));
+    func_0036CCB8(self->gfx);
+    sBsVec4 v;
+    v.x = zero;
+    v.y = zero;
+    v.z = -3000.0f;
+    v.w = zero;
+    func_0036CBF8(self->gfx, 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &v);
+    func_0036CE00(self->gfx, 7.5f, zero, 7.5f);
+    func_0036CE28(self->gfx, 0.10000000149011612f, 0.1940000057220459f);
+    func_0036D008(self->gfx);
+    func_0036D3D8(self->gfx, zero);
+    self->params->mode = 1;
+    self->params->f04 = 0;
+    self->params->f08 = -1.0f;
+    self->params->f0C = 1.0f;
+    self->params->f10 = 6.0f;
+    self->params->f14 = 4.0f;
+    self->params->f18 = 6.0f;
+    self->params->f1C[0] = zero;
+    self->params->f1C[1] = zero;
+    self->params->f1C[2] = zero;
+    self->params->f1C[3] = zero;
+    self->params->f1C[4] = zero;
+    self->params->f1C[5] = zero;
+    self->params->f1C[6] = zero;
+    self->params->f1C[7] = zero;
+    self->params->f1C[8] = zero;
+    self->params->f1C[9] = zero;
+    self->params->f1C[10] = zero;
+    self->params->f1C[11] = zero;
+    self->params->f1C[12] = zero;
+    self->params->f50 = 600.0f;
+    self->params->f54 = 200.0f;
+    self->params->f58 = zero;
+    self->params->f5C = zero;
+    self->params->f60 = zero;
+    self->params->f64 = 200.0f;
+    self->params->f68 = zero;
+    self->params->f6C = zero;
+    self->params->f70 = zero;
+    self->params->f74 = 100.0f;
+    self->params->f78 = zero;
+    self->params->f7C = zero;
+    self->params->f80 = -800.0f;
+    self->params->f84 = 1.0f;
+    self->params->f88 = 1.0f;
+    self->params->f8C = 1.0f;
+    self->params->f90 = 1.0f;
+    self->params->f94 = zero;
+    self->params->f98 = 0.21559999883174896f;
+    self->params->f9C = 0.18000000715255737f;
+    self->params->fA0 = 0.13699999451637268f;
+    self->params->fA4[0] = zero;
+    self->params->fA4[1] = zero;
+    self->params->fA4[2] = zero;
+    self->params->fA4[3] = zero;
+    self->params->fA4[4] = zero;
+    self->params->fA4[5] = zero;
+    self->params->fA4[6] = zero;
+    self->params->fA4[7] = zero;
+    self->params->fC8 = 1;
+    self->params->fCC = 6.0f;
+    self->params->count = 5;
+    self->params->fD0 = 8;
+    self->params->fD4 = 27.0f;
+    self->params->count = 14;
+    sBsEmitter* em = self->emitter;
+    em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
+    self->active = 0;
+    func_002DAA78(self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DA8E8);
 

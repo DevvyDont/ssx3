@@ -65,7 +65,124 @@ void* get_cCTActionNone(void* unused, int* outType)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camboundobj);
+#ifdef SKIP_ASM
+// PORT: the game's tagged allocator, bound as a placement operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
+struct sCTVec3G {
+    float x, y, z;
+    sCTVec3G() {}
+    sCTVec3G(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+extern sCTVec3G D_004FF0D8;     // zero vector
+extern void* D_0045C3F0[];      // cCTBoundObj vtable
+extern void* D_0045C2A8[];      // ellipse
+extern void* D_0045C268[];      // box
+extern void* D_0045C228[];      // line
+extern void* D_0045C1E8[];      // point
+extern char D_0045C110[];
+extern char D_0045C128[];
+extern char D_0045C140[];
+extern char D_0045C158[];
+
+// PORT: raw vtable stores stand in for the real virtual classes: the base ctor stores the
+// cCTBoundObj vtable first and the derived class's vtable last, where g++ 2.95 sets the
+// derived vptr (after the base ctor, before the derived class's members are constructed).
+struct sCTBoundObjG {
+    sCTVec3G center;    // 0x00
+    int f0C;            // 0x0C
+    int f10;            // 0x10
+    int f14;            // 0x14
+    sCTVec3G size;      // 0x18
+    void** vtable;      // 0x24
+    sCTBoundObjG(const sCTVec3G& s, void** vt)
+    {
+        vtable = D_0045C3F0;
+        center = D_004FF0D8;
+        f0C = 0;
+        f10 = 0;
+        f14 = 0;
+        size = s;
+        vtable = vt;
+    }
+};
+
+struct sCTBoundEllG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTBoundEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C2A8) { type = 0; }
+};
+
+struct sCTBoundBoxG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTBoundBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C268) { type = 1; }
+};
+
+struct sCTBoundLineG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTVec3G pts[2];    // 0x2C
+    sCTBoundLineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
+    {
+        type = 2;
+        pts[0] = D_004FF0D8;
+        pts[1] = D_004FF0D8;
+    }
+};
+
+struct sCTBoundPointG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTBoundPointG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C1E8) { type = 3; }
+};
+
+class cCTBoundObjEllK2;
+class cCTBoundObjBoxK2;
+class cCTBoundObjLineK2;
+struct sBoundObjPoint;
+extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj);
+extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj);
+extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj);
+void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
+
+extern "C" int get_camboundobj(void* reader, void** out)
+{
+    int type;
+    int n = get_uint(reader, &type);
+    switch (type) {
+    case 0: {
+        sCTBoundEllG* o = new (D_0045C110, 0, 0) sCTBoundEllG;
+        int r = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 1: {
+        sCTBoundBoxG* o = new (D_0045C128, 0, 0) sCTBoundBoxG;
+        int r = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 2: {
+        sCTBoundLineG* o = new (D_0045C140, 0, 0) sCTBoundLineG;
+        int r = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 3: {
+        sCTBoundPointG* o = new (D_0045C158, 0, 0) sCTBoundPointG;
+        // PORT: get_cCTBoundObjPoint returns the byte count as void*.
+        int r = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjEllipse);
