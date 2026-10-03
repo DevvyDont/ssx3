@@ -199,7 +199,111 @@ extern "C" int func_002ECC28(void* p, int x, int y)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECCB8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_0014ABE0();
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" void* func_0014AD50(void* self, int rider);
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(void* self, int i);
+extern "C" int func_00123168(void* self);
+extern "C" int func_00123128(void* self);
+extern "C" void* cUIStateStack_getCurrentState(void* self);
+extern "C" void func_002F2218(int a, int id);
+extern char* D_004A28A8;
+
+struct sVEi_CCB8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sLensItem_CCB8 {
+    char pad0[4];
+    short slot;                 // 0x4
+    char pad6[0x11 - 6];
+    signed char kind;           // 0x11
+    signed char ids[2];         // 0x12
+    char pad14[0x38 - 0x14];
+};
+
+struct sLensMgr_CCB8 {
+    int active;                 // 0x0
+    char* rider;                // 0x4
+    int* charId;                // 0x8
+    int fxSys;                  // 0xC
+    sLensEntry entries[15];     // 0x10
+};
+
+extern "C" void func_002ECCB8(void* vself)
+{
+    sLensMgr_CCB8* self = (sLensMgr_CCB8*)vself;
+    int used[15];
+    for (int z = 14; z >= 0; z--) {
+        used[z] = 0;
+    }
+    void* lib = func_0014ABE0();
+    char* tbl = 0;
+    int id = -1;
+    char* rider = self->rider;
+    if (rider != 0) {
+        char* o = rider + 0x6C0;
+        sVEi_CCB8* vt = *(sVEi_CCB8**)o;
+        tbl = (char*)func_0014AD50(lib, vt[7].fn(o + vt[7].delta));
+        id = func_00123168(self->rider);
+        if (id < 10) {
+            id = func_00123128(self->rider);
+        }
+    } else if (self->charId != 0) {
+        char* st = (char*)cUIStateStack_getCurrentState(*(char**)(*(char**)(D_004A28A8 + 0x7C) + 0xC) + 0x18);
+        tbl = (char*)func_0014AD28(lib, *(signed char*)(st + 0x44), *self->charId);
+        id = *self->charId;
+    }
+    void* lib2 = func_0014BDB8_noarg();
+    int n;
+    sLensEntry* ents = self->entries;
+    n = func_0014D988(lib2, id);
+    sLensItem_CCB8* e = (sLensItem_CCB8*)func_0014D998(lib2, id);
+    for (int i = 0; i < n; i++, e++) {
+        int k = e->kind;
+        if (k == -1) {
+            continue;
+        }
+        short s = (*(short**)(tbl + 0x288))[e->slot];
+        char* q;
+        if (s >= 0) {
+            q = tbl + (s * 4 + 0x290);
+        } else {
+            q = 0;
+        }
+        if (id < 10 && (*(unsigned short*)(q + 2) & 0x10) == 0) {
+            continue;
+        }
+        for (int j = 0; j < 2; j++) {
+            int v = e->ids[j];
+            if (v == -1) {
+                continue;
+            }
+            if (k >= 50) {
+                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 50, v)] = 1;
+                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 49, v)] = 1;
+            } else {
+                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k, v)] = 1;
+            }
+        }
+    }
+    for (int r = 0; r < 15; r++) {
+        if (ents[r].id != -1 && used[r] == 0) {
+            func_002F2218(self->fxSys, ents[r].id);
+            ents[r].id = -1;
+        }
+    }
+    self->active = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002ECF78);

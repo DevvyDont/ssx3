@@ -192,7 +192,102 @@ extern "C" void func_001F4A90(char* self, char* obj, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4C30);
+#ifdef SKIP_ASM
+// PORT: func_0039E508__FPv is called with (self, widget) here; bind the 2-arg form to that symbol.
+void func_0039E508_2(void* self, void* w) __asm__("func_0039E508__FPv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+int func_00150E50(void* iface, int level);
+extern "C" void cFEStateBuyAttrib_updateTotalCost(void* self);
+extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
+extern char D_0046F040[];
+extern char D_0046F070[];
+extern char D_004A2330[];
+
+struct sVEi_4C30 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sBuyAttrib_4C30 {
+    char pad0[0x10];
+    char* owner;            // 0x10
+    char pad14[0x48 - 0x14];
+    void* screen;           // 0x48
+    int max4C[7];           // 0x4C
+    int level[7];           // 0x68
+    int bought[7];          // 0x84
+    int cost;               // 0xA0
+    int bank;               // 0xA4
+    int busy;               // 0xA8
+};
+
+static inline void defaultMsg_4C30(sBuyAttrib_4C30* s, int msg)
+{
+    sDefObj_4A90* p = *(sDefObj_4A90**)(s->owner + 0x14);
+    if (p == 0)
+        p = &D_004A5A58;
+    if (p != 0)
+        p->vt[2].fn((char*)p + p->vt[2].delta, msg);
+}
+
+static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
+{
+    unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)s->screen, GetHashValue32(name));
+    if (frame != 0xFFFF)
+        cUIScreen_playFrame(s->screen, frame, 1);
+    defaultMsg_4C30(s, 1);
+}
+
+extern "C" void func_001F4C30(sBuyAttrib_4C30* self, char* w)
+{
+    int changed = 0;
+    func_0039E508_2(self, w);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0046F040)) + 0x95);
+    if (self->busy == 0) {
+        sVEi_4C30* vt = *(sVEi_4C30**)(w + 8);
+        if (vt[19].fn(w + vt[19].delta) != 0) {
+            int* bought = self->bought;
+            int* cnt = &bought[idx];
+            changed = 1;
+            if (*cnt > 0) {
+                (*cnt)--;
+                self->cost -= func_00150E50(iface, self->level[idx] - 1);
+                cFEStateBuyAttrib_updateTotalCost(self);
+                playFrame_4C30(self, D_004A2330);
+            } else {
+                defaultMsg_4C30(self, 4);
+            }
+        } else {
+            sVEi_4C30* vt2 = *(sVEi_4C30**)(w + 8);
+            if (vt2[20].fn(w + vt2[20].delta) != 0) {
+                int* level = self->level;
+                int* lvl = &level[idx];
+                changed = 1;
+                int total = func_00150E50(iface, *lvl - 1) + self->cost;
+                if (*lvl < 11 && total <= self->bank) {
+                    int* bought = self->bought;
+                    int* cnt = &bought[idx];
+                    if (self->max4C[idx] + *cnt < (*lvl + 1) * 5) {
+                        (*cnt)++;
+                        self->cost += func_00150E50(iface, *lvl - 1);
+                        cFEStateBuyAttrib_updateTotalCost(self);
+                        playFrame_4C30(self, D_0046F070);
+                    }
+                } else {
+                    defaultMsg_4C30(self, 4);
+                }
+            }
+        }
+    }
+    if (changed) {
+        cFEStateBuyAttrib_updateExperienceDisplay(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateLevels);
@@ -649,5 +744,59 @@ extern "C" void func_001F6840(void* self, char* name, const char* str)
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6F30);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+extern "C" int func_00146E98(void* player, int idx);
+extern "C" int func_00157B08(void* reward, int id, int n);
+extern "C" int func_00145870(void* game, int track);
+int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
+int cBERewardInterface_getTrackMedal(void* self, int a, int charID, int mode, int track);
+extern int D_004780D0[];
+extern int D_00478110[];
+
+extern "C" void func_001F6F30(void* vself)
+{
+    char* self = (char*)vself;
+    void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    void* game = cBE_getInterface_Fv(cBE_getBE(), 0);
+    char charID = cBENewPlayerInterface_getRiderCharID(player, func_00146E98(player, 0));
+    if (func_00157B08(reward, func_00146E98(player, 0), 0) == 0) {
+        *(int*)(self + 0x58) += 3;
+        *(int*)(self + 0x68) += 4;
+    }
+    if (func_00157B08(reward, func_00146E98(player, 0), 1) == 0) {
+        *(int*)(self + 0x58) += 3;
+        *(int*)(self + 0x68) += 4;
+    }
+    if (func_00157B08(reward, func_00146E98(player, 0), 2) == 0) {
+        *(int*)(self + 0x58) += 2;
+        *(int*)(self + 0x68) += 4;
+    }
+    for (int i = 0; i < 8; i++) {
+        int mode = 0;
+        if (i % 3 == 0) mode = 4;
+        char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_004780D0[i]);
+        if (medal == 0) {
+            *(int*)(self + 0x60) |= 1 << i;
+            *(int*)(self + 0x5C) += 1;
+        }
+    }
+    for (int i = 0; i < 12; i++) {
+        int mode;
+        if ((i & 3) == 0) {
+            mode = 5;
+        } else {
+            mode = func_00145870(game, D_00478110[i]);
+        }
+        char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_00478110[i]);
+        if (medal == 0) {
+            *(int*)(self + 0x70) |= 1 << i;
+            *(int*)(self + 0x6C) += 1;
+        }
+    }
+}
+#endif
 

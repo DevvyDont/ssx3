@@ -119,7 +119,87 @@ extern "C" void cFELoadScreen_load(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233640);
+#ifdef SKIP_ASM
+int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
+int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
+extern "C" int func_00146E98(void* player, int idx);
+struct cBigFile {
+    int field_0x0;
+    int field_0x4;
+};
+// PORT: cBigFile_cBigFile1 really takes (self, path, flags); bound by asm label.
+cBigFile* cBigFile_cBigFile1_3640(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
+void cBigFile__cBigFile(cBigFile* self, int flags);
+void cMemMan_free(void*);
+extern "C" char* func_003E2190(const char* name, int flags);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_0047BD78[];
+extern char D_0047BD90[];
+extern char D_0047BDA0[];
+extern char* D_00442928[];
+extern int D_004A2B38;
+extern int D_004A2B3C;
+
+struct sLsOpt_3640 {
+    int on;         // 0x0
+    int f4;
+    int alt;        // 0x8
+};
+extern sLsOpt_3640 D_00534B30_3640[] __asm__("D_00534B30");
+
+struct sVE_3640 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, const char*, int, int, int);
+};
+
+static inline int loadTex_3640(char* data, const char* name)
+{
+    char* g = (char*)D_004A289C;
+    sVE_3640* vt = *(sVE_3640**)(g + 0x10D8);
+    return vt[46].fn(g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+}
+
+extern "C" void func_00233640(void* self, int type)
+{
+    char name[0x70];
+    cBigFile bf;
+    void* plr = cBE_getInterface_3438(cBE_getBE(), 1);
+    cBE_getInterface_3438(cBE_getBE(), 0);
+    cBigFile_cBigFile1_3640(&bf, D_0047BD78, 0x100);
+    if (type == 1) {
+        const char* fmt = D_0047BD90;
+        cBE_getInterface_3438(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        sLsOpt_3640* opt = D_00534B30_3640;
+        if (opt->on != 0) {
+            if (opt->alt != 0) {
+                sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 0)], D_004A2B38);
+            } else {
+                sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 1)], D_004A2B38);
+            }
+        } else {
+            sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, func_00146E98(plr, 0))], D_004A2B38);
+        }
+        char* data = func_003E2190(name, 0x3000100);
+        *(int*)((char*)self + 0x10) = loadTex_3640(data, D_0047BDA0);
+        if (data != 0)
+            cMemMan_free(data);
+    } else if (type == 2 && D_00535C11[0] == 2) {
+        int* slot = (int*)((char*)self + 0x10);
+        for (int i = 0; i < 2; i++) {
+            sprintf(name, D_0047BD90, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
+            char* data = func_003E2190(name, 0x3000100);
+            *slot = loadTex_3640(data, D_0047BDA0);
+            if (data != 0)
+                cMemMan_free(data);
+            slot++;
+        }
+    }
+    cBigFile__cBigFile(&bf, 2);
+}
+#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
 

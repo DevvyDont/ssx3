@@ -196,7 +196,129 @@ extern "C" void func_0034FE90(void* self, void* stream)
 
 INCLUDE_ASM("object/instancenode", func_0034FED8);
 
+//100%
 INCLUDE_ASM("object/instancenode", func_00350288);
+#ifdef SKIP_ASM
+struct sInMat44_0288 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sInVec4_0288 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sInBone_0288 {
+    int parent;                 // 0x0
+    int f4;
+    int f8;
+    sInMat44_0288* mat;         // 0xC
+};
+
+struct sInSkel_0288 {
+    int f0;
+    int count;                  // 0x4
+    sInBone_0288* bones;        // 0x8
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMat_0288(sInMat44_0288* d, const sInMat44_0288* a, const sInMat44_0288* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMat_0288(sInMat44_0288* d, const sInMat44_0288* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent, const sInMat44_0288* m, const sInVec4_0288& scale)
+{
+    sInMat44_0288 local;
+    sInVec4_0288 v;
+    sInVec4_0288 tr;
+    sInMat44_0288 t;
+    v = *(sInVec4_0288*)m->m[0];
+    *(sInVec4_0288*)local.m[0] = v;
+    v = *(sInVec4_0288*)m->m[1];
+    *(sInVec4_0288*)local.m[1] = v;
+    v = *(sInVec4_0288*)m->m[2];
+    *(sInVec4_0288*)local.m[2] = v;
+    tr = *(sInVec4_0288*)m->m[3];
+    v.x = tr.x * scale.x;
+    v.y = tr.y * scale.y;
+    v.z = tr.z * scale.z;
+    v.w = tr.w * scale.w;
+    *(sInVec4_0288*)local.m[3] = v;
+    vu0MulMat_0288(&t, parent, &local);
+    vu0CopyMat_0288(d, &t);
+}
+
+extern "C" void func_00350288(void* self, sInMat44_0288* parent, sInMat44_0288* out)
+{
+    char* o = *(char**)((char*)self + 0x18);
+    sInSkel_0288* sk = *(sInSkel_0288**)(o + 0x80);
+    float s = *(float*)(o + 0x84);
+    sInBone_0288* b = sk->bones;
+    sInVec4_0288 scale;
+    scale.x = s;
+    scale.y = s;
+    scale.z = s;
+    scale.w = 1.0f;
+    for (int i = 0; i < sk->count; i++, b++) {
+        sInMat44_0288 t2;
+        if (b->parent != -1) {
+            buildBone_0288(&t2, &out[b->parent], b->mat, scale);
+            vu0CopyMat_0288(&out[i], &t2);
+        } else {
+            buildBone_0288(&t2, parent, b->mat, scale);
+            vu0CopyMat_0288(&out[i], &t2);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/instancenode", cInstanceNode_getBoundBoxInfo);
 

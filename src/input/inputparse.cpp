@@ -577,7 +577,111 @@ extern "C" void* func_00323A68(void* self)
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseTerm);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseBinaryFunc);
+#ifdef SKIP_ASM
+extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void* cInputMapParser_parseExpression(void* self);
+extern "C" void func_00321500(void* self, const char* fmt, ...);
+extern "C" void* func_003215F8(void* self);
+extern "C" void func_00321638(void* self, void* node);
+extern "C" float func_0031C228(float x);
+extern "C" float func_0040DA10(float x);
+extern "C" float func_0040D758(float x);
+extern char D_0048E198[];
+extern char D_0048E1B8[];
+extern char D_0048E0B8[];
+
+struct sBinNode_4138 {
+    int type;
+    union {
+        float value;
+        sBinNode_4138* a;
+    };
+    sBinNode_4138* b;
+};
+
+static inline float pow_4138(float x, float y)
+{
+    return func_0040D758(func_0040DA10(x) * y);
+}
+
+static inline float atan2_4138(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f) {
+            return y;
+        }
+        if (y >= 0.0f) {
+            return 1.5707963705062866f;
+        }
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f) {
+            a += 3.1415927410125732f;
+        } else {
+            a -= 3.1415927410125732f;
+        }
+    }
+    return a;
+}
+
+// PORT: uses g++ min/max operators (<? >?).
+extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op)
+{
+    if (*(int*)((char*)self + 0x98) != 9) {
+        func_00321500(self, D_0048E198);
+        return 0;
+    }
+    cInputMapParser_readToken(self);
+    sBinNode_4138* a = (sBinNode_4138*)cInputMapParser_parseExpression(self);
+    if (a == 0) {
+        return 0;
+    }
+    if (*(int*)((char*)self + 0x98) != 8) {
+        func_00321500(self, D_0048E1B8);
+        func_00321638(self, a);
+        return 0;
+    }
+    cInputMapParser_readToken(self);
+    sBinNode_4138* b = (sBinNode_4138*)cInputMapParser_parseExpression(self);
+    if (b == 0) {
+        return 0;
+    }
+    if (*(int*)((char*)self + 0x98) != 0xA) {
+        func_00321500(self, D_0048E0B8);
+        func_00321638(self, a);
+        func_00321638(self, b);
+        return 0;
+    }
+    cInputMapParser_readToken(self);
+    if (a->type == 4 && b->type == 4) {
+        switch (op) {
+        case 0x15:
+            a->value = b->value <? a->value;
+            break;
+        case 0x14:
+            a->value = b->value >? a->value;
+            break;
+        case 0x16:
+            a->value = pow_4138(a->value, b->value);
+            break;
+        case 0x17:
+            a->value = atan2_4138(a->value, b->value);
+            break;
+        }
+        func_00321638(self, b);
+        return a;
+    }
+    sBinNode_4138* n = (sBinNode_4138*)func_003215F8(self);
+    n->type = op;
+    n->a = a;
+    n->b = b;
+    return n;
+}
+#endif
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseUnaryFunc);
 

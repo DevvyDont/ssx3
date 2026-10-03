@@ -470,7 +470,105 @@ extern "C" void func_003AE300(char* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AE450);
+#ifdef SKIP_ASM
+struct sAlloc_AE450 {
+    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
+    void* free;
+    int flags;
+};
+// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
+extern sAlloc_AE450 D_00509430_AE450 __asm__("D_00509430");
+extern char D_00495210[];
+
+struct sTimer_AE450 {
+    unsigned int start;     // 0x0
+    int pad4;
+    long ticks;             // 0x8
+    int period;             // 0x10
+    int pad14;
+};
+
+struct func_003B0430_sObj;
+struct func_003B0430_sKey;
+extern "C" func_003B0430_sObj* func_003B0430(func_003B0430_sObj* self, func_003B0430_sKey* key);
+// PORT: the unit declares func_003B0758 with int params; it stores pointers.
+extern "C" void* func_003B0758_AE450(void* self, void* a1, void* a2, void* a3, int a4) __asm__("func_003B0758");
+void* func_003AECB8(void* self, void* a1);
+void* func_003AED20(void* self, void* a1, int a2);
+extern "C" void* func_003AED40(void* self, int a1, int a2);
+extern "C" int func_003AEEF8(void* self);
+extern "C" void func_003E0AD8(int h, int a, int b);
+extern "C" int func_003E0D80(int h, int a, int b, int c);
+extern "C" void ASYNCFILE_release(int h, void* data, int* size);
+extern "C" int func_003B0600(void* p, int a1);
+extern "C" unsigned int func_003E4E98();
+extern "C" unsigned int func_003E5008();
+extern "C" void func_0042E508(void* timer);
+extern "C" void* func_003AE888(void*, int);
+
+static inline void* wsAlloc_AE450(sAlloc_AE450* a, int size)
+{
+    return a->alloc(D_00495210, size, 0, 0, a->flags);
+}
+
+static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
+{
+    return a->alloc != 0 && a->free != 0;
+}
+
+// PORT: 64-bit long tick counter
+extern "C" int func_003AE450(char* self, int a1, int a2)
+{
+    func_003E0AD8(*(int*)(self + 0x34), 0x97, 0x33);
+    func_003E0AD8(*(int*)(self + 0x30), 0x97, 0x33);
+    if (*(int*)(self + 0x24) != 0) {
+        int size;
+        ASYNCFILE_release(*(int*)(self + 0x24), self + 0x20, &size);
+        *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0x20), size, 0);
+    }
+    if (*(int*)(self + 0x2C) != 0) {
+        int size;
+        ASYNCFILE_release(*(int*)(self + 0x2C), self + 0x28, &size);
+        *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x28), size, 0);
+    }
+    if (*(int*)(self + 0x14) == 0) {
+        *(int*)(self + 0x3C) = *(int*)(self + 0x38);
+    }
+    if (*(int*)(self + 0x1C) == 0) {
+        char* s = (char*)func_003AED40(wsAlloc_AE450(&D_00509430_AE450, 0x14), *(int*)(self + 0x34), *(int*)(self + 0x3C));
+        *(char**)(self + 0x0) = s;
+        *(unsigned int*)(self + 0x54) = *(int*)(s + 0xC) >= 0;
+    } else {
+        *(unsigned int*)(self + 0x54) = 0;
+    }
+    *(void**)(self + 0x64) = 0;
+    if (wsCanAlloc_AE450(&D_00509430_AE450)) {
+        char key[0x10];
+        *(char**)(self + 0x60) = self;
+        func_003B0758_AE450(key, self + 0x60, (void*)func_003AECB8, (void*)func_003AED20, a1);
+        *(func_003B0430_sObj**)(self + 0x64) = func_003B0430((func_003B0430_sObj*)wsAlloc_AE450(&D_00509430_AE450, 0x1C), (func_003B0430_sKey*)key);
+    }
+    *(int*)(self + 0x74) = func_003B0600(*(void**)(self + 0x64), 0);
+    sTimer_AE450* t = (sTimer_AE450*)wsAlloc_AE450(&D_00509430_AE450, 0x18);
+    t->ticks = 0;
+    t->start = func_003E4E98();
+    t->period = 0x1000;
+    *(sTimer_AE450**)(self + 0x5C) = t;
+    func_0042E508(t);
+    unsigned int ms = (unsigned int)(t->ticks * 1000) / func_003E5008();
+    *(int*)(self + 0x40) = a2;
+    *(int*)(self + 0x50) = 0;
+    *(int*)(self + 0x58) = 0;
+    *(unsigned int*)(self + 0x4C) = ms;
+    if (*(void**)(self + 0x0) != 0) {
+        func_003AEEF8(*(void**)(self + 0x0));
+    }
+    func_003AE888(self, 0x1000);
+    return *(int*)(self + 0x74);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AE6C8);
@@ -2215,7 +2313,96 @@ extern "C" int func_003B26B8(int w, int h, int fmt, int clut, int maxLevel, int 
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B27C8);
+#ifdef SKIP_ASM
+extern "C" char func_003B3DA8(int key);
+extern "C" void func_003E6448(void* dst, int value, int size);
+// PORT: memset-like fill called with an unsigned all-ones value here
+extern "C" void func_003E6448_u(void* dst, unsigned int value, int size) __asm__("func_003E6448");
+extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel);
+extern "C" int func_003B2688(int v);
+extern "C" unsigned char func_003B38B8(int clut);
+
+struct sTexHdr_27C8 {
+    unsigned type : 8;          // 0x0
+    unsigned next : 24;
+    short w;                    // 0x4
+    short h;                    // 0x6
+    int f8;                     // 0x8
+    unsigned flags : 28;        // 0xC
+    unsigned levels : 4;
+    int dataOff;                // 0x10
+};
+
+struct sRGBA_27C8 {
+    unsigned char r, g, b, a;
+};
+
+static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
+{
+    if (*(int*)((char*)t + 0xC) & 0x1000) {
+        return (unsigned char*)t + t->dataOff;
+    }
+    return (unsigned char*)t + 0x10;
+}
+
+extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int levels, int extra1, int extra2)
+{
+    sTexHdr_27C8* t = (sTexHdr_27C8*)tex;
+    int bpp = 0x20;
+    if (fmt != 0) bpp = fmt;
+    char c = func_003B3DA8(bpp);
+    func_003E6448(t, 0, 0x10);
+    t->type = c;
+    t->w = w;
+    t->h = h;
+    t->levels = levels;
+    sTexHdr_27C8* hdr = t;
+    unsigned char* p = (unsigned char*)hdr + (func_003B2558(w, h, bpp, levels) + 0x10);
+    if (bpp < 9 && clut != 0) {
+        int n = func_003B2688(bpp);
+        unsigned char cfmt = func_003B38B8(clut);
+        int off = ((p - (unsigned char*)hdr) + 0xF) & ~0xF;
+        p = (unsigned char*)hdr + off;
+        int cbits = 0x10;
+        if (clut != 0xF) cbits = clut;
+        hdr->next = off;
+        func_003E6448(p, 0, 0x10);
+        ((sTexHdr_27C8*)p)->type = cfmt;
+        ((sTexHdr_27C8*)p)->h = 1;
+        ((sTexHdr_27C8*)p)->w = n;
+        if (clut >= 0x20) {
+            sRGBA_27C8* pal = (sRGBA_27C8*)texData_27C8((sTexHdr_27C8*)p);
+            for (int i = 0; i < n; i++) {
+                pal[i].b = i;
+                pal[i].g = i;
+                pal[i].r = i;
+                pal[i].a = 0xFF;
+            }
+        } else {
+            func_003E6448_u(texData_27C8((sTexHdr_27C8*)p), 0xFFFFFFFF, n * cbits / 8);
+        }
+        hdr = (sTexHdr_27C8*)p;
+        p += n * cbits / 8 + 0x10;
+    }
+    if (extra1 != 0) {
+        hdr->next = p - (unsigned char*)hdr;
+        hdr = (sTexHdr_27C8*)p;
+        func_003E6448(p, 0, extra1 + 8);
+        *(int*)(p + 4) = extra1;
+        p[0] = 0x6F;
+        p += extra1 + 8;
+    }
+    if (extra2 != 0) {
+        hdr->next = p - (unsigned char*)hdr;
+        func_003E6448(p, 0, extra2 + 0x10);
+        p[0] = 0x69;
+        *(short*)(p + 6) = 0x10;
+        *(int*)(p + 0x10) = 0x455355;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B2A68);

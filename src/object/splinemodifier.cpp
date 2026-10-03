@@ -1100,7 +1100,161 @@ extern "C" void func_0035B6D0(sSplineLink* link)
 
 INCLUDE_ASM("object/splinemodifier", func_0035B708);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035BA88);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void* func_002D1BE0();
+
+struct sSmVec4_BA88 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sSmBox_BA88 {
+    sSmVec4_BA88 min;
+    sSmVec4_BA88 max;
+};
+struct sSmCell_BA88 {
+    int level;
+    int x, y, z;
+};
+struct sSmNode_BA88 {
+    sSmNode_BA88* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sSmRoot_BA88 {
+    sSmCell_BA88 cell;              // 0x00
+    sSmNode_BA88* node;             // 0x10
+};
+struct sSmSeg_BA88 {
+    char pad0[0x64];
+    sSmSeg_BA88* next;              // 0x64
+    char pad68[4];
+    float minx, miny, minz;         // 0x6C
+    float maxx, maxy, maxz;         // 0x78
+};
+struct sSmTrack_BA88 {
+    char pad0[0x20];
+    int count;                      // 0x20
+    sSmSeg_BA88* first;             // 0x24
+};
+struct sSmSet_BA88 {
+    char pad0[0x44];
+    unsigned int* refs;             // 0x44
+};
+struct sSmWorld_BA88 {
+    char pad0[0x8];
+    sSmSet_BA88** sets;             // 0x8
+};
+
+extern "C" void* func_002D1BD8();
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern char D_004911D0[];
+extern "C" void cRailModifier_buildXform(void* self);
+
+class cSmStream_BA88 {
+public:
+    virtual void v01();
+    virtual void v02(void* p, int n);
+    virtual int v03();
+};
+
+static inline sSmRoot_BA88* findRoot_BA88(char* w, const sSmCell_BA88& c)
+{
+    sSmRoot_BA88* r = (sSmRoot_BA88*)w;
+    sSmRoot_BA88* rx = c.x >= 0 ? r : r + 4;
+    sSmRoot_BA88* ry = c.y >= 0 ? rx : rx + 2;
+    sSmRoot_BA88* rz = c.z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void remove_BA88(char* w, void* item, const sSmBox_BA88* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sSmCell_BA88 c;
+    func_00328F28(&c, box);
+    sSmRoot_BA88* r = findRoot_BA88(w, c);
+    func_003284B8(r->node, 2, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+static inline void insert_BA88(char* w, void* item, const sSmBox_BA88* box)
+{
+    sSmCell_BA88 c;
+    func_00328F28(&c, box);
+    func_00328C20(findRoot_BA88(w, c), 2, item, &c);
+}
+
+static inline sSmTrack_BA88* toTrack_BA88(unsigned int p)
+{
+    return (sSmTrack_BA88*)(p << 2);
+}
+
+static inline sSmTrack_BA88* refToTrack_BA88(unsigned int v)
+{
+    unsigned int p = v >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return toTrack_BA88(p);
+}
+
+struct sSmRef_BA88 {
+    unsigned int id;
+
+    sSmTrack_BA88* get()
+    {
+        sSmSet_BA88* set = (*(sSmWorld_BA88**)func_002D1BD8())->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return refToTrack_BA88(set->refs[id >> 8]);
+    }
+};
+
+extern "C" char* func_0035BA88(char* self, cSmStream_BA88* src)
+{
+    *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
+    *(void**)(self + 0x8) = D_004911D0;
+    *(void**)(self + 0x0) = 0;
+    *(void**)(self + 0x4) = 0;
+    src->v02(self + 0x10, 0x30);
+    *(int*)(self + 0x40) = src->v03();
+    cRailModifier_buildXform(self);
+    insert_BA88((char*)func_002D1BE0(), *(void**)(self + 0x44), (sSmBox_BA88*)(self + 0x10));
+    sSmTrack_BA88* t = ((sSmRef_BA88*)(self + 0x30))->get();
+    sSmSeg_BA88* seg = t->first;
+    for (int i = 0; i < t->count; i++) {
+        sSmBox_BA88 b;
+        b.min.x = seg->minx;
+        b.min.y = seg->miny;
+        b.min.z = seg->minz;
+        b.min.w = 1.0f;
+        b.max.x = seg->maxx;
+        b.max.y = seg->maxy;
+        b.max.z = seg->maxz;
+        b.max.w = 1.0f;
+        remove_BA88((char*)func_002D1BE0(), seg, &b);
+        seg = seg->next;
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_0035BD70);
 

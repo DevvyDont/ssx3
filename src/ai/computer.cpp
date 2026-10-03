@@ -1443,7 +1443,86 @@ void func_00111AA0_impl(void* self, void* a, void* b, int c, float x)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00111AC0);
+#ifdef SKIP_ASM
+class cStream_00111AC0 {
+public:
+    virtual void Write(void* p, int n);
+};
+
+extern char D_004D33A0[];
+extern "C" void func_00104D68(void* self, void* s);
+extern "C" void func_00310EA8(void* self, void* s);
+extern "C" void func_00113AA0(void* self, void* s);
+extern "C" void func_001174B0(void* self, void* s);
+extern "C" void func_0013F848(void* self, void* s);
+extern "C" void func_0013ACB0(void* self, void* s);
+extern "C" void func_00138AD8(void* self, void* s);
+extern "C" void func_0013C5E0(void* self, void* s);
+extern "C" void func_00139970(void* self, void* s);
+extern "C" void func_00131598(void* self, void* s);
+extern "C" void func_0012FBF0(void* self, void* s);
+extern "C" void func_001361F8(void* self, void* s);
+extern "C" void func_0012C558(void* self, void* s);
+extern "C" void func_00132840(void* self, void* s);
+extern "C" void func_0012E708(void* self, void* s);
+extern "C" void func_0012F5B0(void* self, void* s);
+extern "C" void func_0012C9C0(void* self, void* s);
+extern "C" void func_001330B8(void* self, void* s);
+extern "C" void func_001368E8(void* self, void* s);
+extern "C" void func_002F6A58(void* self, void* s);
+extern "C" int func_0026B508(void* tree, void* path);
+extern "C" int func_0026B550(void* tree, void* path);
+
+extern "C" void func_00111AC0(char* self, char* s)
+{
+    cStream_00111AC0* st = (cStream_00111AC0*)s;
+    st->Write(*(void**)(self + 0x18), 0x6C0);
+    func_00104D68(*(void**)(*(char**)(self + 0x18) + 0x784), s);
+    func_00310EA8(*(void**)(*(char**)(self + 0x18) + 0x780), s);
+    func_00113AA0(*(void**)(*(char**)(self + 0x18) + 0x788), s);
+    func_001174B0(*(void**)(*(char**)(self + 0x18) + 0x790), s);
+    unsigned int id0 = 0xFFFFFFFF;
+    char* p0 = **(char***)(*(char**)(self + 0x18) + 0x864);
+    if (p0 != 0) {
+        id0 = *(unsigned int*)(p0 + 0x150);
+    }
+    st->Write(&id0, 4);
+    st->Write(*(void**)(*(char**)(self + 0x18) + 0x864), 0x10);
+    unsigned int id1 = 0xFFFFFFFF;
+    char* p1 = **(char***)(*(char**)(self + 0x18) + 0x868);
+    if (p1 != 0) {
+        id1 = *(unsigned int*)(p1 + 0x150);
+    }
+    st->Write(&id1, 4);
+    st->Write(*(void**)(*(char**)(self + 0x18) + 0x868), 0x10);
+    st->Write(self + 0xDE0, 4);
+    st->Write(self + 0xDE4, 4);
+    func_0013F848(self, s);
+    func_0013ACB0(self + 0x20, s);
+    func_00138AD8(self + 0x30, s);
+    func_0013C5E0(self + 0xB0, s);
+    func_00139970(self + 0x110, s);
+    func_00131598(self + 0x1D0, s);
+    func_0012FBF0(self + 0x210, s);
+    func_001361F8(self + 0x230, s);
+    func_0012C558(self + 0x290, s);
+    func_00132840(self + 0x2B0, s);
+    func_0012E708(self + 0x2C0, s);
+    func_0012F5B0(self + 0x350, s);
+    func_0012C9C0(self + 0x360, s);
+    func_001330B8(self + 0x370, s);
+    func_001368E8(self + 0x390, s);
+    func_002F6A58(self + 0xD20, s);
+    st->Write(*(void**)(*(char**)(self + 0x18) + 0xABC), 0x20);
+    st->Write(*(void**)(*(char**)(self + 0x18) + 0xAC0), 0x20);
+    int ids[2];
+    ids[0] = func_0026B508(D_004D33A0, *(void**)(*(char**)(self + 0x18) + 0xAB4));
+    ids[1] = func_0026B550(D_004D33A0, *(void**)(*(char**)(self + 0x18) + 0xAB8));
+    st->Write(ids, 8);
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_00111D98);
 
@@ -1712,9 +1791,305 @@ extern "C" void func_001125C0(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_001127F0);
+#ifdef SKIP_ASM
+struct sVec4_1127F0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
+extern char D_004D33A0[];
+extern "C" int func_0026B178(void* tree, void* pos, void** out, int maxOut);
+extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
+sVec4_1127F0 func_0026AB20_1127F0(void* path, int* inRange, float t) __asm__("func_0026AB20");
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float vu0Length_1127F0(const sVec4_1127F0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_1127F0 vu0Scale_1127F0(const sVec4_1127F0& v, float s)
+{
+    sVec4_1127F0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4_1127F0 vu0Add_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
+{
+    sVec4_1127F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_1127F0 vu0Sub_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
+{
+    sVec4_1127F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" void func_001127F0(void* vself, int skipCur)
+{
+    char* self = (char*)vself;
+    void* paths[3];
+    sVec4_1127F0 out;
+    sVec4_1127F0 pos;
+    float len = vu0Length_1127F0(*(sVec4_1127F0*)(self + 0x1E0));
+    void* best = *(void**)(self + 0xAB4);
+    float bestD = 9.999999933815813e+36f;
+    if (len == 0.0f) {
+        pos = *(sVec4_1127F0*)(self + 0x110);
+    } else {
+        float s = func_00112588(self, 1) / len;
+        pos = vu0Add_1127F0(*(sVec4_1127F0*)(self + 0x110), vu0Scale_1127F0(*(sVec4_1127F0*)(self + 0x1E0), s));
+    }
+    int n = func_0026B178(D_004D33A0, &pos, paths, 3);
+    for (int i = 0; i < n; i++) {
+        if (skipCur && paths[i] == *(void**)(self + 0xAB4)) {
+            continue;
+        }
+        float tOut;
+        float t = func_0026A428(paths[i], &pos, &out, &tOut, 1);
+        if (paths[i] == *(void**)(self + 0xAB4)) {
+            if (1592.0f < __builtin_fabsf(*(float*)((char*)paths[i] + 0x38) - *(float*)(self + 0x4D0) - t)) {
+                *(int*)(*(char**)(self + 0xAC0) + 0x14) = -1;
+            }
+        }
+        t += 796.0f;
+        sVec4_1127F0 d1 = vu0Sub_1127F0(pos, func_0026AB20_1127F0(paths[i], 0, t));
+        sVec4_1127F0 d0 = vu0Sub_1127F0(*(sVec4_1127F0*)(self + 0x110), out);
+        float dist = vu0Dot_1127F0(d0, d0) + vu0Dot_1127F0(d1, d1);
+        if (dist < bestD) {
+            best = paths[i];
+            bestD = dist;
+        }
+    }
+    *(void**)(self + 0xAB4) = best;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_00112A50);
+#ifdef SKIP_ASM
+struct sVec4_112A50 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern char D_004D33A0[];
+extern "C" int func_0026AFB8(void* tree, void* pos, void** out, int maxOut, int a4);
+extern "C" float func_0026AC48(void* self);
+extern "C" float func_0026A638(void* path, void* a1, void* a2, void* a3, void* hint, int n);
+extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
+sVec4_112A50 func_0026AB20_112A50(void* path, int* inRange, float t) __asm__("func_0026AB20");
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float vu0Length_112A50(const sVec4_112A50& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_112A50 vu0Scale_112A50(const sVec4_112A50& v, float s)
+{
+    sVec4_112A50 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4_112A50 vu0Add_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
+{
+    sVec4_112A50 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_112A50 vu0Sub_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
+{
+    sVec4_112A50 r;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+struct sVEi_112A50 { short delta; short index; int (*fn)(void*); };
+struct sVEf_112A50 { short delta; short index; float (*fn)(void*, void*); };
+
+extern "C" void func_00112A50(void* vself, int keep)
+{
+    char* self = (char*)vself;
+    void* paths[6];
+    sVec4_112A50 out;
+    sVec4_112A50 pos;
+    float len = vu0Length_112A50(*(sVec4_112A50*)(self + 0x1E0));
+    void* best = 0;
+    float bestD = 9.999999933815813e+36f;
+    float bestW = -1.0f;
+    if (len == 0.0f) {
+        pos = *(sVec4_112A50*)(self + 0x110);
+    } else {
+        pos = vu0Add_112A50(*(sVec4_112A50*)(self + 0x110), vu0Scale_112A50(*(sVec4_112A50*)(self + 0x1E0), 796.0f / len));
+    }
+    int n = func_0026AFB8(D_004D33A0, &pos, paths, 6, 0);
+    for (int i = 0; i < n; i++) {
+        if (paths[i] == *(void**)(self + 0xAB8) && keep) {
+            continue;
+        }
+        float tOut;
+        float t = func_0026A428(paths[i], &pos, &out, &tOut, 1);
+        if (func_0026AC48(paths[i]) - 200.0f < t) {
+            continue;
+        }
+        sVec4_112A50 d1 = vu0Sub_112A50(pos, func_0026AB20_112A50(paths[i], 0, t + 796.0f));
+        sVec4_112A50 d0 = vu0Sub_112A50(*(sVec4_112A50*)(self + 0x110), out);
+        float dist = vu0Dot_112A50(d0, d0) + vu0Dot_112A50(d1, d1);
+        char* o = self + 0x6C0;
+        sVEi_112A50* ve = &(*(sVEi_112A50**)o)[9];
+        if (ve->fn(o + ve->delta) == 1) {
+            sVEf_112A50* vf = &(*(sVEf_112A50**)(self + 0x6C0))[20];
+            dist = vf->fn(self + vf->delta, paths[i]);
+            if (bestW < dist) {
+                best = paths[i];
+                bestW = dist;
+                if (best == *(void**)(self + 0xAB8)) {
+                    best = 0;
+                }
+            }
+        } else {
+            if (dist < bestD) {
+                best = paths[i];
+                bestD = dist;
+                if (best == *(void**)(self + 0xAB8)) {
+                    best = 0;
+                }
+            }
+        }
+    }
+    if (best != 0) {
+        *(void**)(self + 0xAB8) = best;
+        *(int*)(*(char**)(self + 0xABC) + 0x14) = -1;
+        float r = func_0026A638(*(void**)(self + 0xAB8), self + 0x110, self + 0x490, self + 0x4C8, *(void**)(self + 0xABC), 1);
+        *(float*)(self + 0x4C4) = r;
+        *(sVec4_112A50*)(self + 0x4A0) = func_0026AB20_112A50(*(void**)(self + 0xAB8), 0, r + 796.0f);
+        *(float*)(self + 0x4C0) = *(float*)(self + 0x4C4);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_00112D58);

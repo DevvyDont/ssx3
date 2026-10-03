@@ -726,7 +726,109 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRow);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* func_00398380(void* self, int id);
+extern char D_00467040[];
+extern char D_00467050[];
+extern char D_004C6818[];
+
+struct sVEv_08A0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEp_08A0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+struct sVEi_08A0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sGalCell_08A0 {
+    char pad0[0x8];
+    void* vt;                   // 0x8
+    char padC[0x78 - 0xC];
+    int reward;                 // 0x78
+    void* tex;                  // 0x7C
+};
+
+struct sGallery_08A0 {
+    char pad0[0x8];
+    sVEi_08A0* vt;              // 0x8
+    char padC[0x10 - 0xC];
+    char* ui;                   // 0x10
+    char pad14[0x5C - 0x14];
+    int cols;                   // 0x5C
+    int f60;
+    int scroll;                 // 0x64
+    int count;                  // 0x68
+    char pad6C[0x8F0 - 0x6C];
+    int selected;               // 0x8F0
+    char pad8F4[0x924 - 0x8F4];
+    sGalCell_08A0* cells[4][8];  // 0x924
+    sGalCell_08A0* frames[4][8]; // 0x9A4
+};
+
+static inline void show_08A0(sGalCell_08A0* c, int on)
+{
+    sVEv_08A0* vt = (sVEv_08A0*)c->vt;
+    vt[9].fn((char*)c + vt[9].delta, on);
+}
+
+extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row)
+{
+    int idx = (self->scroll + row) * self->cols;
+    for (int col = 0; col < self->cols; col++, idx++) {
+        if (idx < self->count) {
+            show_08A0(self->cells[row][col], 1);
+            show_08A0(self->frames[row][col], 1);
+            if (self->vt[38].fn((char*)self + self->vt[38].delta, idx) != 0) {
+                int a = self->vt[26].fn((char*)self + self->vt[26].delta, idx);
+                if (a >= 0) {
+                    sGalCell_08A0* cell = self->cells[row][col];
+                    cell->reward = a;
+                    cell->tex = 0;
+                } else {
+                    int b = self->vt[27].fn((char*)self + self->vt[27].delta, idx);
+                    if (b != 0) {
+                        sGalCell_08A0* cell = self->cells[row][col];
+                        cell->tex = (void*)b;
+                        cell->reward = -1;
+                    }
+                }
+            } else {
+                int c = self->vt[34].fn((char*)self + self->vt[34].delta, idx);
+                void* t;
+                if (self->selected >= 0 && self->vt[36].fn((char*)self + self->vt[36].delta, c) == self->selected) {
+                    char* ui = self->ui;
+                    int h = GetHashValue32(D_00467040);
+                    t = func_00398380(ui + 0x58, h);
+                } else {
+                    char* ui = self->ui;
+                    int h = GetHashValue32(D_00467050);
+                    t = func_00398380(ui + 0x58, h);
+                }
+                sGalCell_08A0* cell = self->cells[row][col];
+                cell->tex = t;
+                cell->reward = -1;
+            }
+            sGalCell_08A0* cell = self->cells[row][col];
+            sVEp_08A0* vt = (sVEp_08A0*)cell->vt;
+            vt[11].fn((char*)cell + vt[11].delta, D_004C6818);
+        } else {
+            show_08A0(self->cells[row][col], 0);
+            show_08A0(self->frames[row][col], 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D0B00);
