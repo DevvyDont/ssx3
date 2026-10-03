@@ -74,11 +74,178 @@ int func_001D9F30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004679B0[];
+extern char D_004A2040[];
+extern char D_004679C0[];
+extern char D_004A2048[];
+extern char D_004679D0[];
+extern char D_004679E0[];
+extern char D_004679F0[];
+extern char D_00467A00[];
+extern char D_004A2050[];
+extern char D_004A2058[];
+extern char D_004A2060[];
+extern char D_004A2068[];
+extern char D_00467A10[];
+
+struct sWidget_1D9F38 {
+    char pad00[0x14];
+    unsigned int flags;
+    char pad18[0x20];
+    int hash;
+};
+
+struct sNetHelp_1D9F38 {
+    char pad00[0xA8];
+    sWidget_1D9F38* wA8;
+    sWidget_1D9F38* wAC;
+    sWidget_1D9F38* wB0;
+    sWidget_1D9F38* rows[7];
+    sWidget_1D9F38* wD0;
+    sWidget_1D9F38* wD4;
+    sWidget_1D9F38* wD8;
+    sWidget_1D9F38* wDC;
+    sWidget_1D9F38* wE0;
+    sWidget_1D9F38* wE4;
+    sWidget_1D9F38* wE8;
+    sWidget_1D9F38* wEC;
+    sWidget_1D9F38* wF0;
+};
+
+static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidget_1D9F38* w)
+{
+    int h = w->hash;
+    if (h == GetHashValue32(D_004679B0)) {
+        self->wA8 = w;
+        w->flags |= 0x80;
+    } else if (h == GetHashValue32(D_004A2040)) {
+        self->wAC = w;
+        w->flags |= 0x80;
+    } else if (h == GetHashValue32(D_004679C0)) {
+        self->wB0 = w;
+        w->flags |= 0x80;
+    } else if (IsHash_1D9F38(w->hash, D_004A2048)) {
+        self->wD0 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004679D0)) {
+        self->wD4 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004679E0)) {
+        self->wD8 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004679F0)) {
+        self->wDC = w;
+    } else if (IsHash_1D9F38(w->hash, D_00467A00)) {
+        self->wE0 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004A2050)) {
+        self->wE8 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004A2058)) {
+        self->wE4 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004A2060)) {
+        self->wF0 = w;
+    } else if (IsHash_1D9F38(w->hash, D_004A2068)) {
+        self->wEC = w;
+    } else {
+        char buf[16];
+        for (int i = 0; i < 7; i++) {
+            sprintf(buf, D_00467A10, i);
+            if (h == GetHashValue32(buf)) {
+                self->rows[i] = w;
+                break;
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA110);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA238);
+#ifdef SKIP_ASM
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void func_001DA110(void* self);
+extern char D_004A1408[];
+
+struct sVEnt_1DA238 { short delta; short index; void (*fn)(void*, int); };
+struct sVec3_1DA238 { float x, y, z; };
+
+struct sWidget_1DA238 {
+    char pad00[8];
+    sVEnt_1DA238* vt;
+    char pad0C[0x38];
+    sVec3_1DA238 pos;
+};
+
+struct sNetHelp_1DA238 {
+    char pad00[0x48];
+    int state;                  // 0x48
+    char pad4C[8];
+    int title;                  // 0x54
+    int c[3];                   // 0x58
+    int f64;                    // 0x64
+    int a[7];                   // 0x68
+    int b[7];                   // 0x84
+    char padA0[8];
+    sWidget_1DA238* wA8;        // 0xA8
+    sWidget_1DA238* wAC;        // 0xAC
+    sWidget_1DA238* wB0;        // 0xB0
+    sWidget_1DA238* rows[7];    // 0xB4
+    sWidget_1DA238* icons[9];   // 0xD0
+};
+
+static inline void show_1DA238(sWidget_1DA238* w, int on)
+{
+    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+}
+
+extern "C" int func_001DA238(sNetHelp_1DA238* self, int a1)
+{
+    if (a1) {
+        if (self->title) {
+            cUIText_setUnicodeStringByID((cUIText*)self->wA8, self->title);
+        } else {
+            cUIText_setAsciiString((cUIText*)self->wA8, D_004A1408);
+        }
+        if (self->c[0]) {
+            func_001DA110(self);
+        } else {
+            cUIText_setAsciiString((cUIText*)self->wAC, D_004A1408);
+        }
+        if (self->f64) {
+            cUIText_setUnicodeStringByID((cUIText*)self->wB0, self->f64);
+        } else {
+            cUIText_setAsciiString((cUIText*)self->wB0, D_004A1408);
+        }
+        for (int j = 0; j < 9; j++) {
+            show_1DA238(self->icons[j], 0);
+        }
+        for (int i = 0; i < 7; i++) {
+            if (i < self->state) {
+                show_1DA238(self->rows[i], 1);
+                show_1DA238(self->icons[self->b[i]], 1);
+                sVec3_1DA238 p = self->icons[self->b[i]]->pos;
+                p.y += (float)i * 22.0f;
+                self->icons[self->b[i]]->pos = p;
+                if (self->a[i]) {
+                    cUIText_setUnicodeStringByID((cUIText*)self->rows[i], self->a[i]);
+                } else {
+                    cUIText_setAsciiString((cUIText*)self->rows[i], D_004A1408);
+                }
+            } else {
+                show_1DA238(self->rows[i], 0);
+            }
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA478);
@@ -159,9 +326,105 @@ void func_001DA530(void* self, int i, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA648);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* func_002CE418(void* self, void* a1, const char* name);
+extern "C" void* func_002CCF98(void* self, int a1, void* a2, int a3);
+extern "C" void* func_002CCDF0(void* self, void* text);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern "C" char* func_00416958(char* dst, const char* src, int n);
+extern void* D_004A28A8;
+extern void* D_0046D690[];
+extern char D_00467A20[];
+extern char D_00467A30[];
+extern char D_00467A40[];
+extern char D_00467A50[];
+extern char D_004A1408[];
 
+static inline void copyName_1DA648(char* dst, const char* src)
+{
+    dst[0] = 0;
+    func_00416958(dst, src, 0xF);
+}
+
+extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0046D690;
+    *(int*)((char*)self + 0x130) = *(int*)vinfo;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A20);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xA);
+    func_002CE418((char*)self + 0x168, D_00467A30, D_004A1408);
+    func_002CE418((char*)self + 0x194, D_00467A40, D_004A1408);
+    func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
+    func_002CCDF0((char*)self + 0x1E4, D_00467A50);
+    cMenu_addItem(self, (char*)self + 0x134, -1);
+    cMenu_addItem(self, (char*)self + 0x150, -1);
+    cMenu_addItem(self, (char*)self + 0x168, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C0, -1);
+    cMenu_addItem(self, (char*)self + 0x1E4, -1);
+    copyName_1DA648((char*)self + 0x180, *(char**)((char*)D_004A28A8 + 0xC4));
+    copyName_1DA648((char*)self + 0x1AC, *(char**)((char*)D_004A28A8 + 0xC8));
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA7E8);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* func_002CE418(void* self, void* a1, const char* name);
+extern "C" void* func_002CCF98(void* self, int a1, void* a2, int a3);
+extern "C" void* func_002CCDF0(void* self, void* text);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern "C" char* func_00416958(char* dst, const char* src, int n);
+extern void* D_004A28A8;
+extern void* D_0046D6E8[];
+extern char D_00467A20[];
+extern char D_00467A30[];
+extern char D_00467A40[];
+extern char D_00467A50[];
+extern char D_004A1408[];
+
+static inline void copyName_1DA7E8(char* dst, const char* src)
+{
+    dst[0] = 0;
+    func_00416958(dst, src, 0xF);
+}
+
+extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0046D6E8;
+    *(int*)((char*)self + 0x130) = *(int*)vinfo;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A20);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xA);
+    func_002CE418((char*)self + 0x168, D_00467A30, D_004A1408);
+    func_002CE418((char*)self + 0x194, D_00467A40, D_004A1408);
+    func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
+    func_002CCDF0((char*)self + 0x1E4, D_00467A50);
+    cMenu_addItem(self, (char*)self + 0x134, -1);
+    cMenu_addItem(self, (char*)self + 0x150, -1);
+    cMenu_addItem(self, (char*)self + 0x168, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C0, -1);
+    cMenu_addItem(self, (char*)self + 0x1E4, -1);
+    copyName_1DA7E8((char*)self + 0x180, *(char**)((char*)D_004A28A8 + 0xC4));
+    copyName_1DA7E8((char*)self + 0x1AC, *(char**)((char*)D_004A28A8 + 0xC8));
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA988);

@@ -317,7 +317,94 @@ extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale,
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F14B0);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char* s);
+struct sGlyphTable_1F14B0;
+extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
+
+struct sGlyph_1F14B0 {
+    unsigned short code;
+    unsigned char lead;
+    char pad_0x3[6];
+    signed char width;
+    char pad_0xA[2];
+};
+
+struct sGlyphTable_1F14B0 {
+    int count;
+    sGlyph_1F14B0* glyphs;
+    sGlyph_1F14B0* fallback;
+    int first;
+    int last;
+    char pad14[0x1C];
+    float f30;
+    float f34;
+    float f38;
+    float f3C;
+};
+
+static inline sGlyph_1F14B0* findGlyph_1F14B0(sGlyphTable_1F14B0* t, int c)
+{
+    if (c < t->first)
+        return 0;
+    if (c <= t->last)
+        return t->glyphs + c - t->first;
+    int lo = t->last - t->first;
+    int hi = t->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph_1F14B0* g = &t->glyphs[mid];
+        if (c == g->code)
+            return g;
+        if (c < g->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return t->fallback;
+}
+
+struct sVec2_1F14B0 {
+    float x, y;
+};
+
+extern "C" void func_001F14B0(void* self, const char* str, sGlyphTable_1F14B0* font, float amp, float x, float y)
+{
+    sVec2_1F14B0 sc;
+    sc.x = font->f38 / font->f30;
+    sc.y = font->f3C / font->f34;
+    int len = strlen(str);
+    char buf[2];
+    buf[1] = 0;
+    for (int i = 0; i < len; i++) {
+        buf[0] = str[i];
+        int d = i - (len >> 1);
+        int neg = 0;
+        if (d == 0) {
+            d = 1;
+        } else if (d < 0) {
+            neg = 1;
+            d = -d;
+        }
+        unsigned char ch = buf[0];
+        int d2 = d * 2;
+        int half = (ch & 0x7F) >> 1;
+        int a = (d2 * half * 5) & 0x7F;
+        int b = (d * (ch & 0xF) * 4) & 0x7F;
+        float oy = (float)a;
+        float ox = (float)b;
+        oy = -oy;
+        if (neg) {
+            ox = -ox;
+        }
+        func_00391CB0(font, x + amp * ox, y + amp * oy, buf);
+        sGlyph_1F14B0* g = findGlyph_1F14B0(font, buf[0]);
+        x += (float)(g->width + g->lead) * sc.x;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F16C0);

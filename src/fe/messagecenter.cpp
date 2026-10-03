@@ -442,7 +442,105 @@ extern "C" void func_001985F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHilightedSongInfo);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" int USTR_length(unsigned short* s);
+extern "C" int strlen(const char* s);
+void cMemMan_free(void* p);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void func_003A0E90(void* text, void* p);
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_00198AB8(void* self, int i);
+// PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
+int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
+extern "C" const char* func_00198AF0(void* a0);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_00460770[];
+extern char D_00460780[];
+extern char D_00460688[];
+extern char D_004A1408[];
+extern char* D_004A28A8;
+
+struct sVtEntry_001986D0 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+class cMsgWidget_1986D0 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sReqLine_1986D0 {
+    char pad_0x0[0x160];
+    ulong mask;                 // 0x160
+    char pad_0x168[0x4];
+    int enabled;                // 0x16C
+    char pad_0x170[0x64];
+    cMsgWidget_1986D0* title;   // 0x1D4
+    cUIText* info;              // 0x1D8
+    cMsgWidget_1986D0* icon;    // 0x1DC
+};
+
+extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx)
+{
+    sReqLine_1986D0* self = (sReqLine_1986D0*)vself;
+    if (self->title != 0) {
+        char* db = *(char**)(D_004A28A8 + 0x8C);
+        sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
+        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460770));
+        char* name = (char*)func_00198AB8(self, idx);
+        int len = USTR_length(fmt) + strlen(name) + 1;
+        unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460688, 0x100, 0);
+        // PORT: the format argument is a string pointer passed through an int parameter
+        func_002C26D0(buf, fmt, (int)name);
+        self->title->show(1);
+        func_003A0E90(self->title, buf);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+    }
+    if (self->info == 0) {
+        return;
+    }
+    ulong mask = self->mask;
+    if ((int)((mask >> idx) & 1)) {
+        cUIText_setAsciiString(self->info, D_004A1408);
+        self->icon->show(0);
+        return;
+    }
+    int n = 0;
+    for (int j = 0; j < 64; j++) {
+        n += (int)((mask >> j) & 1);
+    }
+    if (n < 6) {
+        cUIText_setUnicodeStringByID(self->info, GetHashValue32(D_00460780));
+        if (self->enabled) {
+            self->icon->show(1);
+        }
+    } else {
+        cUIText_setAsciiString(self->info, func_00198AF0((void*)func_00198AE8_2(self, idx)));
+        if (self->enabled) {
+            self->icon->show(1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", func_001988D8);

@@ -510,5 +510,57 @@ extern "C" int func_001962A8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/locale", func_00196378);
+#ifdef SKIP_ASM
+struct func_00196378_sVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct func_00196378_sVEntryP {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+extern char D_004C66D8[];
+extern "C" void func_00186518(void* self, int a1);
+
+static inline void func_00196378_call(char* o, int slot, int a)
+{
+    func_00196378_sVEntry* vt = *(func_00196378_sVEntry**)(o + 8);
+    vt[slot].fn(o + vt[slot].delta, a);
+}
+
+static inline void func_00196378_callp(char* o, int slot, void* a)
+{
+    func_00196378_sVEntryP* vt = *(func_00196378_sVEntryP**)(o + 8);
+    vt[slot].fn(o + vt[slot].delta, a);
+}
+
+extern "C" void func_00196378(void* self, int a1)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0x7C) == 0) {
+        func_00196378_call(*(char**)(s + 0x68), 9, 1);
+        func_00196378_call(*(char**)(s + 0x50), 9, 1);
+        func_00196378_call(*(char**)(s + 0x64), 9, 1);
+        func_00196378_call(*(char**)(s + 0x6C), 9, 1);
+        func_00196378_call(*(char**)(s + 0x58), 9, 1);
+        func_00196378_call(*(char**)(s + 0x68), 26, 1);
+        func_00196378_call(*(char**)(s + 0x68), 6, 0);
+        func_00196378_callp(*(char**)(s + 0x50), 11, D_004C66D8);
+        func_00196378_call(*(char**)(s + 0x6C), 26, 1);
+        func_00196378_call(*(char**)(s + 0x6C), 6, 0);
+        func_00196378_callp(*(char**)(s + 0x58), 11, D_004C66D8);
+        if (*(int*)(s + 0x74) == 0) {
+            func_00196378_call(*(char**)(s + 0x64), 26, 1);
+            func_00196378_call(*(char**)(s + 0x64), 6, 0);
+        }
+    }
+    func_00186518(self, a1);
+}
+#endif
 

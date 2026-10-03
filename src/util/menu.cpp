@@ -203,7 +203,55 @@ void* func_002CA4A8(void* self)
 
 INCLUDE_ASM("util/menu", func_002CA4C8);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CA768);
+#ifdef SKIP_ASM
+extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+struct sRect_2CA768 { float x, y, w, h; };
+struct sColor_2CA768 { float r, g, b, a; };
+struct sVec2_2CA768 {
+    float x, y;
+    sVec2_2CA768(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sVEnt_2CA768 { short delta; short index; void (*fn)(void*, sRect_2CA768*, char*); };
+
+static inline char* font_2CA768(char* item)
+{
+    return *(char**)(*(char**)(*(char**)item + 0x124) + 0x58);
+}
+
+// PORT: the unit's callers declare func_002CA768 as (void*, int, int, int, void*, char*, sColor*) returning void*;
+// the body takes (item, rect, left, center, right, style, color) and returns nothing. Bound by asm label.
+extern "C" void func_002CA768_impl(char* item, sRect_2CA768* rect, const char* left, const char* center, const char* right, char* style, sColor_2CA768* color) __asm__("func_002CA768");
+
+extern "C" void func_002CA768_impl(char* item, sRect_2CA768* rect, const char* left, const char* center, const char* right, char* style, sColor_2CA768* color)
+{
+    char* menu = *(char**)item;
+    sVEnt_2CA768* vt = *(sVEnt_2CA768**)(menu + 0x12C);
+    vt[8].fn(menu + vt[8].delta, rect, style);
+    *(sColor_2CA768*)(font_2CA768(item) + 0x40) = *color;
+    char* f0 = font_2CA768(item);
+    sVec2_2CA768 sc(2.0f, 2.0f);
+    *(sVec2_2CA768*)(f0 + 0x28) = sc;
+    if (left) {
+        func_00391CB0(font_2CA768(item), rect->x + 16.0f, rect->y + 6.0f - 1.0f, left);
+    }
+    if (center) {
+        char* f = font_2CA768(item);
+        float w = func_00391FB0(f, center, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        func_00391CB0(font_2CA768(item), rect->x + (rect->w - w) * 0.5f, rect->y + 6.0f - 1.0f, center);
+    }
+    if (right) {
+        char* f = font_2CA768(item);
+        float w = func_00391FB0(f, right, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        func_00391CB0(font_2CA768(item), rect->x + (rect->w - w) - 16.0f, rect->y + 6.0f - 1.0f, right);
+    }
+    *(sVec2_2CA768*)(font_2CA768(item) + 0x28) = sVec2_2CA768(0.0f, 0.0f);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CA988);
@@ -1580,7 +1628,81 @@ extern "C" void func_002CC758(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CC8F0);
+#ifdef SKIP_ASM
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3B0(void* self);
+extern "C" int func_002CA3E8(void** self);
+
+struct sVEnt_2CC8F0 { short delta; short index; void* fn; };
+typedef int (*Pick_2CC8F0)(void*, void*, int);
+typedef void (*Notify_2CC8F0)(void*, void*);
+
+struct sEnt_2CC8F0 {
+    const char* name;
+    int value;
+};
+
+struct sList_2CC8F0 {
+    char* menu;
+    char pad04[0x14];
+    int count;
+    sEnt_2CC8F0* entries;
+    int* value;
+};
+
+static inline void notify_2CC8F0(sList_2CC8F0* self)
+{
+    sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(self->menu + 0x12C);
+    ((Notify_2CC8F0)vt[4].fn)(self->menu + vt[4].delta, self);
+}
+
+extern "C" int func_002CC8F0(void* vself)
+{
+    sList_2CC8F0* self = (sList_2CC8F0*)vself;
+    int r = func_002CA2B0(self);
+    if (func_002CA3B0(self) != 0) {
+        return r;
+    }
+    if (r != 0) {
+        return r;
+    }
+    if (func_002CA3E8((void**)self) == 6) {
+        sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(self->menu + 0x12C);
+        r = ((Pick_2CC8F0)vt[3].fn)(self->menu + vt[3].delta, self, 0);
+    } else {
+    int n = self->count;
+    int i = 0;
+    for (;;) {
+        if (i == n) {
+            if (func_002CA3E8((void**)self) == 2 || func_002CA3E8((void**)self) == 0) {
+                *self->value = self->entries[0].value;
+                notify_2CC8F0(self);
+            } else if (func_002CA3E8((void**)self) == 3 || func_002CA3E8((void**)self) == 1) {
+                *self->value = self->entries[self->count - 1].value;
+                notify_2CC8F0(self);
+            }
+            goto done;
+        }
+        if (*self->value == self->entries[i].value) {
+            if (func_002CA3E8((void**)self) == 2 || func_002CA3E8((void**)self) == 0) {
+                *self->value = self->entries[(i + self->count - 1) % self->count].value;
+                notify_2CC8F0(self);
+            } else if (func_002CA3E8((void**)self) == 3 || func_002CA3E8((void**)self) == 1) {
+                *self->value = self->entries[(i + 1) % self->count].value;
+                notify_2CC8F0(self);
+            }
+            goto done;
+        }
+        i++;
+    }
+done:
+    return r;
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CCB18);
@@ -3230,7 +3352,69 @@ extern "C" void func_002CFB28(func_002CFB28_cMenu** self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CFB58);
+#ifdef SKIP_ASM
+extern "C" int func_002CA378(void* self);
+extern "C" void* func_002CBF30(void* self);
+
+struct sMenuRect_2CFB58 { float x, y, z, w; };
+
+struct sVEnt_2CFB58 { short delta; short index; sMenuRect_2CFB58 (*fn)(void*); };
+
+struct sItem_2CFB58 {
+    char pad00[0x10];
+    sVEnt_2CFB58* vt;
+};
+
+struct sMenu_2CFB58 {
+    char* owner;
+    char pad04[0x10];
+    sItem_2CFB58* sel;
+    int count;
+    char pad1C[8];
+    sItem_2CFB58* items[70];
+    void* f13C;
+    char pad140[0xC];
+    sMenuRect_2CFB58 rects[1];
+};
+
+extern "C" sMenuRect_2CFB58* func_002CFB58(sMenuRect_2CFB58* ret, sMenu_2CFB58* self)
+{
+    sMenuRect_2CFB58 r;
+    float zero = 0.0f;
+    r.w = zero;
+    r.z = zero;
+    r.y = zero;
+    r.x = zero;
+    self->f13C = *(void**)(self->owner + 0x124);
+    for (int i = 0; i < self->count; i++) {
+        if (func_002CA378(self->items[i])) {
+            sVEnt_2CFB58* vt = self->items[i]->vt;
+            self->rects[i] = vt[4].fn((char*)self->items[i] + vt[4].delta);
+            if (self == func_002CBF30(self->owner) || self->items[i] == self->sel) {
+                r.w += self->rects[i].w;
+            }
+            float h = self->rects[i].z;
+            if (self->items[i] != self->sel) {
+                h += 20.0f;
+            }
+            if (r.z < h) {
+                r.z = h;
+            }
+        } else {
+            sMenuRect_2CFB58 z;
+            z.x = 0;
+            z.y = 0;
+            z.z = 0;
+            z.w = 0;
+            self->rects[i] = z;
+        }
+    }
+    *ret = r;
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CFD28);
@@ -3523,7 +3707,56 @@ extern "C" void func_002D08E0(void* self)
 
 INCLUDE_ASM("util/menu", func_002D0908);
 
+//100%
 INCLUDE_ASM("util/menu", func_002D0D48);
+#ifdef SKIP_ASM
+extern "C" void* func_002CBF30(void* self);
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern char D_00486748[];
+
+struct sMenuRect_2D0D48 { float x, y, z, w; };
+
+static inline char* font_2D0D48(char* item)
+{
+    return *(char**)(*(char**)(*(char**)item + 0x124) + 0x58);
+}
+
+extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
+{
+    int margin = 100;
+    int focused = 0;
+    if (item == func_002CBF30(*(void**)item)) {
+        focused = *(int*)(item + 0x40) != 0;
+    }
+    int pad = focused ? 0x50 : 0x14;
+    char* font = font_2D0D48(item);
+    float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
+    float w = func_00391FB0(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    char* font2 = font_2D0D48(item);
+    float w2 = func_00391FB0(font2, D_00486748, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
+    if (w < w2) w = w2;
+    sMenuRect_2D0D48 r;
+    float zero = 0.0f;
+    r.y = zero;
+    r.x = zero;
+    if (focused) {
+        float h = lh + lh + 6.0f;
+        float p = (float)pad;
+        if (h < p) {
+            h = p + 24.0f;
+        } else {
+            h = h + 24.0f;
+        }
+        r.w = h;
+    } else {
+        char* font3 = font_2D0D48(item);
+        r.w = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
+    }
+    r.z = (float)margin + w + 64.0f;
+    *ret = r;
+    return ret;
+}
+#endif
 
 INCLUDE_ASM("util/menu", func_002D0EF8);
 

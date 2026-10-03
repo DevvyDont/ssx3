@@ -189,7 +189,77 @@ INCLUDE_ASM("fe/debugfe", func_0017DA30);
 
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017DE70);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void func_00145108(void* iface, int idx);
+extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" int cBENewRaceInterface_setNumberAI(void* iface, int n);
+extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* iface, int rider, int ctrl);
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int id);
+extern "C" void func_001472C8(void* iface, int a1, int a2);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
+extern void* D_004A28A8;
+extern void* D_004A2EB8;
+extern void* D_004A3028;
+extern int D_004A11B8;
+extern int D_00535C08[];
+extern char D_0045CF98[];
+
+struct sNetCfg_17DE70 {
+    int active;
+    int f4;
+    int host;
+    unsigned short port;
+};
+extern sNetCfg_17DE70 D_00534B30_cfg __asm__("D_00534B30");
+
+struct sVEnt_17DE70 { short delta; short index; void (*fn)(void*); };
+
+static inline void vcall1_17DE70(void* obj)
+{
+    sVEnt_17DE70* vt = *(sVEnt_17DE70**)((char*)obj + 0xC);
+    vt[1].fn((char*)obj + vt[1].delta);
+}
+
+extern "C" void func_0017DE70(char* self)
+{
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    func_00145108(race, 1);
+    cBENewRaceInterface_setGameMode(race, 4);
+    cBENewRaceInterface_setNumberAI(race, 0);
+    D_00535C08[0] = 0;
+    D_004A11B8 = 1;
+    vcall1_17DE70(race);
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    for (int i = 2; i < 6; i++) {
+        cBENewPlayerInterface_setRiderCtrlID(player, i, -1);
+        cBENewPlayerInterface_setRiderCharID(player, i, 0);
+    }
+    func_001472C8(player, 0, 0);
+    func_001472C8(player, 1, -1);
+    vcall1_17DE70(player);
+    void* net = cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    sNetCfg_17DE70* cfg = &D_00534B30_cfg;
+    D_00534B30_cfg.active = 1;
+    cfg->host = *(int*)((char*)D_004A3028 + 0xB4);
+    vcall1_17DE70(net);
+    unsigned int ip;
+    if (cfg->host) {
+        ip = *(unsigned int*)((char*)D_004A3028 + 0xAC);
+    } else {
+        ip = *(unsigned int*)((char*)D_004A3028 + 0xA8);
+    }
+    char buf[256];
+    sprintf(buf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+    *(int*)(self + 0x1C10) = cCommSystem_openDSockChannel(D_004A2EB8, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
+    *(int*)(self + 4) = 0x10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E030);
@@ -637,7 +707,85 @@ extern "C" void func_0017F838(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017F868);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern char* D_004A289C;
+extern char* D_004A5B80;
+extern char D_0045D4B8[];
+extern char D_0045D4C8[];
+extern char D_0045D4E0[];
+extern char D_0045D4F8[];
+extern char D_0045D510[];
+extern char D_0045D520[];
+extern char D_004A1340[];
+extern char D_004A1348[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* cMemMan_free(void* ptr);
+extern "C" void* func_003915E8(void* self, const char* name, int a2);
+extern "C" int* func_003E1908(const char* name, int flags);
+extern "C" int* FILE_load(const char* name, int flags);
+extern "C" void* func_0017B1B0(void* self);
+extern "C" void* func_0017D298(char* self);
+
+struct sVEnt_17F868 { short delta; short index; void* fn; };
+typedef void (*Fn1_17F868)(void*, int);
+typedef int (*Load_17F868)(void*, void*, const char*, int, int, int);
+
+struct sVec2_17F868 {
+    float x, y;
+    sVec2_17F868(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sDebugFE_17F868 {
+    char pad_0x00[0xC];
+    void* objs[2];      // 0xC
+    void* cur;          // 0x14
+    char* font;         // 0x18
+    int snd1C;          // 0x1C
+    int snd20;          // 0x20
+};
+
+extern "C" void func_0017F868(sDebugFE_17F868* self)
+{
+    char* m = D_004A289C;
+    sVEnt_17F868* vt = *(sVEnt_17F868**)(m + 0x10D8);
+    ((Fn1_17F868)vt[44].fn)(m + vt[44].delta, 0);
+    self->font = (char*)func_003915E8(cMemMan_alloc(0x84, D_0045D4B8, 0, 0), D_0045D4C8, 0);
+    sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
+    *(sVec2_17F868*)(self->font + 0x30) = sc;
+    *(sVec2_17F868*)(self->font + 0x38) = *(sVec2_17F868*)(self->font + 0x30);
+    self->snd1C = -1;
+    int* data = func_003E1908(D_0045D4E0, 0x100);
+    if (data) {
+        char* p = (char*)data + data[5];
+        if (p) {
+            char* g = D_004A5B80;
+            sVEnt_17F868* gvt = *(sVEnt_17F868**)(g + 0x10D8);
+            self->snd1C = ((Load_17F868)gvt[46].fn)(g + gvt[46].delta, p, D_004A1340, 0, 1, -1);
+        }
+        cMemMan_free(data);
+    }
+    data = FILE_load(D_0045D4F8, 0x100);
+    char* m2 = D_004A289C;
+    sVEnt_17F868* vt2 = *(sVEnt_17F868**)(m2 + 0x10D8);
+    self->snd20 = ((Load_17F868)vt2[46].fn)(m2 + vt2[46].delta, (char*)data + data[5], D_004A1348, 0, 1, -1);
+    if (data) {
+        cMemMan_free(data);
+    }
+    for (int i = 0; i < 2; i++) {
+        self->objs[i] = 0;
+    }
+    self->cur = self->objs[0] = func_0017B1B0(cMemMan_alloc(0x8C48, D_0045D510, 0, 0));
+    self->objs[1] = func_0017D298((char*)cMemMan_alloc(0x1C18, D_0045D520, 0, 0));
+    if (*(int*)((char*)D_004A28A8 + 0x74)) {
+        self->cur = self->objs[1];
+    } else {
+        self->cur = self->objs[0];
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017FA60);
 
@@ -726,7 +874,92 @@ extern "C" void func_0017FB98(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", func_0017FBF0);
+#ifdef SKIP_ASM
+extern char* D_004A289C;
+extern char D_004FF1A0[];
+extern "C" int func_00231D60(void* self);
+extern "C" void func_0017F500(void* self, int a1);
+
+struct sVEnt_17FBF0 { short delta; short index; void* fn; };
+typedef int (*FnI_17FBF0)(void*);
+typedef void (*FnV_17FBF0)(void*);
+typedef void (*FnP_17FBF0)(void*, void*);
+typedef void (*FnView_17FBF0)(void*, int, int, float, float, float, float, float, float);
+
+struct sVec4_17FBF0 {
+    float x, y, z, w;
+    sVec4_17FBF0() {}
+    sVec4_17FBF0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+struct sRS_17FBF0 {
+    int f0;
+    unsigned int lo : 2;
+    unsigned int b2 : 5;
+    unsigned int b7 : 5;
+    unsigned int b12 : 8;
+    unsigned int b20 : 2;
+    unsigned int b22 : 1;
+    unsigned int b23 : 2;
+    unsigned int hi : 7;
+    unsigned int c0 : 5;
+    unsigned int c5 : 5;
+    unsigned int chi : 22;
+};
+
+static inline sRS_17FBF0* rs_17FBF0(char* m) { return *(sRS_17FBF0**)(m + 0xE84); }
+static inline void setB23_17FBF0(sRS_17FBF0* r, int v) { r->b23 = v; }
+static inline void setB20_17FBF0(sRS_17FBF0* r, int v) { r->b20 = v; }
+static inline void setB12_17FBF0(sRS_17FBF0* r, int v) { r->b12 = v; }
+static inline void setB2_17FBF0(sRS_17FBF0* r, int v) { r->b2 = v; }
+static inline void setB22_17FBF0(sRS_17FBF0* r, int v) { r->b22 = v; }
+static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
+
+extern "C" int func_0017FBF0(char* self)
+{
+    char* m = D_004A289C;
+    sVEnt_17FBF0* vt = *(sVEnt_17FBF0**)(m + 0x10D8);
+    if (!((FnI_17FBF0)vt[17].fn)(m + vt[17].delta)) {
+        return 0;
+    }
+    if (func_00231D60(self) == 0) {
+        char* m1 = D_004A289C;
+        sVEnt_17FBF0* vt1 = *(sVEnt_17FBF0**)(m1 + 0x10D8);
+        char* this1 = m1 + vt1[15].delta;
+        sVec4_17FBF0 pos;
+        float one = 1.0f;
+        sVec4_17FBF0 col(one, 0.0f, 0.0f, 0.0f);
+        float zero = 0.0f;
+        pos.x = zero;
+        pos.y = zero;
+        pos.z = zero;
+        ((FnP_17FBF0)vt1[15].fn)(this1, &pos);
+        char* m2 = D_004A289C;
+        sVEnt_17FBF0* vt2 = *(sVEnt_17FBF0**)(m2 + 0x10D8);
+        ((FnView_17FBF0)vt2[26].fn)(m2 + vt2[26].delta, 0, 0, zero, zero, 640.0f, 480.0f, -1.0f, one);
+        char* m3 = D_004A289C;
+        sVEnt_17FBF0* vt3 = *(sVEnt_17FBF0**)(m3 + 0x10D8);
+        ((FnP_17FBF0)vt3[34].fn)(m3 + vt3[34].delta, D_004FF1A0);
+        char* m4 = D_004A289C;
+        setB23_17FBF0(rs_17FBF0(m4), 2);
+        setB20_17FBF0(rs_17FBF0(m4), 3);
+        setB12_17FBF0(rs_17FBF0(m4), 0xD);
+        setB2_17FBF0(rs_17FBF0(m4), 5);
+        setB22_17FBF0(rs_17FBF0(m4), 1);
+        func_0017F500(self + 0x24, *(int*)(self + 0x1C));
+        setC5_17FBF0(rs_17FBF0(D_004A289C), 9);
+        void* menu = *(void**)(self + 0x14);
+        sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
+        ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
+    }
+    char* m5 = D_004A289C;
+    sVEnt_17FBF0* vt5 = *(sVEnt_17FBF0**)(m5 + 0x10D8);
+    ((FnV_17FBF0)vt5[20].fn)(m5 + vt5[20].delta);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017FDF0);
 

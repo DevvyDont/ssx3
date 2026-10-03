@@ -818,7 +818,60 @@ extern "C" int func_002B6C90(void* self, int a1, sTriggerEntry18* entries, int n
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6CF8);
+#ifdef SKIP_ASM
+struct sWtmEnt18;
+
+struct sVec3_2B6CF8 {
+    float x, y, z;
+    sVec3_2B6CF8() {}
+    sVec3_2B6CF8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi);
+
+extern "C" void func_002B6CF8(void* self, sWtmEnt18* e, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
+{
+    *lo = sVec3_2B6CF8(10000.0f, 10000.0f, 10000.0f);
+    *hi = sVec3_2B6CF8(-10000.0f, -10000.0f, -10000.0f);
+    int* info = *(int**)((char*)e + 0x10);
+    char* base = (char*)(info + 2);
+    char* p = base + info[0] * 4;
+    for (int i = 0; i < info[1]; i++) {
+        sVec3_2B6CF8 a;
+        sVec3_2B6CF8 b;
+        func_002B6F40(self, (int*)p, &a, &b);
+        if (a.x < lo->x) lo->x = a.x;
+        if (a.y < lo->y) lo->y = a.y;
+        if (a.z < lo->z) lo->z = a.z;
+        if (b.x > hi->x) hi->x = b.x;
+        if (b.y > hi->y) hi->y = b.y;
+        if (b.z > hi->z) hi->z = b.z;
+        switch (*(int*)p) {
+        case 0:
+            p += 0x1C;
+            break;
+        case 1:
+            p += 0x30;
+            break;
+        case 2:
+            p += 0x30;
+            break;
+        case 3:
+            p += 0x18;
+            break;
+        }
+    }
+    char* obj = *(char**)((char*)e + 0xC);
+    lo->x += *(float*)(obj + 0x40);
+    lo->y += *(float*)(obj + 0x44);
+    lo->z += *(float*)(obj + 0x48);
+    hi->x += *(float*)(obj + 0x40);
+    hi->y += *(float*)(obj + 0x44);
+    hi->z += *(float*)(obj + 0x48);
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6F40);
 

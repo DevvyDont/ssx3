@@ -604,7 +604,83 @@ extern "C" int func_003AA960(void* self, void* list)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AAA08);
+#ifdef SKIP_ASM
+extern "C" void func_0032C540(void* self);
+extern "C" int func_00327DA8(void* self, char* data, void* ctx);
+
+struct sList_3AAA08 {
+    char* items;
+    int count;
+};
+
+struct sNode_3AAA08 {
+    unsigned short n;
+    unsigned short pad;
+    char* p4;
+    char* p8;
+    char* pC;
+    char* p10;
+};
+
+struct sChunk_3AAA08 {
+    unsigned short type;
+    unsigned short n;
+    char* data;             // 0x4
+    sList_3AAA08* list;     // 0x8
+    char* items;            // 0xC
+};
+
+extern "C" int func_003AAA08(void* self, void* ctx, sChunk_3AAA08* c)
+{
+    if ((int)c->data == -1) {
+        c->data = 0;
+    } else {
+        c->data = (char*)c + (int)c->data;
+    }
+    if ((int)c->list == -1) {
+        c->list = 0;
+    } else {
+        c->list = (sList_3AAA08*)((char*)c + (int)c->list);
+    }
+    if ((int)c->items == -1) {
+        c->items = 0;
+    } else {
+        c->items = (char*)c + (int)c->items;
+    }
+    if (c->type == 3) {
+        sList_3AAA08* l = c->list;
+        l->count = 0;
+        l->items = 0;
+        l->count = c->n;
+        l->items = c->items;
+        for (int i = 0; i < l->count; i++) {
+            func_0032C540(l->items + i * 0x140);
+        }
+        char* data = c->data;
+        for (int i = 0; i < l->count; i++) {
+            data += func_00327DA8(l->items + i * 0x140, data, ctx);
+        }
+    } else if (c->type == 1) {
+        sList_3AAA08* l = c->list;
+        l->count = 0;
+        l->items = 0;
+        l->count = c->n;
+        l->items = c->items;
+        sNode_3AAA08* node = (sNode_3AAA08*)c->data;
+        for (int i = 0; i < l->count; i++) {
+            ((sNode_3AAA08**)l->items)[i] = node;
+            node->p4 = (char*)node + (int)node->p4;
+            node->p8 = (char*)node + (int)node->p8;
+            node->pC = (char*)node + (int)node->pC;
+            node->p10 = (char*)node + (int)node->p10;
+            node = (sNode_3AAA08*)(node->p10 + node->n * 16);
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AABD8);

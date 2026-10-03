@@ -425,7 +425,110 @@ unsigned int func_0031FBB8(void* self, void* mem)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FC20);
+#ifdef SKIP_ASM
+// dlmalloc 2.7 mALLINFo()
+struct sMChunk_31FC20
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+    sMChunk_31FC20* fd;          // 0x8
+    sMChunk_31FC20* bk;          // 0xC
+};
+
+struct sMState_31FC20
+{
+    unsigned int max_fast;              // 0x0
+    sMChunk_31FC20* fastbins[11];       // 0x4
+    sMChunk_31FC20* top;                // 0x30
+    sMChunk_31FC20* last_remainder;     // 0x34
+    sMChunk_31FC20* bins[192];          // 0x38
+    char pad338[0x18];                  // 0x338
+    int n_mmaps;                        // 0x350
+    int n_mmaps_max;                    // 0x354
+    int max_n_mmaps;                    // 0x358
+    unsigned int pagesize;              // 0x35C
+    unsigned int morecore_properties;   // 0x360
+    unsigned int mmapped_mem;           // 0x364
+    unsigned int sbrked_mem;            // 0x368
+    unsigned int max_sbrked_mem;        // 0x36C
+    unsigned int max_mmapped_mem;       // 0x370
+    unsigned int max_total_mem;         // 0x374
+};
+
+struct sMallinfo_31FC20
+{
+    int arena;
+    int ordblks;
+    int smblks;
+    int hblks;
+    int hblkhd;
+    int usmblks;
+    int fsmblks;
+    int uordblks;
+    int fordblks;
+    int keepcost;
+};
+
+struct sMState_31EEE8;
+extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
+
+extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
+{
+    sMState_31FC20* av = *(sMState_31FC20**)ms;
+    sMallinfo_31FC20 mi;
+    int i;
+    sMChunk_31FC20* b;
+    sMChunk_31FC20* p;
+    unsigned int avail;
+    unsigned int fastavail;
+    int nblocks;
+    int nfastblocks;
+
+    if (av->top == 0) {
+        func_0031EEE8(ms, (sMState_31EEE8*)av);
+    }
+
+    avail = av->top->size & ~3U;
+    nblocks = 1;
+
+    nfastblocks = 0;
+    fastavail = 0;
+
+    for (i = 0; (unsigned int)i < 11U; ++i) {
+        for (p = av->fastbins[i]; p != 0; p = p->fd) {
+            ++nfastblocks;
+            fastavail += p->size & ~3U;
+        }
+    }
+
+    avail += fastavail;
+
+    for (i = 1; i < 96; ++i) {
+        sMChunk_31FC20** bp = &av->bins[i << 1];
+        b = (sMChunk_31FC20*)((char*)bp - 8);
+        for (p = bp[1]; p != b; p = p->bk) {
+            ++nblocks;
+            avail += p->size & ~3U;
+            if (p == p->bk->bk) break;
+            if (p == p->bk && p != b) break;
+        }
+    }
+
+    mi.smblks = nfastblocks;
+    mi.ordblks = nblocks;
+    mi.fordblks = avail;
+    mi.uordblks = av->sbrked_mem - avail;
+    mi.arena = av->sbrked_mem;
+    mi.hblks = av->n_mmaps;
+    mi.hblkhd = av->mmapped_mem;
+    mi.fsmblks = fastavail;
+    mi.keepcost = av->top->size & ~3U;
+    mi.usmblks = av->max_total_mem;
+    return mi;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FF20__FPv);

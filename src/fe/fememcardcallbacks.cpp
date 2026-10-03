@@ -532,7 +532,47 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D77E8);
+#ifdef SKIP_ASM
+extern char D_004644D8[];
+extern char D_0045DCD8[];
+extern char D_00462C88[];
+
+extern "C" void func_001D77E8(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644D8)), name);
+    char* fe = (char*)D_004A2028;
+    *(int*)(fe + 0x19C) = 0x12;
+    sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+    vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
+    char* o2this = o2 + o2vt[4].delta;
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045DCD8));
+    mvt[26].fn(mthis, str2, 0);
+    char* m3 = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* m3vt = *(sVEntryV001D69E0**)(m3 + 8);
+    char* m3this = m3 + m3vt[26].delta;
+    char* o3 = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* o3vt = *(sVEntry001D69E0**)(o3 + 4);
+    char* o3this = o3 + o3vt[4].delta;
+    void* str3 = o3vt[4].fn(o3this, GetHashValue32(D_00462C88));
+    m3vt[26].fn(m3this, str3, 1);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7998);

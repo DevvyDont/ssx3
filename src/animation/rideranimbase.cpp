@@ -157,7 +157,109 @@ extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeOrientationOffset);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sRabQuat_00311B48 QuatMul_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+{
+    sRabQuat_00311B48 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sRabQuat_00311B48 Sub_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+{
+    sRabQuat_00311B48 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sRabQuat_00311B48 Add_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+{
+    sRabQuat_00311B48 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sRabQuat_00311B48 Rot_00311BF0(const sRabQuat_00311B48& q, const sRabQuat_00311B48& v)
+{
+    sRabQuat_00311B48 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sRabXform_00311B48 Combine_00311BF0(const sRabXform_00311B48& a, const sRabXform_00311B48& b)
+{
+    sRabXform_00311B48 r;
+    r.rot = QuatMul_00311BF0(a.rot, b.rot);
+    r.pos = Add_00311BF0(Rot_00311BF0(a.rot, Sub_00311BF0(b.pos, D_004FF130)), a.pos);
+    return r;
+}
+
+extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_00311B48* xf)
+{
+    for (int i = 0; i < 6; i++) {
+        int j = 0;
+        if (j < (*(cAnimSequencer**)((char*)self + 0x50))[i].mCount) {
+            do {
+            sRabXform_00311B48* src = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(*(cAnimSequencer**)((char*)self + 0x50))[i], j) + 0x60);
+            sRabXform_00311B48* dst = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(*(cAnimSequencer**)((char*)self + 0x50))[i], j) + 0x60);
+            *dst = Combine_00311BF0(*xf, *src);
+                j++;
+            } while (j < (*(cAnimSequencer**)((char*)self + 0x50))[i].mCount);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311E88);
