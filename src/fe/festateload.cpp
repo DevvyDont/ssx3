@@ -78,7 +78,109 @@ extern "C" void func_00186778(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateload", func_001867A8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" int func_002018A8(void* tmpl, void* obj, int msg);
+extern "C" void func_0039F190(void* list, int a1);
+extern "C" void func_0039F400(void* list, void* item);
+extern int D_004A1A70;
+
+static inline int IsQuick1867A8() { return D_004A1A70 == 1; }
+extern char D_0045DC60[];
+
+class cMgr1867A8 {
+public:
+    int f0;
+    // vptr at 0x4
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void* v04(void* owner, int id);
+    virtual void* v05(void* owner, int id);
+};
+
+class cFEVObj_1867A8 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual int v24(int a, int b);
+};
+
+static inline void PlayIntro1867A8(void* self)
+{
+    int f = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0045DC60));
+    if (f != 0xFFFF) {
+        cUIScreen_playFrame(*(void**)((char*)self + 0x40), f, 1);
+    }
+}
+
+static inline void Opened1867A8(void* self, void* item)
+{
+    if (item != 0) {
+        cFEVObj_1867A8* c = *(cFEVObj_1867A8**)(**(char***)((char*)self + 0x10) + 0x10);
+        if (c != 0) {
+            c->v24(1, 0);
+        }
+        PlayIntro1867A8(self);
+        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, item);
+    }
+}
+
+extern "C" void func_001867A8(void* self, void* obj, int msg)
+{
+    if (msg == 5) {
+        if (func_002018A8((char*)self + 0x48, obj, 5) == 1) {
+            if (IsQuick1867A8()) {
+                PlayIntro1867A8(self);
+                func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+            } else {
+                cMgr1867A8* m = **(cMgr1867A8***)((char*)self + 0x10);
+                Opened1867A8(self, m->v04(self, *(int*)((char*)obj + 0x18)));
+            }
+        }
+    } else if (msg == 6) {
+        if (func_002018A8((char*)self + 0x48, obj, 6) == 1) {
+            if (IsQuick1867A8()) {
+                PlayIntro1867A8(self);
+                func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+            } else {
+                cMgr1867A8* m = **(cMgr1867A8***)((char*)self + 0x10);
+                Opened1867A8(self, m->v05(self, *(int*)((char*)obj + 0x18)));
+            }
+        }
+    } else {
+        func_002018A8((char*)self + 0x48, obj, msg);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateload", func_00186950);

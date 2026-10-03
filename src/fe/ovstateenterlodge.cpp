@@ -418,7 +418,52 @@ extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7F08);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0039E4C0(void* self, void* a1);
+extern "C" void func_0020A6F0(void* self, const char* name, const char* ext);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern signed char D_00535C11[];
+extern char D_004A2428[];
+extern char D_004A2430[];
+extern char D_004A2438[];
+extern char D_004A2440[];
+extern char D_0046E4E8[];
+
+static inline void LoadRider1F7F08(void* self, int n)
+{
+    char name[32];
+    sprintf(name, D_004A2440, n);
+    func_0020A6F0(self, name, D_0046E4E8);
+    sprintf(name, D_004A2428, n);
+    func_0020A6F0(self, name, D_0046E4E8);
+    sprintf(name, D_004A2430, n);
+    func_0020A6F0(self, name, D_0046E4E8);
+    sprintf(name, D_004A2438, n);
+    func_0020A6F0(self, name, D_0046E4E8);
+}
+
+extern "C" void func_001F7F08(void* self, void* a1)
+{
+    func_0039E4C0(self, a1);
+    char* prof = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int id = *(int*)(prof + 0x18);
+    if (id >= 0) {
+        LoadRider1F7F08(self, id + 1);
+    }
+    if (D_00535C11[0] == 2) {
+        int id2 = *(int*)(prof + 0x1C);
+        if (id2 >= 0) {
+            LoadRider1F7F08(self, id2 + 1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F80C8);

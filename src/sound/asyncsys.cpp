@@ -49,7 +49,77 @@ extern "C" void func_0028A230(cAsyncSys* self)
 
 INCLUDE_ASM("sound/asyncsys", func_0028A298);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/asyncsys", func_0028A558);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" void func_0028A298(void* self);
+
+struct sRing28A558 {
+    int size;
+    int* data;
+    int head;
+    int tail;
+};
+
+struct sAsync28A558 {
+    char pad0[0x8];
+    int slot;              // 0x8
+    char names[6][0x40];   // 0xC
+    char pad18C[0x18C - 0xC - 6 * 0x40];
+    sRing28A558 q18C;      // 0x18C
+    sRing28A558 q19C;      // 0x19C
+    sRing28A558 q1AC;      // 0x1AC
+    sRing28A558 q1BC;      // 0x1BC
+};
+
+extern "C" void func_0028A558(void* self, int a1, const char* name, int a3, int a4)
+{
+    sAsync28A558* s = (sAsync28A558*)self;
+    {
+        sRing28A558* q = &s->q18C;
+        if ((s->q18C.head + 1) % s->q18C.size != s->q18C.tail) {
+            q->data[q->head] = a1;
+            if (++s->q18C.head >= s->q18C.size) {
+                s->q18C.head = 0;
+            }
+        }
+    }
+    {
+        sRing28A558* q = &s->q1AC;
+        if ((s->q1AC.head + 1) % s->q1AC.size != s->q1AC.tail) {
+            q->data[q->head] = a3;
+            if (++s->q1AC.head >= s->q1AC.size) {
+                s->q1AC.head = 0;
+            }
+        }
+    }
+    {
+        sRing28A558* q = &s->q1BC;
+        if ((s->q1BC.head + 1) % s->q1BC.size != s->q1BC.tail) {
+            q->data[q->head] = a4;
+            if (++s->q1BC.head >= s->q1BC.size) {
+                s->q1BC.head = 0;
+            }
+        }
+    }
+    strcpy(s->names[s->slot], name);
+    int slot = s->slot++;
+    {
+        sRing28A558* q = &s->q19C;
+        if ((s->q19C.head + 1) % s->q19C.size != s->q19C.tail) {
+            q->data[q->head] = slot;
+            if (++s->q19C.head >= s->q19C.size) {
+                s->q19C.head = 0;
+            }
+        }
+    }
+    if (s->slot >= 6) {
+        s->slot = 0;
+    }
+    func_0028A298(self);
+}
+#endif
 
 INCLUDE_ASM("sound/asyncsys", func_0028A728);
 
@@ -205,7 +275,96 @@ extern "C" void func_0028B2D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B320);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
+extern "C" void* func_002523A8(void* self);
+extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void func_0028B2D0(void* self);
+extern "C" void func_0028B528(void* self);
+extern "C" int func_003B6098(void* sema, int a1);
+extern "C" int func_003B6528(int id);
+extern "C" void func_003B6548(void* data, int id);
+extern "C" int func_003E1BB8(const char* name, void* data, int size);
+extern char* D_004A3614;
+
+class cSndStream_B320 {
+public:
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6(int id);
+    virtual void v7();
+};
+
+// PORT: data pointers are passed through int parameters of the semaphore/bank helpers
+extern "C" void func_0028B320(void* self, const char* file, int align)
+{
+    void* data = 0;
+    func_0028B528(self);
+    func_0028B2D0(self);
+    int size = 0;
+    switch (*(int*)((char*)self + 0x8)) {
+    case 0:
+        data = FILE_loadsizez(file, &size, align);
+        if (data == 0) {
+            return;
+        }
+        break;
+    case 2:
+        data = FILE_loadsizez(file, &size, 0x100);
+        if (data == 0) {
+            return;
+        }
+        break;
+    case 1:
+        if (func_003E1BB8(file, *(void**)((char*)self + 0x10), *(int*)((char*)self + 0x14)) == 0) {
+            return;
+        }
+        size = *(int*)((char*)self + 0x14);
+        data = *(void**)((char*)self + 0x10);
+        break;
+    }
+    if (*(int*)((char*)self + 0x8) == 2) {
+        (**(cSndStream_B320***)(D_004A3614 + 0x1D8))->v6(*(int*)((char*)self + 0xC));
+    }
+    switch (func_003B6098((char*)self + 0x4, (int)data)) {
+    case 7: {
+        int h = func_003B6528(*(int*)((char*)self + 0x4));
+        if (*(int*)((char*)self + 0x8) == 2) {
+            func_003B6548(*(void**)((char*)self + 0x10), *(int*)((char*)self + 0x4));
+        } else {
+            void* m = func_00252FA0((void*)file, h, 0);
+            *(void**)((char*)self + 0x10) = m;
+            func_003B6548(m, *(int*)((char*)self + 0x4));
+            func_002523A8(data);
+            *(int*)((char*)self + 0x14) = h;
+        }
+        *(int*)self = 1;
+        break;
+    }
+    case 8:
+        if (*(int*)((char*)self + 0x8) == 0) {
+            *(void**)((char*)self + 0x10) = data;
+            *(int*)((char*)self + 0x14) = size;
+        }
+        *(int*)self = 1;
+        break;
+    default:
+        if (*(int*)((char*)self + 0x8) != 1) {
+            func_002523A8(data);
+        }
+        *(int*)self = 0;
+        break;
+    }
+    (**(cSndStream_B320***)(D_004A3614 + 0x1D8))->v7();
+    strcpy((char*)self + 0x20, file);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B528);

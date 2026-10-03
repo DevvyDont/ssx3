@@ -618,7 +618,117 @@ extern "C" void* func_00231D18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_00231D60);
+#ifdef SKIP_ASM
+extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
+extern int D_004A28AC;
+extern char D_004FF1A0[];
+
+struct sRS231D60 {
+    int f0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 5;
+    unsigned int f4_12 : 8;
+    unsigned int f4_20 : 2;
+    unsigned int f4_22 : 1;
+    unsigned int f4_23 : 2;
+    unsigned int f4_25 : 7;
+    unsigned int f8_0 : 5;
+    unsigned int f8_5 : 5;
+    unsigned int f8_10 : 22;
+    int fC;
+    int f10;
+};
+
+extern sRS231D60 D_00501420;
+
+class cCtx231D60 {
+public:
+    char pad0[0xE84];
+    sRS231D60* top;
+    char pad1[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26(int a, float x, float y, float w, float h, float zn, float zf, int b);
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34(void* p);
+};
+
+// Typed view of the render context (the unit declares D_004A289C as void*).
+extern cCtx231D60* D_004A289C_231D60 __asm__("D_004A289C");
+
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp231D60(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" int func_00231D60(void* self)
+{
+    if (*(float*)((char*)self + 4) > 0.0f) {
+    cCtx231D60* ctx = D_004A289C_231D60;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *D_004A289C_231D60->top = D_00501420;
+    D_004A289C_231D60->v26(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
+    D_004A289C_231D60->v34(D_004FF1A0);
+    D_004A289C_231D60->top->f8_5 = 31;
+    D_004A289C_231D60->top->f4_23 = 2;
+    D_004A289C_231D60->top->f4_20 = 0;
+    D_004A289C_231D60->top->f4_12 = 0;
+    float a = Clamp231D60(*(float*)((char*)self + 4) * 5.0f, 0.0f, 1.0f);
+    float p0[2];
+    float p1[2];
+    float col[4];
+    p0[0] = -1.0f;
+    p0[1] = -1.0f;
+    p1[0] = 1.0f;
+    p1[1] = 1.0f;
+    col[0] = a;
+    col[1] = 0.0f;
+    col[2] = 0.0f;
+    col[3] = 0.0f;
+    func_0038EC40((void*)D_004A28AC, p0, p1, col, 0.0f);
+    *(int*)((char*)D_004A289C_231D60 + 0xE84) -= 0x14;
+    return a >= 1.0f;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00231F80);
