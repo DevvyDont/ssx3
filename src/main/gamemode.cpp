@@ -1,6 +1,134 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_00536668[];
+extern int* D_004A2C6C;
+extern char* D_004A2C70;
+extern char D_0047C0A8[];
+extern char D_0047C0B8[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00416210(void* dst, int c, int n);
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern void* D_0047CC60[];
+extern void* D_0047CCC8[];
+extern void* D_0047CD30[];
+extern void* D_0047CD98[];
+extern void* D_0047CE00[];
+extern void* D_0047CE68[];
+extern void* D_0047CED0[];
+extern void* D_0047CF38[];
+extern void* D_0047CFA0[];
+
+struct sGMMode_4 {
+    void** vt;
+    sGMMode_4(void** v) { vt = v; }
+};
+
+struct sGMMode_8 {
+    void** vt;
+    char pad[0x4];
+    sGMMode_8(void** v) { vt = v; }
+};
+
+struct sGMMode_C {
+    void** vt;
+    char pad[0x8];
+    sGMMode_C(void** v) { vt = v; }
+};
+
+struct sGMMode_2C {
+    void** vt;
+    char pad[0x28];
+    sGMMode_2C(void** v) { vt = v; }
+};
+
+struct sGMMode_7C {
+    void** vt;
+    char pad[0x78];
+    sGMMode_7C(void** v) { vt = v; }
+};
+
+struct sGMMode_D0 {
+    void** vt;
+    char pad[0xCC];
+    sGMMode_D0(void** v) { vt = v; }
+};
+
+extern "C" int* cGameModeMan_getGM(void)
+{
+    if (D_004A2C6C == 0) {
+        D_004A2C6C = (int*)cMemMan_alloc(0xA0, D_0047C0A8, 0, 0);
+        func_00416210(D_00536668, 0, 0x28);
+        if (D_00536668[0] == 0) {
+            D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
+            if (D_00536668[0] == 0) {
+                D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
+                if (D_00536668[0] == 0) {
+                    D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
+                }
+            }
+        }
+        if (D_00536668[1] == 0) {
+            D_00536668[1] = new (D_0047C0B8, 0, 0) sGMMode_D0(D_0047CF38);
+        }
+        if (D_00536668[2] == 0) {
+            D_00536668[2] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CE00);
+        }
+        if (D_00536668[5] == 0) {
+            D_00536668[5] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CD30);
+        }
+        if (D_00536668[4] == 0) {
+            D_00536668[4] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CD98);
+            if (D_00536668[4] == 0) {
+                D_00536668[4] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CD98);
+                if (D_00536668[4] == 0) {
+                    D_00536668[4] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CD98);
+                }
+            }
+        }
+        if (D_00536668[6] == 0) {
+            D_00536668[6] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CCC8);
+        }
+        if (D_00536668[7] == 0) {
+            D_00536668[7] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CC60);
+            if (D_00536668[7] == 0) {
+                D_00536668[7] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CC60);
+                if (D_00536668[7] == 0) {
+                    D_00536668[7] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CC60);
+                }
+            }
+        }
+        if (D_00536668[8] == 0) {
+            D_00536668[8] = new (D_0047C0B8, 0, 0) sGMMode_2C(D_0047CED0);
+        }
+        if (D_00536668[9] == 0) {
+            D_00536668[9] = new (D_0047C0B8, 0, 0) sGMMode_8(D_0047CE68);
+            if (D_00536668[9] == 0) {
+                D_00536668[9] = new (D_0047C0B8, 0, 0) sGMMode_8(D_0047CE68);
+                if (D_00536668[9] == 0) {
+                    D_00536668[9] = new (D_0047C0B8, 0, 0) sGMMode_8(D_0047CE68);
+                }
+            }
+        }
+        if (D_00536668[5] == 0) {
+            D_00536668[5] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CD30);
+        }
+        if (D_00536668[6] == 0) {
+            D_00536668[6] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CCC8);
+        }
+        int* gm = D_004A2C6C;
+        D_004A2C70 = (char*)gm;
+        gm[2] = -1;
+        gm[0] = 0;
+        gm[1] = 0;
+        gm[0x20] = 0;
+    }
+    return D_004A2C6C;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_002380E8);
@@ -321,7 +449,183 @@ extern "C" void func_00238DA8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00238E20);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" int func_001454F8(void* iface, int a1);
+extern "C" void func_00238B70(void* self, int n);
+// PORT: func_00239938 is defined as (void); this caller passes self.
+extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
+struct sScore_239AA0;
+extern "C" void func_00239AA0(sScore_239AA0* self);
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern void* D_004A28A8;
+extern char* D_004A2C70;
+extern signed char D_00535C11[];
+extern unsigned int D_00536640[];
+extern int D_00536708[];
+
+struct sGM_238E20 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int a18[10];
+    int a40[10];
+    int f68;
+    int f6C;
+    int f70;
+    int f74;
+    int f78;
+    int f7C;
+    int f80;
+    int f84;
+    int f88;
+    int f8C;
+    int f90;
+    int f94;
+    int f98;
+    int f9C;
+};
+
+struct sVEntry_238E20 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sScore_238E20 {
+    sVEntry_238E20* vt;
+    int t[3][10];
+};
+
+struct sRace_238E20 {
+    char pad00[0x20];
+    int f20;
+    int f24;
+};
+
+static inline sRace_238E20* race_238E20()
+{
+    return *(sRace_238E20**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+}
+
+extern "C" void func_00238E20(sScore_238E20* self)
+{
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int i;
+    sGM_238E20* gm = (sGM_238E20*)D_004A2C70;
+    int quick = D_00535C11[0];
+    gm->f8C = 0;
+    gm->f7C = 0;
+    if (quick != 0) {
+        gm->f10 = 5;
+        if (gm->f8 == 1) {
+            gm->f14 = 4;
+        } else {
+            gm->f14 = 5;
+        }
+        sGM_238E20* g1 = (sGM_238E20*)D_004A2C70;
+        g1->f6C = -1;
+        g1->f90 = 0;
+        if (g1->f8 == 1) {
+            g1->f94 = g1->f8;
+        } else {
+            g1->f94 = 0;
+        }
+        func_00416210(self->t, 0, 0x78);
+        self->vt[4].fn((char*)self + self->vt[4].delta);
+        if (((sGM_238E20*)D_004A2C70)->f84 == 1) {
+            func_00239938_self(self);
+        }
+        sGM_238E20* g2 = (sGM_238E20*)D_004A2C70;
+        g2->f70 = 3;
+        g2->f74 = 3;
+        func_00239AA0((sScore_239AA0*)self);
+    }
+    ((sGM_238E20*)D_004A2C70)->f78 = func_001454F8(race, ((sGM_238E20*)D_004A2C70)->f0) * 60;
+    sGM_238E20* g3 = (sGM_238E20*)D_004A2C70;
+    if (g3->f8 == 2) {
+        g3->f94 = 0;
+    } else {
+        g3->f94 = 1;
+    }
+    sGM_238E20* g = (sGM_238E20*)D_004A2C70;
+    int s = g->f70;
+    g->f0 = s;
+    switch (s) {
+    case 0:
+    case 1: {
+        g->f0 = 1;
+        g->f70 = 1;
+        g->f74 = 1;
+        g->f10 = 5;
+        g->f88 = 1;
+        g->f90 = 0;
+        g->f9C = 0;
+        g->f98 = 0;
+        g->f80 = 0;
+        g->f14 = 5;
+        g->f6C = -1;
+        self->t[0][0] = 0;
+        self->t[1][0] = 0;
+        self->t[2][0] = 0;
+        int* t0 = self->t[0];
+        if (g->f84 == 1) {
+            func_00416210(t0, 0, 0x78);
+            self->vt[4].fn((char*)self + self->vt[4].delta);
+            func_00239938_self(self);
+            func_00239AA0((sScore_239AA0*)self);
+        }
+        D_00536640[0] = 0;
+        for (i = 1; i < ((sGM_238E20*)D_004A2C70)->f10 + 1; i++) {
+            D_00536640[i] = self->t[2][i];
+        }
+        func_00238B70(D_004A2C70, ((sGM_238E20*)D_004A2C70)->f10 + 1);
+        {
+            sGM_238E20* h = (sGM_238E20*)D_004A2C70;
+            race_238E20()->f20 = h->a18[D_00536708[0]];
+            race_238E20()->f24 = h->a18[D_00536708[1]];
+            for (i = 1; i < ((sGM_238E20*)D_004A2C70)->f10 + 1; i++) {
+                D_00536640[i] = t0[i];
+            }
+        }
+        func_00238B70(D_004A2C70, ((sGM_238E20*)D_004A2C70)->f10 + 1);
+        ((sGM_238E20*)D_004A2C70)->f84 = 0;
+        break;
+    }
+    case 2:
+        g->f9C = 0;
+        g->f70 = 1;
+        g->f74 = 1;
+        g->f98 = 0;
+        D_00536640[0] = 0;
+        for (i = 1; i < ((sGM_238E20*)D_004A2C70)->f10 + 1; i++) {
+            D_00536640[i] = self->t[1][i] + self->t[0][i];
+        }
+        func_00238B70(D_004A2C70, ((sGM_238E20*)D_004A2C70)->f10 + 1);
+        break;
+    case 3:
+        g->f98 = 1;
+        g->f70 = 3;
+        g->f74 = 3;
+        g->f88 = 1;
+        g->f9C = 0;
+        g->f84 = 0;
+        D_00536640[0] = 0;
+        for (i = 1; i < ((sGM_238E20*)D_004A2C70)->f10 + 1; i++) {
+            D_00536640[i] = self->t[2][i];
+        }
+        func_00238B70(D_004A2C70, ((sGM_238E20*)D_004A2C70)->f10 + 1);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("main/gamemode", func_00239230);
 
@@ -601,7 +905,213 @@ extern "C" int func_0023A070(char* self, int player, int secs)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023A108);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int func_00145750(void* iface);
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void func_0023A4F0(void* self);
+extern "C" void func_0023A668(void* self);
+extern char* D_004A2C70;
+extern signed char D_00535C11[];
+extern unsigned int D_00536640[];
+extern int D_00536730[];
+extern int D_00536708[];
+
+struct sGM_23A108 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int a18[10];
+    int a40[10];
+    int f68;
+    int f6C;
+    int f70;
+    int f74;
+    int f78;
+    int f7C;
+    int f80;
+    int f84;
+    int f88;
+    int f8C;
+    int f90;
+    int f94;
+    int f98;
+    int f9C;
+};
+
+struct sVEntry_23A108 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+class cGameModeBase_23A108 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+struct sMode_23A108 : public cGameModeBase_23A108 {
+    int f4;                     // 0x04
+    int f8;                     // 0x08
+    int fC;                     // 0x0C
+    char pad10[0x18];           // 0x10
+    int charA;                  // 0x28
+    int othersA[5];             // 0x2C
+    int charB;                  // 0x40
+    int charC;                  // 0x44
+    int othersB[4];             // 0x48
+    int tbl[3][10];             // 0x58
+};
+
+static inline void fillOthers_23A108(int* dst, int p)
+{
+    for (int i = 0; i < 3; i++) {
+        int v = D_00536708[i];
+        if (v != p) {
+            sGM_23A108* gm = (sGM_23A108*)D_004A2C70;
+            int x = gm->a40[v];
+            if (x == 0) {
+                *dst = gm->a18[v];
+            } else {
+                *dst = x;
+            }
+            dst++;
+        }
+    }
+}
+
+extern "C" void func_0023A108(sMode_23A108* self)
+{
+    sGM_23A108* g0 = (sGM_23A108*)D_004A2C70;
+    g0->f9C = 0;
+    g0->f0 = g0->f70;
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int quick = D_00535C11[0];
+    if (quick != 0 && ((sGM_23A108*)D_004A2C70)->f0 != 3) {
+        ((sGM_23A108*)D_004A2C70)->f0 = 3;
+        self->fC = 0;
+    }
+    sGM_23A108* gm = (sGM_23A108*)D_004A2C70;
+    int state = gm->f0;
+    gm->f7C = 0;
+    gm->f8C = 0;
+    switch (state) {
+    case 0:
+    case 1:
+        gm->f98 = 0;
+        gm->f0 = 1;
+        gm->f14 = 0;
+        gm->f10 = 5;
+        if (gm->f84 == 1) {
+            func_0023A4F0(self);
+            func_0023A668(self);
+        }
+        func_00416210(self->tbl, 9, 0x78);
+        self->v05();
+        {
+            sGM_23A108* g = (sGM_23A108*)D_004A2C70;
+            g->f6C = -1;
+            g->f70 = 1;
+            g->f74 = 1;
+            g->f78 = 0;
+            g->f80 = 0;
+            g->f84 = 0;
+            g->f88 = 0;
+            g->f90 = 1;
+            g->f94 = 0;
+        }
+        self->f8 = 0;
+        self->fC = 0;
+        break;
+    case 2:
+        gm->f98 = 0;
+        gm->f10 = 5;
+        gm->f14 = 0;
+        if (self->f8 == 0) {
+            int p = func_00146E98(player, 0);
+            self->charA = cBENewPlayerInterface_getRiderCharID(player, p);
+            fillOthers_23A108(self->othersA, p);
+            func_0023A668(self);
+        }
+        {
+            sGM_23A108* g = (sGM_23A108*)D_004A2C70;
+            g->f6C = -1;
+            g->f70 = 2;
+            g->f74 = 2;
+        }
+        func_00416210(D_00536640, 9, 0x28);
+        func_00416210(D_00536730, 0, 0x28);
+        func_00416210(self->tbl[1], 9, 0x28);
+        {
+            sGM_23A108* g = (sGM_23A108*)D_004A2C70;
+            g->f78 = 0;
+            g->f80 = 0;
+            g->f84 = 0;
+            g->f88 = 0;
+            g->f90 = 0;
+            g->f94 = 0;
+        }
+        self->f8 = 1;
+        self->fC = 0;
+        break;
+    case 3:
+        gm->f10 = 5;
+        gm->f14 = 0;
+        gm->f98 = 1;
+        if (self->fC == 0) {
+            if (quick != 0) {
+                func_0023A4F0(self);
+                ((sGM_23A108*)D_004A2C70)->f0 = 1;
+                func_0023A668(self);
+                ((sGM_23A108*)D_004A2C70)->f0 = state;
+                func_00416210(self->tbl, 9, 0x78);
+                self->v05();
+            } else {
+                int p = func_00146E98(player, 0);
+                self->charB = cBENewPlayerInterface_getRiderCharID(player, p);
+                self->charC = func_00145750(race);
+                fillOthers_23A108(self->othersB, p);
+                func_0023A668(self);
+            }
+        }
+        {
+            sGM_23A108* g = (sGM_23A108*)D_004A2C70;
+            g->f6C = -1;
+            g->f70 = 3;
+            g->f74 = 3;
+        }
+        func_00416210(D_00536640, 9, 0x28);
+        func_00416210(D_00536730, 9, 0x28);
+        func_00416210(self->tbl[2], 9, 0x28);
+        {
+            sGM_23A108* g = (sGM_23A108*)D_004A2C70;
+            g->f78 = 0;
+            g->f80 = 0;
+            g->f84 = 0;
+            g->f88 = 0;
+            g->f90 = 0;
+            g->f94 = 0;
+        }
+        self->fC = 1;
+        self->f8 = 0;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_0023A4F0);

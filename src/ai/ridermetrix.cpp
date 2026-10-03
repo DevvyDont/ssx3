@@ -482,7 +482,169 @@ int func_00117B88_impl(void* self, int type, int value, int arg, float duration)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", func_00117C28);
+#ifdef SKIP_ASM
+extern "C" void func_00117718(void*);
+extern "C" void* func_0028B180();
+struct sGradeStep_119210;
+extern "C" int func_00119210(void* self, int* idx, sGradeStep_119210* tbl, int type, float x);
+extern "C" void func_00116FB8(void* slot);
+extern "C" void func_00117FE0(void* self);
+extern "C" void func_00290F58(void* audio, void* rider, float mult);
+extern "C" void* func_00416210(void* dst, int c, int n);
+int func_0011FE98(void* rider);
+int func_0011FEE8(void* rider);
+
+extern sGradeStep_119210 D_00459E00[];
+extern sGradeStep_119210 D_00459E20[];
+extern sGradeStep_119210 D_00459F68[];
+extern sGradeStep_119210 D_00459E40[];
+extern sGradeStep_119210 D_00459F08[];
+
+struct sVec17C28 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRider17C28 {
+    char pad_0x000[0x1C0];
+    sVec17C28 up;        // 0x1C0
+    char pad_0x1D0[0x10];
+    sVec17C28 vel;       // 0x1E0
+    char pad_0x1F0[0x110];
+    float timeScale;     // 0x300
+};
+
+struct sMetrixSlot17C28 {
+    char pad_0x00[0x9C];
+};
+
+struct sMetrix17C28 {
+    char pad_0x00[0x14];
+    float mult;          // 0x14
+    char pad_0x18[0x4];
+    float f1C;           // 0x1C
+    char pad_0x20[0x4];
+    float airTime;       // 0x24
+    char pad_0x28[0x4];
+    float t2C;           // 0x2C
+    float t30;           // 0x30
+    char pad_0x34[0x8];
+    float add3C;         // 0x3C
+    float t40;           // 0x40
+    char pad_0x44[0x28];
+    float t6C;           // 0x6C
+    char pad_0x70[0x8];
+    float t78;           // 0x78
+    char pad_0x7C[0x8];
+    int points;          // 0x84
+    int idx88;           // 0x88
+    int idx8C;           // 0x8C
+    int idx90;           // 0x90
+    int idx94;           // 0x94
+    int idx98;           // 0x98
+    char pad_0x9C[0x8];
+    float tA4;           // 0xA4
+    char pad_0xA8[0xB4];
+    float maxSpeed;      // 0x15C
+    float maxAvg;        // 0x160
+    float speedSum;      // 0x164
+    float frames;        // 0x168
+    char pad_0x16C[0x3C];
+    float avgSpeed;      // 0x1A8
+    sRider17C28* rider;  // 0x1AC
+    sMetrixSlot17C28* slots; // 0x1B0
+    int count;           // 0x1B4
+    char clear[8];       // 0x1B8
+    int dirty;           // 0x1C0
+};
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float len17C28(const sVec17C28& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern "C" void func_00117C28(sMetrix17C28* self)
+{
+    float dt = self->rider->timeScale * 0.016666668f;
+    float speed = len17C28(self->rider->vel);
+    if (self->tA4 >= 0.0f) {
+        if (func_0011FE98(self->rider) == 0 && func_0011FEE8(self->rider) != 1) {
+            self->tA4 = self->tA4 - dt;
+            if (self->tA4 <= 0.0f) {
+                func_00117718(self);
+            }
+        }
+    }
+    if (self->t30 >= 0.0f) {
+        self->t30 += dt;
+        self->points += func_00119210(self, &self->idx88, D_00459E00, 0x1C, self->t30);
+    }
+    if (self->t40 >= 0.0f) {
+        self->t40 += dt;
+        self->mult += self->add3C;
+        self->points += func_00119210(self, &self->idx8C, D_00459E20, 0x20, self->t40);
+    }
+    if (self->airTime >= 0.0f) {
+        float d = speed * dt;
+        self->airTime += d;
+        self->mult += d * 5e-05f;
+        sVec17C28 up = self->rider->up;
+        if (up.z < 0.0f) {
+            self->f1C += d * 0.0002f;
+        }
+        self->points += func_00119210(self, &self->idx98, D_00459F68, 0x1D, self->airTime);
+    }
+    if (self->t2C >= 0.0f) {
+        self->t2C += dt;
+        self->mult += dt * 0.01f;
+        self->points += func_00119210(self, &self->idx90, D_00459E40, 0x1E, self->t2C);
+    }
+    if (self->t6C >= 0.0f) {
+        self->t6C += dt;
+        self->mult += dt * 0.04999999701976776f;
+    }
+    if (self->t78 >= 0.0f) {
+        self->t78 += dt;
+        self->mult += dt * 0.04999999701976776f;
+        self->points += func_00119210(self, &self->idx94, D_00459F08, 0x1F, self->t78);
+    }
+    self->avgSpeed = self->avgSpeed * 0.9f + speed * 0.1f;
+    self->speedSum += speed;
+    self->frames += 1.0f;
+    if (self->maxAvg < self->avgSpeed) {
+        self->maxAvg = self->avgSpeed;
+    }
+    if (self->maxSpeed < speed) {
+        self->maxSpeed = speed;
+    }
+    func_00117FE0(self);
+    if (self->slots != 0) {
+        for (int i = 0; i < self->count; i++) {
+            func_00116FB8(&self->slots[i]);
+        }
+    }
+    func_00416210(self->clear, 0, 8);
+    self->dirty = 1;
+    func_00290F58(func_0028B180(), self->rider, self->mult);
+}
+#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117FE0);
 

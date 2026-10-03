@@ -124,7 +124,139 @@ extern "C" int func_001DF028(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onUpdate);
+#ifdef SKIP_ASM
+struct cUIScreen;
+// PORT: the unit declares cUIScreen_getFrameByLabel as returning int; the frame id is an unsigned short.
+unsigned short cUIScreen_getFrameByLabel_us(cUIScreen* screen, int hash) __asm__("cUIScreen_getFrameByLabel__FP9cUIScreeni");
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0039F190(void* self, int a1);
+extern char* D_004A289C;
+extern char D_004A1550[];
+extern char D_004A1558[];
+extern char D_004A1560[];
+extern char D_0045DDF0[];
+
+struct sVEm_F050 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sDefObj_F050 {
+    sVEm_F050* vt;
+};
+extern sDefObj_F050 D_004A5A58;
+
+struct sVEi_F050 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sVEs_F050 {
+    short delta;
+    short index;
+    void (*fn)(void*, unsigned char);
+};
+
+struct sVEp_F050 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+struct sPopup_F050 {
+    char pad0[0x10];
+    char* owner;                // 0x10
+    char pad14[0x8];            // 0x14
+    int flags;                  // 0x1C
+    char pad20[0x20];           // 0x20
+    void* screen;               // 0x40
+    char pad44[0x4];            // 0x44
+    int x;                      // 0x48
+    int y;                      // 0x4C
+    signed char accepted;       // 0x50
+};
+
+static inline int padCall_F050(char* in, int slot)
+{
+    sVEi_F050* vt = *(sVEi_F050**)(in + 8);
+    return vt[slot].fn(in + vt[slot].delta);
+}
+
+static inline void sound_F050(sPopup_F050* s, int msg)
+{
+    sDefObj_F050* p = *(sDefObj_F050**)(s->owner + 0x14);
+    if (p == 0)
+        p = &D_004A5A58;
+    if (p != 0)
+        p->vt[2].fn((char*)p + p->vt[2].delta, msg);
+}
+
+static inline void playFrame_F050(sPopup_F050* s, char* name)
+{
+    unsigned short frame = cUIScreen_getFrameByLabel_us((cUIScreen*)s->screen, GetHashValue32(name));
+    if (frame != 0xFFFF)
+        cUIScreen_playFrame(s->screen, frame, 1);
+}
+
+static inline int clamp_F050(int v, int lo, int hi)
+{
+    if (v >= lo) {
+        if (v > hi) {
+            v = hi;
+        }
+    } else {
+        v = lo;
+    }
+    return v;
+}
+
+extern "C" void cFEPopupScreenPos_onUpdate(sPopup_F050* self)
+{
+    char* in = *(char**)(self->owner + 0xC);
+    for (int i = 0; i < 2; i++) {
+        sVEs_F050* vt = *(sVEs_F050**)(in + 8);
+        vt[44].fn(in + vt[44].delta, i);
+        if (padCall_F050(in, 40) == 0) {
+            continue;
+        }
+        if (padCall_F050(in, 5)) {
+            sound_F050(self, 6);
+            self->accepted = 1;
+            self->flags |= 0x80;
+            func_0039F190(self->owner + 0x18, 1);
+        } else if (padCall_F050(in, 6)) {
+            sound_F050(self, 3);
+            self->accepted = 0;
+            self->flags |= 0x80;
+            func_0039F190(self->owner + 0x18, 1);
+        } else if (padCall_F050(in, 19)) {
+            self->x--;
+            playFrame_F050(self, D_004A1550);
+        } else if (padCall_F050(in, 20)) {
+            self->x++;
+            playFrame_F050(self, D_0045DDF0);
+        } else if (padCall_F050(in, 17)) {
+            self->y++;
+            playFrame_F050(self, D_004A1558);
+        } else if (padCall_F050(in, 18)) {
+            self->y--;
+            playFrame_F050(self, D_004A1560);
+        }
+        if (self->x < -20 || self->x > 20 || self->y < -20 || self->y > 20) {
+            sound_F050(self, 4);
+        }
+        self->x = clamp_F050(self->x, -20, 20);
+        self->y = clamp_F050(self->y, -20, 20);
+        sVEp_F050* rv = *(sVEp_F050**)(D_004A289C + 0x10D8);
+        rv[12].fn(D_004A289C + rv[12].delta, self->x, self->y);
+        return;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF378__FPv);
@@ -4747,7 +4879,93 @@ extern "C" void func_001E7558(void* self, void* menu)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E75D0);
+#ifdef SKIP_ASM
+// func_0039E4C0 returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
+void func_0039E4C0_v(void* self) __asm__("func_0039E4C0");
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" void func_0020A6F0(void* self, char* text, char* name);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void func_003A1310(void* self, int a1);
+extern void* D_004A28A8;
+extern int* D_004A2EEC;
+extern int D_00534B30[];
+extern int D_00536730[];
+extern signed char D_00535BC8[];
+extern char D_004A2170[];
+extern char D_0046E4E8[];
+extern char D_0046E638[];
+extern char D_0046E7C8[];
+extern char D_0046E7D8[];
+extern char D_0046E7E8[];
+extern char D_0046E7F8[];
+extern char D_0046E808[];
+
+struct sRect_75D0 {
+    int a, b, c, d;
+};
+extern sRect_75D0 D_004C8408;
+
+extern "C" void func_001E75D0(void* self)
+{
+    char buf[32];
+    int second = 0;
+    func_0039E4C0_v(self);
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int mode = D_00535BC8[0x49];
+    int track = D_00535BC8[0x48];
+    int first = 1;
+    if (mode == 2) {
+        second = 1;
+        if ((track >= 1 && track <= 3) || track == 5 || track == 6) {
+            first = 0;
+            second = 0;
+        }
+    }
+    if (first) {
+        sprintf(buf, D_004A2170, D_00536730[func_00146E98(player, 0)] + 1);
+        func_0020A6F0(self, buf, D_0046E4E8);
+        sprintf(buf, D_0046E638, D_00536730[func_00146E98(player, 0)] + 1);
+        func_0020A6F0(self, buf, D_0046E4E8);
+    }
+    if (second) {
+        sprintf(buf, D_004A2170, D_00536730[func_00146E98(player, 1)] + 1);
+        func_0020A6F0(self, buf, D_0046E4E8);
+        sprintf(buf, D_0046E638, D_00536730[func_00146E98(player, 1)] + 1);
+        func_0020A6F0(self, buf, D_0046E4E8);
+    }
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0 && D_004A2EEC != 0 && *D_004A2EEC != 0) {
+        cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E7C8));
+        if (o != 0) {
+            o->v09(1);
+        }
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E7D8));
+        if (t != 0) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E7E8));
+        }
+        o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E7F8));
+        if (o != 0) {
+            o->v09(1);
+        }
+        char* p = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E808));
+        *(int*)(p + 0x74) |= 1;
+        *(sRect_75D0*)(p + 0xA8) = D_004C8408;
+        func_003A1310(p, 1);
+        ((cUIObjK1DEB90*)p)->v09(0);
+    }
+    func_00294F78(func_0028B180(), 0xE);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E7920__FPv);

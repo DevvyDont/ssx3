@@ -1098,7 +1098,254 @@ extern "C" void func_0035B6D0(sSplineLink* link)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035B708);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern "C" void* func_002D1BE0();
+extern "C" void* func_002D1BD8();
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern char D_004911D0[];
+extern "C" void cRailModifier_buildXform(void* self);
+struct sSmMod_C040;
+extern "C" void func_0035C040(sSmMod_C040* self);
+
+struct sSmVec4_B708 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sSmBox_B708 {
+    sSmVec4_B708 min;
+    sSmVec4_B708 max;
+};
+struct sSmCell_B708 {
+    int level;
+    int x, y, z;
+};
+struct sSmNode_B708 {
+    sSmNode_B708* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sSmRoot_B708 {
+    sSmCell_B708 cell;              // 0x00
+    sSmNode_B708* node;             // 0x10
+};
+struct sSmSeg_B708 {
+    char pad0[0x64];
+    sSmSeg_B708* next;              // 0x64
+    char pad68[4];
+    float minx, miny, minz;         // 0x6C
+    float maxx, maxy, maxz;         // 0x78
+};
+struct sSmTrack_B708 {
+    char pad0[0x20];
+    int count;                      // 0x20
+    sSmSeg_B708* first;             // 0x24
+};
+struct sSmSet_B708 {
+    char pad0[0x44];
+    unsigned int* refs;             // 0x44
+};
+struct sSmWorld_B708 {
+    char pad0[0x8];
+    sSmSet_B708** sets;             // 0x8
+};
+struct sSmVEntry_B708 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sSmModelObj_B708 {
+    char pad0[0xC];
+    sSmVEntry_B708* vt;             // 0xC
+};
+struct sSmModel_B708 {
+    char pad0[0xC];
+    sSmModelObj_B708* obj;          // 0xC
+    char pad10[0x50];
+    float minx, miny, minz;         // 0x60
+    float maxx, maxy, maxz;         // 0x6C
+};
+struct sSmDesc_B708 {
+    int f0;
+    unsigned int id;                // 0x4
+    int f8;                         // 0x8
+};
+
+static inline sSmRoot_B708* findRoot_B708(char* w, int x, int y, int z)
+{
+    sSmRoot_B708* r = (sSmRoot_B708*)w;
+    sSmRoot_B708* rx = x >= 0 ? r : r + 4;
+    sSmRoot_B708* ry = y >= 0 ? rx : rx + 2;
+    sSmRoot_B708* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void remove_B708(char* w, void* item, const sSmBox_B708* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sSmCell_B708 c;
+    func_00328F28(&c, box);
+    sSmRoot_B708* r = findRoot_B708(w, c.x, c.y, c.z);
+    func_003284B8(r->node, 2, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+static inline void insert_B708(char* w, void* item, const sSmBox_B708* box)
+{
+    sSmCell_B708 c;
+    func_00328F28(&c, box);
+    func_00328C20(findRoot_B708(w, c.x, c.y, c.z), 2, item, &c);
+}
+
+static inline sSmTrack_B708* toTrack_B708(unsigned int p)
+{
+    return (sSmTrack_B708*)(p << 2);
+}
+
+static inline sSmTrack_B708* refToTrack_B708(unsigned int v)
+{
+    unsigned int p = v >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return toTrack_B708(p);
+}
+
+struct sSmRef_B708 {
+    unsigned int id;
+
+    sSmTrack_B708* get()
+    {
+        sSmSet_B708* set = (*(sSmWorld_B708**)func_002D1BD8())->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return refToTrack_B708(set->refs[id >> 8]);
+    }
+};
+
+// PORT: PS2-only VU0 inline asm (a -= b).
+static inline void subEq_B708(sSmVec4_B708& a, const sSmVec4_B708& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void addEq_B708(sSmVec4_B708& a, const sSmVec4_B708& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b));
+}
+
+static inline sSmBox_B708 getBox_B708(const sSmModel_B708* m)
+{
+    sSmBox_B708 b;
+    b.min.x = m->minx;
+    b.min.y = m->miny;
+    b.min.z = m->minz;
+    b.min.w = 1.0f;
+    b.max.x = m->maxx;
+    b.max.y = m->maxy;
+    b.max.z = m->maxz;
+    b.max.w = 1.0f;
+    return b;
+}
+
+static inline void setBox_B708(char* self, sSmBox_B708 b)
+{
+    *(sSmBox_B708*)(self + 0x10) = b;
+}
+
+static inline void grow_B708(sSmBox_B708& box, float d)
+{
+    sSmVec4_B708 pad;
+    pad.x = d;
+    pad.y = d;
+    pad.z = d;
+    pad.w = 0.0f;
+    subEq_B708(box.min, pad);
+    addEq_B708(box.max, pad);
+}
+
+extern "C" char* func_0035B708(char* self, sSmDesc_B708* desc, sSmModel_B708* model)
+{
+    sSmBox_B708* box = (sSmBox_B708*)(self + 0x10);
+    *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
+    *(void**)(self + 0x8) = D_004911D0;
+    *(void**)(self + 0x0) = 0;
+    *(void**)(self + 0x4) = 0;
+    *(sSmModel_B708**)(self + 0x40) = model;
+    *(unsigned int*)(self + 0x30) = desc->id;
+    *(int*)(self + 0x34) = desc->f8;
+    sSmModelObj_B708* o = model->obj;
+    if (o->vt[44].fn((char*)o + o->vt[44].delta) == 0) {
+        sSmModel_B708* m = *(sSmModel_B708**)(self + 0x40);
+        sSmBox_B708 b;
+        b.min.x = m->minx;
+        b.min.y = m->miny;
+        b.min.z = m->minz;
+        b.min.w = 1.0f;
+        b.max.x = m->maxx;
+        b.max.y = m->maxy;
+        b.max.z = m->maxz;
+        b.max.w = 1.0f;
+        setBox_B708(self, b);
+        sSmVec4_B708 pad;
+        pad.x = 100.0f;
+        pad.y = 100.0f;
+        pad.z = 100.0f;
+        pad.w = 0.0f;
+        subEq_B708(((sSmBox_B708*)(self + 0x10))->min, pad);
+        addEq_B708(((sSmBox_B708*)(self + 0x10))->max, pad);
+    }
+    cRailModifier_buildXform(self);
+    func_0035C040((sSmMod_C040*)self);
+    insert_B708((char*)func_002D1BE0(), *(void**)(self + 0x44), box);
+    sSmTrack_B708* t = ((sSmRef_B708*)(self + 0x30))->get();
+    sSmSeg_B708* seg = t->first;
+    for (int i = 0; i < t->count; i++) {
+        sSmBox_B708 b;
+        b.min.x = seg->minx;
+        b.min.y = seg->miny;
+        b.min.z = seg->minz;
+        b.min.w = 1.0f;
+        b.max.x = seg->maxx;
+        b.max.y = seg->maxy;
+        b.max.z = seg->maxz;
+        b.max.w = 1.0f;
+        remove_B708((char*)func_002D1BE0(), seg, &b);
+        seg = seg->next;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035BA88);

@@ -2634,7 +2634,95 @@ extern "C" func_002CE418_sItem* func_002CE418(func_002CE418_sItem* self, int a1,
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CE488);
+#ifdef SKIP_ASM
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3E8(void** self);
+extern "C" int strlen(const char* s);
+int func_002CC250(void* self);
+int func_002CC258(void* self);
+
+struct sTextItem_E488 {
+    char* menu;                 // 0x00
+    char pad4[0x14];            // 0x04
+    char name[0x10];            // 0x18
+    int cursor;                 // 0x28
+};
+
+static inline int validChar_E488(char c)
+{
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '!';
+}
+
+extern "C" int func_002CE488(sTextItem_E488* self)
+{
+    int r = func_002CA2B0(self);
+    if (r == 0) {
+    int len = strlen(self->name);
+    int mod = len + 1;
+    if (mod >= 16) {
+        mod = 15;
+    }
+    int key = func_002CA3E8((void**)self);
+    if (key == 2) {
+        self->cursor = (self->cursor + mod - 1) % mod;
+    } else if (key == 3) {
+        self->cursor = (self->cursor + 1) % mod;
+    } else if (key == 4) {
+        // PORT: pointer in int (index-first address).
+        char* c = (char*)(self->cursor + (int)self);
+        c += 0x18;
+        do {
+            (*c)--;
+        } while (!validChar_E488(*c));
+    } else if (key == 5) {
+        // PORT: pointer in int (index-first address).
+        char* c = (char*)(self->cursor + (int)self);
+        c += 0x18;
+        do {
+            (*c)++;
+        } while (!validChar_E488(*c));
+    } else if (key == 9) {
+        if (len < 14) {
+            for (int i = self->cursor; i < len; i++) {
+                self->name[i + 1] = self->name[i];
+            }
+            self->name[self->cursor] = '_';
+        }
+    } else if (key == 10) {
+        if (len != 0 && self->cursor < len) {
+            for (int i = self->cursor; i < len - 1; i++) {
+                self->name[i] = self->name[i + 1];
+            }
+            self->name[len - 1] = 0;
+        }
+    } else if (key == 6) {
+        r = 3;
+    } else {
+        int code = func_002CC250(*(void**)(self->menu + 0x124));
+        int ch = func_002CC258(*(void**)(self->menu + 0x124));
+        if (code == 8) {
+            if (len != 0 && self->cursor > 0) {
+                for (int i = self->cursor; i < len - 1; i++) {
+                    self->name[i] = self->name[i + 1];
+                }
+                self->name[len - 1] = 0;
+                self->cursor--;
+            }
+        } else if (validChar_E488(ch)) {
+            if (len < 14) {
+                for (int i = self->cursor; i < len; i++) {
+                    self->name[i + 1] = self->name[i];
+                }
+                self->name[self->cursor++] = ch;
+            }
+        }
+    }
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CE820);
@@ -3873,7 +3961,130 @@ extern "C" void func_002D08E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D0908);
+#ifdef SKIP_ASM
+extern "C" int func_002CA2B0(void* self);
+extern "C" int func_002CA3B0(void* self);
+extern "C" int func_002CA3E8(void** self);
+float func_002CA408_f(void* self) __asm__("func_002CA408__FPv");
+float func_002CA428_f(void* self) __asm__("func_002CA428__FPv");
+// PORT: the unit declares func_002CA448/func_002CA468 as void*; these callers use the float result.
+float func_002CA448_f(void* self) __asm__("func_002CA448__FPv");
+float func_002CA468_f(void* self) __asm__("func_002CA468__FPv");
+
+struct sCurvePt_D0908 {
+    float x, y;
+};
+
+struct sVE_D0908 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sCurveItem_D0908 {
+    char* menu;                 // 0x00
+    char pad4[0x14];            // 0x04
+    int count;                  // 0x18
+    unsigned int lockX;         // 0x1C
+    unsigned int lockY;         // 0x20
+    int cur;                    // 0x24
+    sCurvePt_D0908* pts;        // 0x28
+    float minX;                 // 0x2C
+    float minY;                 // 0x30
+    float maxX;                 // 0x34
+    float maxY;                 // 0x38
+    int order;                  // 0x3C
+    int editing;                // 0x40
+};
+
+extern "C" int func_002D0908(sCurveItem_D0908* self)
+{
+    int r = 0;
+    if (func_002CA3B0(self) == 0) {
+    int changed = 0;
+    if (func_002CA3E8((void**)self) == 6) {
+        self->editing ^= 1;
+    }
+    if (self->editing != 0) {
+        if (func_002CA3E8((void**)self) == 8) {
+            self->editing = 0;
+        } else if (func_002CA3E8((void**)self) == 7) {
+            self->editing = 0;
+        } else if (self->editing != 0) {
+            if (func_002CA3E8((void**)self) == 4) {
+                if (self->cur > 0) {
+                    self->cur--;
+                    changed = 1;
+                }
+            } else if (func_002CA3E8((void**)self) == 5) {
+                if (self->cur < self->count - 1) {
+                    self->cur++;
+                    changed = 1;
+                }
+            }
+            float step = (self->maxX - self->minX) / (float)(self->count * 2 > 49 ? self->count * 2 : 50);
+            float dy = func_002CA448_f(self) - func_002CA468_f(self);
+            if (dy != 0.0f && (self->lockY & (1 << self->cur)) == 0) {
+                self->pts[self->cur].y += dy * (self->maxY - self->minY) * 0.008333333767950535f;
+                changed = 1;
+                if (self->maxY < self->pts[self->cur].y) {
+                    self->pts[self->cur].y = self->maxY;
+                }
+                if (self->pts[self->cur].y < self->minY) {
+                    self->pts[self->cur].y = self->minY;
+                }
+                if (self->cur < self->count - 1) {
+                    if (self->order > 0 && self->pts[self->cur + 1].y < self->pts[self->cur].y) {
+                        self->pts[self->cur].y = self->pts[self->cur + 1].y;
+                    } else if (self->order < 0 && self->pts[self->cur].y < self->pts[self->cur + 1].y) {
+                        self->pts[self->cur].y = self->pts[self->cur + 1].y;
+                    }
+                }
+                if (self->cur > 0) {
+                    if (self->order > 0 && self->pts[self->cur].y < self->pts[self->cur - 1].y) {
+                        self->pts[self->cur].y = self->pts[self->cur - 1].y;
+                    } else if (self->order < 0 && self->pts[self->cur - 1].y < self->pts[self->cur].y) {
+                        self->pts[self->cur].y = self->pts[self->cur - 1].y;
+                    }
+                }
+            }
+            float dx = func_002CA428_f(self) - func_002CA408_f(self);
+            if (dx != 0.0f && (self->lockX & (1 << self->cur)) == 0) {
+                self->pts[self->cur].x += dx * (self->maxX - self->minX) * 0.008333333767950535f;
+                changed = 1;
+                if (self->maxX < self->pts[self->cur].x) {
+                    self->pts[self->cur].x = self->maxX;
+                }
+                if (self->pts[self->cur].x < self->minX) {
+                    self->pts[self->cur].x = self->minX;
+                }
+                if (self->cur < self->count - 1) {
+                    if (self->pts[self->cur + 1].x - step < self->pts[self->cur].x) {
+                        self->pts[self->cur].x = self->pts[self->cur + 1].x - step;
+                    }
+                }
+                if (self->cur > 0) {
+                    if (self->pts[self->cur].x < self->pts[self->cur - 1].x + step) {
+                        self->pts[self->cur].x = self->pts[self->cur - 1].x + step;
+                    }
+                }
+            }
+        } else {
+            r = func_002CA2B0(self);
+        }
+    } else {
+        r = func_002CA2B0(self);
+    }
+    if (changed) {
+        sVE_D0908* vt = *(sVE_D0908**)(self->menu + 0x12C);
+        vt[4].fn(self->menu + vt[4].delta, self);
+    }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D0D48);

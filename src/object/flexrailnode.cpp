@@ -873,7 +873,173 @@ extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* di
 
 INCLUDE_ASM("object/flexrailnode", func_0034A838);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034A8C8);
+#ifdef SKIP_ASM
+extern "C" float func_002D1C70();
+
+struct sV4_A8C8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sV4Slot_A8C8 {
+    sV4_A8C8 v;
+    sV4Slot_A8C8() {}
+};
+
+// PORT: the unit declares D_004FF120 with another vector type; alias it here.
+extern sV4_A8C8 D_004FF120_A8C8 __asm__("D_004FF120");
+
+struct sFrElem_A8C8 {
+    sV4_A8C8 pos;               // 0x00
+    sV4_A8C8 vel;               // 0x10
+    sV4_A8C8 posA;              // 0x20
+    sV4_A8C8 posB;              // 0x30
+    sV4_A8C8 force;             // 0x40
+    char pad50[0x10];
+};
+
+struct sFrRailA8C8 {
+    char pad0[0x20];
+    int count;                  // 0x20
+    char pad24[0x3C];
+    float k[3];                 // 0x60
+    char pad6C[4];
+    sFrElem_A8C8* elems;        // 0x70
+};
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float vu0Len_A8C8(const sV4_A8C8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize).
+static inline sV4_A8C8 vu0Norm_A8C8(const sV4_A8C8& v)
+{
+    sV4_A8C8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_A8C8 vu0Scale_A8C8(const sV4_A8C8& v, float s)
+{
+    sV4_A8C8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_A8C8 vu0Add_A8C8(const sV4_A8C8& a, const sV4_A8C8& b)
+{
+    sV4_A8C8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product).
+static inline sV4_A8C8 vu0Cross_A8C8(const sV4_A8C8& a, const sV4_A8C8& b)
+{
+    sV4_A8C8 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b)
+        : "memory");
+}
+
+extern "C" void func_0034A8C8(sFrRailA8C8* self)
+{
+    float dt = func_002D1C70();
+    sV4Slot_A8C8 f[8];
+    for (int i = 0; i < self->count - 1; i++) {
+        f[i].v = vu0Scale_A8C8(self->elems[i].posA, -self->k[0]);
+        vu0AddEq_A8C8(f[i].v, vu0Scale_A8C8(self->elems[i].posB, -self->k[1]));
+    }
+    for (int i = 0; i < self->count - 1; i++) {
+        vu0AddEq_A8C8(f[i].v, self->elems[i].force);
+    }
+    for (int i = 0; i < self->count - 1; i++) {
+        sV4_A8C8 a;
+        a = vu0Scale_A8C8(f[i].v, dt);
+        vu0AddEq_A8C8(self->elems[i].posA, vu0Scale_A8C8(self->elems[i].posB, dt));
+        vu0AddEq_A8C8(self->elems[i].posB, a);
+    }
+    sV4_A8C8 acc = D_004FF120_A8C8;
+    for (int i = 0; i < self->count - 1; i++) {
+        vu0AddEq_A8C8(acc, self->elems[i].posA);
+        float len = vu0Len_A8C8(self->elems[i].vel);
+        sV4_A8C8 s = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
+        self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, s);
+    }
+    for (int i = 0; i < self->count; i++) {
+        self->elems[i].force = D_004FF120_A8C8;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AC10);

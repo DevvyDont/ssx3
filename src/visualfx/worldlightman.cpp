@@ -378,7 +378,220 @@ void* func_002F64F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6518);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: called for effect only; bound by asm label so the call has no value
+void func_002F64F0_v(void* self) __asm__("func_002F64F0__FPv");
+struct sWLCode6910;
+extern "C" void func_002F6910(sWLCode6910* self);
+extern void* D_004A28A8;
+extern int D_004A3BC0;
+extern int D_00534B30[];
+
+struct sVec6518 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+extern sVec6518 D_004FF130;
+
+struct sVE6518 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sRider6518 {
+    char pad0[0x1E0];
+    sVec6518 vel;               // 0x1E0
+    char pad1F0[0xF8];          // 0x1F0
+    float f2E8;                 // 0x2E8
+    float f2EC;                 // 0x2EC
+    float f2F0;                 // 0x2F0
+    int mode;                   // 0x2F4
+    float f2F8;                 // 0x2F8
+    float f2FC;                 // 0x2FC
+    char pad300[0x4];           // 0x300
+    int f304;                   // 0x304
+    int f308;                   // 0x308
+    float maxSpeed;             // 0x30C
+    float steer;                // 0x310
+    float blend;                // 0x314
+    char pad318[0x88];          // 0x318
+    sVec6518 dir;               // 0x3A0
+};
+
+struct sWLCode6518 {
+    sRider6518* rider;          // 0x0
+    signed char state;          // 0x4
+    unsigned char step;         // 0x5
+    signed char count;          // 0x6
+    unsigned char flags;        // 0x7
+};
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float len6518(const sVec6518& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec6518 norm6518(const sVec6518& v)
+{
+    sVec6518 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sVec6518 scale6518(const sVec6518& v, float s)
+{
+    sVec6518 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v *= s).
+static inline void scaleEq6518(sVec6518& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec6518 add6518(const sVec6518& a, const sVec6518& b)
+{
+    sVec6518 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sVEsub6518 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void func_002F6518(sWLCode6518* self)
+{
+    char* sub = (char*)self->rider + 0x6C0;
+    sVEsub6518* vt = *(sVEsub6518**)sub;
+    if (vt[9].fn(sub + vt[9].delta) != 0) {
+        return;
+    }
+    if (D_004A3BC0 >= 2) {
+        func_002F64F0_v(self);
+        D_004A3BC0--;
+    }
+    func_002F6910((sWLCode6910*)self);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0) {
+        self->state = 0;
+    }
+    if (self->state == 1) {
+        self->rider->mode = 11;
+        self->rider->f308 = (self->flags >> 1) & 1;
+        self->rider->f2F8 = 1.0f;
+        self->rider->f2F0 = 60.0f;
+        self->rider->f2EC = 60.0f;
+        self->rider->f2E8 = 60.0f;
+        self->rider->f304 = 0;
+    } else {
+        self->rider->f308 = 1;
+        if (self->rider->mode != 11) {
+            return;
+        }
+        self->rider->mode = 0;
+        self->rider->f2F8 = 0.0f;
+        self->rider->f2F0 = 0.0f;
+        self->rider->f2EC = 0.0f;
+        self->rider->f2E8 = 0.0f;
+        self->rider->f304 = 1;
+    }
+    sRider6518* r = self->rider;
+    if (r->mode != 11) {
+        return;
+    }
+    if (!(0.0f < r->f2FC)) {
+        return;
+    }
+    float len = len6518(r->vel);
+    if (len < r->maxSpeed && len != 0.0f) {
+        r->vel = norm6518(r->vel);
+        scaleEq6518(self->rider->vel, self->rider->maxSpeed * self->rider->blend + len * (1.0f - self->rider->blend));
+        len = len6518(self->rider->vel);
+    }
+    r = self->rider;
+    if (r->steer == 0.0f) {
+        return;
+    }
+    if (!(0.0010000000474974513f < len6518(r->dir))) {
+        return;
+    }
+    if (!(9.999999747378752e-05f < len6518(r->vel))) {
+        return;
+    }
+    r->vel = add6518(scale6518(norm6518(r->dir), len * self->rider->steer),
+                     scale6518(norm6518(self->rider->vel), len * (1.0f - self->rider->steer)));
+    r = self->rider;
+    if (r->vel.x < 0.0f && r->vel.x >= 0.0f) {
+        r->vel = D_004FF130;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6908__FPv);
