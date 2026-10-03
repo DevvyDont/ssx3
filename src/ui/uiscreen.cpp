@@ -537,7 +537,167 @@ extern "C" void func_0039D968(void* self, float x, float y)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039DA20);
+#ifdef SKIP_ASM
+extern "C" int strlen(const char*);
+int GetHashValue32(char* str);
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0039DE68(void* self, int a);
+
+struct sV3_DA20 {
+    float x, y, z;
+};
+struct sV4_DA20 {
+    float x, y, z, w;
+};
+
+struct sWVt_DA20 { short delta; short index; void* fn; };
+typedef void (*tShow_DA20)(void*, int);
+typedef void (*tGet_DA20)(void*, sV4_DA20*);
+
+struct sWidget_DA20 {
+    char pad0[8];
+    sWVt_DA20* vt;      // 0x08
+    char padC[0x44 - 0xC];
+    sV3_DA20 pos;       // 0x44
+};
+
+struct sScroll_DA20 {
+    char pad0[0x14];
+    int flags;                  // 0x14
+    char pad18[0x5C - 0x18];
+    cUIScreen* screen;          // 0x5C
+    char pad60[0x74 - 0x60];
+    sWidget_DA20* track;        // 0x74
+    sWidget_DA20* thumb;        // 0x78
+    sWidget_DA20* up;           // 0x7C
+    sWidget_DA20* down;         // 0x80
+    sWidget_DA20* extra;        // 0x84
+    int mode;                   // 0x88
+    char upLabel[0x19];         // 0x8C
+    char downLabel[0x1B];       // 0xA5
+    int pos;                    // 0xC0
+    int total;                  // 0xC4
+    int visible;                // 0xC8
+};
+
+static inline void wShow_DA20(sWidget_DA20* w, int on)
+{
+    ((tShow_DA20)w->vt[9].fn)((char*)w + w->vt[9].delta, on);
+}
+
+static inline void wGet_DA20(sWidget_DA20* w, sV4_DA20* out)
+{
+    ((tGet_DA20)w->vt[20].fn)((char*)w + w->vt[20].delta, out);
+}
+
+static inline void wSet_DA20(sWidget_DA20* w, sV4_DA20* in)
+{
+    ((tGet_DA20)w->vt[21].fn)((char*)w + w->vt[21].delta, in);
+}
+
+extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int total)
+{
+    char* name = self->upLabel;
+    if (strlen(name) != 0 && pos < self->pos) {
+        cUIScreen* scr = self->screen;
+        if (scr != 0) {
+            int f = cUIScreen_getFrameByLabel(scr, GetHashValue32(name));
+            if (f != 0xFFFF)
+                cUIScreen_playFrame(scr, f, 1);
+        }
+    }
+    name = self->downLabel;
+    if (strlen(name) != 0 && self->pos < pos) {
+        cUIScreen* scr = self->screen;
+        if (scr != 0) {
+            int f = cUIScreen_getFrameByLabel(scr, GetHashValue32(name));
+            if (f != 0xFFFF)
+                cUIScreen_playFrame(scr, f, 1);
+        }
+    }
+    self->total = total;
+    self->pos = pos;
+    self->visible = visible;
+    if (self->track == 0 || self->thumb == 0)
+        return;
+    sV3_DA20 tpos = self->track->pos;
+    sV3_DA20 npos = self->thumb->pos;
+    sV4_DA20 tsize;
+    sV4_DA20 nsize;
+    {
+        sWidget_DA20* w = self->track;
+        ((tGet_DA20)w->vt[20].fn)((char*)w + w->vt[20].delta, &tsize);
+    }
+    {
+        sWidget_DA20* w = self->thumb;
+        ((tGet_DA20)w->vt[20].fn)((char*)w + w->vt[20].delta, &nsize);
+    }
+    func_0039DE68(self, 1);
+    if (self->total != 0) {
+        if (self->flags & 1) {
+            float fp = (float)self->pos / (float)self->total;
+            float fv = (float)self->visible / (float)self->total;
+            npos.x = tpos.x;
+            nsize.x = tsize.x;
+            npos.y = tpos.y + tsize.y * fp;
+            nsize.y = tsize.y * fv;
+            if (tsize.y < nsize.y)
+                nsize.y = tsize.y;
+        }
+        if (self->up != 0) {
+            if (self->pos == 0)
+                wShow_DA20(self->up, 0);
+            else
+                wShow_DA20(self->up, 1);
+        }
+        if (self->down != 0) {
+            if (self->pos + self->visible >= self->total)
+                wShow_DA20(self->down, 0);
+            else
+                wShow_DA20(self->down, 1);
+        }
+    } else {
+        npos.y = tpos.y;
+        npos.x = tpos.x;
+        nsize.x = tsize.x;
+        nsize.y = tsize.y;
+    }
+    if (nsize.y == tsize.y) {
+        switch (self->mode) {
+        case 0:
+            func_0039DE68(self, 0);
+            break;
+        case 1:
+            if (self->up != 0)
+                wShow_DA20(self->up, 0);
+            if (self->down != 0)
+                wShow_DA20(self->down, 0);
+            wShow_DA20(self->thumb, 0);
+            break;
+        case 2:
+            if (self->up != 0)
+                wShow_DA20(self->up, 1);
+            if (self->down != 0)
+                wShow_DA20(self->down, 1);
+            wShow_DA20(self->thumb, 0);
+            break;
+        }
+    } else {
+        if (self->extra != 0)
+            wShow_DA20(self->extra, 1);
+        wShow_DA20(self->thumb, 1);
+        wShow_DA20(self->track, 1);
+    }
+    self->thumb->pos = npos;
+    {
+        sWidget_DA20* w = self->thumb;
+        ((tGet_DA20)w->vt[21].fn)((char*)w + w->vt[21].delta, &nsize);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039DE68);

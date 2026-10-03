@@ -699,7 +699,101 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013C878);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C948);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013CCF0);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" float func_001494C0(void* self, int rider, int value);
+extern "C" float func_001493D8(void* self, int rider, int value);
+extern "C" float func_00148D80(void* self, int rider, int value);
+
+struct sCurvePt_13CCF0 { float x, y; };
+
+// PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
+static inline float hpAbs_13CCF0(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float hpLerp_13CCF0(const sCurvePt_13CCF0& a, const sCurvePt_13CCF0& b, float x)
+{
+    float y0 = a.y;
+    x -= a.x;
+    return y0 + (b.y - y0) * x / (b.x - a.x);
+}
+
+struct sHpCfg_13CCF0 { char pad[0x90]; sCurvePt_13CCF0 p[4]; };
+
+static inline float hpCurve_13CCF0(const sHpCfg_13CCF0* c, float x)
+{
+    if (c->p[1].x < x)
+    {
+        if (c->p[2].x < x)
+        {
+            if (c->p[3].x < x)
+                return c->p[3].y;
+            return hpLerp_13CCF0(c->p[2], c->p[3], x);
+        }
+        return hpLerp_13CCF0(c->p[1], c->p[2], x);
+    }
+    if (x < c->p[0].x)
+        return c->p[0].y;
+    return hpLerp_13CCF0(c->p[0], c->p[1], x);
+}
+
+static inline float hpClamp_13CCF0(float v, float lo, float hi)
+{
+    if (v >= lo)
+        return v <? hi;
+    return lo;
+}
+
+static inline float hpRamp_13CCF0(float v, float lo, float hi)
+{
+    if (v >= lo)
+    {
+        if (v <= hi)
+            return (v - lo) / (hi - lo);
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
+#define RIDER (*(char**)((char*)self + 0x18))
+
+extern "C" float func_0013CCF0(void* self, sHpCfg_13CCF0* cfg, float a)
+{
+    float one = 1.0f;
+    float spd = hpAbs_13CCF0(*(float*)(RIDER + 0x214));
+    func_001494C0(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
+    float k1 = one / (func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.31941401958465576f + one);
+    float k2 = func_00148D80(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.46218693256378174f + one;
+    float c = hpCurve_13CCF0(cfg, hpAbs_13CCF0(a) * 0.035999998450279236f);
+    float t = hpClamp_13CCF0(hpAbs_13CCF0(a) / 1666.666748046875f, 0.0f, 1.0f);
+    c = c * (one * (k1 * (1.0f - t) + one * t));
+    float ramp = hpRamp_13CCF0(*(float*)(RIDER + 0x378), 0.10000000149011612f, 0.20000000298023224f);
+    float lift = ramp * (spd * 3.0004208087921143f) * spd * k2;
+    float drag = ramp * (spd * 999.9600219726562f);
+    float f8 = 1.0f;
+    if (*(int*)(RIDER + 0x438) == 2 || *(int*)(RIDER + 0x438) == 3 || *(int*)(RIDER + 0x438) == 13)
+        f8 = 0.5f - *(float*)(RIDER + 0x454) / *(float*)((char*)self + 8);
+    float f12 = 1.0f;
+    if (0.0f < *(float*)(RIDER + 0x1E8) - *(float*)(RIDER + 0x3D8))
+        f12 = 0.5999583005905151f;
+    float f2 = 1.0f;
+    if (*(int*)(RIDER + 0x320) != *(int*)(RIDER + 0x324) && *(float*)(RIDER + 0x2FC) == 0.0f)
+        f2 = 1.1147289276123047f;
+    float f5 = 1.0f;
+    if (0.0f < a && 0.0f < *(float*)(RIDER + 0x1E8) - *(float*)(RIDER + 0x3D8) && *(int*)(RIDER + 0x438) == 13)
+        f5 = 34.84144592285156f;
+    return ((-a * f8) * (c + lift) * f12 * f2 - drag) * f5;
+}
+#undef RIDER
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D028);
@@ -1264,7 +1358,217 @@ extern "C" void func_0013F410(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F488);
+#ifdef SKIP_ASM
+extern "C" void cRider_updateOrientationImplicit(void*);
+int func_0011FEE8(void* rider);
+extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" void func_00106538(void* rider, void* v);
+extern "C" void func_001065B0(void* rider, void* hit);
+extern "C" void func_00105D98(void* rider, void* info, int id);
+extern "C" void* func_0028B180();
+extern "C" void func_002989A8(void* snd, void* rider);
+extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void func_0032F708(void* self, int flags);
+
+struct sHit_13F488 {
+    sVec4HP pos;            // 0x00
+    sVec4HP normal;         // 0x10
+    sVec4HP v20;            // 0x20
+    float pad30[4];         // 0x30
+    float dist;             // 0x40
+    int pad44[2];           // 0x44
+    int m4C;                // 0x4C
+    char* obj;              // 0x50
+    char* tri;              // 0x54
+    int pad58[5];           // 0x58
+    float m6C;              // 0x6C
+    float m70;              // 0x70
+    int pad74[3];           // 0x74
+} __attribute__((aligned(16)));
+
+struct sSphere_13F488 {
+    int state;              // 0x00
+    int f4;                 // 0x04
+    int f8;                 // 0x08
+    int padC;               // 0x0C
+    sVec4HP dir;            // 0x10
+    char rest[0x320 - 0x20];
+} __attribute__((aligned(16)));
+
+struct sInfo_13F488 {
+    sVec4HP pos;
+    sVec4HP dir;
+    sVec4HP normal;
+    float depth;
+} __attribute__((aligned(16)));
+
+struct sVEnt_13F488 { short delta; short index; bool (*fn)(void*); };
+struct sVEntH_13F488 { short delta; short index; void (*fn)(void*, void*); };
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4HP vu0Scale_13F488(const sVec4HP& v, float s)
+{
+    sVec4HP r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4HP vu0Sub_13F488(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void vu0AddEq_13F488(sVec4HP& a, const sVec4HP& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_13F488(const sVec4HP& a, const sVec4HP& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4HP vu0Normalize_13F488(const sVec4HP& v)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_13F488(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline bool riderFlag_13F488(char* r)
+{
+    char* sub = r + 0x6C0;
+    sVEnt_13F488* vt = *(sVEnt_13F488**)sub;
+    return vt[8].fn(sub + vt[8].delta);
+}
+
+#define RIDER (*(char**)((char*)self + 0x18))
+#define RV(off) (*(sVec4HP*)(RIDER + (off)))
+
+extern "C" void func_0013F488(void* self)
+{
+    if (func_0011FEE8(RIDER) == 9)
+        return;
+    if (!riderFlag_13F488(RIDER)) {
+        char* r = RIDER;
+        if (*(float*)(r + 0x4C8) < 50.0f && absf_13F488(*(float*)(r + 0x498) - *(float*)(r + 0x118)) < 50.0f)
+            return;
+    }
+    sHit_13F488 hit;
+    sSphere_13F488 sph;
+    char* r = RIDER;
+    func_0032F650(&sph, *(void**)(r + 0xAA0), !riderFlag_13F488(r));
+    sph.f8 = 1;
+    sph.dir = RV(0x370);
+    float d = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
+    if (d < 0.0f)
+        { func_0032F708(&sph, 2); return; }
+    if (hit.obj != 0) {
+        char* h = *(char**)(hit.obj + 0xC);
+        if (h) {
+            sVEntH_13F488* vt = *(sVEntH_13F488**)(h + 0xC);
+            vt[42].fn(h + vt[42].delta, &hit);
+        }
+    }
+    {
+        float dot = vu0Dot_13F488(RV(0x370), hit.normal);
+        if (dot < -0.9998999834060669f)
+            { func_0032F708(&sph, 2); return; }
+        if (dot < 0.0f)
+            hit.normal = vu0Normalize_13F488(vu0Sub_13F488(hit.normal, vu0Scale_13F488(RV(0x370), dot)));
+    }
+    {
+        sVec4HP push = vu0Scale_13F488(vu0Scale_13F488(hit.normal, 1.100000023841858f), d);
+        func_00106538(RIDER, &push);
+        sVec4HP a = vu0Sub_13F488(RV(0x1E0), hit.v20);
+        float dot2 = vu0Dot_13F488(vu0Scale_13F488(hit.normal, -1.0f), a);
+        if (dot2 < 0.0f)
+            { func_0032F708(&sph, 2); return; }
+        sVec4HP n = vu0Normalize_13F488(a);
+        float k = dot2 * 0.05000000074505806f;
+        if (k < 27.77777862548828f)
+            k = 27.77777862548828f;
+        vu0AddEq_13F488(RV(0x1E0), vu0Scale_13F488(hit.normal, dot2 + k));
+        func_001065B0(RIDER, &hit);
+        cRider_updateOrientationImplicit(RIDER);
+        sInfo_13F488 info;
+        info.pos = hit.pos;
+        info.dir = n;
+        info.normal = hit.normal;
+        info.depth = dot2;
+        func_00105D98(RIDER, &info, hit.m4C);
+        func_002989A8(func_0028B180(), RIDER);
+    }
+    func_0032F708(&sph, 2);
+}
+#undef RV
+#undef RIDER
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F848);

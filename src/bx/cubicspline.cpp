@@ -136,7 +136,169 @@ void func_0031E260(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031E2D8);
+#ifdef SKIP_ASM
+// dlmalloc 2.7 sYSMALLOc()
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit long param
+extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+struct sMState_31EEE8;
+extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
+// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
+extern "C" void func_0031ED60_E2D8(void* ms, void* mem) __asm__("func_0031ED60");
+extern "C" int* func_00415FB8();
+
+struct sMChunk_31E2D8
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+};
+
+struct sMState_31E2D8
+{
+    unsigned int max_fast;              // 0x0
+    sMChunk_31E2D8* fastbins[11];       // 0x4
+    sMChunk_31E2D8* top;                // 0x30
+    char pad34[0x344 - 0x34];
+    unsigned int trim_threshold;        // 0x344
+    unsigned int top_pad;               // 0x348
+    char pad34C[0x35C - 0x34C];
+    unsigned int pagesize;              // 0x35C
+    unsigned int morecore_properties;   // 0x360
+    unsigned int mmapped_mem;           // 0x364
+    unsigned int sbrked_mem;            // 0x368
+    unsigned int max_sbrked_mem;        // 0x36C
+    unsigned int max_mmapped_mem;       // 0x370
+    unsigned int max_total_mem;         // 0x374
+};
+
+extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
+{
+    sMChunk_31E2D8* old_top;
+    unsigned int old_size;
+    char* old_end;
+    long size;
+    char* brk;
+    long correction;
+    char* snd_brk;
+    unsigned int front_misalign;
+    unsigned int end_misalign;
+    char* aligned_brk;
+    sMChunk_31E2D8* p;
+    sMChunk_31E2D8* remainder;
+    unsigned int remainder_size;
+    unsigned int sum;
+    unsigned int pagemask = av->pagesize - 1;
+
+    if (av->max_fast & 2) {
+        func_0031EEE8(ms, (sMState_31EEE8*)av);
+        return func_0031E818(ms, nb - 15);
+    }
+
+    old_top = av->top;
+    old_size = old_top->size & ~3U;
+    old_end = (char*)old_top + old_size;
+
+    brk = snd_brk = (char*)0xFFFFFFFF;
+
+    size = nb + av->top_pad + 16;
+    if (av->morecore_properties & 1)
+        size -= old_size;
+    size = (size + pagemask) & ~pagemask;
+    if (size > 0)
+        brk = (char*)func_0031FFD8(ms, size);
+
+    if (brk != (char*)0xFFFFFFFF) {
+        av->sbrked_mem += size;
+
+        if (brk == old_end && snd_brk == (char*)0xFFFFFFFF) {
+            old_top->size = (size + old_size) | 1;
+        } else {
+            front_misalign = 0;
+            end_misalign = 0;
+            correction = 0;
+            aligned_brk = brk;
+
+            if ((av->morecore_properties & 1) && old_size != 0 && brk < old_end) {
+                av->morecore_properties &= ~1U;
+            }
+
+            if (av->morecore_properties & 1) {
+                if (old_size != 0)
+                    av->sbrked_mem += brk - old_end;
+
+                front_misalign = (unsigned int)(brk + 8) & 15;
+                if (front_misalign > 0) {
+                    correction = 16 - front_misalign;
+                    aligned_brk += correction;
+                }
+
+                correction += old_size;
+
+                end_misalign = (unsigned int)(brk + size + correction);
+                correction += ((end_misalign + pagemask) & ~pagemask) - end_misalign;
+
+                snd_brk = (char*)func_0031FFD8(ms, correction);
+
+                if (snd_brk == (char*)0xFFFFFFFF) {
+                    correction = 0;
+                    snd_brk = (char*)func_0031FFD8(ms, 0);
+                } else if (snd_brk < brk) {
+                    snd_brk = brk + size;
+                    correction = 0;
+                    av->morecore_properties &= ~1U;
+                }
+            } else {
+                if (snd_brk == (char*)0xFFFFFFFF) {
+                    snd_brk = (char*)func_0031FFD8(ms, 0);
+                    av->sbrked_mem += snd_brk - brk - size;
+                }
+            }
+
+            if (snd_brk != (char*)0xFFFFFFFF) {
+                av->top = (sMChunk_31E2D8*)aligned_brk;
+                av->top->size = (snd_brk - aligned_brk + correction) | 1;
+                av->sbrked_mem += correction;
+
+                if (old_size != 0) {
+                    old_size = (old_size - 12) & ~15U;
+                    old_top->size = old_size | 1;
+                    ((sMChunk_31E2D8*)((char*)old_top + old_size))->size = 5;
+                    ((sMChunk_31E2D8*)((char*)old_top + old_size + 4))->size = 5;
+                    if (old_size >= 16) {
+                        unsigned int tt = av->trim_threshold;
+                        av->trim_threshold = 0xFFFFFFFF;
+                        func_0031ED60_E2D8(ms, (char*)old_top + 8);
+                        av->trim_threshold = tt;
+                    }
+                }
+            }
+        }
+
+        sum = av->sbrked_mem;
+        if (sum > av->max_sbrked_mem)
+            av->max_sbrked_mem = sum;
+        sum += av->mmapped_mem;
+        if (sum > av->max_total_mem)
+            av->max_total_mem = sum;
+
+        p = av->top;
+        size = p->size & ~3U;
+        if ((unsigned int)size >= (unsigned int)(nb + 16)) {
+            remainder_size = size - nb;
+            remainder = (sMChunk_31E2D8*)((char*)p + nb);
+            av->top = remainder;
+            p->size = nb | 1;
+            remainder->size = remainder_size | 1;
+            return (char*)p + 8;
+        }
+    }
+
+    *func_00415FB8() = 12;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031E6D8);
@@ -990,4 +1152,112 @@ void func_00320548(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_00320550);
+#ifdef SKIP_ASM
+void* func_00316A00(void* self);
+void* func_00317930(void* self);
+void* func_0031FF20(void* self);
+void func_0031FF38(void* self, int flags);
+
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sV2_0550 {
+    float x, y;
+    sV2_0550(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+struct sV3_0550 {
+    float x, y, z;
+    sV3_0550(const float& ax, const float& ay, const float& az) : x(ax), y(ay), z(az) {}
+};
+struct sV4_0550 {
+    float x, y, z, w;
+    sV4_0550(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+struct sQ_0550 {
+    float x, y, z, w;
+    sQ_0550(const float& ax, const float& ay, const float& az, const float& aw)
+    {
+        w = aw;
+        x = ax;
+        y = ay;
+        z = az;
+    }
+} __attribute__((aligned(16)));
+struct sM33_0550 {
+    float m[3][3];
+    sM33_0550()
+    {
+        m[0][0] = 1.0f; m[1][0] = 0.0f; m[2][0] = 0.0f;
+        m[0][1] = 0.0f; m[1][1] = 1.0f; m[2][1] = 0.0f;
+        m[0][2] = 0.0f; m[1][2] = 0.0f; m[2][2] = 1.0f;
+    }
+};
+struct sM44_0550 {
+    float m[4][4];
+    sM44_0550(float d)
+    {
+        m[0][0] = d;    m[1][0] = 0.0f; m[2][0] = 0.0f; m[3][0] = 0.0f;
+        m[0][1] = 0.0f; m[1][1] = d;    m[2][1] = 0.0f; m[3][1] = 0.0f;
+        m[0][2] = 0.0f; m[1][2] = 0.0f; m[2][2] = d;    m[3][2] = 0.0f;
+        m[0][3] = 0.0f; m[1][3] = 0.0f; m[2][3] = 0.0f; m[3][3] = d;
+    }
+};
+struct sXf_0550 {
+    sV4_0550 a;
+    sQ_0550 b;
+    sXf_0550(const sV4_0550& aa, const sQ_0550& ab) : a(aa), b(ab) {}
+};
+
+extern char D_004FF000[];
+extern char D_004FF018[];
+extern char D_004FF030[];
+extern char D_004FF048[], D_004FF058[], D_004FF068[], D_004FF078[], D_004FF088[], D_004FF098[], D_004FF0A8[], D_004FF0B8[], D_004FF0C8[];
+extern char D_004A5958;
+extern void* D_004A3E94;
+extern char D_004A5960[], D_004A5968[], D_004A5970[];
+extern char D_004FF0D8[], D_004FF0E8[], D_004FF0F8[], D_004FF108[];
+extern char D_004FF120[], D_004FF130[], D_004FF140[], D_004FF150[], D_004FF160[];
+extern char D_004FF170[], D_004FF1A0[], D_004FF1E0[], D_004FF220[], D_004FF230[], D_004FF250[];
+
+extern "C" void func_00320550(int init, int prio)
+{
+    if (prio == 0xFFFF) {
+        if (init != 0) {
+            func_00316A00(D_004FF000);
+            func_00317930(D_004FF018);
+            func_00317930(D_004FF030);
+            new (D_004FF048) sV3_0550(1.0f, 0.0f, 0.0f);
+            new (D_004FF058) sV3_0550(0.0f, 0.0f, 1.0f);
+            new (D_004FF068) sV3_0550(1.0f, 1.0f, 0.0f);
+            new (D_004FF078) sV3_0550(1.0f, 0.0f, 1.0f);
+            new (D_004FF088) sV3_0550(0.0f, 1.0f, 0.0f);
+            new (D_004FF098) sV3_0550(1.0f, 0.5f, 0.0f);
+            new (D_004FF0A8) sV3_0550(0.0f, 0.0f, 0.0f);
+            new (D_004FF0B8) sV3_0550(1.0f, 1.0f, 1.0f);
+            new (D_004FF0C8) sV3_0550(0.25f, 0.25f, 0.25f);
+            D_004A3E94 = &D_004A5958;
+            new (D_004A5960) sV2_0550(0.0f, 0.0f);
+            new (D_004A5968) sV2_0550(1.0f, 0.0f);
+            new (D_004A5970) sV2_0550(0.0f, 1.0f);
+            new (D_004FF0D8) sV3_0550(0.0f, 0.0f, 0.0f);
+            new (D_004FF0E8) sV3_0550(1.0f, 0.0f, 0.0f);
+            new (D_004FF0F8) sV3_0550(0.0f, 1.0f, 0.0f);
+            new (D_004FF108) sV3_0550(0.0f, 0.0f, 1.0f);
+            new (D_004FF120) sV4_0550(0.0f, 0.0f, 0.0f, 0.0f);
+            new (D_004FF130) sV4_0550(0.0f, 0.0f, 0.0f, 1.0f);
+            new (D_004FF140) sV4_0550(1.0f, 0.0f, 0.0f, 0.0f);
+            new (D_004FF150) sV4_0550(0.0f, 1.0f, 0.0f, 0.0f);
+            new (D_004FF160) sV4_0550(0.0f, 0.0f, 1.0f, 0.0f);
+            new (D_004FF170) sM33_0550();
+            new (D_004FF1A0) sM44_0550(1.0f);
+            new (D_004FF1E0) sM44_0550(0.0f);
+            new (D_004FF220) sQ_0550(0.0f, 0.0f, 0.0f, 1.0f);
+            new (D_004FF230) sXf_0550(*(sV4_0550*)D_004FF130, *(sQ_0550*)D_004FF220);
+            func_0031FF20(D_004FF250);
+        } else {
+            func_0031FF38(D_004FF250, 2);
+        }
+    }
+}
+#endif

@@ -120,7 +120,122 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/appman", cAppMan_mainLoop);
+#ifdef SKIP_ASM
+// PORT: cAppMan_checkHalt returns int; the main loop ignores it (void call here).
+void cAppMan_checkHalt_v(cAppMan* self) __asm__("cAppMan_checkHalt__FP7cAppMan");
+void func_00317530(void* self, float arg);
+void func_003175A0(void* self);
+void func_00317600(void* self);
+// PORT: func_00319D10 takes no arguments at this call site.
+void func_00319D10_0() __asm__("func_00319D10__FPv");
+int func_00319D18(void* self);
+// PORT: func_00319D18 is called with (1, 1) here.
+int func_00319D18_2(int a, int b) __asm__("func_00319D18__FPv");
+
+struct sVtI_6F00 { short delta; short index; int (*fn)(void*); };
+struct sVtV1_6F00 { short delta; short index; void (*fn)(void*, int); };
+
+static inline int calli_6F00(char* o, int vtoff, int slot)
+{
+    sVtI_6F00* vt = *(sVtI_6F00**)(o + vtoff);
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+static inline void call1_6F00(char* o, int vtoff, int slot, int a)
+{
+    sVtV1_6F00* vt = *(sVtV1_6F00**)(o + vtoff);
+    vt[slot].fn(o + vt[slot].delta, a);
+}
+
+extern "C" void cAppMan_mainLoop(void* p)
+{
+    char* self = (char*)p;
+    int count = 0;
+    calli_6F00(self, 0x5C, 5);
+    for (;;) {
+        callv_6D60(*(char**)(self + 0x8), 8, 11);
+        SYNCTASK_run(0);
+        callv_6D60(*(char**)(self + 0x8), 8, 12);
+        switch (*(volatile int*)(self + 0x58)) {
+        case 1:
+            if (calli_6F00(*(char**)(self + 0x8), 8, 10)) {
+                *(volatile int*)(self + 0x58) = 2;
+                func_00317600(self + 0x38);
+            } else {
+                func_003175A0(self + 0x38);
+            }
+            break;
+        case 2:
+            if (calli_6F00(*(char**)(self + 0x0), 0, 4)) {
+                cAppMan_checkHalt_v((cAppMan*)self);
+                callv_6D60(*(char**)(self + 0x0), 0, 3);
+                cAppMan_checkHalt_v((cAppMan*)self);
+                char* cur = *(char**)(self + 0x0);
+                if (cur)
+                    call1_6F00(cur, 0, 1, 3);
+                func_00319D18_2(1, 1);
+                func_00319D10_0();
+                count = 0;
+                char* next = *(char**)(self + 0x4);
+                *(int*)(self + 0x4) = 0;
+                *(char**)(self + 0x0) = next;
+                callv_6D60(next, 0, 5);
+                cAppMan_checkHalt_v((cAppMan*)self);
+                calli_6F00(self, 0x5C, 5);
+                *(int*)(self + 0x2C) = 0;
+                *(volatile int*)(self + 0x58) = 0;
+            }
+            break;
+        case 3:
+            if (calli_6F00(*(char**)(self + 0x0), 0, 4)) {
+                cAppMan_checkHalt_v((cAppMan*)self);
+                callv_6D60(*(char**)(self + 0x0), 0, 3);
+                cAppMan_checkHalt_v((cAppMan*)self);
+                char* cur = *(char**)(self + 0x0);
+                if (cur)
+                    call1_6F00(cur, 0, 1, 3);
+                *(int*)(self + 0x0) = 0;
+                return;
+            }
+            break;
+        case 0:
+            if (*(int*)(self + 0x4)) {
+                func_00317530(self + 0x38, 10.0f);
+                call1_6F00(*(char**)(self + 0x8), 8, 9, *(int*)(self + 0x4));
+                *(volatile int*)(self + 0x58) = 1;
+            }
+            break;
+        }
+        while (calli_6F00(self, 0x5C, 6)) {
+            cAppMan_checkHalt_v((cAppMan*)self);
+            count++;
+            if (*(int*)(self + 0x20) < count) {
+                count += calli_6F00(self, 0x5C, 5);
+                break;
+            }
+            (*(int*)(self + 0x1C))++;
+            callv_6D60(*(char**)(self + 0x0), 0, 6);
+            cAppMan_checkHalt_v((cAppMan*)self);
+        }
+        if ((*(int*)(self + 0x34) == 1 && count > 1 && calli_6F00(*(char**)(self + 0x0), 0, 7))
+            || (*(int*)(self + 0x34) == 0 && count != 0 && calli_6F00(*(char**)(self + 0x0), 0, 7))) {
+            cAppMan_checkHalt_v((cAppMan*)self);
+            if (0.0f < *(float*)(self + 0x2C)) {
+                float k = *(float*)(self + 0x30);
+                *(float*)(self + 0x2C) = (1.0f - k) * *(float*)(self + 0x24) * (float)*(int*)(self + 0x10) / (float)count + k * *(float*)(self + 0x2C);
+            } else {
+                *(float*)(self + 0x2C) = *(float*)(self + 0x24) * (float)*(int*)(self + 0x10) / (float)count;
+            }
+            count = 0;
+        } else {
+            callv_6D60(*(char**)(self + 0x8), 8, 4);
+            cAppMan_checkHalt_v((cAppMan*)self);
+        }
+    }
+}
+#endif
 
 int cExecutionMan_checkHalt(void* self, int flag);
 

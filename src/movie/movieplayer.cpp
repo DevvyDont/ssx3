@@ -966,7 +966,106 @@ extern "C" void func_0023EB80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023EC00);
+#ifdef SKIP_ASM
+extern "C" void func_0023EB50(void* self);
+extern "C" int func_00241CD8(void* self);
+// PORT: the target calls func_00241FB0 as a void function here (the unit defines it returning void*).
+void func_00241FB0_v(void* self) __asm__("func_00241FB0__FPv");
+
+struct sMovieVEntryEC00 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMovieVEntryEC00b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline int ovCall_EC00(char* s, int slot)
+{
+    void* o = *(void**)(s + 0x434);
+    sMovieVEntryEC00* vt = *(sMovieVEntryEC00**)o;
+    return vt[slot].fn((char*)o + vt[slot].delta);
+}
+
+static inline void post_EC00(char* s, int code)
+{
+    sMovieVEntryEC00b* vt = *(sMovieVEntryEC00b**)(s + 0x748);
+    vt[1].fn(s + vt[1].delta, code);
+}
+
+extern "C" void func_0023EC00(void* self)
+{
+    char* s = (char*)self;
+    int ready = func_00241CD8(self);
+    if ((*(int*)(s + 0x108))-- > 0)
+        return;
+    if (ovCall_EC00(s, 11))
+        return;
+    if (*(int*)(s + 0xC8)) {
+        int busy = 0;
+        if (*(int*)(s + 0xBC) || *(int*)(s + 0xC0) || (*(int (**)())(s + 0x78))())
+            busy = 1;
+        if (*(int*)(s + 0x128) && busy) {
+            post_EC00(s, 0x38);
+            return;
+        }
+        if (ovCall_EC00(s, 55) && ovCall_EC00(s, 58) && !ovCall_EC00(s, 51) && !ovCall_EC00(s, 59)) {
+            post_EC00(s, 6);
+            return;
+        }
+    }
+    if (*(int*)(s + 0xBC)) {
+        int f = *(int*)(s + 0x43C);
+        if (!(f & 8)) {
+            if (f & 1) {
+                post_EC00(s, 0x14);
+                return;
+            }
+            if (ovCall_EC00(s, 55) && ovCall_EC00(s, 58) && !ovCall_EC00(s, 51) && !ovCall_EC00(s, 59) && !ovCall_EC00(s, 13)) {
+                int a = ovCall_EC00(s, 23);
+                if (ovCall_EC00(s, 20) < a || !ovCall_EC00(s, 25)) {
+                    post_EC00(s, 0x15);
+                    return;
+                }
+            }
+        } else if (ready) {
+            func_0023EB50(self);
+            return;
+        }
+        func_00241FB0_v(self);
+        post_EC00(s, 7);
+        return;
+    }
+    {
+        int busy = 0;
+        if (*(int*)(s + 0xC0) || (*(int (**)())(s + 0x78))())
+            busy = 1;
+        if (*(int*)(s + 0x124) || busy) {
+            if (*(int*)(s + 0x43C) & 8) {
+                func_0023EB50(self);
+                return;
+            }
+        } else if (*(int*)(s + 0x43C) & 8) {
+            goto fail;
+        }
+        if (*(int*)(s + 0x43C) & 1) {
+            if ((*(int (**)())(s + 0x78))())
+                post_EC00(s, 0x24);
+            else
+                post_EC00(s, 5);
+            return;
+        }
+    fail:
+        func_00241FB0_v(self);
+        post_EC00(s, 0x1D);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023EF68);
@@ -1451,7 +1550,150 @@ extern "C" void func_0023F578(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023F698);
+#ifdef SKIP_ASM
+extern "C" void func_0023EB50(void* self);
+extern "C" int func_00241CD8(void* self);
+extern "C" void func_00242050(void* self);
+extern "C" int func_003DBDB0(void* a, void* b);
+
+struct sMovieVEntryF698 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMovieVEntryF698i {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sMovieVEntryF698ip {
+    short delta;
+    short index;
+    void (*fn)(void*, int, void*);
+};
+struct sMovieVEntryF698b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline int ovCall_F698(char* s, int slot)
+{
+    void* o = *(void**)(s + 0x434);
+    sMovieVEntryF698* vt = *(sMovieVEntryF698**)o;
+    return vt[slot].fn((char*)o + vt[slot].delta);
+}
+
+static inline int ovCallI_F698(char* s, int slot, int a)
+{
+    void* o = *(void**)(s + 0x434);
+    sMovieVEntryF698i* vt = *(sMovieVEntryF698i**)o;
+    return vt[slot].fn((char*)o + vt[slot].delta, a);
+}
+
+static inline void ovCallIP_F698(char* s, int slot, int a, void* p)
+{
+    void* o = *(void**)(s + 0x434);
+    sMovieVEntryF698ip* vt = *(sMovieVEntryF698ip**)o;
+    vt[slot].fn((char*)o + vt[slot].delta, a, p);
+}
+
+static inline void post_F698(char* s, int code)
+{
+    sMovieVEntryF698b* vt = *(sMovieVEntryF698b**)(s + 0x748);
+    vt[1].fn(s + vt[1].delta, code);
+}
+
+extern "C" void func_0023F698(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0x338))
+        return;
+    if (*(int*)(s + 0x128) && *(int*)(s + 0xC8)) {
+        post_F698(s, 0x38);
+        return;
+    }
+    int ready = func_00241CD8(self);
+    if (!(*(int (**)())(s + 0x64))() && ready) {
+        int f = *(int*)(s + 0x43C);
+        if (f & 8) {
+            func_0023EB50(self);
+            return;
+        }
+        if (f & 0x10) {
+            post_F698(s, 0x27);
+            return;
+        }
+        if (f & 2) {
+            post_F698(s, 0x30);
+            return;
+        }
+        if (f & 1) {
+            post_F698(s, 5);
+            return;
+        }
+        if (f & 4) {
+            post_F698(s, 0x17);
+            return;
+        }
+    }
+    if (*(int*)(s + 0xC8)) {
+        *(int*)(s + 0xC8) = 0;
+        func_00242050(self);
+        return;
+    }
+    if ((*(int (**)())(s + 0x6C))()) {
+        post_F698(s, 1);
+        return;
+    }
+    if ((*(int (**)())(s + 0x64))()) {
+        *(float*)(s + 0x110) = 1.0f;
+        *(float*)(s + 0x114) = 0.016669999808073044f;
+        if (*(int*)(s + 0xCC)) {
+            if (ovCall_F698(s, 55) && ovCall_F698(s, 58) && !ovCall_F698(s, 51) && !ovCall_F698(s, 59)) {
+                if (!ovCallI_F698(s, 67, *(int*)(s + 0xF8))) {
+                    int a = ovCall_F698(s, 23);
+                    if (ovCall_F698(s, 20) < a || !ovCall_F698(s, 25)) {
+                        post_F698(s, 0x15);
+                        return;
+                    }
+                }
+                for (int i = 0; i < 6; i++) {
+                    if (ovCallI_F698(s, 67, i)) {
+                        char buf[0x200];
+                        ovCallIP_F698(s, 14, i, buf);
+                        if (func_003DBDB0(s + 0x276, buf) == 0 && i != *(int*)(s + 0xF8)) {
+                            post_F698(s, 0x37);
+                            return;
+                        }
+                    }
+                }
+                if (ovCallI_F698(s, 67, *(int*)(s + 0xF8))) {
+                    ovCallIP_F698(s, 14, *(int*)(s + 0xF8), s + 0x234);
+                    post_F698(s, 9);
+                    return;
+                }
+                post_F698(s, 0xD);
+            } else {
+                post_F698(s, 0xA);
+                return;
+            }
+        } else if (ovCallI_F698(s, 65, *(int*)(s + 0xF8))) {
+            post_F698(s, 0x16);
+        } else if (ovCallI_F698(s, 66, *(int*)(s + 0xF8))) {
+            post_F698(s, 0x17);
+        } else if (!ovCall_F698(s, 53)) {
+            post_F698(s, 0x14);
+        }
+    }
+    if ((*(int (**)())(s + 0x68))() && *(int*)(s + 0xD4)) {
+        ovCallIP_F698(s, 14, *(int*)(s + 0xF8), s + 0x234);
+        post_F698(s, 0x18);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023FAE0);
@@ -3552,7 +3794,207 @@ extern "C" void func_00242570(sMovieList* list, sMovieNode* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_002425C0);
+#ifdef SKIP_ASM
+extern "C" void func_002429B0(void* self, const void* eye, void* frustum);
+extern "C" void func_00229F88(int index, void* v, void* m);
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+extern "C" int func_00242978(const void* a, const void* b);
+
+struct sVec4_25C0 {
+    float x, y, z, w;
+    sVec4_25C0() {}
+    sVec4_25C0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct sMtx_25C0 {
+    sVec4_25C0 r[4];
+};
+
+struct sBox_25C0 {
+    sVec4_25C0 min;
+    sVec4_25C0 max;
+};
+
+struct sBounds_25C0 {
+    float minx, miny, minz, pad0C;
+    float maxx, maxy, maxz;
+};
+
+struct sView_25C0 {
+    sVec4_25C0 pos;         // 0x00
+    char pad10[0x50 - 0x10];
+    sVec4_25C0 normal;      // 0x50
+    char pad60[0xA0 - 0x60];
+    float minx, miny, minz; // 0xA0
+    float maxx, maxy, maxz; // 0xAC
+    char padB8[4];
+    sView_25C0* next;       // 0xBC
+};
+
+struct sVisEnt_25C0 {
+    sView_25C0* view;
+    float dist;
+};
+
+struct sVisMgr_25C0 {
+    sView_25C0* head;       // 0x00
+    int enabled;            // 0x04
+    sVisEnt_25C0 ents[32];  // 0x08
+    int count;              // 0x108
+    int nvis;               // 0x10C
+    int mask;               // 0x110
+};
+
+struct sCamVt_25C0 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sCam_25C0 {
+    char pad0[0x10D8];
+    sCamVt_25C0* vt;        // 0x10D8
+};
+
+extern sCam_25C0* D_004A289C;
+
+typedef sMtx_25C0 (*tCamMtx_25C0)(void*);
+typedef sMtx_25C0* (*tCamMtxP_25C0)(void*);
+typedef bool (*tCamCull_25C0)(void*, sVec4_25C0*, sVec4_25C0*, sMtx_25C0*);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_25C0 vu0Scale_25C0(const sVec4_25C0& v, float s)
+{
+    sVec4_25C0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_25C0(const sVec4_25C0& a, const sVec4_25C0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (squared 3D distance).
+static inline float vu0DistSq_25C0(const sVec4_25C0& a, const sVec4_25C0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf4, %3\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf7, $vf5, $vf5\n"
+        "vadday.x  ACC, $vf7, $vf7y\n"
+        "vmaddz.x  $vf7, $vf6, $vf7z\n"
+        "qmfc2.ni  %1, $vf7\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sVec4_25C0 rowPos_25C0(const sMtx_25C0* m)
+{
+    return m->r[3];
+}
+
+static inline sVec4_25C0 mulT_25C0(const sMtx_25C0* m, const sVec4_25C0& v)
+{
+    return sVec4_25C0(v.x * m->r[0].x + v.y * m->r[0].y + v.z * m->r[0].z + v.w * m->r[0].w,
+                      v.x * m->r[1].x + v.y * m->r[1].y + v.z * m->r[1].z + v.w * m->r[1].w,
+                      v.x * m->r[2].x + v.y * m->r[2].y + v.z * m->r[2].z + v.w * m->r[2].w,
+                      v.x * m->r[3].x + v.y * m->r[3].y + v.z * m->r[3].z + v.w * m->r[3].w);
+}
+
+static inline sMtx_25C0* camMtx_25C0()
+{
+    sCam_25C0* c = D_004A289C;
+    return ((tCamMtxP_25C0)c->vt[0x23].fn)((char*)c + c->vt[0x23].delta);
+}
+
+extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
+{
+    self->nvis = 0;
+    self->mask = 0;
+    if (self->enabled == 0)
+        return;
+    sCam_25C0* c = D_004A289C;
+    sMtx_25C0 mtx = ((tCamMtx_25C0)c->vt[0x2B].fn)((char*)c + c->vt[0x2B].delta);
+    sVec4_25C0 p = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
+    p = mulT_25C0(camMtx_25C0(), p);
+    self->count = 0;
+    p.w = 1.0f;
+    sView_25C0* it = self->head;
+    while (it != 0) {
+        sView_25C0* v = it;
+        it = it->next;
+        sBox_25C0 box;
+        box.min.x = v->minx;
+        box.min.y = v->miny;
+        box.min.z = v->minz;
+        box.min.w = 1.0f;
+        box.max.x = v->maxx;
+        box.max.y = v->maxy;
+        box.max.z = v->maxz;
+        box.max.w = 1.0f;
+        int ov = bb->minx <= box.max.x && box.min.x <= bb->maxx
+              && bb->miny <= box.max.y && box.min.y <= bb->maxy
+              && bb->minz <= box.max.z && box.min.z <= bb->maxz;
+        if (ov) {
+            sCam_25C0* c2 = D_004A289C;
+            bool vis = !((tCamCull_25C0)c2->vt[0x5D].fn)((char*)c2 + c2->vt[0x5D].delta, &box.min, &box.max, &mtx);
+            if (vis) {
+                if (!(0.0f < vu0Dot_25C0(p, v->normal))) {
+                    float d = vu0DistSq_25C0(p, v->pos);
+                    self->ents[self->count].view = v;
+                    self->ents[self->count].dist = d;
+                    self->count++;
+                }
+            }
+        }
+    }
+    if (self->count == 0)
+        return;
+    func_00418EF8(self->ents, self->count, 8, func_00242978);
+    int n = self->count;
+    if (n > 2)
+        n = 2;
+    self->nvis = n;
+    for (int i = 0; i < self->nvis; i++) {
+        self->mask |= 1 << i;
+        func_002429B0(self, &p, self->ents[i].view);
+        func_00229F88(i, &self->ents[i].view->normal, (char*)self->ents[i].view + 0x60);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00242978);
@@ -3572,5 +4014,120 @@ extern "C" int func_00242978(const void* a, const void* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_002429B0);
+#ifdef SKIP_ASM
+struct sVec4_29B0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPlane_29B0 {
+    float x, y, z, d;
+};
+
+struct sFrustum_29B0 {
+    sVec4_29B0 pad0;
+    sVec4_29B0 corner[4];   // 0x10
+    sVec4_29B0 pad50;
+    sPlane_29B0 plane[4];   // 0x60
+};
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_29B0 vu0Sub_29B0(const sVec4_29B0& a, const sVec4_29B0& b)
+{
+    sVec4_29B0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec4_29B0 vu0Cross_29B0(const sVec4_29B0& a, const sVec4_29B0& b)
+{
+    sVec4_29B0 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_29B0 vu0Normalize_29B0(const sVec4_29B0& v)
+{
+    sVec4_29B0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_29B0(const sVec4_29B0& a, const sVec4_29B0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline void makePlane_29B0(sFrustum_29B0* f, int i, const sVec4_29B0& eye, const sVec4_29B0& c0, const sVec4_29B0& c1)
+{
+    sVec4_29B0 a;
+    sVec4_29B0 b;
+    sVec4_29B0 n;
+    a = vu0Sub_29B0(c1, eye);
+    b = vu0Sub_29B0(c0, eye);
+    n = vu0Normalize_29B0(vu0Cross_29B0(a, b));
+    n.w = -vu0Dot_29B0(eye, n);
+    f->plane[i].x = n.x;
+    f->plane[i].y = n.y;
+    f->plane[i].z = n.z;
+    f->plane[i].d = n.w;
+}
+
+extern "C" void func_002429B0(void* self, const void* eyep, void* fp)
+{
+    const sVec4_29B0& eye = *(const sVec4_29B0*)eyep;
+    sFrustum_29B0* f = (sFrustum_29B0*)fp;
+    makePlane_29B0(f, 0, eye, f->corner[0], f->corner[1]);
+    makePlane_29B0(f, 1, eye, f->corner[1], f->corner[2]);
+    makePlane_29B0(f, 2, eye, f->corner[2], f->corner[3]);
+    makePlane_29B0(f, 3, eye, f->corner[3], f->corner[0]);
+}
+#endif
 

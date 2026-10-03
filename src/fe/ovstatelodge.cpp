@@ -93,7 +93,210 @@ extern "C" void func_001D2A90(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" int func_00398380(void* self, int id);
+// The array-initializer clear (memset) is a void libcall here.
+extern "C" void func_00416210(void* dst, int c, int n);
+
+struct sName5_2AD0 { char c[5]; };
+extern sName5_2AD0 D_00467298[];
+extern char D_00466E60[];
+extern char D_00467238[];
+extern char D_00467250[];
+extern char D_004A1F20[];
+extern char D_00467260[];
+extern char D_00467270[];
+extern char D_00467280[];
+extern char D_004672A0[];
+extern char D_004672B0[];
+extern char D_004672C0[];
+extern char D_004672D0[];
+extern char D_004672E0[];
+extern char D_004672F0[];
+extern char D_00467308[];
+extern char D_00467320[];
+extern char D_00467338[];
+extern char D_00467348[];
+extern char D_00467358[];
+extern char D_00467368[];
+extern char D_00467380[];
+extern char D_00467398[];
+extern char D_004673B0[];
+extern char D_004673D0[];
+extern char D_004673F0[];
+extern char D_00467410[];
+extern char D_00467420[];
+extern char D_00467430[];
+extern char D_00467440[];
+extern char D_004A1F28[];
+extern char D_004A1F30[];
+extern char D_004A1F38[];
+extern char D_00460488[];
+
+struct sWVEnt_2AD0 { short delta; short index; void (*fn)(void*, int); };
+
+struct sWidget_2AD0 {
+    char pad0[8];
+    sWVEnt_2AD0* vt;    // 0x08
+    char padC[0x18 - 0xC];
+    int index;          // 0x18
+    char pad1C[0x38 - 0x1C];
+    int hash;           // 0x38
+    char pad3C[0x78 - 0x3C];
+    int f78;            // 0x78
+    int f7C;            // 0x7C
+};
+
+static inline void wShow_2AD0(sWidget_2AD0* w, int on)
+{
+    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+}
+
+static inline void setW_2AD0(char* s, int off, sWidget_2AD0* w)
+{
+    *(sWidget_2AD0**)(s + off) = w;
+    wShow_2AD0(w, 0);
+}
+
+extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
+{
+    char* s = (char*)self;
+    int h = w->hash;
+    if (h == GetHashValue32(D_00466E60)) {
+        cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467238));
+        return;
+    }
+    if (h == GetHashValue32(D_00467250)) {
+        setW_2AD0(s, 0x48, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004A1F20)) {
+        setW_2AD0(s, 0x4C, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467260)) {
+        *(sWidget_2AD0**)(s + 0x50) = w;
+        return;
+    }
+    if (h == GetHashValue32(D_00467270) || h == GetHashValue32(D_00467280)) {
+        char buf[20];
+        *(sName5_2AD0*)buf = D_00467298[0];
+        func_00416210(buf + 5, 0, 15);
+        char* eng = *(char**)(s + 0x10);
+        buf[2] = *(unsigned char*)(s + 0xB8) + '0';
+        int hash = GetHashValue32(buf);
+        int r = func_00398380(eng + 0x58, hash);
+        w->f78 = -1;
+        w->f7C = r;
+        return;
+    }
+    if (h == GetHashValue32(D_004672A0)) {
+        setW_2AD0(s, 0x58, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004672B0)) {
+        setW_2AD0(s, 0x5C, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004672C0)) {
+        setW_2AD0(s, 0x60, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004672D0)) {
+        setW_2AD0(s, 0x64, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004672E0)) {
+        setW_2AD0(s, 0x68, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004672F0)) {
+        setW_2AD0(s, 0x6C, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467308)) {
+        setW_2AD0(s, 0x70, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467320)) {
+        setW_2AD0(s, 0x74, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467338)) {
+        setW_2AD0(s, 0x90, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467348)) {
+        setW_2AD0(s, 0x94, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467358)) {
+        setW_2AD0(s, 0x98, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467368)) {
+        setW_2AD0(s, 0x78, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467380)) {
+        setW_2AD0(s, 0x7C, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467398)) {
+        setW_2AD0(s, 0x80, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004673B0)) {
+        setW_2AD0(s, 0x84, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004673D0)) {
+        setW_2AD0(s, 0x88, w);
+        return;
+    }
+    if (h == GetHashValue32(D_004673F0)) {
+        setW_2AD0(s, 0x8C, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467410)) {
+        setW_2AD0(s, 0x9C, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467420)) {
+        setW_2AD0(s, 0xA0, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467430)) {
+        setW_2AD0(s, 0xA4, w);
+        return;
+    }
+    if (h == GetHashValue32(D_00467440)) {
+        w->index = 0;
+        return;
+    }
+    if (h == GetHashValue32(D_004A1F28)) {
+        w->index = 1;
+        return;
+    }
+    if (h == GetHashValue32(D_004A1F30)) {
+        w->index = 2;
+        return;
+    }
+    if (h == GetHashValue32(D_004A1F38)) {
+        w->index = 3;
+        return;
+    }
+    if (h == GetHashValue32(D_00460488)) {
+        setW_2AD0(s, 0x54, w);
+        return;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D2EA0);
 
@@ -228,7 +431,155 @@ extern "C" void cFEStatePeakRoom_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" char* func_00156A90(void* self, int a1, int a2);
+extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int func_00398380(void* self, int id);
+extern char D_00466E60[];
+extern char D_00467658[];
+extern char D_00467668[];
+extern char D_00467678[];
+extern char D_004A1FA8[];
+extern char D_004A1FB0[];
+extern char D_00460488[];
+extern char* D_004415E0[];
+extern char* D_004415F0[];
+extern char* D_00441540[];
+extern char* D_00441558[];
+extern char* D_00441570[];
+extern char* D_00441588[];
+extern char* D_004415A0[];
+extern char* D_004415B8[];
+
+struct sWVEnt_38F8 { short delta; short index; void (*fn)(void*, int); };
+
+struct sWidget_38F8 {
+    char pad0[8];
+    sWVEnt_38F8* vt;    // 0x08
+    char padC[0x18 - 0xC];
+    int index;          // 0x18
+    char pad1C[0x38 - 0x1C];
+    int hash;           // 0x38
+    char pad3C[0x78 - 0x3C];
+    int f78;            // 0x78
+    int f7C;            // 0x7C
+};
+
+struct sPeak_38F8 {
+    char pad0[0x10];
+    char* engine;               // 0x10
+    char pad14[0x44 - 0x14];
+    signed char player;         // 0x44
+    char pad45[0x48 - 0x45];
+    sWidget_38F8* slots[4];     // 0x48
+    sWidget_38F8* grid[6][5];   // 0x58
+    sWidget_38F8* fD0;          // 0xD0
+    int fD4;                    // 0xD4
+    int fD8;                    // 0xD8
+    int charID;                 // 0xDC
+    int mode;                   // 0xE0
+};
+
+static inline void wShow_38F8(sWidget_38F8* w, int on)
+{
+    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+}
+
+extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* w)
+{
+    int h = w->hash;
+    if (h == GetHashValue32(D_00466E60)) {
+        int m = self->mode;
+        if (m == 2)
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467658));
+        else if (m == 1)
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467668));
+        else
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467678));
+    }
+    if (h == GetHashValue32(D_004A1FA8)) {
+        self->fD4 = w->f7C;
+        return;
+    }
+    if (h == GetHashValue32(D_004A1FB0)) {
+        self->fD8 = w->f7C;
+        return;
+    }
+    if (h == GetHashValue32(D_00460488)) {
+        self->fD0 = w;
+        wShow_38F8(w, 0);
+        return;
+    }
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    for (int i = 0; i < 4; i++) {
+        if (h == GetHashValue32(D_004415F0[i])) {
+            self->slots[i] = w;
+            if (func_00157BF0(iface, self->player, self->charID, self->mode, i)) {
+                char* info = func_00156A90(iface, self->mode, i);
+                char* eng = self->engine;
+                int hash = GetHashValue32(*(char**)(info + 8));
+                int r = func_00398380(eng + 0x58, hash);
+                sWidget_38F8* sw = self->slots[i];
+                sw->f78 = -1;
+                sw->f7C = r;
+            } else {
+                wShow_38F8(self->slots[i], 0);
+            }
+            return;
+        }
+        if (h == GetHashValue32(D_004415E0[i])) {
+            w->index = i;
+            return;
+        }
+    }
+    for (int j = 0; j < 5; j++) {
+        if (h == GetHashValue32(D_00441588[j])) {
+            self->grid[1][j] = w;
+            wShow_38F8(w, 0);
+            w->index = j;
+            return;
+        }
+        if (h == GetHashValue32(D_00441570[j])) {
+            self->grid[0][j] = w;
+            wShow_38F8(w, 0);
+            w->index = j;
+            return;
+        }
+        if (h == GetHashValue32(D_00441540[j])) {
+            self->grid[2][j] = w;
+            wShow_38F8(w, 0);
+            w->index = j;
+            return;
+        }
+        if (h == GetHashValue32(D_00441558[j])) {
+            self->grid[3][j] = w;
+            wShow_38F8(w, 0);
+            w->index = j;
+            return;
+        }
+        if (h == GetHashValue32(D_004415A0[j])) {
+            self->grid[4][j] = w;
+            wShow_38F8(w, 0);
+            w->index = j;
+            return;
+        }
+        if (h == GetHashValue32(D_004415B8[j])) {
+            self->grid[5][j] = w;
+            wShow_38F8(w, 0);
+            w->index = j;
+            return;
+        }
+    }
+}
+#endif
 
 extern "C" void* func_0039E4C0(void* self);
 

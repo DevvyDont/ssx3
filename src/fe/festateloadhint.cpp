@@ -469,7 +469,100 @@ INCLUDE_ASM("fe/festateloadhint", func_00246CF8);
 
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_InitwidgetMultiP);
 
+//100%
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_widgetCreateQP);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" char* func_00155270(void* iface, int a1);
+extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" int func_00148950(void* iface, int id);
+extern "C" void func_002C2540(void* dst, const char* s);
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void func_003A0E90(void* obj, char* text);
+extern "C" double func_00413AF8(float f);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char* D_004A28A8;
+extern char D_004A2C28[];
+extern char D_0047BC80[];
+extern char D_0047BEC8[];
+extern char D_0047BED8[];
+extern char D_0047BEE8[];
+extern char D_0047BF00[];
+extern char D_0047BF18[];
+extern char D_0047BF30[];
+extern char D_0047BF48[];
+extern char D_0047BF60[];
+extern char D_0047BF88[];
+// PORT: the literal "%02.0f:%02.0f" (strcpy of a constant expands to an aligned 14-byte copy);
+// splat names it, so copy from the symbol with the literal's length and rodata alignment.
+extern char D_0047BF78[] __attribute__((aligned(8)));
+
+static inline int wHash_7AB0(char* w) { return *(int*)(w + 0x38); }
+
+struct sVEnt_7AB0 { short delta; short index; void* (*fn)(void*, int); };
+
+extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
+{
+    char* w = (char*)widget;
+    void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+    void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
+    void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
+    void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
+    char* st = func_00155270(iface8, func_00146E98(iface1, 0));
+    unsigned short text[0x18];
+    unsigned short fmtw[0x20];
+    if (wHash_7AB0(w) == GetHashValue32(D_0047BEC8)) {
+        func_002C2540(text, func_0014EE58(iface2, func_00146E98(iface1, 0)));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BED8)) {
+        char* o = *(char**)(D_004A28A8 + 0x8C);
+        sVEnt_7AB0* vt = *(sVEnt_7AB0**)(o + 4);
+        func_002C2508(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
+        func_002C26D0(text, fmtw, func_00148950(iface3, func_00146E98(iface1, 0)));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BEE8)) {
+        func_002C2540(fmtw, D_004A2C28);
+        func_002C26D0(text, fmtw, *(int*)(st + 0x2C));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF00)) {
+        func_002C2540(fmtw, D_004A2C28);
+        func_002C26D0(text, fmtw, *(int*)(st + 0x28));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF18)) {
+        func_002C2540(fmtw, D_004A2C28);
+        func_002C26D0(text, fmtw, *(int*)(st + 0x18));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF30)) {
+        func_002C2540(fmtw, D_004A2C28);
+        func_002C26D0(text, fmtw, *(int*)(st + 0x20));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF48)) {
+        func_002C2540(fmtw, D_004A2C28);
+        func_002C26D0(text, fmtw, *(int*)(st + 0xC));
+        func_003A0E90(widget, (char*)text);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF60)) {
+        int t = (int)*(float*)(st + 0x48);
+        int min = t / 60;
+        int sec = t % 60;
+        char fmt[0x20];
+        char buf[0x20];
+        __builtin_memcpy(fmt, D_0047BF78, sizeof("%02.0f:%02.0f"));
+        sprintf(buf, fmt, func_00413AF8((float)min), func_00413AF8((float)sec));
+        cUIText_setAsciiString((cUIText*)widget, buf);
+    } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF88)) {
+        func_002C2540(fmtw, D_004A2C28);
+        func_002C26D0(text, fmtw, *(int*)(st + 0x88));
+        func_003A0E90(widget, (char*)text);
+    }
+}
+#endif
 
 extern "C" void* func_00242EB8(int, int);
 

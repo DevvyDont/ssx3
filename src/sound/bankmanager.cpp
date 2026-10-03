@@ -512,7 +512,82 @@ extern "C" void func_0028BF38(void* self, int i, int a, int b, int c, int d, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028BF78);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" int func_0028B1B0(void);
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028D488(void* self);
+extern "C" int func_002B49E0(void* monitor);
+extern "C" int func_002B4AF0(void* monitor);
+extern "C" void func_00287558(void* self, int on);
+// PORT: func_002B4070 takes the 64-bit bank mask as a second argument (64-bit `long`).
+extern "C" void func_002B4070_BF78(void* monitor, long mask) __asm__("func_002B4070");
+
+struct sCfg_BF78 {
+    int flags;
+    int v[(0x288 - 4) / 4];
+};
+extern sCfg_BF78 D_00535610_BF78 __asm__("D_00535610");
+
+extern "C" void func_0028BF78(char* self, int state)
+{
+    if (*(int*)(self + 0x608C) == state)
+        return;
+    *(int*)(self + 0x608C) = state;
+    switch (state) {
+    case 0: {
+        func_002B4070_BF78(self + 0x118, *(long*)(self + 0x518));
+        cBE_getInterface_Fv(cBE_getBE(), 4);
+        sCfg_BF78 cfg = D_00535610_BF78;
+        func_00287558(self, (cfg.flags >> 17) & 1);
+        if (func_0028B1B0() == 0)
+            return;
+        if (*(int*)(self + 0x530) == 0)
+            return;
+        if ((unsigned int)(func_002B49E0(self + 0x118) - 101) >= 3)
+            return;
+        func_0028D488(self);
+        func_0028CF98(self, 0, 0, -1, 0);
+        break;
+    }
+    case 1:
+    case 3: {
+        func_002B4070_BF78(self + 0x118, *(long*)(self + 0x6098));
+        cBE_getInterface_Fv(cBE_getBE(), 4);
+        sCfg_BF78 cfg = D_00535610_BF78;
+        func_00287558(self, (cfg.flags >> 17) & 1);
+        if (*(long*)(self + 0x6098) == 0)
+            return;
+        if (func_0028B1B0() == 0)
+            return;
+        if (*(int*)(self + 0x530) == 0)
+            return;
+        int st = func_002B49E0(self + 0x118);
+        if ((unsigned int)(st - 1) < 3)
+            return;
+        if (func_002B4AF0(self + 0x118) != 0 && st != 0x12D)
+            return;
+        func_0028D488(self);
+        func_0028CF98(self, 0, 0, -1, 0);
+        break;
+    }
+    case 2:
+        func_00287558(self, 0);
+        if (func_0028B1B0() == 0)
+            return;
+        if ((unsigned int)(func_002B49E0(self + 0x118) - 101) < 3)
+            return;
+        func_0028CF98(self, 0, 0, -1, 0);
+        *(int*)(self + 0x5FD4) = 0;
+        *(int*)(self + 0x5FD0) = 0;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028C2D0);
@@ -563,7 +638,138 @@ extern "C" void func_0028C2D0(char* self, long key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028C430);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" int func_002906B8(void* self);
+extern "C" void func_002B2850(void* a, void* mon);
+
+struct sEntry_C430 {
+    signed char kind;
+    char pad[0x17];
+};
+struct sQuad_C430 {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+struct sStack_C430 {
+    int field_0x0;                  // 0x1D8
+    sEntry_C430 cur;                // 0x1DC
+    volatile int depth;             // 0x1F4
+    sEntry_C430* entries;           // 0x1F8
+    int flags[4];                   // 0x1FC
+    int* a34;
+    int* a38;
+    int* a3C;
+    char a40[4][8];
+    int* a60;
+    int* a64;
+    int* a68;
+    int* a6C;
+    sQuad_C430* a70;
+    int* a74;
+    int* a78;
+    int* a7C;
+    int* a80;
+    int* a84;
+};
+struct sMgr_C430 {
+    char pad_0x0[0x1D8];
+    sStack_C430 st;                 // 0x1D8
+};
+
+struct sDesc_C430 {
+    char pad0[0x70];
+    int count;          // 0x70
+    char pad74[0x8C - 0x74];
+    int volume;         // 0x8C
+};
+struct sObj_C430 {
+    sDesc_C430* desc;   // 0x00
+    char pad4[0x34 - 4];
+    int kind;           // 0x34
+};
+struct sCue_C430 {
+    char pad0[4];
+    int f4;             // 0x04
+    char pad8[0x18 - 8];
+    sObj_C430* obj;     // 0x18
+    char* data;         // 0x1C
+    int idx;            // 0x20
+    int f24;            // 0x24
+};
+
+static inline void bmPush_C430(sMgr_C430** self, int kind, int data)
+{
+    sMgr_C430* m = *self;
+    sStack_C430* st = &m->st;
+    m->st.depth++;
+    st->entries[m->st.depth] = m->st.cur;
+    m->st.flags[m->st.depth] = 0;
+    st->a34[m->st.depth] = 0;
+    st->a38[m->st.depth] = st->entries[m->st.depth].kind;
+    st->a3C[m->st.depth] = 0;
+    func_00416210((char*)st + m->st.depth * 8 + 0x40, 0, 8);
+    st->a60[m->st.depth] = 0;
+    st->a64[m->st.depth] = 0;
+    st->a68[m->st.depth] = 0;
+    st->a6C[m->st.depth] = 0;
+    st->a70[m->st.depth].b = 0;
+    st->a70[m->st.depth].a = 100;
+    st->a70[m->st.depth].c = 90;
+    st->a70[m->st.depth].d = 50;
+    st->a74[m->st.depth] = 0;
+    st->a80[m->st.depth] = 0;
+    st->a84[m->st.depth] = 0;
+    st->a78[m->st.depth] = 127;
+    st->a7C[m->st.depth] = 1;
+    (*(int**)((char*)self + 4))[(*self)->st.depth] = kind;
+    (*(int**)((char*)self + 8))[(*self)->st.depth] = data;
+}
+
+#define BM_MIN_C430(a, b) ((a) < (b) ? (a) : (b))
+#define BM_MAX_C430(a, b) ((a) >= (b) ? (a) : (b))
+
+extern "C" int func_0028C430(void* p, sCue_C430* cue)
+{
+    sMgr_C430** self = (sMgr_C430**)p;
+    int* pidx = &cue->idx;
+    char* data = cue->data;
+    int saved = cue->f24;
+    sObj_C430* obj = cue->obj;
+    sDesc_C430* desc = obj->desc;
+    int kind = obj->kind;
+    int ivol = desc->volume;
+    int count = desc->count;
+    if (cue->idx >= count) {
+        cue->idx = 0;
+        if (count <= 0)
+            goto end;
+    }
+    {
+        float vol = (float)ivol;
+        int idx = cue->idx;
+        while (idx < 0)
+            idx += count;
+        bmPush_C430(self, kind, (int)(data + idx));
+        sMgr_C430** pp = *(sMgr_C430***)((char*)self + 0x118);
+        (*pp)->st.a3C[(*pp)->st.depth] = (int)((char*)self + 0x60A0);
+        sMgr_C430* m2 = **(sMgr_C430***)((char*)self + 0x118);
+        sStack_C430* st2 = &m2->st;
+        st2->a38[m2->st.depth] = (int)BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth] * (vol * 0.009999999776482582f), 127.0f), 0.0f);
+        st2->entries[st2->depth].kind = BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth], 127), 0);
+        func_002B2850(*(void**)((char*)self + 0x520), (char*)self + 0x118);
+        func_002906B8(self);
+        (*pidx)++;
+        cue->f4 = saved;
+    }
+end:
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028C8C0__FPvi);
@@ -574,7 +780,192 @@ void func_0028C8C0(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028C8C8);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// func_00285D98 returns a rider pointer here (the unit declares it int).
+struct sRiderC8C8;
+extern "C" sRiderC8C8* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+int func_0011FE98(void* rider);
+int func_0028D898(void* self);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_0028D960(void* self);
+extern "C" void func_002910E0(void* self);
+extern "C" void func_002913D8(void* self);
+extern "C" int func_002A4168(void* self);
+extern "C" int func_002A41D8(void* self);
+extern "C" void func_002B3C98(void* mon, char v);
+extern "C" void func_002B3D10(void* mon, char v);
+extern "C" int func_002B4620(void* mon);
+extern "C" int func_002B46E8(void* mon);
+extern "C" void func_002B4708(void* mon);
+extern "C" int func_002B4878(void* mon);
+extern int D_004A361C;
+extern int D_004A3620;
+
+struct sBmVtC8C8 { short delta; short index; void (*fn)(void*, int); };
+
+struct sApC8C8 {
+    char pad0[0x98];
+    float f98;          // 0x98
+    float f9C;          // 0x9C
+    float fA0;          // 0xA0
+    char padA4[0xAC - 0xA4];
+    int state;          // 0xAC
+};
+
+struct sRiderC8C8 {
+    char pad0[0x788];
+    sApC8C8* ap;        // 0x788
+};
+
+struct sBmC8C8 {
+    char pad0[0x118];
+    char mon[0x5558 - 0x118];   // 0x118
+    sBmVtC8C8* monVt;           // 0x5558
+    char pad555C[0x5830 - 0x555C];
+    float f5830;                // 0x5830
+    char pad5834[0x60A0 - 0x5834];
+    float f60A0;                // 0x60A0
+    char pad60A4[0x6244 - 0x60A4];
+    float f6244;                // 0x6244
+    float f6248;                // 0x6248
+    float f624C;                // 0x624C
+    int f6250;                  // 0x6250
+};
+
+static inline float bmSpeed_C8C8(sBmC8C8* self, sRiderC8C8* rider)
+{
+    int s = rider->ap->state;
+    int air = 0;
+    if (s == 1 || s == 3)
+        air = 1;
+    if (air) {
+        if (D_004A361C == 1)
+            return self->f6244;
+        float v = rider->ap->f98;
+        self->f6248 = 0.0f;
+        self->f6244 = v;
+        return v;
+    }
+    if (D_004A361C == 1)
+        return self->f6244;
+    return 0.0f;
+}
+
+extern "C" void func_0028C8C8(sBmC8C8* self)
+{
+    if (self->f6250 > 0)
+        self->f6250--;
+    sRiderC8C8* rider = func_00285D98_p(self, -1);
+    float spd;
+    if (func_0011FE98(rider) == 1) {
+        int s = rider->ap->state;
+        int air = 0;
+        if (s == 1 || s == 3)
+            air = 1;
+        if (air) {
+            if (D_004A361C == 1) {
+                spd = self->f6244;
+            } else {
+                spd = rider->ap->f98;
+                self->f6248 = 0.0f;
+                self->f6244 = spd;
+            }
+            goto have;
+        }
+        if (D_004A361C == 1) {
+            spd = self->f6244;
+            goto have;
+        }
+    }
+    spd = 0.0f;
+have:
+    int play = 0;
+    self->f60A0 = *(float*)func_00287968(self, 1, 0);
+    D_004A3620 = D_004A361C;
+    D_004A361C = 0;
+    if (3.9994986057281494f < spd) {
+        int r = func_002B4878(self->mon);
+        if (r == 1 && !func_002A4168(self) && !func_002A41D8(self)) {
+            if (!func_0028D898(self))
+                play = r;
+        }
+    }
+    if (func_00288AE0(self) == 0) {
+        if (2.0f < spd) {
+            D_004A361C = 1;
+            float lo = rider->ap->fA0;
+            if (lo < self->f6248)
+                lo = self->f6248;
+            self->f6248 = lo;
+            float hi;
+            if (D_004A3620 == 0) {
+                hi = (rider->ap->f9C - rider->ap->fA0) * 0.5f;
+                if (hi < 0.5f)
+                    hi = 0.5f;
+                hi = hi + lo;
+                self->f624C = hi;
+            } else {
+                hi = self->f624C;
+            }
+            float vmax = 127.0f;
+            float inv = 0.007874015718698502f;
+            float vol = ((1.0f - spd * 0.8425197005271912f * 0.5f) * vmax <? vmax) >? 20.0f;
+            if (lo < hi) {
+                float ratio = lo / hi;
+                int full = 127;
+                float t = vmax - ratio * 107.0f;
+                char v = (int)((t <? vmax) >? 20.0f);
+                if (play) {
+                    float k = *(float*)func_00287968(self, 1, 0);
+                    int d = v - 20;
+                    float f = (float)(full - d) * (k * inv);
+                    self->f60A0 = f;
+                    func_002B3D10(self->mon, (int)(f * 100.0f));
+                }
+                t = vmax - (vmax - vol) * ratio;
+                v = (int)((t <? vmax) >? vol);
+                self->f5830 = (float)(full - v) * inv;
+                if (play)
+                    func_002B3C98(self->mon, v);
+            } else {
+                self->f5830 = (vmax - vol) * inv;
+                if (play) {
+                    func_002B3C98(self->mon, (int)vol);
+                    float k = *(float*)func_00287968(self, 1, 0);
+                    self->f60A0 = k;
+                    func_002B3D10(self->mon, (int)(k * 100.0f));
+                }
+            }
+            self->f5830 = self->f5830 * *(float*)func_00287968(self, 5, 0);
+            if (D_004A3620 == 0) {
+                func_002910E0(self);
+                if (play) {
+                    char* mon = self->mon;
+                    if (func_002B4620(mon) && func_0028D960(self))
+                        self->monVt[3].fn(mon + self->monVt[3].delta, 7);
+                }
+            }
+            return;
+        }
+    }
+    char* mon = self->mon;
+    if (D_004A3620 == 1) {
+        func_002913D8(self);
+        if (func_002B46E8(mon)) {
+            if (func_0028D960(self))
+                self->monVt[3].fn(mon + self->monVt[3].delta, 8);
+            func_002B4708(mon);
+        }
+    }
+    func_002B3C98(mon, 0x7F);
+    func_002B3D10(mon, (int)(self->f60A0 * 100.0f));
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028CD48);
@@ -841,7 +1232,102 @@ void func_0028DF08(void* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028DF18);
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028E100);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" void* func_0028B1E8();
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028D488(void* self);
+extern "C" int func_0028D960(void* self);
+extern "C" int func_002A1E20(void* self, int id);
+extern "C" int func_002A4030(void* self);
+extern "C" void func_002B3C28(void* self, int a1);
+extern "C" void func_002B49C0(void* self, int a1);
+extern char D_004A3630[];
+extern char D_004A3638[];
+extern char D_004A3640[];
+
+struct sBmVtE100 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef void (*tBmLoadE100)(void*, void*, int, void*, int);
+typedef int (*tBmSetE100)(void*, int);
+
+static inline void bmLoad_E100(char* self, char* bank, int n)
+{
+    char* mon = self + 0x118;
+    sBmVtE100* vt = *(sBmVtE100**)(self + 0x5558);
+    ((tBmLoadE100)vt[2].fn)(mon + vt[2].delta, bank, 0xC, func_00287968(self, 1, 0), 0);
+    func_002B49C0(mon, n);
+}
+
+static inline void bmLoadBank_E100(char* self, int t)
+{
+    if (t == 1) {
+        bmLoad_E100(self, D_004A3630, 1);
+    } else if (t == 2) {
+        bmLoad_E100(self, D_004A3638, 2);
+    } else {
+        bmLoad_E100(self, D_004A3640, 3);
+    }
+    char* mon = self + 0x118;
+    sBmVtE100* vt2 = *(sBmVtE100**)(self + 0x5558);
+    ((tBmSetE100)vt2[4].fn)(mon + vt2[4].delta, 0xC);
+    func_002B3C28(mon, 0x7F);
+}
+
+extern "C" void func_0028E100(char* self)
+{
+    if (*(int*)(self + 0x6274) == 0)
+        return;
+    int st = *(int*)(self + 0x6278);
+    int id;
+    if (st == 0) {
+        if (func_0028D960(self)) {
+            int t;
+            id = *(int*)(self + 0x6284);
+            if (id == 0x17) {
+                t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            } else {
+                t = func_002A1E20(self, id);
+                *(int*)(self + 0x6284) = 0x17;
+            }
+            bmLoadBank_E100(self, t);
+        }
+    } else if (st == 2) {
+        if (func_0028D960(self)) {
+            id = *(int*)(self + 0x6284);
+            if (id != 0x17) {
+                if (func_002A4030(self)) {
+                    func_0028D488(self);
+                    func_0028CF98(self, 0x24, 1, -1, 0);
+                } else {
+                    id = *(int*)(self + 0x6284);
+                    bmLoadBank_E100(self, func_002A1E20(self, id));
+                }
+                *(int*)(self + 0x6284) = 0x17;
+            }
+        }
+    } else if (st == 4) {
+        func_0028CF98(self, 0, 0, -1, 0);
+    } else {
+        if (func_0028D960(self)) {
+            if (*(int*)(self + 0x6278) == 3)
+                func_0028CF98(self, 0x24, 0, -1, 0);
+            else
+                func_0028CF98(self, 0, 0, -1, 0);
+        }
+    }
+    *(int*)(self + 0x6274) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028E888);
@@ -1163,7 +1649,93 @@ extern "C" void func_0028F730(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F768);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+
+struct sEntry_F768 {
+    signed char kind;
+    char pad[0x17];
+};
+struct sQuad_F768 {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+struct sStack_F768 {
+    int field_0x0;                  // 0x1D8
+    sEntry_F768 cur;                // 0x1DC
+    volatile int depth;             // 0x1F4
+    sEntry_F768* entries;           // 0x1F8
+    int flags[4];                   // 0x1FC
+    int* a34;
+    int* a38;
+    int* a3C;
+    char a40[4][8];
+    int* a60;
+    int* a64;
+    int* a68;
+    int* a6C;
+    sQuad_F768* a70;
+    int* a74;
+    int* a78;
+    int* a7C;
+    int* a80;
+    int* a84;
+};
+struct sMgr_F768 {
+    char pad_0x0[0x1D8];
+    sStack_F768 st;                 // 0x1D8
+};
+
+static inline void bmPush_F768(sMgr_F768** self, int kind)
+{
+    sMgr_F768* m = *self;
+    sStack_F768* st = &m->st;
+    m->st.depth++;
+    st->entries[m->st.depth] = m->st.cur;
+    m->st.flags[m->st.depth] = 0;
+    st->a34[m->st.depth] = 0;
+    st->a38[m->st.depth] = st->entries[m->st.depth].kind;
+    st->a3C[m->st.depth] = 0;
+    func_00416210((char*)st + m->st.depth * 8 + 0x40, 0, 8);
+    st->a60[m->st.depth] = 0;
+    st->a64[m->st.depth] = 0;
+    st->a68[m->st.depth] = 0;
+    st->a6C[m->st.depth] = 0;
+    st->a70[m->st.depth].b = 0;
+    st->a70[m->st.depth].a = 100;
+    st->a70[m->st.depth].c = 90;
+    st->a70[m->st.depth].d = 50;
+    st->a74[m->st.depth] = 0;
+    st->a80[m->st.depth] = 0;
+    st->a84[m->st.depth] = 0;
+    st->a78[m->st.depth] = 127;
+    st->a7C[m->st.depth] = 1;
+    (*(int**)((char*)self + 4))[(*self)->st.depth] = kind;
+    (*(int**)((char*)self + 8))[(*self)->st.depth] = 0;
+}
+
+#define BM_MIN_F768(a, b) ((a) < (b) ? (a) : (b))
+#define BM_MAX_F768(a, b) ((a) >= (b) ? (a) : (b))
+
+extern "C" void func_0028F768(void* p)
+{
+    sMgr_F768** self = (sMgr_F768**)p;
+    bmPush_F768(self, 13);
+    sMgr_F768* m2 = **(sMgr_F768***)((char*)self + 0x118);
+    sStack_F768* st2 = &m2->st;
+    st2->a38[m2->st.depth] = 127;
+    st2->entries[m2->st.depth].kind = BM_MAX_F768(BM_MIN_F768(st2->a38[st2->depth], 127), 0);
+    sMgr_F768** pp = *(sMgr_F768***)((char*)self + 0x118);
+    (*pp)->st.a3C[(*pp)->st.depth] = (int)func_00287968(self, 1, 0);
+    *(int*)((char*)self + 0x62A8) = func_002906B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028FA98);

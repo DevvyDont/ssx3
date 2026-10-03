@@ -478,7 +478,136 @@ extern "C" int func_003A13E0(sUIText13E0* self, char* input)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1588);
+#ifdef SKIP_ASM
+extern "C" int func_003A12D0(void* self);
+extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
+extern "C" void func_0039FEB8(void* self, void* pos, void* size);
+extern "C" void func_00391E30(void* font, float x, float y, int str);
+extern "C" void func_0039DA20(void* sb, int top, int rows, int count);
+extern char* D_004A289C;
+
+struct sV2_1588 {
+    float x, y;
+    sV2_1588() {}
+    sV2_1588(float ax, float ay) : x(ax), y(ay) {}
+};
+struct sV3_1588 {
+    float x, y, z;
+    sV3_1588() {}
+    sV3_1588(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+struct sCol_1588 {
+    float r, g, b, a;
+};
+struct sRect_1588 {
+    float x0, y0, x1, y1;
+};
+
+struct sFont_1588 {
+    char pad0[0x14];
+    int height;             // 0x14
+    char pad18[0x10];
+    sV2_1588 shadowOfs;     // 0x28
+    sV2_1588 scale;         // 0x30
+    sV2_1588 cur;           // 0x38
+    sCol_1588 color;        // 0x40
+    sCol_1588 shadowColor;  // 0x50
+};
+
+struct sLayerBits_1588 {
+    unsigned char lo;
+    unsigned char layer : 5;
+};
+struct sDrawBits_1588 {
+    unsigned int lo : 5;
+    unsigned int layer : 5;
+};
+
+struct sVE_1588 { short delta; short index; void (*fn)(void*); };
+
+struct sText_1588 {
+    char pad0[0x8];
+    sVE_1588* vt;           // 0x08
+    char padC[0x8];
+    int flags14;            // 0x14
+    char pad18[0x4];
+    sCol_1588 color;        // 0x1C
+    char pad2C[0x18];
+    float x;                // 0x44
+    float y;                // 0x48
+    char pad4C[0x4];
+    float sx;               // 0x50
+    float sy;               // 0x54
+    char pad58[0xC];
+    float height;           // 0x64
+    char pad68[0xC];
+    int flags;              // 0x74
+    sCol_1588 shadowColor;  // 0x78
+    char pad88[0x20];
+    sCol_1588 selColor;     // 0xA8
+    void* scroll;           // 0xB8
+    int* strs;              // 0xBC
+    char padC0[0x4];
+    unsigned short cur;     // 0xC4
+    unsigned short top;     // 0xC6
+    unsigned short count;   // 0xC8
+    char padCA[0x2];
+    float yofs;             // 0xCC
+};
+
+extern "C" void func_003A1588(sText_1588* self, float x, float y)
+{
+    if (((self->flags14 >> 2) & 1) == 0) {
+        self->vt[16].fn((char*)self + self->vt[16].delta);
+    }
+    sFont_1588* font = (sFont_1588*)func_003A12D0(self);
+    if (font == 0) {
+        return;
+    }
+    sV2_1588 s(self->sx, self->sy);
+    font->cur.x = font->scale.x * s.x;
+    font->cur.y = font->scale.y * s.y;
+    if ((self->flags >> 3) & 1) {
+        sCol_1588 c = self->shadowColor;
+        c.r = self->color.r;
+        font->shadowColor = c;
+        font->shadowOfs = sV2_1588(2.0f, 2.0f);
+    } else {
+        font->shadowOfs = sV2_1588(0.0f, 0.0f);
+    }
+    int* d = (int*)(*(char**)(D_004A289C + 0xE84) + 8);
+    *d = (*d & ~0x3E0) | (((((sLayerBits_1588*)&self->flags14)->layer + 9) << 5) & 0x3E0);
+    sV3_1588 pos(self->x + x, self->y + y, 0.0f);
+    float lineH = self->sy * ((float)font->height * font->scale.y) + 3.0f;
+    signed char rows = (int)(self->height / lineH);
+    int i = 0;
+    if (rows > 0) do {
+        unsigned short idx = self->top + i;
+        if (idx >= self->count) {
+            break;
+        }
+        if ((self->flags & 1) && idx == self->cur) {
+            font->color = self->selColor;
+        } else {
+            font->color = self->color;
+        }
+        int str = self->strs[i + self->top];
+        i++;
+        sRect_1588 r;
+        func_003921F0(font, str, &r, 0, self->sx, self->sy);
+        sV3_1588 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+        sV3_1588 p = pos;
+        func_0039FEB8(self, &p, &size);
+        pos.y += lineH;
+        func_00391E30(font, p.x, p.y + self->yofs, str);
+    } while (i < rows);
+    if (self->scroll != 0) {
+        func_0039DA20(self->scroll, self->top, rows, self->count);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A18C0);
