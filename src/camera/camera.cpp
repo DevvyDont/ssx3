@@ -910,7 +910,84 @@ extern "C" void func_00160130(sRollShake_160130* self, float amount)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00160228);
+#ifdef SKIP_ASM
+extern "C" float func_0031BF60(float x);
+extern "C" float func_0031C040(float x);
+
+struct sVec_00160228 {
+    float x, y, z, w;
+    sVec_00160228() {}
+    sVec_00160228(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+extern sVec_00160228 D_004FF120_v160228 __asm__("D_004FF120");
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_00160228 Scale_00160228(const sVec_00160228& v, float s)
+{
+    sVec_00160228 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_00160228 Add_00160228(const sVec_00160228& a, const sVec_00160228& b)
+{
+    sVec_00160228 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec_00160228 Cross_00160228(const sVec_00160228& a, const sVec_00160228& b)
+{
+    sVec_00160228 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" sVec_00160228 func_00160228(char* p, float a, float b)
+{
+    float zero = 0.0f;
+    if (*(float*)(p + 0x18) == zero) return D_004FF120_v160228;
+    sVec_00160228 fwd(func_0031C040(b) * func_0031C040(a), func_0031C040(b) * func_0031BF60(a), -func_0031BF60(b), zero);
+    sVec_00160228 right(func_0031BF60(a), -func_0031C040(a), zero, zero);
+    sVec_00160228 up = Cross_00160228(fwd, right);
+    float k = *(float*)(p + 0x20) / *(float*)(p + 0x28);
+    float sx = k * (*(float*)(p + 0xC) - *(float*)(p + 0x0));
+    float sy = k * (*(float*)(p + 0x10) - *(float*)(p + 0x4));
+    float sz = *(float*)(p + 0x18) * 10.0f;
+    sVec_00160228 res = Scale_00160228(Add_00160228(Scale_00160228(right, sx), Scale_00160228(up, sy)), sz);
+    return res;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_001603F0);
@@ -971,7 +1048,162 @@ void func_001604B0(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_001604B8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" float func_00320BF0(int pad, int axis);
+extern "C" void func_00162568(void* self, struct sCamInfo_001607E0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_001668B8(void* self, void* out);
+extern float D_004A127C;
+extern float D_004A1280;
+extern float D_004A1284;
+
+struct sVec_1604B8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sCamInfo_1604B8 {
+    char pad0[0x10];
+    sVec_1604B8 pos;    // 0x10
+    char pad20[0x50];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_1604B8 Scale_1604B8(const sVec_1604B8& v, float s)
+{
+    sVec_1604B8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_1604B8 Sub_1604B8(const sVec_1604B8& a, const sVec_1604B8& b)
+{
+    sVec_1604B8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v /= s).
+static inline void DivEq_1604B8(sVec_1604B8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_1604B8(const sVec_1604B8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float Abs_1604B8(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `<?` (min) operator.
+static inline float Clamp_1604B8(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+struct sCamYP_1604B8 {
+    char pad0[0x50];
+    float yaw;          // 0x50
+    float pitch;        // 0x54
+};
+
+struct sGame_1604B8 {
+    char pad0[0x84];
+    char* f84;          // 0x84
+    char pad88[0xB0 - 0x88];
+    int pads[4];        // 0xB0
+};
+
+extern "C" void func_001604B8(char* self)
+{
+    sCamInfo_1604B8 info;
+    func_00162568(self, (sCamInfo_001607E0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    sGame_1604B8* g = (sGame_1604B8*)D_004A28A8;
+    int pad = g->pads[*(int*)(*(char**)(g->f84 + 0x28) + 0x28)];
+    float ax = func_00320BF0(pad, 0xBE);
+    float ay = func_00320BF0(pad, 0xBF);
+    float az = -func_00320BF0(pad, 0xC0);
+    ax *= Abs_1604B8(ax);
+    ay *= Abs_1604B8(ay);
+    az *= Abs_1604B8(az);
+    ax *= 0.05000000074505806f;
+    D_004A127C += ax;
+    if (D_004A127C > 6.2831854820251465f) {
+        D_004A127C = D_004A127C - 6.2831854820251465f;
+    } else if (D_004A127C < 0.0f) {
+        D_004A127C = D_004A127C + 6.2831854820251465f;
+    }
+    float k = 0.05000000074505806f;
+    D_004A1280 += ay * k;
+    D_004A1280 = Clamp_1604B8(D_004A1280, 0.0f, 1.5079644918441772f);
+    ((sCamYP_1604B8*)self)->pitch = D_004A1280;
+    ((sCamYP_1604B8*)self)->yaw = D_004A127C;
+    sVec_1604B8 dir;
+    func_001668B8(self, &dir);
+    DivEq_1604B8(dir, Length_1604B8(dir));
+    D_004A1284 = Clamp_1604B8(D_004A1284 * (az * k + 1.0f), 150.0f, 850.0f);
+    *(sVec_1604B8*)(self + 0x20) = info.pos;
+    *(sVec_1604B8*)(self + 0x40) = Sub_1604B8(*(sVec_1604B8*)(self + 0x20), Scale_1604B8(dir, D_004A1284));
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_001606D8);
@@ -2854,7 +3086,51 @@ extern "C" void func_00168A40(void* self, void* out)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_00168A70);
+#ifdef SKIP_ASM
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(char* self, char* p, float k, float t);
+extern "C" void func_001641C0(char* self, char* p, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+extern "C" void func_00163158(void* self, void* info, float a, float b);
+// PORT: func_00163450 is defined with 7 float parameters; this caller passes 8.
+void func_00163450_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
+                     float h) __asm__("func_00163450");
+
+extern "C" void func_00168A70(char* self)
+{
+    sCamInfo_001607E0 info;
+    func_00162568(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
+                  0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
+    float zero = 0.0f;
+    float k = 0.9800000190734863f;
+    func_00162998(self, &info);
+    func_00162A20(self, (char*)&info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 12.331472396850586f, 84.0909652709961f, 38.64322280883789f, 93.62934875488281f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, zero, 0.8567028641700745f, 1.0f, 0.949999988079071f);
+    func_00163450_8(self, (char*)&info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f,
+                    zero, k, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, -8.730510711669922f, 64.15198516845703f, 58.114906311035156f, 5.931424617767334f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.34134337306022644f, 0.8672914505004883f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, (char*)&info, 200.33114624023438f, 0.9706981778144836f);
+    func_001641C0(self, (char*)&info, 600.0f, 300.0f, 100.0f, k);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+    func_00163158(self, &info, -0.2944446802139282f, 0.6521888375282288f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00168C50);
@@ -2920,7 +3196,51 @@ extern "C" void func_00168D50(void* self, void* out)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_00168D80);
+#ifdef SKIP_ASM
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(char* self, char* p, float k, float t);
+extern "C" void func_001641C0(char* self, char* p, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+extern "C" void func_00163158(void* self, void* info, float a, float b);
+// PORT: func_00163450 is defined with 7 float parameters; this caller passes 8.
+void func_00163450_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
+                     float h) __asm__("func_00163450");
+
+extern "C" void func_00168D80(char* self)
+{
+    sCamInfo_001607E0 info;
+    func_00162568(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
+                  0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
+    float zero = 0.0f;
+    float k = 0.9800000190734863f;
+    func_00162998(self, &info);
+    func_00162A20(self, (char*)&info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 12.331472396850586f, 84.0909652709961f, 38.64322280883789f, 93.62934875488281f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, zero, 0.8567028641700745f, 1.0f, 0.949999988079071f);
+    func_00163450_8(self, (char*)&info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f,
+                    zero, k, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, -8.730510711669922f, 64.15198516845703f, 58.114906311035156f, 5.931424617767334f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.34134337306022644f, 0.8672914505004883f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, (char*)&info, 200.33114624023438f, 0.9706981778144836f);
+    func_001641C0(self, (char*)&info, 600.0f, 300.0f, 100.0f, k);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+    func_00163158(self, &info, 0.2944446802139282f, 0.6521888375282288f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00168F60);

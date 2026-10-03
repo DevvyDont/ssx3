@@ -135,7 +135,58 @@ void func_00351538_impl(char* self, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00351660);
+#ifdef SKIP_ASM
+extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x);
+
+struct sImSeg_351660 {
+    float a, b, c, d;
+    float lo;
+    float hi;
+};
+
+struct sImCurve_351660 {
+    int count;
+    sImSeg_351660* segs;
+};
+
+struct sImV4_351660 {
+    float x, y, z, w;
+    sImV4_351660() {}
+    sImV4_351660(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+static inline bool inRange_351660(sImSeg_351660* e, float x)
+{
+    return e->lo <= x && x < e->hi;
+}
+
+extern "C" void func_00351660(char* self, sImV4_351660* vel, sImV4_351660* rotVel, float t)
+{
+    float out[16];
+    sImCurve_351660** curves = *(sImCurve_351660***)(*(char**)(self + 0x40) + 0x20);
+    int* cur = (int*)self;
+    int mask = 1;
+    float* o = out;
+    for (int i = 0; i < 16; i++, mask <<= 1, o++) {
+        sImCurve_351660* c = *curves;
+        if (*(int*)(*(char**)(self + 0x40) + 0x18) & mask) {
+            sImSeg_351660* e = &c->segs[*cur];
+            if (!inRange_351660(e, t)) {
+                e = (sImSeg_351660*)func_00351A80((sImRangeTable*)c, cur, t);
+            }
+            curves++;
+            cur++;
+            *o = e->a * (t * 3.0f) * t + 2.0f * e->b * t + e->c;
+        } else {
+            *o = 0.0f;
+        }
+    }
+    *vel = sImV4_351660(out[0], out[1], out[2], 0.0f);
+    *rotVel = sImV4_351660(-out[3], -out[4], -out[5], 0.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00351800);
@@ -654,7 +705,121 @@ void* func_00352208(void* self)
 
 INCLUDE_ASM("object/instanceman", func_00352230);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352500);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern char* D_004A5B64;
+
+struct sV4_352500 {
+    float x, y, z, w;
+    sV4_352500() {}
+    sV4_352500(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sQ_352500 : sV4_352500 {
+    sQ_352500(float aw, float ax, float ay, float az) { w = aw; x = ax; y = ay; z = az; }
+};
+
+struct sVE_352500 { short delta; short index; void (*fn)(void*, int); };
+
+struct sDebris_352500 {
+    char pad0[0xC];
+    sVE_352500* vt;         // 0xC
+    char pad10[0x8];
+    char* model;            // 0x18
+    float timer;            // 0x1C
+    char pad20[0x10];
+    sV4_352500 rot[24];     // 0x30
+    sV4_352500 axis[24];    // 0x1B0
+    float spin[24];         // 0x330
+    char pad390[0x20];
+    sV4_352500 pos[24];     // 0x3B0
+    sV4_352500 vel[24];     // 0x530
+    int state;              // 0x6B0
+    float gravity;          // 0x6B4
+};
+
+// PORT: PS2-only VU0 inline asm (quaternion multiply).
+static inline sV4_352500 QMul_352500(const sV4_352500& a, const sV4_352500& b)
+{
+    sV4_352500 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vmul.xyzw $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w  ACC, $vf7, $vf7x\n"
+        "vmsubay.w ACC, $vf0, $vf7y\n"
+        "vmsubz.w  $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place normalize via rsqrt).
+static inline void NormalizeEq_352500(sV4_352500& v)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v)
+        :
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void AddEq_352500(sV4_352500& d, const sV4_352500& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(d)
+        : "m"(d), "m"(b)
+        : "memory");
+}
+
+extern "C" void func_00352500(sDebris_352500* self)
+{
+    if (self->timer > 0.0f) {
+        self->timer -= *(float*)(D_004A5B64 + 0x14);
+        if (self->timer <= 0.0f) {
+            self->vt[34].fn((char*)self + self->vt[34].delta, 1);
+            return;
+        }
+    }
+    if (self->timer > 0.0f) {
+        char* g = *(char**)(self->model + 0x80);
+        for (int i = 0; i < *(int*)(g + 4); i++) {
+            float s, c;
+            func_0031BE50(&s, &c, self->spin[i] * 0.5f);
+            sV4_352500* q = &self->rot[i];
+            *q = QMul_352500(*q, sQ_352500(c, s * self->axis[i].x, s * self->axis[i].y, s * self->axis[i].z));
+            NormalizeEq_352500(*q);
+        }
+        for (int i = 0; i < *(int*)(g + 4); i++) {
+            AddEq_352500(self->pos[i], self->vel[i]);
+            AddEq_352500(self->vel[i], sV4_352500(0.0f, 0.0f, self->gravity * -980.0f * *(float*)(D_004A5B64 + 0x14), 0.0f));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00352708);

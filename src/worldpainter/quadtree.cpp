@@ -1441,7 +1441,134 @@ extern "C" void func_002C64D0(void* self, int a1, unsigned short* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C64F8);
+#ifdef SKIP_ASM
+struct sSaveSlot_2C64F8 {
+    int busy;               // 0x00
+    int locked;             // 0x04
+    int bad;                // 0x08
+    char pad0C[0x63];
+    unsigned char sec;      // 0x6F
+    unsigned char min;      // 0x70
+    unsigned char hour;     // 0x71
+    unsigned char day;      // 0x72
+    unsigned char month;    // 0x73
+    unsigned short year;    // 0x74
+    char pad76[0x2];
+};
+struct sSaveMgrBase_2C64F8 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual int v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual int v67(int slot);
+};
+struct sSaveMgr_2C64F8 : sSaveMgrBase_2C64F8 {
+    char pad4[0x1A0];
+    sSaveSlot_2C64F8 slots[6];  // 0x1A4
+};
+
+extern "C" int func_002C64F8(sSaveMgr_2C64F8* self)
+{
+    int best = -1;
+    if (self->v55() == 0) {
+        return -1;
+    }
+    for (int i = 0; i < 6; i++) {
+        if (self->slots[i].busy == 0 && self->slots[i].locked == 0 && self->v67(i) != 0 && self->slots[i].bad == 0) {
+            if (best != -1) {
+                unsigned int ct = self->slots[i].hour * 3600 + self->slots[i].min * 60 + self->slots[best].sec;
+                unsigned short cy = self->slots[i].year;
+                unsigned char cd = self->slots[i].day;
+                unsigned int bt = self->slots[best].hour * 3600 + self->slots[best].min * 60 + self->slots[best].sec;
+                unsigned short by = self->slots[best].year;
+                unsigned char bm = self->slots[best].month;
+                unsigned char bd = self->slots[best].day;
+                unsigned char cm = self->slots[i].month;
+                if (cy < by) {
+                } else if (by < cy) {
+                    best = i;
+                } else if (cm < bm) {
+                } else if (bm < cm) {
+                    best = i;
+                } else if (cd < bd) {
+                } else if (bd < cd) {
+                    best = i;
+                } else if (ct < bt) {
+                } else if (bt < ct) {
+                    best = i;
+                }
+            } else {
+                best = i;
+            }
+        }
+    }
+    return best;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C66B8);

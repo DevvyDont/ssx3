@@ -447,7 +447,94 @@ extern "C" void func_001A2BC0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fereal", cRealFE_loadStartState);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_0039E2A0(void* self, void* owner);
+extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
+extern "C" void func_0039F400(void* stack, void* state);
+extern "C" void* func_00194738(void* self, void* owner);
+extern "C" void* func_001F3700(void* self, void* owner);
+extern "C" void* func_001D5038(void* self, void* owner);
+extern "C" void func_00255CC8(void* a, int b);
+extern "C" void func_00266E88(void* a);
+extern "C" void func_00266DF8(void* a);
+extern "C" void func_0025B6D8(void* a, int b);
+extern "C" void func_0014ECA0(void* a, int b);
+extern "C" void func_0014DE28(void* be, int b);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern char D_00461358[];
+extern char D_0045E290[];
+extern char D_00461188[];
+extern char D_00461370[];
+extern void* D_0046BC58[];
+extern int D_004A19C4;
+extern int D_004A19D8;
+extern void* D_004A28A8;
+extern void* D_004A2EB8;
+extern char* D_004A2EEC;
+extern void* D_004A33F4;
+extern void* D_004A3028;
+
+// PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+struct sVEnt_1A2C40 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sStartState_1A2C40 {
+    int f0;
+    int f4;
+    sVEnt_1A2C40* vt;   // 0x8
+    char pad[0x3C];
+};
+struct sRealFE_1A2C40 {
+    char pad0[0xC];
+    char* ui;   // 0xC
+};
+
+extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
+{
+    sStartState_1A2C40* s = new (D_00461358, 0, 0) sStartState_1A2C40;
+    func_0039E2A0(s, self->ui);
+    s->vt = (sVEnt_1A2C40*)D_0046BC58;
+    s->vt[4].fn((char*)s + s->vt[4].delta);
+    cUIStateStack_pushExplicit(self->ui + 0x18, s);
+    switch (D_004A19C4) {
+    case 0: {
+        D_004A19D8 = 0;
+        void* st = func_00194738(cMemMan_alloc(0x4C, D_0045E290, 0, 0), self->ui);
+        func_0039F400(self->ui + 0x18, st);
+        break;
+    }
+    case 0x27: {
+        D_004A19D8 = 1;
+        void* st = func_001F3700(cMemMan_alloc(0x58, D_00461188, 0, 0), self->ui);
+        func_0039F400(self->ui + 0x18, st);
+        D_004A19C4 = 0;
+        break;
+    }
+    case 0x34: {
+        D_004A19D8 = 0;
+        void* st = func_001D5038(cMemMan_alloc(0x6D4, D_00461370, 0, 0), self->ui);
+        func_0039F400(self->ui + 0x18, st);
+        func_00255CC8(D_004A2EB8, *(int*)(D_004A2EEC + 0x6C));
+        func_00266E88(D_004A33F4);
+        func_00266DF8(D_004A33F4);
+        func_0025B6D8(D_004A3028, 1);
+        func_0014ECA0(cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7), 0);
+        func_0014DE28(cBE_getBE(), 1);
+        func_0014DE28(cBE_getBE(), 2);
+        D_004A19C4 = 0;
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fereal", func_001A2E20);

@@ -67,7 +67,105 @@ extern "C" void cGame_renderModels(void* self, void* world)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022C1B0);
+#ifdef SKIP_ASM
+extern void* D_004A4248;
+
+struct sVec_C1B0 {
+    float x, y, z, w;
+    sVec_C1B0() {}
+    sVec_C1B0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sMat_C1B0 {
+    float m[4][4];
+};
+
+struct sVEm_C1B0 { short delta; short index; sMat_C1B0* (*fn)(void*); };
+struct sVEf_C1B0 { short delta; short index; float (*fn)(void*); };
+struct sVEv_C1B0 { short delta; short index; void (*fn)(void*); };
+
+struct sRCtx_C1B0 {
+    char pad0[0x10D8];
+    sVEm_C1B0* vt;      // 0x10D8
+};
+extern sRCtx_C1B0* D_004A289C_C1B0 __asm__("D_004A289C");
+
+struct sCamObj_C1B0 {
+    char pad0[4];
+    sVEf_C1B0* vt;      // 0x4
+};
+
+struct sRenderCam_C1B0 {
+    sCamObj_C1B0* cam;  // 0x0
+    char pad4[0xC];
+    sVec_C1B0 pos;      // 0x10
+    float k;            // 0x20
+    float c;            // 0x24
+    float n;            // 0x28
+    float f;            // 0x2C
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_C1B0 Scale_C1B0(const sVec_C1B0& v, float s)
+{
+    sVec_C1B0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sVec_C1B0 MulVec_C1B0(const sMat_C1B0* m, const sVec_C1B0& v)
+{
+    return sVec_C1B0(v.x * m->m[0][0] + v.y * m->m[0][1] + v.z * m->m[0][2] + v.w * m->m[0][3],
+                     v.x * m->m[1][0] + v.y * m->m[1][1] + v.z * m->m[1][2] + v.w * m->m[1][3],
+                     v.x * m->m[2][0] + v.y * m->m[2][1] + v.z * m->m[2][2] + v.w * m->m[2][3],
+                     v.x * m->m[3][0] + v.y * m->m[3][1] + v.z * m->m[3][2] + v.w * m->m[3][3]);
+}
+
+static inline sMat_C1B0* viewMat_C1B0()
+{
+    sRCtx_C1B0* c = D_004A289C_C1B0;
+    return c->vt[35].fn((char*)c + c->vt[35].delta);
+}
+
+// PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.
+sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self) __asm__("func_0022C1B0");
+
+sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
+{
+    self->cam = (sCamObj_C1B0*)D_004A4248;
+    self->pos = Scale_C1B0(sVec_C1B0(*(sVec_C1B0*)viewMat_C1B0()->m[3]), -1.0f);
+    sMat_C1B0* m = viewMat_C1B0();
+    self->pos = sVec_C1B0(self->pos.x * m->m[0][0] + self->pos.y * m->m[0][1] + self->pos.z * m->m[0][2] + self->pos.w * m->m[0][3],
+                          self->pos.x * m->m[1][0] + self->pos.y * m->m[1][1] + self->pos.z * m->m[1][2] + self->pos.w * m->m[1][3],
+                          self->pos.x * m->m[2][0] + self->pos.y * m->m[2][1] + self->pos.z * m->m[2][2] + self->pos.w * m->m[2][3],
+                          self->pos.x * m->m[3][0] + self->pos.y * m->m[3][1] + self->pos.z * m->m[3][2] + self->pos.w * m->m[3][3]);
+    self->n = 1.0f;
+    self->f = 3.0f;
+    self->pos.w = 1.0f;
+    sCamObj_C1B0* o = self->cam;
+    float a = o->vt[8].fn((char*)o + o->vt[8].delta);
+    o = self->cam;
+    float b = o->vt[9].fn((char*)o + o->vt[9].delta);
+    a = a * a * 2.0f;
+    b = b * b * 2.0f;
+    self->k = (self->n - self->f) / (b - a);
+    self->c = self->f - self->k * a;
+    o = self->cam;
+    ((sVEv_C1B0*)o->vt)[17].fn((char*)o + o->vt[17].delta);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022C3B8);

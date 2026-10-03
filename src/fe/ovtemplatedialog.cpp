@@ -17,7 +17,98 @@ extern "C" int func_0020A8B0(int a0, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8F8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0020AB50(int state);
+int func_00158F30(void* self);
+extern "C" void func_002706B8(void* p);
+extern void* D_004A28A8;
+extern char* D_004A2EEC;
+extern int D_00534B30[];
+extern char D_00535BC8[];
+extern int D_004A26FC;
+extern int D_004A2704;
+extern int D_004A2700;
+extern int D_004A1228;
+
+static inline bool isKind_A8F8(int k, int v)
+{
+    return k == v;
+}
+
+extern "C" void func_0020A8F8(int mode)
+{
+    int v = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = v != 0 && v < 10;
+    if (busy) return;
+    int state = 0;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    signed char* g = (signed char*)D_00535BC8;
+    int type = **(int**)((char*)D_004A28A8 + 0xC0);
+    int sub = g[0x48];
+    int team = g[0x49];
+    int kind = g[0x4A];
+    switch (mode) {
+    case 2:
+        D_004A2704 = 0;
+        if (D_004A1228 != 0) {
+            state = 0x11;
+        } else if (sub == 4) {
+            D_004A26FC = mode;
+        } else {
+            D_004A26FC = 0;
+            if (kind == 0) {
+                state = 8;
+            } else if (team == mode) {
+                state = 0x15;
+            } else {
+                if (kind >= 4 && kind <= 11) state = 0x14;
+                else state = 9;
+            }
+        }
+        break;
+    case 7:
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        if (sub == 4) {
+            D_004A26FC = sub;
+            return;
+        }
+        D_004A26FC = 0;
+        char* a = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
+        char* b = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        int any = 0;
+        if (*(int*)(a + 0x18) >= 0 || *(int*)(a + 0x1C) >= 0) any = 1;
+        if (any) {
+            if (D_00534B30[0] != 0) {
+                state = func_0020A8B0(kind, type);
+            } else {
+                D_004A2700 = 0;
+                state = 0xF;
+            }
+        } else {
+            if (func_00158F30(b) > 0 || *(int*)(b + 0x10) != 0) {
+                state = 0x10;
+            } else {
+                state = func_0020A8B0(kind, type);
+            }
+        }
+        int z = !isKind_A8F8(kind, 6) && !isKind_A8F8(kind, 7) && !isKind_A8F8(kind, 8) && !isKind_A8F8(kind, 9) &&
+                !isKind_A8F8(kind, 10) && !isKind_A8F8(kind, 11);
+        if (z) func_002706B8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+        if (D_00534B30[0] != 0) *(int*)(D_004A2EEC + 0x64) = 0x8CA0;
+        break;
+    }
+    if (state == 0) {
+        D_004A26FC = 2;
+    } else {
+        func_0020AB50(state);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020AB50);
 
@@ -354,5 +445,72 @@ extern "C" void func_0020DBD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020DC68);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0020A380(void* self);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cOVState_REPLAY_setupCameraName(void* self);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
+extern void* D_004A28A8;
+extern char D_00471A40[];
+extern char D_00471BA0[];
+extern char D_00471BB0[];
+extern char D_00471BC0[];
+extern char D_00471BD0[];
+extern char D_00471BE0[];
+extern char D_00471BF0[];
+
+struct sVE_20DC68 { short delta; short index; void (*fn)(void*, int); };
+
+extern "C" void func_0020DC68(char* self)
+{
+    *(int*)(self + 0xC) = GetHashValue32(D_00471A40);
+    void* engine = *(void**)(self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471A40), 0);
+    *(void**)(self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+    *(int*)(self + 0xA0) = 0;
+    *(int*)(self + 0x9C) = 0;
+    cUIState_hideObjSafe(self, D_00471BA0);
+    cUIState_hideObjSafe(self, D_00471BB0);
+    if (*(int*)(self + 0xA0) != 0) {
+        cUIState_hideObjSafe(self, D_00471BC0);
+        cUIState_showObjSafe(self, D_00471BD0);
+    } else {
+        cUIState_showObjSafe(self, D_00471BC0);
+        cUIState_hideObjSafe(self, D_00471BD0);
+    }
+    *(int*)(self + 0xA4) = 0xF5;
+    *(int*)(self + 0xAC) = 0xF5;
+    *(int*)(self + 0xB0) = 0x1E0;
+    *(int*)(self + 0xA8) = 0;
+    cOVState_REPLAY_setupCameraName(self);
+    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28) + 0x608) != 0) {
+        *(int*)(self + 0xB4) = 1;
+    } else {
+        *(int*)(self + 0xB4) = 0;
+    }
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00471BE0));
+    *(int*)(obj + 0x90) |= 8;
+    if (*(int*)(self + 0xB4) != 0) {
+        if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00471BF0));
+        if (o != 0) {
+            sVE_20DC68* e = &(*(sVE_20DC68**)(o + 8))[9];
+            e->fn(o + e->delta, 0);
+            e = &(*(sVE_20DC68**)(o + 8))[8];
+            e->fn(o + e->delta, 0);
+        }
+    }
+}
+#endif
 

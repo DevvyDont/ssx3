@@ -468,7 +468,54 @@ extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetCreate);
+#ifdef SKIP_ASM
+struct cUIText;
+extern "C" void func_001D4F90(void* self, int index, cUIText* text);
+extern char D_004A2000[];
+extern char D_004A2008[];
+extern char D_004A2010[];
+extern char D_004A2018[];
+extern char D_00467748[];
+extern char D_00467758[];
+extern char D_004674A8[];
+extern char D_004674B8[];
+extern char D_004674C8[];
+extern char D_004674D8[];
+extern char D_004674E8[];
+extern char D_00467768[];
+
+extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
+{
+    int id = *(int*)((char*)w + 0x38);
+    if (id == GetHashValue32(D_004A2000)) {
+        *(int*)((char*)w + 0x18) = 5;
+    } else if (id == GetHashValue32(D_004A2008)) {
+        *(int*)((char*)w + 0x18) = 6;
+    } else if (id == GetHashValue32(D_004A2010)) {
+        *(int*)((char*)w + 0x18) = 3;
+    } else if (id == GetHashValue32(D_004A2018)) {
+        *(int*)((char*)w + 0x18) = 7;
+    } else if (id == GetHashValue32(D_00467748)) {
+        *(int*)((char*)w + 0x18) = 4;
+    } else if (id == GetHashValue32(D_00467758)) {
+        *(int*)((char*)w + 0x18) = 8;
+    } else if (id == GetHashValue32(D_004674A8)) {
+        func_001D4F90(self, 5, (cUIText*)w);
+    } else if (id == GetHashValue32(D_004674B8)) {
+        func_001D4F90(self, 3, (cUIText*)w);
+    } else if (id == GetHashValue32(D_004674C8)) {
+        func_001D4F90(self, 7, (cUIText*)w);
+    } else if (id == GetHashValue32(D_004674D8)) {
+        func_001D4F90(self, 4, (cUIText*)w);
+    } else if (id == GetHashValue32(D_004674E8)) {
+        func_001D4F90(self, 8, (cUIText*)w);
+    } else if (id == GetHashValue32(D_00467768)) {
+        func_001D4F90(self, 6, (cUIText*)w);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4EA8);
@@ -942,5 +989,83 @@ void func_001D5F38(void* self)
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5F40);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D64C0);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_00287670(void* opt);
+extern "C" int func_002876A0(void* opt);
+extern "C" int func_002876D0(void* opt);
+extern "C" void func_00286200(void* opt);
+extern "C" void func_00284C28();
+extern "C" void SSXAUDIO_Init(int lang);
+extern "C" void func_00287410(void* opt, int v);
+extern "C" void func_00287488(void* opt, int v);
+extern "C" void func_00287520(void* opt, int v);
+extern "C" void func_00287558(void* opt, int v);
+extern "C" void func_002875D0(void* opt, int v);
+extern "C" void func_00285FB0(void* opt);
+
+struct sLang_001D64C0 {
+    int f0;
+    virtual void v01();
+    virtual int v02(int lang);
+};
+struct sLangHolder_001D64C0 {
+    char pad0[0x1D8];
+    sLang_001D64C0* lang;   // 0x1D8
+};
+struct sOptSub_001D64C0 {
+    sLangHolder_001D64C0** holder;  // 0x0
+    char pad4[0x543C];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04(int v);
+};
+struct sOptBase_001D64C0 {
+    char pad0[0x118];
+};
+struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
+};
+
+extern "C" void func_001D64C0(unsigned int mode)
+{
+    int lang;
+    switch (mode) {
+    case 1:
+        lang = 2;
+        break;
+    case 2:
+        lang = 0;
+        break;
+    case 3:
+        lang = 3;
+        break;
+    case 0:
+    default:
+        lang = 1;
+        break;
+    }
+    if ((*((sOpt_001D64C0*)func_0028B180())->holder)->lang->v02(lang) == 1) {
+        float a = func_00287670(func_0028B180());
+        float b = func_002876A0(func_0028B180());
+        float c = func_002876D0(func_0028B180());
+        int x = *(int*)((char*)func_0028B180() + 0x62B8);
+        int y = *(int*)((char*)func_0028B180() + 0x62B4);
+        int z = *(int*)((char*)func_0028B180() + 0x534);
+        func_00286200(func_0028B180());
+        func_00284C28();
+        SSXAUDIO_Init(lang);
+        func_00287410(func_0028B180(), (int)a);
+        func_00287488(func_0028B180(), (int)b);
+        func_00287520(func_0028B180(), (int)c);
+        func_00287558(func_0028B180(), x);
+        func_002875D0(func_0028B180(), y);
+        func_00285FB0(func_0028B180());
+        sOpt_001D64C0* o = (sOpt_001D64C0*)func_0028B180();
+        o->v04(z);
+    }
+}
+#endif
 

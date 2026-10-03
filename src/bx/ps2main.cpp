@@ -129,7 +129,49 @@ INCLUDE_ASM("bx/ps2main", func_0031B7A8);
 
 INCLUDE_ASM("bx/ps2main", func_0031BB30);
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031BCB0);
+#ifdef SKIP_ASM
+extern "C" float func_0031C128(float x);
+extern "C" float func_0031BF60(float x);
+
+struct sQuat_31BCB0 {
+    float x, y, z, w;
+    sQuat_31BCB0() {}
+    sQuat_31BCB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+// Quaternion slerp.
+extern "C" sQuat_31BCB0 func_0031BCB0(const sQuat_31BCB0* a, const sQuat_31BCB0* b, float t)
+{
+    float cosom = a->x * b->x + a->y * b->y + a->z * b->z + a->w * b->w;
+    sQuat_31BCB0 to;
+    if (cosom < 0.0f) {
+        cosom = -cosom;
+        to.x = -b->x;
+        to.y = -b->y;
+        to.z = -b->z;
+        to.w = -b->w;
+    } else {
+        to.x = b->x;
+        to.y = b->y;
+        to.z = b->z;
+        to.w = b->w;
+    }
+    float s0, s1;
+    if (1.0f - cosom > 0.0010000000474974513f) {
+        float omega = 1.5707963705062866f - func_0031C128(cosom);
+        float sinom = func_0031BF60(omega);
+        s0 = func_0031BF60((1.0f - t) * omega) / sinom;
+        s1 = func_0031BF60(t * omega) / sinom;
+    } else {
+        s0 = 1.0f - t;
+        s1 = t;
+    }
+    sQuat_31BCB0 r(s0 * a->x + s1 * to.x, s0 * a->y + s1 * to.y, s0 * a->z + s1 * to.z, s0 * a->w + s1 * to.w);
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031BE50);

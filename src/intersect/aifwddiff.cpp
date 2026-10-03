@@ -469,9 +469,127 @@ extern "C" int func_00328360(sCell_00328360* c, sBox_00328360* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_003284B8);
+#ifdef SKIP_ASM
+void operator_delete(int* p);
 
+struct sItem_003284B8 {
+    sItem_003284B8* next;   // 0x0
+    sItem_003284B8* prev;   // 0x4
+};
+struct sList_003284B8 {
+    sItem_003284B8* head;
+    void remove(sItem_003284B8* it)
+    {
+        if (it->next) it->next->prev = it->prev;
+        if (it->prev) {
+            it->prev->next = it->next;
+        } else {
+            head = it->next;
+        }
+    }
+};
+struct sNode_003284B8 {
+    sNode_003284B8* child[2][2][2];     // 0x00
+    sList_003284B8 lists[3];            // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i].head) return 0;
+        }
+        return 1;
+    }
+};
+struct sCell_003284B8 {
+    int level;
+    int x, y, z;
+};
+
+extern "C" void func_003284B8(sNode_003284B8* node, int idx, sItem_003284B8* item, const sCell_003284B8* target,
+                              const sCell_003284B8* cur)
+{
+    int lv = cur->level;
+    if (target->level == lv) {
+        node->lists[idx].remove(item);
+        return;
+    }
+    int sh = lv - target->level - 1;
+    int dx = (target->x >> sh) - cur->x * 2;
+    int dy = (target->y >> sh) - cur->y * 2;
+    int dz = (target->z >> sh) - cur->z * 2;
+    sCell_003284B8 c;
+    c.x = cur->x * 2 + dx;
+    c.level = --lv;
+    c.y = cur->y * 2 + dy;
+    c.z = cur->z * 2 + dz;
+    sNode_003284B8** ch = &node->child[dx][dy][dz];
+    func_003284B8(*ch, idx, item, target, &c);
+    if ((*ch)->empty()) {
+        operator_delete((int*)*ch);
+        *ch = 0;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328660);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc is the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_003E6448(void* p, int v, int n);
+extern char D_004A3FC0[];
+
+struct sItem_00328660 {
+    sItem_00328660* next;   // 0x0
+    sItem_00328660* prev;   // 0x4
+};
+struct sList_00328660 {
+    sItem_00328660* head;
+    sList_00328660() : head(0) {}
+    void push(sItem_00328660* it)
+    {
+        if (head) head->prev = it;
+        it->next = head;
+        it->prev = 0;
+        head = it;
+    }
+};
+struct sNode_00328660 {
+    sNode_00328660* child[2][2][2];     // 0x00
+    sList_00328660 lists[3];            // 0x20
+    sNode_00328660() { func_003E6448(child, 0, sizeof(child)); }
+};
+struct sCell_00328660 {
+    int level;
+    int x, y, z;
+};
+
+extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* at)
+{
+    sCell_00328660 cur = *at;
+    while (cur.level != target->level) {
+        int sh = cur.level - target->level - 1;
+        cur.level--;
+        int dx = (target->x >> sh) - cur.x * 2;
+        int dy = (target->y >> sh) - cur.y * 2;
+        int dz = (target->z >> sh) - cur.z * 2;
+        cur.x = cur.x * 2 + dx;
+        cur.y = cur.y * 2 + dy;
+        cur.z = cur.z * 2 + dz;
+        sNode_00328660** c = &node->child[dx][dy][dz];
+        if (*c == 0) {
+            *c = new (D_004A3FC0, 0x20000000, 0) sNode_00328660;
+        }
+        node = *c;
+    }
+    node->lists[idx].push(item);
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00328808);
 
