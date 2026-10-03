@@ -307,7 +307,100 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
 
 INCLUDE_ASM("fe/festatecharselect", func_001817E8);
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00181BD0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" int func_00148B78(void* iface, int a, int b);
+extern "C" int func_00148BC8(void* iface, int a, int b);
+extern "C" int func_00148C18(void* iface, int a, int b);
+extern "C" int func_00148C68(void* iface, int a, int b);
+extern "C" int func_00148CB8(void* iface, int a, int b);
+extern "C" int func_00148D08(void* iface, int a, int b);
+extern "C" int func_00148D58(void* iface, int a, int b);
+extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void func_0039C428(void* bar, int v);
+extern "C" double func_00413AF8(float f);
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern char D_004A13B0;
+extern char D_0045D6F0[];
+extern char D_004A13B8[];
+struct sStr9_181BD0 { char c[9]; };
+struct sStr4_181BD0 { char c[4]; };
+extern sStr9_181BD0 D_0045D6E0;
+extern char D_004A13A8[];
+
+class cFEVObj_181BD0 {
+public:
+    char pad[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int on);
+};
+
+// PORT: the unit declares func_00181BD0 with an int index; the body sign-extends both id arguments.
+extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char charID) __asm__("func_00181BD0");
+
+extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char charID)
+{
+    sStr9_181BD0 name = D_0045D6E0;
+    char bar[8];
+    *(sStr4_181BD0*)bar = *(sStr4_181BD0*)D_004A13A8;
+    func_00416210(bar + 4, 0, 4);
+    char buf[100];
+    int stats[7];
+    float k = 0.2f;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
+    stats[0] = func_00148BC8(iface, rider, charID);
+    stats[1] = func_00148C68(iface, rider, charID);
+    stats[2] = func_00148B78(iface, rider, charID);
+    stats[3] = func_00148CB8(iface, rider, charID);
+    stats[4] = func_00148D58(iface, rider, charID);
+    stats[5] = func_00148D08(iface, rider, charID);
+    stats[6] = func_00148C18(iface, rider, charID);
+    int total = 0;
+    for (int i = 0; i < 7; i++) {
+        name.c[7] = '0' + i;
+        cFEVObj_181BD0* t = (cFEVObj_181BD0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name.c));
+        bar[0] = '0' + i;
+        char* b = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(bar));
+        if (t != 0 && b != 0) {
+            int v = stats[i];
+            // PORT: g++ minimum/maximum operator
+            int c = v >? 0;
+            total += v;
+            sprintf(buf, &D_004A13B0, func_00413AF8((float)v * k));
+            t->v09(1);
+            cUIText_setAsciiString((cUIText*)t, buf);
+            *(int*)(b + 0x80) = 0x37;
+            func_0039C428(b, c);
+        }
+    }
+    total -= total % 5;
+    char* ovr = D_004A13B8;
+    cUIText* avg = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D6F0));
+    sprintf(buf, &D_004A13B0, func_00413AF8((float)total * 0.02857142873108387f));
+    cUIText_setAsciiString(avg, buf);
+    char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
+    *(int*)(ob + 0x80) = 0x37;
+    func_0039C428(ob, total / 7);
+    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, rider, charID, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharselect", func_00181EF0);
 

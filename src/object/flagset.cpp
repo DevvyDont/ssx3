@@ -251,7 +251,145 @@ extern "C" void func_0034B818(void* elem)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034B9B0);
+#ifdef SKIP_ASM
+extern char* D_004A5B80;
+extern char* D_004A47B8;
+extern int D_004A4244;
+// PORT: 128-bit integer mode for VU0 asm memory operands
+typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
+extern char D_004FF1A0[];
+
+struct sRS_34B9B0 {
+    unsigned int f0_0 : 12;
+    unsigned int f0_12 : 8;
+    unsigned int f0_20 : 12;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 25;
+    int f8;
+    int fC;
+    int f10;
+};
+extern sRS_34B9B0 D_00501420;
+
+struct sVec4_34B9B0 {
+    float x, y, z, w;
+    sVec4_34B9B0() {}
+    sVec4_34B9B0(const float& a, const float& b, const float& c, const float& d) : x(a), y(b), z(c), w(d) {}
+} __attribute__((aligned(16)));
+
+struct sRow_34B9B0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_34B9B0 {
+    sRow_34B9B0 r[4];
+};
+
+struct sModel_34B9B0 {
+    char pad_0x0[0x7D];
+    unsigned char page;     // 0x7D
+    short slot;             // 0x7E
+};
+
+static inline int IsLoaded_34B9B0(sModel_34B9B0* m)
+{
+    char* wc = *(char**)D_004A47B8;
+    if (m->page == 0xFF)
+        return 1;
+    int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;
+    return ok ? *(int*)(wc + m->slot * 0x18 + 0x3F0) == 3 : 0;
+}
+
+struct sPair_34B9B0 { sRow_34B9B0 r[4]; };
+struct sVE43_34B9B0 { short delta; short index; sPair_34B9B0 (*fn)(void*); };
+struct sPair_34B9B0;
+struct sVE93_34B9B0 { short delta; short index; int (*fn)(void*, sVec4_34B9B0*, sVec4_34B9B0*, sPair_34B9B0*); };
+struct sVE96_34B9B0 { short delta; short index; void (*fn)(void*, void*, int, int, int); };
+struct sVE7_34B9B0 { short delta; short index; void (*fn)(void*, void*, void*, sMat_34B9B0*); };
+
+static inline void SetF0_12_34B9B0(sRS_34B9B0* rs, int v) { rs->f0_12 = v; }
+static inline void SetF4_2_34B9B0(sRS_34B9B0* rs, int v) { rs->f4_2 = v; }
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void MatCopy_34B9B0(sMat_34B9B0* d, const sMat_34B9B0* s)
+{
+    __asm__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+struct sFlagSetEntry;
+struct sFSE_34B9B0 {
+    char pad[0x94];
+    sModel_34B9B0* models[1];
+};
+
+#define TOP_34B9B0(c) (*(sRS_34B9B0**)((c) + 0xE84))
+
+extern "C" void func_0034B9B0(sFlagSetEntry* e)
+{
+    char* self = (char*)e;
+    if (D_004A4244 == 0) {
+        return;
+    }
+    char* ctx = D_004A5B80;
+    TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
+    *++TOP_34B9B0(ctx) = D_00501420;
+    if (*(signed char*)(self + 3) != 0) {
+        SetF0_12_34B9B0(TOP_34B9B0(D_004A5B80), 0xFF);
+        SetF4_2_34B9B0(TOP_34B9B0(D_004A5B80), 11);
+    } else {
+        SetF4_2_34B9B0(TOP_34B9B0(ctx), 5);
+    }
+    float one = 1.0f;
+    for (int i = 0; i < *(int*)(self + 0x5C); i++) {
+        sModel_34B9B0* m = ((sFSE_34B9B0*)self)->models[i];
+        if (!IsLoaded_34B9B0(m)) {
+            continue;
+        }
+        {
+            sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
+            char* thisp = ctx + vt[93].delta;
+            sVec4_34B9B0 a(*(float*)((char*)m + 0x60), *(float*)((char*)m + 0x64), *(float*)((char*)m + 0x68), one);
+            sVec4_34B9B0 b(*(float*)((char*)m + 0x6C), *(float*)((char*)m + 0x70), *(float*)((char*)m + 0x74), one);
+            sVec4_34B9B0* pb = &b;
+            sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
+            sPair_34B9B0 c = vt43[43].fn(ctx + vt43[43].delta);
+            if (vt[93].fn(thisp, &a, pb, &c) == 1) {
+                continue;
+            }
+        }
+        {
+            char* pos = (char*)m + 0x10;
+            sMat_34B9B0 mat;
+            MatCopy_34B9B0(&mat, (sMat_34B9B0*)D_004FF1A0);
+            mat.r[3].x = *(float*)(self + 0x88);
+            mat.r[3].y = *(float*)(self + 0x8C);
+            char* h = *(char**)(self + 0x60);
+            if (h != 0) {
+                sVE7_34B9B0* hv = *(sVE7_34B9B0**)(h + 4);
+                hv[7].fn(h + hv[7].delta, pos, *(void**)((char*)m + 0x94), &mat);
+            } else {
+                sVE96_34B9B0* v96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
+                v96[96].fn(ctx + v96[96].delta, m, 0, 0, 0);
+            }
+        }
+    }
+    TOP_34B9B0(ctx)--;
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034BCA0);
 

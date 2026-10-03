@@ -651,7 +651,107 @@ extern "C" int func_00353418(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353448);
+#ifdef SKIP_ASM
+extern "C" void func_0035F688(void* self, void* stream);
+extern "C" void func_0035FD98(void* self, void* stream);
+
+struct sVE_353448 { short delta; short index; int (*fn)(void*); };
+struct sVEv_353448 { short delta; short index; void (*fn)(void*, void*); };
+struct sVEw_353448 { short delta; short index; void (*fn)(void*, void*, int); };
+
+struct sHdr_353448 {
+    int flags;
+    int a;
+    int b;
+    int count1;
+    int count2;
+    char ids[32];
+};
+
+
+static inline int VCall0_353448(char* o, int voff, int slot)
+{
+    sVE_353448* e = &(*(sVE_353448**)(o + voff))[slot];
+    return e->fn(o + e->delta);
+}
+
+static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
+{
+    sVEv_353448* e = &(*(sVEv_353448**)(o + voff))[slot];
+    e->fn(o + e->delta, arg);
+}
+
+extern "C" void func_00353448(char* self, char* stream)
+{
+    sHdr_353448 h;
+    h.flags = 0;
+    h.b = 0;
+    h.a = 0;
+    h.count1 = 0;
+    h.count2 = 0;
+    for (int i = 0; i < 32; i++) {
+        h.ids[i] = 0;
+    }
+    char* o0 = *(char**)(self + 0x0);
+    if (o0 != 0) {
+        h.flags |= 1;
+        h.a = VCall0_353448(o0, 0, 26);
+    }
+    if (*(void**)(self + 0x4) != 0) {
+        h.flags |= 2;
+    }
+    if (*(void**)(self + 0x8) != 0) {
+        h.flags |= 4;
+    }
+    char* oC = *(char**)(self + 0xC);
+    if (oC != 0) {
+        h.flags |= 8;
+        h.b = VCall0_353448(oC, 4, 5);
+    }
+    for (char* p = *(char**)(self + 0x10); p; p = *(char**)p) {
+        h.ids[h.count1++] = VCall0_353448(p, 8, 2);
+    }
+    if (h.count1 > 0) {
+        h.flags |= 0x10;
+    }
+    for (char* p = *(char**)(self + 0x1C); p; p = *(char**)p) {
+        h.count2++;
+    }
+    if (h.count2 > 0) {
+        h.flags |= 0x20;
+    }
+    {
+        sVEw_353448* e = &(*(sVEw_353448**)stream)[1];
+        e->fn(stream + e->delta, &h, 0x34);
+    }
+    char* w0 = *(char**)(self + 0x0);
+    if (w0 != 0) {
+        VCall1_353448(w0, 0, 27, stream);
+    }
+    if (*(void**)(self + 0x4) != 0) {
+        func_0035FD98(*(void**)(self + 0x4), stream);
+    }
+    if (*(void**)(self + 0x8) != 0) {
+        func_0035F688(*(void**)(self + 0x8), stream);
+    }
+    char* wC = *(char**)(self + 0xC);
+    if (wC != 0) {
+        VCall1_353448(wC, 4, 6, stream);
+    }
+    if (h.count1 > 0) {
+        for (char* p = *(char**)(self + 0x10); p; p = *(char**)p) {
+            VCall1_353448(p, 8, 4, stream);
+        }
+    }
+    if (h.count2 > 0) {
+        for (char* p = *(char**)(self + 0x1C); p; p = *(char**)p) {
+            VCall1_353448(p, 8, 2, stream);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/modifierblock", tModifierBlock_readFromReplayFrame);
 

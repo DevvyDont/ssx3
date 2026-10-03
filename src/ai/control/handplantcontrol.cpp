@@ -118,7 +118,122 @@ void func_00139A18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139A20);
+#ifdef SKIP_ASM
+extern "C" void cRider_updateOrientationImplicit(void*);
+extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
+extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
+extern "C" void func_00125970(char* self);
+int func_0011FEE8(void* rider);
+extern void* D_004A28A8;
+extern void* D_004FF120[];
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_139A20(sVec4HP& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product, by-value second operand).
+static inline float vu0Dot_139A20(const sVec4HP& a, sVec4HP b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_139A20(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_00139A20(void* p)
+{
+    char* self = (char*)p;
+    func_00125970(*(char**)(self + 0x4));
+    char* r = *(char**)(self + 0x4);
+    func_00113648(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, *(float*)(r + 0x300) * 0.01666666753590107f);
+    char* r1 = *(char**)(self + 0x4);
+    {
+        sVec4HP up = *(sVec4HP*)(r1 + 0x180);
+        *(sVec4HP*)(r1 + 0x370) = up;
+    }
+    *(sVec4HP*)(*(char**)(self + 0x4) + 0x3D0) = *(sVec4HP*)D_004FF120;
+    int st = *(int*)(*(char**)(*(char**)(self + 0x4) + 0x788) + 0xAC);
+    int ok = 0;
+    if (st == 1 || st == 3) ok = 1;
+    if (ok) {
+        char* r2 = *(char**)(self + 0x4);
+        char* ap = *(char**)(r2 + 0x788);
+        int idx = *(int*)(ap + 0x90);
+        char* e = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + idx * 0xB0;
+        int flag = 0;
+        short sf = *(short*)(ap + 0x94);
+        if (sf != -1) {
+            int m = sf & 8;
+            flag = m != 0;
+        }
+        if (idx != 0x12 && *(int*)(e + 0x44) == 0 && flag) {
+            float d = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
+            float t = *(float*)(r2 + 0x300);
+            float x;
+            if (d >= 0.01666666753590107f)
+                x = t / d;
+            else
+                x = t * 59.999996185302734f;
+            float y = *(float*)(*(char**)(self + 0x4) + 0x300) * 1.396263599395752f;
+            if (func_0011FEE8(*(void**)(self + 0x4)) == 5) {
+                char* r3 = *(char**)(self + 0x4);
+                int big = 1;
+                if (!(0.0872664749622345f < absf_139A20(*(float*)(*(char**)(r3 + 0x77C) + 0x258)))) big = 0;
+                if (big) {
+                    func_00121AA0(r3, *(char**)(r3 + 0x788) + 0x20, D_004FF120, x, y);
+                    goto done;
+                }
+            }
+            char* r4 = *(char**)(self + 0x4);
+            char* ap4 = *(char**)(r4 + 0x788);
+            char* tgt = ap4 + 0x20;
+            if (*(float*)(ap4 + 0x28) < 0.30000001192092896f || *(int*)self != 0) {
+                sVec4HP v = *(sVec4HP*)(ap4 + 0x10);
+                if (vu0Dot_139A20(v, *(sVec4HP*)(r4 + 0x1B0)) < 0.0f) {
+                    vu0ScaleEq_139A20(v, -1.0f);
+                }
+                char* r5 = *(char**)(self + 0x4);
+                func_00121AA0(r5, *(char**)(r5 + 0x788) + 0x20, &v, x, y);
+            } else {
+                func_00121AA0(r4, tgt, D_004FF120, x, y);
+            }
+        }
+    }
+done:
+    cRider_updateOrientationImplicit(*(void**)(self + 0x4));
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139C88);
 
@@ -948,7 +1063,183 @@ extern "C" int func_0013D1B8(void* self, sHit_13D1B8* out, float* dist)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D818);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F178);
+#ifdef SKIP_ASM
+extern "C" void func_00114298(void* rider, float v);
+// PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
+extern "C" void func_0011E150_v13F178(void* rider, int a1) __asm__("func_0011E150");
+extern "C" void func_00105398(void* rider, int a1);
+extern "C" void func_00107888(void* rider);
+extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void func_0013F488(void* self);
+extern "C" void func_00294170(void* snd, void* rider);
+int func_0011FE98(void* rider);
+// PORT: func_0011FE78 is defined with one parameter but this caller passes (rider, 1).
+void func_0011FE78_impl_13F178(void* rider, int v) __asm__("func_0011FE78__FPv");
+extern char* D_004A3500;
+extern int D_004A115C;
+extern void* D_004A28A8;
+
+struct sInfo_13F178 {
+    sVec4HP pos;
+    sVec4HP dir;
+    sVec4HP up;
+    int f30;
+} __attribute__((aligned(16)));
+
+extern "C" void func_0010EB30(void* rider, int a1, int a2, int a3, sInfo_13F178* info);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4HP vu0Scale_13F178(const sVec4HP& v, float s)
+{
+    sVec4HP r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4HP vu0Add_13F178(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4HP vu0Normalize_13F178(const sVec4HP& v)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_13F178(const sVec4HP& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_13F178(sVec4HP& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_13F178(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+#define RIDER_13F178 (*(char**)((char*)self + 0x18))
+
+extern "C" void func_0013F178(void* self)
+{
+    if (*(int*)((char*)self + 0xC) != 0) {
+        func_00114298(RIDER_13F178, -1.0f);
+    } else {
+        char* r = RIDER_13F178;
+        int idx = *(int*)(r + 0x438);
+        char* e = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + idx * 0xB0;
+        int fl;
+        if (idx == 0x12) {
+            sInfo_13F178 info;
+            info.pos = *(sVec4HP*)(r + 0x110);
+            info.dir = vu0Normalize_13F178(*(sVec4HP*)(r + 0x1E0));
+            info.up = *(sVec4HP*)(RIDER_13F178 + 0x370);
+            info.f30 = 0;
+            func_0010EB30(RIDER_13F178, 0x168, 0, *(int*)(RIDER_13F178 + 0x438), &info);
+        } else if (*(int*)(e + 0x44) != 0 || (fl = *(short*)(r + 0x2D4), (fl & 2) != 0)) {
+            func_00116120(r, 0, 1);
+        }
+    }
+    func_0011E150_v13F178(RIDER_13F178, 0);
+    *(int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = D_004A115C;
+    func_0013F488(self);
+    *(unsigned int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = 0xFFFFFFFF;
+    func_00105398(RIDER_13F178, 0);
+    func_00107888(RIDER_13F178);
+    if (*(int*)((char*)self + 0xC) != 0 && func_0011FE98(RIDER_13F178) == 0) {
+        func_0011FE78_impl_13F178(RIDER_13F178, 1);
+        func_00294170(D_004A3500, RIDER_13F178);
+    }
+    char* r = RIDER_13F178;
+    *(sVec4HP*)(r + 0x390) = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)(r + 0x370), 0.5f)));
+    char* r3 = RIDER_13F178;
+    float len = vu0Length_13F178(*(sVec4HP*)(r3 + 0x1E0));
+    if (*(float*)(r3 + 0x2E4) < len) {
+        vu0ScaleEq_13F178(*(sVec4HP*)(r3 + 0x1E0), *(float*)(r3 + 0x2E4) / len);
+    }
+    float k = 0.0f;
+    float vmax = 3333.33349609375f;
+    if (0.0f <= len) {
+        k = 1.0f;
+        if (len <= vmax) {
+            k = len / vmax;
+        }
+    }
+    *(float*)(RIDER_13F178 + 0x75C) = k;
+    char* r4 = RIDER_13F178;
+    *(float*)(r4 + 0x754) = absf_13F178(*(float*)(r4 + 0x1F0));
+    char* r5 = RIDER_13F178;
+    *(float*)(r5 + 0x750) = absf_13F178(*(float*)(r5 + 0x214));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F410);
@@ -1513,7 +1804,84 @@ int func_001441A0(void* self, void* a1)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001441B8);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144368);
+#ifdef SKIP_ASM
+struct sKey_144368 {
+    int level;
+    int x;
+    int y;
+    int z;
+};
+
+struct sBox_144368 {
+    float min[4];
+    float max[4];
+};
+
+struct sTree_144368 {
+    void* f0;
+    sBox_144368* boxes;
+    int count;
+};
+
+struct sNode_144368 {
+    sNode_144368* child[8];
+};
+
+extern "C" void func_00101A28(void* a, sNode_144368* node, int leaf);
+
+extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_144368* key)
+{
+    int n = self->count;
+    int i = 0;
+    int ok;
+    do {
+        if (i == n) {
+            return;
+        }
+        union { int i; float f; } u;
+        u.i = (key->level + 0x7F) << 23;
+        float s = u.f;
+        // PORT: pointer arithmetic through int
+        sBox_144368* b = (sBox_144368*)((i << 5) + (int)self->boxes);
+        ok = 0;
+        if (((float)key->x - 0.2f) * s <= b->max[0] && ((float)key->y - 0.2f) * s <= b->max[1] && ((float)key->z - 0.2f) * s <= b->max[2]
+            && b->min[0] <= ((float)(key->x + 1) + 0.2f) * s && b->min[1] <= ((float)(key->y + 1) + 0.2f) * s && b->min[2] <= ((float)(key->z + 1) + 0.2f) * s) {
+            ok = 1;
+        }
+        i++;
+    } while (!ok);
+    int leaf = key->level < 14;
+    func_00101A28(self->f0, node, leaf);
+    if (leaf) {
+        return;
+    }
+    if (key->level == 11) {
+        return;
+    }
+    sKey_144368 k;
+    k.level = key->level - 1;
+    k.x = key->x * 2;
+    k.y = key->y * 2;
+    k.z = key->z * 2;
+    if (node->child[0]) func_00144368(self, node->child[0], &k);
+    k.x++;
+    if (node->child[4]) func_00144368(self, node->child[4], &k);
+    k.y++;
+    if (node->child[6]) func_00144368(self, node->child[6], &k);
+    k.x--;
+    if (node->child[2]) func_00144368(self, node->child[2], &k);
+    k.z++;
+    if (node->child[3]) func_00144368(self, node->child[3], &k);
+    k.x++;
+    if (node->child[7]) func_00144368(self, node->child[7], &k);
+    k.y--;
+    if (node->child[5]) func_00144368(self, node->child[5], &k);
+    k.x--;
+    if (node->child[1]) func_00144368(self, node->child[1], &k);
+}
+#endif
 
 extern "C" void* func_00311958(void* self);
 

@@ -308,5 +308,93 @@ extern "C" int func_0022E920(sRenderList* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamerender", func_0022E968);
+#ifdef SKIP_ASM
+extern char D_0047D110[];
+extern char D_0047D168[];
+extern char D_0047D1C0[];
+extern char D_0047D218[];
+extern char D_0047D270[];
+extern char D_0047D378[];
+extern char D_0047D3D0[];
+extern char D_0047D480[];
+extern char D_0047D4D8[];
+extern char D_0047D588[];
+extern char D_0047D638[];
+extern char D_0047D690[];
+extern char D_0047D6E8[];
+extern char* D_004A2C68;
+extern int D_004A2A54;
+extern "C" void func_00231CD0(void* self);
+extern "C" void* func_00233C10(void* self);
+extern "C" void func_00234188(void* self);
+extern "C" void* func_00234EF8(void* self);
+extern "C" void func_00236208(void* self);
+extern "C" void func_00236868(void* self);
+extern "C" void func_00244240(int a);
+
+struct sArr_22E968 {
+    char pad[0x5C];
+    int a[2];
+    int pad64;
+    int b[2];
+};
+
+static inline void Base_22E968(char* s, int off)
+{
+    *(void**)(s + off + 0xC) = D_0047D6E8;
+    *(int*)(s + off + 0x0) = 0;
+    D_004A2C68 = 0;
+}
+
+static inline void Init_22E968(char* s, int off, void* vt, int id)
+{
+    Base_22E968(s, off);
+    *(void**)(s + off + 0xC) = vt;
+    *(int*)(s + off + 0x4) = 0;
+    *(int*)(s + off + 0x0) = id;
+}
+
+extern "C" char* func_0022E968(char* self)
+{
+    func_00231CD0(self);
+    *(int*)(self + 0xC) = 0;
+    *(int*)(self + 0x24) = 0;
+    *(void**)(self + 0x0) = D_0047D110;
+    *(int*)(self + 0x48) = 0;
+    *(int*)(self + 0x7C) = 0;
+    D_004A2A54 = 0;
+    func_00244240(0);
+    *(int*)(self + 0x84) = 0;
+    func_00234188(self + 0xB0);
+    Init_22E968(self, 0xD0, D_0047D270, 3);
+    Init_22E968(self, 0xE0, D_0047D4D8, 4);
+    Init_22E968(self, 0xF0, D_0047D480, 5);
+    func_00233C10(self + 0x100);
+    Init_22E968(self, 0x118, D_0047D690, 8);
+    Init_22E968(self, 0x128, D_0047D218, 8);
+    Init_22E968(self, 0x138, D_0047D638, 11);
+    Init_22E968(self, 0x148, D_0047D588, 10);
+    func_00234EF8(self + 0x158);
+    func_00236868(self + 0x178);
+    Init_22E968(self, 0x18C, D_0047D1C0, 7);
+    Base_22E968(self, 0x19C);
+    *(void**)(self + 0x1A8) = D_0047D3D0;
+    *(int*)(self + 0x1A0) = 3;
+    *(int*)(self + 0x1B0) = 0;
+    *(int*)(self + 0x1B4) = 0;
+    *(int*)(self + 0x19C) = 1;
+    func_00236208(self + 0x1B8);
+    Init_22E968(self, 0x1DC, D_0047D378, 10);
+    Init_22E968(self, 0x1EC, D_0047D168, 4);
+    *(int*)(self + 0x228) = -1;
+    *(int*)(self + 0x224) = 0;
+    for (int i = 0; i < 2; i++) {
+        ((sArr_22E968*)self)->a[i] = 0;
+        ((sArr_22E968*)self)->b[i] = 0;
+    }
+    return self;
+}
+#endif
 

@@ -703,7 +703,128 @@ void* func_00352208(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352230);
+#ifdef SKIP_ASM
+unsigned int BXrand();
+extern char* D_004A5B64;
+
+struct sV4_352230 {
+    float x, y, z, w;
+    sV4_352230() {}
+    sV4_352230(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sDebris_352230 {
+    char pad0[0x18];
+    char* model;            // 0x18
+    float timer;            // 0x1C
+    float spinScale;        // 0x20
+    char pad24[0xC];
+    sV4_352230 rot[24];     // 0x30
+    sV4_352230 axis[24];    // 0x1B0
+    float spin[24];         // 0x330
+    float vmax[4];          // 0x390
+    sV4_352230 vbase;       // 0x3A0
+    sV4_352230 pos[24];     // 0x3B0
+    sV4_352230 vel[24];     // 0x530
+};
+
+static inline float randf_352230()
+{
+    union {
+        int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+static inline float randRange_352230(float lo, float hi)
+{
+    return randf_352230() * (hi - lo) + lo;
+}
+
+static inline float randScale_352230(float s)
+{
+    return s * randf_352230();
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_352230 Normalize_352230(const sV4_352230& v)
+{
+    sV4_352230 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_352230 Scale_352230(const sV4_352230& v, float s)
+{
+    sV4_352230 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(d)
+        : "m"(d), "m"(b)
+        : "memory");
+}
+
+extern "C" void func_00352230(void* p)
+{
+    sDebris_352230* self = (sDebris_352230*)p;
+    char* g = *(char**)(self->model + 0x80);
+    for (int i = 0; i < *(int*)(g + 4); i++) {
+        self->spin[i] = self->spinScale * randRange_352230(0.5f, 1.0f);
+        self->axis[i] = sV4_352230(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), 0.0f);
+        self->axis[i] = Normalize_352230(self->axis[i]);
+    }
+    for (int j = 0; j < *(int*)(g + 4); j++) {
+        float vx = randScale_352230(self->vmax[0]) * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        if (BXrand() & 1) {
+            vx = -vx;
+        }
+        float vy = randScale_352230(self->vmax[1]) * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        if (BXrand() & 1) {
+            vy = -vy;
+        }
+        float vz = randScale_352230(self->vmax[2]) * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        self->vel[j] = Scale_352230(self->vbase, *(float*)(D_004A5B64 + 0x14));
+        AddEq_352230(self->vel[j], sV4_352230(vx, vy, vz, 0.0f));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00352500);

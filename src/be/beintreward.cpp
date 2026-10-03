@@ -102,7 +102,125 @@ extern "C" char* func_00156B28(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00156C70);
+#ifdef SKIP_ASM
+extern int D_004A6CA8[];
+struct sBELibTables;
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(sBELibTables* self, int i);
+unsigned int BXrand();
+
+struct sBEFlagEntry_6C70 {
+    unsigned short field_0x0;
+    unsigned short flags;
+};
+
+struct sBEEntry_6C70 {
+    char pad_0x0[4];
+    short id;           // 0x4
+    char pad_0x6[0x2E];
+    int flags;          // 0x34
+};
+
+static inline sBEFlagEntry_6C70* Flag_6C70(char* p, sBEEntry_6C70* e)
+{
+    short s = (*(short**)(p + 0x288))[e->id];
+    if (s >= 0)
+        return (sBEFlagEntry_6C70*)(p + 0x290) + s;
+    return 0;
+}
+
+static inline int Match_6C70(sBEEntry_6C70* e, int type)
+{
+    return (type == 0 && (e->flags & 0x100)) || (type == 1 && (e->flags & 0x200)) || (type == 2 && (e->flags & 0x400));
+}
+
+extern "C" int func_00156C70(void* self, int a1, int a2, int type)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    int n = 0;
+    void* lib = func_0014BDB8_noarg();
+    int count = func_0014D988(lib, a2);
+    sBEEntry_6C70* e = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, a2);
+    int i;
+    for (i = 0; i < count; i++, e++)
+    {
+        if (type == 0 && (*(unsigned char*)((char*)e + 0x35) & 1))
+        {
+            if ((Flag_6C70(p, e)->flags & 2) == 0)
+                n++;
+        }
+        else if (type == 1 && (e->flags & 0x200))
+        {
+            if ((Flag_6C70(p, e)->flags & 2) == 0)
+                n++;
+        }
+        else if (type == 2 && (e->flags & 0x400))
+        {
+            if ((Flag_6C70(p, e)->flags & 2) == 0)
+                n++;
+        }
+    }
+    if (n > 0)
+    {
+        n = BXrand() % n;
+        e = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, a2);
+        int j;
+        for (j = 0; j < count; j++, e++)
+        {
+            if (type == 0 && (*(unsigned char*)((char*)e + 0x35) & 1))
+            {
+                short id = e->id;
+                short s = (*(short**)(p + 0x288))[id];
+                sBEFlagEntry_6C70* f;
+                if (s >= 0)
+                    f = (sBEFlagEntry_6C70*)(p + 0x290) + s;
+                else
+                    f = 0;
+                if ((f->flags & 2) == 0)
+                {
+                    if (--n < 0)
+                        return id;
+                }
+            }
+            else if (type == 1 && (e->flags & 0x200))
+            {
+                short id = e->id;
+                short s = (*(short**)(p + 0x288))[id];
+                sBEFlagEntry_6C70* f;
+                if (s >= 0)
+                    f = (sBEFlagEntry_6C70*)(p + 0x290) + s;
+                else
+                    f = 0;
+                if ((f->flags & 2) == 0)
+                {
+                    if (--n < 0)
+                        return id;
+                }
+            }
+            else if (type == 2 && (e->flags & 0x400))
+            {
+                short id = e->id;
+                short s = (*(short**)(p + 0x288))[id];
+                sBEFlagEntry_6C70* f;
+                if (s >= 0)
+                    f = (sBEFlagEntry_6C70*)(p + 0x290) + s;
+                else
+                    f = 0;
+                if ((f->flags & 2) == 0)
+                {
+                    if (--n < 0)
+                        return id;
+                }
+            }
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00156EE0);

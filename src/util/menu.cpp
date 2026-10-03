@@ -3539,7 +3539,175 @@ extern "C" func_002CFF88_sRect* func_002CFF88(func_002CFF88_sRect* out, void* it
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D0008);
+#ifdef SKIP_ASM
+// PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the body reads $8 (5th arg).
+void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
+
+struct sCol_2D0008 { float a, r, g, b; };
+
+struct sVtx_2D0008 {
+    float u, v, q;
+    int pad;
+    int r, g, b, a;
+    float pos[4] __attribute__((aligned(16)));
+    sVtx_2D0008() {}
+};
+
+struct sVec4_2D0008 {
+    float x, y, z, w;
+    sVec4_2D0008(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sRect_2D0008 { float x, y, w, h; };
+
+struct sRS_2D0008 {
+    int f0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 25;
+    int f8;
+    int fC;
+    short f10;
+};
+
+class cCtx_2D0008 {
+public:
+    char pad0[0xE84];
+    sRS_2D0008* top;
+    char pad1[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71(int prim, void* verts, int n);
+};
+
+extern cCtx_2D0008* D_004A289C_2d0008 __asm__("D_004A289C");
+
+// PORT: rect pointer passed through func_002CA988's int parameter
+extern "C" void func_002D0008(char* self, float* rect)
+{
+    func_002CA988_5(self, (int)rect, *(int*)(self + 0x18), 0, 0);
+    sVtx_2D0008 v[4];
+    sRect_2D0008 rc;
+    rc.w = 20.0f;
+    rc.h = 17.0f;
+    rc.x = rect[0] + rect[2] - 16.0f - rc.w;
+    rc.y = rect[1] + 6.0f + 2.0f;
+    float x2 = rc.x + rc.w;
+    float y2 = rc.y + rc.h;
+    sCol_2D0008* c = *(sCol_2D0008**)(self + 0x14);
+    float zero = 0.0f;
+    float one = 1.0f;
+    v[0].r = (int)(c->r * 128.0f);
+    v[0].g = (int)(c->g * 128.0f);
+    v[0].b = (int)(c->b * 128.0f);
+    v[0].a = (int)(c->a * 128.0f);
+    v[0].v = zero;
+    v[0].u = zero;
+    v[0].q = one;
+    *(sVec4_2D0008*)v[0].pos = sVec4_2D0008(rc.x, rc.y, zero, one);
+    v[1].r = (int)(c->r * 128.0f);
+    v[1].g = (int)(c->g * 128.0f);
+    v[1].b = (int)(c->b * 128.0f);
+    v[1].a = (int)(c->a * 128.0f);
+    v[1].v = zero;
+    v[1].u = zero;
+    v[1].q = one;
+    *(sVec4_2D0008*)v[1].pos = sVec4_2D0008(rc.x, y2, zero, one);
+    v[2].r = (int)(c->r * 128.0f);
+    v[2].g = (int)(c->g * 128.0f);
+    v[2].b = (int)(c->b * 128.0f);
+    v[2].a = (int)(c->a * 128.0f);
+    v[2].v = zero;
+    v[2].u = zero;
+    v[2].q = one;
+    *(sVec4_2D0008*)v[2].pos = sVec4_2D0008(x2, rc.y, zero, one);
+    v[3].r = (int)(c->r * 128.0f);
+    v[3].g = (int)(c->g * 128.0f);
+    v[3].b = (int)(c->b * 128.0f);
+    v[3].a = (int)(c->a * 128.0f);
+    v[3].v = zero;
+    v[3].u = zero;
+    v[3].q = one;
+    *(sVec4_2D0008*)v[3].pos = sVec4_2D0008(x2, y2, zero, one);
+    if (c->a != 1.0f) {
+        D_004A289C_2d0008->top->f4_2 = 5;
+    } else {
+        D_004A289C_2d0008->top->f4_2 = 1;
+    }
+    *(short*)((char*)D_004A289C_2d0008->top + 0x10) = -1;
+    D_004A289C_2d0008->v71(4, v, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cARGBMenuItem_cARGBMenuItem);

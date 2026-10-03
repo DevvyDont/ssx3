@@ -247,9 +247,113 @@ extern "C" float func_00313D70(sSeq_00313D70* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313DD0);
+#ifdef SKIP_ASM
+struct sVEntry_313DD0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
 
+static inline void Ser_313DD0(char* s, void* p, int n)
+{
+    sVEntry_313DD0* e = &(*(sVEntry_313DD0**)s)[1];
+    e->fn(s + e->delta, p, n);
+}
+
+class cAsStream;
+
+extern "C" void func_00313DD0(void* node, cAsStream* stream)
+{
+    char* self = (char*)node;
+    char* s = (char*)stream;
+    Ser_313DD0(s, self + 0x0, 0x4);
+    Ser_313DD0(s, self + 0x4, 0x54);
+    Ser_313DD0(s, self + 0x60, 0x20);
+    Ser_313DD0(s, self + 0x80, 0x4);
+    Ser_313DD0(s, self + 0x84, 0x4);
+    Ser_313DD0(s, self + 0x88, 0x8);
+    Ser_313DD0(s, self + 0x90, 0x4);
+    Ser_313DD0(s, self + 0x94, 0x4);
+    Ser_313DD0(s, self + 0x98, 0x4);
+    Ser_313DD0(s, self + 0x9C, 0x4);
+    Ser_313DD0(s, self + 0xA0, 0x4);
+    Ser_313DD0(s, self + 0xA4, 0x4);
+    Ser_313DD0(s, self + 0xA8, 0x4);
+    Ser_313DD0(s, self + 0xB0, 0x10);
+    Ser_313DD0(s, self + 0xC0, 0x4);
+    Ser_313DD0(s, self + 0xC4, 0x4);
+    int n = 0;
+    char* p = *(char**)(self + 0xAC);
+    if (p != 0) {
+        int c = 0;
+        do {
+            p = *(char**)(p + 0xC);
+            c++;
+        } while (p != 0);
+        n = c;
+    }
+    Ser_313DD0(s, &n, 4);
+    for (p = *(char**)(self + 0xAC); p; p = *(char**)(p + 0xC)) {
+        Ser_313DD0(s, p, 0x10);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314050);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0048A5B0[];
+
+struct sVEntry_314050 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+static inline void Read_314050(char* s, void* p, int n)
+{
+    sVEntry_314050* e = &(*(sVEntry_314050**)s)[2];
+    e->fn(s + e->delta, p, n);
+}
+
+extern "C" void func_00314050(void* node, void* stream)
+{
+    char* self = (char*)node;
+    char* s = (char*)stream;
+    Read_314050(s, self + 0x0, 0x4);
+    Read_314050(s, self + 0x4, 0x54);
+    Read_314050(s, self + 0x60, 0x20);
+    Read_314050(s, self + 0x80, 0x4);
+    Read_314050(s, self + 0x84, 0x4);
+    Read_314050(s, self + 0x88, 0x8);
+    Read_314050(s, self + 0x90, 0x4);
+    Read_314050(s, self + 0x94, 0x4);
+    Read_314050(s, self + 0x98, 0x4);
+    Read_314050(s, self + 0x9C, 0x4);
+    Read_314050(s, self + 0xA0, 0x4);
+    Read_314050(s, self + 0xA4, 0x4);
+    Read_314050(s, self + 0xA8, 0x4);
+    Read_314050(s, self + 0xB0, 0x10);
+    Read_314050(s, self + 0xC0, 0x4);
+    Read_314050(s, self + 0xC4, 0x4);
+    int n;
+    Read_314050(s, &n, 4);
+    char* tail = *(char**)(self + 0xAC);
+    for (int i = 0; i < n; i++) {
+        char* p = (char*)cMemMan_alloc(0x10, D_0048A5B0, 0x20000000, 0);
+        Read_314050(s, p, 0x10);
+        if (*(char**)(self + 0xAC) != 0) {
+            *(char**)(tail + 0xC) = p;
+        } else {
+            *(char**)(self + 0xAC) = p;
+        }
+        tail = p;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_003142E8__FPv);
