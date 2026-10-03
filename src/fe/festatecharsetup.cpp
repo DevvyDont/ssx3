@@ -1,6 +1,113 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onCreateScreen);
+#ifdef SKIP_ASM
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+extern "C" void func_00182DB8(void* self);
+extern "C" void func_001A0570(void* self, int i, int v);
+extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F140(void* snd, int a);
+extern void* D_004A28A8;
+extern signed char D_00535C11[];
+extern char D_0045D7C0[];
+extern char D_004A1410[];
+extern char D_0045D7D0[];
+extern char D_0045D7F0[];
+extern char D_0045D810[];
+extern char D_0045D820[];
+extern char D_0045D830[];
+extern char D_0045D840[];
+extern char D_0045D850[];
+
+struct sVEntry_182928 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+class cWidget_182928 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void enable(int on);
+    virtual void show(int on);
+};
+
+struct sCharSetup_182928 {
+    char pad_0x0[0x10];
+    void* engine;               // 0x10
+    char pad_0x14[0x2C];
+    void* screen;               // 0x40
+    signed char player;         // 0x44
+};
+
+static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
+{
+    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+    if (o != 0) {
+        o->show(1);
+        *(int*)((char*)o + 0x18) = idx;
+    }
+}
+
+extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
+{
+    void* engine = self->engine;
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D7C0), 0);
+    self->screen = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_00182DB8(self);
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
+    sVEntry_182928* vt = *(sVEntry_182928**)(iface + 0xC);
+    vt[2].fn(iface + vt[2].delta);
+    func_001A0570(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, self->player, 0);
+    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, self->player, charId, 0);
+    func_0028F140(func_0028B180(), 1);
+    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1410));
+    if (txt != 0) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 2) {
+            switch (self->player) {
+            case 0:
+                cUIText_setUnicodeStringByID(txt, GetHashValue32(D_0045D7D0));
+                break;
+            case 1:
+                cUIText_setUnicodeStringByID(txt, GetHashValue32(D_0045D7F0));
+                break;
+            }
+        }
+    }
+    showIdx_182928(self, D_0045D810, 0);
+    showIdx_182928(self, D_0045D820, 1);
+    showIdx_182928(self, D_0045D830, 2);
+    showIdx_182928(self, D_0045D840, 3);
+    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045D850));
+    if (o != 0) {
+        o->show(0);
+        o->enable(1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharsetup", func_00182C08);

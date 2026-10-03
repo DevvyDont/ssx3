@@ -4,7 +4,89 @@
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
+//100%
 INCLUDE_ASM("render/font", cFont_linkFont);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+struct sFontTexHdr;
+extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img);
+extern char D_004A46F8[];
+
+struct sGlyph_1788 {
+    unsigned short code;    // 0x0
+    unsigned char w;        // 0x2
+    unsigned char h;        // 0x3
+    unsigned short u;       // 0x4
+    unsigned short v;       // 0x6
+    unsigned char adv;      // 0x8
+    unsigned char xoff;     // 0x9
+    signed char yoff;       // 0xA
+    char pad;
+};
+
+struct sPad_1788 {
+    float x, y;
+};
+
+struct sFont_1788 {
+    int count;              // 0x0
+    sGlyph_1788* table;     // 0x4
+    sGlyph_1788* def;       // 0x8
+    int first;              // 0xC
+    int last;               // 0x10
+    int maxH;               // 0x14
+    sPad_1788 pad;          // 0x18
+};
+
+extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
+{
+    sFont_1788* self = (sFont_1788*)vself;
+    char* data = (char*)vdata;
+    sGlyph_1788* src = (sGlyph_1788*)(data + *(int*)(data + 0x14));
+    sPad_1788 p;
+    p.x = (float)data[0x10];
+    p.y = (float)data[0x11];
+    self->pad = p;
+    self->count = *(short*)(data + 0xA);
+    self->table = (sGlyph_1788*)operator_new_tag(self->count * 12, D_004A46F8, flags, 0);
+    int space = 0;
+    self->maxH = 0;
+    self->last = self->first = src->code;
+    for (int i = 0; i < self->count; i++) {
+        self->table[i].code = src[i].code;
+        self->table[i].w = src[i].w;
+        self->table[i].h = src[i].h;
+        self->table[i].u = src[i].u;
+        self->table[i].v = src[i].v;
+        self->table[i].adv = src[i].adv;
+        self->table[i].xoff = src[i].xoff;
+        self->table[i].yoff = src[i].yoff;
+        if (i != 0 && self->table[i].code == self->last + 1) {
+            self->last = self->table[i].code;
+        }
+        if (self->table[i].code == ' ') {
+            space = i;
+        }
+        if (self->table[i].code == 0xAC) {
+            self->def = &self->table[i];
+        }
+        if (self->table[i].code == 0xA0) {
+            self->table[i].w = src[space].w;
+            self->table[i].h = src[space].h;
+            self->table[i].u = src[space].u;
+            self->table[i].v = src[space].v;
+            self->table[i].adv = src[space].adv;
+            self->table[i].xoff = src[space].xoff;
+            self->table[i].yoff = src[space].yoff;
+        }
+        if (self->maxH < self->table[i].h + self->table[i].yoff) {
+            self->maxH = self->table[i].h + self->table[i].yoff;
+        }
+    }
+    cFont_downloadTexture((char*)self, (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
+}
+#endif
 
 INCLUDE_ASM("render/font", func_003919E8);
 

@@ -171,7 +171,101 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DDAB8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DDD30);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE058);
+#ifdef SKIP_ASM
+struct sCol_E058 {
+    float a, r, g, b;
+};
+
+struct sEnt_E058 {
+    sCol_E058 col;              // 0x00
+    char pad10[0xE0];
+};
+
+struct sSeg_E058 {
+    float f0;                   // 0x00
+    char pad4[0xC];             // 0x04
+    int r;                      // 0x10
+    int g;                      // 0x14
+    int b;                      // 0x18
+    char pad1C[0x14];           // 0x1C
+};
+
+struct sWakeVt_E058 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sWake_E058 {
+    char* obj;                  // 0x00
+    int count;                  // 0x04
+    int head;                   // 0x08
+    char padC[0x4];             // 0x0C
+    sSeg_E058* ring;            // 0x10
+    sSeg_E058* trails[4];       // 0x14
+    char pad24[0x14];           // 0x24
+    float phase;                // 0x38
+    char pad3C[0x4];            // 0x3C
+    int frame;                  // 0x40
+    char pad44[0x5C];           // 0x44
+    sCol_E058 col;              // 0xA0
+    char padB0[0x8];            // 0xB0
+    int cap;                    // 0xB8
+};
+
+extern sEnt_E058 D_004FA398[];
+
+// PORT: g++ minimum operator (<?).
+static inline float wakeClampE058(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo) {
+        r = v <? hi;
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+extern "C" void func_002DE058(sWake_E058* self)
+{
+    self->phase += 0.03333333507180214f;
+    if (self->phase >= 4.0f) {
+        self->phase -= 4.0f;
+    }
+    if (self->count < self->cap) {
+        self->count++;
+    }
+    self->head = (self->head + self->cap - 1) % self->cap;
+    char* sub = self->obj + 0x6C0;
+    sWakeVt_E058* vt = *(sWakeVt_E058**)sub;
+    sCol_E058 col = D_004FA398[vt[7].fn(sub + vt[7].delta)].col;
+    col.a *= 2.0f;
+    col.r *= 2.0f;
+    col.g *= 2.0f;
+    col.b *= 2.0f;
+    col.r = wakeClampE058(col.r, 0.0f, 1.0f);
+    col.g = wakeClampE058(col.g, 0.0f, 1.0f);
+    col.b = wakeClampE058(col.b, 0.0f, 1.0f);
+    col.a = wakeClampE058(col.a, 0.0f, 1.0f);
+    self->col = col;
+    self->ring[self->head].f0 = (float)self->frame * 0.5f;
+    self->ring[self->head].f0 -= (float)(int)(self->ring[self->head].f0 * 0.015625f) * 64.0f + 32.0f;
+    self->ring[self->head].r = (int)(self->col.r * 128.0f);
+    self->ring[self->head].g = (int)(self->col.g * 128.0f);
+    self->ring[self->head].b = (int)(self->col.b * 128.0f);
+    int i;
+    for (i = 0; i < 4; i++) {
+        self->trails[i][self->head].f0 = self->ring[self->head].f0;
+        self->trails[i][self->head].r = self->ring[self->head].r;
+        self->trails[i][self->head].g = self->ring[self->head].g;
+        self->trails[i][self->head].b = self->ring[self->head].b;
+    }
+    self->frame++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE368);
@@ -431,7 +525,91 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E1598);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1A80);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1F70);
+#ifdef SKIP_ASM
+struct sWakeFx1F70 {
+    char* obj;                  // 0x00
+    char pad4[0xC];             // 0x04
+    float f10;                  // 0x10
+    char pad14[0x14];           // 0x14
+    char* p28;                  // 0x28
+    char* p2C;                  // 0x2C
+    sWakeVecE398 dir;           // 0x30
+    char pad40[0x50];           // 0x40
+    sWakeVecE398 col;           // 0x90
+    sWakeVecE398 pos;           // 0xA0
+    int iB0;                    // 0xB0
+    char padB4[0x8];            // 0xB4
+    float fBC;                  // 0xBC
+    char padC0[0x10];           // 0xC0
+    char* pD0;                  // 0xD0
+};
+
+struct sWakeVt1F70 {
+    short delta;
+    short index;
+    sWakeVecE398* (*fn)(void*);
+};
+
+// PORT: g++ minimum operator (<?).
+static inline float wakeClamp1F70(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo) {
+        r = v <? hi;
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+static inline float wakeLimit1F70()
+{
+    return 277.77777099609375f;
+}
+
+static inline sWakeVecE398* wakeVel1F70(sWakeFx1F70* self)
+{
+    char* sub = self->obj + 0x6C0;
+    sWakeVt1F70* vt = *(sWakeVt1F70**)sub;
+    return vt[2].fn(sub + vt[2].delta);
+}
+
+// PORT: g++ minimum/maximum operators (<?, >?).
+extern "C" void func_002E1F70(sWakeFx1F70* self)
+{
+    int done = 0;
+    void* em = self->p28 + 0x1080;
+    if (self->iB0 == 0 || *(float*)(self->pD0 + 0x5C) < 0.009999999776482582f) {
+        self->f10 = (self->f10 - 0.01666666753590107f) >? 0.0f;
+    } else {
+        done = 1;
+        self->f10 = (self->f10 + 0.010000000707805157f) <? *(float*)(self->pD0 + 0x5C);
+    }
+    if ((self->iB0 == 0 && wakeVel1F70(self)->z < -3333.33349609375f) || self->fBC < wakeLimit1F70()) {
+        self->f10 = 0.0f;
+    }
+    sWakeVecE398 pos = self->pos;
+    if (!done && 0.0f < self->f10) {
+        float a = wakeClamp1F70(self->f10 * 1.25f, 0.0f, 1.0f);
+        if (wakeVel1F70(self)->z < 0.0f) {
+            a *= wakeClamp1F70((wakeVel1F70(self)->z + 3333.33349609375f) / 3333.33349609375f, 0.0f, 1.0f);
+        }
+        sWakeVecE398 col = self->col;
+        col.w = a;
+        sWakeVecE398* v = wakeVel1F70(self);
+        sWakeVecE398 vel = wakeAdd0EE8(
+            wakeAdd0EE8(wakeScale0EE8(*v, *(float*)(self->p2C + 0x818)),
+                        wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
+            wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
+        func_002DE398((char*)self, &pos);
+        func_003717C0(em, &pos, &vel, &col, 1, 0.01666666753590107f);
+    } else {
+        func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2260);
@@ -673,7 +851,219 @@ void* func_002E2860(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2868);
+#ifdef SKIP_ASM
+struct sV3_2868 { float x, y, z; };
+struct sV4_2868 { float x, y, z, w; sV4_2868(const float& a, const float& b, const float& c, const float& d) { x = a; y = b; z = c; w = d; } };
+struct sV2_2868 { float x, y; sV2_2868() { x = 0.0f; y = 0.0f; } sV2_2868(const float& a, const float& b) { x = a; y = b; } };
+struct sCol_2868 { float a; sV3_2868 d; };
+
+struct sRsState_2868 {
+    int f0;                 // 0x0
+    int flagsA;             // 0x4
+    int flagsB;             // 0x8
+    int fC;                 // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sRsVEnt_2868 {
+    short delta;
+    short index;
+    void (*fn)(void*, sV4_2868*, sV2_2868*, sV2_2868*, sV2_2868*, sCol_2868*, float, int);
+};
+
+struct sRsCtx_2868 {
+    char pad0[0xE84];
+    sRsState_2868* top;         // 0xE84
+    char pad1[0x1024 - 0xE88];
+    int tex1024;                // 0x1024
+    int tex1028;                // 0x1028
+    char pad2[0x10D8 - 0x102C];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual void v73();
+    virtual void v74();
+    virtual void v75();
+    virtual void v76();
+    virtual void v77();
+    virtual void v78();
+    virtual void Draw(const sV4_2868& pos, const sV2_2868& size, const sV2_2868& uv0, const sV2_2868& uv1, const sCol_2868& col, float rot, int flags);
+};
+
+struct sPart_2868 {
+    char pad0[0xC];
+    int flags;                  // 0xC
+    sV3_2868 vel;               // 0x10
+    sV3_2868 pos;               // 0x1C
+    char pad28[0x40 - 0x28];
+    float alpha[1];             // 0x40
+};
+
+struct sWake_2868 {
+    char pad0[0x20];
+    sPart_2868* part;           // 0x20
+    char pad24[4];
+    float rot;                  // 0x28
+    unsigned short on;          // 0x2C
+    unsigned short useAlpha;    // 0x2E
+};
+
+extern sRsCtx_2868* D_004A5B80_2868 __asm__("D_004A5B80");
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_2868(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline int rsTex1024_2868(sRsCtx_2868* ctx)
+{
+    return ctx->tex1024;
+}
+
+static inline int rsTex1028_2868(sRsCtx_2868* ctx)
+{
+    return ctx->tex1028;
+}
+
+static inline void rsSetA_2868(sRsCtx_2868* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+}
+
+extern "C" void func_002E2868(sWake_2868* self, int idx)
+{
+    if (self->on == 0) {
+        return;
+    }
+    sV3_2868 n;
+    sPart_2868* q = self->part;
+    float x = q->vel.x;
+    float y = q->vel.y;
+    float z = q->vel.z;
+    float len = Sqrt_2868(x * x + y * y + z * z);
+    if (len != 0.0f) {
+        float inv = 1.0f / len;
+        n.x = x * inv;
+        n.y = y * inv;
+        n.z = z * inv;
+    } else {
+        n.x = q->vel.x;
+        n.y = q->vel.y;
+        n.z = q->vel.z;
+    }
+    sCol_2868 col;
+    col.d.x = n.x;
+    col.d.y = n.y;
+    col.d.z = n.z;
+    sRsCtx_2868* ctx = D_004A5B80_2868;
+    if (self->useAlpha != 0) {
+        col.a = self->part->alpha[idx];
+        rsSetA_2868(ctx, 0x1800000, 23, 2);
+        rsSetA_2868(ctx, 0x300000, 20, 0);
+        rsSetA_2868(ctx, 0xFF000, 12, 0x14);
+    } else {
+        col.a = 1.0f;
+        rsSetA_2868(ctx, 0x1800000, 23, 1);
+        rsSetA_2868(ctx, 0x300000, 20, 0);
+        rsSetA_2868(ctx, 0xFF000, 12, 0x14);
+    }
+    if (col.a <= 0.0f) {
+        return;
+    }
+    float size = 0.0f;
+    switch ((unsigned int)(self->part->flags & 0x70)) {
+    case 0x10:
+        ctx->top->tex = rsTex1024_2868(ctx);
+        size = 180.0f;
+        break;
+    case 0x20:
+        ctx->top->tex = rsTex1028_2868(ctx);
+        size = 100.0f;
+        break;
+    case 0x40:
+        ctx->top->tex = rsTex1024_2868(ctx);
+        size = 350.0f;
+        break;
+    }
+    sPart_2868* p = self->part;
+    ctx->Draw(sV4_2868(p->pos.x, p->pos.y, p->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->rot, 2);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2B00);
 
@@ -1692,9 +2082,247 @@ extern "C" void func_002E5D18(void* self, int flags)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern int D_004A473C;
+extern float D_004A4740;
+extern float D_004A4744;
+extern float D_004A4748;
+extern float D_004A474C;
+extern float D_004A4750;
+extern float D_004A4754;
+extern float D_004A4758;
+extern float D_004A475C;
+struct sWakeV4_5DA0 { float x, y, z, w; };
+extern sWakeV4_5DA0 D_005059B8;
+extern sWakeV4_5DA0 D_005059C8;
+extern "C" float func_002EE448(int i);
+extern "C" float func_002EE508(int i);
+extern "C" float func_002EE600(int i);
+extern "C" float func_002EE660(int i);
+extern "C" float func_002EE4C0(int i);
+extern "C" float func_002EE570(int i);
+extern "C" float func_002EE5B8(int i);
+extern "C" float func_002EE6A8(int i);
+extern "C" float func_002EE780(int i);
+extern "C" float cRenderStateMan_SnowFlakeColourR(int i);
+extern "C" float cRenderStateMan_SnowFlakeColourG(int i);
+extern "C" float cRenderStateMan_SnowFlakeColourB(int i);
+extern "C" float func_002EE8A0(int i);
+extern "C" float func_002EE8E8(int i);
+extern "C" float func_002EE930(int i);
+extern "C" float func_002EE978(int i);
+void* func_002306A8(void* self, int i);
+extern "C" void func_002F4330(void* obj, float v);
 
+struct sWakeRec_5DA0 {
+    float f[8];
+    sWakeV4_5DA0 c0;
+    sWakeV4_5DA0 c1;
+};
+extern "C" void func_002E4F50(int* elem, sWakeRec_5DA0* rec);
+
+extern "C" void func_002E5DA0(void* self)
+{
+    sWakeRec_5DA0 recs[2];
+    unsigned int i;
+    for (i = 0; i < *(unsigned int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x10); i++) {
+        if (D_004A473C != 0) {
+            recs[i].f[0] = D_004A4740;
+            recs[i].f[1] = D_004A4744;
+            recs[i].f[2] = D_004A4758;
+            recs[i].f[3] = D_004A475C;
+            recs[i].f[4] = D_004A4748;
+            recs[i].f[5] = D_004A474C;
+            recs[i].f[6] = D_004A4750;
+            recs[i].f[7] = D_004A4754;
+            const sWakeV4_5DA0* a = &D_005059B8; recs[i].c0.x = a->x; recs[i].c0.y = a->y; recs[i].c0.z = a->z; recs[i].c0.w = a->w;
+            const sWakeV4_5DA0* b = &D_005059C8; recs[i].c1.x = b->x; recs[i].c1.y = b->y; recs[i].c1.z = b->z; recs[i].c1.w = b->w;
+        } else {
+            int k = (i == 0) ? 6 : 7;
+            recs[i].f[0] = func_002EE448(k);
+            recs[i].f[1] = func_002EE508(k);
+            recs[i].f[2] = func_002EE600(k);
+            recs[i].f[3] = func_002EE660(k);
+            recs[i].f[4] = func_002EE4C0(k);
+            recs[i].f[5] = func_002EE570(k);
+            recs[i].f[6] = func_002EE5B8(k);
+            recs[i].f[7] = func_002EE6A8(k);
+            recs[i].c0.x = func_002EE780(k);
+            recs[i].c0.y = cRenderStateMan_SnowFlakeColourR(k);
+            recs[i].c0.z = cRenderStateMan_SnowFlakeColourG(k);
+            recs[i].c0.w = cRenderStateMan_SnowFlakeColourB(k);
+            recs[i].c1.x = func_002EE8A0(k);
+            recs[i].c1.y = func_002EE8E8(k);
+            recs[i].c1.z = func_002EE930(k);
+            recs[i].c1.w = func_002EE978(k);
+        }
+        func_002F4330(func_002306A8(*(void**)((char*)D_004A28A8 + 0x84), i), recs[i].f[0]);
+    }
+    int j;
+    for (j = 0; j < 12; j++) {
+        int* p = ((int**)((char*)self + 0x10))[j];
+        if (p != 0) {
+            func_002E4F50(p, &recs[*p]);
+        }
+    }
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6008);
+#ifdef SKIP_ASM
+struct sV4_6008 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_6008 {
+    sV4_6008 v[4];
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sMat_6008& operator=(const sMat_6008& o)
+    {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+struct sRsState_6008 {
+    int f0;                 // 0x0
+    int flagsA;             // 0x4
+    int flagsB;             // 0x8
+    int fC;                 // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sRsVEnt_6008 {
+    short delta;
+    short index;
+    sMat_6008* (*fn)(void*);
+};
+
+struct sRsCtx_6008 {
+    char pad0[0xE84];
+    sRsState_6008* top;         // 0xE84
+    char pad1[0xF70 - 0xE88];
+    int texF70;                 // 0xF70
+    char pad2[0x10D8 - 0xF74];
+    sRsVEnt_6008* vtable;       // 0x10D8
+};
+
+struct sRiders_6008 {
+    int f0;
+    char* riders[4];            // 0x4
+    int cur;                    // 0x14
+};
+
+struct sWakeFx_6008 {
+    char pad0[0x10];
+    int* parts[12];             // 0x10
+    sWakeVec5430 last[4];       // 0x40
+};
+
+extern int D_004A4524;
+extern int D_004A4760[1];
+extern void* D_004A28A8;
+extern sRsCtx_6008* D_004A5B80_6008 __asm__("D_004A5B80");
+extern sRsState_6008 D_00501420_6008[] __asm__("D_00501420");
+extern sV4_6008 D_004FF130;
+extern "C" void func_002E55D8(int* p, sMat_6008* m, float r, float g, float b);
+
+static inline sRiders_6008* riders_6008()
+{
+    return *(sRiders_6008**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sWakeVec5430 sub_6008(const sWakeVec5430& a, const sWakeVec5430& b)
+{
+    sWakeVec5430 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline int rsTexF70_6008(sRsCtx_6008* ctx)
+{
+    return ctx->texF70;
+}
+
+static inline void rsSetA_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+}
+
+static inline void rsSetB_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
+}
+
+extern "C" void func_002E6008(sWakeFx_6008* self)
+{
+    if (D_004A4524 != 0) {
+        return;
+    }
+    sRiders_6008* rs = riders_6008();
+    int k = rs->cur;
+    sWakeVec5430 a = *(sWakeVec5430*)(rs->riders[k] + 0x20);
+    sWakeVec5430 d = sub_6008(a, self->last[k]);
+    self->last[k] = a;
+    sRsCtx_6008* ctx = D_004A5B80_6008;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *ctx->top = D_00501420_6008[0];
+    rsSetA_6008(ctx, 0x400000, 22, 1);
+    rsSetB_6008(ctx, 0x3E0, 5, 7);
+    if (D_004A4760[0] != 0) {
+        rsSetA_6008(ctx, 0x7C, 2, 7);
+    } else {
+        rsSetA_6008(ctx, 0x7C, 2, 5);
+    }
+    rsSetA_6008(ctx, 0x3, 0, 2);
+    rsSetB_6008(ctx, 0x1FFFFC00, 10, 0);
+    ctx->top->tex = rsTexF70_6008(ctx);
+    sMat_6008 m;
+    m = *ctx->vtable[35].fn((char*)ctx + ctx->vtable[35].delta);
+    m.v[3] = D_004FF130;
+    sRiders_6008* rs2 = riders_6008();
+    sWakeVec5430 c = *(sWakeVec5430*)(rs2->riders[rs2->cur] + 0x80);
+    float r = c.x * 0.6f + -0.5f;
+    float g = c.y * 0.6f + -0.5f;
+    float b = c.z * 0.6f + -0.5f;
+    int i;
+    for (i = 0; i < 12; i++) {
+        int* p = self->parts[i];
+        if (p != 0 && *p == k) {
+            func_002E5430((sWakeGrid5430*)p, &d);
+            func_002E55D8(self->parts[i], &m, r, g, b);
+        }
+    }
+    ctx->top--;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E62C8);

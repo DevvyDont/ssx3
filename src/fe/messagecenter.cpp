@@ -258,7 +258,98 @@ extern "C" void func_00197DB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/messagecenter", func_00197E70);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" int USTR_length(unsigned short* s);
+extern "C" int strlen(const char* s);
+void cMemMan_free(void* p);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void func_003A0E90(void* text, void* p);
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_0028B180();
+extern "C" void* func_002B40F0(void* self, int i);
+extern "C" void* func_002B4120(void* self, int i);
+extern char D_00460470[];
+extern char D_00460668[];
+extern char D_00460678[];
+extern char* D_004A28A8;
+
+struct sVtEntry_197E70 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+class cMsgWidget_197E70 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+struct sReqLine_197E70 {
+    char pad_0x0[0x1B4];
+    cMsgWidget_197E70* title;   // 0x1B4
+    cMsgWidget_197E70* artist;  // 0x1B8
+};
+
+extern "C" void func_00197E70(void* vself)
+{
+    sReqLine_197E70* self = (sReqLine_197E70*)vself;
+    if (self->title == 0 || self->artist == 0) {
+        return;
+    }
+    int cur = *(int*)((char*)func_0028B180() + 0x508);
+    if (cur < *(int*)((char*)func_0028B180() + 0x504)) {
+        char* name = (char*)func_002B40F0((char*)func_0028B180() + 0x118, cur);
+        char* artist = (char*)func_002B4120((char*)func_0028B180() + 0x118, cur);
+        if (strlen(name) != 0) {
+            self->title->show(1);
+            char* db = *(char**)(D_004A28A8 + 0x8C);
+            sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
+            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460668));
+            int len = USTR_length(fmt) + strlen(name) + 1;
+            unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
+            // PORT: the format argument is a string pointer passed through an int parameter
+            func_002C26D0(buf, fmt, (int)name);
+            func_003A0E90(self->title, buf);
+            if (buf != 0) {
+                cMemMan_free(buf);
+            }
+        } else {
+            self->title->show(0);
+        }
+        if (strlen(artist) != 0) {
+            self->artist->show(1);
+            char* db = *(char**)(D_004A28A8 + 0x8C);
+            sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
+            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460678));
+            int len = USTR_length(fmt) + strlen(artist) + 1;
+            unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
+            // PORT: the format argument is a string pointer passed through an int parameter
+            func_002C26D0(buf, fmt, (int)artist);
+            func_003A0E90(self->artist, buf);
+            if (buf != 0) {
+                cMemMan_free(buf);
+            }
+        } else {
+            self->artist->show(0);
+        }
+    } else {
+        self->title->show(0);
+        self->artist->show(0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00198118);

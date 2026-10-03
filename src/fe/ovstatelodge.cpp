@@ -367,7 +367,94 @@ extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3F80);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_001CE6F0(int mountain);
+extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
+extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
+extern "C" char* func_00156AE0(void* iface, int peak, int ch);
+extern "C" int func_00398380(void* self, int id);
+
+class cWidget_3F80 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+struct sRoom_3F80 {
+    char pad_0x0[0x10];
+    char* engine;                   // 0x10
+    char pad_0x14[0x30];
+    signed char player;             // 0x44
+    char pad_0x45[0x13];
+    cWidget_3F80* icon[5];          // 0x58
+    cWidget_3F80* box[5];           // 0x6C
+    cWidget_3F80* name[5];          // 0x80
+    cWidget_3F80* bar[5];           // 0x94
+    cWidget_3F80* medal[5];         // 0xA8
+    cWidget_3F80* lock[5];          // 0xBC
+    char pad_0xD0[0xC];
+    int charId;                     // 0xDC
+    int mountain;                   // 0xE0
+};
+
+extern "C" void func_001D3F80(void* vself, int peak)
+{
+    sRoom_3F80* self = (sRoom_3F80*)vself;
+    int n;
+    void* iface;
+    int i;
+    cWidget_3F80** icon = self->icon;
+    cWidget_3F80** box = self->box;
+    cWidget_3F80** name = self->name;
+    cWidget_3F80** bar = self->bar;
+    cWidget_3F80** medal = self->medal;
+    cWidget_3F80** lock = self->lock;
+    n = func_001CE6F0(self->mountain);
+    for (int j = 0; j < 5; j++) {
+        self->icon[j]->show(0);
+        self->box[j]->show(0);
+        self->name[j]->show(0);
+        self->bar[j]->show(0);
+        self->medal[j]->show(0);
+        self->lock[j]->show(0);
+    }
+    iface = cBE_getInterface_Fv_3F80(cBE_getBE(), 0xD);
+    for (i = 0; i < n; i++) {
+        int ch = func_001CED90(self->player, self->charId, self->mountain, peak, i);
+        setChallengeName(name[i], self->mountain, peak, i);
+        name[i]->show(1);
+        bar[i]->show(1);
+        box[i]->show(1);
+        if (ch != -1) {
+            char* o = func_00156AE0(iface, peak, ch);
+            char* eng = self->engine;
+            int hash = GetHashValue32(*(char**)(o + 8));
+            int h = func_00398380(eng + 0x58, hash);
+            cWidget_3F80* w = icon[i];
+            *(int*)((char*)w + 0x7C) = h;
+            *(int*)((char*)w + 0x78) = -1;
+            icon[i]->show(1);
+            medal[i]->show(1);
+        } else {
+            lock[i]->show(1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D4268);

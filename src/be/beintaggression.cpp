@@ -94,7 +94,83 @@ extern "C" int func_00155B50(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintaggression", func_00155BF0);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern "C" void func_001E2A08(int charID, int level);
+extern signed char D_005305F9[];
+
+extern "C" void func_00155BF0(void* self, int a, int b, int event)
+{
+    int profile = cBELibrary_getProfileIndex(a);
+    int ca = cBELibrary_getCharacterID(a);
+    int cb = cBELibrary_getCharacterID(b);
+    int add = 0;
+    int oldLvl = D_004A6CA8[profile][ca].aggression[cb].v[1];
+    int pts = D_004A6CA8[profile][ca].aggression[cb].v[2];
+    int st = D_004A6CA8[profile][ca].aggression[cb].v[0];
+    switch (event) {
+    case 0:
+        add = 1;
+        break;
+    case 1:
+        add = 2;
+        break;
+    case 2:
+        add = 4;
+        break;
+    case 3:
+        add = 6;
+        break;
+    }
+    pts += add;
+    int lv = pts / 5;
+    int lvl = lv;
+    if (oldLvl < lvl) {
+        if (a == 0 && D_005305F9[0] == 0) {
+            func_001E2A08(cb, pts);
+        }
+        switch (st) {
+        case 0:
+            if (lv >= 3) {
+                lvl = 2;
+                pts = 10;
+            }
+            break;
+        case 1:
+            if (lv >= 4) {
+                lvl = 2;
+                pts = 10;
+                st = 3;
+            }
+            break;
+        case 2:
+            if (lv <= 0) {
+                lvl = 1;
+                pts = 5;
+            } else if (lv >= 4) {
+                lvl = 3;
+                pts = 15;
+            }
+            break;
+        case 3:
+            if (lv <= 0) {
+                lvl = 1;
+                pts = 5;
+            } else if (lv >= 5) {
+                lvl = 4;
+                pts = 20;
+            }
+            break;
+        }
+    }
+    D_004A6CA8[profile][ca].aggression[cb].v[2] = pts;
+    D_004A6CA8[profile][ca].aggression[cb].v[1] = lvl;
+    D_004A6CA8[profile][ca].aggression[cb].v[0] = st;
+}
+#endif
 
 INCLUDE_ASM("be/beintaggression", func_00155E58);
 

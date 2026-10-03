@@ -368,11 +368,185 @@ extern "C" int cDirtysock_tag_TagFieldGetBinary(const char* data, void* buffer, 
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetStructure);
+#ifdef SKIP_ASM
+extern char D_004A4A90[];
+
+extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffer, int len, const char* tmpl)
+{
+    int count;
+    int size;
+    int sign;
+    unsigned int value;
+    char* buf = (char*)buffer;
+    char* limit;
+    char temp[1024];
+
+    if (len < 0) {
+        limit = buf + 65535;
+    } else {
+        limit = buf + len;
+    }
+    if (data == 0) {
+        data = D_004A4A90;
+    }
+    if (buf == 0) {
+        buf = (char*)(buffer = temp);
+    }
+    while (*tmpl != 0) {
+        if (*tmpl == '#') {
+            for (++tmpl; (*tmpl != 0) && (*tmpl++ != '='); ) {
+            }
+        }
+        for (count = 0; (*tmpl >= '0') && (*tmpl <= '9'); ++tmpl) {
+            count = (count * 10) + (*tmpl & 15);
+        }
+        if (*tmpl == 'a') {
+            if (count != 0) {
+                buf += count;
+            } else {
+                buf += 1;
+            }
+        }
+        size = 0;
+        if (*tmpl == 'b') {
+            size = 2;
+        }
+        if (*tmpl == 'w') {
+            size = 4;
+        }
+        if (*tmpl == 'l') {
+            size = 8;
+        }
+        if (size > 0) {
+            sign = *data;
+            if (sign == '-') {
+                ++data;
+            }
+            for (value = 0; (size > 0) && (*data >= '0'); --size) {
+                value = (value << 4) | D_004962C0[*data++];
+            }
+            if ((size > 0) && (*data == ',')) {
+                ++data;
+            }
+            if (sign == '-') {
+                value = -value;
+            }
+            if (*tmpl == 'b') {
+                *buf++ = value;
+            }
+            if (*tmpl == 'w') {
+                *(short*)buf = value;
+                buf += 2;
+            }
+            if (*tmpl == 'l') {
+                *(int*)buf = value;
+                buf += 4;
+            }
+        }
+        if ((*tmpl == 's') && (count > 0)) {
+            for (size = 0; ((*data >= '0') || (*data == '%')) && (size + 1 < count); ++size) {
+                if (*data == '%') {
+                    buf[size] = D_004961C0[data[1]] | D_004962C0[data[2]];
+                    data += 3;
+                } else {
+                    buf[size] = *data++;
+                }
+            }
+            for (; size < count; ++size) {
+                buf[size] = 0;
+            }
+            if (*data == ',') {
+                ++data;
+            }
+            buf += size;
+        }
+        if (buf >= limit) {
+            break;
+        }
+        ++tmpl;
+        if (*tmpl == '*') {
+            --tmpl;
+        }
+    }
+    return buf - (char*)buffer;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetCrypt);
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetTime);
+#ifdef SKIP_ASM
+// _TagFieldParseNumber / memset / ds_tmtosecs
+extern "C" char* func_003EAE68(const char* data, int* value);
+extern "C" void* func_00416210(void* dst, int value, int size);
+// PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
+extern "C" unsigned long func_003EB090(sDsTmK2* tm);
+
+extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int defval)
+{
+    sDsTmK2 tm;
+    int value;
+    unsigned int result = 0;
+
+    if (data != 0) {
+        if (*data == '$') {
+            for (++data; *data >= '0'; ++data) {
+                result = (result << 4) | D_004962C0[*data];
+            }
+        } else if ((*data >= '0') && (*data <= '9')) {
+            const char* p = func_003EAE68(data, &value);
+            if (*p <= ' ') {
+                result = value;
+            } else if ((*data >= '0') && (*data <= '9')) {
+                func_00416210(&tm, 0, sizeof(tm));
+                tm.tm_isdst = -1;
+                data = func_003EAE68(data, &tm.tm_year);
+                if ((unsigned char)(*data - '-') <= 1) {
+                    data++;
+                }
+                data = func_003EAE68(data, &tm.tm_mon);
+                if ((unsigned char)(*data - '-') <= 1) {
+                    data++;
+                }
+                data = func_003EAE68(data, &tm.tm_mday);
+                if (*data == ' ') {
+                    data++;
+                }
+                data = func_003EAE68(data, &tm.tm_hour);
+                if (*data == ':') {
+                    data++;
+                }
+                data = func_003EAE68(data, &tm.tm_min);
+                if (*data == ':') {
+                    data++;
+                }
+                data = func_003EAE68(data, &tm.tm_sec);
+                if ((tm.tm_year < 1970) || (tm.tm_year > 2099) || (tm.tm_mon < 1) || (tm.tm_mon > 12) || (tm.tm_mday < 1) || (tm.tm_mday > 31)) {
+                    tm.tm_year = 0;
+                }
+                if ((tm.tm_hour < 0) || (tm.tm_hour > 23) || (tm.tm_min < 0) || (tm.tm_min > 59) || (tm.tm_sec < 0) || (tm.tm_sec > 61)) {
+                    tm.tm_year = 0;
+                }
+                if (tm.tm_year != 0) {
+                    tm.tm_year -= 1900;
+                    tm.tm_mon -= 1;
+                    result = func_003EB090(&tm);
+                }
+            }
+        }
+    }
+    if (result == 0) {
+        result = defval;
+        if (result == 0) {
+            result = func_003EF088();
+        }
+    }
+    return result;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", func_003EDD70);

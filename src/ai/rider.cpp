@@ -722,7 +722,72 @@ extern "C" void func_00120090(void* self, float x)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_001200D0);
+#ifdef SKIP_ASM
+extern "C" void func_0010E028(void* self, int mode, float t);
+
+struct sVt_1200D0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+static inline float decay_1200D0(float v, float step)
+{
+    if (step < v) {
+        return v - step;
+    }
+    if (v < -step) {
+        return v + step;
+    }
+    return 0.0f;
+}
+
+extern "C" void func_001200D0(void* vself)
+{
+    char* self = (char*)vself;
+    float step = *(float*)(self + 0x300) * 0.01666666753590107f;
+    *(float*)(self + 0x2E8) = decay_1200D0(*(float*)(self + 0x2E8), step);
+    if (0.01666666753590107f < *(float*)(self + 0x2EC) || func_0011FE98(self) != 1) {
+        *(float*)(self + 0x2EC) = decay_1200D0(*(float*)(self + 0x2EC), step);
+    }
+    char* sub = self + 0x6C0;
+    sVt_1200D0* e = &(*(sVt_1200D0**)sub)[9];
+    e->fn(sub + e->delta);
+    if ((func_0011FE98(self) == 1 || func_0011FEE8(self) == 12) && 0.0f < *(float*)(self + 0x2F0) && *(float*)(self + 0x2F0) <= 0.01666666753590107f) {
+        *(float*)(self + 0x2F0) = 0.01666666753590107f;
+    } else if (0.0f < *(float*)(self + 0x2F0)) {
+        *(float*)(self + 0x2F0) = decay_1200D0(*(float*)(self + 0x2F0), step);
+        if (*(float*)(self + 0x2F0) == 0.0f) {
+            func_0010E028(self, 6, 0.0f);
+        }
+    }
+    if (*(int*)(self + 0x2F4) == 10) {
+        *(float*)(self + 0x2F8) = 1.0f;
+        if (*(float*)(self + 0x2F0) == 0.0f) {
+            *(int*)(self + 0x2F4) = 5;
+            *(float*)(self + 0x2F0) = 20.0f;
+        }
+    } else {
+        switch (*(int*)(self + 0x304)) {
+        case 0:
+            *(float*)(self + 0x2F8) = 1.0f;
+            break;
+        case 1:
+            if (func_0011FEE8(self) != 6) {
+                *(float*)(self + 0x2F8) = decay_1200D0(*(float*)(self + 0x2F8), step * 0.004999999888241291f);
+            }
+            break;
+        case 2:
+            if (func_0011FEE8(self) != 6) {
+                *(float*)(self + 0x2F8) = decay_1200D0(*(float*)(self + 0x2F8), step * 0.02398611046373844f);
+            }
+            break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00120378);
 
@@ -1696,7 +1761,133 @@ extern "C" void func_001235F8(void* self)
 
 INCLUDE_ASM("ai/rider", func_00123640);
 
+//100%
 INCLUDE_ASM("ai/rider", func_00123B48);
+#ifdef SKIP_ASM
+extern "C" void func_002803F0(void* self);
+extern "C" void func_0011D390(void* self);
+extern "C" void* func_0028B180();
+void func_002A1BD0(void* p);
+extern "C" void func_0030EA80(void* model, int i, int channel);
+extern "C" void func_0030E9E0(void* model, int i, int channel);
+int func_0027C958(void* self);
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+extern "C" void* func_0014AD50(void* iface, int id);
+int func_0014D988(void* tbl, int g);
+extern "C" void* func_0014D998(void* tbl, int g);
+extern "C" void func_002AD5F0(void* bank, int id, int a, float f);
+
+struct sItem_123B48 {
+    short a;
+    unsigned short flags;
+};
+
+struct sDb_123B48 {
+    char pad0[0x288];
+    short* map;                 // 0x288
+    char pad28C[0x4];
+    sItem_123B48 items[1];      // 0x290
+};
+
+struct sEnt_123B48 {
+    char pad0[0x4];
+    short item;                 // 0x04
+    char pad6[0xA];
+    signed char id;             // 0x10
+    char pad11[0x23];
+    int flags;                  // 0x34
+};
+
+static inline sItem_123B48* lookup_123B48(sDb_123B48* d, int i)
+{
+    short k = d->map[i];
+    if (k >= 0) {
+        return &d->items[k];
+    }
+    return 0;
+}
+
+static inline int entId_123B48(sEnt_123B48* e)
+{
+    return e->id;
+}
+
+static inline int entOn_123B48(sEnt_123B48* e)
+{
+    return e->flags & 0x40;
+}
+
+static inline void* model_123B48(char* self)
+{
+    return *(void**)(self + 0x780);
+}
+
+static inline void setChan_123B48(char* self, int id, int ch)
+{
+    func_0030E9E0(model_123B48(self), id, ch);
+}
+
+static inline int entItem_123B48(sEnt_123B48* e)
+{
+    return e->item;
+}
+
+static inline unsigned short itemFlags_123B48(sDb_123B48* db, sEnt_123B48* e)
+{
+    return lookup_123B48(db, entItem_123B48(e))->flags;
+}
+
+extern "C" void func_00123B48(char* self)
+{
+    func_002803F0(self + 0x6D0);
+    func_0011D390(self);
+    if (*(int*)(self + 0xAC8) != 0) {
+        func_002A1BD0(func_0028B180());
+    }
+    *(int*)(self + 0xAFC) = 0;
+    *(int*)(self + 0xB04) = 0;
+    *(int*)(self + 0xAC4) = 0;
+    int* ids = (int*)(self + 0xB08);
+    *(int*)(self + 0xAD0) = 0;
+    *(int*)(self + 0xB00) = 1;
+    func_0030EA80(*(void**)(self + 0x780), 5, 0);
+    func_0030EA80(*(void**)(self + 0x780), 6, 0);
+    func_0030EA80(*(void**)(self + 0x780), 8, 0);
+    func_0030EA80(*(void**)(self + 0x780), 9, 0);
+    func_0030EA80(*(void**)(self + 0x780), 11, 0);
+    func_0030E9E0(*(void**)(self + 0x780), 4, 0);
+    func_0030E9E0(*(void**)(self + 0x780), 7, 0);
+    // PORT: func_0027C958 returns a record pointer as int
+    if (*(signed char*)((char*)func_0027C958(*(void**)(self + 0x6D8)) + 6) != 0) {
+        void* iface = cBE_getInterface(cBE_getBE(), 9);
+        void* tbl = func_0014BDB8_noarg();
+        sDb_123B48* db = (sDb_123B48*)func_0014AD50(iface, *(int*)(self + 0x86C));
+        int g = func_00123128(self);
+        int n = func_0014D988(tbl, g);
+        sEnt_123B48* e = (sEnt_123B48*)func_0014D998(tbl, g);
+        int i;
+        for (i = 0; i < n; i++, e++) {
+            int id = entId_123B48(e);
+            if (id >= 0 && entOn_123B48(e)) {
+                if (itemFlags_123B48(db, e) & 0x10) {
+                    setChan_123B48(self, id, 0);
+                    setChan_123B48(self, id, 1);
+                    setChan_123B48(self, id, 2);
+                    setChan_123B48(self, id, 3);
+                }
+            }
+        }
+    }
+    int j;
+    for (j = 0; j < 4; j++) {
+        if (ids[j] >= 0) {
+            func_002AD5F0(*(char**)*(char**)((char*)func_0028B180() + 0x118) + 0x1D8, ids[j], 1, 0.0f);
+        }
+        ids[j] = -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00123DA8);

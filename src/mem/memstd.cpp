@@ -1,6 +1,109 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_create);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+// PORT: debugmenu defines MEM_initblock with a short flags parameter; this caller passes the int unconverted.
+extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
+extern "C" void* func_003E6448(void* dst, int value, int size);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int func_003E5698(void* sema);
+extern char D_004A2E38[];
+extern char D_004A2E40[];
+extern void* D_004D2438[];
+
+struct sMemNode_251718 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    char* end;
+    void* fC;
+    sMemNode_251718* next;
+    sMemNode_251718* prev;
+};
+
+struct sMemClass_251718 {
+    char name[8];
+    sMemNode_251718* first;     // 0x8
+    sMemNode_251718* last;      // 0xC
+    sMemNode_251718 head;       // 0x10
+    int f28;                    // 0x28
+    int align;                  // 0x2C
+    int hdr;                    // 0x30
+    int flags;                  // 0x34
+    int locked;                 // 0x38
+    int sema[5];                // 0x3C
+};
+
+extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int f28, int align, int hdr, int a7, int a8, int lock)
+{
+    char buf[0x100];
+    int flags = id;
+    if (a7) {
+        flags |= 0x2000;
+    }
+    if (a8) {
+        flags |= 0x1000;
+    }
+    char* data = mem;
+    data += hdr + 0x60;
+    data += align + 0x2F;
+    data = (char*)((int)data & -align);
+    char* end = mem + size;
+    end -= hdr + 0x30;
+    sprintf(buf, D_004A2E38, name);
+    sMemNode_251718* blk = (sMemNode_251718*)(data - 0x10);
+    sMemClass_251718* cls = (sMemClass_251718*)(mem + 0x10);
+    MEM_initblock(mem, buf, 0x50, hdr, flags | 0x8000, 0, blk);
+    MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
+    sprintf(buf, D_004A2E40, name);
+    MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
+    D_004D2438[id & 0x3F] = cls;
+    func_003E6448(cls, 0, 0x50);
+    strcpy(cls->name, name);
+    *(char**)(mem + 0x1C) = end;
+    *(char**)(mem + 0x18) = mem;
+    cls->first->tag = 0x4253;
+    cls->last->tag = 0x4253;
+    *(unsigned short*)(mem + 0x20) = 0x4253;
+    *(int*)(mem + 0x24) = 0x7FFFFFFF;
+    *(int*)(mem + 0x38) = f28;
+    *(int*)(mem + 0x3C) = align;
+    *(int*)(mem + 0x40) = hdr;
+    *(int*)(mem + 0x44) = flags;
+    sMemNode_251718* h = (sMemNode_251718*)(mem + 0x20);
+    *(sMemNode_251718**)(mem + 0x30) = h;
+    *(sMemNode_251718**)(mem + 0x34) = h;
+    *(int*)(mem + 0x48) = 0;
+    sMemNode_251718* q = h;
+    sMemNode_251718* p = q;
+    int sz = *(char**)(data - 8) - (char*)blk;
+    if (*(char**)(mem + 0x30) + (*(char**)(mem + 0x34) - *(char**)(mem + 0x30)) / 2 < (char*)blk) {
+        do
+            p = p->prev;
+        while (blk < p);
+        q = p->next;
+    } else {
+        do
+            q = q->next;
+        while (q < blk);
+        p = q->prev;
+    }
+    blk->size = sz;
+    blk->next = q;
+    blk->prev = p;
+    p->next = blk;
+    q->prev = blk;
+    blk->tag = 0x4246;
+    blk->flags |= 0x4000;
+    if (lock) {
+        func_003E5698(cls->sema);
+        cls->locked = 1;
+    }
+    return blk->size;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_link);
