@@ -319,7 +319,39 @@ extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x)
 
 INCLUDE_ASM("object/instanceman", func_00351B40);
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352168);
+#ifdef SKIP_ASM
+extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
+extern void* D_0048F6D8[];
+
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sInstManVEntry2168 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sInstElem2168 {
+    float v[4];
+    sInstElem2168() {}
+};
+
+extern "C" void* func_00352168(void* self, void* a1, void* stream)
+{
+    cInstanceNode_cInstanceNode(self, a1, stream);
+    *(void***)((char*)self + 0xC) = D_0048F6D8;
+    new ((char*)self + 0x30) sInstElem2168[24];
+    new ((char*)self + 0x1B0) sInstElem2168[24];
+    new ((char*)self + 0x330) sInstElem2168[24];
+    new ((char*)self + 0x4B0) sInstElem2168[24];
+    sInstManVEntry2168* e = &(*(sInstManVEntry2168**)stream)[2];
+    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 0xC);
+    *(float*)((char*)self + 0x1C) = -1.0f;
+    return self;
+}
+#endif
 
 extern void* D_0048F6D8[];
 extern "C" void* func_0034FBF0(void*);

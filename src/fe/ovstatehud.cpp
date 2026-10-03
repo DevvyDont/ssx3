@@ -183,7 +183,67 @@ extern "C" void func_001F10F8(void* self, float* out, float* pos, float* size, f
 
 INCLUDE_ASM("fe/ovstatehud", func_001F1190);
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F1338);
+#ifdef SKIP_ASM
+struct sPos_001F1338 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sHudVert_001F1338 {
+    float u, v, q, f0C;     // 0x00
+    int r, g, b, a;         // 0x10
+    sPos_001F1338 pos;      // 0x20
+    sHudVert_001F1338() {}
+};
+
+struct sVEnt_001F1338 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1338*, int); };
+extern char* D_004A289C;
+
+extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale, float* color)
+{
+    sHudVert_001F1338 v[4];
+    int a = (int)(color[0] * 128.0f);
+    int r = (int)(color[1] * 255.0f);
+    int g = (int)(color[2] * 255.0f);
+    int b = (int)(color[3] * 255.0f);
+    for (int i = 0; i < 4; i++) {
+        v[i].a = a;
+        v[i].r = r;
+        v[i].g = g;
+        v[i].b = b;
+        v[i].q = 1.0f;
+    }
+    float x0 = pos[0];
+    float y0 = pos[1];
+    float x1 = x0 + size[0] * scale[0];
+    float y1 = y0 + size[1] * scale[1];
+    sPos_001F1338 p;
+    p.x = x0;
+    p.y = y0;
+    p.z = 0.0f;
+    p.w = 1.0f;
+    v[0].pos = p;
+    p.x = x1;
+    p.y = y0;
+    p.z = 0.0f;
+    p.w = 1.0f;
+    v[1].pos = p;
+    p.x = x0;
+    p.y = y1;
+    p.z = 0.0f;
+    p.w = 1.0f;
+    v[2].pos = p;
+    p.x = x1;
+    p.y = y1;
+    p.z = 0.0f;
+    p.w = 1.0f;
+    v[3].pos = p;
+    *(short*)(*(char**)(D_004A289C + 0xE84) + 0x10) = -1;
+    sVEnt_001F1338* vt = *(sVEnt_001F1338**)(D_004A289C + 0x10D8);
+    vt[71].fn(D_004A289C + vt[71].delta, 4, v, 0);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F14B0);
 

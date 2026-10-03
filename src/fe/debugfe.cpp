@@ -582,7 +582,45 @@ extern "C" void func_0017F2D0(void* p)
 
 INCLUDE_ASM("fe/debugfe", func_0017F500);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017F7B8);
+#ifdef SKIP_ASM
+extern "C" void func_00231CD0(void* self);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern char D_0046D900[];
+
+struct sDbgEntry17F7B8 {
+    int a;
+    int b;
+    sDbgEntry17F7B8() {}
+};
+
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sDbgList17F7B8 {
+    int a;                      // 0x00
+    int b;                      // 0x04
+    int c;                      // 0x08
+    int d;                      // 0x0C
+    sDbgEntry17F7B8 e[64];      // 0x10
+    int n;                      // 0x210
+};
+
+extern "C" void* func_0017F7B8(void* self)
+{
+    func_00231CD0(self);
+    *(void**)self = D_0046D900;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    sDbgList17F7B8* l = (sDbgList17F7B8*)((char*)self + 0x24);
+    new (l->e) sDbgEntry17F7B8[64];
+    l->n = 0;
+    func_003E6448(l->e, 0, 0x200);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017F838);

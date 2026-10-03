@@ -139,7 +139,48 @@ extern "C" void func_00347D38(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00347D90);
+#ifdef SKIP_ASM
+extern "C" void* func_0034FB00(void* self, int type, void* a2, void* a3);
+extern "C" void* func_00372520(void* self, int n);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern char D_004900D0[];
+extern char D_0048E7C8[];
+extern char D_004A4008[];
+
+struct sFlexSeg_347D90 {
+    int v[16];
+    sFlexSeg_347D90() {}
+};
+
+struct sFlexDef_347D90 {
+    int f0;
+    unsigned int links[8];
+    char pad24[0x44 - 0x24];
+    int f44;
+};
+
+extern "C" void* func_00347D90(char* self, void* a2, void* a3, sFlexDef_347D90* def)
+{
+    func_0034FB00(self, 1, a2, a3);
+    *(char**)(self + 0xC) = D_004900D0;
+    int len = def->f44;
+    *(int*)(self + 0x20) = 0;
+    *(int*)(self + 0x24) = len;
+    for (int i = 0; i < 8; i++) {
+        if (def->links[i] != 0xFFFFFFFF) {
+            *(int*)(self + 0x20) += 1;
+        }
+    }
+    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
+    *segs = new (D_0048E7C8, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
+    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, D_004A4008, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/flexbridgenode", func_00347EA8);
 

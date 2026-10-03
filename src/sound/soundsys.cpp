@@ -2979,7 +2979,67 @@ extern "C" void func_002A4CF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A4D68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002A4D68_sTriple {
+    int a;
+    int b;
+    int c;
+};
+
+struct func_002A4D68_sChan {
+    int e0;
+    int e4;
+    int e8;
+    char pad[0x20 - 0xC];
+    int index;      // +0x20
+    char pad2[0x30 - 0x24];
+    func_002A4D68_sChan() {}
+};
+
+struct func_002A4D68_sObj {
+    int f0;
+    char pad4[0x10 - 0x4];
+    int f10;
+    int f14;
+    int f18;
+    int f1C;
+    func_002A4D68_sTriple triples[15];  // 0x20
+    int fD4;
+    int fD8;
+    int fDC;
+    func_002A4D68_sChan chans[3];       // 0xE0
+    int f170;
+    int f174;
+    int f178;
+    int f17C;
+    int f180;
+    int f184;
+    int f188;
+    int f18C;
+    func_002A4D68_sObj() __asm__("func_002A4D68");
+};
+
+func_002A4D68_sObj::func_002A4D68_sObj()
+    : f0(-1), f10(0), f14(0), f18(0), f1C(0), fD4(0), fD8(-1),
+      f170(0), f174(-1), f178(0), f17C(0), f180(0), f184(3), f188(0), f18C(0)
+{
+    int i;
+    for (i = 0; i < 15; i++) {
+        triples[i].a = 0;
+        triples[i].b = 0;
+        triples[i].c = 0;
+    }
+    for (i = 0; i < 3; i++) {
+        *(int*)((char*)this + i * 0x30 + 0x100) = i;
+        *(int*)((char*)this + i * 0x30 + 0xE0) = -1;
+        *(int*)((char*)this + i * 0x30 + 0xE4) = -1;
+        *(int*)((char*)this + i * 0x30 + 0xE8) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4E38);

@@ -576,7 +576,45 @@ extern "C" void func_003147F0(sSequencer_003147F0* self, cAsStream* s)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_00314880);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void func_00314050(void* node, void* stream);
+extern const char D_0048A5C0[];
+
+struct sStreamVE_314880 { short delta; short index; void (*fn)(void*, void*, int); };
+
+struct sSeqTrack_314880
+{
+    char pad[0x1C];
+    sSeqTrack_314880() {}
+};
+
+struct sSeqNode_314880
+{
+    sSeqTrack_314880 tracks[3];
+    char pad54[0xD0 - 0x54];
+    sSeqNode_314880() {}
+};
+
+extern "C" void func_00314880(void* self, void* stream)
+{
+    int n;
+    sStreamVE_314880* vt = *(sStreamVE_314880**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, &n, 4);
+    *(int*)self = 0;
+    for (int i = 0; i < n; i++)
+    {
+        sSeqNode_314880* node = new (D_0048A5C0, 0x20000000, 0) sSeqNode_314880;
+        func_003E6448(node, 0, 0xD0);
+        func_00314050(node, stream);
+        func_00314368((sSequencer_00314368*)self, (sSeqNode_00314368*)node);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314978__FPv);

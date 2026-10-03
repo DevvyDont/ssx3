@@ -133,7 +133,69 @@ extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, flo
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038EC40);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sLmQuadVec4 {
+    float x, y, z, w;
+    sLmQuadVec4() {}
+    sLmQuadVec4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sLmQuadVtx {
+    float s;                // 0x0
+    float t;                // 0x4
+    float q;                // 0x8
+    int pad_0xC;
+    int c[4];               // 0x10
+    sLmQuadVec4 pos;        // 0x20
+};
+
+struct sLmQuadVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sLmQuadVtx*, int);
+};
+
+struct sLmQuadCtx {
+    char pad_0x0[0x10D8];
+    sLmQuadVEntry* vtable;      // 0x10D8
+};
+
+extern sLmQuadCtx* D_004A5B80_EC40 __asm__("D_004A5B80");
+
+extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z)
+{
+    sLmQuadVtx v[4];
+    float zero = 0.0f;
+    float one = 1.0f;
+    v[0].q = one;
+    v[0].c[0] = (int)(col[1] * 255.0f);
+    v[0].c[1] = (int)(col[2] * 255.0f);
+    v[0].c[2] = (int)(col[3] * 255.0f);
+    v[0].c[3] = (int)(col[0] * 128.0f);
+    v[0].pos = sLmQuadVec4(p0[0], p0[1], z, one);
+    v[3] = v[0];
+    v[2] = v[0];
+    v[1] = v[0];
+    v[3].pos.x = p1[0];
+    v[1].pos.x = p1[0];
+    v[3].pos.y = p1[1];
+    v[2].pos.y = p1[1];
+    v[0].t = zero;
+    v[0].s = zero;
+    v[1].s = one;
+    v[1].t = zero;
+    v[2].s = zero;
+    v[2].t = one;
+    v[3].s = one;
+    v[3].t = one;
+    sLmQuadCtx* g = D_004A5B80_EC40;
+    sLmQuadVEntry* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038EE78);
 

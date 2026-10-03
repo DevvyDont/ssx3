@@ -1,6 +1,59 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ai/ai", cAI_cAI);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern char D_004585A0[];
+extern char D_00458550[];
+extern char D_004585C8[];
+extern char D_00458578[];
+extern char D_00458488[];
+extern char D_00458528[];
+extern char D_00458500[];
+extern char D_004584D8[];
+extern char D_00457F00[];
+extern char D_00457F10[];
+
+struct sAIEntry_1286A0 {
+    char pad[0x20];
+    sAIEntry_1286A0() {}
+};
+
+struct sAIState_1286A0 {
+    int f0;                     // 0x00
+    char pad4[0xC];
+    sAIEntry_1286A0 e[6];       // 0x10
+    int d0;                     // 0xD0
+    int d4;                     // 0xD4
+    int d8;                     // 0xD8
+    char padDC[0x8E0 - 0xDC];
+    sAIState_1286A0() : f0(0) { d0 = -1; d4 = 1; d8 = 0; }
+};
+
+struct sAIObj_1286A0 {
+    char pad[0xB60];
+    sAIObj_1286A0(void* owner) __asm__("func_00101310");
+};
+
+extern "C" void* cAI_cAI(void* self)
+{
+    *(void**)((char*)self + 0xCC) = D_00458488;
+    *(void**)((char*)self + 0xAC) = D_004585C8;
+    *(void**)((char*)self + 0xB0) = D_004585A0;
+    *(void**)((char*)self + 0xB4) = D_00458550;
+    *(void**)((char*)self + 0xBC) = D_00458578;
+    *(void**)((char*)self + 0xC0) = D_00458528;
+    *(void**)((char*)self + 0xC4) = D_00458500;
+    *(void**)((char*)self + 0xC8) = D_004584D8;
+    sAIState_1286A0** slot = (sAIState_1286A0**)((char*)self + 0xA4);
+    *slot = new (D_00457F00, 0, 0) sAIState_1286A0;
+    *(sAIObj_1286A0**)((char*)self + 0xA8) = new (D_00457F10, 0, 0) sAIObj_1286A0(self);
+    *(int*)((char*)self + 0x74) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001287B8);
