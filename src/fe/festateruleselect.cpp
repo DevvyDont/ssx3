@@ -413,7 +413,94 @@ void func_00192968(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00192970);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+
+struct sName11_00192970 { char c[11]; };
+struct sName12_00192970 { char c[12]; };
+struct sName13_00192970 { char c[13]; };
+struct sName4_00192970 { char c[4]; };
+struct sName2_00192970 { char c[2]; };
+struct sName5_00192970 { char c[5]; };
+
+extern char D_0045FC88[];
+extern char D_0045FC98[];
+extern char D_0045FCA8[];
+extern char D_0045FCB8[];
+extern char D_004A1740[];
+extern char D_004A1748[];
+extern char D_004A14F8[];
+extern char D_004A1750[];
+
+class cFEVObj_00192970 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+    virtual void v09(int on);
+};
+
+static inline void Hide_00192970(void* screen, char* name)
+{
+    cFEVObj_00192970* t = (cFEVObj_00192970*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+    if (t != 0) {
+        t->v09(0);
+    }
+}
+
+struct sOwner_00192970 {
+    char pad[0x8];
+    cFEVObj_00192970* items[8];     // 0x8
+    int f28;                        // 0x28
+    int mask;                       // 0x2C
+};
+
+extern "C" void func_00192970(sOwner_00192970* self, void* screen)
+{
+    sName11_00192970 n0 = *(sName11_00192970*)D_0045FC88;
+    sName12_00192970 n1 = *(sName12_00192970*)D_0045FC98;
+    sName12_00192970 n2 = *(sName12_00192970*)D_0045FCA8;
+    sName13_00192970 n3 = *(sName13_00192970*)D_0045FCB8;
+    sName4_00192970 n4 = *(sName4_00192970*)D_004A1740;
+    sName4_00192970 n5 = *(sName4_00192970*)D_004A1748;
+    sName2_00192970 n6 = *(sName2_00192970*)D_004A14F8;
+    sName5_00192970 n7 = *(sName5_00192970*)D_004A1750;
+    for (int i = 0; i < 8; i++) {
+        if (((self->mask >> i) & 1) == 0) {
+            if (self->items[i] != 0) {
+                self->items[i]->v08(1);
+                self->items[i]->v09(0);
+                n0.c[0] = i + '0';
+                n1.c[0] = i + '0';
+                n2.c[0] = i + '0';
+                n3.c[0] = i + '0';
+                n6.c[0] = i + '1';
+                n7.c[3] = i + '1';
+                n4.c[2] = i + '1';
+                n5.c[2] = i + '1';
+                Hide_00192970(screen, n0.c);
+                Hide_00192970(screen, n1.c);
+                Hide_00192970(screen, n2.c);
+                Hide_00192970(screen, n3.c);
+                Hide_00192970(screen, n6.c);
+                Hide_00192970(screen, n7.c);
+                Hide_00192970(screen, n4.c);
+                Hide_00192970(screen, n5.c);
+            }
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateruleselect", func_00192D00);

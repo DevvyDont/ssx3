@@ -455,7 +455,82 @@ extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036AE20);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here (GIF/DMA packet words).
+struct sGmVE_AE20 {
+    short delta;
+    short index;
+    unsigned int (*fn)(void*);
+};
+
+static inline unsigned int gmCall_AE20(char* self, int slot)
+{
+    sGmVE_AE20* vt = *(sGmVE_AE20**)(self + 0x10D8);
+    return vt[slot].fn(self + vt[slot].delta);
+}
+
+extern "C" void func_0036AE20(void* vself, int idx, int a, int b, int n, char** pp)
+{
+    char* self = (char*)vself;
+    unsigned int full = 0x1000;
+    int w = *(int*)(self + 0x5A30);
+    int h = *(int*)(self + 0x5A34);
+    int offX = ((full - gmCall_AE20(self, 10)) >> 1) << 4;
+    int offY = ((full - gmCall_AE20(self, 11)) >> 1) << 4;
+    int cols = w / 8;
+    int zbp = *(int*)(self + 0x5A80);
+    ulong* p = (ulong*)*pp;
+    p += 2;
+    p[0] = (cols * 2 + 11) | ((ulong)0x8000 << 45);
+    p[1] = 0xE;
+    unsigned int fbw = gmCall_AE20(self, 10) >> 6;
+    p[2] = b | ((ulong)fbw << 16) | ((ulong)0x3FFF0200 << 16);
+    p[3] = 0x4C;
+    p[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    p[5] = 0x4E;
+    p[6] = 0x30000;
+    p[7] = 0x47;
+    p[8] = offX | ((ulong)offY << 32);
+    p[9] = 0x18;
+    p[10] = ((ulong)(w - 1) << 16) | ((ulong)(h * 2 - 1) << 48);
+    p[11] = 0x40;
+    p[12] = 0;
+    p[13] = 0x3F;
+    p[14] = (ulong)0x8000 << 24;
+    p[15] = 0x3B;
+    p[16] = 0;
+    p[17] = 0x14;
+    unsigned int tbw = gmCall_AE20(self, 10) >> 6;
+    p[18] = (a << 5) | ((ulong)tbw << 14) | ((ulong)0xEAB2 << 20);
+    p[19] = 6;
+    p[20] = 0x116;
+    p[21] = 0;
+    p[22] = 0x3F80000080808080;
+    p[23] = 1;
+    p += 24;
+    for (int i = 0; i < cols; i += 2) {
+        int j = i * 0x80;
+        int x0 = offX + 0x80 + j;
+        int x1 = offX + 0x100 + j;
+        int u0 = 8 + j;
+        int u1 = 0x88 + j;
+        p[0] = u0 | 0x80000;
+        p[1] = 3;
+        p[2] = x0 | ((ulong)offY << 16);
+        p[3] = 5;
+        p[4] = u1 | ((ulong)(n * 16 + 8) << 16);
+        p[5] = 3;
+        p[6] = x1 | ((ulong)(offY + n * 16) << 16);
+        p[7] = 5;
+        p += 8;
+    }
+    *(ulong*)*pp = ((p - (ulong*)*pp) / 2 - 1) | 0x10000000;
+    ((ulong*)*pp)[1] = 0;
+    *pp = (char*)p;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036B158);
 

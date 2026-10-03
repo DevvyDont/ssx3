@@ -116,7 +116,148 @@ extern "C" int func_001FAB08(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0020A380(void* self);
+extern "C" void func_001FAFF8(void* self, bool on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
+extern "C" void func_002583A8(void* self, int a1, int a2);
+extern void* D_004A2EEC;
+extern void* D_004A3028;
+extern void* D_004A5B64;
+extern char D_0046F9D0[];
+extern char D_0046F9E0[];
+extern char D_0046F9F0[];
+extern char D_0046FA08[];
+extern char D_0046FA18[];
+extern char D_0046FA38[];
+extern char D_0046FA58[];
+extern char D_0046FA78[];
+extern char D_0046FA90[];
+extern char D_0046FAA0[];
+extern char D_0046FAB0[];
+extern char D_0046FAC8[];
+extern char D_0046FAD8[];
+extern char D_0046FAE8[];
+extern char D_0046FB00[];
+extern char D_0046FB18[];
+extern char D_0046FB28[];
+
+class cUIObj_1FAB18 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+};
+
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
+{
+    char* s = (char*)self;
+    void* eng = *(void**)(s + 0x10);
+    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046F9D0), 0);
+    *(void**)(s + 0x40) = scr;
+    if (scr != 0) {
+        cUIScreen_playFrame(scr, 0, 0);
+    }
+    func_0020A380(self);
+    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046F9E0));
+    if (t != 0) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046F9F0));
+    }
+    cUIObj_1FAB18* o = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FA08));
+    if (o != 0) {
+        o->setVisible(1);
+        char* p = (char*)D_004A2EEC;
+        *(int*)((char*)o + 0x14) |= 0x80;
+        int e = *(int*)(p + 0x24);
+        int one = 1;
+        if (e != 0) {
+            if (e == one) {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA18));
+            } else if (e == 2) {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA18));
+            } else if (e == 3) {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA18));
+            } else {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA38));
+            }
+        } else if (*(int*)(p + 0x28) != 0) {
+            *(int*)(s + 0xA0) = 0;
+            int e2 = *(int*)(p + 0x28);
+            if (e2 == one) {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
+            } else if (e2 == 2) {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
+            } else if (e2 == 3) {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
+            } else {
+                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
+            }
+        } else if (*(int*)(p + 0x8C) != 0) {
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA78));
+            *(int*)(s + 0xA0) = 0;
+        } else if (*(int*)(p + 0x14) != 0) {
+            *(int*)(s + 0xA0) = 0;
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA78));
+        } else {
+            *(int*)(s + 0xA0) = 0;
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
+        }
+        cUIObj_1FAB18* o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FA90));
+        if (o2 != 0) {
+            if (*(int*)((char*)D_004A2EEC + 0xA0) != 0) {
+                cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(D_0046FAA0));
+            } else {
+                cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(D_0046FAB0));
+            }
+            o2->setVisible(0);
+            *(int*)((char*)o2 + 0x18) = 0;
+        }
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FAC8));
+        if (o2 != 0) {
+            o2->setVisible(0);
+        }
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FAD8));
+        if (o2 != 0) {
+            o2->setVisible(0);
+        }
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FAE8));
+        if (o2 != 0) {
+            o2->setVisible(0);
+        }
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FB00));
+        if (o2 != 0) {
+            o2->setVisible(0);
+        }
+        cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 0);
+    }
+    if (D_004A2EEC != 0) {
+        func_002583A8(D_004A2EEC, *(int*)((char*)D_004A3028 + 4), 3);
+        *(int*)(s + 0x9C) = *(int*)((char*)D_004A5B64 + 0x18);
+        func_001FAFF8(self, 0);
+        cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FB18));
+        if (t2 != 0) {
+            cUIText_setUnicodeStringByID(t2, GetHashValue32(D_0046FB28));
+        }
+    } else {
+        func_001FAFF8(self, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FAF08__FPv);

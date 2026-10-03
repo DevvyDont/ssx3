@@ -416,7 +416,192 @@ extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010D410);
+#ifdef SKIP_ASM
+unsigned int AIrand();
+extern "C" float func_0010D870(void* self, int a1, int a2, int a3);
+struct sAi0010FC30;
+extern "C" int func_0010FC30(sAi0010FC30* self, int team);
+extern "C" float func_00112588(void* self, int arg1);
+extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
+extern void* D_004A28A8;
+
+struct sVec4_10D410 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float vu0Length_10D410(const sVec4_10D410& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_10D410 vu0Scale_10D410(const sVec4_10D410& v, float s)
+{
+    sVec4_10D410 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4_10D410 vu0Add_10D410(const sVec4_10D410& a, const sVec4_10D410& b)
+{
+    sVec4_10D410 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline int speedLimit_10D410(int kind)
+{
+    if (kind == 1) {
+        return 20;
+    }
+    if (kind == 2) {
+        return 40;
+    }
+    if (kind == 3) {
+        return 60;
+    }
+    if (kind == 4) {
+        return 80;
+    }
+    if (kind == 5) {
+        return 100;
+    }
+    if (kind == 6) {
+        return 120;
+    }
+    return 0;
+}
+
+struct sAi_10D410 {
+    char pad0[0x28];
+    char* riders[20];
+    int count;
+};
+
+extern "C" float func_0010D410(char* self, char* tgt)
+{
+    float sc[7];
+    char* ai = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    int flags = *(int*)(tgt + 0x38);
+    int kind = (flags >> 7) & 7;
+    int lvl = (flags >> 4) & 7;
+    int solo = flags & 1;
+    if (kind > 8) {
+        kind = 0;
+    }
+    int b2 = (flags >> 2) & 1;
+    int b1 = (flags >> 1) & 1;
+    int b3 = (flags >> 3) & 1;
+    float base = func_0010D870(self, b3, b2, b1);
+    if (base <= 0.0f) {
+        return 0.0f;
+    }
+    if (*(int*)(self + 0xE04) == 0 && solo != 0) {
+        return 0.0f;
+    }
+    float speed = vu0Length_10D410(*(sVec4_10D410*)(*(char**)(self + 0x18) + 0x1E0)) * 0.035999998450279236f;
+    if (lvl == 0) {
+        if ((float)speedLimit_10D410(kind) < speed) {
+            return 0.0f;
+        }
+    } else if (lvl == 3) {
+        if (speed < (float)speedLimit_10D410(kind)) {
+            return 0.0f;
+        }
+    }
+    char* r = *(char**)(self + 0x18);
+    float len = vu0Length_10D410(*(sVec4_10D410*)(r + 0x1E0));
+    float total = 22.0f;
+    float s = func_00112588(r, 1) / len;
+    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)(*(char**)(self + 0x18) + 0x110), vu0Scale_10D410(*(sVec4_10D410*)(*(char**)(self + 0x18) + 0x1E0), s));
+    sVec4_10D410 out;
+    float t;
+    func_0026A428(tgt, &pos, &out, &t, 1);
+    float d = t;
+    float v = 100.0f - d * d * 1.5999999959603883e-05f;
+    if (v < 0.0f) {
+        v = 0.0f;
+    }
+    if (5000.0f < d) {
+        return -1.0f;
+    }
+    sc[0] = v * 0.22727273404598236f;
+    char* r2 = *(char**)(self + 0x18);
+    if (*(int*)(r2 + 0xF0) != 0 && *(char**)(((sAi_10D410*)ai)->riders[*(int*)(r2 + 0xF8)] + 0xAB8) == tgt) {
+        return 100.0f;
+    }
+    float zero = 0.0f;
+    sc[1] = zero;
+    float w = 1.0f / total;
+    sc[2] = (float)lvl * (w * 0.3333333432674408f);
+    // PORT: the path pointer is passed as func_0010FC30's int team
+    int n = func_0010FC30((sAi0010FC30*)ai, (int)tgt);
+    n -= tgt == *(char**)(*(char**)(self + 0x18) + 0xAB8);
+    float c;
+    if (n <= 0) {
+        c = 100.0f;
+    } else if (n == 1) {
+        c = 25.0f;
+    } else {
+        c = zero;
+    }
+    w = 5.0f / total;
+    sc[3] = c * w;
+    w = base / total;
+    sc[4] = w;
+    w = 5.0f / total;
+    if (*(int*)(self + 0xE04) != 0 && solo != 0) {
+        sc[5] = w * 100.0f;
+    } else {
+        sc[5] = 0.0f;
+    }
+    w = 2.0f / total;
+    if (*(int*)(self + 0xE08) != 0) {
+        sc[6] = (float)(AIrand() % 100) * w;
+    } else {
+        sc[6] = 0.0f;
+    }
+    float sum = 0.0f;
+    for (int i = 0; i < 7; i++) {
+        sum += sc[i];
+    }
+    return sum;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010D870);
@@ -1524,7 +1709,157 @@ extern "C" void func_00111AC0(char* self, char* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00111D98);
+#ifdef SKIP_ASM
+class cStream_00111D98 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* p, int n);
+    virtual void Read(void* p, int n);
+};
+
+struct sRefSet_00111D98 {
+    char pad_0x0[0xC];
+    unsigned int* refs;     // 0xC
+};
+
+struct sRefWorld_00111D98 {
+    char pad_0x0[0x8];
+    sRefSet_00111D98** sets;    // 0x8
+};
+
+extern sRefWorld_00111D98** D_004A47B8;
+extern char D_004D33A0[];
+extern "C" void func_00104DE0(void* self, void* s);
+extern "C" void func_00310EE0(void* self, void* s);
+extern "C" void func_00113AD8(void* self, void* s);
+extern "C" void func_001174E8(void* self, void* s);
+extern "C" void func_0013F880(void* self, void* s);
+extern "C" void func_0013ACE8(void* self, void* s);
+extern "C" void func_00138B10(void* self, void* s);
+extern "C" void func_0013C618(void* self, void* s);
+extern "C" void func_001399A8(void* self, void* s);
+extern "C" void func_001315D0(void* self, void* s);
+extern "C" void func_0012FC28(void* self, void* s);
+extern "C" void func_00136230(void* self, void* s);
+extern "C" void func_0012C590(void* self, void* s);
+extern "C" void func_00132878(void* self, void* s);
+extern "C" void func_0012E740(void* self, void* s);
+extern "C" void func_0012F5E8(void* self, void* s);
+extern "C" void func_0012C9F8(void* self, void* s);
+extern "C" void func_001330F0(void* self, void* s);
+extern "C" void func_00136920(void* self, void* s);
+extern "C" void func_002DCF28(void*);
+extern "C" void func_002DAA78(void*);
+extern "C" void func_002E8560(void*);
+extern "C" void func_002E6640(void*);
+void func_002EADC0(void*);
+extern "C" void func_002EF6A0(void*);
+extern "C" void func_002D4BE0(void*);
+extern "C" void func_002E3930(void*);
+extern "C" void func_002F1148(void*);
+extern "C" void func_002F6A90(void* self, void* s);
+extern "C" void* func_0026AF70(void* tree, int id);
+extern "C" void* func_0026AF88(void* tree, int id);
+extern "C" void func_00312598(void* self, int a1);
+extern "C" void func_003103F0(void* self);
+extern "C" void func_00106828(void* self);
+
+static inline void* idxToPtr_00111D98(unsigned int i)
+{
+    return (void*)(i << 2);
+}
+
+static inline void* refToPtr_00111D98(unsigned int v)
+{
+    unsigned int i = v >> 8;
+    if (i == 0) {
+        return 0;
+    }
+    return idxToPtr_00111D98(i);
+}
+
+struct sRef_00111D98 {
+    unsigned int id;
+    sRef_00111D98() : id(0xFFFFFFFF) {}
+
+    void* get()
+    {
+        sRefSet_00111D98* set = (*D_004A47B8)->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return refToPtr_00111D98(set->refs[id >> 8]);
+    }
+};
+
+struct sQuad_00111D98 {
+    int v[4];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00111D98(char* self, char* s)
+{
+    cStream_00111D98* st = (cStream_00111D98*)s;
+    st->Read(*(void**)(self + 0x18), 0x6C0);
+    func_00104DE0(*(void**)(*(char**)(self + 0x18) + 0x784), s);
+    func_00310EE0(*(void**)(*(char**)(self + 0x18) + 0x780), s);
+    func_00113AD8(*(void**)(*(char**)(self + 0x18) + 0x788), s);
+    func_001174E8(*(void**)(*(char**)(self + 0x18) + 0x790), s);
+    int ids[2];
+    sRef_00111D98 r0;
+    st->Read(&r0, 4);
+    st->Read(*(void**)(*(char**)(self + 0x18) + 0x864), 0x10);
+    if (~r0.id != 0) {
+        **(void***)(*(char**)(self + 0x18) + 0x864) = r0.get();
+    }
+    sRef_00111D98 r1;
+    st->Read(&r1, 4);
+    st->Read(*(void**)(*(char**)(self + 0x18) + 0x868), 0x10);
+    if (~r1.id != 0) {
+        **(void***)(*(char**)(self + 0x18) + 0x868) = r1.get();
+    }
+    st->Read(self + 0xDE0, 4);
+    st->Read(self + 0xDE4, 4);
+    func_0013F880(self, s);
+    func_0013ACE8(self + 0x20, s);
+    func_00138B10(self + 0x30, s);
+    func_0013C618(self + 0xB0, s);
+    func_001399A8(self + 0x110, s);
+    func_001315D0(self + 0x1D0, s);
+    func_0012FC28(self + 0x210, s);
+    func_00136230(self + 0x230, s);
+    func_0012C590(self + 0x290, s);
+    func_00132878(self + 0x2B0, s);
+    func_0012E740(self + 0x2C0, s);
+    func_0012F5E8(self + 0x350, s);
+    func_0012C9F8(self + 0x360, s);
+    func_001330F0(self + 0x370, s);
+    func_00136920(self + 0x390, s);
+    func_002DCF28(self + 0x3B0);
+    func_002DAA78(self + 0x470);
+    func_002E8560(self + 0x520);
+    func_002E6640(self + 0x610);
+    func_002EADC0(self + 0x9C0);
+    func_002EF6A0(self + 0xAD0);
+    func_002D4BE0(self + 0xAF0);
+    func_002E3930(self + 0xB00);
+    func_002F1148(self + 0xC70);
+    func_002F6A90(self + 0xD20, s);
+    st->Read(*(void**)(*(char**)(self + 0x18) + 0xABC), 0x20);
+    st->Read(*(void**)(*(char**)(self + 0x18) + 0xAC0), 0x20);
+    st->Read(ids, 8);
+    *(void**)(*(char**)(self + 0x18) + 0xAB4) = func_0026AF70(D_004D33A0, ids[0]);
+    *(void**)(*(char**)(self + 0x18) + 0xAB8) = func_0026AF88(D_004D33A0, ids[1]);
+    sQuad_00111D98* q = *(sQuad_00111D98**)(*(char**)(self + 0x18) + 0x78C);
+    if (q != 0) {
+        *q = *(sQuad_00111D98*)(*(char**)(self + 0x18) + 0x110);
+    }
+    func_00312598(*(void**)(*(char**)(self + 0x18) + 0x784), 0);
+    func_003103F0(*(void**)(*(char**)(self + 0x18) + 0x780));
+    func_00106828(*(void**)(self + 0x18));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_00112180);

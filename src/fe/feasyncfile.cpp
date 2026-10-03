@@ -1324,7 +1324,104 @@ extern "C" void func_001A5FB8(void* self, int sel)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A6070);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" int func_002624F8(void* self, int id);
+extern "C" const char* func_002625C8(void* self, int idx);
+extern "C" int func_00263338(void* self, int a1);
+extern "C" int func_002633F8(void* self, int a1);
+extern "C" void func_001A7390(void* self, const char* str, int a2);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern char D_004A1390[];
+extern char D_00461558[];
+extern char D_004617A8[];
+extern char D_004617B8[];
+extern char D_004617C8[];
+extern char D_004617E0[];
+
+static inline void* GetSession_001A6070()
+{
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    return D_004A3328;
+}
+
+class cFEVObj_001A6070 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int on);
+};
+
+extern "C" int func_001A6070(void* self, int idx)
+{
+    if (*(void**)((char*)self + 0x40) == 0) {
+        return 0;
+    }
+    cFEVObj_001A6070* name = (cFEVObj_001A6070*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004617A8));
+    cFEVObj_001A6070* status = (cFEVObj_001A6070*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00461558));
+    if (status == 0 || name == 0) {
+        return 0;
+    }
+    int n = *(int**)((char*)self + 0x6EC) - *(int**)((char*)self + 0x6E8);
+    if (n == 0) {
+        cUIText_setAsciiString((cUIText*)name, D_004A1390);
+        if (*(int*)((char*)GetSession_001A6070() + 0xE8) != 0) {
+            cUIText_setUnicodeStringByID((cUIText*)status, GetHashValue32(D_004617B8));
+        } else {
+            cUIText_setUnicodeStringByID((cUIText*)status, GetHashValue32(D_004617C8));
+            GetSession_001A6070();
+        }
+        return 0;
+    }
+    if (idx >= n) {
+        return 0;
+    }
+    int e = *(int*)(*(char**)((char*)self + 0x6E8) + (idx << 2));
+    int id = func_002624F8(GetSession_001A6070(), e);
+    const char* str = func_002625C8(GetSession_001A6070(), id);
+    if (str == 0) {
+        return 0;
+    }
+    cBXString_cBXString4((char*)self + 0x6E0, str);
+    cUIText_setAsciiString((cUIText*)name, str);
+    name->v09(1);
+    status->v09(1);
+    if (func_00263338(GetSession_001A6070(), id) != 0) {
+        func_001A7390(self, str, func_002633F8(GetSession_001A6070(), id));
+    } else {
+        cUIText_setUnicodeStringByID((cUIText*)status, GetHashValue32(D_004617E0));
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A63C8);
@@ -5150,7 +5247,130 @@ extern "C" void func_001AEBF0()
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AEC60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern void* D_004A28A8;
+extern int D_00534B34[];
+extern char D_004632A8[];
+extern char D_004632B8[];
+extern char D_004632D0[];
+extern char D_004632E0[];
+extern char D_004632F0[];
+extern char D_00463130[];
+
+class cFEVObj_001AEC60 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+};
+
+struct sVE_001AEC60 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001AEC60(void* self, int on)
+{
+    char* s = (char*)self;
+    if (*(void**)(s + 0x40) == 0) {
+        return;
+    }
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    int locked = D_00534B34[0];
+    cFEVObj_001AEC60* o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632A8));
+    if (o != 0) {
+        o->v08(on);
+    }
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632B8));
+    if (o != 0) {
+        (*(cFEVObj_001AEC60**)(s + 0x6E0))->v08(on);
+        o->v08(on);
+        if (on == 0) {
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[0] == 0 || locked != 0);
+        }
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E0)) + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E0)) + vt[8].delta, (*(int**)(s + 0x6D8))[0] == 0 || locked != 0);
+        }
+        }
+    }
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632D0));
+    if (o != 0) {
+        o->v08(on);
+        (*(cFEVObj_001AEC60**)(s + 0x6E4))->v08(on);
+        if (on == 0) {
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E4)) + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E4)) + vt[8].delta, (*(int**)(s + 0x6D8))[1] == 0 || locked != 0);
+        }
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[1] == 0 || locked != 0);
+        }
+        }
+    }
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632E0));
+    if (o != 0) {
+        o->v08(on);
+        (*(cFEVObj_001AEC60**)(s + 0x6E8))->v08(on);
+        if (on == 0) {
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E8)) + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E8)) + vt[8].delta, (*(int**)(s + 0x6D8))[3] == 0 || locked != 0);
+        }
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[3] == 0 || locked != 0);
+        }
+        }
+    }
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632F0));
+    if (o != 0) {
+        o->v08(on);
+        (*(cFEVObj_001AEC60**)(s + 0x6EC))->v08(on);
+        if (on == 0) {
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6EC)) + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6EC)) + vt[8].delta, (*(int**)(s + 0x6D8))[2] == 0 || locked != 0);
+        }
+            {
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
+            void (**pf)(void*, int) = &vt[8].fn;
+            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[2] == 0 || locked != 0);
+        }
+        }
+    }
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00463130));
+    if (o != 0) {
+        o->v08(on);
+    }
+    (*(cFEVObj_001AEC60**)(s + 0x6DC))->v08(on);
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AF098);
 
@@ -5514,7 +5734,109 @@ extern "C" void func_001AF930(void* screen)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AFA60);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" void* cBXString_cBXString1(void* self, void* other);
+extern "C" void cBXString__cBXString(void* self, int flags);
+// PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
+extern "C" void func_002C2718_1AFA60(char* buf, const char* fmt, ...) __asm__("func_002C2718");
+extern "C" void func_003A0E90(cUIText* text, char* str);
+// PORT: SN soft-float float->double helper called by name
+extern "C" double func_00413AF8(float f);
+extern "C" void func_0025DD08(void* self, const char* str, int a2);
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern char D_00463108[];
+extern char D_004634E8[];
+extern char D_004634F8[];
+extern char D_00463508[];
+extern char D_00463520[];
+extern char D_00463550[];
+extern char D_00463568[];
+extern char D_00463580[];
+extern char D_00463590[];
+extern char D_004635A8[];
+extern char D_004A1A88[];
+
+struct sVEntry_001AFA60 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Loc1AFA60(char* name)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001AFA60* vt = *(sVEntry_001AFA60**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+}
+
+struct sBXString1AFA60 {
+    char* str;
+    sBXString1AFA60() {}
+    sBXString1AFA60(const sBXString1AFA60& o);
+};
+
+struct sStats1AFA60 {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+};
+
+extern "C" void func_001AFA60(void* screen, char* msg)
+{
+    sBXString1AFA60 s;
+    char buf[0x100];
+    sStats1AFA60* st = (sStats1AFA60*)(msg + 0x18);
+    cBXString_cBXString1(&s, (char*)D_004A3028 + 0x98);
+    *(sStats1AFA60*)((char*)D_004A3028 + 0xCC) = *(sStats1AFA60*)(msg + 0x18);
+    func_0025DD08(D_004A3028, s.str, *(int*)(msg + 0x14));
+    cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463108));
+    if (t != 0) {
+        cUIText_setAsciiString(t, s.str);
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634E8));
+    if (t != 0) {
+        int name = Loc1AFA60(D_00463550);
+        func_002C2718_1AFA60(buf, D_004A1A88, name, *(int*)(msg + 0x18));
+        func_003A0E90(t, buf);
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634F8));
+    if (t != 0) {
+        int name = Loc1AFA60(D_00463568);
+        func_002C2718_1AFA60(buf, D_004A1A88, name, *(int*)(msg + 0x20));
+        func_003A0E90(t, buf);
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463508));
+    if (t != 0) {
+        int b = *(int*)(msg + 0x20);
+        int a = *(int*)(msg + 0x1C);
+        float pct = 0.0f;
+        if (a < b) {
+            pct = (float)a / (float)b * 100.0f;
+        } else if (a != 0) {
+            pct = 100.0f;
+        }
+        int name = Loc1AFA60(D_00463580);
+        func_002C2718_1AFA60(buf, D_00463590, name, st->b, st->c, func_00413AF8(pct));
+        func_003A0E90(t, buf);
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463520));
+    if (t != 0) {
+        int name = Loc1AFA60(D_004635A8);
+        func_002C2718_1AFA60(buf, D_004A1A88, name, st->d);
+        func_003A0E90(t, buf);
+    }
+    cBXString__cBXString(&s, 2);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001AFD88);
@@ -5595,7 +5917,140 @@ void* func_001B0130(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0150);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern void* D_004A3028;
+extern int D_00535C04[];
+extern int D_005308D0[];
+extern char D_004A12C0[];
+extern char D_004A1A90[];
+extern char D_00461520[];
+extern char D_004635F8[];
+extern char D_00463608[];
+extern char D_00463618[];
+extern char D_00463108[];
+extern char D_00463118[];
+extern char D_00463140[];
+extern char D_00463150[];
+extern char D_00463168[];
+extern char D_00463178[];
+extern char D_00463190[];
+extern char D_004631A0[];
+extern char D_004631B8[];
+extern char D_00463628[];
+extern char D_00463640[];
+extern char D_00463228[];
+extern char D_00463658[];
+extern char D_00463670[];
+extern char D_00463688[];
+extern char D_004636A0[];
+extern char D_004636B0[];
+extern char D_004630E0[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+
+class cFEVObj_001B0150 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int on);
+};
+
+static inline int IsHash_001B0150(int id, char* name) { return id == GetHashValue32(name); }
+
+extern "C" void func_001B0150(void* self, cFEVObj_001B0150* obj)
+{
+    char buf[16];
+    char* o = (char*)obj;
+    cUIText* t = (cUIText*)obj;
+    if (IsHash_001B0150(*(int*)(o + 0x38), D_00461520)) {
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004635F8)) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463608));
+        *(int*)(o + 0x18) = 0xB;
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463618)) {
+        *(int*)(o + 0x18) = 0xC;
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463108)) {
+        cUIText_setAsciiString(t, *(const char**)((char*)D_004A3028 + 0x98));
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463118)) {
+        *(int*)(o + 0x18) = 7;
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463140)) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463150));
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463168)) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463178));
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463190)) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_004631A0));
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004631B8)) {
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463628)) {
+        cUIText_setAsciiString(t, D_004A1A90);
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463640)) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        int n = D_00535C04[0];
+        if (n == 0) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463228));
+        } else {
+            sprintf(buf, D_004A12C0, n);
+            cUIText_setAsciiString(t, buf);
+        }
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463658)) {
+        if ((D_005308D0[0] >> 8) & 1) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+        } else {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+        }
+        cUIText_setAsciiString(t, D_004A1A90);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463670)) {
+        if ((D_005308D0[0] >> 6) & 1) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+        } else {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+        }
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463688)) {
+        int f = D_005308D0[0] >> 7;
+        if (f & 1) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+        } else {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+        }
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004636A0)) {
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004636B0)) {
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463628)) {
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463640)) {
+        obj->v09(1);
+    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004630E0)) {
+        *(int*)(o + 0x14) |= 0x80;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0538);
@@ -5764,7 +6219,126 @@ INCLUDE_ASM("fe/feasyncfile", func_001B06E0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0708);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0850);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" const char* func_00145340(void* track);
+extern "C" const char* func_00144BF0(void* track);
+extern void* D_004A28A8;
+extern int D_00534B34[];
+extern int D_005308D0[];
+extern int D_00535C04[];
+extern char D_004A1390[];
+extern char D_004A12C0[];
+extern char D_004636A0[];
+extern char D_004636B0[];
+extern char D_00463628[];
+extern char D_00463798[];
+extern char D_00463670[];
+extern char D_00463688[];
+extern char D_00463640[];
+extern char D_00463228[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+
+extern "C" void func_001B0850(void* self, void* iface, void* screen)
+{
+    char buf[16];
+    if (screen == 0) {
+        return;
+    }
+    cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004636A0));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            cUIText_setAsciiString(t, func_00145340(iface));
+        }
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004636B0));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            cUIText_setAsciiString(t, func_00144BF0(iface));
+        }
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463628));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+            if (D_00534B34[0] != 0) {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            } else {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            }
+        }
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463798));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            if ((D_005308D0[0] >> 8) & 1) {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            } else {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            }
+        }
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463670));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            if ((D_005308D0[0] >> 6) & 1) {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            } else {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            }
+        }
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463688));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            int f = D_005308D0[0] >> 7;
+            if (f & 1) {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            } else {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            }
+        }
+    }
+    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463640));
+    if (t != 0) {
+        if (iface == 0) {
+            cUIText_setAsciiString(t, D_004A1390);
+        } else {
+            cBE_getInterface_Fv(cBE_getBE(), 0);
+            int n = D_00535C04[0];
+            if (n <= 0) {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463228));
+            } else {
+                sprintf(buf, D_004A12C0, n);
+                cUIText_setAsciiString(t, buf);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0C08);
@@ -6348,7 +6922,119 @@ extern "C" void func_001B1B10(void* self, int sel, int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B1B98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00148BC8(void* iface, int a1, int idx);
+extern "C" int func_00148C68(void* iface, int a1, int idx);
+extern "C" int func_00148B78(void* iface, int a1, int idx);
+extern "C" int func_00148CB8(void* iface, int a1, int idx);
+extern "C" int func_00148D58(void* iface, int a1, int idx);
+extern "C" int func_00148D08(void* iface, int a1, int idx);
+extern "C" int func_00148C18(void* iface, int a1, int idx);
+extern "C" void func_0039C428(void* self, int v);
+extern void* D_004A28A8;
+extern char* D_004412C8[];
+extern char D_004A19F8[];
+extern char D_004A1B18[];
+extern char D_004A1B20[];
+extern char D_004A12C0[];
+extern char D_00441340[];
+extern char D_00441350[];
+extern char D_00441360[];
+extern char D_00441378[];
+extern unsigned char D_00534FD8[];
+extern int D_00534B34[];
+
+class cFEVObj_001B1B98 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int on);
+};
+
+extern "C" void func_001B1B98(void* self, int index, int a2, int a3)
+{
+    char buf[0x30];
+    int stats[7];
+    char num[0x10];
+    char* name1;
+    char* name2;
+    if ((unsigned int)index >= 31) {
+        return;
+    }
+    if (a2 != 0) {
+        sprintf(buf, D_004A19F8, D_004412C8[index], D_004A1B18);
+    } else {
+        sprintf(buf, D_004A19F8, D_004412C8[index], D_004A1B20);
+    }
+    cFEVObj_001B1B98* o = (cFEVObj_001B1B98*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+    if (o != 0) {
+        o->v09(a3);
+    }
+    if (a3 == 0) {
+        return;
+    }
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (a2 != 0) {
+        name1 = D_00441350;
+        name2 = D_00441378;
+        unsigned char* src = D_00534FD8;
+        for (int j = 0; j < 7; j++) {
+            stats[j] = src[j];
+        }
+    } else {
+        name1 = D_00441340;
+        name2 = D_00441360;
+        if (D_00534B34[0] != 0) {
+            int v = 0x28;
+            for (int j = 6; j >= 0; j--) {
+                stats[j] = v;
+            }
+        } else {
+            stats[0] = func_00148BC8(iface, 0, index);
+            stats[1] = func_00148C68(iface, 0, index);
+            stats[2] = func_00148B78(iface, 0, index);
+            stats[3] = func_00148CB8(iface, 0, index);
+            stats[4] = func_00148D58(iface, 0, index);
+            stats[5] = func_00148D08(iface, 0, index);
+            stats[6] = func_00148C18(iface, 0, index);
+        }
+    }
+    for (int i = 0; i < 7; i++) {
+        name1[0] = '0' + i;
+        cFEVObj_001B1B98* a = (cFEVObj_001B1B98*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name1));
+        name2[0] = '0' + i;
+        void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name2));
+        if (a != 0 && b != 0) {
+            int v = stats[i];
+            int q = v / 5;
+            sprintf(num, D_004A12C0, q);
+            a->v09(1);
+            cUIText_setAsciiString((cUIText*)a, num);
+            *(int*)((char*)b + 0x80) = 0x37;
+            func_0039C428(b, v);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B1EC0);
@@ -7702,7 +8388,98 @@ extern "C" void func_001B47C0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4888);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+// PORT: func_002C26D0 / func_002C2718 are varargs formatters (dst, fmt, ...); the unit declares 3-arg views
+extern "C" void func_002C26D0_1B4888(void* str, int fmt, ...) __asm__("func_002C26D0");
+extern "C" void func_002C2718_1B4888(char* buf, const char* fmt, ...) __asm__("func_002C2718");
+extern void* D_004A28A8;
+extern char D_004A12C0[];
+extern char D_0045DC90[];
+extern char D_0045DCD8[];
+extern char D_00463F08[];
+extern char D_00463F20[];
+extern char D_00463F70[];
+extern char D_00462688[];
+extern char D_0045F7E0[];
+extern char D_00462C88[];
+
+struct sVEntry_001B4888 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Loc1B4888(char* name)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001B4888* vt = *(sVEntry_001B4888**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+}
+
+extern "C" void func_001B4888(void* self, int a1, int a2, int a3)
+{
+    char buf[0x20];
+    int flag = 0;
+    void* p = func_001A9C50(self);
+    char* sub = (char*)p + 0xBC;
+    switch (a2) {
+    case 2:
+        if (a3 == -1) {
+            char* dst = (char*)self + 0x71C;
+            a3 = 1;
+            int name = Loc1B4888(D_00463F08);
+            func_002C26D0_1B4888(dst, Loc1B4888(D_00463F20), a3, name);
+            *(char**)((char*)p + 0xC4) = dst;
+            *(int*)((char*)p + 0xC0) = a3;
+        } else {
+            char* dst = (char*)self + 0x71C;
+            int name = Loc1B4888(D_00463F08);
+            func_002C26D0_1B4888(dst, Loc1B4888(D_00463F20), a3 + 1, name);
+            *(char**)((char*)p + 0xC4) = dst;
+            *(int*)((char*)p + 0xC0) = 1;
+            flag = 1;
+        }
+        break;
+    case 0x14: {
+        func_002C2718_1B4888(buf, D_004A12C0, a3 + 1);
+        char* dst = (char*)self + 0x71C;
+        func_002C26D0_1B4888(dst, Loc1B4888(D_0045DC90), buf);
+        *(char**)((char*)p + 0xC4) = dst;
+        *(int*)((char*)p + 0xC0) = 1;
+        break;
+    }
+    case 0x18: {
+        func_002C2718_1B4888(buf, D_004A12C0, a3 + 1);
+        char* dst = (char*)self + 0x71C;
+        int name = Loc1B4888(D_00463F08);
+        func_002C26D0_1B4888(dst, Loc1B4888(D_00463F70), name, buf);
+        *(char**)((char*)p + 0xC4) = dst;
+        *(int*)((char*)p + 0xC0) = 1;
+        break;
+    }
+    case 6:
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462688);
+        *(int*)((char*)p + 0xC0) = 3;
+        break;
+    }
+    *(int*)sub = 2;
+    func_001C57C0(sub, 0, GetHashValue32(D_0045DCD8));
+    if (flag == 0) {
+        func_001C57C0(sub, 1, GetHashValue32(D_0045F7E0));
+    } else {
+        func_001C57C0(sub, 1, GetHashValue32(D_00462C88));
+    }
+    *(int*)(sub + 0x94) = a1;
+    *(int*)(sub + 0xA8) = 0;
+    func_001A9BC0(self, p);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4C00);
@@ -12133,7 +12910,147 @@ void* func_001BCE18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BCE38);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_0039AB00(void* self, int a1);
+extern "C" void func_0039B760(void* self, unsigned char a1);
+extern char D_00464DB0[];
+extern char D_00464DC0[];
+extern char D_00464DD0[];
+extern char D_00464DE8[];
+extern char D_004A1BF0[];
+extern char D_00464E00[];
+extern char D_00464E10[];
+extern char D_00464E20[];
+extern char D_00464E30[];
+extern char D_00464E40[];
+extern char D_00464E50[];
+extern char D_00464E60[];
+extern char D_00464E70[];
+extern char D_00464E80[];
+extern char D_00464E90[];
+extern char D_00464EA0[];
+extern char D_00464EB0[];
+extern char D_00464EC8[];
+extern char D_00464EE0[];
+extern char D_00464EF8[];
+extern char D_00464F10[];
+extern char D_00464F20[];
+extern char D_00464F30[];
+extern char D_00464F40[];
+extern char D_00464F50[];
+
+class cFEVObj_001BCE38 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int on);
+    virtual void v08();
+    virtual void v09(int on);
+};
+
+extern "C" void func_001BCE38(void* self, cFEVObj_001BCE38* obj)
+{
+    char buf[16];
+    char* s = (char*)self;
+    char* o = (char*)obj;
+    int id = *(int*)(o + 0x38);
+    if (id == GetHashValue32(D_00464DB0)) {
+        *(void**)(s + 0x6D4) = obj;
+    } else if (id == GetHashValue32(D_00464DC0)) {
+        *(void**)(s + 0x6D0) = obj;
+        func_0039AB00(obj, 1);
+        (*(cFEVObj_001BCE38**)(s + 0x6D0))->v07(1);
+        func_0039B760(*(void**)(s + 0x6D0), 1);
+        *(int*)(*(char**)(s + 0x6D0) + 0x14) &= ~0x80;
+        *(int*)(*(char**)(s + 0x6D0) + 0x14) |= 1;
+    } else if (id == GetHashValue32(D_00464DD0)) {
+        cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(D_00464DE8));
+    } else if (id == GetHashValue32(D_004A1BF0)) {
+        *(void**)(s + 0x704) = obj;
+    } else if (id == GetHashValue32(D_00464E00)) {
+        *(void**)(s + 0x700) = obj;
+        *(int*)(o + 0x18) = 4;
+    } else if (id == GetHashValue32(D_00464E10)) {
+        *(void**)(s + 0x718) = obj;
+        *(int*)(o + 0x18) = 0;
+    } else if (id == GetHashValue32(D_00464E20)) {
+        *(void**)(s + 0x71C) = obj;
+        *(int*)(o + 0x18) = 1;
+    } else if (id == GetHashValue32(D_00464E30)) {
+        *(void**)(s + 0x720) = obj;
+        *(int*)(o + 0x18) = 2;
+    } else if (id == GetHashValue32(D_00464E40)) {
+        *(void**)(s + 0x724) = obj;
+        *(int*)(o + 0x18) = 3;
+    } else if (id == GetHashValue32(D_00464E50)) {
+        *(void**)(s + 0x730) = obj;
+        obj->v09(1);
+    } else if (id == GetHashValue32(D_00464E60)) {
+        *(void**)(s + 0x734) = obj;
+        obj->v09(0);
+    } else if (id == GetHashValue32(D_00464E70)) {
+        *(void**)(s + 0x738) = obj;
+        obj->v09(0);
+    } else if (id == GetHashValue32(D_00464E80)) {
+        *(void**)(s + 0x73C) = obj;
+        obj->v09(0);
+    } else if (id == GetHashValue32(D_00464E90)) {
+        *(void**)(s + 0x728) = obj;
+    } else if (id == GetHashValue32(D_00464EA0)) {
+        *(void**)(s + 0x72C) = obj;
+    } else if (id == GetHashValue32(D_00464EB0)) {
+        *(void**)(s + 0x708) = obj;
+        *(int*)(o + 0x14) &= ~1;
+    } else if (id == GetHashValue32(D_00464EC8)) {
+        *(void**)(s + 0x70C) = obj;
+        *(int*)(o + 0x14) &= ~1;
+    } else if (id == GetHashValue32(D_00464EE0)) {
+        *(void**)(s + 0x710) = obj;
+        *(int*)(o + 0x14) &= ~1;
+    } else if (id == GetHashValue32(D_00464EF8)) {
+        *(void**)(s + 0x714) = obj;
+        *(int*)(o + 0x14) &= ~1;
+    } else if (id == GetHashValue32(D_00464F10)) {
+        *(void**)(s + 0x740) = obj;
+        obj->v09(0);
+    } else if (id == GetHashValue32(D_00464F20)) {
+        *(void**)(s + 0x744) = obj;
+        obj->v09(0);
+    } else if (id == GetHashValue32(D_00464F30)) {
+        *(void**)(s + 0x748) = obj;
+        obj->v09(0);
+    } else if (id == GetHashValue32(D_00464F40)) {
+        *(void**)(s + 0x74C) = obj;
+        obj->v09(0);
+    } else {
+        void** p = (void**)(s + 0x6D8);
+        int i;
+        for (i = 0; ; p++, i++) {
+            if (i >= 10) {
+                return;
+            }
+            sprintf(buf, D_00464F50, i);
+            if (id == GetHashValue32(buf)) {
+                break;
+            }
+        }
+        *p = obj;
+        *(int*)(o + 0x18) = i;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BD1B8);
 
@@ -13779,7 +14696,123 @@ extern "C" void func_001BF6C0(cFEVObj_001BF6C0* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BF758);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" int USTR_length(void* s);
+extern "C" int strlen(const char* s);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void cMemMan_free(void* p);
+// PORT: operator_new__FUi really takes (size, tag, flags, d)
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001A9BC0(void* self, void* popup);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void* func_001AC010(void* self, int a1);
+extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
+extern "C" void* func_001B88F0(void* self, int a1, int a2);
+extern "C" void* func_001C0418(void* self, int a1);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_0025B6D8(void* self, int a1);
+extern "C" void func_002C27C0(void* dst, const char* fmt, int a, int b);
+extern "C" void func_0039F290(void* list, void* item);
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern char D_00465348[];
+extern char D_00462ED0[];
+extern char D_00462D10[];
+extern char D_00464860[];
+extern char D_00465360[];
+extern char D_00465380[];
+extern char D_00465398[];
+extern const char D_00461CD8[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+
+struct sVEntry_001BF758 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Loc1BF758(char* name)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001BF758* vt = *(sVEntry_001BF758**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+}
+
+extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
+{
+    if (a1 == 0) {
+        return;
+    }
+    switch (kind) {
+    case 5:
+        switch (*(int*)((char*)a1 + 0x18)) {
+        case 0:
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(const char**)((char*)D_004A28A8 + 0xC4));
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)((char*)D_004A28A8 + 0xC8));
+            func_0025B6D8(D_004A3028, 0);
+            break;
+        case 2:
+            func_001A8A40(self, func_001B88F0(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)((char*)self + 0x10), 1));
+            break;
+        case 1:
+            func_001A8A40(self, func_001AC010(cMemMan_alloc(0x6E4, D_00465348, 0, 0), *(int*)((char*)self + 0x10)));
+            break;
+        case 3: {
+            void* o = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 3, 0, 0);
+            *(int*)((char*)o + 0x18) = 0x82C;
+            func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, o);
+            break;
+        }
+        }
+        break;
+    case 6: {
+        if (*(void**)((char*)self + 0x6D0) != 0) {
+            cMemMan_free(*(void**)((char*)self + 0x6D0));
+            *(void**)((char*)self + 0x6D0) = 0;
+        }
+        int a = Loc1BF758(D_00465360);
+        char* title = D_00465380;
+        int b = Loc1BF758(title);
+        char* sep = D_00465398;
+        int len = USTR_length((void*)a) + USTR_length((void*)b) + strlen(sep) + 1;
+        *(void**)((char*)self + 0x6D0) = operator_new_tag(len * 2, D_00461CD8, 0x100, 0);
+        void* p = func_001A9C50(self);
+        char* sub = (char*)p + 0xBC;
+        if (*(void**)((char*)self + 0x6D0) != 0) {
+            func_002C27C0(*(void**)((char*)self + 0x6D0), sep, a, b);
+            *(void**)((char*)p + 0xC4) = *(void**)((char*)self + 0x6D0);
+            *(int*)((char*)p + 0xC0) = 1;
+        } else {
+            *(int*)((char*)p + 0xC4) = GetHashValue32(title);
+            *(int*)((char*)p + 0xC0) = 3;
+        }
+        *(int*)sub = 2;
+        func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+        func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+        *(int*)(sub + 0xAC) = 1;
+        *(int*)(sub + 0x94) = 0x848;
+        func_001A9BC0(self, p);
+        break;
+    }
+    case 8: {
+        void* o = func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), *(int*)((char*)self + 0x10));
+        *(int*)((char*)o + 0x18) = 0x12;
+        func_001A8A40(self, o);
+        break;
+    }
+    default:
+        func_001A8918(self, (int)a1, kind);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BFAE0);
@@ -14364,7 +15397,118 @@ extern "C" void* func_001C1038(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1080);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A1A80[];
+extern char D_004657F8[];
+extern char D_004A1C00[];
+extern char D_00465808[];
+extern char D_00465818[];
+extern char D_00465828[];
+extern char D_00465838[];
+extern char D_00465848[];
+extern char D_00465858[];
+extern char D_00465868[];
+extern char D_00465878[];
+extern char D_00465890[];
+extern char D_004658A0[];
+extern char D_004658B0[];
+extern char D_004658C0[];
+extern char D_004658D0[];
+extern char D_004658E0[];
+
+class cFEVObj_001C1080 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int on);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24(int on);
+    virtual void v25(int on);
+};
+
+extern "C" void func_001C1080(void* self, cFEVObj_001C1080* obj)
+{
+    char* s = (char*)self;
+    int id = *(int*)((char*)obj + 0x38);
+    obj->v09(1);
+    if (id == GetHashValue32(D_004A1A80)) {
+        *(void**)(s + 0x6F4) = obj;
+        obj->v25(1);
+    } else if (id == GetHashValue32(D_004657F8)) {
+        func_001A9AB8(self, (cUIListBox_001A9AB8*)obj, 1);
+        obj->v24(1);
+        *(void**)(s + 0x70C) = obj;
+    } else if (id == GetHashValue32(D_004A1C00)) {
+        func_001A9AB8(self, (cUIListBox_001A9AB8*)obj, 1);
+        obj->v24(1);
+        *(void**)(s + 0x710) = obj;
+    } else if (id == GetHashValue32(D_00465808)) {
+        func_001A9AB8(self, (cUIListBox_001A9AB8*)obj, 1);
+        obj->v24(1);
+        *(void**)(s + 0x714) = obj;
+    } else if (id == GetHashValue32(D_00465818)) {
+        func_001A9AB8(self, (cUIListBox_001A9AB8*)obj, 1);
+        obj->v24(1);
+        *(void**)(s + 0x718) = obj;
+    } else if (id == GetHashValue32(D_00465828)) {
+        func_001A9AB8(self, (cUIListBox_001A9AB8*)obj, 1);
+        obj->v24(1);
+        *(void**)(s + 0x71C) = obj;
+    } else if (id == GetHashValue32(D_00465838)) {
+        obj->v25(1);
+        *(void**)(s + 0x6F8) = obj;
+    } else if (id == GetHashValue32(D_00465848)) {
+        obj->v25(1);
+        *(void**)(s + 0x6FC) = obj;
+    } else if (id == GetHashValue32(D_00465858)) {
+        obj->v25(1);
+        *(void**)(s + 0x700) = obj;
+    } else if (id == GetHashValue32(D_00465868)) {
+        obj->v25(1);
+        *(void**)(s + 0x704) = obj;
+    } else if (id == GetHashValue32(D_00465878)) {
+        obj->v25(1);
+        *(void**)(s + 0x708) = obj;
+    } else if (id == GetHashValue32(D_00465890)) {
+        *(void**)(s + 0x720) = obj;
+    } else if (id == GetHashValue32(D_004658A0)) {
+        *(void**)(s + 0x724) = obj;
+    } else if (id == GetHashValue32(D_004658B0)) {
+        *(void**)(s + 0x728) = obj;
+    } else if (id == GetHashValue32(D_004658C0)) {
+        *(void**)(s + 0x72C) = obj;
+    } else if (id == GetHashValue32(D_004658D0)) {
+        *(void**)(s + 0x730) = obj;
+    } else if (id == GetHashValue32(D_004658E0)) {
+        *(void**)(s + 0x6E4) = obj;
+        obj->v09(0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C13E0);
@@ -15330,7 +16474,124 @@ void* func_001C2EE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C2F00);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_0039AB00(void* self, int a1);
+extern "C" void func_0039B760(void* self, unsigned char a1);
+extern char D_00465C78[];
+extern char D_00465C88[];
+extern char D_00465C98[];
+extern char D_004A1C10[];
+extern char D_00465CA8[];
+extern char D_00465CB8[];
+extern char D_00465CC8[];
+extern char D_00465CE0[];
+extern char D_004A1C18[];
+extern char D_00465CF0[];
+extern char D_00465D00[];
+extern char D_00465D10[];
+extern char D_004A1BB8[];
+extern char D_00465D20[];
+extern char D_00465D30[];
+extern char D_00465D40[];
+extern char D_00465D50[];
+extern char D_00465D60[];
+extern char D_00465D70[];
+extern char D_00465D80[];
+
+struct sCol_001C2F00 {
+    float r, g, b, a;
+    sCol_001C2F00(const float& r_) : r(r_), g(0.0f), b(0.0f), a(0.0f) {}
+};
+
+class cFEVObj_001C2F00 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int on);
+    virtual void v08();
+    virtual void v09(int on);
+    virtual void v10();
+    virtual void v11(const sCol_001C2F00& c);
+};
+
+static inline int IsHash_001C2F00(int id, char* name) { return id == GetHashValue32(name); }
+
+extern "C" void func_001C2F00(void* self, cFEVObj_001C2F00* obj)
+{
+    char* s = (char*)self;
+    char* o = (char*)obj;
+    if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465C78) || IsHash_001C2F00(*(int*)(o + 0x38), D_00465C88)) {
+        *(int*)(o + 0x14) &= ~1;
+        obj->v11(sCol_001C2F00(1.0f));
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465C98)) {
+        obj->v09(0);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_004A1C10)) {
+        obj->v09(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CA8)) {
+        obj->v09(0);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CB8)) {
+        obj->v09(0);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CC8)) {
+        obj->v09(0);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CE0)) {
+        obj->v09(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_004A1C18)) {
+        obj->v09(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CF0)) {
+        obj->v07(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D00)) {
+        obj->v07(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D10)) {
+        obj->v07(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_004A1BB8)) {
+        obj->v09(1);
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D20)) {
+        *(int*)(o + 0x14) &= ~1;
+        obj->v07(1);
+        *(void**)(s + 0x6D0) = obj;
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D30)) {
+        *(void**)(s + 0x6D4) = obj;
+        *(int*)(o + 0x90) |= 8;
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D40)) {
+        *(void**)(s + 0x6D8) = obj;
+        *(int*)(o + 0x90) |= 8;
+    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D50)) {
+        func_0039B760(obj, 10);
+        *(void**)(s + 0x6DC) = obj;
+        func_0039AB00(obj, 1);
+        (*(cFEVObj_001C2F00**)(s + 0x6DC))->v07(1);
+    } else {
+        char buf[32];
+        for (int i = 0; i < 10; i++) {
+            sprintf(buf, D_00465D60, i);
+            if (IsHash_001C2F00(*(int*)(o + 0x38), buf)) {
+                obj->v09(1);
+                break;
+            }
+            sprintf(buf, D_00465D70, i);
+            if (IsHash_001C2F00(*(int*)(o + 0x38), buf)) {
+                obj->v09(1);
+                break;
+            }
+            sprintf(buf, D_00465D80, i);
+            if (IsHash_001C2F00(*(int*)(o + 0x38), buf)) {
+                obj->v09(1);
+                break;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C32B8);

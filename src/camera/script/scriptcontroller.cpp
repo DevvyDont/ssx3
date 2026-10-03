@@ -647,7 +647,188 @@ extern "C" void func_0016A4E0(cScriptCtlVirt2* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A510);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
+float* func_0027C4B8(void* cam);
+extern "C" char* func_00279F18(void* self, int a1, int a2);
+extern "C" void func_0027C510(void* cam, void* out);
+extern "C" float func_0031C228(float x);
+extern "C" void func_00160028(void* self, float v);
+extern "C" void func_00160130(void* self, float v);
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+
+struct sVec4_16A510 {
+    float x, y, z, w;
+    sVec4_16A510() {}
+    sVec4_16A510(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+static inline sVec4_16A510 mtxMulVec_16A510(char* m, const sVec4_16A510& v)
+{
+    sVec4_16A510 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_16A510 Scale_16A510(const sVec4_16A510& v, float s)
+{
+    sVec4_16A510 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_16A510 Add_16A510(const sVec4_16A510& a, const sVec4_16A510& b)
+{
+    sVec4_16A510 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_16A510 Sub_16A510(const sVec4_16A510& a, const sVec4_16A510& b)
+{
+    sVec4_16A510 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_16A510(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+static inline float Atan2_16A510(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f) return y;
+        if (y >= 0.0f) return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f) r += 3.1415927410125732f;
+        else r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+static inline sVec4_16A510 vec_16A510(char* p)
+{
+    return *(sVec4_16A510*)p;
+}
+
+struct sVec2_16A510 {
+    float x, y;
+    sVec2_16A510(float ax, float ay) : x(ax), y(ay) {}
+};
+
+static inline float Length_16A510(const sVec2_16A510& v)
+{
+    return Sqrt_16A510(v.x * v.x + v.y * v.y);
+}
+
+struct sScrCam_16A510 {
+    float roll;             // 0x0
+    float x4;               // 0x4
+    float x8;               // 0x8
+    char padC[0x14];
+    sVec4_16A510 pos;       // 0x20
+    sVec4_16A510 target;    // 0x30
+    float pitch;            // 0x40
+    float yaw;              // 0x44
+    float x48;              // 0x48
+    float ox, oy, oz;       // 0x4C
+    float dist;             // 0x58
+    float r5C;              // 0x5C
+    float r60;              // 0x60
+    float r64;              // 0x64
+    float r68;              // 0x68
+    float r6C;              // 0x6C
+};
+
+struct sVEp_16A510 {
+    short delta;
+    short index;
+    sVec4_16A510* (*fn)(void*);
+};
+
+extern "C" void func_0016A510(char* p)
+{
+    sScrCam_16A510* self = (sScrCam_16A510*)p;
+    char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
+    float* f = func_0027C4B8(cam);
+    char* m = *(char**)(p + 0x14) + 0x30;
+    char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x22], *(int*)(cam + 8));
+    if (rider == 0) {
+        rider = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x28);
+    }
+    self->x4 = f[0];
+    self->x8 = f[1];
+    func_0027C510(cam, &self->ox);
+    char* obj = rider + 0x6C0;
+    sVec4_16A510 rot = *(sVec4_16A510*)(*(char**)(rider + 0x780) + 0x140);
+    self->roll = self->r64 * 0.01745329424738884f;
+    self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    self->target = sVec4_16A510(self->ox, self->oy, self->oz, self->target.w);
+    self->target = mtxMulVec_16A510(m, self->target);
+    sVEp_16A510* vt = *(sVEp_16A510**)obj;
+    sVec4_16A510* rp = vt[5].fn(obj + vt[5].delta);
+    self->pos = Add_16A510(Add_16A510(*rp, Scale_16A510(vec_16A510(rider + 0x1B0), self->dist * rot.y)),
+                               Scale_16A510(vec_16A510(rider + 0x1C0), self->r5C * rot.x));
+    sVec4_16A510 t = Sub_16A510(self->pos, self->target);
+    self->yaw = Atan2_16A510(t.y, t.x);
+    float h = Length_16A510(sVec2_16A510(t.x, t.y));
+    self->x48 = Atan2_16A510(t.z, h);
+    func_00160028(p + 0x70, self->r68);
+    func_00160130(p + 0x70, self->r6C);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A868);
 
@@ -673,7 +854,206 @@ extern "C" void* func_0016AD38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD98);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
+float* func_0027C6A0(void* cam);
+extern "C" char* func_00279F18(void* self, int a1, int a2);
+extern "C" void func_0027C6F8(void* cam, void* out);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" float func_0031C228(float x);
+extern "C" void func_00160028(void* self, float v);
+extern "C" void func_00160130(void* self, float v);
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+
+struct sVec4_16AD98 {
+    float x, y, z, w;
+    sVec4_16AD98() {}
+    sVec4_16AD98(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+static inline sVec4_16AD98 mtxMulVec_16AD98(char* m, const sVec4_16AD98& v)
+{
+    sVec4_16AD98 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_16AD98 Scale_16AD98(const sVec4_16AD98& v, float s)
+{
+    sVec4_16AD98 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_16AD98 Add_16AD98(const sVec4_16AD98& a, const sVec4_16AD98& b)
+{
+    sVec4_16AD98 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_16AD98 Sub_16AD98(const sVec4_16AD98& a, const sVec4_16AD98& b)
+{
+    sVec4_16AD98 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_16AD98(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+static inline float Atan2_16AD98(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f) return y;
+        if (y >= 0.0f) return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f) r += 3.1415927410125732f;
+        else r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+static inline sVec4_16AD98 vec_16AD98(char* p)
+{
+    return *(sVec4_16AD98*)p;
+}
+
+struct sVec2_16AD98 {
+    float x, y;
+    sVec2_16AD98(float ax, float ay) : x(ax), y(ay) {}
+};
+
+static inline float Length_16AD98(const sVec2_16AD98& v)
+{
+    return Sqrt_16AD98(v.x * v.x + v.y * v.y);
+}
+
+struct sScrCam_16AD98 {
+    float roll;             // 0x0
+    float x4;               // 0x4
+    float x8;               // 0x8
+    char padC[0x14];
+    sVec4_16AD98 pos;       // 0x20
+    sVec4_16AD98 target;    // 0x30
+    float pitch;            // 0x40
+    float yaw;              // 0x44
+    float x48;              // 0x48
+    float ox, oy, oz;       // 0x4C
+    float dist;             // 0x58
+    float r5C;              // 0x5C
+    float r60;              // 0x60
+    float r64;              // 0x64
+    float r68;              // 0x68
+    float r6C;              // 0x6C
+};
+
+struct sVEp_16AD98 {
+    short delta;
+    short index;
+    sVec4_16AD98* (*fn)(void*);
+};
+
+extern "C" void func_0016AD98(char* p)
+{
+    sScrCam_16AD98* self = (sScrCam_16AD98*)p;
+    char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
+    float* f = func_0027C6A0(cam);
+    func_0027C6F8(cam, &self->ox);
+    self->x4 = f[0];
+    self->x8 = f[1];
+    self->roll = self->r64 * 0.01745329424738884f;
+    self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
+    if (rider == 0) {
+        rider = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x28);
+    }
+    char* obj = rider + 0x6C0;
+    sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
+    sVEp_16AD98* vt = *(sVEp_16AD98**)obj;
+    sVec4_16AD98* rp = vt[5].fn(obj + vt[5].delta);
+    self->pos = Add_16AD98(Add_16AD98(*rp, Scale_16AD98(vec_16AD98(rider + 0x1B0), self->ox * rot.y)),
+                           Scale_16AD98(vec_16AD98(rider + 0x1C0), self->oy * rot.x));
+    float yaw;
+    float pit;
+    float k;
+    if (((signed char*)f)[0x1E] == 0) {
+        sVec4_16AD98 v = vec_16AD98(rider + 0x1B0);
+        sVec4_16AD98* pv = &v;
+        float a = self->dist * 0.01745329424738884f;
+        yaw = Atan2_16AD98(v.z, Length_16AD98(sVec2_16AD98(v.x, v.y))) - a;
+        float b = self->r5C * 0.01745329424738884f;
+        pit = b + Atan2_16AD98(pv->y, pv->x);
+        k = self->oz;
+    } else {
+        yaw = self->dist * 0.01745329424738884f;
+        pit = self->r5C * 0.01745329424738884f;
+        k = self->oz;
+    }
+    float s0, c0, s1, c1;
+    char* g = *(char**)(p + 0x14);
+    pit += *(float*)(g + 0x78);
+    yaw += *(float*)(g + 0x74);
+    func_0031BE50(&s0, &c0, pit);
+    func_0031BE50(&s1, &c1, yaw);
+    sVec4_16AD98 d(c1 * c0, c1 * s0, -s1, 0.0f);
+    self->target = Sub_16AD98(self->pos, Scale_16AD98(d, k));
+    func_00160028(p + 0x70, self->r68);
+    func_00160130(p + 0x70, self->r6C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016B150);

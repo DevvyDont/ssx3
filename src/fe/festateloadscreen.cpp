@@ -502,7 +502,190 @@ extern "C" void func_00233C50(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233CD8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+void* cBEAggressionInterface_getThis();
+extern "C" void func_00155E58(void* p);
+extern "C" void func_001F36D8(void* hud, int a);
+extern "C" void func_0020CC60();
+extern "C" void func_00233AA0(void* self);
+extern "C" int func_00278F38(void* self, int i);
+extern "C" void func_002790A0(void* self, int i);
+extern "C" int func_002791D8(void* self, int i);
+extern "C" int func_00279248(void* self, int i);
+extern "C" void func_0027AC60(void* self);
+extern "C" void* func_0039F9D8(void* list, int hash);
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+extern int D_005366A8[];
+// PORT: function-local `static const float` with a dynamic initializer (guard D_004A4F64),
+// spelled with splat's globals; the const object's loads are loop-invariant (RTX_UNCHANGING).
+extern const float D_004A4F60;
+extern int D_004A4F64;
+extern char D_0047C010[];
+
+struct sRace_233CD8 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+};
+extern sRace_233CD8 D_00535BC8_r233CD8 __asm__("D_00535BC8");
+
+static inline int isMode_233CD8(sRace_233CD8* r, int m)
+{
+    return r->mode48 == m;
+}
+
+struct sVec4_233CD8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_233CD8(const sVec4_233CD8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+struct sVEntry_233CD8 {
+    short delta;
+    short index;
+    sVec4_233CD8* (*fn)(void*);
+};
+
+static inline sVec4_233CD8* riderPos_233CD8(char* rider)
+{
+    char* obj = rider + 0x6C0;
+    sVEntry_233CD8* vt = *(sVEntry_233CD8**)obj;
+    return vt[2].fn(obj + vt[2].delta);
+}
+
+class cFEVObj_233CD8 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual int v24(int on, int a2);
+};
+
+
+extern "C" void func_00233CD8(void* self)
+{
+    char* s = (char*)self;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (*(int*)(s + 0x14) != 0) {
+        if (--*(int*)(s + 0x14) == 0) {
+            int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+            int ok = n != 0 && n < 10;
+            if (!ok) {
+                func_0020CC60();
+                if (*(int*)(s + 0x10) != 2) {
+                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)func_0039F9D8(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18, GetHashValue32(D_0047C010));
+                    if (o != 0) {
+                        o->v24(0, 0);
+                    }
+                }
+            }
+        }
+    }
+    int state = *(int*)(s + 0x10);
+    switch (state) {
+    case 0: {
+        char* g = (char*)D_004A28A8;
+        char* x = *(char**)(g + 0xC0);
+        char* r = *(char**)(*(char**)(g + 0x84) + 0xC);
+        int cnt = *(int*)(r + 0x7C);
+        if (D_005366A8[0] == 0) {
+            for (int i = 0; i < cnt; i++) {
+                if (D_004A4F64 == 0) {
+                    *(float*)&D_004A4F60 = 277.77777099609375f;
+                    D_004A4F64 = 1;
+                }
+                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char**)(r + 0x40))[i] + 0x18)))) {
+                    return;
+                }
+            }
+        }
+        sRace_233CD8* rc = &D_00535BC8_r233CD8;
+        int skip = !isMode_233CD8(rc, 4) && *(int*)(x + 0x98) != 0 && *(int*)(x + 0x9C) == 0;
+        if (skip) {
+            return;
+        }
+        func_002790A0(D_004A28A4, 0);
+        func_0027AC60(D_004A28A4);
+        func_00278F38(D_004A28A4, 0);
+        if (func_00279248(D_004A28A4, 0) > 0) {
+            *(int*)s = 0xC;
+        }
+        sRace_233CD8* rc2 = &D_00535BC8_r233CD8;
+        if (rc2->mode48 == 0) {
+            func_00155E58(cBEAggressionInterface_getThis());
+        }
+        *(int*)(s + 0x10) = 1;
+        break;
+    }
+    case 1: {
+        if (func_002791D8(D_004A28A4, 0) == 1) {
+            break;
+        }
+        cFEVObj_233CD8* o = (cFEVObj_233CD8*)func_0039F9D8(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18, GetHashValue32(D_0047C010));
+        if (o != 0) {
+            o->v24(1, 0);
+        }
+        func_001F36D8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 4);
+        *(int*)(s + 0x10) = 2;
+        break;
+    }
+    case 2: {
+        sRace_233CD8* rc = &D_00535BC8_r233CD8;
+        if (rc->flag49 == 0 && rc->mode48 == 4) {
+            func_00233AA0(self);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_00234008);
