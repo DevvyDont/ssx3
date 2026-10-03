@@ -375,7 +375,189 @@ extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSp
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032B6E0);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C0F8);
+#ifdef SKIP_ASM
+struct sV4_C0F8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sV4_C0F8 D_004FF120;
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vDot_C0F8(const sV4_C0F8& a, const sV4_C0F8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+struct sTriBox_C0F8 {
+    float lo[3];
+    float hi[3];
+};
+
+struct sTriMesh_C0F8 {
+    unsigned short numTris;     // 0x0
+    short pad2;
+    unsigned char* indices;     // 0x4
+    sTriBox_C0F8* boxes;        // 0x8
+    sV4_C0F8* verts;            // 0xC
+    sV4_C0F8* normals;          // 0x10
+};
+
+struct sTriHit_C0F8 {
+    sV4_C0F8 pos;       // 0x00
+    sV4_C0F8 nrm;       // 0x10
+    sV4_C0F8 v20;       // 0x20
+    sV4_C0F8 v30;       // 0x30
+    float t;            // 0x40
+    int type;           // 0x44
+    int f48;
+    int f4C;            // 0x4C
+    int f50;            // 0x50
+    int f54;            // 0x54
+    int f58;            // 0x58
+    int f5C;            // 0x5C
+    int tri;            // 0x60
+    int f64;            // 0x64
+    int f68;            // 0x68
+    int f6C;            // 0x6C
+    int f70;            // 0x70
+    int pad[3];
+};
+
+struct sVE_C0F8a {
+    short delta;
+    short index;
+    int (*fn)(void*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, float*);
+};
+struct sVE_C0F8b {
+    short delta;
+    short index;
+    int (*fn)(void*, float*, float*);
+};
+
+struct sTriTester_C0F8 {
+    char pad0[0x8];
+    int useNormal;          // 0x8
+    char padC[0x4];
+    sV4_C0F8 dir;           // 0x10
+    char pad20[0x30];
+    sVE_C0F8a* vt;          // 0x50
+};
+
+extern "C" int func_0032C0F8(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, sTriHit_C0F8* out)
+{
+    sV4_C0F8 pos;
+    sV4_C0F8 hn;
+    float t;
+    int n = 0;
+    if (mesh->numTris < 11) {
+        for (int i = 0; i < mesh->numTris; i++) {
+            sV4_C0F8* nrm = &mesh->normals[i];
+            if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
+                continue;
+            }
+                        sV4_C0F8* v = mesh->verts;
+            sV4_C0F8* p0 = &v[mesh->indices[i * 3]];
+            sV4_C0F8* p1 = &v[mesh->indices[i * 3 + 1]];
+            sV4_C0F8* p2 = &v[mesh->indices[i * 3 + 2]];
+            int r;
+            if (flag != 0) {
+                r = self->vt[5].fn((char*)self + self->vt[5].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+            } else {
+                r = self->vt[4].fn((char*)self + self->vt[4].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+            }
+            if (r == 0) {
+                continue;
+            }
+            sTriHit_C0F8* h = &out[n];
+            h->f54 = 0;
+            h->type = 2;
+            h->tri = -1;
+            h->f50 = 0;
+            h->f58 = 0;
+            h->f5C = -1;
+            h->f64 = -1;
+            h->f4C = -1;
+            h->v20 = D_004FF120;
+            h->v30 = D_004FF120;
+            h->f68 = 0;
+            h->f6C = 0;
+            h->f70 = 0;
+            h->pos = pos;
+            h->nrm = hn;
+            h->t = t;
+            h->tri = i;
+            h->f54 = 0;
+            n++;
+        }
+    } else {
+        int nb = (mesh->numTris + 9) / 10;
+        for (int b = 0; b < nb; b++) {
+            sTriBox_C0F8* box = &mesh->boxes[b];
+            sVE_C0F8b* vt = (sVE_C0F8b*)self->vt;
+            if (!vt[9].fn((char*)self + vt[9].delta, box->lo, box->hi)) {
+                continue;
+            }
+            int end = (b + 1) * 10 < mesh->numTris ? (b + 1) * 10 : mesh->numTris;
+            for (int i = b * 10; i < end; i++) {
+                sV4_C0F8* nrm = &mesh->normals[i];
+                if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
+                    continue;
+                }
+                                sV4_C0F8* v = mesh->verts;
+                sV4_C0F8* p0 = &v[mesh->indices[i * 3]];
+                sV4_C0F8* p1 = &v[mesh->indices[i * 3 + 1]];
+                sV4_C0F8* p2 = &v[mesh->indices[i * 3 + 2]];
+                int r;
+                if (flag != 0) {
+                    r = self->vt[5].fn((char*)self + self->vt[5].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+                } else {
+                    r = self->vt[4].fn((char*)self + self->vt[4].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+                }
+                if (r == 0) {
+                    continue;
+                }
+                sTriHit_C0F8* h = &out[n];
+                h->f54 = 0;
+                h->type = 2;
+                h->tri = -1;
+                h->f50 = 0;
+                h->f58 = 0;
+                h->f5C = -1;
+                h->f64 = -1;
+                h->f4C = -1;
+                h->v20 = D_004FF120;
+                h->v30 = D_004FF120;
+                h->f68 = 0;
+                h->f6C = 0;
+                h->f70 = 0;
+                h->pos = pos;
+                h->nrm = hn;
+                h->t = t;
+                h->tri = i;
+                h->f54 = 0;
+                n++;
+            }
+        }
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032C508);
 

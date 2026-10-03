@@ -1112,9 +1112,316 @@ extern "C" int func_002AEC28(int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AEC58);
+#ifdef SKIP_ASM
+extern void* D_004D3E98[];
+extern "C" void func_003B58A0(void);
+extern "C" void func_003B58D8(void);
+extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
+extern "C" int func_003B8AD8(int h);
+extern "C" int func_003B86C0(int h);
+extern "C" int func_003B7B48(int h, void* out);
+// PORT: the unit declares func_003B7C40(int, int); the second argument is an out-pointer
+extern "C" void func_003B7C40(int h, int v);
+extern "C" int func_003B7F18(int h);
 
+struct sMonSub_EC58 {
+    int size;   // 0x0
+    int id;     // 0x4
+    int pos;    // 0x8
+};
+
+struct sMonSlot_EC58 {
+    int h;              // 0x0
+    int sub;            // 0x4
+    char pad08[0x4];
+    int status;         // 0xC
+    char pad10[0x38];
+    int f48;            // 0x48
+    int f4C;            // 0x4C
+    int f50;            // 0x50
+    int f54;            // 0x54
+    int busy;           // 0x58
+    int f5C;            // 0x5C
+    int f60;            // 0x60
+    signed char isMem;  // 0x64
+    signed char dirty;  // 0x65
+    signed char count;  // 0x66
+    char pad67[0x5];
+    sMonSub_EC58* subs; // 0x6C
+};
+
+struct sStrmInfo_EC58 {
+    int count;
+    int pad[3];
+};
+
+struct sStrmState_EC58 {
+    int state;  // 0x0
+    int a;      // 0x4
+    int b;      // 0x8
+    int c;      // 0xC
+};
+
+struct sStrmPos_EC58 {
+    unsigned int samples;   // 0x0
+    int pad[7];
+};
+
+struct sStrmHdr_EC58 {
+    unsigned short rate;
+    char pad[0xE];
+};
+
+// PORT: the end of this function stores the out-pointers themselves into the slot (as in the original)
+extern "C" int func_002AEC58(int idx, int* outA, int* outB)
+{
+    sMonSlot_EC58* m = (sMonSlot_EC58*)D_004D3E98[idx];
+    *outA = 0;
+    *outB = 0;
+    if (m == 0) {
+        return -1;
+    }
+    int f60 = -8;
+    m->busy = 1;
+    if (m->h < 0) {
+        return -2;
+    }
+    m->dirty = 1;
+    func_003B58A0();
+    sStrmInfo_EC58 info;
+    sStrmState_EC58 st;
+    sStrmHdr_EC58 hdr;
+    char buf[0x70];
+    sStrmPos_EC58 pos;
+    if (m->isMem != 0) {
+        if (m->sub >= 0 && m->subs->id >= 0) {
+            f60 = func_003B6670(m->h, m->sub, &hdr, buf, &pos.samples);
+            if (f60 >= 0) {
+                *outB = func_003B8AD8(m->subs->id);
+                if (*outB < 0) {
+                    *outB = 0;
+                    m->subs->id = -1;
+                    goto done;
+                }
+                *outB *= 10;
+                *outA = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - *outB;
+            }
+            m->subs->pos = *outB;
+            m->f50 = m->subs->size;
+            m->status = func_003B86C0(m->subs->id);
+            m->f5C = m->subs->id;
+        }
+    } else {
+        f60 = func_003B7B48(m->h, &info);
+        m->f50 = 0;
+        if (info.count >= m->count) {
+            m->busy = 0;
+        }
+        for (int j = 0; j < m->count; j++) {
+            m->subs[j].pos = 0;
+            if (m->subs[j].id < 0) {
+                continue;
+            }
+            func_003B7C40(m->subs[j].id, (int)&st);
+            switch (st.state) {
+            case 1:
+                m->subs[j].pos = m->subs[j].size;
+                m->f54 += m->subs[j].size;
+                m->f50 += st.c;
+                m->busy = 0;
+                m->f5C = m->subs[j].id;
+                break;
+            case 0:
+            case 2:
+                *outA = st.a;
+                *outB = st.b;
+                if (outA == 0 && outB == 0) {
+                    *outA = 0;
+                    *outB = m->subs[j].size;
+                }
+                m->subs[j].pos = *outB;
+                m->f54 += *outB;
+                m->f50 += st.c;
+                if (st.c < st.b) {
+                    m->busy = 0;
+                }
+                m->f5C = m->subs[j].id;
+                break;
+            default:
+                m->subs[j].id = -1;
+                break;
+            }
+        }
+        m->status = func_003B7F18(m->h);
+    }
+done:
+    m->f48 = (int)outA;
+    m->f4C = (int)outB;
+    m->f60 = f60;
+    m->dirty = 0;
+    func_003B58D8();
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AEFA8);
+#ifdef SKIP_ASM
+extern void* D_004D3E98[];
+extern "C" void func_003B58A0(void);
+extern "C" void func_003B58D8(void);
+extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
+extern "C" int func_003B8AD8(int h);
+extern "C" int func_003B86C0(int h);
+extern "C" int func_003B7B48(int h, void* out);
+// PORT: the unit declares func_003B7C40(int, int); the second argument is an out-pointer
+extern "C" void func_003B7C40(int h, int v);
+extern "C" int func_003B7F18(int h);
+
+struct sMonSub_EFA8 {
+    int size;   // 0x0
+    int id;     // 0x4
+    int pos;    // 0x8
+};
+
+struct sMonSlot_EFA8 {
+    int h;              // 0x0
+    int sub;            // 0x4
+    char pad08[0x4];
+    int status;         // 0xC
+    char pad10[0x38];
+    int f48;            // 0x48
+    int f4C;            // 0x4C
+    int f50;            // 0x50
+    int f54;            // 0x54
+    int busy;           // 0x58
+    int f5C;            // 0x5C
+    int f60;            // 0x60
+    signed char isMem;  // 0x64
+    signed char dirty;  // 0x65
+    signed char count;  // 0x66
+    char pad67[0x5];
+    sMonSub_EFA8* subs; // 0x6C
+};
+
+struct sStrmInfo_EFA8 {
+    int count;
+    int pad[3];
+};
+
+struct sStrmState_EFA8 {
+    int state;  // 0x0
+    int a;      // 0x4
+    int b;      // 0x8
+    int c;      // 0xC
+};
+
+struct sStrmPos_EFA8 {
+    unsigned int samples;   // 0x0
+    int pad[7];
+};
+
+struct sStrmHdr_EFA8 {
+    unsigned short rate;
+    char pad[0xE];
+};
+
+extern "C" void func_002AEFA8(int reset)
+{
+    func_003B58A0();
+    for (int i = 0; i < 24; i++) {
+        sMonSlot_EFA8* m = (sMonSlot_EFA8*)D_004D3E98[i];
+        if (m == 0) {
+            continue;
+        }
+        if (reset != 0) {
+            m->f60 = 0;
+            m->dirty = 1;
+            continue;
+        }
+        int f60 = -8;
+        int f48 = 0;
+        int f4C = 0;
+        m->busy = 1;
+        if (m->h >= 0) {
+            sStrmInfo_EFA8 info;
+            sStrmState_EFA8 st;
+            sStrmHdr_EFA8 hdr;
+            char buf[0x70];
+            sStrmPos_EFA8 pos;
+            if (m->isMem != 0) {
+                if (m->sub >= 0 && m->subs->id >= 0) {
+                    f60 = func_003B6670(m->h, m->sub, &hdr, buf, &pos.samples);
+                    if (f60 >= 0) {
+                        f4C = func_003B8AD8(m->subs->id);
+                        if (f4C < 0) {
+                            f4C = 0;
+                            m->subs->id = -1;
+                            goto done;
+                        }
+                        f4C *= 10;
+                        f48 = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - f4C;
+                    }
+                    m->subs->pos = f4C;
+                    m->f50 = m->subs->size;
+                    m->status = func_003B86C0(m->subs->id);
+                    m->f5C = m->subs->id;
+                }
+            } else {
+                f60 = func_003B7B48(m->h, &info);
+                m->f50 = 0;
+                if (info.count >= m->count) {
+                    m->busy = 0;
+                }
+                for (int j = 0; j < m->count; j++) {
+                    m->subs[j].pos = 0;
+                    if (m->subs[j].id < 0) {
+                        continue;
+                    }
+                    func_003B7C40(m->subs[j].id, (int)&st);
+                    switch (st.state) {
+                    case 1:
+                        m->subs[j].pos = m->subs[j].size;
+                        m->f54 += m->subs[j].size;
+                        m->f50 += st.c;
+                        m->busy = 0;
+                        m->f5C = m->subs[j].id;
+                        break;
+                    case 0:
+                    case 2:
+                        f48 = st.a;
+                        f4C = st.b;
+                        if (f48 == 0 && f4C == 0) {
+                            f48 = f4C;
+                            f4C = m->subs[j].size;
+                        }
+                        m->subs[j].pos = f4C;
+                        m->f54 += f4C;
+                        m->f50 += st.c;
+                        if (st.c < st.b) {
+                            m->busy = 0;
+                        }
+                        m->f5C = m->subs[j].id;
+                        break;
+                    default:
+                        m->subs[j].id = -1;
+                        break;
+                    }
+                }
+                m->status = func_003B7F18(m->h);
+            }
+        }
+    done:
+        m->f48 = f48;
+        m->f4C = f4C;
+        m->f60 = f60;
+        m->dirty = 0;
+    }
+    func_003B58D8();
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF2F0);
@@ -2260,7 +2567,114 @@ extern "C" void* func_002B1B98(int a0, int a1, int a2, int a3, char a4, int a5, 
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1C50);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* bmNew_1C50(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" int func_003D3058(int a, int b);
+extern "C" void func_002B4A20(void* self, void* name, int sync);
+extern "C" void func_002B21E0(void*, int);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004833F0[];
+extern char D_00483408[];
+extern char D_00483420[];
+extern char D_00483430[];
+extern char D_004A3588[];
+extern char D_004A3590[];
+extern char D_004A36E0[];
+extern void*** D_004A37EC;
+
+struct sBankEntry_1C50 {
+    unsigned char vol;      // 0x0
+    char pad1[0x13];
+    unsigned short f14;     // 0x14
+    short pad16;
+};
+
+struct sBankDef_1C50 {
+    char pad00[0x1C];
+    volatile int cur;           // 0x1C
+    sBankEntry_1C50* entries;   // 0x20
+    char pad24[0x14];
+    int* vols;                  // 0x38
+};
+
+struct sBankMon_1C50 {
+    char* snd;                  // 0x0
+    sBankEntry_1C50 entry;      // 0x4
+    int f1C;                    // 0x1C
+    int f20;
+    void* buf24;                // 0x24
+    void* buf28;                // 0x28
+    int f2C;                    // 0x2C
+    int f30;                    // 0x30
+    int f34;                    // 0x34
+    int f38;                    // 0x38
+    int f3C;                    // 0x3C
+    char f40;                   // 0x40
+    int f44;                    // 0x44
+    int f48;                    // 0x48
+    int f4C;                    // 0x4C
+    int f50;                    // 0x50
+    int f54;                    // 0x54
+    int f58;                    // 0x58
+    int f5C;                    // 0x5C
+    char name[0x40];            // 0x60
+};
+
+#define BM_MIN_1C50(a, b) ((a) < (b) ? (a) : (b))
+#define BM_MAX_1C50(a, b) ((a) >= (b) ? (a) : (b))
+
+static inline sBankEntry_1C50* bankCur_1C50(sBankDef_1C50* d)
+{
+    return &d->entries[d->cur];
+}
+
+// PORT: callers declare the first parameter as void*; the body takes the typed object (bound by asm label)
+extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7) __asm__("func_002B1C50");
+
+extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7)
+{
+    char* snd = (char*)a2;
+    sBankDef_1C50* def = (sBankDef_1C50*)a3;
+    self->f1C = -1;
+    self->buf24 = 0;
+    self->buf28 = 0;
+    self->f2C = 0;
+    self->f30 = -1;
+    self->f38 = 0;
+    self->f34 = a6;
+    self->f3C = a5;
+    self->f40 = a4;
+    self->f48 = 0;
+    self->f4C = 0;
+    self->f50 = 0;
+    self->f54 = 1;
+    self->f58 = -1;
+    self->f5C = 0;
+    self->f44 = bankCur_1C50(def)->f14;
+    self->buf24 = bmNew_1C50(0x37000, D_004833F0, 0, 0);
+    self->buf28 = bmNew_1C50(func_003D3058(1, 0), D_00483408, 0, 0);
+    float scale = (float)*(int*)(snd + 0x88) * 0.01f;
+    def->vols[def->cur] = (int)BM_MAX_1C50(BM_MIN_1C50((float)def->vols[def->cur] * scale, 127.0f), 0.0f);
+    def->entries[def->cur].vol = BM_MAX_1C50(BM_MIN_1C50(def->vols[def->cur], 127), 0);
+    if (*(int*)(snd + 0xA4) == 1) {
+        sprintf(self->name, D_004A3588, D_004A3590, D_00483420, a0);
+    } else {
+        sprintf(self->name, D_004A3588, D_004A3590, D_00483430, a0);
+    }
+    self->snd = snd;
+    self->entry = *bankCur_1C50(def);
+    char buf[0x100];
+    sprintf(buf, D_004A36E0, self->name, snd);
+    func_002B4A20(D_004A37EC, buf, a7);
+    if (a7 != 0) {
+        func_002B21E0(self, 1);
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1F78);

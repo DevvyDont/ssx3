@@ -1365,7 +1365,124 @@ extern "C" void func_001D93E8(void* self, char* objName, char* animName)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerDisplayState);
+#ifdef SKIP_ASM
+struct cUIScreen;
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+void cUIScreen_jumpToFrame(void* self, unsigned short frame);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void func_003A0D00(void* self, unsigned short* str);
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_004A1600[];
+extern char D_004A1608[];
+extern char D_004A2030[];
+extern char D_004A2038[];
+extern char D_004678B0[];
+extern char D_00467980[];
+extern char D_00463F58[];
+
+struct sVEntryT1D9470 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sVEntryF1D9470 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
+{
+    unsigned short buf[0x100];
+    int frame = 0xFFFF;
+    *(int*)(self + 0x214) = state;
+    switch (state) {
+    case 1: {
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        if (o) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 0);
+        }
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        if (o) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 1);
+        }
+        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_004A2030));
+        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
+        if (text) {
+            unsigned short* str = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+            char* mp = (char*)func_00227F80(D_004A28A8);
+            func_00241DC8(mp, buf, *(int*)(mp + 0x428));
+            char* m = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
+            func_002C26D0(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(D_00463F58)), buf);
+            func_003A0D00(text, str);
+            sVEntryT1D9470* tvt = *(sVEntryT1D9470**)(text + 8);
+            tvt[9].fn(text + tvt[9].delta, 1);
+            if (str)
+                cMemMan_free(str);
+        }
+        break;
+    }
+    case 2: {
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        if (o) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 0);
+        }
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        if (o) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 1);
+        }
+        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_00467980));
+        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
+        if (text) {
+            unsigned short* str = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+            func_00241DC8(mp, buf, *(int*)(mp + 0x428));
+            char* m = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
+            func_002C26D0(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(D_00463F58)), buf);
+            func_003A0D00(text, str);
+            sVEntryT1D9470* tvt = *(sVEntryT1D9470**)(text + 8);
+            tvt[9].fn(text + tvt[9].delta, 1);
+            if (str)
+                cMemMan_free(str);
+        }
+        break;
+    }
+    case 3: {
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        if (o) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 1);
+        }
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        if (o) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 0);
+        }
+        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_004A2038));
+        break;
+    }
+    }
+    if (frame != 0xFFFF)
+        cUIScreen_jumpToFrame(*(void**)(self + 0x40), frame);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D97E0);

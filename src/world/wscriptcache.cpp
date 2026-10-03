@@ -168,7 +168,144 @@ extern "C" void func_003ACC90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ACCD8);
+#ifdef SKIP_ASM
+struct sWScriptCacheItem;
+void cMemMan_free(void* p);
+
+struct sRef_CCD8 {
+    unsigned int idx : 8;
+    unsigned int slot : 24;
+};
+
+struct sPair_CCD8 {
+    short a;
+    unsigned short b;
+};
+
+struct sRec40_CCD8 {
+    int f0;
+    int f4;
+    int f8;
+    char pad[0x34];
+};
+
+struct sRec54_CCD8 {
+    int f0;
+    int f4;
+    int f8;
+    char pad[0x48];
+};
+
+#define WSD_CCD8 (*(char**)((char*)e + 0x8))
+
+static inline void* toPtr_CCD8(unsigned int v)
+{
+    return (void*)(v << 2);
+}
+
+static inline void* lookup_CCD8(char* obj, int tblOff, unsigned int slot)
+{
+    unsigned int v = (*(unsigned int**)(obj + tblOff))[slot] >> 8;
+    if (v == 0) {
+        return 0;
+    }
+    return toPtr_CCD8(v);
+}
+
+static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
+{
+    char* obj = (*(char***)(w + 0x8))[ref.idx];
+    if (obj == 0) {
+        return 0;
+    }
+    return lookup_CCD8(obj, tblOff, ref.slot);
+}
+
+extern "C" void func_003ACCD8(sWScriptCacheItem* ep, void* world, int index)
+{
+    char* e = (char*)ep;
+    char** wp = (char**)world;
+    char* d = WSD_CCD8;
+    if (d == 0) {
+        *(short*)e = 3;
+        return;
+    }
+    {
+        if (!(*(unsigned short*)d == 0x1000 && *(int*)(d + 0xC) == *(int*)(*(char**)*wp + 0x4))) {
+            if (*(short*)(e + 0x2) == 0) {
+                cMemMan_free(d);
+            }
+            WSD_CCD8 = 0;
+        }
+        if (WSD_CCD8 != 0) {
+            *(int*)(WSD_CCD8 + 0x14) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x14);
+            *(int*)(WSD_CCD8 + 0x1C) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x1C);
+            *(int*)(WSD_CCD8 + 0x24) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x24);
+            *(int*)(WSD_CCD8 + 0x2C) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x2C);
+            *(int*)(WSD_CCD8 + 0x34) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x34);
+            *(int*)(WSD_CCD8 + 0x3C) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x3C);
+            *(int*)(WSD_CCD8 + 0x40) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x40);
+            *(int*)(WSD_CCD8 + 0x48) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x48);
+            *(int*)(WSD_CCD8 + 0x50) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x50);
+            *(int*)(WSD_CCD8 + 0x58) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x58);
+            int* t3c = *(int**)(WSD_CCD8 + 0x3C);
+            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x38); i++) {
+                t3c[i] = (int)WSD_CCD8 + t3c[i];
+            }
+            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x4C); i++) {
+                (*(int**)(WSD_CCD8 + 0x50))[i] = *(int*)(WSD_CCD8 + 0x40) + (*(int**)(WSD_CCD8 + 0x50))[i];
+            }
+            sRef_CCD8 ref;
+            *(unsigned int*)&ref = 0xFFFFFFFF;
+            ref.idx = index;
+            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x44); i++) {
+                ref.slot = i;
+                char* o = (char*)resolve_CCD8(*wp, ref, 0x1C);
+                char* x = (char*)(*(int**)(WSD_CCD8 + 0x50))[*(unsigned short*)(*(char**)(WSD_CCD8 + 0x48) + (i << 1))];
+                *(char**)(o + 0x88) = x;
+                int v = *(int*)(x + 0x4) & 0xFFFF0000;
+                *(int*)(o + 0x8) = v | (v >> 16) | 2;
+            }
+            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x4C); i++) {
+                char* r = (*(char***)(WSD_CCD8 + 0x50))[i];
+                int type = *(int*)r;
+                if (type == 1 || type == 3) {
+                    *(void**)(r + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(r + 0xC), 0x64);
+                } else {
+                    *(void**)(r + 0xC) = 0;
+                }
+            }
+            int n54 = *(int*)(WSD_CCD8 + 0x54);
+            for (int i = 0; i < n54; i++) {
+                char* w = *wp;
+                ref.slot = i;
+                char* o = (char*)resolve_CCD8(w, ref, 0x44);
+                sPair_CCD8 p = (*(sPair_CCD8**)(WSD_CCD8 + 0x58))[i];
+                *(int*)(o + 0x28) = (short)p.b;
+                unsigned int v = p.a << 16;
+                *(unsigned int*)(o + 0x1C) = (v & 0xFFFF0000) | (v >> 16);
+            }
+            {
+                sRec40_CCD8* r = *(sRec40_CCD8**)(WSD_CCD8 + 0x2C);
+                int n = *(int*)(WSD_CCD8 + 0x28);
+                for (int i = 0; i < n; i++, r++) {
+                    r->f8 = (int)WSD_CCD8 + r->f8;
+                }
+            }
+            {
+                sRec54_CCD8* r = *(sRec54_CCD8**)(WSD_CCD8 + 0x24);
+                int n = *(int*)(WSD_CCD8 + 0x20);
+                for (int i = 0; i < n; i++, r++) {
+                    r->f8 = (int)WSD_CCD8 + r->f8;
+                }
+            }
+        }
+    }
+    *(short*)e = 3;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003AD120);
 
@@ -390,7 +527,112 @@ extern "C" void* func_003ADE08(void* self, int a1, int a2, int a3, int a4, int a
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADEC8);
+#ifdef SKIP_ASM
+struct sAlloc_ADEC8 {
+    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
+    void* (*free)(void* p);
+    int flags;
+};
+// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
+extern sAlloc_ADEC8 D_00509430_ADEC8 __asm__("D_00509430");
+extern char D_00495218[];
+extern char D_00495230[];
+extern "C" signed char func_003B5440();
+extern "C" void func_003E62B0();
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void func_003E0AD8(int h, int a, int b);
+extern "C" int func_003E0D80(int h, int a, int b, int c);
+extern "C" int func_003DF690(int a, int flags);
+extern "C" int func_003E06D8(int a, int b, int c, void* buf, int size);
+extern "C" void func_003E0948(int h, int a, int b, int c, int d);
+extern "C" int func_003E0BF8(int h, int a);
+extern "C" int func_003E0C88(int h, int a, int b, int c);
+
+static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
+{
+    return a->alloc != 0 && a->free != 0;
+}
+
+extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8)
+{
+    char* self = (char*)selfp;
+    if (func_003B5440() == 0) {
+        a8 = 1;
+    }
+    func_003E6448(self, 0, 0x78);
+    *(int*)(self + 0x18) = a7;
+    *(int*)(self + 0x1C) = a8;
+    *(int*)(self + 0x20) = 0;
+    *(int*)(self + 0x28) = 0;
+    *(int*)(self + 0x24) = 0;
+    *(int*)(self + 0x2C) = 0;
+    *(int*)(self + 0x44) = 0;
+    *(int*)(self + 0x5C) = 0;
+    *(int*)(self + 0x64) = 0;
+    *(int*)(self + 0x0) = 0;
+    *(int*)(self + 0x70) = 0;
+    *(int*)(self + 0x74) = 0;
+    *(int*)(self + 0xC) = a1;
+    *(int*)(self + 0x10) = a4;
+    if (!wsCanAlloc_ADEC8(&D_00509430_ADEC8)) {
+        func_003E62B0();
+        return;
+    }
+    if (a4 != 0) {
+        *(int*)(self + 0x14) = 1;
+        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(D_00495218, a3, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(D_00495230, a6, 0, 0, D_00509430_ADEC8.flags);
+        *(int*)(self + 0x30) = func_003E06D8(2, 2, 1, *(void**)(self + 0x4), a3);
+        *(int*)(self + 0x34) = func_003E06D8(2, 2, 1, *(void**)(self + 0x8), a6);
+        func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
+        func_003E0AD8(*(int*)(self + 0x30), 0x98, 0x34);
+        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 0x4D, 1);
+        func_003E0948(*(int*)(self + 0x30), 2, 0, 0, -2);
+        if (*(int*)(self + 0x1C) == 0) {
+            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 0x4353, 1);
+        } else {
+            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 0x4353, -1);
+        }
+        func_003E0948(*(int*)(self + 0x34), 2, 0, 0, -2);
+        int type = *(int*)(self + 0x18);
+        if (type == 1) {
+            *(int*)(self + 0x2C) = func_003DF690(a4, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x24) = func_003DF690(a1, D_00509430_ADEC8.flags);
+        } else if (type == 0) {
+            *(int*)(self + 0x3C) = func_003E0C88(*(int*)(self + 0x34), a4, 0, 0);
+            *(int*)(self + 0x38) = func_003E0C88(*(int*)(self + 0x30), a1, 0, 0);
+        } else if (type == 2) {
+            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), a2, 0);
+            *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x10), a5, 0);
+        }
+    } else {
+        *(int*)(self + 0x14) = 0;
+        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(D_00495218, a3, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x8) = 0;
+        *(int*)(self + 0x30) = func_003E06D8(2, 3, 2, *(void**)(self + 0x4), a3);
+        *(int*)(self + 0x34) = func_003E0BF8(*(int*)(self + 0x30), 2);
+        func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
+        func_003E0AD8(*(int*)(self + 0x30), 0x98, 0x34);
+        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 0x4D, 1);
+        func_003E0948(*(int*)(self + 0x30), 3, 0, 0, -2);
+        if (*(int*)(self + 0x1C) == 0) {
+            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 0x4353, 2);
+        } else {
+            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 0x4353, -1);
+        }
+        int type = *(int*)(self + 0x18);
+        if (type == 1) {
+            *(int*)(self + 0x24) = func_003DF690(a1, D_00509430_ADEC8.flags);
+        } else if (type == 0) {
+            *(int*)(self + 0x38) = func_003E0C88(*(int*)(self + 0x30), a1, 0, 0);
+        } else if (type == 2) {
+            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), a2, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AE300);
@@ -1427,7 +1669,134 @@ extern "C" void func_003B0B40(void* a, void* b, void* c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B0C58);
+#ifdef SKIP_ASM
+struct sAlloc_B0C58 {
+    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
+    void* (*free)(void* p);
+    int flags;
+};
+// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
+extern sAlloc_B0C58 D_00509430_B0C58 __asm__("D_00509430");
+struct sD_0050A088;
+extern sD_0050A088 D_0050A088;
+extern int D_00509648[];
+// MPEG decoder globals: plain scalars outside small data (the original TU kept them out of $gp)
+#define BSS_B0C58 __attribute__((section(".bss")))
+extern int D_005094F4_s __asm__("D_005094F4") BSS_B0C58;
+extern int D_005094F8_s __asm__("D_005094F8") BSS_B0C58;
+extern int D_005094FC_s __asm__("D_005094FC") BSS_B0C58;
+extern int D_00509500_s __asm__("D_00509500") BSS_B0C58;
+extern int D_00509524_s __asm__("D_00509524") BSS_B0C58;
+extern int D_00509548_s __asm__("D_00509548") BSS_B0C58;
+extern int D_00509584_s __asm__("D_00509584") BSS_B0C58;
+extern int D_0050958C_s __asm__("D_0050958C") BSS_B0C58;
+extern int D_005095A0_s __asm__("D_005095A0") BSS_B0C58;
+extern int D_005094D4_s __asm__("D_005094D4") BSS_B0C58;
+extern int D_005094D8_s __asm__("D_005094D8") BSS_B0C58;
+extern int D_005094DC_s __asm__("D_005094DC") BSS_B0C58;
+extern int D_005094E0_s __asm__("D_005094E0") BSS_B0C58;
+extern char D_004953E8[];
+extern char D_004953F0[];
+extern char D_00495400[];
+extern "C" void func_003B1228(void* data);
+extern "C" int func_003B13D8(void);
+extern "C" void* func_003B07F8(void* self, unsigned int w, int h);
+extern "C" void func_00402708(void);
+extern "C" void func_004027B8(void* a, void* b, int size);
+extern "C" void* func_00402C08(void* a, int n, void* fn, void* arg);
+extern "C" int func_003B0B10(void* self, void* a1, void* a2);
+
+struct sWSNode_B0C58 {
+    sWSNode_B0C58* next;
+    sWSNode_B0C58* prev;
+};
+
+struct sScript_B0C58 {
+    char pad00[0x10];
+    int count;
+};
+
+struct sData_B0C58 {
+    int f0;
+    void* data;
+};
+
+struct sPlayer_B0C58 {
+    int f0;
+    int state;              // 0x4
+    int w;                  // 0x8
+    int h;                  // 0xC
+    int f10;                // 0x10
+    int f14;                // 0x14
+    sWSNode_B0C58 list18;   // 0x18
+    sWSNode_B0C58 frames;   // 0x20
+    sScript_B0C58* script;  // 0x28
+    void* work;             // 0x2C
+    char mpeg[0x48];        // 0x30
+    void* ipuBuf;           // 0x78
+    void* ipuBufUc;         // 0x7C
+};
+
+extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B0C58* d)
+{
+    self->script = script;
+    self->f10 = 0;
+    self->f14 = 0;
+    if (self->work != 0) {
+        D_00509430_B0C58.free(self->work);
+        self->work = 0;
+    }
+    if (self->ipuBuf != 0) {
+        D_00509430_B0C58.free(self->ipuBuf);
+        self->ipuBuf = 0;
+    }
+    self->state = 1;
+    void* data = d->data;
+    *(void**)&D_0050A088 = D_00509648;
+    func_003B1228(data);
+    func_003B13D8();
+    int mode = D_00509648[0x420 / 4];
+    if (mode == 0) {
+        D_00509524_s = 1;
+        D_005095A0_s = 1;
+        D_00509584_s = 3;
+        D_0050958C_s = 1;
+        D_00509548_s = 5;
+    }
+    D_005094FC_s = (D_005094F4_s + 15) / 16;
+    D_00509500_s = (mode != 0 && D_00509524_s == 0) ? (D_005094F8_s + 31) / 32 * 2 : (D_005094F8_s + 15) / 16;
+    int w = D_005094FC_s * 16;
+    D_005094D4_s = w;
+    self->w = w;
+    int h = D_00509500_s * 16;
+    D_005094D8_s = h;
+    self->h = h;
+    D_005094DC_s = w >> 1;
+    D_005094E0_s = h >> 1;
+    int n = self->script->count;
+    for (int i = 0; i < n; i++) {
+        int cw = self->w;
+        int ch = self->h;
+        char* r = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 0x14, 0, 0, D_00509430_B0C58.flags), cw, ch);
+        sWSNode_B0C58* node = r ? (sWSNode_B0C58*)(r + 8) : 0;
+        sWSNode_B0C58* head = &self->frames;
+        sWSNode_B0C58* old = head->next;
+        head->next = node;
+        old->prev = node;
+        node->next = old;
+        node->prev = head;
+    }
+    self->work = D_00509430_B0C58.alloc(D_004953F0, self->w * self->h * 9 / 2 + 0x176C, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->ipuBuf = D_00509430_B0C58.alloc(D_00495400, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->ipuBufUc = (void*)(((unsigned int)self->ipuBuf & 0x0FFFFFFF) | 0x30000000);
+    func_00402708();
+    func_004027B8(self->mpeg, self->work, self->w * self->h * 9 / 2 + 0x176C);
+    func_00402C08(self->mpeg, 1, (void*)func_003B0B10, self);
+    return 2;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B0FA0__FPv);
@@ -2443,7 +2812,81 @@ extern "C" void func_003B2B68(char* buf)
 
 INCLUDE_ASM("world/wscriptcache", func_003B2B90);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B2E78);
+#ifdef SKIP_ASM
+// PORT: 64-bit `ulong` palette entries (`long` is 8 bytes on this compiler).
+static inline unsigned short dxtTo1555_2E78(unsigned short c)
+{
+    if (c != 0) {
+        // the alpha bit is a sign-extended short constant (forces the final 16-bit mask)
+        int g = ((c >> 1) & 0x3E0) | (short)0x8000;
+        c = ((c & 0x1F) << 10) | g | (c >> 11);
+    }
+    return c;
+}
+
+// Decode one DXT1 block into 4 rows of 4 64-bit texels.
+extern "C" void func_003B2E78(char* src, int pitch, char* dst)
+{
+    ulong pal[4];
+    ulong c = *(ulong*)dst;
+    ulong c0 = ((c & 0x1F) << 3) | ((c & 0x7E0) << 5) | ((c & 0xF800) << 8);
+    ulong c1 = ((c >> 13) & 0xF8) | ((c >> 11) & 0xFC00) | ((c & 0xF8000000) >> 8);
+    pal[0] = c0 | 0x40204;
+    pal[1] = c1 | 0x40204;
+    if (c0 >= c1) {
+        int b0 = c0 & 0xFF0000;
+        int b1 = c1 & 0xFF0000;
+        int g0 = c0 & 0xFF00;
+        int g1 = c1 & 0xFF00;
+        int r0 = c0 & 0xFF;
+        int r1 = c1 & 0xFF;
+        pal[2] = ((((b0 * 5 + b1 * 3) >> 3) & 0xFF0000) | (((g0 * 5 + g1 * 3) >> 3) & 0xFF00)) | (((r0 * 5 + r1 * 3) >> 3) & 0xFF);
+        pal[3] = (((((b0 * 3 + b1 * 5) >> 3) & 0xFF0000) | (((g0 * 3 + g1 * 5) >> 3) & 0xFF00)) | (((r0 * 3 + r1 * 5) >> 3) & 0xFF)) | 0xFF000000UL;
+    } else {
+        int b0 = c0 & 0xFF0000;
+        int b1 = c1 & 0xFF0000;
+        int g0 = c0 & 0xFF00;
+        int g1 = c1 & 0xFF00;
+        int r0 = c0 & 0xFF;
+        int r1 = c1 & 0xFF;
+        pal[2] = ((ulong)((r0 + r1) | ((g0 + g1) | (b0 + b1))) >> 1) | 0xFF000000UL;
+        pal[3] = 0;
+    }
+    pal[0] |= 0xFF000000;
+    pal[1] |= 0xFF000000;
+    pal[2] |= 0xFF000000;
+    pal[0] = dxtTo1555_2E78(pal[0]);
+    pal[1] = dxtTo1555_2E78(pal[1]);
+    pal[2] = dxtTo1555_2E78(pal[2]);
+    pal[3] = dxtTo1555_2E78(pal[3]);
+    unsigned int b;
+    b = ((unsigned char*)dst)[4];
+    ((ulong*)src)[0] = pal[b & 3];
+    ((ulong*)src)[1] = pal[(b >> 2) & 3];
+    ((ulong*)src)[2] = pal[(b >> 4) & 3];
+    ((ulong*)src)[3] = pal[b >> 6];
+    src += pitch;
+    b = ((unsigned char*)dst)[5];
+    ((ulong*)src)[0] = pal[b & 3];
+    ((ulong*)src)[1] = pal[(b >> 2) & 3];
+    ((ulong*)src)[2] = pal[(b >> 4) & 3];
+    ((ulong*)src)[3] = pal[b >> 6];
+    src += pitch;
+    b = ((unsigned char*)dst)[6];
+    ((ulong*)src)[0] = pal[b & 3];
+    ((ulong*)src)[1] = pal[(b >> 2) & 3];
+    ((ulong*)src)[2] = pal[(b >> 4) & 3];
+    ((ulong*)src)[3] = pal[b >> 6];
+    src += pitch;
+    b = ((unsigned char*)dst)[7];
+    ((ulong*)src)[0] = pal[b & 3];
+    ((ulong*)src)[1] = pal[(b >> 2) & 3];
+    ((ulong*)src)[2] = pal[(b >> 4) & 3];
+    ((ulong*)src)[3] = pal[b >> 6];
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B3308);

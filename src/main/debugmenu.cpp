@@ -2,9 +2,179 @@
 
 INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_cRenderTogglesMenu);
 
+//100%
 INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_cVisualEffectsTestMenu);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047FC88[];
+extern char D_0047E038[];
+extern char D_0047E058[];
+extern char D_0047E070[];
+extern char D_0047E088[];
+extern char D_0047E098[];
+extern char D_0047E0B0[];
+extern char D_0047E0C0[];
+extern char D_0047E0D0[];
+extern char D_0047E0E0[];
+extern char D_0047E100[];
+extern char D_004A2CF0[];
+extern char D_004A2CF8[];
+extern char D_004A2D00[];
+extern char D_004A2D08[];
+extern char D_004A2D10[];
+extern char D_004A2D18[];
+extern char D_004A2D20[];
+extern char D_004A2D28[];
+extern int D_004A4478;
+extern int D_004A447C;
+extern int D_004A4480;
+extern int D_004A4484;
+extern int D_004A4488;
+extern int D_004A448C;
+extern int D_004A4490;
+extern int D_004A4494;
+extern int D_004A4498;
+extern int D_004A449C;
+extern int D_004A44A0;
+extern int D_004A44A4;
+extern int D_004A44A8;
+extern int D_004A44AC;
+extern int D_004A44B0;
+extern int D_004A44B4;
+extern int D_004A44B8;
 
+extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047FC88;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E038);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4478, 0, 1, D_0047E058);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A447C, 0, 1, D_0047E070);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &D_004A4480, 0, 1, D_0047E088);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x1F4, 3, &D_004A4484, 0, 0x3e8, D_0047E098);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x224, 4, &D_004A4488, -640, 0x280, D_0047E0B0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x254, 5, &D_004A448C, -480, 0x1e0, D_0047E0C0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x284, 6, &D_004A4490, -640, 0x280, D_004A2CF0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x2B4, 7, &D_004A4494, -640, 0x280, D_004A2CF8);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x2E4, 8, &D_004A4498, -1, 0x3e8, D_004A2D00);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x314, 9, &D_004A449C, -1, 0x3e8, D_004A2D08);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x344, 0xa, &D_004A44A0, -255, 0xff, D_004A2D10);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x374, 0xb, &D_004A44A4, -255, 0xff, D_004A2D18);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x3A4, 0xc, &D_004A44A8, -255, 0xff, D_004A2D20);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x3D4, 0xd, &D_004A44AC, -255, 0xff, D_004A2D28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x404, 0xe, &D_004A44B0, -16, 0x10, D_0047E0D0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x434, 0xf, &D_004A44B4, 0, 1, D_0047E0E0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x464, 0x10, &D_004A44B8, 0, 0x64, D_0047E100);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C4, -1);
+    cMenu_addItem(self, (char*)self + 0x1F4, -1);
+    cMenu_addItem(self, (char*)self + 0x224, -1);
+    cMenu_addItem(self, (char*)self + 0x254, -1);
+    cMenu_addItem(self, (char*)self + 0x284, -1);
+    cMenu_addItem(self, (char*)self + 0x2B4, -1);
+    cMenu_addItem(self, (char*)self + 0x2E4, -1);
+    cMenu_addItem(self, (char*)self + 0x314, -1);
+    cMenu_addItem(self, (char*)self + 0x344, -1);
+    cMenu_addItem(self, (char*)self + 0x374, -1);
+    cMenu_addItem(self, (char*)self + 0x3A4, -1);
+    cMenu_addItem(self, (char*)self + 0x3D4, -1);
+    cMenu_addItem(self, (char*)self + 0x404, -1);
+    cMenu_addItem(self, (char*)self + 0x434, -1);
+    cMenu_addItem(self, (char*)self + 0x464, -1);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/debugmenu", cPlantsMenu_cPlantsMenu);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047FC30[];
+extern char D_0047E118[];
+extern char D_0047E128[];
+extern char D_0047E138[];
+extern char D_0047E148[];
+extern char D_0047E160[];
+extern char D_0047E178[];
+extern char D_0047E188[];
+extern char D_0047E1A8[];
+extern char D_0047E1C0[];
+extern char D_0047E1E0[];
+extern char D_0047E200[];
+extern char D_0047E210[];
+extern char D_004A2D30[];
+extern int D_004A4444;
+extern float D_004A4448;
+extern float D_004A444C;
+extern float D_004A4450;
+extern float D_004A4454;
+extern float D_004A4458;
+extern int D_004A445C;
+extern float D_004A4460;
+extern float D_004A4464;
+extern float D_004A4468;
+extern float D_004A446C;
+extern float D_004A4470;
+
+extern "C" void* cPlantsMenu_cPlantsMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047FC30;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E118);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4444, 0, 2, D_004A2D30);
+    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A4448, 0.0f, 2.0f, D_0047E128);
+    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A444C, -5.0f, 5.0f, D_0047E138);
+    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A4450, 0.0f, 2.0f, D_0047E148);
+    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A4454, 0.0f, 2.0f, D_0047E160);
+    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4458, 0.0f, 1000.0f, D_0047E178);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x298, 6, &D_004A445C, 0, 0x1770, D_0047E188);
+    cFloatMenuItem_ctor((char*)self + 0x2C8, 7, &D_004A4460, 0.0f, 6000.0f, D_0047E1A8);
+    cFloatMenuItem_ctor((char*)self + 0x2FC, 8, &D_004A4464, 0.0f, 6000.0f, D_0047E1C0);
+    cFloatMenuItem_ctor((char*)self + 0x330, 9, &D_004A4468, 0.0f, 6000.0f, D_0047E1E0);
+    cFloatMenuItem_ctor((char*)self + 0x364, 0xa, &D_004A446C, 0.0f, 360.0f, D_0047E200);
+    cFloatMenuItem_ctor((char*)self + 0x398, 0xb, &D_004A4470, 0.0f, 360.0f, D_0047E210);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C8, -1);
+    cMenu_addItem(self, (char*)self + 0x1FC, -1);
+    cMenu_addItem(self, (char*)self + 0x230, -1);
+    cMenu_addItem(self, (char*)self + 0x264, -1);
+    cMenu_addItem(self, (char*)self + 0x298, -1);
+    cMenu_addItem(self, (char*)self + 0x2C8, -1);
+    cMenu_addItem(self, (char*)self + 0x2FC, -1);
+    cMenu_addItem(self, (char*)self + 0x330, -1);
+    cMenu_addItem(self, (char*)self + 0x364, -1);
+    cMenu_addItem(self, (char*)self + 0x398, -1);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/debugmenu", cLightGlowMenu_cLightGlowMenu);
 
@@ -397,9 +567,171 @@ extern "C" void* cFlagsMenu_cFlagsMenu(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047F868[];
+extern char D_0047EBE8[];
+extern char D_0047EC00[];
+extern char D_0047EC20[];
+extern char D_0047EC40[];
+extern char D_0047EC58[];
+extern char D_0047EC78[];
+extern char D_0047EC98[];
+extern char D_0047ECC0[];
+extern char D_0047ECE8[];
+extern char D_0047ED08[];
+extern char D_0047ED20[];
+extern char D_0047ED38[];
+extern char D_0047ED48[];
+extern char D_0047ED60[];
+extern char D_0047ED78[];
+extern char D_0047ED88[];
+extern int D_004A4700;
+extern int D_004A4704;
+extern float D_004A4708;
+extern float D_004A470C;
+extern float D_004A4710;
+extern float D_004A4714;
+extern float D_004A4718;
+extern int D_004A471C;
+extern int D_004A4720;
+extern int D_004A4724;
+extern int D_004A4728;
+extern int D_004A472C;
+extern int D_004A4730;
+extern int D_004A4734;
+extern int D_004A4738;
 
+extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047F868;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EBE8);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4700, 0, 1, D_0047EC00);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A4704, 0, 1, D_0047EC20);
+    cFloatMenuItem_ctor((char*)self + 0x1C4, 2, &D_004A4708, 0.0f, 1.0f, D_0047EC40);
+    cFloatMenuItem_ctor((char*)self + 0x1F8, 3, &D_004A470C, 0.0f, 60.0f, D_0047EC58);
+    cFloatMenuItem_ctor((char*)self + 0x22C, 4, &D_004A4710, 0.0f, 60.0f, D_0047EC78);
+    cFloatMenuItem_ctor((char*)self + 0x260, 5, &D_004A4714, 0.0f, 120.0f, D_0047EC98);
+    cFloatMenuItem_ctor((char*)self + 0x294, 6, &D_004A4718, 0.0f, 120.0f, D_0047ECC0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x2C8, 7, &D_004A471C, 0, 0x64, D_0047ECE8);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x2F8, 8, &D_004A4720, 0, 1, D_0047ED08);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x328, 9, &D_004A4724, 0, 1, D_0047ED20);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x358, 0xa, &D_004A4728, 0, 1, D_0047ED38);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x388, 0xb, &D_004A472C, 0, 1, D_0047ED48);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x3B8, 0xc, &D_004A4730, 0, 1, D_0047ED60);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x3E8, 0xd, &D_004A4734, 0, 1, D_0047ED78);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x418, 0xe, &D_004A4738, 0, 1, D_0047ED88);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C4, -1);
+    cMenu_addItem(self, (char*)self + 0x1F8, -1);
+    cMenu_addItem(self, (char*)self + 0x22C, -1);
+    cMenu_addItem(self, (char*)self + 0x260, -1);
+    cMenu_addItem(self, (char*)self + 0x294, -1);
+    cMenu_addItem(self, (char*)self + 0x2C8, -1);
+    cMenu_addItem(self, (char*)self + 0x2F8, -1);
+    cMenu_addItem(self, (char*)self + 0x328, -1);
+    cMenu_addItem(self, (char*)self + 0x358, -1);
+    cMenu_addItem(self, (char*)self + 0x388, -1);
+    cMenu_addItem(self, (char*)self + 0x3B8, -1);
+    cMenu_addItem(self, (char*)self + 0x3E8, -1);
+    cMenu_addItem(self, (char*)self + 0x418, -1);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_cSnowfallTogglesMenu);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047F810[];
+extern char D_0047EDA0[];
+extern char D_0047EDB8[];
+extern char D_0047EDD0[];
+extern char D_0047EDE8[];
+extern char D_0047EE00[];
+extern char D_0047EE18[];
+extern char D_0047EE30[];
+extern char D_0047EE48[];
+extern char D_0047EE60[];
+extern char D_0047EE78[];
+extern char D_0047EE98[];
+extern char D_0047EEB0[];
+extern char D_0047EEC8[];
+extern char D_005059B8[];
+extern char D_005059C8[];
+extern int D_004A473C;
+extern float D_004A4740;
+extern float D_004A4744;
+extern float D_004A4748;
+extern float D_004A474C;
+extern float D_004A4750;
+extern float D_004A4754;
+extern float D_004A4758;
+extern float D_004A475C;
+extern int D_004A4760;
+
+extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047F810;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EDA0);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A473C, 0, 1, D_0047EDB8);
+    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A4740, 0.0f, 4.0f, D_0047EDD0);
+    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A4744, 0.0f, 100.0f, D_0047EDE8);
+    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A4748, 0.1f, 10.0f, D_0047EE00);
+    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A474C, 0.0f, 360.0f, D_0047EE18);
+    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4750, 0.0f, 1.0f, D_0047EE30);
+    cFloatMenuItem_ctor((char*)self + 0x298, 6, &D_004A4754, -2.0f, 5.0f, D_0047EE48);
+    cFloatMenuItem_ctor((char*)self + 0x2CC, 7, &D_004A4758, 0.0f, 1.0f, D_0047EE60);
+    cFloatMenuItem_ctor((char*)self + 0x300, 8, &D_004A475C, 0.0f, 100.0f, D_0047EE78);
+    cARGBMenuItem_cARGBMenuItem((char*)self + 0x334, 9, D_0047EE98, D_005059B8);
+    cARGBMenuItem_cARGBMenuItem((char*)self + 0x990, 0xa, D_0047EEB0, D_005059C8);
+    cIntMenuItem_cIntMenuItem((char*)self + 0xFEC, 0xb, &D_004A4760, 0, 1, D_0047EEC8);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C8, -1);
+    cMenu_addItem(self, (char*)self + 0x1FC, -1);
+    cMenu_addItem(self, (char*)self + 0x230, -1);
+    cMenu_addItem(self, (char*)self + 0x264, -1);
+    cMenu_addItem(self, (char*)self + 0x298, -1);
+    cMenu_addItem(self, (char*)self + 0x2CC, -1);
+    cMenu_addItem(self, (char*)self + 0x300, -1);
+    cMenu_addItem(self, (char*)self + 0x334, -1);
+    cMenu_addItem(self, (char*)self + 0x990, -1);
+    cMenu_addItem(self, (char*)self + 0xFEC, -1);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_cSplashTogglesMenu);
 
@@ -453,9 +785,193 @@ extern "C" void* cTubeMenu_cTubeMenu(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", cPathArrowMenu_cPathArrowMenu);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047F708[];
+extern char D_0047F4D8[];
+extern char D_0047F4E8[];
+extern char D_0047F4F8[];
+extern char D_0047F508[];
+extern char D_0047F518[];
+extern char D_0047F528[];
+extern char D_0047F538[];
+extern char D_0047F548[];
+extern char D_0047F558[];
+extern char D_0047F568[];
+extern char D_004A2D30[];
+extern char D_004A2DA8[];
+extern char D_004A2DB0[];
+extern char D_004A2DB8[];
+extern char D_004A2DC0[];
+extern char D_004A2DC8[];
+extern char D_004A2DD0[];
+extern int D_004A41EC;
+extern float D_004A41F0;
+extern float D_004A41F4;
+extern float D_004A41F8;
+extern float D_004A41FC;
+extern float D_004A4200;
+extern float D_004A4204;
+extern int D_004A4208;
+extern int D_004A420C;
+extern int D_004A4210;
+extern int D_004A4214;
+extern float D_004A4218;
+extern float D_004A421C;
+extern float D_004A4220;
+extern int D_004A4224;
+extern int D_004A4228;
 
+extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047F708;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F4D8);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41EC, 0, 1, D_004A2D30);
+    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A41F0, 0.0f, 1000.0f, D_0047F4E8);
+    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A41F4, 0.0f, 1000.0f, D_0047F4F8);
+    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A41F8, 0.0f, 1000.0f, D_0047F508);
+    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A41FC, 0.0f, 1000.0f, D_0047F518);
+    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4200, 0.0f, 1000.0f, D_0047F528);
+    cFloatMenuItem_ctor((char*)self + 0x298, 6, &D_004A4204, 0.0f, 1000.0f, D_004A2DC0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x2CC, 7, &D_004A4208, 0, 0xff, D_004A2DA8);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x2FC, 8, &D_004A420C, 0, 0xff, D_004A2DB0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x32C, 9, &D_004A4210, 0, 0xff, D_004A2DB8);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x35C, 0xa, &D_004A4214, 0, 0xff, D_004A2DC8);
+    cFloatMenuItem_ctor((char*)self + 0x38C, 0xb, &D_004A4218, 0.0f, 1000.0f, D_0047F538);
+    cFloatMenuItem_ctor((char*)self + 0x3C0, 0xc, &D_004A421C, 0.0f, 1000.0f, D_0047F548);
+    cFloatMenuItem_ctor((char*)self + 0x3F4, 0xd, &D_004A4220, 50.0f, 1000.0f, D_0047F558);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x428, 0xe, &D_004A4224, 0, 0x3e8, D_004A2DD0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x458, 0xf, &D_004A4228, 1, 0x4650, D_0047F568);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C8, -1);
+    cMenu_addItem(self, (char*)self + 0x1FC, -1);
+    cMenu_addItem(self, (char*)self + 0x230, -1);
+    cMenu_addItem(self, (char*)self + 0x264, -1);
+    cMenu_addItem(self, (char*)self + 0x298, -1);
+    cMenu_addItem(self, (char*)self + 0x2CC, -1);
+    cMenu_addItem(self, (char*)self + 0x2FC, -1);
+    cMenu_addItem(self, (char*)self + 0x32C, -1);
+    cMenu_addItem(self, (char*)self + 0x35C, -1);
+    cMenu_addItem(self, (char*)self + 0x38C, -1);
+    cMenu_addItem(self, (char*)self + 0x3C0, -1);
+    cMenu_addItem(self, (char*)self + 0x3F4, -1);
+    cMenu_addItem(self, (char*)self + 0x428, -1);
+    cMenu_addItem(self, (char*)self + 0x458, -1);
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_cVisualEffectsMainMenu);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
+extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047F6B0[];
+extern char D_0047F578[];
+extern char D_0047F598[];
+extern char D_0047F5A8[];
+extern char D_0047F5C0[];
+extern char D_0047F5D0[];
+extern char D_0047F5E0[];
+extern char D_0047F5F0[];
+extern char D_0047F600[];
+extern char D_0047F610[];
+extern char D_0047F620[];
+extern char D_0047F630[];
+extern char D_0047F650[];
+extern char D_0047F668[];
+extern char D_0047F688[];
+extern char D_0047F698[];
+extern char D_004A2DD8[];
+extern char D_004A2DE0[];
+extern char D_004A2DE8[];
+extern char D_004C98E0[];
+extern char D_004CA328[];
+extern char D_004CA7C0[];
+extern char D_004CAEF8[];
+extern char D_004CB2C8[];
+extern char D_004CBBE8[];
+extern char D_004CBDE8[];
+extern char D_004CC150[];
+extern char D_004CCAB0[];
+extern char D_004CCDE0[];
+extern char D_004CD0A8[];
+extern char D_004CD678[];
+extern char D_004CD840[];
+extern char D_004CDC88[];
+extern char D_004CECA8[];
+extern char D_004D11F0[];
+extern char D_004D1480[];
+
+extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047F6B0;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F578);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x164, D_004C98E0, D_0047F598);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x180, D_004CA328, D_0047F5A8);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x19C, D_004CA7C0, D_0047F5C0);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x1B8, D_004CAEF8, D_004A2DD8);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x1D4, D_004CB2C8, D_0047F5D0);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x1F0, D_004CBBE8, D_0047F5E0);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x20C, D_004CBDE8, D_0047F5F0);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x228, D_004CC150, D_0047F600);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x244, D_004CCAB0, D_004A2DE0);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x260, D_004CCDE0, D_0047F610);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x27C, D_004CD0A8, D_0047F620);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x298, D_004CD678, D_004A2DE8);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x2B4, D_004CD840, D_0047F630);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x2D0, D_004CDC88, D_0047F650);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x2EC, D_004CECA8, D_0047F668);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x308, D_004D11F0, D_0047F688);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x324, D_004D1480, D_0047F698);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x180, -1);
+    cMenu_addItem(self, (char*)self + 0x19C, -1);
+    cMenu_addItem(self, (char*)self + 0x1B8, -1);
+    cMenu_addItem(self, (char*)self + 0x1D4, -1);
+    cMenu_addItem(self, (char*)self + 0x1F0, -1);
+    cMenu_addItem(self, (char*)self + 0x20C, -1);
+    cMenu_addItem(self, (char*)self + 0x228, -1);
+    cMenu_addItem(self, (char*)self + 0x244, -1);
+    cMenu_addItem(self, (char*)self + 0x260, -1);
+    cMenu_addItem(self, (char*)self + 0x27C, -1);
+    cMenu_addItem(self, (char*)self + 0x298, -1);
+    cMenu_addItem(self, (char*)self + 0x2B4, -1);
+    cMenu_addItem(self, (char*)self + 0x2D0, -1);
+    cMenu_addItem(self, (char*)self + 0x2EC, -1);
+    cMenu_addItem(self, (char*)self + 0x308, -1);
+    cMenu_addItem(self, (char*)self + 0x324, -1);
+    return self;
+}
+#endif
 
 extern "C" void* func_002CBF60(void* self);
 
@@ -802,7 +1318,101 @@ extern "C" void func_0024E200(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024E388);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+static inline void dtorSubMenuItem_24E388(void* p)
+{
+    func_002CAA80((char*)p + 0x18, 2);
+    func_002CA280(p, 2);
+}
+
+extern "C" void func_0024E388(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x252C, 2);
+    func_002CA280((char*)self + 0x2508, 2);
+    func_002CA280((char*)self + 0x24E4, 2);
+    func_002CA280((char*)self + 0x24C0, 2);
+    func_002CA280((char*)self + 0x249C, 2);
+    dtorSubMenuItem_24E388((char*)self + 0x1EEC);
+    func_002CA280((char*)self + 0x1ED0, 2);
+    func_002CA280((char*)self + 0x1EAC, 2);
+    func_002CA280((char*)self + 0x1E88, 2);
+    func_002CA280((char*)self + 0x1E64, 2);
+    func_002CA280((char*)self + 0x1E40, 2);
+    dtorSubMenuItem_24E388((char*)self + 0x1890);
+    func_002CA280((char*)self + 0x185C, 2);
+    func_002CA280((char*)self + 0x1828, 2);
+    func_002CA280((char*)self + 0x17F4, 2);
+    func_002CA280((char*)self + 0x17C0, 2);
+    func_002CA280((char*)self + 0x178C, 2);
+    func_002CA280((char*)self + 0x1758, 2);
+    func_002CA280((char*)self + 0x1724, 2);
+    func_002CA280((char*)self + 0x16F0, 2);
+    func_002CA280((char*)self + 0x16BC, 2);
+    func_002CA280((char*)self + 0x1688, 2);
+    func_002CA280((char*)self + 0x1654, 2);
+    func_002CA280((char*)self + 0x1620, 2);
+    func_002CA280((char*)self + 0x15EC, 2);
+    func_002CA280((char*)self + 0x15B8, 2);
+    func_002CA280((char*)self + 0x1584, 2);
+    func_002CA280((char*)self + 0x1550, 2);
+    func_002CA280((char*)self + 0x151C, 2);
+    func_002CA280((char*)self + 0x14E8, 2);
+    func_002CA280((char*)self + 0x14B4, 2);
+    func_002CA280((char*)self + 0x1498, 2);
+    func_002CA280((char*)self + 0x1474, 2);
+    func_002CA280((char*)self + 0x1450, 2);
+    func_002CA280((char*)self + 0x142C, 2);
+    func_002CA280((char*)self + 0x1408, 2);
+    dtorSubMenuItem_24E388((char*)self + 0xE58);
+    func_002CA280((char*)self + 0xE3C, 2);
+    func_002CA280((char*)self + 0xE18, 2);
+    func_002CA280((char*)self + 0xDF4, 2);
+    func_002CA280((char*)self + 0xDD0, 2);
+    func_002CA280((char*)self + 0xDAC, 2);
+    dtorSubMenuItem_24E388((char*)self + 0x7FC);
+    func_002CA280((char*)self + 0x7C8, 2);
+    func_002CA280((char*)self + 0x794, 2);
+    func_002CA280((char*)self + 0x760, 2);
+    func_002CA280((char*)self + 0x72C, 2);
+    func_002CA280((char*)self + 0x6F8, 2);
+    func_002CA280((char*)self + 0x6C4, 2);
+    func_002CA280((char*)self + 0x690, 2);
+    func_002CA280((char*)self + 0x65C, 2);
+    func_002CA280((char*)self + 0x628, 2);
+    func_002CA280((char*)self + 0x5F4, 2);
+    func_002CA280((char*)self + 0x5C0, 2);
+    func_002CA280((char*)self + 0x58C, 2);
+    func_002CA280((char*)self + 0x558, 2);
+    func_002CA280((char*)self + 0x524, 2);
+    func_002CA280((char*)self + 0x4F0, 2);
+    func_002CA280((char*)self + 0x4BC, 2);
+    func_002CA280((char*)self + 0x488, 2);
+    func_002CA280((char*)self + 0x454, 2);
+    func_002CA280((char*)self + 0x420, 2);
+    func_002CA280((char*)self + 0x3EC, 2);
+    func_002CA280((char*)self + 0x3B8, 2);
+    func_002CA280((char*)self + 0x384, 2);
+    func_002CA280((char*)self + 0x350, 2);
+    func_002CA280((char*)self + 0x31C, 2);
+    func_002CA280((char*)self + 0x2EC, 2);
+    func_002CA280((char*)self + 0x2BC, 2);
+    func_002CA280((char*)self + 0x28C, 2);
+    func_002CA280((char*)self + 0x258, 2);
+    func_002CA280((char*)self + 0x224, 2);
+    func_002CA280((char*)self + 0x1F4, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024E7C8);

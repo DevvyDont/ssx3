@@ -351,7 +351,107 @@ void* func_001895F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00189610);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0014F4F8(void* iface);
+extern "C" void func_00189D60(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0029ED90(void* p, int a);
+extern char D_0045DD20[];
+extern char D_0045DDD8[];
+extern int D_004A14D0;
+extern void* D_004A289C;
+
+struct sGameCfg_189610 {
+    unsigned int flags;     // 0x0
+    signed char f4;
+    signed char f5;         // 0x5
+    signed char f6;         // 0x6
+    char pad7[0x288 - 7];
+};
+// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_189610 D_00535610_189610 __asm__("D_00535610");
+
+struct sVE_189610a {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sVE_189610b {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+struct sVE_189610c {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline int Is_189610(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+static inline int GetOpt_189610(char* w, int i)
+{
+    sVE_189610a* vt = *(sVE_189610a**)(w + 8);
+    return vt[23].fn(w + vt[23].delta, i);
+}
+
+static inline sGameCfg_189610 Cfg_189610()
+{
+    return D_00535610_189610;
+}
+
+extern "C" void func_00189610(void* self, char* popup, int event)
+{
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (event) {
+    case 0x15:
+        break;
+    case 0x16:
+        if (Is_189610(*(int*)(popup + 0xC), D_0045DD20)) {
+            if (GetOpt_189610(popup, 2)) {
+                func_0014F4F8(iface);
+                D_004A14D0 = 1;
+                func_00189D60(self);
+                func_0029ED90(func_0028B180(), 1);
+            }
+        } else if (Is_189610(*(int*)(popup + 0xC), D_0045DDD8)) {
+            if (GetOpt_189610(popup, 2)) {
+                int a = GetOpt_189610(popup, 0);
+                int b = GetOpt_189610(popup, 1);
+                sGameCfg_189610* c = &D_00535610_189610;
+                D_004A14D0 = 1;
+                c->f6 = a;
+                c->f5 = b;
+            } else {
+                char* g = (char*)D_004A289C;
+                sVE_189610b* vt = *(sVE_189610b**)(g + 0x10D8);
+                char* thisp = g + vt[12].delta;
+                void (**pf)(void*, int, int) = &vt[12].fn;
+                (*pf)(thisp, Cfg_189610().f6, Cfg_189610().f5);
+            }
+        } else if (*(int*)(popup + 0xC) == 0x1B) {
+            if (GetOpt_189610(popup, 2)) {
+                func_0014F4F8(iface);
+                D_004A14D0 = 1;
+                func_00189D60(self);
+            }
+        }
+        {
+            sVE_189610c* vt = *(sVE_189610c**)(iface + 0xC);
+            vt[1].fn(iface + vt[1].delta);
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00189958);
@@ -371,7 +471,157 @@ extern "C" int func_00189970(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetEvent);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_00228C08(void* p);
+extern "C" void* func_0028B180();
+extern "C" void func_0029ED90(void* p, int a);
+extern "C" int func_0039A738(void* self);
+extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_0045DD68[];
+extern char D_0045DF88[];
+extern char D_0045DFA0[];
+extern void* D_0046B230[];
+extern void* D_0046B300[];
+extern void* D_0046B3D0[];
+extern char D_004A1520[];
+extern char D_004A1528[];
+extern char* D_00440FD8[];
+extern int D_004A14D0;
+extern void* D_004A28A8;
+
+struct sGameCfg_189980 {
+    unsigned int pad0 : 19;
+    bool showHud : 1;           // bit 19
+    unsigned int f20 : 2;       // bits 20-21
+    unsigned int mode : 3;      // bits 22-24
+    unsigned int pad25 : 7;
+    char rest[0x288 - 4];
+};
+// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_189980 D_00535610_189980 __asm__("D_00535610");
+
+struct sVE_189980a {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sVE_189980b {
+    short delta;
+    short index;
+    void (*fn)(void*, char);
+};
+struct sVE_189980c {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sOptGame_189980 {
+    char pad0[0x10];
+    char* engine;           // 0x10
+    char pad14[0x40 - 0x14];
+    char* screen;           // 0x40
+    char pad44[0x48 - 0x44];
+    signed char item[3];    // 0x48
+};
+
+static inline int Is_189980(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+static inline void Refresh_189980(sOptGame_189980* self)
+{
+    char* scr = self->screen;
+    sVE_189980a* vt = *(sVE_189980a**)(scr + 0x48);
+    char* sub = scr + 0x40;
+    vt[16].fn(sub + vt[16].delta);
+}
+
+extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* widget, unsigned int event)
+{
+    if (widget == 0) {
+        return;
+    }
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (event) {
+    case 7: {
+        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        func_0039E318(p, self->engine, self);
+        *(void***)(p + 8) = D_0046B3D0;
+        p[0x48] = 0;
+        func_0039F290(self->engine + 0x18, p);
+        break;
+    }
+    case 5:
+        if (Is_189980(*(int*)(widget + 0x38), D_004A1520)) {
+            char* p = (char*)operator new(0x54, D_0045DF88, 0x100, 0);
+            func_0039E318(p, self->engine, self);
+            *(void***)(p + 8) = D_0046B230;
+            *(int*)(p + 0x4C) = 0;
+            *(int*)(p + 0x48) = 0;
+            p[0x50] = 0;
+            func_0039F290(self->engine + 0x18, p);
+        } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
+            char* p = (char*)operator new(0x4C, D_0045DFA0, 0x100, 0);
+            func_0039E318(p, self->engine, self);
+            *(void***)(p + 8) = D_0046B300;
+            *(int*)(p + 0xC) = 0x1B;
+            func_0039F290(self->engine + 0x18, p);
+        }
+        break;
+    case 6: {
+        {
+            sVE_189980a* vt = *(sVE_189980a**)(iface + 0xC);
+            vt[1].fn(iface + vt[1].delta);
+        }
+        func_00228C08(D_004A28A8);
+        {
+            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVE_189980b* vt = *(sVE_189980b**)(o + 4);
+            vt[3].fn(o + vt[3].delta, D_00535610_189980.mode);
+        }
+        Refresh_189980(self);
+        char* eng = *(char**)self->engine;
+        sVE_189980c* vt = *(sVE_189980c**)(eng + 4);
+        void* r = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
+        if (r != 0) {
+            func_0039F400(self->engine + 0x18, r);
+        }
+        break;
+    }
+    case 9:
+        if (self->item[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[0]])) {
+            D_00535610_189980.mode = func_0039A738(widget);
+            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVE_189980b* vt = *(sVE_189980b**)(o + 4);
+            char* thisp = o + vt[3].delta;
+            vt[3].fn(thisp, func_0039A738(widget));
+            Refresh_189980(self);
+            func_0029ED90(func_0028B180(), 1);
+        }
+        if (self->item[1] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[1]])) {
+            bool on = *(unsigned char*)(widget + 0x319);
+            D_00535610_189980.showHud = on;
+        }
+        if (self->item[2] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[2]])) {
+            D_00535610_189980.f20 = *(unsigned char*)(widget + 0x319);
+        }
+        func_00228C08(D_004A28A8);
+        D_004A14D0 = 1;
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_00189D60);
 
@@ -446,7 +696,84 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018A3D8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0014F458(void* iface);
+extern "C" void func_0018BEF8(void* self, unsigned int mode);
+extern "C" void* func_0028B180();
+extern "C" void func_00287410(void* snd, int v);
+extern "C" void func_00287488(void* snd, int v);
+extern "C" void func_00287520(void* snd, int v);
+extern "C" void func_00287558(void* snd, int v);
+extern "C" void func_002875D0(void* snd, int v);
+extern "C" void cFEStateOptionsSound_updateWidget(void* self);
+extern char D_0045DD20[];
+extern int D_004A14D4;
+
+struct sSndCfg_18A3D8 {
+    unsigned int sfxVol : 4;        // bits 0-3
+    unsigned int musicVol : 4;      // bits 4-7
+    unsigned int speechVol : 4;     // bits 8-11
+    unsigned int output : 2;        // bits 12-13
+    unsigned int pad14 : 2;
+    int f16 : 1;                    // bit 16
+    int f17 : 1;                    // bit 17
+    int pad18 : 14;
+    char rest[0x288 - 4];
+};
+// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
+extern sSndCfg_18A3D8 D_00535610_18A3D8 __asm__("D_00535610");
+
+struct sVE_18A3D8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Is_18A3D8(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+static inline int GetOpt_18A3D8(char* w, int i)
+{
+    sVE_18A3D8* vt = *(sVE_18A3D8**)(w + 8);
+    return vt[23].fn(w + vt[23].delta, i);
+}
+
+static inline sSndCfg_18A3D8 Cfg_18A3D8()
+{
+    return D_00535610_18A3D8;
+}
+
+extern "C" void func_0018A3D8(void* self, char* popup, int event)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (event) {
+    case 0x15:
+        break;
+    case 0x16:
+        if (Is_18A3D8(*(int*)(popup + 0xC), D_0045DD20)) {
+            if (GetOpt_18A3D8(popup, 2)) {
+                func_0014F458(iface);
+                func_0018BEF8(self, D_00535610_18A3D8.output);
+                func_00287410(func_0028B180(), Cfg_18A3D8().sfxVol);
+                func_00287488(func_0028B180(), Cfg_18A3D8().speechVol);
+                func_00287520(func_0028B180(), Cfg_18A3D8().musicVol);
+                func_00287558(func_0028B180(), Cfg_18A3D8().f17 != 0);
+                func_002875D0(func_0028B180(), Cfg_18A3D8().f16 != 0);
+                cFEStateOptionsSound_updateWidget(self);
+            }
+            D_004A14D4 = 1;
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A870__FPv);
