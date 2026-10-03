@@ -10,13 +10,21 @@ struct cRiderSphereTree {
     int field_0x28;
 };
 
-//0% - target has extra dead constant load + redundant -1 materialization not yet reproduced
+//100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_cRiderSphereTree__FP16cRiderSphereTree);
 #ifdef SKIP_ASM
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sRiderSphere_329910 {
+    float pos[4];
+    sRiderSphere_329910() {}
+};
+
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
 {
+    new ((char*)self + 0x2C) sRiderSphere_329910[20];
     self->field_0x24 = -1;
-    self->field_0x28 = -1;
+    *(unsigned int*)&self->field_0x28 = 0xFFFFFFFF;
     return self;
 }
 #endif

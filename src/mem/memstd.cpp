@@ -674,7 +674,191 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002548D0);
+#ifdef SKIP_ASM
+struct sVec4_2548D0 {
+    float v[4];
+    sVec4_2548D0() {}
+} __attribute__((aligned(16)));
+
+struct sVtx_2548D0 {
+    float u, v, q;
+    int pad;
+    int r, g, b, a;
+    sVec4_2548D0 pos;
+    sVtx_2548D0() {}
+};
+
+struct sRS_2548D0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short f10;
+};
+
+class cWorld_2548D0 {
+public:
+    char pad0[0xE84];
+    sRS_2548D0* top;
+    char pad1[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual unsigned int v10();
+    virtual unsigned int v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual int v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26(int a, int b, float x, float y, float w, float h, float zn, float zf);
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34(void* p);
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71(int n, void* verts, int flags);
+};
+
+extern cWorld_2548D0* D_004A5B80_2548D0 __asm__("D_004A5B80");
+extern char D_004FF1A0[];
+
+struct sMesh_2548D0 {
+    int f0;
+    int f4;
+    cWorld_2548D0* world;   // 0x8
+    void* res;              // 0xC
+    char* hdr;              // 0x10
+    int** items;            // 0x14
+    int f18;
+    int rows;               // 0x1C
+    int cols;               // 0x20
+    int widths[6];          // 0x24
+    int f3C;                // 0x3C
+    float x;                // 0x40
+    float y;                // 0x44
+    float z;                // 0x48
+    float cw;               // 0x4C
+    float ch;               // 0x50
+};
+
+// PORT: the unit declares func_002548D0 as returning void*, but it returns nothing (v0 is left as is); bind the real signature.
+extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
+extern "C" void func_002548D0_impl(void* p)
+{
+    sMesh_2548D0* self = (sMesh_2548D0*)p;
+    while (self->world->v17() == 0) {
+    }
+    float w = (float)self->world->v10();
+    float h = (float)self->world->v11();
+    self->world->v26(0, 0, 0.0f, 0.0f, w, h, 0.0f, 1.0f);
+    self->world->v34(D_004FF1A0);
+    sRS_2548D0* rs = self->world->top;
+    rs->f8 = (rs->f8 & ~0x3E0) | ((self->f3C << 5) & 0x3E0);
+    sVtx_2548D0 v[4];
+    int i;
+    for (i = 0; i < 4; i++) {
+        v[i].a = 0x80;
+        v[i].r = 0x80;
+        v[i].g = 0x80;
+        v[i].b = 0x80;
+        v[i].q = 1.0f;
+    }
+    float cw = self->cw * 16.0f;
+    float x0 = self->x + 0.5f;
+    v[0].u = 0.0f;
+    v[0].v = 0.0f;
+    float x1 = x0 + cw;
+    v[1].u = 1.0f;
+    v[1].v = 0.0f;
+    v[2].u = 0.0f;
+    v[2].v = 1.0f;
+    v[3].u = 1.0f;
+    v[3].v = 1.0f;
+    int cell = 0;
+    int row;
+    for (row = 0; row < self->rows; row++) {
+        float yoff = 0.0f;
+        int col = 0;
+        if (col < self->cols) {
+            int* wp = self->widths;
+            do {
+                float y = self->y + 0.5f + yoff;
+                float ch = (float)*wp * self->ch;
+                int id = *self->items[cell];
+                D_004A5B80_2548D0->top->f10 = id;
+                { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[0].pos = q; }
+                { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[1].pos = q; }
+                { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[2].pos = q; }
+                { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[3].pos = q; }
+                yoff += ch;
+                cell++;
+                wp++;
+                col++;
+                self->world->v71(4, v, 0);
+            } while (col < self->cols);
+        }
+        x0 += cw;
+        x1 += cw;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00254C48);
