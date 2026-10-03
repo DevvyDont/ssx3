@@ -743,7 +743,30 @@ extern "C" void* func_00372AA0(sPtObj_2AA0* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00372B30);
+#ifdef SKIP_ASM
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sPtElem2B30 {
+    float v[4];
+    sPtElem2B30() {}
+};
+
+extern "C" void* func_00372B30(void* self)
+{
+    new ((char*)self + 0x20) sPtElem2B30[4];
+    new ((char*)self + 0x60) sPtElem2B30[6];
+    new ((char*)self + 0xC0) sPtElem2B30[8];
+    new ((char*)self + 0x140) sPtElem2B30[4];
+    new ((char*)self + 0x180) sPtElem2B30[6];
+    new ((char*)self + 0x1E0) sPtElem2B30[8];
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00372B78);
 
@@ -2300,7 +2323,301 @@ INCLUDE_ASM("render/particle", func_00381AD0);
 
 INCLUDE_ASM("render/particle", func_00381F10);
 
+//100%
 INCLUDE_ASM("render/particle", func_00382170);
+#ifdef SKIP_ASM
+struct sPt2170 {
+    float x, y, z, w;
+    sPt2170() {}
+} __attribute__((aligned(16)));
+
+struct sMat2170 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sVtx2170 {
+    float s, t, q, pad;     // 0x00
+    int r, g, b, a;         // 0x10
+    sPt2170 pos;            // 0x20
+    sVtx2170() {}
+};
+
+struct sRS2170 {
+    int field_0x0;
+    int flagsA;             // 0x4, bits 2..6 = layer
+    int flagsB;             // 0x8
+    int field_0xC;
+    short tex;              // 0x10
+    short pad;
+};
+
+struct cRMgr2170 {
+    char pad_0x0[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual sMat2170* v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual void v73(int n, sVtx2170* v, int f);
+};
+
+extern sPt2170 D_004FFBC0[];
+extern int D_004A59A0;
+
+// PORT: PS2-only VU0 inline asm (matrix copy); the PC port needs a C fallback.
+static inline void CopyMat2170(sMat2170* dst, const sMat2170* src)
+{
+    __asm__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
+static inline sPt2170 MulMat2170(const sMat2170* m, const sPt2170& v)
+{
+    sPt2170 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar); the PC port needs a C fallback.
+static inline sPt2170 Scale2170(const sPt2170& v, float s)
+{
+    sPt2170 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add); the PC port needs a C fallback.
+static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
+{
+    sPt2170 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00382170(cRMgr2170* mgr, sPt2170* pos, float* col, float radius, int segs)
+{
+    char* self = (char*)mgr;
+    sMat2170 m;
+    int step;
+    int i;
+    int k;
+
+    CopyMat2170(&m, mgr->v35());
+    sPt2170 c = MulMat2170(&m, *pos);
+    if (3000.0f < c.z) {
+        return;
+    }
+    if (segs > 0) {
+        step = segs;
+    } else if (2000.0f < c.z) {
+        step = 4;
+    } else if (750.0f < c.z) {
+        step = 2;
+    } else {
+        step = 1;
+    }
+    if (D_004A59A0 == 0) {
+        D_004FFBC0[0].x = 0.0f;
+        D_004FFBC0[0].y = 1.0f;
+        D_004FFBC0[0].z = 0.0f;
+        D_004FFBC0[0].w = 0.0f;
+        D_004FFBC0[1].x = 0.3799999952316284f;
+        D_004FFBC0[1].y = 0.9200000166893005f;
+        D_004FFBC0[1].z = 0.0f;
+        D_004FFBC0[1].w = 0.0f;
+        D_004FFBC0[2].x = 0.7099999785423279f;
+        D_004FFBC0[2].y = 0.7099999785423279f;
+        D_004FFBC0[2].z = 0.0f;
+        D_004FFBC0[2].w = 0.0f;
+        D_004FFBC0[3].x = 0.9200000166893005f;
+        D_004FFBC0[3].y = 0.3799999952316284f;
+        D_004FFBC0[3].z = 0.0f;
+        D_004FFBC0[3].w = 0.0f;
+        D_004FFBC0[4].x = 1.0f;
+        D_004FFBC0[4].y = 0.0f;
+        D_004FFBC0[4].z = 0.0f;
+        D_004FFBC0[4].w = 0.0f;
+        D_004FFBC0[5].x = 0.9200000166893005f;
+        D_004FFBC0[5].y = -0.3799999952316284f;
+        D_004FFBC0[5].z = 0.0f;
+        D_004FFBC0[5].w = 0.0f;
+        D_004FFBC0[6].x = 0.7099999785423279f;
+        D_004FFBC0[6].y = -0.7099999785423279f;
+        D_004FFBC0[6].z = 0.0f;
+        D_004FFBC0[6].w = 0.0f;
+        D_004FFBC0[7].x = 0.3799999952316284f;
+        D_004FFBC0[7].y = -0.9200000166893005f;
+        D_004FFBC0[7].z = 0.0f;
+        D_004FFBC0[7].w = 0.0f;
+        D_004FFBC0[8].x = 0.0f;
+        D_004FFBC0[8].y = -1.0f;
+        D_004FFBC0[8].z = 0.0f;
+        D_004FFBC0[8].w = 0.0f;
+        D_004FFBC0[9].x = -0.3799999952316284f;
+        D_004FFBC0[9].y = -0.9200000166893005f;
+        D_004FFBC0[9].z = 0.0f;
+        D_004FFBC0[9].w = 0.0f;
+        D_004FFBC0[10].x = -0.7099999785423279f;
+        D_004FFBC0[10].y = -0.7099999785423279f;
+        D_004FFBC0[10].z = 0.0f;
+        D_004FFBC0[10].w = 0.0f;
+        D_004FFBC0[11].x = -0.9200000166893005f;
+        D_004FFBC0[11].y = -0.3799999952316284f;
+        D_004FFBC0[11].z = 0.0f;
+        D_004FFBC0[11].w = 0.0f;
+        D_004FFBC0[12].x = -1.0f;
+        D_004FFBC0[12].y = 0.0f;
+        D_004FFBC0[12].z = 0.0f;
+        D_004FFBC0[12].w = 0.0f;
+        D_004FFBC0[13].x = -0.9200000166893005f;
+        D_004FFBC0[13].y = 0.3799999952316284f;
+        D_004FFBC0[13].z = 0.0f;
+        D_004FFBC0[13].w = 0.0f;
+        D_004FFBC0[14].x = -0.7099999785423279f;
+        D_004FFBC0[14].y = 0.7099999785423279f;
+        D_004FFBC0[14].z = 0.0f;
+        D_004FFBC0[14].w = 0.0f;
+        D_004FFBC0[15].x = -0.3799999952316284f;
+        D_004FFBC0[15].y = 0.9200000166893005f;
+        D_004FFBC0[15].z = 0.0f;
+        D_004FFBC0[15].w = 0.0f;
+        D_004A59A0 = 1;
+    }
+    (*(sRS2170**)(self + 0xE84))->tex = -1;
+    (*(sRS2170**)(self + 0xE84))->flagsA = ((*(sRS2170**)(self + 0xE84))->flagsA & ~0x7C) | 4;
+    mgr->v31();
+    mgr->v37();
+
+    sVtx2170 verts[17];
+    i = 0;
+    for (k = 0; k < 16; k += step) {
+        verts[i].r = (int)(col[1] * 128.0f);
+        verts[i].g = (int)(col[2] * 128.0f);
+        verts[i].b = (int)(col[3] * 128.0f);
+        verts[i].a = (int)(col[0] * 128.0f);
+        sPt2170 p = Add2170(c, Scale2170(D_004FFBC0[k], radius));
+        verts[i].pos = p;
+        i++;
+    }
+    verts[i].r = (int)(col[1] * 128.0f);
+    verts[i].g = (int)(col[2] * 128.0f);
+    verts[i].b = (int)(col[3] * 128.0f);
+    verts[i].a = (int)(col[0] * 128.0f);
+    sPt2170 p = Add2170(c, Scale2170(D_004FFBC0[0], radius));
+    verts[i].pos = p;
+    i++;
+    mgr->v73(i, verts, 0);
+    (*(sRS2170**)(self + 0xE84))->flagsA = ((*(sRS2170**)(self + 0xE84))->flagsA & ~0x7C) | 4;
+    mgr->v32();
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003825C0);

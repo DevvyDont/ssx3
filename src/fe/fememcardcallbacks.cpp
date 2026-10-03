@@ -1543,5 +1543,30 @@ extern "C" void func_001D9D18(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D48);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_001DA4A8(void* self);
+extern char D_0046A618[];
+
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sMcSlot9D48 {
+    int v[2];
+    sMcSlot9D48() {}
+};
+
+extern "C" void* func_001D9D48(void* self, void* engine, void* owner)
+{
+    func_0039E318(self, engine, owner);
+    *(void**)((char*)self + 0x8) = D_0046A618;
+    new ((char*)self + 0x54) sMcSlot9D48[7];
+    *(int*)((char*)self + 0x4C) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    *(int*)((char*)self + 0xC) = 0x4C;
+    func_001DA4A8(self);
+    return self;
+}
+#endif
 

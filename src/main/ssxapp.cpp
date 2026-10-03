@@ -271,7 +271,75 @@ INCLUDE_ASM("main/ssxapp", func_00228C08);
 
 INCLUDE_ASM("main/ssxapp", initOnline);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229180);
+#ifdef SKIP_ASM
+extern "C" void func_002292E0(void* self);
+// PORT: the ctor's mangled name says int; it receives the allocated block (pointer in int)
+void* cCrowdRender2D_cCrowdRender2D(int mem);
+void* cCrowdRender2D_constructCrowdAnim2D(void* r);
+extern char D_0047B320[];
+extern int D_004A2A00;
+
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sCrowdCfg_229180 {
+    short f0;
+    short f2;
+    short f4;
+    short f6;
+    int f8;
+    int fC;
+    int f10;
+};
+extern sCrowdCfg_229180 D_00536690_229180[] __asm__("D_00536690");
+
+struct sCrowdId_229180 {
+    unsigned int id;
+    sCrowdId_229180() : id(0xFFFFFFFF) {}
+};
+
+struct sCrowdSlot_229180 {
+    char data[0x40];
+    sCrowdSlot_229180() {}
+};
+
+struct sCrowdRest_229180 {
+    char data[0x20];
+    sCrowdRest_229180() {}
+};
+
+static inline int AnimCount_229180(char* anim)
+{
+    return *(int*)(anim + 0x10);
+}
+
+struct sCrowd_229180 {
+    void* render;
+    char* anim;
+};
+
+extern "C" void* func_00229180(sCrowd_229180* self)
+{
+    new ((char*)self + 0x8) sCrowdId_229180[128];
+    new ((char*)self + 0x210) sCrowdSlot_229180[128];
+    new ((char*)self + 0x2220) sCrowdRest_229180[40];
+    // PORT: the singleton pointer is held in an int global
+    D_004A2A00 = (int)self;
+    self->render = cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, D_0047B320, 0x20000000, 0));
+    char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(self->render);
+    self->anim = anim;
+    D_00536690_229180[0].f0 = AnimCount_229180(anim);
+    D_00536690_229180[0].fC = 0x20000;
+    D_00536690_229180[0].f10 = 0;
+    D_00536690_229180[0].f2 = -1;
+    D_00536690_229180[0].f4 = -1;
+    D_00536690_229180[0].f8 = 0;
+    D_00536690_229180[0].f6 = -1;
+    func_002292E0(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229278);
