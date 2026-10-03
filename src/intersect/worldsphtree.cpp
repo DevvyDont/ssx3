@@ -758,7 +758,70 @@ INCLUDE_ASM("intersect/worldsphtree", func_00336D40);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00336F30);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/worldsphtree", func_003378C0);
+#ifdef SKIP_ASM
+struct sHit_003378C0 {
+    float pad0[16];
+    float dist;             // 0x40
+    int pad44[3];
+    char* obj;              // 0x50
+    char* tri;              // 0x54
+    int pad58[10];
+    sHit_003378C0() {}
+} __attribute__((aligned(16)));
+
+struct sVEnt_003378C0 { short delta; short index; float (*fn)(void*); };
+extern "C" int func_00336F30(void* self, void* q, sHit_003378C0* hits, int max, int a4);
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_003378C0(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline int isBetter_003378C0(sHit_003378C0* a, sHit_003378C0* b)
+{
+    if (a->obj != 0) {
+        if (b->obj == 0) {
+            return 1;
+        }
+        return *(unsigned int*)(a->obj + 0x78) < *(unsigned int*)(b->obj + 0x78);
+    }
+    if (b->obj != 0) {
+        return 0;
+    }
+    return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
+}
+
+extern "C" float func_003378C0(void* self, char* q, sHit_003378C0* out, int a3)
+{
+    sHit_003378C0 hits[128];
+    int n = func_00336F30(self, q, hits, 0x80, a3);
+    if (n == 0) {
+        return -1.0f;
+    }
+    int best = 0;
+    sVEnt_003378C0* vt = *(sVEnt_003378C0**)(q + 0x50);
+    float ref = vt[3].fn(q + vt[3].delta);
+    float bestDiff = absf_003378C0(hits[0].dist - ref);
+    for (int i = 1; i < n; i++) {
+        float d = absf_003378C0(hits[i].dist - ref);
+        if (d < bestDiff) {
+            bestDiff = d;
+            best = i;
+        } else if (d == bestDiff) {
+            if (isBetter_003378C0(&hits[i], &hits[best])) {
+                best = i;
+            }
+        }
+    }
+    *out = hits[best];
+    return out->dist;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00339598);
 

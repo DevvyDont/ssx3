@@ -379,7 +379,50 @@ extern "C" void func_0013C618(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C650);
+#ifdef SKIP_ASM
+extern "C" void cRider_cRider(void* self);
+
+struct sVEntry_13C650 { short delta; short index; void* fn; };
+struct sVtbl9_13C650 { sVEntry_13C650 e[9]; } __attribute__((aligned(8)));
+struct sVtbl22_13C650 { sVEntry_13C650 e[22]; } __attribute__((aligned(8)));
+
+extern const sVtbl9_13C650 D_00459A98;
+extern char D_00459B90[];
+extern const sVtbl22_13C650 D_00459AE0;
+
+// PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
+// +0x18, vbase at +0x20); when not most-derived, g++ copies cRider's overridden vtables to the stack and
+// fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
+extern "C" void* func_0013C650(void* self, int inChrg)
+{
+    if (inChrg)
+    {
+        char* vb = (char*)self + 0x20;
+        *(char**)((char*)self + 0x18) = vb;
+        cRider_cRider(vb);
+    }
+    *(void**)(*(char**)((char*)self + 0x18) + 0x6E8) = (void*)&D_00459A98;
+    *(void**)(*(char**)((char*)self + 0x18) + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)((char*)self + 0x18) + 0x6C0) = (void*)&D_00459AE0;
+    if (!inChrg)
+    {
+        sVtbl9_13C650 t1 = D_00459A98;
+        *(void**)(*(char**)((char*)self + 0x18) + 0x6E8) = &t1;
+        char* base = *(char**)((char*)self + 0x18) - 0x20;
+        int d = (char*)self - base;
+        t1.e[1].delta = D_00459A98.e[1].delta + d;
+        sVtbl22_13C650 t2 = D_00459AE0;
+        *(void**)(*(char**)((char*)self + 0x18) + 0x6C0) = &t2;
+        t2.e[1].delta = D_00459AE0.e[1].delta + d;
+    }
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)(*(char**)((char*)self + 0x18) + 0x31C) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C7A8);
