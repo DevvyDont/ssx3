@@ -1695,7 +1695,78 @@ extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A180);
+#ifdef SKIP_ASM
+// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
+void func_0026BA68_A180(void* dst, void* src) __asm__("func_0026BA68");
+extern "C" void func_0026BA48(void* p, void* q);
+extern "C" void func_0026A338(void* self, void* src, void* dst);
+extern "C" void func_0026A378(void* self, char* src, int* dst);
+
+struct sVE0_26A180 { short delta; short index; void (*fn)(void*); };
+struct sVE1_26A180 { short delta; short index; void (*fn)(void*, char*, int, int); };
+
+struct sBXStr_26A180
+{
+    int count2;         // 0x0
+    char* items2;       // 0x4
+    int count1;         // 0x8
+    char vecA[0xC];     // 0xC
+    char* items1;       // 0x18
+    char vecB[0xC];     // 0x1C
+    char vecC[0xC];     // 0x28
+    void* vt;           // 0x34
+};
+
+extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
+{
+    char* start = src;
+    int n;
+    int a;
+    int b;
+    int c;
+    sVE0_26A180* vt0 = (sVE0_26A180*)self->vt;
+    vt0[3].fn((char*)self + vt0[3].delta);
+    func_0026BA68_A180(&n, src);
+    src += 4;
+    for (int i = 0; i < n; i++)
+    {
+        func_0026BA68_A180(&a, src);
+        src += 4;
+        func_0026BA68_A180(&b, src);
+        src += 4;
+        sVE1_26A180* vt1 = (sVE1_26A180*)self->vt;
+        vt1[4].fn((char*)self + vt1[4].delta, src, a, b);
+        src += b;
+    }
+    func_0026BA68_A180(&c, src);
+    src += 4;
+    self->count1 = c;
+    func_0026BA68_A180(&c, src);
+    src += 4;
+    self->count2 = c;
+    func_0026BA48(self->vecA, src);
+    src += 0xC;
+    func_0026BA48(self->vecB, src);
+    src += 0xC;
+    func_0026BA48(self->vecC, src);
+    src += 0xC;
+    self->items1 = src;
+    for (int i = 0; i < self->count1; i++)
+    {
+        func_0026A338(self, src, self->items1 + i * 16);
+        src += 16;
+    }
+    self->items2 = src;
+    for (int i = 0; i < self->count2; i++)
+    {
+        func_0026A378(self, src, (int*)(self->items2 + i * 16));
+        src += 16;
+    }
+    return src - start;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A338);

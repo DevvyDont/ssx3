@@ -175,7 +175,91 @@ void* func_003A6928(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/world", func_003A6948);
+#ifdef SKIP_ASM
+struct cBXString;
+extern "C" void* cBXString_cBXString2(void* self, const char* str);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+extern "C" void func_00318D28(cBXString* self);
+extern "C" void* func_003E1908(const char* name, int flags);
+extern "C" int func_004165A8(const void* a, const void* b);
+void cMemMan_free(void*);
+extern char D_004A47C0[];
+extern char D_004A47C8[];
+
+struct sName_3A6948 {
+    char* name;
+    int ok;
+};
+
+struct sEntry_3A6948 {
+    char name[0x58];
+};
+
+struct sFile_3A6948 {
+    unsigned short magic;       // 0x00
+    char pad_2[6];
+    unsigned int count;         // 0x08
+    char pad_c[8];
+    sEntry_3A6948* entries;     // 0x14
+};
+
+struct sStr_3A6948 {
+    char* s;
+    sStr_3A6948() {}
+    sStr_3A6948(const sStr_3A6948&);
+};
+
+extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
+{
+    sFile_3A6948* data;
+    int ret;
+    {
+        sStr_3A6948 full;
+        sStr_3A6948 tmp;
+        sStr_3A6948 str;
+        char* pre = D_004A47C0;
+        cBXString* t = (cBXString*)&tmp;
+        cBXString_cBXString2(&str, path);
+        func_003186D0(t, pre, (cBXString*)&str);
+        func_00318630((cBXString*)&full, t, D_004A47C8);
+        data = (sFile_3A6948*)func_003E1908(full.s, 0x3000000);
+        cBXString__cBXString(&full, 2);
+        cBXString__cBXString(t, 2);
+        cBXString__cBXString(&str, 2);
+    }
+    ret = data && data->magic == 0x3800;
+    if (ret)
+    {
+        int i;
+        data->entries = (sEntry_3A6948*)((char*)data + 0x50);
+        ret = 0;
+        for (i = 0; i < n; i++)
+        {
+            sStr_3A6948 s;
+            unsigned int j;
+            names[i].ok = 0;
+            cBXString_cBXString2(&s, names[i].name);
+            func_00318D28((cBXString*)&s);
+            for (j = 0; j < data->count; j++)
+            {
+                if (func_004165A8(&data->entries[j], s.s) == 0)
+                {
+                    names[i].ok = ret = 1;
+                    break;
+                }
+            }
+            cBXString__cBXString(&s, 2);
+        }
+    }
+    if (data)
+        cMemMan_free(data);
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/world", func_003A6AE0);

@@ -581,7 +581,55 @@ extern "C" void func_001FC768(void* self)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FC878);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FCEC0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern signed char D_00535C10[];
+extern char D_0046E888[];
+extern char D_004A2548[];
+extern char D_0046FEB0[];
+extern char D_0046FEC0[];
+
+struct sVec3_1FCEC0
+{
+    float x, y, z;
+    sVec3_1FCEC0() {}
+    sVec3_1FCEC0(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+extern "C" int func_001FCEC0(void* self, void* msg)
+{
+    if (msg != 0)
+    {
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int mode = D_00535C10[0];
+    if (mode == 2 || mode == 3)
+    {
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E888));
+        sVec3_1FCEC0 p = *(sVec3_1FCEC0*)(o + 0x44);
+        *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x + 130.0f, p.y, p.z);
+    }
+    else if (mode == 5 || mode == 6)
+    {
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2548));
+        sVec3_1FCEC0 p = *(sVec3_1FCEC0*)(o + 0x44);
+        *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x, p.y + 40.0f, p.z);
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FEB0));
+        p = *(sVec3_1FCEC0*)(o + 0x44);
+        *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x, p.y + 67.0f, p.z);
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FEC0));
+        p = *(sVec3_1FCEC0*)(o + 0x44);
+        *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x, p.y - 48.0f, p.z);
+    }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
@@ -834,7 +882,164 @@ extern "C" void func_001FE648(void* self, int a1, bool on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE6E8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* self);
+extern "C" void func_0023CAE8(void* self, int a, int b);
+void func_00270ED8(void* self);
+// PORT: the unit declares func_0023D570 as returning void*; this caller ignores the result (void view by asm label).
+extern "C" void func_0023D570_v(void* self, int mode) __asm__("func_0023D570");
+
+class cMovieSub434_1FE6E8 {
+public:
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual int v09();
+    virtual int v10();
+    virtual int v11();
+    virtual int v12();
+    virtual int v13();
+    virtual int v14();
+    virtual int v15();
+    virtual int v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual int v21();
+    virtual int v22();
+    virtual int v23();
+    virtual int v24();
+    virtual int v25();
+    virtual int v26();
+    virtual int v27();
+    virtual int v28();
+    virtual int v29();
+    virtual int v30();
+    virtual int v31();
+    virtual int v32();
+    virtual int v33();
+    virtual int v34();
+    virtual int v35();
+    virtual int v36();
+    virtual int v37();
+    virtual int v38();
+    virtual int v39();
+    virtual int v40();
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+    virtual int v44();
+    virtual int v45();
+    virtual int v46();
+    virtual int v47();
+    virtual int v48();
+    virtual int v49();
+    virtual int v50();
+    virtual int v51();
+    virtual int v52();
+    virtual int v53();
+    virtual int v54(int);
+    virtual int v55();
+    virtual int v56();
+    virtual int v57();
+    virtual int v58();
+    virtual int v59();
+    virtual int v60();
+    virtual int v61();
+    virtual int v62();
+    virtual int v63();
+    virtual int v64();
+    virtual int v65();
+    virtual int v66();
+    virtual int v67(int);
+};
+
+class cMoviePlayer_1FE6E8 {
+public:
+    char pad[0x748];
+    virtual void v01(int);
+};
+
+extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
+{
+    if (msg == 0)
+        return;
+    if (*(int*)((char*)self + 0x1A8) != 0)
+        return;
+    switch (type)
+    {
+    case 5:
+    {
+        int one = 1;
+        if (*(int*)((char*)self + 0x1C0) == 6)
+            return;
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        int st = *(int*)((char*)self + 0x214);
+        if (st != 3)
+            return;
+        int v = *(int*)((char*)msg + 0x18);
+        *(int*)((char*)self + 0x1C4) = v;
+        *(int*)(mp + 0xF8) = v;
+        *(int*)((char*)self + 0x1A8) = one;
+        if (*(int*)((char*)self + 0x1C8) == one)
+        {
+            func_00270ED8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+            *(int*)((char*)self + 0x1C8) = 0;
+        }
+        func_0023CAE8(mp, 0, -1);
+        *(int*)((char*)self + 0x1DC) = one;
+        *(int*)((char*)self + 0x1A8) = one;
+        *(int*)((char*)self + 0x1C0) = st;
+        break;
+    }
+    case 6:
+    {
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        if (*(int*)((char*)self + 0x1A8) == 1)
+            return;
+        int s = *(int*)((char*)self + 0x1C0);
+        if (s == 6)
+            return;
+        *(int*)((char*)self + 0x1E4) = 1;
+        if (s == 0 || s == 2 || s == 1)
+            ((cMoviePlayer_1FE6E8*)mp)->v01(0);
+        *(int*)((char*)self + 0x1C0) = 6;
+        break;
+    }
+    case 7:
+    {
+        int one = 1;
+        if (*(int*)((char*)self + 0x1C0) == 6)
+            return;
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
+            return;
+        int v = *(int*)((char*)msg + 0x18);
+        *(int*)((char*)self + 0x1C4) = v;
+        *(int*)(mp + 0xF8) = v;
+        int s = *(int*)((char*)self + 0x1C0);
+        if (s != one)
+            return;
+        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v67(*(int*)((char*)self + 0x1C4)))
+            return;
+        *(int*)((char*)self + 0x1A8) = s;
+        *(int*)((char*)self + 0x1C0) = 4;
+        func_0023D570_v(mp, 0);
+        ((cMoviePlayer_1FE6E8*)mp)->v01(0x18);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE8F0);
@@ -994,7 +1199,158 @@ extern "C" void func_001FF310(void* self, int a1, bool on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* self);
+extern "C" void func_0023CAE8(void* self, int a, int b);
+// PORT: the unit declares func_0023D570 as returning void*; this caller ignores the result (void view by asm label).
+extern "C" void func_0023D570_v(void* self, int mode) __asm__("func_0023D570");
+
+class cMovieSub434_1FF3B0 {
+public:
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual int v09();
+    virtual int v10();
+    virtual int v11();
+    virtual int v12();
+    virtual int v13();
+    virtual int v14();
+    virtual int v15();
+    virtual int v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual int v21();
+    virtual int v22();
+    virtual int v23();
+    virtual int v24();
+    virtual int v25();
+    virtual int v26();
+    virtual int v27();
+    virtual int v28();
+    virtual int v29();
+    virtual int v30();
+    virtual int v31();
+    virtual int v32();
+    virtual int v33();
+    virtual int v34();
+    virtual int v35();
+    virtual int v36();
+    virtual int v37();
+    virtual int v38();
+    virtual int v39();
+    virtual int v40();
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+    virtual int v44();
+    virtual int v45();
+    virtual int v46();
+    virtual int v47();
+    virtual int v48();
+    virtual int v49();
+    virtual int v50();
+    virtual int v51();
+    virtual int v52();
+    virtual int v53();
+    virtual int v54(int);
+    virtual int v55();
+    virtual int v56();
+    virtual int v57();
+    virtual int v58();
+    virtual int v59();
+    virtual int v60();
+    virtual int v61();
+    virtual int v62();
+    virtual int v63();
+    virtual int v64();
+    virtual int v65();
+    virtual int v66();
+    virtual int v67(int);
+};
+
+class cMoviePlayer_1FF3B0 {
+public:
+    char pad[0x748];
+    virtual void v01(int);
+};
+
+extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
+{
+    if (msg == 0)
+        return;
+    if (*(int*)((char*)self + 0x1A8) != 0)
+        return;
+    switch (type)
+    {
+    case 5:
+    {
+        int one = 1;
+        if (*(int*)((char*)self + 0x1C0) == 6)
+            return;
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        int st = *(int*)((char*)self + 0x214);
+        if (st != 3)
+            return;
+        int v = *(int*)((char*)msg + 0x18);
+        *(int*)((char*)self + 0x1C4) = v;
+        *(int*)(mp + 0xF8) = v;
+        *(int*)((char*)self + 0x1A8) = one;
+        func_0023CAE8(mp, 2, -1);
+        *(int*)((char*)self + 0x1DC) = one;
+        *(int*)((char*)self + 0x1A8) = one;
+        *(int*)((char*)self + 0x1C0) = st;
+        break;
+    }
+    case 6:
+    {
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        if (*(int*)((char*)self + 0x1A8) == 1)
+            return;
+        int s = *(int*)((char*)self + 0x1C0);
+        if (s == 6)
+            return;
+        *(int*)((char*)self + 0x1E4) = 1;
+        if (s == 0 || s == 2 || s == 1)
+            ((cMoviePlayer_1FF3B0*)mp)->v01(0);
+        *(int*)((char*)self + 0x1C0) = 6;
+        break;
+    }
+    case 7:
+    {
+        int one = 1;
+        if (*(int*)((char*)self + 0x1C0) == 6)
+            return;
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
+            return;
+        int v = *(int*)((char*)msg + 0x18);
+        *(int*)((char*)self + 0x1C4) = v;
+        *(int*)(mp + 0xF8) = v;
+        int s = *(int*)((char*)self + 0x1C0);
+        if (s != one)
+            return;
+        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v67(*(int*)((char*)self + 0x1C4)))
+            return;
+        *(int*)((char*)self + 0x1A8) = s;
+        *(int*)((char*)self + 0x1C0) = 4;
+        func_0023D570_v(mp, 0);
+        ((cMoviePlayer_1FF3B0*)mp)->v01(0x18);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onCreateScreen);

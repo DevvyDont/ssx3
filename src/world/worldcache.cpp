@@ -155,7 +155,91 @@ extern "C" void func_003A7818(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A7878);
+#ifdef SKIP_ASM
+void* func_003A7768(void* self);
+
+struct sWCBlock_7878 {
+    char* data;
+    int size;
+    int pos;
+    int pad;
+    int used;
+    sWCBlock_7878* next;
+};
+
+struct sWCPool_7878 {
+    void* alloc;
+    int f4;
+    unsigned int count;
+    sWCBlock_7878* head;
+    sWCBlock_7878* cur;
+};
+
+static inline void NewBlock_7878(sWCPool_7878* self)
+{
+    sWCBlock_7878* b = (sWCBlock_7878*)func_003A7768(self->alloc);
+    b->pos = 0;
+    b->pad = 0;
+    b->next = self->head;
+    self->head = b;
+    self->cur = b;
+    self->count++;
+}
+
+extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
+{
+    if (self->count == 0)
+        NewBlock_7878(self);
+    sWCBlock_7878* first = self->cur;
+    int align = 4 << ((flags >> 24) & 0xF);
+    int pos = first->pos;
+    int rem = pos % align;
+    int pad = 0;
+    if (rem)
+        pad = align - rem;
+    if (pos + pad + size < first->size)
+    {
+        first->pos = pos + (pad + size);
+        char* p = first->data + pos;
+        p += pad;
+        self->cur->pad += pad;
+        return p;
+    }
+    if (self->count >= 2)
+    {
+        self->cur = self->head;
+        if (self->cur)
+        {
+            do
+            {
+                sWCBlock_7878* b = self->cur;
+                if (b != first)
+                {
+                    int bpos = b->pos;
+                    rem = bpos % align;
+                    pad = 0;
+                    if (rem)
+                        pad = align - rem;
+                    if (bpos + pad + size < b->size)
+                    {
+                        b->pos = bpos + (pad + size);
+                        char* p = b->data + bpos;
+                        p += pad;
+                        self->cur->pad += pad;
+                        return p;
+                    }
+                }
+                self->cur = self->cur->next;
+            } while (self->cur);
+        }
+    }
+    NewBlock_7878(self);
+    self->cur->pos += size;
+    return self->cur->data;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A7A20);
@@ -463,7 +547,73 @@ extern "C" void func_003A7F90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", cWorldCache_init);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_003A7A20(void* self);
+extern "C" void* cWorldCacheTable_cWorldCacheTable(void* self, void* data);
+extern "C" void* FILE_load(const char* name, int flags);
+extern "C" void* func_003AAD98(void);
+extern "C" int func_003A6E98(void* self, const char* name, void* owner);
+// PORT: the unit defines func_003A9000(sWorldCacheMap*, sWCHdr*, int id); this caller passes the cache in the
+// third argument. Bound by asm label with pointer parameters.
+extern "C" int func_003A9000_p(void* self, void* data, void* owner) __asm__("func_003A9000");
+struct func_003A82C8_sCache;
+extern "C" void func_003A82C8(func_003A82C8_sCache* self);
+extern char D_00494E30[];
+extern char D_00494E40[];
+extern char D_00494E50[];
+extern char D_004A47C0[];
+extern char D_004A47C8[];
+
+struct sBXStr_7FC0
+{
+    char* p;
+    sBXStr_7FC0() {}
+    sBXStr_7FC0(const sBXStr_7FC0&);
+};
+
+extern "C" void* cBXString_cBXString2(sBXStr_7FC0* self, const char* s);
+extern "C" sBXStr_7FC0* func_00318630(sBXStr_7FC0* self, sBXStr_7FC0* a, const char* str);
+extern "C" sBXStr_7FC0* func_003186D0(sBXStr_7FC0* self, const char* str, sBXStr_7FC0* b);
+extern "C" void cBXString__cBXString(sBXStr_7FC0* self, int flags);
+
+struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
+
+extern "C" int cWorldCache_init(void* self, const char* name, int arg)
+{
+    *(void**)((char*)self + 0xC) = func_003A7A20(cMemMan_alloc(0x13C, D_00494E30, 0, 0));
+    sBXStr_7FC0 path;
+    sBXStr_7FC0 full;
+    sBXStr_7FC0 base;
+    func_003186D0(&full, D_004A47C0, (cBXString_cBXString2(&base, name), &base));
+    func_00318630(&path, &full, D_004A47C8);
+    *(void**)self = FILE_load(path.p, 0x2000000);
+    cBXString__cBXString(&path, 2);
+    cBXString__cBXString(&full, 2);
+    cBXString__cBXString(&base, 2);
+    char* hdr = *(char**)self;
+    *(char**)(hdr + 0x14) = hdr + 0x50;
+    *(void**)((char*)self + 0x4) = cWorldCacheTable_cWorldCacheTable(cMemMan_alloc(0xE8, D_00494E40, 0, 0), *(char**)self + 0x18);
+    *(void***)((char*)self + 0x8) = (void**)operator_new_tag(*(int*)(*(char**)self + 0x8) * 4, D_00494E50, 0, 0);
+    for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 0x8); i++)
+        (*(void***)((char*)self + 0x8))[i] = 0;
+    char* x = (char*)func_003AAD98();
+    *(char**)((char*)self + 0x3E8) = x;
+    sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
+    vt[2].fn(x + vt[2].delta, arg);
+    if (func_003A6E98((char*)self + 0x300, name, self) == 0)
+        return 0;
+    int r = func_003A9000_p((char*)self + 0x10, *(void**)self, self);
+    if (r == 0)
+        return 0;
+    func_003A82C8((func_003A82C8_sCache*)self);
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
@@ -646,7 +796,107 @@ extern "C" void func_003A8650(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", cWorldCache_updatePages);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
+extern "C" void* func_003A9A98(void* self, int i);
+extern "C" void func_003A6F88(void* self, int i, int a, int b);
+extern "C" void func_003A8528(void* self, int i);
+extern char* D_004A5B64;
+extern char* D_004A5B80;
+extern char D_00494E88[];
+
+// PORT: g++ 2.95 new-expression; the ctor and the tagged allocator are bound to their symbols by asm label.
+struct sHullPage_8668 {
+    char data[0x10];
+    sHullPage_8668(unsigned short* d) __asm__("cHullPage_cHullPage");
+    void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+};
+
+struct sWCPSlot_8668 {
+    int state;   // 0x0
+    int locked;  // 0x4
+    sHullPage_8668* page;  // 0x8
+    float pri;   // 0xC
+    int time;    // 0x10
+    int stamp;   // 0x14
+};
+
+struct sWCPCache_8668 {
+    char pad0[0x390];
+    int busy;                   // 0x390
+    char pad394[0x3EC - 0x394];
+    unsigned int count;         // 0x3EC
+    sWCPSlot_8668 slot[256];    // 0x3F0
+    int timeBase;               // 0x1BF0
+};
+
+struct sVE_8668 { short delta; short index; int (*fn)(void*); };
+
+static inline int Frame_8668()
+{
+    char* o = D_004A5B80;
+    sVE_8668* vt = *(sVE_8668**)(o + 0x10D8);
+    return vt[114].fn(o + vt[114].delta);
+}
+
+extern "C" void cWorldCache_updatePages(void* p)
+{
+    sWCPCache_8668* self = (sWCPCache_8668*)p;
+    int now = *(int*)(D_004A5B64 + 0x1C);
+    int best = -1;
+    float bestPri = -1.0f;
+    for (unsigned int i = 0; i < self->count; i++)
+    {
+        int st = self->slot[i].state;
+        if (st == 0)
+            continue;
+        int expired = 0;
+        if (self->slot[i].locked == 0 && now - self->slot[i].time >= self->timeBase)
+            expired = 1;
+        switch (st)
+        {
+        case 2:
+            break;
+        case 1:
+            if (expired)
+            {
+                self->slot[i].state = 0;
+                break;
+            }
+            if (self->slot[i].pri > bestPri)
+            {
+                bestPri = self->slot[i].pri;
+                best = i;
+            }
+            break;
+        case 3:
+            if (!expired)
+                break;
+            self->slot[i].state = 4;
+            self->slot[i].stamp = Frame_8668();
+            break;
+        case 4:
+            if (Frame_8668() - self->slot[i].stamp < 5)
+                break;
+            func_003A8528(self, i);
+            self->slot[i].state = 0;
+            break;
+        }
+    }
+    if (best < 0)
+        return;
+    void* mgr = (char*)self + 0x300;
+    if (self->busy != 0)
+        return;
+    unsigned short* data = (unsigned short*)func_003A9A98((char*)self + 0x10, best);
+    self->slot[best].page = new (D_00494E88, 0x20000000, 0) sHullPage_8668(data);
+    func_003A6F88(mgr, best, data[0], *(int*)(data + 2));
+    self->slot[best].state = 2;
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A88A8);
 

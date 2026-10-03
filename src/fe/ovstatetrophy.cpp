@@ -287,7 +287,81 @@ extern "C" void func_00210608(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char* D_004A2750;
+extern char* D_004A2754;
+extern void* D_004A28A8;
+float func_00113128(void* rider);
+extern "C" float func_00210820(int i);
+
+struct sTrophyEntry_210618 {
+    int active;
+    int seg;
+    float dist;
+    float pos;
+    int pad[2];
+};
+
+struct sTrophySeg_210618 {
+    char pad[0x10];
+    float dist;
+};
+
+// The unit declares D_004C8BC8 as a 16-byte pad struct; view it as the per-rider table by asm label.
+extern sTrophyEntry_210618 D_004C8BC8_210618[] __asm__("D_004C8BC8");
+
+extern "C" void func_00210618(int i)
+{
+    char* course = D_004A2750;
+    sTrophySeg_210618* segs = (sTrophySeg_210618*)D_004A2754;
+    if (course == 0)
+        return;
+    char* race = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    if (i >= *(int*)(race + 0x78))
+        return;
+    float d = *(float*)(course + 0x10) - func_00113128(*(void**)(race + (i << 2) + 0x28));
+    if (D_004C8BC8_210618[i].active == 0)
+    {
+        float prev = D_004C8BC8_210618[i].dist;
+        float dd = d - prev;
+        float lim = 138.88890075683594f;
+        if (dd > lim)
+            d = prev + lim;
+        else if (dd < -lim)
+            d = prev - lim;
+    }
+    if (d <= 0.0f)
+    {
+        D_004C8BC8_210618[i].seg = 0;
+        D_004C8BC8_210618[i].dist = 0.0f;
+        D_004C8BC8_210618[i].pos = func_00210820(i);
+    }
+    else
+    {
+        int last = *(int*)course - 1;
+        if (segs[last].dist <= d)
+        {
+            D_004C8BC8_210618[i].seg = last;
+            D_004C8BC8_210618[i].dist = *(float*)(course + 0x10);
+            D_004C8BC8_210618[i].pos = func_00210820(i);
+        }
+        else
+        {
+            int k = D_004C8BC8_210618[i].seg;
+            while (segs[k].dist <= d)
+                k++;
+            while (d < segs[k].dist)
+                k--;
+            D_004C8BC8_210618[i].seg = k;
+            D_004C8BC8_210618[i].dist = d;
+            D_004C8BC8_210618[i].pos = func_00210820(i);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210820);
@@ -381,7 +455,90 @@ extern "C" void func_002108F8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210940);
+#ifdef SKIP_ASM
+struct sColor_210940 {
+    float r, g, b, a;
+    sColor_210940(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+class cUIText;
+class cUIObj_210940 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual int setColor(const sColor_210940& c);
+};
+
+struct sRect_210940 { int a, b, c, d; };
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+void cUIText_setAsciiString(cUIText* text, const char* s);
+extern "C" void func_0020A380(void* self);
+extern "C" void func_003A1310(void* self, int a1);
+extern void* D_004A28A8;
+extern char D_00471CE8[];
+extern char D_00471D00[];
+extern char D_00471D10[];
+extern char D_00471D20[];
+extern char D_00471D30[];
+extern char D_00471D40[];
+extern char D_0046E808[];
+extern char D_00534FC8[];
+extern sRect_210940 D_004C8D08;
+
+extern "C" void func_00210940(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471CE8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen == 0)
+        return;
+    cUIScreen_playFrame(screen, 0, 0);
+    cUIObj_210940* t = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D00));
+    if (t != 0)
+    {
+        t->setVisible(1);
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        cUIText_setAsciiString((cUIText*)t, D_00534FC8);
+    }
+    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D10));
+    *(int*)(a + 0x14) |= 1;
+    void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D20));
+    void* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D30));
+    void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D40));
+    *(void**)(a + 0x7C) = b;
+    *(void**)(a + 0x80) = c;
+    *(void**)(a + 0x84) = d;
+    *(int*)(a + 0x88) = 2;
+    cUIObj_210940* e = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E808));
+    if (e != 0)
+    {
+        *(int*)((char*)e + 0x74) |= 1;
+        func_003A1310(e, 1);
+        e->setVisible(1);
+        *(int*)((char*)e + 0x14) |= 0x80;
+        e->setColor(sColor_210940(1.0f, 0.0f, 0.0f, 0.0f));
+        *(sRect_210940*)((char*)e + 0xA8) = D_004C8D08;
+        *(char**)((char*)e + 0xB8) = a;
+    }
+    func_0020A380(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);

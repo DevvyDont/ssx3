@@ -338,7 +338,71 @@ extern "C" void func_00343820(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343868);
+#ifdef SKIP_ASM
+extern "C" void func_00343868(void* self, int msg, float level)
+{
+    int bit = 0;
+    int fire = 0;
+    if (level == 1.0f)
+        bit = 1;
+    else if (level == 2.0f)
+        bit = 2;
+    else if (level == 3.0f)
+        bit = 4;
+    else if (level == 4.0f)
+        bit = 8;
+    else if (level == 5.0f)
+        bit = 0x10;
+    else if (level == 6.0f)
+        bit = 0x20;
+    else if (level == 7.0f)
+        bit = 0x40;
+    else if (level == 8.0f)
+        bit = 0x80;
+    else if (level == 9.0f)
+        bit = 0x100;
+    else if (level == 10.0f)
+        bit = 0x200;
+    if (msg == 0x1F4)
+    {
+        int f = *(int*)((char*)self + 0x20);
+        if ((f & bit) == 0)
+        {
+            fire = 1;
+            *(int*)((char*)self + 0x20) = f | bit;
+        }
+    }
+    else if (msg == 0x1F5)
+    {
+        int f = *(int*)((char*)self + 0x20);
+        if ((f & bit) == 0)
+        {
+            if (level == 1.0f)
+            {
+                fire = 1;
+                *(int*)((char*)self + 0x20) = f | 1;
+            }
+            else if (f & (bit >> 1))
+            {
+                fire = 1;
+                *(int*)((char*)self + 0x20) = f | bit;
+            }
+        }
+    }
+    else
+    {
+        fire = msg == 0x1F6;
+    }
+    if (fire)
+    {
+        int c = *(int*)((char*)self + 0x1C);
+        if (c > 0)
+            *(int*)((char*)self + 0x1C) = c - 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00343A18);
@@ -852,7 +916,74 @@ extern "C" void func_003449F0(void* elem)
 
 INCLUDE_ASM("object/debouncenode", func_00344AA0);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344E18);
+#ifdef SKIP_ASM
+struct sTrackWorld51C0;
+extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" void func_00344730(sDebounce4730* self, int index);
+extern char* D_004A47B8;
+extern char* D_004A5B80;
+
+struct sModel_44E18 {
+    char pad_0x0[0x7D];
+    unsigned char page;     // 0x7D
+    short slot;             // 0x7E
+};
+
+struct sModelSet_44E18 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+
+struct sWorld_44E18 {
+    char pad_0x0[0x8];
+    sModelSet_44E18** sets; // 0x8
+};
+
+static inline sModel_44E18* GetModel_44E18(unsigned int* ref)
+{
+    return (sModel_44E18*)((sModelRef4730*)ref)->get();
+}
+
+static inline int IsLoaded_44E18(sModel_44E18* m)
+{
+    char* wc = *(char**)D_004A47B8;
+    if (m->page == 0xFF)
+        return 1;
+    int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;
+    return ok ? *(int*)(wc + m->slot * 0x18 + 0x3F0) == 3 : 0;
+}
+
+struct sVE7_44E18 { short delta; short index; void (*fn)(void*, void*, float, void*, void*, void*, int, int); };
+struct sVE5_44E18 { short delta; short index; void (*fn)(void*, void*, void*, int, int); };
+
+extern "C" void func_00344E18(void* self)
+{
+    char* r = D_004A5B80;
+    unsigned int* ref = (unsigned int*)((char*)self + 0xC);
+    int off = 0;
+    for (int i = 0; i < 32; ref += 2, i++, off += 8)
+    {
+        if (~*ref == 0)
+            continue;
+        sModel_44E18* m = GetModel_44E18(ref);
+        if (!IsLoaded_44E18(m))
+            continue;
+        if (*(int*)((char*)self + 0x114) >= 2)
+        {
+            func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
+            sVE7_44E18* vt = *(sVE7_44E18**)(r + 0x10D8);
+            vt[95].fn(r + vt[95].delta, m, 1.0f, (char*)self + 0x118, (char*)m + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
+        }
+        else
+        {
+            sVE5_44E18* vt = *(sVE5_44E18**)(r + 0x10D8);
+            vt[96].fn(r + vt[96].delta, m, *(void**)((char*)self + 0x1E8), 0, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344FC0);

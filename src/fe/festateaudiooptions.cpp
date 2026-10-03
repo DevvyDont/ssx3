@@ -27,7 +27,126 @@ extern "C" int func_00196B08(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196B90);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self);
+extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+int GetHashValue32(char* str);
+extern "C" void func_003E6448(void* p, int c, int n);
+extern "C" int func_00398380(void* list, int hash);
+extern "C" int func_00150928(void* iface, int idx, int ch);
+// PORT: 64-bit results (long is 8 bytes on the EE).
+extern "C" long func_00158728(void* iface, int idx, int ch);
+extern "C" long func_00158750(void* iface, int idx, int ch);
+extern "C" void* func_0028B180();
+extern "C" void func_00197AD8(void* self);
+extern void* D_00469378[];
+extern char D_0045DA48[];
+extern char D_0045DA38[];
+extern char D_0045DA58[];
+
+struct sAudioState_196B90
+{
+    char pad0[0x4C];
+    char buf[0x100];        // 0x4C
+    int f14C;               // 0x14C
+    int f150;               // 0x150
+    char pad154[4];
+    long f158;              // 0x158
+    long f160;              // 0x160
+    int f168;               // 0x168
+    int f16C;               // 0x16C
+    int f170;               // 0x170
+    int a174[8];            // 0x174
+    int a194[8];            // 0x194
+    int f1B4;               // 0x1B4
+    int f1B8;               // 0x1B8
+    int a1BC[6];            // 0x1BC
+    int f1D4;               // 0x1D4
+    int f1D8;               // 0x1D8
+    int f1DC;               // 0x1DC
+    int f1E0;               // 0x1E0
+    int f1E4;
+    int f1E8;
+    int f1EC;
+    int f1F0;
+    int f1F4;
+    int f1F8;
+    int f1FC;
+    int f200;
+    int f204;               // 0x204
+    int f208;               // 0x208
+    int f20C;               // 0x20C
+};
+
+static inline int Find_196B90(char* mgr, int hash)
+{
+    return func_00398380(mgr + 0x58, hash);
+}
+
+extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
+{
+    sAudioState_196B90* self = (sAudioState_196B90*)p;
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 0x11;
+    *(void***)((char*)self + 0x8) = D_00469378;
+    *(signed char*)((char*)self + 0x44) = idx;
+    if (**(void***)((char*)self + 0x10) != 0)
+        *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    func_003E6448(self->buf, 0, 0x100);
+    self->f14C = 0;
+    self->f150 = 0;
+    self->f170 = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        self->a174[i] = 0;
+        self->a194[i] = 0;
+    }
+    self->f1B4 = 0;
+    self->f1B8 = 0;
+    for (int i = 5; i >= 0; i--)
+        self->a1BC[i] = 0;
+    self->f16C = a3;
+    self->f1D4 = 0;
+    self->f1DC = 0;
+    self->f1D8 = 0;
+    self->f1E0 = 0;
+    self->f1E4 = 0;
+    self->f1E8 = 0;
+    self->f1EC = 0;
+    self->f1F0 = 0;
+    self->f1F4 = 0;
+    self->f1F8 = 0;
+    self->f1FC = 0;
+    self->f200 = 0;
+    self->f158 = 0;
+    {
+        char* mgr = *(char**)((char*)self + 0x10);
+        self->f204 = Find_196B90(mgr, GetHashValue32(D_0045DA48));
+    }
+    {
+        char* mgr = *(char**)((char*)self + 0x10);
+        self->f208 = Find_196B90(mgr, GetHashValue32(D_0045DA38));
+    }
+    {
+        char* mgr = *(char**)((char*)self + 0x10);
+        self->f20C = Find_196B90(mgr, GetHashValue32(D_0045DA58));
+    }
+    *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    self->f168 = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    void* ifc = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    self->f160 = func_00158728(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    self->f158 = func_00158750(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    self->f14C = *(int*)((char*)func_0028B180() + 0x504);
+    func_00197AD8(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196DB0);

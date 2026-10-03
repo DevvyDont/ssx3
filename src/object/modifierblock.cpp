@@ -683,7 +683,107 @@ void* func_00353AE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00353B10);
+#ifdef SKIP_ASM
+// PORT: func_002D1C58 is defined returning void*, but its value is the rider index passed to func_002D1C20(int).
+extern "C" int func_002D1C58_i() __asm__("func_002D1C58");
+extern "C" void* func_002D1C20(int i);
+extern int D_004A452C;
+extern char D_004FF1A0[];
+
+struct sMat_53B10 {
+    float m[16];
+} __attribute__((aligned(16)));
+
+struct sVec4_53B10 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRS_53B10 {
+    unsigned int f0lo : 2;
+    unsigned int f0b : 2;
+    unsigned int f0hi : 28;
+    unsigned int f4lo : 12;
+    unsigned int alpha : 8;
+    unsigned int zmode : 2;
+    unsigned int zon : 1;
+    unsigned int blendm : 2;
+    unsigned int f4hi : 7;
+    int f8;                     // bits 5..9 = blend
+    int fC;
+    int f10;
+};
+
+struct sVE_53B10 { short delta; short index; void (*fn)(void*, void*, float, void*, void*, int, int, int); };
+
+struct sCtx_53B10 {
+    char pad_0x0[0xE84];
+    sRS_53B10* top;             // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sVE_53B10* vtable;          // 0x10D8
+};
+
+extern sCtx_53B10* D_004A5B80_53B10 __asm__("D_004A5B80");
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMatrix_53B10(sMat_53B10* dst, void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+static inline void SetZOn_53B10(sRS_53B10* r, int v) { r->zon = v; }
+static inline void SetBlendM_53B10(sRS_53B10* r, int v) { r->blendm = v; }
+static inline void SetZMode_53B10(sRS_53B10* r, int v) { r->zmode = v; }
+static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
+
+extern "C" void func_00353B10(void* self)
+{
+    if (D_004A452C != 0)
+        return;
+    sCtx_53B10* ctx = D_004A5B80_53B10;
+    if (*(void**)((char*)self + 0x14) == 0)
+        return;
+    sMat_53B10 m;
+    vu0CopyMatrix_53B10(&m, D_004FF1A0);
+    sVec4_53B10 pos = *(sVec4_53B10*)func_002D1C20(func_002D1C58_i());
+    *(sVec4_53B10*)&m.m[12] = pos;
+    ctx->top[1] = ctx->top[0];
+    sRS_53B10* t = ctx->top;
+    ctx->top = t + 1;
+    int f8 = t[1].f8;
+    t[1].f8 = f8 & ~0x3E0;
+    int old = (unsigned int)(f8 & 0x3E0) >> 5;
+    ctx->top->f0b = 3;
+    SetZOn_53B10(ctx->top, 1);
+    SetBlendM_53B10(ctx->top, 2);
+    SetZMode_53B10(ctx->top, 0);
+    SetAlpha_53B10(ctx->top, 0x14);
+    char* o = *(char**)((char*)self + 0x14);
+    if (o != 0)
+    {
+        *(unsigned int*)(o + 8) = (*(unsigned int*)(o + 8) & ~2u) | 4;
+        char* o2 = *(char**)((char*)self + 0x14);
+        sVE_53B10* vt = ctx->vtable;
+        vt[95].fn((char*)ctx + vt[95].delta, o2, 1.0f, *(void**)(*(char**)(o2 + 0x80) + 0xC), &m, 0, 0, 0x5420);
+    }
+    sRS_53B10* t2 = ctx->top;
+    ctx->top = t2 - 1;
+    int* pf = (int*)((char*)t2 - 0xC);
+    *pf = (*pf & ~0x3E0) | (old << 5);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353CF0);

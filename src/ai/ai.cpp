@@ -374,9 +374,202 @@ extern "C" int func_001298C8()
 
 INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 
+//100%
 INCLUDE_ASM("ai/ai", cAI_initMissionRiders);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void cRider_cRider(void* self);
+extern "C" void func_00125C70(void* self, int inChrg);
+extern "C" void func_0030DBA0(void* self, float a, float b);
+extern "C" void func_00148AA8(void* self, int rider, int value);
+extern "C" void cRider_addFocusBox(void* self);
+extern "C" void cRider_initOnce(void* self, int immediate);
+struct cRider;
+void cRider_addRiderMetrix(cRider* rider);
+void func_00144D70(void*, int, int);
+extern char D_00457F20[];
 
+struct sVEntry_MR { short delta; short index; void* fn; };
+struct sVtbl9_MR { sVEntry_MR e[9]; } __attribute__((aligned(8)));
+struct sVtbl22_MR { sVEntry_MR e[22]; } __attribute__((aligned(8)));
+
+extern const sVtbl9_MR D_00458240;
+extern char D_00459B90[];
+extern const sVtbl22_MR D_00458288;
+extern char D_00458338[];
+
+// PORT: g++ 2.95 most-derived constructor of a class deriving virtually from cRider (vbase at +0xE10,
+// vbase pointers in every subobject), inlined here; the not-in-charge vtable fix-up is written out by hand.
+static inline char* cMissionRider_ctor(char* self, int inChrg)
+{
+    if (inChrg)
+    {
+        char* vb = self + 0xE10;
+        *(char**)(self + 0xD20) = vb;
+        *(char**)(self + 0xC70) = vb;
+        *(char**)(self + 0xB40) = vb;
+        *(char**)(self + 0xB00) = vb;
+        *(char**)(self + 0xAF0) = vb;
+        *(char**)(self + 0xAD0) = vb;
+        *(char**)(self + 0x9C0) = vb;
+        *(char**)(self + 0x610) = vb;
+        *(char**)(self + 0x520) = vb;
+        *(char**)(self + 0x470) = vb;
+        *(char**)(self + 0x3B0) = vb;
+        *(char**)(self + 0x3A0) = vb;
+        *(char**)(self + 0x398) = vb;
+        *(char**)(self + 0x384) = vb;
+        *(char**)(self + 0x364) = vb;
+        *(char**)(self + 0x358) = vb;
+        *(char**)(self + 0x340) = vb;
+        *(char**)(self + 0x2B8) = vb;
+        *(char**)(self + 0x2A4) = vb;
+        *(char**)(self + 0x288) = vb;
+        *(char**)(self + 0x224) = vb;
+        *(char**)(self + 0x200) = vb;
+        *(char**)(self + 0x1F0) = vb;
+        *(char**)(self + 0x1E4) = vb;
+        *(char**)(self + 0x1C0) = vb;
+        *(char**)(self + 0x1B0) = vb;
+        *(char**)(self + 0x100) = vb;
+        *(char**)(self + 0xA0) = vb;
+        *(char**)(self + 0x70) = vb;
+        *(char**)(self + 0x24) = vb;
+        *(char**)(self + 0x18) = vb;
+        cRider_cRider(vb);
+    }
+    func_00125C70(self, 0);
+    *(const void**)(*(char**)(self + 0x18) + 0x6E8) = &D_00458240;
+    *(void**)(*(char**)(self + 0x18) + 0x6D0) = D_00459B90;
+    *(const void**)(*(char**)(self + 0x18) + 0x6C0) = &D_00458288;
+    *(void**)(self + 0xDE8) = D_00458338;
+    if (!inChrg)
+    {
+        sVtbl9_MR t1 = D_00458240;
+        *(void**)(*(char**)(self + 0x18) + 0x6E8) = &t1;
+        char* base = *(char**)(self + 0x18) - 0xE10;
+        int d = self - base;
+        t1.e[1].delta = D_00458240.e[1].delta + d;
+        sVtbl22_MR t2 = D_00458288;
+        *(void**)(*(char**)(self + 0x18) + 0x6C0) = &t2;
+        t2.e[1].delta = D_00458288.e[1].delta + d;
+    }
+    return self;
+}
+
+struct sRiderMR { char pad[0x86C]; int mIndex; int mCtrl; };
+
+struct sAiObjMR
+{
+    char pad0[0x28];
+    sRiderMR* mRiders[18];
+    char* mMission[2];
+    int mCount;
+    char pad7C[0xC];
+    int mNumMission;
+};
+
+extern "C" void cAI_initMissionRiders(void* p)
+{
+    sAiObjMR* self = (sAiObjMR*)p;
+    if (self->mNumMission > 0)
+        return;
+    char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    char* m = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x34);
+    int idx = self->mCount;
+    char* obj = cMissionRider_ctor((char*)cMemMan_alloc(0x1950, D_00457F20, 0x80000000, 0), 1);
+    *(int*)(obj + 0xDF0) = *(int*)(m + 0x6C);
+    *(int*)(obj + 0xDF4) = 0;
+    func_0030DBA0(*(void**)(*(char**)(obj + 0x18) + 0x780), 0.5f, 0.5f);
+    func_00148AA8(cBE_getInterface_Fv(cBE_getBE(), 3), idx, 5);
+    self->mRiders[idx] = obj ? *(sRiderMR**)(obj + 0x18) : 0;
+    self->mRiders[idx]->mIndex = idx;
+    self->mRiders[idx]->mCtrl = 0;
+    cRider_addFocusBox(*(void**)(obj + 0x18));
+    cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
+    cRider_initOnce(self->mRiders[idx], 0);
+    func_00144D70(rm, idx, idx);
+    idx++;
+    self->mMission[self->mNumMission] = obj;
+    self->mCount = idx;
+    self->mNumMission++;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", cAI_initComputerRiders);
+#ifdef SKIP_ASM
+extern "C" void* func_00108C80(void* mem, int a, int b);
+extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* iface, int rider, int ctrl);
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
+int cBENewPlayerInterface_getRiderCharID(void* iface, int rider);
+struct cRider;
+void cRider_addRiderMetrix(cRider* rider);
+extern "C" void func_0010C9A8(void*);
+extern "C" void cComputer_updateRiderDifficulty(void*);
+extern "C" void func_0012B698(void* self, void* rider);
+void func_00144D70(void*, int, int);
+extern char D_00457F30[];
+extern int D_00535C04[];
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+
+struct sRiderCR { char pad[0x86C]; int mIndex; int mCtrl; };
+struct sVEntryCR { short delta; short index; void (*fn)(void*); };
+class cBEIfaceCR {
+public:
+    int pad[3];
+    virtual void update();
+};
+
+struct sAiObjCR
+{
+    char pad0[0x10];
+    int f10;
+    char pad14[0x14];
+    sRiderCR* mRiders[8];
+    char* mObjs[12];
+    int mCount;
+    char pad7C[4];
+    int mNumComputers;
+};
+
+extern "C" void cAI_initComputerRiders(void* p)
+{
+    sAiObjCR* self = (sAiObjCR*)p;
+    char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    int n = D_00535C04[0] - self->mNumComputers;
+    int idx = self->mCount;
+    for (int i = 0; i < n; i++)
+    {
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, idx);
+        char* obj = (char*)func_00108C80(cMemMan_alloc(0x1A90, D_00457F30, 0x80000000, 0), 1, 0);
+        sRiderCR** slot = &self->mRiders[idx];
+        sRiderCR* rider = obj ? *(sRiderCR**)(obj + 0x18) : 0;
+        *slot = rider;
+        rider->mIndex = idx;
+        cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
+        cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
+        ((cBEIfaceCR*)iface)->update();
+        sRiderCR* r2 = *slot;
+        int m1 = -1;
+        r2->mCtrl = m1;
+        cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
+        func_0010C9A8(obj);
+        cComputer_updateRiderDifficulty(obj);
+        func_0012B698(self, obj);
+        func_00144D70(rm, idx, idx);
+        self->mObjs[self->mNumComputers] = obj;
+        self->mNumComputers++;
+        idx++;
+    }
+    ((cBEIfaceCR*)rm)->update();
+    ((cBEIfaceCR*)iface)->update();
+    self->mCount = idx;
+    self->f10 = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", cAI_initComputerActors);
@@ -976,7 +1169,81 @@ extern "C" int func_0012B420(sAiObj128A48* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012B498);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A28A8;
+extern "C" void func_00120D58(void* self);
+extern "C" void func_00125958(void* self, int a1);
+extern "C" void func_00117520(void* self, int a1);
+extern "C" int func_0014F7A8(int i);
+extern int D_00534B30[];
+
+struct sRider_12B498
+{
+    char pad[0xB30];
+    int fB30;
+};
+
+struct sOptEntry_12B498
+{
+    unsigned int f0;
+    int x;
+    int y;
+};
+
+struct sOptView_12B498
+{
+    sOptEntry_12B498 e[2];
+    int f18;
+};
+
+// The unit declares D_005308B8 later with its own type; bind this view by asm label.
+extern sOptView_12B498 D_005308B8_12B498 __asm__("D_005308B8");
+
+static inline int OptBit_12B498(sOptView_12B498* o, int b)
+{
+    return (o->f18 >> b) & 1;
+}
+
+extern "C" void func_0012B498(void* self, void* obj, int i)
+{
+    int v = 1;
+    if (OptBit_12B498(&D_005308B8_12B498, 3))
+        v = 3;
+    else if (OptBit_12B498(&D_005308B8_12B498, 0))
+        v = 0;
+    else
+        if ((D_005308B8_12B498.e[i].f0 >> 5) & 1) v = 2;
+    char* r = *(char**)((char*)obj + 0x18);
+    *(int*)(r + 0x304) = v;
+    func_00120D58(r);
+    if ((D_005308B8_12B498.e[i].f0 >> 3) & 1)
+        *(float*)(*(char**)((char*)obj + 0x18) + 0xB24) = 1.0f;
+    if (OptBit_12B498(&D_005308B8_12B498, 4))
+        *(int*)(*(char**)((char*)obj + 0x18) + 0xB28) = 2;
+    if ((D_005308B8_12B498.e[i].f0 >> 4) & 1)
+        func_00125958(*(void**)((char*)obj + 0x18), 0);
+    else if (OptBit_12B498(&D_005308B8_12B498, 1))
+        func_00125958(*(void**)((char*)obj + 0x18), 1);
+    if (D_005308B8_12B498.e[i].f0 & 1)
+        *(int*)(*(char**)((char*)obj + 0x18) + 0xB20) = 2;
+    (*(sRider_12B498**)((char*)obj + 0x18))->fB30 = func_0014F7A8(i);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0)
+    {
+        if (D_00534B30[1] != 0)
+            *(int*)(*(char**)((char*)obj + 0x18) + 0xB34) = 8;
+    }
+    else if ((D_005308B8_12B498.e[i].f0 >> 1) & 1)
+        *(int*)(*(char**)((char*)obj + 0x18) + 0xB34) = 1;
+    char* m = *(char**)(*(char**)((char*)obj + 0x18) + 0x790);
+    if ((D_005308B8_12B498.e[i].f0 >> 2) & 1)
+        *(float*)(m + 0x1C4) = 0.5f;
+    func_00117520(m, D_005308B8_12B498.e[i].x);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012B698);
@@ -1827,7 +2094,112 @@ extern "C" void func_0012E740(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012E778);
+#ifdef SKIP_ASM
+extern "C" int func_00116378(void*);
+// The unit declares func_00116120 as void, but this caller tests its result: bind an int view by asm label.
+extern "C" int func_00116120_i(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" int func_00106848(void*);
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void func_00113E80(void*, float);
+extern "C" void func_00113F38(void*, float);
+extern "C" void func_00113F88(void* rider, float a, float b);
+extern "C" int func_00312AE8(void* self, int i);
+extern "C" void func_001326C8(void*, int);
+extern "C" void func_00115640(void* rider);
+
+struct sAiVec4_12E778
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sAiBitsA_12E778
+{
+    int pad : 21;
+    int v : 6;
+};
+
+struct sAiBitsB_12E778
+{
+    int pad : 15;
+    int v : 6;
+};
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float aiDot_12E778(const sAiVec4_12E778& a, const sAiVec4_12E778& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" void func_0012E778(void* self, void* in)
+{
+    if (func_00116378(*(void**)self))
+        return;
+    if (func_00116120_i(*(void**)self, (*(int*)in >> 12) & 1, 0))
+        return;
+    if (func_00106848(*(void**)self))
+        return;
+    if (func_0011FE98(*(void**)self) == 1)
+    {
+        func_00114130(*(void**)self, 0, 0);
+        func_00113E80(*(void**)self, 0.0f);
+    }
+    else
+    {
+        int w = *(int*)in;
+        func_00114130(*(void**)self, (w >> 14) & 1, (w >> 13) & 1);
+        if (func_0011FE98(*(void**)self) == 4)
+        {
+            func_00113F38(*(void**)self, ((sAiBitsA_12E778*)in)->v * 0.032258063554763794f);
+        }
+        else
+        {
+            char* r = *(char**)self;
+            float v = ((sAiBitsB_12E778*)in)->v * 0.032258063554763794f;
+            if (aiDot_12E778(*(sAiVec4_12E778*)(r + 0x1E0), *(sAiVec4_12E778*)(r + 0x3A0)) < 0.0f)
+                v = -v;
+            func_00113E80(r, v);
+        }
+    }
+    float z = 0.0f;
+    func_00113F88(*(void**)self, z, z);
+    char* r2 = *(char**)self;
+    *(float*)(r2 + 0x204) = z;
+    *(float*)(r2 + 0x200) = 0.03333333507180214f;
+    if (func_00312AE8(*(void**)(*(char**)self + 0x784), 2) == 0)
+        return;
+    if (func_0011FE98(*(void**)self) == 4)
+    {
+        func_001326C8(*(char**)(*(char**)self + 0x77C) + 0x2B0, 0);
+        func_0011FEC8_impl(*(void**)self, 7);
+    }
+    else
+    {
+        func_00115640(*(void**)self);
+        if (func_0011FE98(*(void**)self) == 1)
+            func_0011FEC8_impl(*(void**)self, 4);
+        else
+            func_0011FEC8_impl(*(void**)self, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012E980);
@@ -1966,7 +2338,71 @@ extern "C" void func_0012F230(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012F398);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+extern "C" char* func_00311B20(void*, int);
+extern "C" int func_0012F588(void* self);
+void* func_00230698(void* self, int id);
+extern "C" void func_002E4578(void* obj);
+extern "C" void func_0010E098(void*, int, float);
+extern "C" float func_00119368(void* self, int a1);
+extern "C" void func_00119E38(void* p, int flip, int c);
+extern "C" void func_00112D58(void*);
+extern "C" void func_0011DF18(void* self, int notify);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+extern signed char D_00535C12[];
+
+struct sVec4_12F398
+{
+    float x, y, z, w;
+};
+
+extern "C" sVec4_12F398 func_0026A8B8(void* self, float t);
+extern "C" void func_0011D660_12F398(void* self, void* a, sVec4_12F398* b, int n, float t) __asm__("func_0011D660");
+
+extern "C" void func_0012F398(void* self)
+{
+    float t = *(float*)((char*)self + 0x4);
+    float step = *(float*)(*(char**)((char*)self + 0x8) + 0x300) * 0.02500000223517418f;
+    float n;
+    if (t > step + 1.0f)
+        n = t - step;
+    else if (t < 1.0f - step)
+        n = t + step;
+    else
+        n = 1.0f;
+    *(float*)((char*)self + 0x4) = n;
+    if (t <= 0.5f && n > 0.5f)
+    {
+        float range = 200.0f;
+        func_00112D58(*(void**)((char*)self + 0x8));
+        char* r = *(char**)((char*)self + 0x8);
+        const sVec4_12F398& dir = func_0026A8B8(*(void**)(r + 0xAB8), *(float*)(r + 0x4C4));
+        if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C12[0] == 2)
+            range = 1000.0f;
+        func_0011D660_12F398(*(void**)((char*)self + 0x8), *(char**)((char*)self + 0x8) + 0x490, (sVec4_12F398*)&dir, 0x11F, range);
+        func_0011DF18(*(void**)((char*)self + 0x8), 1);
+        if (*(int*)self != 0)
+            func_0010E098(*(void**)((char*)self + 0x8), 1, func_00119368(*(void**)(*(char**)((char*)self + 0x8) + 0x790), 0));
+        else
+            func_0010E098(*(void**)((char*)self + 0x8), 1, func_00119368(*(void**)(*(char**)((char*)self + 0x8) + 0x790), 1));
+    }
+    if (*(float*)((char*)self + 0x4) == 1.0f)
+    {
+        if (func_0012F588(self))
+            func_002E4578(func_00230698(*(void**)((char*)D_004A28A8 + 0x84), *(int*)(*(char**)((char*)self + 8) + 0x870)));
+        func_00119E38(*(void**)(*(char**)((char*)self + 8) + 0x790), 0, 0);
+        *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 8) + 0x784), 2) + 0x90) = 1.0f;
+        func_0011FEC8_impl(*(void**)((char*)self + 0x8), 4);
+        func_0011FE78_impl(*(void**)((char*)self + 0x8), 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012F588);
@@ -2130,7 +2566,106 @@ void func_0012FC60(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012FC80);
+#ifdef SKIP_ASM
+extern "C" int func_00116378(void*);
+// The unit declares func_00116120 as void, but this caller tests its result: bind an int view by asm label.
+extern "C" int func_00116120_i(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" int func_00106848(void*);
+extern "C" int func_0012FFF8(void*);
+extern "C" int func_001162C8(void*, int, int);
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void func_00113E80(void*, float);
+extern "C" void func_00113F38(void*, float);
+extern "C" void func_00113F88(void* rider, float a, float b);
+extern "C" void func_00115B58(void*);
+extern "C" void func_00115D48(void*);
+struct sPadIn_130228;
+extern "C" void func_00130228(void* self, sPadIn_130228* in);
+extern "C" void func_001303E0(void* self, void* a1);
+struct sPadIn_1304E0;
+extern "C" void func_001304E0(void* self, sPadIn_1304E0* in);
+// PORT: func_001304D0 is defined with one param, but this caller passes the input in $a1.
+void func_001304D0_2(void* self, void* in) __asm__("func_001304D0__FPv");
+
+struct sAiBitsC_12FC80
+{
+    int pad : 24;
+    int v : 6;
+};
+
+struct sAiBitsD_12FC80
+{
+    int pad : 18;
+    int v : 6;
+};
+
+// PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
+static inline float aiAbs_12FC80(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float aiClamp_12FC80(float v, float lo, float hi)
+{
+    if (v >= lo)
+        return v <? hi;
+    return lo;
+}
+
+extern "C" void func_0012FC80(void* self, void* in)
+{
+    if (func_00116378(*(void**)((char*)self + 0x14)))
+        return;
+    if (func_00116120_i(*(void**)((char*)self + 0x14), (*(int*)in >> 12) & 1, 0))
+        return;
+    if (func_00106848(*(void**)((char*)self + 0x14)))
+        return;
+    if (func_0012FFF8(self))
+        return;
+    int w = *(int*)in;
+    if (func_001162C8(*(void**)((char*)self + 0x14), (w >> 15) & 1, (w >> 16) & 1))
+        return;
+    int w2 = *(int*)in;
+    func_00114130(*(void**)((char*)self + 0x14), (w2 >> 14) & 1, (w2 >> 13) & 1);
+    func_00113F88(*(void**)((char*)self + 0x14), 0.0f, 0.0f);
+    char* r = *(char**)((char*)self + 0x14);
+    if (*(int*)(r + 0x328) != 0)
+    {
+        func_00113F38(r, aiClamp_12FC80(((sAiBitsC_12FC80*)in)->v * 0.032258063554763794f, -0.5f, 0.5f));
+    }
+    else
+    {
+        float a = aiAbs_12FC80(*(float*)(r + 0x280));
+        float d;
+        if (a > 0.5f)
+            d = a - 0.5f;
+        else
+            d = 0.5f - a;
+        func_00113E80(*(void**)((char*)self + 0x14), aiClamp_12FC80(((sAiBitsD_12FC80*)in)->v * 0.032258063554763794f, -d, d));
+    }
+    func_00115B58(*(void**)((char*)self + 0x14));
+    func_00115D48(*(void**)((char*)self + 0x14));
+    switch (*(int*)self)
+    {
+    case 0:
+        func_00130228(self, (sPadIn_130228*)in);
+        break;
+    case 1:
+        func_001303E0(self, in);
+        break;
+    case 2:
+        func_001304D0_2(self, in);
+        break;
+    case 3:
+        func_001304E0(self, (sPadIn_1304E0*)in);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012FE98);
@@ -2197,9 +2732,163 @@ extern "C" void func_0012FEC8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012FFF8);
+#ifdef SKIP_ASM
+int func_00312AA0(void* self, int i);
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void func_0010E098(void*, int, float);
+extern "C" void func_00116930(void* rider);
+extern "C" float func_00119A38(void*);
+extern "C" float func_00119AD8(void* p, int v);
 
+// PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
+static inline float aiAbs_12FFF8(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" int func_0012FFF8(void* self)
+{
+    int k = func_0011FE98(*(void**)((char*)self + 0x14));
+    if (k != 1)
+        return 0;
+    char* r = *(char**)((char*)self + 0x14);
+    if (*(int*)(r + 0x328) != 0)
+    {
+        *(int*)(r + 0x328) = 0;
+        func_00116930(*(void**)((char*)self + 0x14));
+    }
+    int anim = func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2);
+    if (*(int*)self == 2)
+    {
+        int ok = 0;
+        if (anim == 0x25 || anim == 0x26)
+        {
+            char* p = *(char**)((char*)self + 0x14);
+            *(float*)(p + 0x288) = 0.0f;
+            *(float*)(p + 0x284) = *(float*)(p + 0x300) * 0.02500000223517418f;
+            ok = aiAbs_12FFF8(*(float*)(*(char**)((char*)self + 0x14) + 0x280)) <= 0.15000000596046448f;
+        }
+        else if (anim == 0x1D || anim == 0x1E)
+        {
+            char* p = *(char**)((char*)self + 0x14);
+            if (*(float*)(p + 0x280) < 0.0f)
+            {
+                *(float*)(p + 0x288) = -1.0f;
+                *(float*)(p + 0x284) = *(float*)(p + 0x300) * 0.02500000223517418f;
+            }
+            else
+            {
+                *(float*)(p + 0x288) = 1.0f;
+                *(float*)(p + 0x284) = *(float*)(p + 0x300) * 0.02500000223517418f;
+            }
+            ok = 0.8500000238418579f <= aiAbs_12FFF8(*(float*)(*(char**)((char*)self + 0x14) + 0x280));
+        }
+        if (ok == 0)
+            return 1;
+        char* q = *(char**)((char*)self + 0x14);
+        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119AD8(*(void**)(q + 0x790), *(int*)(q + 0x330)));
+        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119A38(*(void**)(*(char**)((char*)self + 0x14) + 0x790)));
+        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x11F, 0, -1.0f);
+        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 5);
+        return 1;
+    }
+    if (anim == 0x25 || anim == 0x26 || anim == 0x1D || anim == 0x1E)
+    {
+        *(int*)self = 2;
+    }
+    else
+    {
+        char* s = *(char**)((char*)self + 0x14);
+        if (*(int*)(s + 0x330) == 1)
+            cRiderAnimBase_play(*(void**)(s + 0x784), 0x1B, 0, -1.0f);
+        else
+            cRiderAnimBase_play(*(void**)(s + 0x784), 0x23, 0, -1.0f);
+        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 5);
+    }
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_00130228);
+#ifdef SKIP_ASM
+extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+extern "C" void func_0010E098(void*, int, float);
+extern "C" float func_001199F8(void*, int);
+
+// PORT: abs.s via inline asm (use fabsf off-PS2).
+static inline float Abs_130228(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct sPadIn_130228
+{
+    int f0;
+    int x : 6;
+    int y : 6;
+};
+
+extern "C" void func_00130228(void* self, sPadIn_130228* in)
+{
+    float fx = in->x * 0.032258063554763794f;
+    float fy = in->y * 0.032258063554763794f;
+    if (fx == 0.0f && Abs_130228(fy) < 0.5f)
+    {
+        char* r = *(char**)((char*)self + 0x14);
+        *(float*)(r + 0x270) = 0.0f;
+        *(float*)(r + 0x26C) = *(float*)(r + 0x300) * 2.0f * 0.01666666753590107f;
+        *(int*)self = 3;
+        char* r2 = *(char**)((char*)self + 0x14);
+        if (*(int*)(r2 + 0x330) == 2)
+        {
+            cRiderAnimBase_play_i(*(void**)(r2 + 0x784), 0x21, 0, -1.0f);
+        }
+        else
+        {
+            cRiderAnimBase_play_i(*(void**)(r2 + 0x784), 0x19, 0, -1.0f);
+        }
+        return;
+    }
+    char* r = *(char**)((char*)self + 0x14);
+    *(float*)(r + 0x278) = *(float*)(r + 0x300) * 0.01666666753590107f;
+    *(float*)(r + 0x27C) = 0.5f;
+    char* r2 = *(char**)((char*)self + 0x14);
+    *(float*)(r2 + 0x270) = 1.0f;
+    *(float*)(r2 + 0x26C) = *(float*)(r2 + 0x300) * 2.0f * 0.01666666753590107f;
+    char* r3 = *(char**)((char*)self + 0x14);
+    if (*(float*)(r3 + 0x268) == 1.0f)
+    {
+        func_0010E098(*(void**)((char*)self + 0x14), 1, func_001199F8(*(void**)(r3 + 0x790), *(int*)(r3 + 0x330)));
+        *(int*)self = 1;
+        char* r4 = *(char**)((char*)self + 0x14);
+        if (*(int*)(r4 + 0x330) == 2)
+        {
+            cRiderAnimBase_play_i(*(void**)(r4 + 0x784), 0x24, 0, -1.0f);
+            char* r5 = *(char**)((char*)self + 0x14);
+            *(float*)(r5 + 0x284) = 0.0f;
+            *(float*)(r5 + 0x288) = 1.0f;
+            *(float*)(r5 + 0x280) = 1.0f;
+        }
+        else
+        {
+            cRiderAnimBase_play_i(*(void**)(r4 + 0x784), 0x1C, 0, -1.0f);
+            char* r5 = *(char**)((char*)self + 0x14);
+            *(float*)(r5 + 0x288) = 0.0f;
+            *(float*)(r5 + 0x280) = 0.0f;
+            *(float*)(r5 + 0x284) = 0.0f;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001303E0);
@@ -2245,7 +2934,69 @@ void func_001304D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_001304E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int func_00312AA0(void* self, int i);
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void func_0010E098(void*, int, float);
+extern "C" void func_00115640(void* rider);
+extern "C" float func_00119A38(void*);
+extern "C" void func_001326C8(void*, int);
+
+struct sPadIn_1304E0
+{
+    int f0;
+    int x : 6;
+    int y : 6;
+};
+
+extern "C" void func_001304E0(void* self, sPadIn_1304E0* in)
+{
+    int anim = func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2);
+    char* r;
+    if ((anim == 0x21 || anim == 0x19) && 0.0f < *(float*)((r = *(char**)((char*)self + 0x14)) + 0x268))
+    {
+        float fx = in->x * 0.032258063554763794f;
+        if ((fx < -0.5f && anim == 0x21) || (0.5f < fx && anim == 0x19))
+        {
+            if (fx < 0.0f)
+            {
+                cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x20, 0, -1.0f);
+                *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 2;
+            }
+            else
+            {
+                cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x18, 0, -1.0f);
+                *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 1;
+            }
+            char* r2 = *(char**)((char*)self + 0x14);
+            *(float*)(r2 + 0x270) = 1.0f;
+            *(float*)(r2 + 0x26C) = *(float*)(r2 + 0x300) * 2.0f * 0.01666666753590107f;
+            *(int*)self = 0;
+        }
+        return;
+    }
+    r = *(char**)((char*)self + 0x14);
+    if (*(int*)(r + 0x330) == 1 || *(int*)(r + 0x330) == 2)
+    {
+        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119A38(*(void**)(r + 0x790)));
+    }
+    if (func_0011FE98(*(void**)((char*)self + 0x14)) == 4)
+    {
+        func_001326C8(*(char**)(*(char**)((char*)self + 0x14) + 0x77C) + 0x2B0, 0);
+        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 7);
+    }
+    else
+    {
+        func_00115640(*(void**)((char*)self + 0x14));
+        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001306B0);
@@ -2870,7 +3621,83 @@ extern "C" void func_001330F0(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00133128);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" float func_001495A8(void* self, int rider, int value);
+extern "C" char* func_00311B20(void*, int);
+extern "C" float func_00135180(void* self);
+extern "C" void func_00135B30(void* self, float a, float b);
+
+extern "C" void func_00133128(void* self)
+{
+    float lo = 4.499661445617676f;
+    *(int*)((char*)self + 0x8) = -1;
+    *(int*)((char*)self + 0x4) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x2C) = 0;
+    *(int*)((char*)self + 0x30) = 0;
+    *(int*)((char*)self + 0x34) = 0;
+    *(float*)((char*)self + 0x38) = lo;
+    *(float*)((char*)self + 0x3C) = lo;
+    *(float*)((char*)self + 0x40) = 0.0f;
+    *(float*)((char*)self + 0x44) = 0.0f;
+    *(float*)(*(char**)((char*)self + 0x58) + 0x2DC) = 0.0f;
+    *(float*)(*(char**)((char*)self + 0x58) + 0x2E0) = 0.0f;
+    *(float*)((char*)self + 0x48) = 0.0f;
+    *(float*)((char*)self + 0x50) = 1.0000000150474662e+30f;
+    char* r = *(char**)((char*)self + 0x58);
+    *(float*)((char*)self + 0x4C) = 0.0f;
+    *(float*)((char*)self + 0x54) = 0.0f;
+    if (*(float*)(r + 0x2A4) != 0.0f || *(float*)(r + 0x2B0) != 0.0f)
+    {
+        *(int*)((char*)self + 0xC) = 0;
+        float x = *(float*)(r + 0x2A4);
+        float a = __builtin_fabsf(x);
+        float b = __builtin_fabsf(*(float*)(r + 0x2B0));
+        float m;
+        if (b < a)
+            m = a;
+        else
+            m = b;
+        if (x != 0.0f)
+        {
+            float v = m * 7.00038480758667f >? lo;
+            *(float*)((char*)self + 0x38) = v;
+            *(float*)(r + 0x2DC) = v;
+        }
+        r = *(char**)((char*)self + 0x58);
+        if (*(float*)(r + 0x2B0) != 0.0f)
+        {
+            float v = (m * 7.00038480758667f >? lo) * 0.6666666865348816f;
+            *(float*)((char*)self + 0x3C) = v;
+            *(float*)(r + 0x2E0) = v;
+        }
+        *(float*)((char*)self + 0x40) = func_00135180(self);
+        char* r2 = *(char**)((char*)self + 0x58);
+        func_00135B30(self, *(float*)(r2 + 0x2B0), *(float*)(r2 + 0x2A4));
+        float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(*(char**)((char*)self + 0x58) + 0x86C), *(int*)(*(char**)((char*)self + 0x58) + 0xB34));
+        char* r4 = *(char**)((char*)self + 0x58);
+        float t = (s * 0.5002591609954834f + 1.0f) * (*(float*)(r4 + 0x2E0) >? *(float*)(r4 + 0x2DC)) * 0.14284929633140564f;
+        *(float*)(func_00311B20(*(void**)(r4 + 0x784), 2) + 0x90) = t;
+        *(int*)self = 1;
+    }
+    else
+    {
+        *(int*)self = 0;
+        *(int*)((char*)self + 0xC) = 3;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00133308);
 

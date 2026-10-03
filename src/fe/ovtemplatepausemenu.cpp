@@ -111,7 +111,79 @@ void func_001F8720(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8728);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+class cUIScreen;
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" int func_001E3408(void);
+extern "C" void func_0020E900(void* self);
+extern "C" void func_00258790(void* self, int a1);
+extern "C" void func_0020D190(void);
+// func_0039F190 returns its last list node in $v0; the unit declares it void.
+void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+extern char* D_004A2EEC;
+extern int D_004A2A50;
+extern int D_004A2A54;
+extern int D_005366E8[];
+extern int D_004428F0[];
+extern char D_004A2478[];
+extern char D_0046F850[];
+
+struct sColor_1F8728 { float r, g, b, a; };
+struct sVEnt_1F8728 { short delta; short index; void (*fn)(void*, void*); };
+
+extern "C" void func_001F8728(void* self)
+{
+    int st = *(int*)((char*)self + 0x110);
+    if ((st == 1 || st == 2 || st == 4) && func_001E3408() > 0)
+    {
+        float a = *(float*)((char*)self + 0xC8) + *(float*)((char*)self + 0xCC);
+        *(float*)((char*)self + 0xC8) = a;
+        if (a >= 1.0f)
+        {
+            *(float*)((char*)self + 0xC8) = 1.0f;
+            *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
+        }
+        else if (a < 0.0f)
+        {
+            *(float*)((char*)self + 0xC8) = 0.0f;
+            *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
+        }
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(D_004A2478));
+        if (o != 0)
+        {
+            sColor_1F8728 c = *(sColor_1F8728*)(o + 0x1C);
+            c.r = *(float*)((char*)self + 0xC8);
+            sVEnt_1F8728* vt = *(sVEnt_1F8728**)(o + 8);
+            vt[11].fn(o + vt[11].delta, &c);
+        }
+    }
+    func_0020E900(self);
+    char* g = D_004A2EEC;
+    if (g == 0)
+        return;
+    int go = 0;
+    if (*(int*)(g + 0x68) == 0 || *(int*)(g + 0x64) == 0)
+        go = 1;
+    if (!go)
+        return;
+    func_00258790(D_004A2EEC, 0);
+    char* g2 = D_004A2EEC;
+    *(int*)(g2 + 0x68) = -1;
+    *(int*)(g2 + 0x64) = -1;
+    int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(D_0046F850));
+    cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
+    *(int*)((char*)self + 0xD0) = 1;
+    func_0020D190();
+    func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+}
+#endif
 
 extern "C" void* func_0020A430(void*);
 

@@ -1697,7 +1697,121 @@ extern "C" void func_002400B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00240130);
+#ifdef SKIP_ASM
+extern "C" void func_0023CA70(void* self);
+extern "C" void func_00241240(void* self);
+
+class cMovieSub434_0130 {
+public:
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual int v09();
+    virtual int v10();
+    virtual int v11();
+    virtual int v12();
+    virtual int v13();
+    virtual int v14();
+    virtual int v15();
+    virtual int v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual int v21();
+    virtual int v22();
+    virtual int v23();
+    virtual int v24();
+    virtual int v25();
+    virtual int v26();
+    virtual int v27();
+    virtual int v28();
+    virtual int v29();
+    virtual int v30();
+    virtual int v31();
+    virtual int v32();
+    virtual int v33();
+    virtual int v34();
+    virtual int v35();
+    virtual int v36();
+    virtual int v37();
+    virtual int v38();
+    virtual int v39();
+    virtual void v40(int);
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+    virtual int v44();
+    virtual int v45();
+    virtual int v46();
+    virtual int v47();
+    virtual int v48();
+    virtual int v49();
+    virtual int v50();
+    virtual int v51();
+    virtual int v52();
+    virtual int v53();
+    virtual int v54();
+    virtual int v55();
+    virtual int v56();
+    virtual int v57();
+    virtual int v58();
+    virtual int v59();
+    virtual int v60();
+    virtual int v61();
+    virtual int v62();
+    virtual int v63();
+    virtual int v64();
+    virtual int v65();
+    virtual int v66();
+    virtual int v67();
+    virtual int v68();
+    virtual int v69();
+    virtual int v70();
+    virtual int v71();
+    virtual int v72();
+    virtual int v73();
+};
+
+extern "C" void func_00240130(void* self)
+{
+    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
+    *(int*)((char*)self + 0x108) -= 1;
+    int n = (*(cMovieSub434_0130**)((char*)self + 0x434))->v18();
+    *(float*)((char*)self + 0x10C) = (float)n / (float)*(int*)((char*)self + 0xF0);
+    if ((*(cMovieSub434_0130**)((char*)self + 0x434))->v73() != 0) {
+        me->v01(0x24);
+        (*(void (**)())((char*)self + 0x2C))();
+        return;
+    }
+    if ((*(cMovieSub434_0130**)((char*)self + 0x434))->v31() == 1) {
+        int a = *(int*)((char*)self + 0xE8);
+        int b = *(int*)((char*)self + 0xF0);
+        if (a < b) {
+            if ((*(int (**)(int))((char*)self + 0x1C))(b - a) == 0)
+                func_00241240(self);
+        } else if ((*(int (**)())((char*)self + 0x20))() == 0) {
+            (*(cMovieSub434_0130**)((char*)self + 0x434))->v40(*(int*)((char*)self + 0xF8));
+            func_00241240(self);
+        } else {
+            func_0023CA70(self);
+            me->v01(0x21);
+        }
+        return;
+    }
+    if ((*(cMovieSub434_0130**)((char*)self + 0x434))->v73() != 0) {
+        (*(void (**)())((char*)self + 0x2C))();
+        me->v01(0x24);
+    }
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_002402D0);
 
@@ -2659,7 +2773,145 @@ extern "C" void func_00241540(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceDisplayString);
+#ifdef SKIP_ASM
+// PORT: callers pass more args than the unit's declarations of these take.
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" int func_002C24D0(void* s);
+extern "C" void func_00241DC8(void* self, void* dst, int n);
+int GetHashValue32(char* s);
+extern void* D_004A28A8;
+extern char D_0047C360[];
+extern char D_0047C378[];
+extern char D_0047C390[];
+
+class cMovieSub434_1710 {
+public:
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual int v09();
+    virtual int v10();
+    virtual int v11();
+    virtual int v12();
+    virtual int v13();
+    virtual int v14();
+    virtual int v15();
+    virtual int v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual int v21();
+    virtual int v22();
+    virtual int v23();
+    virtual int v24();
+    virtual int v25();
+    virtual int v26();
+    virtual int v27();
+    virtual int v28();
+    virtual int v29();
+    virtual int v30();
+    virtual int v31();
+    virtual int v32();
+    virtual int v33();
+    virtual int v34();
+    virtual int v35();
+    virtual int v36();
+    virtual int v37();
+    virtual int v38();
+    virtual int v39();
+    virtual int v40();
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+    virtual int v44();
+    virtual int v45();
+    virtual int v46();
+    virtual int v47();
+    virtual int v48(int);
+    virtual int v49();
+    virtual int v50(int);
+    virtual int v51();
+    virtual int v52(int);
+    virtual int v53();
+    virtual int v54();
+    virtual int v55();
+    virtual int v56(int);
+    virtual int v57(int);
+    virtual int v58();
+    virtual int v59();
+    virtual int v60(int);
+};
+
+struct sLocVEntry_241710 {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+struct sMCDev_241710 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    char name[0xE0 - 0x18];
+};
+
+struct sMCOverlayMgr_241710 {
+    char pad[0x344];
+    sMCDev_241710 dev[1];
+};
+
+static inline void* Loc_241710(char* key)
+{
+    char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+    sLocVEntry_241710* vt = *(sLocVEntry_241710**)(loc + 4);
+    char* thisp = loc + vt[4].delta;
+    return vt[4].fn(thisp, GetHashValue32(key));
+}
+
+extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* self, int idx, char* dst)
+{
+    char buf[0x200];
+    if ((*(cMovieSub434_1710**)((char*)self + 0x434))->v52(idx))
+    {
+        if ((*(cMovieSub434_1710**)((char*)self + 0x434))->v48(idx) || (*(cMovieSub434_1710**)((char*)self + 0x434))->v50(idx) || (*(cMovieSub434_1710**)((char*)self + 0x434))->v60(idx))
+        {
+            func_00241DC8(self, buf, idx);
+            func_002C26D0_v(dst, Loc_241710(D_0047C360), buf);
+        }
+        else if (!(*(cMovieSub434_1710**)((char*)self + 0x434))->v56(idx))
+        {
+            func_00241DC8(self, buf, idx);
+            func_002C26D0_v(dst, Loc_241710(D_0047C378), buf);
+        }
+        else if ((*(cMovieSub434_1710**)((char*)self + 0x434))->v57(idx))
+        {
+            func_00241DC8(self, buf, idx);
+            char* name = ((sMCOverlayMgr_241710*)self)->dev[idx].name;
+            if (func_002C24D0(name) == 0)
+                func_002C26D0_v(dst, Loc_241710(D_0047C390), buf);
+            else
+                func_002C2508(dst, name);
+        }
+    }
+    else
+    {
+        func_00241DC8(self, buf, idx);
+        func_002C26D0_v(dst, Loc_241710(D_0047C360), buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002419D8);
@@ -2744,7 +2996,103 @@ extern "C" int func_00241AC0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241B20);
+#ifdef SKIP_ASM
+class cMovieSub434_1B20 {
+public:
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual int v09();
+    virtual int v10();
+    virtual int v11();
+    virtual int v12();
+    virtual int v13();
+    virtual int v14();
+    virtual int v15();
+    virtual int v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual int v21();
+    virtual int v22();
+    virtual int v23();
+    virtual int v24();
+    virtual int v25();
+    virtual int v26();
+    virtual int v27();
+    virtual int v28();
+    virtual int v29();
+    virtual int v30();
+    virtual int v31();
+    virtual int v32();
+    virtual int v33();
+    virtual int v34();
+    virtual int v35();
+    virtual int v36();
+    virtual int v37();
+    virtual int v38();
+    virtual int v39();
+    virtual int v40();
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+    virtual int v44();
+    virtual int v45();
+    virtual int v46();
+    virtual int v47();
+    virtual int v48();
+    virtual int v49();
+    virtual int v50();
+    virtual int v51();
+    virtual int v52();
+    virtual bool v53();
+    virtual int v54();
+    virtual int v55();
+    virtual int v56();
+    virtual int v57();
+    virtual int v58();
+    virtual int v59();
+};
+
+struct sMovieFlags_1B20
+{
+    unsigned int a : 1;
+    unsigned int b : 1;
+    unsigned int c : 1;
+    unsigned int d : 1;
+    unsigned int e : 1;
+    unsigned int f : 4;
+    unsigned int rest : 23;
+};
+
+// PORT: the unit declares func_00241B20 as returning int; it really returns this 4-byte flags struct in $v0.
+extern "C" sMovieFlags_1B20 func_00241B20_s(void* self) __asm__("func_00241B20");
+
+extern "C" sMovieFlags_1B20 func_00241B20_s(void* self)
+{
+    if (*(int*)((char*)self + 0x42C) != *(int*)((char*)self + 0x428))
+        return *(sMovieFlags_1B20*)((char*)self + 0x43C);
+    sMovieFlags_1B20 s = {0, 0, 0, 0, 0, 0, 0};
+    s.a = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v49();
+    int b = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v51() || (*(cMovieSub434_1B20**)((char*)self + 0x434))->v59();
+    s.b = b;
+    int c = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v13() && (*(cMovieSub434_1B20**)((char*)self + 0x434))->v20() < (*(cMovieSub434_1B20**)((char*)self + 0x434))->v23();
+    s.c = c;
+    s.d = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v53();
+    int e = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v55() || !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v58();
+    s.e = e;
+    s.f = 0;
+    return s;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("movie/movieplayer", func_00241CD8);
@@ -2881,7 +3229,141 @@ extern "C" void func_00242050(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_002420C8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* p, int c, int n);
+
+class cMovieSub434_20C8 {
+public:
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual int v09();
+    virtual int v10();
+    virtual int v11();
+    virtual int v12();
+    virtual int v13();
+    virtual int v14();
+    virtual int v15();
+    virtual int v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual int v21();
+    virtual int v22();
+    virtual int v23();
+    virtual int v24();
+    virtual int v25();
+    virtual int v26();
+    virtual int v27();
+    virtual int v28();
+    virtual int v29();
+    virtual int v30();
+    virtual int v31();
+    virtual int v32();
+    virtual int v33();
+    virtual int v34();
+    virtual int v35();
+    virtual int v36();
+    virtual int v37();
+    virtual int v38();
+    virtual int v39();
+    virtual int v40();
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+    virtual int v44();
+    virtual int v45();
+    virtual int v46();
+    virtual int v47();
+    virtual int v48(int);
+    virtual int v49();
+    virtual int v50(int);
+    virtual int v51();
+    virtual int v52();
+    virtual int v53();
+    virtual int v54();
+    virtual int v55();
+    virtual int v56(int);
+    virtual int v57(int);
+    virtual int v58();
+    virtual int v59();
+    virtual int v60(int);
+    virtual int v61();
+    virtual int v62();
+    virtual int v63();
+    virtual int v64();
+    virtual int v65();
+    virtual int v66();
+    virtual int v67();
+    virtual int v68();
+    virtual int v69();
+    virtual void v70(int, char*, int);
+};
+
+struct sSlot_20C8
+{
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+    char name[200];
+};
+
+struct sMP_20C8
+{
+    char pad0[0x344];
+    sSlot_20C8 slots[1];
+    int f424;
+    int f428;
+    int cur;
+};
+
+// PORT: the unit declares func_002420C8 as returning void*, but it returns nothing; bind the void body by asm label.
+extern "C" void func_002420C8_v(void* self, int i) __asm__("func_002420C8");
+
+extern "C" void func_002420C8_v(void* self, int i)
+{
+    sMP_20C8* me = (sMP_20C8*)self;
+    me->slots[i].a = 1;
+    char* bb = (char*)self + 0x348;
+    int* pb = (int*)(bb + i * 0xE0);
+    char* bc = (char*)self + 0x34C;
+    int* pc = (int*)(bc + i * 0xE0);
+    *pb = 1;
+    *pc = 1;
+    char* name = me->slots[i].name;
+    me->slots[i].d = 1;
+    func_003E6448(name, 0, 200);
+    if ((*(cMovieSub434_20C8**)((char*)self + 0x434))->v48(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v50(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v60(i))
+    {
+        me->slots[i].a = 0;
+        return;
+    }
+    if (!(*(cMovieSub434_20C8**)((char*)self + 0x434))->v56(i))
+    {
+        *pb = 0;
+        return;
+    }
+    if (!(*(cMovieSub434_20C8**)((char*)self + 0x434))->v57(i))
+    {
+        *pc = 0;
+        return;
+    }
+    if (i == me->cur)
+        me->slots[me->cur].e = (*(cMovieSub434_20C8**)((char*)self + 0x434))->v20();
+    (*(cMovieSub434_20C8**)((char*)self + 0x434))->v70(i, name, 100);
+}
+#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00242288);
 

@@ -2302,9 +2302,131 @@ extern "C" int func_00273D20(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00273DC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
+extern "C" void func_002723A8(sRcHeap* h, void* p);
 
+class cRcObj_3DC0 {
+public:
+    int unk_0x0;
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10(int);
+};
+
+class cRcListener_3DC0 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* src, int id);
+    virtual void v02(void* src, int id);
+};
+
+extern "C" void func_00273DC0(void* self)
+{
+    if (*(int*)((char*)self + 0x28) == 0)
+        return;
+    cRcListener_3DC0* l = *(cRcListener_3DC0**)((char*)self + 0x2C);
+    if (l != 0)
+        l->v02(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3));
+    *(void**)((char*)self + 0x2C) = 0;
+    if (*(unsigned char*)(*(char**)((char*)self + 0x1C) + 2) != 0)
+    {
+        for (int i = 0; i < *(unsigned char*)(*(char**)((char*)self + 0x1C) + 2); i++)
+        {
+            cRcObj_3DC0** objs = *(cRcObj_3DC0***)((char*)self + 0x24);
+            objs[i]->v02();
+            switch ((*(cRcObj_3DC0***)((char*)self + 0x24))[i]->v07())
+            {
+            case 0:
+                func_002724E8_impl((*(cRcObj_3DC0***)((char*)self + 0x24))[i]);
+                break;
+            case 1:
+            {
+                cRcObj_3DC0* o = (*(cRcObj_3DC0***)((char*)self + 0x24))[i];
+                if (o)
+                    o->v10(3);
+                break;
+            }
+            case 2:
+            {
+                cRcObj_3DC0* o = (*(cRcObj_3DC0***)((char*)self + 0x24))[i];
+                if (o)
+                    o->v10(3);
+                break;
+            }
+            case 3:
+            {
+                cRcObj_3DC0* o = (*(cRcObj_3DC0***)((char*)self + 0x24))[i];
+                if (o)
+                    o->v10(3);
+                break;
+            }
+            }
+        }
+        func_002723A8((sRcHeap*)(*(char**)(*(char**)((char*)self + 0x8) + 0x8) + 8), *(void**)((char*)self + 0x24));
+        *(void**)((char*)self + 0x24) = 0;
+    }
+    *(int*)((char*)self + 0x28) = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("replay/replaycache", func_00273F68);
+#ifdef SKIP_ASM
+class cRcObj_3F68 {
+public:
+    int unk_0x0;
+    // vptr at 0x4; slot N at vtable offset N*8
+    virtual int v01(void* data, void* cache, int* mask);
+    virtual void v02();
+};
+
+extern "C" int func_00273F68(void* self)
+{
+    if (*(int*)((char*)self + 0x28) == 0)
+        return 0;
+    unsigned char* hdr = *(unsigned char**)((char*)self + 0x1C);
+    int mask = 0;
+    int i = 0;
+    int changed = 0;
+    unsigned char* p = hdr + *(unsigned short*)hdr;
+    if (hdr[2] != 0)
+    {
+        do
+        {
+            unsigned char* rec = p;
+            int ch = 0;
+            p += 4;
+            (*(cRcObj_3F68***)((char*)self + 0x24))[i]->v02();
+            int m = 0;
+            if ((*(cRcObj_3F68***)((char*)self + 0x24))[i]->v01(p, self, &m) != 0 || changed)
+                ch = 1;
+            i++;
+            p += *(unsigned short*)(rec + 2);
+            changed = ch;
+            mask |= m;
+        } while (i < (*(unsigned char**)((char*)self + 0x1C))[2]);
+    }
+    cRcListener3D20* l = *(cRcListener3D20**)((char*)self + 0x2C);
+    if (l == 0)
+        return changed;
+    if (mask)
+        l->v03(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3), mask, 0.0f);
+    (*(cRcListener3D20**)((char*)self + 0x2C))->v04(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3), mask, 0.0f, 0.0f);
+    return changed;
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_00274100);
 
@@ -2647,7 +2769,95 @@ extern "C" void func_00274A08(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00274A30);
+#ifdef SKIP_ASM
+extern "C" int func_00274C70(void* self);
+extern "C" void func_00274918(void* p);
+void* func_00274810(void* self);
+extern "C" void func_00274DE0(void* self);
+extern "C" void func_002749E8(void* self);
+
+struct sRcPlay_4A30 {
+    char pad0[0x1C];
+    int loop;       // 0x1C
+    int playing;    // 0x20
+    float speed;    // 0x24
+    float pos;      // 0x28
+    int f2C;        // 0x2C
+    char pad30[4];
+    int seekTo;     // 0x34
+    int steps;      // 0x38
+};
+
+extern "C" void func_00274A30(void* p)
+{
+    sRcPlay_4A30* self = (sRcPlay_4A30*)p;
+    int need = 1;
+    if (self->seekTo >= 0)
+    {
+        int target = self->seekTo;
+        self->seekTo = -1;
+        int len = func_00274C70(self);
+        int saved = self->f2C;
+        self->f2C = 0;
+        if (self->loop != 0)
+            target = target % len;
+        float ft = (float)target;
+        if (self->playing == 1)
+            func_00274DE0(self);
+        if (ft != self->pos)
+        {
+            if (ft < self->pos)
+            {
+                func_00274918(self);
+                func_00274810(self);
+                func_00274DE0(self);
+            }
+            float one = 1.0f;
+            float pos = self->pos;
+            float frac = (float)((int)pos + 1) - pos;
+            float speed = self->speed;
+            if (frac < one)
+            {
+                self->speed = frac;
+                func_00274DE0(self);
+            }
+            self->speed = one;
+            while (self->playing != 0 && self->pos < ft)
+                func_00274DE0(self);
+            self->speed = speed;
+        }
+        if (self->playing != 0)
+            self->f2C = saved;
+        need = 0;
+    }
+    if (self->steps != 0)
+    {
+        int steps = self->steps;
+        int saved2 = self->f2C;
+        self->steps = 0;
+        self->f2C = 0;
+        if (self->playing != 0)
+        {
+            do
+            {
+                func_00274DE0(self);
+                steps--;
+                if (self->playing == 0)
+                    goto skip;
+            } while (steps != 0);
+            self->f2C = saved2;
+        }
+    skip:
+        if (self->f2C <= 0)
+            func_002749E8(self);
+        need = 0;
+    }
+    if (need)
+        func_00274DE0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274C10__FPvi);
