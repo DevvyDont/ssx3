@@ -1641,7 +1641,78 @@ extern "C" void func_0012C130(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012C230);
+#ifdef SKIP_ASM
+extern "C" float func_00115AB0(void* rider);
+extern "C" int func_0012C028(void* self);
+extern "C" int func_0012C078(void* self);
+
+struct sAiBits0012C230
+{
+    int pad : 12;
+    int v : 6;
+};
+
+extern "C" void func_0012C230(void* self, void* a1)
+{
+    float fy = ((sAiBits0012C230*)a1)->v * 0.032258063554763794f;
+    float old = *(float*)((char*)self + 0x10);
+    float target;
+    if (fy > 0.0f)
+        target = 0.6200000047683716f;
+    else if (fy < 0.0f)
+        target = 0.0f;
+    else
+        target = 0.3100000023841858f;
+    float v = func_00115AB0(*(void**)((char*)self + 0x14));
+    char* r = *(char**)((char*)self + 0x14);
+    *(float*)(r + 0x2CC) = 0.0f;
+    *(float*)(r + 0x2D0) = v;
+    *(float*)(r + 0x2C8) = v;
+    float d = __builtin_fabsf(target - *(float*)((char*)self + 0x10));
+    float rate;
+    if (d >= 0.20000000298023224f)
+        rate = d * 4.5f;
+    else
+        rate = 0.9000000357627869f;
+    float step = rate * 0.01666666753590107f;
+    float t = *(float*)((char*)self + 0x10);
+    float n;
+    if (t > target + step)
+    {
+        n = t - step;
+    }
+    else
+    {
+        n = target;
+        if (t < target - step)
+            n = t + step;
+    }
+    *(float*)((char*)self + 0x10) = n;
+    *(float*)((char*)self + 0x4) = *(float*)((char*)self + 0x4) + 0.01666666753590107f;
+    if (old != n)
+    {
+        *(int*)((char*)self + 0x4) = 0;
+        if (old < n)
+            *(float*)((char*)self + 0xC) = n;
+        else
+            *(float*)((char*)self + 0x8) = n;
+    }
+    if (func_0012C028(self) == 0) return;
+    if (func_0012C078(self) == 0) return;
+    float z = 0.0f;
+    if (target > 0.5f && *(float*)((char*)self + 0x4) < 0.4000000059604645f)
+    {
+        float e = *(float*)((char*)self + 0x4);
+        z = (*(float*)((char*)self + 0xC) - *(float*)((char*)self + 0x8)) * 2027.77783203125f * (1.0f - *(float*)((char*)self + 0x10)) / (e + 1.0f);
+    }
+    if (z < 555.5555419921875f)
+        z = 555.5555419921875f;
+    *(float*)((char*)self + 0xC) = z;
+    *(int*)self = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012C408);
