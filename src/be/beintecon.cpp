@@ -278,7 +278,112 @@ extern "C" void func_00151368(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_001513B8);
+#ifdef SKIP_ASM
+int func_0014DC40(void* self, int kind);
+extern "C" void* func_0014DC50(void* self, int kind);
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(void* self, int i);
+extern "C" int func_00151C90(void* self, int id, int on);
+extern char D_004A6750[];
+
+struct sEconItem_1513B8
+{
+    short id;
+    short flags;
+};
+
+struct sEconItems_1513B8
+{
+    char pad[0x288];
+    short* lookup;                  // 0x288
+    int count;                      // 0x28C
+    sEconItem_1513B8 items[0x20D];  // 0x290
+    char pad2[0xBC0 - 0x290 - 0x20D * 4];
+    signed char kind;               // 0xBC0
+};
+
+struct sEconGroup_1513B8
+{
+    int f0;
+    short id;       // 0x4
+    short prize;    // 0x6
+};
+
+struct sEconDef_1513B8
+{
+    int f0;
+    short id;       // 0x4
+    char pad6[0x8];
+    short price;    // 0xE
+    char pad10[0x28];
+};
+
+static inline sEconItem_1513B8* Find_1513B8(sEconItems_1513B8* self, int id)
+{
+    int idx = self->lookup[id];
+    if (idx >= 0)
+        return &self->items[idx];
+    return 0;
+}
+
+static inline int Price_1513B8(sEconDef_1513B8* d)
+{
+    short v = d->price;
+    int p = v;
+    if (v > 0)
+        p = v * 10;
+    return p;
+}
+
+extern "C" void func_001513B8(void* vself)
+{
+    sEconItems_1513B8* self = (sEconItems_1513B8*)vself;
+    void* db = D_004A6750;
+    int n = func_0014DC40(db, self->kind);
+    sEconGroup_1513B8* g = (sEconGroup_1513B8*)func_0014DC50(db, self->kind);
+    for (int i = 0; i < n; i++, g++)
+    {
+        func_00151C90(self, g->prize, 1);
+    }
+    int j;
+    for (j = 0; j < self->count; j++)
+    {
+        sEconItem_1513B8* it = &self->items[j];
+        if (it->flags & 0x10)
+            it->flags |= 0x26;
+    }
+    int m = func_0014D988(db, self->kind);
+    sEconDef_1513B8* d = (sEconDef_1513B8*)func_0014D998(db, self->kind);
+    int changed = 0;
+    for (int i = 0; i < m; i++, d++)
+    {
+        if (Price_1513B8(d) == 0)
+        {
+            Find_1513B8(self, d->id)->flags |= 2;
+        }
+        else if (Price_1513B8(d) == -1)
+        {
+            Find_1513B8(self, d->id)->flags |= 2;
+            func_00151C90(self, d->id, 1);
+            changed = 1;
+        }
+    }
+    if (changed)
+    {
+        int k;
+        for (k = 0; k < self->count; k++)
+        {
+            sEconItem_1513B8* it = &self->items[k];
+            if (it->flags & 0x10)
+                it->flags |= 6;
+            else
+                it->flags &= ~4;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_001515B8);

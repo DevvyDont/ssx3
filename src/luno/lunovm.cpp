@@ -250,9 +250,111 @@ extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
 
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_set);
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_002257E0);
+#ifdef SKIP_ASM
+extern "C" void func_00225BE8(cLunoValue* self, sVEntry00224C00** stream, int base);
 
+extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
+{
+    cLunoTableRef* self = (cLunoTableRef*)vself;
+    (*stream)[1].fn((char*)stream + (*stream)[1].delta, self->table, 8);
+    int cnt = 0;
+    cLunoTable* t = self->table;
+    cLunoNode* n = (cLunoNode*)t->nodes;
+    for (int i = 0; i <= t->modulus; i++) {
+        if (n->value.type != 0) {
+            cnt++;
+        }
+        cLunoNode* next = n + 1;
+        for (cLunoNode* m = n->next; m != 0; m = m->next) {
+            if (m->value.type != 0) {
+                cnt++;
+            }
+        }
+        n = next;
+    }
+    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &cnt, 4);
+    if (cnt > 0) {
+        cLunoNode* n = (cLunoNode*)self->table->nodes;
+        for (int i = 0; i <= self->table->modulus; i++) {
+            cLunoValue* v = &n->value;
+            if (n->value.type != 0) {
+                cnt--;
+                func_00225BE8(&n->key, stream, base);
+                func_00225BE8(v, stream, base);
+            }
+            cLunoNode* next = n + 1;
+            for (cLunoNode* m = n->next; m != 0; m = m->next) {
+                cLunoValue* mv = &m->value;
+                if (m->value.type != 0) {
+                    cnt--;
+                    func_00225BE8(&m->key, stream, base);
+                    func_00225BE8(mv, stream, base);
+                }
+            }
+            n = next;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("luno/lunovm", func_002259A8);
+#ifdef SKIP_ASM
+extern "C" void func_00225B90(cLunoValue* self, int flags);
+extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int base);
+extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val);
+
+
+struct cLunoNode_9A8 {
+    cLunoValue key;
+    cLunoValue val;
+    cLunoNode_9A8* next;
+    void* vt;
+    cLunoNode_9A8()
+    {
+        vt = D_00479890;
+        key.type = 0;
+        key.word0 = 0;
+        val.type = 0;
+        val.word0 = 0;
+        next = 0;
+    }
+    void operator delete[](void* p, unsigned int size);
+};
+
+extern "C" void func_002259A8(cLunoTableRef* self, sVEntry00224C00** stream, int base)
+{
+    if (self->table->nodes != 0) {
+        cLunoTableEntry* p = self->table->nodes + *(int*)((char*)self->table->nodes - 0x10);
+        while (self->table->nodes != p) {
+            p--;
+            p->vtable[1].func((char*)p + p->vtable[1].delta, 0);
+        }
+        cMemMan_free((char*)self->table->nodes - 0x10);
+    }
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, self->table, 8);
+    cLunoTableEntry** slot = &self->table->nodes;
+    *slot = (cLunoTableEntry*)new (D_00479870, 0xA0000000, 0) cLunoNode_9A8[self->table->modulus + 1];
+    int i;
+    int cnt;
+    cLunoValue key;
+    cLunoValue val;
+    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &cnt, 4);
+    for (i = 0; i < cnt; i++) {
+        key.type = 0;
+        key.word0 = 0;
+        func_00225CA0(&key, stream, base);
+        val.type = 0;
+        val.word0 = 0;
+        func_00225CA0(&val, stream, base);
+        luno_cLunoTable_set(self, &key, &val);
+        func_00225B90(&val, 2);
+        func_00225B90(&key, 2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00225B90);

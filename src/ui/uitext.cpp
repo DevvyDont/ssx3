@@ -395,7 +395,88 @@ extern "C" void func_003A1360(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A13E0);
+#ifdef SKIP_ASM
+struct sUIInputVE13E0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sUIFont13E0 {
+    char pad_0x0[0x14];
+    int height;             // 0x14
+    char pad_0x18[0x1C];
+    float scale;            // 0x34
+};
+
+struct sUIText13E0 {
+    char pad_0x0[0x54];
+    float scale;            // 0x54
+    char pad_0x58[0xC];
+    float height;           // 0x64
+    char pad_0x68[0xC];
+    unsigned int flags;     // 0x74
+    char pad_0x78[0x10];
+    signed char keyUp;      // 0x88
+    signed char keyDown;    // 0x89
+    char pad_0x8A[0x3A];
+    unsigned short cur;     // 0xC4
+    unsigned short top;     // 0xC6
+    unsigned short count;   // 0xC8
+};
+
+static inline int pressed13E0(char* input, int key)
+{
+    sUIInputVE13E0* e = &(*(sUIInputVE13E0**)(input + 8))[2];
+    return e->fn(input + e->delta, key);
+}
+
+extern "C" int func_003A13E0(sUIText13E0* self, char* input)
+{
+    sUIFont13E0* font = (sUIFont13E0*)func_003A12D0(self);
+    if (font == 0) {
+        return 0;
+    }
+    signed char rows = (int)(self->height / (self->scale * ((float)font->height * font->scale) + 3.0f));
+    if (self->flags & 1) {
+        if (pressed13E0(input, self->keyUp) != 0) {
+            if (self->cur != 0) {
+                self->cur--;
+            }
+            return 1;
+        }
+        if (pressed13E0(input, self->keyDown) != 0) {
+            if (self->cur < self->count - 1) {
+                self->cur++;
+            }
+            return 1;
+        }
+        short d = self->cur - self->top;
+        if (d < 0) {
+            self->top = self->cur;
+        } else if (d >= rows) {
+            self->top = self->cur - rows + 1;
+        }
+    } else {
+        if (pressed13E0(input, self->keyUp) != 0) {
+            if (self->top != 0) {
+                self->top--;
+            }
+            return 1;
+        }
+        if (pressed13E0(input, self->keyDown) == 0) {
+            return 0;
+        }
+        if (self->top < self->count - rows) {
+            self->top++;
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ui/uitext", func_003A1588);
 
@@ -449,7 +530,70 @@ extern "C" int func_003A1958(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A19F8);
+#ifdef SKIP_ASM
+extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str);
+extern "C" void func_002C2540(void* dst, void* src);
+
+extern "C" void func_003A19F8(void* self, char* str)
+{
+    ((cUIText_3A0C70*)self)->v05(1);
+    void* font = (void*)func_003A12D0(self);
+    if (font == 0) {
+        return;
+    }
+    int last = -1;
+    int len = strlen(str);
+    int i = 0;
+    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494078, 0x100, 0);
+    float w = 0.0f;
+    int start = 0;
+    func_002C2540(buf, str);
+    while (i < len) {
+        if (buf[i] == 0x5C && buf[i + 1] == buf[i]) {
+            buf[i] = 0;
+            i += 2;
+            cUITextScroll_addUnicodeString(self, &buf[start]);
+            last = -1;
+            w = 0.0f;
+            start = i;
+        } else if (buf[i] == 0xD) {
+            buf[i] = 0;
+            i += 1;
+            cUITextScroll_addUnicodeString(self, &buf[start]);
+            last = -1;
+            w = 0.0f;
+            start = i;
+        } else {
+            w += func_00392C60(font, buf[i]) * *(float*)((char*)self + 0x50);
+            if (buf[i] == 0x20) {
+                last = i;
+            }
+            if (w > *(float*)((char*)self + 0x60)) {
+                if (last < 0) {
+                    last = i - 1;
+                }
+                if (last > 0) {
+                    buf[last] = 0;
+                    i = last;
+                    w = 0.0f;
+                    cUITextScroll_addUnicodeString(self, &buf[start]);
+                    last = -1;
+                    start = i + 1;
+                }
+            }
+            i++;
+        }
+    }
+    if (start != i) {
+        cUITextScroll_addUnicodeString(self, &buf[start]);
+    }
+    if (buf) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeString);
@@ -483,7 +627,63 @@ extern "C" void func_003A1CF0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1D30);
+#ifdef SKIP_ASM
+extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str);
+
+extern "C" void func_003A1D30(void* self, void* vstr)
+{
+    unsigned short* str = (unsigned short*)vstr;
+    ((cUIText_3A0C70*)self)->v05(1);
+    void* font = (void*)func_003A12D0(self);
+    if (font == 0) {
+        return;
+    }
+    int last = -1;
+    int len = USTR_length(str);
+    int i = 0;
+    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494078, 0x100, 0);
+    float w = 0.0f;
+    int start = 0;
+    USTR_copy(buf, str);
+    while (i < len) {
+        if (buf[i] == 0x5C && buf[i + 1] == buf[i]) {
+            buf[i] = 0;
+            i += 2;
+            cUITextScroll_addUnicodeString(self, &buf[start]);
+            last = -1;
+            w = 0.0f;
+            start = i;
+        } else {
+            w += func_00392C60(font, buf[i]) * *(float*)((char*)self + 0x50);
+            if (buf[i] == 0x20) {
+                last = i;
+            }
+            if (w > *(float*)((char*)self + 0x60)) {
+                if (last < 0) {
+                    last = i - 1;
+                }
+                if (last > 0) {
+                    buf[last] = 0;
+                    i = last;
+                    w = 0.0f;
+                    cUITextScroll_addUnicodeString(self, &buf[start]);
+                    last = -1;
+                    start = i + 1;
+                }
+            }
+            i++;
+        }
+    }
+    if (start != i) {
+        cUITextScroll_addUnicodeString(self, &buf[start]);
+    }
+    if (buf) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A1F18);

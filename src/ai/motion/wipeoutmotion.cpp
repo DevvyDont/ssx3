@@ -257,7 +257,172 @@ void func_00136F28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136F30);
+#ifdef SKIP_ASM
+struct sVec4_6F30 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRider_6F30 {
+    char pad_0x0[0x130];
+    sVec4_6F30 pos;         // 0x130
+    sVec4_6F30 quat;        // 0x140
+    int active;             // 0x150
+    char pad_0x154[0x1AC];
+    float rate;             // 0x300
+};
+
+struct sWipeout_6F30 {
+    char pad_0x0[0x10];
+    sVec4_6F30 vel;         // 0x10
+    sVec4_6F30 angVel;      // 0x20
+    char pad_0x30[0x10];
+    sRider_6F30* rider;     // 0x40
+};
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline void vu0Scale_6F30(sVec4_6F30& out, const sVec4_6F30& v, float s)
+{
+    sVec4_6F30 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    out = r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector * scalar).
+static inline void vu0ScaleEq_6F30(sVec4_6F30& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void vu0AddEq_6F30(sVec4_6F30& a, const sVec4_6F30& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_6F30(const sVec4_6F30& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (quaternion derivative 0.5 * (0, w) * q).
+static inline void vu0QuatDeriv_6F30(sVec4_6F30& out, const sVec4_6F30& q, const sVec4_6F30& w)
+{
+    sVec4_6F30 r;
+    __asm__(
+        "qmtc2.ni  %3, $vf1\n"
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsuba.w   ACC, $vf0, $vf0\n"
+        "vmsubx.w  $vf2, $vf0, $vf1x\n"
+        "vmul.xyz  $vf7, $vf4, $vf5\n"
+        "vmulw.xyz $vf3, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vopmsub.xyz $vf6, $vf4, $vf5\n"
+        "vmulax.w  ACC, $vf2, $vf7x\n"
+        "vmadday.w ACC, $vf2, $vf7y\n"
+        "vmaddz.w  $vf8, $vf2, $vf7z\n"
+        "vmulax.xyz ACC, $vf3, $vf1x\n"
+        "vmaddx.xyz $vf8, $vf6, $vf1x\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(w), "r"(0x3F000000)
+        : "memory");
+    out = r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place normalize).
+static inline void vu0NormalizeEq_6F30(sVec4_6F30& v)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v)
+        :
+        : "memory");
+}
+
+extern "C" void func_00136F30(sWipeout_6F30* self)
+{
+    if (self->rider->active == 0) {
+        return;
+    }
+    float dt = self->rider->rate * 0.01666666753590107f;
+    sVec4_6F30 tmp;
+    vu0Scale_6F30(tmp, self->vel, dt);
+    vu0AddEq_6F30(self->rider->pos, tmp);
+    sVec4_6F30 v2;
+    v2.x = self->vel.x * -0.20000000298023224f;
+    v2.y = self->vel.y * -0.20000000298023224f;
+    v2.z = -1800.0f;
+    v2.w = 0.0f;
+    vu0Scale_6F30(tmp, v2, dt);
+    vu0AddEq_6F30(self->vel, tmp);
+    float len = vu0Length_6F30(self->vel);
+    if (3333.33349609375f < len) {
+        vu0ScaleEq_6F30(self->vel, 3333.33349609375f / len);
+    }
+    vu0ScaleEq_6F30(self->angVel, 1.0f - dt * 0.5f);
+    vu0QuatDeriv_6F30(v2, self->rider->quat, self->angVel);
+    vu0Scale_6F30(tmp, v2, dt);
+    sRider_6F30* r = self->rider;
+    r->quat.x += tmp.x;
+    r->quat.y += tmp.y;
+    r->quat.z += tmp.z;
+    r->quat.w += tmp.w;
+    vu0NormalizeEq_6F30(self->rider->quat);
+}
+#endif
 
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137138);
 

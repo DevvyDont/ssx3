@@ -361,7 +361,78 @@ INCLUDE_ASM("fe/festateoptions", func_0018A8D0);
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018BEF8);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_00287670(void* snd);
+extern "C" int func_002876A0(void* snd);
+extern "C" int func_002876D0(void* snd);
+extern "C" void func_00286200(void* snd);
+extern "C" void func_00284C28();
+extern "C" void SSXAUDIO_Init(int mode);
+extern "C" void func_00287410(void* snd, int v);
+extern "C" void func_00287488(void* snd, int v);
+extern "C" void func_00287520(void* snd, int v);
+extern "C" void func_00287558(void* snd, int v);
+extern "C" void func_002875D0(void* snd, int v);
+extern "C" void func_00285FB0(void* snd);
+
+struct sVE_18BEF8i {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sVE_18BEF8v {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0018BEF8(void* self, unsigned int mode)
+{
+    int m;
+    switch (mode) {
+    case 1:
+        m = 2;
+        break;
+    case 2:
+        m = 0;
+        break;
+    case 3:
+        m = 3;
+        break;
+    case 0:
+    default:
+        m = 1;
+        break;
+    }
+    char* obj = *(char**)(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8);
+    sVE_18BEF8i* vt = *(sVE_18BEF8i**)(obj + 4);
+    if (vt[2].fn(obj + vt[2].delta, m) == 1) {
+        float a = func_00287670(func_0028B180());
+        float b = func_002876A0(func_0028B180());
+        float c = func_002876D0(func_0028B180());
+        int s0 = *(int*)((char*)func_0028B180() + 0x62B8);
+        int s1 = *(int*)((char*)func_0028B180() + 0x62B4);
+        int s2 = *(int*)((char*)func_0028B180() + 0x534);
+        func_00286200(func_0028B180());
+        func_00284C28();
+        SSXAUDIO_Init(m);
+        func_00287410(func_0028B180(), (int)a);
+        func_00287488(func_0028B180(), (int)b);
+        func_00287520(func_0028B180(), (int)c);
+        func_00287558(func_0028B180(), s0);
+        func_002875D0(func_0028B180(), s1);
+        func_00285FB0(func_0028B180());
+        char* snd = (char*)func_0028B180();
+        sVE_18BEF8v* vt2 = *(sVE_18BEF8v**)(snd + 0x5558);
+        char* sub = snd + 0x118;
+        vt2[4].fn(sub + vt2[4].delta, s2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
@@ -464,9 +535,157 @@ extern "C" int func_0018C270(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C2A0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_0045DD68[];
+extern void* D_0046B3D0[];
+extern int D_004A14D8;
 
+struct sOptions_C2A0 {
+    unsigned int pad0 : 30;
+    unsigned int mode : 2;
+    int data[(0x288 - 4) / 4];
+};
+extern sOptions_C2A0 D_00535610_C2A0 __asm__("D_00535610");
+
+struct sVE_18C2A0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sVE_18C2A0n {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVE_18C2A0p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
+{
+    if (widget == 0) {
+        return;
+    }
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (event) {
+    case 7: {
+        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        func_0039E318(p, *(void**)(self + 0x10), self);
+        *(void***)(p + 8) = D_0046B3D0;
+        *(char*)(p + 0x48) = 0;
+        func_0039F290(*(char**)(self + 0x10) + 0x18, p);
+        break;
+    }
+    case 6: {
+        sVE_18C2A0n* vt = *(sVE_18C2A0n**)(iface + 0xC);
+        vt[1].fn(iface + vt[1].delta);
+        char* obj = **(char***)(self + 0x10);
+        sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
+        void* r = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
+        if (r != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 1: {
+        sVE_18C2A0* vt = *(sVE_18C2A0**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 1);
+        D_004A14D8 = 1;
+        D_00535610_C2A0.mode = *(unsigned char*)(widget + 0x18);
+        break;
+    }
+    case 2:
+        if (Is_0018C2A0(*(int*)(widget + 0x38), D_004A14F8) || Is_0018C2A0(*(int*)(widget + 0x38), D_004A1500) ||
+            Is_0018C2A0(*(int*)(widget + 0x38), D_004A1508)) {
+            sVE_18C2A0* vt = *(sVE_18C2A0**)(widget + 8);
+            vt[9].fn(widget + vt[9].delta, 0);
+        }
+        break;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018C478);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern char D_004A1398[];
+
+struct sName_C478 {
+    char s[2];
+};
+extern char D_004A14F8[];
+
+struct sOptions_C478 {
+    unsigned int pad0 : 30;
+    unsigned int mode : 2;
+    int data[(0x288 - 4) / 4];
+};
+extern sOptions_C478 D_00535610_C478 __asm__("D_00535610");
+
+static inline int optMode_C478(sOptions_C478 o)
+{
+    return o.mode;
+}
+
+struct sVE_18C478h {
+    short delta;
+    short index;
+    char* (*fn)(void*, int);
+};
+
+struct sVE_18C478v {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0018C478(void* vself)
+{
+    char* self = (char*)vself;
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    sName_C478 name = *(sName_C478*)D_004A14F8;
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1398));
+    if (menu != 0) {
+        int i;
+        for (i = 0; i < 3; i++) {
+            name.s[0] = '1' + i;
+            sVE_18C478h* vt = *(sVE_18C478h**)(menu + 8);
+            char* item = vt[14].fn(menu + vt[14].delta, GetHashValue32(name.s));
+            if (item != 0) {
+                *(int*)(item + 0x18) = i;
+                if (i == optMode_C478(D_00535610_C478)) {
+                    sVE_18C478v* vt2 = *(sVE_18C478v**)(item + 8);
+                    vt2[9].fn(item + vt2[9].delta, 1);
+                    cUIMenu_setSelectedByIndex(menu, i);
+                } else {
+                    sVE_18C478v* vt2 = *(sVE_18C478v**)(item + 8);
+                    vt2[9].fn(item + vt2[9].delta, 0);
+                }
+            }
+        }
+        *(int*)(menu + 0x14) &= ~1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C658);
@@ -486,7 +705,58 @@ extern "C" void* func_0018C658(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
+#ifdef SKIP_ASM
+extern "C" void cUIListBox_addEntryByStringID(void* box, int id, int idx);
+extern "C" void func_0018D108(void* self, int idx, float x, float y);
+extern "C" void func_0018CDC0(void* self);
+extern char D_0045E068[];
+extern char D_004A1568[];
+extern char D_004A1570[];
+extern char D_004A15C8[];
+extern char D_004A1578[];
+extern char D_0045DF40[];
+extern char D_0045E028[];
+extern char D_0045E078[];
+extern char D_0045E090[];
+
+extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E068), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    *(int*)((char*)self + 0x4C) = 0;
+    *(int*)((char*)self + 0x48) = 0;
+    void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1568));
+    if (o != 0) {
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045DF40), 0);
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045E028), 1);
+    }
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1570));
+    if (o != 0) {
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045DF40), 0);
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045E028), 1);
+    }
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C8));
+    if (o != 0) {
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045E078), 0);
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045E090), 1);
+    }
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1578));
+    if (o != 0) {
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045E078), 0);
+        cUIListBox_addEntryByStringID(o, GetHashValue32(D_0045E090), 1);
+    }
+    float zero = 0.0f;
+    func_0018D108(self, 0, zero, zero);
+    func_0018D108(self, 1, zero, zero);
+    func_0018CDC0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C8B8);
@@ -829,9 +1099,160 @@ extern "C" void func_0018D3C0(void* self)
 
 INCLUDE_ASM("fe/festateoptions", func_0018D438);
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018D460);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0039F190(void* list, int a1);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void func_00147138(void* self, int a1, const char* name);
+extern "C" void func_0014DE28(void* self, int c);
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0019EBA0(void* self);
+extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern void* D_004A28A8;
+extern char D_004A1408[];
+extern char D_0045DC60[];
 
+struct sVE_18D460n {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVE_18D460p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0018D460(char* self, char* widget, unsigned int event)
+{
+    switch (event) {
+    case 0xF:
+        *(int*)(widget + 0x18) = 1;
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 0x10:
+        *(int*)(widget + 0x18) = 0;
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 0x15:
+        break;
+    case 0x16: {
+        if (*(int*)(widget + 0x18) == 0) {
+            break;
+        }
+        int sel = *(signed char*)(self + 0x44);
+        if (sel < 0) {
+            sel = 0;
+        }
+        char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_00147138(iface, sel, D_004A1408);
+        sVE_18D460n* vt = *(sVE_18D460n**)(iface + 0xC);
+        vt[1].fn(iface + vt[1].delta);
+        func_0014DE28(cBE_getBE(), sel);
+        void* r = func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, 0);
+        func_0019EBA0(r);
+        cFERider_init(r, 0, 4, 0);
+        r = func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, 1);
+        func_0019EBA0(r);
+        cFERider_init(r, 1, 0, 0);
+        char* obj = **(char***)(self + 0x10);
+        sVE_18D460p* vt2 = *(sVE_18D460p**)(obj + 4);
+        void* x = vt2[4].fn(obj + vt2[4].delta, self, (1 << *(signed char*)(self + 0x48)) | 0x100);
+        if (x != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, x);
+        }
+        int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0045DC60));
+        if (f != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)(self + 0x40), f, 1);
+        }
+        break;
+    }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetEvent);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
+extern void* D_004A28A8;
+extern char D_0045E110[];
+extern char D_0045E130[];
+
+struct sVE_18D648s {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+struct sVE_18D648p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sVE_18D648v {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, int event)
+{
+    if (widget == 0) {
+        return;
+    }
+    switch (event) {
+    case 5: {
+        unsigned int v = *(unsigned int*)(widget + 0x18);
+        *(int*)(widget + 0x18) = 3;
+        if (v == 3) {
+            *(signed char*)(self + 0x48) = *(signed char*)(self + 0x14);
+            char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVE_18D648s* vt = *(sVE_18D648s**)(mgr + 4);
+            unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0045E110));
+            char* p = (char*)operator new(0xBFC, D_0045E130, 0x100, 0);
+            char* o = (char*)func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+            sVE_18D648v* vt2 = *(sVE_18D648v**)(o + 8);
+            vt2[25].fn(o + vt2[25].delta, 1);
+            *(int*)(o + 0x18) = 0;
+            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+        } else {
+            if (v > 3) {
+                v |= 1 << *(signed char*)(self + 0x14);
+            }
+            char* obj = **(char***)(self + 0x10);
+            sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
+            void* r = vt[4].fn(obj + vt[4].delta, self, v);
+            if (r != 0) {
+                func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            }
+        }
+        break;
+    }
+    case 6: {
+        char* obj = **(char***)(self + 0x10);
+        sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
+        void* r = vt[5].fn(obj + vt[5].delta, self, *(int*)(widget + 0x18));
+        if (r != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018D7F0);

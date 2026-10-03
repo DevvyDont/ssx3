@@ -63,7 +63,51 @@ void* func_001DEDE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DEE10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern char D_0045DDD8[];
+
+struct sOptions_EE10 {
+    unsigned int flags;
+    int pad_4 : 8;
+    int b5 : 8;
+    int b6 : 8;
+    int pad_7 : 8;
+    int data[(0x288 - 8) / 4];
+};
+extern sOptions_EE10 D_00535610_EE10 __asm__("D_00535610");
+
+static inline int optB6_EE10(sOptions_EE10 o)
+{
+    return o.b6;
+}
+
+static inline int optB5_EE10(sOptions_EE10 o)
+{
+    return o.b5;
+}
+
+extern "C" void func_001DEE10(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DDD8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+        *(int*)((char*)self + 0xC) = GetHashValue32(D_0045DDD8);
+    }
+    void* be = cBE_getBE();
+    cBE_getInterface_Fv(be, 4);
+    int* p48 = (int*)((char*)self + 0x48);
+    *p48 = optB6_EE10(D_00535610_EE10);
+    int* p4C = (int*)((char*)self + 0x4C);
+    *p4C = optB5_EE10(D_00535610_EE10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF028);
@@ -2139,11 +2183,165 @@ extern "C" int func_001E1AD0(sRangeK1E1AD0* r, int arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1C10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+int cBENewPlayerInterface_getRiderCharID(void* self, int player);
+extern "C" int func_001E3A30(void* self);
+extern "C" void func_001E2FE0(int a, unsigned char b);
+
+struct sEntry14_1C10 {
+    int type;
+    int f4;
+    char pad_0x8[0x14 - 0x8];
+};
+extern sEntry14_1C10 D_00441630_1C10[] __asm__("D_00441630");
+
+
+
+extern "C" void func_001E1C10(int which)
+{
+    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = n != 0 && n < 10;
+    if (busy == 0) {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        int id;
+        switch (which) {
+        case 0: {
+            if (func_001E3A30((void*)0x1C) != 0) {
+                break;
+            }
+            if (func_001E3A30((void*)0x1D) != 0) {
+                break;
+            }
+            sEntry14_1C10* r;
+            if (ch != 3) {
+                sEntry14_1C10* tbl = D_00441630_1C10;
+                r = &tbl[0x1C];
+            } else {
+                sEntry14_1C10* tbl = D_00441630_1C10;
+                r = &tbl[0x1D];
+            }
+            id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
+            if (id != 0x100) {
+                func_001E2FE0(id, 0);
+            }
+            break;
+        }
+        case 1: {
+            if (func_001E3A30((void*)0x1E) != 0) {
+                break;
+            }
+            if (func_001E3A30((void*)0x1F) != 0) {
+                break;
+            }
+            sEntry14_1C10* r;
+            if (ch != 7) {
+                sEntry14_1C10* tbl = D_00441630_1C10;
+                r = &tbl[0x1E];
+            } else {
+                sEntry14_1C10* tbl = D_00441630_1C10;
+                r = &tbl[0x1F];
+            }
+            id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
+            if (id != 0x100) {
+                func_001E2FE0(id, 0);
+            }
+            break;
+        }
+        case 2: {
+            if (func_001E3A30((void*)0x20) != 0) {
+                break;
+            }
+            if (func_001E3A30((void*)0x21) != 0) {
+                break;
+            }
+            sEntry14_1C10* r;
+            if (ch != 8) {
+                sEntry14_1C10* tbl = D_00441630_1C10;
+                r = &tbl[0x20];
+            } else {
+                sEntry14_1C10* tbl = D_00441630_1C10;
+                r = &tbl[0x21];
+            }
+            id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
+            if (id != 0x100) {
+                func_001E2FE0(id, 0);
+            }
+            break;
+        }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E1DD0);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1EB8);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" int func_001E3A30(void* self);
+extern "C" void func_001E3A78(int a, int b);
+extern "C" void func_001E20D0(int which, int flag);
+extern "C" void func_001E2220(int which, int flag);
+
+extern "C" void func_001E1EB8(void)
+{
+    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = n != 0 && n < 10;
+    if (busy == 0) {
+        if (func_001E3A30((void*)0x28) != 0) {
+            func_001E2220(0, 0);
+            func_001E3A78(0x28, 0);
+        } else if (func_001E3A30((void*)0x29) != 0) {
+            func_001E2220(0, 1);
+            func_001E3A78(0x29, 0);
+        }
+        if (func_001E3A30((void*)0x2C) != 0) {
+            func_001E2220(1, 0);
+            func_001E3A78(0x2C, 0);
+        } else if (func_001E3A30((void*)0x2D) != 0) {
+            func_001E2220(1, 1);
+            func_001E3A78(0x2D, 0);
+        }
+        if (func_001E3A30((void*)0x30) != 0) {
+            func_001E2220(2, 0);
+            func_001E3A78(0x30, 0);
+        } else if (func_001E3A30((void*)0x31) != 0) {
+            func_001E2220(2, 1);
+            func_001E3A78(0x31, 0);
+        }
+        if (func_001E3A30((void*)0x2A) != 0) {
+            func_001E20D0(0, 0);
+            func_001E3A78(0x2A, 0);
+        } else if (func_001E3A30((void*)0x2B) != 0) {
+            func_001E20D0(0, 1);
+            func_001E3A78(0x2B, 0);
+        }
+        if (func_001E3A30((void*)0x2E) != 0) {
+            func_001E20D0(1, 0);
+            func_001E3A78(0x2E, 0);
+        } else if (func_001E3A30((void*)0x2F) != 0) {
+            func_001E20D0(1, 1);
+            func_001E3A78(0x2F, 0);
+        }
+        if (func_001E3A30((void*)0x32) != 0) {
+            func_001E20D0(2, 0);
+            func_001E3A78(0x32, 0);
+        } else if (func_001E3A30((void*)0x33) != 0) {
+            func_001E20D0(2, 1);
+            func_001E3A78(0x33, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E20D0);
@@ -2393,9 +2591,187 @@ extern "C" void func_001E25D8(int key, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2648);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+int cBENewPlayerInterface_getRiderCharID(void* self, int player);
+extern "C" int func_001E3A30(void* self);
+extern "C" void func_001E3A78(int a, int b);
+extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" void func_001E32C8(int type);
 
+// PORT: the unit declares func_001E2648(void*, int); the first arg is really an int id.
+extern "C" void func_001E2648_impl(int which, int flag) __asm__("func_001E2648");
+extern "C" void func_001E2648_impl(int which, int flag)
+{
+    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = n != 0 && n < 10;
+    if (busy == 0) {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        switch (which) {
+        case 0xE:
+            if (func_001E3A30((void*)0x16) != 0) {
+                break;
+            }
+            func_001E32C8(1);
+            func_001E32C8(0x16);
+            if (flag == 0) {
+                func_001E3A78(0x16, 1);
+                if (ch != 3) {
+                    func_001E2FE0(0x74, 0);
+                } else {
+                    func_001E2FE0(0x76, 0);
+                }
+            } else {
+                if (ch != 3) {
+                    func_001E2FE0(0x73, 0);
+                } else {
+                    func_001E2FE0(0x75, 0);
+                }
+            }
+            break;
+        case 0xF:
+            if (func_001E3A30((void*)0x17) != 0) {
+                break;
+            }
+            func_001E32C8(2);
+            func_001E32C8(0x17);
+            if (flag == 0) {
+                func_001E3A78(0x17, 1);
+                if (ch != 7) {
+                    func_001E2FE0(0x78, 0);
+                } else {
+                    func_001E2FE0(0x7A, 0);
+                }
+            } else {
+                if (ch != 7) {
+                    func_001E2FE0(0x77, 0);
+                } else {
+                    func_001E2FE0(0x79, 0);
+                }
+            }
+            break;
+        case 0x10:
+            if (func_001E3A30((void*)0x18) != 0) {
+                break;
+            }
+            func_001E32C8(3);
+            func_001E32C8(0x18);
+            if (flag == 0) {
+                func_001E3A78(0x18, 1);
+                if (ch != 8) {
+                    func_001E2FE0(0x7C, 0);
+                } else {
+                    func_001E2FE0(0x7E, 0);
+                }
+            } else {
+                if (ch != 8) {
+                    func_001E2FE0(0x7B, 0);
+                } else {
+                    func_001E2FE0(0x7D, 0);
+                }
+            }
+            break;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2828);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+int cBENewPlayerInterface_getRiderCharID(void* self, int player);
+extern "C" int func_001E3A30(void* self);
+extern "C" void func_001E3A78(int a, int b);
+extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" void func_001E32C8(int type);
+
+// PORT: the unit declares func_001E2828(void*, int); the first arg is really an int id.
+extern "C" void func_001E2828_impl(int which, int flag) __asm__("func_001E2828");
+extern "C" void func_001E2828_impl(int which, int flag)
+{
+    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = n != 0 && n < 10;
+    if (busy == 0) {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        switch (which) {
+        case 0xE:
+            if (func_001E3A30((void*)0x19) != 0) {
+                break;
+            }
+            func_001E32C8(4);
+            func_001E32C8(0x19);
+            if (flag == 0) {
+                func_001E3A78(0x19, 1);
+                if (ch != 3) {
+                    func_001E2FE0(0x80, 0);
+                } else {
+                    func_001E2FE0(0x82, 0);
+                }
+            } else {
+                if (ch != 3) {
+                    func_001E2FE0(0x7F, 0);
+                } else {
+                    func_001E2FE0(0x81, 0);
+                }
+            }
+            break;
+        case 0xF:
+            if (func_001E3A30((void*)0x1A) != 0) {
+                break;
+            }
+            func_001E32C8(5);
+            func_001E32C8(0x1A);
+            if (flag == 0) {
+                func_001E3A78(0x1A, 1);
+                if (ch != 7) {
+                    func_001E2FE0(0x84, 0);
+                } else {
+                    func_001E2FE0(0x86, 0);
+                }
+            } else {
+                if (ch != 7) {
+                    func_001E2FE0(0x83, 0);
+                } else {
+                    func_001E2FE0(0x85, 0);
+                }
+            }
+            break;
+        case 0x10:
+            if (func_001E3A30((void*)0x1B) != 0) {
+                break;
+            }
+            func_001E32C8(6);
+            func_001E32C8(0x1B);
+            if (flag == 0) {
+                func_001E3A78(0x1B, 1);
+                if (ch != 8) {
+                    func_001E2FE0(0x88, 0);
+                } else {
+                    func_001E2FE0(0x8A, 0);
+                }
+            } else {
+                if (ch != 8) {
+                    func_001E2FE0(0x87, 0);
+                } else {
+                    func_001E2FE0(0x89, 0);
+                }
+            }
+            break;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2A08);
@@ -3213,7 +3589,112 @@ extern "C" void func_001E4168(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4200);
+#ifdef SKIP_ASM
+struct sPopupEntry18_4200 {
+    int field_0x0;
+    int id;                         // 0x4
+    char pad_0x8[0x10];
+};
+extern sPopupEntry18_4200 D_004C6C08_4200[] __asm__("D_004C6C08");
+
+struct sPopupEntry14_4200 {
+    int type;
+    int start;                      // 0x4
+    int count;                      // 0x8
+    int field_0xC;
+    int enabled;                    // 0x10
+};
+extern sPopupEntry14_4200 D_00441630_4200[] __asm__("D_00441630");
+
+struct sVEntry001E4200 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern char D_0046E050[];
+extern int D_004A20C0;
+
+// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
+unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+// PORT: func_001E3A30 is declared int; its result is used as a bool here
+extern "C" bool func_001E3A30_b(int id) __asm__("func_001E3A30");
+extern "C" int func_001E3620(int idx);
+extern "C" void func_001E3A78(int a, int b);
+extern "C" void func_001E48B0(void*);
+extern "C" void func_001E4458(void*);
+extern "C" void func_001E4658(void*);
+extern "C" void func_001E50C8(void* self, int a1, int a2);
+extern "C" void func_001E5148(void* self, int idx);
+
+extern "C" void func_001E4200(void* self, void* widget, unsigned int event)
+{
+    if (widget == 0) {
+        return;
+    }
+    sPopupList* list = func_001E39F8_list();
+    int n1 = func_001E2BB8(4, 1);
+    int n2 = func_001E33E8_noarg();
+    switch (event) {
+    case 5:
+        if (n1 + n2 > 0) {
+            int k = *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95);
+            int idx = n2 - k - 1;
+            if (idx >= 0) {
+                int id = func_001E3620(idx);
+                list->mask |= 1 << idx;
+                func_001E50C8(self, id, k + 1);
+            } else if (idx + n1 >= 0) {
+                int w = *(int*)((char*)widget + 0x18);
+                sPopupEntry18_4200* a = &D_004C6C08_4200[w];
+                sPopupEntry14_4200* e = &D_00441630_4200[a->id];
+                if (e->enabled != 0 && w == e->start) {
+                    func_001E3A78(a->id, !func_001E3A30_b(a->id));
+                    func_001E48B0(self);
+                    func_001E4658(self);
+                    func_001E4458(self);
+                } else {
+                    func_001E50C8(self, w, k + 1);
+                }
+            }
+        }
+        break;
+    case 7:
+        *(int*)((char*)self + 0x170) = 0;
+        if (n2 > 0) {
+            int idx = n2 - *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95) - 1;
+            if (idx >= 0) {
+                func_001E5148(self, idx);
+                *(int*)((char*)self + 0x170) = 1;
+            }
+            func_001E4458(self);
+        }
+        break;
+    case 6: {
+        int f = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x17C), GetHashValue32(D_0046E050));
+        if (f != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)((char*)self + 0x17C), f, 1);
+        }
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        D_004A20C0 = 0;
+        break;
+    }
+    case 1: {
+        int i;
+        for (i = 0; i < 8; i++) {
+            void* o = ((void**)((char*)self + 0xFC))[i];
+            sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)o + 8);
+            vt[5].fn((char*)o + vt[5].delta, 0);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4458);
@@ -3624,7 +4105,87 @@ extern "C" void func_001E52F8(void* self, void* widget)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E5428);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPopupEntry18_5428 {
+    int field_0x0;
+    int field_0x4;
+    char pad_0x8[0x4];
+    int field_0xC;
+    char pad_0x10[0x8];
+};
+extern sPopupEntry18_5428 D_004C6C08_5428[] __asm__("D_004C6C08");
+
+struct sPopupEntry14_5428 {
+    int type;
+    char pad_0x4[0x10];
+};
+extern sPopupEntry14_5428 D_00441630_5428[] __asm__("D_00441630");
+
+struct sVEntryK1E5428 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sVEntryS1E5428 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern char D_0046E2C0[];
+extern char D_0046E2D0[];
+extern char D_004A2138[];
+
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" int func_001E2EA0(int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_001E55D0(void* self, int idx);
+extern "C" void func_001E5780(void* self, int idx);
+
+extern "C" void func_001E5428(void* self)
+{
+    sPopupEntry18_5428* a = &D_004C6C08_5428[*(int*)((char*)self + 0x68)];
+    sPopupEntry14_5428* e = &D_00441630_5428[a->field_0x4];
+    if (e->type == 4) {
+        void* o = *(void**)((char*)self + 0x5C);
+        if (o != 0) {
+            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)o + 8);
+            vt[9].fn((char*)o + vt[9].delta, 0);
+        }
+        o = *(void**)((char*)self + 0x60);
+        if (o != 0) {
+            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)o + 8);
+            vt[9].fn((char*)o + vt[9].delta, 0);
+        }
+        if (*(cUIText**)((char*)self + 0x64) != 0) {
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x64), GetHashValue32(D_0046E2C0));
+        }
+    }
+    if (*(void**)((char*)self + 0x4C) != 0) {
+        if (e->type == 4) {
+            unsigned short buf[0x18];
+            char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
+            unsigned short* fmt = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046E2D0));
+            func_002C26D0(buf, fmt, func_001E2DC0(*(int*)((char*)self + 0x68)));
+            func_003A0E90(*(void**)((char*)self + 0x4C), buf);
+        } else {
+            char buf[0x30];
+            sprintf(buf, D_004A2138, *(int*)((char*)self + 0x6C));
+            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x4C), buf);
+        }
+    }
+    if (*(cUIText**)((char*)self + 0x50) != 0) {
+        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), func_001E2EA0(a->field_0xC));
+    }
+    func_001E55D0(self, *(int*)((char*)self + 0x68));
+    func_001E5780(self, *(int*)((char*)self + 0x68));
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E55D0);

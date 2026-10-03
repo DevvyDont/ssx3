@@ -187,7 +187,102 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00397DF8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sUIRS_7DF8 {
+    unsigned int f0_0 : 2;
+    unsigned int f0_2 : 2;
+    unsigned int f0_4 : 28;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 5;
+    unsigned int f4_12 : 8;
+    unsigned int f4_20 : 2;
+    unsigned int f4_22 : 1;
+    unsigned int f4_23 : 2;
+    unsigned int f4_25 : 7;
+    int f8;
+    int fC;
+    int f10;
+};
+
+class cUICtx_7DF8 {
+public:
+    char pad0[0xE84];
+    sUIRS_7DF8* top;
+    char pad1[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26(int a, int b, float x, float y, float w, float h, float zn, float zf);
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34(void* p);
+};
+
+// Typed view of the render context (the unit declares D_004A289C as void* later).
+extern cUICtx_7DF8* D_004A289C_7df8 __asm__("D_004A289C");
+extern char D_004FF1A0[];
+extern sUIRS_7DF8 D_00501420_7df8 __asm__("D_00501420");
+extern "C" void func_0039EBE0(void* p);
+
+static inline void setF4_22_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_22 = v; }
+static inline void setF4_23_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_23 = v; }
+static inline void setF4_20_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_20 = v; }
+static inline void setF4_12_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_12 = v; }
+static inline void setF4_2_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_2 = v; }
+
+extern "C" void func_00397DF8(void* self)
+{
+    cUICtx_7DF8* ctx = D_004A289C_7df8;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *D_004A289C_7df8->top = D_00501420_7df8;
+    D_004A289C_7df8->v31();
+    D_004A289C_7df8->v21();
+    D_004A289C_7df8->v26(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
+    D_004A289C_7df8->v34(D_004FF1A0);
+    setF4_22_7DF8(D_004A289C_7df8->top, 1);
+    setF4_23_7DF8(D_004A289C_7df8->top, 2);
+    setF4_20_7DF8(D_004A289C_7df8->top, 0);
+    setF4_12_7DF8(D_004A289C_7df8->top, 0x14);
+    setF4_2_7DF8(D_004A289C_7df8->top, 5);
+    D_004A289C_7df8->top->f0_2 = 3;
+    func_0039EBE0((char*)self + 0x18);
+    D_004A289C_7df8->v22();
+    D_004A289C_7df8->v32();
+    D_004A289C_7df8->top--;
+}
+#endif
 
 void func_0039ECA8(void*);
 
@@ -250,7 +345,121 @@ extern "C" void func_00398078(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", cUITextureBank_setData);
+#ifdef SKIP_ASM
+struct sUITexElem8138 {
+    int tex;                // 0x00
+    float f4;               // 0x04
+    float f8;               // 0x08
+    float fC;               // 0x0C
+    float f10;              // 0x10
+    float f14;              // 0x14
+    float f18;              // 0x18
+    int id;                 // 0x1C
+    sUITexElem8138()
+    {
+        tex = -1;
+        f4 = 1.0f;
+        f8 = 1.0f;
+        fC = 0.0f;
+        f10 = 0.0f;
+        f14 = 1.0f;
+        f18 = 1.0f;
+    }
+};
+
+struct sUITexSrc8138 {
+    int id;                 // 0x00
+    char b4;                // 0x04
+    unsigned char tex;      // 0x05
+    char pad6[2];
+    float f8;               // 0x08
+    float fC;               // 0x0C
+    float f10;              // 0x10
+    float f14;              // 0x14
+};
+
+struct sUITexData8138 {
+    int count;              // 0x00
+    sUITexSrc8138 e[1];     // 0x04
+};
+
+struct sUITexBank8138 {
+    sUITexData8138* data;   // 0x00
+    int* texIds;            // 0x04
+    int texCount;           // 0x08
+    sUITexElem8138* elems;  // 0x0C
+    int elemCount;          // 0x10
+};
+
+struct sUIFshDir8138 {
+    int offset;
+    int pad;
+};
+
+struct sUIFsh8138 {
+    char pad_0x0[0x8];
+    int count;              // 0x08
+    char pad_0xC[0x8];
+    sUIFshDir8138 dir[1];   // 0x14
+};
+
+struct sUIVE_8138 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, void*, int, int, int);
+};
+
+extern char D_00493D90[];
+extern char D_00493DA0[];
+extern char D_00493DB0[];
+extern char D_004A4778[];
+extern char* D_004A289C_8138 __asm__("D_004A289C");
+extern "C" sUIFsh8138* func_003E22F0(char* name, int flags);
+extern "C" void func_002523A8(void* p);
+extern "C" void* func_00416210(void* dst, int c, int n);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+
+extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
+{
+    sUITexBank8138* self = (sUITexBank8138*)vbank;
+    sUITexData8138* data = (sUITexData8138*)vdata;
+    char name[0x70];
+    int i = 0;
+    sprintf(name, D_00493D90, id);
+    sUIFsh8138* fsh = func_003E22F0(name, 0x3000100);
+    self->texCount = fsh->count;
+    self->texIds = (int*)operator_new_tag(self->texCount * 4, D_00493DA0, 0, 0);
+    func_00416210(self->texIds, 0xFF, self->texCount * 4);
+    for (; i < self->texCount; i++) {
+        char* shape = (char*)fsh + fsh->dir[i].offset;
+        if (shape != 0) {
+            sUIVE_8138* vt = *(sUIVE_8138**)(D_004A289C_8138 + 0x10D8);
+            self->texIds[i] = vt[46].fn(D_004A289C_8138 + vt[46].delta, shape, D_004A4778, 0, 1, -1);
+        }
+    }
+    func_002523A8(fsh);
+    sUITexSrc8138* src = data->e;
+    self->data = data;
+    int n = data->count;
+    self->elemCount = n;
+    sUITexElem8138*& slot = self->elems;
+    slot = new (D_00493DB0, 0, 0) sUITexElem8138[n];
+    func_00416210(self->elems, 0xFF, self->elemCount * 4);
+    int j;
+    for (j = 0; j < self->elemCount; j++, src++) {
+        self->elems[j].fC = src->fC;
+        self->elems[j].f10 = src->f8;
+        self->elems[j].f18 = src->f14;
+        self->elems[j].f14 = src->f10;
+        self->elems[j].id = src->id;
+        self->elems[j].tex = self->texIds[src->tex];
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", func_00398380);

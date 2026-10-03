@@ -67,11 +67,289 @@ extern "C" void func_00359688_impl(void* self, float speed)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_00359698);
+#ifdef SKIP_ASM
+extern "C" float func_002D1C70();
+
+struct cSplineModifier_9698 {
+    char pad_0x0[0x30];
+    int mode;               // 0x30
+    char pad_0x34[0x8];
+    float pos;              // 0x3C
+    float accel;            // 0x40
+    float accelTime;        // 0x44
+    float speed;            // 0x48
+    int field_0x4c;
+    int stopped;            // 0x50
+    int active;             // 0x54
+    int dirty;              // 0x58
+    char pad_0x5c[0x88];
+    float length;           // 0xE4
+};
+
+extern "C" void func_00359698(cSplineModifier_9698* self)
+{
+    float zero = 0.0f;
+    if (zero < self->accelTime) {
+        self->accelTime -= func_002D1C70();
+        self->speed += self->accel * func_002D1C70();
+    }
+    if (self->active == 0) {
+        return;
+    }
+    if (self->stopped != 0) {
+        return;
+    }
+    float pos = self->pos + self->speed * func_002D1C70();
+    self->pos = pos;
+    if (pos < zero) {
+        int mode = self->mode;
+        if (mode == 0) {
+            self->speed = -self->speed;
+            self->pos = zero;
+            self->stopped = 1;
+            self->active = 0;
+        } else if (mode == 2) {
+            self->speed = -self->speed;
+            self->pos = -pos;
+        } else if (mode == 4) {
+            self->speed = -self->speed;
+            self->pos = zero;
+            self->stopped = 1;
+            self->active = 0;
+        } else {
+            self->pos = pos + self->length;
+        }
+    } else if (self->length <= pos) {
+        int mode = self->mode;
+        if (mode == 0) {
+            self->active = 0;
+            self->stopped = 1;
+            self->speed = -self->speed;
+            self->pos = self->length - 0.10000000149011612f;
+        } else if (mode == 2) {
+            self->speed = -self->speed;
+            self->pos = pos - (pos - (self->length - 0.10000000149011612f));
+        } else if (mode == 4) {
+            self->active = 0;
+            self->stopped = 1;
+            self->speed = -self->speed;
+            self->pos = self->length - 0.10000000149011612f;
+        } else {
+            self->pos = pos - self->length;
+        }
+    }
+    self->dirty = 1;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_00359830);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_00359CF8);
+#ifdef SKIP_ASM
+struct sSmVec4_9CF8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSmMat_9CF8 {
+    sSmVec4_9CF8 r[4];
+};
+
+struct sSmBody_9CF8 {
+    sSmVec4_9CF8 pos;       // 0x00
+    sSmVec4_9CF8 f10;       // 0x10
+    sSmVec4_9CF8 vel;       // 0x20
+    sSmVec4_9CF8 rot;       // 0x30
+};
+
+struct cSplineModifier_9CF8 {
+    char pad_0x0[0x48];
+    float speed;            // 0x48
+    int field_0x4c;
+    int stopped;            // 0x50
+    int active;             // 0x54
+    char pad_0x58[0x8];
+    sSmMat_9CF8 mat;        // 0x60
+    sSmVec4_9CF8 origin;    // 0xA0
+    sSmVec4_9CF8 dir;       // 0xB0
+    float fC0;              // 0xC0
+    float fC4;              // 0xC4
+    float fC8;              // 0xC8
+    float fCC;              // 0xCC
+    float fD0;              // 0xD0
+    float fD4;              // 0xD4
+};
+
+// PORT: PS2 abs.s asm helper; use fabsf on PC.
+static inline float Abs_9CF8(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_9CF8(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize).
+static inline sSmVec4_9CF8 vu0Normalize_9CF8(const sSmVec4_9CF8& v)
+{
+    sSmVec4_9CF8 r;
+    __asm__(
+        "lqc2       $vf3, %1\n"
+        "vaddw.x    $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw  $vf4, $vf3, $vf3\n"
+        "vadday.x   ACC, $vf4, $vf4y\n"
+        "vmaddaz.x  ACC, $vf6, $vf4z\n"
+        "vmaddw.x   $vf4, $vf6, $vf4w\n"
+        "vrsqrt     Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2       $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sSmVec4_9CF8 vu0Scale_9CF8(const sSmVec4_9CF8& v, float s)
+{
+    sSmVec4_9CF8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline sSmVec4_9CF8 vu0MulMat_9CF8(const sSmMat_9CF8* m, const sSmVec4_9CF8& v)
+{
+    sSmVec4_9CF8 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSmVec4_9CF8 vu0Sub_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+{
+    sSmVec4_9CF8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSmVec4_9CF8 vu0Add_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+{
+    sSmVec4_9CF8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sSmVec4_9CF8 vu0Cross_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+{
+    sSmVec4_9CF8 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void vu0AddTo_9CF8(sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+extern "C" void func_00359CF8(cSplineModifier_9CF8* self, sSmBody_9CF8* body)
+{
+    char* sub = (char*)self + 0x10;
+    if (self->active == 0) {
+        return;
+    }
+    if (self->stopped != 0) {
+        return;
+    }
+    float a = 0.0f;
+    float b = a;
+    float t = self->dir.x;
+    if (9.999999747378752e-06f < Abs_9CF8(t)) {
+        float c4 = self->fC4;
+        float c0 = self->fC0;
+        float d0 = self->fD0;
+        float sum = d0 + self->fD4;
+        b = -d0 / sum;
+        b *= c4 / t - self->dir.y * c0 / d0;
+        a = (1.0f / Sqrt_9CF8(sum)) * (self->fC8 - self->dir.z * (c0 + c4) / sum);
+    }
+    sSmVec4_9CF8 vel = vu0Scale_9CF8(vu0Normalize_9CF8(self->dir), *(float*)(sub + 0x38));
+    sSmVec4_9CF8 w;
+    w.x = 0.0f;
+    w.z = b * self->speed;
+    w.y = a * self->speed;
+    w.w = 0.0f;
+    w = vu0MulMat_9CF8(&self->mat, w);
+    sSmVec4_9CF8 d = vu0Sub_9CF8(body->pos, self->origin);
+    vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(d, w)));
+    vu0AddTo_9CF8(body->rot, w);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/splinemodifier", func_00359EB8);
@@ -376,7 +654,126 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupOverlapSystem);
 
 INCLUDE_ASM("object/splinemodifier", func_0035A780);
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035A918);
+#ifdef SKIP_ASM
+struct sSmVec4_A918 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSmBox_A918 {
+    sSmVec4_A918 min;       // 0x30
+    sSmVec4_A918 max;       // 0x40
+};
+
+struct sSmElem_A918 {
+    char pad_0x0[0x30];
+    sSmBox_A918 box;        // 0x30
+    char pad_0x50[0x10];
+};
+
+struct sSmVE_A918 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct cMultiSpline_A918 {
+    sSmVE_A918* vtable;     // 0x0
+    int count;              // 0x4
+    char pad_0x8[0x10];
+    float radius;           // 0x18
+    char pad_0x1c[0x14];
+    int dirty;              // 0x30
+    char pad_0x34[0x8];
+    sSmElem_A918* elems;    // 0x3C
+    char* model;            // 0x40
+    char** insts;           // 0x44
+};
+
+struct sBox_F048;
+extern "C" void* func_002D1BE0();
+extern "C" void func_003291E0(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSmVec4_A918 vu0Sub_A918(const sSmVec4_A918& a, const sSmVec4_A918& b)
+{
+    sSmVec4_A918 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSmVec4_A918 vu0Add_A918(const sSmVec4_A918& a, const sSmVec4_A918& b)
+{
+    sSmVec4_A918 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sSmVec4_A918 instPos_A918(cMultiSpline_A918* self, int i)
+{
+    return *(sSmVec4_A918*)(self->insts[i] + 0x40);
+}
+
+struct sSmInst_A918 {
+    char pad_0x0[0x40];
+    sSmVec4_A918 pos;       // 0x40
+    char pad_0x50[0x10];
+    float bmin[3];          // 0x60
+    float bmax[3];          // 0x6C
+};
+
+static inline void setMin_A918(sSmInst_A918* in, const sSmVec4_A918& v)
+{
+    in->bmin[0] = v.x;
+    in->bmin[1] = v.y;
+    in->bmin[2] = v.z;
+}
+
+static inline void setMax_A918(sSmInst_A918* in, const sSmVec4_A918& v)
+{
+    in->bmax[0] = v.x;
+    in->bmax[1] = v.y;
+    in->bmax[2] = v.z;
+}
+
+extern "C" void func_0035A918(cMultiSpline_A918* self)
+{
+    if (self->dirty != 0) {
+        self->vtable[3].fn((char*)self + self->vtable[3].delta);
+    }
+    for (int i = 1; i < self->count; i++) {
+        sSmBox_A918 old = self->elems[i].box;
+        float r = self->radius;
+        sSmVec4_A918 ext;
+        ext.x = r;
+        ext.y = r;
+        ext.z = r;
+        ext.w = 0.0f;
+        self->elems[i].box.min = vu0Sub_A918(instPos_A918(self, i), ext);
+        self->elems[i].box.max = vu0Add_A918(instPos_A918(self, i), ext);
+        void* id = self->insts[i];
+        func_003291E0(func_002D1BE0(), 0, id, (sBox_F048*)&self->elems[i].box, (sBox_F048*)&old);
+        setMin_A918((sSmInst_A918*)self->insts[i], self->elems[i].box.min);
+        setMax_A918((sSmInst_A918*)self->insts[i], self->elems[i].box.max);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035AAD0__FPv);

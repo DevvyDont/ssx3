@@ -3628,7 +3628,62 @@ extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned i
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003627A8);
+#ifdef SKIP_ASM
+extern ulong D_00505A80[];
+
+struct sRmPkt27A8 {
+    int count;      // 0x0
+    ulong* cur;     // 0x4
+    ulong* base;    // 0x8
+};
+
+// PORT: 64-bit DMA/VIF/GIF tag writes (ulong) and addresses held in int.
+extern "C" void func_003627A8(sRmPkt27A8* self, ulong** pp, int mode)
+{
+    if (self->count == 0) {
+        return;
+    }
+    switch (mode) {
+    case 0:
+        self->cur = D_00505A80;
+        self->cur[0] = (self->count + 2) | 0x60000000;
+        self->cur[1] = 0;
+        self->cur[2] = 0;
+        self->cur[3] = (ulong)(unsigned int)((self->count + 1) | 0x50000000) << 32;
+        self->cur[4] = (ulong)(self->count | 0x8000) | ((ulong)1 << 60);
+        self->cur[5] = 0xE;
+        self->cur += 6;
+        (*pp)[0] = ((ulong)(unsigned int)D_00505A80 << 32) | 0x50000000;
+        (*pp)[1] = 0;
+        *pp += 2;
+        break;
+    case 1:
+        *pp = self->cur;
+        self->cur = self->base;
+        self->cur[0] = (self->count + 2) | 0x10000000;
+        self->cur[1] = 0;
+        self->cur[2] = 0;
+        self->cur[3] = (ulong)(unsigned int)((self->count + 1) | 0x50000000) << 32;
+        self->cur[4] = (ulong)(self->count | 0x8000) | ((ulong)1 << 60);
+        self->cur[5] = 0xE;
+        self->cur += 6;
+        break;
+    case 2:
+        *pp = self->cur;
+        self->cur = self->base;
+        self->cur[0] = (self->count + 2) | 0x10000000;
+        self->cur[1] = 0;
+        self->cur[2] = 0;
+        self->cur[3] = (ulong)(unsigned int)(((self->count + 1) << 16) | 0x6C0003F2) << 32;
+        self->cur[4] = (ulong)(self->count | 0x8000) | ((ulong)1 << 60);
+        self->cur[5] = 0xE;
+        self->cur += 6;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362978);
@@ -3695,11 +3750,117 @@ INCLUDE_ASM("object/railmodifier", func_00363490);
 
 INCLUDE_ASM("object/railmodifier", func_00363C20);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00364050);
+#ifdef SKIP_ASM
+struct sRmSortItem4050 {
+    unsigned int key;
+    int val;
+};
+
+extern sRmSortItem4050 D_00505B70[];
+extern void* D_004A4474;
+extern "C" void* func_0038F460(void* ring, unsigned int addr, int size, int flags);
+extern "C" void func_0038F6A8(void* ring);
+
+// 4-pass 8-bit radix sort of the item list at self+0x67CA8 (count at +0x67CA4).
+extern "C" void func_00364050(char* self)
+{
+    void* ring = D_004A4474;
+    sRmSortItem4050* dst = D_00505B70;
+    int n = *(int*)(self + 0x67CA4);
+    sRmSortItem4050* src = (sRmSortItem4050*)(self + 0x67CA8);
+    int (*hist)[257] = (int (*)[257])func_0038F460(ring, 0, -1, 0);
+    func_003E6448(hist, 0, 0x1010);
+    for (int i = 0; i < n; i++) {
+        unsigned int key = src[i].key;
+        hist[0][(key & 0xFF) + 1]++;
+        hist[1][((key >> 8) & 0xFF) + 1]++;
+        hist[2][((key >> 16) & 0xFF) + 1]++;
+        hist[3][(key >> 24) + 1]++;
+    }
+    for (int i = 1; i < 256; i++) {
+        hist[0][i] += hist[0][i - 1];
+        hist[1][i] += hist[1][i - 1];
+        hist[2][i] += hist[2][i - 1];
+        hist[3][i] += hist[3][i - 1];
+    }
+    int shift;
+    for (shift = 0; shift < 32; shift += 8) {
+        int* h = (int*)hist + ((shift << 5) + (shift >> 3));
+        for (int i = 0; i < n; i++) {
+            int idx = h[(src[i].key >> shift) & 0xFF]++;
+            dst[idx] = src[i];
+        }
+        sRmSortItem4050* t = dst;
+        dst = src;
+        src = t;
+    }
+    func_0038F6A8(ring);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00364240);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00364360);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
+extern "C" void func_00364CD0(void* self, int a, int b, unsigned int c, ulong** pp);
+// PORT: bound by asm label so this caller's packet type doesn't conflict with the definition.
+extern "C" void func_003627A8_4360(void* pkt, ulong** pp, int mode) __asm__("func_003627A8");
+extern char* D_004A5B80;
+
+struct sRmGsState4360 {
+    unsigned int w0;
+    unsigned int w1;
+    unsigned int w2;
+    unsigned int w3;
+    short tex[2];
+    sRmGsState4360()
+    {
+        unsigned int i;
+        for (i = 0; i < 2; i++) {
+            tex[i] = -1;
+        }
+        func_00416210(this, 0, 0x10);
+    }
+};
+
+struct sRmPkt4360 {
+    int count;      // 0x0
+    ulong* cur;     // 0x4
+    ulong* base;    // 0x8
+};
+
+// PORT: 64-bit DMA/GIF tag writes (ulong).
+extern "C" void func_00364360(void* self, ulong** pp)
+{
+    char* gs = D_004A5B80;
+    sRmGsState4360 st;
+    sRmPkt4360 pkt;
+    st = *(sRmGsState4360*)&D_00501420;
+    (*pp)[0] = 0x10000001;
+    (*pp)[1] = 0;
+    (*pp)[2] = 0;
+    (*pp)[3] = (ulong)1 << 60;
+    *pp += 4;
+    func_00364CD0(self, (st.w0 & 0x3C0) >> 6, 0, st.w3 & 0x3FFFFFFF, pp);
+    pkt.count = 0;
+    pkt.base = *pp;
+    pkt.cur = *pp + 6;
+    func_003625C0((sGifPacket*)&pkt, (st.w0 & 0xC) >> 2, 0);
+    func_00362478((sGifPacket*)&pkt, (st.w1 & 0x7C) >> 2, (st.w0 >> 12) & 0xFF, 0);
+    func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40), (st.w1 >> 22) & 1, 0);
+    func_003626D8((sRmGsPacket*)&pkt, (st.w1 >> 23) & 3, (st.w1 >> 20) & 3, (st.w1 & 0xFF000) >> 12, 0);
+    func_003625C0((sGifPacket*)&pkt, (st.w0 & 0x30) >> 4, 1);
+    func_00362478((sGifPacket*)&pkt, (st.w1 & 0xF80) >> 7, (st.w0 >> 20) & 0xFF, 1);
+    func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40), (st.w1 >> 23) & 1, 1);
+    func_003626D8((sRmGsPacket*)&pkt, (st.w1 >> 25) & 3, (st.w1 >> 22) & 3, (st.w1 & 0xFF000) >> 12, 1);
+    func_003627A8_4360(&pkt, pp, 1);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003645B8);
 

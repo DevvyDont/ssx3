@@ -340,7 +340,90 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DFE88);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E02B8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E0EE8);
+#ifdef SKIP_ASM
+struct sWakeFx0EE8 {
+    char* obj;                  // 0x00
+    char pad4[0x24];            // 0x04
+    char* em;                   // 0x28
+    char* p2C;                  // 0x2C
+    sWakeVecE398 dir;           // 0x30
+    char pad40[0x50];           // 0x40
+    sWakeVecE398 col;           // 0x90
+    sWakeVecE398 pos;           // 0xA0
+    int iB0;                    // 0xB0
+    char padB4[0x8];            // 0xB4
+    float fBC;                  // 0xBC
+    char padC0[0x10];           // 0xC0
+    char* pD0;                  // 0xD0
+};
+
+struct sWakeVt0EE8 {
+    short delta;
+    short index;
+    sWakeVecE398* (*fn)(void*);
+};
+
+extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sWakeVecE398 wakeScale0EE8(const sWakeVecE398& v, float s)
+{
+    sWakeVecE398 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sWakeVecE398 wakeAdd0EE8(const sWakeVecE398& a, const sWakeVecE398& b)
+{
+    sWakeVecE398 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline float wakeLimit0EE8()
+{
+    return 222.22222900390625f;
+}
+
+extern "C" void func_002E0EE8(sWakeFx0EE8* self)
+{
+    int flag = *(int*)(*(char**)(self->obj + 0x88C) + 0xA0);
+    char* em = self->em;
+    if (self->iB0 != 0 && wakeLimit0EE8() < self->fBC && *(int*)(self->pD0 + 0x58) != 0 && flag == 0) {
+        sWakeVecE398 pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
+        func_002DE398((char*)self, &pos);
+        char* sub = self->obj + 0x6C0;
+        sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
+        sWakeVecE398* v = vt[2].fn(sub + vt[2].delta);
+        sWakeVecE398 vel = wakeAdd0EE8(
+            wakeAdd0EE8(wakeScale0EE8(*v, *(float*)(self->p2C + 0xD8)),
+                        wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xDC))),
+            wakeScale0EE8(wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xE0)), self->fBC));
+        func_003717C0(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
+    } else {
+        func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
 
@@ -1525,7 +1608,61 @@ extern "C" void func_002E4F28(int* self, int flags)
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4F50);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5430);
+#ifdef SKIP_ASM
+struct sWakeVec5430 {
+    float x, y, z, w;
+    sWakeVec5430() {}
+    sWakeVec5430(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sWakeGrid5430 {
+    char pad_0x0[0xC];
+    float size;                 // 0xC
+    char pad_0x10[0x10];
+    sWakeVec5430 pos;           // 0x20
+};
+
+// PORT: PS2-only VU0 inline asm (a -= b).
+static inline void wakeSub5430(sWakeVec5430& a, const sWakeVec5430& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+static inline void wakeWrap5430(float& r, float v, float s)
+{
+    if (v > s * 0.5f) {
+        float q = v / s;
+        r = (q - (float)(int)q) * s - s;
+    } else if (v < -(s * 0.5f)) {
+        float q = v / s;
+        r = (q - (float)(int)q) * s + s;
+    }
+}
+
+extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* d)
+{
+    wakeSub5430(self->pos, *d);
+    float x = self->pos.x;
+    float y = self->pos.y;
+    float z = self->pos.z;
+    float px = x;
+    float py = y;
+    float pz = z;
+    wakeWrap5430(x, px, self->size);
+    wakeWrap5430(y, py, self->size);
+    wakeWrap5430(z, pz, self->size);
+    self->pos = sWakeVec5430(x, y, z, 1.0f);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E55D8);
 

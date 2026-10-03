@@ -186,7 +186,67 @@ extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003710D0);
+#ifdef SKIP_ASM
+struct sPtQ10D0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+static inline float randUnit10D0()
+{
+    union { int i; float f; } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+// PORT: the unit's callers use a 4-arg declaration; bind the real 5-arg body by asm label.
+extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt) __asm__("func_003710D0");
+extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt)
+{
+    if (*(int*)(self + 0x174) == 0) {
+        return;
+    }
+    int alive = (*(sPtQ10D0**)(self + 0x1A4))[*(int*)(self + 0x17C)].w > 0.0f;
+    if (alive) {
+        if (rnd == 0) {
+            *(int*)(self + 0x1E0) = *(int*)(self + 0x1E0) - 1;
+        }
+    } else if (rnd) {
+        *(int*)(self + 0x1E0) = *(int*)(self + 0x1E0) + 1;
+    }
+    if (pos) {
+        *(sPtQ10D0*)(self + 0x1B0) = *pos;
+    } else {
+        pos = (sPtQ10D0*)(self + 0x1B0);
+    }
+    if (vel) {
+        *(sPtQ10D0*)(self + 0x1C0) = *vel;
+    } else {
+        vel = (sPtQ10D0*)(self + 0x1C0);
+    }
+    (*(sPtQ10D0**)(self + 0x1A0))[*(int*)(self + 0x17C)] = *pos;
+    (*(sPtQ10D0**)(self + 0x1A0))[*(int*)(self + 0x17C)].w = 0.0f;
+    (*(sPtQ10D0**)(self + 0x1A4))[*(int*)(self + 0x17C)] = *vel;
+    // PORT: pointer held in int (index-first addu)
+    sPtQ10D0* v = (sPtQ10D0*)((*(int*)(self + 0x17C) << 4) + *(int*)(self + 0x1A4));
+    if (rnd) {
+        v->w = randUnit10D0() + 1.0f;
+    } else {
+        v->w = 0.0f;
+    }
+    int idx = *(int*)(self + 0x17C) - 1;
+    *(int*)(self + 0x17C) = idx;
+    if (idx < 0) {
+        *(int*)(self + 0x17C) = *(int*)(self + 0x178) - 1;
+    }
+    float f = *(float*)(self + 0x10) + *(float*)(self + 0x14) * dt;
+    *(float*)(self + 0x10) = f;
+    if ((int)f >= *(int*)(self + 0xC)) {
+        *(float*)(self + 0x10) = 0.0f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003712B8);
@@ -770,7 +830,79 @@ extern "C" void* func_00372B30(void* self)
 
 INCLUDE_ASM("render/particle", func_00372B78);
 
+//100%
 INCLUDE_ASM("render/particle", func_003739D0);
+#ifdef SKIP_ASM
+struct sPtSlot39D0 {
+    int f0;
+    int f4;
+    int f8;
+};
+
+struct sPtPools39D0 {
+    int cnt[3];                     // 0x0
+    sPtSlot39D0* elems[3];          // 0xC
+    sPtSlot39D0* slots[3];          // 0x18
+    char pad_0x24[0xC];
+    int* freeList[3];               // 0x30
+    int freeCount[3];               // 0x3C
+    char pad_0x48[0x1A8 - 0x48];
+    int cntB[3];                    // 0x1A8
+    char pad_0x1B4[0x1CC - 0x1B4];
+    int* freeListB[3];              // 0x1CC
+    int freeCountB[3];              // 0x1D8
+};
+
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+extern "C" void func_003739D0(sPtPools39D0* self)
+{
+    int n0 = self->cnt[0];
+    int n1 = self->cnt[1];
+    int n2 = self->cnt[2];
+    int size = 0xC;
+    func_003E6448(self->elems[0], 0, n0 * size);
+    func_003E6448(self->elems[1], 0, n1 * size);
+    func_003E6448(self->elems[2], 0, n2 * size);
+    self->freeCount[0] = 0;
+    self->freeCount[1] = 0;
+    self->freeCount[2] = 0;
+    int i;
+    for (i = 0; i < n0; i++) {
+        self->freeList[0][self->freeCount[0]++] = i;
+    }
+    for (i = 0; i < n1; i++) {
+        self->freeList[1][self->freeCount[1]++] = i;
+    }
+    for (i = 0; i < n2; i++) {
+        self->freeList[2][self->freeCount[2]++] = i;
+    }
+    int m0 = self->cntB[0];
+    int m1 = self->cntB[1];
+    int m2 = self->cntB[2];
+    int k;
+    for (k = 0; k < 3; k++) {
+        int j;
+        for (j = 0; j < self->cnt[k]; j++) {
+            self->slots[k][j].f8 = -1;
+            self->slots[k][j].f4 = 0;
+            self->slots[k][j].f0 = 0;
+        }
+    }
+    self->freeCountB[0] = 0;
+    self->freeCountB[1] = 0;
+    self->freeCountB[2] = 0;
+    for (i = 0; i < m0; i++) {
+        self->freeListB[0][self->freeCountB[0]++] = i;
+    }
+    for (i = 0; i < m1; i++) {
+        self->freeListB[1][self->freeCountB[1]++] = i;
+    }
+    for (i = 0; i < m2; i++) {
+        self->freeListB[2][self->freeCountB[2]++] = i;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00374180);
@@ -854,7 +986,51 @@ extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int id
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00374298);
+#ifdef SKIP_ASM
+struct sV2_4298 {
+    float x, y;
+    sV2_4298() {}
+    sV2_4298(float ax, float ay) : x(ax), y(ay) {}
+    sV2_4298& operator+=(const sV2_4298& b) { x += b.x; y += b.y; return *this; }
+};
+
+static inline sV2_4298 operator-(const sV2_4298& a, const sV2_4298& b)
+{
+    return sV2_4298(a.x - b.x, a.y - b.y);
+}
+
+static inline sV2_4298 operator*(const sV2_4298& a, float k)
+{
+    return sV2_4298(a.x * k, a.y * k);
+}
+
+extern "C" void func_00374298(char* self, char* src, sV2_4298* out, int idx)
+{
+    int n = *(int*)(self + (idx << 2) + 0x19C);
+    sV2_4298 c0 = *(sV2_4298*)(src + 0x20);
+    sV2_4298 c1 = *(sV2_4298*)(src + 0x28);
+    sV2_4298 c2 = *(sV2_4298*)(src + 0x30);
+    sV2_4298 c3 = *(sV2_4298*)(src + 0x38);
+    float step = 1.0f / (float)(n - 1);
+    sV2_4298 dl = (c2 - c0) * step;
+    sV2_4298 dr = (c3 - c1) * step;
+    int i;
+    for (i = 0; i < n; i++) {
+        sV2_4298 p = c0;
+        sV2_4298 d = (c1 - c0) * step;
+        int j;
+        for (j = 0; j < n; j++) {
+            *out = p;
+            out++;
+            p += d;
+        }
+        c0 += dl;
+        c1 += dr;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00374440);
@@ -1377,9 +1553,238 @@ extern "C" int func_00376578(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003765B8);
+#ifdef SKIP_ASM
+struct sPtQ65B8 {
+    float v[4];
+} __attribute__((aligned(16)));
 
+struct sPtMtx65B8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPtScis65B8 {
+    unsigned short v[4];
+};
+
+struct sPtView65B8 {
+    float x, y, w, h;               // 0x00
+    char pad_0x10[0x14];
+    float f24;                      // 0x24
+    float f28;                      // 0x28
+    float f2C;                      // 0x2C
+    sPtQ65B8 q30;                   // 0x30
+    sPtQ65B8 q40;                   // 0x40
+    sPtQ65B8 q50;                   // 0x50
+    sPtMtx65B8 m60;                 // 0x60
+    sPtMtx65B8 mA0;                 // 0xA0
+    sPtMtx65B8 mE0;                 // 0xE0
+    sPtMtx65B8 m120;                // 0x120
+    sPtQ65B8 q160;                  // 0x160
+    sPtQ65B8 q170;                  // 0x170
+    sPtMtx65B8 m180;                // 0x180
+    sPtMtx65B8 m1C0;                // 0x1C0
+    sPtQ65B8 q200;                  // 0x200
+    sPtQ65B8 q210;                  // 0x210
+    sPtScis65B8 scissor;            // 0x220
+    int key;                        // 0x228
+    int pad_0x22C;
+};
+
+struct sPtGfx65B8 {
+    char pad_0x0[0x10DC];
+    int curView;                    // 0x10DC
+    char pad_0x10E0[0x18F0 - 0x10E0];
+    char* keys;                     // 0x18F0
+    char pad_0x18F4[0x5780 - 0x18F4];
+    sPtMtx65B8 m5780;               // 0x5780
+    sPtMtx65B8 m57C0;               // 0x57C0
+    sPtMtx65B8 m5800;               // 0x5800
+    sPtQ65B8 q5840;                 // 0x5840
+    sPtQ65B8 q5850;                 // 0x5850
+    sPtMtx65B8 m5860;               // 0x5860
+    sPtMtx65B8 m58A0;               // 0x58A0
+    sPtQ65B8 q58E0;                 // 0x58E0
+    sPtQ65B8 q58F0;                 // 0x58F0
+    sPtScis65B8 scissor;            // 0x5900
+    float f5908;                    // 0x5908
+    float f590C;                    // 0x590C
+    float f5910;                    // 0x5910
+    char pad_0x5914[0xC];
+    sPtQ65B8 q5920;                 // 0x5920
+    char pad_0x5930[0x6AF0 - 0x5930];
+    sPtMtx65B8 m6AF0;               // 0x6AF0
+    char pad_0x6B30[0x40];
+    sPtQ65B8 q6B70;                 // 0x6B70
+    sPtQ65B8 q6B80;                 // 0x6B80
+    char pad_0x6B90[0x6D20 - 0x6B90];
+    sPtView65B8 views[1];           // 0x6D20
+};
+
+// PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
+static inline void vu0CopyMtx65B8(sPtMtx65B8* dst, sPtMtx65B8* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"(src), "r"(dst)
+        : "memory");
+}
+
+extern "C" void func_003950C0(sPtView65B8* dst, sPtView65B8* src);
+
+extern "C" void func_003765B8(sPtGfx65B8* self)
+{
+    sPtView65B8* v = &self->views[self->curView];
+    v->scissor = self->scissor;
+    v->key = *(int*)(self->keys + 0x69CC4);
+    v->f24 = self->f590C;
+    v->f28 = self->f5908;
+    vu0CopyMtx65B8(&v->m60, &self->m6AF0);
+    v->q30 = self->q6B70;
+    v->q40 = self->q6B80;
+    vu0CopyMtx65B8(&v->mA0, &self->m5780);
+    vu0CopyMtx65B8(&v->mE0, &self->m57C0);
+    vu0CopyMtx65B8(&v->m120, &self->m5800);
+    v->q160 = self->q5840;
+    v->q170 = self->q5850;
+    vu0CopyMtx65B8(&v->m180, &self->m5860);
+    vu0CopyMtx65B8(&v->m1C0, &self->m58A0);
+    v->q200 = self->q58E0;
+    v->q210 = self->q58F0;
+    v->f2C = self->f5910;
+    v->q50 = self->q5920;
+    self->curView++;
+    func_003950C0(&self->views[self->curView], v);
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00376768);
+#ifdef SKIP_ASM
+struct sPtQ6768 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+struct sPtMtx6768 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPtScis6768 {
+    unsigned short v[4];
+};
+
+struct sPtView6768 {
+    float x, y, w, h;               // 0x00
+    char pad_0x10[0x14];
+    float f24;                      // 0x24
+    float f28;                      // 0x28
+    float f2C;                      // 0x2C
+    sPtQ6768 q30;                   // 0x30
+    sPtQ6768 q40;                   // 0x40
+    sPtQ6768 q50;                   // 0x50
+    sPtMtx6768 m60;                 // 0x60
+    sPtMtx6768 mA0;                 // 0xA0
+    sPtMtx6768 mE0;                 // 0xE0
+    sPtMtx6768 m120;                // 0x120
+    sPtQ6768 q160;                  // 0x160
+    sPtQ6768 q170;                  // 0x170
+    sPtMtx6768 m180;                // 0x180
+    sPtMtx6768 m1C0;                // 0x1C0
+    sPtQ6768 q200;                  // 0x200
+    sPtQ6768 q210;                  // 0x210
+    sPtScis6768 scissor;            // 0x220
+    int key;                        // 0x228
+    int pad_0x22C;
+};
+
+struct sPtGfx6768 {
+    char pad_0x0[0x10DC];
+    int curView;                    // 0x10DC
+    char pad_0x10E0[0x18F0 - 0x10E0];
+    char* keys;                     // 0x18F0
+    char pad_0x18F4[0x5780 - 0x18F4];
+    sPtMtx6768 m5780;               // 0x5780
+    sPtMtx6768 m57C0;               // 0x57C0
+    sPtMtx6768 m5800;               // 0x5800
+    sPtQ6768 q5840;                 // 0x5840
+    sPtQ6768 q5850;                 // 0x5850
+    sPtMtx6768 m5860;               // 0x5860
+    sPtMtx6768 m58A0;               // 0x58A0
+    sPtQ6768 q58E0;                 // 0x58E0
+    sPtQ6768 q58F0;                 // 0x58F0
+    sPtScis6768 scissor;            // 0x5900
+    float f5908;                    // 0x5908
+    float f590C;                    // 0x590C
+    float f5910;                    // 0x5910
+    char pad_0x5914[0xC];
+    sPtQ6768 q5920;                 // 0x5920
+    char pad_0x5930[0x6AF0 - 0x5930];
+    sPtMtx6768 m6AF0;               // 0x6AF0
+    char pad_0x6B30[0x40];
+    sPtQ6768 q6B70;                 // 0x6B70
+    sPtQ6768 q6B80;                 // 0x6B80
+    int i6B90;                      // 0x6B90
+    char pad_0x6B94[0x6D20 - 0x6B94];
+    sPtView6768 views[1];           // 0x6D20
+};
+
+// PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
+static inline void vu0CopyMtx6768(sPtMtx6768* dst, sPtMtx6768* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"(src), "r"(dst)
+        : "memory");
+}
+
+extern "C" void func_00364B88(void* table, void* key);
+
+extern "C" void func_00376768(sPtGfx6768* self)
+{
+    self->curView--;
+    sPtView6768* v = &self->views[self->curView];
+    self->scissor = v->scissor;
+    if (v->key == -1) {
+        func_00364B88(self->keys, &self->scissor);
+    } else {
+        *(int*)(self->keys + 0x69CC4) = v->key;
+    }
+    self->f590C = v->f24;
+    self->f5908 = v->f28;
+    vu0CopyMtx6768(&self->m6AF0, &v->m60);
+    self->q6B70 = v->q30;
+    self->q6B80 = v->q40;
+    vu0CopyMtx6768(&self->m5780, &v->mA0);
+    vu0CopyMtx6768(&self->m57C0, &v->mE0);
+    vu0CopyMtx6768(&self->m5800, &v->m120);
+    self->q5840 = v->q160;
+    self->q5850 = v->q170;
+    vu0CopyMtx6768(&self->m5860, &v->m180);
+    vu0CopyMtx6768(&self->m58A0, &v->m1C0);
+    self->q58E0 = v->q200;
+    self->q58F0 = v->q210;
+    self->f5910 = v->f2C;
+    self->q5920 = v->q50;
+    self->i6B90 = 0;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00376938);
 
@@ -1506,7 +1911,144 @@ extern "C" void func_00376C28(sPartSys* self, float* a, float* b, float* c)
 
 INCLUDE_ASM("render/particle", func_00376C58);
 
+//100%
 INCLUDE_ASM("render/particle", func_00377278);
+#ifdef SKIP_ASM
+struct sPt7278 {
+    float x, y, z, w;
+    sPt7278() {}
+    sPt7278(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sMat7278 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPtView7278 {
+    char pad_0x0[0x1C];
+    float depth;                    // 0x1C
+    char pad_0x20[0x210];
+};
+
+struct sPtCam7278 {
+    char pad_0x0[0x8];
+    float x;                        // 0x8
+    char pad_0xC[0xC];
+    float y;                        // 0x18
+    char pad_0x1C[0xC];
+    float z;                        // 0x28
+};
+
+struct sPtGfx7278 {
+    char pad_0x0[0x10DC];
+    int curView;                    // 0x10DC
+    char pad_0x10E0[0x13E4 - 0x10E0];
+    sPtCam7278* cam;                // 0x13E4
+    char pad_0x13E8[0x5858 - 0x13E8];
+    float f5858;                    // 0x5858
+    char pad_0x585C[0x58A0 - 0x585C];
+    sMat7278 m58A0;                 // 0x58A0
+    char pad_0x58E0[0x8];
+    float depthScale;               // 0x58E8
+    char pad_0x58EC[0xC];
+    float f58F8;                    // 0x58F8
+    char pad_0x58FC[0x5A40 - 0x58FC];
+    int mode;                       // 0x5A40
+    char pad_0x5A44[0x6B90 - 0x5A44];
+    int texReady;                   // 0x6B90
+    char pad_0x6B94[0x6D20 - 0x6B94];
+    sPtView7278 views[1];           // 0x6D20
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
+static inline sPt7278 MulMat7278(const sMat7278* m, const sPt7278& v)
+{
+    sPt7278 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar); the PC port needs a C fallback.
+static inline sPt7278 Scale7278(const sPt7278& v, float s)
+{
+    sPt7278 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add); the PC port needs a C fallback.
+static inline sPt7278 Add7278(const sPt7278& a, const sPt7278& b)
+{
+    sPt7278 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_0037D968(void* self);
+
+static inline float DepthOffset7278(sPtGfx7278* self, sPt7278* pos, float dist)
+{
+    if (dist != 0.0f) {
+    sPt7278 dir(self->cam->x, self->cam->y, self->cam->z, 0.0f);
+    sPt7278 a = MulMat7278(&self->m58A0, *pos);
+    sPt7278 c = MulMat7278(&self->m58A0, Add7278(*pos, Scale7278(dir, dist)));
+    float za = a.z / a.w;
+    float zc = c.z / c.w;
+    if (-1.0f <= za && za <= 1.0f && -1.0f <= zc && zc <= 1.0f) {
+        return self->depthScale * (zc - za);
+    }
+    }
+    return 0.0f;
+}
+
+extern "C" void func_00377278(sPtGfx7278* self, sPt7278* pos, float dist)
+{
+    sPtView7278* v = &self->views[self->curView];
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    float d = DepthOffset7278(self, pos, dist);
+    if (d != v->depth) {
+        v->depth = d;
+        float k = 32767.5f;
+        if (self->mode == 0x31) {
+            k = 8388467.5f;
+        }
+        self->f58F8 = k + d;
+        self->f5858 = k + v->depth;
+        self->texReady = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00377458);
 
@@ -2307,7 +2849,66 @@ extern "C" void func_0037E120(void* self, sPartPktQuad* m, sPartPktQuad* hdr, in
 
 INCLUDE_ASM("render/particle", func_0037E238);
 
+//100%
 INCLUDE_ASM("render/particle", func_00380380);
+#ifdef SKIP_ASM
+struct sV3_0380 {
+    float x, y, z;
+};
+
+struct sCol0380 {
+    unsigned short r : 5;
+    unsigned short g : 5;
+    unsigned short b : 5;
+    unsigned short a : 1;
+};
+
+struct sEnt0380 {
+    int f0;
+    char* node;
+    int f8;
+    int fC;
+};
+
+struct sMdl0380 {
+    char pad_0x0[0x8];
+    sEnt0380* ents;         // 0x8
+    char pad_0xC[0xC];
+    sV3_0380 scale;         // 0x18
+    int dataOff;            // 0x24
+};
+
+extern "C" void func_00380380(void* self, char* obj, int idx, float* pos, float* uv, float* col)
+{
+    sMdl0380* mdl = *(sMdl0380**)(obj + 0x80);
+    char* base = *(char**)(*(char**)(*(char**)(mdl->ents[idx].node + 0x20)) + 0x4);
+    char* data = *(char**)(base + mdl->dataOff + 0x4);
+    short* t = (short*)(data + 0x80);
+    short* p = (short*)(data + 0xA0);
+    sCol0380* c = (sCol0380*)(*(char**)(base + *(int*)(obj + 0x98) + 0x14) + 0x10);
+    sV3_0380 k;
+    sV3_0380 s = mdl->scale;
+    k.x = s.x * 3.0518509447574615e-05f;
+    k.y = s.y * 3.0518509447574615e-05f;
+    k.z = s.z * 3.0518509447574615e-05f;
+    int i;
+    for (i = 0; i < 4; i++) {
+        pos[i * 3 + 0] = (float)p[0] * k.x;
+        pos[i * 3 + 1] = (float)p[1] * k.y;
+        pos[i * 3 + 2] = (float)p[2] * k.z;
+        p += 3;
+        uv[i * 2 + 0] = (float)t[0] * 0.000244140625f;
+        uv[i * 2 + 1] = (float)t[1] * 0.000244140625f;
+        t += 2;
+        col[1] = (float)c->r * 0.032258063554763794f;
+        col[2] = (float)c->g * 0.032258063554763794f;
+        col[3] = (float)c->b * 0.032258063554763794f;
+        col[0] = (float)c->a;
+        c++;
+        col += 4;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00380518);
 
@@ -3053,7 +3654,83 @@ INCLUDE_ASM("render/particle", func_00386E78);
 
 INCLUDE_ASM("render/particle", func_00387EC0);
 
+//100%
 INCLUDE_ASM("render/particle", func_003883B8);
+#ifdef SKIP_ASM
+struct sPtRS_83B8 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_83B8 {
+    sPtRS_83B8 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_83B8 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_83B8 ents[1];            // 0x80
+};
+
+struct sPtGfx_83B8 {
+    char pad_0x0[0xE84];
+    sPtRS_83B8* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_83B8* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+extern int D_004A5B84;
+extern sPtRS_83B8 D_00501420_rs __asm__("D_00501420");
+
+extern "C" void func_0037D968(void* self);
+extern "C" void func_003885E0(void* self, void* a, void* b, void* c, void* d, int i0, int i1, float f0, float f1);
+
+// PORT: uncached (0x30000000) pointers held in int.
+extern "C" void func_003883B8(sPtGfx_83B8* self, void* a1, int n, void* a3, void* a4, void* a5, float f0, float f1)
+{
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    unsigned int buf = self->bufAddr;
+    func_003E6448((void*)D_004A5B84, 0, 0x30);
+    int i;
+    for (i = 0; i < n - 1; i++) {
+        func_003885E0(self, a1, a3, a4, a5, i, i + 1, f0, f1);
+    }
+    sPtRing_83B8* ring = self->ring;
+    unsigned int next = self->bufAddr;
+    sPtRS_83B8* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_83B8* e = (sPtEnt_83B8*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+    *self->top = D_00501420_rs;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003885E0);
 
