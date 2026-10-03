@@ -284,7 +284,158 @@ extern "C" void func_001C5F20(void* self, float t)
 
 INCLUDE_ASM("fe/fepopup", cScreenPopup_FillObjectPointers);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C66E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_001CA488(void* self, void* obj);
+extern "C" void func_001CA4C0(void* self, void* obj);
+extern sQuad_58E8 D_004C67A8;
+
+struct sVEp_C66E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+static inline void SetColor_C66E8(char* o, sQuad_58E8* c)
+{
+    if (o != 0) {
+        sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+        vt[11].fn(o + vt[11].delta, c);
+    }
+}
+
+extern "C" void func_001C66E8_impl(char* self) __asm__("func_001C66E8");
+extern "C" void func_001C66E8_impl(char* self)
+{
+    switch (*(int*)(self + 0x31C)) {
+    case 0:
+        func_001CA4C0(self, *(void**)(self + 0x64));
+        func_001CA4C0(self, *(void**)(self + 0x48));
+        func_001CA4C0(self, *(void**)(self + 0x4C));
+        func_001CA488(self, *(void**)(self + 0x50));
+        func_001CA488(self, *(void**)(self + 0x54));
+        func_001CA488(self, *(void**)(self + 0x58));
+        func_001CA488(self, *(void**)(self + 0x5C));
+        func_001CA488(self, *(void**)(self + 0x60));
+        func_001CA488(self, *(void**)(self + 0x68));
+        {
+            char* o = *(char**)(self + 0x74);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x78);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x7C);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x80);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        *(sQuad_58E8*)(self + 0x32C) = D_004C6788;
+        *(sQuad_58E8*)(self + 0x33C) = D_004C6798;
+        break;
+    case 1:
+        func_001CA4C0(self, *(void**)(self + 0x64));
+        func_001CA4C0(self, *(void**)(self + 0x50));
+        func_001CA4C0(self, *(void**)(self + 0x54));
+        func_001CA4C0(self, *(void**)(self + 0x58));
+        func_001CA4C0(self, *(void**)(self + 0x5C));
+        func_001CA4C0(self, *(void**)(self + 0x60));
+        func_001CA488(self, *(void**)(self + 0x48));
+        func_001CA488(self, *(void**)(self + 0x4C));
+        func_001CA488(self, *(void**)(self + 0x68));
+        {
+            char* o = *(char**)(self + 0x74);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x78);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x7C);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x80);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6798);
+            }
+        }
+        *(sQuad_58E8*)(self + 0x32C) = D_004C6788;
+        *(sQuad_58E8*)(self + 0x33C) = D_004C6798;
+        break;
+    case 2:
+        func_001CA488(self, *(void**)(self + 0x48));
+        func_001CA488(self, *(void**)(self + 0x4C));
+        func_001CA488(self, *(void**)(self + 0x50));
+        func_001CA488(self, *(void**)(self + 0x54));
+        func_001CA488(self, *(void**)(self + 0x58));
+        func_001CA488(self, *(void**)(self + 0x5C));
+        func_001CA488(self, *(void**)(self + 0x60));
+        func_001CA488(self, *(void**)(self + 0x64));
+        func_001CA4C0(self, *(void**)(self + 0x68));
+        {
+            char* o = *(char**)(self + 0x74);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6788);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x78);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6788);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x7C);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6788);
+            }
+        }
+        {
+            char* o = *(char**)(self + 0x80);
+            if (o != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
+                vt[11].fn(o + vt[11].delta, &D_004C6788);
+            }
+        }
+        *(sQuad_58E8*)(self + 0x32C) = D_004C67A8;
+        *(sQuad_58E8*)(self + 0x33C) = D_004C6788;
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", func_001C6B08);
@@ -3321,7 +3472,166 @@ extern "C" void func_001CD2F0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainTransition);
+#ifdef SKIP_ASM
+struct cUIScreen;
+int GetHashValue32(char* str);
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void cKeyboardPopup_redrawScreen(void* self);
+extern "C" void cKeyboardPopup_setStatic(void* self, unsigned short* str);
+extern "C" void func_001CB418(void* self, const char* str);
+extern "C" void func_001CCF00(void* self, const char* str);
+extern "C" void func_001CD020(void* self, int a1);
+extern "C" void func_001CCC30(void* self);
+extern "C" void cBXString_Reset(void* self);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+void cMemMan_free(void* ptr);
+extern void* D_004A33F0;
+extern char D_004A1CD0[];
+extern char D_004A1CD8[];
+extern char D_00466700[];
+extern char D_00466570[];
+extern char D_00466530[];
+extern char D_00466710[];
+extern char D_00466540[];
+extern char D_00466558[];
+extern char D_004A1408[];
+
+struct sVec3_D348 { float x, y, z; };
+
+struct sVEi_D348 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sVEp_D348 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sKbd_D348 {
+    char pad_0x0[0x68];
+    int f68;            // 0x68
+    char pad_0x6C[0x41C - 0x6C];
+    int f41C;           // 0x41C
+};
+
+static inline void SetVis_D348(char* o, int on)
+{
+    sVEi_D348* vt = *(sVEi_D348**)(o + 8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+extern "C" int cKeyboardPopup_onGainTransition(char* s, int first)
+{
+    if (first) {
+        char buf[16];
+        ((sKbd_D348*)s)->f41C = 1;
+        ((sKbd_D348*)s)->f68 = 1;
+        if (D_004A33F0 != 0) {
+            ((sKbd_D348*)s)->f68 = (*(unsigned int*)((char*)D_004A33F0 + 0x88) >> 1) & 1;
+        }
+        *(int*)(s + 0x6C) = 0;
+        if (*(int*)(s + 0x418) == 0) {
+            s[0x74] = 0;
+        }
+        *(int*)(s + 0x138) = 0;
+        *(int*)(s + 0x13C) = 0;
+        *(int*)(s + 0x134) = 0;
+        int a = 0;
+        int c = 0;
+        int b = 0;
+        cKeyboardPopup_redrawScreen(s);
+        switch (*(int*)(s + 0x43C)) {
+        case 0:
+            c = 1;
+            sprintf(buf, D_004A1CD0);
+            break;
+        case 2:
+            b = 1;
+            sprintf(buf, D_00466700);
+            break;
+        case 1:
+        default:
+            a = 1;
+            sprintf(buf, D_004A1CD8);
+            break;
+        }
+        char* oa = *(char**)(s + 0x48);
+        if (oa != 0) {
+            SetVis_D348(oa, a);
+        }
+        char* ob = *(char**)(s + 0x50);
+        if (ob != 0) {
+            SetVis_D348(ob, b);
+        }
+        char* oc = *(char**)(s + 0x4C);
+        if (oc != 0) {
+            SetVis_D348(oc, c);
+        }
+        int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(s + 0x40), GetHashValue32(buf));
+        if (f != 0xFFFF) {
+            cUIScreen_playFrame(*(void**)(s + 0x40), f, 1);
+        }
+        char* o1 = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466570));
+        if (o1 != 0) {
+            sVEp_D348* vt = *(sVEp_D348**)(o1 + 8);
+            vt[20].fn(o1 + vt[20].delta, s + 0x400);
+            *(sVec3_D348*)(s + 0x40C) = *(sVec3_D348*)(o1 + 0x44);
+        }
+        char* o2 = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466530));
+        if (o2 != 0) {
+            sVEp_D348* vt = *(sVEp_D348**)(o2 + 8);
+            vt[20].fn(o2 + vt[20].delta, s + 0x3F4);
+            *(sVec3_D348*)(s + 0x3E8) = *(sVec3_D348*)(o2 + 0x44);
+            *(float*)(s + 0x410) = *(float*)(s + 0x3F8) + *(float*)(s + 0x3EC);
+        }
+        char* o3 = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466710));
+        if (o3 != 0) {
+            sVec3_D348 p = *(sVec3_D348*)(o3 + 0x44);
+            *(float*)(s + 0x3E8) += p.x;
+            *(float*)(s + 0x3EC) += p.y;
+            *(float*)(s + 0x3F0) += p.z;
+        }
+        char* o4 = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466540));
+        if (o4 != 0) {
+            SetVis_D348(o4, 0);
+        }
+        char* o5 = (char*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00466558));
+        if (o5 != 0) {
+            SetVis_D348(o5, 0);
+        }
+        if (*(int*)(s + 0x418) != 0) {
+            func_001CB418(s, s + 0x74);
+        }
+        if (*(int*)(s + 0x42C) != 0) {
+            func_001CD020(s, *(int*)(s + 0x42C));
+            *(int*)(s + 0x42C) = 0;
+        } else if (*(int*)(s + 0x428) != 0) {
+            cKeyboardPopup_setStatic(s, *(unsigned short**)(s + 0x428));
+            if (*(void**)(s + 0x428) != 0) {
+                cMemMan_free(*(void**)(s + 0x428));
+            }
+            *(void**)(s + 0x428) = 0;
+        } else {
+            char** str = (char**)(s + 0x424);
+            if (*(int*)(*str - 8) != 0) {
+                func_001CCF00(s, *str);
+                cBXString_Reset(str);
+            } else {
+                func_001CCF00(s, D_004A1408);
+            }
+        }
+        func_001CCC30(s);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_redrawScreen);

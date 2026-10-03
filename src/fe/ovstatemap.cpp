@@ -350,7 +350,133 @@ extern "C" void func_00208F10(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPopup);
+#ifdef SKIP_ASM
+struct sVE_9010 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sUIObj_9010 {
+    int pad_0x0[2];
+    sVE_9010* vt;               // 0x8
+    char pad_0xC[0x95 - 0xC];
+    unsigned char f95;          // 0x95
+};
+
+struct sStrMgr_9010 {
+    int pad_0x0;
+    sVE_9010* vt;               // 0x4
+};
+
+typedef void (*VIntFn_9010)(void*, int);
+typedef void* (*VGetFn_9010)(void*, int);
+
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* t, int id);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+int cBELibrary_getCharacterID(int);
+extern "C" int func_00150928(void* self, int a, int b);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" void func_002C27C0(void* buf, const char* fmt, void* str, int n);
+extern "C" void func_003A0E90(void* t, void* str);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern void* D_004A28A8;
+extern char D_00470A20[];
+extern char D_00471850[];
+extern char D_00470A60[];
+extern char D_004A2638[];
+extern char D_004A2640[];
+extern char D_00471818[];
+extern char D_004A26F0[];
+extern char D_00471890[];
+extern char D_004A26F8[];
+extern char D_004718A0[];
+extern char D_004718B8[];
+extern char D_004718C8[];
+extern char D_004718D8[];
+extern char D_00470700[];
+extern char D_004706B8[];
+extern char D_004706C8[];
+extern char D_00470AA8[];
+
+extern "C" void cOVState_MAP_setupPopup(void* selfp)
+{
+    char* self = (char*)selfp;
+    sUIObj_9010* menu = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_00470A20));
+    sUIObj_9010* list = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_00471850));
+    if (*(int*)(self + 0xBC) != 0) {
+        unsigned short text[0x28];
+        char buf[0x10];
+        cUIState_showObjSafe(self, D_00470A60);
+        if (menu != 0) {
+            cUIMenu_setSelectedByIndex(menu, 0);
+        }
+        unsigned char n = 0;
+        cUIState_showObjSafe(self, D_004A2638);
+        cUIState_hideObjSafe(self, D_004A2640);
+        if (list != 0) {
+            ((VIntFn_9010)list->vt[7].fn)((char*)list + list->vt[7].delta, 0);
+            n = list->f95;
+        }
+        if (menu != 0) {
+            ((VIntFn_9010)menu->vt[7].fn)((char*)menu + menu->vt[7].delta, 1);
+            ((VIntFn_9010)menu->vt[9].fn)((char*)menu + menu->vt[9].delta, 1);
+        }
+        sStrMgr_9010* g = *(sStrMgr_9010**)((char*)D_004A28A8 + 0x8C);
+        sVE_9010* vt = g->vt;
+        void* str = ((VGetFn_9010)vt[4].fn)((char*)g + vt[4].delta, GetHashValue32(D_00471818));
+        if (str != 0) {
+            func_002C27C0(text, D_004A26F0, str, n + 1);
+            void* t = cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_00471890));
+            if (t != 0) {
+                func_003A0E90(t, text);
+            }
+        }
+        int id = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), 0, cBELibrary_getCharacterID(0));
+        sprintf(buf, D_004A26F8, id);
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004718A0));
+        if (t != 0) {
+            cUIText_setAsciiString(t, buf);
+        }
+        sprintf(buf, D_004A26F8, 500);
+        t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004718B8));
+        if (t != 0) {
+            cUIText_setAsciiString(t, buf);
+        }
+        t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004718C8));
+        if (t != 0) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_004718D8));
+        }
+        cUIState_hideObjSafe(self, D_00470700);
+        cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706B8));
+        sUIObj_9010* b = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706C8));
+        if (a != 0) {
+            cUIText_setUnicodeStringByID(a, GetHashValue32(D_00470AA8));
+        }
+        if (b != 0) {
+            ((VIntFn_9010)b->vt[9].fn)((char*)b + b->vt[9].delta, 1);
+            ((VIntFn_9010)b->vt[8].fn)((char*)b + b->vt[8].delta, 0);
+        }
+        cUIState_showObjSafe(self, D_004706C8);
+    } else {
+        cUIState_hideObjSafe(self, D_00470A60);
+        if (list != 0) {
+            ((VIntFn_9010)list->vt[7].fn)((char*)list + list->vt[7].delta, 1);
+        }
+        if (menu != 0) {
+            ((VIntFn_9010)menu->vt[7].fn)((char*)menu + menu->vt[7].delta, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_00209300);

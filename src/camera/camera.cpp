@@ -626,7 +626,158 @@ extern "C" void* func_0015F938(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015F9B8);
+#ifdef SKIP_ASM
+struct sV_15F9B8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sM_15F9B8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPair_15F9B8 {
+    sV_15F9B8 a;
+    sV_15F9B8 b;
+};
+
+extern sM_15F9B8 D_004FF1A0_15F9B8 __asm__("D_004FF1A0");
+extern sV_15F9B8 D_004FF150_15F9B8 __asm__("D_004FF150");
+extern sV_15F9B8 D_004FF160_v15F9B8 __asm__("D_004FF160");
+extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" sPair_15F9B8 func_0031B748_15F9B8(sM_15F9B8* m) __asm__("func_0031B748");
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
+static inline void vu0MulMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* a, const sM_15F9B8* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void vu0TransMtx_15F9B8(sM_15F9B8* m, const sV_15F9B8& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+static inline void SinCos_15F9B8(float* s, float* c, float angle)
+{
+    func_0031BE50(s, c, angle);
+}
+
+static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float angle)
+{
+    sM_15F9B8 r;
+    float s;
+    float c;
+    float one = 1.0f;
+    SinCos_15F9B8(&s, &c, angle);
+    float t = one - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    r.m[3][3] = one;
+    vu0MulMtx_15F9B8(m, m, &r);
+}
+
+extern "C" sPair_15F9B8 func_0015F9B8(char* src)
+{
+    sM_15F9B8 m;
+    vu0CopyMtx_15F9B8(&m, &D_004FF1A0_15F9B8);
+    vu0TransMtx_15F9B8(&m, *(sV_15F9B8*)(src + 0x20));
+    RotAxis_15F9B8(&m, D_004FF150_15F9B8, -*(float*)(src + 0x30));
+    RotAxis_15F9B8(&m, D_004FF160_v15F9B8, *(float*)(src + 0x34));
+    return func_0031B748_15F9B8(&m);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", func_0015FD08);
@@ -1520,7 +1671,65 @@ void func_00160BF0(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00160BF8);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_001607E0 cmSub_00160BF8(const sVec_001607E0& a, const sVec_001607E0& b)
+{
+    sVec_001607E0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00160BF8(char* self)
+{
+    sCamInfo_001607E0 info;
+    func_00162568(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    float eps = 0.0010000000474974513f;
+    sVec_001607E0 dir;
+    if (__builtin_fabsf(info.dir.x) > eps || __builtin_fabsf(info.dir.y) > eps) {
+        dir = info.dir;
+    } else {
+        dir = cmGet_001607E0(self, 4);
+        if (__builtin_fabsf(dir.x) < eps && __builtin_fabsf(dir.y) < eps) {
+            dir = D_004FF140_v1607E0;
+        }
+    }
+    dir.z = 0.0f;
+    sVec_001607E0 side = cmCross_001607E0(D_004FF160_v1607E0, dir);
+    cmNormalize_001607E0(dir);
+    cmNormalize_001607E0(side);
+    *(sVec_001607E0*)(self + 0x20) = cmAdd_001607E0(cmGet_001607E0(self, 1), cmScale_001607E0(D_004FF160_v1607E0, 0.0f));
+    if (*(int*)(self + 0x394)) {
+        *(sVec_001607E0*)(self + 0x20) = cmAdd_001607E0(cmScale_001607E0(*(sVec_001607E0*)(self + 0x3B0), 0.6399999856948853f),
+                                                    cmScale_001607E0(*(sVec_001607E0*)(self + 0x20), 0.36000001430511475f));
+    }
+    *(sVec_001607E0*)(self + 0x3B0) = *(sVec_001607E0*)(self + 0x20);
+    float r = 385.91839599609375f;
+    *(sVec_001607E0*)(self + 0x40) = cmAdd_001607E0(
+        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)(self + 0x20), cmScale_001607E0(dir, func_0031C040(*(float*)(self + 0x390)) * r)),
+                       cmScale_001607E0(side, func_0031BF60(*(float*)(self + 0x390)) * r)),
+        cmScale_001607E0(D_004FF160_v1607E0, 53.241573333740234f));
+    if (*(int*)(self + 0x394)) {
+        sVec_001607E0 d = cmSub_00160BF8(*(sVec_001607E0*)(self + 0x20), *(sVec_001607E0*)(self + 0x40));
+        sVec_001607E0 e = cmAdd_001607E0(cmScale_001607E0(*(sVec_001607E0*)(self + 0x3A0), 0.9700000286102295f),
+                                         cmScale_001607E0(d, 0.029999971389770508f));
+        *(sVec_001607E0*)(self + 0x40) = cmSub_00160BF8(*(sVec_001607E0*)(self + 0x20), e);
+    }
+    *(sVec_001607E0*)(self + 0x3A0) = cmSub_00160BF8(*(sVec_001607E0*)(self + 0x20), *(sVec_001607E0*)(self + 0x40));
+    *(int*)(self + 0x394) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00160FD0);
@@ -2333,7 +2542,184 @@ extern "C" void func_001624E8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00162568);
+#ifdef SKIP_ASM
+int func_0011FE98(void*);
+extern sVec_001607E0 D_004FF120_v162568 __asm__("D_004FF120");
+
+struct sVEi_162568 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sVEf_162568 {
+    short delta;
+    short index;
+    float (*fn)(void*);
+};
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_001607E0 cmSub_162568(const sVec_001607E0& a, const sVec_001607E0& b)
+{
+    sVec_001607E0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dot product).
+static inline float cmDot_162568(const sVec_001607E0& a, const sVec_001607E0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / |v| via vrsqrt).
+static inline sVec_001607E0 cmNormalized_162568(const sVec_001607E0& v)
+{
+    sVec_001607E0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline int cmGetI_162568(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEi_162568* e = &(*(sVEi_162568**)o)[slot];
+    return e->fn(o + e->delta);
+}
+
+static inline float cmGetF_162568(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEf_162568* e = &(*(sVEf_162568**)o)[slot];
+    return e->fn(o + e->delta);
+}
+
+static inline sVec_001607E0 cmLerp_162568(const sVec_001607E0& a, const sVec_001607E0& b, float t)
+{
+    sVec_001607E0 r = cmAdd_001607E0(cmScale_001607E0(a, t), cmScale_001607E0(b, 1.0f - t));
+    return r;
+}
+
+static inline sVec_001607E0 cmGetR_162568(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEv_001607E0* e = &(*(sVEv_001607E0**)o)[slot];
+    sVec_001607E0 r = e->fn(o + e->delta);
+    return r;
+}
+
+static inline void SetFrame_162568(char* out, const sVec_001607E0& pos, sVec_001607E0 dir, sVec_001607E0 vel)
+{
+    *(sVec_001607E0*)(out + 0x0) = pos;
+    *(sVec_001607E0*)(out + 0x10) = vel;
+    *(sVec_001607E0*)(out + 0x20) = dir;
+}
+
+extern "C" void func_00162568_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
+                                   float g, float h) __asm__("func_00162568");
+extern "C" void func_00162568_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
+                                   float g, float h)
+{
+    sVec_001607E0 v = cmGet_001607E0(self, 3);
+    int mode = func_0011FE98(*(void**)(*(char**)(self + 0x30) + 4));
+    if (cmLength_001607E0(v) < 27.77777862548828f) {
+        v = *(sVec_001607E0*)(self + 0x1B0);
+    }
+    *(sVec_001607E0*)(self + 0x1B0) = v;
+    sVec_001607E0 w = v;
+    w.z = 0.0f;
+    sVec_001607E0 dz = cmSub_162568(v, w);
+    sVec_001607E0 n = cmDot_162568(v, v) > 0.0f ? cmNormalized_162568(v) : D_004FF120_v162568;
+    int k = cmGetI_162568(self, 20);
+    float lo, hi, t0, t1;
+    if ((unsigned)(k - 2) < 2 || k == 13) {
+        lo = e;
+        hi = f;
+        t0 = g;
+        t1 = h;
+    } else {
+        lo = a;
+        hi = b;
+        t0 = c;
+        t1 = d;
+    }
+    float x = __builtin_fabsf(n.z);
+    float frac;
+    if (x >= t0) {
+        if (x <= t1) {
+            frac = (x - t0) / (t1 - t0);
+        } else {
+            frac = 1.0f;
+        }
+    } else {
+        frac = 0.0f;
+    }
+    float r = lo + (hi - lo) * frac;
+    if (mode == 1) {
+        if (cmLength_001607E0(w) < 27.77777862548828f) {
+            w = *(sVec_001607E0*)(self + 0x100);
+        }
+    }
+    sVec_001607E0 nf = cmLerp_162568(*(sVec_001607E0*)(self + 0x100), w, r);
+    *(sVec_001607E0*)(self + 0x100) = nf;
+    sVec_001607E0 p = cmAdd_001607E0(nf, dz);
+    *(int*)(out + 0x64) = mode == 4;
+    *(int*)(out + 0x58) = mode == 2;
+    *(int*)(out + 0x5C) = mode == 5;
+    *(int*)(out + 0x60) = mode == 1;
+    *(int*)(out + 0x40) = mode;
+    *(float*)(out + 0x4C) = cmGetF_162568(self, 17);
+    *(float*)(out + 0x54) = cmGetF_162568(self, 18);
+    SetFrame_162568(out, *(sVec_001607E0*)(self + 0x40), p, cmGetR_162568(self, 1));
+    *(float*)(out + 0x44) = cmLength_001607E0(*(sVec_001607E0*)(out + 0x20));
+    float s;
+    if (*(float*)(out + 0x4C) > 0.0f) {
+        s = (*(float*)(out + 0x4C) + 1.0f) * 0.5f;
+    } else {
+        s = 0.0f;
+    }
+    *(float*)(out + 0x50) = s;
+    *(float*)(self + 0x2F4) = *(float*)(out + 0x4C);
+    *(float*)(self + 0x2F8) = *(float*)(out + 0x50);
+    *(int*)(self + 0x2FC) = *(int*)(out + 0x5C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00162998);
@@ -2470,7 +2856,216 @@ extern "C" cQuad128 func_00162B80(void* self, void* a1)
 
 INCLUDE_ASM("camera/camera", func_00162B90);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00162C78);
+#ifdef SKIP_ASM
+struct sV_162C78 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVE_162C78 {
+    short delta;
+    short index;
+    sV_162C78 (*fn)(void*);
+};
+
+struct sInfo_162C78 {
+    char pad0[0x20];
+    sV_162C78 dir;      // 0x20
+    sV_162C78 out;      // 0x30
+    char pad40[0x4];
+    float speed;        // 0x44
+};
+
+struct sHist_162C78 {
+    float a[5];         // 0x00
+    float b[5];         // 0x14
+    float c[5];         // 0x28
+    int idx;            // 0x3C
+    float k0;           // 0x40
+    float k1;           // 0x44
+    float k2;           // 0x48
+};
+
+extern "C" float func_0031C128(float x);
+
+// PORT: PS2-only VU0 inline asm (dot product).
+static inline float Dot_162C78(const sV_162C78& a, const sV_162C78& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV_162C78 Scale_162C78(const sV_162C78& v, float s)
+{
+    sV_162C78 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV_162C78 Add_162C78(const sV_162C78& a, const sV_162C78& b)
+{
+    sV_162C78 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_162C78(const sV_162C78& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void DivEq_162C78(sV_162C78& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+static inline void Normalize_162C78(sV_162C78& v)
+{
+    DivEq_162C78(v, Length_162C78(v));
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_162C78(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `<?` / `>?` operators.
+static inline float Clamp_162C78(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+static inline sV_162C78 Get_162C78(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVE_162C78* e = &(*(sVE_162C78**)o)[slot];
+    return e->fn(o + e->delta);
+}
+
+static inline sV_162C78 Lerp_162C78(const sV_162C78& p, const sV_162C78& q, float t)
+{
+    return Add_162C78(Scale_162C78(p, t), Scale_162C78(q, 1.0f - t));
+}
+
+static inline void LerpTo_162C78(sV_162C78& out, const sV_162C78& p, const sV_162C78& q, float t)
+{
+    out = Add_162C78(Scale_162C78(p, t), Scale_162C78(q, 1.0f - t));
+}
+
+extern "C" void func_00162C78_impl(char* self, sInfo_162C78* info) __asm__("func_00162C78");
+extern "C" void func_00162C78_impl(char* self, sInfo_162C78* info)
+{
+    sV_162C78 n;
+    if (info->speed > 27.77777862548828f) {
+        sV_162C78 v = Get_162C78(self, 3);
+        if (Dot_162C78(v, v) < 1.0f) {
+            v = *(sV_162C78*)(self + 0x1C0);
+        }
+        *(sV_162C78*)(self + 0x1C0) = v;
+        float ang;
+        float len = Sqrt_162C78(Dot_162C78(*(sV_162C78*)(self + 0x80), *(sV_162C78*)(self + 0x80)) *
+                                Dot_162C78(*(sV_162C78*)(self + 0x1C0), *(sV_162C78*)(self + 0x1C0)));
+        if (len < 0.0010000000474974513f) {
+            ang = 0.0f;
+        } else {
+            ang = 1.5707963705062866f -
+                  func_0031C128(Clamp_162C78(
+                      Dot_162C78(*(sV_162C78*)(self + 0x80), *(sV_162C78*)(self + 0x1C0)) / len, -1.0f, 1.0f));
+        }
+        ang = (ang - 0.19082477688789368f) >? 0.0f;
+        float prev = ((sHist_162C78*)(self + 0x340))->b[(((sHist_162C78*)(self + 0x340))->idx + 4) % 5];
+        float d = ang - ((sHist_162C78*)(self + 0x340))->b[(((sHist_162C78*)(self + 0x340))->idx + 4) % 5];
+        sHist_162C78* h = (sHist_162C78*)(self + 0x340);
+        float sum = 0.0f;
+        for (int i = 0; i < 5; i++) {
+            sum += h->c[i];
+        }
+        int p2 = (h->idx + 4) % 5;
+        float val = prev + d * h->k0 + sum * h->k1 + (h->a[p2] - ang) * h->k2;
+        h->a[h->idx] = ang;
+        h->b[h->idx] = val;
+        h->c[h->idx] = ang - val;
+        float s = (1.0f - ((val * 2.5214130878448486f) <? 1.0f >? 0.0f)) * 0.03946405649185181f +
+                  0.95552659034729f;
+        h->idx = (h->idx + 1) % 5;
+        if ((unsigned)(*(int*)(*(char**)(*(char**)(self + 0x30) + 4) + 0x434) - 0xB) < 3) {
+            s = Sqrt_162C78(Sqrt_162C78(s));
+        }
+        LerpTo_162C78(n, *(sV_162C78*)(self + 0x80), Scale_162C78(info->dir, 1.0f / info->speed), s);
+        *(sV_162C78*)(self + 0x80) = n;
+    } else {
+        n = *(sV_162C78*)(self + 0x80);
+    }
+    Normalize_162C78(n);
+    info->out = n;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00163010);
 
@@ -3106,7 +3701,202 @@ INCLUDE_ASM("camera/camera", func_00166550);
 
 INCLUDE_ASM("camera/camera", func_00166640);
 
+//100%
 INCLUDE_ASM("camera/camera", func_001668B8);
+#ifdef SKIP_ASM
+struct sV_1668B8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sM_1668B8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+
+extern sM_1668B8 D_004FF1A0_1668B8 __asm__("D_004FF1A0");
+extern sV_1668B8 D_004FF150_1668B8 __asm__("D_004FF150");
+extern sV_1668B8 D_004FF160_v1668B8 __asm__("D_004FF160");
+extern sV_1668B8 D_004FF130_v1668B8 __asm__("D_004FF130");
+extern "C" void func_0031BE50(float* sout, float* cout, float x);
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_1668B8(sM_1668B8* dst, const sM_1668B8* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
+static inline void vu0MulMtx_1668B8(sM_1668B8* dst, const sM_1668B8* a, const sM_1668B8* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply in place, m = m * b).
+static inline void vu0MulEqMtx_1668B8(sM_1668B8* m, const sM_1668B8* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void vu0TransMtx_1668B8(sM_1668B8* m, const sV_1668B8& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+static inline void SinCos_1668B8(float* s, float* c, float angle)
+{
+    func_0031BE50(s, c, angle);
+}
+
+static inline void Rotate_1668B8(sM_1668B8* m, const sV_1668B8& axis, float angle)
+{
+    sM_1668B8 tm;
+    vu0CopyMtx_1668B8(&tm, m);
+    sV_1668B8 pos = *(sV_1668B8*)tm.m[3];
+    *(sV_1668B8*)tm.m[3] = D_004FF130_v1668B8;
+    float s;
+    float c;
+    SinCos_1668B8(&s, &c, angle);
+    float one = 1.0f;
+    float t = one - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    m->m[0][0] = tx * x + c;
+    m->m[1][0] = tx * y + sz;
+    m->m[2][0] = tx * z - sy;
+    m->m[0][1] = ty * x - sz;
+    m->m[1][1] = ty * y + c;
+    m->m[2][1] = ty * z + sx;
+    m->m[0][2] = tz * x + sy;
+    m->m[1][2] = tz * y - sx;
+    m->m[2][2] = tz * z + c;
+    m->m[3][0] = 0.0f;
+    m->m[3][1] = 0.0f;
+    m->m[3][2] = 0.0f;
+    m->m[3][3] = one;
+    m->m[0][3] = 0.0f;
+    m->m[1][3] = 0.0f;
+    m->m[2][3] = 0.0f;
+    *(sV_1668B8*)m->m[3] = pos;
+    vu0MulEqMtx_1668B8(m, &tm);
+}
+
+static inline sV_1668B8 Row_1668B8(const sM_1668B8& m, int i)
+{
+    return *(const sV_1668B8*)m.m[i];
+}
+
+extern "C" void func_001668B8_impl(char* self, sV_1668B8* out) __asm__("func_001668B8");
+extern "C" void func_001668B8_impl(char* self, sV_1668B8* out)
+{
+    sM_1668B8 m;
+    vu0CopyMtx_1668B8(&m, &D_004FF1A0_1668B8);
+    Rotate_1668B8(&m, D_004FF150_1668B8, -*(float*)(self + 0x54));
+    Rotate_1668B8(&m, D_004FF160_v1668B8, -*(float*)(self + 0x50));
+    *out = Row_1668B8(m, 0);
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00166C60);
 

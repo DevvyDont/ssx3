@@ -464,7 +464,102 @@ extern "C" void func_001F4380(void* self)
 
 INCLUDE_ASM("fe/festatelodge", func_001F43D8);
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F4400);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void func_001CD088(void* self, int a1);
+extern "C" void func_001CE3C8(void* self, int key, int a2, int a3);
+extern "C" void func_001CE408(void* self, int a1);
+extern "C" void func_001CB418(void* self, const char* str);
+extern "C" const char* func_00147170(void* iface, int player);
+extern "C" void* func_00182220(void* self, void* engine, void* owner, int player, int charID);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" int func_001577A0(void* self, int a1, int a2);
+int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern int D_00441AF8[];
+extern char D_0046EFD0[];
+extern char D_0046EFE0[];
+extern char D_0046E050[];
+
+struct sVE_1F4400 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001F4400(char* self, char* w, int event)
+{
+    if (w == 0) {
+        return;
+    }
+    switch (event) {
+    case 5: {
+        int k = *(int*)(w + 0x18);
+        if (D_00441AF8[k] == 0) {
+            return;
+        }
+        if (k == 14) {
+            void* p = cMemMan_alloc(0x444, D_0046EFD0, 0x100, 0);
+            char* o = (char*)func_001CB030(p, *(void**)(self + 0x10), self, 0, *(unsigned char*)(self + 0x15));
+            *(char*)(o + 0x44) = 0;
+            *(int*)(o + 0x140) = 0x37;
+            func_001CD088(o, 8);
+            func_001CE3C8(o, 0x4B, 1, 2);
+            *(int*)(o + 0x58) = 1;
+            func_001CE408(o, 1);
+            func_001CE3C8(o, 0xE, 0, 2);
+            func_001CE3C8(o, 0x27, 0, 2);
+            func_001CE3C8(o, 0x28, 0, 2);
+            func_001CE3C8(o, 0x34, 0, 2);
+            func_001CE3C8(o, 0x1A, 0, 2);
+            func_001CE3C8(o, 0x19, 0, 2);
+            func_001CE3C8(o, 0x35, 0, 2);
+            func_001CE3C8(o, 0x40, 0, 2);
+            func_001CE3C8(o, 0x41, 0, 2);
+            func_001CE3C8(o, 0x42, 0, 2);
+            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+            func_001CB418(o, func_00147170(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
+            return;
+        }
+        if (k == 11) {
+            int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
+            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), id) > 0) {
+                void* p = cMemMan_alloc(0x1E4, D_0046EFE0, 0, 0);
+                void* o = func_00182220(p, *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), id);
+                func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+            }
+            return;
+        }
+        cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0046E050)), 1);
+        char* obj = **(char***)(self + 0x10);
+        sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
+        void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
+        if (r != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 6: {
+        char* obj = **(char***)(self + 0x10);
+        sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
+        void* r = vt[5].fn(obj + vt[5].delta, self, 0);
+        if (r != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F4728);
 

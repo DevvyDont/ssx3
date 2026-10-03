@@ -2,7 +2,157 @@
 
 INCLUDE_ASM("main/gameload", cGame_load);
 
+//100%
 INCLUDE_ASM("main/gameload", cGame_loadTrack);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+
+struct sBXStr_F6B0 {
+    char* p;
+    sBXStr_F6B0() {}
+    sBXStr_F6B0(const sBXStr_F6B0&);
+};
+
+extern char* D_004A3E90;
+extern int D_004A11B8;
+extern char D_0047B480[];
+extern char D_004A2A90[];
+extern char D_004A2A98[];
+extern char D_0047B728[];
+extern char D_0047B738[];
+extern char D_0047B748[];
+extern char D_0047B758[];
+extern char D_004A2AA0[];
+extern char D_004A2AA8[];
+extern char D_004C5830[];
+extern void* D_004882E0[];
+
+extern "C" void* cBXString_cBXString2(sBXStr_F6B0* self, const char* s);
+extern "C" sBXStr_F6B0* func_00318630(sBXStr_F6B0* self, sBXStr_F6B0* a, const char* str);
+extern "C" sBXStr_F6B0* func_003186D0(sBXStr_F6B0* self, const char* str, sBXStr_F6B0* b);
+extern "C" void cBXString__cBXString(sBXStr_F6B0* self, int flags);
+extern "C" sBXStr_F6B0* cBXString_operatorE(sBXStr_F6B0* self, sBXStr_F6B0* o);
+extern "C" char* func_00144BC0(void* iface);
+extern "C" void cBigFile_open(void* bf, const char* name, int flags);
+extern "C" void func_003A6AE0(void* a, const char* name, void* b);
+void* func_00353AC0(void* p);
+extern "C" void* func_0022CCE8(void* p, void* game);
+extern "C" void func_002C2F18(void* p);
+extern "C" void* func_002B6AA0(void* p, int a);
+extern "C" void func_00334800(void* p);
+extern "C" void func_0022D088(void* p, int id, int a);
+extern "C" int func_0022D278(void* p, int id);
+extern "C" void func_0022D8D8(void* p);
+void func_003A6928(void* p);
+extern "C" void func_003E5398(int a);
+// PORT: func_0016CA10__FPv also receives the path string (passed through in $5)
+void func_0016CA10_F6B0(void* p, const char* s) __asm__("func_0016CA10__FPv");
+extern "C" void func_002DBF80(void* p);
+void* cLensFxMan_construct();
+extern "C" void func_002ED048();
+
+struct sElem4_F6B0 {
+    int v;
+    sElem4_F6B0() {}
+};
+
+struct sRow_F6B0 {
+    sElem4_F6B0 e[4];
+    char pad[0xB0 - 0x10];
+    sRow_F6B0() {}
+};
+
+struct sTbl_F6B0 {
+    sRow_F6B0 rows[19];
+    static void* operator new(unsigned int size, const char* tag, unsigned int flags, int d)
+    {
+        return cMemMan_alloc(size, tag, flags, d);
+    }
+    sTbl_F6B0() {}
+};
+
+struct sElemFF_F6B0 {
+    char b[0x30];
+    sElemFF_F6B0() {}
+    static void* operator new[](unsigned int, void* p) { return p; }
+};
+
+extern "C" void cGame_loadTrack(char* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    sBXStr_F6B0 name;
+    name.p = D_004A3E90;
+    if (D_004A11B8 != 0) {
+        sBXStr_F6B0 a;
+        sBXStr_F6B0 b;
+        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, func_00144BC0(iface) + 0x44), &b));
+        cBXString_operatorE(&name, &a);
+        cBXString__cBXString(&a, 2);
+        cBXString__cBXString(&b, 2);
+    } else {
+        sBXStr_F6B0 a;
+        sBXStr_F6B0 b;
+        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, func_00144BC0(iface) + 0x34), &b));
+        cBXString_operatorE(&name, &a);
+        cBXString__cBXString(&a, 2);
+        cBXString__cBXString(&b, 2);
+    }
+    {
+        sBXStr_F6B0 path;
+        func_00318630(&path, &name, D_004A2A90);
+        cBigFile_open(*(void**)(self + 0xA8), path.p, 0);
+        cBXString__cBXString(&path, 2);
+    }
+    sTbl_F6B0*& tbl = *(sTbl_F6B0**)(self + 0x44);
+    char*& ent = *(char**)(self + 0x18);
+    func_003A6AE0(*(void**)(self + 0x10), name.p, *(void**)(self + 0x20));
+    *(void**)(self + 0x14) = func_00353AC0(cMemMan_alloc(0x18, D_004A2A98, 0, 0));
+    *(void**)(self + 0x78) = func_0022CCE8(cMemMan_alloc(0x1D4, D_0047B728, 0, 0), self);
+    tbl = new (D_0047B738, 0, 0) sTbl_F6B0;
+    func_002C2F18(*(void**)(self + 0x44));
+    *(void**)(self + 0x4C) = func_002B6AA0(cMemMan_alloc(0x250, D_0047B748, 0, 0), 0);
+    func_00334800(*(void**)(self + 0x20));
+    sBXStr_F6B0 dir;
+    dir.p = D_004A3E90;
+    *(int*)(**(char***)(self + 0x10) + 0x3D4) = 0;
+    {
+        sBXStr_F6B0 a;
+        sBXStr_F6B0 b;
+        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, func_00144BC0(iface) + 0x34), &b));
+        cBXString_operatorE(&dir, &a);
+        cBXString__cBXString(&a, 2);
+        cBXString__cBXString(&b, 2);
+    }
+    int id = *(int*)func_00144BC0(iface);
+    func_0022D088(*(void**)(self + 0x78), id, 0);
+    *(int*)(*(char**)(self + 0x78) + 0x1A4) = 1;
+    while (!func_0022D278(*(void**)(self + 0x78), id)) {
+        func_0022D8D8(*(void**)(self + 0x78));
+        func_003A6928(*(void**)(self + 0x10));
+        func_003E5398(0);
+    }
+    *(int*)(**(char***)(self + 0x10) + 0x3D4) = 1;
+    {
+        sBXStr_F6B0 a;
+        sBXStr_F6B0 c;
+        func_0016CA10_F6B0(D_004C5830, (func_003186D0(&c, D_004A2AA0, &dir), func_00318630(&a, &c, D_004A2AA8), a.p));
+        cBXString__cBXString(&a, 2);
+        cBXString__cBXString(&c, 2);
+    }
+    char* obj = (char*)cMemMan_alloc(0x3010, D_0047B758, 0, 0);
+    func_002DBF80(obj);
+    *(void***)(obj + 4) = D_004882E0;
+    new (obj + 0x10) sElemFF_F6B0[256];
+    ent = obj;
+    *(void**)(self + 0x1C) = cLensFxMan_construct();
+    func_002ED048();
+    cBXString__cBXString(&dir, 2);
+    cBXString__cBXString(&name, 2);
+}
+#endif
 
 INCLUDE_ASM("main/gameload", func_0022FA98);
 

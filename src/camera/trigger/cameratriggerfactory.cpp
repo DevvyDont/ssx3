@@ -930,7 +930,158 @@ extern "C" void* func_00173678(void* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173E40);
+#ifdef SKIP_ASM
+struct sV_173E40 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sM_173E40 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPair_173E40 {
+    sV_173E40 a;
+    sV_173E40 b;
+};
+
+extern sM_173E40 D_004FF1A0;
+extern sV_173E40 D_004FF150;
+extern sV_173E40 D_004FF160_v173E40 __asm__("D_004FF160");
+extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" sPair_173E40 func_0031B748(sM_173E40* m);
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_173E40(sM_173E40* dst, const sM_173E40* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
+static inline void vu0MulMtx_173E40(sM_173E40* dst, const sM_173E40* a, const sM_173E40* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void vu0TransMtx_173E40(sM_173E40* m, const sV_173E40& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+static inline void SinCos_173E40(float* s, float* c, float angle)
+{
+    func_0031BE50(s, c, angle);
+}
+
+static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float angle)
+{
+    sM_173E40 r;
+    float s;
+    float c;
+    float one = 1.0f;
+    SinCos_173E40(&s, &c, angle);
+    float t = one - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    r.m[3][3] = one;
+    vu0MulMtx_173E40(m, m, &r);
+}
+
+extern "C" sPair_173E40 func_00173E40(char* src)
+{
+    sM_173E40 m;
+    vu0CopyMtx_173E40(&m, &D_004FF1A0);
+    vu0TransMtx_173E40(&m, *(sV_173E40*)(src + 0x40));
+    RotAxis_173E40(&m, D_004FF150, -*(float*)(src + 0x54));
+    RotAxis_173E40(&m, D_004FF160_v173E40, *(float*)(src + 0x50));
+    return func_0031B748(&m);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174190);

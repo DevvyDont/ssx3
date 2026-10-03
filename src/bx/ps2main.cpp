@@ -86,7 +86,51 @@ extern "C" float func_0031B098(float a, float b, float c, float d, float e, floa
 
 INCLUDE_ASM("bx/ps2main", func_0031B178);
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031B310);
+#ifdef SKIP_ASM
+extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i);
+
+// 4x4 adjoint (transposed cofactor matrix), in place.
+extern "C" void func_0031B310(void* vm)
+{
+    float (*m)[4] = (float (*)[4])vm;
+    float a1, a2, a3, a4, b1, b2, b3, b4;
+    float c1, c2, c3, c4, d1, d2, d3, d4;
+
+    a1 = m[0][0]; b1 = m[0][1];
+    c1 = m[0][2]; d1 = m[0][3];
+
+    a2 = m[1][0]; b2 = m[1][1];
+    c2 = m[1][2]; d2 = m[1][3];
+
+    a3 = m[2][0]; b3 = m[2][1];
+    c3 = m[2][2]; d3 = m[2][3];
+
+    a4 = m[3][0]; b4 = m[3][1];
+    c4 = m[3][2]; d4 = m[3][3];
+
+    m[0][0] =  func_0031B098(b2, b3, b4, c2, c3, c4, d2, d3, d4);
+    m[1][0] = -func_0031B098(a2, a3, a4, c2, c3, c4, d2, d3, d4);
+    m[2][0] =  func_0031B098(a2, a3, a4, b2, b3, b4, d2, d3, d4);
+    m[3][0] = -func_0031B098(a2, a3, a4, b2, b3, b4, c2, c3, c4);
+
+    m[0][1] = -func_0031B098(b1, b3, b4, c1, c3, c4, d1, d3, d4);
+    m[1][1] =  func_0031B098(a1, a3, a4, c1, c3, c4, d1, d3, d4);
+    m[2][1] = -func_0031B098(a1, a3, a4, b1, b3, b4, d1, d3, d4);
+    m[3][1] =  func_0031B098(a1, a3, a4, b1, b3, b4, c1, c3, c4);
+
+    m[0][2] =  func_0031B098(b1, b2, b4, c1, c2, c4, d1, d2, d4);
+    m[1][2] = -func_0031B098(a1, a2, a4, c1, c2, c4, d1, d2, d4);
+    m[2][2] =  func_0031B098(a1, a2, a4, b1, b2, b4, d1, d2, d4);
+    m[3][2] = -func_0031B098(a1, a2, a4, b1, b2, b4, c1, c2, c4);
+
+    m[0][3] = -func_0031B098(b1, b2, b3, c1, c2, c3, d1, d2, d3);
+    m[1][3] =  func_0031B098(a1, a2, a3, c1, c2, c3, d1, d2, d3);
+    m[2][3] = -func_0031B098(a1, a2, a3, b1, b2, b3, d1, d2, d3);
+    m[3][3] =  func_0031B098(a1, a2, a3, b1, b2, b3, c1, c2, c3);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/ps2main", func_0031B6C8);

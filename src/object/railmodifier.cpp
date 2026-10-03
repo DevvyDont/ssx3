@@ -283,7 +283,189 @@ extern "C" void func_0035D288(sRmBody* self)
 
 INCLUDE_ASM("object/railmodifier", func_0035D340);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035D4A0);
+#ifdef SKIP_ASM
+extern "C" void func_0035D908(sRmBody* b, const sRmVec4* r, const sRmVec4* imp);
+
+struct sRmRigid_D4A0 {
+    sRmVec4 pos;        // 0x00
+    char pad_0x10[0x30];
+    float invMass;      // 0x40
+    char pad_0x44[0xC];
+    sRmMat33 invI;      // 0x50
+    char pad_0x74[0xC];
+    sRmVec4 vel;        // 0x80
+    sRmVec4 angVel;     // 0x90
+};
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sRmVec4 SubD4A0(const sRmVec4& a, const sRmVec4& b)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sRmVec4 AddD4A0(const sRmVec4& a, const sRmVec4& b)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sRmVec4 CrossD4A0(const sRmVec4& a, const sRmVec4& b)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dot product).
+static inline float DotD4A0(const sRmVec4& a, const sRmVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float LengthD4A0(const sRmVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / s).
+static inline sRmVec4 DivD4A0(const sRmVec4& v, float s)
+{
+    sRmVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sRmVec4 ScaleD4A0(const sRmVec4& v, float s)
+{
+    sRmVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sRmVec4 MulID4A0(sRmRigid_D4A0* b, const sRmVec4& v)
+{
+    sRmVec4 r;
+    float x = v.x;
+    float y = v.y;
+    float z = v.z;
+    r.x = b->invI.m[0][0] * x + b->invI.m[1][0] * y + b->invI.m[2][0] * z;
+    r.y = b->invI.m[0][1] * x + b->invI.m[1][1] * y + b->invI.m[2][1] * z;
+    r.z = b->invI.m[0][2] * x + b->invI.m[1][2] * y + b->invI.m[2][2] * z;
+    r.w = v.w;
+    return r;
+}
+
+static inline sRmVec4 PointVelD4A0(sRmRigid_D4A0* b, const sRmVec4& p)
+{
+    return AddD4A0(b->vel, CrossD4A0(b->angVel, SubD4A0(p, b->pos)));
+}
+
+extern "C" void func_0035D4A0(sRmRigid_D4A0* b, sRmVec4* point, sRmVec4* n, float e, float mu)
+{
+    sRmVec4 r = SubD4A0(*point, b->pos);
+    sRmVec4 vp = PointVelD4A0(b, *point);
+    float d = DotD4A0(vp, *n);
+    if (mu != 0.0f) {
+        sRmVec4 t = SubD4A0(vp, ScaleD4A0(*n, d));
+        float len = LengthD4A0(t);
+        if (len > 0.0010000000474974513f) {
+            sRmVec4 dir = DivD4A0(t, len);
+            float j = -mu * len / (b->invMass + DotD4A0(dir, CrossD4A0(MulID4A0(b, CrossD4A0(r, dir)), r)));
+            sRmVec4 imp = ScaleD4A0(dir, j);
+            func_0035D908((sRmBody*)b, &r, &imp);
+            vp = PointVelD4A0(b, *point);
+            d = DotD4A0(vp, *n);
+            if (d > 0.0f) {
+                return;
+            }
+        }
+    }
+    float j = -(e + 1.0f) * d / (b->invMass + DotD4A0(*n, CrossD4A0(MulID4A0(b, CrossD4A0(r, *n)), r)));
+    sRmVec4 imp = ScaleD4A0(*n, j);
+    func_0035D908((sRmBody*)b, &r, &imp);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035D908);
 
@@ -318,7 +500,205 @@ extern "C" void func_0035DA38(void* self, func_0035DA38_cObj* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035DA70);
+#ifdef SKIP_ASM
+extern void* D_004913F8[];
+extern void* D_0048F080[];
+void* func_0035CFE8(void* self);
+extern "C" void func_0032C508(void* p);
+extern "C" void* func_00327CC8(void* self, void* src);
+extern "C" void func_0035E248(void* self);
+
+extern "C" void* func_0035DDE8_DA70(void* self, void* a1, void* a2) __asm__("func_0035DDE8");
+
+struct sXf_DA70 {
+    sRmVec4 pos;
+    sRmVec4 quat;
+};
+
+extern "C" sXf_DA70 func_0031B748(void* m);
+extern "C" sXf_DA70 func_0035E770_DA70(void* self) __asm__("func_0035E770");
+
+struct sV4c_DA70 {
+    float x, y, z, w;
+    sV4c_DA70(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sRmVec4 QuatRot_DA70(const sRmVec4& q, const sRmVec4& v)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst = v rotated by quaternion q).
+static inline void QuatRotTo_DA70(sRmVec4& dst, const sRmVec4& q, const sRmVec4& v)
+{
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(dst)
+        : "m"(q), "m"(v)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void AddTo_DA70(sRmVec4& dst, const sRmVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (unit quaternion + position -> 4x4 matrix).
+static inline void QuatPosToMtx_DA70(void* m, const sRmVec4& q, const sRmVec4& p)
+{
+    __asm__ __volatile__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf3, %2\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf3, 0x30(%0)\n"
+        "sqc2       $vf10, 0x0(%0)\n"
+        "sqc2       $vf11, 0x10(%0)\n"
+        "sqc2       $vf12, 0x20(%0)\n"
+        :
+        : "r"(m), "m"(q), "m"(p)
+        : "memory");
+}
+
+struct sFlags_DA70 {
+    char pad0[0x8];
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+};
+
+static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int bits)
+{
+    *w = (*w & mask) | bits;
+}
+
+extern "C" char* func_0035DA70(char* self, char* a1, char* a2, char* a3)
+{
+    float* timing = (float*)(self + 0x4);
+    *(void***)self = D_004913F8;
+    func_0035CFE8(self + 0x30);
+    *(void***)self = D_0048F080;
+    func_0032C508(self + 0xE0);
+    *(int*)(self + 0x20) = 0;
+    *(int*)(self + 0xD0) = *(int*)(a2 + 0x50);
+    func_00327CC8(self + 0xE0, *(void**)(a2 + 0x48));
+    *(float*)(self + 0x8) = *(float*)(a1 + 0x4);
+    char* t = *(char**)(self + 0x178);
+    *(float*)(self + 0xC) = *(float*)(a1 + 0x8);
+    *(float*)(self + 0x70) = 1.0f / timing[1];
+    sRmVec4 v;
+    v.x = *(float*)(t + 0x2C);
+    v.y = *(float*)(t + 0x30);
+    v.z = *(float*)(t + 0x34);
+    v.w = 0.0f;
+    *(sRmVec4*)(self + 0x2B0) = v;
+    *(sRmMat33*)(self + 0x280) = *(sRmMat33*)(t + 0x5C);
+    ((sRmMat33*)(self + 0x280))->m[0][0] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[0][1] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[0][2] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[1][0] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[1][1] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[1][2] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[2][0] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[2][1] *= 0.5f;
+    ((sRmMat33*)(self + 0x280))->m[2][2] *= 0.5f;
+    sXf_DA70 x = func_0031B748(*(char**)(self + 0xD0) + 0x10);
+    {
+        sRmVec4 r1;
+        QuatRotTo_DA70(r1, x.quat, *(sRmVec4*)(self + 0x2B0));
+        v = r1;
+        sRmVec4 b;
+        sRmVec4 r2;
+        QuatRotTo_DA70(r2, x.quat, v);
+        b = r2;
+        AddTo_DA70(x.pos, b);
+    }
+    *(sXf_DA70*)(self + 0x30) = x;
+    sXf_DA70 y = func_0035E770_DA70(self);
+    QuatPosToMtx_DA70(self + 0x240, y.quat, y.pos);
+    func_0035E248(self);
+    func_0035D288((sRmBody*)(self + 0x30));
+    *(float*)(self + 0x14) = 0.10000000149011612f;
+    *(float*)(self + 0x18) = 0.4000000059604645f;
+    *(float*)(self + 0x1C) = 277.77777099609375f;
+    *(int*)(self + 0x10) = 0;
+    SetBits_DA70((unsigned int*)(*(char**)(self + 0xD0) + 0x8), 0xFFFFFFDFu, 0x40);
+    SetBits_DA70((unsigned int*)(*(char**)(self + 0xD0) + 0x8), 0xFFFFFFFDu, 0x4);
+    *(unsigned int*)(*(char**)(self + 0xD0) + 0x8) |= 0x1;
+    func_0035DDE8_DA70(self, a3, a2);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_0035DDE8);
 
@@ -741,7 +1121,109 @@ extern "C" void* func_0035F788(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F7D0);
+#ifdef SKIP_ASM
+extern char* D_004A5B64;
+
+struct sV2_F7D0 {
+    float x, y;
+    sV2_F7D0() {}
+    sV2_F7D0(float ax, float ay) : x(ax), y(ay) {}
+    sV2_F7D0 operator-() const { return sV2_F7D0(-x, -y); }
+    sV2_F7D0 operator*(float s) const { return sV2_F7D0(x * s, y * s); }
+    sV2_F7D0& operator+=(const sV2_F7D0& o)
+    {
+        x += o.x;
+        y += o.y;
+        return *this;
+    }
+};
+
+struct sRmState_F7D0 {
+    int f0;             // 0x0
+    float t;            // 0x4
+    float dur;          // 0x8
+    float fC;           // 0xC
+    float f10;          // 0x10
+    float f14;          // 0x14
+    char pad_0x18[0x18];
+    sV2_F7D0 pos;       // 0x30
+    sV2_F7D0 vel;       // 0x38
+    int active;         // 0x40
+};
+
+extern "C" void func_0035F7D0(sRmState_F7D0* self)
+{
+    if (self->dur > 0.0f || self->fC > 0.0f) {
+        self->t += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        if (self->active) {
+            if (self->f14 != 0.0f) {
+                self->f10 += self->f14;
+                if (self->f14 >= 6.2831854820251465f) {
+                    self->f14 = self->f14 - 6.2831854820251465f;
+                } else if (self->f14 <= 6.2831854820251465f) {
+                    self->f14 = self->f14 + 6.2831854820251465f;
+                }
+            }
+            if (self->t >= self->dur) {
+                self->t = 0.0f;
+                if (self->t < self->fC) {
+                    self->active = 0;
+                }
+                if (self->f0 == 2 || self->f0 == 6) {
+                    self->vel = -self->vel;
+                }
+            }
+            if (self->active) {
+                if (self->f0 == 6) {
+                    if (self->vel.x < 0.0f) {
+                        float t = self->t;
+                        if (t < self->dur * 0.5f) {
+                            sV2_F7D0 m = self->vel * t * (1.0f / self->dur);
+                            self->pos.x += m.x;
+                            self->pos.y += m.y;
+                        } else {
+                            sV2_F7D0 m = self->vel * (self->dur - t) * (1.0f / self->dur);
+                            self->pos.x += m.x;
+                            self->pos.y += m.y;
+                        }
+                    } else {
+                        float u = self->dur - self->t;
+                        if (u < self->dur * 0.5f) {
+                            sV2_F7D0 m = self->vel * u * (1.0f / self->dur);
+                            self->pos.x += m.x;
+                            self->pos.y += m.y;
+                        } else {
+                            sV2_F7D0 m = self->vel * (self->dur - u) * (1.0f / self->dur);
+                            self->pos.x += m.x;
+                            self->pos.y += m.y;
+                        }
+                    }
+                } else {
+                    self->pos.x += self->vel.x;
+                    self->pos.y += self->vel.y;
+                }
+                if (self->pos.x > 1.0f) {
+                    self->pos.x = self->pos.x - 1.0f;
+                } else if (self->pos.x < -1.0f) {
+                    self->pos.x = self->pos.x + 1.0f;
+                }
+                if (self->pos.y > 1.0f) {
+                    self->pos.y = self->pos.y - 1.0f;
+                } else if (self->pos.y < -1.0f) {
+                    self->pos.y = self->pos.y + 1.0f;
+                }
+            }
+        } else if (self->t >= self->fC) {
+            self->t = 0.0f;
+            if (self->dur > 0.0f) {
+                self->active = 1;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035FB30);

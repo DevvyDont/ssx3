@@ -753,7 +753,115 @@ extern "C" void func_00353448(char* self, char* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_readFromReplayFrame);
+#ifdef SKIP_ASM
+struct sMbStreamVEntry36D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sMbStream36D8 {
+    sMbStreamVEntry36D8* vt;
+};
+
+struct sMbReplayHdr36D8 {
+    unsigned int flags;      // 0x00
+    int type;                // 0x04
+    int kind;                // 0x08
+    int numA;                // 0x0C
+    int numB;                // 0x10
+    signed char typesA[32];  // 0x14
+};
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cSplineModifier_cSplineModifier(void* self, sMbStream36D8* s);
+extern "C" void* func_0035A118(void* self, sMbStream36D8* s);
+extern "C" void* func_00357090(void* self, sMbStream36D8* s);
+extern "C" void* func_00356F68(void* self, sMbStream36D8* s);
+extern "C" void* func_0035DF70(void* self, sMbStream36D8* s);
+extern "C" void* func_00357358(void* self, sMbStream36D8* s);
+extern "C" void* func_00357798(void* self, sMbStream36D8* s);
+extern "C" void* func_0035F788(void* self, sMbStream36D8* s);
+extern "C" void* func_0035F1A8(void* self, sMbStream36D8* s);
+extern "C" void* func_00342808(void* self, sMbStream36D8* s);
+extern "C" void* func_003459A8(void* self, sMbStream36D8* s);
+extern "C" void* func_00345D80(void* self, sMbStream36D8* s);
+extern "C" void* func_003461C0(void* self, sMbStream36D8* s);
+extern "C" void* func_0035BA88(void* self, sMbStream36D8* s);
+extern "C" void func_00345720(void* pool, void* item);
+extern "C" void func_0035B690(void* list, void* item);
+
+extern const char D_0048E8D0[];
+extern const char D_0048E8E0[];
+extern const char D_0048E8F0[];
+extern const char D_0048E908[];
+extern const char D_0048E918[];
+extern const char D_0048E928[];
+extern const char D_0048E940[];
+extern const char D_0048E958[];
+extern const char D_0048E968[];
+extern const char D_0048E978[];
+extern const char D_0048E990[];
+extern const char D_0048E9A8[];
+extern const char D_0048E9B8[];
+
+extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStream36D8* stream)
+{
+    sMbReplayHdr36D8 hdr;
+    int i;
+
+    *(void**)&self->node = 0;
+    self->field_0x4 = 0;
+    self->field_0x8 = 0;
+    self->field_0xC = 0;
+    stream->vt[2].fn((char*)stream + stream->vt[2].delta, &hdr, 0x34);
+
+    if (hdr.flags & 1) {
+        if (hdr.type == 1) {
+            *(void**)&self->node = cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), stream);
+        } else if (hdr.type == 2) {
+            *(void**)&self->node = func_0035A118(cMemMan_alloc(0x58, D_0048E8D0, 0x20000000, 0), stream);
+        } else if (hdr.type == 4) {
+            *(void**)&self->node = func_00357090(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), stream);
+        } else if (hdr.type == 3) {
+            *(void**)&self->node = func_00356F68(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), stream);
+        } else if (hdr.type == 5) {
+            *(void**)&self->node = func_0035DF70(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), stream);
+        } else if (hdr.type == 6) {
+            *(void**)&self->node = func_00357358(cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0), stream);
+        } else if (hdr.type == 7) {
+            *(void**)&self->node = func_00357798(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), stream);
+        }
+    }
+    if (hdr.flags & 2) {
+        self->field_0x4 = (int)func_0035F788(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), stream);
+    }
+    if (hdr.flags & 4) {
+        self->field_0x8 = (int)func_0035F1A8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), stream);
+    }
+    if ((hdr.flags & 8) && hdr.kind == 1) {
+        self->field_0xC = (int)func_00342808(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), stream);
+    }
+    for (i = 0; i < hdr.numA; i++) {
+        void* p;
+        if (hdr.typesA[i] == 1) {
+            p = func_003459A8(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), stream);
+        } else if (hdr.typesA[i] == 2) {
+            p = func_00345D80(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), stream);
+        } else if (hdr.typesA[i] == 3) {
+            p = func_003461C0(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), stream);
+        } else {
+            p = 0;
+        }
+        func_00345720((char*)self + 0x10, p);
+    }
+    for (i = 0; i < hdr.numB; i++) {
+        func_0035B690((char*)self + 0x1C, func_0035BA88(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), stream));
+    }
+}
+#endif
 
 extern void* D_0048F008[];
 
