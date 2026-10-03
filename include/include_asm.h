@@ -31,6 +31,22 @@ __asm__(".include \"include/labels.inc\"\n");
 
 #else
 
+#if defined(SKIP_ASM) && defined(ASM_OFFSETS) && !defined(M2CTX) && !defined(PERMUTER)
+/* Position-faithful obj/current: place each function at its obj/target offset (tools/asm_offsets.py),
+   because SN's assembler pads short loops depending on where they sit. */
+__asm__(".include \"asm_offsets.inc\"\n");
+#ifndef INCLUDE_ASM
+#define INCLUDE_ASM(FOLDER, NAME) \
+    __asm__( \
+        ".section .text\n" \
+        ".ifdef __off_" #NAME "\n" \
+        ".org __off_" #NAME "\n" \
+        ".endif\n" \
+        ".previous\n" \
+    )
+#endif
+#endif
+
 #ifndef INCLUDE_ASM
 #define INCLUDE_ASM(FOLDER, NAME)
 #endif

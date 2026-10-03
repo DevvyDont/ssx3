@@ -164,6 +164,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         extra_flags: str = "",
         collect_objdiff: bool = False,
         orig_entry=None,
+        implicit: List[str] = None,
     ):
         """
         Helper function to build objects.
@@ -213,6 +214,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 rule=task,
                 inputs=[str(s) for s in src_paths],
                 variables=build_vars,
+                implicit=implicit or [],
                 implicit_outputs=implicit_outputs,
             )
             # Collect for objdiff.json if requested
@@ -295,6 +297,12 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
+        "asmoff",
+        description="asmoff $out",
+        command="python3 tools/asm_offsets.py $src $in $out",
+    )
+
+    ninja.rule(
         "sha1sum",
         description="sha1sum $in",
         command="sha1sum -c $in && touch $out",
@@ -305,6 +313,18 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         description="elf $out",
         command=f"{cross}objcopy $in $out -O binary",
     )
+
+    def current_c_flags(entry):
+        """-DSKIP_ASM plus the target offsets of the unit's INCLUDE_ASM functions (tools/asm_offsets.py), so
+        every C function in obj/current sits at its obj/target offset: SN's assembler pads short loops
+        depending on position, so a matched function only reproduces the target bytes there."""
+        obj = Path(entry.object_path)
+        stem = obj.with_suffix("").stem if obj.suffix == ".o" else obj.stem
+        src = str(entry.src_paths[0])
+        inc = f"obj/offsets/{stem}/asm_offsets.inc"
+        ninja.build(outputs=[inc], rule="asmoff", inputs=[f"obj/target/{stem}.o"], implicit=[src],
+                    variables={"src": src})
+        return f"-DSKIP_ASM -DASM_OFFSETS -Wa,-Iobj/offsets/{stem}", [inc]
 
     # Add recipes for everything
     for entry in linker_entries:
@@ -327,13 +347,15 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags=flags, implicit=inc)
             else:
                 build(entry.object_path, entry.src_paths, "cc")
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags=flags, implicit=inc)
             else:
                 build(entry.object_path, entry.src_paths, "cpp")
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
