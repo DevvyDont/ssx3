@@ -97,7 +97,52 @@ extern "C" void func_00348C48(void* self)
 
 INCLUDE_ASM("object/flexrailnode", func_00348D98);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00348FA0);
+#ifdef SKIP_ASM
+extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
+extern "C" void func_003492A8(void* self);
+struct sFrBoxRail;
+extern "C" void func_00349110(sFrBoxRail* self);
+extern "C" void cFlexRailNode_addSpaceHash(void* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern char D_0048FF30[];
+extern char D_0048E820[];
+
+struct sFlexRailRef_348FA0 {
+    unsigned int id;
+    sFlexRailRef_348FA0() : id(0xFFFFFFFF) {}
+};
+
+struct sFlexRailElem_348FA0 {
+    char pad[0x40];
+    sFlexRailRef_348FA0 link;
+    char pad44[0xC];
+};
+
+struct sFrStreamVEntry_348FA0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
+{
+    func_00347EA8(self, a1, stream);
+    *(void**)(self + 0xC) = D_0048FF30;
+    sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
+    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(self + 0x70);
+    *elems = new (D_0048E820, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
+    sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
+    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x50);
+    func_003492A8(self);
+    func_00349110((sFrBoxRail*)self);
+    cFlexRailNode_addSpaceHash(self);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", func_003490B0);
@@ -365,7 +410,45 @@ extern "C" void func_00349AD0(void* self, void* stream)
 
 INCLUDE_ASM("object/flexrailnode", func_00349B48);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00349DB0);
+#ifdef SKIP_ASM
+extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
+extern "C" void func_0034A0B0(void* self);
+extern "C" void cFlexRailNode_addSpaceHash(void* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern char D_0048FD90[];
+extern char D_0048E830[];
+
+struct sFlexRailElem_349DB0 {
+    char pad[0x50];
+    unsigned int link;
+    char pad54[0xC];
+    sFlexRailElem_349DB0() : link(~0u) {}
+};
+
+struct sFrStreamVEntry_349DB0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void* func_00349DB0(char* self, void* a1, void* stream)
+{
+    func_00347EA8(self, a1, stream);
+    *(void**)(self + 0xC) = D_0048FD90;
+    sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
+    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(self + 0x70);
+    *elems = new (D_0048E830, 0x20000000, 0) sFlexRailElem_349DB0[*(int*)(self + 0x20)];
+    sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
+    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x60);
+    func_0034A0B0(self);
+    cFlexRailNode_addSpaceHash(self);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", func_00349EB8);

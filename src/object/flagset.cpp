@@ -654,7 +654,50 @@ extern "C" void func_0034D960(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034D9B0);
+#ifdef SKIP_ASM
+extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
+extern "C" void cAnimNode_setAnimMeshCache(void* self);
+extern "C" float func_00351508(void* p);
+struct sFlagOwner_E348;
+extern "C" void func_0034E348(sFlagOwner_E348* self);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern void* D_00490CC8[];
+extern char D_0048E758[];
+
+struct sFlagSlot_34D9B0 {
+    int v[16];
+    sFlagSlot_34D9B0() {}
+};
+
+extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force)
+{
+    char* node = self + 0x14;
+    func_00355280(node, a1, a2, a3);
+    *(void***)(self + 0x20) = D_00490CC8;
+    sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(self + 0x44);
+    *slot = new (D_0048E758, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
+    cAnimNode_setAnimMeshCache(self);
+    float f = 0.0f;
+    if (*(void**)(self + 0x48) != 0) {
+        f = func_00351508(*(void**)(self + 0x48));
+    }
+    *(float*)(self + 0x0) = f;
+    *(float*)(self + 0x8) = 10000000000.0f;
+    *(float*)(self + 0x4) = f;
+    *(int*)(self + 0x10) = 1;
+    *(float*)(self + 0xC) = 10000000000.0f;
+    char* sub = self + 0x14;
+    if (force != 0 || (*(unsigned int*)(*(char**)(sub + 0x18) + 8) & 1)) {
+        char* n = *(char**)(sub + 0x18);
+        *(unsigned int*)(n + 8) = (*(unsigned int*)(n + 8) & ~2u) | 4;
+    }
+    func_0034E348((sFlagOwner_E348*)self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("object/flagset", func_0034DAC8);
 

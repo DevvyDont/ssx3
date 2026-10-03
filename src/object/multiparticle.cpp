@@ -1,6 +1,44 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
+extern "C" void* func_00370018(void* p);
+extern "C" void func_003705E0(void* sys, void* data, int n);
+extern char D_004A4030[];
+extern char D_004A4038[];
+extern char D_004FF1A0[];
+
+// PORT: array new bound to the tagged allocator
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+
+struct sMPRef {
+    unsigned int id;
+    sMPRef() : id(0xFFFFFFFF) {}
+};
+
+struct sMultiParticle {
+    int count;     // 0x0
+    int field_0x4; // 0x4
+    int field_0x8; // 0x8
+    sMPRef* refs;  // 0xC
+    void* sys;     // 0x10
+};
+
+extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
+{
+    sMPRef** slot = &self->refs;
+    *slot = new (D_004A4030, 0x20000000, 0) sMPRef[self->count];
+    self->sys = func_00370018(cMemMan_alloc(0x190, D_004A4038, 0x20000000, 0));
+    for (int i = 0; i < self->count; i++) {
+        self->refs[i].id = 0xFFFFFFFF;
+    }
+    func_003705E0(self->sys, D_004FF1A0, self->field_0x8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358120);

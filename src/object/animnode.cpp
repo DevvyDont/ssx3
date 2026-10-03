@@ -2,7 +2,46 @@
 
 INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
 
+//100%
 INCLUDE_ASM("object/animnode", func_0034E600);
+#ifdef SKIP_ASM
+struct sVec4_E600 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_E600 {
+    sVec4_E600 r[4];
+    sMat_E600() {}
+};
+
+struct sVEntry_E600a {
+    short delta;
+    short index;
+    sMat_E600* (*fn)(void*, int);
+};
+
+struct sVEntry_E600b {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sMat_E600*);
+};
+
+extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out)
+{
+    void* obj = (char*)self + 0x14;
+    if (id == *(int*)((char*)self + 0x2C)) {
+        sVEntry_E600a* vt = *(sVEntry_E600a**)((char*)self + 0x20);
+        sVec4_E600 t = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
+        *out = t;
+        return;
+    }
+    sMat_E600 buf[24];
+    sVEntry_E600b* vt = *(sVEntry_E600b**)((char*)self + 0x20);
+    vt[33].fn((char*)obj + vt[33].delta, id + 0x10, buf);
+    sVec4_E600 t = buf[idx].r[3];
+    *out = t;
+}
+#endif
 
 INCLUDE_ASM("object/animnode", func_0034E698);
 
