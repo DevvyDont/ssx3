@@ -493,7 +493,96 @@ void* func_002766B0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_002766D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00276270(char* self, int a1);
+extern "C" void func_00276868(void* self, int a1);
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_00277598(void* self, int index);
+extern "C" void func_00277800(void* self);
+// The unit declares func_00277980 as void; it returns whether it handled the update.
+extern "C" int func_00277980_r(void* self) __asm__("func_00277980");
+extern "C" void* func_00277C08(void*, int, int);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" int func_00282540(void* self, int id);
+extern "C" void func_00283818(void* p);
+extern "C" void* func_00283D70(void* list, int i);
+// The unit declares func_00283D28 as returning void*, but it returns the list's count.
+int func_00283D28_count(void* list) __asm__("func_00283D28");
+
+struct sSeqItem_66D0 {
+    char pad_0x0[0xC];
+    int handle;         // 0xC
+};
+
+struct sSeq_66D0 {
+    char* owner;        // 0x0
+    char pad_0x4[0x8];
+    char list[0x98];    // 0xC
+    int state;          // 0xA4
+    int fA8;            // 0xA8
+    char pad_0xAC[0x8];
+    int fB4;            // 0xB4
+    char pad_0xB8[0x4];
+    int cur;            // 0xBC
+    int pos;            // 0xC0
+};
+
+extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
+{
+    int pos = delta + self->pos;
+    if (pos == self->pos) {
+        return self->state;
+    }
+    if (pos < self->cur) {
+        pos = self->cur;
+    }
+    int n = func_00283D28_count(self->list);
+    if (self->state != 3) {
+        self->pos = 0;
+        if (pos < n) {
+            func_00277598(self, pos);
+            int st = self->state;
+            self->cur = -1;
+            self->state = 0;
+            if (st != 0) {
+                func_00276270((char*)self, self->fB4);
+            }
+            return self->state;
+        }
+        goto reset;
+    }
+    self->pos = pos;
+    if (self->cur > 0 && self->cur < pos) {
+        sSeqItem_66D0* it = (sSeqItem_66D0*)func_00283D70(self->list, self->cur);
+        if (func_00277DD8(self, it) == 0) {
+            func_00282540(self->owner, it->handle);
+        } else if (it->handle != 0) {
+            func_00283818(self->owner + 0x500);
+        }
+        it->handle = -1;
+        self->cur = -1;
+        if (self->fA8) {
+            func_00277C08(self, 0, 1);
+        }
+        self->cur = func_00277450(self, pos, 0);
+    }
+    if (self->fA8 == 0) {
+        if (force == 0 || func_00277980_r(self) == 0) {
+            if (self->cur < 0) {
+                goto reset;
+            }
+            func_00277800(self);
+        }
+    }
+    return self->state;
+reset:
+    func_00276868(self, 1);
+    return self->state;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276868);
@@ -1018,7 +1107,110 @@ extern "C" void func_00277838(void* selfp)
 
 INCLUDE_ASM("scripter/datamanager", func_00277980);
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277C08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char* D_004A28A8;
+void* func_00230698(void* self, int a1);
+extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void func_002826D8(void* self, int a1);
+extern "C" void func_00282720(void* self, int a1);
+extern "C" int func_00282798(void* self, int a1);
+extern "C" void func_00283B78(void* self, int on);
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" void func_002E4638(void* p, int on);
+extern "C" void func_002EA8B8(void* p, int on);
+
+struct sSeqItem_7C08 {
+    char pad_0x0[0xC];
+    int handle;         // 0xC
+};
+
+struct sSeq_7C08 {
+    char* owner;        // 0x0
+    int f4;             // 0x4
+    char pad_0x8[0x4];
+    char list[0x98];    // 0xC
+    int state;          // 0xA4
+    int paused;         // 0xA8
+    char pad_0xAC[0x18];
+    int pauseCount;     // 0xC4
+};
+
+// The unit declares func_00277C08 as returning void*; the body returns nothing. Bind by asm label.
+extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard) __asm__("func_00277C08");
+
+extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
+{
+    if (self->state != 3) {
+        return;
+    }
+    if (hard == 0) {
+        int c = self->pauseCount;
+        if (on) {
+            self->pauseCount = c + 1;
+            if (c != 0) {
+                return;
+            }
+        } else {
+            if (c <= 0) {
+                return;
+            }
+            int d = c - 1;
+            self->pauseCount = d;
+            if (d != 0) {
+                return;
+            }
+        }
+        if (self->paused) {
+            return;
+        }
+    } else {
+        if (self->paused == on) {
+            return;
+        }
+        self->paused = on;
+        if (self->pauseCount) {
+            return;
+        }
+    }
+    if (on) {
+        sSeqItem_7C08* it = (sSeqItem_7C08*)func_00283D70(self->list, 0);
+        if (func_00277DD8(self, it) == 0) {
+            int st = func_00282798(self->owner, it->handle);
+            if (st >= 3 && st <= 5) {
+                func_002826D8(self->owner, it->handle);
+            }
+        } else {
+            func_00283B78(self->owner + 0x500, 1);
+        }
+        if (self->f4) {
+            func_002EA8B8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64), 1);
+            char* p = (char*)func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+            if (*(int*)(p + 0x44)) {
+                func_002E4638(p, 1);
+            }
+        }
+    } else {
+        sSeqItem_7C08* it = (sSeqItem_7C08*)func_00283D70(self->list, 0);
+        if (func_00277DD8(self, it) == 0) {
+            if (func_00282798(self->owner, it->handle) == 5) {
+                func_00282720(self->owner, it->handle);
+            }
+        } else {
+            func_00283B78(self->owner + 0x500, 0);
+        }
+        if (self->f4) {
+            func_002EA8B8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64), 0);
+            char* p = (char*)func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+            if (*(int*)(p + 0x44)) {
+                func_002E4638(p, 0);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277DD8);
@@ -1072,7 +1264,100 @@ void func_00277F08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277F20);
+#ifdef SKIP_ASM
+extern "C" void func_00281E80(void* self);
+extern "C" void func_00283798(void* self);
+extern "C" void func_00281018(void* self);
+extern "C" void func_0027BFD0(void* self);
+extern "C" void func_002805B8(void* self);
+extern "C" void cScriptAnimBankManager_cScriptAnimBankManager(void* self, int flags, int a2, int a3);
+extern "C" void cScriptSoundBankManager_cScriptSoundBankManager(void* self, int flags, int a2, int a3);
+void func_00281160(void* self, int i);
+extern void* D_00482100[];
+extern void* D_004821A0[];
+extern void* D_00482168[];
+extern void* D_004821B8[];
+extern void* D_004A34B0;
+
+struct sScriptSlot_7F20 {
+    char data[0x120];
+    sScriptSlot_7F20() { func_00281018(this); }
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+
+struct sScriptMgr_7F20 {
+    char pad_0x0[0x2A8];
+    void** vt2A8;               // 0x2A8
+    void** vt2AC;               // 0x2AC
+    char pad_0x2B0[0x518 - 0x2B0];
+    void** vt518;               // 0x518
+    char pad_0x51C[0x528 - 0x51C];
+    void** vt528;               // 0x528
+    int f52C;                   // 0x52C
+    int f530;                   // 0x530
+    int f534;                   // 0x534
+    int f538;                   // 0x538
+    int f53C;                   // 0x53C
+    int f540;                   // 0x540
+    int f544;                   // 0x544
+    int f548;                   // 0x548
+    int f54C;                   // 0x54C
+    int f550;                   // 0x550
+    int f554;                   // 0x554
+    int ids[50];                // 0x558
+    int f620;                   // 0x620
+    int f624;                   // 0x624
+    char cues[10][0x10];        // 0x628
+    char pad_0x6C8[0x6D0 - 0x6C8];
+    char slots[2][0x120];       // 0x6D0
+    char pad_0x910[0xA48 - 0x910];
+    int fA48;                   // 0xA48
+};
+
+extern "C" sScriptMgr_7F20* func_00277F20(sScriptMgr_7F20* self)
+{
+    func_00281E80(self);
+    func_00283798((char*)self + 0x500);
+    cDataManager_cDataManager((cDataManager5828*)((char*)self + 0x51C), 0, 0x100);
+    self->vt2AC = D_00482100;
+    self->vt518 = D_004821A0;
+    self->vt528 = D_00482168;
+    self->vt2A8 = D_004821B8;
+    new ((char*)self + 0x6D0) sScriptSlot_7F20[2];
+    func_0027BFD0((char*)self + 0x910);
+    func_002805B8((char*)self + 0x92C);
+    cScriptAnimBankManager_cScriptAnimBankManager((char*)self + 0xA28, 0, 10, 0xF0);
+    cScriptSoundBankManager_cScriptSoundBankManager((char*)self + 0xA38, 0, 10, 0x11);
+    self->f52C = 0;
+    self->f530 = 0;
+    self->f534 = 0;
+    self->f538 = 0;
+    self->f53C = 0;
+    self->f540 = 0;
+    self->f544 = 0;
+    self->f548 = 0;
+    D_004A34B0 = self;
+    self->fA48 = 10;
+    self->f550 = 2;
+    self->f54C = 0;
+    self->f554 = 0;
+    self->f620 = 0;
+    self->f624 = 0;
+    int i;
+    for (i = 49; i >= 0; i--) {
+        self->ids[i] = 0;
+    }
+    for (i = 0; i < 10; i++) {
+        func_00277F08(self->cues[i]);
+    }
+    for (i = 0; i < 2; i++) {
+        func_00281160(self->slots[i], i);
+    }
+    return self;
+}
+#endif
 
 INCLUDE_ASM("scripter/datamanager", func_002780B8);
 

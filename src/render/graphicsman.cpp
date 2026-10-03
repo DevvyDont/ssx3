@@ -4,7 +4,59 @@
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
+//100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_AddBlendedMatrix);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00492638[];
+
+struct sBlendWeight {
+    short bone;
+    short weight;
+};
+
+struct sBlendMatrix {
+    int count;              // 0x0
+    sBlendWeight* weights;  // 0x4
+    int pad_0x8;
+};
+
+struct sGfxManBlend {
+    char pad_0x000[0xF48];
+    sBlendMatrix* blend;    // 0xF48
+    int nBlend;             // 0xF4C
+};
+
+extern "C" int func_00369A78(void* a, void* b, int tol0, int tol1, int tol2);
+
+extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* m)
+{
+    if (self->blend == 0) {
+        sBlendMatrix* mem = (sBlendMatrix*)operator_new_tag(0x3000, D_00492638, 0x100, 0);
+        self->blend = mem;
+        sBlendWeight* w = (sBlendWeight*)(mem + 0x200);
+        for (int k = 0; k < 0x200; k++) {
+            self->blend[k].weights = w;
+            w += 3;
+        }
+    }
+    sBlendMatrix* e = self->blend;
+    for (int i = 0; i < self->nBlend; i++, e++) {
+        if (func_00369A78(e, m, 10, 20, 20)) {
+            for (int j = 0; j < e->count; j++) {
+                m->weights[j].bone = e->weights[j].bone;
+            }
+            return;
+        }
+    }
+    self->blend[self->nBlend].count = m->count;
+    for (int j = 0; j < m->count; j++) {
+        self->blend[self->nBlend].weights[j] = m->weights[j];
+    }
+    self->nBlend++;
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_00369A78);
 
@@ -330,7 +382,78 @@ extern "C" void func_0036ABA0(void* self, int idx)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_0036AC00);
+#ifdef SKIP_ASM
+extern int D_004A4324;
+extern int D_004A4328;
+extern void* D_004A4474;
+extern char D_00507B80[];
+extern "C" void func_0036ABA0(void* self, int idx);
+extern "C" void func_0036A428(void* self, void* mat, int idx);
+extern "C" char* func_0038F460(void* self, unsigned int addr, int size, int flags);
+extern "C" int func_0038F668(void* self, char* end, int arg);
+extern "C" int func_00366CE0(void* self, int size, int owner, int skipB, int level, int align);
+extern "C" void func_0036AA60(void* self, int x, int y, char** pp);
+extern "C" void func_0036AE20(void* self, int idx, int a, int b, int n, char** pp);
+extern "C" void func_0036B158(void* self, int idx, int y, char** pp);
+extern "C" void func_003663D8(void* self, int id);
+extern "C" void func_00368138(void* self, void* pkt);
+
+struct sGmEntry_AC00 {
+    float x;            // 0x0
+    float y;            // 0x4
+    int z;              // 0x8
+    float w;            // 0xC
+    int q[4];           // 0x10
+};
+
+struct sGmOwner_AC00 {
+    char pad[0x6C64];
+    sGmEntry_AC00 entries[1];
+};
+
+struct sGmVEntry_AC00 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
+{
+    if (D_004A4324 == 0) {
+        return;
+    }
+    if (D_004A4328 != 0) {
+        func_0036ABA0(self, idx);
+    }
+    sGmEntry_AC00* e = &((sGmOwner_AC00*)self)->entries[idx];
+    if (e->w == 0.0f && e->z != 0) {
+        return;
+    }
+    char* mat = D_00507B80 + (idx << 10);
+    func_0036A428(self, mat, idx);
+    void* dma = D_004A4474;
+    char* pkt = func_0038F460(dma, *handle, -1, 0);
+    int slot = func_00366CE0(*(char**)(self + 0x18F4) + 0x1F60, 0x400, 0x7FFFFFFF, 0, 0, 1);
+    int* rec = (int*)(*(char**)(*(char**)(self + 0x18F4) + 0x3F50) + slot * 0x1C);
+    // PORT: the packet builder takes the matrix block's address as an int.
+    func_0036AA60(self, (int)mat, *rec >> 8, &pkt);
+    *handle = func_0038F668(dma, pkt, 4);
+    pkt = func_0038F460(dma, *handle, -1, 0);
+    int a = *(int*)(self + 0x5A80);
+    int b = *(int*)(self + 0x5A84);
+    sGmVEntry_AC00* vt = *(sGmVEntry_AC00**)(self + 0x10D8);
+    int n = vt[11].fn(self + vt[11].delta);
+    func_0036AE20(self, idx, a, b, n * 2, &pkt);
+    *handle = func_0038F668(dma, pkt, 4);
+    pkt = func_0038F460(dma, *handle, -1, 0);
+    func_0036B158(self, idx, *rec >> 8, &pkt);
+    *handle = func_0038F668(dma, pkt, 4);
+    func_003663D8(*(char**)(self + 0x18F4) + 0x1F60, slot);
+    func_00368138(*(char**)(self + 0x18F4), pkt2);
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036AE20);
 
@@ -805,7 +928,84 @@ extern "C" void func_00370888(void* self, const sGmQuad2* m, const sGmQuad* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_003708C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sGfxRS_708C0 {
+    int field_0x0;          // 0x0
+    int flagsA;             // 0x4, bits 2..6 = layer
+    int flagsB;             // 0x8, bits 5..9 = blend
+    int field_0xC;          // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sGfxMat_708C0 {
+    float m[4][4];
+};
+
+struct sGfxVEntry_708C0 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sGfxCtx_708C0 {
+    char pad_0x0[0xE84];
+    sGfxRS_708C0* top;          // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
+    sGfxVEntry_708C0* vtable;   // 0x10D8
+};
+
+extern sGfxCtx_708C0* D_004A5B80_708C0 __asm__("D_004A5B80");
+extern int D_0044B420[];
+
+typedef sGfxMat_708C0 (*tGetMat_708C0)(void*);
+typedef int (*tCull_708C0)(void*, void*, void*, const sGfxMat_708C0&);
+typedef void (*tDraw_708C0)(void*, void*);
+
+struct sGfxObj_708C0 {
+    char pad_0x0[0x4];
+    int base;               // 0x4
+    int kind;               // 0x8
+    int visible;            // 0xC
+};
+
+static inline int GetTexId_708C0(int i)
+{
+    return D_004A5B80_708C0->texIds[i];
+}
+
+extern "C" void func_003708C0(void* selfp)
+{
+    char* self = (char*)selfp;
+    sGfxCtx_708C0* g = D_004A5B80_708C0;
+    sGfxVEntry_708C0* vt = g->vtable;
+    if (((tCull_708C0)vt[93].fn)((char*)g + vt[93].delta, self + 0x160, self + 0x170,
+                                 ((tGetMat_708C0)vt[43].fn)((char*)g + vt[43].delta)) == 1) {
+        return;
+    }
+    if (((sGfxObj_708C0*)self)->visible == 0) {
+        return;
+    }
+    int layer = D_0044B420[((sGfxObj_708C0*)self)->kind];
+    g->top[1] = g->top[0];
+    sGfxRS_708C0* prev = g->top;
+    g->top = prev + 1;
+    prev[1].flagsB = (prev[1].flagsB & ~0x3E0) | 0xE0;
+    g->top->flagsA = (g->top->flagsA & 0xFFBFFFFF) | 0x400000;
+    g->top->flagsA = g->top->flagsA & 0xFE7FFFFF;
+    g->top->flagsA = g->top->flagsA & 0xFFCFFFFF;
+    g->top->flagsA = (g->top->flagsA & 0xFFF00FFF) | 0x14000;
+    g->top->flagsA = (g->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
+    g->top->tex = GetTexId_708C0(((sGfxObj_708C0*)self)->base + (int)*(float*)(self + 0x184));
+    sGfxVEntry_708C0* vt2 = g->vtable;
+    ((tDraw_708C0)vt2[82].fn)((char*)g + vt2[82].delta, self + 0x10);
+    g->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370AA8);

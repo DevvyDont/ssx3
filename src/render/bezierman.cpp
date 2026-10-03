@@ -60,7 +60,92 @@ void func_0038B178(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038B190);
+#ifdef SKIP_ASM
+struct sBezPatch_B190 {
+    void* obj;              // 0x0
+    int extra;              // 0x4
+    int kind;               // 0x8
+    unsigned short tex;     // 0xC
+    short pad;
+};
+
+struct sBezMixPatch_B190 {
+    void* obj;              // 0x0
+    int extra;              // 0x4
+    int kind;               // 0x8
+    unsigned short tex;     // 0xC
+    short pad;
+    unsigned char types[4]; // 0x10
+};
+
+struct sBezMan_B190 {
+    char pad_0x0[0x458];
+    int n4;                         // 0x458
+    sBezPatch_B190 list4[900];      // 0x45C
+    int n6;                         // 0x3C9C
+    sBezPatch_B190 list6[220];      // 0x3CA0
+    int n8;                         // 0x4A60
+    sBezPatch_B190 list8[50];       // 0x4A64
+    int nMix;                       // 0x4D84
+    sBezMixPatch_B190 mix[75];      // 0x4D88
+};
+
+struct sBezObj_B190 {
+    char pad_0x0[0x1A6];
+    unsigned short tex4;    // 0x1A6
+    unsigned short tex6;    // 0x1A8
+    unsigned short tex8;    // 0x1AA
+};
+
+extern "C" void func_0038B190(sBezMan_B190* m, sBezObj_B190* o, unsigned char* t, int unused, int extra)
+{
+    if (t[0] == t[2] && t[1] == t[3] && t[0] == t[1]) {
+        switch (t[0]) {
+        case 4:
+            if (m->n4 < 900) {
+                sBezPatch_B190* e = &m->list4[m->n4++];
+                e->extra = extra;
+                e->obj = o;
+                e->kind = 0;
+                e->tex = o->tex4;
+            }
+            break;
+        case 6:
+            if (m->n6 < 220) {
+                sBezPatch_B190* e = &m->list6[m->n6++];
+                e->extra = extra;
+                e->kind = 1;
+                e->obj = o;
+                e->tex = o->tex6;
+            }
+            break;
+        case 8:
+            if (m->n8 < 50) {
+                sBezPatch_B190* e = &m->list8[m->n8++];
+                e->extra = extra;
+                e->kind = 2;
+                e->obj = o;
+                e->tex = o->tex8;
+            }
+            break;
+        }
+        return;
+    }
+    if (m->nMix < 75) {
+        sBezMixPatch_B190* e = &m->mix[m->nMix++];
+        e->extra = extra;
+        e->obj = o;
+        int* pk = &e->kind;
+        *pk = (t[0] == 8 || t[1] == 8 || t[2] == 8 || t[3] == 8) ? 2 : 0;
+        e->tex = o->tex8;
+        for (int i = 0; i < 4; i++) {
+            e->types[i] = t[i];
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/bezierman", func_0038B338);

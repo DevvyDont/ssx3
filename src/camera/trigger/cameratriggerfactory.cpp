@@ -1,6 +1,143 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
+#ifdef SKIP_ASM
+extern "C" int get_uint(void* reader, void* dst);
+extern "C" int get_cCTActionSwitchCam(void* reader, void* dst);
+extern "C" int get_cCTActionBoundedCam(void* reader, char* obj);
+extern "C" int get_cCTActionSpline(void* reader, void* dst);
+void* get_cCTActionNone(void* unused, int* outType);
+// PORT: the game's tagged allocator, bound as a placement operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
+struct sCTActVec3A {
+    float x, y, z;
+};
+
+extern sCTActVec3A D_004FF0D8_act __asm__("D_004FF0D8");     // zero vector
+extern void* D_0045C2E8[];      // cCTAction vtable
+extern void* D_0045C1D0[];      // bounded cam
+extern void* D_0045C1B8[];      // spline
+extern char D_0045C0B0[];
+extern char D_0045C0C8[];
+extern char D_0045C0E0[];
+extern char D_0045C0F8[];
+
+// PORT: raw vtable stores stand in for the real virtual classes (vptr at 0x4, after `type`).
+// Classes with their own vtable set `type` in their own ctor, after the derived vptr store.
+struct sCTActA {
+    int type;           // 0x00
+    void** vtable;      // 0x04
+    sCTActA()
+    {
+        vtable = D_0045C2E8;
+    }
+    sCTActA(int t)
+    {
+        vtable = D_0045C2E8;
+        type = t;
+    }
+};
+
+struct sCTActSwitchA : sCTActA {
+    int target;         // 0x08
+    float blend;        // 0x0C
+    sCTActSwitchA() : sCTActA(0)
+    {
+        target = 0;
+        blend = 1.0f;
+    }
+};
+
+struct sCTActBoundedA : sCTActA {
+    int f08;            // 0x08
+    float blend;        // 0x0C
+    float f10;          // 0x10
+    float f14;          // 0x14
+    float f18;          // 0x18
+    float f1C;          // 0x1C
+    int f20;            // 0x20
+    int f24;            // 0x24
+    sCTActVec3A f28;    // 0x28
+    sCTActBoundedA() : sCTActA()
+    {
+        vtable = D_0045C1D0;
+        type = 1;
+        f08 = 0;
+        blend = 1.0f;
+        f14 = 0.5235987901687622f;
+        f10 = 400.0f;
+        f1C = 25.0f;
+        f18 = 70.0f;
+        f24 = 0;
+        f28 = D_004FF0D8_act;
+        f20 = 0;
+    }
+};
+
+struct sCTActSplineA : sCTActA {
+    int f08;            // 0x08
+    float blend;        // 0x0C
+    float f10;          // 0x10
+    int f14;            // 0x14
+    float f18;          // 0x18
+    int f1C;            // 0x1C
+    sCTActSplineA() : sCTActA()
+    {
+        vtable = D_0045C1B8;
+        type = 2;
+        f08 = 0;
+        blend = 1.0f;
+        f10 = 0.5235987901687622f;
+        f14 = 0;
+        f18 = 4.0f;
+        f1C = 0;
+    }
+};
+
+struct sCTActNoneA : sCTActA {
+    sCTActNoneA() : sCTActA(3) {}
+};
+
+extern "C" int get_camaction(void* reader, void** out)
+{
+    int type;
+    int n = get_uint(reader, &type);
+    switch (type) {
+    case 0: {
+        sCTActSwitchA* o = new (D_0045C0B0, 0, 0) sCTActSwitchA;
+        int r = get_cCTActionSwitchCam(reader, o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 1: {
+        sCTActBoundedA* o = new (D_0045C0C8, 0, 0) sCTActBoundedA;
+        int r = get_cCTActionBoundedCam(reader, (char*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 2: {
+        sCTActSplineA* o = new (D_0045C0E0, 0, 0) sCTActSplineA;
+        int r = get_cCTActionSpline(reader, o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 3: {
+        sCTActNoneA* o = new (D_0045C0F8, 0, 0) sCTActNoneA;
+        // PORT: get_cCTActionNone returns the byte count as void*.
+        int r = (int)get_cCTActionNone(reader, (int*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionBoundedCam);
@@ -305,9 +442,192 @@ void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camspline);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+extern char D_0045C170[];
 
+struct sCTSplineG : sCTBoundObjG {
+    sCTVec3G pts[4];    // 0x28
+    sCTSplineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3F0)
+    {
+        pts[0] = D_004FF0D8;
+        pts[1] = D_004FF0D8;
+        pts[2] = D_004FF0D8;
+        pts[3] = D_004FF0D8;
+    }
+};
+
+class cCTSplineK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; control points at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_camspline(void* reader, cCTSplineK2** out)
+{
+    int n;
+    *out = (cCTSplineK2*)new (D_0045C170, 0, 0) sCTSplineG;
+    n = get_t3Vector_n(reader, (*out)->center());
+    n += get_t3Vector_n(reader, (*out)->axis());
+    n += get_float(reader, (*out)->sizeX());
+    n += get_float(reader, (*out)->sizeY());
+    n += get_float(reader, (*out)->sizeZ());
+    n += get_t3Vector_n(reader, (char*)*out + 0x28);
+    n += get_t3Vector_n(reader, (char*)*out + 0x34);
+    n += get_t3Vector_n(reader, (char*)*out + 0x40);
+    n += get_t3Vector_n(reader, (char*)*out + 0x4C);
+    return n;
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00171FA8);
+#ifdef SKIP_ASM
+struct sVec4_171FA8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_171FA8 {
+    sVec4_171FA8 lo;
+    sVec4_171FA8 hi;
+};
+
+struct sVEbox_171FA8 {
+    short delta;
+    short index;
+    sBox_171FA8 (*fn)(void*);
+};
+
+struct sVEin_171FA8 {
+    short delta;
+    short index;
+    int (*fn)(void*, sVec4_171FA8*);
+};
+
+extern "C" float func_0040DA10(float x);
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_171FA8 Add_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
+{
+    sVec4_171FA8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_171FA8 Sub_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
+{
+    sVec4_171FA8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_171FA8 Scale_171FA8(const sVec4_171FA8& v, float s)
+{
+    sVec4_171FA8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_171FA8(const sVec4_171FA8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+static inline sBox_171FA8 GetBox_171FA8(char* o)
+{
+    sVEbox_171FA8* e = &(*(sVEbox_171FA8**)(o + 0x24))[6];
+    return e->fn(o + e->delta);
+}
+
+static inline int Inside_171FA8(char* o, sVec4_171FA8* p)
+{
+    sVEin_171FA8* e = &(*(sVEin_171FA8**)(o + 0x24))[7];
+    return e->fn(o + e->delta, p);
+}
+
+static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
+{
+    return Scale_171FA8(Add_171FA8(b.lo, b.hi), 0.5f);
+}
+
+extern "C" sVec4_171FA8 func_00171FA8(char* obj, sVec4_171FA8* pos, float step)
+{
+    sVec4_171FA8 center = Center_171FA8(GetBox_171FA8(obj));
+    sVec4_171FA8 dir = Sub_171FA8(*pos, center);
+    sVec4_171FA8 a = *pos;
+    sVec4_171FA8 b = center;
+    float k = 2.0f;
+    sVEin_171FA8* e;
+    while (e = &(*(sVEin_171FA8**)(obj + 0x24))[7], e->fn(obj + e->delta, &a)) {
+        b = a;
+        sVec4_171FA8 off = Scale_171FA8(dir, k);
+        a = Add_171FA8(center, off);
+        k += k;
+    }
+    float len = Length_171FA8(Sub_171FA8(a, b));
+    int n = (int)func_0040DA10(len / step) + 1;
+    for (int i = 0; i < n; i++) {
+        sVec4_171FA8 m = Scale_171FA8(Add_171FA8(a, b), 0.5f);
+        e = &(*(sVEin_171FA8**)(obj + 0x24))[7];
+        if (e->fn(obj + e->delta, &m)) {
+            b = m;
+        } else {
+            a = m;
+        }
+    }
+    return a;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001721C0);
@@ -399,7 +719,54 @@ extern "C" sCTBoxK2b func_00172840(char* obj)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001728F8);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camvolume);
+#ifdef SKIP_ASM
+class cCTVolumeEllK2;
+class cCTVolumeBoxK2;
+extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj);
+extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj);
+extern void* D_0045C350[];      // volume ellipse vtable
+extern void* D_0045C300[];      // volume box vtable
+extern char D_0045C188[];
+extern char D_0045C1A0[];
+
+struct sCTVolEllG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTVolEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C350) { type = 0; }
+};
+
+struct sCTVolBoxG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTVolBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C300) { type = 1; }
+};
+
+extern "C" int get_camvolume(void* reader, void** out)
+{
+    int type;
+    int n = get_uint(reader, &type);
+    switch (type) {
+    case 0: {
+        sCTVolEllG* o = new (D_0045C188, 0, 0) sCTVolEllG;
+        int r = get_cCTVolumeEllipse(reader, (cCTVolumeEllK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 1: {
+        sCTVolBoxG* o = new (D_0045C1A0, 0, 0) sCTVolBoxG;
+        int r = get_cCTVolumeBox(reader, (cCTVolumeBoxK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    default:
+        *(int*)reader -= n;
+        return 0;
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeEllipse);
@@ -818,7 +1185,50 @@ extern "C" void func_00176868(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176890);
+#ifdef SKIP_ASM
+struct sVEnt176890 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+extern "C" void* func_0016C6B0(void*, void*);
+extern "C" void cActiveTriggerList_add(void*, void*);
+
+extern "C" void func_00176890(void* node, void* ctx)
+{
+    char* e;
+    for (e = *(char**)((char*)node + 0x28); e != 0; e = *(char**)e) {
+        if (*(int*)(e + 8) == 4) {
+            char* trig = *(char**)(e + 0xC);
+            char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
+            char* bound = *(char**)(trig + 8);
+            sVEnt176890* cvt = *(sVEnt176890**)sub;
+            sVEnt176890* bvt = *(sVEnt176890**)(bound + 0x24);
+            char* bthis = bound + bvt[7].delta;
+            int r = cvt[5].fn(sub + cvt[5].delta);
+            if (bvt[7].fn(bthis, r)) {
+                void* f = func_0016C6B0(*(void**)ctx, trig);
+                if (f) {
+                    *(int*)((char*)f + 0xC) = 1;
+                } else {
+                    cActiveTriggerList_add(*(void**)ctx, trig);
+                }
+            }
+        }
+    }
+    if (*(void**)((char*)node + 0x0)) func_00176890(*(void**)((char*)node + 0x0), ctx);
+    if (*(void**)((char*)node + 0x4)) func_00176890(*(void**)((char*)node + 0x4), ctx);
+    if (*(void**)((char*)node + 0x8)) func_00176890(*(void**)((char*)node + 0x8), ctx);
+    if (*(void**)((char*)node + 0xC)) func_00176890(*(void**)((char*)node + 0xC), ctx);
+    if (*(void**)((char*)node + 0x10)) func_00176890(*(void**)((char*)node + 0x10), ctx);
+    if (*(void**)((char*)node + 0x14)) func_00176890(*(void**)((char*)node + 0x14), ctx);
+    if (*(void**)((char*)node + 0x18)) func_00176890(*(void**)((char*)node + 0x18), ctx);
+    if (*(void**)((char*)node + 0x1C)) func_00176890(*(void**)((char*)node + 0x1C), ctx);
+}
+#endif
 
 extern "C" void* func_00175A20(int, int);
 
@@ -892,7 +1302,60 @@ extern "C" void func_00176AE0(void* self, void* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176B10);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+// PORT: the camera.cpp definition takes 7 floats; this caller passes an 8th in $f19.
+extern "C" void func_00163450(void* self, void* info, float a, float b, float c, float d, float e, float f,
+                              float g, float h);
+extern "C" void func_001641C0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+
+struct sCamInfo_176B10
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00176B10(char* self)
+{
+    sCamInfo_176B10 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 222.8457794189453f, 5.91639518737793f, 76.68663024902344f, 5.25f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 5.74874210357666f, 27.03497314453125f, 8.82034969329834f, 7.998477935791016f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9651793837547302f, 1.0f, 0.949999988079071f);
+    func_00163450(self, &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+                  0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, 57.0410041809082f, 1.552131175994873f, 10.378137588500977f, 10.066482543945312f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.840967059135437f, 2.494720935821533f, 0.0949358195066452f, 0.8546590209007263f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 120.85977172851562f, 0.9706981778144836f);
+    func_001641C0(self, &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176CE0);
@@ -980,7 +1443,60 @@ extern "C" void func_00176DE0(void* self, void* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176E10);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+// PORT: the camera.cpp definition takes 7 floats; this caller passes an 8th in $f19.
+extern "C" void func_00163450(void* self, void* info, float a, float b, float c, float d, float e, float f,
+                              float g, float h);
+extern "C" void func_001641C0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+
+struct sCamInfo_176E10
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00176E10(char* self)
+{
+    sCamInfo_176E10 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 300.9249267578125f, 11.549837112426758f, 76.68663024902344f, 10.755208015441895f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 11.678784370422363f, 31.225603103637695f, 11.392387390136719f, 9.33469009399414f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9599078297615051f, 1.0f, 0.949999988079071f);
+    func_00163450(self, &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+                  0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, 31.10257339477539f, 0.37469127774238586f, 12.332656860351562f, 10.589057922363281f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.8110172748565674f, 2.494720935821533f, 0.13641449809074402f, 0.8536682724952698f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 146.38900756835938f, 0.9706981778144836f);
+    func_001641C0(self, &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176FE0);
@@ -1048,7 +1564,60 @@ extern "C" void func_001770E0(void* self, void* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177110);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+// PORT: the camera.cpp definition takes 7 floats; this caller passes an 8th in $f19.
+extern "C" void func_00163450(void* self, void* info, float a, float b, float c, float d, float e, float f,
+                              float g, float h);
+extern "C" void func_001641C0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+
+struct sCamInfo_177110
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00177110(char* self)
+{
+    sCamInfo_177110 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 505.79815673828125f, 11.549837112426758f, 76.68663024902344f, 11.38194465637207f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 13.021197319030762f, 98.84776306152344f, 12.293619155883789f, 13.058300971984863f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9653480052947998f, 1.0f, 0.949999988079071f);
+    func_00163450(self, &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+                  0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, 50.02703094482422f, 2.5781052112579346f, 13.97744369506836f, 10.748767852783203f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.10213389247655869f, 0.8599911332130432f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 167.9465789794922f, 0.9706981778144836f);
+    func_001641C0(self, &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001772E0);
@@ -2063,7 +2632,110 @@ extern "C" int func_0017A2C8(int* self, int start, void* key)
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A978);
+#ifdef SKIP_ASM
+struct cBXString;
+struct cBigFile;
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+// PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
+cBigFile* cBigFile_cBigFile1_17A978(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
+void cBigFile__cBigFile(cBigFile* self, int flags);
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int func_003A6948(const char* path, int n, void* names);
+extern char D_0045CE20[];
+extern char D_004A1298[];
+
+struct sCamEntry_17A978 {
+    char name[0x40];    // 0x00
+    char tag[4];        // 0x40
+    char pad_44[0x48];
+};
+
+struct sCamMgr_17A978 {
+    int count;                          // 0x0000
+    sCamEntry_17A978 entries[0x100];    // 0x0004
+};
+
+struct sCamName_17A978 {
+    char* name;
+    int ok;
+};
+
+// Non-POD (user-declared copy ctor, never defined) so locals get the 16-byte slots g++ gives classes.
+struct sStr_17A978 {
+    char* s;
+    sStr_17A978() {}
+    sStr_17A978(const sStr_17A978&);
+};
+
+struct sBigFile_17A978 {
+    int f0;
+    int f4;
+    sBigFile_17A978() {}
+    sBigFile_17A978(const sBigFile_17A978&);
+};
+
+extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
+{
+    sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
+    sCamName_17A978* names = (sCamName_17A978*)namesp;
+    int fail = 0;
+    int i;
+    int j;
+    for (i = 0; i < n; i++) {
+        int found = 0;
+        for (j = 0; j < self->count; j++) {
+            if (func_0041AA88(names[i].name, self->entries[j].name) == 0 &&
+                func_0041AA88(tag, self->entries[j].tag) == 0) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            fail = 1;
+            break;
+        }
+    }
+    if (!fail) {
+        return 0;
+    }
+    sStr_17A978 base;
+    sStr_17A978 s;
+    sBigFile_17A978 bf;
+    char* pre = D_0045CE20;
+    cBXString_cBXString2(&s, tag);
+    func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
+    cBXString__cBXString(&s, 2);
+    cBigFile* pbf = (cBigFile*)&bf;
+    func_00318630((cBXString*)&s, (cBXString*)&base, D_004A1298);
+    cBigFile_cBigFile1_17A978(pbf, s.s, 0x100);
+    cBXString__cBXString(&s, 2);
+    int r = func_003A6948(base.s, n, names);
+    if (r == 0) {
+        cBigFile__cBigFile((cBigFile*)&bf, 2);
+        cBXString__cBXString(&base, 2);
+        return 0;
+    }
+    for (int k = 0; k < n; k++) {
+        if (names[k].ok) {
+            for (int m = 0; m < self->count; m++) {
+                if (func_0041AA88(names[k].name, self->entries[m].name) == 0 &&
+                    func_0041AA88(tag, self->entries[m].tag) == 0) {
+                    names[k].ok = 0;
+                    break;
+                }
+            }
+        }
+    }
+    cBigFile__cBigFile((cBigFile*)&bf, 2);
+    cBXString__cBXString(&base, 2);
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABC8__FPv);

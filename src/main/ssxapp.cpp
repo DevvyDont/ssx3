@@ -146,7 +146,126 @@ extern "C" void* func_00227F80()
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_purge);
+#ifdef SKIP_ASM
+void operator_delete(int* p);
+extern "C" void func_00398438(void* p);
+extern "C" void func_00326A68(void* p);
+extern "C" void func_00278308(void* p);
+extern "C" void func_003DEDC0(void* handle, int arg);
+// PORT: func_002B4B48 is declared (void*) but never reads it; this caller passes nothing.
+extern "C" void func_002B4B48_noarg() __asm__("func_002B4B48");
+extern "C" void func_00284C28();
+extern "C" void func_0014DD98(void* p);
+extern "C" void func_002380E8(void* p);
+extern "C" void func_001A35E8(void* p, int flags);
+extern void* D_004A28A0;
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+extern void* D_004A289C;
+
+struct sVEPurge0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVEPurge {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sSSXAppPurge {
+    char pad_0x00[0x78];
+    void* f78;          // 0x78
+    char pad_0x7C[0xC];
+    int* f88;           // 0x88
+    char pad_0x8C[0x10];
+    char* f9C;          // 0x9C
+    char pad_0xA0[0x18];
+    int* fB8[2];        // 0xB8
+    void* fC0;          // 0xC0
+    char pad_0xC4[0x10];
+    void* fD4;          // 0xD4
+    void* fD8;          // 0xD8
+    void* fDC;          // 0xDC
+    void* fE0;          // 0xE0
+    void* fE4;          // 0xE4
+    void* fE8;          // 0xE8
+    void* fEC[11];      // 0xEC
+    void* f118;         // 0x118
+    void* f11C;         // 0x11C
+};
+
+extern "C" void cSSXApp_purge(sSSXAppPurge* self)
+{
+    int i;
+    for (i = 0; i < 2; i++) {
+        if (self->fB8[i]) {
+            operator_delete(self->fB8[i]);
+        }
+    }
+    int* q = self->f88;
+    if (q) {
+        func_00398438(q);
+        operator_delete(q);
+    }
+    int* mgr = (int*)D_004A28A0;
+    self->f88 = 0;
+    D_004A28A0 = 0;
+    func_00326A68(mgr);
+    operator_delete(mgr);
+    if (D_004A28A4) {
+        func_00278308(D_004A28A4);
+        char* o = (char*)D_004A28A4;
+        if (o) {
+            sVEPurge* vt = *(sVEPurge**)(o + 0x2A8);
+            vt[1].fn(o + vt[1].delta, 3);
+        }
+        D_004A28A4 = 0;
+    }
+    {
+        char* g = (char*)D_004A289C;
+        sVEPurge0* vt = *(sVEPurge0**)(g + 0x10D8);
+        vt[3].fn(g + vt[3].delta);
+    }
+    {
+        char* g = (char*)D_004A289C;
+        if (g) {
+            sVEPurge* vt = *(sVEPurge**)(g + 0x10D8);
+            vt[1].fn(g + vt[1].delta, 3);
+        }
+    }
+    D_004A289C = 0;
+    if (self->fE4) func_003DEDC0(self->fE4, 100);
+    if (self->fE8) func_003DEDC0(self->fE8, 100);
+    for (i = 0; i < 11; i++) {
+        if (self->fEC[i]) {
+            func_003DEDC0(self->fEC[i], 100);
+        }
+    }
+    if (self->f118) func_003DEDC0(self->f118, 100);
+    func_002B4B48_noarg();
+    func_00284C28();
+    if (self->fD4) func_003DEDC0(self->fD4, 100);
+    if (self->fD8) func_003DEDC0(self->fD8, 100);
+    if (self->fDC) func_003DEDC0(self->fDC, 100);
+    if (self->fE0) func_003DEDC0(self->fE0, 100);
+    if (self->f78) func_0014DD98(self->f78);
+    func_002380E8(self->fC0);
+    if (self->f11C) func_001A35E8(self->f11C, 3);
+    {
+        char* m = self->f9C;
+        if (m) {
+            sVEPurge* vt = *(sVEPurge**)(m + 0x34);
+            vt[1].fn(m + vt[1].delta, 3);
+        }
+    }
+    D_004A28A8 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_startGameLoad);
@@ -462,7 +581,107 @@ extern "C" void func_002294C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229530);
+#ifdef SKIP_ASM
+unsigned int BXrand();
+extern "C" int func_002A77C8(void* self, int a1);
+extern void* D_004A3500;
+struct sRingOwner;
+struct sQuad229;
+extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value);
+
+struct sVec4_229530 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sCrowdSlot_229530 {
+    sVec4_229530 pos;       // 0x00
+    sVec4_229530 dx;        // 0x10
+    sVec4_229530 dy;        // 0x20
+    int delay;              // 0x30
+    char pad_0x34[0xC];
+};
+
+struct sCrowd_229530 {
+    int pad0;
+    int* anim;                          // 0x4
+    unsigned int ids[128];              // 0x8
+    char pad_0x208[0x8];
+    sCrowdSlot_229530 slots[128];       // 0x210
+    int count;                          // 0x2210
+};
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_229530 Add_229530(const sVec4_229530& a, const sVec4_229530& b)
+{
+    sVec4_229530 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_229530 Scale_229530(const sVec4_229530& v, float s)
+{
+    sVec4_229530 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline float randf_229530()
+{
+    union { int i; float f; } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+static inline float rands_229530(float lo, float hi)
+{
+    return randf_229530() * (hi - lo) + lo;
+}
+
+extern "C" void func_00229530(void* selfp)
+{
+    sCrowd_229530* self = (sCrowd_229530*)selfp;
+    int n = func_002A77C8(D_004A3500, 0);
+    n = n > -1 ? n : -n;
+    if (n != self->count) {
+        int c = n > 0 ? n : 1;
+        self->count = n;
+        *self->anim = c;
+    }
+    int dec = self->count * 10 + 4;
+    for (int i = 0; i < 128; i++) {
+        if (self->ids[i] != 0xFFFFFFFF) {
+            self->slots[i].delay -= dec;
+            if (self->slots[i].delay <= 0) {
+                float r1 = rands_229530(-1.0f, 1.0f);
+                float r2 = rands_229530(-1.0f, 1.0f);
+                sVec4_229530 p = Add_229530(Add_229530(self->slots[i].pos, Scale_229530(self->slots[i].dx, r1)),
+                                            Scale_229530(self->slots[i].dy, r2));
+                func_00229738((sRingOwner*)self, (sQuad229*)&p, 3);
+                self->slots[i].delay = BXrand() % 300 + 300;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229738);
@@ -846,7 +1065,145 @@ extern "C" void func_0022A770(sVisOwner_A770* self, sVisList_A770* list, int cou
 
 INCLUDE_ASM("main/ssxapp", func_0022A830);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022ADD8);
+#ifdef SKIP_ASM
+extern void* D_004A289C;
+extern "C" void func_002425C0(void* a, void* b);
+extern "C" void func_00229F30(void* a, void* b);
+void func_00229F80(void* p);
+extern "C" void func_0022A830(void* ctx, void* data, void* cfg);
+extern "C" void func_0022A698(void* self, void* list, int n);
+extern "C" void func_0022A5A0(void* self, void* list, int n);
+
+struct sMat_22ADD8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sVEMat_22ADD8 {
+    short delta;
+    short index;
+    sMat_22ADD8 (*fn)(void*);
+};
+
+struct sCfg_22ADD8 {
+    char pad_0x00[0x10];
+    void* data;         // 0x10
+};
+
+struct sCtx_22ADD8 {
+    void* owner;        // 0x0
+    void* f4;           // 0x4
+    void* f8;           // 0x8
+    int fC;             // 0xC
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through vf1..vf4).
+static inline void MatCopy_22ADD8(sMat_22ADD8* dst, const sMat_22ADD8* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct sWorldInit_22ADD8 {
+    void* f0;               // 0x0
+    void* f4;               // 0x4
+    char pad_0x8[0x88];
+    int f90;                // 0x90
+    int f94;                // 0x94
+    char pad_0x98[0x1098 - 0x98];
+    int f1098;              // 0x1098
+    char pad_0x109C[0x209C - 0x109C];
+    int f209C;              // 0x209C
+    char pad_0x20A0[0x40A0 - 0x20A0];
+    int f40A0;              // 0x40A0
+    char pad_0x40A4[0x50A4 - 0x40A4];
+    int f50A4;              // 0x50A4
+    int f50A8;              // 0x50A8
+    char pad_0x50AC[0x70AC - 0x50AC];
+    int f70AC;              // 0x70AC
+    char pad_0x70B0[0x78B0 - 0x70B0];
+    int f78B0;              // 0x78B0
+    int f78B4;              // 0x78B4
+    char pad_0x78B8[0x7AB8 - 0x78B8];
+    int f7AB8;              // 0x7AB8
+    int f7ABC;              // 0x7ABC
+    char pad_0x7AC0[0x7BC0 - 0x7AC0];
+    int f7BC0;              // 0x7BC0
+    char pad_0x7BC4[0x7FC4 - 0x7BC4];
+    int f7FC4;              // 0x7FC4
+};
+
+static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
+{
+    if (data) {
+        func_0022A830(ctx, data, c);
+    }
+}
+
+extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3, int a4)
+{
+    sWorldInit_22ADD8* w = (sWorldInit_22ADD8*)self;
+    w->f0 = a2;
+    w->f4 = a3;
+    w->f90 = a4;
+    w->f94 = 0;
+    w->f1098 = 0;
+    w->f209C = 0;
+    w->f40A0 = 0;
+    w->f50A8 = 0;
+    w->f70AC = 0;
+    w->f78B4 = 0;
+    w->f7ABC = 0;
+    w->f7BC0 = 0;
+    w->f7FC4 = 0;
+    w->f50A4 = 0;
+    w->f78B0 = 0;
+    w->f7AB8 = 0;
+    {
+        char* g = (char*)D_004A289C;
+        sVEMat_22ADD8* vt = *(sVEMat_22ADD8**)(g + 0x10D8);
+        sMat_22ADD8 m = vt[43].fn(g + vt[43].delta);
+        MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &m);
+    }
+    MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)D_004A289C + 0x5800));
+    func_002425C0(*(void**)(self + 0x0), *(void**)(self + 0x4));
+    func_00229F30(self + 0x10, self + 0x50);
+    func_00229F80(*(void**)(self + 0x4));
+    sCtx_22ADD8 ctx;
+    char* f0 = *(char**)(self + 0x0);
+    void* f8 = *(void**)(f0 + 0x110);
+    ctx.owner = self;
+    ctx.f4 = f0;
+    ctx.f8 = f8;
+    ctx.fC = 0;
+    Load_22ADD8(&ctx, cfg[0].data, &cfg[0]);
+    Load_22ADD8(&ctx, cfg[1].data, &cfg[1]);
+    Load_22ADD8(&ctx, cfg[2].data, &cfg[2]);
+    Load_22ADD8(&ctx, cfg[3].data, &cfg[3]);
+    Load_22ADD8(&ctx, cfg[4].data, &cfg[4]);
+    Load_22ADD8(&ctx, cfg[5].data, &cfg[5]);
+    Load_22ADD8(&ctx, cfg[6].data, &cfg[6]);
+    Load_22ADD8(&ctx, cfg[7].data, &cfg[7]);
+    func_0022A698(self, self + 0x98, *(int*)(self + 0x94));
+    func_0022A5A0(self, self + 0x98, *(int*)(self + 0x94));
+    func_0022A770((sVisOwner_A770*)self, (sVisList_A770*)(self + 0x98), *(int*)(self + 0x94));
+    func_0022A408(self, (sList_A408*)(self + 0x109C), *(int*)(self + 0x1098));
+    func_0022A368(self, (sList_A368*)(self + 0x109C), *(int*)(self + 0x1098));
+    func_0022A4A8((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022B008);
 

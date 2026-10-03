@@ -186,7 +186,90 @@ extern "C" void func_00329B40(sSphereTreeNode* s, sSphereVec4* v)
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329B90);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329DC8);
+#ifdef SKIP_ASM
+struct sSphereV4_9DC8 {
+    float x, y, z, w;
+    sSphereV4_9DC8() {}
+    sSphereV4_9DC8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sSphereKid_9DC8 {
+    sSphereV4_9DC8 pos;     // 0x00
+    float radius;           // 0x10
+    int pad[3];
+};
+
+struct sSphereBox_9DC8 {
+    char pad_0x00[0x10];
+    sSphereV4_9DC8 center;  // 0x10
+    float radius;           // 0x20
+    int pad_0x24;
+    unsigned int mask;      // 0x28
+    int count;              // 0x2C
+    sSphereKid_9DC8 kids[1]; // 0x30
+};
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSphereV4_9DC8 Sub_9DC8(const sSphereV4_9DC8& a, const sSphereV4_9DC8& b)
+{
+    sSphereV4_9DC8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereV4_9DC8 Add_9DC8(const sSphereV4_9DC8& a, const sSphereV4_9DC8& b)
+{
+    sSphereV4_9DC8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sVec4_2F650;
+
+extern "C" void func_00329DC8(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
+{
+    sSphereBox_9DC8* node = (sSphereBox_9DC8*)tree;
+    sSphereV4_9DC8* mn = (sSphereV4_9DC8*)mnp;
+    sSphereV4_9DC8* mx = (sSphereV4_9DC8*)mxp;
+    *mn = sSphereV4_9DC8(10000000000.0f, 10000000000.0f, 10000000000.0f, 1.0f);
+    *mx = sSphereV4_9DC8(-10000000000.0f, -10000000000.0f, -10000000000.0f, 1.0f);
+    if (node->mask == 0) {
+        *mn = Sub_9DC8(node->center, sSphereV4_9DC8(node->radius, node->radius, node->radius, 0.0f));
+        *mx = Add_9DC8(node->center, sSphereV4_9DC8(node->radius, node->radius, node->radius, 0.0f));
+        return;
+    }
+    for (int i = 0; i < node->count; i++) {
+        if (node->mask & (1 << i)) {
+            sSphereV4_9DC8 r(node->kids[i].radius, node->kids[i].radius, node->kids[i].radius, 1.0f);
+            sSphereV4_9DC8 t = Sub_9DC8(node->kids[i].pos, r);
+            if (t.x < mn->x) mn->x = t.x;
+            if (t.y < mn->y) mn->y = t.y;
+            if (t.z < mn->z) mn->z = t.z;
+            t = Add_9DC8(node->kids[i].pos, r);
+            if (t.x > mx->x) mx->x = t.x;
+            if (t.y > mx->y) mx->y = t.y;
+            if (t.z > mx->z) mx->z = t.z;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329F98);
 
@@ -194,7 +277,67 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032A1C0);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032AA28);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B2B8);
+#ifdef SKIP_ASM
+extern "C" int func_00329590(void* a, void* b, void* center, void* box, void* boxMin, void* boxMax, float radius);
+
+struct sSphereHit_B2B8 {
+    char pad_0x00[0x10];
+    sSphereVec4 center; // 0x10
+    float radius;       // 0x20
+    int pad_0x24;
+    unsigned int mask;  // 0x28
+    int count;          // 0x2C
+};
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_B2B8(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+struct sSphereHit_32FAC0;
+
+extern "C" int func_0032B2B8(void* tree, void* a, void* b, sSphereVec4* outPos, sSphereHit_32FAC0* hit)
+{
+    sSphereHit_B2B8* self = (sSphereHit_B2B8*)tree;
+    sSphereVec4* outNormal = (sSphereVec4*)hit;
+    sSphereVec4 normal;
+    sSphereVec4 dir;
+    float t;
+    if (func_00329590(a, b, &self->center, &normal, &dir, &t, self->radius) == 0) {
+        return 0;
+    }
+    if (self->mask == 0) {
+        *outPos = Scale_B2B8(dir, t);
+        *outNormal = normal;
+        return 1;
+    }
+    float best = -1.0f;
+    for (int i = 0; i < self->count; i++) {
+        if (self->mask & (1 << i)) {
+            if (func_00329590(a, b, &self->center, &normal, &dir, &t, self->radius) && best < t) {
+                *outPos = Scale_B2B8(dir, t);
+                *outNormal = normal;
+                best = t;
+            }
+        }
+    }
+    return best != -1.0f;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032B620);
 
@@ -380,11 +523,184 @@ extern "C" int func_0032CB58(void* self, void* other, void* a2, void* a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032CBF8);
+#ifdef SKIP_ASM
+extern "C" int func_0032CDB0(void* self, void* a1, float f, void* pos, int a4, int a5, void* a6, void* a7);
+extern "C" int func_0032CBF8(void* self, void* other, void* pos, int a3, int a4, void* a5, void* a6);
+
+struct sSphereLevel_CBF8 {
+    float radius;   // 0x0
+    float offset;   // 0x4
+    int stride;     // 0x8
+};
+
+struct sSphereTreeInfo_CBF8 {
+    char pad_0x00[0xC];
+    int depth;                      // 0x0C
+    char pad_0x10[0x10];
+    sSphereLevel_CBF8* levels;      // 0x20
+    char pad_0x24[4];
+    unsigned char* masks;           // 0x28
+};
+
+struct sSphereOct_CBF8 {
+    sSphereVec4 dirs[8];            // 0x00
+    char pad_0x80[0x10];
+    float scale;                    // 0x90
+    char pad_0x94[4];
+    sSphereTreeInfo_CBF8* tree;     // 0x98
+};
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_CBF8(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereVec4 Add_CBF8(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" int func_0032CBF8(void* selfp, void* other, void* posp, int depth, int base, void* a5, void* a6)
+{
+    sSphereOct_CBF8* self = (sSphereOct_CBF8*)selfp;
+    sSphereVec4 p;
+    unsigned char mask = self->tree->masks[base];
+    if (depth < self->tree->depth) {
+        if (depth >= 4) {
+            return 1;
+        }
+        if (mask != 0) {
+            float off = self->tree->levels[depth + 1].offset;
+            for (int i = 0; i < 8; i++) {
+                if ((mask >> i) & 1) {
+                    p = Add_CBF8(*(sSphereVec4*)posp, Scale_CBF8(self->dirs[i], off));
+                    if (func_0032CDB0(other, &p, self->tree->levels[depth].radius * self->scale, (char*)other + 0x80, 0, 0, a5, a6) &&
+                        func_0032CBF8(self, other, &p, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, a5, a6)) {
+                        return 1;
+                    }
+                }
+            }
+            return 0;
+        }
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032CDB0);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D028);
+#ifdef SKIP_ASM
+extern "C" int func_00329590(void* a, void* b, void* center, void* box, void* boxMin, void* boxMax, float radius);
+extern "C" int func_0032D028(void* self, void* a1, void* a2, void* pos, int a4, int a5, void* a6, void* a7);
+
+struct sSphereLevel_D028 {
+    float radius;   // 0x0
+    float offset;   // 0x4
+    int stride;     // 0x8
+};
+
+struct sSphereTreeInfo_D028 {
+    char pad_0x00[0xC];
+    int depth;                      // 0x0C
+    char pad_0x10[0x10];
+    sSphereLevel_D028* levels;      // 0x20
+    char pad_0x24[4];
+    unsigned char* masks;           // 0x28
+};
+
+struct sSphereOct_D028 {
+    sSphereVec4 dirs[8];            // 0x00
+    char pad_0x80[0x10];
+    float scale;                    // 0x90
+    char pad_0x94[4];
+    sSphereTreeInfo_D028* tree;     // 0x98
+};
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_D028(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereVec4 Add_D028(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" int func_0032D028(void* selfp, void* a1, void* a2, void* pos, int depth, int base, void* outPos, void* outNormal)
+{
+    sSphereOct_D028* self = (sSphereOct_D028*)selfp;
+    sSphereVec4 normal;
+    sSphereVec4 dir;
+    float t;
+    if (func_00329590(a1, a2, pos, &normal, &dir, &t, self->tree->levels[depth].radius * self->scale) == 0) {
+        return 0;
+    }
+    unsigned char mask = self->tree->masks[base];
+    if (depth < self->tree->depth && mask != 0) {
+        float off = self->tree->levels[depth + 1].offset;
+        for (int i = 0; i < 8; i++) {
+            if ((mask >> i) & 1) {
+                sSphereVec4 p = Add_D028(*(sSphereVec4*)pos, Scale_D028(self->dirs[i], off));
+                if (func_0032D028(self, a1, a2, &p, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPos, outNormal)) {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+    *(sSphereVec4*)outNormal = normal;
+    *(sSphereVec4*)outPos = Scale_D028(dir, t);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D440);
@@ -440,7 +756,67 @@ extern "C" void func_0032DA40(int n, int* keys, int* vals)
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032DB40);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032DC10);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label as a placement operator new[].
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_0048E540[];
+extern void** D_004A3FC8;
+extern void* D_004A3FCC;
+extern int D_004A3FD0;
+extern int D_004A3FD4;
+extern void** D_004A3FD8;
+extern void* D_004A3FDC;
+extern int D_004A3FE0;
+extern int D_004A3FE4;
+extern int D_004A3FE8;
+
+// Allocates the two decompression caches; each buffer holds a full octree of the given depth
+// (1 + 8 + 64 + ... nodes).
+extern "C" void func_0032DC10(int nSmall, int smallDepth, int nBig, int threshold)
+{
+    int smallSize = 0;
+    int bigSize = 0;
+    int i;
+    int k;
+    D_004A3FE8 = threshold;
+    k = 1;
+    for (i = 0; i <= smallDepth; i++) {
+        smallSize += k;
+        k <<= 3;
+    }
+    k = 1;
+    for (i = 0; i <= D_004A3FE8; i++) {
+        bigSize += k;
+        k <<= 3;
+    }
+    D_004A3FC8 = 0;
+    D_004A3FCC = 0;
+    D_004A3FD8 = 0;
+    D_004A3FDC = 0;
+    if (nSmall != 0) {
+        D_004A3FC8 = new (D_0048E540, 0, 0) void*[nSmall];
+        D_004A3FCC = new (D_0048E540, 0, 0) int[nSmall];
+    }
+    if (nBig != 0) {
+        D_004A3FD8 = new (D_0048E540, 0, 0) void*[nBig];
+        D_004A3FDC = new (D_0048E540, 0, 0) int[nBig];
+    }
+    for (i = 0; i < nSmall; i++) {
+        D_004A3FC8[i] = new (D_0048E540, 0, 0) char[smallSize];
+        ((int*)D_004A3FCC)[i] = -1;
+    }
+    for (i = 0; i < nBig; i++) {
+        D_004A3FD8[i] = new (D_0048E540, 0, 0) char[bigSize];
+        ((int*)D_004A3FDC)[i] = -1;
+    }
+    D_004A3FD0 = nSmall;
+    D_004A3FE0 = nBig;
+    D_004A3FD4 = 0;
+    D_004A3FE4 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032DE20);
@@ -488,7 +864,70 @@ extern "C" void func_0032DE20(void)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032DF28);
+#ifdef SKIP_ASM
+extern void** D_004A3FC8;
+extern void* D_004A3FCC;
+extern int D_004A3FD0;
+extern int D_004A3FD4;
+extern void** D_004A3FD8;
+extern void* D_004A3FDC;
+extern int D_004A3FE0;
+extern int D_004A3FE4;
+extern int D_004A3FE8;
+extern "C" void* func_0032B620(void* dst, void* src);
+
+struct sSphereData_DF28 {
+    int key;        // 0x00
+    int slot;       // 0x04
+    int pad_0x08;
+    int size;       // 0x0C
+    char pad_0x10[0x14];
+    void* packed;   // 0x24
+};
+
+// PORT: returns the cached buffer pointer as int (the unit declares it int-returning).
+extern "C" int func_0032DF28(void* selfp)
+{
+    sSphereData_DF28* self = (sSphereData_DF28*)selfp;
+    int key = self->key;
+    int* pslot = &self->slot;
+    if (self->size < D_004A3FE8) {
+        if (((int*)D_004A3FCC)[*pslot] == key) {
+            return (int)D_004A3FC8[*pslot];
+        }
+        for (int i = 0; i < D_004A3FD0; i++) {
+            if (((int*)D_004A3FCC)[i] == key) {
+                *pslot = i;
+                return (int)D_004A3FC8[i];
+            }
+        }
+        func_0032B620(D_004A3FC8[D_004A3FD4], self->packed);
+        ((int*)D_004A3FCC)[D_004A3FD4] = key;
+        *pslot = D_004A3FD4;
+        D_004A3FD4++;
+        D_004A3FD4 %= D_004A3FD0;
+        return (int)D_004A3FC8[*pslot];
+    } else {
+        if (((int*)D_004A3FDC)[*pslot] == key) {
+            return (int)D_004A3FD8[*pslot];
+        }
+        for (int i = 0; i < D_004A3FE0; i++) {
+            if (((int*)D_004A3FDC)[i] == key) {
+                *pslot = i;
+                return (int)D_004A3FD8[i];
+            }
+        }
+        func_0032B620(D_004A3FD8[D_004A3FE4], self->packed);
+        ((int*)D_004A3FDC)[D_004A3FE4] = key;
+        *pslot = D_004A3FE4;
+        D_004A3FE4++;
+        D_004A3FE4 %= D_004A3FE0;
+        return (int)D_004A3FD8[*pslot];
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E100);

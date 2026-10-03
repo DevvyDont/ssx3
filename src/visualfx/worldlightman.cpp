@@ -199,7 +199,59 @@ extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int coun
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5B68);
+#ifdef SKIP_ASM
+extern "C" float func_002F5D30(void* a, void* b, void* light);
+
+struct sLight_5B68 {
+    char pad_0x0[0x8];
+    int type;           // 0x8
+};
+
+struct sLightMgr_5B68 {
+    char pad_0x0[0x210];
+    unsigned int count;         // 0x210
+    sLight_5B68* lights[1];     // 0x214
+};
+
+// Keeps the `max` best-scoring type-6 lights in out[], sorted by descending score.
+extern "C" void func_002F5B68(void* a, void* b, void* mgrp, void** outp, int max)
+{
+    sLightMgr_5B68* mgr = (sLightMgr_5B68*)mgrp;
+    sLight_5B68** out = (sLight_5B68**)outp;
+    float score[32];
+    int count = 0;
+    int i;
+    for (i = 0; i < max; i++) {
+        out[i] = 0;
+        score[i] = 0.0f;
+    }
+    float minScore = 0.0f;
+    unsigned int n = mgr->count;
+    for (unsigned int j = 0; j < n; j++) {
+        sLight_5B68* l = mgr->lights[j];
+        if (l->type == 6) {
+            float s = func_002F5D30(a, b, l);
+            if (minScore < s) {
+                int k;
+                for (k = 0; k < count && s < score[k]; k++) {
+                }
+                if (k < max) {
+                    count += count < max;
+                    for (int m = count - 1; k < m; m--) {
+                        out[m] = out[m - 1];
+                        score[m] = score[m - 1];
+                    }
+                    out[k] = l;
+                    score[k] = s;
+                }
+                minScore = score[max - 1];
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F5D30);
 

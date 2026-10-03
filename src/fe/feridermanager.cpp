@@ -267,7 +267,90 @@ extern "C" void func_0019ED80(sFERiderED80* self)
 
 INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feridermanager", func_0019F138);
+#ifdef SKIP_ASM
+extern void* D_004A289C;
+extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
+extern "C" int func_001A0100(int* self);
+extern "C" int func_0019FD58(int* self);
+extern "C" void func_0019F780(int* self);
+extern "C" void func_0019F2D0(void* self);
+extern "C" void func_003123C0(void* anim, int a1, float blend);
+extern "C" void func_00312490(void* anim);
+extern "C" void func_002F1A08(void* p);
+extern "C" void func_002ECF78(void* p);
+
+struct sFERiderF138 {
+    unsigned int state;     // 0x0
+    int f4;                 // 0x4
+    char pad_0x8[0x4];
+    void* anim;             // 0xC
+    char pad_0x10[0xC24 - 0x10];
+    int fC24;               // 0xC24
+    int fC28;               // 0xC28
+    char pad_0xC2C[0xC70 - 0xC2C];
+    void* fC70;             // 0xC70
+    void* fC74;             // 0xC74
+    char pad_0xC78[0xCB4 - 0xC78];
+    int fCB4;               // 0xCB4
+    int fCB8;               // 0xCB8
+    int fCBC;               // 0xCBC
+    int fCC0;               // 0xCC0
+    int fCC4;               // 0xCC4
+    int fCC8;               // 0xCC8
+    char pad_0xCCC[0xCD4 - 0xCCC];
+    int pending;            // 0xCD4
+};
+
+struct sVEF138 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void func_0019F138(void* selfp)
+{
+    sFERiderF138* self = (sFERiderF138*)selfp;
+    if (self->pending >= 0) {
+        char* g = (char*)D_004A289C;
+        sVEF138* vt = *(sVEF138**)(g + 0x10D8);
+        if (self->pending < vt[114].fn(g + vt[114].delta)) {
+            self->pending = -1;
+            cFERider_init(self, self->f4, self->fC24, self->fC28);
+        }
+    } else {
+        if (self->state >= 10) {
+            return;
+        }
+        if (self->fCBC == 0 && func_001A0100((int*)self)) {
+            self->fCBC = 1;
+        } else if (self->fCBC != 0) {
+            if (self->fCB8 == 0 && func_0019FD58((int*)self)) {
+                self->fCB8 = 1;
+                if (self->fCB4 == 0) {
+                    func_0019ED80((sFERiderED80*)self);
+                }
+            } else if (self->fCBC != 0 && self->fCB8 != 0 && self->fCB4 != 0 && self->fCC0 == 0) {
+                func_0019F780((int*)self);
+                self->fCC0 = 1;
+                int* pv = &self->fCC8;
+                *pv = self->fCC4 != 0 || *pv != 0;
+                self->fCC4 = 0;
+            }
+        }
+    }
+    if (self->fCC8 != 0) {
+        if (self->anim != 0) {
+            func_003123C0(self->anim, 0, 1.0f);
+            func_00312490(self->anim);
+        }
+        func_0019F2D0(self);
+        func_002F1A08(self->fC70);
+        func_002ECF78(self->fC74);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F2D0);
@@ -627,9 +710,150 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019FD58);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" int func_0019CCE8(void* self, int a1, int a2);
+extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" int func_0019E238(void* mgr, int bank, int i);
+extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern void* D_004A28A8;
+extern void* D_004A1968;
 
+struct sItemFD58 {
+    short id;
+    unsigned short flags;
+};
+struct sItemListFD58 {
+    char pad_0x0[0x288];
+    short* map;             // 0x288
+    int count;              // 0x28C
+    sItemFD58 items[1];     // 0x290
+};
+
+extern "C" int func_0019FD58(int* self)
+{
+    if (*(int*)((char*)self + 0xCB8) != 0) {
+        return 1;
+    }
+    int ok = 1;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+    sItemListFD58* list = (sItemListFD58*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->count;
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    for (int i = 0; i < n; i++) {
+        sItemFD58* it = &list->items[i];
+        int r = func_0019CCE8(D_004A1968, self[1], it->id);
+        if (r >= 0) {
+            if (func_0019E238(mgr, self[0], r) == 0) {
+                ok = 0;
+            }
+        }
+    }
+    if (ok) {
+        int used[256];
+        func_003E6448(used, 0, sizeof(used));
+        for (int i = 0; i < n; i++) {
+            sItemFD58* it = &list->items[i];
+            int r = func_0019CCE8(D_004A1968, self[1], it->id);
+            if (r >= 0) {
+                if (func_0019E2B0(mgr, self[0], r) && used[r] == 0) {
+                    sPkg_F908* pkg = (sPkg_F908*)func_0019E2B0(mgr, self[0], r);
+                    int fl = it->flags & 0x10;
+                    func_0019F908((sRiderTable_F878*)self, pkg, fl != 0);
+                }
+                used[r] = 1;
+                func_0019DC20(mgr, self[0], r);
+                func_0019CD38(D_004A1968, self[1], it->id, -1);
+            }
+        }
+    }
+    return ok;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019FF00);
+#ifdef SKIP_ASM
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+extern "C" int func_0014D448(void* self, int g, int key);
+extern "C" int func_0019CBE0(void* self, int a1, int a2);
+extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
+extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int a5);
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void func_0019DF20(void* mgr, int bank);
+extern void* D_004A28A8;
+extern void* D_004A1968;
+
+struct sItemFF00 {
+    short id;
+    unsigned short flags;
+};
+struct sItemListFF00 {
+    char pad_0x0[0x28C];
+    int count;              // 0x28C
+    sItemFF00 items[1];     // 0x290
+};
+struct sBoneEntFF00 {
+    char pad_0x0[0x28];
+    char* file;             // 0x28
+    char pad_0x2C[0x38 - 0x2C];
+};
+struct sBoneDbFF00 {
+    int f0;
+    sBoneEntFF00* entries;  // 0x4
+};
+
+static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
+{
+    if (i < 0)
+        return 0;
+    return &db->entries[i];
+}
+
+extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, int force, int a4)
+{
+    int n = list->count;
+    sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    for (int i = 0; i < n; i++) {
+        sItemFF00* it = &list->items[i];
+        if (force == 0 && (it->flags & 0x10) == 0) {
+            if (func_0019CBE0(D_004A1968, self[1], it->id) >= 0) {
+                func_0019DC20(mgr, self[0], func_0019CBE0(D_004A1968, self[1], it->id));
+                func_0019CC30(D_004A1968, self[1], it->id, -1);
+            }
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        sItemFF00* it = &list->items[i];
+        if (func_0019CBE0(D_004A1968, self[1], it->id) < 0) {
+            if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
+                sBoneEntFF00* e = getEntK19FF00(db, func_0014D448(db, self[0], it->id));
+                if (e->file) {
+                    int r = func_0019DA10(mgr, self[0], e->file, 8, a4, 1);
+                    func_0019CC30(D_004A1968, self[1], it->id, r);
+                    *(int*)((char*)self + 0xCBC) = 0;
+                    *(int*)((char*)self + 0xCB4) = 0;
+                } else {
+                    func_0019CC30(D_004A1968, self[1], it->id, -1);
+                }
+            }
+            if (prev) {
+                prev++;
+            }
+        }
+    }
+    func_0019DF20(mgr, self[0]);
+}
+#endif
 
 INCLUDE_ASM("fe/feridermanager", func_001A0100);
 

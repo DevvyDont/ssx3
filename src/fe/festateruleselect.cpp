@@ -15,7 +15,75 @@ void* func_00191C48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00191C68);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
+extern "C" void* func_001887A0(void* mem, void* owner, int a2);
+extern "C" void func_00192088(void* self, int idx, int a2);
+struct sRuleSel_2380;
+extern "C" void func_00192380(sRuleSel_2380* self, void* item);
+extern "C" int func_0039A738(void* self);
+extern "C" void func_0039F400(void* stack, void* state);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern char D_0045D698[];
+extern char D_005308B8[];
+
+struct sVE_1C68 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sMsg_1C68 {
+    char pad_0x0[0x18];
+    int id;             // 0x18
+    char pad_0x1C[0x60];
+    int* info;          // 0x7C
+};
+
+extern "C" void func_00191C68(char* self, sMsg_1C68* msg, unsigned int type)
+{
+    if (msg == 0) {
+        return;
+    }
+    switch (type) {
+    case 5:
+        if (msg->info[6] == 0) {
+            char* o = **(char***)(self + 0x10);
+            sVE_1C68* vt = *(sVE_1C68**)(o + 0x4);
+            void* st = vt[4].fn(o + vt[4].delta, self, msg->id);
+            if (st) {
+                func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+            }
+        }
+        break;
+    case 6: {
+        char* o = **(char***)(self + 0x10);
+        sVE_1C68* vt = *(sVE_1C68**)(o + 0x4);
+        void* st = vt[5].fn(o + vt[5].delta, self, msg->id);
+        if (st) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+        }
+        func_003E6448(D_005308B8, 0, 0x20);
+        break;
+    }
+    case 9: {
+        int id = msg->id;
+        func_00192088(self, id, func_0039A738(msg));
+        func_00192380((sRuleSel_2380*)self, msg);
+        break;
+    }
+    case 7: {
+        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(void**)(self + 0x10), 1);
+        *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00191E08);
@@ -30,7 +98,83 @@ extern "C" int func_00191E08(void* self, void* msg)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateruleselect", func_00191E48);
+#ifdef SKIP_ASM
+struct cUIScreen;
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char idx);
+int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_0045E270[];
+extern char D_0045E280[];
+extern char D_0045FB20[];
+extern char* D_00441058[];
+
+// PORT: the frame labels are copied with the builtin block move (the original likely used
+// strcpy on string literals); the two strings live at these symbols.
+extern char D_0045FAD8[] __attribute__((aligned(8)));
+extern char D_004A1708[] __attribute__((aligned(8)));
+
+struct sVE_1E48 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void SetVisible_1E48(char* o, int on)
+{
+    sVE_1E48* vt = *(sVE_1E48**)(o + 0x8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+extern "C" int func_00191E48(char* self, void* unused, unsigned int type, int idx)
+{
+    switch (type) {
+    case 9:
+        return 0x100;
+    case 1: {
+        int sel = (*(signed char**)(self + 0x48))[idx];
+        int play = 0;
+        char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E270));
+        char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E280));
+        int locked = *(signed char*)(self + sel + 0x51) < 1;
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045FB20));
+        if (locked && t) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00441058[sel]));
+        }
+        char label[32];
+        if (sel) {
+            if (locked) {
+                if (a) SetVisible_1E48(a, 1);
+                if (b) SetVisible_1E48(b, 1);
+                play = 1;
+                __builtin_memcpy(label, D_0045FAD8, 10);
+            }
+        } else {
+            if (a) SetVisible_1E48(a, 0);
+            if (b) SetVisible_1E48(b, 0);
+            play = 1;
+            __builtin_memcpy(label, D_004A1708, 7);
+        }
+        if (play) {
+            int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(label));
+            if (f != 0xFFFF) {
+                cUIScreen_playFrame(*(void**)(self + 0x40), f, 1);
+            }
+        }
+        return locked;
+    }
+    case 4:
+        cFEStateRuleSelect_setupMenu(self, idx);
+        return 0x101;
+    }
+    return 0x101;
+}
+#endif
 
 INCLUDE_ASM("fe/festateruleselect", func_00192088);
 

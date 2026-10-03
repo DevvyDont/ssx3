@@ -126,7 +126,88 @@ extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/bucketman", func_00354C98);
+#ifdef SKIP_ASM
+void* cBucketMan_addfirst(cBucketMan* self, int index);
+extern "C" void* func_00354ED0(cBucketMan* self, int index);
+extern "C" void* func_00354F20(cBucketMan* self, void* node, int index);
+extern "C" void* func_00354F70(cBucketMan* self, void* node, int index);
+
+struct sSortVE_4C98 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+
+struct sSortDelVE_4C98 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sSortNode_4C98 {
+    int f0;
+    sSortNode_4C98* prev;   // 0x4
+    sSortNode_4C98* next;   // 0x8
+    sSortVE_4C98* vt;       // 0xC
+};
+
+struct sSortLink_4C98 {
+    int field_0x0;
+    sSortNode_4C98* prev;   // 0x4
+    sSortNode_4C98* next;   // 0x8
+};
+
+struct sSortLists_4C98 {
+    int flags;              // 0x00
+    sSortLink_4C98 head0;   // 0x04
+    char pad_0x10[0x14];    // 0x10
+    sSortLink_4C98 head1;   // 0x24
+    char pad_0x30[0x14];    // 0x30
+};
+
+// Moves every node of the bucket's pending list into its sorted list.
+extern "C" void func_00354C98(cBucketMan* self, int index)
+{
+    sSortNode_4C98* n = (sSortNode_4C98*)cBucketMan_addfirst(self, index);
+    while (n) {
+        sSortNode_4C98* nextN = (sSortNode_4C98*)func_00354F70(self, n, index);
+        n->next->prev = n->prev;
+        n->prev->next = n->next;
+        sSortNode_4C98* m;
+        for (m = (sSortNode_4C98*)func_00354ED0(self, index); m; m = (sSortNode_4C98*)func_00354F20(self, m, index)) {
+            if (n->vt[6].fn((char*)n + n->vt[6].delta, m)) {
+                if (n->vt[7].fn((char*)n + n->vt[7].delta, m)) {
+                    n->prev = m->prev;
+                    m->prev->next = n;
+                    n->next = m->next;
+                    m->next->prev = n;
+                    m->prev = 0;
+                    m->next = 0;
+                    if (m) {
+                        sSortDelVE_4C98* dv = (sSortDelVE_4C98*)m->vt;
+                        dv[1].fn((char*)m + dv[1].delta, 3);
+                    }
+                } else {
+                    n->prev = m->prev;
+                    m->prev->next = n;
+                    n->next = m;
+                    m->prev = n;
+                }
+                break;
+            }
+        }
+        if (m == 0) {
+            n->prev = ((sSortLists_4C98*)self->mBuckets)[index].head0.prev;
+            ((sSortLists_4C98*)self->mBuckets)[index].head0.prev->next = n;
+            n->next = (sSortNode_4C98*)(self->mBuckets + index * 0x44 + 0x4);
+            ((sSortLists_4C98*)self->mBuckets)[index].head0.prev = n;
+        }
+        n = nextN;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/bucketman", func_00354E48);

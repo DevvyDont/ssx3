@@ -56,7 +56,59 @@ INCLUDE_ASM("main/debugmenu", cScreenTintMenu_cScreenTintMenu);
 
 INCLUDE_ASM("main/debugmenu", cShadowMenu_cShadowMenu);
 
+//100%
 INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_cSnowSurfaceMenu);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+extern "C" void* cFloatMenuItem_cFloatMenuItem(void* self, int a1, void* var, void* text, float lo, float hi);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047F970[];
+extern char D_0047E9C0[];
+extern char D_004A2D30[];
+extern char D_0047E9D8[];
+extern char D_004A2D70[];
+extern char D_004A2D78[];
+extern char D_004A2D80[];
+extern char D_0047E9F0[];
+extern char D_0047EA00[];
+extern int D_004A46DC;
+extern int D_004A46E0;
+extern float D_004A46E4;
+extern float D_004A46E8;
+extern float D_004A46EC;
+extern float D_004A46F0;
+extern float D_004A46F4;
+
+extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047F970;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E9C0);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A46DC, 0, 1, D_004A2D30);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A46E0, 0, 1, D_0047E9D8);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1C4, 2, &D_004A46E4, D_004A2D70, 0.0f, 32.0f);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1F8, 3, &D_004A46E8, D_004A2D78, 0.0f, 32.0f);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x22C, 4, &D_004A46EC, D_004A2D80, 0.0f, 32.0f);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x260, 5, &D_004A46F0, D_0047E9F0, 0.0f, 3.0f);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x294, 6, &D_004A46F4, D_0047EA00, 0.0f, 3.0f);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C4, -1);
+    cMenu_addItem(self, (char*)self + 0x1F8, -1);
+    cMenu_addItem(self, (char*)self + 0x22C, -1);
+    cMenu_addItem(self, (char*)self + 0x260, -1);
+    cMenu_addItem(self, (char*)self + 0x294, -1);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_cBoardTrailMenu);
 
@@ -99,7 +151,55 @@ INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_cSnowfallTogglesMenu);
 
 INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_cSplashTogglesMenu);
 
+//100%
 INCLUDE_ASM("main/debugmenu", cTubeMenu_cTubeMenu);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+void* func_002CAA58(void* self);
+cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
+cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
+extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
+extern "C" void* cFloatMenuItem_cFloatMenuItem(void* self, int a1, void* var, void* text, float lo, float hi);
+extern "C" void cMenu_addItem(void* menu, void* item, int index);
+extern void* D_0047F760[];
+extern char D_0047F4A8[];
+extern char D_004A2D30[];
+extern char D_0047F4B8[];
+extern char D_0047F4C8[];
+extern char D_004A2DA8[];
+extern char D_004A2DB0[];
+extern char D_004A2DB8[];
+extern int D_004A41D4;
+extern float D_004A41D8;
+extern float D_004A41DC;
+extern int D_004A41E0;
+extern int D_004A41E4;
+extern int D_004A41E8;
+
+extern "C" void* cTubeMenu_cTubeMenu(void* self)
+{
+    func_002CAA58(self);
+    *(void***)((char*)self + 0x12C) = D_0047F760;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F4A8);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41D4, 0, 1, D_004A2D30);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x194, 1, &D_004A41D8, D_0047F4B8, 0.0f, 1000.0f);
+    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1C8, 2, &D_004A41DC, D_0047F4C8, 0.0f, 1000.0f);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x1FC, 3, &D_004A41E0, 0, 0xFF, D_004A2DA8);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x22C, 4, &D_004A41E4, 0, 0xFF, D_004A2DB0);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x25C, 5, &D_004A41E8, 0, 0xFF, D_004A2DB8);
+    cMenu_addItem(self, (char*)self + 0x130, -1);
+    cMenu_addItem(self, (char*)self + 0x14C, -1);
+    cMenu_addItem(self, (char*)self + 0x164, -1);
+    cMenu_addItem(self, (char*)self + 0x194, -1);
+    cMenu_addItem(self, (char*)self + 0x1C8, -1);
+    cMenu_addItem(self, (char*)self + 0x1FC, -1);
+    cMenu_addItem(self, (char*)self + 0x22C, -1);
+    cMenu_addItem(self, (char*)self + 0x25C, -1);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("main/debugmenu", cPathArrowMenu_cPathArrowMenu);
 
@@ -160,7 +260,48 @@ extern "C" void func_0024D998(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024DAB8);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024DAB8(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x700, 2);
+    func_002CA280((char*)self + 0x6CC, 2);
+    func_002CA280((char*)self + 0x698, 2);
+    func_002CA280((char*)self + 0x664, 2);
+    func_002CA280((char*)self + 0x630, 2);
+    func_002CA280((char*)self + 0x600, 2);
+    func_002CA280((char*)self + 0x5CC, 2);
+    func_002CA280((char*)self + 0x598, 2);
+    func_002CA280((char*)self + 0x564, 2);
+    func_002CA280((char*)self + 0x530, 2);
+    func_002CA280((char*)self + 0x4FC, 2);
+    func_002CA280((char*)self + 0x4C8, 2);
+    func_002CA280((char*)self + 0x494, 2);
+    func_002CA280((char*)self + 0x460, 2);
+    func_002CA280((char*)self + 0x42C, 2);
+    func_002CA280((char*)self + 0x3FC, 2);
+    func_002CA280((char*)self + 0x3C8, 2);
+    func_002CA280((char*)self + 0x394, 2);
+    func_002CA280((char*)self + 0x360, 2);
+    func_002CA280((char*)self + 0x32C, 2);
+    func_002CA280((char*)self + 0x2F8, 2);
+    func_002CA280((char*)self + 0x2C4, 2);
+    func_002CA280((char*)self + 0x290, 2);
+    func_002CA280((char*)self + 0x25C, 2);
+    func_002CA280((char*)self + 0x228, 2);
+    func_002CA280((char*)self + 0x1F4, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024DC68);
@@ -195,7 +336,59 @@ extern "C" void func_0024DC68(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024DD70);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_0024DD70(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x928, 2);
+    func_002CA280((char*)self + 0x8F4, 2);
+    func_002CA280((char*)self + 0x8C0, 2);
+    func_002CA280((char*)self + 0x88C, 2);
+    func_002CA280((char*)self + 0x858, 2);
+    func_002CA280((char*)self + 0x824, 2);
+    func_002CA280((char*)self + 0x7F0, 2);
+    func_002CA280((char*)self + 0x7C0, 2);
+    func_002CA280((char*)self + 0x78C, 2);
+    func_002CA280((char*)self + 0x758, 2);
+    func_002CA280((char*)self + 0x724, 2);
+    func_002CA280((char*)self + 0x6F0, 2);
+    func_002CA280((char*)self + 0x6BC, 2);
+    func_002CA280((char*)self + 0x688, 2);
+    func_002CA280((char*)self + 0x654, 2);
+    func_002CA280((char*)self + 0x620, 2);
+    func_002CA280((char*)self + 0x5EC, 2);
+    func_002CA280((char*)self + 0x5B8, 2);
+    func_002CA280((char*)self + 0x584, 2);
+    func_002CA280((char*)self + 0x550, 2);
+    func_002CA280((char*)self + 0x520, 2);
+    func_002CA280((char*)self + 0x4F0, 2);
+    func_002CA280((char*)self + 0x4C0, 2);
+    func_002CA280((char*)self + 0x490, 2);
+    func_002CA280((char*)self + 0x45C, 2);
+    func_002CA280((char*)self + 0x42C, 2);
+    func_002CA280((char*)self + 0x3FC, 2);
+    func_002CA280((char*)self + 0x3C8, 2);
+    func_002CA280((char*)self + 0x394, 2);
+    func_002CA280((char*)self + 0x360, 2);
+    func_002CA280((char*)self + 0x32C, 2);
+    func_002CA280((char*)self + 0x2F8, 2);
+    func_002CA280((char*)self + 0x2C4, 2);
+    func_002CA280((char*)self + 0x290, 2);
+    func_002CA280((char*)self + 0x25C, 2);
+    func_002CA280((char*)self + 0x228, 2);
+    func_002CA280((char*)self + 0x1F4, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024DFA0);
@@ -923,7 +1116,51 @@ void* func_00250A80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_00250AE0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+
+extern "C" void func_00250AE0(void* self, int flags)
+{
+    func_002CA280((char*)self + 0x77C, 2);
+    func_002CA280((char*)self + 0x748, 2);
+    func_002CA280((char*)self + 0x714, 2);
+    func_002CA280((char*)self + 0x6E0, 2);
+    func_002CA280((char*)self + 0x6B0, 2);
+    func_002CA280((char*)self + 0x67C, 2);
+    func_002CA280((char*)self + 0x648, 2);
+    func_002CA280((char*)self + 0x614, 2);
+    func_002CA280((char*)self + 0x5E0, 2);
+    func_002CA280((char*)self + 0x5AC, 2);
+    func_002CA280((char*)self + 0x578, 2);
+    func_002CA280((char*)self + 0x544, 2);
+    func_002CA280((char*)self + 0x514, 2);
+    func_002CA280((char*)self + 0x4E0, 2);
+    func_002CA280((char*)self + 0x4AC, 2);
+    func_002CA280((char*)self + 0x478, 2);
+    func_002CA280((char*)self + 0x444, 2);
+    func_002CA280((char*)self + 0x410, 2);
+    func_002CA280((char*)self + 0x3DC, 2);
+    func_002CA280((char*)self + 0x3AC, 2);
+    func_002CA280((char*)self + 0x37C, 2);
+    func_002CA280((char*)self + 0x34C, 2);
+    func_002CA280((char*)self + 0x31C, 2);
+    func_002CA280((char*)self + 0x2E8, 2);
+    func_002CA280((char*)self + 0x2B8, 2);
+    func_002CA280((char*)self + 0x288, 2);
+    func_002CA280((char*)self + 0x258, 2);
+    func_002CA280((char*)self + 0x228, 2);
+    func_002CA280((char*)self + 0x1F8, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, flags);
+}
+#endif
 
 INCLUDE_ASM("main/debugmenu", func_00250CB0);
 
