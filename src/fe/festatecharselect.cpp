@@ -147,9 +147,163 @@ extern "C" void func_00181420(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00181450);
+#ifdef SKIP_ASM
+struct sPadVtI_1450 { short delta; short index; int (*fn)(void*); };
+struct sPadVtF_1450 { short delta; short index; float (*fn)(void*); };
 
+static inline int padBtn_1450(char* pad, int slot)
+{
+    sPadVtI_1450* vt = *(sPadVtI_1450**)(pad + 8);
+    return vt[slot].fn(pad + vt[slot].delta);
+}
+
+static inline float padAxis_1450(char* pad, int slot)
+{
+    sPadVtF_1450* vt = *(sPadVtF_1450**)(pad + 8);
+    return vt[slot].fn(pad + vt[slot].delta);
+}
+
+static inline float wrapHi_1450(float a)
+{
+    while (a >= 360.0f)
+        a -= 360.0f;
+    return a;
+}
+
+static inline float wrapLo_1450(float a)
+{
+    while (a < 0.0f)
+        a += 360.0f;
+    return a;
+}
+
+// PORT: g++ `<?` (min) operator.
+static inline float clamp_1450(float v, float lo, float hi)
+{
+    if (v >= lo) return v <? hi;
+    return lo;
+}
+
+extern "C" int func_00181450(char* self, char* pad)
+{
+    int changed = 0;
+    if (padBtn_1450(pad, 35)) {
+        *(float*)(self + 0x60) += padAxis_1450(pad, 38) * 3.0f;
+        if (*(float*)(self + 0x60) >= 360.0f) {
+            float a = *(float*)(self + 0x60);
+            do
+                a -= 360.0f;
+            while (a >= 360.0f);
+            *(float*)(self + 0x60) = a;
+        }
+        float a = *(float*)(self + 0x60);
+        float zero = 0.0f;
+        if (a < zero) {
+            float b;
+            do {
+                b = a + 360.0f;
+                a = b;
+            } while (b < zero);
+            *(float*)(self + 0x60) = b;
+        }
+        changed = 1;
+    }
+    if (padBtn_1450(pad, 33)) {
+        *(float*)(self + 0x58) = clamp_1450(*(float*)(self + 0x58) + padAxis_1450(pad, 36) * -0.10000000149011612f, 0.0f, 1.0f);
+        changed = 1;
+    }
+    if (padBtn_1450(pad, 34)) {
+        *(float*)(self + 0x5C) = clamp_1450(*(float*)(self + 0x5C) + padAxis_1450(pad, 37) * -0.10000000149011612f, -1.0f, 1.0f);
+        changed = 1;
+    }
+    return changed;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void* func_0014EEC8(void* self, int player, int index);
+extern signed char D_00535C11[];
+extern signed char D_00440F68[];
+extern char D_0045D610[];
+extern char D_0045D620[];
+extern char D_0045D638[];
+extern char D_0045D658[];
+extern char D_0045D678[];
+struct sCharKey_1620 { char c[2]; };
+extern sCharKey_1620 D_004A13A0[];
+
+struct sWVt_1620 { short delta; short index; void (*fn)(void*, int); };
+struct sWidget_1620 {
+    int f0;
+    int f4;
+    sWVt_1620* vt;              // 0x8
+    int fC;
+    int f10;
+    unsigned b0 : 1;            // 0x14
+    unsigned b1 : 6;
+    unsigned b7 : 1;
+    unsigned b8 : 24;
+    int id18;                   // 0x18
+    char pad1C[0x38 - 0x1C];
+    int hash;                   // 0x38
+};
+
+static inline void refresh_1620(sWidget_1620* w)
+{
+    w->vt[9].fn((char*)w + w->vt[9].delta, 0);
+}
+
+extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
+{
+    int h = w->hash;
+    if (h == GetHashValue32(D_0045D610)) {
+        w->b0 = 0;
+        w->b7 = 1;
+        return;
+    }
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (h == GetHashValue32(D_0045D620) && D_00535C11[0] == 2) {
+        refresh_1620(w);
+        return;
+    }
+    if (h == GetHashValue32(D_0045D638)) {
+        if (D_00535C11[0] == 2) {
+            switch (*(signed char*)(self + 0x44)) {
+            case 0:
+                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0045D658));
+                break;
+            case 1:
+                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0045D678));
+                break;
+            }
+            return;
+        }
+        refresh_1620(w);
+        return;
+    }
+    sCharKey_1620 key = D_004A13A0[0];
+    for (int i = 0; i < 10; i++) {
+        key.c[0] = '0' + i;
+        if (h == GetHashValue32(key.c)) {
+            cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0));
+            w->id18 = i;
+            refresh_1620(w);
+            return;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharselect", func_001817E8);
 
@@ -157,7 +311,79 @@ INCLUDE_ASM("fe/festatecharselect", func_00181BD0);
 
 INCLUDE_ASM("fe/festatecharselect", func_00181EF0);
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00182220);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_0014EEC8(void* self, int player, int index);
+extern "C" int func_00157EE0(void* iface, int a1, int a2, int a3);
+extern "C" void* func_0015A478();
+extern "C" int func_00398380(void* self, int id);
+extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern void* D_0046CF30[];
+extern char* D_00440F78[];
+
+struct sCharEnt_2220 { char* name; char* label; int f8; char pad[3]; signed char id; };
+struct sCharList_2220 { char pad[0x28]; sCharEnt_2220* ents; char pad2C[0x50 - 0x2C]; int count; };
+struct sCharSel_2220 {
+    char pad0[0x8];
+    void** vt;                  // 0x8
+    int fC;                     // 0xC
+    char* owner;                // 0x10
+    char f14;
+    unsigned char f15;          // 0x15
+    char pad16[0x44 - 0x16];
+    signed char player;         // 0x44
+    char pad45[0x54 - 0x45];
+    int sel[6];                 // 0x54
+    int f6C;
+    int f70;                    // 0x70
+    int f74;                    // 0x74
+    int count;                  // 0x78
+    int ids[30];                // 0x7C
+    int hashes[30];             // 0xF4
+    char* names[30];            // 0x16C
+};
+
+extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void* owner, signed char player, int slot)
+{
+    func_0039E318(self, engine, owner);
+    self->fC = 10;
+    self->vt = D_0046CF30;
+    self->player = player;
+    self->count = 1;
+    self->f70 = 0;
+    self->ids[0] = 0;
+    char* o = self->owner;
+    int h = GetHashValue32(D_00440F78[slot]);
+    self->hashes[0] = func_00398380(o + 0x58, h);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
+    sCharList_2220* list = (sCharList_2220*)func_0015A478();
+    int n = list->count;
+    for (int i = 0; i < n; i++) {
+        sCharEnt_2220* e = &list->ents[i];
+        if (func_00157EE0(iface, self->player, slot, e->id)) {
+            char* lbl = e->label;
+            self->ids[self->count] = e->id;
+            char* o2 = self->owner;
+            int h2 = GetHashValue32(lbl);
+            self->hashes[self->count] = func_00398380(o2 + 0x58, h2);
+            self->names[self->count] = e->name;
+            self->count++;
+        }
+    }
+    self->names[0] = (char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), slot, 0);
+    for (int j = 5; j >= 0; j--)
+        self->sel[j] = 0;
+    self->f74 = 0;
+    self->f15 = func_001A1CD0(*(void**)self->owner, self->player);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00182420);

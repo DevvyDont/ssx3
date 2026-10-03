@@ -87,7 +87,45 @@ extern "C" void func_00152728(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintsavefile", func_00152758);
+#ifdef SKIP_ASM
+int func_00152948(void* self);
+// PORT: the unit defines func_00152700(void); this caller passes self in $a0.
+void func_00152700_s(void* self) __asm__("func_00152700");
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+extern "C" int func_003E62D0(void* buf, int n, int seed);
+extern void* D_004A1220;
+struct sSaveHdr_2758 { int w[0x288 / 4]; };
+extern sSaveHdr_2758 D_00535898;
+extern char D_00535C18[];
+struct sCharTbl_2758 { char pad[0x10]; unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 22; unsigned char f13; char pad14[8]; };
+extern sCharTbl_2758 D_00535B20[];
+struct sSaveBits_2758 { unsigned a : 1; unsigned b : 8; unsigned rest : 23; };
+struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
+
+extern "C" void* func_00152758(void* self)
+{
+    int size = func_00152948(self);
+    func_00152700_s(self);
+    D_004A1220 = operator_new_tag(size, D_0045A7F0, 0x100, 0);
+    char* p = (char*)D_004A1220;
+    *(sSaveHdr_2758*)p = D_00535898;
+    p += sizeof(sSaveHdr_2758);
+    func_0041605C(p, D_00535C18, 0xA28);
+    p += 0xA28;
+    sSaveBits6_2758 bits;
+    for (int i = 0; i < 6; i++) {
+        bits.e[i].a = D_00535B20[i].b1;
+        bits.e[i].b = D_00535B20[i].f13;
+    }
+    *(sSaveBits6_2758*)p = bits;
+    p += sizeof(sSaveBits6_2758);
+    int crc = func_003E62D0(D_004A1220, size - 4, 0xFBEA);
+    __builtin_memcpy(p, &crc, 4);
+    return D_004A1220;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintsavefile", func_00152948__FPv);

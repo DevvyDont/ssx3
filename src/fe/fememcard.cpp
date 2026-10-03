@@ -159,11 +159,141 @@ extern "C" void func_00186C98(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00186D60);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00152BA8();
+extern char D_0045DCA8[];
+extern char D_0045DCC8[];
+extern char D_0045DCD8[];
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
+extern char* D_004A14B8_86D60 __asm__("D_004A14B8");
+
+struct sVtI_86D60 { short delta; short index; int (*fn)(void*, int); };
+struct sVtS_86D60 { short delta; short index; unsigned short* (*fn)(void*, int); };
+struct sVtB_86D60 { short delta; short index; void (*fn)(void*, void*, int, int, int, int, int); };
+struct sVtW_86D60 { short delta; short index; void (*fn)(void*, unsigned short*, int); };
+struct sVtV_86D60 { short delta; short index; void (*fn)(void*, int); };
+struct sLocal_86D60 { int v[8]; };
+
+extern "C" void func_00186D60(void)
+{
+    sLocal_86D60 loc;
+    unsigned short buf[0x320];
+    void* mp = func_00227F80(D_004A28A8);
+    func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
+    cBE_getInterface_Fv(cBE_getBE(), 5);
+    char* o = *(char**)((char*)mp + 0x434);
+    sVtI_86D60* vt = *(sVtI_86D60**)o;
+    o += vt[22].delta;
+    int need = vt[22].fn(o, func_00152BA8());
+    unsigned short* b = buf;
+    char* lo = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVtS_86D60* lvt = *(sVtS_86D60**)(lo + 4);
+    lo += lvt[4].delta;
+    unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(D_0045DCA8));
+    func_002C26D0(b, fmt, &loc, need);
+    char* st = D_004A14B8_86D60;
+    *(int*)(st + 0x19C) = 9;
+    sVtB_86D60* svt = *(sVtB_86D60**)(st + 8);
+    svt[36].fn(st + svt[36].delta, b, 0, 0, 0, 0, 0);
+
+    {
+        char* w = *(char**)(D_004A14B8_86D60 + 0x218);
+        char* lo2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
+        sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
+        w += wvt[26].delta;
+        lo2 += lvt2[4].delta;
+        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(D_0045DCC8)), 0);
+    }
+    {
+        char* w = *(char**)(D_004A14B8_86D60 + 0x218);
+        char* lo2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
+        sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
+        w += wvt[26].delta;
+        lo2 += lvt2[4].delta;
+        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(D_0045DCD8)), 1);
+    }
+    char* w2 = *(char**)(D_004A14B8_86D60 + 0x218);
+    sVtV_86D60* vvt = *(sVtV_86D60**)(w2 + 8);
+    vvt[25].fn(w2 + vvt[25].delta, 1);
+}
+#endif
 
 INCLUDE_ASM("fe/fememcard", func_00186F40);
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00186F90);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00152BA8();
+struct sFEMemCardK187270;
+extern "C" void func_00187270(sFEMemCardK187270* self);
+extern "C" void* func_00227F80(void* p);
+extern "C" int func_0023C8D0(void* mp);
+extern "C" int func_002419D8(void* mp, int card);
+extern void* D_004A28A8;
+// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
+extern char* D_004A14B8_86F90 __asm__("D_004A14B8");
+extern int D_004A14BC;
+
+struct sVtA_86F90 { short delta; short index; void (*fn)(void*, int, void*); };
+struct sVtI_86F90 { short delta; short index; int (*fn)(void*, int); };
+struct sVtV_86F90 { short delta; short index; void (*fn)(void*, int); };
+struct sVt0_86F90 { short delta; short index; int (*fn)(void*); };
+
+extern "C" void func_00186F90(void)
+{
+    if (*(int*)(D_004A14B8_86F90 + 0x234) != 0) {
+        if (D_004A14BC < 4)
+            return;
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* o = *(char**)(mp + 0x434);
+        sVtA_86F90* vt = *(sVtA_86F90**)o;
+        vt[14].fn(o + vt[14].delta, *(int*)(mp + 0xF8), D_004A14B8_86F90 + 0x9C);
+        return;
+    }
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    if (func_0023C8D0(mp) == 0) {
+        int fail = 0;
+        cBE_getInterface_Fv(cBE_getBE(), 5);
+        int extra = 0;
+        int avail = func_002419D8(mp, *(int*)(mp + 0x428));
+        char* st = D_004A14B8_86F90;
+        int flags = *(int*)(st + 0x22C);
+        *(int*)(st + 0x230) = 0;
+        if (flags & 1) {
+            extra = 1;
+            char* o = *(char**)(mp + 0x434);
+            sVtI_86F90* vt = *(sVtI_86F90**)o;
+            char* thisp = o + vt[22].delta;
+            int r = vt[22].fn(thisp, func_00152BA8());
+            *(int*)(D_004A14B8_86F90 + 0x230) += r;
+        }
+        char* o;
+        if (avail < *(int*)(D_004A14B8_86F90 + 0x230)
+            || ((o = *(char**)(mp + 0x434), (*(sVt0_86F90**)o)[25].fn(o + (*(sVt0_86F90**)o)[25].delta) != -1)
+                && (o = *(char**)(mp + 0x434), (*(sVt0_86F90**)o)[25].fn(o + (*(sVt0_86F90**)o)[25].delta) < extra)))
+            fail = 1;
+        if (fail) {
+            *(int*)(D_004A14B8_86F90 + 0x234) = 1;
+            sVtV_86F90* vt = *(sVtV_86F90**)(mp + 0x748);
+            vt[1].fn(mp + vt[1].delta, 0x17);
+            return;
+        }
+    }
+    func_00187270((sFEMemCardK187270*)D_004A14B8_86F90);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187148);
@@ -613,7 +743,83 @@ extern "C" void func_00187920(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00187A38);
+#ifdef SKIP_ASM
+extern "C" void* func_00227F80(void* p);
+extern "C" int func_0023C8D0(void* mp);
+extern "C" void func_0023C8F0(void* mp, int mode);
+extern void* D_004A28A8;
+extern int D_004A14BC;
+extern int D_004A14B4;
+
+struct sVt0_87A38 { short delta; short index; int (*fn)(void*); };
+struct sVtV_87A38 { short delta; short index; void (*fn)(void*, int); };
+struct sMcFlags_87A38 { unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 1; unsigned rest : 29; };
+struct sMemCard_87A38 {
+    char pad0[0x1BC];
+    int f1BC;                   // 0x1BC
+    char pad1C0[0x22C - 0x1C0];
+    sMcFlags_87A38 flags;       // 0x22C
+    int f230;
+    int f234;                   // 0x234
+    sMcFlags_87A38 saved;       // 0x238
+};
+
+static inline int cardCall_87A38(char* o, int slot)
+{
+    sVt0_87A38* vt = *(sVt0_87A38**)o;
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+static inline void mpNotify_87A38(char* mp, int msg)
+{
+    sVtV_87A38* vt = *(sVtV_87A38**)(mp + 0x748);
+    vt[1].fn(mp + vt[1].delta, msg);
+}
+
+extern "C" void func_00187A38(void* p)
+{
+    sMemCard_87A38* self = (sMemCard_87A38*)p;
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    char* card = *(char**)(mp + 0x434);
+    if (func_0023C8D0(mp))
+        D_004A14BC = 3;
+    switch (D_004A14BC) {
+    case 0:
+        if (cardCall_87A38(card, 13))
+            self->flags.b1 = 0;
+        func_0023C8F0(mp, 1);
+        mpNotify_87A38(mp, 0x33);
+        D_004A14BC++;
+        self->f1BC = 0;
+        break;
+    case 1:
+        if (cardCall_87A38(card, 13))
+            self->flags.b0 = 0;
+        if (*(int*)(mp + 0x428) == 0) {
+            int r = cardCall_87A38(*(char**)(mp + 0x434), 17);
+            D_004A14B4 = r;
+            if (r == -1)
+                D_004A14B4 = 0;
+        }
+        func_0023C8F0(mp, 0);
+        mpNotify_87A38(mp, 0x33);
+        D_004A14BC++;
+        self->f1BC = 1;
+        break;
+    case 2:
+        if (cardCall_87A38(card, 13))
+            self->flags.b2 = 0;
+        D_004A14BC++;
+    case 3:
+        if (*(int*)(mp + 0x428) == 0)
+            self->saved = self->flags;
+        self->f234 = 0;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187C10__FPv);

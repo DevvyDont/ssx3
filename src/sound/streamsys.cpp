@@ -1,6 +1,60 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance);
+#ifdef SKIP_ASM
+struct sSsEnt_99D8 { char vol; char pad[0x17]; };
+struct sSsPlayer_99D8 {
+    char pad0[0x1C];
+    volatile int cur;           // 0x1C
+    sSsEnt_99D8* ents;          // 0x20
+    char pad24[0x38 - 0x24];
+    int* vols;                  // 0x38
+    float** scales;             // 0x3C
+};
+struct sStreamInst_99D8 {
+    char* mem;          // 0x0
+    int f4;             // 0x4
+    int handle;         // 0x8
+    char vol;           // 0xC
+    float* scale;       // 0x10
+    char pad14[0x74 - 0x14];
+    int f74;            // 0x74
+    int f78;            // 0x78
+    int heap;           // 0x7C
+    int f80;            // 0x80
+};
+extern "C" int func_003B7818(void* desc, int n, int m, void* mem, int size);
+extern "C" int func_003B7B00(int n, int m);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_004A3770[];
+
+static inline int curVol_99D8(sSsPlayer_99D8* p) { return p->vols[p->cur]; }
+
+#define MIN_99D8(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_99D8(a, b) ((a) >= (b) ? (a) : (b))
+
+extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* self, sSsPlayer_99D8* p, int heap, int extra)
+{
+    self->f74 = 0;
+    self->handle = -1;
+    self->f78 = 0;
+    self->heap = heap;
+    self->f80 = 0;
+    self->scale = p->scales[p->cur];
+    self->vol = curVol_99D8(p);
+    if (self->scale) {
+        p->vols[p->cur] = (int)MAX_99D8(MIN_99D8((float)p->vols[p->cur] * *self->scale, 127.0f), 0.0f);
+        p->ents[p->cur].vol = MAX_99D8(MIN_99D8(p->vols[p->cur], 127), 0);
+    }
+    int n = func_003B7B00(8, 300) + extra;
+    self->mem = new (D_004A3770, heap, 0) char[n];
+    self->f4 = 0;
+    self->handle = func_003B7818(&p->ents[p->cur], 8, 300, self->mem, n);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9DF0);
@@ -247,9 +301,132 @@ extern "C" int func_002AA428(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", cStreamSys_cStreamSys);
+#ifdef SKIP_ASM
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+extern "C" void* func_002ADE88(void* self, int heap);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_00483218[];
+extern void* D_00483B48[];
 
+struct sSsVEntryA490 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sSsVtblAA490 {
+    sSsVEntryA490 e[4];
+} __attribute__((aligned(8)));
+struct sSsVtblBA490 {
+    sSsVEntryA490 e[7];
+} __attribute__((aligned(8)));
+extern const sSsVtblAA490 D_00483998;
+extern const sSsVtblBA490 D_004839B8;
+
+struct sStreamSysA490 {
+    char* vbase;        // 0x0
+    int count;          // 0x4
+    void** items;       // 0x8
+    char vb2[0x8];      // 0xC
+    char vb[0x4];       // 0x14
+};
+
+extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchrg, int banks, int count, int heap)
+{
+    if (inchrg) {
+        self->vbase = self->vb;
+        *(char**)(self->vb + 0x1D8) = self->vb2;
+        func_002ADE88(self->vb2, heap);
+        cBankManager_cBankManager(self->vbase, 0, banks, heap);
+    }
+    *(const sSsVtblAA490**)(*(char**)(self->vbase + 0x1D8) + 4) = &D_00483998;
+    *(void***)(self->vbase + 0xAB0) = D_00483B48;
+    *(const sSsVtblBA490**)(self->vbase + 0x1D4) = &D_004839B8;
+    if (!inchrg) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-ups (copied vtables on the stack), written out by hand.
+        sSsVtblAA490 t1 = D_00483998;
+        *(sSsVtblAA490**)(*(char**)(self->vbase + 0x1D8) + 4) = &t1;
+        char* base1 = *(char**)(self->vbase + 0x1D8) - 0xC;
+        int d1 = (char*)self - base1;
+        t1.e[1].delta = D_00483998.e[1].delta + d1;
+        sSsVtblBA490 t2 = D_004839B8;
+        *(sSsVtblBA490**)(self->vbase + 0x1D4) = &t2;
+        char* base2 = self->vbase - 0x14;
+        int d2 = (char*)self - base2;
+        t2.e[1].delta = D_004839B8.e[1].delta + d2;
+    }
+    self->count = count;
+    self->items = new (D_00483218, 0, 0) void*[count];
+    for (int i = 0; i < self->count; i++)
+        self->items[i] = 0;
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA648);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void func_002A9DF0(void* e, int a1);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern void* D_00483B48[];
+
+struct sSsVEntryA648 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sSsVtblAA648 {
+    sSsVEntryA648 e[4];
+} __attribute__((aligned(8)));
+struct sSsVtblBA648 {
+    sSsVEntryA648 e[7];
+} __attribute__((aligned(8)));
+// Views of the vtables cStreamSys_cStreamSys (earlier in this unit) declares with its own types.
+extern const sSsVtblAA648 D_00483998_A648 __asm__("D_00483998");
+extern const sSsVtblBA648 D_004839B8_A648 __asm__("D_004839B8");
+
+// PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
+extern "C" void func_002AA648(void* p, int flags)
+{
+    char* self = (char*)p;
+    *(const sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483998_A648;
+    *(void***)(*(char**)self + 0xAB0) = D_00483B48;
+    *(const sSsVtblBA648**)(*(char**)self + 0x1D4) = &D_004839B8_A648;
+    if (flags == 0) {
+        sSsVtblAA648 t1 = D_00483998_A648;
+        *(sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
+        char* base1 = *(char**)(*(char**)self + 0x1D8) - 0xC;
+        int d1 = self - base1;
+        t1.e[1].delta = D_00483998_A648.e[1].delta + d1;
+        sSsVtblBA648 t2 = D_004839B8_A648;
+        *(sSsVtblBA648**)(*(char**)self + 0x1D4) = &t2;
+        char* base2 = *(char**)self - 0x14;
+        int d2 = self - base2;
+        t2.e[1].delta = D_004839B8_A648.e[1].delta + d2;
+    }
+    for (int i = 0; i < *(int*)(self + 4); i++) {
+        void* e = (*(void***)(self + 8))[i];
+        if (e != 0) {
+            func_002A9DF0(e, 3);
+        }
+    }
+    if (*(void**)(self + 8) != 0) {
+        cMemMan_free(*(void**)(self + 8));
+    }
+    if (flags & 2) {
+        func_0028BB10(*(void**)self, 0);
+        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AA7F0);
 
@@ -410,7 +587,78 @@ int func_002AB188(void* self, int a1)
 
 INCLUDE_ASM("sound/streamsys", func_002AB200);
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB478);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void func_002A6B50(void* self, int flags);
+extern "C" void func_002AA648(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void func_002B0AE8(char* self, int flags);
+extern "C" void func_002B3398(char* self, int flags);
+extern void* D_004838F8[];
+extern void* D_004837F8[];
+extern void* D_00483870[];
+
+struct sSsVEntryB478 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sSsVtblAB478 {
+    sSsVEntryB478 e[4];
+} __attribute__((aligned(8)));
+struct sSsVtblBB478 {
+    sSsVEntryB478 e[8];
+} __attribute__((aligned(8)));
+struct sSsVtblCB478 {
+    sSsVEntryB478 e[7];
+} __attribute__((aligned(8)));
+extern const sSsVtblAB478 D_004837D8;
+extern const sSsVtblBB478 D_00483760;
+extern const sSsVtblCB478 D_004837A0;
+
+// PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
+extern "C" void func_002AB478(char* self, int flags)
+{
+    char* mon = self + 0x118;
+    char* bank = self + 0x5560;
+    *(void***)(self + 0x5558) = D_004838F8;
+    *(void***)(self + 0x571C) = D_00483870;
+    *(void***)(self + 0xC) = D_004837F8;
+    *(const sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &D_004837D8;
+    *(const sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760;
+    *(const sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &D_004837A0;
+    if (flags == 0) {
+        sSsVtblAB478 t1 = D_004837D8;
+        *(sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &t1;
+        char* base1 = *(char**)(**(char***)(self + 0x118) + 0x1D8) - 0x5728;
+        int d1 = self - base1;
+        t1.e[1].delta = D_004837D8.e[1].delta + d1;
+        sSsVtblBB478 t2 = D_00483760;
+        *(sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &t2;
+        char* base2 = **(char***)(self + 0x118) - 0x5730;
+        int d2 = self - base2;
+        t2.e[1].delta = D_00483760.e[1].delta + d2;
+        t2.e[5].delta = D_00483760.e[5].delta + d2;
+        sSsVtblCB478 t3 = D_004837A0;
+        *(sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &t3;
+        t3.e[1].delta = D_004837A0.e[1].delta + d2;
+    }
+    func_002B0AE8(bank, 0);
+    func_002B3398(mon, 0);
+    func_002A6B50(self, 0);
+    if (flags & 2) {
+        func_002AA648(*(void**)(self + 0x118), 0);
+        func_0028BB10(**(void***)(self + 0x118), 0);
+        func_002ADEE8(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
+    }
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB6B0);
@@ -828,7 +1076,89 @@ extern "C" void func_002ABE78(void* self, int vol)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABF60);
+#ifdef SKIP_ASM
+void func_002A9F30(void* self, int val);
+void* func_002AA408(void* self);
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" void func_003B85F0(int h, int a);
+extern "C" void func_003B89E0(int h);
+extern "C" void func_003B9920(int h);
+extern "C" void func_003B9E48(int h, int a);
+
+extern "C" void func_002ABF60(void* self, int vol)
+{
+    int orig = vol;
+    switch (*(int*)self) {
+    case 1: {
+        if (*(float*)((char*)self + 0x90) >= 0.0f)
+            vol = (int)(*(float*)((char*)self + 0x90) * (float)vol);
+        if (vol > 127)
+            vol = 127;
+        int none = -1;
+        if (vol <= none)
+            vol = 0;
+        if (*(int*)((char*)self + 0xB4) >= 0) {
+            int d = vol - *(int*)((char*)self + 0xB4);
+            if (d >= -4 && d <= 4)
+                return;
+        }
+        *(int*)((char*)self + 0xB4) = vol;
+        func_003B58A0();
+        if (orig == none)
+            func_003B89E0(*(int*)((char*)self + 0x4));
+        else
+            func_003B85F0(*(int*)((char*)self + 0x4), vol);
+        func_003B58D8();
+        break;
+    }
+    case 2: {
+        if (*(float*)((char*)self + 0x90) >= 0.0f)
+            vol = (int)(*(float*)((char*)self + 0x90) * (float)vol);
+        if (vol > 127)
+            vol = 127;
+        int none = -1;
+        if (vol <= none)
+            vol = 0;
+        if (*(int*)((char*)self + 0xB4) >= 0) {
+            int d = vol - *(int*)((char*)self + 0xB4);
+            if (d >= -4 && d <= 4)
+                return;
+        }
+        *(int*)((char*)self + 0xB4) = vol;
+        func_003B58A0();
+        if (orig == none)
+            func_003B9920(*(int*)((char*)self + 0x4));
+        else
+            func_003B9E48(*(int*)((char*)self + 0x4), vol);
+        func_003B58D8();
+        break;
+    }
+    case 3: {
+        if (*(float*)((char*)self + 0x90) >= 0.0f)
+            vol = (int)(*(float*)((char*)self + 0x90) * (float)vol);
+        if (vol > 127)
+            vol = 127;
+        int none = -1;
+        if (vol <= none)
+            vol = 0;
+        if (*(int*)((char*)self + 0xB4) >= 0) {
+            int d = vol - *(int*)((char*)self + 0xB4);
+            if (d >= -4 && d <= 4)
+                return;
+        }
+        *(int*)((char*)self + 0xB4) = vol;
+        if (orig == none)
+            func_002AA408(*(void**)((char*)self + 0xC));
+        else
+            func_002A9F30(*(void**)((char*)self + 0xC), vol);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AC180);

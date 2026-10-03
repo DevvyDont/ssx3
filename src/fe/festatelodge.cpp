@@ -32,7 +32,73 @@ extern "C" void cFEStateLodge_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146D98(void* iface, int a1);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern char D_0046EDC0[];
+extern char D_0046EDD0[];
+extern char D_0046EDE0[];
+extern char D_0046EDF0[];
+extern char D_0046EE00[];
+extern char D_0046EE10[];
+extern char D_0046EE20[];
+extern char D_0046EE30[];
+extern char D_0046EE40[];
+extern char D_0046EE50[];
+extern char D_0046EE60[];
+extern char D_0046EE78[];
+extern char D_0046EE90[];
+
+struct sWVt_3840 { short delta; short index; void (*fn)(void*, int); };
+
+extern "C" void cFEStateLodge_onWidgetCreate(void* self, void* w)
+{
+    int h = *(int*)((char*)w + 0x38);
+    if (h == GetHashValue32(D_0046EDC0)) {
+        *(int*)((char*)w + 0x18) = 0;
+    } else if (h == GetHashValue32(D_0046EDD0)) {
+        *(int*)((char*)w + 0x18) = 1;
+    } else if (h == GetHashValue32(D_0046EDE0)) {
+        *(int*)((char*)w + 0x18) = 2;
+    } else if (h == GetHashValue32(D_0046EDF0)) {
+        *(int*)((char*)w + 0x18) = 3;
+    } else if (h == GetHashValue32(D_0046EE00)) {
+        *(int*)((char*)w + 0x18) = 4;
+    } else if (h == GetHashValue32(D_0046EE10)) {
+        *(int*)((char*)w + 0x18) = 5;
+    } else if (h == GetHashValue32(D_0046EE20)) {
+        *(int*)((char*)w + 0x18) = 8;
+    } else if (h == GetHashValue32(D_0046EE30)) {
+        *(int*)((char*)w + 0x18) = 6;
+    } else if (h == GetHashValue32(D_0046EE40)) {
+        *(int*)((char*)w + 0x18) = 7;
+        sWVt_3840* vt = *(sWVt_3840**)((char*)w + 8);
+        vt[8].fn((char*)w + vt[8].delta, 1);
+        vt = *(sWVt_3840**)((char*)w + 8);
+        vt[9].fn((char*)w + vt[9].delta, 0);
+    } else if (h == GetHashValue32(D_0046EE50)) {
+        int lvl = func_00146D98(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+        if (lvl >= 17) {
+            if (lvl < 19) {
+                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0046EE60));
+                return;
+            }
+            if (lvl < 21) {
+                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0046EE78));
+                return;
+            }
+        }
+        cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0046EE90));
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F3A38);
 

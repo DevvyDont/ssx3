@@ -95,7 +95,75 @@ extern "C" void func_00348C48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_00348D98);
+#ifdef SKIP_ASM
+extern "C" void func_00347D90(void* self, int type, void* a1, void* desc);
+extern "C" void func_003492A8(void* self);
+struct sFrBoxRail;
+extern "C" void func_00349110(sFrBoxRail* self);
+extern "C" void cFlexRailNode_addSpaceHash(void* self);
+struct sFrNode9220;
+extern "C" void func_00349220(void* self, sFrNode9220* node);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern char D_0048FF30[];
+extern char D_0048E820[];
+
+struct sFrV_8D98 { float x, y, z, w; } __attribute__((aligned(16)));
+extern sFrV_8D98 D_004FF120;
+
+struct sFlexRailRef_348D98 {
+    unsigned int id;
+    sFlexRailRef_348D98() : id(0xFFFFFFFF) {}
+};
+
+struct sFlexRailElem_348D98 {
+    sFrV_8D98 force;            // 0x00
+    sFrV_8D98 vel;              // 0x10
+    sFrV_8D98 posA;             // 0x20
+    sFrV_8D98 posB;             // 0x30
+    sFlexRailRef_348D98 link;   // 0x40
+    int bone;                   // 0x44
+    char pad48[8];
+};
+
+extern "C" void* func_00348D98(char* self, void* a1, char* desc)
+{
+    func_00347D90(self, 0x14, a1, desc);
+    *(void**)(self + 0xC) = D_0048FF30;
+    *(float*)(self + 0x60) = *(float*)(desc + 0x48);
+    *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
+    *(float*)(self + 0x68) = *(float*)(desc + 0x50);
+    sFlexRailRef_348D98 refs[8];
+    int bones[8];
+    int n = 0;
+    unsigned int* ids = (unsigned int*)(desc + 4);
+    int* bn = (int*)(desc + 0x24);
+    for (int i = 0; i < 8; i++, ids++, bn++) {
+        unsigned int id = *ids;
+        if (id != 0xFFFFFFFF) {
+            refs[n].id = id;
+            bones[n] = *bn;
+            n++;
+        }
+    }
+    sFlexRailElem_348D98*& elems = *(sFlexRailElem_348D98**)(self + 0x70);
+    elems = new (D_0048E820, 0x20000000, 0) sFlexRailElem_348D98[*(int*)(self + 0x20)];
+    for (int j = 0; j < *(int*)(self + 0x20); j++) {
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].link.id = refs[j].id;
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].bone = bones[j];
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].vel = D_004FF120;
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].force = D_004FF120;
+        func_00349220(self, (sFrNode9220*)&(*(sFlexRailElem_348D98**)(self + 0x70))[j]);
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].posB = (*(sFlexRailElem_348D98**)(self + 0x70))[j].posA;
+    }
+    func_003492A8(self);
+    func_00349110((sFrBoxRail*)self);
+    cFlexRailNode_addSpaceHash(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_00348FA0);
@@ -385,7 +453,105 @@ extern "C" void func_00349840(void* self, void* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_003498E8);
+#ifdef SKIP_ASM
+struct sFrV_98E8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFrN_98E8 {
+    sFrV_98E8 force;            // 0x00
+    sFrV_98E8 vel;              // 0x10
+    sFrV_98E8 posA;             // 0x20
+    sFrV_98E8 posB;             // 0x30
+    sFrModelRef9220 model;      // 0x40
+    int bone;                   // 0x44
+    char pad48[8];
+};
+
+extern "C" float func_002D1C70();
+extern "C" void func_00349220(void* self, sFrNode9220* node);
+// View (func_00348D98 earlier in this unit declares it with its own type).
+extern sFrV_98E8 D_004FF120_98E8 __asm__("D_004FF120");
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sFrV_98E8 vu0Sub_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
+{
+    sFrV_98E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sFrV_98E8 vu0Scale_98E8(const sFrV_98E8& v, float s)
+{
+    sFrV_98E8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sFrV_98E8 vu0Add_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
+{
+    sFrV_98E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+extern "C" void func_003498E8(char* self)
+{
+    float dt = func_002D1C70();
+    sFrN_98E8* n = *(sFrN_98E8**)(self + 0x70);
+    for (int i = 0; i < *(int*)(self + 0x20); i++, n++) {
+        if (*(int*)((char*)n->model.get() + 0xC))
+            func_00349220(self, (sFrNode9220*)n);
+        float* k = (float*)(self + 0x60);
+        float ks = -*(float*)(self + 0x60);
+        sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8(n->posA, n->posB), ks),
+                                    vu0Scale_98E8(n->force, k[2]));
+        vu0AddEq_98E8(acc, vu0Scale_98E8(n->vel, -*(float*)(self + 0x64)));
+        vu0AddEq_98E8(n->posA, vu0Scale_98E8(n->vel, dt));
+        vu0AddEq_98E8(n->vel, vu0Scale_98E8(acc, dt));
+        n->force = D_004FF120_98E8;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_00349AD0);

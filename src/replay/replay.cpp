@@ -1,6 +1,86 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("replay/replay", cReplay_restoreFrame);
+#ifdef SKIP_ASM
+class cStreamRF {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+};
+class cStreamRB;
+class cStreamRDB;
+struct cReplayFramePtr;
+extern "C" void func_00354C98(void* mgr, void* bucket);
+extern "C" void cBucketMan_purgeBucket(void* mgr, int bucket);
+extern "C" void cWorld_resetMap(void* world);
+void cReplayFramePtr_readRewind(cReplayFramePtr* p);
+void func_00317908(void* buf);
+// PORT: cWorldPainterMan_reset__FPv is called without loading $a0 here.
+void cWorldPainterMan_reset_0() __asm__("cWorldPainterMan_reset__FPv");
+extern "C" void* cBE_getBE();
+extern "C" void cBE_readFromReplayFrame(void* be, void* stream);
+extern "C" void cAvalanche_readFromReplayFrame(char* stream);
+extern "C" void func_0030BD20(void* self, void* stream);
+extern "C" void func_00229E58(void* self, void* stream);
+extern "C" void func_00344240(void* self, void* stream);
+extern "C" void func_00357D28(void* self, void* stream);
+extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* stream);
+extern "C" void cReplay_restoreDeadBucket(void* self, cStreamRDB* stream);
+extern "C" void func_00103578(void* self, void* stream);
+extern "C" void func_0026DE58(void* self, int a);
+extern "C" void func_0012B788(void* self);
+extern "C" void cGameViewMan_updateAll(void* self);
+extern char D_004A5988;
+extern void* D_004A47B8_DBF0 __asm__("D_004A47B8");
+extern void* D_004A28A8;
+extern void* D_004A3DD8;
+extern void* D_004A2A00;
+extern void* D_004A3FF0;
+extern void* D_004A4028;
+extern int D_004A5B78;
+extern int D_004A5B7C;
+
+struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
+
+extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
+{
+    void* bm = &D_004A5988;
+    func_00354C98(bm, (void*)1);
+    cBucketMan_purgeBucket(bm, 1);
+    cBucketMan_purgeBucket(bm, 8);
+    cWorld_resetMap(D_004A47B8_DBF0);
+    cReplayFramePtr_readRewind((cReplayFramePtr*)stream);
+    char buf[0x18];
+    stream->v02(buf, 0x18);
+    func_00317908(buf);
+    int v;
+    stream->v02(&v, 4);
+    D_004A5B78 = v;
+    stream->v02(&v, 4);
+    D_004A5B7C = v;
+    cWorldPainterMan_reset_0();
+    cBE_readFromReplayFrame(cBE_getBE(), stream);
+    char* o = *(char**)((char*)D_004A28A8 + 0x84);
+    sVtS_DBF0* vt = *(sVtS_DBF0**)o;
+    vt[9].fn(o + vt[9].delta, stream);
+    char* o2 = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    sVtS_DBF0* vt2 = *(sVtS_DBF0**)(o2 + 0xCC);
+    vt2[8].fn(o2 + vt2[8].delta, stream);
+    cAvalanche_readFromReplayFrame((char*)stream);
+    func_0030BD20(D_004A3DD8, stream);
+    func_00229E58(D_004A2A00, stream);
+    func_00344240(D_004A3FF0, stream);
+    func_00357D28(D_004A4028, stream);
+    cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
+    cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
+    func_00103578(*(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0xA4), stream);
+    func_0026DE58(self, 1);
+    func_0012B788(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+    cGameViewMan_updateAll(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84));
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replay", cReplay_restoreBucket);

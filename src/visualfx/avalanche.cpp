@@ -81,7 +81,92 @@ extern "C" void func_002D6410(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D64D8);
+#ifdef SKIP_ASM
+struct sVec4_64D8 {
+    float x, y, z, w;
+    sVec4_64D8() {}
+    sVec4_64D8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+extern float D_004A3A94;
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_64D8(const sVec4_64D8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_64D8 vNorm_64D8(const sVec4_64D8& v)
+{
+    sVec4_64D8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_64D8 vScale_64D8(const sVec4_64D8& v, float s)
+{
+    sVec4_64D8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+static inline int isBad_64D8(const float* f)
+{
+    unsigned int b = *(const unsigned int*)f;
+    int r = 0;
+    if (b == 0x7F800000 || b == 0x7FC00000 || b == 0xFF800000 || b == 0xFFC00000)
+        r = 1;
+    return r;
+}
+
+extern "C" void func_002D64D8(void* self, sVec4_64D8* v)
+{
+    if (D_004A3A94 < vLen_64D8(*v))
+        *v = vScale_64D8(vNorm_64D8(*v), D_004A3A94);
+    int bad = isBad_64D8(&v->x) || isBad_64D8(&v->y) || isBad_64D8(&v->z) || isBad_64D8(&v->w);
+    if (bad)
+        *v = sVec4_64D8(10.0f, 10.0f, 10.0f, 0.0f);
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", tAvalancheNode_calculate);
 
@@ -326,7 +411,97 @@ INCLUDE_ASM("visualfx/avalanche", func_002D8A00);
 
 INCLUDE_ASM("visualfx/avalanche", func_002D8EA8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D9130);
+#ifdef SKIP_ASM
+struct sRState_9130 {
+    int f0;
+    int f4;
+    unsigned b0 : 5;
+    unsigned b5 : 5;
+    unsigned b10 : 22;
+    int fC;
+    short f10;
+    short f12;
+};
+struct sRCtx_9130 {
+    char pad[0xE84];
+    sRState_9130* top;          // 0xE84
+    char padE88[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void setMatrix(void* m, int a);
+    virtual void setPos(float x, float y, float z);
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void setRot(void* r);
+};
+struct sCam_9130 {
+    int f0;
+    float* views[4];            // 0x4
+    int cur;                    // 0x14
+    float mats[4][4];           // 0x18
+};
+extern char* D_004A28A8;
+extern sRCtx_9130* D_004A5B80;
+extern int D_004A41EC;
+extern sRState_9130 D_00501420;
+extern "C" void func_002D8EA8(void* slot);
+
+static inline sCam_9130* getCam_9130() { return *(sCam_9130**)(*(char**)(D_004A28A8 + 0x84) + 0x84); }
+
+static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
+
+extern "C" void func_002D9130(void)
+{
+    if ((D_004A3A30 != 0 && D_004A3ABC != 0) || D_004A41EC != 0)
+    {
+        sRCtx_9130* ctx = D_004A5B80;
+        float* view = getCam_9130()->views[getCam_9130()->cur];
+        ctx->top[1] = ctx->top[0];
+        ctx->top++;
+        *ctx->top = D_00501420;
+        setB5_9130(ctx, 7);
+        *(short*)((char*)ctx->top + 0x10) = -1;
+        ctx->setMatrix(getCam_9130()->mats[getCam_9130()->cur], 1);
+        ctx->setPos(view[0], view[1], view[2]);
+        ctx->setRot(view + 0x10);
+        if (D_004A3A30 != 0)
+        {
+            for (int i = 0; i < 16; i++)
+                func_002D8EA8(&D_00538938[i]);
+        }
+        ctx->top--;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_addAvalancheNode);
 
@@ -594,7 +769,204 @@ extern "C" void func_002D9FB8(void* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_resolveDataPointers);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern void* D_004A3AB0;
+extern void* D_004A3AB4;
+extern int D_004A3ABC;
 
+struct sAvVec4_A028 {
+    float x, y, z, w;
+    sAvVec4_A028() {}
+    sAvVec4_A028(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+struct sAvNodeA028 {
+    char pad0[0xE0];
+    sAvVec4_A028 pos;           // 0xE0
+    unsigned short type;        // 0xF0
+    unsigned char emit;         // 0xF2
+    unsigned char owned;        // 0xF3
+    sAvNodeA028* next;          // 0xF4
+    int id;                     // 0xF8
+    char* data;                 // 0xFC
+    float count;                // 0x100
+};
+struct sAvPairA028 { float v; int f4; };
+struct sAvIdxA028 { unsigned short a; unsigned short b; };
+struct sAvGroupA028 {
+    int f0;
+    sAvNodeA028* nodes;         // 0x4
+    sAvGroupA028* next;         // 0x8
+    unsigned short nPairs;      // 0xC
+    unsigned short nIdx;        // 0xE
+    sAvPairA028 pairs[32];      // 0x10
+    sAvIdxA028 idx[1];          // 0x110
+};
+
+extern "C" void cAvalanche_resolveDataPointers(void)
+{
+    if (D_004A3AB0 == 0)
+        return;
+    if (D_004A3AB4 == 0)
+        return;
+    if (D_004A3ABC != 0)
+        return;
+    char* p = (char*)D_004A3AB4 + 8;
+    for (sAvGroupA028* g = (sAvGroupA028*)D_004A3AB0; g != 0; g = g->next) {
+        for (sAvNodeA028* n = g->nodes; n != 0; n = n->next) {
+            p += 4;
+            float* f = (float*)p;
+            n->pos = sAvVec4_A028(f[0], f[1], f[2], 1.0f);
+            p += 12;
+            if (n->owned && n->data)
+                cMemMan_free(n->data);
+            n->data = p;
+            n->owned = 0;
+            p += (int)n->count * 10;
+        }
+        g->nPairs = *(unsigned short*)p;
+        p += 2;
+        g->nIdx = *(unsigned short*)p;
+        p += 2;
+        for (int i = 0; i < g->nPairs; i++) {
+            g->pairs[i].v = *(float*)p;
+            g->pairs[i].f4 = 0;
+            p += 8;
+        }
+        for (int j = 0; j < g->nIdx; j++) {
+            g->idx[j].b = *(unsigned short*)p;
+            p += 2;
+            g->idx[j].a = *(unsigned short*)p;
+            p += 2;
+        }
+        g->nPairs = 0;
+    }
+    D_004A3ABC = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002DA1C0);
+#ifdef SKIP_ASM
+struct sVec4_A1C0 {
+    float x, y, z, w;
+    sVec4_A1C0() {}
+    sVec4_A1C0(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+struct sVec3_A1C0 { float x, y, z; };
+struct sAvInfo_A1C0 {
+    sVec4_A1C0 center;          // 0x0
+    float total;                // 0x10
+    float minDist;              // 0x14
+    int count;                  // 0x18
+    bool any;                   // 0x1C
+};
+struct sAvNode_A1C0 {
+    char pad0[0x60];
+    sVec4_A1C0 pos;             // 0x60
+    char pad70[0xB0 - 0x70];
+    float weight;               // 0xB0
+    char padB4[0x2E0 - 0xB4];
+    char* src;                  // 0x2E0
+    sAvNode_A1C0* next;         // 0x2E4
+};
+extern sVec4_A1C0 D_004FF120;
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_A1C0 vSub_A1C0(const sVec4_A1C0& a, const sVec4_A1C0& b)
+{
+    sVec4_A1C0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_A1C0(const sVec4_A1C0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vAddEq_A1C0(sVec4_A1C0& dst, const sVec4_A1C0& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void vDivEq_A1C0(sVec4_A1C0& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: g++ `<?` (min) operator.
+extern "C" sAvInfo_A1C0 func_002DA1C0(sVec3_A1C0 p)
+{
+    sAvInfo_A1C0 r;
+    r.center = D_004FF120;
+    r.minDist = 999999.0f;
+    r.count = 0;
+    r.total = 0.0f;
+    r.any = 0;
+    for (int i = 0; i < 16; i++) {
+        sAvalancheSlot* s = &D_00538938[i];
+        if (s->active == 0)
+            continue;
+        for (sAvNode_A1C0* n = *(sAvNode_A1C0**)s->pad; n != 0; n = n->next) {
+            if (n->src == 0)
+                continue;
+            sVec4_A1C0 d = vSub_A1C0(sVec4_A1C0(p.x, p.y, p.z, 1.0f), n->pos);
+            float dist = vLen_A1C0(d);
+            if (dist < 225000000.0f) {
+                vAddEq_A1C0(r.center, n->pos);
+                r.total += n->weight;
+                r.minDist = r.minDist <? dist;
+                r.any |= *(unsigned short*)(n->src + 0xF0) == 2;
+                r.count++;
+            }
+        }
+    }
+    vDivEq_A1C0(r.center, (float)r.count);
+    r.total = r.total / (float)r.count;
+    return r;
+}
+#endif
 

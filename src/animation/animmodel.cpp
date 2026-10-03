@@ -402,7 +402,61 @@ extern "C" int func_00310C48(void* self, int idx, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310CE8);
+#ifdef SKIP_ASM
+extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern char D_004A3DF0[];
+
+struct sAnimPart_0CE8 {
+    int f0;
+    int firstBit;               // 0x4
+    int f8;
+    int chanBit;                // 0xC
+    char pad10[0x38 - 0x10];
+    char* names;                // 0x38 (0x50-byte entries)
+    char pad3C[0x44 - 0x3C];
+    int count;                  // 0x44
+    char pad48[0x58 - 0x48];
+};
+
+// PORT: returns a 64-bit mask (long is 8 bytes on the EE).
+extern "C" ulong func_00310CE8(char* self, int idx, char* names)
+{
+    if (*(int*)(self + 0x14) < idx)
+        return 0;
+    int* tbl = *(int**)(self + 0x1C);
+    if (tbl == 0 || tbl[idx] < 0)
+        return 0;
+    char* p = names;
+    ulong mask = 0;
+    sAnimPart_0CE8* part = &(*(sAnimPart_0CE8**)(self + 0xC))[tbl[idx]];
+    while (*p) {
+        char* q = p;
+        if (*q != 0 && *q != ',') {
+            do
+                q++;
+            while (*q != 0 && *q != ',');
+        }
+        int len = q - p;
+        if (part->chanBit >= 0 && func_00416B18(p, D_004A3DF0, len) == 0) {
+            mask |= (ulong)1 << (part->chanBit + *(int*)(self + 0x10));
+        } else {
+            char* list = part->names;
+            int j = 0;
+            ulong one = 1;
+            for (; j < part->count; j++) {
+                if (func_00416B18(list + j * 0x50, p, len) == 0 && *(list + len + j * 0x50) == 0) {
+                    mask |= one << (part->firstBit + j);
+                    break;
+                }
+            }
+        }
+        p = q + (*q == ',');
+    }
+    return mask;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00310EA8);

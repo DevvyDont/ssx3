@@ -42,7 +42,68 @@ void cAppMan__cAppMan(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/appman", cAppMan_run);
+#ifdef SKIP_ASM
+extern "C" void SYNCTASK_run(int a);
+extern "C" void cAppMan_mainLoop(void* self);
+struct cAppMan;
+int cAppMan_checkHalt(cAppMan* self);
+
+struct sVt0_6D60 { short delta; short index; int (*fn)(void*); };
+struct sVt1_6D60 { short delta; short index; void (*fn)(void*, int); };
+struct sVt2_6D60 { short delta; short index; void (*fn)(void*, int, int); };
+
+static inline int call0_6D60(char* o, int vtoff, int slot)
+{
+    sVt0_6D60* vt = *(sVt0_6D60**)(o + vtoff);
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+struct sVtV_6D60 { short delta; short index; void (*fn)(void*); };
+
+static inline void callv_6D60(char* o, int vtoff, int slot)
+{
+    sVtV_6D60* vt = *(sVtV_6D60**)(o + vtoff);
+    vt[slot].fn(o + vt[slot].delta);
+}
+
+static inline void call1_6D60(char* o, int vtoff, int slot, int a)
+{
+    sVt1_6D60* vt = *(sVt1_6D60**)(o + vtoff);
+    vt[slot].fn(o + vt[slot].delta, a);
+}
+
+extern "C" int cAppMan_run(char* self, char* exec, int a2, int a3)
+{
+    *(float*)(self + 0x14) = 0.01666666753590107f;
+    *(char**)(self + 0x8) = exec;
+    *(int*)(self + 0x10) = 60;
+    call1_6D60(exec, 8, 2, 60);
+    sVt2_6D60* vt = *(sVt2_6D60**)(self + 0x5C);
+    vt[3].fn(self + vt[3].delta, a2, a3);
+    call1_6D60(*(char**)(self + 0x8), 8, 9, *(int*)(self + 0x4));
+    while (call0_6D60(*(char**)(self + 0x8), 8, 10) == 0) {
+        callv_6D60(*(char**)(self + 0x8), 8, 11);
+        SYNCTASK_run(0);
+        callv_6D60(*(char**)(self + 0x8), 8, 12);
+        callv_6D60(*(char**)(self + 0x8), 8, 4);
+        cAppMan_checkHalt((cAppMan*)self);
+    }
+    char* next = *(char**)(self + 0x4);
+    *(int*)(self + 0x4) = 0;
+    *(char**)(self + 0x0) = next;
+    callv_6D60(next, 0, 5);
+    *(int*)(self + 0x58) = 0;
+    cAppMan_mainLoop(self);
+    callv_6D60(self, 0x5C, 4);
+    callv_6D60(*(char**)(self + 0x8), 8, 3);
+    char* e = *(char**)(self + 0x8);
+    if (e)
+        call1_6D60(e, 8, 1, 3);
+    return 0;
+}
+#endif
 
 struct cAppMan {
     char pad_0x00[0x4];

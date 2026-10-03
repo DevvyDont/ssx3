@@ -565,7 +565,115 @@ extern "C" void func_0031A3C0(void* buf)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031A490);
+#ifdef SKIP_ASM
+// PORT: PS2-only handler trampoline: saves/restores all 32 FPU registers around the
+// handler call and re-enables interrupts (sync; ei). Needs a native replacement off-PS2.
+extern "C" int func_0031A490(int arg, void (*handler)(int))
+{
+    int save[32];
+    __asm__ __volatile__(
+        "mfc1 $2, $f0\n\tsw $2, %0\n\t"
+        "mfc1 $2, $f1\n\tsw $2, %1\n\t"
+        "mfc1 $2, $f2\n\tsw $2, %2\n\t"
+        "mfc1 $2, $f3\n\tsw $2, %3\n\t"
+        "mfc1 $2, $f4\n\tsw $2, %4\n\t"
+        "mfc1 $2, $f5\n\tsw $2, %5\n\t"
+        "mfc1 $2, $f6\n\tsw $2, %6\n\t"
+        "mfc1 $2, $f7\n\tsw $2, %7\n\t"
+        : "=m"(save[0]), "=m"(save[1]), "=m"(save[2]), "=m"(save[3]), "=m"(save[4]), "=m"(save[5]), "=m"(save[6]), "=m"(save[7])
+        :
+        : "$2");
+    __asm__ __volatile__(
+        "mfc1 $2, $f8\n\tsw $2, %0\n\t"
+        "mfc1 $2, $f9\n\tsw $2, %1\n\t"
+        "mfc1 $2, $f10\n\tsw $2, %2\n\t"
+        "mfc1 $2, $f11\n\tsw $2, %3\n\t"
+        "mfc1 $2, $f12\n\tsw $2, %4\n\t"
+        "mfc1 $2, $f13\n\tsw $2, %5\n\t"
+        "mfc1 $2, $f14\n\tsw $2, %6\n\t"
+        "mfc1 $2, $f15\n\tsw $2, %7\n\t"
+        : "=m"(save[8]), "=m"(save[9]), "=m"(save[10]), "=m"(save[11]), "=m"(save[12]), "=m"(save[13]), "=m"(save[14]), "=m"(save[15])
+        :
+        : "$2");
+    __asm__ __volatile__(
+        "mfc1 $2, $f16\n\tsw $2, %0\n\t"
+        "mfc1 $2, $f17\n\tsw $2, %1\n\t"
+        "mfc1 $2, $f18\n\tsw $2, %2\n\t"
+        "mfc1 $2, $f19\n\tsw $2, %3\n\t"
+        "mfc1 $2, $f20\n\tsw $2, %4\n\t"
+        "mfc1 $2, $f21\n\tsw $2, %5\n\t"
+        "mfc1 $2, $f22\n\tsw $2, %6\n\t"
+        "mfc1 $2, $f23\n\tsw $2, %7\n\t"
+        : "=m"(save[16]), "=m"(save[17]), "=m"(save[18]), "=m"(save[19]), "=m"(save[20]), "=m"(save[21]), "=m"(save[22]), "=m"(save[23])
+        :
+        : "$2");
+    __asm__ __volatile__(
+        "mfc1 $2, $f24\n\tsw $2, %0\n\t"
+        "mfc1 $2, $f25\n\tsw $2, %1\n\t"
+        "mfc1 $2, $f26\n\tsw $2, %2\n\t"
+        "mfc1 $2, $f27\n\tsw $2, %3\n\t"
+        "mfc1 $2, $f28\n\tsw $2, %4\n\t"
+        "mfc1 $2, $f29\n\tsw $2, %5\n\t"
+        "mfc1 $2, $f30\n\tsw $2, %6\n\t"
+        "mfc1 $2, $f31\n\tsw $2, %7\n\t"
+        : "=m"(save[24]), "=m"(save[25]), "=m"(save[26]), "=m"(save[27]), "=m"(save[28]), "=m"(save[29]), "=m"(save[30]), "=m"(save[31])
+        :
+        : "$2");
+    handler(arg);
+    __asm__ __volatile__(
+        "lw $2, %0\n\tmtc1 $2, $f0\n\t"
+        "lw $2, %1\n\tmtc1 $2, $f1\n\t"
+        "lw $2, %2\n\tmtc1 $2, $f2\n\t"
+        "lw $2, %3\n\tmtc1 $2, $f3\n\t"
+        "lw $2, %4\n\tmtc1 $2, $f4\n\t"
+        "lw $2, %5\n\tmtc1 $2, $f5\n\t"
+        "lw $2, %6\n\tmtc1 $2, $f6\n\t"
+        "lw $2, %7\n\tmtc1 $2, $f7\n\t"
+        :
+        : "m"(save[0]), "m"(save[1]), "m"(save[2]), "m"(save[3]), "m"(save[4]), "m"(save[5]), "m"(save[6]), "m"(save[7])
+        : "$2");
+    __asm__ __volatile__(
+        "lw $2, %0\n\tmtc1 $2, $f8\n\t"
+        "lw $2, %1\n\tmtc1 $2, $f9\n\t"
+        "lw $2, %2\n\tmtc1 $2, $f10\n\t"
+        "lw $2, %3\n\tmtc1 $2, $f11\n\t"
+        "lw $2, %4\n\tmtc1 $2, $f12\n\t"
+        "lw $2, %5\n\tmtc1 $2, $f13\n\t"
+        "lw $2, %6\n\tmtc1 $2, $f14\n\t"
+        "lw $2, %7\n\tmtc1 $2, $f15\n\t"
+        :
+        : "m"(save[8]), "m"(save[9]), "m"(save[10]), "m"(save[11]), "m"(save[12]), "m"(save[13]), "m"(save[14]), "m"(save[15])
+        : "$2");
+    __asm__ __volatile__(
+        "lw $2, %0\n\tmtc1 $2, $f16\n\t"
+        "lw $2, %1\n\tmtc1 $2, $f17\n\t"
+        "lw $2, %2\n\tmtc1 $2, $f18\n\t"
+        "lw $2, %3\n\tmtc1 $2, $f19\n\t"
+        "lw $2, %4\n\tmtc1 $2, $f20\n\t"
+        "lw $2, %5\n\tmtc1 $2, $f21\n\t"
+        "lw $2, %6\n\tmtc1 $2, $f22\n\t"
+        "lw $2, %7\n\tmtc1 $2, $f23\n\t"
+        :
+        : "m"(save[16]), "m"(save[17]), "m"(save[18]), "m"(save[19]), "m"(save[20]), "m"(save[21]), "m"(save[22]), "m"(save[23])
+        : "$2");
+    __asm__ __volatile__(
+        "lw $2, %0\n\tmtc1 $2, $f24\n\t"
+        "lw $2, %1\n\tmtc1 $2, $f25\n\t"
+        "lw $2, %2\n\tmtc1 $2, $f26\n\t"
+        "lw $2, %3\n\tmtc1 $2, $f27\n\t"
+        "lw $2, %4\n\tmtc1 $2, $f28\n\t"
+        "lw $2, %5\n\tmtc1 $2, $f29\n\t"
+        "lw $2, %6\n\tmtc1 $2, $f30\n\t"
+        "lw $2, %7\n\tmtc1 $2, $f31\n\t"
+        :
+        : "m"(save[24]), "m"(save[25]), "m"(save[26]), "m"(save[27]), "m"(save[28]), "m"(save[29]), "m"(save[30]), "m"(save[31])
+        : "$2");
+    __asm__ __volatile__("sync\n\tei");
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A6B8);
