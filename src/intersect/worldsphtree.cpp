@@ -506,7 +506,209 @@ INCLUDE_ASM("intersect/worldsphtree", func_00331450);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00332DB8);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00333EF8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sVec4_333EF8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sVec4_333EF8 D_004FF120_333EF8[] __asm__("D_004FF120");
+
+struct sQuery_333EF8 {
+    char pad00[0x20];
+    float max[4];
+    float min[4];
+};
+
+struct sTriObj_333EF8 {
+    char pad00[8];
+    short id;
+    unsigned short flags;
+    char pad0C[0x14C];
+    float bmin[3];
+    float bmax[3];
+};
+
+struct sHit_333EF8 {
+    sVec4_333EF8 pos;   // 0x00
+    sVec4_333EF8 nrm;   // 0x10
+    sVec4_333EF8 v20;   // 0x20
+    sVec4_333EF8 v30;   // 0x30
+    float dist;         // 0x40
+    int type;           // 0x44
+    int pad48;
+    int id;             // 0x4C
+    int f50;            // 0x50
+    void* obj;          // 0x54
+    int f58;            // 0x58
+    int f5C;            // 0x5C
+    int f60;            // 0x60
+    int f64;            // 0x64
+    int f68;            // 0x68
+    float u;            // 0x6C
+    float v;            // 0x70
+    int pad74[3];
+};
+
+struct sVEnt_333EF8 { short delta; short index; void* fn; };
+struct sBox_333EF8;
+typedef int (*Test_333EF8)(void*);
+typedef sBox_333EF8* (*GetBox_333EF8)(void*);
+
+struct sBox_333EF8 {
+    float min[4];
+    float max[4];
+};
+
+struct sObj_333EF8 {
+    int pad00[3];
+    sVEnt_333EF8* vt;
+};
+
+struct sNode_333EF8 {
+    void* next;
+    int pad04;
+    int flags;
+    sObj_333EF8* obj;
+    int pad10[20];
+    float bmin[3];
+    float bmax[3];
+    int pad78[4];
+    int active;
+};
+
+struct sOwner_333EF8 {
+    char pad00[0xA4];
+    void* cache;
+};
+
+struct sTree_333EF8 {
+    sOwner_333EF8* owner;           // 0x0
+    int pad04;
+    unsigned int count;             // 0x8
+    sNode_333EF8* items[0x40];      // 0xC
+    unsigned int ntris;             // 0x10C
+    sTriObj_333EF8* tris[1];        // 0x110
+};
+
+extern "C" void func_003279D0(void* cache, void* src, void** out);
+struct sVec4_335960;
+struct sHit_003342D0;
+extern "C" int func_0032B6E0(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
+extern "C" int func_00334888(void* q, void* node, void* buf, int cap, int mode);
+
+static inline int overlapTri_333EF8(const sQuery_333EF8* q, const sTriObj_333EF8* n)
+{
+    int r = 0;
+    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
+        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
+        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline int overlapNode_333EF8(const sQuery_333EF8* q, const sNode_333EF8* n)
+{
+    int r = 0;
+    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
+        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
+        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline int overlapBox_333EF8(const sQuery_333EF8* q, const sBox_333EF8* o)
+{
+    int r = 0;
+    if (q->max[0] > o->min[0] && q->min[0] < o->max[0] &&
+        q->max[1] > o->min[1] && q->min[1] < o->max[1] &&
+        q->max[2] > o->min[2] && o->max[2] > q->min[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline void reset_333EF8(sHit_333EF8* h)
+{
+    h->type = 2;
+    h->obj = 0;
+    h->f50 = 0;
+    h->f58 = 0;
+    h->f5C = -1;
+    h->f60 = -1;
+    h->f64 = -1;
+    h->id = -1;
+    h->v20 = *D_004FF120_333EF8;
+    h->v30 = *D_004FF120_333EF8;
+    h->f68 = 0;
+    h->u = 0;
+    h->v = 0;
+}
+
+extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int cap, int arg)
+{
+    sTree_333EF8* self = (sTree_333EF8*)vself;
+    sQuery_333EF8* q = (sQuery_333EF8*)vq;
+    sHit_333EF8* hits = (sHit_333EF8*)vhits;
+    int n = 0;
+    for (unsigned int i = 0; i < self->ntris; i++) {
+        sTriObj_333EF8* obj = self->tris[i];
+        if ((obj->flags & 0x41) != 0x41) {
+            continue;
+        }
+        if (!overlapTri_333EF8(q, obj)) {
+            continue;
+        }
+        sVec4_333EF8 uv;
+        sVec4_333EF8 pos;
+        sVec4_333EF8 nrm;
+        void* node;
+        float dist;
+        func_003279D0(self->owner->cache, obj, &node);
+        if (!func_0032B6E0(q, obj, node, (sVec4_335960*)&pos, (sVec4_335960*)&nrm, &dist, (sVec4_335960*)&uv, arg)) {
+            continue;
+        }
+        reset_333EF8(&hits[n]);
+        hits[n].pos = pos;
+        hits[n].nrm = nrm;
+        hits[n].id = obj->id;
+        hits[n].obj = obj;
+        hits[n].dist = dist;
+        hits[n].u = uv.x;
+        hits[n].v = uv.y;
+        n++;
+    }
+    for (unsigned int j = 0; j < self->count; j++) {
+        sNode_333EF8* node = self->items[j];
+        if (node->active == 0) {
+            continue;
+        }
+        int flags = node->flags;
+        if (flags & 0x20) {
+            if (overlapNode_333EF8(q, node)) {
+                n += func_00334888(q, node, (char*)hits + n * 0x80, cap - n, 2);
+            }
+        } else if (flags & 0x40) {
+            if (node->obj == 0) {
+                continue;
+            }
+            sVEnt_333EF8* vt = node->obj->vt;
+            if (((Test_333EF8)vt[44].fn)((char*)node->obj + vt[44].delta)) {
+                sVEnt_333EF8* vt2 = node->obj->vt;
+                sBox_333EF8* b = ((GetBox_333EF8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                if (overlapBox_333EF8(q, b)) {
+                    n += func_00334888(q, node, (char*)hits + n * 0x80, cap - n, 2);
+                }
+            }
+        }
+    }
+    return n;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/worldsphtree", func_003342D0);
@@ -1364,7 +1566,141 @@ INCLUDE_ASM("intersect/worldsphtree", func_0033B748);
 
 INCLUDE_ASM("intersect/worldsphtree", func_0033CCF8);
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_0033DBE8);
+#ifdef SKIP_ASM
+struct sQuery_369D8;
+struct sCtx_369D8;
+struct sCell_369D8;
+extern "C" void func_00335960(void* ctx, void* obj);
+extern "C" void func_00335B90(void* ctx, void* obj);
+extern "C" void func_00340FA0(void* self, void* ctx);
+
+struct sOct_DBE8 {
+    sOct_DBE8* child[8];            // 0x00
+    void** listB;                   // 0x20
+    void** listA;                   // 0x24
+};
+
+struct sCell_DBE8 {
+    int level;                      // 0x0
+    int x;                          // 0x4
+    int y;                          // 0x8
+    int z;                          // 0xC
+};
+
+struct sCtx_DBE8 {
+    float* pos;                     // 0x0
+};
+
+static inline int Classify_DBE8(sCtx_DBE8* ctx, sCell_DBE8* c)
+{
+    int bits = (c->level + 0x7F) << 23;
+    float s = *(float*)&bits;
+    float* p = ctx->pos;
+    if (p[0] < ((float)c->x - 0.2f) * s) {
+        return 1;
+    }
+    if (((float)(c->x + 1) + 0.2f) * s < p[0]) {
+        return 1;
+    }
+    if (p[1] < ((float)c->y - 0.2f) * s) {
+        return 1;
+    }
+    if (((float)(c->y + 1) + 0.2f) * s < p[1]) {
+        return 1;
+    }
+    return 2;
+}
+
+extern "C" void func_0033DBE8(char* flag, sQuery_369D8* q, sQuery_369D8* q2, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
+{
+    sCtx_DBE8* ctx = (sCtx_DBE8*)vctx;
+    sOct_DBE8* node = (sOct_DBE8*)vnode;
+    sCell_DBE8* cell = (sCell_DBE8*)vcell;
+    int r = Classify_DBE8(ctx, cell);
+    if (r == 0) {
+        void** o;
+        for (o = node->listA; o != 0; o = (void**)*o) {
+            func_00335960(q2, o);
+        }
+        for (o = node->listB; o != 0; o = (void**)*o) {
+            func_00335B90(q2, o);
+        }
+        if (node->child[0]) {
+            func_00340FA0(node->child[0], q2);
+        }
+        if (node->child[1]) {
+            func_00340FA0(node->child[1], q2);
+        }
+        if (node->child[2]) {
+            func_00340FA0(node->child[2], q2);
+        }
+        if (node->child[3]) {
+            func_00340FA0(node->child[3], q2);
+        }
+        if (node->child[4]) {
+            func_00340FA0(node->child[4], q2);
+        }
+        if (node->child[5]) {
+            func_00340FA0(node->child[5], q2);
+        }
+        if (node->child[6]) {
+            func_00340FA0(node->child[6], q2);
+        }
+        if (node->child[7]) {
+            func_00340FA0(node->child[7], q2);
+        }
+    } else if (r == 2) {
+        void** o;
+        for (o = node->listA; o != 0; o = (void**)*o) {
+            func_00335960(q, o);
+        }
+        for (o = node->listB; o != 0; o = (void**)*o) {
+            func_00335B90(q, o);
+        }
+        if (cell->level == 11) {
+            return;
+        }
+        sCell_DBE8 sub;
+        sub.level = cell->level - 1;
+        sub.x = cell->x * 2;
+        sub.y = cell->y * 2;
+        sub.z = cell->z * 2;
+        if (node->child[0]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[0], (sCell_369D8*)&sub);
+        }
+        sub.x++;
+        if (node->child[4]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[4], (sCell_369D8*)&sub);
+        }
+        sub.y++;
+        if (node->child[6]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[6], (sCell_369D8*)&sub);
+        }
+        sub.x--;
+        if (node->child[2]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[2], (sCell_369D8*)&sub);
+        }
+        sub.z++;
+        if (node->child[3]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[3], (sCell_369D8*)&sub);
+        }
+        sub.x++;
+        if (node->child[7]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[7], (sCell_369D8*)&sub);
+        }
+        sub.y--;
+        if (node->child[5]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[5], (sCell_369D8*)&sub);
+        }
+        sub.x--;
+        if (node->child[1]) {
+            func_0033DBE8(flag, q, q2, vctx, node->child[1], (sCell_369D8*)&sub);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_0033DFD8);
 

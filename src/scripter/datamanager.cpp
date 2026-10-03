@@ -480,7 +480,156 @@ extern "C" int func_00276270(char* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00276388);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern void* D_004A28A4;
+extern char D_004A34A0[];
+int GetHashValue32(char* s);
+void* func_00230698(void* self, int a1);
+char* func_0027C070(void* obj);
+extern "C" void func_00277778(void* self);
+extern "C" int func_00277DD8(void* self, void* a1);
+// The unit declares func_00279720 as void; it returns func_002822A0's result.
+int func_00279720_i(void* self, int val, int key, int b, int c) __asm__("func_00279720");
+extern "C" int func_0027A4A0(void* self, int a1, int a2);
+extern "C" void func_002826D8(void* self, int a1);
+extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" int func_002839A8(void* self);
+extern "C" void func_00283AA0(void* self);
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
+// PORT: real parameter order of func_002E4370 has the floats before the two trailing ints (cf. boardwakefx).
+void func_002E4370_f(void* snd, int a1, int h, int h2, float t0, float t1, float t2, int a4, int a5) __asm__("func_002E4370");
+extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
+extern "C" void func_002E4578(void* p);
+extern "C" void func_002EA6B8(void* gm, float t);
+extern "C" void func_002EA860(void* gm);
+extern "C" void* func_0039F9D8(void* table, int hash);
+
+struct sDmVEntry_6388 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+struct sDmVEntry2_6388 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sDm_6388 {
+    void* eng;              // 0x0
+    int active;             // 0x4
+    int val;                // 0x8
+    char list[0xA4 - 0xC];  // 0xC
+    int state;              // 0xA4
+    int fA8;
+    int fAC;                // 0xAC
+    int fB0;                // 0xB0
+    int fB4;
+    int fB8;                // 0xB8
+};
+
+struct sDmFade_6388 {
+    char pad_0x0[0x8];
+    signed char cat;        // 0x8
+    signed char key;        // 0x9
+    short tIn;              // 0xA
+    short tHold;            // 0xC
+    short tOut;             // 0xE
+};
+
+struct sDmItem_6388 {
+    int f0;
+    int f4;
+    int flags;              // 0x8
+    int id;                 // 0xC
+};
+
+// The unit declares func_00276388 as void; it returns the state at 0xA4.
+int func_00276388_impl(char* self, int fade, int notify) __asm__("func_00276388");
+
+int func_00276388_impl(char* self, int fade, int notify)
+{
+    sDm_6388* dm = (sDm_6388*)self;
+    if (*(int*)(self + 0xA4) == 1) {
+        func_00277778(self);
+    }
+    if (*(int*)(self + 0xA4) != 2) {
+        return *(int*)(self + 0xA4);
+    }
+    sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
+    dm->state = 3;
+    char* table = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18;
+    char* o = (char*)func_0039F9D8(table, GetHashValue32(D_004A34A0));
+    if (o != 0) {
+        sDmVEntry_6388* e = &(*(sDmVEntry_6388**)(o + 0x8))[24];
+        e->fn(o + e->delta, 0, 0);
+    }
+    if (func_00277DD8(self, item) == 0) {
+        func_00279720_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
+        if (*(int*)(self + 0x4) != 0) {
+            void* snd = func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+            if (*(int*)((char*)snd + 0x44) != 0) {
+                func_002E4578(snd);
+            }
+            int tIn = 0;
+            int tHold = 0;
+            float t = 0.0f;
+            sDmFade_6388* f = (sDmFade_6388*)func_0027C070(func_00282BF0(*(void**)self, item->id));
+            if (fade) {
+                tIn = f->tIn;
+                tHold = f->tHold;
+            }
+            *(int*)(self + 0xB8) = 0;
+            if (tIn + tHold + f->tOut > 0) {
+                if (f->cat != 7) {
+                    int h = func_0027A4A0(*(void**)self, f->cat, f->key);
+                    if (h != 0) {
+                        int h2 = func_0027A4A0(*(void**)self, f->cat, f->key);
+                        float tt = (float)tIn * 0.01666666753590107f;
+                        func_002E4370_f(snd, 2, h, h2, tt, (float)tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f, 0, 0);
+                        t = tt;
+                        *(int*)(self + 0xB8) = tIn + tHold;
+                    }
+                } else if (tIn) {
+                    int h = func_0027A4A0(D_004A28A4, 7, f->key);
+                    float tt = (float)tIn * 0.01666666753590107f;
+                    func_002E4540(snd, 2, h, 0, tt);
+                    t = tt;
+                }
+                if (*(int*)(self + 0xB8) > 0) {
+                    notify = 0;
+                    func_002826D8(*(void**)self, item->id);
+                    *(int*)(self + 0xAC) = 1;
+                    *(int*)(self + 0xB0) = 1;
+                }
+            }
+            if (t <= 0.0f) {
+                t = 0.5f;
+            }
+            func_002EA6B8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64), t);
+        }
+        if (notify) {
+            char* eng = *(char**)self;
+            sDmVEntry2_6388* e = &(*(sDmVEntry2_6388**)(eng + 0x2A8))[6];
+            e->fn(eng + e->delta, item->id);
+        }
+    } else {
+        if (*(int*)(self + 0x4) != 0) {
+            func_002EA860(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64));
+        }
+        func_002839A8(*(char**)self + 0x500);
+        if (notify) {
+            func_00283AA0(*(char**)self + 0x500);
+        }
+    }
+    return *(int*)(self + 0xA4);
+}
+#endif
 
 extern "C" void* func_00277C08(void*, int, int);
 

@@ -693,7 +693,302 @@ extern "C" void func_00356198(void* selfv)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356298);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMoveQuad;
+extern sMoveQuad D_004FF1A0[];
+
+struct sMnVec_6298 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMnMat_6298 {
+    sMnVec_6298 r[4];
+};
+
+struct sMnSlot_6298 {
+    int f0;
+    int type;                       // 0x4 (array at 0x20 + 4)
+};
+
+struct sMnCam_6298 {
+    char pad_0x0[0x20];
+    sMnSlot_6298 slots[(0x3F0 - 0x20) / 8];  // 0x20
+    struct {
+        int kind;
+        char pad[0x14];
+    } paths[1];                     // 0x3F0
+};
+
+struct sMnObj_6298 {
+    char pad_0x0[0x8];
+    int flags;                      // 0x8
+    char pad_0xC[0x50 - 0xC];
+    char box[0x10];                 // 0x50
+    float pos[3];                   // 0x60
+    float scl[3];                   // 0x6C
+    char pad_0x78[0x7D - 0x78];
+    unsigned char slot;             // 0x7D
+    short path;                     // 0x7E
+    char pad_0x80[0x94 - 0x80];
+    void* light;                    // 0x94
+};
+
+class cMnOwner_6298 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual int v26();
+};
+
+struct sMnMod_6298 {
+    cMnOwner_6298* owner;           // 0x0
+    void* rot;                      // 0x4
+    char* volatile light;           // 0x8
+};
+
+class cMnNode_6298 {
+public:
+    char pad[0xC];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void* v24();
+    virtual void v25();
+    virtual int v26();
+    virtual void* v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void* v44();
+    virtual sMnVec_6298* v45();
+};
+
+extern sMnCam_6298** D_004A47B8_6298 __asm__("D_004A47B8");
+struct sMnGfxVt_6298 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct cMnGfx_6298 {
+    char pad_0x0[0x10D8];
+    sMnGfxVt_6298* vt;              // 0x10D8
+};
+
+typedef sMnMat_6298 (*MnViewFn_6298)(void*);
+typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const sMnMat_6298&);
+typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
+
+extern cMnGfx_6298* D_004A5B80_6298 __asm__("D_004A5B80");
+extern "C" void func_00352DD0(void* self);
+extern "C" int func_002D2058(void* v);
+extern "C" void* func_0035FC20(void* self, void* m);
+
+#define OBJ_6298(s) (*(sMnObj_6298**)((char*)(s) + 0x18))
+#define MOD_6298(s) (*(sMnMod_6298**)((char*)(s) + 0x1C))
+
+static inline int HasRot_6298(sMnMod_6298* m)
+{
+    return m != 0 && m->rot != 0;
+}
+
+static inline int HasLight_6298(sMnMod_6298* m)
+{
+    return m != 0 && m->light != 0;
+}
+
+static inline void* Mat_6298(void* rot, sMnMat_6298* m)
+{
+    void* r;
+    if (rot) {
+        r = func_0035FC20(rot, m);
+    } else {
+        r = 0;
+    }
+    return r;
+}
+
+static inline void* LmSub_6298(char* l)
+{
+    return l + 0x24;
+}
+
+static inline void* Lm_6298(char* l)
+{
+    if (l == 0) {
+        return 0;
+    }
+    return LmSub_6298(l);
+}
+
+static inline void* RotOf_6298(cMnNode_6298* n, sMnMat_6298* m)
+{
+    if (HasRot_6298(MOD_6298(n))) {
+        return Mat_6298(MOD_6298(n)->rot, m);
+    }
+    return 0;
+}
+
+static inline void* LightOf_6298(cMnNode_6298* n)
+{
+    if (HasLight_6298(MOD_6298(n))) {
+        return Lm_6298(MOD_6298(n)->light);
+    }
+    return OBJ_6298(n)->light;
+}
+
+static inline bool IsT6_6298(sMnCam_6298* c, int i)
+{
+    return c->slots[i].type == 6;
+}
+
+static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
+{
+    if (obj->slot == 0xFF) {
+        return 1;
+    }
+    if (IsT6_6298(cam, obj->slot)) {
+        return cam->paths[obj->path].kind == 3;
+    }
+    return 0;
+}
+
+extern "C" void func_00356298(cMnNode_6298* self)
+{
+    sMnCam_6298* cam = *D_004A47B8_6298;
+    sMnObj_6298* obj = OBJ_6298(self);
+    if (!Visible_6298(cam, obj)) {
+        return;
+    }
+    int flags = 0;
+    cMnGfx_6298* gfx = D_004A5B80_6298;
+    if (MOD_6298(self)) {
+        func_00352DD0(MOD_6298(self));
+        cMnOwner_6298* o = MOD_6298(self)->owner;
+        if (o) {
+            if (o->v26() == 7) {
+                flags |= 0x2000;
+            }
+        }
+    }
+    if (!(OBJ_6298(self)->flags & 4)) {
+        return;
+    }
+    if (*(int*)((char*)self + 0x28)) {
+        return;
+    }
+    void* mat = self->v44();
+    int res;
+    if (mat) {
+        sMnVec_6298* m = self->v45();
+        sMnGfxVt_6298* vt = gfx->vt;
+        char* thisp = (char*)gfx + vt[93].delta;
+        res = ((MnCullFn_6298)vt[93].fn)(thisp, m, m + 1, ((MnViewFn_6298)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+    } else {
+        sMnGfxVt_6298* vt = gfx->vt;
+        char* thisp = (char*)gfx + vt[93].delta;
+        sMnVec_6298 b[2];
+        b[0].x = OBJ_6298(self)->pos[0];
+        b[0].y = OBJ_6298(self)->pos[1];
+        b[0].z = OBJ_6298(self)->pos[2];
+        b[0].w = 1.0f;
+        b[1].x = OBJ_6298(self)->scl[0];
+        b[1].y = OBJ_6298(self)->scl[1];
+        b[1].z = OBJ_6298(self)->scl[2];
+        b[1].w = 1.0f;
+        res = ((MnCullFn_6298)vt[93].fn)(thisp, &b[0], &b[1], ((MnViewFn_6298)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+    }
+    if (res == 1) {
+        return;
+    }
+    flags |= 0x400;
+    if (res) {
+        flags |= 0x20;
+    }
+    if (!mat) {
+        if (func_002D2058(OBJ_6298(self)->box)) {
+            return;
+        }
+    }
+    void* rot = 0;
+    void* tex;
+    void* xf;
+    if (self->v26()) {
+        tex = self->v27();
+        xf = D_004FF1A0;
+    } else {
+        tex = 0;
+        xf = self->v24();
+    }
+    sMnMat_6298 rm;
+    if (HasRot_6298(MOD_6298(self))) {
+        rot = RotOf_6298(self, &rm);
+        flags |= 2;
+    }
+    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
+    sMnGfxVt_6298* vt = gfx->vt;
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, *(float*)((char*)self + 0x24));
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_00356608);
 

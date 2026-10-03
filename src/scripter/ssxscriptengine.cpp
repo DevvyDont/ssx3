@@ -1274,7 +1274,159 @@ extern "C" void func_0027AAF8(void* self, int state)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027AC60);
+#ifdef SKIP_ASM
+extern "C" int* func_00144BC0(void* iface);
+extern "C" int func_00146150(void* self, int index, int kind, int flag);
+extern "C" void func_00146320(void* self, int index, int kind, int flag, int value);
+extern "C" int func_001464D0(void* self, int index, int rc, int kind, int flag);
+extern "C" int func_00146E98(void* iface, int idx);
+extern "C" signed char func_0014A0B0(int index);
+int cBENewPlayerInterface_getRiderCharID(void* self, int index);
+
+struct sScGame_AC60 {
+    char pad_0x0[0x48];
+    signed char mode;               // 0x48
+    signed char lock;               // 0x49
+};
+
+struct sScVt_AC60 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sScSub_AC60 {
+    sScVt_AC60* vt;
+};
+
+struct sScRider_AC60 {
+    char pad_0x0[0x6C0];
+    sScSub_AC60 sub;                // 0x6C0
+};
+
+struct sScSlot_AC60 {
+    char pad_0x0[0x18];
+    sScRider_AC60* rider;           // 0x18
+};
+
+struct sScList_AC60 {
+    char pad_0x0[0x28];
+    sScRider_AC60* riders[6];       // 0x28
+    sScSlot_AC60* slots[2];         // 0x40
+    sScSlot_AC60* first;            // 0x48
+    char pad_0x4C[0x5C - 0x4C];
+    sScSlot_AC60* other;            // 0x5C
+    char pad_0x60[0x78 - 0x60];
+    int nriders;                    // 0x78
+    int nslots;                     // 0x7C
+    int nfirst;                     // 0x80
+    int nother;                     // 0x84
+};
+
+struct sScTbl_AC60 {
+    int v[4];
+};
+
+struct sScBlk_AC60 {
+    int w[0x54 / 4];
+    int kind;                       // 0x54
+    int w2[(0x64 - 0x58) / 4];
+};
+
+extern sScGame_AC60 D_00535BC8;
+extern int D_00536730[];
+extern int D_00536708[];
+extern sScTbl_AC60 D_00481E90;
+
+static inline int Call_AC60(sScRider_AC60* r, int slot)
+{
+    sScSub_AC60* s = &r->sub;
+    return s->vt[slot].fn((char*)s + s->vt[slot].delta);
+}
+
+extern "C" void func_0027AC60(void* self)
+{
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
+    sScGame_AC60* g = &D_00535BC8;
+    int mode = g->mode;
+    if (mode == 4) {
+        return;
+    }
+    if (*(int*)(*(char**)(D_004A28A8 + 0xC0) + 0x98) == 0) {
+        return;
+    }
+    char* x = *(char**)(D_004A28A8 + 0x84);
+    if (*(int*)(*(char**)(x + 0x84) + 0x10) != 1) {
+        return;
+    }
+    int found = 0;
+    sScList_AC60* list = *(sScList_AC60**)(x + 0xC);
+    if (g->lock == 0) {
+        for (int i = 0; i < list->nslots; i++) {
+            if (D_00536730[Call_AC60(list->slots[i]->rider, 7)] < 3) {
+                found = 1;
+                goto done;
+            }
+        }
+    }
+done:
+    if (found) {
+        int ids[3];
+        int best = 3;
+        for (int j = 0; j < 3; j++) {
+            int v = D_00536708[j];
+            ids[j] = v;
+            if (v >= list->nriders) {
+                ids[j] = -1;
+            } else if (Call_AC60(list->riders[v], 8)) {
+                best = j;
+            }
+        }
+        sScTbl_AC60 tbl = D_00481E90;
+        int k = tbl.v[best];
+        if (best == 0) {
+            k = 9;
+            int c = func_0014A0B0(Call_AC60(list->riders[ids[0]], 7));
+            if ((unsigned)(c - 10) < 11 || c == 0x1C) {
+                k = 10;
+            }
+        }
+        func_00278E50(D_004A28A4, 0, k, 1, 0, ids[0], ids[1], ids[2]);
+    }
+    if (D_00535BC8.lock != 0) {
+        return;
+    }
+    if ((unsigned)mode >= 4) {
+        return;
+    }
+    void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
+    sScBlk_AC60 blk = *(sScBlk_AC60*)func_00144BC0(econ);
+    int first = mode == 0;
+    int idx = func_00146E98(players, 0);
+    int r = func_00146150(players, idx, blk.kind, first);
+    if ((unsigned)(func_0014A0B0(idx) - 10) < 11) {
+        return;
+    }
+    int rc = cBENewPlayerInterface_getRiderCharID(players, idx);
+    if (func_001464D0(players, idx, rc, blk.kind, first)) {
+        return;
+    }
+    if (r != 0) {
+        return;
+    }
+    int v = -1;
+    if (list->nfirst > 0) {
+        v = Call_AC60(list->first->rider, 7);
+    } else if (list->nother > 0) {
+        v = Call_AC60(list->other->rider, 7);
+    }
+    func_00278E50(D_004A28A4, 0, 0x18, 1, 0, v, -1, -1);
+    func_00278E50(D_004A28A4, 0, 0x19, 3, 0, v, -1, -1);
+    func_00146320(players, idx, blk.kind, first, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetScriptFromCategory);

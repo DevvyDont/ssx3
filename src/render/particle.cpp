@@ -2437,7 +2437,86 @@ INCLUDE_ASM("render/particle", func_0037BD38);
 
 INCLUDE_ASM("render/particle", func_0037BD98);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037C198);
+#ifdef SKIP_ASM
+struct sPtBits_C198 {
+    unsigned long f0 : 3;
+    unsigned long g0 : 1;
+    unsigned long f1 : 3;
+    unsigned long g1 : 1;
+    unsigned long f2 : 3;
+    unsigned long g2 : 1;
+    unsigned long f3 : 3;
+    unsigned long g3 : 1;
+    unsigned long f4 : 3;
+    unsigned long g4 : 1;
+    unsigned long f5 : 3;
+    unsigned long g5 : 1;
+    unsigned long f6 : 3;
+    unsigned long g6 : 1;
+    unsigned long f7 : 3;
+    unsigned long g7 : 1;
+    unsigned long f8 : 3;
+    unsigned long g8 : 1;
+    unsigned long f9 : 3;
+    unsigned long g9 : 1;
+    unsigned long f10 : 3;
+    unsigned long g10 : 1;
+    unsigned long f11 : 3;
+    unsigned long g11 : 1;
+    unsigned long f12 : 3;
+    unsigned long g12 : 1;
+    unsigned long f13 : 3;
+    unsigned long g13 : 1;
+    unsigned long f14 : 3;
+    unsigned long g14 : 1;
+    unsigned long f15 : 3;
+    unsigned long g15 : 1;
+};
+
+struct sPtGfx_C198 {
+    char pad_0x0[0x59E0];
+    sPtBits_C198 bits;              // 0x59E0
+};
+
+// PORT: 64-bit `long` bitfields (the GS-style register word).
+extern "C" void func_0037C198(sPtGfx_C198* self, int* src)
+{
+    self->bits.f0 = src[0];
+    self->bits.f1 = src[1];
+    self->bits.f2 = src[2];
+    self->bits.f3 = src[3];
+    self->bits.f4 = src[4];
+    self->bits.f5 = src[5];
+    self->bits.f6 = src[6];
+    self->bits.f7 = src[7];
+    self->bits.f8 = src[8];
+    self->bits.f9 = src[9];
+    self->bits.f10 = src[10];
+    self->bits.f11 = src[11];
+    self->bits.f12 = src[12];
+    self->bits.f13 = src[13];
+    self->bits.f14 = src[14];
+    self->bits.f15 = src[15];
+    self->bits.g0 = 0;
+    self->bits.g1 = 0;
+    self->bits.g2 = 0;
+    self->bits.g3 = 0;
+    self->bits.g4 = 0;
+    self->bits.g5 = 0;
+    self->bits.g6 = 0;
+    self->bits.g7 = 0;
+    self->bits.g8 = 0;
+    self->bits.g9 = 0;
+    self->bits.g10 = 0;
+    self->bits.g11 = 0;
+    self->bits.g12 = 0;
+    self->bits.g13 = 0;
+    self->bits.g14 = 0;
+    self->bits.g15 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037C570);
@@ -3269,7 +3348,192 @@ INCLUDE_ASM("render/particle", func_00380CE0);
 
 INCLUDE_ASM("render/particle", func_00381310);
 
+//100%
 INCLUDE_ASM("render/particle", func_003816F0);
+#ifdef SKIP_ASM
+struct sPtRS_16F0 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_16F0 {
+    sPtRS_16F0 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_16F0 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_16F0 ents[1];            // 0x80
+};
+
+struct sQuad_16F0 {
+    unsigned int w[4];
+} __attribute__((aligned(16)));
+
+struct sMat_16F0 {
+    float m[4][4];
+    sMat_16F0() {}
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+    sMat_16F0(const sMat_16F0& s)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+} __attribute__((aligned(16)));
+
+struct sVec4_16F0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPtGfx_16F0 {
+    char pad_0x0[0xE84];
+    sPtRS_16F0* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_16F0* ring;             // 0x18F0
+    char pad_0x18F4[0x5860 - 0x18F4];
+    sMat_16F0 m5860;                // 0x5860
+    char pad_0x58A0[0x5A00 - 0x58A0];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+struct sPtObj_16F0 {
+    sQuad_16F0 q[5];                // 0x00
+    sMat_16F0 mat;                  // 0x50
+};
+
+extern int D_004A4474;
+extern char D_408[];
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_0037D968(void* self);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix product).
+static inline sMat_16F0 MulMat_16F0(const sMat_16F0& a, const sMat_16F0& b)
+{
+    sMat_16F0 d;
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(&d), "r"(&a), "r"(&b)
+        : "memory");
+    return d;
+}
+
+static inline void CopyQuads_16F0(unsigned long** pp, const void* srcp, int n)
+{
+    const sQuad_16F0* src = (const sQuad_16F0*)srcp;
+    sQuad_16F0* d = (sQuad_16F0*)*pp;
+    sQuad_16F0* end = d + n;
+    while (d != end) {
+        *d++ = *src++;
+    }
+    *pp = (unsigned long*)d;
+}
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
+extern "C" void func_003816F0(sPtGfx_16F0* self, sPtObj_16F0* obj)
+{
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x140;
+    self->top->fC &= 0xC0000000;
+    self->top->f4 = (self->top->f4 & ~3) | 2;
+    self->top->f8 &= 0xE00003FF;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    sMat_16F0 m = MulMat_16F0(self->m5860, obj->mat);
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
+    p[0] = 0x1000000D;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = (unsigned long)0xD817 << 47;
+    p += 4;
+    sVec4_16F0 v0;
+    v0.x = 0.0f;
+    v0.y = 0.0f;
+    v0.z = 0.0f;
+    v0.w = 0.0f;
+    sVec4_16F0 v1;
+    v1.x = 1.0f;
+    v1.y = 1.0f;
+    v1.z = 0.0f;
+    v1.w = 0.0f;
+    CopyQuads_16F0(&p, (const sQuad_16F0*)&m, 4);
+    CopyQuads_16F0(&p, (const sQuad_16F0*)&v0, 1);
+    CopyQuads_16F0(&p, (const sQuad_16F0*)&v1, 1);
+    CopyQuads_16F0(&p, obj->q, 5);
+    p[0] = (unsigned long)(((unsigned int)D_408 >> 3) | 0x14000000) << 32;
+    p[1] = (unsigned long)0x8800 << 45;
+    p += 2;
+    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    self->bufAddr = next;
+    sPtRing_16F0* ring = self->ring;
+    sPtRS_16F0* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_16F0* e = (sPtEnt_16F0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top->f4 &= ~3;
+    self->top->f8 &= 0xE00003FF;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00381AD0);
 

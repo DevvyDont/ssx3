@@ -355,7 +355,111 @@ extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D83B8);
+#ifdef SKIP_ASM
+extern void* D_004A3AB0;
+extern int D_004A3A48;
+extern char D_004A3AF0[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144BE0(void* iface);
+extern "C" char* func_00144C48(void* iface, int i);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_003DEBF0(char* name, int mode, int prio, int* fd);
+extern "C" void func_003DECA0(int fd, int prio);
+extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows);
+
+struct sAvPart_83B8 {
+    char pad_0x0[0xE0];
+    float pos[3];                   // 0xE0
+    char pad_0xEC[0xF4 - 0xEC];
+    sAvPart_83B8* next;             // 0xF4
+    char pad_0xF8[0x4];
+    char* data;                     // 0xFC
+    float count;                    // 0x100
+};
+
+struct sAvLink_83B8 {
+    int id;                         // 0x0
+    char* obj;                      // 0x4
+};
+
+struct sAvPair_83B8 {
+    short a;
+    short b;
+};
+
+struct sAvGroup_83B8 {
+    int f0;
+    sAvPart_83B8* parts;            // 0x4
+    sAvGroup_83B8* next;            // 0x8
+    unsigned short nlinks;          // 0xC
+    unsigned short npairs;          // 0xE
+    sAvLink_83B8 links[0x20];       // 0x10
+    sAvPair_83B8 pairs[1];          // 0x110
+};
+
+// PORT: func_002D82A0 takes the file handle and offset as void* (ints passed through pointers).
+extern "C" void func_002D83B8(int direct, char* name)
+{
+    if (D_004A3AB0 == 0) {
+        return;
+    }
+    int off = 0;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    char buf[0x100];
+    sprintf(buf, D_004A3AF0, func_00144C48(iface, func_00144BE0(iface)), name);
+    int fd;
+    if (func_003DEBF0(buf, 0x26, 0x64, &fd)) {
+        sAvGroup_83B8* g;
+        for (g = (sAvGroup_83B8*)D_004A3AB0; g != 0; g = g->next) {
+            for (sAvPart_83B8* p = g->parts; p != 0; p = p->next) {
+                off += 0x10 + (int)p->count * 10;
+            }
+            off += 4;
+            int k;
+            for (k = 0; k < g->nlinks; k++) {
+                off += 8;
+            }
+            for (k = 0; k < g->npairs; k++) {
+                off += 4;
+            }
+        }
+        int magic = 0x2BEEF00;
+        func_002D82A0(direct, (void*)fd, 0, (char*)&magic, 4, 1);
+        func_002D82A0(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
+        off = 8;
+        for (g = (sAvGroup_83B8*)D_004A3AB0; g != 0; g = g->next) {
+            unsigned short h;
+            for (sAvPart_83B8* p = g->parts; p != 0; p = p->next) {
+                h = 0xBEEF;
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
+                h = (int)p->count * 10 + 0xC;
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)p->pos, 4, 3);
+                off += func_002D82A0(1, (void*)fd, (void*)off, p->data, 10, (int)p->count);
+            }
+            h = g->nlinks;
+            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
+            h = g->npairs;
+            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
+            int k;
+            for (k = 0; k < g->nlinks; k++) {
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&g->links[k].id, 4, 1);
+                off += func_002D82A0(direct, (void*)fd, (void*)off, g->links[k].obj + 0x78, 4, 1);
+            }
+            for (k = 0; k < g->npairs; k++) {
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&g->pairs[k].b, 2, 1);
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&g->pairs[k].a, 2, 1);
+            }
+        }
+        func_003DECA0(fd, 0x64);
+    }
+    D_004A3A48 = 0;
+}
+#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D87D0);
 

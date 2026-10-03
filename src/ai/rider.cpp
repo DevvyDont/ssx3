@@ -1582,7 +1582,212 @@ extern "C" void func_00122658(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00122898);
+#ifdef SKIP_ASM
+struct sV4_2898 {
+    float x, y, z, w;
+    sV4_2898() {}
+    sV4_2898(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sV3_2898 {
+    float x, y, z;
+};
+
+struct sMat_2898 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sRS_2898 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+};
+
+struct sModel_2898 {
+    char pad0[0x30];
+    sMat_2898* bones;               // 0x30
+};
+
+struct sObj_2898 {
+    char pad0[0x110];
+    sMat_2898 mat;                  // 0x110
+    sV4_2898 f150;                  // 0x150
+    sV4_2898 f160;                  // 0x160
+    void* f170;                     // 0x170
+};
+
+struct sRider_2898 {
+    char pad0[0x1C0];
+    sV4_2898 pos;                   // 0x1C0
+    char pad1D0[0x780 - 0x1D0];
+    sModel_2898* model;             // 0x780
+    char pad784[0x8E8 - 0x784];
+    int boneA;                      // 0x8E8
+    char pad8EC[0x918 - 0x8EC];
+    int boneB;                      // 0x918
+    char pad91C[0xAA4 - 0x91C];
+    int drawn;                      // 0xAA4
+    sObj_2898* obj;                 // 0xAA8
+};
+
+struct sVE0_2898 { short delta; short index; void (*fn)(void*); };
+struct sVEI_2898 { short delta; short index; int (*fn)(void*); };
+struct sVEI3_2898 { short delta; short index; int (*fn)(void*, void*, const sV4_2898&); };
+struct sVE2_2898 { short delta; short index; void (*fn)(void*, void*, int); };
+struct sVE3_2898 { short delta; short index; void (*fn)(void*, void*, void*); };
+struct sVE4_2898 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
+
+extern void* D_004A289C;
+extern int D_004A4C00;
+extern sV3_2898 D_004A5E40;
+
+extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, sMat_2898* bones, int f);
+extern "C" void func_00310948(void* model, int lod, sV4_2898* a, sV4_2898* b);
+extern "C" void func_00375890(void* obj);
+int func_0011FE98(void*);
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_2898 Add_2898(const sV4_2898& a, const sV4_2898& b)
+{
+    sV4_2898 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_2898 Scale_2898(const sV4_2898& v, float s)
+{
+    sV4_2898 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMat_2898(sMat_2898* d, sMat_2898* s)
+{
+    __asm__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+static inline void Set3_2898(sV3_2898& v, float x, float y, float z)
+{
+    v.x = x;
+    v.y = y;
+    v.z = z;
+}
+
+static inline sV4_2898 BonePos_2898(sRider_2898* r, int i) { return *(sV4_2898*)((char*)r->model->bones + (i << 6) + 0x30); }
+
+static inline void* Tex_2898(sObj_2898* o) { return o->f170; }
+
+static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE84); }
+
+extern "C" void func_00122898(void* vself)
+{
+    sRider_2898* self = (sRider_2898*)vself;
+    if (self->drawn == 0) {
+        self->drawn = 1;
+        void* g = D_004A289C;
+        top_2898(g)[1] = top_2898(g)[0];
+        top_2898(g)++;
+        sV3_2898 a;
+        {
+            sV4_2898 m = Scale_2898(Add_2898(BonePos_2898(self, self->boneB), BonePos_2898(self, self->boneA)), 0.5f);
+            a.x = m.x;
+            a.y = m.y;
+            a.z = m.z;
+        }
+        if (D_004A4C00 == 0) {
+            Set3_2898(D_004A5E40, 0.0f, 0.0f, -1.0f);
+            D_004A4C00 = 1;
+        }
+        sV3_2898 b;
+        {
+            sV4_2898 p = self->pos;
+            b.x = p.x;
+            b.y = p.y;
+            b.z = p.z;
+        }
+        float k = 0.3f;
+        func_00374D00(self->obj, &a, &b, &D_004A5E40, self->model->bones, 0);
+        void* g2 = D_004A289C;
+        top_2898(g2)->f8 = (top_2898(g2)->f8 & ~0x3E0) | 0x20;
+        top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFE7FFFFF) | 0x1000000;
+        top_2898(g2)->f4 = top_2898(g2)->f4 & 0xFFCFFFFF;
+        top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFFF00FFF) | 0x14000;
+        top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFFBFFFFF) | 0x400000;
+        top_2898(g2)->f4 = (top_2898(g2)->f4 & ~0x7C) | 4;
+        sVE0_2898* vt = *(sVE0_2898**)((char*)g2 + 0x10D8);
+        vt[31].fn((char*)g2 + vt[31].delta);
+        void* g3 = D_004A289C;
+        sVE2_2898* vt3 = *(sVE2_2898**)((char*)g3 + 0x10D8);
+        vt3[53].fn((char*)g3 + vt3[53].delta, self->obj->f170, 1);
+        void* g4 = D_004A289C;
+        sVEI3_2898* vt4 = *(sVEI3_2898**)((char*)g4 + 0x10D8);
+        vt4[55].fn((char*)g4 + vt4[55].delta, Tex_2898(self->obj), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
+        if (func_0011FE98(self) == 0) {
+            k = 0.0f;
+        }
+        sMat_2898 mat;
+        CopyMat_2898(&mat, &self->obj->mat);
+        sV4_2898 p0 = self->obj->f150;
+        sV4_2898 p1 = self->obj->f160;
+        void* g5 = D_004A289C;
+        sVE4_2898* vt5 = *(sVE4_2898**)((char*)g5 + 0x10D8);
+        vt5[101].fn((char*)g5 + vt5[101].delta, &mat, &p0, &p1);
+        sV4_2898 c1;
+        c1.x = 1.0f;
+        c1.y = k;
+        c1.z = k;
+        c1.w = k;
+        sV4_2898 c2;
+        c2.x = 1.0f;
+        c2.y = 0.3f;
+        c2.z = 0.3f;
+        c2.w = 0.3f;
+        func_00310948(self->model, 3, &c1, &c2);
+        void* g6 = D_004A289C;
+        sVEI_2898* vt6 = *(sVEI_2898**)((char*)g6 + 0x10D8);
+        vt6[54].fn((char*)g6 + vt6[54].delta);
+        void* g7 = D_004A289C;
+        sVE0_2898* vt7 = *(sVE0_2898**)((char*)g7 + 0x10D8);
+        vt7[32].fn((char*)g7 + vt7[32].delta);
+        void* g8 = D_004A289C;
+        top_2898(g8)--;
+    }
+    func_00375890(self->obj);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00122C28);
