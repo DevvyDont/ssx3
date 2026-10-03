@@ -526,7 +526,105 @@ extern "C" void func_00231348(void* self, cStream_00231348* stream)
 
 INCLUDE_ASM("main/gameload", func_002314D0);
 
+//100%
 INCLUDE_ASM("main/gameload", func_00231840);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern void* D_004A2EEC;
+extern int D_004A2E9C;
+extern int D_00534B30[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00147290(void* iface, int i);
+extern "C" int func_00231AB8(void* self);
+int func_00320C48(void* obj, int a1);
+
+static inline void** PlayerObj_1840(int p)
+{
+    return *(void***)((char*)D_004A28A8 + (p << 2) + 0xB0);
+}
+
+static inline int IsReady_1840(void** o)
+{
+    return *o && *(int*)*o;
+}
+
+static inline int Count_1840(char* self)
+{
+    return *(int*)(*(char**)(self + 0xC) + 0x7C);
+}
+
+static inline char* At_1840(char* self, int i)
+{
+    return *(char**)(*(char**)(self + 0xC) + (i << 2) + 0x40);
+}
+
+extern "C" int func_00231840(char* self)
+{
+    if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x8) > 0) {
+        return 0;
+    }
+    int mask = 0;
+    void* bi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    char* g = *(char**)(self + 0x28);
+    int sel = -1;
+    if (*(int*)(g + 0x608)) {
+        int p = *(int*)(g + 0x28);
+        void** o = PlayerObj_1840(p);
+        if (!IsReady_1840(o)) {
+            mask = 1 << p;
+        } else if (D_004A2E9C == 0) {
+            if (func_00320C48(o, 0x3C)) {
+                sel = p;
+            }
+        }
+    } else {
+        int i;
+        for (i = 0; i < Count_1840(self); i++) {
+            char* r = At_1840(self, i);
+            if (*(int*)(*(char**)(r + 0x18) + 0x87C)) {
+                int p = func_00147290(bi, i);
+                void** o = PlayerObj_1840(p);
+                if (!IsReady_1840(o)) {
+                    mask |= 1 << p;
+                } else if (sel < 0 && D_004A2E9C == 0) {
+                    if (func_00320C48(o, 0x3C)) {
+                        sel = p;
+                    }
+                }
+            }
+        }
+    }
+    *(int*)(self + 0x224) = mask;
+    if (mask) {
+        if (sel < 0) {
+            int i;
+            sel = 0;
+            for (i = 0; i < Count_1840(self); i++) {
+                char* r = At_1840(self, i);
+                if (*(int*)(*(char**)(r + 0x18) + 0x87C)) {
+                    int p = func_00147290(bi, i);
+                    if (IsReady_1840(PlayerObj_1840(p))) {
+                        sel = p;
+                        break;
+                    }
+                }
+            }
+        }
+        *(int*)(self + 0x228) = sel;
+        return 1;
+    }
+    if (sel >= 0) {
+        cBE_getInterface_Fv(cBE_getBE(), 7);
+        if (D_00534B30[0] != 0 || func_00231AB8(self)) {
+            *(int*)(self + 0x228) = sel;
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00231AB8);

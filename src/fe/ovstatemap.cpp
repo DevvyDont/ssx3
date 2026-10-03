@@ -97,7 +97,149 @@ void func_002087E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainTransition);
+#ifdef SKIP_ASM
+struct sV3_87F0 {
+    float x, y, z;
+};
+
+struct sV4_87F0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVE_87F0 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sUIObj_87F0 {
+    int pad_0x0[2];
+    sVE_87F0* vt;               // 0x8
+    char pad_0xC[0xC];
+    int f18;                    // 0x18
+};
+
+struct sStrMgr_87F0 {
+    int pad_0x0;
+    sVE_87F0* vt;               // 0x4
+};
+
+class cRiderSub_87F0 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual sV4_87F0* v05();
+};
+
+struct sMapF_87F0 {
+    char pad_0x0[0x9C];
+    int flags[8];               // 0x9C
+};
+
+typedef void (*VIntFn_87F0)(void*, int);
+typedef void (*VPtrFn_87F0)(void*, void*);
+typedef void* (*VGetFn_87F0)(void*, int);
+
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int* func_00144BC0(void*);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_00209E78(void* self);
+extern char D_004C8B58[];
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* t, int id);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" int func_001545F8(void* iface, int id);
+extern "C" void func_002C27C0(void* buf, const char* fmt, void* str, int n);
+extern "C" void func_003A0E90(void* t, void* str);
+extern "C" int func_0026B680(void* tbl, sV3_87F0* pos);
+extern void* D_004A28A8;
+extern char D_00471808[];
+extern char D_00471818[];
+extern char D_00471828[];
+extern char D_00471838[];
+extern char D_00471850[];
+extern char D_004706B8[];
+extern char D_004706C8[];
+extern char D_004A2558[];
+extern char D_004D33A0[];
+
+extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
+{
+    char* self = (char*)selfp;
+    if (on != 0) {
+        int i = 0;
+        sUIObj_87F0* t;
+        void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
+        void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
+        int n = func_001545F8(ifMap, *func_00144BC0(ifGame));
+        for (i = 0; i < 8; i++) {
+            char buf[0x20];
+            unsigned short text[0x28];
+            sprintf(buf, D_00471808, i);
+            t = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(buf));
+            if (i < n) {
+                ((sMapF_87F0*)self)->flags[i] = 1;
+                sStrMgr_87F0* g = *(sStrMgr_87F0**)((char*)D_004A28A8 + 0x8C);
+                sVE_87F0* vt = g->vt;
+                void* str = ((VGetFn_87F0)vt[4].fn)((char*)g + vt[4].delta, GetHashValue32(D_00471818));
+                if (str == 0) {
+                    continue;
+                }
+                func_002C27C0(text, D_004A2558, str, i + 1);
+                if (t == 0) {
+                    continue;
+                }
+                if (i == 0) {
+                    cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_00471828));
+                } else if (i == n - 1 && n != 2) {
+                    cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_00471838));
+                } else {
+                    func_003A0E90(t, text);
+                }
+                t->f18 = i + 1;
+            } else {
+                ((sMapF_87F0*)self)->flags[i] = 0;
+                ((VIntFn_87F0)t->vt[9].fn)((char*)t + t->vt[9].delta, 0);
+                ((VIntFn_87F0)t->vt[8].fn)((char*)t + t->vt[8].delta, 1);
+            }
+        }
+        void* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_00471850));
+        char* game = *(char**)((char*)D_004A28A8 + 0x84);
+        if (game != 0) {
+            char* rider = *(char**)(*(char**)(game + 0xC) + 0x28);
+            sV4_87F0 p = *((cRiderSub_87F0*)(rider + 0x6C0))->v05();
+            sV3_87F0 q;
+            q.x = p.x;
+            q.y = p.y;
+            q.z = p.z;
+            int r = func_0026B680(D_004D33A0, &q);
+            int idx = r - 1;
+            if (r == 0) {
+                idx = 0;
+            }
+            cUIMenu_setSelectedByIndex(menu, idx);
+        }
+        func_00209E78(self);
+        t = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706B8));
+        if (t != 0) {
+            t->f18 = 0;
+            ((VPtrFn_87F0)t->vt[11].fn)((char*)t + t->vt[11].delta, D_004C8B58);
+        }
+        t = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706C8));
+        if (t != 0) {
+            t->f18 = 1;
+            ((VPtrFn_87F0)t->vt[11].fn)((char*)t + t->vt[11].delta, D_004C8B58);
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_00208B00);
@@ -234,7 +376,135 @@ extern "C" void func_00209300(void* self, sObj00209300* o)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_00209370);
+#ifdef SKIP_ASM
+struct sCol_9370 {
+    float a, r, g, b;
+};
+
+struct sV3_9370 {
+    float x, y, z;
+    sV3_9370() {}
+    sV3_9370(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+class cFEObj_9370 {
+public:
+    int pad_0x0[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void SetVisible(int on);
+    virtual void v10();
+    virtual void SetColor(const sCol_9370* c);
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void SetScale(const sV3_9370& s);
+};
+
+struct sFEObjData_9370 {
+    char pad_0x0[0x1C];
+    sCol_9370 col;              // 0x1C
+    char pad_0x2C[0x18];
+    sV3_9370 pos;               // 0x44
+    char pad_0x50[0x28];
+    int f78;                    // 0x78
+    int f7C;                    // 0x7C
+};
+
+struct sAsyncFile_9370 {
+    char pad_0x0[0x110];
+    int data;                   // 0x110
+    char pad_0x114[0x8];
+};
+
+struct sMap_9370 {
+    char pad_0x0[0xC4];
+    int file;                   // 0xC4
+    int loaded;                 // 0xC8
+    float fade;                 // 0xCC
+    cFEObj_9370* img;           // 0xD0
+    char pad_0xD4[0x8];
+    int busy;                   // 0xDC
+    char pad_0xE0[0x24];
+    cFEObj_9370* icons[8];      // 0x104
+    sV3_9370 iconPos[8];        // 0x124
+    char pad_0x184[0x48];
+    float bob;                  // 0x1CC
+    float bobVel;               // 0x1D0
+};
+
+struct cFEAsyncManager;
+int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
+extern "C" void func_0020E900(void* self);
+extern void* D_004A28A8;
+
+extern "C" void func_00209370(sMap_9370* self)
+{
+    func_0020E900(self);
+    if (self->busy != 0) {
+        return;
+    }
+    if (self->loaded != 0) {
+        if (self->fade < 1.0f) {
+            self->fade += 0.10000000149011612f;
+        }
+        cFEObj_9370* o = self->img;
+        sCol_9370 c = ((sFEObjData_9370*)o)->col;
+        c.a = self->fade;
+        o->SetColor(&c);
+        self->img->SetVisible(1);
+    } else {
+        self->fade = 0.0f;
+        self->img->SetVisible(0);
+    }
+    sAsyncFile_9370* am = *(sAsyncFile_9370**)((char*)D_004A28A8 + 0x11C);
+    if (cFEAsyncManager_GetFileStatus((cFEAsyncManager*)am, self->file) == 3 && self->loaded == 0) {
+        cFEObj_9370* o = self->img;
+        if (o != 0) {
+            int data = am[self->file].data;
+            ((sFEObjData_9370*)o)->f7C = 0;
+            ((sFEObjData_9370*)o)->f78 = data;
+            self->loaded = 1;
+            self->fade = 0.0f;
+        }
+    }
+    if (0.0f < self->bobVel) {
+        if (21.5f < self->bob) {
+            self->bobVel = -0.1599999964237213f;
+        }
+    } else if (self->bob < 18.0f) {
+        self->bobVel = 0.1599999964237213f;
+    }
+    self->bob += self->bobVel;
+    int i;
+    for (i = 0; i < 8; i++) {
+        cFEObj_9370* o = self->icons[i];
+        if (o != 0) {
+            sV3_9370* bp = &self->iconPos[i];
+            float d = (self->bob - 18.0f) * 0.5f;
+            sV3_9370 p;
+            p.x = bp->x - d;
+            p.y = bp->y - d;
+            ((sFEObjData_9370*)o)->pos = p;
+            self->icons[i]->SetScale(sV3_9370(self->bob, self->bob, 0.0f));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_002095E8);
@@ -282,7 +552,133 @@ extern "C" void func_00209648(void* self, void* obj, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPlayerIndicator);
+#ifdef SKIP_ASM
+struct sV3_96A8 {
+    float x, y, z;
+    sV3_96A8() {}
+    sV3_96A8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+    sV3_96A8(const float& ax, const float& ay) : x(ax), y(ay), z(0.0f) {}
+};
+
+struct sV4_96A8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBounds_96A8 {
+    char pad_0x0[0x1C];
+    float minX;                 // 0x1C
+    float minY;                 // 0x20
+    float maxX;                 // 0x24
+    float maxY;                 // 0x28
+    char pad_0x2C[0x4];
+};
+
+class cFEObj_96A8 {
+public:
+    int pad_0x0[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void SetVisible(int on);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void SetScale(const sV3_96A8& s);
+};
+
+struct sFEObjData_96A8 {
+    char pad_0x0[0x14];
+    int flags;                  // 0x14
+    char pad_0x18[0x2C];
+    sV3_96A8 pos;               // 0x44
+};
+
+class cRiderSub_96A8 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual sV4_96A8* v05();
+};
+
+struct sMapSt_96A8 {
+    char pad_0x0[0xD0];
+    cFEObj_96A8* img;           // 0xD0
+    char* screen;               // 0xD4
+    char pad_0xD8[0x8];
+    cFEObj_96A8* ind;           // 0xE0
+};
+
+struct cList;
+struct cListNode;
+void cList_addToEnd(cList* list, cListNode* node);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_00154678(sBounds_96A8* out, void* iface, int id);
+extern "C" void* func_0039FB30(void* self, void* parent, int a2);
+extern "C" void func_0021CCC8(void* p);
+extern "C" void func_00399730(void* obj, int hash);
+extern void* D_004A28A8;
+extern char D_004718F0[];
+extern char D_00471908[];
+extern void* D_00494AA8[];
+
+static inline float Absf_96A8(float v)
+{
+    if (v < 0.0f) {
+        v = -v;
+    }
+    return v;
+}
+
+extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
+{
+    sMapSt_96A8* self = (sMapSt_96A8*)selfp;
+    void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
+    void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
+    sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
+    char* rider = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x28);
+    sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
+    sBounds_96A8 b;
+    func_00154678(&b, ifMap, *func_00144BC0(ifGame));
+    float fx = Absf_96A8((pp.x - b.minX) / (b.maxX - b.minX));
+    int px = (int)(fx * 356.0f);
+    float fy = Absf_96A8((pp.y - b.minY) / (b.maxY - b.minY));
+    int py = (int)(fy * 266.0f);
+    char* ind = (char*)cMemMan_alloc(0x88, D_004718F0, 0x20000000, 0);
+    func_0039FB30(ind, self->screen, 0);
+    *(void***)(ind + 0x8) = D_00494AA8;
+    func_0021CCC8(ind + 0x74);
+    *(int*)(ind + 0x78) = -1;
+    self->ind = (cFEObj_96A8*)ind;
+    *(int*)(ind + 0x7C) = 0;
+    {
+        sV3_96A8 p((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 0x61) - 5.0f, mapPos.z);
+        ((sFEObjData_96A8*)self->ind)->pos = p;
+    }
+    self->ind->SetScale(sV3_96A8(17.0f, 17.0f));
+    func_00399730(self->ind, GetHashValue32(D_00471908));
+    self->ind->SetVisible(0);
+    sFEObjData_96A8* d = (sFEObjData_96A8*)self->ind;
+    d->flags = (d->flags & ~0x1F00) | 0xD00;
+    cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->ind);
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 

@@ -48,7 +48,79 @@ extern "C" void cFEStateRiderBio_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateriderbiodetail", func_00190A08);
+#ifdef SKIP_ASM
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void cFEStateRiderBio_fillDNAInfo(void* self);
+extern "C" void cFEStateRiderBio_fillFavesInfo(void* self);
+extern "C" void cFEStateRiderBio_fillQnAInfo(void* self);
+extern "C" void cFEStateRiderBio_fillBioInfo(void* self);
+extern char D_0045E3F8[];
+extern char D_004A1610[];
+extern char D_0045E408[];
+extern char D_0045E418[];
+extern char D_0045E428[];
+extern char D_004A1618[];
+extern char D_0045E438[];
+extern char D_0045E450[];
+extern char D_0045E460[];
+
+extern "C" void func_00190A08(void* self)
+{
+    switch (*(int*)((char*)self + 0x4C)) {
+    case 0:
+        cUIState_showObjSafe(self, D_0045E3F8);
+        cUIState_showObjSafe(self, D_004A1610);
+        cUIState_hideObjSafe(self, D_0045E408);
+        cUIState_hideObjSafe(self, D_0045E418);
+        cUIState_hideObjSafe(self, D_0045E428);
+        cUIState_hideObjSafe(self, D_004A1618);
+        cUIState_hideObjSafe(self, D_0045E438);
+        cUIState_showObjSafe(self, D_0045E450);
+        cUIState_showObjSafe(self, D_0045E460);
+        cFEStateRiderBio_fillDNAInfo(self);
+        break;
+    case 1:
+        cUIState_hideObjSafe(self, D_0045E3F8);
+        cUIState_hideObjSafe(self, D_004A1610);
+        cUIState_showObjSafe(self, D_0045E408);
+        cUIState_showObjSafe(self, D_0045E418);
+        cUIState_hideObjSafe(self, D_0045E428);
+        cUIState_hideObjSafe(self, D_004A1618);
+        cUIState_hideObjSafe(self, D_0045E438);
+        cUIState_showObjSafe(self, D_0045E450);
+        cUIState_showObjSafe(self, D_0045E460);
+        cFEStateRiderBio_fillFavesInfo(self);
+        break;
+    case 2:
+        cUIState_hideObjSafe(self, D_0045E3F8);
+        cUIState_hideObjSafe(self, D_004A1610);
+        cUIState_hideObjSafe(self, D_0045E408);
+        cUIState_hideObjSafe(self, D_0045E418);
+        cUIState_showObjSafe(self, D_0045E428);
+        cUIState_showObjSafe(self, D_004A1618);
+        cUIState_hideObjSafe(self, D_0045E438);
+        cUIState_hideObjSafe(self, D_0045E450);
+        cUIState_hideObjSafe(self, D_0045E460);
+        cFEStateRiderBio_fillQnAInfo(self);
+        break;
+    case 3:
+        cUIState_hideObjSafe(self, D_0045E3F8);
+        cUIState_hideObjSafe(self, D_004A1610);
+        cUIState_hideObjSafe(self, D_0045E408);
+        cUIState_hideObjSafe(self, D_0045E418);
+        cUIState_hideObjSafe(self, D_0045E428);
+        cUIState_hideObjSafe(self, D_004A1618);
+        cUIState_showObjSafe(self, D_0045E438);
+        cUIState_hideObjSafe(self, D_0045E450);
+        cUIState_hideObjSafe(self, D_0045E460);
+        cFEStateRiderBio_fillBioInfo(self);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateriderbiodetail", func_00190CD8);

@@ -64,7 +64,97 @@ int func_0014E2C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014E2C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sNetHdr_E2C8 {
+    int w[0x4C / 4];
+};
+
+struct sNetPair_E2C8 {
+    int w[2];
+};
+
+struct sNetTrip_E2C8 {
+    int w[3];
+};
+
+struct sNetHW_E2C8 {
+    short h[2];
+};
+
+struct sNetDW_E2C8 {
+    int w[2];
+};
+
+struct sNetTag_E2C8 {
+    char c[7];
+};
+
+struct sNetKey_E2C8 {
+    short h[3];
+};
+
+struct sCharE_E2C8 {
+    char pad_0x00[0x11];
+    signed char charID;     // 0x11
+    char pad_0x12[0x2];
+    int w[2];
+};
+
+struct sNetState_E2C8 {
+    sNetHdr_E2C8 hdr;                   // 0x000
+    sCharE_E2C8 me;             // 0x04C
+    sCharE_E2C8 chars[6];       // 0x068
+    signed char charID;                 // 0x110
+    sNetTag_E2C8 tag;                   // 0x111
+    sNetKey_E2C8 keys[0x55];            // 0x118
+    sNetHW_E2C8 blob[0x20D];            // 0x316
+    char pad_0xB4A[2];
+    sNetDW_E2C8 moves[0x1A];            // 0xB4C
+    sNetTrip_E2C8 t0;                   // 0xC1C
+    sNetTrip_E2C8 t1;                   // 0xC28
+    sNetPair_E2C8 pair;                 // 0xC34
+    int a;                              // 0xC3C
+    int b;                              // 0xC40
+};
+
+extern sCharE_E2C8 D_00535B20_E2C8[] __asm__("D_00535B20");
+extern int D_004A11B8;
+extern int D_004A11BC;
+extern sNetHdr_E2C8 D_005305B0;
+extern char D_005308D0[];
+extern char D_004A6F38[];
+extern char D_004A7778[];
+extern char D_004A7887[];
+
+extern "C" void func_0014E2C8(void* self, int p, sNetState_E2C8* out)
+{
+    out->a = D_004A11B8;
+    out->b = D_004A11BC;
+    out->hdr = D_005305B0;
+    for (int i = 0; i < 6; i++) {
+        out->chars[i] = D_00535B20_E2C8[i];
+    }
+    out->me = D_00535B20_E2C8[p];
+    signed char c = D_00535B20_E2C8[p].charID;
+    out->charID = c;
+    out->pair = *(sNetPair_E2C8*)D_005308D0;
+    out->t0 = *(sNetTrip_E2C8*)(D_005308D0 - 0x18);
+    out->t1 = *(sNetTrip_E2C8*)(D_005308D0 - 0xC);
+    for (int k = 0; k < 0x20D; k++) {
+        out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (c * 0xF88 + p * 0x9B50)))[k];
+    }
+    for (int k = 0; k < 0x1A; k++) {
+        out->moves[k] = ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + p * 0x9B50)))[k];
+    }
+    out->tag = *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + p * 0x9B50));
+    for (int k = 0; k < 0x55; k++) {
+        out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + p * 0x9B50)))[k];
+    }
+}
+#endif
 
 INCLUDE_ASM("be/beintnetwork", func_0014E5C8);
 

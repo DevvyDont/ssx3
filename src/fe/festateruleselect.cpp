@@ -220,7 +220,72 @@ extern "C" void func_00192380(sRuleSel_2380* self, void* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+
+struct sVE_2488 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sQuad_2488 {
+    int a, b, c, d;
+};
+extern sQuad_2488 D_004C66C8;
+
+struct sObj_2488 {
+    char pad0[0x8];
+    sVE_2488* vt;
+    char padC[0x18 - 0xC];
+    int idx;
+    char pad1C[0x88 - 0x1C];
+    sQuad_2488 q88;
+};
+
+// PORT: the names are built with the builtin block move (the original likely used
+// strcpy on string literals); the two strings live at these symbols.
+extern char D_004A16A8[];
+extern char D_004A16B0[];
+
+extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
+{
+    char* self = (char*)selfp;
+    char name0[16];
+    char name1[16];
+    __builtin_memcpy(name0, D_004A16A8, 3);
+    __builtin_memcpy(name1, D_004A16B0, 3);
+    signed char n = *(signed char*)(self + 0x50) < 12 ? *(signed char*)(self + 0x50) : 11;
+    for (signed char i = 0; i < n; i++) {
+        sObj_2488* a = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name0));
+        sObj_2488* b = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name1));
+        if (a && b) {
+            if (*(signed char*)(self + a->idx + 0x51) > 0) {
+                b->vt[25].fn((char*)b + b->vt[25].delta, 1);
+                b->q88 = D_004C66C8;
+                b->vt[8].fn((char*)b + b->vt[8].delta, 1);
+                a->vt[24].fn((char*)a + a->vt[24].delta, 1);
+                a->q88 = D_004C66C8;
+                a->vt[8].fn((char*)a + a->vt[8].delta, 1);
+            } else {
+                b->vt[25].fn((char*)b + b->vt[25].delta, 0);
+                b->vt[8].fn((char*)b + b->vt[8].delta, 0);
+                a->vt[24].fn((char*)a + a->vt[24].delta, 0);
+                a->vt[8].fn((char*)a + a->vt[8].delta, 0);
+            }
+        }
+        if (i < 9) {
+            name0[0]++;
+            name1[0]++;
+        } else {
+            name1[0] = name0[0] = i + 0x58;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_001926F0);

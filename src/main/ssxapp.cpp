@@ -67,11 +67,207 @@ extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp00226830* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_init);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+
+class cPlayerMgr_6900;
+extern "C" void func_00326A28(cPlayerMgr_6900* self);
+
+struct sApp_6900 {
+    char pad_0x0[0xA0];
+    void* shape;    // 0xA0
+};
+
+struct sVE_6900 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sGfx_6900 {
+    char pad_0x0[0x10D8];
+    sVE_6900* vt;   // 0x10D8
+};
+
+struct sColor_6900 {
+    float r, g, b, a;
+    sColor_6900() {}
+    sColor_6900(const float& ar, const float& ag, const float& ab, const float& aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+struct sTint_6900 {
+    int a;
+    int b;
+    int c;
+    sColor_6900 col;
+    sTint_6900() : a(0), b(0), c(0) { col = sColor_6900(1.0f, 1.0f, 1.0f, 1.0f); }
+};
+
+extern void* D_004A28A0;
+extern void* D_004A28A8;
+extern void* D_004A289C;
+extern void* D_004A28AC;
+extern char D_00479A40[];
+extern char D_00479A50[];
+extern char D_00479A60[];
+extern char D_00479A70[];
+extern char D_00479A80[];
+extern char D_00479A90[];
+extern char D_00479AA0[];
+extern char D_0047AB40[];
+extern char D_004A28B0[];
+extern "C" void* func_002C7440();
+extern "C" void* func_00375A08();
+void cLightMan_construct();
+void cBezierMan_construct();
+extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv);
+extern "C" void* SHAPE_locate(const char* name, void* list);
+extern "C" void func_00369FF8(void* gfx);
+void* func_00232328(void* p);
+extern "C" void* func_001A3590(void* p);
+extern "C" void func_001A3648(void* p);
+extern "C" void* cGameModeMan_getGM();
+struct cAppMan;
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+
+typedef void (*V0Fn_6900)(char*);
+typedef void (*V1Fn_6900)(char*, int);
+typedef void* (*LoadFn_6900)(char*, void*, const char*, int, int, int);
+
+extern "C" void cSSXApp_init(char* self, int argc, char** argv)
+{
+    D_004A28A8 = self;
+    *(void**)(self + 0x9C) = func_002C7440();
+    cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, D_00479A40, 0, 0);
+    func_00326A28(pm);
+    D_004A28A0 = pm;
+    char* g = (char*)func_00375A08();
+    D_004A289C = g;
+    sVE_6900* vt = ((sGfx_6900*)g)->vt;
+    ((V0Fn_6900)vt[2].fn)(g + vt[2].delta);
+    cLightMan_construct();
+    cBezierMan_construct();
+    D_004A28AC = cMemMan_alloc(1, D_00479A50, 0, 0);
+    int i;
+    for (i = 0; i < 2; i++) {
+        int* p = (int*)cMemMan_alloc(0x2A4, D_00479A60, 0, 0);
+        ((int**)(self + 0xA8))[i] = p;
+        *p = 0;
+    }
+    *(int*)(self + 0x84) = 0;
+    *(int*)(self + 0x80) = 0;
+    *(int*)(self + 0x7C) = 0;
+    cSSXApp_parseCommandLine(self, argc, argv);
+    char* g2 = (char*)D_004A289C;
+    sVE_6900* vt2 = ((sGfx_6900*)g2)->vt;
+    ((V1Fn_6900)vt2[44].fn)(g2 + vt2[44].delta, 0x100);
+    char* g3 = (char*)D_004A289C;
+    sVE_6900* vt3 = ((sGfx_6900*)g3)->vt;
+    char* o = g3 + vt3[46].delta;
+    void* r = SHAPE_locate(D_0047AB40, D_004A28B0);
+    ((sApp_6900*)D_004A28A8)->shape = ((LoadFn_6900)vt3[46].fn)(o, r, D_00479A70, 0, 1, -1);
+    func_00369FF8(D_004A289C);
+    *(sTint_6900**)(self + 0xA4) = new (D_00479A80, 0, 0) sTint_6900;
+    cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, D_00479A90, 0x100, 0)));
+    *(void**)(self + 0xC0) = cGameModeMan_getGM();
+    void* m = func_001A3590(cMemMan_alloc(0x590, D_00479AA0, 0, 0));
+    *(void**)(self + 0x11C) = m;
+    func_001A3648(m);
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadInputMap);
 
+//100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_parseCommandLine);
+#ifdef SKIP_ASM
+struct cBXString {
+    char* str;
+    cBXString() {}
+    cBXString(const cBXString& o);
+};
+
+extern "C" void* cBXString_cBXString2(cBXString* self, const char* str);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n);
+extern "C" cBXString* func_00319028(cBXString* self, cBXString* other, int n);
+extern "C" void* cBXString_operatorE(void* self, void* other);
+extern "C" void cBXString__cBXString(void* self, int flags);
+int cBXString_FindFirstOf(cBXString* self, char ch);
+int cBXString_FindLastOf(cBXString* self, char ch, int len);
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern int D_004A4540;
+extern char D_004A29B0[];
+extern char D_004A29B8[];
+extern char D_004A29C0[];
+extern char D_0047A7D8[];
+extern char D_0047A7E8[];
+extern char D_0047A7F8[];
+
+#define MAX_7BF0(x, y) ((x) > (y) ? (x) : (y))
+
+// PORT: cBXString keeps its length in a header 8 bytes before the text (pointer held in int).
+extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv)
+{
+    int i = 1;
+    while (i < argc) {
+        if (argv[i][0] == '-') {
+            char* opt = argv[i] + 1;
+            if (func_0041AA88(opt, D_004A29B0) == 0) {
+                i++;
+                if (i >= argc) {
+                    break;
+                }
+                cBXString s;
+                cBXString_cBXString2(&s, argv[i]);
+                int a = cBXString_FindFirstOf(&s, '/');
+                int b = cBXString_FindFirstOf(&s, '\\');
+                int c = cBXString_FindFirstOf(&s, ':');
+                int p = MAX_7BF0(a, MAX_7BF0(b, c));
+                if (p >= 0) {
+                    cBXString t;
+                    func_00319028(&t, &s, *(int*)((int)s.str - 8) - p - 1);
+                    cBXString_operatorE(&s, &t);
+                    cBXString__cBXString(&t, 2);
+                }
+                int dot = cBXString_FindLastOf(&s, '.', 0);
+                if (dot >= 0) {
+                    cBXString t;
+                    cBXString_cBXString5(&t, &s, dot);
+                    cBXString_operatorE(&s, &t);
+                    cBXString__cBXString(&t, 2);
+                }
+                cBXString_operatorE(self + 0xCC, &s);
+                cBXString__cBXString(&s, 2);
+            } else if (func_0041AA88(opt, D_0047A7D8) == 0) {
+                i++;
+                if (i >= argc) {
+                    break;
+                }
+                cBXString_cBXString4(self + 0xC4, argv[i]);
+            } else if (func_0041AA88(opt, D_0047A7E8) == 0) {
+                i++;
+                if (i >= argc) {
+                    break;
+                }
+                cBXString_cBXString4(self + 0xC8, argv[i]);
+            } else if (func_0041AA88(opt, D_004A29B8) == 0) {
+                *(int*)(self + 0x60) = 1;
+            } else if (func_0041AA88(opt, D_004A29C0) == 0) {
+                *(int*)(self + 0x64) = 0;
+            } else if (func_0041AA88(opt, D_0047A7F8) == 0) {
+                *(int*)(self + 0x74) = 1;
+            }
+        }
+        i++;
+    }
+    D_004A4540 = *(int*)(self + 0x64) == 0;
+}
+#endif
 
 extern "C" int func_00326C60(void* mgr);
 extern void* D_004A28A0;
@@ -386,9 +582,184 @@ void cSSXApp_loadexecpurge(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00228C08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sOptions_228C08 {
+    unsigned int pad0 : 20;
+    unsigned int mode : 2;          // bits 20..21
+    unsigned int pad22 : 10;
+    int pad_4 : 8;
+    int b5 : 8;
+    int b6 : 8;
+    int pad_7 : 8;
+    int data[(0x288 - 8) / 4];
+};
+extern sOptions_228C08 D_00535610_228C08 __asm__("D_00535610");
 
+static inline sOptions_228C08 GetOptions_228C08()
+{
+    return D_00535610_228C08;
+}
+
+class cGfx_228C08 {
+public:
+    char pad_0x0[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12(int a, int b);
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40(int mode);
+};
+
+struct sVE_228C08 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+extern cGfx_228C08* D_004A5B80_228C08 __asm__("D_004A5B80");
+
+extern "C" void func_00228C08()
+{
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (GetOptions_228C08().mode) {
+    case 0:
+        D_004A5B80_228C08->v40(0);
+        break;
+    case 1:
+        D_004A5B80_228C08->v40(1);
+        break;
+    case 2:
+        D_004A5B80_228C08->v40(2);
+        break;
+    default:
+        D_004A5B80_228C08->v40(0);
+        break;
+    }
+    cGfx_228C08* g = D_004A5B80_228C08;
+    sVE_228C08* vt = *(sVE_228C08**)((char*)g + 0x10D8);
+    char* thisp = (char*)g + vt[12].delta;
+    void (**pfn)(void*, int, int) = &vt[12].fn;
+    (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/ssxapp", initOnline);
+#ifdef SKIP_ASM
+extern int D_004A3E94;
+extern int D_004A29EC;
+extern char D_00479918[];
+extern char D_004A29F0[];
+extern char D_004A29F8[];
+extern char D_0047A988[];
+extern char D_0047A998[];
+extern char D_0047A9C8[];
+extern char D_0047A9D8[];
+extern char D_0047A9E8[];
+extern char D_0047A9F8[];
+extern char D_0047AA08[];
+extern char D_0047AA20[];
+extern char D_0047AA58[];
+extern char D_0047AA68[];
+extern char D_0047AA78[];
+extern char D_0047AA90[];
+extern char D_0047AAA0[];
+extern char D_0047AAC8[];
+extern char D_0047AAD8[];
+extern char D_0047AAE8[];
+extern char D_0047AAF8[];
+extern char D_0047AB08[];
+extern char D_0047AB18[];
+extern char D_0047AB30[];
+extern "C" int func_00319718(int loader, const char* name, int flags, int argLen, const char* args);
+extern "C" void func_00319930(int loader);
+extern "C" void func_003197D0(int loader);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void THREAD_yieldticks(int ticks);
+extern "C" void func_0040B130(int a);
+extern "C" void func_003F6A40();
+extern "C" void func_003F6AB0();
+extern "C" void func_00266788();
+
+extern "C" void initOnline()
+{
+    char buf[0x100];
+    func_00319718(D_004A3E94, D_0047A988, 0, 0x2B, D_0047A998);
+    int ok = 0;
+    func_00319718(D_004A3E94, D_0047A9C8, 0, 0x10, D_0047A9D8);
+    func_00319718(D_004A3E94, D_0047A9E8, 0, 0, 0);
+    func_00319930(D_004A3E94);
+    func_00319718(D_004A3E94, D_0047A9F8, 1, 0x12, D_0047AA08);
+    int n = sprintf(buf, D_0047AA20, D_00479918, D_004A29F0, 0, D_00479918, D_004A29F0);
+    func_00319718(D_004A3E94, D_0047AA58, 1, n + 1, buf);
+    func_00319718(D_004A3E94, D_0047AA68, 1, 0x14, D_0047AA78);
+    D_004A29EC = 0;
+    if (func_00319718(D_004A3E94, D_0047AA90, 0, 0, 0) >= 0) {
+        D_004A29EC = 1;
+        ok = 1;
+    }
+    func_00319718(D_004A3E94, D_004A29F8, 1, 0, 0);
+    n = sprintf(buf, D_0047AAA0, D_00479918, D_004A29F0, 0);
+    if (func_00319718(D_004A3E94, D_0047AAC8, 0, n + 1, buf) >= 0) {
+        D_004A29EC = 1;
+    }
+    if (D_004A29EC && ok) {
+        func_00319718(D_004A3E94, D_0047AAD8, 1, 0, 0);
+    }
+    THREAD_yieldticks(10);
+    if (D_004A29EC) {
+        func_003197D0(D_004A3E94);
+        func_00319718(D_004A3E94, D_0047AAE8, 1, 0, 0);
+        func_0040B130(0);
+        func_00319718(D_004A3E94, D_0047AAF8, 1, 0, 0);
+        func_00319718(D_004A3E94, D_0047AB08, 0, 0x12, D_0047AB18);
+        if (func_00319718(D_004A3E94, D_0047AB30, 0, 0, 0) >= 0) {
+            func_003F6A40();
+        } else {
+            func_003F6AB0();
+        }
+    }
+    func_00266788();
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229180);

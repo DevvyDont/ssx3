@@ -717,7 +717,159 @@ extern "C" void func_0034A028(void* self, sFrNodeA028* node)
 
 INCLUDE_ASM("object/flexrailnode", func_0034A0B0);
 
+//100%
 INCLUDE_ASM("object/flexrailnode", func_0034A568);
+#ifdef SKIP_ASM
+struct sV4_A568 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFrElem_A568 {
+    sV4_A568 pos;               // 0x00
+    sV4_A568 vel;               // 0x10
+    sV4_A568 posA;              // 0x20
+    sV4_A568 posB;              // 0x30
+    sV4_A568 force;             // 0x40
+    char pad50[0x10];
+};
+
+struct sFrNodeA568 {
+    sV4_A568 pos;               // 0x00
+    char pad10[0x54];
+    int idx;                    // 0x64
+};
+
+struct sFrRailA568 {
+    char pad0[0x60];
+    float k[3];                 // 0x60
+    char pad6C[4];
+    sFrElem_A568* elems;        // 0x70
+};
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float vu0Len_A568(const sV4_A568& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_A568 vu0Scale_A568(const sV4_A568& v, float s)
+{
+    sV4_A568 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar, in place).
+static inline void vu0ScaleEq_A568(sV4_A568& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_A568 vu0Sub_A568(const sV4_A568& a, const sV4_A568& b)
+{
+    sV4_A568 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product).
+static inline sV4_A568 vu0Cross_A568(const sV4_A568& a, const sV4_A568& b)
+{
+    sV4_A568 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* dir)
+{
+    float len = vu0Len_A568(*dir);
+    sV4_A568 d;
+    if (200.0f < len) {
+        d = vu0Scale_A568(*dir, 200.0f / len);
+    } else {
+        d = *dir;
+    }
+    if (node->idx < 0) {
+        return;
+    }
+    sV4_A568 a = vu0Sub_A568(node->pos, self->elems[0].pos);
+    sV4_A568 c = vu0Cross_A568(d, a);
+    float alen = vu0Len_A568(a);
+    int i;
+    for (i = 0; i < node->idx; i++) {
+        float* k = self->k;
+        sV4_A568 t = a;
+        float lv = vu0Len_A568(self->elems[i].vel);
+        vu0ScaleEq_A568(t, lv / vu0Len_A568(t));
+        vu0AddEq_A568(self->elems[i].force, vu0Scale_A568(vu0Scale_A568(c, vu0Len_A568(self->elems[i].vel) / alen), k[2]));
+    }
+    float* k = self->k;
+    vu0AddEq_A568(self->elems[node->idx].force, vu0Scale_A568(vu0Scale_A568(c, vu0Len_A568(vu0Sub_A568(node->pos, self->elems[node->idx].pos)) / alen), k[2]));
+}
+#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034A838);
 

@@ -1065,9 +1065,279 @@ extern "C" void func_00374440(char* self, sPtRect* rect, sPtVec2* out, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00374518);
+#ifdef SKIP_ASM
+struct sPatchVec4518 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
+struct sPatchOut4518 {
+    float x, y, z;
+    sPatchOut4518() {}
+    sPatchOut4518(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+    sPatchOut4518(const sPatchOut4518& o) : x(o.x), y(o.y), z(o.z) {}
+};
+
+static inline sPatchOut4518 Cross4518(const sPatchOut4518& a, const sPatchOut4518& b)
+{
+    return sPatchOut4518(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+}
+
+static inline sPatchOut4518 Normalize4518(const sPatchOut4518& v)
+{
+    float d2 = v.x * v.x + v.y * v.y + v.z * v.z;
+    float d;
+    // PORT: sqrt.s (sqrtf without errno check)
+    __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
+    if (d != 0.0f) {
+        float k = 1.0f / d;
+        return sPatchOut4518(v.x * k, v.y * k, v.z * k);
+    }
+    return v;
+}
+
+struct sPatchSet4518 {
+    char pad_0x00[0x190];
+    sPatchVec4518* basis[3];    // 0x190
+    int count[3];               // 0x19C
+    char pad_0x1A8[0x310 - 0x1A8];
+    sPatchVec4518* dbasis[3];   // 0x310
+};
+
+// PORT: PS2-only VU0 inline asm (tensor-product patch evaluation, then normals
+// as the normalised cross product of the two partial derivatives).
+extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out, int idx)
+{
+    int n = self->count[idx];
+    sPatchVec4518* basis = self->basis[idx];
+    sPatchVec4518* dbasis = self->dbasis[idx];
+    sPatchOut4518* o = out;
+    int i;
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "lqc2      $vf5, 0x40(%0)\n"
+        "lqc2      $vf6, 0x50(%0)\n"
+        "lqc2      $vf7, 0x60(%0)\n"
+        "lqc2      $vf8, 0x70(%0)\n"
+        "lqc2      $vf9, 0x80(%0)\n"
+        "lqc2      $vf10, 0x90(%0)\n"
+        "lqc2      $vf11, 0xA0(%0)\n"
+        "lqc2      $vf12, 0xB0(%0)\n"
+        "lqc2      $vf13, 0xC0(%0)\n"
+        "lqc2      $vf14, 0xD0(%0)\n"
+        "lqc2      $vf15, 0xE0(%0)\n"
+        "lqc2      $vf16, 0xF0(%0)\n"
+        :
+        : "r"(mat + 0x40));
+    for (i = 0; i < n; i++) {
+        __asm__ __volatile__(
+            "lqc2      $vf17, 0x0(%0)\n"
+            "vmulax.xyzw ACC, $vf1, $vf17x\n"
+            "vmadday.xyzw ACC, $vf2, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf3, $vf17z\n"
+            "vmaddw.xyzw $vf18, $vf4, $vf17w\n"
+            "vmulax.xyzw ACC, $vf5, $vf17x\n"
+            "vmadday.xyzw ACC, $vf6, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf7, $vf17z\n"
+            "vmaddw.xyzw $vf19, $vf8, $vf17w\n"
+            "vmulax.xyzw ACC, $vf9, $vf17x\n"
+            "vmadday.xyzw ACC, $vf10, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf11, $vf17z\n"
+            "vmaddw.xyzw $vf20, $vf12, $vf17w\n"
+            "vmulax.xyzw ACC, $vf13, $vf17x\n"
+            "vmadday.xyzw ACC, $vf14, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf15, $vf17z\n"
+            "vmaddw.xyzw $vf21, $vf16, $vf17w\n"
+            :
+            : "r"(&dbasis[i]));
+        for (int j = 0; j < n; j++) {
+            sPatchVec4518 t;
+            __asm__(
+                "lqc2      $vf22, 0x0(%1)\n"
+                "vmulax.xyzw ACC, $vf18, $vf22x\n"
+                "vmadday.xyzw ACC, $vf19, $vf22y\n"
+                "vmaddaz.xyzw ACC, $vf20, $vf22z\n"
+                "vmaddw.xyzw $vf23, $vf21, $vf22w\n"
+                "sqc2      $vf23, %0\n"
+                : "=m"(t)
+                : "r"(&basis[j]));
+            *o++ = *(sPatchOut4518*)&t;
+        }
+    }
+    o = out;
+    for (i = 0; i < n; i++) {
+        __asm__ __volatile__(
+            "lqc2      $vf17, 0x0(%0)\n"
+            "vmulax.xyzw ACC, $vf1, $vf17x\n"
+            "vmadday.xyzw ACC, $vf2, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf3, $vf17z\n"
+            "vmaddw.xyzw $vf18, $vf4, $vf17w\n"
+            "vmulax.xyzw ACC, $vf5, $vf17x\n"
+            "vmadday.xyzw ACC, $vf6, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf7, $vf17z\n"
+            "vmaddw.xyzw $vf19, $vf8, $vf17w\n"
+            "vmulax.xyzw ACC, $vf9, $vf17x\n"
+            "vmadday.xyzw ACC, $vf10, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf11, $vf17z\n"
+            "vmaddw.xyzw $vf20, $vf12, $vf17w\n"
+            "vmulax.xyzw ACC, $vf13, $vf17x\n"
+            "vmadday.xyzw ACC, $vf14, $vf17y\n"
+            "vmaddaz.xyzw ACC, $vf15, $vf17z\n"
+            "vmaddw.xyzw $vf21, $vf16, $vf17w\n"
+            :
+            : "r"(&basis[i]));
+        for (int j = 0; j < n; j++) {
+            sPatchVec4518 t;
+            __asm__(
+                "lqc2      $vf22, 0x0(%1)\n"
+                "vmulax.xyzw ACC, $vf18, $vf22x\n"
+                "vmadday.xyzw ACC, $vf19, $vf22y\n"
+                "vmaddaz.xyzw ACC, $vf20, $vf22z\n"
+                "vmaddw.xyzw $vf23, $vf21, $vf22w\n"
+                "sqc2      $vf23, %0\n"
+                : "=m"(t)
+                : "r"(&dbasis[j]));
+            sPatchOut4518 r = Normalize4518(Cross4518(*(sPatchOut4518*)&t, *o));
+            *o++ = r;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_003747A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPV3_47A0 {
+    float x, y, z;
+};
+
+struct sPV2_47A0 {
+    float x, y;
+};
+
+struct sPEnt_47A0 {
+    char* mat;      // 0x0
+    int flags;      // 0x4
+    int nslot;      // 0x8
+};
+
+struct sPMgr_47A0 {
+    char pad_0x0[0x18];
+    sPEnt_47A0* entries[3];         // 0x18
+    char pad_0x24[0xC];
+    int* freeList[3];               // 0x30
+    int freeCount[3];               // 0x3C
+    sPV3_47A0 (*pos0)[16];          // 0x48
+    sPV3_47A0 (*pos1)[36];          // 0x4C
+    sPV3_47A0 (*pos2)[64];          // 0x50
+    sPV2_47A0 (*uv0)[16];           // 0x54
+    sPV2_47A0 (*uv1)[36];           // 0x58
+    sPV2_47A0 (*uv2)[64];           // 0x5C
+    sPV2_47A0 (*col0)[16];          // 0x60
+    sPV2_47A0 (*col1)[36];          // 0x64
+    sPV2_47A0 (*col2)[64];          // 0x68
+    char pad_0x6C[0x1B4 - 0x6C];
+    sPV3_47A0 (*nrm0)[16];          // 0x1B4
+    sPV3_47A0 (*nrm1)[36];          // 0x1B8
+    sPV3_47A0 (*nrm2)[64];          // 0x1BC
+    char pad_0x1C0[0xC];
+    int* nfreeList[3];              // 0x1CC
+    int nfreeCount[3];              // 0x1D8
+};
+
+// func_00374518 is declared through a local view so the unit's own definition keeps its types
+extern "C" void func_00374518_47A0(sPMgr_47A0* self, char* mat, sPV3_47A0* out, int idx) __asm__("func_00374518");
+
+static inline int PopSlot_47A0(sPMgr_47A0* self, int idx)
+{
+    int r;
+    if (self->freeCount[idx] > 0) {
+        r = self->freeList[idx][--self->freeCount[idx]];
+    } else {
+        r = -1;
+    }
+    return r;
+}
+
+static inline sPV3_47A0* PosOf_47A0(sPMgr_47A0* self, int idx, int slot)
+{
+    switch (idx) {
+    case 0:
+        return self->pos0[slot];
+    case 1:
+        return self->pos1[slot];
+    case 2:
+        return self->pos2[slot];
+    }
+    return 0;
+}
+
+static inline sPV2_47A0* UVOf_47A0(sPMgr_47A0* self, int idx, int slot)
+{
+    switch (idx) {
+    case 0:
+        return self->uv0[slot];
+    case 1:
+        return self->uv1[slot];
+    case 2:
+        return self->uv2[slot];
+    }
+    return 0;
+}
+
+static inline sPV2_47A0* ColOf_47A0(sPMgr_47A0* self, int idx, int slot)
+{
+    switch (idx) {
+    case 0:
+        return self->col0[slot];
+    case 1:
+        return self->col1[slot];
+    case 2:
+        return self->col2[slot];
+    }
+    return 0;
+}
+
+static inline sPV3_47A0* NrmOf_47A0(sPMgr_47A0* self, int idx, int slot)
+{
+    switch (idx) {
+    case 0:
+        return self->nrm0[slot];
+    case 1:
+        return self->nrm1[slot];
+    case 2:
+        return self->nrm2[slot];
+    }
+    return 0;
+}
+
+extern "C" int func_003747A0(sPMgr_47A0* self, char* mat, int idx, int bit, int normals)
+{
+    int slot = PopSlot_47A0(self, idx);
+    sPV3_47A0* pos = PosOf_47A0(self, idx, slot);
+    sPV2_47A0* uv = UVOf_47A0(self, idx, slot);
+    sPV2_47A0* col = ColOf_47A0(self, idx, slot);
+    func_00374180((sPatchSet*)self, mat, (sPatchOut*)pos, idx);
+    func_00374298((char*)self, mat, (sV2_4298*)uv, idx);
+    func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
+    sPEnt_47A0* e = &self->entries[idx][slot];
+    e->mat = mat;
+    *(short*)(mat + (idx << 1) + 0x1A6) = slot;
+    e->flags |= 0xC | (1 << bit);
+    if (normals) {
+        int nslot = self->nfreeList[idx][--self->nfreeCount[idx]];
+        sPV3_47A0* nrm = NrmOf_47A0(self, idx, nslot);
+        func_00374518_47A0(self, mat, nrm, idx);
+        e->nslot = nslot;
+    }
+    return slot;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00374A88);
@@ -2495,7 +2765,88 @@ extern "C" int func_0037D938(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D968);
+#ifdef SKIP_ASM
+struct sMat_D968 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMat_D968(sMat_D968* d, const sMat_D968* a, const sMat_D968* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMat_D968(sMat_D968* d, const sMat_D968* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+extern "C" void func_003645B8(void* ring, sMat_D968* m);
+
+extern "C" void func_0037D968(void* selfp)
+{
+    char* self = (char*)selfp;
+    *(int*)(self + 0x6B90) = 1;
+    sMat_D968 t2;
+    sMat_D968 t;
+    vu0MulMat_D968(&t, (sMat_D968*)(self + 0x6AF0), *(sMat_D968**)(self + 0x13E4));
+    vu0CopyMat_D968(&t2, &t);
+    vu0CopyMat_D968((sMat_D968*)(self + 0x6B30), &t2);
+    vu0CopyMat_D968((sMat_D968*)(self + 0x5780), *(sMat_D968**)(self + 0x13E4));
+    vu0MulMat_D968(&t, (sMat_D968*)(self + 0x57C0), (sMat_D968*)(self + 0x5780));
+    vu0CopyMat_D968(&t2, &t);
+    vu0CopyMat_D968((sMat_D968*)(self + 0x5800), &t2);
+    vu0MulMat_D968(&t, (sMat_D968*)(self + 0x5860), (sMat_D968*)(self + 0x5780));
+    vu0CopyMat_D968(&t2, &t);
+    vu0CopyMat_D968((sMat_D968*)(self + 0x58A0), &t2);
+    func_003645B8(*(void**)(self + 0x18F0), (sMat_D968*)(self + 0x5780));
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037DBE8);
@@ -3556,7 +3907,155 @@ extern "C" void func_00385BE0(cPartVirt* self, int a, void* b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00385C10);
+#ifdef SKIP_ASM
+struct sPtRS_5C10 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_5C10 {
+    sPtRS_5C10 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_5C10 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_5C10 ents[1];            // 0x80
+};
+
+struct sPtGfx_5C10 {
+    char pad_0x0[0xE84];
+    sPtRS_5C10* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_5C10* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+struct sMat_5C10 {
+    float m[4][4];
+    sMat_5C10() {}
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+    sMat_5C10(const sMat_5C10& s)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+} __attribute__((aligned(16)));
+
+struct sVec4_5C10 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBez_5C10 {
+    char pad_0x0[0x194];
+    float scale;                    // 0x194
+    char pad_0x198[0x8];
+    int buf;                        // 0x1A0
+    int flip;                       // 0x1A4
+    char pad_0x1A8[0x4];
+    unsigned int tags[2];           // 0x1AC
+    char pad_0x1B4[0x1C4 - 0x1B4];
+    sPtGfx_5C10* gfx;               // 0x1C4
+};
+
+// PORT: PS2-only VU0 inline asm (scale the rows of a 4x4 matrix by a vector).
+static inline sMat_5C10 ScaleMat_5C10(const sMat_5C10& m, const sVec4_5C10& v)
+{
+    sMat_5C10 d;
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%2)\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulx.xyzw $vf8, $vf4, $vf1x\n"
+        "vmuly.xyzw $vf9, $vf5, $vf1y\n"
+        "vmulz.xyzw $vf10, $vf6, $vf1z\n"
+        "vmulw.xyzw $vf11, $vf7, $vf1w\n"
+        "sqc2      $vf8, 0x0(%0)\n"
+        "sqc2      $vf9, 0x10(%0)\n"
+        "sqc2      $vf10, 0x20(%0)\n"
+        "sqc2      $vf11, 0x30(%0)\n"
+        :
+        : "r"(&d), "r"(&m), "r"(&v)
+        : "memory");
+    return d;
+}
+
+extern int D_004A4474;
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_0037D968(void* self);
+extern "C" void func_0037E120_5C10(sPtGfx_5C10* gfx, sMat_5C10* m, sMat_5C10* hdr, sVec4_5C10* scale, int flag, int a5, int prim, char** pp) __asm__("func_0037E120");
+
+// PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `ulong`.
+extern "C" void func_00385C10(sBez_5C10* self, sMat_5C10* mat, int tex, int flag)
+{
+    if (self->flip) {
+        self->flip = 0;
+        self->buf = (self->buf + 1) & 1;
+    }
+    if (self->gfx->texReady == 0) {
+        func_0037D968(self->gfx);
+    }
+    self->gfx->top->f0 = (self->gfx->top->f0 & ~0x3C0) | 0xC0;
+    self->gfx->top->fC &= 0xC0000000;
+    self->gfx->top->tex = tex;
+    unsigned int addr = self->gfx->bufAddr;
+    sMat_5C10 m = *mat;
+    float s = self->scale;
+    sVec4_5C10 sc;
+    sc.x = s;
+    sc.y = s;
+    sc.z = s;
+    sc.w = 1.0f;
+    sMat_5C10 m2 = ScaleMat_5C10(*mat, sc);
+    char* p = (char*)func_0038F460(D_004A4474, addr, -1, 0);
+    func_0037E120_5C10(self->gfx, &m2, &m, &sc, flag, 0, flag ? 0x22 : 0x20, &p);
+    *(ulong*)p = ((ulong)self->tags[self->buf] << 32) | 0x50000000;
+    *(ulong*)(p + 8) = 0;
+    p += 0x10;
+    addr = func_0038F668(D_004A4474, (unsigned long*)p, 4);
+    sPtRing_5C10* ring = self->gfx->ring;
+    sPtRS_5C10* rs = self->gfx->top;
+    unsigned int cur = self->gfx->bufAddr;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_5C10* e = (sPtEnt_5C10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = cur;
+        e->next = addr;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->gfx->bufAddr = addr + 0x10;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00385EB0);
 

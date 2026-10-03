@@ -593,9 +593,198 @@ extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* ite
 
 INCLUDE_ASM("intersect/aifwddiff", func_00328808);
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328C20);
+#ifdef SKIP_ASM
+struct sNode_8C20 {
+    sNode_8C20* child[2][2][2];         // 0x00
+    sList_00328660 lists[3];            // 0x20
+    sNode_8C20() {}
+    sNode_8C20(sNode_8C20* c, const sCell_00328660& cc, const sCell_00328660& pc)
+    {
+        int dx = cc.x - pc.x * 2;
+        int dy = cc.y - pc.y * 2;
+        int dz = cc.z - pc.z * 2;
+        func_003E6448(child, 0, sizeof(child));
+        child[dx][dy][dz] = c;
+    }
+};
 
+struct sRoot_8C20 {
+    sCell_00328660 cell;            // 0x00
+    sNode_8C20* node;               // 0x10
+};
+
+static inline int Contains_8C20(const sCell_00328660& a, const sCell_00328660& b)
+{
+    int d = a.level - b.level;
+    if (d < 0) {
+        return 0;
+    }
+    if (d == 0) {
+        return b.x == a.x && b.y == a.y && b.z == a.z;
+    }
+    return (b.x >> d) == a.x && (b.y >> d) == a.y && (b.z >> d) == a.z;
+}
+
+static inline sCell_00328660 Parent_8C20(const sCell_00328660& c)
+{
+    sCell_00328660 r;
+    r.level = c.level + 1;
+    r.x = c.x >> 1;
+    r.y = c.y >> 1;
+    r.z = c.z >> 1;
+    return r;
+}
+
+extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_00328660* cell)
+{
+    sNode_8C20** pn = &root->node;
+    if (root->node == 0) {
+        root->cell = *cell;
+        sNode_8C20* n = new (D_004A3FC0, 0x20000000, 0) sNode_8C20;
+        func_003E6448(n->child, 0, sizeof(n->child));
+        *pn = n;
+        root->node->lists[idx].push(item);
+        return;
+    }
+    while (!Contains_8C20(root->cell, *cell)) {
+        sCell_00328660 nc = Parent_8C20(root->cell);
+        sNode_8C20* n = new (D_004A3FC0, 0x20000000, 0) sNode_8C20(root->node, root->cell, nc);
+        root->cell = nc;
+        root->node = n;
+    }
+    func_00328660((sNode_00328660*)root->node, idx, item, cell, &root->cell);
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328F28);
+#ifdef SKIP_ASM
+struct sVec4_8F28 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_8F28 {
+    sVec4_8F28 min;
+    sVec4_8F28 max;
+};
+
+struct sCell_8F28 {
+    int level;
+    int x, y, z;
+};
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_8F28 vu0Sub_8F28(const sVec4_8F28& a, const sVec4_8F28& b)
+{
+    sVec4_8F28 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4_8F28 vu0Add_8F28(const sVec4_8F28& a, const sVec4_8F28& b)
+{
+    sVec4_8F28 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_8F28 vu0Scale_8F28(const sVec4_8F28& v, float s)
+{
+    sVec4_8F28 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
+static inline int Floor_8F28(float f)
+{
+    float t;
+    int q;
+    __asm__("cvt.w.s %0, %2\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "=&f"(t), "=r"(q) : "f"(f));
+    if (f < t) {
+        q--;
+    }
+    return q;
+}
+
+static inline sCell_8F28 Parent_8F28(const sCell_8F28& c)
+{
+    sCell_8F28 r;
+    r.level = c.level + 1;
+    r.x = c.x >> 1;
+    r.y = c.y >> 1;
+    r.z = c.z >> 1;
+    return r;
+}
+
+extern "C" void func_00328F28(sCell_8F28* c, sBox_8F28* b)
+{
+    sVec4_8F28 size = vu0Sub_8F28(b->max, b->min);
+    sVec4_8F28 center = vu0Add_8F28(b->min, vu0Scale_8F28(size, 0.5f));
+    float m = size.x;
+    if (m < size.y) {
+        m = size.y;
+    }
+    if (m < size.z) {
+        m = size.z;
+    }
+    union {
+        float f;
+        int i;
+    } u;
+    u.f = m * 0.7142857313156128f;
+    c->level = ((u.i >> 23) & 0xFF) - 0x7F;
+    if (c->level < 11) {
+        c->level = 11;
+    }
+    union {
+        int i;
+        float f;
+    } s;
+    s.i = (c->level + 0x7F) << 23;
+    float scale = s.f;
+    c->x = Floor_8F28(center.x / scale);
+    c->y = Floor_8F28(center.y / scale);
+    c->z = Floor_8F28(center.z / scale);
+    for (;;) {
+        s.i = (c->level + 0x7F) << 23;
+        scale = s.f;
+        int ok = 0;
+        if (((float)c->x - 0.2f) * scale <= b->min.x && ((float)c->y - 0.2f) * scale <= b->min.y && ((float)c->z - 0.2f) * scale <= b->min.z
+            && b->max.x <= ((float)(c->x + 1) + 0.2f) * scale && b->max.y <= ((float)(c->y + 1) + 0.2f) * scale && b->max.z <= ((float)(c->z + 1) + 0.2f) * scale) {
+            ok = 1;
+        }
+        if (ok) {
+            break;
+        }
+        *c = Parent_8F28(*c);
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_003291E0);
 
