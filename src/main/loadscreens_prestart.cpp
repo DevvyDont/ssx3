@@ -691,9 +691,224 @@ extern "C" int func_00232DA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232E20);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+// malloc-like allocation (gcc treats operator new results as unaliased)
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* func_00397B08(void* p);
+extern "C" int cUIEngine_loadFile(void* ui, const char* name);
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void func_0039F400(void* list, void* item);
+// PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
+extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern int D_004A19D8;
+extern int D_004A19DC;
+extern char D_00535BC8[];
+extern char D_0047B698[];
+extern char D_0047BD28[];
+extern char D_0047B9F0[];
+extern char D_0047BD38[];
+extern char D_0047BD50[];
+extern char D_0047BD68[];
+extern char D_0046D1D0[];
+extern char D_0047C878[];
+extern char D_0047C7A8[];
+extern char D_0047C948[];
 
+struct sVE_2E20 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sNode_2E20 {
+    int f0;
+    char f4;
+    void* f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+};
+
+struct sUI_2E20 {
+    int f0;
+    int f4;
+    int f8;
+    sNode_2E20* fC;
+    int f10;
+    int f14;
+    char list[4];
+};
+
+struct cLoadItemA_2E20 {
+    char pad[0x48];
+    cLoadItemA_2E20(void* ui)
+    {
+        func_0039E2A0(this, ui);
+        *(void**)(pad + 8) = D_0047C878;
+        D_004A19D8 = 0;
+    }
+};
+
+struct cLoadItemB_2E20 {
+    char pad[0x48];
+    cLoadItemB_2E20(void* ui)
+    {
+        func_0039E2A0(this, ui);
+        *(void**)(pad + 8) = D_0047C7A8;
+        D_004A19DC = 0;
+    }
+};
+
+struct cLoadItemC_2E20 {
+    char pad[0x48];
+    void* owner;    // 0x48
+    cLoadItemC_2E20(void* ui)
+    {
+        func_0039E2A0(this, ui);
+        *(void**)(pad + 8) = D_0047C948;
+        owner = 0;
+    }
+};
+
+extern "C" void func_00232E20(void* self)
+{
+    char* w = (char*)D_004A289C;
+    sVE_2E20* vt = *(sVE_2E20**)(w + 0x10D8);
+    vt[44].fn(w + vt[44].delta, 0x100);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
+    *(void**)((char*)self + 0xC) = ui;
+    cUIEngine_loadFile(ui, D_0047BD28);
+    (*(sUI_2E20**)((char*)self + 0xC))->f8 = *(int*)((char*)D_004A28A8 + 0x88);
+    (*(sUI_2E20**)((char*)self + 0xC))->f10 = *(int*)((char*)D_004A28A8 + 0x8C);
+    sNode_2E20* n = (sNode_2E20*)operator new(0x1C, D_0047B9F0, 0x100, 0);
+    n->f4 = 0;
+    n->f8 = D_0046D1D0;
+    n->f18 = 0;
+    n->fC = 0;
+    n->f10 = 0;
+    n->f14 = 0;
+    (*(sUI_2E20**)((char*)self + 0xC))->fC = n;
+    void* item;
+    if (D_004A19D8 == 0) {
+        signed char* g = (signed char*)D_00535BC8;
+        if (g[0x49] != 0)
+            goto other;
+        if (g[0x48] == 5)
+            goto makeA;
+        if (g[0x48] != 6)
+            goto other;
+    }
+makeA:
+    item = new (D_0047BD38, 0, 0) cLoadItemA_2E20(*(void**)((char*)self + 0xC));
+    goto done;
+other:
+    {
+        signed char* g2 = (signed char*)D_00535BC8;
+        int x = 0;
+        if (g2[0x49] == 0) {
+            int t = g2[0x48] != 5;
+            if (t)
+                x = g2[0x48] != 6;
+        }
+        if (x) {
+            item = new (D_0047BD50, 0, 0) cLoadItemB_2E20(*(void**)((char*)self + 0xC));
+        } else {
+            cLoadItemC_2E20* c = new (D_0047BD68, 0, 0) cLoadItemC_2E20(*(void**)((char*)self + 0xC));
+            item = c;
+            c->owner = self;
+            cGameLoadScreen_loadTexture_2E20(self, 0);
+        }
+    }
+done:
+    func_0039F400(*(char**)((char*)self + 0xC) + 0x18, item);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_loadTexture);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
+struct cBigFile {
+    int field_0x0;
+    int field_0x4;
+};
+// PORT: cBigFile_cBigFile1 really takes (self, path, flags); bound by asm label.
+cBigFile* cBigFile_cBigFile1_3048(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
+void cBigFile__cBigFile(cBigFile* self, int flags);
+void cMemMan_free(void*);
+extern "C" int func_00144BE0(void* self);
+extern "C" char* func_003E2190(const char* name, int flags);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern signed char D_00535C11[];
+extern char D_0047BD78[];
+extern char D_0047BD90[];
+extern char D_0047BDA0[];
+extern char D_0047BDB0[];
+extern char D_0047BDC8[];
+extern char D_004A2C30[];
+extern char* D_00442928[];
+extern char* D_00442950[];
+extern int D_004A2B3C;
+extern char* D_004A289C_3048 __asm__("D_004A289C");
+
+struct sVE_3048 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, const char*, int, int, int);
+};
+
+static inline int loadTex_3048(char* data, const char* name)
+{
+    char* g = D_004A289C_3048;
+    sVE_3048* vt = *(sVE_3048**)(g + 0x10D8);
+    return vt[46].fn(g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+}
+
+extern "C" void cGameLoadScreen_loadTexture(char* self)
+{
+    char name[0x70];
+    cBigFile bf;
+    void* plr = cBE_getInterface_Fv(cBE_getBE(), 1);
+    void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] == 2) {
+        cBigFile_cBigFile1_3048(&bf, D_0047BD78, 0x100);
+        int* slot = (int*)(self + 0x10);
+        for (int i = 0; i < 2; i++) {
+            sprintf(name, D_0047BD90, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
+            char* data = func_003E2190(name, 0x3000100);
+            *slot = loadTex_3048(data, D_0047BDA0);
+            if (data != 0)
+                cMemMan_free(data);
+            slot++;
+        }
+        cBigFile__cBigFile(&bf, 2);
+    } else {
+        cBigFile_cBigFile1_3048(&bf, D_0047BDB0, 0x100);
+        signed char n = func_00144BE0(fe);
+        if (n > 16)
+            n = 0;
+        sprintf(name, D_004A2C30, D_00442950[n]);
+        char* data = func_003E2190(name, 0x3000100);
+        *(int*)(self + 0x10) = loadTex_3048(data, D_0047BDC8);
+        if (data != 0)
+            cMemMan_free(data);
+        cBigFile__cBigFile(&bf, 2);
+    }
+}
+#endif
 
 INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
 

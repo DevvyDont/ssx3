@@ -614,7 +614,117 @@ extern "C" void func_001D05F0(void* self, int arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateHelpText);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern char D_00466F90[];
+extern char D_00466FB0[];
+extern char D_00466FC8[];
+extern char D_00466FE0[];
+extern char D_00466FF8[];
+extern char D_00467010[];
+extern char D_00467028[];
+extern char D_00460958[];
+
+struct sVE_0648v {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVE_0648i {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sVE_0648p {
+    short delta;
+    short index;
+    char* (*fn)(void*, int);
+};
+
+static inline void setVis_0648(char* o, int on)
+{
+    sVE_0648v* vt = *(sVE_0648v**)(o + 8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+static inline void setHelp_0648(char* self, char* key)
+{
+    cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x900), GetHashValue32(key));
+}
+
+// PORT: item pointers passed through int vtable parameters.
+extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
+{
+    char* txt = *(char**)(self + 0x900);
+    if (txt == 0)
+        return;
+    setVis_0648(txt, 0);
+    sVE_0648p* vtp = *(sVE_0648p**)(self + 8);
+    char* item = vtp[34].fn(self + vtp[34].delta, idx);
+    if (item == 0)
+        return;
+    sVE_0648i* vti = *(sVE_0648i**)(self + 8);
+    int state = vti[36].fn(self + vti[36].delta, (int)item);
+    setVis_0648(*(char**)(self + 0x900), 1);
+    if (*(int*)(self + 0x4C) == 8) {
+        sVE_0648i* vt = *(sVE_0648i**)(self + 8);
+        if (vt[38].fn(self + vt[38].delta, idx)) {
+            setHelp_0648(self, D_00466F90);
+        } else if (state < 0) {
+            setHelp_0648(self, *(char**)(item + 8));
+        } else {
+            int m = *(int*)(self + 0x8F0);
+            if (m >= 0) {
+                if (state != m) {
+                    if (state == 1)
+                        setHelp_0648(self, D_00466FB0);
+                    else if (state == 2)
+                        setHelp_0648(self, D_00466FC8);
+                    else
+                        setHelp_0648(self, D_00466FE0);
+                } else {
+                    sVE_0648i* v2 = *(sVE_0648i**)(self + 8);
+                    if (*(int*)(self + 0x54) < v2[35].fn(self + v2[35].delta, (int)item))
+                        setHelp_0648(self, D_00460958);
+                    else
+                        setHelp_0648(self, D_00466FF8);
+                }
+            } else {
+                setHelp_0648(self, D_00467010);
+            }
+        }
+    } else {
+        sVE_0648i* vt = *(sVE_0648i**)(self + 8);
+        if (vt[38].fn(self + vt[38].delta, idx)) {
+            setHelp_0648(self, D_00467028);
+        } else {
+            int m = *(int*)(self + 0x8F0);
+            if (m >= 0) {
+                if (state != m) {
+                    if (state == 1)
+                        setHelp_0648(self, D_00466FB0);
+                    else if (state == 2)
+                        setHelp_0648(self, D_00466FC8);
+                    else
+                        setHelp_0648(self, D_00466FE0);
+                } else {
+                    sVE_0648i* v2 = *(sVE_0648i**)(self + 8);
+                    if (*(int*)(self + 0x54) < v2[35].fn(self + v2[35].delta, (int)item))
+                        setHelp_0648(self, D_00460958);
+                    else
+                        setHelp_0648(self, D_00466FF8);
+                }
+            } else {
+                setHelp_0648(self, D_00467010);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRow);
 

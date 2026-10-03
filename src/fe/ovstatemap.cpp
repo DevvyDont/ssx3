@@ -396,7 +396,44 @@ extern "C" void func_0020A088(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+// PORT: SN soft-float float->double conversion (the source passed floats to sprintf).
+extern "C" double func_00413AF8(float f);
+extern char D_004C6848[];
+extern char D_004719F0[];
+extern char D_00471A00[];
+
+struct sGameSettings_A1A8 {
+    unsigned int flags;     // 0x0, bits 22..24 = language
+    int pad[0x288 / 4 - 1];
+};
+extern sGameSettings_A1A8 D_00535610_A1A8 __asm__("D_00535610");
+
+// Format a time in seconds as minutes/seconds for the current language.
+extern "C" char* func_0020A1A8(int secs)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    int m = secs / 60;
+    int s = secs % 60;
+    sGameSettings_A1A8 set = D_00535610_A1A8;
+    switch ((set.flags >> 22) & 7) {
+    case 0:
+    case 2:
+        sprintf(D_004C6848, D_004719F0, func_00413AF8((float)m), func_00413AF8((float)s));
+        break;
+    case 1:
+    case 3:
+        sprintf(D_004C6848, D_00471A00, func_00413AF8((float)m), func_00413AF8((float)s));
+        break;
+    }
+    return D_004C6848;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A380);
@@ -478,7 +515,81 @@ extern "C" void func_0020A430(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A4E0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void* cBXString_Concat(void* self, const char* str);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_003A19F8(void* text, char* str);
+extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern "C" int func_00258160(int a, char* name, int len);
+extern void* D_004A28A8;
+extern int* D_004A2EEC_A4E0 __asm__("D_004A2EEC");
+extern char D_00534B30[];
+extern char D_0046E660[];
+extern char D_0046E7F8[];
+extern char D_0046E808[];
+extern char D_004A2710[];
+
+struct sBXString_A4E0 {
+    char* str;
+    sBXString_A4E0() {}
+    sBXString_A4E0(const sBXString_A4E0& o);
+};
+
+struct sVE_A4E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void show_A4E0(char* o, int on)
+{
+    sVE_A4E0* vt = *(sVE_A4E0**)(o + 8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+// PORT: the session pointer is passed through func_00258160's int parameter.
+extern "C" int func_0020A4E0(char* self)
+{
+    int ret = 0;
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    char* net = D_00534B30;
+    if (*(int*)net != 0 && *(void**)(self + 0x40) != 0) {
+        int* sess = D_004A2EEC_A4E0;
+        if (sess != 0 && *sess != 0) {
+            char* name = self + 0x58;
+            if (func_00258160((int)sess, name, 0x41) != 0) {
+                char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E660));
+                if (a != 0)
+                    show_A4E0(a, 0);
+                char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E7F8));
+                if (b != 0)
+                    show_A4E0(b, 0);
+                ret = 1;
+                char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E808));
+                unsigned short c8 = *(unsigned short*)(obj + 0xC8);
+                unsigned short c4 = *(unsigned short*)(obj + 0xC4);
+                unsigned short c6 = *(unsigned short*)(obj + 0xC6);
+                int none = c8 == 0;
+                sBXString_A4E0 s;
+                cBXString_cBXString2(&s, net + 0x498);
+                cBXString_Concat(&s, D_004A2710);
+                cBXString_Concat(&s, name);
+                func_003A19F8(obj, s.str);
+                func_001A83D8(obj, 0x28, 4, c8, c4, c6, none, 1);
+                show_A4E0(obj, 1);
+                cBXString__cBXString(&s, 2);
+            }
+        }
+    }
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_0020A6A8);

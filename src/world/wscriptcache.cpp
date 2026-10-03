@@ -635,7 +635,86 @@ extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AEAD0);
+#ifdef SKIP_ASM
+struct sAlloc_AEAD0 {
+    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
+    void* free;
+    int flags;
+};
+// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
+extern sAlloc_AEAD0 D_00509430_AEAD0 __asm__("D_00509430");
+extern char D_00495210[];
+
+extern "C" unsigned char* func_003E12E0(void* q);
+extern "C" void SYNCTASK_run(int a);
+extern "C" int func_003B11F0(int v);
+void* func_003B0720(void* self);
+extern "C" void* func_003B11A0();
+// PORT: func_003B04F8 returns its vcall's int result; the unit defines it void.
+extern "C" int func_003B04F8_i(void* self, void* obj, void* item) __asm__("func_003B04F8");
+extern "C" void func_003B0538(void* self);
+extern "C" void* func_003E13E8(void* p, int a1);
+extern "C" int func_003E1530(void* q);
+
+struct sChunk_AEAD0 {
+    unsigned char* data;    // 0x0
+    unsigned char* body;    // 0x4
+    unsigned int size;      // 0x8
+};
+
+static inline unsigned int le32_AEAD0(unsigned char* p)
+{
+    return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
+}
+
+// PORT: chunk pointers passed through int parameters of some callees. The unit declares
+// func_003AEAD0(int, void*) for its caller; the real body takes (self, ctx, out), bound by asm label.
+extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out) __asm__("func_003AEAD0");
+extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
+{
+    int kind = 0;
+    void* q = *(void**)(self + 0x30);
+    *out = 0;
+    for (;;) {
+        unsigned char* p = func_003E12E0(q);
+        SYNCTASK_run(0);
+        if (p != 0) {
+            unsigned int tag = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+            if (func_003B11F0(tag))
+                kind = 3;
+            if (kind != 0) {
+                sChunk_AEAD0* c = (sChunk_AEAD0*)func_003B0720(D_00509430_AEAD0.alloc(D_00495210, 0xC, 0, 0, D_00509430_AEAD0.flags));
+                *out = c;
+                c->data = p;
+                if (kind == 2) {
+                    unsigned int size = le32_AEAD0(p + 4);
+                    c->body = p;
+                    c->size = size;
+                } else {
+                    unsigned int size = le32_AEAD0(p + 4);
+                    c->body = p + 8;
+                    c->size = size;
+                }
+                if (*(int*)(ctx + 0x14) != 0)
+                    return;
+                if (kind != 3)
+                    return;
+                if (func_003B04F8_i(ctx, func_003B11A0(), c) != 2)
+                    func_003B0538(ctx);
+                return;
+            }
+            char name[8];
+            *(unsigned int*)name = tag;
+            name[4] = 0;
+            func_003E13E8(q, (int)p);
+        }
+        if (func_003E1530(q))
+            return;
+    }
+}
+#endif
 
 extern "C" void* func_003AEAD0(int, void*);
 
@@ -1630,7 +1709,70 @@ extern "C" void func_003B17A8(void)
 
 INCLUDE_ASM("world/wscriptcache", func_003B1988);
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B1AB0);
+#ifdef SKIP_ASM
+extern int D_005095DC[];
+extern int D_00509520[];
+extern int D_00509524[];
+extern int D_00509528[];
+extern int D_0050952C[];
+extern int D_00509530[];
+extern int D_00509534[];
+extern int D_00509510[];
+extern int D_00509514[];
+extern int D_00509518[];
+extern int D_005094EC[];
+extern int D_005094F0[];
+extern int D_005094F4[];
+extern int D_005094F8[];
+extern float D_00509504[];
+struct sD_00509508;
+extern float D_0044C388[];
+extern char D_004954B8[];
+void* func_003B2360(void* self);
+
+struct sMpegCtx1AB0 {
+    char pad[0x420];
+    int f420;
+    int f424;
+};
+
+// Parse an MPEG-2 sequence extension.
+extern "C" void func_003B1AB0(void)
+{
+    sMpegCtx1AB0* g = (sMpegCtx1AB0*)D_0050A088.ptr;
+    g->f420 = 1;
+    g->f424 = 0;
+    D_005095DC[0] = 0;
+    D_00509520[0] = (int)func_003B1300(8);
+    D_00509524[0] = (int)func_003B1300(1);
+    D_00509528[0] = (int)func_003B1300(2);
+    int hext = (int)func_003B1300(2);
+    int vext = (int)func_003B1300(2);
+    int brext = (int)func_003B1300(0xC);
+    func_003B2360(D_004954B8);
+    int vbvext = (int)func_003B1300(8);
+    D_0050952C[0] = (int)func_003B1300(1);
+    D_00509530[0] = (int)func_003B1300(2);
+    D_00509534[0] = (int)func_003B1300(5);
+    D_00509508.value = D_0044C388[D_00509510[0]] * ((float)(D_00509530[0] + 1) / (float)(D_00509534[0] + 1));
+    if ((D_00509520[0] >> 7) & 1) {
+        if ((D_00509520[0] & 0xF) == 5) {
+            D_005094EC[0] = 0x85;
+            D_005094F0[0] = 8;
+        }
+    } else {
+        D_005094EC[0] = D_00509520[0] >> 4;
+        D_005094F0[0] = D_00509520[0] & 0xF;
+    }
+    D_005094F4[0] = (hext << 12) | (D_005094F4[0] & 0xFFF);
+    D_005094F8[0] = (vext << 12) | (D_005094F8[0] & 0xFFF);
+    D_00509514[0] = D_00509514[0] + (brext << 18);
+    D_00509504[0] = D_00509514[0] * 400.0f;
+    D_00509518[0] = D_00509518[0] + (vbvext << 10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B1CC0);
@@ -2151,5 +2293,50 @@ extern "C" int func_003B3308(void* buf, int size, int type)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003B33B0);
+#ifdef SKIP_ASM
+extern "C" int func_003B3308(void* buf, int size, int type);
+extern "C" void func_003B2E78(char* src, int pitch, char* dst);
+extern "C" void func_003B2B90(char* src, int pitch, char* dst, int fmt);
+
+// Compress a w x h image into 4x4 blocks.
+extern "C" void func_003B33B0(void* out, char* src, int w, int h, int fmt)
+{
+    char* dst = (char*)out;
+    int x, y;
+    int n = w * h;
+    if (fmt == 3 || fmt == 5) {
+        if (func_003B3308(dst, n, fmt)) {
+            for (y = 0; y < h; y += 4) {
+                for (x = 0; x < w; x += 4) {
+                    func_003B2E78(src, w * 8, dst + 8);
+                    func_003B2B90(src, w * 8, dst, fmt);
+                    src += 0x20;
+                    dst += 0x10;
+                }
+                src += w * 0x18;
+            }
+        } else {
+            for (y = 0; y < h; y += 4) {
+                for (x = 0; x < w; x += 4) {
+                    func_003B2E78(src, w * 8, dst + 8);
+                    src += 0x20;
+                    dst += 0x10;
+                }
+                src += w * 0x18;
+            }
+        }
+    } else {
+        for (y = 0; y < h; y += 4) {
+            for (x = 0; x < w; x += 4) {
+                func_003B2E78(src, w * 4, dst);
+                src += 0x20;
+                dst += 8;
+            }
+            src += w * 0x18;
+        }
+    }
+}
+#endif
 

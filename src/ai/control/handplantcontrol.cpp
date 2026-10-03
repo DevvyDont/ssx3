@@ -328,7 +328,99 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013AF28);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013BD80);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013BFA8);
+#ifdef SKIP_ASM
+extern "C" void func_00114298(void* rider, float v);
+// PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
+extern "C" void func_0011E150_v(void* rider, int a1) __asm__("func_0011E150");
+extern "C" void func_00105398(void* rider, int a1);
+extern "C" void func_00107888(void* rider);
+extern "C" void func_0013C140(void* self);
+extern "C" void func_00294170(void* snd, void* rider);
+int func_0011FEE8(void* rider);
+int func_0011FE98(void* rider);
+// PORT: func_0011FE78 is defined with one parameter but this caller passes (rider, 1).
+void func_0011FE78_impl_BFA8(void* rider, int v) __asm__("func_0011FE78__FPv");
+extern char* D_004A3500;
+
+struct sTbl_BFA8 {
+    int v[4];
+};
+extern sTbl_BFA8 D_00458230;
+
+struct sVec4_BFA8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_BFA8(const sVec4_BFA8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_BFA8(sVec4_BFA8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+#define RIDER_BFA8 (*(char**)((char*)self + 0x50))
+
+extern "C" void func_0013BFA8(void* self)
+{
+    func_0011E150_v(RIDER_BFA8, 0);
+    if (*(int*)((char*)self + 0x20) != 0) {
+        char* r = RIDER_BFA8;
+        *(int*)(r + 0x234) = 0;
+        *(float*)(r + 0x230) = 0.03333333507180214f;
+        func_00114298(RIDER_BFA8, -1.0f);
+    }
+    sTbl_BFA8 tbl = D_00458230;
+    if (func_0011FEE8(RIDER_BFA8) == 0xC) {
+        char* r = RIDER_BFA8;
+        *(int*)(*(char**)(r + 0xAA0) + 0x28) = tbl.v[*(int*)(*(char**)(r + 0x77C) + 0x394)];
+    } else {
+        *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0x16;
+    }
+    func_00105398(RIDER_BFA8, 0);
+    *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 3;
+    func_0013C140(self);
+    *(unsigned int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0xFFFFFFFF;
+    func_00107888(RIDER_BFA8);
+    if (*(int*)((char*)self + 0x20) != 0 && func_0011FE98(RIDER_BFA8) == 4) {
+        func_0011FE78_impl_BFA8(RIDER_BFA8, 1);
+        func_00294170(D_004A3500, RIDER_BFA8);
+    }
+    char* r = RIDER_BFA8;
+    float len = vu0Length_BFA8(*(sVec4_BFA8*)(r + 0x1E0));
+    if (*(float*)(r + 0x2E4) < len)
+        vu0ScaleEq_BFA8(*(sVec4_BFA8*)(r + 0x1E0), *(float*)(r + 0x2E4) / len);
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C140);
 
@@ -915,7 +1007,56 @@ extern "C" void func_0013F880(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8F8);
+#ifdef SKIP_ASM
+struct sSortObj_F8F8 {
+    char pad[0x78];
+    unsigned int key;   // 0x78
+};
+
+// Merge sort of an object-pointer array by key, using buf as scratch; the sorted result ends up in buf.
+extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSortObj_F8F8** buf, void* cmp)
+{
+    int n = last - first;
+    if (n == 2) {
+        if (first[0]->key < first[1]->key) {
+            buf[0] = first[0];
+            buf[1] = first[1];
+        } else {
+            buf[0] = first[1];
+            buf[1] = first[0];
+        }
+        return;
+    }
+    sSortObj_F8F8** mid = first + (n + 1) / 2;
+    sSortObj_F8F8** bmid = buf + n / 2;
+    sSortObj_F8F8** bend = buf + n;
+    if (n < 3)
+        *bmid = *first;
+    else
+        func_0013F8F8(first, mid, bmid, cmp);
+    if (n < 4)
+        *first = *mid;
+    else
+        func_0013F8F8(mid, last, first, cmp);
+    sSortObj_F8F8** b = bmid;
+    sSortObj_F8F8** bend2 = bmid + (n + 1) / 2;
+    sSortObj_F8F8** a = first;
+    sSortObj_F8F8** aend = first + n / 2;
+    sSortObj_F8F8** out = buf;
+    while (out < bend) {
+        if (a < aend) {
+            if (b < bend2 && (*b)->key < (*a)->key)
+                *out++ = *b++;
+            else
+                *out++ = *a++;
+        } else {
+            *out++ = *b++;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013FAD8);
 

@@ -283,7 +283,68 @@ extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026B880);
+#ifdef SKIP_ASM
+extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" void func_0026BA48(void* dst, void* src);
+
+extern int D_00445428[];
+
+struct sPathNode_B880 {
+    int id;             // 0x0
+    int type;           // 0x4
+    char pos[0xC];      // 0x8
+    char dir[0xC];      // 0x14
+    char* f20;          // 0x20
+    char* f24;          // 0x24
+};
+
+struct sPathSys_B880 {
+    int count;                  // 0x0
+    sPathNode_B880* nodes;      // 0x4
+    int pad_0x8;                // 0x8
+    char* fC;                   // 0xC
+    int pad_0x10;               // 0x10
+    char* f14;                  // 0x14
+};
+
+extern "C" int func_0026B880(sPathSys_B880* self, char* p)
+{
+    int tmp;
+    int a;
+    int b;
+    char* start = p;
+    func_0026BA68(&tmp, p);
+    p += 4;
+    self->nodes = (sPathNode_B880*)p;
+    self->count = tmp;
+    for (int i = 0; i < self->count; i++) {
+        func_0026BA68(&self->nodes[i].id, p);
+        p += 4;
+        func_0026BA68(&tmp, p);
+        p += 4;
+        func_0026BA48(self->nodes[i].pos, p);
+        p += 0xC;
+        func_0026BA48(self->nodes[i].dir, p);
+        p += 0xC;
+        func_0026BA68(&a, p);
+        p += 4;
+        func_0026BA68(&b, p);
+        p += 4;
+        self->nodes[i].type = 0;
+        for (int j = 0; j < 3; j++) {
+            if (D_00445428[j] == tmp) {
+                self->nodes[i].type = j;
+                break;
+            }
+        }
+        self->nodes[i].f24 = self->fC + a * 0x40;
+        self->nodes[i].f20 = self->f14 + b * 0x3C;
+    }
+    return p - start;
+}
+#endif
 
 extern "C" void* func_003E6574(void*, void*, int);
 

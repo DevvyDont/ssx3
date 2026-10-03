@@ -215,7 +215,80 @@ extern "C" void func_0039A8D8(void* self, int count)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uilistbox", func_0039A928);
+#ifdef SKIP_ASM
+struct cUIThing;
+unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
+extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" unsigned char func_0039B7B0(void* self, int a1);
+
+struct sVEntry39A928a {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEntry39A928b {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sUIFlags39A928 {
+    unsigned int pad0 : 4;
+    unsigned int active : 1;
+};
+
+extern "C" void func_0039A928(char* self, int on)
+{
+    ((sUIFlags39A928*)(self + 0x14))->active = on != 0;
+    if (on) {
+        if (*(unsigned char*)(self + 0xA4) != 0xFF) {
+            cUIMenu_setSelectedByIndex(self, *(unsigned char*)(self + 0xA4));
+            return;
+        }
+        char* cur = *(char**)(self + 0xA0);
+        if (cur == 0) {
+            unsigned char idx = func_0039B7B0(self, 0);
+            if (idx == 0xFF)
+                idx = 0;
+            cUIMenu_setSelectedByIndex(self, idx);
+        } else if (((*(int*)(cur + 0x14) >> 4) & 1) == 0) {
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 0);
+            if (ev != 0xFFFF) {
+                void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+                if (scr != 0) {
+                    cUIScreen_playFrame(scr, ev, 1);
+                }
+            }
+            char* c = *(char**)(self + 0xA0);
+            sVEntry39A928a* va = *(sVEntry39A928a**)(c + 8);
+            va[7].fn(c + va[7].delta, 1);
+            char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            sVEntry39A928b* vb = *(sVEntry39A928b**)(o + 8);
+            vb[19].fn(o + vb[19].delta, *(void**)(self + 0xA0), 1);
+        }
+    } else {
+        char* cur = *(char**)(self + 0xA0);
+        if (cur != 0) {
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
+            if (ev != 0xFFFF) {
+                void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+                if (scr != 0) {
+                    cUIScreen_playFrame(scr, ev, 1);
+                }
+            }
+            char* c = *(char**)(self + 0xA0);
+            sVEntry39A928a* va = *(sVEntry39A928a**)(c + 8);
+            va[7].fn(c + va[7].delta, 0);
+            char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            sVEntry39A928b* vb = *(sVEntry39A928b**)(o + 8);
+            vb[19].fn(o + vb[19].delta, *(void**)(self + 0xA0), 2);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039AAC0);

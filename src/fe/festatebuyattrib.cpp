@@ -120,7 +120,77 @@ extern "C" void func_001F4A60(void* self, void* sender, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4A90);
+#ifdef SKIP_ASM
+struct cUIScreen;
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CABA8(void* mem, void* owner, void* state, int a3);
+extern "C" void func_001CAFC0(void* self, int a1, int a2, int a3);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_0046F050[];
+extern char D_0046F060[];
+extern char D_0046E050[];
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+
+struct sVE_4A90 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEr_4A90 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, void*);
+};
+struct sDefObj_4A90 {
+    sVE_4A90* vt;
+};
+extern sDefObj_4A90 D_004A5A58;
+
+extern "C" void func_001F4A90(char* self, char* obj, int msg)
+{
+    if (obj == 0)
+        return;
+    switch (msg) {
+    case 5:
+        if (*(int*)(self + 0xA4) >= *(int*)(self + 0xA0) && *(int*)(self + 0xA0) > 0) {
+            void* o = func_001CABA8(cMemMan_alloc(0x70, D_0046F050, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
+            func_001CAFC0(o, 0, *(int*)(self + 0xA0), *(int*)(self + 0xA4));
+            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+        } else {
+            sDefObj_4A90* p = *(sDefObj_4A90**)(*(char**)(self + 0x10) + 0x14);
+            if (p == 0)
+                p = &D_004A5A58;
+            if (p != 0)
+                p->vt[2].fn((char*)p + p->vt[2].delta, 4);
+        }
+        break;
+    case 6:
+        if (*(int*)(self + 0xA8) != 0) {
+            *(int*)(self + 0xA8) = 0;
+            cUIState_hideObjSafe(self, D_0046F060);
+            char* o = *(char**)(self + 0xAC);
+            sVE_4A90* vt = *(sVE_4A90**)(o + 8);
+            vt[7].fn(o + vt[7].delta, 1);
+        } else {
+            char* mgr = **(char***)(self + 0x10);
+            sVEr_4A90* vt = *(sVEr_4A90**)(mgr + 4);
+            void* r = vt[5].fn(mgr + vt[5].delta, self, *(void**)(obj + 0x18));
+            if (r != 0) {
+                int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x48), GetHashValue32(D_0046E050));
+                if (frame != 0xFFFF)
+                    cUIScreen_playFrame(*(void**)(self + 0x48), frame, 1);
+                func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            }
+        }
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4C30);
 
@@ -492,7 +562,67 @@ extern "C" void func_001F5A38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupMenuFocus);
+#ifdef SKIP_ASM
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
+extern "C" void cFEStateCareerStats_setupRidersBest(void* self);
+extern "C" void func_001F60E0(void* self);
+extern "C" void func_001F6490(void* self);
+extern char D_0046F210[];
+extern char D_0046F220[];
+extern char D_0046F238[];
+extern char D_0046F250[];
+
+struct sVE_5BA8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void setFocus_5BA8(char* o, int on)
+{
+    sVE_5BA8* vt = *(sVE_5BA8**)(o + 8);
+    vt[7].fn(o + vt[7].delta, on);
+}
+
+extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
+{
+    char* self = (char*)self_;
+    *(int*)(self + 0x48) = menu;
+    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F210));
+    if (a != 0)
+        setFocus_5BA8(a, 0);
+    char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F220));
+    if (b != 0)
+        setFocus_5BA8(b, 0);
+    char* c = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F238));
+    if (c != 0)
+        setFocus_5BA8(c, 0);
+    char* d = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F250));
+    if (d != 0)
+        setFocus_5BA8(d, 0);
+    switch (*(int*)(self + 0x48)) {
+    case 0:
+        setFocus_5BA8(a, 1);
+        cFEStateCareerStats_setupHighlightsList(self);
+        break;
+    case 1:
+        setFocus_5BA8(b, 1);
+        func_001F60E0(self);
+        break;
+    case 2:
+        setFocus_5BA8(c, 1);
+        func_001F6490(self);
+        break;
+    case 3:
+        setFocus_5BA8(d, 1);
+        cFEStateCareerStats_setupRidersBest(self);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupHighlightsList);
 

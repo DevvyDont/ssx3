@@ -1,6 +1,86 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_003513D0(void* self);
+extern "C" void func_003612C0(void* self);
+extern "C" void func_00351398(void* self, void* src);
+extern char D_0048E860[];
+extern char D_0048E870[];
+extern void* D_00490AD0[];
+extern void* D_00490AF0[];
+
+struct sMeshInst_E448 {
+    char pad_0x0[0x84];
+    void** vtable;          // 0x84
+    char pad_0x88[0x48];
+    sMeshInst_E448()
+    {
+        vtable = D_00490AF0;
+        func_003513D0(this);
+        vtable = D_00490AD0;
+        func_003612C0(this);
+    }
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sMeshRef_E448 {
+    char data[0x20];
+    sMeshRef_E448() {}
+};
+
+struct sAnimEntry_E448 {
+    int pad_0x0[2];
+    void* src;              // 0x8
+    int pad_0xC;
+};
+
+struct sAnimDef_E448 {
+    int pad_0x0;
+    int count;                  // 0x4
+    sAnimEntry_E448* entries;   // 0x8
+};
+
+struct sAnimNode_E448 {
+    char pad_0x0[0x2C];
+    char* res;                  // 0x2C
+    char pad_0x30[0x10];
+    int numMeshes;              // 0x40
+    int pad_0x44;
+    sMeshInst_E448* meshes;     // 0x48
+    sMeshRef_E448* refs;        // 0x4C
+};
+
+extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
+{
+    sAnimDef_E448* def = *(sAnimDef_E448**)(self->res + 0x80);
+    sAnimEntry_E448* e = def->entries;
+    int i;
+    self->numMeshes = 0;
+    for (i = 0; i < def->count; i++, e++) {
+        if (e->src != 0)
+            self->numMeshes++;
+    }
+    if (self->numMeshes != 0) {
+        sMeshInst_E448*& meshes = self->meshes;
+        meshes = new (D_0048E860, 0x20000000, 0) sMeshInst_E448[self->numMeshes];
+    } else {
+        self->meshes = 0;
+    }
+    sMeshRef_E448*& refs = self->refs;
+    refs = new (D_0048E870, 0x20000000, 0) sMeshRef_E448[def->count];
+    e = def->entries;
+    int k = 0;
+    for (i = 0; i < def->count; i++, e++) {
+        if (e->src != 0) {
+            func_00351398(&self->meshes[k++], e->src);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/animnode", func_0034E600);

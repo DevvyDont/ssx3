@@ -314,7 +314,72 @@ extern "C" void func_00367DB8(sPs2TexSet* self, int idx, ulong** pp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367F18);
+#ifdef SKIP_ASM
+// PORT: 64-bit GS register words (ulong is 64-bit here).
+struct sGsTex0Bits7F18 {
+    ulong TBP0 : 14;
+    ulong TBW : 6;
+    ulong PSM : 6;
+    ulong TW : 4;
+    ulong TH : 4;
+    ulong TCC : 1;
+    ulong TFX : 2;
+    ulong CBP : 14;
+    ulong CPSM : 4;
+    ulong CSM : 1;
+    ulong CSA : 5;
+    ulong CLD : 3;
+};
+
+struct sPs2RenderTex7F18 {
+    char pad_0x00[0x38];
+    sGsTex0Bits7F18 tex0;   // 0x38
+};
+
+struct sPs2TexSet7F18 {
+    char pad_0x00[0x8];
+    sPs2RenderTex7F18* tex[1];  // 0x08
+};
+
+union sFloatBits7F18 {
+    float f;
+    int i;
+};
+
+// Draw a full-size sprite over render texture idx, tinted with color (a, r, g, b in 0..1).
+extern "C" void func_00367F18(sPs2TexSet7F18* self, int idx, float* color, ulong** pp)
+{
+    sPs2RenderTex7F18* t = self->tex[idx];
+    ulong* p = *pp;
+    sFloatBits7F18 q;
+    q.f = 1.0f;
+    p[0] = 0x10000006;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = (ulong)0x50000005 << 32;
+    p[4] = ((ulong)0x44000000 << 32) | 1;
+    p[5] = 0x5510;
+    p[6] = 0x10E;
+    p[7] = (ulong)(int)(color[1] * 128.0f) | ((ulong)(int)(color[2] * 128.0f) << 8) |
+           ((ulong)(int)(color[3] * 128.0f) << 16) | ((ulong)(int)(color[0] * 128.0f) << 24) |
+           ((ulong)q.i << 32);
+    p[8] = (ulong)((0x800 - ((1 << t->tex0.TW) >> 1)) << 4) |
+           ((ulong)((0x800 - ((1 << t->tex0.TH) >> 1)) << 4) << 16) | ((ulong)1 << 32);
+    p[9] = (ulong)((((1 << t->tex0.TW) >> 1) + 0x801) << 4) |
+           ((ulong)((((1 << t->tex0.TH) >> 1) + 0x801) << 4) << 16) | ((ulong)1 << 32);
+    p[10] = ((ulong)0x10000000 << 32) | 0x8001;
+    p[11] = 0xE;
+    {
+        ulong hi = ((ulong)((1 << t->tex0.TH) - 2) << 48) | (((ulong)1 << 32) | 1);
+        p[12] = ((ulong)((1 << t->tex0.TW) - 2) << 16) | hi;
+    }
+    p[13] = 0x40;
+    p += 14;
+    *pp = p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00368138);
@@ -671,7 +736,63 @@ extern "C" void func_00369690(void* self, int count, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/ps2graphicsman", func_003696C8);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" void* func_003B3900(void* src, const char* name);
+extern "C" char* strcpy(char* dst, const char* src);
+extern char D_004A41A0[];
+
+struct sTexEnt_96C8 {
+    int handle;     // 0x0
+    char name[8];   // 0x4
+};
+
+struct sVE_96C8 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, const char*, int, int, int);
+};
+
+struct sGfx_96C8 {
+    char pad0[0x278];
+    int numSrc;                 // 0x278
+    void** src;                 // 0x27C
+    sTexEnt_96C8 ents[256];     // 0x280
+    int count;                  // 0xE80
+};
+
+// Look up (or load and cache) a texture by its 4-character name.
+extern "C" int func_003696C8(void* self_, const char* name)
+{
+    sGfx_96C8* self = (sGfx_96C8*)self_;
+    char buf[0x10];
+    const char* p = name;
+    if (*p) {
+        char* d = buf;
+        do
+            *d++ = *p++;
+        while (*p && p - name < 4);
+    }
+    buf[p - name] = 0;
+    for (int i = 0; i < self->count; i++) {
+        if (func_004165A8(buf, self->ents[i].name) == 0)
+            return self->ents[i].handle;
+    }
+    strcpy(self->ents[self->count].name, buf);
+    for (int j = 0; j < self->numSrc; j++) {
+        void* r = func_003B3900(self->src[j], self->ents[self->count].name);
+        if (r != 0) {
+            sVE_96C8* vt = *(sVE_96C8**)((char*)self + 0x10D8);
+            self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, r, D_004A41A0, 0, 1, -1);
+            return self->ents[self->count++].handle;
+        }
+    }
+    self->ents[self->count].handle = -1;
+    return self->ents[self->count++].handle;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369890__FPvii);
