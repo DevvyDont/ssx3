@@ -40,7 +40,94 @@ extern "C" void func_00284C28()
 
 INCLUDE_ASM("sound/ssxAudio", func_00284C68);
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00285210);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+void operator_delete(int*);
+extern "C" void func_00289650(void* msg);
+extern "C" void func_0028F730(void* self);
+extern "C" void func_003B5A60(void (*cb)(void*));
+extern "C" void func_002B0DA0(void* p);
+extern "C" void func_003DEDC0(void* h, int a);
+extern "C" void func_002AB478(void* self, int flags);
+extern "C" void func_002AA648(void* self, int flags);
+extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void func_002ADEE8(void* self, int flags);
+extern void* D_00483688[];
+extern void* D_004836B8[];
+extern void* D_004836D8[];
+
+struct sSaVEntry285210 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sSaVtbl4_285210 {
+    sSaVEntry285210 e[4];
+} __attribute__((aligned(8)));
+struct sSaVtbl8_285210 {
+    sSaVEntry285210 e[8];
+} __attribute__((aligned(8)));
+struct sSaVtbl7_285210 {
+    sSaVEntry285210 e[7];
+} __attribute__((aligned(8)));
+extern const sSaVtbl4_285210 D_00483708_285210 __asm__("D_00483708");
+extern const sSaVtbl8_285210 D_00483648_285210 __asm__("D_00483648");
+extern const sSaVtbl7_285210 D_00483728_285210 __asm__("D_00483728");
+
+#define S_285210 ((char*)self)
+#define BM_285210 (**(char***)(S_285210 + 0x118))
+
+extern "C" void func_00285210(void* self, int flags)
+{
+    char* p5560 = S_285210 + 0x5560;
+    *(void***)(S_285210 + 0x5558) = D_00483688;
+    *(void***)(S_285210 + 0x571C) = D_004836D8;
+    *(void***)(S_285210 + 0xC) = D_004836B8;
+    *(const sSaVtbl4_285210**)(*(char**)(BM_285210 + 0x1D8) + 4) = &D_00483708_285210;
+    *(const sSaVtbl8_285210**)(BM_285210 + 0xAB0) = &D_00483648_285210;
+    *(const sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &D_00483728_285210;
+    if (flags == 0) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtables on the stack), written out by hand.
+        sSaVtbl4_285210 v1 = D_00483708_285210;
+        *(sSaVtbl4_285210**)(*(char**)(BM_285210 + 0x1D8) + 4) = &v1;
+        char* base1 = *(char**)(BM_285210 + 0x1D8) - 0x6C90;
+        int d1 = S_285210 - base1;
+        v1.e[1].delta = D_00483708_285210.e[1].delta + d1;
+        v1.e[2].delta = D_00483708_285210.e[2].delta + d1;
+        sSaVtbl8_285210 v2 = D_00483648_285210;
+        *(sSaVtbl8_285210**)(BM_285210 + 0xAB0) = &v2;
+        char* base2 = BM_285210 - 0x6C98;
+        int d2 = S_285210 - base2;
+        v2.e[1].delta = D_00483648_285210.e[1].delta + d2;
+        v2.e[2].delta = D_00483648_285210.e[2].delta + d2;
+        v2.e[3].delta = D_00483648_285210.e[3].delta + d2;
+        v2.e[5].delta = D_00483648_285210.e[5].delta + d2;
+        v2.e[6].delta = D_00483648_285210.e[6].delta + d2;
+        sSaVtbl7_285210 v3 = D_00483728_285210;
+        *(sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &v3;
+        v3.e[1].delta = D_00483728_285210.e[1].delta + d2;
+    }
+    func_0028F730(self);
+    func_003B5A60(func_00289650);
+    func_002B0DA0(p5560);
+    if (*(void**)(S_285210 + 0x5728))
+        func_003DEDC0(*(void**)(S_285210 + 0x5728), 100);
+    if (*(void**)(S_285210 + 0x5980))
+        cMemMan_free(*(void**)(S_285210 + 0x5980));
+    func_002AB478(self, 0);
+    if (flags & 2) {
+        func_002AA648(*(void**)(S_285210 + 0x118), 0);
+        func_0028BB10(BM_285210, 0);
+        func_002ADEE8(*(void**)(BM_285210 + 0x1D8), 0);
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#undef S_285210
+#undef BM_285210
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_002854A8);
 
@@ -982,7 +1069,103 @@ extern "C" void func_00287A10(void* self_, int mask, float v, float time)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00287C48);
+#ifdef SKIP_ASM
+extern float D_004A352C;
+extern float D_004A3530;
+extern float D_004A3534;
+extern float D_004A3538;
+extern float D_004A353C;
+extern float D_004A3540;
+extern float D_004A3544;
+extern float D_004A3548;
+extern float D_004A354C;
+extern float D_004A3550;
+
+struct sSaChan7C48 {
+    float base;     // +0x0
+    float gain;     // +0x4
+    float out;      // +0x8
+    float pad;
+};
+
+struct sSaMixOut7C48 {
+    char pad0[0x636C];
+    float mix[10];          // 0x636C
+};
+
+struct sSaMix7C48 {
+    char pad0[0x62C0];
+    sSaChan7C48 chan[11];   // 0x62C0 (chan[10].pad overlaps mix[0])
+    char pad6370[0x6398 - 0x6370];
+    float vol[10];          // 0x6398 (vol[j-1])
+    int fading;             // 0x63C0
+    int fadeMask;           // 0x63C4
+    float fadeRate;         // 0x63C8
+    float fadeTarget;       // 0x63CC
+    float fadeCur;          // 0x63D0
+    char pad63D4[0x63E8 - 0x63D4];
+    float cur[10];          // 0x63E8 (cur[j-1])
+};
+
+static inline void sSaMix7C48_set(sSaMix7C48* s, int j, float v)
+{
+    s->vol[j - 1] = v;
+    s->chan[j].gain = s->chan[j].base * v;
+    s->chan[j].out = s->chan[j].gain * s->cur[j - 1];
+}
+
+extern "C" void func_00287C48(void* self_)
+{
+    sSaMix7C48* self = (sSaMix7C48*)self_;
+    if (self->fading) {
+        self->fadeCur += self->fadeRate;
+        if (self->fadeRate < 0.0f) {
+            if (self->fadeCur < self->fadeTarget) {
+                self->fadeCur = self->fadeTarget;
+                self->fading = 0;
+            }
+        } else if (self->fadeCur > self->fadeTarget) {
+            self->fadeCur = self->fadeTarget;
+            self->fading = 0;
+        }
+        if (self->fadeMask & 1)
+            sSaMix7C48_set(self, 1, self->fadeCur);
+        if (self->fadeMask & 2)
+            sSaMix7C48_set(self, 5, self->fadeCur);
+        if (self->fadeMask & 4) {
+            sSaMix7C48_set(self, 4, self->fadeCur);
+            float m = self->chan[4].out;
+            sSaMixOut7C48* o = (sSaMixOut7C48*)self;
+            o->mix[0] = m * D_004A352C;
+            o->mix[1] = m * D_004A3530;
+            o->mix[2] = m * D_004A3534;
+            o->mix[3] = m * D_004A3538;
+            o->mix[4] = m * D_004A353C;
+            o->mix[5] = m * D_004A3540;
+            o->mix[6] = m * D_004A3544;
+            o->mix[7] = m * D_004A3548;
+            o->mix[8] = m * D_004A354C;
+            o->mix[9] = m * D_004A3550;
+        }
+        if (self->fadeMask & 8)
+            sSaMix7C48_set(self, 2, self->fadeCur);
+        if (self->fadeMask & 0x80)
+            sSaMix7C48_set(self, 3, self->fadeCur);
+        if (self->fadeMask & 0x20)
+            sSaMix7C48_set(self, 6, self->fadeCur);
+        if (self->fadeMask & 0x40)
+            sSaMix7C48_set(self, 7, self->fadeCur);
+        if (self->fadeMask & 0x10)
+            sSaMix7C48_set(self, 8, self->fadeCur);
+        if (self->fadeMask & 0x100)
+            sSaMix7C48_set(self, 9, self->fadeCur);
+        if (self->fadeMask & 0x200)
+            sSaMix7C48_set(self, 10, self->fadeCur);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00287F00);

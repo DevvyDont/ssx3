@@ -274,7 +274,71 @@ extern "C" void func_001D6C28(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D6D88);
+#ifdef SKIP_ASM
+// PORT: operator_new really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void* p);
+int GetHashValue32(char* str);
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_00241DC8(void* mp, void* out, int a2);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern char D_0045E2A0[];
+extern char D_004644D8[];
+extern char D_0045DCD8[];
+extern char D_00462C88[];
+extern char D_0045F7E0[];
+
+static inline void* Str_1D6D88(char* key)
+{
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    char* othis = o + ovt[4].delta;
+    return ovt[4].fn(othis, GetHashValue32(key));
+}
+
+static inline void SetLine_1D6D88(char* key, int a)
+{
+    char* m = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+    char* mthis = m + mvt[26].delta;
+    void* str = Str_1D6D88(key);
+    mvt[26].fn(mthis, str, a);
+}
+
+extern "C" void func_001D6D88(void)
+{
+    unsigned short name[0x100];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    func_00241DC8(mp, name, *(int*)(mp + 0x428));
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
+    func_002C26D0(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644D8)), name);
+    *(int*)((char*)D_004A2028 + 0x19C) = 9;
+    if (!(*(int*)(mp + 0xBC) || *(int*)(mp + 0xC0) || (*(int (**)())(mp + 0x78))())) {
+        char* fe = (char*)D_004A2028;
+        sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+        vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
+        SetLine_1D6D88(D_0045DCD8, 1);
+        char* m = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
+        mvt[25].fn(m + mvt[25].delta, 1);
+        SetLine_1D6D88(D_00462C88, 0);
+    } else {
+        char* fe = (char*)D_004A2028;
+        sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
+        vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
+        SetLine_1D6D88(D_0045F7E0, 0);
+    }
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D7010);

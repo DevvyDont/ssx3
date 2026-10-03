@@ -2268,7 +2268,125 @@ extern "C" void func_00273A60(void* self, int idx)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00273AA8);
+#ifdef SKIP_ASM
+extern "C" void* func_00272308(void* heap, int size);
+// PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
+extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
+extern "C" void* func_002725B8(void* self);
+extern "C" void* func_00272D68(void* self);
+extern "C" void* func_00273180(void* self);
+extern "C" void* func_002734A8(void* self);
+extern "C" int func_00274D70(void* self);
+
+struct sRcVE_273AA8 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, void*, int*);
+};
+
+struct sRcVE2_273AA8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sRcVE3_273AA8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sRcHdr_273AA8 {
+    unsigned short first;   // 0x0
+    unsigned char count;    // 0x2
+    unsigned char kind;     // 0x3
+};
+
+struct sRcRec_273AA8 {
+    unsigned short type;    // 0x0
+    unsigned short size;    // 0x2
+};
+
+struct sRcObj_273AA8 {
+    int f0;
+    sRcVE_273AA8* vt;       // 0x4
+};
+
+struct sRcCache_273AA8 {
+    char pad0[0x8];
+    char* owner;            // 0x8
+    char padC[0x1C - 0xC];
+    sRcHdr_273AA8* hdr;     // 0x1C
+    char pad20[0x24 - 0x20];
+    sRcObj_273AA8** objs;   // 0x24
+    int ready;              // 0x28
+    char* player;           // 0x2C
+    int done;               // 0x30
+    int flags;              // 0x34
+    int started;            // 0x38
+};
+
+extern "C" int func_00273AA8(sRcCache_273AA8* self)
+{
+    self->done = 0;
+    self->flags = 0;
+    if (self->hdr->count) {
+        void* heap = *(char**)(self->owner + 8) + 8;
+        self->objs = (sRcObj_273AA8**)func_00272308(heap, self->hdr->count * 4);
+        char* p = (char*)self->hdr + self->hdr->first;
+        for (int i = 0; i < self->hdr->count; i++) {
+            sRcRec_273AA8* e = (sRcRec_273AA8*)p;
+            p += 4;
+            switch (e->type) {
+            case 0: {
+                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)self->objs);
+                *slot = (sRcObj_273AA8*)func_002725B8(func_00272488_impl(0x28, heap));
+                break;
+            }
+            case 1: {
+                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)self->objs);
+                *slot = (sRcObj_273AA8*)func_002734A8(func_00272488_impl(0x28, heap));
+                break;
+            }
+            case 2: {
+                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)self->objs);
+                *slot = (sRcObj_273AA8*)func_00272D68(func_00272488_impl(0x2C, heap));
+                break;
+            }
+            case 3: {
+                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)self->objs);
+                *slot = (sRcObj_273AA8*)func_00273180(func_00272488_impl(0x28, heap));
+                break;
+            }
+            }
+            int flag = 0;
+            int* pd = &self->done;
+            int r = 0;
+            sRcObj_273AA8* o = self->objs[i];
+            if (o->vt[1].fn((char*)o + o->vt[1].delta, p, self, &flag) || self->done)
+                r = 1;
+            *pd = r;
+            self->flags |= flag;
+            p += e->size;
+        }
+    }
+    self->ready = 1;
+    char* x = (char*)func_00274D70(self->owner);
+    if (x) {
+        sRcVE2_273AA8* vt = *(sRcVE2_273AA8**)x;
+        self->player = (char*)vt[6].fn(x + vt[6].delta, self, self->hdr->kind);
+    }
+    if (self->player) {
+        char* pl = self->player;
+        sRcVE3_273AA8* vt = *(sRcVE3_273AA8**)pl;
+        vt[1].fn(pl + vt[1].delta, self, self->hdr->kind);
+    }
+    self->started = 1;
+    return self->ready;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00273D20);

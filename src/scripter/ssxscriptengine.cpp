@@ -1744,7 +1744,143 @@ extern "C" void func_0027B948(void* self, char* obj, sVec4_27B948* pos, int* rol
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BB08);
+#ifdef SKIP_ASM
+extern "C" float func_0031C128(float x);
+extern "C" int* func_00144BC0(void* iface);
+extern int D_00482660[];
+extern char** D_004A47B8;
+
+struct sVec_27BB08 {
+    float x, y, z, w;
+    sVec_27BB08() {}
+    sVec_27BB08(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
+} __attribute__((aligned(16)));
+
+struct sMat_27BB08 {
+    float m[16];
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sMat_27BB08& operator=(const sMat_27BB08& o)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
+static inline sVec_27BB08 MulMat_27BB08(const sMat_27BB08* m, const sVec_27BB08& v)
+{
+    sVec_27BB08 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place a += b).
+static inline void AddEq_27BB08(sVec_27BB08& a, const sVec_27BB08& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+static inline float Atan2_27BB08(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            r += 3.1415927410125732f;
+        else
+            r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+static inline char* IdxToPtr_27BB08(unsigned int i)
+{
+    return (char*)(i << 2);
+}
+
+static inline char* RefToPtr_27BB08(unsigned int v)
+{
+    unsigned int i = v >> 8;
+    if (i == 0)
+        return 0;
+    return IdxToPtr_27BB08(i);
+}
+
+static inline char* Bone_27BB08(char* model, unsigned int code)
+{
+    if (model == 0)
+        return 0;
+    return RefToPtr_27BB08(((unsigned int*)*(char**)(model + 0x1C))[code >> 8]);
+}
+
+extern "C" void func_0027BB08(char* self, int slot, sVec_27BB08* pos, int* flag, float* pitch, float* yaw, int cat,
+                              const sVec_27BB08* off)
+{
+    if (cat == 0x32) {
+        int k = *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+        cat = D_00482660[k];
+    }
+    int* tbl = *(int**)(self + (cat << 2) + 0x558);
+    if (tbl == 0)
+        return;
+    unsigned int code = tbl[slot];
+    if (~code == 0)
+        return;
+    char* model = ((char**)*(char**)(*D_004A47B8 + 8))[code & 0xFF];
+    char* m = Bone_27BB08(model, code);
+    *pos = sVec_27BB08(*(float*)(m + 0x40), *(float*)(m + 0x44), *(float*)(m + 0x48), 1.0f);
+    *yaw = Atan2_27BB08(*(float*)(m + 0x14), *(float*)(m + 0x10));
+    *pitch = func_0031C128(*(float*)(m + 0x18));
+    *flag = 0;
+    if (off) {
+        sMat_27BB08 rot;
+        rot = *(sMat_27BB08*)(m + 0x10);
+        sVec_27BB08 v = *off;
+        v.w = 0.0f;
+        v = MulMat_27BB08(&rot, v);
+        AddEq_27BB08(*pos, v);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD78__FPv);

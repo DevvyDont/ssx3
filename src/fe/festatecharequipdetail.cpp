@@ -321,7 +321,153 @@ extern "C" int func_00199A38(void* self, cPad_9A38* in)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199C28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void cFEStateCharEquip_updateHeading(void* self, int id);
+extern "C" void func_0019B180(void* self, int id);
+extern "C" void func_0019B618(void* self, int a1, int a2);
+extern "C" void func_0019A4E8(void* self, int a1);
+extern "C" void func_0019A9B8(void* self);
+extern "C" void func_0019ACA0(void* self);
+extern "C" int func_0019BEE8(void* self);
+extern "C" void func_0019C7E8(void* self, void* item);
+extern "C" void func_0019BC90(void* self);
+extern "C" void func_0019BD48(void* self, int a1);
+extern "C" int func_0014B478(void* self, int a1, int a2);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_001A0548(void* self, int a1);
+extern int D_004A11E0;
+extern int D_004A18D8;
+extern void* D_004A28A8;
+
+struct sList_9C28 {
+    char pad_0x0[0x98];
+    unsigned char top;   // 0x98
+};
+
+struct sItem_9C28 {
+    int f0;
+    short id;           // 0x4
+    char pad6[0xE - 0x6];
+    short cost;         // 0xE
+    char pad10[0x34 - 0x10];
+    int flags;          // 0x34
+};
+
+struct sVE_9C28 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sCharEquip_9C28 {
+    char pad0[0x10];
+    char* menu;                     // 0x10
+    char pad14[0x44 - 0x14];
+    signed char team;               // 0x44
+    char pad45[0x5C - 0x45];
+    sList_9C28* list;               // 0x5C
+    char pad60[0xBC - 0x60];
+    int slot;                       // 0xBC
+    int money;                      // 0xC0
+    int spent;                      // 0xC4
+    int mode;                       // 0xC8
+    char padCC[0xD0 - 0xCC];
+    int stack[(0x120 - 0xD0) / 4];  // 0xD0
+    int depth;                      // 0x120
+    sItem_9C28* items[(0x958 - 0x124) / 4]; // 0x124
+    int count;                      // 0x958
+    char pad95C[0xA78 - 0x95C];
+    int vals[6];                    // 0xA78
+    char padA90[0xAE0 - 0xA90];
+    int state;                      // 0xAE0
+};
+
+static inline int isMode1_9C28(sCharEquip_9C28* self)
+{
+    return self->mode == 1;
+}
+
+extern "C" void func_00199C28(void* selfv, char* w, unsigned int ev)
+{
+    sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
+    if (w == 0)
+        return;
+    switch (ev) {
+    case 5: {
+        if (self->list == 0)
+            return;
+        int idx = self->list->top + *(int*)(w + 0x18);
+        if (idx >= self->count)
+            return;
+        sItem_9C28* item = self->items[idx];
+        int id = item->id;
+        if (item->flags & 0x20) {
+            self->depth++;
+            cFEStateCharEquip_updateHeading(self, id);
+            self->stack[self->depth] = id;
+            func_0019B180(self, id);
+            func_0019B618(self, 1, 1);
+            if (id == D_004A11E0)
+                self->state = 3;
+            return;
+        }
+        if (!(item->flags & 4))
+            return;
+        if (isMode1_9C28(self)) {
+            int cost = item->cost;
+            if (cost > 0)
+                cost *= 10;
+            if (self->money < cost)
+                return;
+            func_0019C7E8(self, item);
+            return;
+        }
+        int* vals = self->vals;
+        void* iface = cBE_getInterface(cBE_getBE(), 9);
+        if (D_004A18D8 < *(int*)((char*)vals + (*(int*)(w + 0x18) << 2)) + self->spent)
+            return;
+        if (!func_0019BEE8(self))
+            return;
+        self->spent = func_0014B478(iface, self->team, self->slot);
+        func_0019B618(self, 0, 1);
+        func_0019BC90(self);
+        func_0019BD48(self, *(int*)((char*)vals + (*(int*)(w + 0x18) << 2)));
+        func_0019ACA0(self);
+        return;
+    }
+    case 6: {
+        if (self->depth > 0) {
+            int* stack = self->stack;
+            if (*(int*)((char*)stack + (self->depth << 2)) == D_004A11E0)
+                self->state = 4;
+            cFEStateCharEquip_updateHeading(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
+            func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
+            func_0019B618(self, 1, 1);
+        } else {
+            char* r = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, self->team);
+            *(int*)(r + 0xC20) = 0;
+            *(int*)(r + 0xC1C) = 1;
+            char* obj = *(char**)self->menu;
+            sVE_9C28* vt = *(sVE_9C28**)(obj + 4);
+            void* x = vt[5].fn(obj + vt[5].delta, self, 0);
+            if (x)
+                func_0039F400(self->menu + 0x18, x);
+        }
+        break;
+    }
+    case 1:
+        if (isMode1_9C28(self))
+            func_0019A4E8(self, 1);
+        func_0019A9B8(self);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199F20);
 
@@ -1135,7 +1281,115 @@ extern "C" void func_0019B618(void* self, int reset, int select)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B7E0);
+#ifdef SKIP_ASM
+extern "C" int func_0014AFB0(void* self, int a1, int a2, int id, int locked);
+extern "C" void* func_003E6574(void* dst, void* src, int n);
+extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src);
+extern "C" int func_0014B478(void* self, int a1, int a2);
+
+struct sFlagEntry_19B7E0
+{
+    short id;
+    unsigned short flags;
+    sFlagEntry_19B7E0() : id(-1), flags(0) {}
+};
+
+struct sProfile_19B7E0
+{
+    char pad[0x288];
+    short* index;
+    int count;
+    sFlagEntry_19B7E0 entries[0x20D];
+};
+
+static inline sFlagEntry_19B7E0* getEntry_19B7E0(sProfile_19B7E0* p, int idx)
+{
+    short k = p->index[idx];
+    if (k >= 0)
+        return &p->entries[k];
+    return 0;
+}
+
+static inline int IsSet_19B7E0(sFlagEntry_19B7E0* e)
+{
+    return e->flags & 4;
+}
+
+struct sItem_19B7E0 {
+    int f0;
+    short id;           // 0x4
+    char pad6[0x14 - 0x6];
+    char* name;         // 0x14
+    char pad18[0x34 - 0x18];
+    int flags;          // 0x34
+};
+
+struct sCharEquip_19B7E0 {
+    char pad0[0x44];
+    signed char team;               // 0x44
+    char pad45[0x5C - 0x45];
+    sList_B618* list;               // 0x5C
+    char pad60[0x8C - 0x60];
+    cUIObj_B618* texts[6];          // 0x8C
+    cUIObj_B618* icons[6];          // 0xA4
+    int slot;                       // 0xBC
+    char padC0[0x124 - 0xC0];
+    sItem_19B7E0* items[(0xA78 - 0x124) / 4]; // 0x124
+    int vals[6];                    // 0xA78
+    char padA90[0xA98 - 0xA90];
+    int colLocked;                  // 0xA98
+    int colFree;                    // 0xA9C
+    int colOwned;                   // 0xAA0
+};
+
+extern "C" void func_0019B7E0(void* selfv, int i)
+{
+    sCharEquip_19B7E0* self = (sCharEquip_19B7E0*)selfv;
+    sList_B618* l = self->list;
+    int top = l ? l->top : 0;
+    sItem_19B7E0* item = self->items[top + i];
+    cUIObj_B618* text = self->texts[i];
+    cUIObj_B618* icon = self->icons[i];
+    self->vals[i] = 0xFFFE7961;
+    int col = 0;
+    if (item->flags & 0x20) {
+        col = self->colOwned;
+    } else {
+        void* iface = cBE_getInterface(cBE_getBE(), 9);
+        sProfile_19B7E0* prof = (sProfile_19B7E0*)func_0014AD28(iface, self->team, self->slot);
+        sFlagEntry_19B7E0* e = getEntry_19B7E0(prof, item->id);
+        sFlagEntry_19B7E0 save[0x20D];
+        func_003E6574(save, prof->entries, 0x834);
+        int before = func_0014B478(iface, self->team, self->slot);
+        if (func_0014AFB0(iface, self->team, self->slot, item->id, !IsSet_19B7E0(e))) {
+            self->vals[i] = func_0014B478(iface, self->team, self->slot) - before;
+            if (IsSet_19B7E0(e))
+                col = self->colLocked;
+            else
+                col = self->colFree;
+        }
+        func_0014ACB0(iface, self->team, self->slot, save);
+    }
+    if (text) {
+        if (item->flags & 0x20)
+            cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(item->name));
+        else
+            cUIText_setAsciiString((cUIText*)text, item->name);
+        text->setVisible(1);
+    }
+    if (icon) {
+        if (col) {
+            icon->setVisible(1);
+            *(int*)((char*)icon + 0x7C) = col;
+            *(int*)((char*)icon + 0x78) = -1;
+        } else {
+            icon->setVisible(0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BA60);

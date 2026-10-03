@@ -736,7 +736,132 @@ extern "C" void func_002EF6A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF6D0);
+#ifdef SKIP_ASM
+int func_0011FE98(void*);
+extern "C" int func_001298C8();
+
+struct sRsVec4_EF6D0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRsSeg_EF6D0 {
+    sRsVec4_EF6D0 p0;
+    sRsVec4_EF6D0 p1;
+};
+
+struct sTrail_EF6D0 {
+    char* rider;                // 0x0
+    sRsSeg_EF6D0* ring;         // 0x4
+    int head;                   // 0x8
+    int count;                  // 0xC
+    float start;                // 0x10
+    int len;                    // 0x14
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sRsVec4_EF6D0 Scale_EF6D0(const sRsVec4_EF6D0& v, float s)
+{
+    sRsVec4_EF6D0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sRsVec4_EF6D0 Add_EF6D0(const sRsVec4_EF6D0& a, const sRsVec4_EF6D0& b)
+{
+    sRsVec4_EF6D0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sRsVec4_EF6D0 Sub_EF6D0(const sRsVec4_EF6D0& a, const sRsVec4_EF6D0& b)
+{
+    sRsVec4_EF6D0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_EF6D0(const sRsVec4_EF6D0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+static inline int Approach_EF6D0(int n, int step)
+{
+    return n > step ? n - step : (n > -step - 1 ? 0 : n + step);
+}
+
+extern "C" void func_002EF6D0(sTrail_EF6D0* self)
+{
+    if (func_0011FE98(self->rider) == 1) {
+        char* r = self->rider;
+        sRsVec4_EF6D0 a = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x89C) << 6) + 0x30);
+        sRsVec4_EF6D0 b = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6) + 0x30);
+        sRsVec4_EF6D0 c = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(r + 0x780) + 0x34) + (*(int*)(r + 0x8A4) << 6));
+        sRsVec4_EF6D0 d = Sub_EF6D0(b, Scale_EF6D0(a, 0.699999988079071f));
+        self->ring[self->head].p0 = Add_EF6D0(d, Scale_EF6D0(c, 90.0f));
+        self->ring[self->head].p1 = Sub_EF6D0(d, Scale_EF6D0(c, 90.0f));
+        if ((func_001298C8() & 1) == 0) {
+            int old = self->head;
+            self->head = old + 1;
+            self->head %= 25;
+            if (self->count < self->len)
+                self->count++;
+            self->ring[self->head] = self->ring[old];
+        }
+    } else {
+        int n = self->count;
+        self->count = Approach_EF6D0(n, 2);
+    }
+    self->start -= Length_EF6D0(*(sRsVec4_EF6D0*)(self->rider + 0x1E0)) * 0.00016666666488163173f;
+    if (self->start < 0.0f)
+        self->start += 1.0f;
+    if (self->start > 1.0f)
+        self->start -= 1.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF950);
@@ -1054,7 +1179,138 @@ extern "C" void* func_002EFF98(sRSMan_002EFF98* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F00A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" float func_002EE3B8(int i);
+extern "C" float func_002EE738(int i);
+extern "C" float func_002EE9C0(int i);
+extern "C" float func_002EEA08(int i);
+extern "C" float func_002EEA50(int i);
+extern "C" float func_002EEA98(int i);
+extern "C" float func_002EEAE0(int i);
+extern "C" float func_002EEB28(int i);
+extern "C" float func_002EEB70(int i);
+extern "C" float func_002EEBD0(int i);
+extern "C" float func_002EEC30(int i);
+extern "C" float func_002EEC90(int i);
+extern "C" float func_002EECF0(int i);
+extern "C" float func_002EED50(int i);
+extern "C" float func_002EEDB0(int i);
+extern "C" float func_002EEDF8(int i);
+extern "C" float func_002EEE40(int i);
+extern "C" float func_002EEE88(int i);
+extern "C" float func_002EEED0(int i);
+extern "C" float func_002EEF18(int i);
+extern "C" float func_002EEF60(int i);
+extern "C" float func_002EF038(int i);
+extern "C" int func_002F7BE0(void* p);
+extern void* D_004A28A8;
+extern void* D_004A3B5C;
+extern int D_004A4328;
+extern int D_004A4334;
+extern float D_004A4338;
+extern float D_004A432C;
+extern float D_004A4330;
+extern int D_004A45DC;
+extern float D_004A45E4;
+extern float D_004A45E8;
+extern float D_004A45EC;
+extern float D_004A45F0;
+extern float D_004A45F4;
+extern float D_004A45F8;
+extern float D_004A4614;
+extern int D_004A460C;
+extern int D_004A43CC;
+extern float D_004A43D4;
+extern float D_004A43D8;
+extern float D_004A43DC;
+extern float D_004A43E0;
+extern float D_004A43E4;
+extern float D_004A43F0;
+extern float D_004A43F4;
+
+struct sRsCol_F00A0 {
+    float r, g, b, a;
+    sRsCol_F00A0(const float& x, const float& y, const float& z, const float& w) : r(x), g(y), b(z), a(w) {}
+};
+extern sRsCol_F00A0 D_00504720;
+
+struct sRsCtx_F00A0 {
+    char pad0[0x8C];
+    void* a8C[8];       // 0x8C
+    float aAC[8];       // 0xAC
+    float aCC[8];       // 0xCC
+    float aEC[8];       // 0xEC
+    float a10C[8];      // 0x10C
+    float a12C[8];      // 0x12C
+    float a14C[8];      // 0x14C
+    float a16C[8];      // 0x16C
+    float a18C[8];      // 0x18C
+    float a1AC[8];      // 0x1AC
+    float a1CC[8];      // 0x1CC
+    float a1EC[8];      // 0x1EC
+    float a20C[8];      // 0x20C
+    float a22C[8];      // 0x22C
+    float a24C[8];      // 0x24C
+};
+extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("D_004A5B80");
+
+extern "C" void func_002F00A0(void* self, int i)
+{
+    sRsCtx_F00A0* ctx = D_ctx_F00A0;
+    if (D_004A4328 == 0) {
+        sRsCol_F00A0* dst = &D_00504720;
+        D_004A4338 = func_002EE9C0(i);
+        D_004A4334 = 1;
+        D_004A432C = func_002EEA08(i);
+        D_004A4330 = func_002EEA50(i);
+        float g = func_002EEA98(i);
+        float b = func_002EEAE0(i);
+        float a = func_002EEB28(i);
+        *dst = sRsCol_F00A0(1.0f, g, b, a);
+    }
+    if (D_004A45DC == 0) {
+        D_004A45E4 = func_002EEB70(i);
+        D_004A45E8 = func_002EEBD0(i);
+        D_004A45EC = func_002EEC30(i);
+        D_004A45F0 = func_002EEC90(i);
+        D_004A45F4 = func_002EECF0(i);
+        D_004A45F8 = func_002EED50(i);
+        D_004A4614 = func_002EE738(i);
+        int on = 0;
+        int* st = *(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+        if (*st == 1 || func_002F7BE0(st))
+            on = 1;
+        D_004A460C = on;
+    }
+    if (D_004A43CC == 0) {
+        D_004A43D4 = func_002EEDB0(i);
+        D_004A43D8 = func_002EEDF8(i);
+        D_004A43DC = func_002EEE40(i);
+        D_004A43E0 = func_002EEE88(i);
+        D_004A43E4 = func_002EEED0(i);
+        D_004A43F0 = func_002EEF18(i);
+        D_004A43F4 = func_002EEF60(i);
+    }
+    ctx->a8C[i] = D_004A3B5C;
+    ctx->aAC[i] = func_002EF038(i);
+    ctx->aCC[i] = func_002EE3B8(i);
+    ctx->aEC[i] = func_002EE9C0(i);
+    ctx->a10C[i] = func_002EEA98(i);
+    ctx->a12C[i] = func_002EEAE0(i);
+    ctx->a14C[i] = func_002EEB28(i);
+    ctx->a16C[i] = func_002EEA08(i);
+    ctx->a18C[i] = func_002EEA50(i);
+    ctx->a1AC[i] = func_002EEB70(i);
+    ctx->a1CC[i] = func_002EEBD0(i);
+    ctx->a1EC[i] = func_002EEC30(i);
+    ctx->a20C[i] = func_002EEC90(i);
+    ctx->a22C[i] = func_002EECF0(i);
+    ctx->a24C[i] = func_002EED50(i);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0368);

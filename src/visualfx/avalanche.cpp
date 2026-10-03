@@ -576,7 +576,168 @@ extern "C" void func_002D96E0(void)
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9738);
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_triggerAvalanche);
+#ifdef SKIP_ASM
+extern "C" float cRenderStateMan_SnowFlakeColourR(int a);
+extern "C" float cRenderStateMan_SnowFlakeColourG(int a);
+extern "C" float cRenderStateMan_SnowFlakeColourB(int a);
+extern "C" void func_00370DC8(void* self, void* node, float k);
+extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
+
+extern "C" void func_0029DEF0(void* self, int a1);
+extern char* D_004A28A8;
+extern void* D_004A3AB0;
+
+struct sVec_D97A8 {
+    float x, y, z, w;
+    sVec_D97A8() {}
+    sVec_D97A8(const float& a, const float& b, const float& c, const float& d) : x(a), y(b), z(c), w(d) {}
+} __attribute__((aligned(16)));
+
+struct sMat_D97A8 {
+    sVec_D97A8 row[4];
+};
+extern sMat_D97A8 D_004FF1A0_D97A8 __asm__("D_004FF1A0");
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMatrix_D97A8(sMat_D97A8* dst, sMat_D97A8* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct sAvAct_D97A8;
+struct sAvNode_D97A8 {
+    char pad0[0xE0];
+    sVec_D97A8 pos;             // 0xE0
+    unsigned short type;        // 0xF0
+    unsigned char emit;         // 0xF2
+    unsigned char owned;        // 0xF3
+    sAvNode_D97A8* next;        // 0xF4
+    char* obj;                  // 0xF8
+    char padFC[0x114 - 0xFC];
+    sAvAct_D97A8* act;          // 0x114
+};
+
+struct sAvGroup_D97A8 {
+    int id;                     // 0x0
+    sAvNode_D97A8* nodes;       // 0x4
+    sAvGroup_D97A8* next;       // 0x8
+};
+
+struct sAvAct_D97A8 {
+    int f0;                     // 0x0
+    char pad4[0x10 - 0x4];
+    sVec_D97A8 pos;             // 0x10
+    sMat_D97A8 m20;             // 0x20
+    sVec_D97A8 objPos;          // 0x60
+    sMat_D97A8 m70;             // 0x70
+    char padB0[0xC0 - 0xB0];
+    sVec_D97A8 scale;           // 0xC0
+    char emitter[0x1E0 - 0xD0]; // 0xD0
+    sVec_D97A8 colour;          // 0x1E0
+    char pad1F0[0x2D0 - 0x1F0];
+    int f2D0;                   // 0x2D0
+    char pad2D4[0x2E0 - 0x2D4];
+    sAvNode_D97A8* data;        // 0x2E0
+    sAvAct_D97A8* next;         // 0x2E4
+    int pad2E8;
+    int f2EC;                   // 0x2EC
+};
+extern sAvAct_D97A8 D_act_D97A8[] __asm__("D_004EE770");
+
+struct sAvSlot_D97A8 {
+    sAvGroup_D97A8* group;      // 0x0
+    sAvAct_D97A8* active;       // 0x4
+    void* arr;                  // 0x8
+    int fC;
+    int f10;                    // 0x10
+    int f14;                    // 0x14
+    float time;                 // 0x18
+};
+extern sAvSlot_D97A8 D_slots_D97A8[] __asm__("D_00538938");
+
+extern "C" int cAvalanche_triggerAvalanche(int id)
+{
+    cAvalanche_resolveDataPointers();
+    for (sAvGroup_D97A8* g = (sAvGroup_D97A8*)D_004A3AB0; g != 0; g = g->next) {
+        if (g->id != id)
+            continue;
+        for (int j = 0; j < 16; j++) {
+            if (D_slots_D97A8[j].group == g)
+                return (int)0x80000000;
+        }
+        sAvSlot_D97A8* slot = D_slots_D97A8;
+        for (int i = 0; i < 16; i++, slot++) {
+            if (slot->group != 0)
+                continue;
+            slot->group = g;
+            slot->active = 0;
+            slot->time = 0.0f;
+            slot->f10 = 0;
+            slot->f14 = 0;
+            sAvAct_D97A8* act = D_act_D97A8;
+            int k = 0;
+            for (sAvNode_D97A8* n = g->nodes; n != 0; n = n->next) {
+                for (; k < 64; k++, act++) {
+                    if (act->data == 0) {
+                        act->data = n;
+                        n->act = act;
+                        act->next = slot->active;
+                        slot->active = act;
+                        act->f0 = 0;
+                        act->pos = n->pos;
+                        CopyMatrix_D97A8(&act->m20, &D_004FF1A0_D97A8);
+                        act->f2EC = 0;
+                        {
+                            sVec_D97A8 p = *(sVec_D97A8*)(n->obj + 0x40);
+                            act->objPos = p;
+                        }
+                        CopyMatrix_D97A8(&act->m70, &D_004FF1A0_D97A8);
+                        act->scale = sVec_D97A8(1.0f, 1.0f, 1.0f, 1.0f);
+                        tActiveAvalancheNode_calculateScale(act, 0.0f);
+                        if (n->emit) {
+                            cDynamicColourEmitter_reset(act->emitter);
+                            func_00370DC8(act->emitter, n, 2.0f);
+                            act->f2D0 = 1;
+                            float r = cRenderStateMan_SnowFlakeColourR(0);
+                            float gg = cRenderStateMan_SnowFlakeColourG(0);
+                            float b = cRenderStateMan_SnowFlakeColourB(0);
+                            act->colour = sVec_D97A8(r, gg, b, 0.0f);
+                        }
+                        break;
+                    }
+                }
+                if (k == 64) {
+                    slot->group = 0;
+                    for (act = slot->active; act != 0; act = act->next) {
+                        if (act->data)
+                            act->data->act = 0;
+                        act->data = 0;
+                    }
+                    return (int)0x80000000;
+                }
+            }
+            tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
+            func_0029DEF0(func_0028B180(), 1);
+            (*(int*)(*(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0xA8) + 0x708))++;
+            return slot - D_slots_D97A8;
+        }
+    }
+    return (int)0x80000000;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9A80);

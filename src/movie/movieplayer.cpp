@@ -720,7 +720,104 @@ extern "C" void func_0023E4F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023E540);
+#ifdef SKIP_ASM
+extern "C" int func_00241CD8(void* self);
+extern "C" void func_0023EB50(void* self);
+extern "C" void func_00241FD0(void* self);
+extern "C" void func_00242050(void* self);
+
+struct sMovieVEntryE540a {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sMovieVEntryE540b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline int Pad_E540(void* self, int slot)
+{
+    void* o = *(void**)((char*)self + 0x434);
+    sMovieVEntryE540a* vt = *(sMovieVEntryE540a**)o;
+    return vt[slot].fn((char*)o + vt[slot].delta);
+}
+
+static inline void Post_E540(void* self, int code)
+{
+    sMovieVEntryE540b* vt = *(sMovieVEntryE540b**)((char*)self + 0x748);
+    vt[1].fn((char*)self + vt[1].delta, code);
+}
+
+static inline int Ready_E540(void* self)
+{
+    return Pad_E540(self, 55) && Pad_E540(self, 58) && !Pad_E540(self, 51) && !Pad_E540(self, 59);
+}
+
+#define S_E540 ((char*)self)
+
+extern "C" void func_0023E540(void* self)
+{
+    if (Pad_E540(self, 11))
+        return;
+    int quit = 0;
+    if (*(int*)(S_E540 + 0xBC) || *(int*)(S_E540 + 0xC0) || (*(int (**)())(S_E540 + 0x78))())
+        quit = 1;
+    if (*(int*)(S_E540 + 0x128) && *(int*)(S_E540 + 0xC8) && quit) {
+        Post_E540(self, 0x38);
+        return;
+    }
+    int held = *(int*)(S_E540 + 0x43C);
+    if (func_00241CD8(self)) {
+        if ((*(int*)(S_E540 + 0x124) || quit) && (*(int*)(S_E540 + 0x43C) & 8)) {
+            func_0023EB50(self);
+            return;
+        }
+        if (!(*(int*)(S_E540 + 0x43C) & 8)) {
+            if (*(int*)(S_E540 + 0x43C) & 1) {
+                Post_E540(self, 5);
+                return;
+            }
+            if (*(int*)(S_E540 + 0x120) && (*(int*)(S_E540 + 0x43C) & 0x10)) {
+                Post_E540(self, 0x27);
+                return;
+            }
+        }
+        int rel;
+        if ((!(*(int*)(S_E540 + 0x43C) & 8) && (held & 8)) || (rel = held & ~4, *(int*)(S_E540 + 0x43C) == 0 && rel)) {
+            func_00241FD0(self);
+            return;
+        }
+    }
+    if (!quit) {
+        if (*(int*)(S_E540 + 0xC8)) {
+            *(int*)(S_E540 + 0xC8) = 0;
+            func_00242050(self);
+            return;
+        }
+        if (*(int*)(S_E540 + 0x43C) & 8) {
+            Post_E540(self, 0x31);
+            return;
+        }
+    }
+    if (*(int*)(S_E540 + 0xBC)) {
+        if (Pad_E540(self, 55) && Pad_E540(self, 58) && !Pad_E540(self, 51) && !Pad_E540(self, 59))
+            Post_E540(self, 6);
+        else
+            Post_E540(self, 7);
+    } else {
+        if (Pad_E540(self, 55) && Pad_E540(self, 58) && !Pad_E540(self, 51) && !Pad_E540(self, 59))
+            Post_E540(self, 6);
+        else
+            Post_E540(self, 0x1D);
+    }
+}
+#undef S_E540
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023E820);
