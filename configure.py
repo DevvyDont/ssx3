@@ -2,6 +2,7 @@
 import argparse
 import os
 import shutil
+import subprocess
 import sys
 import json
 from pathlib import Path
@@ -34,7 +35,13 @@ if sys.platform == "darwin":
     COMMON_INCLUDES += " -isystem tools/macos/include"
 
 
-CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
+# The compiler is SN V1.36 with its dormant `vec_mark` insn switched on (see tools/patch_vecmark.py):
+# the retail code shows EA's compiler emitted it in every empty array-ctor loop. The patched copy is
+# generated from the stock download on first configure.
+STOCK_CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
+CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36-vecmark"
+if not os.path.isdir(CC_DIR) and os.path.isdir(STOCK_CC_DIR):
+    subprocess.run([sys.executable, f"{TOOLS_DIR}/patch_vecmark.py", STOCK_CC_DIR, CC_DIR], check=True)
 DRIVER_PATH_FLAG = f"-B{CC_DIR}/lib/gcc-lib/ee/2.95.3/"
 
 # See tools/cc/README.md for how these were gathered
@@ -94,7 +101,7 @@ compiler_type = "gcc"
 [preserve_macros]
 
 [decompme.compilers]
-"tools/cc/eegcc-2.95.3-V1.36/bin/gcc" = "eegcc-2.95.3-V1.36"
+"tools/cc/eegcc-2.95.3-V1.36-vecmark/bin/gcc" = "eegcc-2.95.3-V1.36"
 """)
 
 

@@ -31,3 +31,4 @@ objdiff.json
 # macOS tooling (downloaded, not committed)
 tools/wibo/
 tools/objdiff/objdiff-cli-macos
+tools/cc/eegcc-2.95.3-V1.36-vecmark
