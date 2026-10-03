@@ -261,7 +261,103 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136F30);
 
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137138);
 
+//100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137550);
+#ifdef SKIP_ASM
+struct sVec4_7550 {
+    float x, y, z, w;
+    sVec4_7550() {}
+    sVec4_7550(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sQuat_7550 {
+    float x, y, z, w;
+};
+
+struct sBone_7550 {
+    sVec4_7550 pos;     // 0x00
+    sQuat_7550 rot;     // 0x10
+};
+
+struct sRadii_7550 {
+    float r[4];
+};
+extern const sRadii_7550 D_00458220;
+
+extern "C" void func_00329A90(void* tree, int n, sVec4_7550* pos, float* radii, sVec4_7550* center, float radius);
+
+// PORT: PS2-only VU0 inline asm (non-volatile) (vector times scalar).
+static inline sVec4_7550 vu0Scale_7550(const sVec4_7550& v, float s)
+{
+    sVec4_7550 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (non-volatile) (vector add).
+static inline sVec4_7550 vu0Add_7550(const sVec4_7550& a, const sVec4_7550& b)
+{
+    sVec4_7550 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (non-volatile) (vector subtract).
+static inline sVec4_7550 vu0Sub_7550(const sVec4_7550& a, const sVec4_7550& b)
+{
+    sVec4_7550 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
+{
+    return sVec4_7550(1.0f - 2.0f * (b->rot.y * b->rot.y + b->rot.z * b->rot.z),
+                      2.0f * (b->rot.x * b->rot.y + b->rot.w * b->rot.z),
+                      2.0f * (b->rot.x * b->rot.z - b->rot.w * b->rot.y),
+                      0.0f);
+}
+
+extern "C" void func_00137550(char* self)
+{
+    sVec4_7550 pts[4];
+    sRadii_7550 radii = D_00458220;
+    char* r = *(char**)(self + 0x40);
+    char* model = *(char**)(r + 0x780);
+    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(r + 0x8A4)];
+    float s = *(float*)(model + 0x140);
+    sVec4_7550 d = vu0Scale_7550(xAxis_7550(bone), s);
+    pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 70.0f));
+    pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 30.0f));
+    pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 30.0f));
+    pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 70.0f));
+    func_00329A90(*(void**)(self + 0x44), 4, pts, radii.r, &bone->pos,
+                  *(float*)(*(char**)(*(char**)(self + 0x40) + 0x780) + 0x140) * 90.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137750);

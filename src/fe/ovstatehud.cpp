@@ -181,7 +181,79 @@ extern "C" void func_001F10F8(void* self, float* out, float* pos, float* size, f
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F1190);
+#ifdef SKIP_ASM
+struct sPos_001F1190 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sHudVert_001F1190 {
+    float u, v, q, f0C;     // 0x00
+    int r, g, b, a;         // 0x10
+    sPos_001F1190 pos;      // 0x20
+    sHudVert_001F1190() {}
+};
+
+static inline int texOf_001F1190(cOVStateHUDElem* e) { return e->field_0x0; }
+
+struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1190*, int); };
+extern char* D_004A289C;
+
+extern "C" void func_001F1190(void* self, cOVStateHUDElem* e, float* pos, float* size, float* scale, float* color)
+{
+    if (e != 0) {
+        *(short*)(*(char**)(D_004A289C + 0xE84) + 0x10) = texOf_001F1190(e);
+        sHudVert_001F1190 v[4];
+        int a = (int)(color[0] * 128.0f);
+        int r = (int)(color[1] * 128.0f);
+        int g = (int)(color[2] * 128.0f);
+        int b = (int)(color[3] * 128.0f);
+        for (int i = 0; i < 4; i++) {
+            v[i].a = a;
+            v[i].r = r;
+            v[i].g = g;
+            v[i].b = b;
+            v[i].q = 1.0f;
+        }
+        float x0 = pos[0];
+        float y0 = pos[1];
+        float x1 = x0 + size[0] * scale[0];
+        float y1 = y0 + size[1] * scale[1];
+        v[0].u = e->x;
+        v[0].v = e->rangeMax;
+        v[1].u = e->y;
+        v[1].v = e->rangeMax;
+        v[2].u = e->x;
+        v[2].v = e->z;
+        v[3].u = e->y;
+        v[3].v = e->z;
+        sPos_001F1190 p;
+        p.x = x0;
+        p.y = y0;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        v[0].pos = p;
+        p.x = x1;
+        p.y = y0;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        v[1].pos = p;
+        p.x = x0;
+        p.y = y1;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        v[2].pos = p;
+        p.x = x1;
+        p.y = y1;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        v[3].pos = p;
+        sVEnt_001F1190* vt = *(sVEnt_001F1190**)(D_004A289C + 0x10D8);
+        vt[71].fn(D_004A289C + vt[71].delta, 4, v, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F1338);

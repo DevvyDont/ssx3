@@ -1,6 +1,89 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_initialize);
+#ifdef SKIP_ASM
+extern "C" void* cRider_cRider(void* self);
+extern "C" void func_003E6448(void* p, int c, int n);
+struct func_002E8560_sTrail;
+extern "C" void func_002E8560(func_002E8560_sTrail* self);
+extern char D_00459B90[];
+extern char D_00487B20[];
+
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+
+struct sBTVtEnt {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBTVt9 {
+    sBTVtEnt e[9];
+} __attribute__((aligned(8)));
+struct sBTVt22 {
+    sBTVtEnt e[22];
+} __attribute__((aligned(8)));
+
+extern const sBTVt9 D_00488BB8;
+extern const sBTVt22 D_00488C00;
+
+struct sBTTrailVtx {
+    float v[12];
+    sBTTrailVtx() {}
+};
+
+struct cBoardTrailFX {
+    char* vbase;                // 0x00
+    int f04;                    // 0x04
+    int f08;                    // 0x08
+    int fC;                     // 0x0C
+    sBTTrailVtx* strip[6];      // 0x10
+    int f28;                    // 0x28
+    short ids[48];              // 0x2C
+};
+
+// PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
+// (cRider at +0xF0): vtable copies with delta fixups when not in charge.
+extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
+{
+    if (inChrg) {
+        self->vbase = (char*)self + 0xF0;
+        cRider_cRider((char*)self + 0xF0);
+    }
+    *(const void**)(self->vbase + 0x6E8) = &D_00488BB8;
+    *(void**)(self->vbase + 0x6D0) = D_00459B90;
+    *(const void**)(self->vbase + 0x6C0) = &D_00488C00;
+    if (inChrg == 0) {
+        int vc;
+        sBTVt9 t1 = D_00488BB8;
+        *(void**)(self->vbase + 0x6E8) = &t1;
+        {
+            char* vbo = self->vbase - 0xF0;
+            vc = (char*)self - vbo;
+        }
+        t1.e[1].delta = D_00488BB8.e[1].delta + vc;
+        sBTVt22 t2 = D_00488C00;
+        *(void**)(self->vbase + 0x6C0) = &t2;
+        t2.e[1].delta = D_00488C00.e[1].delta + vc;
+    }
+    self->f28 = 0;
+    short neg = -1;
+    int i;
+    for (i = 47; i >= 0; i--) {
+        self->ids[i] = neg;
+    }
+    sBTTrailVtx** s = self->strip;
+    s[0] = new (D_00487B20, 0, 0) sBTTrailVtx[324];
+    for (i = 1; i < 6; i++) {
+        s[i] = self->strip[0] + i * 54;
+    }
+    self->fC = 0;
+    func_003E6448(self->strip[0], 0, 0x3CC0);
+    func_002E8560((func_002E8560_sTrail*)self);
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E83F0);
 
