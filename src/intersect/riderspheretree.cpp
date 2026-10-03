@@ -611,7 +611,156 @@ extern "C" int func_0032CBF8(void* selfp, void* other, void* posp, int depth, in
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032CDB0);
+#ifdef SKIP_ASM
+struct sSphereLevel_CDB0 {
+    float radius;   // 0x0
+    float offset;   // 0x4
+    int stride;     // 0x8
+};
+
+struct sSphereTreeInfo_CDB0 {
+    char pad_0x00[0xC];
+    int depth;                      // 0x0C
+    char pad_0x10[0x10];
+    sSphereLevel_CDB0* levels;      // 0x20
+    char pad_0x24[4];
+    unsigned char* masks;           // 0x28
+};
+
+struct sSphereOct_CDB0 {
+    sSphereVec4 dirs[8];            // 0x00
+    char pad_0x80[0x10];
+    float scale;                    // 0x90
+    char pad_0x94[4];
+    sSphereTreeInfo_CDB0* tree;     // 0x98
+};
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_CDB0(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereVec4 Add_CDB0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSphereVec4 Sub_CDB0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_CDB0(const sSphereVec4& a, const sSphereVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / |v|).
+static inline sSphereVec4 Normalize_CDB0(const sSphereVec4& v)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_CDB0(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+extern "C" int func_0032CDB0(void* selfp, void* a1, float r, void* pos, int depth, int base, void* outA, void* outB)
+{
+    sSphereOct_CDB0* self = (sSphereOct_CDB0*)selfp;
+    float sum = r + self->tree->levels[depth].radius * self->scale;
+    sSphereVec4 d = Sub_CDB0(*(sSphereVec4*)a1, *(sSphereVec4*)pos);
+    float dd = Dot_CDB0(d, d);
+    if (!(dd < sum * sum))
+        return 0;
+    float f;
+    unsigned char mask = self->tree->masks[base];
+    if (depth < self->tree->depth && mask != 0) {
+        f = self->tree->levels[depth + 1].offset;
+        for (int i = 0; i < 8; i++) {
+            if ((mask >> i) & 1) {
+                sSphereVec4 p = Add_CDB0(*(sSphereVec4*)pos, Scale_CDB0(self->dirs[i], f));
+                if (func_0032CDB0(self, a1, r, &p, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outA, outB))
+                    return 1;
+            }
+        }
+        return 0;
+    }
+    sSphereVec4 n = Normalize_CDB0(d);
+    f = sum - Sqrt_CDB0(dd);
+    *(sSphereVec4*)outA = Scale_CDB0(n, f);
+    *(sSphereVec4*)outB = Sub_CDB0(*(sSphereVec4*)a1, Scale_CDB0(n, r - f));
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D028);
@@ -1181,7 +1330,141 @@ int func_0032E688(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E690);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A5978;
+extern sSphereVec4 D_004FF260[];
+extern sSphereVec4 D_004FF120_E690[] __asm__("D_004FF120");
+
+struct sHit_E690 {
+    sSphereVec4 pos;    // 0x00
+    sSphereVec4 nrm;    // 0x10
+    sSphereVec4 v20;    // 0x20
+    sSphereVec4 v30;    // 0x30
+    float dist;         // 0x40
+    int type;           // 0x44
+    int pad48;
+    int id;             // 0x4C
+    int f50;            // 0x50
+    void* obj;          // 0x54
+    int f58;            // 0x58
+    int f5C;            // 0x5C
+    int f60;            // 0x60
+    int f64;            // 0x64
+    float f68;          // 0x68
+    float u;            // 0x6C
+    float v;            // 0x70
+    int pad74[3];
+};
+
+static inline void reset_E690(sHit_E690* h)
+{
+    h->type = 2;
+    h->obj = 0;
+    h->f50 = 0;
+    h->f58 = 0;
+    h->f5C = -1;
+    h->f60 = -1;
+    h->f64 = -1;
+    h->id = -1;
+    h->v20 = *D_004FF120_E690;
+    h->v30 = *D_004FF120_E690;
+    h->f68 = 0;
+    h->u = 0;
+    h->v = 0;
+}
+
+struct sRay_E690 {
+    char pad0[0x60];
+    sSphereVec4 origin;     // 0x60
+    sSphereVec4 dir;        // 0x70
+};
+
+extern "C" int func_0032E690(sRay_E690* self, float* bmin, float* bmax, sHit_E690* hits)
+{
+    float tmin = -1.0f;
+    float tmax = 2.0f;
+    float* pd = &self->dir.x;
+    float* po = &self->origin.x;
+    int fmin = -1;
+    int fmax = -1;
+    for (int i = 0; i < 3; i++, bmin++, bmax++, pd++, po++) {
+        float d = *pd;
+        if (__builtin_fabsf(d) > 1.000000013351432e-10f) {
+            float o = *po;
+            float t1 = (*bmin - o) / d;
+            float t2 = (*bmax - o) / d;
+            int face = i * 2;
+            if (t2 < t1) {
+                float tt = t1;
+                face++;
+                t1 = t2;
+                t2 = tt;
+            }
+            if (tmin < t1) {
+                tmin = t1;
+                fmin = face;
+            }
+            if (t2 < tmax) {
+                tmax = t2;
+                fmax = face ^ 1;
+            }
+            if (tmax < tmin)
+                return 0;
+            if (tmax < 0.0f)
+                return 0;
+            if (1.0f < tmin)
+                return 0;
+        }
+    }
+    if (D_004A5978 == 0) {
+        D_004FF260[0].x = -1.0f;
+        D_004FF260[0].y = 0.0f;
+        D_004FF260[0].z = 0.0f;
+        D_004FF260[0].w = 0.0f;
+        D_004FF260[1].x = 1.0f;
+        D_004FF260[1].y = 0.0f;
+        D_004FF260[1].z = 0.0f;
+        D_004FF260[1].w = 0.0f;
+        D_004FF260[2].x = 0.0f;
+        D_004FF260[2].y = -1.0f;
+        D_004FF260[2].z = 0.0f;
+        D_004FF260[2].w = 0.0f;
+        D_004FF260[3].x = 0.0f;
+        D_004FF260[3].y = 1.0f;
+        D_004FF260[3].z = 0.0f;
+        D_004FF260[3].w = 0.0f;
+        D_004FF260[4].x = 0.0f;
+        D_004FF260[4].y = 0.0f;
+        D_004FF260[4].z = -1.0f;
+        D_004FF260[4].w = 0.0f;
+        D_004FF260[5].x = 0.0f;
+        D_004FF260[5].y = 0.0f;
+        D_004FF260[5].z = 1.0f;
+        D_004FF260[5].w = 0.0f;
+        D_004A5978 = 1;
+    }
+    int n = 0;
+    if (0.0f <= tmin) {
+        sHit_E690* h = &hits[0];
+        reset_E690(h);
+        h->nrm = D_004FF260[fmin];
+        h->pos = vu0Add_E4D0(self->origin, vu0Scale_E4D0(self->dir, tmin));
+        h->dist = tmin;
+        n = 1;
+    }
+    if (tmax < 1.0f) {
+        reset_E690(&hits[n]);
+        hits[n].nrm = D_004FF260[fmax];
+        hits[n].pos = vu0Add_E4D0(self->origin, vu0Scale_E4D0(self->dir, tmax));
+        hits[n].dist = tmax;
+        n++;
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032E9A0);
 

@@ -1439,7 +1439,97 @@ extern "C" void func_0012BAF0(void* self, int* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012BB20);
+#ifdef SKIP_ASM
+extern signed char D_00535C12[];
+extern "C" void func_00258F20(void* self, int t, int seed);
+
+struct sAi_12BB20
+{
+    int state;          // 0x00
+    int f4;
+    int timer;          // 0x08
+    int fC[3];
+    int countdown;      // 0x18
+    char pad1C[0x24];
+    char* riders[15];   // 0x40
+    int count;          // 0x7C
+};
+
+static inline bool riderOk_12BB20(char* rider)
+{
+    return *(float*)(*(char**)(rider + 0x18) + 0x470) >= 0.0f;
+}
+
+extern "C" void func_0012BB20(sAi_12BB20* self)
+{
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] == 0)
+        return;
+    int seed = 0;
+    if (self->timer % 60 == 0)
+        seed = func_0012B420((sAiObj128A48*)self);
+    int st = self->state;
+    if (st != 5) {
+        if (st != 3)
+            return;
+        if (*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x214) != st)
+            return;
+    }
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    signed char m = D_00535C12[0];
+    if (m == 0 || m == 4) {
+        int t = self->countdown;
+        if (t >= 0) {
+            if (t > 0) {
+                t--;
+                self->countdown = t;
+                if (t <= 0) {
+                    for (int i = 0; i < self->count; i++) {
+                        bool ok = riderOk_12BB20(self->riders[i]);
+                        if (!ok) {
+                            *(int*)(*(char**)(self->riders[i] + 0x18) + 0x480) = 1;
+                            func_00125108(*(void**)(self->riders[i] + 0x18));
+                        }
+                    }
+                    func_0026FA50(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+                    self->countdown = -1;
+                }
+            }
+        } else {
+            if (self->timer <= 0xD32B && func_0012A250((sAiObj12A250*)self) == 0) {
+                int n = self->count;
+                for (int j = 0; j < n; j++) {
+                    bool ok = riderOk_12BB20(self->riders[j]);
+                    if (ok && *(int*)(D_004A2EEC + 0x8C) == 0 && *(int*)(D_004A2EEC + 0x48) == 0) {
+                        int d = 0xD3A4 - self->timer;
+                        if (d > 0x1C20) d = 0x1C20;
+                        self->countdown = d;
+                    }
+                }
+            }
+            if (self->timer > 0xD3A3 && func_0012A250((sAiObj12A250*)self) == 0) {
+                for (int i = 0; i < self->count; i++) {
+                    bool ok = riderOk_12BB20(self->riders[i]);
+                    if (!ok) {
+                        *(int*)(*(char**)(self->riders[i] + 0x18) + 0x480) = 1;
+                        func_00125108(*(void**)(self->riders[i] + 0x18));
+                    }
+                }
+                func_0026FA50(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+                self->countdown = -1;
+            }
+        }
+    }
+    int v = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = v != 0 && v < 10;
+    if (busy)
+        return;
+    if (self->timer % 60 == 0)
+        func_00258F20(D_004A2EEC, self->timer, seed);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012BE20);
@@ -2297,7 +2387,75 @@ void func_0012E9B0(void* self)
 
 INCLUDE_ASM("ai/ai", func_0012E9B8);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012EE30);
+#ifdef SKIP_ASM
+extern "C" float func_0031C228(float x);
+int func_00312AA0(void* self, int i);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+
+static inline float aiAtan2_12EE30(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f) return y;
+        if (y >= 0.0f) return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f) r += 3.1415927410125732f;
+        else r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+// PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
+static inline float aiAbs_12EE30(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_0012EE30(void* self, void* tbl_)
+{
+    char* obj = *(char**)self;
+    float x = *(float*)(obj + 0x2A4);
+    float y = *(float*)(obj + 0x2B0);
+    float ax = aiAbs_12EE30(x);
+    float ay = aiAbs_12EE30(y);
+    float mag = (ay < ax) ? ax : ay;
+    float a;
+    if (*(int*)(obj + 0x320))
+        a = aiAtan2_12EE30(-y, -x);
+    else
+        a = aiAtan2_12EE30(-y, x);
+    int cur = func_00312AA0(*(void**)(*(char**)self + 0x784), 2);
+    int anim;
+    if (mag == 0.0f)
+        anim = ((int (*)[5])tbl_)[0][*(int*)(*(char**)self + 0x328)];
+    else if (aiAbs_12EE30(a) > 2.7488937377929688f)
+        anim = ((int (*)[5])tbl_)[1][*(int*)(*(char**)self + 0x328)];
+    else if (a > 1.9634956121444702f)
+        anim = ((int (*)[5])tbl_)[2][*(int*)(*(char**)self + 0x328)];
+    else if (a > 1.1780973672866821f)
+        anim = ((int (*)[5])tbl_)[3][*(int*)(*(char**)self + 0x328)];
+    else if (a > 0.39269912242889404f)
+        anim = ((int (*)[5])tbl_)[4][*(int*)(*(char**)self + 0x328)];
+    else if (a < -1.9634956121444702f)
+        anim = ((int (*)[5])tbl_)[5][*(int*)(*(char**)self + 0x328)];
+    else if (a < -1.1780973672866821f)
+        anim = ((int (*)[5])tbl_)[6][*(int*)(*(char**)self + 0x328)];
+    else if (a < -0.39269912242889404f)
+        anim = ((int (*)[5])tbl_)[7][*(int*)(*(char**)self + 0x328)];
+    else
+        anim = ((int (*)[5])tbl_)[8][*(int*)(*(char**)self + 0x328)];
+    if (anim != cur)
+        cRiderAnimBase_play(*(void**)(*(char**)self + 0x784), anim, 0, -1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012F118);
@@ -3388,7 +3546,111 @@ extern "C" void func_00131D08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00131D30);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" bool func_001446A0(void* self, int bit);
+extern "C" int func_00116120_i(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" int func_001161D0(void* rider, float v);
+extern "C" void func_00132060(void* self, int neg);
+extern "C" int func_00132620(void* self, int id);
+extern "C" int func_00132770(void* self, void* a1);
+
+struct sPadA_131D30
+{
+    int pad : 17;
+    int id : 8;
+};
+
+struct sPadB_131D30
+{
+    int pad : 25;
+    int v : 6;
+};
+
+struct sPadC_131D30
+{
+    int x : 6;
+    int y : 6;
+};
+
+static inline float clamp_131D30(float v, float lo, float hi)
+{
+    if (v >= lo)
+        return v <? hi;
+    return lo;
+}
+
+extern "C" void func_00131D30(void* self, void* in)
+{
+    if (func_00116120_i(*(void**)((char*)self + 0x8), (*(int*)in >> 12) & 1, 0))
+        return;
+    if (func_00132770(self, in))
+        return;
+    int w = *(int*)in;
+    if (func_001162C8(*(void**)((char*)self + 0x8), (w >> 14) & 1, (w >> 13) & 1))
+        return;
+    if (func_00132620(self, ((sPadA_131D30*)in)->id))
+        return;
+    int w2 = *(int*)in;
+    float k = 0.032258063554763794f;
+    float zero = 0.0f;
+    func_00114130(*(void**)((char*)self + 0x8), (w2 >> 16) & 1, (w2 >> 15) & 1);
+    func_00113F38(*(void**)((char*)self + 0x8), ((sPadB_131D30*)in)->v * k);
+    func_00113F88(*(void**)((char*)self + 0x8), zero, zero);
+    func_00115B58(*(void**)((char*)self + 0x8));
+    func_00115D48(*(void**)((char*)self + 0x8));
+    sPadC_131D30* in2 = (sPadC_131D30*)((char*)in + 4);
+    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) == 0xE) {
+        if (!func_001446A0(func_00311B20(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) + 0xB0, 0))
+            return;
+        if (func_001161D0(*(void**)((char*)self + 0x8), in2->y * k))
+            return;
+        float fy = in2->x * k;
+        if (fy == zero)
+            return;
+        func_00132060(self, fy < zero);
+        return;
+    }
+    if (func_001161D0(*(void**)((char*)self + 0x8), in2->y * k))
+        return;
+    float fx = in2->y * k;
+    float fy = in2->x * k;
+    float v = fy;
+    if (fx != zero && fy == zero)
+        v = fx;
+    if (v != 0.0f) {
+        char* r = *(char**)((char*)self + 0x8);
+        *(float*)(r + 0x240) = 0.0f;
+        *(float*)(r + 0x23C) = 0.06666667014360428f;
+        func_00132060(self, v < 0.0f);
+        return;
+    }
+    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) == 0xA) {
+        char* r = *(char**)((char*)self + 0x8);
+        *(float*)(r + 0x240) = 0.0f;
+        *(float*)(r + 0x23C) = 0.06666667014360428f;
+        return;
+    }
+    char* r = *(char**)((char*)self + 0x8);
+    *(float*)(r + 0x240) = clamp_131D30(*(float*)(*(char**)(r + 0x77C) + 0xC8) * 1.2000000476837158f, -1.0f, 1.0f);
+    *(float*)(r + 0x23C) = 0.06666667014360428f;
+    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2);
+    char* r2 = *(char**)((char*)self + 0x8);
+    int s = *(int*)(r2 + 0x328);
+    int anim;
+    if (s == 4)
+        anim = 0x14;
+    else {
+        anim = 0x12;
+        if (s == 3) anim = 0x13;
+    }
+    if (cur != anim)
+        cRiderAnimBase_play(*(void**)(r2 + 0x784), anim, 0, -1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00132048);
@@ -4162,7 +4424,52 @@ extern "C" void func_00136230(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00136268);
+#ifdef SKIP_ASM
+float func_00119938(void* self, int a1, int a2);
+
+struct sAnimSet_00136268 {
+    int anims[4];       // 0x00
+    char pad10[0x10];
+    int x20;            // 0x20
+};
+extern sAnimSet_00136268 D_0045A038[];
+
+extern "C" void func_00136268(void* self)
+{
+    sAnimSet_00136268* e = &D_0045A038[*(int*)((char*)self + 0x4)];
+    char* r = *(char**)((char*)self + 0x8);
+    int s = *(int*)(r + 0x328);
+    if (s == 4) {
+        char* anim = *(char**)(r + 0x784);
+        *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
+        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
+        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x8) + 0x784), e->anims[0], 0, -1.0f);
+    } else if (s == 3) {
+        cRiderAnimBase_play(*(void**)(r + 0x784), e->anims[1], 0, -1.0f);
+    } else if (s == 2) {
+        *(int*)(r + 0x320) = 0;
+        *(int*)(*(char**)(*(char**)((char*)self + 0x8) + 0x784) + 0x18) = 0;
+        char* anim = *(char**)(*(char**)((char*)self + 0x8) + 0x784);
+        *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
+        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
+        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x8) + 0x784), e->anims[2], 0, -1.0f);
+    } else {
+        char* anim = *(char**)(r + 0x784);
+        *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
+        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
+        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x8) + 0x784), e->anims[3], 0, -1.0f);
+    }
+    float k = 0.33000001311302185f;
+    func_0010E098(*(void**)((char*)self + 0x8), 1, func_00119938(*(void**)(*(char**)((char*)self + 0x8) + 0x790), e->x20, *(int*)(*(char**)((char*)self + 0x8) + 0x328)));
+    *(int*)(*(char**)((char*)self + 0x8) + 0x328) = 3;
+    *(int*)self = 0;
+    func_00116930(*(void**)((char*)self + 0x8));
+    func_00311E88(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 1, k);
+    func_00311E88(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 0, k);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_00136508);
 

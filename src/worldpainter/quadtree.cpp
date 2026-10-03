@@ -29,7 +29,71 @@ extern "C" void* func_002C1CD8(void* self, float fx, float fz)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d);
+struct func_002C2088_sOut;
+struct func_002C2088_sNode;
+extern "C" void func_002C2088(void* self, func_002C2088_sOut* out, int* count, int* map, func_002C2088_sNode* node);
+extern char D_00485FB0[];
+extern char D_00485FC8[];
+
+struct sQTHeader_1DA8 {
+    float f0;           // 0x00
+    float f4;           // 0x04
+    float f8;           // 0x08
+    int fC;             // 0x0C
+    int f10;            // 0x10
+    unsigned short f14; // 0x14
+    unsigned short f16;
+    int f18;            // 0x18
+    int f1C;            // 0x1C
+    char* f20;          // 0x20
+    int f24;            // 0x24
+};
+
+extern "C" void cQuadTree_exportTree(sQTHeader_1DA8* self, char** out, int* size, void* ctx,
+                                     float (*fixFloat)(void*, float), int (*fixInt)(int, void*),
+                                     unsigned short (*fixShort)(unsigned short, void*))
+{
+    int i;
+    *size = self->fC * 8 + 0x28;
+    int* map = new (D_00485FB0, 0, 0) int[self->f10];
+    for (i = 0; i < self->f10; i++)
+        map[i] = -1;
+    *out = new (D_00485FC8, 0, 0) char[*size];
+    func_00416210(*out, 0xDEADBEEF, *size);
+    sQTHeader_1DA8* o = (sQTHeader_1DA8*)*out;
+    *o = *self;
+    int cnt = 0;
+    unsigned short* p = (unsigned short*)(o + 1);
+    func_002C2088(self, (func_002C2088_sOut*)p, &cnt, map, (func_002C2088_sNode*)(self->f20 + self->f14 * 8));
+    for (i = 0; i < cnt; i++, p += 4) {
+        if (p[0] & 1) {
+            func_002C16B8(p, map[p[0] >> 1], map[p[1] >> 1], map[p[2] >> 1], map[p[3] >> 1]);
+            p[0] = fixShort(p[0], ctx);
+            p[1] = fixShort(p[1], ctx);
+            p[2] = fixShort(p[2], ctx);
+            p[3] = fixShort(p[3], ctx);
+        } else {
+            ((int*)p)[0] = fixInt(((int*)p)[0], ctx);
+            ((int*)p)[1] = fixInt(((int*)p)[1], ctx);
+        }
+    }
+    o->f10 = 0;
+    o->f24 = 0;
+    o->f1C = fixInt(self->f1C, ctx);
+    o->f18 = fixInt(self->f18, ctx);
+    o->f0 = fixFloat(ctx, o->f0);
+    o->f4 = fixFloat(ctx, o->f4);
+    o->f8 = fixFloat(ctx, o->f8);
+    o->fC = fixInt(o->fC, ctx);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2088);

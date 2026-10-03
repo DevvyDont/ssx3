@@ -175,7 +175,121 @@ extern "C" void func_003A9D60(sWV_9D60* self, int cam)
 
 INCLUDE_ASM("world/worldview", func_003A9E50);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldview", func_003AA028);
+#ifdef SKIP_ASM
+extern "C" float func_003A9E50(void* self, void* pos, void* bmin, void* bmax);
+extern "C" int func_003A8618(void* self, int a1);
+extern "C" void func_003A8448(void* self, int i, float f);
+
+struct sV4_A028 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sWVCam_A028 {
+    int active;         // 0x00
+    int f4;
+    int frame;          // 0x08
+    int fC;
+    sV4_A028 pos;       // 0x10
+    sV4_A028 bmin;      // 0x20
+    sV4_A028 bmax;      // 0x30
+    float range;        // 0x40
+    float near;         // 0x44
+    float best;         // 0x48
+    int f4C;
+};
+
+struct sWV_A028 {
+    void* world;        // 0x00
+    char pad4[0x23C];
+    sWVCam_A028 cams[4]; // 0x240
+};
+
+struct sSecInfo_A028 {
+    short f0;
+    unsigned short id;  // 0x02
+};
+
+struct sSection_A028 {
+    float bmin[4];      // 0x00
+    float bmax[4];      // 0x10
+    sV4_A028 n0;        // 0x20
+    sV4_A028 n1;        // 0x30
+    char pad40[0x10];
+    void* child0;       // 0x50
+    void* child1;       // 0x54
+    sSecInfo_A028* info; // 0x58
+};
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_A028(const sV4_A028& a, const sV4_A028& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline int overlap_A028(const sV4_A028* c, const sSection_A028* s)
+{
+    int r = 0;
+    if (c[0].x <= s->bmax[0] && c[1].x >= s->bmin[0] &&
+        c[0].y <= s->bmax[1] && c[1].y >= s->bmin[1] &&
+        c[0].z <= s->bmax[2] && c[1].z >= s->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
+{
+    if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (sSection_A028*)sec_))
+        return;
+    if (((sSection_A028*)sec_)->info != 0) {
+        float d = func_003A9E50(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((sSection_A028*)sec_)->bmax);
+        float m = ((sWV_A028*)self_)->cams[cam].near;
+        float w;
+        if (d < 0.0f) {
+            w = 0.800000011920929f;
+            if (func_003A8618(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
+                m = 0.0f;
+        } else {
+            if (((sWV_A028*)self_)->cams[cam].range < d)
+                return;
+            w = (1.0f - d / ((sWV_A028*)self_)->cams[cam].range) * 0.800000011920929f;
+            if (d < m) {
+                if (func_003A8618(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
+                    m = d;
+            }
+        }
+        if (loaded)
+            ((sWV_A028*)self_)->cams[cam].near = m;
+        if (m < ((sWV_A028*)self_)->cams[cam].best)
+            ((sWV_A028*)self_)->cams[cam].best = m;
+        func_003A8448(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id, w);
+    }
+    if (((sSection_A028*)sec_)->child0 != 0) {
+        if (Dot_A028(((sSection_A028*)sec_)->n0, ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
+            func_003AA028(self_, ((sSection_A028*)sec_)->child0, cam, loaded);
+    }
+    if (((sSection_A028*)sec_)->child1 != 0) {
+        if (Dot_A028(((sSection_A028*)sec_)->n1, ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
+            func_003AA028(self_, ((sSection_A028*)sec_)->child1, cam, loaded);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA2F0);

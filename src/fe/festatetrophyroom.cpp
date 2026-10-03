@@ -30,7 +30,106 @@ void* func_001D43D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetCreate);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+int GetHashValue32(char* str);
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" char* func_00156A90(void* self, int a1, int a2);
+extern "C" int func_001CE6F0(int a, int b);
+extern "C" void func_001D47A0(void* self, int index);
+extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
+extern char D_004A1FE8[];
+extern char D_004A1FF0[];
+extern char D_00466E60[];
+extern char D_004676D8[];
+extern char D_004676F0[];
+extern char D_00467708[];
+extern char D_00467720[];
+extern char* D_00441600[];
+extern char* D_00441618[];
+
+struct sVEntry_43F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sTrophy_43F0 {
+    char pad0[0x48];
+    void* f48;          // 0x48
+    void* f4C;          // 0x4C
+    char pad50[4];
+    int f54;            // 0x54
+    int f58;            // 0x58
+    char pad5C[0x40];
+    int f9C;            // 0x9C
+};
+
+static inline void vcall_43F0(void* o, int slot, int arg)
+{
+    sVEntry_43F0* vt = *(sVEntry_43F0**)((char*)o + 8);
+    vt[slot].fn((char*)o + vt[slot].delta, arg);
+}
+
+extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
+{
+    int h = *(int*)((char*)w + 0x38);
+    if (h == GetHashValue32(D_004A1FE8)) {
+        self->f48 = w;
+        func_001D47A0(self, self->f9C);
+        return;
+    }
+    if (h == GetHashValue32(D_004A1FF0)) {
+        self->f4C = w;
+        vcall_43F0(w, 9, 0);
+        return;
+    }
+    if (h == GetHashValue32(D_00466E60)) {
+        int id = 0;
+        switch (self->f58) {
+        case 3:
+            id = GetHashValue32(D_004676D8);
+            break;
+        case 2:
+            id = GetHashValue32(D_004676F0);
+            break;
+        case 0:
+            id = GetHashValue32(D_00467708);
+            break;
+        case 1:
+            id = GetHashValue32(D_00467720);
+            break;
+        }
+        cUIText_setUnicodeStringByID((cUIText*)w, id);
+        return;
+    }
+    for (int i = 0; i < 6; i++) {
+        if (h == GetHashValue32(D_00441600[i])) {
+            int n = func_001CE6F0(self->f54, self->f58);
+            *(int*)((char*)w + 0x18) = i;
+            if (n < i) {
+                vcall_43F0(w, 9, 0);
+                vcall_43F0(w, 8, 1);
+            } else if (i == 0) {
+                cUIText_setAsciiString((cUIText*)w, *(char**)func_00156A90(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->f54, self->f58));
+            } else {
+                setChallengeName(w, self->f54, self->f58, i - 1);
+            }
+        } else if (h == GetHashValue32(D_00441618[i])) {
+            if (func_001CE6F0(self->f54, self->f58) < i) {
+                vcall_43F0(w, 9, 0);
+                vcall_43F0(w, 8, 1);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4660);

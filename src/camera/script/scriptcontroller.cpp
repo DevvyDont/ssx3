@@ -316,7 +316,136 @@ extern "C" void func_00169540(cScriptCtlVirt2* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169570);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
+float* func_0027C098(void* cam);
+extern "C" void func_0027C0F0(void* cam, void* out);
+extern "C" float func_0031C228(float x);
+extern "C" void func_00160028(void* self, float v);
+extern "C" void func_00160130(void* self, float v);
+
+struct sVec4_169570 {
+    float x, y, z, w;
+    sVec4_169570() {}
+    sVec4_169570(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+static inline sVec4_169570 mtxMulVec_169570(char* m, const sVec4_169570& v)
+{
+    sVec4_169570 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_169570 Sub_169570(const sVec4_169570& a, const sVec4_169570& b)
+{
+    sVec4_169570 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_169570(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+static inline float Atan2_169570(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f) return y;
+        if (y >= 0.0f) return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f) r += 3.1415927410125732f;
+        else r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+struct sVec2_169570 {
+    float x, y;
+    sVec2_169570(float ax, float ay) : x(ax), y(ay) {}
+};
+
+static inline float Length_169570(const sVec2_169570& v)
+{
+    return Sqrt_169570(v.x * v.x + v.y * v.y);
+}
+
+struct sScrCam_169570 {
+    float roll;             // 0x0
+    float x4;               // 0x4
+    float x8;               // 0x8
+    char padC[0x14];
+    sVec4_169570 pos;       // 0x20
+    sVec4_169570 target;    // 0x30
+    float pitch;            // 0x40
+    float yaw;              // 0x44
+    float x48;              // 0x48
+    float ox, oy, oz;       // 0x4C
+    float dist;             // 0x58
+    float r5C;              // 0x5C
+    float r60;              // 0x60
+    float r64;              // 0x64
+    float r68;              // 0x68
+    float r6C;              // 0x6C
+    float r70;              // 0x70
+};
+
+extern "C" void func_00169570(char* p)
+{
+    sScrCam_169570* self = (sScrCam_169570*)p;
+    char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
+    float* f = func_0027C098(cam);
+    char* m = *(char**)(p + 0x14) + 0x30;
+    self->x4 = f[0];
+    self->x8 = f[1];
+    func_0027C0F0(cam, &self->ox);
+    self->roll = self->r68 * 0.01745329424738884f;
+    self->target = sVec4_169570(self->ox, self->oy, self->oz, 1.0f);
+    self->target = mtxMulVec_169570(m, self->target);
+    self->pitch = self->r64 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    self->pos = mtxMulVec_169570(m, sVec4_169570(self->dist, self->r5C, self->r60, 1.0f));
+    sVec4_169570 d = Sub_169570(self->pos, self->target);
+    self->yaw = Atan2_169570(d.y, d.x);
+    float h = Length_169570(sVec2_169570(d.x, d.y));
+    self->x48 = Atan2_169570(d.z, h);
+    func_00160028(p + 0x74, self->r6C);
+    func_00160130(p + 0x74, self->r70);
+}
+#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169828);
 

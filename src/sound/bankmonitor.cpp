@@ -1796,7 +1796,86 @@ extern "C" int func_002B03B8(const char* name)
 
 INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B07F8);
+#ifdef SKIP_ASM
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+extern "C" void* cStreamSys_cStreamSys(void* self, int inchrg, int banks, int count, int heap);
+struct sBankSlots;
+extern "C" void func_002B1428(sBankSlots* self);
+extern char* D_004A37B4;
+extern void* D_00483870[];
+extern void* D_00483B48[];
+extern const char D_00483308[];
+
+struct sName17_07F8 { char s[17]; };
+struct sName18_07F8 { char s[18]; } __attribute__((aligned(2)));
+extern const sName17_07F8 D_00483318;
+extern const sName18_07F8 D_00483330;
+extern const sName17_07F8 D_00483348;
+extern const sName17_07F8 D_00483360;
+extern const sName18_07F8 D_00483378;
+
+struct sBmonVEntry07F8 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmonVtblA07F8 {
+    sBmonVEntry07F8 e[4];
+} __attribute__((aligned(8)));
+struct sBmonVtblB07F8 {
+    sBmonVEntry07F8 e[7];
+} __attribute__((aligned(8)));
+// The unit declares these vtables later with its own types; bind views by asm label.
+extern const sBmonVtblA07F8 D_004838A0_07F8 __asm__("D_004838A0");
+extern const sBmonVtblB07F8 D_004838C0_07F8 __asm__("D_004838C0");
+
+// PORT: g++ 2.95 constructor of a class with virtual bases (stack vtable this-adjust fix-ups written out by hand).
+extern "C" char* func_002B07F8(char* self, int inchrg, int a2, int a3, int heap)
+{
+    if (inchrg) {
+        char* vb = self + 0x1C0;
+        char* vb2 = self + 0xC98;
+        *(char**)(self + 0xC98) = self + 0x1C8;
+        *(char**)self = vb2;
+        *(char**)(self + 0x3A0) = vb;
+        func_002ADE88(vb, heap);
+        cBankManager_cBankManager(*(void**)(self + 0xC98), 0, a2, heap);
+        cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
+    }
+    *(const sBmonVtblA07F8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0_07F8;
+    *(void***)(**(char***)self + 0xAB0) = D_00483B48;
+    *(const sBmonVtblB07F8**)(**(char***)self + 0x1D4) = &D_004838C0_07F8;
+    if (inchrg == 0) {
+        sBmonVtblA07F8 t1 = D_004838A0_07F8;
+        *(sBmonVtblA07F8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &t1;
+        char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x1C0;
+        int d1 = self - base1;
+        t1.e[1].delta = D_004838A0_07F8.e[1].delta + d1;
+        sBmonVtblB07F8 t2 = D_004838C0_07F8;
+        *(sBmonVtblB07F8**)(**(char***)self + 0x1D4) = &t2;
+        char* base2 = **(char***)self - 0x1C8;
+        int d2 = self - base2;
+        t2.e[1].delta = D_004838C0_07F8.e[1].delta + d2;
+    }
+    *(void***)(self + 0x1BC) = D_00483870;
+    *(int*)(self + 0x10) = -1;
+    *(int*)(self + 0x8) = 0;
+    *(int*)(self + 0xC) = 0;
+    D_004A37B4 = self;
+    *(void***)(self + 0x4) = new (D_00483308, 0, 0) void*[2];
+    for (int i = 0; i < 2; i++)
+        (*(void***)(self + 0x4))[i] = 0;
+    func_002B1428((sBankSlots*)self);
+    *(sName17_07F8*)(self + 0x158) = D_00483318;
+    *(sName18_07F8*)(self + 0x16C) = D_00483330;
+    *(sName17_07F8*)(self + 0x180) = D_00483348;
+    *(sName17_07F8*)(self + 0x194) = D_00483360;
+    *(sName18_07F8*)(self + 0x1A8) = D_00483378;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B0AE8);
@@ -2632,7 +2711,87 @@ extern "C" void func_002B3398(char* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B35A0);
+#ifdef SKIP_ASM
+extern "C" void func_002B3838(void* self, int a1, int a2, int a3);
+
+struct sBmEnt35A0 {
+    signed char b0;
+    char pad1[3];
+    int f4[5];
+};
+
+struct sBmPair35A0 {
+    int a;
+    int b;
+};
+
+struct sBmV16_35A0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+struct sBmSub35A0 {
+    int f0;
+    sBmEnt35A0 cfg;         // 0x04
+    volatile int cur;       // 0x1C (target re-reads it after every store and twice back-to-back: volatile)
+    sBmEnt35A0* ents;       // 0x20
+    int arr24[4];           // 0x24
+    int* p34;               // 0x34
+    int* p38;               // 0x38
+    int* p3C;               // 0x3C
+    sBmPair35A0 arr40[4];   // 0x40
+    int* p60;               // 0x60
+    int* p64;               // 0x64
+    int* p68;               // 0x68
+    int* p6C;               // 0x6C
+    sBmV16_35A0* p70;       // 0x70
+    int* p74;               // 0x74
+    int* p78;               // 0x78
+    int* p7C;               // 0x7C
+    int* p80;               // 0x80
+    int* p84;               // 0x84
+};
+
+struct sBmTrack35A0 {
+    char pad0[0x1D8];
+    sBmSub35A0 sub;         // 0x1D8
+};
+
+extern "C" void func_002B35A0(sBmTrack35A0*** self, int a1, int a2, int a3, int a4)
+{
+    sBmTrack35A0* t = **self;
+    sBmSub35A0* s = &t->sub;
+    t->sub.cur++;
+    s->ents[t->sub.cur] = s->cfg;
+    t->sub.arr24[t->sub.cur] = 0;
+    s->p34[t->sub.cur] = 0;
+    s->p38[t->sub.cur] = s->ents[t->sub.cur].b0;
+    s->p3C[t->sub.cur] = 0;
+    func_00416210((char*)s + t->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[t->sub.cur] = 0;
+    s->p64[t->sub.cur] = 0;
+    s->p68[t->sub.cur] = 0;
+    s->p6C[t->sub.cur] = 0;
+    s->p70[t->sub.cur].f4 = 0;
+    s->p70[t->sub.cur].f0 = 100;
+    s->p70[t->sub.cur].f8 = 90;
+    s->p70[t->sub.cur].fC = 50;
+    s->p74[t->sub.cur] = 0;
+    s->p80[t->sub.cur] = 0;
+    s->p84[t->sub.cur] = 0;
+    s->p78[t->sub.cur] = 0x7F;
+    s->p7C[t->sub.cur] = 1;
+    sBmTrack35A0* t2 = **self;
+    t2->sub.p3C[t2->sub.cur] = a3;
+    func_002B3838(self, a1, a2, a4);
+    sBmTrack35A0* t3 = **self;
+    t3->sub.cur--;
+}
+#endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B3838);
 

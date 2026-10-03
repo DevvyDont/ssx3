@@ -445,17 +445,439 @@ extern "C" void func_001F16C0(void* self, int a1, int a2, int a3, int a4, int a5
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderTime);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_001DC990(void* font, float x, float y, const char* fmt, ...);
+extern char D_004A2100[];
+extern char D_004A2108[];
+extern char D_004A22F0[];
+extern char D_004A22F8[];
 
+struct sFont_001F1840 {
+    char pad0[0x14];
+    int count;          // 0x14
+    char pad18[0x18];
+    float f30;          // 0x30
+    float f34;          // 0x34
+    float f38;          // 0x38
+    float f3C;          // 0x3C
+    sColor_001F16C0 color; // 0x40
+};
+
+struct sHUD_001F1840 {
+    char pad0[0x16C];
+    float digitW;       // 0x16C
+    float f170;         // 0x170
+    float f174;         // 0x174
+    float oneW;         // 0x178
+    char pad17C[0x42C - 0x17C];
+    sFont_001F1840* font; // 0x42C
+    const char* sep;    // 0x430
+};
+
+static inline float oneAdj_001F1840(const char* s, float w)
+{
+    float adj = 0.0f;
+    if (s[0] == '1') adj = w;
+    if (s[1] == '1') adj += w;
+    return adj;
+}
+
+extern "C" void cOVStateHUD1P_renderTime(void* self_, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11)
+{
+    sHUD_001F1840* self = (sHUD_001F1840*)self_;
+    float size[2];
+    float out[2];
+    char bufs[3][4];
+    float n = 3.0f;
+    if (a5 & 1) n = 4.0f;
+    size[1] = (float)self->font->count * self->font->f34;
+    size[0] = self->f170 * n + (self->digitW + 2.0f + 2.0f) * (n - 1.0f);
+    func_001F10F8(self, out, pos, size, scale, align, flags, a11);
+    sFont_001F1840* font = self->font;
+    font->f38 = font->f30 * scale[0];
+    font->f3C = font->f34 * scale[1];
+    self->font->color = *color;
+    float sepW = (self->f170 + 2.0f) * scale[0];
+    float digW = (self->digitW + 2.0f) * scale[0];
+    float oneW = self->oneW * scale[0];
+    if (a5 & 6) {
+        if (a5 & 2)
+            func_00391CB0(self->font, out[0], out[1], D_004A2108);
+        else
+            func_00391CB0(self->font, out[0], out[1], D_004A2100);
+        out[0] += self->f174;
+    }
+    sprintf(bufs[0], D_004A22F0, a1);
+    sprintf(bufs[1], D_004A22F0, a2);
+    sprintf(bufs[2], D_004A22F0, a3);
+    func_00391CB0(self->font, out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
+    out[0] += sepW;
+    for (int i = 1; i < 3; i++) {
+        func_00391CB0(self->font, out[0], out[1], self->sep);
+        out[0] += digW;
+        char* p = bufs[i];
+        func_00391CB0(self->font, out[0] + oneAdj_001F1840(p, oneW), out[1], p);
+        out[0] += sepW;
+    }
+    if (a5 & 1)
+        func_001DC990(self->font, out[0], out[1], D_004A22F8, a4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F1B30);
+#ifdef SKIP_ASM
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+struct sVec4_001F1B30 {
+    float x, y, z, w;
+    sVec4_001F1B30(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
+};
+
+struct sFont_001F1B30 {
+    char pad0[0x30];
+    float f30;          // 0x30
+    float f34;          // 0x34
+    float f38;          // 0x38
+    float f3C;          // 0x3C
+    sColor_001F16C0 color; // 0x40
+    sVec4_001F1B30 tint;   // 0x50
+};
+
+struct sRS_001F1B30 {
+    int f0;
+    int f4;
+    int f8;
+};
+
+extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+{
+    float scale[2];
+    float pos[4];
+    float escale[2];
+    float r[4];
+    float out[2];
+    float size[2];
+    sColor_001F16C0 col;
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    sHudElemDef_001F16C0* e = &defs[idx];
+    func_001E91F8(e, pos);
+    func_001E9290(e, escale);
+    if (scaleMul != 0) {
+        escale[0] *= scaleMul[0];
+        escale[1] *= scaleMul[1];
+    }
+    font->f38 = font->f30 * escale[0];
+    font->f3C = font->f34 * escale[1];
+    func_00391FB0(font, str, r, 0, font->f38, font->f3C);
+    int ax = (align == 0x7F) ? e->align : align;
+    int ay = (flags == 0x7F) ? defs[idx].flags : flags;
+    size[0] = r[2];
+    size[1] = r[3];
+    func_001F10F8(ctx, out, pos, size, scale, ax, ay, a5);
+    if (posOff != 0) {
+        out[0] += posOff[0];
+        out[1] += posOff[1];
+    }
+    if (rect != 0) {
+        rect[0] = out[0];
+        rect[1] = out[1];
+        rect[2] = r[2];
+        rect[3] = r[3];
+    }
+    if (color == 0) {
+        func_001E91A8(&defs[idx], &col);
+    } else {
+        col = *color;
+    }
+    sVec4_001F1B30 t(col.r, 0.0f, 0.0f, 0.0f);
+    sRS_001F1B30* rs = *(sRS_001F1B30**)(D_004A289C + 0xE84);
+    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    font->color = col;
+    font->tint = t;
+    func_00391CB0(font, out[0], out[1], str);
+    font->tint = sVec4_001F1B30(1.0f, 0.0f, 0.0f, 0.0f);
+    font->f38 = font->f30 * scale[0];
+    font->f3C = font->f34 * scale[1];
+}
+#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F1E28);
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F22E8);
+#ifdef SKIP_ASM
+extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
+extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
 
+struct sVec4_001F22E8 {
+    float x, y, z, w;
+    sVec4_001F22E8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
+};
+
+struct sFont_001F22E8 {
+    char pad0[0x30];
+    float f30;          // 0x30
+    float f34;          // 0x34
+    float f38;          // 0x38
+    float f3C;          // 0x3C
+    sColor_001F16C0 color; // 0x40
+    sVec4_001F22E8 tint;   // 0x50
+};
+
+struct sRS_001F22E8 {
+    int f0;
+    int f4;
+    int f8;
+};
+
+extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+{
+    float scale[2];
+    float pos[4];
+    float escale[2];
+    float r[4];
+    float out[2];
+    float size[2];
+    sColor_001F16C0 col;
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    sHudElemDef_001F16C0* e = &defs[idx];
+    func_001E91F8(e, pos);
+    func_001E9290(e, escale);
+    if (scaleMul != 0) {
+        escale[0] *= scaleMul[0];
+        escale[1] *= scaleMul[1];
+    }
+    font->f38 = font->f30 * escale[0];
+    font->f3C = font->f34 * escale[1];
+    func_003921F0(font, str, r, 0, font->f38, font->f3C);
+    int ax = (align == 0x7F) ? e->align : align;
+    int ay = (flags == 0x7F) ? defs[idx].flags : flags;
+    size[0] = r[2];
+    size[1] = r[3];
+    func_001F10F8(ctx, out, pos, size, scale, ax, ay, a5);
+    if (posOff != 0) {
+        out[0] += posOff[0];
+        out[1] += posOff[1];
+    }
+    if (rect != 0) {
+        rect[0] = out[0];
+        rect[1] = out[1];
+        rect[2] = r[2];
+        rect[3] = r[3];
+    }
+    if (color == 0) {
+        func_001E91A8(&defs[idx], &col);
+    } else {
+        col = *color;
+    }
+    sVec4_001F22E8 t(col.r, 0.0f, 0.0f, 0.0f);
+    sRS_001F22E8* rs = *(sRS_001F22E8**)(D_004A289C + 0xE84);
+    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    font->color = col;
+    font->tint = t;
+    func_00391E30(font, out[0], out[1], str);
+    font->tint = sVec4_001F22E8(1.0f, 0.0f, 0.0f, 0.0f);
+    font->f38 = font->f30 * scale[0];
+    font->f3C = font->f34 * scale[1];
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F2AA0);
+#ifdef SKIP_ASM
+extern "C" char* func_00392430(void* f, const char* str, char* dst, int max, float sx, float width);
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
+struct sFont_001F2AA0 {
+    char pad0[0x14];
+    int count;          // 0x14
+    char pad18[0x18];
+    float f30;          // 0x30
+    float f34;          // 0x34
+    float f38;          // 0x38
+    float f3C;          // 0x3C
+    sColor_001F16C0 color; // 0x40
+};
+
+struct sRS_001F2AA0 {
+    int f0;
+    int f4;
+    int f8;
+};
+
+static inline float alignPos_001F2AA0(float v, int a, float size)
+{
+    if (a == 0)
+        v -= size * 0.5f;
+    else if (a > 0)
+        v -= size;
+    return v;
+}
+
+extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int flags, float* rect)
+{
+    float wrap[2];
+    float pos[2];
+    float escale[2];
+    char lines[5][50];
+    sColor_001F16C0 col;
+    float scale[2];
+    int n = 0;
+    sHudElemDef_001F16C0* e = &defs[idx];
+    func_001E9220(e, wrap, 0);
+    func_001E91F8(e, pos);
+    func_001E9290(e, escale);
+    sFont_001F2AA0* sf = *(sFont_001F2AA0**)((char*)self + 0x428);
+    sf->f38 = sf->f30 * escale[0];
+    sf->f3C = sf->f34 * escale[1];
+    const char* p = str;
+    while (p != 0) {
+        p = func_00392430(*(sFont_001F2AA0**)((char*)self + 0x428), p, lines[n], 0x32, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
+        n++;
+    }
+    func_001E91A8(&defs[idx], &col);
+    font->color = col;
+    float fn = (float)n;
+    sRS_001F2AA0* rs = *(sRS_001F2AA0**)(D_004A289C + 0xE84);
+    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    float lineH = (float)font->count * font->f34 * escale[1];
+    float totalH = lineH * fn;
+    float y = alignPos_001F2AA0(pos[1], defs[idx].flags, totalH);
+    if (rect != 0) {
+        rect[0] = 65536.0f;
+        rect[1] = y;
+        rect[2] = 0.0f;
+        rect[3] = totalH;
+    }
+    int i = 0;
+    if (n > 0) do {
+        char* line = lines[i];
+        float w = func_00391FB0(font, line, 0, 0, font->f38, font->f3C);
+        float x = pos[0];
+        int al = defs[idx].align;
+        if (flags & 1) {
+            x = 640.0f - x;
+            if (!(flags & 2)) al = -al;
+        }
+        if (al == 0)
+            x -= w * 0.5f;
+        else if (al > 0)
+            x -= w;
+        func_00391CB0(font, x, y, line);
+        if (rect != 0) {
+            if (x < rect[0]) rect[0] = x;
+            if (rect[2] < w) rect[2] = w;
+        }
+        y += lineH;
+    } while (++i < n);
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    font->f38 = font->f30 * scale[0];
+    font->f3C = font->f34 * scale[1];
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001F2DB0);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_00392680(void* f, const unsigned short* str, unsigned short* dst, int max, float sx, float width);
+extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
+extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
+
+struct sFont_001F2DB0 {
+    char pad0[0x14];
+    int count;          // 0x14
+    char pad18[0x18];
+    float f30;          // 0x30
+    float f34;          // 0x34
+    float f38;          // 0x38
+    float f3C;          // 0x3C
+    sColor_001F16C0 color; // 0x40
+};
+
+struct sRS_001F2DB0 {
+    int f0;
+    int f4;
+    int f8;
+};
+
+static inline float alignPos_001F2DB0(float v, int a, float size)
+{
+    if (a == 0)
+        v -= size * 0.5f;
+    else if (a > 0)
+        v -= size;
+    return v;
+}
+
+extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int flags, float* rect)
+{
+    float wrap[2];
+    float pos[2];
+    float escale[2];
+    unsigned short lines[5][50];
+    sColor_001F16C0 col;
+    float scale[2];
+    int n = 0;
+    func_001E9220(&defs[29], wrap, 0);
+    sHudElemDef_001F16C0* e = &defs[idx];
+    func_001E91F8(e, pos);
+    func_001E9290(e, escale);
+    sFont_001F2DB0* sf = *(sFont_001F2DB0**)((char*)self + 0x428);
+    sf->f38 = sf->f30 * escale[0];
+    sf->f3C = sf->f34 * escale[1];
+    const unsigned short* p = str;
+    while (p != 0) {
+        p = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), p, lines[n], 0x32, (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0]);
+        n++;
+    }
+    func_001E91A8(&defs[idx], &col);
+    font->color = col;
+    float fn = (float)n;
+    sRS_001F2DB0* rs = *(sRS_001F2DB0**)(D_004A289C + 0xE84);
+    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    float lineH = (float)font->count * font->f34 * escale[1];
+    float totalH = lineH * fn;
+    float y = alignPos_001F2DB0(pos[1], defs[idx].flags, totalH);
+    if (rect != 0) {
+        rect[0] = 65536.0f;
+        rect[1] = y;
+        rect[2] = 0.0f;
+        rect[3] = totalH;
+    }
+    int i = 0;
+    if (n > 0) do {
+        unsigned short* line = lines[i];
+        float w = func_003921F0(font, line, 0, 0, font->f38, font->f3C);
+        float x = pos[0];
+        int al = defs[idx].align;
+        if (flags & 1) {
+            x = 640.0f - x;
+            if (!(flags & 2)) al = -al;
+        }
+        if (al == 0)
+            x -= w * 0.5f;
+        else if (al > 0)
+            x -= w;
+        func_00391E30(font, x, y, line);
+        if (rect != 0) {
+            if (x < rect[0]) rect[0] = x;
+            if (rect[2] < w) rect[2] = w;
+        }
+        y += lineH;
+    } while (++i < n);
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    font->f38 = font->f30 * scale[0];
+    font->f3C = font->f34 * scale[1];
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F30C0__FPv);
