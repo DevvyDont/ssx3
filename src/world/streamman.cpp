@@ -260,5 +260,154 @@ void* func_003A7218(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/streamman", func_003A7238);
+#ifdef SKIP_ASM
+extern "C" unsigned int cWorldCache_addBxStreamDataTest(void* cache, int group, int id, int key, int size);
+extern "C" void func_003A8CD0_s(void* self, int group, int id, unsigned int key, int a4) __asm__("func_003A8CD0");
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern int D_004A47D0;
+
+struct sStreamMan7238 {
+    void* cache;                // 0x00
+    char pad4[0x90];
+    int group;                  // 0x94
+    int remaining;              // 0x98
+    char pad9C[4];
+    int partial;                // 0xA0
+    unsigned char buf[8];       // 0xA4
+    int retry;                  // 0xAC
+    char padB0[8];
+    int id;                     // 0xB8
+    int key;                    // 0xBC
+    int size;                   // 0xC0
+    int flagC4;                 // 0xC4
+    int copying;                // 0xC8
+    int result;                 // 0xCC
+    char* dst;                  // 0xD0
+};
+
+
+// PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.
+extern "C" int func_003A7238(void* self_, void* pcount_, void* pdata_)
+{
+    sStreamMan7238* self = (sStreamMan7238*)self_;
+    int* pcount = (int*)pcount_;
+    unsigned char** pdata = (unsigned char**)pdata_;
+    while (*pcount >= 8 || (*pcount > 0 && self->size != 0) || self->retry != 0)
+    {
+        unsigned int r;
+        if (self->retry != 0)
+        {
+            r = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
+            self->result = r;
+            if (r == 0xFFFFFFFF)
+                return 0;
+            self->retry = 0;
+            if (r != 0)
+            {
+                self->dst = (char*)r;
+                self->copying = 1;
+            }
+            else
+            {
+                self->copying = 0;
+                if (self->size == 0)
+                    self->flagC4 = 1;
+            }
+        }
+        else
+        if (self->size == 0)
+        {
+            unsigned char hdr[8] __attribute__((aligned(8)));
+            if (self->partial != 0)
+            {
+                int i;
+                unsigned char* h = hdr;
+                *(unsigned int*)(hdr + 4) = 0xFFFFFFFF;
+                for (i = 0; i < self->partial; i++)
+                    h[i] = self->buf[i];
+                for (i = self->partial; i < 8; i++)
+                {
+                    h[i] = *(*pdata)++;
+                    (*pcount)--;
+                }
+                self->id = hdr[0];
+                self->key = *(int*)(hdr + 4);
+                self->size = (int)(*(long*)hdr >> 8) & 0xFFFFFF;
+                self->partial = 0;
+            }
+            else
+            {
+                *(unsigned int*)(hdr + 4) = 0xFFFFFFFF;
+                unsigned char* h = hdr;
+                for (int i = 0; i < 8; i++)
+                {
+                    *h++ = *(*pdata)++;
+                    (*pcount)--;
+                }
+                self->id = hdr[0];
+                self->key = *(int*)(hdr + 4);
+                self->size = (int)(*(long*)hdr >> 8) & 0xFFFFFF;
+            }
+            r = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
+            self->result = r;
+            if (r == 0xFFFFFFFF)
+                return 0;
+            if (r != 0)
+            {
+                self->dst = (char*)r;
+                self->copying = 1;
+            }
+            else
+            {
+                self->copying = 0;
+                if (self->size == 0)
+                    self->flagC4 = 1;
+            }
+        }
+        if (*pcount != 0)
+        {
+            int n = *pcount;
+            if (self->size < n)
+                n = self->size;
+            self->size -= n;
+            if (self->copying != 0)
+            {
+                func_003E6574(self->dst, *pdata, n);
+                self->dst += n;
+                if (self->size == 0)
+                {
+                    func_003A8CD0_s(self->cache, self->group, self->id, self->key, self->result);
+                    self->result = 0;
+                    self->remaining--;
+                }
+            }
+            else if (self->size == 0)
+            {
+                self->remaining--;
+                if (self->flagC4 != 0)
+                {
+                    func_003A8CD0_s(self->cache, self->group, self->id, self->key, (int)&D_004A47D0);
+                    self->flagC4 = 0;
+                }
+            }
+            *pdata += n;
+            *pcount -= n;
+        }
+        if (self->remaining == 0)
+        {
+            *pcount = 0;
+            break;
+        }
+    }
+    if (*pcount != 0)
+    {
+        self->partial = *pcount;
+        for (int i = 0; i < *pcount; i++)
+            self->buf[i] = *(*pdata)++;
+    }
+    return 1;
+}
+#endif
 

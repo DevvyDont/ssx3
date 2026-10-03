@@ -18,7 +18,119 @@ INCLUDE_ASM("ui/uivector", func_003A36D0);
 
 INCLUDE_ASM("ui/uivector", func_003A3808);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A39F8);
+#ifdef SKIP_ASM
+// PORT: func_004139F8 is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
+extern "C" unsigned int func_004139F8(float f);
+extern void* D_004A289C;
+
+struct sV3_3A39F8 {
+    float x, y, z;
+};
+
+struct sV4_3A39F8 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+struct sCol_3A39F8 {
+    float r, g, b, a;
+};
+
+struct sVtx_3A39F8 {
+    float s;
+    float t;
+    float q;
+    int padC;
+    int col[4];         // 0x10
+    sV4_3A39F8 pos;     // 0x20
+};
+
+struct sCount_3A39F8 {
+    unsigned int flag : 1;
+    unsigned int pad1 : 1;
+    unsigned int mode : 15;
+    unsigned int count : 15;
+};
+
+struct sFlags14_3A39F8 {
+    unsigned char b14;
+    unsigned char layer : 5;
+};
+
+struct sRS_3A39F8 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short f10;
+};
+
+struct sVE_3A39F8 { short delta; short index; void* fn; };
+
+typedef void (*tDraw_3A39F8)(void*, int, int, void*, void*, int, void*, void*);
+typedef void (*tDraw2_3A39F8)(void*, int, void*, int);
+
+static inline void SetCol_3A39F8(sVtx_3A39F8& vtx, int k, float v)
+{
+    vtx.col[k] = func_004139F8(v * 0.5f);
+}
+
+static inline void AddPos_3A39F8(sV4_3A39F8& p, int k, float d)
+{
+    p.v[k] += d;
+}
+
+extern "C" void func_003A39F8(char* self, float x, float y)
+{
+    if (*(sV3_3A39F8**)(self + 0x80) == 0)
+        return;
+    for (unsigned int i = 0; i < ((sCount_3A39F8*)(self + 0x74))->count; i++)
+    {
+        (*(sV3_3A39F8**)(self + 0x84))[i] = (*(sV3_3A39F8**)(self + 0x80))[i];
+        (*(sV3_3A39F8**)(self + 0x84))[i].x *= *(float*)(self + 0x50);
+        (*(sV3_3A39F8**)(self + 0x84))[i].y *= *(float*)(self + 0x54);
+    }
+    sRS_3A39F8* rs = *(sRS_3A39F8**)((char*)D_004A289C + 0xE84);
+    rs->f8 = (rs->f8 & ~0x3E0) | (((((sFlags14_3A39F8*)(self + 0x14))->layer) + 9) << 5 & 0x3E0);
+    *(short*)(*(char**)((char*)D_004A289C + 0xE84) + 0x10) = -1;
+    if (((sCount_3A39F8*)(self + 0x74))->flag)
+    {
+        float pos[3];
+        pos[0] = *(float*)(self + 0x44) + x;
+        pos[1] = *(float*)(self + 0x48) + y;
+        pos[2] = 0.0f;
+        char* g = (char*)D_004A289C;
+        sVE_3A39F8* vt = *(sVE_3A39F8**)(g + 0x10D8);
+        ((tDraw_3A39F8)vt[72].fn)(g + vt[72].delta, ((sCount_3A39F8*)(self + 0x74))->mode, ((sCount_3A39F8*)(self + 0x74))->count,
+                                  *(void**)(self + 0x78), *(void**)(self + 0x84), 0, *(void**)(self + 0x7C), pos);
+        return;
+    }
+    if (*(sVtx_3A39F8**)(self + 0x8C) == 0)
+        return;
+    for (unsigned int i = 0; i < ((sCount_3A39F8*)(self + 0x74))->count; i++)
+    {
+        sV4_3A39F8 tt;
+        tt.v[0] = (*(sV3_3A39F8**)(self + 0x84))[i].x;
+        tt.v[1] = (*(sV3_3A39F8**)(self + 0x84))[i].y;
+        tt.v[2] = (*(sV3_3A39F8**)(self + 0x84))[i].z;
+        tt.v[3] = 1.0f;
+        (*(sVtx_3A39F8**)(self + 0x8C))[i].pos = tt;
+        AddPos_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i].pos, 0, *(float*)(self + 0x44) + x);
+        AddPos_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i].pos, 1, *(float*)(self + 0x48) + y);
+        (*(sVtx_3A39F8**)(self + 0x8C))[i].q = 1.0f;
+        (*(sVtx_3A39F8**)(self + 0x8C))[i].s = 0.0f;
+        (*(sVtx_3A39F8**)(self + 0x8C))[i].t = 0.0f;
+        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 3, (*(sCol_3A39F8**)(self + 0x7C))[i].r);
+        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 0, (*(sCol_3A39F8**)(self + 0x7C))[i].g);
+        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 1, (*(sCol_3A39F8**)(self + 0x7C))[i].b);
+        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 2, (*(sCol_3A39F8**)(self + 0x7C))[i].a);
+    }
+    char* g = (char*)D_004A289C;
+    sVE_3A39F8* vt = *(sVE_3A39F8**)(g + 0x10D8);
+    ((tDraw2_3A39F8)vt[73].fn)(g + vt[73].delta, ((sCount_3A39F8*)(self + 0x74))->count, *(void**)(self + 0x8C), 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A3D28);

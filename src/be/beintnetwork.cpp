@@ -156,7 +156,58 @@ extern "C" void func_0014E2C8(void* self, int p, sNetState_E2C8* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintnetwork", func_0014E5C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00151600(void* p, int i, int arg);
+extern "C" void func_00156810(void* self);
+extern sNetTrip_E2C8 D_005308B8_E5C8[] __asm__("D_005308B8");
+
+struct sProfChar_E5C8 {
+    char d[0xF88];
+};
+
+extern sProfChar_E5C8 D_004A6CA8_E5C8[][10] __asm__("D_004A6CA8");
+
+class cBEIface_E5C8 {
+public:
+    int pad[3];
+    virtual void v01();
+    virtual void v02();
+};
+
+extern "C" void func_0014E5C8(void* self, int p, sNetState_E2C8* in)
+{
+    D_004A11B8 = in->a;
+    D_004A11BC = in->b;
+    D_005305B0 = in->hdr;
+    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 0))->v02();
+    if (D_00534B30.data[2] == 0)
+    {
+        for (int i = 2; i < 6; i++)
+            D_00535B20_E2C8[i] = in->chars[i];
+    }
+    D_00535B20_E2C8[p] = in->me;
+    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->v02();
+    signed char c = in->charID;
+    if (D_00534B30.data[2] == 0)
+        *(sNetPair_E2C8*)D_005308D0 = in->pair;
+    D_005308B8_E5C8[p] = (&in->t0)[p];
+    func_00151600(&D_004A6CA8_E5C8[p][c], c, 1);
+    func_00156810(D_004A6CA8_E5C8[p]);
+    for (int k = 0; k < 0x20D; k++)
+        ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (c * 0xF88 + p * 0x9B50)))[k] = in->blob[k];
+    for (int k = 0; k < 0x1A; k++)
+        ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + p * 0x9B50)))[k] = in->moves[k];
+    *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + p * 0x9B50)) = in->tag;
+    for (int k = 0; k < 0x55; k++)
+        ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + p * 0x9B50)))[k] = in->keys[k];
+    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->v02();
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014E9C0);

@@ -398,7 +398,144 @@ extern "C" void func_002B5E68(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int func_002B6740(void* self, void* obj);
+struct sTriggerIdCache;
+extern "C" void func_002B6868(sTriggerIdCache* self, int id);
+extern "C" int func_00287968(void* self, int a1, int a2);
+extern "C" int func_00288A20(void* self, void* rider);
+extern "C" int func_002906B8(void* self);
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+struct sWtEnt5F60 {
+    signed char b0;
+    char pad1[3];
+    int f4[5];
+};
+
+struct sWtPair5F60 {
+    int a;
+    int b;
+};
+
+struct sWtV16_5F60 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+struct sWtSub5F60 {
+    int f0;
+    sWtEnt5F60 cfg;         // 0x04
+    volatile int cur;       // 0x1C (re-read after every store and twice back-to-back: volatile)
+    sWtEnt5F60* ents;       // 0x20
+    int arr24[4];           // 0x24
+    int* p34;               // 0x34
+    int* p38;               // 0x38
+    int* p3C;               // 0x3C
+    sWtPair5F60 arr40[4];   // 0x40
+    int* p60;               // 0x60
+    int* p64;               // 0x64
+    int* p68;               // 0x68
+    int* p6C;               // 0x6C
+    sWtV16_5F60* p70;       // 0x70
+    int* p74;               // 0x74
+    int* p78;               // 0x78
+    int* p7C;               // 0x7C
+    int* p80;               // 0x80
+    int* p84;               // 0x84
+};
+
+struct sWtTrack5F60 {
+    char pad0[0x1D8];
+    sWtSub5F60 sub;         // 0x1D8
+};
+
+struct sWtSnd5F60 {
+    sWtTrack5F60* track;    // 0x0
+    int* types;             // 0x4
+    int* args;              // 0x8
+    char pad[0x10C];
+    sWtTrack5F60** cur;     // 0x118
+};
+
+#define MIN_5F60(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_5F60(a, b) ((a) < (b) ? (b) : (a))
+
+extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol)
+{
+    if (*(int*)(*(char**)(self + 0x33C) + id * 8) == 3)
+        return -1;
+    if (evt != 0)
+    {
+        if (evt != *(void**)(self + 0x328))
+        {
+            if (func_002B6740(self, evt))
+                func_002B6868((sTriggerIdCache*)self, (int)evt);
+        }
+        *(void**)(self + 0x328) = evt;
+    }
+    int type, a, b;
+    if (func_002B63D0(self, id, &type, &a, &b, 1, 0) != 0 && b == 0)
+    {
+        sWtSnd5F60* snd = (sWtSnd5F60*)func_0028B180();
+        int tp = type;
+        int ar = a;
+        sWtTrack5F60* t = snd->track;
+        sWtSub5F60* s = &t->sub;
+        t->sub.cur++;
+        s->ents[t->sub.cur] = s->cfg;
+        t->sub.arr24[t->sub.cur] = 0;
+        s->p34[t->sub.cur] = 0;
+        s->p38[t->sub.cur] = s->ents[t->sub.cur].b0;
+        s->p3C[t->sub.cur] = 0;
+        func_00416210((char*)s + t->sub.cur * 8 + 0x40, 0, 8);
+        s->p60[t->sub.cur] = 0;
+        s->p64[t->sub.cur] = 0;
+        s->p68[t->sub.cur] = 0;
+        s->p6C[t->sub.cur] = 0;
+        s->p70[t->sub.cur].f4 = 0;
+        s->p70[t->sub.cur].f0 = 100;
+        s->p70[t->sub.cur].f8 = 90;
+        s->p70[t->sub.cur].fC = 50;
+        s->p74[t->sub.cur] = 0;
+        s->p80[t->sub.cur] = 0;
+        s->p84[t->sub.cur] = 0;
+        s->p78[t->sub.cur] = 0x7F;
+        s->p7C[t->sub.cur] = 1;
+        snd->types[snd->track->sub.cur] = tp;
+        snd->args[snd->track->sub.cur] = ar;
+        {
+            sWtTrack5F60* t2 = *((sWtSnd5F60*)func_0028B180())->cur;
+            sWtSub5F60* s2 = &t2->sub;
+            s2->p38[t2->sub.cur] = vol;
+            s2->ents[t2->sub.cur].b0 = MAX_5F60(MIN_5F60(s2->p38[s2->cur], 0x7F), 0);
+        }
+        {
+            sWtTrack5F60** pt = ((sWtSnd5F60*)func_0028B180())->cur;
+            int h = func_00287968(func_0028B180(), 7, 0);
+            (*pt)->sub.p3C[(*pt)->sub.cur] = h;
+        }
+        if (rider != 0)
+        {
+            sWtTrack5F60* t3 = *((sWtSnd5F60*)func_0028B180())->cur;
+            t3->sub.arr24[t3->sub.cur] = (int)(rider + 0x110);
+            sWtTrack5F60** pt = ((sWtSnd5F60*)func_0028B180())->cur;
+            int h = func_00288A20(func_0028B180(), rider);
+            (*pt)->sub.p64[(*pt)->sub.cur] = h;
+            sWtTrack5F60* t4 = *((sWtSnd5F60*)func_0028B180())->cur;
+            t4->sub.p34[t4->sub.cur] = 1;
+        }
+        return func_002906B8(func_0028B180());
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B63D0);
@@ -873,7 +1010,103 @@ extern "C" void func_002B6CF8(void* self, sWtmEnt18* e, sVec3_2B6CF8* lo, sVec3_
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6F40);
+#ifdef SKIP_ASM
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float wtSqrt_2B6F40(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+static inline sVec3_2B6CF8 operator*(const sVec3_2B6CF8& v, float s)
+{
+    return sVec3_2B6CF8(v.x * s, v.y * s, v.z * s);
+}
+
+static inline sVec3_2B6CF8 operator+(const sVec3_2B6CF8& a, const sVec3_2B6CF8& b)
+{
+    return sVec3_2B6CF8(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+static inline void operator-=(sVec3_2B6CF8& a, const sVec3_2B6CF8& b)
+{
+    a.x -= b.x;
+    a.y -= b.y;
+    a.z -= b.z;
+}
+
+static inline void operator+=(sVec3_2B6CF8& a, const sVec3_2B6CF8& b)
+{
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+}
+
+static inline sVec3_2B6CF8 Cross_2B6F40(const sVec3_2B6CF8& a, const sVec3_2B6CF8& b)
+{
+    return sVec3_2B6CF8(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+}
+
+struct sShape_2B6F40 {
+    int type;
+    int id;
+    float cx, cy, cz;       // 0x08
+    float e0, e1, e2;       // 0x14
+    float ax, ay, az;       // 0x20
+};
+
+extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
+{
+    sShape_2B6F40* s = (sShape_2B6F40*)shape;
+    switch (s->type)
+    {
+    case 0:
+        lo->x = s->cx - s->e0;
+        lo->y = s->cy - s->e0;
+        lo->z = s->cz - s->e0;
+        hi->x = s->cx + s->e0;
+        hi->y = s->cy + s->e0;
+        hi->z = s->cz + s->e0;
+        break;
+    case 1:
+    {
+        sVec3_2B6CF8 a;
+        sVec3_2B6CF8 b;
+        sVec3_2B6CF8 c;
+        sVec3_2B6CF8 z;
+        a = sVec3_2B6CF8(s->ax, s->ay, s->az);
+        z = sVec3_2B6CF8(0.0f, 0.0f, 1.0f);
+        b = Cross_2B6F40(z, a);
+        b = b * (1.0f / wtSqrt_2B6F40(b.x * b.x + b.y * b.y + b.z * b.z));
+        c = Cross_2B6F40(a, b);
+        *lo = sVec3_2B6CF8(s->cx, s->cy, s->cz);
+        *hi = sVec3_2B6CF8(s->cx, s->cy, s->cz);
+        *lo -= a * s->e0 + b * s->e1 + c * s->e2;
+        *hi += a * s->e0 + b * s->e1 + c * s->e2;
+        break;
+    }
+    case 2:
+        lo->x = s->cx - s->e0;
+        lo->y = s->cy - s->e0;
+        lo->z = s->cz - s->e0;
+        hi->x = s->cx + s->e0;
+        hi->y = s->cy + s->e0;
+        hi->z = s->cz + s->e0;
+        break;
+    case 3:
+        lo->x = s->cx - s->e0;
+        lo->y = s->cy - s->e0;
+        lo->z = s->cz - s->e0;
+        hi->x = s->cx + s->e0;
+        hi->y = s->cy + s->e0;
+        hi->z = s->cz + s->e0;
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7318);
 
@@ -990,7 +1223,118 @@ extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, 
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83F8);
+#ifdef SKIP_ASM
+extern "C" void func_002BADD0(void* node, void* list);
+
+struct sOctKey83F8 {
+    int lvl;
+    int x;
+    int y;
+    int z;
+};
+
+struct sOctItem83F8 {
+    sOctItem83F8* next;
+    int f4;
+    int type;
+};
+
+struct sOctNode83F8 {
+    sOctNode83F8* child[8];
+    char pad20[8];
+    sOctItem83F8* items;    // 0x28
+};
+
+struct sOctList83F8 {
+    int count;
+    sOctItem83F8* items[1];
+};
+
+union sFloatBits83F8 {
+    int i;
+    float f;
+};
+
+static inline int Classify83F8(const float* v, const sOctKey83F8* key)
+{
+    sFloatBits83F8 u;
+    u.i = (key->lvl + 0x7F) << 23;
+    float size = u.f;
+    if (v[0] < ((float)key->x - 0.2f) * size)
+        return 1;
+    if (((float)(key->x + 1) + 0.2f) * size < v[0])
+        return 1;
+    if (v[1] < ((float)key->y - 0.2f) * size)
+        return 1;
+    if (((float)(key->y + 1) + 0.2f) * size < v[1])
+        return 1;
+    if (v[2] < ((float)key->z - 0.2f) * size)
+        return 1;
+    if (((float)(key->z + 1) + 0.2f) * size < v[2])
+        return 1;
+    return 2;
+}
+
+extern "C" void func_002B83F8(void* self, sOctList83F8** partial, sOctList83F8** inside, float** pos,
+                              sOctNode83F8* node, sOctKey83F8* key)
+{
+    int r = Classify83F8(*pos, key);
+    if (r == 0)
+    {
+        for (sOctItem83F8* p = node->items; p != 0; p = p->next)
+        {
+            if (p->type == 5)
+            {
+                sOctList83F8* l = *inside;
+                l->items[l->count++] = p;
+            }
+        }
+        if (node->child[0]) func_002BADD0(node->child[0], inside);
+        if (node->child[1]) func_002BADD0(node->child[1], inside);
+        if (node->child[2]) func_002BADD0(node->child[2], inside);
+        if (node->child[3]) func_002BADD0(node->child[3], inside);
+        if (node->child[4]) func_002BADD0(node->child[4], inside);
+        if (node->child[5]) func_002BADD0(node->child[5], inside);
+        if (node->child[6]) func_002BADD0(node->child[6], inside);
+        if (node->child[7]) func_002BADD0(node->child[7], inside);
+    }
+    else if (r == 2)
+    {
+        for (sOctItem83F8* p = node->items; p != 0; p = p->next)
+        {
+            if (p->type == 5)
+            {
+                sOctList83F8* l = *partial;
+                l->items[l->count++] = p;
+            }
+        }
+        if (key->lvl == 11)
+            return;
+        sOctKey83F8 k;
+        k.lvl = key->lvl - 1;
+        k.x = key->x * 2;
+        k.y = key->y * 2;
+        k.z = key->z * 2;
+        if (node->child[0]) func_002B83F8(self, partial, inside, pos, node->child[0], &k);
+        k.x++;
+        if (node->child[4]) func_002B83F8(self, partial, inside, pos, node->child[4], &k);
+        k.y++;
+        if (node->child[6]) func_002B83F8(self, partial, inside, pos, node->child[6], &k);
+        k.x--;
+        if (node->child[2]) func_002B83F8(self, partial, inside, pos, node->child[2], &k);
+        k.z++;
+        if (node->child[3]) func_002B83F8(self, partial, inside, pos, node->child[3], &k);
+        k.x++;
+        if (node->child[7]) func_002B83F8(self, partial, inside, pos, node->child[7], &k);
+        k.y--;
+        if (node->child[5]) func_002B83F8(self, partial, inside, pos, node->child[5], &k);
+        k.x--;
+        if (node->child[1]) func_002B83F8(self, partial, inside, pos, node->child[1], &k);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8818);
 

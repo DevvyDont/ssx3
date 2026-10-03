@@ -490,7 +490,140 @@ void func_002EADC0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EADD0);
+#ifdef SKIP_ASM
+int func_0011FE98(void* self);
+void func_00392DE8(void* self, int val);
+extern "C" void func_00392D90(void* self, void* q, void* v);
+extern int D_004A4720;
+
+struct sV4_2EADD0
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sV3_2EADD0
+{
+    float x, y, z;
+};
+
+struct sSlot_2EADD0
+{
+    sV4_2EADD0 v[4];
+};
+
+struct sNode_2EADD0
+{
+    sV4_2EADD0 fwd;     // 0x00
+    sV4_2EADD0 pad10;   // 0x10
+    sV4_2EADD0 side;    // 0x20
+    sV4_2EADD0 pos;     // 0x30
+};
+
+struct sTrail_2EADD0
+{
+    char* rider;        // 0x00
+    int pad4[2];
+    int count;          // 0x0C
+    int cur;            // 0x10
+    int pad14[3];
+    sSlot_2EADD0 slots[3];  // 0x20
+    sV4_2EADD0 e0;      // 0xE0
+    sV4_2EADD0 f0;      // 0xF0
+};
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sV4_2EADD0 Add_2EADD0(const sV4_2EADD0& a, const sV4_2EADD0& b)
+{
+    sV4_2EADD0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV4_2EADD0 Sub_2EADD0(const sV4_2EADD0& a, const sV4_2EADD0& b)
+{
+    sV4_2EADD0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
+{
+    sV4_2EADD0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_002EADD0(sTrail_2EADD0* self)
+{
+    float speed = *(float*)(self->rider + 0x2EC);
+    if (D_004A4720 != 0)
+        speed = 10.0f;
+    float zero = 0.0f;
+    if (zero < speed)
+    {
+        func_00392DE8(*(char**)(self->rider + 0x77C) + 0xD30, 1);
+        char* r0 = self->rider;
+        sV3_2EADD0 sz;
+        sz.x = 2.0f;
+        sz.y = 2.0f;
+        sz.z = 2.0f;
+        char* fs = *(char**)(r0 + 0x77C) + 0xD30;
+        sV4_2EADD0 col;
+        col.x = zero;
+        col.y = zero;
+        col.z = 1.0f;
+        col.w = zero;
+        func_00392D90(fs, &col, &sz);
+    }
+    if (zero < speed && func_0011FE98(self->rider) == 1)
+    {
+        self->cur = (self->cur + 2) % 3;
+        int n = self->count + 1;
+        self->count = n < 4 ? n : 3;
+        char* r = self->rider;
+        sV4_2EADD0 pos = ((sNode_2EADD0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6)))->pos;
+        sV4_2EADD0 fwd = ((sNode_2EADD0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6)))->fwd;
+        sV4_2EADD0 side = ((sNode_2EADD0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6)))->side;
+        self->e0 = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
+        self->f0 = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
+        self->slots[self->cur].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        self->slots[self->cur].v[1] = Add_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        self->slots[self->cur].v[2] = Add_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        self->slots[self->cur].v[3] = Sub_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+    }
+    else
+    {
+        self->count = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EB198);
 

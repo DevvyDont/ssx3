@@ -289,7 +289,173 @@ extern "C" void func_00259A60(char* self, int unused)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00259B10);
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025A1D0);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
+// PORT: TagFieldGetString really takes a 4th (default value) argument; the unit declares 3.
+extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
+extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* tag, int defval);
+extern "C" int cDirtysock_tag_TagFieldGetTime(const char* tag, int defval);
+extern "C" int cDirtysock_tag_TagFieldGetAddr(const char* tag, int defval);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" int func_0025A730(void* self, const char* key, int def);
+extern "C" int func_004165A8(void*, void*);
+extern "C" int* func_002591D0();
+extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00259098(void* p, int a, int b);
+extern "C" unsigned int strlen(const char*);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cBENewRaceInterface_setGameMode(void* self, int mode);
+extern "C" void cBENewRaceInterface_setGameEvent(void* self, int ev);
+extern "C" void cBENewRaceInterface_setNumberAI(void* self, int n);
+extern char D_004A2F40[];
+extern char D_004A2F58[];
+extern char D_004A2F60[];
+extern char D_004A2F68[];
+extern char D_004A2F70[];
+extern char D_004A2F78[];
+extern char D_004A2F80[];
+extern char D_004A2F88[];
+extern char D_004A2F90[];
+extern char D_004A2F98[];
+extern char D_004A2FA0[];
+extern char D_004A2FA8[];
+extern int D_00535C08[];
+extern int D_004A11B8;
+extern void* D_004A28A8;
+extern int D_00534B34[];
+extern char D_005308B8[];
+extern char D_00480488[];
+extern char D_004804A8[];
+extern void* D_004812B0[];
+
+struct sMsgListNodeA1D0 {
+    sMsgListNodeA1D0* next;
+    sMsgListNodeA1D0* prev;
+    void* data;
+};
+
+struct sMsgListIterA1D0 {
+    sMsgListNodeA1D0* node;
+    sMsgListIterA1D0(sMsgListNodeA1D0* x) : node(x) {}
+    sMsgListIterA1D0(const sMsgListIterA1D0& x) : node(x.node) {}
+};
+
+static inline sMsgListIterA1D0 sMsgListA1D0_insert(sMsgListIterA1D0 pos, void* const& x)
+{
+    sMsgListNodeA1D0* tmp = (sMsgListNodeA1D0*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_A1D0(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListA1D0_insert(*(sMsgListNodeA1D0**)(self + 0xF0), mp);
+}
+
+struct sAppA1D0 { char pad[0x78]; void* mBE; };
+
+struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
+
+extern "C" void func_0025A1D0(char* self, char* msg)
+{
+    char name[0x100];
+    char b1[0x100];
+    char b2[0x100];
+    char b3[0x100];
+    char b4[0x100];
+    char b5[0x100];
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F58), name, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F60), b1, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F68), b2, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F70), b3, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F78), b4, 0x100, D_004A2F40);
+    *(int*)(self + 0xA0) = cDirtysock_tag_TagFieldGetTime(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F80), 0);
+    int ev = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F88), -1);
+    int kind = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F90), -1);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F88), b5, 0x100, D_004A2F40);
+    *(int*)(self + 0xA8) = func_0025A730(self, b2, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F98), 0));
+    *(int*)(self + 0xAC) = func_0025A730(self, b3, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2FA0), 0));
+    cBXString_cBXString4(self + 0x88, name);
+    cBXString_cBXString4(self + 0x90, b2);
+    cBXString_cBXString4(self + 0x94, b3);
+    cBXString_cBXString4(self + 0x9C, b4);
+    int same = func_004165A8(b1, b2) == 0;
+    *(int*)(self + 0xB4) = same;
+    cBXString_cBXString4(self + 0x98, same ? b3 : b2);
+    *(int*)(self + 0xB0) = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2FA8), 0);
+    if (*(int*)self != 0x18 && *(int*)self != 0x14)
+    {
+        *(int*)self = 0x19;
+        func_00263BA8(func_002591D0(), 0);
+        return;
+    }
+    *(int*)self = 0x19;
+    if (strlen(b5))
+    {
+        char* ri = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+        int mode = 0;
+        switch (kind)
+        {
+        case 0:
+            if (ev >= 14 && ev <= 16)
+            {
+                mode = 5;
+                kind = 4;
+            }
+            else
+                mode = 0;
+            break;
+        case 1:
+            if (ev >= 14 && ev <= 16)
+            {
+                mode = 6;
+                kind = 5;
+            }
+            else
+                mode = 1;
+            break;
+        case 2:
+            mode = 3;
+            break;
+        case 3:
+            mode = 2;
+            break;
+        }
+        cBENewRaceInterface_setGameMode(ri, mode);
+        cBENewRaceInterface_setGameEvent(ri, kind);
+        D_00535C08[0] = ev;
+        D_004A11B8 = 1;
+        cBE_getInterface_Fv(((sAppA1D0*)D_004A28A8)->mBE, 7);
+        if (D_00534B34[0] != 0)
+        {
+            char* cfg = D_005308B8;
+            *(int*)(cfg + 0x18) |= 0x1C0;
+            cBENewRaceInterface_setNumberAI(ri, 0);
+            sVEntryA1D0* vt = *(sVEntryA1D0**)(ri + 0xC);
+            vt[1].fn(ri + vt[1].delta);
+        }
+    }
+    int type = 0xEF;
+    func_00259098(func_002591D0(), *(int*)(self + 0xA4), 0);
+    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+    m[0] = type;
+    *(void***)((char*)m + 0x4) = D_004812B0;
+    post_A1D0(self, m);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025A650);
@@ -4735,7 +4901,150 @@ extern "C" int func_00262A38(void* self, void* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262AF0);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" int func_002620D8(char* self, char* name, int kind, int* err, char* other);
+int func_002623E0_2(void* self, int a1) __asm__("func_002623E0__FPv");
+extern "C" int func_00262400(void* self, int a1);
+extern "C" int func_00262468(void* self, int a1);
+extern "C" int func_00262598(void* self);
+extern "C" void func_00262EC0(char* self, int idx);
+extern "C" void func_00263018(void* self, void* name);
+extern "C" int func_00263128(char* self, char* name);
+extern "C" void* func_0041AA88(void*, void*);
+struct sPtrVec72C8;
+extern "C" void func_002672C8(sPtrVec72C8* self, void** pos, void* const& x);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern char D_00480EC0[];
+extern char D_004810E0[];
+extern void* D_004812B0[];
+extern void* D_004A3028;
+
+struct sMsgListNode_262AF0 {
+    sMsgListNode_262AF0* next;
+    sMsgListNode_262AF0* prev;
+    void* data;
+};
+
+struct sMsgListIter_262AF0 {
+    sMsgListNode_262AF0* node;
+    sMsgListIter_262AF0(sMsgListNode_262AF0* x) : node(x) {}
+    sMsgListIter_262AF0(const sMsgListIter_262AF0& x) : node(x.node) {}
+};
+
+static inline sMsgListIter_262AF0 sMsgList_262AF0_insert(sMsgListIter_262AF0 pos, void* const& x)
+{
+    sMsgListNode_262AF0* tmp = (sMsgListNode_262AF0*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_262AF0(char* owner, void* msg)
+{
+    void* mp = msg;
+    sMsgList_262AF0_insert(*(sMsgListNode_262AF0**)(owner + 0xF0), mp);
+}
+
+struct sObjVec_262AF0 {
+    void* alloc;
+    void** start;
+    void** finish;
+    void** eos;
+};
+
+static inline void construct_262AF0(void** p, void* const& x)
+{
+    if (p != 0)
+        *p = x;
+}
+
+static inline void push_back_262AF0(char* o, sObjVec_262AF0* v, void* const& x)
+{
+    if (*(void***)(o + 0xC0) != *(void***)(o + 0xC4))
+    {
+        construct_262AF0(v->finish, x);
+        ++*(void***)(o + 0xC0);
+    }
+    else
+    {
+        func_002672C8((sPtrVec72C8*)v, *(void***)(o + 0xC0), x);
+    }
+}
+
+extern "C" void func_00262AF0(char* self, char* name, int a2, int a3, int a4, int a5, int a6, int a7,
+                              int s0, int s1, char* s2, int s3, int s4, int s5, int s6)
+{
+    if (func_0041AA88(*(void**)((char*)D_004A3028 + 0x80), name) == 0)
+        return;
+    while (func_00263128(self, name))
+        func_00263018(self, name);
+    int idx = func_00262468(self, (int)name);
+    if (idx < 0)
+    {
+        int err;
+        func_002620D8(self, name, 2, &err, 0);
+        if (err == 2)
+        {
+            int i;
+            for (i = 0; i < func_00262598(self); i++)
+            {
+                if (func_00262400(self, i))
+                {
+                    func_00262EC0(self, i);
+                    break;
+                }
+            }
+            int type = 0x108;
+            func_002620D8(self, name, 2, &err, 0);
+            char* g = (char*)D_004A3028;
+            int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+            m[0] = type;
+            *(void***)((char*)m + 0x4) = D_004812B0;
+            post_262AF0(g, m);
+        }
+    }
+    else if (func_002623E0_2(self, idx))
+    {
+        return;
+    }
+    char* obj = (char*)operator new(0x40, D_00480EC0, 0x20000000, 0);
+    *(char**)(obj + 0x3C) = D_004810E0;
+    cBXString_cBXString2(obj, name);
+    cBXString_cBXString2(obj + 4, s2);
+    *(int*)(obj + 0x8) = a2;
+    *(int*)(obj + 0xC) = a3;
+    *(int*)(obj + 0x10) = a4;
+    *(int*)(obj + 0x14) = a5;
+    *(int*)(obj + 0x18) = a6;
+    *(int*)(obj + 0x1C) = a7;
+    *(int*)(obj + 0x20) = s0;
+    *(int*)(obj + 0x24) = s1;
+    *(int*)(obj + 0x2C) = s3;
+    *(int*)(obj + 0x30) = s4;
+    *(int*)(obj + 0x34) = s5;
+    *(int*)(obj + 0x28) = s6;
+    void* op = obj;
+    push_back_262AF0(self, (sObjVec_262AF0*)(self + 0xB8), op);
+    char* g = (char*)D_004A3028;
+    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+    *(void***)((char*)m + 0x4) = D_004812B0;
+    m[0] = 0xEC;
+    post_262AF0(g, m);
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262E20);
@@ -5498,7 +5807,136 @@ extern "C" void func_00263BA8(void* p, int arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00263CF0);
+#ifdef SKIP_ASM
+struct cAppMan;
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+void* func_00232720(void* self);
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
+extern "C" void cGameComm_construct(int a, int b);
+extern "C" void func_0014EBF8(void* self, int a);
+extern "C" int func_00255D50(void* comm, int chan);
+extern "C" int func_00255E40(void* comm, int chan);
+extern "C" void func_00256C50(void);
+extern "C" void func_0025B800(void* self);
+extern "C" void func_00260F80(void);
+extern "C" void func_002613C8(void* p);
+extern "C" int func_00261460(void* p);
+extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
+extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00264030(int a1, int a2, int a3);
+extern "C" void func_00264098(void);
+extern "C" void func_002642B8(void* self);
+// PORT: func_00264CB8 is defined with one parameter; this caller passes a second in $a1.
+extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern void* D_004A28A8;
+extern void* D_004A2EB8;
+extern void* D_004A2EEC;
+extern void* D_004A3028;
+extern void* D_004A3328;
+extern void* D_004A33CC;
+extern int D_004A19C4;
+extern int D_00534B34[];
+extern int D_00534E58[];
+extern char D_00480EF0[];
+
+struct sVEntry_263CF0 { short delta; short index; void (*fn)(void*); };
+
+static inline bool tsTimedOut_263CF0(int* self)
+{
+    return *(float*)(self + 4) < 0.0f;
+}
+
+static inline bool tsIsState_263CF0(int st)
+{
+    return *(int*)D_004A33CC == st;
+}
+
+static inline void* Mgr_263CF0()
+{
+    if (D_004A3328 == 0)
+        func_00260F80();
+    if (func_00261460(D_004A3328) == 0)
+        func_002613C8(D_004A3328);
+    if (D_004A3328 == 0)
+        func_0025B800(D_004A3028);
+    return D_004A3328;
+}
+
+extern "C" void func_00263CF0(int* self)
+{
+    switch (self[0])
+    {
+    case 0:
+        break;
+    case 1:
+        if (func_00255D50(D_004A2EB8, self[1]))
+        {
+            if (self[3] != 0)
+            {
+                func_00263BA8(self, 1);
+                return;
+            }
+            cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+            func_00264030(self[1], self[2], D_00534B34[0]);
+            func_00264CB8_2(D_004A33CC, *(int*)((char*)D_004A3028 + 0x8C));
+            self[0] = 2;
+            return;
+        }
+        if (func_00255E40(D_004A2EB8, self[1]) || tsTimedOut_263CF0(self))
+        {
+            func_00263BA8(self, 0);
+            return;
+        }
+        *(float*)(self + 4) = *(float*)(self + 4) - *(float*)((char*)D_004A28A8 + 0x14);
+        return;
+    case 2:
+        if (func_00255E40(D_004A2EB8, self[1]))
+        {
+            if (!tsIsState_263CF0(0xB))
+            {
+                char* g = (char*)D_004A3028;
+                int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+                *(void***)((char*)m + 0x4) = D_004812B0;
+                m[0] = 0x113;
+                post_3BA8(g, m);
+            }
+            func_00263BA8(self, 2);
+            return;
+        }
+        {
+            func_002642B8(D_004A33CC);
+            int go = 0;
+            int st = *(int*)D_004A33CC;
+            if (st == 0xD)
+                go = 1;
+            else if (st == 0xB)
+                func_00263BA8(self, 2);
+            if (go == 0)
+                return;
+            func_00264098();
+            func_0025B800(D_004A3028);
+            D_004A19C4 = 0x34;
+            func_00262768(Mgr_263CF0(), 1, 9, *(int*)((char*)D_004A3028 + 0x98), 0, 0);
+            void* bi7 = cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+            char* bi1 = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 1);
+            cBENewPlayerInterface_setRiderCharID(bi1, 0, D_00534E58[0]);
+            sVEntry_263CF0* vt = *(sVEntry_263CF0**)(bi1 + 0xC);
+            vt[1].fn(bi1 + vt[1].delta);
+            func_0014EBF8(bi7, 0);
+            if (D_004A2EEC != 0)
+                func_00256C50();
+            cGameComm_construct(self[1], self[2]);
+            cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_00480EF0, 0x100, 0)));
+            self[0] = 0;
+        }
+        return;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264030);

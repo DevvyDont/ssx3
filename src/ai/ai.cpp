@@ -1945,7 +1945,159 @@ extern "C" void func_0012C5C8(sAiObj12C5C8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012C678);
+#ifdef SKIP_ASM
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void func_0010E028(void* self, int mode, float t);
+extern "C" void func_00113E80(void*, float);
+extern "C" void func_00113F88(void* rider, float a, float b);
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" int func_00114CC0(void* rider);
+extern "C" void func_00115B58(void*);
+int func_0011FE98(void* self);
+extern "C" int func_00311AE8(void*, int);
+int func_00312AA0(void* self, int i);
+extern float D_004A4C8C;
+extern char D_004FF120[];
+
+struct sVec4_12C678
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector *= scalar).
+static inline void vu0ScaleEq_12C678(sVec4_12C678& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float aiLength_12C678(const sVec4_12C678& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float aiAbs_12C678(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct sAiObj12C678
+{
+    int mState;
+    char* mRider;
+};
+
+extern "C" void func_0012C678(sAiObj12C678* self)
+{
+    int anim = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
+    int prev = anim;
+    char* r = self->mRider;
+    *(float*)(r + 0x200) = 0.03333333507180214f;
+    *(float*)(r + 0x204) = *(float*)(r + 0x1F0);
+    switch (self->mState)
+    {
+    case 0:
+        if (anim == 0x15 || (*(float*)(self->mRider + 0x2DC) == 0.0f && func_00114CC0(self->mRider)))
+        {
+            anim = 0x15;
+            func_00113F88(self->mRider, 0.0f, 0.0f);
+        }
+        else
+        {
+            if (func_0011FE98(self->mRider) != 0)
+                break;
+            float zero = 0.0f;
+            float t = -0.10000000149011612f;
+            if (zero < *(float*)(self->mRider + 0x1F0))
+                t = 0.10000000149011612f;
+            anim = 0xB;
+            func_00113E80(self->mRider, t);
+            func_00114130(self->mRider, 0, 0);
+            *(float*)(self->mRider + 0x2DC) = zero;
+            if (*(float*)(self->mRider + 0x378) < 0.800000011920929f)
+            {
+                func_00113F88(self->mRider, zero, zero);
+            }
+            else
+            {
+                vu0ScaleEq_12C678(*(sVec4_12C678*)(self->mRider + 0x1E0), 0.9700000286102295f);
+                if (aiAbs_12C678(*(float*)(self->mRider + 0x214)) == 1.0f ||
+                    aiLength_12C678(*(sVec4_12C678*)(self->mRider + 0x1E0)) < D_004A4C8C)
+                {
+                    self->mState = 1;
+                }
+                else
+                {
+                    func_00113F88(self->mRider, zero, 1.0f);
+                }
+            }
+        }
+        break;
+    case 1:
+    {
+        float zero = 0.0f;
+        func_00113F88(self->mRider, zero, zero);
+        func_00113E80(self->mRider, zero);
+        vu0ScaleEq_12C678(*(sVec4_12C678*)(self->mRider + 0x1E0), 0.9300000071525574f);
+        if (aiAbs_12C678(*(float*)(self->mRider + 0x214)) < 0.20000000298023224f &&
+            *(float*)(self->mRider + 0x1F0) == zero)
+        {
+            self->mState = 2;
+            anim = 4;
+            if (*(int*)(self->mRider + 0x100) == 1)
+                func_0010E028(self->mRider, 1, zero);
+            else
+                func_0010E028(self->mRider, 4, zero);
+        }
+        break;
+    }
+    case 2:
+        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)D_004FF120;
+        *(float*)(*(char**)(self->mRider + 0x784) + 0x1C) = 0.75f;
+        func_00115B58(self->mRider);
+        *(float*)(*(char**)(self->mRider + 0x784) + 0x1C) = 1.0f;
+        if (func_00311AE8(*(void**)(self->mRider + 0x784), 1) == 0)
+        {
+            *(float*)(self->mRider + 0x470) = *(float*)(self->mRider + 0x470) >? 10.0f;
+            self->mState = 3;
+        }
+        break;
+    case 3:
+        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)D_004FF120;
+        break;
+    }
+    if (anim != prev)
+        cRiderAnimBase_play(*(void**)(self->mRider + 0x784), anim, 0, -1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012C9C0);
@@ -2056,11 +2208,446 @@ extern "C" void func_0012CA30(sAiObj12CA30* self)
 
 INCLUDE_ASM("ai/ai", func_0012CB68);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012CD20);
+#ifdef SKIP_ASM
+extern "C" int func_00312AE8(void* self, int i);
+extern "C" char* func_00311B20(void*, int);
+extern "C" float func_00312AB0(void* self, int i);
+extern "C" int func_00311AE8(void*, int);
+extern "C" int func_00312AE8(void* self, int i);
+extern "C" char* func_00311B20(void*, int);
+extern "C" float func_00312AB0(void* self, int i);
+extern "C" int func_00311AE8(void*, int);
+extern "C" void func_0012DA88(void* self);
+extern "C" void func_00136DE0(char* self, void* vel, void* angvel);
+extern "C" void func_00296868(void* mgr, void* self);
+extern "C" void func_00296E80(void* mgr, void* self);
 
+struct sV_12CD20
+{
+    float x, y, z, w;
+    sV_12CD20() {}
+    sV_12CD20(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct sVP_12CD20
+{
+    sV_12CD20 a;
+    sV_12CD20 b;
+};
+
+struct sAiObj12CD20
+{
+    int f0;              // 0x00
+    char pad4[0xC];
+    sVP_12CD20 m10;      // 0x10
+    sVP_12CD20 m30;      // 0x30
+    float f50;           // 0x50
+    char pad54[0x2C];
+    char* mRider;        // 0x80
+};
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV_12CD20 Sub_12CD20(const sV_12CD20& a, const sV_12CD20& b)
+{
+    sV_12CD20 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV_12CD20 Scale_12CD20(const sV_12CD20& v, float s)
+{
+    sV_12CD20 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sV_12CD20 QuatMul_12CD20(const sV_12CD20& a, const sV_12CD20& b)
+{
+    sV_12CD20 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sV_12CD20 Conj_12CD20(const sVP_12CD20& p)
+{
+    sV_12CD20 r;
+    r.w = p.b.w;
+    r.x = p.b.x;
+    r.y = p.b.y;
+    r.z = p.b.z;
+    r.x = -r.x;
+    r.y = -r.y;
+    r.z = -r.z;
+    return r;
+}
+
+extern "C" void func_0012CD20(sAiObj12CD20* self)
+{
+    char* r = self->mRider;
+    sVP_12CD20* nodes = *(sVP_12CD20**)(*(char**)(r + 0x780) + 0x2C);
+    sVP_12CD20* p1 = &nodes[*(int*)(r + 0x89C)];
+    sVP_12CD20* p2 = &nodes[*(int*)(r + 0x8A4)];
+    float t = func_00312AB0(*(void**)(r + 0x784), 2);
+    if (func_00312AE8(*(void**)(self->mRider + 0x784), 2))
+    {
+        char* an = func_00311B20(*(void**)(self->mRider + 0x784), 2);
+        float rate = *(float*)(an + 0x90);
+        float s = rate / ((t - self->f50) * *(float*)(an + 0x10));
+        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p1->a, self->m10.a), *(float*)(*(char**)(self->mRider + 0x784) + 0x1C)), s);
+        float s2 = s + s;
+        sV_12CD20 d = Sub_12CD20(p1->b, self->m10.b);
+        sV_12CD20 q = QuatMul_12CD20(d, Conj_12CD20(*p1));
+        sV_12CD20 angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
+        func_00136DE0(*(char**)(self->mRider + 0x77C) + 0x30, self->mRider + 0x1E0, &angvel);
+        if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x17)
+        {
+            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p2->a, self->m30.a), *(float*)(*(char**)(self->mRider + 0x784) + 0x1C)), s);
+            d = Sub_12CD20(p2->b, self->m30.b);
+            q = QuatMul_12CD20(d, Conj_12CD20(*p2));
+            angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
+            func_00136D40(*(char**)(self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, (sVecPair_12CA30*)p2);
+        }
+        if (*(int*)(*(char**)(self->mRider + 0x77C) + 0x30) == 1)
+        {
+            self->f0 = 1;
+            func_0012DA88(self);
+        }
+        else
+        {
+            self->f0 = 2;
+            func_0012DA88(self);
+            if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x1D ||
+                func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x19)
+                func_00296868(func_0028B180(), self);
+            else
+                func_00296E80(func_0028B180(), self);
+        }
+        return;
+    }
+    if (t < 0.949999988079071f)
+    {
+        self->f50 = t;
+        self->m10 = *p1;
+        self->m30 = *p2;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012D160);
+#ifdef SKIP_ASM
+extern "C" void func_0010F280(void* rider, int flag);
+extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void func_0012DCB0(void* self);
+extern "C" void func_0012DD98(void* self);
+extern "C" void func_0012DF48(void* self);
+extern "C" void func_0012E010(void* self);
+extern "C" float func_0012E528(void* self);
+extern "C" void func_0015E360(void* obj, int mode, float a, float b);
+extern "C" void* func_0028B180();
+extern "C" void func_00296E20(void* mgr, void* rider);
+extern "C" void func_00297438(void* mgr, void* rider);
+extern "C" void func_0029F660(void* mgr, void* rider, int a, int b);
+extern "C" int func_00311AE8(void*, int);
+extern "C" int func_00312AE8(void* self, int i);
+extern void* D_004A28A8;
 
+struct sVEntry12D160 { short delta; short index; void (*fn)(void*, float); };
+
+static inline bool aiOk_12D160(void* self)
+{
+    return *(float*)(*(char**)((char*)self + 0x80) + 0x470) >= 0.0f;
+}
+
+static inline int aiIsOne_12D160(char* r)
+{
+    return *(int*)(r + 0x150) == 1;
+}
+
+static inline float aiRatio_12D160(float v, float hi)
+{
+    float t = 0.0f;
+    if (v >= 0.0f)
+    {
+        t = 1.0f;
+        if (v <= hi)
+            t = v / hi;
+    }
+    return t;
+}
+
+static inline void aiTail_12D160(void* self)
+{
+    func_00296E20(func_0028B180(), *(char**)((char*)self + 0x80));
+    func_00297438(func_0028B180(), *(char**)((char*)self + 0x80));
+}
+
+extern "C" void func_0012D160(void* self)
+{
+    char* r = *(char**)((char*)self + 0x80);
+    float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)(r + 0x1E0));
+    if (*(int*)(r + 0x870) >= 0)
+    {
+        float v = speed * 0.035999998450279236f;
+        float t = aiRatio_12D160(v, 100.0f);
+        char* r2 = *(char**)((char*)self + 0x80);
+        if (*(int*)(r2 + 0x87C) != 0)
+        {
+            func_0015E360(*(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + (*(int*)(r2 + 0x870) << 2) + 4), 4, t, 0.0f);
+        }
+    }
+    float k = func_0012E528(self);
+    {
+        char* r3 = *(char**)((char*)self + 0x80);
+        sVEntry12D160* vt = *(sVEntry12D160**)(r3 + 0x6C0);
+        vt[18].fn(r3 + vt[18].delta, k * 0.5f);
+    }
+    if (*(int*)((char*)self + 0x54) != 0)
+    {
+        *(int*)((char*)self + 0x54) = 0;
+        char* r4 = *(char**)((char*)self + 0x80);
+        sVEntry12D160* vt = *(sVEntry12D160**)(r4 + 0x6C0);
+        vt[17].fn(r4 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)));
+        return;
+    }
+    if (aiIsOne_12D160(*(char**)((char*)self + 0x80)) && speed < 27.77777862548828f)
+    {
+        func_0012E010(self);
+        *(int*)self = 4;
+        aiTail_12D160(self);
+        return;
+    }
+    if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0 &&
+        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0x1D &&
+        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0x19)
+        return;
+    float lim = 694.4444580078125f;
+    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1C)
+        lim = 1666.666748046875f;
+    int fast = *(float*)((char*)self + 0x70) >= 1.0f || aiOk_12D160(self);
+    if ((!aiIsOne_12D160(*(char**)((char*)self + 0x80)) && speed < lim) || fast)
+    {
+        if (*(int*)(*(char**)((char*)self + 0x80) + 0x438) == 0x12 || aiIsOne_12D160(*(char**)((char*)self + 0x80)))
+        {
+            if (fast)
+            {
+                func_00116120(*(char**)((char*)self + 0x80), 0, 3);
+                func_0010F280(*(char**)((char*)self + 0x80), 1);
+            }
+            else if (speed < 277.77777099609375f)
+            {
+                func_0012E010(self);
+                *(int*)self = 4;
+            }
+        }
+        else
+        {
+            func_0010F280(*(char**)((char*)self + 0x80), fast);
+            if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1C)
+                func_0029F660(func_0028B180(), *(char**)((char*)self + 0x80), 1, 0);
+            func_0012DF48(self);
+            *(int*)self = 3;
+        }
+        aiTail_12D160(self);
+    }
+    else if (*(int*)(*(char**)(*(char**)((char*)self + 0x80) + 0x77C) + 0x30) == 1)
+    {
+        func_0012DCB0(self);
+        *(int*)self = 1;
+        aiTail_12D160(self);
+    }
+    else
+    {
+        if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0)
+            func_0012DD98(self);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/ai", func_0012D4E8);
+#ifdef SKIP_ASM
+extern "C" void func_0010F280(void* rider, int flag);
+extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void func_0012DCB0(void* self);
+extern "C" void func_0012DD98(void* self);
+extern "C" void func_0012DE80(void* self);
+extern "C" void func_0012E010(void* self);
+extern "C" void func_0012E468(void* self);
+extern "C" float func_0012E528(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_00296310(void* mgr, void* rider);
+extern "C" void func_00296868(void* mgr, void* self);
+extern "C" void func_00296E80(void* mgr, void* self);
+extern "C" int func_00311AE8(void*, int);
+extern "C" char* func_00311B20(void*, int);
+extern "C" float func_00312AB0(void* self, int i);
+extern "C" int func_00312AE8(void* self, int i);
+extern "C" void func_00313CF0(void* self, int idx, float v);
+
+struct sAiVec4_12D4E8
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float aiDot_12D4E8(const sAiVec4_12D4E8& a, const sAiVec4_12D4E8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sAiVec4_12D4E8 aiScale_12D4E8(const sAiVec4_12D4E8& in, float s)
+{
+    sAiVec4_12D4E8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(in), "f"(s));
+    return r;
+}
+
+struct sVEntry12D4E8 { short delta; short index; void (*fn)(void*, float); };
+
+static inline bool aiOk_12D4E8(void* self)
+{
+    return *(float*)(*(char**)((char*)self + 0x80) + 0x470) >= 0.0f;
+}
+
+static inline int aiIsOne_12D4E8(char* r)
+{
+    return *(int*)(r + 0x150) == 1;
+}
+
+extern "C" void func_0012D4E8(void* self)
+{
+    func_0012E528(self);
+    if (*(int*)((char*)self + 0x54) != 0)
+    {
+        if (*(int*)(*(char**)(*(char**)((char*)self + 0x80) + 0x77C) + 0x30) == 0)
+        {
+            if (*(float*)(*(char**)((char*)self + 0x80) + 0x378) > 0.8999999761581421f &&
+                aiDot_12D4E8(*(sAiVec4_12D4E8*)((char*)self + 0x60), *(sAiVec4_12D4E8*)(*(char**)((char*)self + 0x80) + 0x370)) <
+                    aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)) * -0.8999999761581421f)
+            {
+                func_0012E010(self);
+                char* r2 = *(char**)((char*)self + 0x80);
+                sAiVec4_12D4E8 v = aiScale_12D4E8(*(sAiVec4_12D4E8*)(r2 + 0x370),
+                    aiDot_12D4E8(*(sAiVec4_12D4E8*)(r2 + 0x370), *(sAiVec4_12D4E8*)(r2 + 0x1E0)));
+                *(sAiVec4_12D4E8*)(r2 + 0x1E0) = v;
+                *(int*)self = 4;
+            }
+            else
+            {
+                if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1D ||
+                    func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x19)
+                {
+                    func_0012E468(self);
+                    func_00296868(func_0028B180(), self);
+                }
+                else
+                {
+                    float t = func_00312AB0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+                    func_0012DD98(self);
+                    float a = *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) + 0x10);
+                    func_00313CF0(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2), 0, a * t);
+                    func_00296E80(func_0028B180(), self);
+                }
+                *(int*)self = 2;
+            }
+            func_00296310(func_0028B180(), *(void**)((char*)self + 0x80));
+        }
+        *(int*)((char*)self + 0x54) = 0;
+        char* r3 = *(char**)((char*)self + 0x80);
+        sVEntry12D4E8* vt = *(sVEntry12D4E8**)(r3 + 0x6C0);
+        vt[17].fn(r3 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)));
+        return;
+    }
+    if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0 ||
+        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1D ||
+        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x19)
+    {
+        int fast = *(float*)((char*)self + 0x70) >= 1.0f || aiOk_12D4E8(self);
+        if (fast)
+        {
+            if (!aiIsOne_12D4E8(*(char**)((char*)self + 0x80)))
+            {
+                func_0010F280(*(char**)((char*)self + 0x80), fast);
+                func_0012DE80(self);
+                *(int*)self = 3;
+            }
+            else
+            {
+                func_00116120(*(char**)((char*)self + 0x80), 0, 3);
+                func_0010F280(*(void**)((char*)self + 0x80), 1);
+            }
+        }
+        else if (*(int*)(*(char**)(*(char**)((char*)self + 0x80) + 0x77C) + 0x30) == 0)
+        {
+            func_0012DD98(self);
+            *(int*)self = 2;
+        }
+        else if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0)
+        {
+            func_0012DCB0(self);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012D848);
@@ -2147,7 +2734,171 @@ INCLUDE_ASM("ai/ai", func_0012DE80);
 
 INCLUDE_ASM("ai/ai", func_0012DF48);
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012E010);
+#ifdef SKIP_ASM
+extern "C" void func_00312660(void* buf, void* anim, int id, int a3, float t);
+extern "C" void func_0030ECD8(void* xf, void* model, void* buf, int a3);
+extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
+extern int D_004A4C00;
+extern "C" void cRider_updateOrientationImplicit(void*);
+
+struct sXf_12E010
+{
+    sQuat_12BE20 pos;
+    sQuat_12BE20 rot;
+};
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQuat_12BE20 QuatMul_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
+{
+    sQuat_12BE20 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sQuat_12BE20 Sub_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
+{
+    sQuat_12BE20 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sQuat_12BE20 Add_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
+{
+    sQuat_12BE20 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sQuat_12BE20 Rot_12E010(const sQuat_12BE20& q, const sQuat_12BE20& v)
+{
+    sQuat_12BE20 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sQuat_12BE20 Scale_12E010(const sQuat_12BE20& v, float s)
+{
+    sQuat_12BE20 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sQuat_12BE20 Conj_12E010(const sXf_12E010& p)
+{
+    sQuat_12BE20 r;
+    r.w = p.rot.w;
+    r.x = p.rot.x;
+    r.y = p.rot.y;
+    r.z = p.rot.z;
+    r.x = -r.x;
+    r.y = -r.y;
+    r.z = -r.z;
+    return r;
+}
+
+static inline sXf_12E010 Invert_12E010(const sXf_12E010& a)
+{
+    sXf_12E010 r;
+    r.rot = Conj_12E010(a);
+    r.pos = Add_12E010(Scale_12E010(Rot_12E010(r.rot, Sub_12E010(a.pos, D_004FF130_12BE20)), -1.0f), D_004FF130_12BE20);
+    return r;
+}
+
+static inline sXf_12E010 Combine_12E010(const sXf_12E010& a, const sXf_12E010& b)
+{
+    sXf_12E010 r;
+    r.rot = QuatMul_12E010(a.rot, b.rot);
+    r.pos = Add_12E010(Rot_12E010(a.rot, Sub_12E010(b.pos, D_004FF130_12BE20)), a.pos);
+    return r;
+}
+
+extern "C" void func_0012E010(void* self)
+{
+    char* r = *(char**)((char*)self + 0x80);
+    int anim = 0x199;
+    if (*(int*)(r + 0x150) != 1)
+        anim = 0x19A;
+    char buf[0x50];
+    func_00312660(buf, *(void**)(r + 0x784), anim, (&D_004A4C00)[2], 0.0f);
+    sXf_12E010 a;
+    func_0030ECD8(&a, *(void**)(*(char**)((char*)self + 0x80) + 0x780), buf, 0);
+    char* rd = *(char**)((char*)self + 0x80);
+    char* trk = *(char**)(rd + 0x780);
+    sQuat_12BE20* n = (sQuat_12BE20*)((*(int*)(rd + 0x89C) << 4) + *(int*)(trk + 0x24));
+    sXf_12E010 node;
+    node.pos = sQuat_12BE20(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
+                            n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
+    node.rot = *(sQuat_12BE20*)(*(char**)(*(char**)(rd + 0x780) + 0x28) + (*(int*)(rd + 0x89C) << 4));
+    sXf_12E010 y = Combine_12E010(node, Invert_12E010(a));
+    sXf_12E010* rx = (sXf_12E010*)(*(char**)((char*)self + 0x80) + 0x110);
+    *rx = Combine_12E010(*rx, y);
+    cRider_updateOrientationImplicit(*(void**)((char*)self + 0x80));
+    char* rd3 = *(char**)((char*)self + 0x80);
+    sXf_12E010 w = Invert_12E010(y);
+    cRiderAnimBase_changeOrientationOffset(*(void**)(rd3 + 0x784), &w);
+    cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), anim, 0, -1.0f);
+}
+#endif
 
 INCLUDE_ASM("ai/ai", func_0012E468);
 
@@ -2385,7 +3136,166 @@ void func_0012E9B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012E9B8);
+#ifdef SKIP_ASM
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" int func_00106848(void*);
+extern "C" void func_00113E80(void*, float);
+extern "C" void func_00113F38(void*, float);
+extern "C" void func_00113F88(void* rider, float a, float b);
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void func_00114298(void* rider, float v);
+extern "C" int func_00114CC0(void* rider);
+extern "C" void func_001158B8(void* rider, void* a, void* b, float c, float d);
+extern "C" int func_00116120_i(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" int func_00116378(void*);
+extern "C" void func_00116930(void* rider);
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+extern "C" void func_0012EE30(void*, void*);
+extern "C" void func_00294170(void* self, void* rider);
+extern "C" int func_00311AE8(void*, int);
+int func_00312AA0(void* self, int i);
+extern void* D_004A3500;
+extern char D_0043D840[];
+extern char D_0043D788[];
+
+struct sAiBits0_12E9B8 { int v : 6; };
+struct sAiBits6_12E9B8 { int pad : 6; int v : 6; };
+struct sAiBits15_12E9B8 { int pad : 15; int v : 6; };
+struct sAiBits21_12E9B8 { int pad : 21; int v : 6; };
+
+// PORT: g++ `<?` (min) operator.
+static inline float aiClamp_12E9B8(float v, float lo, float hi)
+{
+    if (v >= lo) return v <? hi;
+    return lo;
+}
+
+static inline float aiStep_12E9B8(float v)
+{
+    if (v < -0.20000000298023224f) return -1.0f;
+    if (v > 0.20000000298023224f) return 1.0f;
+    return 0.0f;
+}
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float aiAbs_12E9B8(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_0012E9B8(void* self, void* in)
+{
+    if (func_00116378(*(void**)self))
+        return;
+    if (func_00116120_i(*(void**)self, (*(int*)in >> 12) & 1, 0))
+        return;
+    if (func_00106848(*(void**)self))
+        return;
+    int w = *(int*)in;
+    if ((w & 0x2000) == 0)
+    {
+        char* r0 = *(char**)self;
+        func_001158B8(r0, r0 + 0x2B0, r0 + 0x2A4, 0.7853982448577881f, 0.20000000298023224f);
+        char* r = *(char**)self;
+        if (*(int*)(r + 0x328) == 3 || *(int*)(r + 0x328) == 4)
+        {
+            float a = 0.0f;
+            char* anim = *(char**)(r + 0x784);
+            *(sQuat_12BE20*)(anim + 0x30) = D_004FF130_12BE20;
+            *(sQuat_12BE20*)(anim + 0x40) = AxisAngle_12BE20(D_004FF160_12BE20, -a);
+        }
+        func_0012EE30(self, D_0043D840);
+        *(int*)(*(char**)self + 0x328) = 0;
+        func_00116930(*(void**)self);
+        if (func_0011FE98(*(void**)self) != 1)
+        {
+            func_00114298(*(void**)self, *(float*)(*(char**)self + 0x220));
+            func_0011FE78_impl(*(void**)self, 1);
+            func_00294170(D_004A3500, *(void**)self);
+        }
+        float z = 0.0f;
+        func_00113E80(*(void**)self, z);
+        func_00113F88(*(void**)self, z, z);
+        func_0011FEC8_impl(*(void**)self, 5);
+        return;
+    }
+    func_00114130(*(void**)self, (w >> 14) & 1, 0);
+    float zero = 0.0f;
+    func_00113F88(*(void**)self, 1.0f, zero);
+    float sx = aiClamp_12E9B8(((sAiBits0_12E9B8*)((char*)in + 4))->v * 0.032258063554763794f, -0.5f, 0.5f);
+    float sy = aiClamp_12E9B8(((sAiBits6_12E9B8*)((char*)in + 4))->v * 0.032258063554763794f, -0.5f, 0.5f);
+    if (func_00311AE8(*(void**)(*(char**)self + 0x784), 2) == 10)
+    {
+        char* r = *(char**)self;
+        if (*(int*)(r + 0x328) == 0)
+            func_00113E80(r, sx);
+        else
+            func_00113F38(r, sy);
+        char* r1 = *(char**)self;
+        *(float*)(r1 + 0x2AC) = 0.0f;
+        *(float*)(r1 + 0x2A8) = 0.08333379030227661f;
+        char* r2 = *(char**)self;
+        *(float*)(r2 + 0x2B4) = 0.08333379030227661f;
+        *(float*)(r2 + 0x2B8) = 0.0f;
+        return;
+    }
+    if (func_00312AA0(*(void**)(*(char**)self + 0x784), 2) == 0x15)
+    {
+        func_00113E80(*(void**)self, zero);
+        char* r1 = *(char**)self;
+        *(float*)(r1 + 0x2AC) = zero;
+        *(float*)(r1 + 0x2A8) = 0.08333379030227661f;
+        char* r2 = *(char**)self;
+        *(float*)(r2 + 0x2B8) = zero;
+        *(float*)(r2 + 0x2B4) = 0.08333379030227661f;
+        return;
+    }
+    char* r = *(char**)self;
+    if (*(int*)(r + 0x328) == 0 && *(float*)(r + 0x2DC) == zero && func_00114CC0(r))
+    {
+        cRiderAnimBase_play(*(void**)(*(char**)self + 0x784), 0x15, 0, -1.0f);
+        return;
+    }
+    float rate = 5.0000901222229f;
+    if (*(int*)(*(char**)self + 0x328) == 0)
+        rate = 5.000027179718018f;
+    float tx = ((sAiBits15_12E9B8*)in)->v * 0.032258063554763794f;
+    float ty = ((sAiBits21_12E9B8*)in)->v * 0.032258063554763794f;
+    if (tx < -0.20000000298023224f)
+        tx = -1.0f;
+    else if (tx > 0.20000000298023224f)
+        tx = 1.0f;
+    else
+        tx = 0.0f;
+    if (ty < -0.20000000298023224f)
+        ty = -1.0f;
+    else if (ty > 0.20000000298023224f)
+        ty = 1.0f;
+    else
+        ty = 0.0f;
+    float ux = tx;
+    float uy = ty;
+    char* r3 = *(char**)self;
+    float d = ux - *(float*)(r3 + 0x2A4);
+    *(float*)(r3 + 0x2AC) = ux;
+    *(float*)(r3 + 0x2A8) = rate * aiAbs_12E9B8(d) * 0.01666666753590107f;
+    char* r4 = *(char**)self;
+    *(float*)(r4 + 0x2B8) = uy;
+    *(float*)(r4 + 0x2B4) = rate * aiAbs_12E9B8(uy - *(float*)(r4 + 0x2B0)) * 0.01666666753590107f;
+    char* r5 = *(char**)self;
+    if (*(int*)(r5 + 0x328) == 0)
+        func_00113E80(r5, sx);
+    else
+        func_00113F38(r5, sy);
+    func_0012EE30(self, D_0043D788);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012EE30);
@@ -2726,7 +3636,161 @@ extern "C" void func_0012F620(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012F730);
+#ifdef SKIP_ASM
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" int func_00106848(void*);
+extern "C" int func_00107578(void* rider, int on);
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" int func_00116120_i(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" int func_001163B0(void* rider, int a, int b);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+extern "C" int func_00311AE8(void*, int);
+int func_00312AA0(void* self, int i);
+extern "C" float func_0031C228(float x);
+
+struct sAiBitsX_12F730
+{
+    int pad : 24;
+    int v : 6;
+};
+
+struct sAiBitsY_12F730
+{
+    int v : 6;
+};
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float aiAbs_12F730(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float aiAtan2_12F730(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f) return y;
+        if (y >= 0.0f) return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f) r += 3.1415927410125732f;
+        else r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float aiFloor_12F730(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0, %1\n\tcvt.s.w %0, %0" : "=f"(t) : "f"(x));
+    if (x < t)
+    {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float aiWrap_12F730(float x)
+{
+    return x - aiFloor_12F730(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+struct sAiObj12F730
+{
+    float mHeading;  // 0x00
+    float mTimer;    // 0x04
+    int mFlag;       // 0x08
+    int mHold;       // 0x0C
+    int mId;         // 0x10
+    char* mRider;    // 0x14
+};
+
+extern "C" void func_0012F730(sAiObj12F730* self, void* in)
+{
+    if (func_00116120_i(self->mRider, (*(int*)in >> 12) & 1, 0))
+        return;
+    if (self->mFlag != 0)
+    {
+        self->mFlag = (*(int*)in & 0xC000) != 0;
+        if (func_001163B0(self->mRider, (*(int*)in >> 14) & 1, (*(int*)in >> 15) & 1))
+            return;
+    }
+    else
+    {
+        func_001163B0(self->mRider, 0, 0);
+    }
+    int w = *(int*)in;
+    float x = ((sAiBitsX_12F730*)&w)->v * 0.032258063554763794f;
+    float y = ((sAiBitsY_12F730*)((char*)in + 4))->v * 0.032258063554763794f;
+    if (w & 0x2000)
+    {
+        if (func_00107578(self->mRider, y > 0.5f))
+            return;
+        y = 1.0f;
+    }
+    if (func_00106848(self->mRider))
+        return;
+    func_00114130(self->mRider, 0, 0);
+    if (self->mHold != 0 && self->mId == -1)
+        self->mId = *((signed char*)in + 2);
+    if (*((signed char*)in + 2) != self->mId || *((signed char*)in + 2) == -1)
+        self->mHold = 0;
+    if (self->mHold == 0 && self->mId != -1)
+        self->mTimer = -1.0f;
+    float ax = aiAbs_12F730(x);
+    float lim = y;
+    if (y <= ax)
+        lim = ax;
+    float ang = aiAtan2_12F730(y, x);
+    if (self->mTimer < 0.0f || lim <= (self->mTimer - 0.5f >? 0.0f) ||
+        __builtin_fabsf(aiWrap_12F730(ang - self->mHeading)) > 1.5707964897155762f)
+    {
+        self->mTimer = -1.0f;
+        y = 0.0f;
+        x = y;
+    }
+    char* r = self->mRider;
+    *(float*)(r + 0x1F8) = x;
+    *(float*)(r + 0x1F4) = 0.05000000447034836f;
+    char* r2 = self->mRider;
+    *(float*)(r2 + 0x200) = 0.05000000447034836f;
+    *(float*)(r2 + 0x204) = *(float*)(r2 + 0x1F0);
+    char* r3 = self->mRider;
+    *(float*)(r3 + 0x224) = 0.05000000447034836f;
+    *(float*)(r3 + 0x228) = y;
+    char* r4 = self->mRider;
+    *(float*)(r4 + 0x218) = 0.05000000447034836f;
+    *(int*)(r4 + 0x21C) = 0;
+    int anim = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
+    char* r5 = self->mRider;
+    if (*(float*)(r5 + 0x220) == 0.0f && *(float*)(r5 + 0x214) == 0.0f && *(float*)(r5 + 0x1F0) == 0.0f && self->mHold == 0)
+    {
+        if (anim != 0x11F)
+        {
+            if (func_00311AE8(*(void**)(r5 + 0x784), 2) != 9)
+                cRiderAnimBase_play(*(void**)(self->mRider + 0x784), 0x11F, 0, -1.0f);
+        }
+        func_0011FEC8_impl(self->mRider, 5);
+        return;
+    }
+    if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 9)
+        return;
+    int a = 10;
+    char* r6 = self->mRider;
+    if (*(float*)(r6 + 0x220) <= (1.0f - aiAbs_12F730(*(float*)(r6 + 0x1F0))) * 0.5f)
+        a = 9;
+    if (a != anim)
+        cRiderAnimBase_play(*(void**)(r6 + 0x784), a, 0, -1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012FB68);
@@ -3315,7 +4379,176 @@ extern "C" int func_001307B8(void* self, void* a1)
 
 INCLUDE_ASM("ai/ai", func_001308D8);
 
+//100%
 INCLUDE_ASM("ai/ai", func_00130DD0);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" void func_002A1560(void* mgr, void* rider);
+extern "C" void func_0010EB30(void* rider, int id, int a, int b, void* info);
+
+struct sAiBitsA_130DD0
+{
+    int v : 6;
+};
+
+struct sAiBitsB_130DD0
+{
+    int pad : 6;
+    int v : 6;
+};
+
+struct sCurvePt_130DD0
+{
+    float x, y;
+};
+
+struct sCurve_130DD0
+{
+    sCurvePt_130DD0 p[4];
+};
+
+extern sCurve_130DD0* D_004A1114;
+extern sCurve_130DD0* D_004A111C;
+
+struct sInfo_130DD0
+{
+    sQuat_12FEC8 pos;
+    sQuat_12FEC8 dir;
+    sQuat_12FEC8 up;
+    float speed;
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sQuat_12FEC8 Scale_130DD0(const sQuat_12FEC8& v, float s)
+{
+    sQuat_12FEC8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline sQuat_12FEC8 Div_130DD0(const sQuat_12FEC8& v, float s)
+{
+    sQuat_12FEC8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float aiAbs_130DD0(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Lerp_130DD0(float x0, float y0, float x1, float y1, float x)
+{
+    return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+}
+
+static inline float Curve_130DD0(const sCurve_130DD0* c, float x)
+{
+    if (c->p[1].x < x)
+    {
+        if (c->p[2].x < x)
+        {
+            if (c->p[3].x < x)
+                return c->p[3].y;
+            return Lerp_130DD0(c->p[2].x, c->p[2].y, c->p[3].x, c->p[3].y, x);
+        }
+        return Lerp_130DD0(c->p[1].x, c->p[1].y, c->p[2].x, c->p[2].y, x);
+    }
+    if (x < c->p[0].x)
+        return c->p[0].y;
+    return Lerp_130DD0(c->p[0].x, c->p[0].y, c->p[1].x, c->p[1].y, x);
+}
+
+extern "C" int func_00130DD0(void* self, void* in)
+{
+    char* r = *(char**)((char*)self + 0x14);
+    float k = *(float*)(r + 0x300) * 0.01666666753590107f;
+    *(float*)((char*)self + 0x4) += k;
+    if (*(float*)(r + 0x274) == 1.0f)
+        *(float*)((char*)self + 0x8) += k;
+    else
+        *(float*)((char*)self + 0x8) = 0.0f;
+    float a = ((sAiBitsA_130DD0*)((char*)in + 4))->v * 0.032258063554763794f;
+    if (*(int*)(*(char**)((char*)self + 0x14) + 0x330) == 2)
+        a = -a >? 0.0f;
+    else
+        a = a >? 0.0f;
+    if (*(float*)((char*)self + 0x4) <= 1.0f)
+    {
+        a = a <? *(float*)((char*)self + 0x4) * 0.5f + 0.5f;
+    }
+    else
+    {
+        float b = aiAbs_130DD0(((sAiBitsB_130DD0*)((char*)in + 4))->v * 0.032258063554763794f);
+        float m = (a <= b) ? b : a;
+        a = 0.0f;
+        if (m > 0.5f)
+            a = 1.0f;
+    }
+    float s;
+    if ((a <= 0.5f && *(float*)(*(char**)((char*)self + 0x14) + 0x274) > 0.5f) || (a >= 0.5f && *(float*)(*(char**)((char*)self + 0x14) + 0x274) < 0.5f))
+    {
+        s = 1.0f;
+    }
+    else
+    {
+        float s1 = Curve_130DD0(D_004A1114, *(float*)(*(char**)((char*)self + 0x14) + 0x274));
+        float s2 = Curve_130DD0(D_004A111C, *(float*)(*(char**)((char*)self + 0x14) + 0x274));
+        float mix = *(float*)((char*)self + 0x4) * 0.20000895857810974f <? 1.0f;
+        s = s1 * (1.0f - mix) + s2 * mix;
+        if (*(float*)(*(char**)((char*)self + 0x14) + 0x274) > 0.800000011920929f)
+            func_002A1560(func_0028B180(), *(void**)((char*)self + 0x14));
+    }
+    char* r3 = *(char**)((char*)self + 0x14);
+    *(float*)(r3 + 0x27C) = a;
+    *(float*)(r3 + 0x278) = s * k;
+    if (*(float*)((char*)self + 0x8) > 1.0f)
+    {
+        sInfo_130DD0 info;
+        char* r4 = *(char**)((char*)self + 0x14);
+        float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)(r4 + 0x1E0));
+        info.pos = *(sQuat_12FEC8*)(r4 + 0x110);
+        info.up = Scale_130DD0(D_004FF160, -1.0f);
+        info.speed = speed;
+        if (speed > 0.0010000000474974513f)
+            info.dir = Div_130DD0(*(sQuat_12FEC8*)(*(char**)((char*)self + 0x14) + 0x1E0), speed);
+        else
+            info.dir = D_004FF160;
+        char* r5 = *(char**)((char*)self + 0x14);
+        if (*(int*)(r5 + 0x330) == 2)
+            func_0010EB30(r5, 0x167, 0, *(int*)(r5 + 0x438), &info);
+        else
+            func_0010EB30(r5, 0x166, 0, *(int*)(r5 + 0x438), &info);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00131200);
@@ -4471,7 +5704,150 @@ extern "C" void func_00136268(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00136508);
+#ifdef SKIP_ASM
+// PORT: the unit declares cRiderAnimBase_play as void, but it returns the new anim index.
+extern "C" int cRiderAnimBase_play_i136508(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+extern "C" int func_00106848(void*);
+extern "C" void func_0010E098(void*, int, float);
+extern "C" void func_00113F38(void*, float);
+extern "C" void func_00113F88(void* rider, float a, float b);
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void func_00115640(void* rider);
+extern "C" int func_00116120_i(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" float func_00119958(void* p, int v);
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+extern "C" void func_001326C8(void*, int);
+extern "C" bool func_001446A0(void* self, int bit);
+extern "C" int func_00311AE8(void*, int);
+extern "C" char* func_00311B20(void*, int);
+int func_00312AA0(void* self, int i);
+extern "C" int func_00312AE8(void* self, int i);
+
+
+struct sAiBitsA_136508
+{
+    int pad : 23;
+    int v : 6;
+};
+
+struct sAiBitsB_136508
+{
+    int pad : 15;
+    int v : 8;
+};
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float aiAbs_136508(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct sAiObj136508
+{
+    int mState;
+    int mIndex;
+    char* mRider;
+};
+
+extern "C" void func_00136508(sAiObj136508* self, void* in)
+{
+    if (func_00116120_i(self->mRider, (*(int*)in >> 12) & 1, 0))
+        return;
+    char* tbl = (char*)D_0045A038 + self->mIndex * 0x24;
+    if (func_00106848(self->mRider))
+    {
+        if (self->mState == 1)
+            cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), *(int*)(tbl + 0x18), 0, -1.0f);
+        return;
+    }
+    int w = *(int*)in;
+    float zero = 0.0f;
+    func_00114130(self->mRider, (w >> 14) & 1, (w >> 13) & 1);
+    func_00113F38(self->mRider, ((sAiBitsA_136508*)in)->v * 0.032258063554763794f);
+    func_00113F88(self->mRider, zero, zero);
+    if (self->mState == 0)
+    {
+        char* r0 = self->mRider;
+        *(float*)(r0 + 0x240) = zero;
+        *(float*)(r0 + 0x23C) = 0.05833333730697632f;
+        if (func_00312AE8(*(void**)(self->mRider + 0x784), 2))
+        {
+            cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), *(int*)(tbl + 0x10), 0, -1.0f);
+            *(float*)(func_00311B20(*(void**)(self->mRider + 0x784), 2) + 0x90) = 1.0f;
+            self->mState = 1;
+        }
+    }
+    if (self->mState == 1)
+    {
+        if (((sAiBitsB_136508*)in)->v != self->mIndex || func_0011FE98(self->mRider) == 0)
+        {
+            cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), *(int*)(tbl + 0x1C), 0, -1.0f);
+            *(float*)(func_00311B20(*(void**)(self->mRider + 0x784), 2) + 0x90) = 1.0f;
+            self->mState = 2;
+        }
+        else if (func_00312AA0(*(void**)(self->mRider + 0x784), 2) != *(int*)(tbl + 0x18) ||
+                 func_00312AE8(*(void**)(self->mRider + 0x784), 2))
+        {
+            if (func_0011FE98(self->mRider) != 4)
+            {
+                char* r = self->mRider;
+                *(float*)(r + 0x240) = 0.0f;
+                *(float*)(r + 0x23C) = 0.05833333730697632f;
+            }
+            else
+            {
+                char* r = self->mRider;
+                *(float*)(r + 0x240) = *(float*)(*(char**)(r + 0x77C) + 0xC8);
+                *(float*)(r + 0x23C) = 0.05833333730697632f;
+            }
+            int cur = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
+            int a;
+            if (aiAbs_136508(*(float*)(self->mRider + 0x238)) < 0.10000000149011612f)
+                a = *(int*)(tbl + 0x10);
+            else
+                a = *(int*)(tbl + 0x14);
+            if (a != cur)
+                cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), a, 0, -1.0f);
+        }
+    }
+    if (self->mState == 2)
+    {
+        char* r2 = self->mRider;
+        *(float*)(r2 + 0x240) = 0.0f;
+        *(float*)(r2 + 0x23C) = 0.05833333730697632f;
+        if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x15 &&
+            !func_00312AE8(*(void**)(self->mRider + 0x784), 2) &&
+            !func_001446A0(func_00311B20(*(void**)(self->mRider + 0x784), 2) + 0xB0, 0))
+            return;
+        if (func_0011FE98(self->mRider) == 4)
+        {
+            func_001326C8(*(char**)(self->mRider + 0x77C) + 0x2B0, 0);
+            func_0011FEC8_impl(self->mRider, 7);
+        }
+        else
+        {
+            func_00115640(self->mRider);
+            if (func_0011FE98(self->mRider) == 1)
+                func_0011FEC8_impl(self->mRider, 5);
+            else
+                func_0011FEC8_impl(self->mRider, 0);
+        }
+        func_0010E098(self->mRider, 1, func_00119958(*(void**)(self->mRider + 0x790), *(int*)(self->mRider + 0x328)));
+        char* r = self->mRider;
+        if (*(int*)(r + 0x2F4) < 10)
+        {
+            *(int*)(r + 0x2F4) = *(int*)(r + 0x2F4) + 1;
+            if (*(int*)(self->mRider + 0x2F4) == 10)
+                *(float*)(self->mRider + 0x2F0) = 60.0f;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001368E8);

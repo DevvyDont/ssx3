@@ -887,7 +887,183 @@ extern "C" void func_001D5428(void* self, int flags)
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5488);
+#ifdef SKIP_ASM
+extern "C" void* func_00227F80(void* app);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_00152948__FPv ignores its argument; this caller passes none.
+int func_00152948_r() __asm__("func_00152948__FPv");
+extern "C" int func_00152BA8();
+// PORT: func_0023CC58__FPv really takes a second argument.
+void func_0023CC58_2(void* app, int n) __asm__("func_0023CC58__FPv");
+extern "C" void func_0023CAA0(void* app, int n);
+extern "C" void func_0023C8F0(void* app, int mode);
+extern "C" void func_0023D5A8(void* app);
+extern "C" void func_00241D40(void* app, int a, char* buf, int n);
+extern "C" void func_00241AA0(char* buf, int n);
+extern "C" void func_002C2540(char* buf, char* s);
+extern "C" void func_002C26D0(void* dst, char* a, char* b, char* c);
+extern void* D_004A28A8;
+extern void* D_004A2028;
+extern char D_004A14C8[];
+// PORT: callback function addresses taken through asm-label views (their real prototypes vary).
+extern char func_001D59A0_a5488[] __asm__("func_001D59A0");
+extern char func_001D5D78_a5488[] __asm__("func_001D5D78");
+extern char func_001D5F38_a5488[] __asm__("func_001D5F38__FPv");
+extern char cFEMemCard_callbackSaveSuccess_a5488[] __asm__("cFEMemCard_callbackSaveSuccess");
+extern char func_001D6C28_a5488[] __asm__("func_001D6C28");
+extern char func_001D5DF0_a5488[] __asm__("func_001D5DF0");
+extern char func_001D5C28_a5488[] __asm__("func_001D5C28");
+extern char func_001D5F40_a5488[] __asm__("func_001D5F40");
+extern char func_001D6AD0_a5488[] __asm__("func_001D6AD0");
+extern char cFEMemCard_callbackReadSuccess_a5488[] __asm__("cFEMemCard_callbackReadSuccess");
+extern char cFEMemCard_callbackDeleteDone_a5488[] __asm__("cFEMemCard_callbackDeleteDone");
+extern char func_001D8020_a5488[] __asm__("func_001D8020");
+extern char func_001D72A8_a5488[] __asm__("func_001D72A8");
+extern char func_001D6D88_a5488[] __asm__("func_001D6D88");
+extern char func_001D7010_a5488[] __asm__("func_001D7010");
+extern char func_001D68E8_a5488[] __asm__("func_001D68E8");
+extern char func_001D7318_a5488[] __asm__("func_001D7318");
+extern char func_001D7548_a5488[] __asm__("func_001D7548");
+extern char cFEMemCard_callbackConfirmFormatDone_a5488[] __asm__("cFEMemCard_callbackConfirmFormatDone");
+extern char cFEMemCard_callbackConfirmDelete_a5488[] __asm__("cFEMemCard_callbackConfirmDelete");
+extern char func_001D77E8_a5488[] __asm__("func_001D77E8");
+extern char func_001D7B18_a5488[] __asm__("func_001D7B18");
+extern char func_001D7998_a5488[] __asm__("func_001D7998");
+extern char func_001DDD28_a5488[] __asm__("func_001DDD28");
+extern char func_001DDD48_a5488[] __asm__("func_001DDD48");
+extern char func_001DDD58_a5488[] __asm__("func_001DDD58");
+extern char func_001DDD68_a5488[] __asm__("func_001DDD68");
+extern char func_001DDD78_a5488[] __asm__("func_001DDD78");
+extern char func_001DDD38_a5488[] __asm__("func_001DDD38");
+extern char func_001DDD88_a5488[] __asm__("func_001DDD88");
+extern char func_001DDD98_a5488[] __asm__("func_001DDD98");
+extern char func_001DDDB8_a5488[] __asm__("func_001DDDB8");
+extern char func_001DDDA8_a5488[] __asm__("func_001DDDA8");
+extern char func_001D7190_a5488[] __asm__("func_001D7190");
+extern char func_001D8160_a5488[] __asm__("func_001D8160");
+extern char func_001D83A8_a5488[] __asm__("func_001D83A8");
+extern char func_001D8358_a5488[] __asm__("func_001D8358");
+extern char func_001D8240_a5488[] __asm__("func_001D8240");
+extern char cFEMemCard_callbackFileExists_a5488[] __asm__("cFEMemCard_callbackFileExists");
+extern char func_001D7D70_a5488[] __asm__("func_001D7D70");
+
+extern "C" void func_001D5488(void* self_, int mode)
+{
+    char* self = (char*)self_;
+    void* gapp = D_004A28A8;
+    D_004A2028 = self;
+    *(int*)(self + 0x1C0) = 0;
+    *(int*)(self + 0x214) = 0;
+    char* app = (char*)func_00227F80(gapp);
+    *(void**)(app + 0x0) = func_001D59A0_a5488;
+    *(void**)(app + 0x18) = func_001D5DF0_a5488;
+    *(void**)(app + 0x8) = func_001D5F38_a5488;
+    *(void**)(app + 0x20) = func_001D5F40_a5488;
+    *(void**)(app + 0x6C) = func_001DDD58_a5488;
+    *(void**)(app + 0x68) = func_001DDD48_a5488;
+    *(void**)(app + 0x64) = func_001DDD28_a5488;
+    *(void**)(app + 0x70) = func_001DDD68_a5488;
+    *(void**)(app + 0x74) = func_001DDD78_a5488;
+    *(void**)(app + 0x78) = func_001DDD38_a5488;
+    *(void**)(app + 0x7C) = func_001DDD88_a5488;
+    *(void**)(app + 0x80) = func_001DDD98_a5488;
+    *(void**)(app + 0x84) = func_001DDDB8_a5488;
+    *(void**)(app + 0x4) = func_001D5D78_a5488;
+    *(void**)(app + 0x44) = func_001D68E8_a5488;
+    *(void**)(app + 0x40) = func_001D7010_a5488;
+    *(void**)(app + 0x1C) = func_001D5C28_a5488;
+    *(void**)(app + 0x88) = func_001DDDA8_a5488;
+    *(void**)(app + 0x48) = func_001D7318_a5488;
+    *(void**)(app + 0x50) = cFEMemCard_callbackConfirmFormatDone_a5488;
+    *(void**)(app + 0x4C) = func_001D7548_a5488;
+    *(void**)(app + 0x54) = cFEMemCard_callbackConfirmDelete_a5488;
+    *(void**)(app + 0x38) = func_001D72A8_a5488;
+    *(void**)(app + 0x28) = cFEMemCard_callbackReadSuccess_a5488;
+    *(void**)(app + 0x24) = func_001D6AD0_a5488;
+    *(void**)(app + 0x3C) = func_001D6D88_a5488;
+    *(void**)(app + 0x58) = func_001D77E8_a5488;
+    *(void**)(app + 0x10) = func_001D6C28_a5488;
+    *(void**)(app + 0xC) = cFEMemCard_callbackSaveSuccess_a5488;
+    *(void**)(app + 0x60) = func_001D7998_a5488;
+    *(void**)(app + 0x30) = cFEMemCard_callbackDeleteDone_a5488;
+    *(void**)(app + 0x34) = func_001D8020_a5488;
+    *(void**)(app + 0x8C) = func_001D7190_a5488;
+    *(void**)(app + 0x90) = func_001D8160_a5488;
+    *(void**)(app + 0x94) = func_001D83A8_a5488;
+    *(void**)(app + 0x98) = func_001D8358_a5488;
+    *(void**)(app + 0x9C) = func_001D8240_a5488;
+    *(void**)(app + 0x5C) = func_001D7B18_a5488;
+    *(void**)(app + 0xA0) = cFEMemCard_callbackFileExists_a5488;
+    *(void**)(app + 0xA8) = func_001D7D70_a5488;
+    *(int*)(self + 0x19C) = 0x19;
+    *(int*)(self + 0x1BC) = mode;
+    *(int*)(self + 0x1A8) = 0;
+    *(int*)(self + 0x1AC) = 0;
+    *(int*)(self + 0x1B0) = 0;
+    *(int*)(self + 0x1B4) = 0;
+    *(int*)(self + 0x1B8) = 0;
+    *(int*)(self + 0x1C4) = 0;
+    *(int*)(self + 0x1CC) = 0;
+    *(int*)(self + 0x1D8) = 0;
+    *(int*)(self + 0x1DC) = 0;
+    *(int*)(self + 0x1E0) = 0;
+    *(int*)(self + 0x1E4) = 0;
+    *(int*)(self + 0x1E8) = 0;
+    *(int*)(self + 0x1EC) = 0;
+    *(int*)(self + 0x1F0) = 0;
+    *(int*)(self + 0x1F4) = 0;
+    *(int*)(self + 0x1F8) = 0;
+    *(int*)(self + 0x1FC) = 0;
+    *(int*)(self + 0x200) = 0;
+    *(int*)(self + 0x204) = 0;
+    *(int*)(self + 0x208) = 0;
+    *(int*)(self + 0x20C) = 0;
+    *(int*)(self + 0x210) = 0;
+    *(int*)(self + 0x218) = 0;
+    *(int*)(self + 0x21C) = 0;
+    *(int*)(self + 0x1A0) = 0;
+    *(int*)(self + 0x1A4) = 0;
+    *(int*)(self + 0x220) = 0;
+    *(int*)(self + 0x224) = 0;
+    *(int*)(self + 0x228) = 0;
+    *(int*)(self + 0x1D4) = 0;
+    *(int*)(self + 0x1D0) = 0;
+    *(int*)(self + 0x1C8) = 0;
+    *(short*)(self + 0x9C) = 0;
+    func_0023D5A8(app);
+    cBE_getInterface_Fv(cBE_getBE(), 5);
+    if (*(int*)(self + 0x1BC) == 2)
+    {
+        int n = func_00152948_r();
+        func_0023CC58_2(app, n);
+        func_0023CAA0(app, n);
+        func_0023C8F0(app, 2);
+    }
+    else if (*(int*)(self + 0x1BC) == 1)
+    {
+        func_0023CC58_2(app, 0x80000);
+        func_0023CAA0(app, 0x80000);
+        func_0023C8F0(app, 0);
+    }
+    else
+    {
+        int n = func_00152BA8();
+        func_0023CC58_2(app, n);
+        func_0023CAA0(app, n);
+        func_0023C8F0(app, 1);
+    }
+    char b0[0x200];
+    char b1[0x200];
+    char b2[0x200];
+    func_00241D40(app, *(int*)(app + 0xB4), b0, 0x100);
+    func_002C2540(b2, D_004A14C8);
+    func_00241AA0(b1, 0x100);
+    func_002C26D0(self + 0x11C, b2, b1, b0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D58B8);
