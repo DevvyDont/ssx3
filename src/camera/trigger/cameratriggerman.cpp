@@ -124,7 +124,125 @@ void func_0016CF40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF48);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+extern void* D_004A28A8;
+
+struct sCtVec4_CF48 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sCtBox_CF48 {
+    sCtVec4_CF48 min;
+    sCtVec4_CF48 max;
+};
+struct sCtCell_CF48 {
+    int level;
+    int x, y, z;
+};
+struct sCtNode_CF48 {
+    sCtNode_CF48* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sCtRoot_CF48 {
+    sCtCell_CF48 cell;              // 0x00
+    sCtNode_CF48* node;             // 0x10
+};
+
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+
+class cCtShape_CF48 {
+public:
+    char pad[0x24];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual sCtBox_CF48 bounds();
+};
+
+struct sCtTrig_CF48 {
+    int f0;
+    unsigned int mask;              // 0x4
+    cCtShape_CF48* shape;           // 0x8
+    char padC[0x8];
+    char item[0xC];                 // 0x14
+    sCtTrig_CF48* reg;              // 0x20
+};
+
+struct sCtMan_CF48 {
+    sCtTrig_CF48** trigs;           // 0x0
+    int count;                      // 0x4
+};
+
+static inline sCtRoot_CF48* findRoot_CF48(char* w, int x, int y, int z)
+{
+    sCtRoot_CF48* r = (sCtRoot_CF48*)w;
+    sCtRoot_CF48* rx = x >= 0 ? r : r + 4;
+    sCtRoot_CF48* ry = y >= 0 ? rx : rx + 2;
+    sCtRoot_CF48* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void remove_CF48(char* w, void* item, const sCtBox_CF48* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sCtCell_CF48 c;
+    func_00328F28(&c, box);
+    sCtRoot_CF48* r = findRoot_CF48(w, c.x, c.y, c.z);
+    func_003284B8(r->node, 2, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+static inline void insert_CF48(char* w, void* item, const sCtBox_CF48* box)
+{
+    sCtCell_CF48 c;
+    func_00328F28(&c, box);
+    func_00328C20(findRoot_CF48(w, c.x, c.y, c.z), 2, item, &c);
+}
+
+// PORT: the unit declares func_0016CF48 as returning void*; it returns nothing.
+extern "C" void func_0016CF48_impl(void* vself, int mask) __asm__("func_0016CF48");
+
+extern "C" void func_0016CF48_impl(void* vself, int mask)
+{
+    sCtMan_CF48* self = (sCtMan_CF48*)vself;
+    for (int i = 0; i < self->count; i++) {
+        sCtTrig_CF48* t = self->trigs[i];
+        if (t->mask & mask) {
+            if (t->reg == 0) {
+                t->reg = t;
+                char* w = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+                sCtBox_CF48 box = t->shape->bounds();
+                insert_CF48(w, t->item, &box);
+            }
+        } else if (t->reg != 0) {
+            char* w = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+            sCtBox_CF48 box = t->shape->bounds();
+            remove_CF48(w, t->item, &box);
+            t->reg = 0;
+        }
+    }
+}
+#endif
 
 extern "C" void* func_0016CF48(void* self, int type);
 

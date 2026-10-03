@@ -58,7 +58,131 @@ extern "C" void func_00188870(void* self, void* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00188980);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIScreen;
+int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, int a4);
+extern "C" void func_001CB418(void* self, char* s);
+extern "C" void func_001CCF00(void* self, char* s);
+extern "C" void func_001CE3C8(void* self, int a1, int a2, int a3);
+extern "C" int func_00187D38(void* self);
+extern "C" void func_00188E58(void* self);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern char D_0045D8D8[];
+extern char D_0045DC60[];
+extern char D_004A1408[];
+extern char D_004A1520[];
+extern char D_004A1530[];
+extern int D_004A14D0;
+extern int D_004A14D4;
+extern int D_004A14D8;
+extern int D_004A14DC;
+extern int D_004A14E0;
+extern char D_004A5A58;
+
+struct sVE_188980p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+class cListener_188980 {
+public:
+    virtual void v01();
+    virtual void v02(int msg);
+};
+
+struct sOpt_188980 {
+    char pad0[0x10];
+    char* engine;           // 0x10
+    char pad14;
+    unsigned char port;     // 0x15
+    char pad16[0x1C - 0x16];
+    int flags;              // 0x1C
+    char pad20[0x40 - 0x20];
+    cUIScreen* screen;      // 0x40
+    int pad44;
+    int f48;                // 0x48
+    int pad4C;
+    void* popup;            // 0x50
+};
+
+static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void func_00188980(sOpt_188980* self, char* widget, unsigned int event)
+{
+    switch (event) {
+    case 5:
+        if (Is_00188980(*(int*)(widget + 0x38), D_004A1520)) {
+            void* p = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
+            void* pop = func_001CB030(p, self->engine, self, 0, self->port);
+            self->popup = pop;
+            func_001CB418(pop, D_004A1408);
+            func_001CCF00(self->popup, D_004A1408);
+            func_001CE3C8(self->popup, 0x4B, 1, 2);
+            func_0039F290(self->engine + 0x18, self->popup);
+            break;
+        } else if (Is_00188980(*(int*)(widget + 0x38), D_004A1530)) {
+            if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
+                func_00188E58(self);
+                break;
+            }
+            D_004A14E0 = 0;
+            self->flags |= 0x80;
+            int f = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(D_0045DC60));
+            if (f != 0xFFFF)
+                cUIScreen_playFrame(self->screen, f, 1);
+            if (self->f48 == 0)
+                break;
+            char* o = *(char**)self->engine;
+            if (o != 0)
+                *(int*)(o + 0xC) = 0x18;
+        }
+        {
+            char* obj = *(char**)self->engine;
+            sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
+            void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(widget + 0x18));
+            if (r != 0)
+                func_0039F400(self->engine + 0x18, r);
+        }
+        break;
+    case 6: {
+        if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
+            func_00188E58(self);
+            break;
+        }
+        D_004A14E0 = 0;
+        self->flags |= 0x80;
+        int f = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(D_0045DC60));
+        if (f != 0xFFFF)
+            cUIScreen_playFrame(self->screen, f, 1);
+        break;
+    }
+    case 13: {
+        int r = func_00187D38((char*)self->popup + 0x74);
+        char* obj = &D_004A5A58;
+        char* l = *(char**)(self->engine + 0x14);
+        if (l != 0)
+            obj = l;
+        if (obj != 0) {
+            if (r == 1) {
+                ((cListener_188980*)obj)->v02(6);
+            } else {
+                ((cListener_188980*)obj)->v02(4);
+            }
+        }
+        self->popup = 0;
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00188C58);
@@ -838,7 +962,103 @@ extern "C" void func_0018C910(void* self, cUIObj_18C910* obj, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018CA10);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" int func_0039A738(void* self);
+extern "C" void func_00147528(void* self, int index, int value);
+extern "C" void func_00147658(void* self, int index, int value);
+extern "C" int func_001474E8(void* iface, int a1);
+extern "C" void func_0018CF50(void* self, int on);
+extern "C" void func_0018D108(void* self, int idx, float x, float y);
+extern char D_0045DD68[];
+extern void* D_0046B3D0[];
+extern char D_004A1568[];
+extern char D_004A1570[];
+extern char D_004A15C8[];
+extern char D_004A1578[];
+extern int D_004A14DC;
+
+struct sVE_18CA10n {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVE_18CA10p {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
+{
+    if (widget == 0) {
+        return;
+    }
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    switch (event) {
+    case 7: {
+        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        func_0039E318(p, *(void**)(self + 0x10), self);
+        *(void***)(p + 8) = D_0046B3D0;
+        *(char*)(p + 0x48) = 0;
+        func_0039F290(*(char**)(self + 0x10) + 0x18, p);
+        break;
+    }
+    case 6: {
+        sVE_18CA10n* vt = *(sVE_18CA10n**)(iface + 0xC);
+        vt[1].fn(iface + vt[1].delta);
+        char* obj = **(char***)(self + 0x10);
+        sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
+        void* r = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
+        if (r != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        }
+        break;
+    }
+    case 9:
+        if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1568)) {
+            func_00147528(iface, 0, func_0039A738(widget) != 0);
+            if (func_001474E8(iface, 0)) {
+                func_0018D108(self, 0, 10.0f, 10.0f);
+                *(int*)(self + 0x48) = 0x3C;
+                *(unsigned char*)(self + 0x50) |= 1;
+            } else {
+                func_0018D108(self, 0, 0.0f, 0.0f);
+            }
+        } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1570)) {
+            func_00147528(iface, 1, func_0039A738(widget) != 0);
+            if (func_001474E8(iface, 1)) {
+                func_0018D108(self, 1, 10.0f, 10.0f);
+                *(int*)(self + 0x4C) = 0x3C;
+                *(unsigned char*)(self + 0x50) |= 2;
+            } else {
+                func_0018D108(self, 1, 0.0f, 0.0f);
+            }
+        } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A15C8)) {
+            func_00147658(iface, 0, func_0039A738(widget));
+            func_0018CF50(self, func_0039A738(widget) == 0);
+        } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1578)) {
+            func_00147658(iface, 1, func_0039A738(widget));
+            func_0018CF50(self, func_0039A738(widget) == 0);
+        }
+        D_004A14DC = 1;
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018CCE0);
 
@@ -1362,7 +1582,212 @@ extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
+#ifdef SKIP_ASM
+extern "C" void* func_00227F80(void* app);
+extern "C" void func_0023CAE8(void* app, int a1, int a2);
+extern "C" void func_0023C8F0(void* app, int a1);
+extern "C" void func_0023D570(void* app, int a1);
+extern void* D_004A28A8;
+
+struct sVE_18DEA0n {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVE_18DEA0i {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sVE_18DEA0v {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sDevSel_18DEA0 {
+    char pad0[8];
+    sVE_18DEA0n* vt;        // 0x8
+    char padC[0x1A8 - 0xC];
+    int busy;               // 0x1A8
+    char pad1AC[0x1BC - 0x1AC];
+    int mode;               // 0x1BC
+    int state;              // 0x1C0
+    int slot;               // 0x1C4
+    char pad1C8[0x1DC - 0x1C8];
+    int f1DC;               // 0x1DC
+    int pad1E0;
+    int f1E4;               // 0x1E4
+    char pad1E8[0x214 - 0x1E8];
+    int f214;               // 0x214
+    char pad218[0x224 - 0x218];
+    int f224;               // 0x224
+    int pad228;
+    int f22C;               // 0x22C
+    char pad230[0x238 - 0x230];
+    int f238;               // 0x238
+};
+
+class cDev_18DEA0 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual int v54(int a);
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual int v67(int a);
+};
+
+extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int event)
+{
+    char* app = (char*)func_00227F80(D_004A28A8);
+    switch (event) {
+    case 5: {
+        if (widget == 0)
+            return;
+        if (self->busy != 0)
+            return;
+        self->f238 = 1;
+        int st = self->f214;
+        if (st != 3)
+            return;
+        if (self->f224 == 0)
+            return;
+        int v = *(int*)(widget + 0x18);
+        self->slot = v;
+        *(int*)(app + 0xF8) = v;
+        if (self->mode == 2 && self->f22C != 0) {
+            func_0023CAE8(app, 2, -1);
+            self->f1DC = 1;
+            self->busy = 1;
+            self->state = st;
+            self->vt[47].fn((char*)self + self->vt[47].delta);
+        } else if (self->mode == 1) {
+            if ((*(cDev_18DEA0**)(app + 0x434))->v67(self->slot)) {
+                func_0023C8F0(app, 0);
+                self->vt[44].fn((char*)self + self->vt[44].delta);
+            } else {
+                self->vt[47].fn((char*)self + self->vt[47].delta);
+            }
+        } else {
+            if ((*(cDev_18DEA0**)(app + 0x434))->v67(self->slot)) {
+                func_0023C8F0(app, 2);
+                self->vt[44].fn((char*)self + self->vt[44].delta);
+            } else {
+                self->vt[47].fn((char*)self + self->vt[47].delta);
+            }
+        }
+        break;
+    }
+    case 6: {
+        self->f238 = 0;
+        char* a = (char*)func_00227F80(D_004A28A8);
+        if (self->busy == 1)
+            return;
+        int s = self->state;
+        if (s == 6)
+            return;
+        self->f1E4 = 1;
+        if (s == 0 || s == 2 || s == 1) {
+            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(a + 0x748);
+            vt[1].fn(a + vt[1].delta, 0);
+        }
+        self->state = 6;
+        break;
+    }
+    case 7: {
+        if (self->busy == 1)
+            return;
+        if (self->state == 6)
+            return;
+        if (self->f22C == 0)
+            return;
+        char* a = (char*)func_00227F80(D_004A28A8);
+        if ((*(cDev_18DEA0**)(a + 0x434))->v54(*(int*)(a + 0x428)) == 0)
+            return;
+        int v = *(int*)(widget + 0x18);
+        self->slot = v;
+        *(int*)(a + 0xF8) = v;
+        int s = self->state;
+        if (s != 1)
+            return;
+        if ((*(cDev_18DEA0**)(a + 0x434))->v67(self->slot)) {
+            self->busy = s;
+            self->state = 4;
+            func_0023D570(a, 0);
+            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(a + 0x748);
+            vt[1].fn(a + vt[1].delta, 0x18);
+        }
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018E178);

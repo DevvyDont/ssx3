@@ -148,7 +148,79 @@ void* func_0035CFE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035CFF0);
+#ifdef SKIP_ASM
+struct sVec4CFF0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat33CFF0 {
+    float m[3][3];
+};
+
+struct sBodyCFF0 {
+    char pad_0x00[0x30];
+    sVec4CFF0 pos;      // 0x30
+    char pad_0x40[0x10];
+    sMat33CFF0 rot;     // 0x50
+    char pad_0x74[0x1C];
+    sVec4CFF0 outPos;   // 0x90
+};
+
+static inline sMat33CFF0 scaleCFF0(const sMat33CFF0& a, float s)
+{
+    sMat33CFF0 r;
+    r.m[0][0] = a.m[0][0] * s;
+    r.m[0][1] = a.m[0][1] * s;
+    r.m[0][2] = a.m[0][2] * s;
+    r.m[1][0] = a.m[1][0] * s;
+    r.m[1][1] = a.m[1][1] * s;
+    r.m[1][2] = a.m[1][2] * s;
+    r.m[2][0] = a.m[2][0] * s;
+    r.m[2][1] = a.m[2][1] * s;
+    r.m[2][2] = a.m[2][2] * s;
+    return r;
+}
+
+static inline void invertCFF0(sMat33CFF0& a)
+{
+    sMat33CFF0 adj;
+    adj.m[0][0] = a.m[1][1] * a.m[2][2] - a.m[1][2] * a.m[2][1];
+    adj.m[0][1] = a.m[2][1] * a.m[0][2] - a.m[2][2] * a.m[0][1];
+    adj.m[0][2] = a.m[0][1] * a.m[1][2] - a.m[0][2] * a.m[1][1];
+    adj.m[1][0] = a.m[2][0] * a.m[1][2] - a.m[2][2] * a.m[1][0];
+    adj.m[1][1] = a.m[0][0] * a.m[2][2] - a.m[0][2] * a.m[2][0];
+    adj.m[1][2] = a.m[1][0] * a.m[0][2] - a.m[1][2] * a.m[0][0];
+    adj.m[2][0] = a.m[1][0] * a.m[2][1] - a.m[1][1] * a.m[2][0];
+    adj.m[2][1] = a.m[2][0] * a.m[0][1] - a.m[2][1] * a.m[0][0];
+    adj.m[2][2] = a.m[0][0] * a.m[1][1] - a.m[0][1] * a.m[1][0];
+    float inv = a.m[0][0] * adj.m[0][0] + a.m[1][0] * adj.m[0][1] + a.m[2][0] * adj.m[0][2];
+    inv = 1.0f / inv;
+    a = scaleCFF0(adj, inv);
+}
+
+static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, sBodyCFF0* b)
+{
+    sVec4CFF0 r;
+    float x = b->outPos.x;
+    float y = b->outPos.y;
+    float z = b->outPos.z;
+    r.x = m.m[0][0] * x + m.m[1][0] * y + m.m[2][0] * z;
+    r.y = m.m[0][1] * x + m.m[1][1] * y + m.m[2][1] * z;
+    r.z = m.m[0][2] * x + m.m[1][2] * y + m.m[2][2] * z;
+    r.w = b->outPos.w;
+    return r;
+}
+
+extern "C" void func_0035CFF0(sBodyCFF0* self, const sVec4CFF0* v)
+{
+    self->outPos = *v;
+    sMat33CFF0 m = self->rot;
+    invertCFF0(m);
+    self->pos = xformCFF0(m, self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035D288);
@@ -3706,7 +3778,95 @@ extern "C" void func_00362978(void* self, int packet, int tail)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003629B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00362CC8(char* self);
+
+struct sRmState_29B8 {
+    unsigned int w0;
+    unsigned int w1;
+    unsigned int w2;
+    unsigned int w3;
+    short tex[2];
+};
+
+struct sRmCtx_29B8 {
+    char pad0[0xE84];
+    sRmState_29B8* top;     // 0xE84
+};
+
+struct sRmSaved_29B8 {
+    sRmState_29B8 st;
+    int pad;
+};
+
+struct sRmBatch_29B8 {
+    char pad_0x0[0x51480];
+    int count;                      // 0x51480
+    sRmSaved_29B8 saved[1024];      // 0x51484
+    int base;                       // 0x57484
+    sRmSaved_29B8* a;               // 0x57488
+    sRmSaved_29B8* b;               // 0x5748C
+    sRmSaved_29B8* c;               // 0x57490
+};
+
+extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("D_004A5B80");
+extern sRmState_29B8 D_00501420_29B8 __asm__("D_00501420");
+
+static inline void set0_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
+{
+    ctx->top->w0 = (ctx->top->w0 & ~mask) | ((v << shift) & mask);
+}
+
+static inline void set1_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
+{
+    ctx->top->w1 = (ctx->top->w1 & ~mask) | ((v << shift) & mask);
+}
+
+static inline void set2_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
+{
+    ctx->top->w2 = (ctx->top->w2 & ~mask) | ((v << shift) & mask);
+}
+
+static inline sRmSaved_29B8* save_29B8(sRmBatch_29B8* self, sRmCtx_29B8* ctx)
+{
+    sRmState_29B8* src = ctx->top;
+    sRmSaved_29B8* d = &self->saved[self->count++];
+    d->st = *src;
+    return d;
+}
+
+extern "C" void func_003629B8(sRmBatch_29B8* self)
+{
+    self->base = 0;
+    func_00362CC8((char*)self);
+    sRmCtx_29B8* ctx = D_004A5B80_29B8;
+    *ctx->top = D_00501420_29B8;
+    set1_29B8(ctx, 0x3, 0, 0);
+    set2_29B8(ctx, 0x1FFFFC00, 10, 0);
+    set1_29B8(ctx, 0x1800000, 23, 1);
+    set1_29B8(ctx, 0x300000, 20, 0);
+    set1_29B8(ctx, 0xFF000, 12, 0x14);
+    set0_29B8(ctx, 0x30, 4, 3);
+    set0_29B8(ctx, 0x3C0, 6, 3);
+    set1_29B8(ctx, 0x7C, 2, 1);
+    set1_29B8(ctx, 0xF80, 7, 0x11);
+    self->a = save_29B8(self, ctx);
+    set1_29B8(ctx, 0xF80, 7, 2);
+    self->b = save_29B8(self, ctx);
+    set1_29B8(ctx, 0x7C, 2, 5);
+    set1_29B8(ctx, 0xF80, 7, 3);
+    set1_29B8(ctx, 0x3, 0, 1);
+    set2_29B8(ctx, 0x1FFFFC00, 10, 0);
+    set1_29B8(ctx, 0x1800000, 23, 1);
+    set1_29B8(ctx, 0x300000, 20, 3);
+    set1_29B8(ctx, 0xFF000, 12, 0x5C);
+    self->c = save_29B8(self, ctx);
+    self->base = self->count;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362CC8);

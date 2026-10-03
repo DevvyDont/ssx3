@@ -144,7 +144,106 @@ extern "C" void* func_0017D298(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D3B0);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_002CA280(void* self, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void func_001DD0C8(void* self, int flags);
+extern "C" void func_001DCEA0(void* self, int flags);
+extern "C" void func_002CC048(void* self, int flags);
+void operator_delete(int* ptr);
+extern void* D_0046D350[];
+extern void* D_0046D948[];
+extern void* D_004A4E90;
+
+struct sVE_17D3B0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+#define DTOR_ARR_17D3B0(base, n)                                  \
+    if ((base) != 0) {                                            \
+        char* p = (base) + (n) * 0x24;                            \
+        while ((base) != p) {                                     \
+            p -= 0x24;                                            \
+            sVE_17D3B0* vt = *(sVE_17D3B0**)(p + 0x10);           \
+            vt[1].fn(p + vt[1].delta, 0);                         \
+        }                                                         \
+    }
+
+static inline void dtorA_17D3B0(char* sub)
+{
+    func_002CA280(sub + 0x134, 2);
+    func_002CAA80(sub, 2);
+}
+
+static inline void dtorB_17D3B0(char* sub)
+{
+    func_002CA280(sub + 0x1C8, 2);
+    func_002CA280(sub + 0x1A4, 2);
+    func_002CA280(sub + 0x18C, 2);
+    func_002CA280(sub + 0x170, 2);
+    func_002CA280(sub + 0x154, 2);
+    func_002CA280(sub + 0x138, 2);
+    func_002CAA80(sub, 2);
+}
+
+static inline void dtorC_17D3B0(char* sub)
+{
+    DTOR_ARR_17D3B0(sub + 0x194, 14)
+    func_002CA280(sub + 0x168, 2);
+    func_002CA280(sub + 0x150, 2);
+    func_002CA280(sub + 0x134, 2);
+    func_002CAA80(sub, 2);
+}
+
+static inline void dtorD_17D3B0(char* sub)
+{
+    func_002CA280(sub + 0x4CC, 2);
+    DTOR_ARR_17D3B0(sub + 0x16C, 24)
+    func_002CA280(sub + 0x154, 2);
+    func_002CA280(sub + 0x138, 2);
+    func_002CAA80(sub, 2);
+}
+
+static inline void dtorE_17D3B0(char* sub)
+{
+    DTOR_ARR_17D3B0(sub + 0x168, 12)
+    func_002CA280(sub + 0x150, 2);
+    func_002CA280(sub + 0x134, 2);
+    func_002CAA80(sub, 2);
+}
+
+static inline void dtorF_17D3B0(char* sub)
+{
+    func_002CA280(sub + 0x130, 2);
+    func_002CAA80(sub, 2);
+}
+
+extern "C" void func_0017D3B0(char* self, int flags)
+{
+    *(void***)self = D_0046D350;
+    D_004A4E90 = 0;
+    cBXString__cBXString(self + 0x1C0C, 2);
+    cBXString__cBXString(self + 0x1C08, 2);
+    cBXString__cBXString(self + 0x1C04, 2);
+    dtorA_17D3B0(self + 0x1AAC);
+    dtorB_17D3B0(self + 0x18C0);
+    dtorC_17D3B0(self + 0x1534);
+    dtorD_17D3B0(self + 0x1044);
+    dtorE_17D3B0(self + 0xD2C);
+    func_001DD0C8(self + 0x74C, 2);
+    dtorF_17D3B0(self + 0x604);
+    func_001DCEA0(self + 0x70, 2);
+    func_002CC048(self + 0x8, 2);
+    *(void***)self = D_0046D948;
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D688);

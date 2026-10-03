@@ -1,6 +1,75 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_addModelPartLOD);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
+// as operator new[] so the new-expressions below compute their destination before the call.
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00489C80[];
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+struct sLodRef_D8B8 {
+    char* part;     // 0x0
+    char* data;     // 0x4
+    int pad[2];
+};
+
+struct sLodSlot_D8B8 {
+    int used;               // 0x0
+    sLodRef_D8B8* refs;     // 0x4
+};
+
+struct sModelPart_D8B8 {
+    int id;                 // 0x00
+    char pad4[0x14];
+    sLodSlot_D8B8 lods[4];  // 0x18
+    char* p38;              // 0x38
+    char* p3C;              // 0x3C
+    char* p40;              // 0x40
+    int h44;                // 0x44
+    int h48;                // 0x48
+    int h4C;                // 0x4C
+    int index;              // 0x50
+    int pad54;
+};
+
+struct sAnimModel_D8B8 {
+    int f0;
+    int nrefs;                  // 0x4
+    int count;                  // 0x8
+    sModelPart_D8B8* parts;     // 0xC
+};
+
+extern "C" void cAnimModel_addModelPartLOD(sAnimModel_D8B8* self, int lod, char* part, int index)
+{
+    char* data = part + 0x60;
+    for (int i = 0; i < self->count; i++) {
+        if (self->parts[i].id == *(signed char*)(part + 0x52)) {
+            self->parts[i].lods[lod].used = 1;
+            self->parts[i].lods[lod].refs[index].part = part;
+            self->parts[i].lods[lod].refs[index].data = data;
+            return;
+        }
+    }
+    for (int k = 0; k < 4; k++) {
+        self->parts[self->count].lods[k].refs = new (D_00489C80, 0, 0) sLodRef_D8B8[self->nrefs];
+        func_003E6448(self->parts[self->count].lods[k].refs, 0, self->nrefs << 4);
+    }
+    self->parts[self->count].id = *(signed char*)(part + 0x52);
+    self->parts[self->count].lods[lod].used = 1;
+    self->parts[self->count].lods[lod].refs[index].part = part;
+    self->parts[self->count].lods[lod].refs[index].data = data;
+    self->parts[self->count].p38 = data + *(int*)(part + 0x18);
+    self->parts[self->count].p40 = data + *(int*)(part + 0x2C);
+    self->parts[self->count].p3C = data + *(int*)(part + 0x1C);
+    self->parts[self->count].h44 = *(short*)(part + 0x4A);
+    self->parts[self->count].h48 = *(short*)(part + 0x4E);
+    self->parts[self->count].h4C = *(short*)(part + 0x50);
+    self->parts[self->count].index = index;
+    self->count++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030DB70__FPvi);
@@ -366,9 +435,366 @@ extern "C" void func_00310530(sAmModel* self, sAmVec4* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310640);
+#ifdef SKIP_ASM
+struct sAmMat_0640;
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMat_0640(void* d, const void* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
 
+struct sAmMat_0640 {
+    float m[16];
+    sAmMat_0640() {}
+    sAmMat_0640(const sAmMat_0640& s) { vu0CopyMat_0640(this, &s); }
+    sAmMat_0640& operator=(const sAmMat_0640& s)
+    {
+        vu0CopyMat_0640(this, &s);
+        return *this;
+    }
+    // placement array new for the one-time construction of the matrix palette.
+    void* operator new[](unsigned int, void* p) { return p; }
+} __attribute__((aligned(16)));
+
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMat_0640(sAmMat_0640* d, const sAmMat_0640* a, const sAmMat_0640* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+static inline sAmMat_0640 mulMat_0640(const sAmMat_0640& a, const sAmMat_0640& b)
+{
+    sAmMat_0640 t;
+    vu0MulMat_0640(&t, &a, &b);
+    return t;
+}
+
+struct sAmRef_0640 {
+    char* part;     // 0x0
+    char* data;     // 0x4
+    int f8;         // 0x8
+    int fC;         // 0xC
+};
+
+struct sAmLod_0640 {
+    int used;               // 0x0
+    sAmRef_0640* refs;      // 0x4
+};
+
+struct sAmPart_0640 {
+    int id;                 // 0x00
+    char pad4[0x14];
+    sAmLod_0640 lods[4];    // 0x18
+    char pad38[0x18];
+    int index;              // 0x50
+    int pad54;
+};
+
+struct sAmLodInfo_0640 {
+    int a;      // 0x0
+    int b;      // 0x4
+};
+
+struct sAmModel_0640 {
+    int f0;
+    int f4;
+    int count;                  // 0x8
+    sAmPart_0640* parts;        // 0xC
+    int nmats;                  // 0x10
+    int f14;
+    int lodded;                 // 0x18
+    char pad1C[0x18];
+    sAmMat_0640* matsA;         // 0x34
+    sAmMat_0640* matsB;         // 0x38
+    int f3C;
+    sAmLodInfo_0640 info[4];    // 0x40
+    char pad60[0x144 - 0x60];
+    float alpha;                // 0x144
+};
+
+struct sAmVEnt_0640 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sAmCtx_0640 {
+    char pad[0x10D8];
+    sAmVEnt_0640* vt;           // 0x10D8
+};
+
+typedef void (*tSetMats_0640)(void*, sAmMat_0640*, int, int, int, int);
+typedef void (*tDraw_0640)(void*, char*, char*, int, int, float);
+
+extern int D_004A5948;
+extern sAmCtx_0640* D_004A5B80_0640 __asm__("D_004A5B80");
+extern sAmMat_0640 D_004FC420[];
+
+extern "C" void func_00310640(sAmModel_0640* self, int lod, int x, int y)
+{
+    sAmCtx_0640* ctx = D_004A5B80_0640;
+    if (D_004A5948 == 0) {
+        new ((void*)D_004FC420) sAmMat_0640[64];
+        D_004A5948 = 1;
+    }
+    for (int i = 0; i < self->nmats; i++) {
+        D_004FC420[i] = mulMat_0640(self->matsA[i], self->matsB[i]);
+    }
+    if (self->lodded != 0) {
+        for (int j = 0; j < self->count; j++) {
+            // PORT: pointer arithmetic through int (offset-first addu).
+            sAmPart_0640* p = (sAmPart_0640*)(j * (int)sizeof(sAmPart_0640) + (int)self->parts);
+            if (p->lods[lod].used != 0) {
+                sAmRef_0640* r = &p->lods[lod].refs[p->index];
+                if (r->part != 0) {
+                    ((tSetMats_0640)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FC420, 0, r->fC, r->f8, 0);
+                    int m = self->parts[j].id == 2 ? x : y;
+                    ((tDraw_0640)ctx->vt[99].fn)((char*)ctx + ctx->vt[99].delta, r->part, r->data, m, 0, self->alpha);
+                }
+            }
+        }
+    } else {
+        ((tSetMats_0640)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FC420, 0, self->info[lod].b, self->info[lod].a, 0);
+        for (int j = 0; j < self->count; j++) {
+            // PORT: pointer arithmetic through int (offset-first addu).
+            sAmPart_0640* p = (sAmPart_0640*)(j * (int)sizeof(sAmPart_0640) + (int)self->parts);
+            if (p->lods[lod].used != 0) {
+                sAmRef_0640* r = p->lods[lod].refs;
+                if (r->part != 0) {
+                    int m = p->id == 2 ? x : y;
+                    ((tDraw_0640)ctx->vt[99].fn)((char*)ctx + ctx->vt[99].delta, r->part, r->data, m, 0, self->alpha);
+                }
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310948);
+#ifdef SKIP_ASM
+struct sAmMat_0948;
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMat_0948(void* d, const void* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+struct sAmMat_0948 {
+    float m[16];
+    sAmMat_0948() {}
+    sAmMat_0948(const sAmMat_0948& s) { vu0CopyMat_0948(this, &s); }
+    sAmMat_0948& operator=(const sAmMat_0948& s)
+    {
+        vu0CopyMat_0948(this, &s);
+        return *this;
+    }
+    // placement array new for the one-time construction of the matrix palette.
+    void* operator new[](unsigned int, void* p) { return p; }
+} __attribute__((aligned(16)));
+
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMat_0948(sAmMat_0948* d, const sAmMat_0948* a, const sAmMat_0948* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+static inline sAmMat_0948 mulMat_0948(const sAmMat_0948& a, const sAmMat_0948& b)
+{
+    sAmMat_0948 t;
+    vu0MulMat_0948(&t, &a, &b);
+    return t;
+}
+
+struct sAmRef_0948 {
+    char* part;     // 0x0
+    char* data;     // 0x4
+    int f8;         // 0x8
+    int fC;         // 0xC
+};
+
+struct sAmLod_0948 {
+    int used;               // 0x0
+    sAmRef_0948* refs;      // 0x4
+};
+
+struct sAmPart_0948 {
+    int id;                 // 0x00
+    char pad4[0x14];
+    sAmLod_0948 lods[4];    // 0x18
+    char pad38[0x18];
+    int index;              // 0x50
+    int pad54;
+};
+
+struct sAmLodInfo_0948 {
+    int a;      // 0x0
+    int b;      // 0x4
+};
+
+struct sAmModel_0948 {
+    int f0;
+    int f4;
+    int count;                  // 0x8
+    sAmPart_0948* parts;        // 0xC
+    int nmats;                  // 0x10
+    int f14;
+    int lodded;                 // 0x18
+    char pad1C[0x14];
+    sAmMat_0948* matsA;         // 0x30
+    int f34;
+    sAmMat_0948* matsB;         // 0x38
+    int f3C;
+    sAmLodInfo_0948 info[4];    // 0x40
+};
+
+struct sAmVEnt_0948 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sAmCtx_0948 {
+    char pad[0x10D8];
+    sAmVEnt_0948* vt;           // 0x10D8
+};
+
+typedef void (*tSetMats_0948)(void*, sAmMat_0948*, int, int, int, int);
+typedef void (*tDraw_0948)(void*, char*, char*, int);
+
+extern int D_004A594C;
+extern sAmCtx_0948* D_004A5B80_0948 __asm__("D_004A5B80");
+extern sAmMat_0948 D_004FD420[];
+
+extern "C" void func_00310948(sAmModel_0948* self, int lod, int x, int y)
+{
+    if (D_004A594C == 0) {
+        new ((void*)D_004FD420) sAmMat_0948[64];
+        D_004A594C = 1;
+    }
+    sAmCtx_0948* ctx = D_004A5B80_0948;
+    for (int i = 0; i < self->nmats; i++) {
+        D_004FD420[i] = mulMat_0948(self->matsA[i], self->matsB[i]);
+    }
+    if (self->lodded != 0) {
+        for (int j = 0; j < self->count; j++) {
+            // PORT: pointer arithmetic through int (offset-first addu).
+            sAmPart_0948* p = (sAmPart_0948*)(j * (int)sizeof(sAmPart_0948) + (int)self->parts);
+            if (p->lods[lod].used != 0) {
+                sAmRef_0948* r = &p->lods[lod].refs[p->index];
+                if (r->part != 0) {
+                    ((tSetMats_0948)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FD420, 0, r->fC, r->f8, 0);
+                    int ok = (unsigned)(self->parts[j].id - 1) < 2;
+                    int m = ok ? x : y;
+                    ((tDraw_0948)ctx->vt[100].fn)((char*)ctx + ctx->vt[100].delta, r->part, r->data, m);
+                }
+            }
+        }
+    } else {
+        ((tSetMats_0948)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FD420, 0, self->info[lod].b, self->info[lod].a, 0);
+        for (int j = 0; j < self->count; j++) {
+            // PORT: pointer arithmetic through int (offset-first addu).
+            sAmPart_0948* p = (sAmPart_0948*)(j * (int)sizeof(sAmPart_0948) + (int)self->parts);
+            if (p->lods[lod].used != 0) {
+                sAmRef_0948* r = p->lods[lod].refs;
+                if (r->part != 0) {
+                    int ok = (unsigned)(p->id - 1) < 2;
+                    int m = ok ? x : y;
+                    ((tDraw_0948)ctx->vt[100].fn)((char*)ctx + ctx->vt[100].delta, r->part, r->data, m);
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00310C48);

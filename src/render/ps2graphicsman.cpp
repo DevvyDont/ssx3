@@ -461,7 +461,118 @@ extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/ps2graphicsman", func_00368660);
+#ifdef SKIP_ASM
+extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
+extern "C" void func_00368170(void* self, int idx, ulong** dma, ulong** gif);
+extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma);
+extern "C" ulong* func_0038F460(void* ring, unsigned int addr, int size, int flags);
+extern "C" void* func_0038F668(void* ring, ulong* p, int a2);
+extern void* D_004A4474;
+
+struct sUpNode_8660 {
+    int flags;
+    int f4[6];
+};
+
+struct sUpHeap_8660 {
+    char pad_0x0[0x1FF0];
+    sUpNode_8660* nodes;    // 0x1FF0
+};
+
+struct sUpTex_8660 {
+    char pad_0x00[0xC];
+    unsigned int psm;       // 0xC
+    char pad_0x10[0x4];
+    int size;               // 0x14
+    char pad_0x18[0x8];
+    int clut;               // 0x20
+    char pad_0x24[0x4];
+    int addr;               // 0x28
+    int caddr;              // 0x2C
+    int node;               // 0x30
+    int cnode;              // 0x34
+};
+
+struct sUpMgr_8660 {
+    char pad_0x0[0x8];
+    sUpTex_8660* texs[0x7D1];   // 0x8
+    int state[2];               // 0x1F4C
+};
+
+// PORT: 64-bit `ulong` GIF/DMA packet words.
+extern "C" void func_00368660(char* self, int a, int b, int a3, ulong** pp, void** gifOut)
+{
+    ulong* cur = *pp;
+    sUpTex_8660* objs[2];
+    if (a < 0 && b < 0)
+        return;
+    objs[0] = a >= 0 ? ((sUpMgr_8660*)self)->texs[a] : 0;
+    objs[1] = b >= 0 ? ((sUpMgr_8660*)self)->texs[b] : 0;
+    int sent = 0;
+    ulong* gif = 0;
+    for (int k = 0; k < 2; k++) {
+        int idx = b;
+        if (k == 0)
+            idx = a;
+        if (idx < 0)
+            continue;
+        int other = a;
+        if (k == 0)
+            other = b;
+        sUpTex_8660* t = ((sUpMgr_8660*)self)->texs[idx];
+        sUpHeap_8660* heap;
+        int shift;
+        if (t->psm == 9) {
+            heap = (sUpHeap_8660*)(self + 0x4350);
+            shift = 2;
+        } else {
+            heap = (sUpHeap_8660*)(self + 0x1F60);
+            shift = 0;
+        }
+        if (t->addr < 0) {
+            ((sUpMgr_8660*)self)->state[k] = -1;
+            int n = func_00366CE0(heap, t->size, idx, other, a3, 1);
+            sUpNode_8660* nd = &heap->nodes[n];
+            int fl = nd->flags;
+            t->node = n;
+            t->addr = (fl >> 8) << shift;
+            if (gif == 0)
+                gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
+            func_00368170(self, idx, &cur, &gif);
+            sent = 1;
+        }
+        if (t->clut != 0 && t->caddr < 0) {
+            *(int*)(self + 0x1F54) = -1;
+            int n = func_00366CE0(self + 0x1F60, t->psm - 0xB < 2 ? 0x100 : 0x400, idx, other, a3, 0);
+            int* f = &((sUpHeap_8660*)(self + 0x1F60))->nodes[n].flags;
+            int fl = *f | 4;
+            *f = fl;
+            t->cnode = n;
+            t->caddr = fl >> 8;
+            if (gif == 0)
+                gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
+            func_003684F0((sPs2UpMgr*)self, idx, &cur, &gif);
+            sent = 1;
+        }
+    }
+    if (gif != 0)
+        *gifOut = func_0038F668(D_004A4474, gif, 4);
+    if (!sent) {
+        cur[0] = 0x10000001;
+        cur[1] = 0;
+        cur[2] = 0;
+        cur[3] = (ulong)0x8800 << 45;
+        cur += 4;
+    }
+    if (a >= 0)
+        func_00368970(self, a, 0, &cur);
+    if (b >= 0)
+        func_00368970(self, b, 1, &cur);
+    *pp = cur;
+}
+#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00368970);
 

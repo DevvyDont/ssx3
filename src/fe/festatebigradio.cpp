@@ -70,7 +70,103 @@ extern "C" void func_00193568(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* s);
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" const char* func_0014EE58(void* iface, int a1);
+extern char D_004A17A0[];
+extern char D_004A17A8[];
+extern char D_0045FD38[];
+extern char D_0045FD48[];
+extern char D_0045FD58[];
+extern char D_0045FD68[];
+extern char D_0045FD78[];
+extern char D_0045FD88[];
+
+class cUIObj_193650 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int on);
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24(int on);
+};
+
+static inline int Is_193650(int id, char* s) { return id == GetHashValue32(s); }
+
+extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650* w)
+{
+    char* wp = (char*)w;
+    if (Is_193650(*(int*)(wp + 0x38), D_004A17A0)) {
+        *(void**)(self + 0x6D0) = 0;
+        w->v07(1);
+        *(void**)(self + 0x6D0) = w;
+        *(int*)(wp + 0x14) |= 1;
+        *(int*)(wp + 0x90) |= 1;
+    } else if (Is_193650(*(int*)(wp + 0x38), D_004A17A8)) {
+        *(void**)(self + 0x704) = 0;
+        w->v07(1);
+        *(void**)(self + 0x704) = w;
+        *(int*)(wp + 0x14) |= 1;
+        *(int*)(wp + 0x90) |= 1;
+    } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD38) || Is_193650(*(int*)(wp + 0x38), D_0045FD48)) {
+        void* p1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
+        cUIText_setAsciiString((cUIText*)w, func_0014EE58(p2, func_00146E98(p1, 0)));
+    } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD58) || Is_193650(*(int*)(wp + 0x38), D_0045FD68)) {
+        void* p1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
+        cUIText_setAsciiString((cUIText*)w, func_0014EE58(p2, func_00146E98(p1, 1)));
+    } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD78)) {
+        *(void**)(self + 0x6D4) = w;
+    } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD88)) {
+        *(void**)(self + 0x708) = w;
+    } else {
+        char name[3];
+        name[2] = 0;
+        for (int i = 0; i < 2; i++) {
+            void** slots = (void**)(self + i * 0x34 + 0x6D8);
+            for (int j = 0; j < 8; j++) {
+                name[0] = '1' + i;
+                name[1] = '1' + j;
+                if (*(int*)(wp + 0x38) == GetHashValue32(name)) {
+                    slots[j] = w;
+                    *(int*)(wp + 0x18) = i;
+                    *(int*)(wp + 0x14) &= ~1;
+                    w->v24(1);
+                }
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebigradio", func_001938F8);
 
