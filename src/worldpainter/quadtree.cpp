@@ -1825,7 +1825,17 @@ extern "C" void func_002C6848(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C68C8);
+#ifdef SKIP_ASM
+extern "C" char* strcpy(char* dst, const char* src);
+
+extern "C" void func_002C68C8(void* self, int i, char* dst)
+{
+    // PORT: (int)self pointer arithmetic (index added first, as in the target).
+    strcpy(dst, (char*)((i << 6) + (int)self) + 0x4E0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C68F0);
