@@ -446,7 +446,34 @@ extern "C" void func_0026EF80()
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026EFB8);
+#ifdef SKIP_ASM
+extern "C" void* func_0026D5E8(void* self);
+void* func_0026E5A8(void* self);
+extern "C" void* func_00272288(void* self);
+void func_0026F4A0(void* self, int state);
+
+extern "C" void* func_0026EFB8(void* self)
+{
+    char* p = (char*)self + 0x2C;
+    for (int i = 15; i != -1; i--, p += 0x38) {
+        func_0026D5E8(p);
+    }
+    char* q = (char*)self + 0x494;
+    func_0026E5A8((char*)self + 0x3B0);
+    func_0026E5A8((char*)self + 0x3BC);
+    for (int i = 1; i != -1; i--, q += 0xB4) {
+        func_00272288(q);
+    }
+    func_0026F4A0(self, 15);
+    for (int i = 1; i >= 0; i--) {
+        int* a = (int*)(0x48C + (char*)self);
+        a[i] = 0;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F088);
