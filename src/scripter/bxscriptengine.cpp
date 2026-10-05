@@ -601,7 +601,44 @@ void* func_00282C18(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282C38);
+#ifdef SKIP_ASM
+struct sBxsThreadSlot2C0 {
+    sBxsThreadHdr hdr; // 0x00
+    int unk0C;         // 0x0C
+    short unk10;       // 0x10
+    short unk12;       // 0x12
+    int unk14;         // 0x14
+    int unk18;         // 0x18
+    int id;            // 0x1C
+    int type;          // 0x20
+};
+
+struct sBxsEngineThreads {
+    char pad[0x2C0];
+    sBxsThreadSlot2C0 threads[16]; // 0x2C0
+};
+
+extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1)
+{
+    sBxsEngineThreads* e = (sBxsEngineThreads*)self;
+    int i = 0;
+    do {
+        if (e->threads[i].type == 0) {
+            e->threads[i].type = a1;
+            switch (a1) {
+            case 1:
+                e->threads[i].hdr.handle = -1;
+                break;
+            }
+            return &e->threads[i].hdr;
+        }
+        i++;
+    } while (i < 16);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282C88__FPvT0);
