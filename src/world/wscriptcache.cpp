@@ -1431,7 +1431,24 @@ extern "C" int func_003B06B0(func_003B06B0_sReq* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B06F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sWSCb06F8 {
+    int pad0;
+    void* ctx;
+    int pad8;
+    void (*fn)(sWSCb06F8* self, void* ctx, int arg);
+};
+
+// The unit later declares func_003B06F8(void*, void*) for its caller; bind this definition by asm label.
+void func_003B06F8_impl(sWSCb06F8* self, int arg) __asm__("func_003B06F8");
+void func_003B06F8_impl(sWSCb06F8* self, int arg)
+{
+    self->fn(self, self->ctx, arg);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B0720__FPv);
