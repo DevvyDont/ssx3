@@ -1730,7 +1730,34 @@ extern "C" sMenuRectCB18* func_002CCB18(sMenuRectCB18* ret, char* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CCC38);
+#ifdef SKIP_ASM
+extern char D_004866B8[];
+
+struct func_002CCC38_sEntry {
+    char* name;  // 0x0
+    int value;   // 0x4
+};
+
+extern "C" void func_002CCC38(void* self, int a1)
+{
+    int i = 0;
+    for (;;) {
+        if (i == *(int*)((char*)self + 0x18)) {
+            func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, D_004866B8);
+            break;
+        }
+        // PORT: pointer held in int (index-first address arithmetic)
+        func_002CCC38_sEntry* e = (func_002CCC38_sEntry*)((i << 3) + *(int*)((char*)self + 0x1C));
+        if (**(int**)((char*)self + 0x20) == e->value) {
+            func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, e->name);
+            return;
+        }
+        i++;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", cSubMenuItem_cSubMenuItem);
