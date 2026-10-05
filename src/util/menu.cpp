@@ -2523,7 +2523,57 @@ extern "C" void* func_002CDFA0(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CDFD8);
+#ifdef SKIP_ASM
+extern void* D_004A3E90;
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void cBXString_cBXString1(void* self, void* src);
+extern "C" int func_003194A8(void* str, const char* fmt, ...);
+extern "C" float func_0040DA10(float x);
+extern "C" int func_00413AF8(float f);
+extern char D_004A3998[];
+extern char D_004A39A0[];
+extern char D_004A39A8[];
+extern char D_004A39B0[];
+extern char D_004A39B8[];
+extern char D_004A39C0[];
+
+struct sBXStrDFD8 { char* p; };
+
+// returns a cBXString by value (hidden result pointer in $4); the unit's later declaration says void.
+void* func_002CDFD8_impl(void* out, float v) __asm__("func_002CDFD8");
+
+void* func_002CDFD8_impl(void* out, float v)
+{
+    float d = func_0040DA10(v) / func_0040DA10(10.0f) + 4.3431620724732056e-05f;
+    float t;
+    // PORT: FPU-only float->int->float round trip (floor helper); no C cast reproduces it.
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(d));
+    if (d < t) t -= 1.0f;
+    int n = (int)t;
+    const char* fmt;
+    if (n < 0) {
+        fmt = D_004A3998;
+    } else if (n < 1) {
+        fmt = D_004A39A0;
+    } else if (n < 2) {
+        fmt = D_004A39A8;
+    } else if (n < 3) {
+        fmt = D_004A39B0;
+    } else if (n < 7) {
+        fmt = D_004A39B8;
+    } else {
+        fmt = D_004A39C0;
+    }
+    sBXStrDFD8 s;
+    s.p = (char*)D_004A3E90;
+    func_003194A8(&s, fmt, func_00413AF8(v));
+    cBXString_cBXString1(out, &s);
+    cBXString__cBXString(&s, 2);
+    return out;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CE100);
