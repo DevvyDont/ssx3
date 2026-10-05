@@ -4340,7 +4340,34 @@ extern "C" void func_00386640(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00386688);
+#ifdef SKIP_ASM
+struct sPartPair {
+    int a, b;
+};
+
+// Pushes the current matrix (self+0x6AF0) and the pair at self+0x5900 onto slot i.
+// PORT: PS2-only VU0 asm (lqc2/sqc2 matrix copy).
+extern "C" void func_00386688(void* self, int i)
+{
+    // PORT: (int)self pointer arithmetic (index added first, as in the target).
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"((char*)self + 0x6AF0), "r"((char*)((i << 6) + (int)self) + 0x5930)
+        : "memory");
+    ((sPartPair*)((char*)self + 0x59B0))[i] = *(sPartPair*)((char*)self + 0x5900);
+    *(int*)((char*)self + 0x59C0) = i + 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003866E0__FPvii);
