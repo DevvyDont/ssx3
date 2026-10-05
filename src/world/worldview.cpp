@@ -849,7 +849,22 @@ extern "C" int func_003AAC50(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AACA8);
+#ifdef SKIP_ASM
+extern "C" int func_003AACA8(void* self, void* a1)
+{
+    if (*(int*)((char*)a1 + 0xC) & 0x100) {
+        return 0;
+    }
+    switch (*(int*)((char*)a1 + 0x10)) {
+    case 1:
+    case 2:
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldview", func_003AAD98);
