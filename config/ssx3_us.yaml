@@ -60,13 +60,13 @@ segments:
     subsegments:
       - [0x1000, asm, sce/crt0]
         
-      - [0x1218, asm]
+      - [0x1218, cpp, seg/seg_1218]
 
       - [0xd4f8, cpp, ai/computer]
 
       - [0x14198, cpp, ai/airpredictor]
 
-      - [0x14b10, asm]
+      - [0x14b10, cpp, seg/seg_14B10]
 
       - [0x182e0, cpp, ai/ridermetrix]
 
@@ -128,7 +128,7 @@ segments:
 
       - [0x6cf20, cpp, camera/trigger/cameratriggerlist]
 
-      - [0x6d428, asm]
+      - [0x6d428, cpp, seg/seg_6D428]
 
       - [0x6d5a8, cpp, camera/trigger/cameratriggervolumes]
 
@@ -202,7 +202,7 @@ segments:
 
       - [0xc68e8, cpp, fe/fepopup]
 
-      - [0xcf758, asm]
+      - [0xcf758, cpp, seg/seg_CF758]
 
       - [0xd00b0, cpp, fe/festaterewards]
 
@@ -214,7 +214,7 @@ segments:
 
       - [0xdadb8, cpp, fe/festatenethelppopup]
 
-      - [0xdc148, asm]
+      - [0xdc148, cpp, main/all_in_one_main]
 
       - [0xdfb90, cpp, fe/fepopupmisc]
 
@@ -244,7 +244,7 @@ segments:
 
       - [0x1121a0, cpp, fe/ovstateprofile]
 
-      - [0x1137e8, asm]
+      - [0x1137e8, cpp, fe/all_in_one_fe]
 
       - [0x1237d0, cpp, luno/lunovm]
 
@@ -278,7 +278,7 @@ segments:
 
       - [0x152718, cpp, mem/memstd]
 
-      - [0x156860, asm]
+      - [0x156860, cpp, seg/seg_156860]
 
       - [0x15a288, cpp, dirtysock/tagsunk]
 
@@ -306,7 +306,7 @@ segments:
 
       - [0x1848e8, cpp, scripter/videngine]
 
-      - [0x184e60, asm]
+      - [0x184e60, cpp, scripter/all_in_one_scripter]
 
       - [0x185bb0, cpp, sound/ssxAudio]
 
@@ -324,7 +324,7 @@ segments:
 
       - [0x1b5b08, cpp, sound/icepick/worldtriggermanager]
 
-      - [0x1ba100, asm]
+      - [0x1ba100, cpp, bx/seg_1BA100]
 
       - [0x1c13a8, cpp, worldpainter/worldpainterquery]
 
@@ -338,13 +338,13 @@ segments:
 
       - [0x1c7f78, cpp, util/statemachine]
 
-      - [0x1c9348, asm]
+      - [0x1c9348, cpp, seg/seg_1C9348]
 
       - [0x1cb258, cpp, util/menu]
 
       - [0x1d2ce0, cpp, util/objectinterface]
 
-      - [0x1d3510, asm]
+      - [0x1d3510, cpp, seg/seg_1D3510]
 
       - [0x1d58f0, cpp, visualfx/angerfx]
 
@@ -354,7 +354,7 @@ segments:
 
       - [0x1dc6d8, cpp, visualfx/crowdrender2d]
       
-      - [0x1dcd10, asm]
+      - [0x1dcd10, cpp, seg/seg_1DCD10]
 
       - [0x1ddb88, cpp, visualfx/boardwakefx]
 
@@ -364,11 +364,11 @@ segments:
 
       - [0x1ef7c8, cpp, visualfx/renderstateman]
 
-      - [0x1f1548, asm]
+      - [0x1f1548, cpp, seg/seg_1F1548]
 
       - [0x1f6298, cpp, visualfx/worldlightman]
 
-      - [0x1fbe38, asm]
+      - [0x1fbe38, cpp, seg/seg_1FBE38]
 
       - [0x208598, cpp, wscript/wscriptprocess]
 
@@ -376,7 +376,7 @@ segments:
 
       - [0x20e8b8, cpp, animation/animmodel]
 
-      - [0x2125c8, asm]
+      - [0x2125c8, cpp, seg/seg_2125C8]
 
       - [0x2128d0, cpp, animation/rideranimbase]
 
@@ -396,11 +396,11 @@ segments:
       
       - [0x2187c8, cpp, bx/bxrandom]
       
-      - [0x218ae8, asm]
+      - [0x218ae8, cpp, seg/seg_218AE8]
 
       - [0x218d20, cpp, bx/memman]
 
-      - [0x218f38, asm]
+      - [0x218f38, cpp, seg/seg_218F38]
 
       - [0x218fe8, cpp, bx/bxstring]
 
@@ -412,7 +412,7 @@ segments:
 
       - [0x21d350, cpp, md5]
       
-      - [0x21e5a8, asm]
+      - [0x21e5a8, cpp, seg/seg_21E5A8]
 
       - [0x21e660, cpp, bx/cubicspline]
 

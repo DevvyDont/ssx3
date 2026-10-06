@@ -1,0 +1,252 @@
+#include "common.h"
+
+INCLUDE_ASM("seg/seg_1FBE38", checkActiveNode);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FB060);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FB270);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FB498);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FB6B8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FB8D0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FBAB0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FBCB8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FBEC8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FC0D0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FC2C0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FC420);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FC5D8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FC7D0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FC9C8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FCC20);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FCDC8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FCFF0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FD250);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FD420);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FD758);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FDED0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FE0C0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
+
+INCLUDE_ASM("seg/seg_1FBE38", cViewer_addParticle);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FEE98);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FF1C8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FF390);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FF5E8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FF850);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FF9A8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FFB50);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FFD58);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_002FFF00);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003000A8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300260);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300418);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003005E8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300770);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300948);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300B20);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300C78);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300E28);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00300F50);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301120);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003012F0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301440);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301560);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301680);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301830);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003019C8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301B88);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301C80);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301D78);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00301F48);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302048);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302210);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302490);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302680);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302778);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302870);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302968);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302AC0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302BD8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302CE8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302DF0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00302EF8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303130);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003032C0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303380);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303430);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303490);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003034F8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303598);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003036B0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003037B0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003039F0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303BA0);
+
+extern "C" void func_00303D88(void) {
+}
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303D90);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303DF8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303E60);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303EC8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303F80);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00303FF0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304100);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304210);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304320);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003044A8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003045B8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304980);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304B38);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304C50);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304E38);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00304FF0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003050F0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00305478);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00305660);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003057C0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003059A0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00305C88);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00305D90);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00305F40);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003061B0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306300);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306438);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003065E8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306770);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306908);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306A90);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306CB0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00306E68);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00307020);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00307128);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003071C8);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003071F0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00307240);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003072B0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00307308);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_003074C0);
+
+INCLUDE_ASM("seg/seg_1FBE38", func_00307568);
