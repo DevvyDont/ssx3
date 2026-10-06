@@ -221,7 +221,13 @@ extern "C" int func_002849D8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002849E0);
+#ifdef SKIP_ASM
+extern "C" int func_002849E0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x550))) != 2;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002849F0);

@@ -92,7 +92,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CC40);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CCC8);
+#ifdef SKIP_ASM
+extern "C" unsigned char *func_0021CCC8(unsigned char *arg0) {
+    *arg0 &= 0xF0;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CCE0);
 
