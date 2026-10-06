@@ -437,7 +437,15 @@ extern "C" float func_00284B78(void *arg0) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B80);
+#ifdef SKIP_ASM
+extern "C" void __sti__all_in_one_scripter_cpp(int, int);
+
+extern "C" void func_00284B80(void) {
+    __sti__all_in_one_scripter_cpp(1, 0xFFFF);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284BA0);

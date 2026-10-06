@@ -12,7 +12,15 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2690);
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D26F8);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D2790);
+#ifdef SKIP_ASM
+extern "C" int func_002D2790(unsigned char **arg0, unsigned char *arg1) {
+    *arg1 = **arg0;
+    *arg0 += 1;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", get_string);
 
@@ -540,7 +548,15 @@ extern "C" float func_002D3CC0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CE0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3CE0(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D00);
@@ -560,7 +576,15 @@ extern "C" void func_002D3D18(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D20);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3D20(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D40);
@@ -572,13 +596,37 @@ extern "C" int func_002D3D40(int arg0) {
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D48);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D70);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
 
+extern "C" void func_002D3D70(void) {
+    func_002CA280();
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D90);
+#ifdef SKIP_ASM
+extern "C" void func_002CAA80();
+
+extern "C" void func_002D3D90(void) {
+    func_002CAA80();
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3DB0);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3DF8);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3DF8(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3E18);
@@ -598,7 +646,15 @@ extern "C" void func_002D3EA0(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EA8);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3EA8(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EC8);
@@ -618,7 +674,15 @@ extern "C" void func_002D3F48(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F50);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3F50(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F70);
@@ -636,10 +700,26 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D4008);
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D4030);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1D3510", func_002D4060);
+#ifdef SKIP_ASM
+extern "C" void func_002D2988(int, int);
+
+extern "C" void func_002D4060(void) {
+    func_002D2988(1, 0xFFFF);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D4080);
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D40C0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1D3510", func_002D48D0);
+#ifdef SKIP_ASM
+extern "C" void func_002D40C0(int, int);
+
+extern "C" void func_002D48D0(void) {
+    func_002D40C0(1, 0xFFFF);
+}
+#endif

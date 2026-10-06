@@ -101,7 +101,17 @@ extern "C" float func_00256BA8(void *arg0) {
 
 INCLUDE_ASM("seg/seg_156860", RpcAlloc);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00256BD8);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free__FPv();
+
+extern "C" void func_00256BD8(int arg0) {
+    if (arg0 != 0) {
+        cMemMan_free__FPv();
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", cGameComm_construct);
 
@@ -242,6 +252,16 @@ extern "C" int func_002591D0(void) {
 
 INCLUDE_ASM("seg/seg_156860", func_002591E8);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00259210);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free__FPv();
+
+extern "C" void func_00259210(int arg0) {
+    if (arg0 != 0) {
+        cMemMan_free__FPv();
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00259230);

@@ -344,7 +344,15 @@ extern "C" int func_002BAC90(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC98);
+#ifdef SKIP_ASM
+extern "C" void func_002B2850(int, void *);
+
+extern "C" void func_002BAC98(void *arg0) {
+    func_002B2850((*(int *)((char*)(arg0) + (0x408))), arg0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BACB8);
@@ -535,15 +543,39 @@ extern "C" int func_002BADC8(void *arg0) {
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BADD0);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAEE8);
+#ifdef SKIP_ASM
+extern "C" void func_002B8818(int, int);
+
+extern "C" void func_002BAEE8(void) {
+    func_002B8818(1, 0xFFFF);
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BAF08);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAF90);
+#ifdef SKIP_ASM
+extern "C" void *func_002C1CD8(int);
+
+extern "C" int func_002BAF90(int *arg0) {
+    return (*(int *)((char*)(func_002C1CD8(*arg0)) + (4)));
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BAFB0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/seg_1BA100", func_002BB0E0);
+#ifdef SKIP_ASM
+extern "C" void func_002BAFB0(int, int);
+
+extern "C" void func_002BB0E0(void) {
+    func_002BAFB0(1, 0xFFFF);
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
 
@@ -600,7 +632,15 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BBBF8);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BBC38);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/seg_1BA100", func_002BC4E0);
+#ifdef SKIP_ASM
+extern "C" void func_002BBC38(int, int);
+
+extern "C" void func_002BC4E0(void) {
+    func_002BBC38(1, 0xFFFF);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC500);
@@ -1230,7 +1270,19 @@ extern "C" int func_002BDAF8(void *arg0, void *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDB10);
+#ifdef SKIP_ASM
+extern "C" int func_002BDB10(void *arg0, void *arg1) {
+    int var_2;
+
+    var_2 = 0;
+    if ((*(float *)((char*)(arg0) + (8))) == (*(float *)((char*)(arg1) + (4)))) {
+        var_2 = 1;
+    }
+    return var_2;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BDB38);
 
@@ -1238,11 +1290,35 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDBD0);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BDC78);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDD10);
+#ifdef SKIP_ASM
+extern "C" int func_002BDD10(void *arg0, void *arg1) {
+    int var_2;
+
+    var_2 = 0;
+    if ((*(float *)((char*)(arg0) + (8))) == (*(float *)((char*)(arg1) + (4)))) {
+        var_2 = 1;
+    }
+    return var_2;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BDD38);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDE08);
+#ifdef SKIP_ASM
+extern "C" int func_002BDE08(void *arg0, void *arg1) {
+    int var_2;
+
+    var_2 = 0;
+    if ((*(float *)((char*)(arg0) + (8))) == (*(float *)((char*)(arg1) + (4)))) {
+        var_2 = 1;
+    }
+    return var_2;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BDE30);
 

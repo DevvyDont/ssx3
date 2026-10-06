@@ -18,7 +18,16 @@ INCLUDE_ASM("main/all_in_one_main", func_001DB778);
 
 INCLUDE_ASM("main/all_in_one_main", func_001DB918);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DBAB8);
+#ifdef SKIP_ASM
+extern "C" void func_0017E558(int);
+
+extern "C" int func_001DBAB8(void *arg0) {
+    func_0017E558((*(int *)((char*)(arg0) + (0x130))));
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DBAD8);
 
@@ -1297,7 +1306,18 @@ extern "C" int func_001DE468(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE470);
+#ifdef SKIP_ASM
+extern "C" void func_001DE470(void *arg0) {
+    int temp_3;
+
+    temp_3 = (*(int *)((char*)(arg0) + (0x134)));
+    if (temp_3 < ((*(int *)((char*)(arg0) + (0x60))) - 1)) {
+        (*(int *)((char*)(arg0) + (0x134))) = (int) (temp_3 + 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE498);

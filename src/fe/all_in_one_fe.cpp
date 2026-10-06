@@ -350,7 +350,15 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002223C0);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_002223E8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/all_in_one_fe", func_00222428);
+#ifdef SKIP_ASM
+extern "C" void __sti__all_in_one_fe_cpp(int, int);
+
+extern "C" void func_00222428(void) {
+    __sti__all_in_one_fe_cpp(1, 0xFFFF);
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00222448);
 
