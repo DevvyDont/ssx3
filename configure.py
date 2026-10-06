@@ -2,6 +2,7 @@
 import argparse
 import os
 import shutil
+import subprocess
 import sys
 import json
 from pathlib import Path
@@ -16,7 +17,10 @@ ROOT = Path(__file__).parent.resolve()
 TOOLS_DIR = ROOT / "tools"
 OUTDIR = "out"
 
-YAML_FILE = ROOT / "config" / "ssx3_us.yaml"
+# Kept relative (not ROOT / ...) so splat resolves base_path relatively too;
+# otherwise it bakes this machine's absolute path into generated files like
+# include/macro.inc's ".include" directives.
+YAML_FILE = Path("config") / "ssx3_us.yaml"
 BASENAME = "SLUS_207.72"
 LD_PATH = f"{BASENAME}.ld"
 ELF_PATH = f"{OUTDIR}/{BASENAME}"
@@ -24,17 +28,33 @@ MAP_PATH = f"{OUTDIR}/{BASENAME}.map"
 PRE_ELF_PATH = f"{OUTDIR}/{BASENAME}.elf"
 
 COMMON_INCLUDES = "-Iinclude -isystem include/sdk/ee -isystem include/gcc"
+if sys.platform == "darwin":
+    # macOS has no /usr/include for the compiler to fall back on (under Linux
+    # + Wine it picks up the host's glibc headers there, e.g. <stdint.h>), so
+    # supply the few headers the sources need from tools/macos/include.
+    COMMON_INCLUDES += " -isystem tools/macos/include"
 
 
-CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
+# The compiler is SN V1.36 with its dormant `vec_mark` insn switched on (see tools/patch_vecmark.py):
+# the retail code shows EA's compiler emitted it in every empty array-ctor loop. The patched copy is
+# generated from the stock download on first configure.
+STOCK_CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
+CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36-vecmark"
+if not os.path.isdir(CC_DIR) and os.path.isdir(STOCK_CC_DIR):
+    subprocess.run([sys.executable, f"{TOOLS_DIR}/patch_vecmark.py", STOCK_CC_DIR, CC_DIR], check=True)
 DRIVER_PATH_FLAG = f"-B{CC_DIR}/lib/gcc-lib/ee/2.95.3/"
 
 # See tools/cc/README.md for how these were gathered
 COMMON_CFLAGS = "-O2"
 COMMON_CXXFLAGS = ""
 
-COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"
-COMPILE_CXX_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -xc++ -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} {COMMON_CXXFLAGS} $in"
+# splat's generated INCLUDE_ASM macro emits `.include "FOLDER/NAME.s"` relative
+# to the nonmatchings dir (no longer hardcodes "asm/nonmatchings/"), so the
+# internal assembler needs that dir on its include search path.
+ASM_INCLUDE_FLAG = "-Wa,-Iasm/nonmatchings"
+
+COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {ASM_INCLUDE_FLAG} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"
+COMPILE_CXX_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -xc++ -c {COMMON_INCLUDES} {ASM_INCLUDE_FLAG} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} {COMMON_CXXFLAGS} $in"
 
 CATEGORY_MAP = {
     "sce": "Libs",
@@ -45,6 +65,14 @@ WINE = "wine"
 if sys.platform == "linux" or sys.platform == "linux2":
     COMPILE_C_RULE = f"{WINE} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WINE} {COMPILE_CXX_RULE}"
+elif sys.platform == "darwin":
+    # macOS: run the Windows compiler with wibo (decompals/wibo, the
+    # `wibo-macos` release asset; runs under Rosetta 2 on Apple Silicon)
+    # instead of Wine. Uses $WIBO, else tools/wibo/wibo, else `wibo` on PATH.
+    _wibo_local = TOOLS_DIR / "wibo" / "wibo"
+    WIBO = os.environ.get("WIBO") or (str(_wibo_local) if _wibo_local.exists() else "wibo")
+    COMPILE_C_RULE = f"{WIBO} {COMPILE_C_RULE}"
+    COMPILE_CXX_RULE = f"{WIBO} {COMPILE_CXX_RULE}"
 
 def clean():
     files_to_clean = [
@@ -73,8 +101,49 @@ compiler_type = "gcc"
 [preserve_macros]
 
 [decompme.compilers]
-"tools/cc/eegcc-2.95.3-V1.36/bin/gcc" = "eegcc-2.95.3-V1.36"
+"tools/cc/eegcc-2.95.3-V1.36-vecmark/bin/gcc" = "eegcc-2.95.3-V1.36"
 """)
+
+
+def rewrite_lit4_loads_for_objdiff():
+    """Objects mode only: turn `lwc1 $fN, (D_x)` loads of .lit4 pool entries back into `li.s $fN, value`.
+
+    The compiler never names float literals: it emits `li.s` and the assembler puts the value in
+    the object's own .lit4 (R_MIPS_LITERAL). splat instead references the retail pool entry by name
+    (GPREL16 to an external D_ symbol), which no C can reproduce. Rewriting the target asm the same
+    way the original toolchain built it makes the two comparable; the instruction bytes are
+    unchanged (one gp-relative lwc1). Values with a zero low half are skipped, because gas would
+    expand those to lui+mtc1. Never used for the linked ELF: its .lit4 layout comes from the split
+    .lit4 data segment.
+    """
+    import re
+    import struct
+
+    lit4_files = list(Path("asm/data").glob("*.lit4.s"))
+    values = {}
+    for f in lit4_files:
+        for addr, word in re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/\s+\.float", f.read_text()):
+            raw = bytes.fromhex(word)
+            if int.from_bytes(raw, "little") & 0xFFFF:
+                values[addr] = struct.unpack("<f", raw)[0]
+    load = re.compile(r"lwc1(\s+)(\$f\d+), \((D_([0-9A-F]{8}))\) /\* gp_rel: \(D_[0-9A-F]{8}\) \*/")
+    rewritten = 0
+    for f in Path("asm/nonmatchings").rglob("*.s"):
+        text = f.read_text()
+        if "gp_rel" not in text:
+            continue
+
+        def sub(m):
+            nonlocal rewritten
+            if m.group(4) not in values:
+                return m.group(0)
+            rewritten += 1
+            return f"li.s{m.group(1)}{m.group(2)}, {values[m.group(4)]!r} /* lit4: {m.group(3)} */"
+
+        new = load.sub(sub, text)
+        if new != text:
+            f.write_text(new)
+    print(f"lit4: rewrote {rewritten} literal loads to li.s for objdiff")
 
 def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_only=False, dual_objects=False):
     """
@@ -95,6 +164,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         extra_flags: str = "",
         collect_objdiff: bool = False,
         orig_entry=None,
+        implicit: List[str] = None,
     ):
         """
         Helper function to build objects.
@@ -144,6 +214,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 rule=task,
                 inputs=[str(s) for s in src_paths],
                 variables=build_vars,
+                implicit=implicit or [],
                 implicit_outputs=implicit_outputs,
             )
             # Collect for objdiff.json if requested
@@ -193,10 +264,18 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
 
     ld_args = "-EL -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -Map $mapfile -T $in -o $out"
 
+    as_cpp = "cpp"
+    as_filter = ""
+    if sys.platform == "darwin":
+        # Apple's /usr/bin/cpp mis-parses `-isystem DIR`; use clang directly.
+        # Also normalise $t0-$t7 to numeric names (see tools/macos/o32_gpr_names.pl).
+        as_cpp = "clang -E -x assembler-with-cpp"
+        as_filter = "perl -p tools/macos/o32_gpr_names.pl | "
+
     ninja.rule(
         "as",
         description="as $in",
-        command=f"cpp {COMMON_INCLUDES} $in -o  - | {cross}as -no-pad-sections -EL -march=5900 -mabi=eabi -Iinclude -o $out",
+        command=f"{as_cpp} {COMMON_INCLUDES} $in -o  - | {as_filter}{cross}as -no-pad-sections -EL -march=5900 -mabi=eabi -Iinclude -o $out",
     )
 
     ninja.rule(
@@ -218,6 +297,12 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
+        "asmoff",
+        description="asmoff $out",
+        command="python3 tools/asm_offsets.py $src $in $out",
+    )
+
+    ninja.rule(
         "sha1sum",
         description="sha1sum $in",
         command="sha1sum -c $in && touch $out",
@@ -228,6 +313,18 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         description="elf $out",
         command=f"{cross}objcopy $in $out -O binary",
     )
+
+    def current_c_flags(entry):
+        """-DSKIP_ASM plus the target offsets of the unit's INCLUDE_ASM functions (tools/asm_offsets.py), so
+        every C function in obj/current sits at its obj/target offset: SN's assembler pads short loops
+        depending on position, so a matched function only reproduces the target bytes there."""
+        obj = Path(entry.object_path)
+        stem = obj.with_suffix("").stem if obj.suffix == ".o" else obj.stem
+        src = str(entry.src_paths[0])
+        inc = f"obj/offsets/{stem}/asm_offsets.inc"
+        ninja.build(outputs=[inc], rule="asmoff", inputs=[f"obj/target/{stem}.o"], implicit=[src],
+                    variables={"src": src})
+        return f"-DSKIP_ASM -DASM_OFFSETS -Wa,-Iobj/offsets/{stem}", [inc]
 
     # Add recipes for everything
     for entry in linker_entries:
@@ -250,13 +347,15 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags=flags, implicit=inc)
             else:
                 build(entry.object_path, entry.src_paths, "cc")
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags=flags, implicit=inc)
             else:
                 build(entry.object_path, entry.src_paths, "cpp")
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
@@ -394,6 +493,7 @@ def main():
     linker_entries = split.linker_writer.entries
 
     if do_objects:
+        rewrite_lit4_loads_for_objdiff()
         build_stuff(linker_entries, skip_checksum=True, objects_only=True, dual_objects=True)
     else:
         build_stuff(linker_entries, do_skip_checksum)

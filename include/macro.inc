@@ -1,27 +1,66 @@
-.macro glabel label
-    .global \label
-    .type \label, @function
-    \label:
-.endm
-.macro dlabel label
-    .global \label
-    \label:
+# This file is used by modern gas.
+# Defines the expected assembly macros
+
+# Evaluate this file only once in case it's included more than once
+.ifndef _MACRO_INC_GUARD
+.internal _MACRO_INC_GUARD
+.set _MACRO_INC_GUARD, 1
+
+# A function symbol.
+.macro glabel label, visibility=global
+    .\visibility "\label"
+    .type "\label", @function
+    "\label":
+        .ent "\label"
 .endm
 
-# Closes out a data symbol opened with glabel/dlabel so it gets a proper
-# ELF size (current splat/spimdisasm emits this after every data symbol).
+# The end of a function symbol.
+.macro endlabel label
+    .size "\label", . - "\label"
+    .end "\label"
+.endm
+
+# An alternative entry to a function.
+.macro alabel label, visibility=global
+    .\visibility "\label"
+    .type "\label", @function
+    "\label":
+        .aent "\label"
+.endm
+
+# A label referenced by an error handler table.
+.macro ehlabel label, visibility=global
+    .\visibility "\label"
+    "\label":
+.endm
+
+
+# A label referenced by a jumptable.
+.macro jlabel label, visibility=global
+    .\visibility "\label"
+    "\label":
+.endm
+
+
+# A data symbol.
+.macro dlabel label, visibility=global
+    .\visibility "\label"
+    .type "\label", @object
+    "\label":
+.endm
+
+# End of a data symbol.
 .macro enddlabel label
-    .size \label, . - \label
+    .size "\label", . - "\label"
 .endm
 
-# Marks a function as not-yet-matched. Current splat/spimdisasm emits this
-# unconditionally before every function split, regardless of match status;
-# it's purely an informational marker (scripts/matching_report.py filters
-# symbols ending in .NON_MATCHING when reading objdiff's symbol table), so
-# this just emits that marker object and has no effect on the actual code.
+
+# Label to signal the symbol haven't been matched yet.
 .macro nonmatching label, size=1
-    .global \label\().NON_MATCHING
-    .type \label\().NON_MATCHING, @object
-    .size \label\().NON_MATCHING, \size
-    \label\().NON_MATCHING:
+    .global "\label\().NON_MATCHING"
+    .type "\label\().NON_MATCHING", @object
+    .size "\label\().NON_MATCHING", \size
+    "\label\().NON_MATCHING":
 .endm
+
+.endif

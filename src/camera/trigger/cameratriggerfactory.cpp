@@ -1,0 +1,2957 @@
+#include "common.h"
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
+#ifdef SKIP_ASM
+extern "C" int get_uint(void* reader, void* dst);
+extern "C" int get_cCTActionSwitchCam(void* reader, void* dst);
+extern "C" int get_cCTActionBoundedCam(void* reader, char* obj);
+extern "C" int get_cCTActionSpline(void* reader, void* dst);
+void* get_cCTActionNone(void* unused, int* outType);
+// PORT: the game's tagged allocator, bound as a placement operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
+struct sCTActVec3A {
+    float x, y, z;
+};
+
+extern sCTActVec3A D_004FF0D8_act __asm__("D_004FF0D8");     // zero vector
+extern void* D_0045C2E8[];      // cCTAction vtable
+extern void* D_0045C1D0[];      // bounded cam
+extern void* D_0045C1B8[];      // spline
+extern char D_0045C0B0[];
+extern char D_0045C0C8[];
+extern char D_0045C0E0[];
+extern char D_0045C0F8[];
+
+// PORT: raw vtable stores stand in for the real virtual classes (vptr at 0x4, after `type`).
+// Classes with their own vtable set `type` in their own ctor, after the derived vptr store.
+struct sCTActA {
+    int type;           // 0x00
+    void** vtable;      // 0x04
+    sCTActA()
+    {
+        vtable = D_0045C2E8;
+    }
+    sCTActA(int t)
+    {
+        vtable = D_0045C2E8;
+        type = t;
+    }
+};
+
+struct sCTActSwitchA : sCTActA {
+    int target;         // 0x08
+    float blend;        // 0x0C
+    sCTActSwitchA() : sCTActA(0)
+    {
+        target = 0;
+        blend = 1.0f;
+    }
+};
+
+struct sCTActBoundedA : sCTActA {
+    int f08;            // 0x08
+    float blend;        // 0x0C
+    float f10;          // 0x10
+    float f14;          // 0x14
+    float f18;          // 0x18
+    float f1C;          // 0x1C
+    int f20;            // 0x20
+    int f24;            // 0x24
+    sCTActVec3A f28;    // 0x28
+    sCTActBoundedA() : sCTActA()
+    {
+        vtable = D_0045C1D0;
+        type = 1;
+        f08 = 0;
+        blend = 1.0f;
+        f14 = 0.5235987901687622f;
+        f10 = 400.0f;
+        f1C = 25.0f;
+        f18 = 70.0f;
+        f24 = 0;
+        f28 = D_004FF0D8_act;
+        f20 = 0;
+    }
+};
+
+struct sCTActSplineA : sCTActA {
+    int f08;            // 0x08
+    float blend;        // 0x0C
+    float f10;          // 0x10
+    int f14;            // 0x14
+    float f18;          // 0x18
+    int f1C;            // 0x1C
+    sCTActSplineA() : sCTActA()
+    {
+        vtable = D_0045C1B8;
+        type = 2;
+        f08 = 0;
+        blend = 1.0f;
+        f10 = 0.5235987901687622f;
+        f14 = 0;
+        f18 = 4.0f;
+        f1C = 0;
+    }
+};
+
+struct sCTActNoneA : sCTActA {
+    sCTActNoneA() : sCTActA(3) {}
+};
+
+extern "C" int get_camaction(void* reader, void** out)
+{
+    int type;
+    int n = get_uint(reader, &type);
+    switch (type) {
+    case 0: {
+        sCTActSwitchA* o = new (D_0045C0B0, 0, 0) sCTActSwitchA;
+        int r = get_cCTActionSwitchCam(reader, o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 1: {
+        sCTActBoundedA* o = new (D_0045C0C8, 0, 0) sCTActBoundedA;
+        int r = get_cCTActionBoundedCam(reader, (char*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 2: {
+        sCTActSplineA* o = new (D_0045C0E0, 0, 0) sCTActSplineA;
+        int r = get_cCTActionSpline(reader, o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 3: {
+        sCTActNoneA* o = new (D_0045C0F8, 0, 0) sCTActNoneA;
+        // PORT: get_cCTActionNone returns the byte count as void*.
+        int r = (int)get_cCTActionNone(reader, (int*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    }
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionBoundedCam);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int get_float(void* reader, void* dst);
+extern "C" int get_uint(void* reader, void* dst);
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+extern "C" int get_cCTActionBoundedCam(void* reader, char* obj)
+{
+    int n;
+    *(int*)obj = 1;
+    n = get_float(reader, obj + 0xC);
+    n += get_float(reader, obj + 0x10);
+    n += get_float(reader, obj + 0x14);
+    n += get_float(reader, obj + 0x18);
+    n += get_float(reader, obj + 0x1C);
+    n += get_float(reader, obj + 0x20);
+    n += get_uint(reader, obj + 0x24);
+    n += get_t3Vector_n(reader, obj + 0x28);
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSwitchCam);
+#ifdef SKIP_ASM
+extern "C" int get_float(void* reader, void* dst);
+extern "C" int get_uint(void* reader, void* dst);
+
+extern "C" int get_cCTActionSwitchCam(void* reader, void* dst)
+{
+    *(int*)dst = 0;
+    int n = get_float(reader, (char*)dst + 0xC);
+    return n + get_uint(reader, (char*)dst + 0x8);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSpline);
+#ifdef SKIP_ASM
+extern "C" int get_cCTActionSpline(void* reader, void* dst)
+{
+    *(int*)dst = 2;
+    int n = get_float(reader, (char*)dst + 0xC);
+    n += get_float(reader, (char*)dst + 0x10);
+    n += get_float(reader, (char*)dst + 0x14);
+    n += get_float(reader, (char*)dst + 0x18);
+    return n + get_float(reader, (char*)dst + 0x1C);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionNone__FPvPi);
+#ifdef SKIP_ASM
+void* get_cCTActionNone(void* unused, int* outType)
+{
+    *outType = 3;
+    return 0;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camboundobj);
+#ifdef SKIP_ASM
+// PORT: the game's tagged allocator, bound as a placement operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
+struct sCTVec3G {
+    float x, y, z;
+    sCTVec3G() {}
+    sCTVec3G(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+extern sCTVec3G D_004FF0D8;     // zero vector
+extern void* D_0045C3F0[];      // cCTBoundObj vtable
+extern void* D_0045C2A8[];      // ellipse
+extern void* D_0045C268[];      // box
+extern void* D_0045C228[];      // line
+extern void* D_0045C1E8[];      // point
+extern char D_0045C110[];
+extern char D_0045C128[];
+extern char D_0045C140[];
+extern char D_0045C158[];
+
+// PORT: raw vtable stores stand in for the real virtual classes: the base ctor stores the
+// cCTBoundObj vtable first and the derived class's vtable last, where g++ 2.95 sets the
+// derived vptr (after the base ctor, before the derived class's members are constructed).
+struct sCTBoundObjG {
+    sCTVec3G center;    // 0x00
+    int f0C;            // 0x0C
+    int f10;            // 0x10
+    int f14;            // 0x14
+    sCTVec3G size;      // 0x18
+    void** vtable;      // 0x24
+    sCTBoundObjG(const sCTVec3G& s, void** vt)
+    {
+        vtable = D_0045C3F0;
+        center = D_004FF0D8;
+        f0C = 0;
+        f10 = 0;
+        f14 = 0;
+        size = s;
+        vtable = vt;
+    }
+};
+
+struct sCTBoundEllG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTBoundEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C2A8) { type = 0; }
+};
+
+struct sCTBoundBoxG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTBoundBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C268) { type = 1; }
+};
+
+struct sCTBoundLineG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTVec3G pts[2];    // 0x2C
+    sCTBoundLineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
+    {
+        type = 2;
+        pts[0] = D_004FF0D8;
+        pts[1] = D_004FF0D8;
+    }
+};
+
+struct sCTBoundPointG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTBoundPointG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C1E8) { type = 3; }
+};
+
+class cCTBoundObjEllK2;
+class cCTBoundObjBoxK2;
+class cCTBoundObjLineK2;
+struct sBoundObjPoint;
+extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj);
+extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj);
+extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj);
+void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
+
+extern "C" int get_camboundobj(void* reader, void** out)
+{
+    int type;
+    int n = get_uint(reader, &type);
+    switch (type) {
+    case 0: {
+        sCTBoundEllG* o = new (D_0045C110, 0, 0) sCTBoundEllG;
+        int r = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 1: {
+        sCTBoundBoxG* o = new (D_0045C128, 0, 0) sCTBoundBoxG;
+        int r = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 2: {
+        sCTBoundLineG* o = new (D_0045C140, 0, 0) sCTBoundLineG;
+        int r = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 3: {
+        sCTBoundPointG* o = new (D_0045C158, 0, 0) sCTBoundPointG;
+        // PORT: get_cCTBoundObjPoint returns the byte count as void*.
+        int r = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    }
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjEllipse);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTBoundObjEllK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 0;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjBox);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTBoundObjBoxK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 1;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjLine);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTBoundObjLineK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 2;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    n += get_t3Vector_n(reader, (char*)obj + 0x2C);
+    n += get_t3Vector_n(reader, (char*)obj + 0x38);
+    return n;
+}
+#endif
+
+struct sBoundObjVTable {
+    char pad_0x00[0x8];
+    short field_0x8;
+    char pad_0xA[2];
+    void* (*fn)(void*); // 0xC
+};
+
+struct sBoundObjPoint {
+    char pad_0x00[0x24];
+    sBoundObjVTable* vtable;
+    int field_0x28;
+};
+
+extern "C" void* get_t3Vector(void* self, void* v);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjPoint__FPvP14sBoundObjPoint);
+#ifdef SKIP_ASM
+void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj)
+{
+    obj->field_0x28 = 3;
+    void* result = obj->vtable->fn((char*)obj + obj->vtable->field_0x8);
+    return get_t3Vector(self, result);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camspline);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+extern char D_0045C170[];
+
+struct sCTSplineG : sCTBoundObjG {
+    sCTVec3G pts[4];    // 0x28
+    sCTSplineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3F0)
+    {
+        pts[0] = D_004FF0D8;
+        pts[1] = D_004FF0D8;
+        pts[2] = D_004FF0D8;
+        pts[3] = D_004FF0D8;
+    }
+};
+
+class cCTSplineK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; control points at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_camspline(void* reader, cCTSplineK2** out)
+{
+    int n;
+    *out = (cCTSplineK2*)new (D_0045C170, 0, 0) sCTSplineG;
+    n = get_t3Vector_n(reader, (*out)->center());
+    n += get_t3Vector_n(reader, (*out)->axis());
+    n += get_float(reader, (*out)->sizeX());
+    n += get_float(reader, (*out)->sizeY());
+    n += get_float(reader, (*out)->sizeZ());
+    n += get_t3Vector_n(reader, (char*)*out + 0x28);
+    n += get_t3Vector_n(reader, (char*)*out + 0x34);
+    n += get_t3Vector_n(reader, (char*)*out + 0x40);
+    n += get_t3Vector_n(reader, (char*)*out + 0x4C);
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00171FA8);
+#ifdef SKIP_ASM
+struct sVec4_171FA8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_171FA8 {
+    sVec4_171FA8 lo;
+    sVec4_171FA8 hi;
+};
+
+struct sVEbox_171FA8 {
+    short delta;
+    short index;
+    sBox_171FA8 (*fn)(void*);
+};
+
+struct sVEin_171FA8 {
+    short delta;
+    short index;
+    int (*fn)(void*, sVec4_171FA8*);
+};
+
+extern "C" float func_0040DA10(float x);
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_171FA8 Add_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
+{
+    sVec4_171FA8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_171FA8 Sub_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
+{
+    sVec4_171FA8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_171FA8 Scale_171FA8(const sVec4_171FA8& v, float s)
+{
+    sVec4_171FA8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_171FA8(const sVec4_171FA8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+static inline sBox_171FA8 GetBox_171FA8(char* o)
+{
+    sVEbox_171FA8* e = &(*(sVEbox_171FA8**)(o + 0x24))[6];
+    return e->fn(o + e->delta);
+}
+
+static inline int Inside_171FA8(char* o, sVec4_171FA8* p)
+{
+    sVEin_171FA8* e = &(*(sVEin_171FA8**)(o + 0x24))[7];
+    return e->fn(o + e->delta, p);
+}
+
+static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
+{
+    return Scale_171FA8(Add_171FA8(b.lo, b.hi), 0.5f);
+}
+
+extern "C" sVec4_171FA8 func_00171FA8(char* obj, sVec4_171FA8* pos, float step)
+{
+    sVec4_171FA8 center = Center_171FA8(GetBox_171FA8(obj));
+    sVec4_171FA8 dir = Sub_171FA8(*pos, center);
+    sVec4_171FA8 a = *pos;
+    sVec4_171FA8 b = center;
+    float k = 2.0f;
+    sVEin_171FA8* e;
+    while (e = &(*(sVEin_171FA8**)(obj + 0x24))[7], e->fn(obj + e->delta, &a)) {
+        b = a;
+        sVec4_171FA8 off = Scale_171FA8(dir, k);
+        a = Add_171FA8(center, off);
+        k += k;
+    }
+    float len = Length_171FA8(Sub_171FA8(a, b));
+    int n = (int)func_0040DA10(len / step) + 1;
+    for (int i = 0; i < n; i++) {
+        sVec4_171FA8 m = Scale_171FA8(Add_171FA8(a, b), 0.5f);
+        e = &(*(sVEin_171FA8**)(obj + 0x24))[7];
+        if (e->fn(obj + e->delta, &m)) {
+            b = m;
+        } else {
+            a = m;
+        }
+    }
+    return a;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001721C0);
+#ifdef SKIP_ASM
+extern "C" float func_001731C0(float* v);
+
+struct sCTVec3K2 {
+    float x, y, z;
+    sCTVec3K2() {}
+    sCTVec3K2(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+static inline sCTVec3K2 operator-(const sCTVec3K2& a, float s)
+{
+    return sCTVec3K2(a.x - s, a.y - s, a.z - s);
+}
+
+static inline sCTVec3K2 operator+(const sCTVec3K2& a, float s)
+{
+    return sCTVec3K2(a.x + s, a.y + s, a.z + s);
+}
+
+struct sCTVec4K2 {
+    float x, y, z, w;
+    sCTVec4K2() {}
+    sCTVec4K2(const sCTVec3K2& v, float w_) : x(v.x), y(v.y), z(v.z), w(w_) {}
+} __attribute__((aligned(16)));
+
+struct sCTBoxK2 {
+    sCTVec4K2 min;
+    sCTVec4K2 max;
+    sCTBoxK2(const sCTVec4K2& a, const sCTVec4K2& b) : min(a), max(b) {}
+};
+
+// Bounding box of a trigger volume: centre +- the largest half-extent.
+extern "C" sCTBoxK2 func_001721C0(char* obj)
+{
+    float r = func_001731C0((float*)(obj + 0x18));
+    sCTVec3K2 rv(r, r, r);
+    const sCTVec3K2& c = *(sCTVec3K2*)obj;
+    return sCTBoxK2(sCTVec4K2(c - r, 1.0f), sCTVec4K2(c + r, 1.0f));
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00172278);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00172840);
+#ifdef SKIP_ASM
+extern "C" float func_001731C0(float* v);
+
+struct sCTVec3K2b {
+    float x, y, z;
+    sCTVec3K2b() {}
+    sCTVec3K2b(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+static inline sCTVec3K2b operator-(const sCTVec3K2b& a, float s)
+{
+    return sCTVec3K2b(a.x - s, a.y - s, a.z - s);
+}
+
+static inline sCTVec3K2b operator+(const sCTVec3K2b& a, float s)
+{
+    return sCTVec3K2b(a.x + s, a.y + s, a.z + s);
+}
+
+struct sCTVec4K2b {
+    float x, y, z, w;
+    sCTVec4K2b() {}
+    sCTVec4K2b(const sCTVec3K2b& v, float w_) : x(v.x), y(v.y), z(v.z), w(w_) {}
+} __attribute__((aligned(16)));
+
+struct sCTBoxK2b {
+    sCTVec4K2b min;
+    sCTVec4K2b max;
+    sCTBoxK2b(const sCTVec4K2b& a, const sCTVec4K2b& b) : min(a), max(b) {}
+};
+
+// Bounding box of a trigger volume: centre +- the largest half-extent.
+extern "C" sCTBoxK2b func_00172840(char* obj)
+{
+    float r = func_001731C0((float*)(obj + 0x18));
+    sCTVec3K2b rv(r, r, r);
+    const sCTVec3K2b& c = *(sCTVec3K2b*)obj;
+    return sCTBoxK2b(sCTVec4K2b(c - r, 1.0f), sCTVec4K2b(c + r, 1.0f));
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001728F8);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camvolume);
+#ifdef SKIP_ASM
+class cCTVolumeEllK2;
+class cCTVolumeBoxK2;
+extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj);
+extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj);
+extern void* D_0045C350[];      // volume ellipse vtable
+extern void* D_0045C300[];      // volume box vtable
+extern char D_0045C188[];
+extern char D_0045C1A0[];
+
+struct sCTVolEllG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTVolEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C350) { type = 0; }
+};
+
+struct sCTVolBoxG : sCTBoundObjG {
+    int type;           // 0x28
+    sCTVolBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C300) { type = 1; }
+};
+
+extern "C" int get_camvolume(void* reader, void** out)
+{
+    int type;
+    int n = get_uint(reader, &type);
+    switch (type) {
+    case 0: {
+        sCTVolEllG* o = new (D_0045C188, 0, 0) sCTVolEllG;
+        int r = get_cCTVolumeEllipse(reader, (cCTVolumeEllK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    case 1: {
+        sCTVolBoxG* o = new (D_0045C1A0, 0, 0) sCTVolBoxG;
+        int r = get_cCTVolumeBox(reader, (cCTVolumeBoxK2*)o);
+        *out = o;
+        n += r;
+        break;
+    }
+    default:
+        *(int*)reader -= n;
+        return 0;
+    }
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeEllipse);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTVolumeEllK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 0;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeBox);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
+extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
+
+class cCTVolumeBoxK2 {
+public:
+    char pad_0x00[0x24];
+    // vptr at 0x24; int at 0x28
+    virtual void* center();
+    virtual void* sizeX();
+    virtual void* sizeY();
+    virtual void* sizeZ();
+    virtual void* axis();
+};
+
+extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj)
+{
+    int n;
+    *(int*)((char*)obj + 0x28) = 1;
+    n = get_t3Vector_n(reader, obj->center());
+    n += get_t3Vector_n(reader, obj->axis());
+    n += get_float(reader, obj->sizeX());
+    n += get_float(reader, obj->sizeY());
+    n += get_float(reader, obj->sizeZ());
+    return n;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001731C0);
+#ifdef SKIP_ASM
+extern "C" float func_001731C0(float* v)
+{
+    float x = v[0];
+    float y = v[1];
+    float r = v[2];
+    if (y < x) {
+        if (r < x) {
+            return x;
+        }
+    } else if (r < y) {
+        r = y;
+    }
+    return r;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173208);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_001622B0(void* self);
+extern void* D_0045C4C8[];
+struct sQuad_00173208 {
+    int v[4];
+} __attribute__((aligned(16)));
+
+extern sQuad_00173208 D_004FF130_00173208 __asm__("D_004FF130");
+
+extern "C" void* func_00173208(void* self)
+{
+    func_001622B0(self);
+    *(void***)((char*)self + 0x10) = D_0045C4C8;
+    *(float*)((char*)self + 0x58) = 0.800000011920929f;
+    *(float*)((char*)self + 0x5C) = 10.300000190734863f;
+    *(float*)((char*)self + 0x60) = 1.100000023841858f;
+    *(float*)((char*)self + 0x64) = 5.0f;
+    *(float*)((char*)self + 0x68) = 10.0f;
+    *(float*)((char*)self + 0x6C) = 70.0f;
+    *(float*)((char*)self + 0x70) = 400.0f;
+    *(int*)((char*)self + 0x74) = 0;
+    *(float*)((char*)self + 0x78) = 20.0f;
+    *(sQuad_00173208*)((char*)self + 0x40) = D_004FF130_00173208;
+    *(int*)((char*)self + 0xC) = 0x5A;
+    *(int*)((char*)self + 0x54) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    return self;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732B8);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// PORT: the unit declares func_001732B8 as `void* (void*)` (callers pass the
+// flags through in $a1); the real body takes (self, flags). Bound by asm label.
+void func_001732B8_impl(void* self, int flags) __asm__("func_001732B8");
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+void func_001732B8_impl(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732E8);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173678);
+#ifdef SKIP_ASM
+struct sVE173678a {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+struct sVE173678b {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*);
+};
+
+extern "C" void* func_00173678(void* self)
+{
+    sVE173678b* vt = *(sVE173678b**)((char*)self + 0x10);
+    char* o = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE173678a* vt2 = *(sVE173678a**)o;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173E40);
+#ifdef SKIP_ASM
+struct sV_173E40 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sM_173E40 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPair_173E40 {
+    sV_173E40 a;
+    sV_173E40 b;
+};
+
+extern sM_173E40 D_004FF1A0;
+extern sV_173E40 D_004FF150;
+extern sV_173E40 D_004FF160_v173E40 __asm__("D_004FF160");
+extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" sPair_173E40 func_0031B748(sM_173E40* m);
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_173E40(sM_173E40* dst, const sM_173E40* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
+static inline void vu0MulMtx_173E40(sM_173E40* dst, const sM_173E40* a, const sM_173E40* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void vu0TransMtx_173E40(sM_173E40* m, const sV_173E40& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+static inline void SinCos_173E40(float* s, float* c, float angle)
+{
+    func_0031BE50(s, c, angle);
+}
+
+static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float angle)
+{
+    sM_173E40 r;
+    float s;
+    float c;
+    float one = 1.0f;
+    SinCos_173E40(&s, &c, angle);
+    float t = one - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    r.m[3][3] = one;
+    vu0MulMtx_173E40(m, m, &r);
+}
+
+extern "C" sPair_173E40 func_00173E40(char* src)
+{
+    sM_173E40 m;
+    vu0CopyMtx_173E40(&m, &D_004FF1A0);
+    vu0TransMtx_173E40(&m, *(sV_173E40*)(src + 0x40));
+    RotAxis_173E40(&m, D_004FF150, -*(float*)(src + 0x54));
+    RotAxis_173E40(&m, D_004FF160_v173E40, *(float*)(src + 0x50));
+    return func_0031B748(&m);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174190);
+#ifdef SKIP_ASM
+extern void* D_0045C458[];
+extern "C" void* func_00173208(void* self);
+
+extern "C" void* func_00174190(void* self)
+{
+    func_00173208(self);
+    *(int*)((char*)self + 0xC) = 0x5B;
+    *(void***)((char*)self + 0x10) = D_0045C458;
+    *(int*)((char*)self + 0x80) = 0;
+    *(int*)((char*)self + 0x74) = 0;
+    return self;
+}
+#endif
+
+extern void* D_0045C458[];
+extern "C" void* func_001732B8(void*);
+
+//99.5%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001741D8__FPv);
+#ifdef SKIP_ASM
+void* func_001741D8(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045C458;
+    return func_001732B8(self);
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174200);
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001744B0);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001747A0);
+#ifdef SKIP_ASM
+struct sVE1747A0a {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+
+struct sVE1747A0b {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*);
+};
+
+extern "C" void* func_001747A0(void* self)
+{
+    sVE1747A0b* vt = *(sVE1747A0b**)((char*)self + 0x10);
+    char* o = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE1747A0a* vt2 = *(sVE1747A0a**)o;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174848);
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00175A20);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176328);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00176328(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+typedef int cQuad128 __attribute__((mode(TI)));
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176358);
+#ifdef SKIP_ASM
+extern "C" void* func_00176358(void* self, void* a1)
+{
+    *(cQuad128*)self = *(cQuad128*)((char*)a1 + 0x20);
+    return self;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176368);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00176368(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176398);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00176398(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001763C8);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_001763C8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001763F8);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+void operator_delete(int* ptr);
+
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_001763F8(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176440__FPv);
+#ifdef SKIP_ASM
+void* func_00176440(void* self)
+{
+    return self;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176448__FPv);
+#ifdef SKIP_ASM
+void* func_00176448(void* self)
+{
+    return (char*)self + 0xC;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176450__FPv);
+#ifdef SKIP_ASM
+void* func_00176450(void* self)
+{
+    return (char*)self + 0x10;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176458__FPv);
+#ifdef SKIP_ASM
+void* func_00176458(void* self)
+{
+    return (char*)self + 0x14;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176460__FPv);
+#ifdef SKIP_ASM
+void* func_00176460(void* self)
+{
+    return (char*)self + 0x18;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001765F8__FPv);
+#ifdef SKIP_ASM
+void func_001765F8(void* self)
+{
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176808);
+#ifdef SKIP_ASM
+struct sVec4A16 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" void func_00176808(float* v, sVec4A16* out)
+{
+    sVec4A16 t;
+    t.x = v[0];
+    t.y = v[1];
+    t.z = v[2];
+    t.w = 1.0f;
+    *out = t;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176840);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_00176840(void* self)
+{
+    int* p = *(int**)((char*)self + 0x8);
+    if (p != 0) {
+        operator_delete(p);
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176868);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+
+extern "C" void func_00176868(void* self)
+{
+    int* p = *(int**)((char*)self + 0x8);
+    if (p != 0) {
+        operator_delete(p);
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176890);
+#ifdef SKIP_ASM
+struct sVEnt176890 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+extern "C" void* func_0016C6B0(void*, void*);
+extern "C" void cActiveTriggerList_add(void*, void*);
+
+extern "C" void func_00176890(void* node, void* ctx)
+{
+    char* e;
+    for (e = *(char**)((char*)node + 0x28); e != 0; e = *(char**)e) {
+        if (*(int*)(e + 8) == 4) {
+            char* trig = *(char**)(e + 0xC);
+            char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
+            char* bound = *(char**)(trig + 8);
+            sVEnt176890* cvt = *(sVEnt176890**)sub;
+            sVEnt176890* bvt = *(sVEnt176890**)(bound + 0x24);
+            char* bthis = bound + bvt[7].delta;
+            int r = cvt[5].fn(sub + cvt[5].delta);
+            if (bvt[7].fn(bthis, r)) {
+                void* f = func_0016C6B0(*(void**)ctx, trig);
+                if (f) {
+                    *(int*)((char*)f + 0xC) = 1;
+                } else {
+                    cActiveTriggerList_add(*(void**)ctx, trig);
+                }
+            }
+        }
+    }
+    if (*(void**)((char*)node + 0x0)) func_00176890(*(void**)((char*)node + 0x0), ctx);
+    if (*(void**)((char*)node + 0x4)) func_00176890(*(void**)((char*)node + 0x4), ctx);
+    if (*(void**)((char*)node + 0x8)) func_00176890(*(void**)((char*)node + 0x8), ctx);
+    if (*(void**)((char*)node + 0xC)) func_00176890(*(void**)((char*)node + 0xC), ctx);
+    if (*(void**)((char*)node + 0x10)) func_00176890(*(void**)((char*)node + 0x10), ctx);
+    if (*(void**)((char*)node + 0x14)) func_00176890(*(void**)((char*)node + 0x14), ctx);
+    if (*(void**)((char*)node + 0x18)) func_00176890(*(void**)((char*)node + 0x18), ctx);
+    if (*(void**)((char*)node + 0x1C)) func_00176890(*(void**)((char*)node + 0x1C), ctx);
+}
+#endif
+
+extern "C" void* func_00175A20(int, int);
+
+//99.38%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176A28__FPv);
+#ifdef SKIP_ASM
+void* func_00176A28(void* self)
+{
+    return func_00175A20(1, 0xffff);
+}
+#endif
+
+extern "C" void* func_00175A20(int, int);
+
+//99.38%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176A48__FPv);
+#ifdef SKIP_ASM
+void* func_00176A48(void* self)
+{
+    return func_00175A20(0, 0xffff);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176A68);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CAB0[];
+
+extern "C" void* func_00176A68(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x3C;
+    *(void***)((char*)self + 0x10) = D_0045CAB0;
+    return self;
+}
+#endif
+
+extern void* D_0045CAB0[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176AA8__FPv);
+#ifdef SKIP_ASM
+void* func_00176AA8(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CAB0;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176AD0);
+#ifdef SKIP_ASM
+extern "C" float func_00176AD0(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176AE0);
+#ifdef SKIP_ASM
+extern "C" void func_00176AE0(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176B10);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+// PORT: the camera.cpp definition takes 7 floats; this caller passes an 8th in $f19.
+extern "C" void func_00163450(void* self, void* info, float a, float b, float c, float d, float e, float f,
+                              float g, float h);
+extern "C" void func_001641C0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+
+struct sCamInfo_176B10
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00176B10(char* self)
+{
+    sCamInfo_176B10 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 222.8457794189453f, 5.91639518737793f, 76.68663024902344f, 5.25f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 5.74874210357666f, 27.03497314453125f, 8.82034969329834f, 7.998477935791016f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9651793837547302f, 1.0f, 0.949999988079071f);
+    func_00163450(self, &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+                  0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, 57.0410041809082f, 1.552131175994873f, 10.378137588500977f, 10.066482543945312f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.840967059135437f, 2.494720935821533f, 0.0949358195066452f, 0.8546590209007263f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 120.85977172851562f, 0.9706981778144836f);
+    func_001641C0(self, &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176CE0);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+class cCamTargetK8940 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+class cCamCtrlK8940 {
+public:
+    char pad_0x00[0x10];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00176CE0(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176D68);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CA38[];
+
+extern "C" void* func_00176D68(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x3D;
+    *(void***)((char*)self + 0x10) = D_0045CA38;
+    return self;
+}
+#endif
+
+extern void* D_0045CA38[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176DA8__FPv);
+#ifdef SKIP_ASM
+void* func_00176DA8(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CA38;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176DD0);
+#ifdef SKIP_ASM
+extern "C" float func_00176DD0(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176DE0);
+#ifdef SKIP_ASM
+extern "C" void func_00176DE0(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176E10);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+// PORT: the camera.cpp definition takes 7 floats; this caller passes an 8th in $f19.
+extern "C" void func_00163450(void* self, void* info, float a, float b, float c, float d, float e, float f,
+                              float g, float h);
+extern "C" void func_001641C0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+
+struct sCamInfo_176E10
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00176E10(char* self)
+{
+    sCamInfo_176E10 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 300.9249267578125f, 11.549837112426758f, 76.68663024902344f, 10.755208015441895f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 11.678784370422363f, 31.225603103637695f, 11.392387390136719f, 9.33469009399414f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9599078297615051f, 1.0f, 0.949999988079071f);
+    func_00163450(self, &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+                  0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, 31.10257339477539f, 0.37469127774238586f, 12.332656860351562f, 10.589057922363281f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.8110172748565674f, 2.494720935821533f, 0.13641449809074402f, 0.8536682724952698f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 146.38900756835938f, 0.9706981778144836f);
+    func_001641C0(self, &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176FE0);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+extern "C" void func_00176FE0(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177068);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045C9C0[];
+
+extern "C" void* func_00177068(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x3E;
+    *(void***)((char*)self + 0x10) = D_0045C9C0;
+    return self;
+}
+#endif
+
+extern void* D_0045C9C0[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001770A8__FPv);
+#ifdef SKIP_ASM
+void* func_001770A8(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045C9C0;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001770D0);
+#ifdef SKIP_ASM
+extern "C" float func_001770D0(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001770E0);
+#ifdef SKIP_ASM
+extern "C" void func_001770E0(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177110);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+// PORT: the camera.cpp definition takes 7 floats; this caller passes an 8th in $f19.
+extern "C" void func_00163450(void* self, void* info, float a, float b, float c, float d, float e, float f,
+                              float g, float h);
+extern "C" void func_001641C0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_001643A8(void* self, void* info, float a, float b, float c);
+
+struct sCamInfo_177110
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00177110(char* self)
+{
+    sCamInfo_177110 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 505.79815673828125f, 11.549837112426758f, 76.68663024902344f, 11.38194465637207f,
+                  1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 13.021197319030762f, 98.84776306152344f, 12.293619155883789f, 13.058300971984863f,
+                  0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9653480052947998f, 1.0f, 0.949999988079071f);
+    func_00163450(self, &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+                  0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
+    func_00162B90(self, &info, 50.02703094482422f, 2.5781052112579346f, 13.97744369506836f, 10.748767852783203f,
+                  0.9241908192634583f);
+    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.10213389247655869f, 0.8599911332130432f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 167.9465789794922f, 0.9706981778144836f);
+    func_001641C0(self, &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001772E0);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+extern "C" void func_001772E0(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177368);
+#ifdef SKIP_ASM
+struct sCamInfo_00178BB0;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+extern "C" void func_00162998(void* self, void* info);
+extern "C" void func_00162A20(void* self, void* info);
+extern "C" void func_00162B80(void* self, void* info);
+extern "C" void func_00162C78(void* self, void* info);
+extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
+extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001633B0(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d);
+extern "C" void func_00164878(void* self, void* info, float a);
+extern "C" void func_001646A0(void* self, void* info, float a, float b);
+extern "C" void func_00165540(void* self, float ang);
+
+struct sCamInfo_177368
+{
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00177368(char* self)
+{
+    sCamInfo_177368 info;
+    func_00162568(self, (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    func_00162998(self, &info);
+    func_00162A20(self, &info);
+    func_00162B80(self, &info);
+    func_00162C78(self, &info);
+    func_00163010(self, &info, 356.4251708984375f, 0.0f, 76.68663024902344f, 0.0f, 1.6834967136383057f,
+                  0.9239780306816101f, 0.907414972782135f);
+    func_00163270(self, &info, 0.0f, -168.60406494140625f, 0.0f, 0.0f, 0.9783917665481567f);
+    func_001633B0(self, &info, 0.0f, 0.9709749817848206f, 1.0f, 0.949999988079071f);
+    func_00162B90(self, &info, -0.24752351641654968f, 0.008603549562394619f, 0.12915411591529846f,
+                  0.22476252913475037f, 0.9241908192634583f);
+    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.19890090823173523f, 0.8672914505004883f);
+    func_00164878(self, &info, 1.5269116163253784f);
+    func_001646A0(self, &info, 0.0f, 0.9706981778144836f);
+    func_00165540(self, *(float*)(self + 0x390));
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001774C0);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CB28[];
+
+extern "C" void* func_001774C0(void* self, int n)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = n + 0x12;
+    *(void***)((char*)self + 0x10) = D_0045CB28;
+    *(float*)((char*)self + 0x390) = (float)n * 0.7853981852531433f;
+    return self;
+}
+#endif
+
+extern void* D_0045CB28[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177520__FPv);
+#ifdef SKIP_ASM
+void* func_00177520(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CB28;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177548__FPv);
+#ifdef SKIP_ASM
+float func_00177548(void* self)
+{
+    return 0.0f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177558);
+#ifdef SKIP_ASM
+extern "C" void func_00177558(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177588);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+extern "C" void func_00177588(cCamCtrlK8940* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177650);
+
+extern "C" void* func_00177650(int, int);
+
+//99.38%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E30__FPv);
+#ifdef SKIP_ASM
+void* func_00177E30(void* self)
+{
+    return func_00177650(1, 0xffff);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E50);
+#ifdef SKIP_ASM
+extern "C" void* func_00162318(void* self);
+extern void* D_0045CCC8[];
+
+extern "C" void* func_00177E50(void* self)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x42;
+    *(void***)((char*)self + 0x10) = D_0045CCC8;
+    return self;
+}
+#endif
+
+extern void* D_0045CCC8[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E90__FPv);
+#ifdef SKIP_ASM
+void* func_00177E90(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CCC8;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177EB8);
+#ifdef SKIP_ASM
+extern "C" float func_00177EB8(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177EC8);
+#ifdef SKIP_ASM
+extern "C" void func_00177EC8(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177EF8);
+#ifdef SKIP_ASM
+struct sVec_00177EF8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVEa_00177EF8 {
+    short delta;
+    short index;
+    sVec_00177EF8* (*fn)(void*);
+};
+
+struct sVEb_00177EF8 {
+    short delta;
+    short index;
+    sVec_00177EF8 (*fn)(void*);
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_00177EF8 ctScale_00177EF8(const sVec_00177EF8& v, float s)
+{
+    sVec_00177EF8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_00177EF8 ctAdd_00177EF8(const sVec_00177EF8& a, const sVec_00177EF8& b)
+{
+    sVec_00177EF8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
+{
+    char* o2 = *(char**)((char*)self + 0x30);
+    sVEb_00177EF8* e2 = &(*(sVEb_00177EF8**)o2)[1];
+    return e2->fn(o2 + e2->delta);
+}
+
+extern "C" sVec_00177EF8 func_00177EF8(void* self)
+{
+    char* o = *(char**)(*(char**)((char*)self + 0x30) + 4) + 0x6C0;
+    sVEa_00177EF8* e = &(*(sVEa_00177EF8**)o)[5];
+    sVec_00177EF8* v = e->fn(o + e->delta);
+    return ctAdd_00177EF8(ctScale_00177EF8(*v, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177FC0);
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178208);
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001783E0);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178520);
+#ifdef SKIP_ASM
+struct func_00178520_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
+extern void* D_0045CC50[];
+extern "C" void* func_00162318(void* self);
+
+extern "C" void* func_00178520(void* self, func_00178520_sVec4* a, func_00178520_sVec4* b)
+{
+    func_00162318(self);
+    *(int*)((char*)self + 0xC) = 0x43;
+    *(void***)((char*)self + 0x10) = D_0045CC50;
+    *(func_00178520_sVec4*)((char*)self + 0x390) = *a;
+    *(func_00178520_sVec4*)((char*)self + 0x3A0) = *b;
+    return self;
+}
+#endif
+
+extern void* D_0045CC50[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178588__FPv);
+#ifdef SKIP_ASM
+void* func_00178588(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CC50;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001785B0);
+#ifdef SKIP_ASM
+extern "C" float func_001785B0(void* self)
+{
+    return 61.68796157836914f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001785C0);
+#ifdef SKIP_ASM
+extern "C" void func_001785C0(void* self, void* out)
+{
+    *(float*)((char*)out + 0x4) = 6.654887676239014f;
+    *(float*)((char*)out + 0x0) = 16.140756607055664f;
+    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
+    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
+    *(int*)((char*)out + 0x10) = 1;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001785F0);
+#ifdef SKIP_ASM
+struct sVec4_1785F0
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+
+struct sVEntry_1785F0 { short delta; short index; sVec4_1785F0 (*fn)(void*); };
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_1785F0 Sub_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+{
+    sVec4_1785F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_1785F0 Add_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+{
+    sVec4_1785F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_1785F0 Scale_1785F0(const sVec4_1785F0& v, float s)
+{
+    sVec4_1785F0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_1785F0 Normalize_1785F0(const sVec4_1785F0& v)
+{
+    sVec4_1785F0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sVec4_1785F0 GetPos_1785F0(char* self)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEntry_1785F0* e = &(*(sVEntry_1785F0**)o)[1];
+    return e->fn(o + e->delta);
+}
+
+// The unit declares func_001785F0 later with its own vector type; bind this body by asm label.
+extern "C" sVec4_1785F0 func_001785F0_impl(char* self) __asm__("func_001785F0");
+
+extern "C" sVec4_1785F0 func_001785F0_impl(char* self)
+{
+    sVec4_1785F0 dir = Normalize_1785F0(Sub_1785F0(*(sVec4_1785F0*)(self + 0x390), *(sVec4_1785F0*)(self + 0x3A0)));
+    sVec4_1785F0 rel = Sub_1785F0(GetPos_1785F0(self), *(sVec4_1785F0*)(self + 0x390));
+    sVec4_1785F0 off = Scale_1785F0(dir, Dot_1785F0(rel, dir) / Dot_1785F0(dir, dir));
+    sVec4_1785F0 res = Sub_1785F0(Add_1785F0(*(sVec4_1785F0*)(self + 0x390), off), Scale_1785F0(dir, 1500.0f));
+    return res;
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178758);
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001787E0);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178938);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+
+struct sVec4_00178938 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" sVec4_00178938 func_001785F0(void* self);
+extern "C" sVec4_00178938 func_00178758(void* self);
+
+class cCamTarget_00178938 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+class cCamCtrl_00178938 {
+public:
+    char pad_0x00[0x10];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00178938(cCamCtrl_00178938* self, int id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->v07()) {
+        *(sVec4_00178938*)((char*)self + 0x40) = func_001785F0(self);
+        *(sVec4_00178938*)((char*)self + 0x20) = func_00178758(self);
+        func_00166C60(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001789E8);
+#ifdef SKIP_ASM
+struct sVec4_1789E8
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+
+struct sVEntry_1789E8 { short delta; short index; sVec4_1789E8 (*fn)(void*); };
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_1789E8 Sub_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+{
+    sVec4_1789E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_1789E8 Add_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+{
+    sVec4_1789E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4_1789E8 Scale_1789E8(const sVec4_1789E8& v, float s)
+{
+    sVec4_1789E8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_1789E8 Normalize_1789E8(const sVec4_1789E8& v)
+{
+    sVec4_1789E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_1789E8(const sVec4_1789E8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void DivEq_1789E8(sVec4_1789E8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+struct sQuad_1789E8
+{
+    float v[4];
+} __attribute__((aligned(16)));
+extern sQuad_1789E8 D_004FF140_v1789E8 __asm__("D_004FF140");
+extern void* D_0045CBD8[];
+extern "C" void* func_00162318(void* self);
+
+static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
+{
+    sVEntry_1789E8* e = &(*(sVEntry_1789E8**)o)[slot];
+    return e->fn(o + e->delta);
+}
+
+extern "C" void* func_001789E8(char* self, char* src)
+{
+    func_00162318(self);
+    sVec4_1789E8* d = (sVec4_1789E8*)(self + 0x390);
+    *(int*)(self + 0xC) = 0x44;
+    *(void***)(self + 0x10) = D_0045CBD8;
+    *(int*)(self + 0x3A0) = 0;
+    sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(src, 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(src, 3)) : Get_1789E8(src, 4);
+    *d = dir;
+    *(float*)(self + 0x398) = 0.0f;
+    float len = Length_1789E8(*(sVec4_1789E8*)(self + 0x390));
+    if (len > 0.009999999776482582f)
+        DivEq_1789E8(*(sVec4_1789E8*)(self + 0x390), len);
+    else
+        *(sQuad_1789E8*)(self + 0x390) = D_004FF140_v1789E8;
+    return self;
+}
+#endif
+
+extern void* D_0045CBD8[];
+extern "C" void* func_00162458(void*);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178B70__FPv);
+#ifdef SKIP_ASM
+void* func_00178B70(void* self)
+{
+    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CBD8;
+    return func_00162458(self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178B98__FPv);
+#ifdef SKIP_ASM
+float func_00178B98(void* self)
+{
+    return 0.0f;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178BA8__FPvT0);
+#ifdef SKIP_ASM
+void func_00178BA8(void* self, void* other)
+{
+    *(int*)((char*)other + 0x10) = 0;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178BB0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" float func_0031C040(float x);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sVec_00178BB0 {
+    float x, y, z, w;
+    sVec_00178BB0() {}
+    sVec_00178BB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sCamInfo_00178BB0 {
+    char data[0x68];
+} __attribute__((aligned(16)));
+
+extern sVec_00178BB0 D_004FF160;
+extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h);
+
+struct sVEv_00178BB0 {
+    short delta;
+    short index;
+    sVec_00178BB0 (*fn)(void*);
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_00178BB0 ctScale_00178BB0(const sVec_00178BB0& v, float s)
+{
+    sVec_00178BB0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_00178BB0 ctAdd_00178BB0(const sVec_00178BB0& a, const sVec_00178BB0& b)
+{
+    sVec_00178BB0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_00178BB0 ctSub_00178BB0(const sVec_00178BB0& a, const sVec_00178BB0& b)
+{
+    sVec_00178BB0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sVec_00178BB0 ctRot_00178BB0(const sVec_00178BB0& q, const sVec_00178BB0& v)
+{
+    sVec_00178BB0 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_00178BB0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float wrap_00178BB0(float x)
+{
+    return x - ffloor_00178BB0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+static inline sVec_00178BB0 AxisAngle_00178BB0(const sVec_00178BB0& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    sVec_00178BB0 q;
+    q.w = c;
+    q.x = s * axis.x;
+    q.y = s * axis.y;
+    q.z = s * axis.z;
+    return q;
+}
+
+static inline sVec_00178BB0 getPos_00178BB0(char* self)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEv_00178BB0* e = &(*(sVEv_00178BB0**)o)[1];
+    return e->fn(o + e->delta);
+}
+
+extern "C" void func_00178BB0(char* self)
+{
+    sCamInfo_00178BB0 info;
+    func_00162568(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    (*(int*)(self + 0x3A0))++;
+    *(int*)(self + 0x3A0) %= 0x44C;
+    float ang = wrap_00178BB0((float)*(int*)(self + 0x3A0) * 0.0009090909152291715f * 6.2831854820251465f);
+    float a = (1.0f - func_0031C040(ang)) * 0.7482788562774658f + -0.7482788562774658f;
+    a -= ffloor_00178BB0(a * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+    sVec_00178BB0 q = AxisAngle_00178BB0(D_004FF160, a);
+    sVec_00178BB0 v = ctRot_00178BB0(q, *(sVec_00178BB0*)(self + 0x390));
+    *(sVec_00178BB0*)(self + 0x20) = ctAdd_00178BB0(getPos_00178BB0(self), ctScale_00178BB0(D_004FF160, -3.0f));
+    int multi = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x78) >= 2;
+    float h = 0.0f;
+    if (multi) {
+        h = 150.0f;
+    }
+    float d = 0.0f;
+    if (multi) {
+        d = 200.0f;
+    }
+    *(sVec_00178BB0*)(self + 0x40) =
+        ctAdd_00178BB0(ctSub_00178BB0(*(sVec_00178BB0*)(self + 0x20), ctScale_00178BB0(v, d + 126.0f)),
+                       ctScale_00178BB0(D_004FF160, h + -27.0f));
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178E90);
+#ifdef SKIP_ASM
+extern "C" void func_00166C60(void* self, int id);
+extern "C" void func_00166550(void* self, float a, float b);
+
+struct sCamVEntryIntA {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sCamVEntryVoidA {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00178E90(void* self, int id)
+{
+    char* obj = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
+    if (id == vt[7].fn(obj + vt[7].delta))
+    {
+        func_00166C60(self, id);
+        func_00166550(self, 100.0f, 100.0f);
+        sCamVEntryVoidA* vt2 = *(sCamVEntryVoidA**)((char*)self + 0x10);
+        vt2[5].fn((char*)self + vt2[5].delta);
+    }
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178F58);
+
+extern "C" void* func_00178F58(int, int);
+
+//99.38%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179738__FPv);
+#ifdef SKIP_ASM
+void* func_00179738(void* self)
+{
+    return func_00178F58(1, 0xffff);
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179798);
+
+extern "C" void* func_00179798(int, int);
+
+//99.38%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179FA8__FPv);
+#ifdef SKIP_ASM
+void* func_00179FA8(void* self)
+{
+    return func_00179798(1, 0xffff);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179FC8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144CC0(void* iface, int id);
+
+extern "C" int func_00179FC8(void* self, int id)
+{
+    if (func_00144CC0(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
+        return 1;
+    }
+    if (id >= 0xE && id <= 0x10) {
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A028);
+#ifdef SKIP_ASM
+struct func_0017A028_sEntry {
+    int active;
+    char pad_0x4[0x88];
+};
+
+struct func_0017A028_sMgr {
+    int count;
+    char pad_0x4[0x88];
+    func_0017A028_sEntry entries[1];
+};
+
+extern "C" int func_0017A028(func_0017A028_sMgr* self, int i)
+{
+    if (*(int*)((char*)self + 0x8C08) == 0) {
+        return -1;
+    }
+    i = (i + 1) % self->count;
+    while (self->entries[i].active == 0) {
+        i = (i + 1) % self->count;
+    }
+    return i;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A0B8);
+#ifdef SKIP_ASM
+extern "C" int func_0017A0B8(func_0017A028_sMgr* self, int i)
+{
+    if (*(int*)((char*)self + 0x8C08) == 0) {
+        return -1;
+    }
+    i = (i + self->count - 1) % self->count;
+    while (self->entries[i].active == 0) {
+        i = (i + self->count - 1) % self->count;
+    }
+    return i;
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A158);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A220);
+#ifdef SKIP_ASM
+extern "C" int func_0017A158(int* self, int i, void* key);
+
+// Circular search: first index after `start` for which func_0017A158 matches.
+extern "C" int func_0017A220(int* self, int start, void* key)
+{
+    int n;
+    int i = (start + 1) % self[0];
+    for (n = 0; n < self[0]; n++) {
+        if (func_0017A158(self, i, key))
+            return i;
+        i = (i + 1) % self[0];
+    }
+    return -1;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A2C8);
+#ifdef SKIP_ASM
+extern "C" int func_0017A158(int* self, int i, void* key);
+
+// Circular search backwards: first index before `start` for which func_0017A158 matches.
+extern "C" int func_0017A2C8(int* self, int start, void* key)
+{
+    int n;
+    int i = (start + self[0] - 1) % self[0];
+    for (n = 0; n < self[0]; n++) {
+        if (func_0017A158(self, i, key))
+            return i;
+        i = (i + self[0] - 1) % self[0];
+    }
+    return -1;
+}
+#endif
+
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A978);
+#ifdef SKIP_ASM
+struct cBXString;
+struct cBigFile;
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+// PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
+cBigFile* cBigFile_cBigFile1_17A978(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
+void cBigFile__cBigFile(cBigFile* self, int flags);
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int func_003A6948(const char* path, int n, void* names);
+extern char D_0045CE20[];
+extern char D_004A1298[];
+
+struct sCamEntry_17A978 {
+    char name[0x40];    // 0x00
+    char tag[4];        // 0x40
+    char pad_44[0x48];
+};
+
+struct sCamMgr_17A978 {
+    int count;                          // 0x0000
+    sCamEntry_17A978 entries[0x100];    // 0x0004
+};
+
+struct sCamName_17A978 {
+    char* name;
+    int ok;
+};
+
+// Non-POD (user-declared copy ctor, never defined) so locals get the 16-byte slots g++ gives classes.
+struct sStr_17A978 {
+    char* s;
+    sStr_17A978() {}
+    sStr_17A978(const sStr_17A978&);
+};
+
+struct sBigFile_17A978 {
+    int f0;
+    int f4;
+    sBigFile_17A978() {}
+    sBigFile_17A978(const sBigFile_17A978&);
+};
+
+extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
+{
+    sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
+    sCamName_17A978* names = (sCamName_17A978*)namesp;
+    int fail = 0;
+    int i;
+    int j;
+    for (i = 0; i < n; i++) {
+        int found = 0;
+        for (j = 0; j < self->count; j++) {
+            if (func_0041AA88(names[i].name, self->entries[j].name) == 0 &&
+                func_0041AA88(tag, self->entries[j].tag) == 0) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            fail = 1;
+            break;
+        }
+    }
+    if (!fail) {
+        return 0;
+    }
+    sStr_17A978 base;
+    sStr_17A978 s;
+    sBigFile_17A978 bf;
+    char* pre = D_0045CE20;
+    cBXString_cBXString2(&s, tag);
+    func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
+    cBXString__cBXString(&s, 2);
+    cBigFile* pbf = (cBigFile*)&bf;
+    func_00318630((cBXString*)&s, (cBXString*)&base, D_004A1298);
+    cBigFile_cBigFile1_17A978(pbf, s.s, 0x100);
+    cBXString__cBXString(&s, 2);
+    int r = func_003A6948(base.s, n, names);
+    if (r == 0) {
+        cBigFile__cBigFile((cBigFile*)&bf, 2);
+        cBXString__cBXString(&base, 2);
+        return 0;
+    }
+    for (int k = 0; k < n; k++) {
+        if (names[k].ok) {
+            for (int m = 0; m < self->count; m++) {
+                if (func_0041AA88(names[k].name, self->entries[m].name) == 0 &&
+                    func_0041AA88(tag, self->entries[m].tag) == 0) {
+                    names[k].ok = 0;
+                    break;
+                }
+            }
+        }
+    }
+    cBigFile__cBigFile((cBigFile*)&bf, 2);
+    cBXString__cBXString(&base, 2);
+    return r;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABC8__FPv);
+#ifdef SKIP_ASM
+void* func_0017ABC8(void* self)
+{
+    int t0 = 0;
+    *(int*)((char*)self + 0x4) = t0;
+    *(int*)((char*)self + 0x8) = -1;
+    *(int*)self = t0;
+    return self;
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABE0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+void cMemMan_free(void* p);
+extern char* D_004A289C;
+
+struct sVE_0017ABE0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sIdList_0017ABE0 {
+    int* ids;
+    int count;
+};
+
+extern "C" void func_0017ABE0(sIdList_0017ABE0* self, int flags)
+{
+    if (self->ids != 0)
+    {
+        for (int i = 0; i < self->count; i++)
+        {
+            int id = self->ids[i];
+            if (id >= 0)
+            {
+                char* obj = D_004A289C;
+                sVE_0017ABE0* vt = *(sVE_0017ABE0**)(obj + 0x10D8);
+                vt[50].fn(obj + vt[50].delta, id);
+            }
+        }
+        if (self->ids != 0)
+            cMemMan_free(self->ids);
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
+
+//100%
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017AC98);
+#ifdef SKIP_ASM
+extern "C" int func_0017AC98(void* self, int i)
+{
+    if (i >= 0 && i < *(int*)((char*)self + 0x4)) {
+        *(int*)((char*)self + 0x8) = i;
+    } else {
+        *(int*)((char*)self + 0x8) = -1;
+    }
+    return 1;
+}
+#endif
+

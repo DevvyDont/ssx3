@@ -1,1 +1,170 @@
-//Known file in project
+#include "common.h"
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_0045A7E0[];
+extern void* D_0045AD08[16];
+extern void* D_004A121C;
+extern int D_004A1228;
+
+struct cBESaveInterface {
+    char pad_0x00[8];
+    int field_0x8;
+    void* vtable;
+};
+
+//99.8%
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getThis__Fv);
+#ifdef SKIP_ASM
+void* cBESaveInterface_getThis()
+{
+    if (D_004A121C == 0) {
+        cBESaveInterface* mem = (cBESaveInterface*)cMemMan_alloc(0x10, D_0045A7E0, 0, 0);
+        mem->field_0x8 = 0;
+        mem->vtable = D_0045AD08;
+        D_004A121C = mem;
+        D_004A1228 = 0;
+    }
+    return D_004A121C;
+}
+#endif
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00152688);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_0045A7F0[];
+extern char* D_004A1224;
+
+extern "C" char* func_00152688(void)
+{
+    D_004A1228 = 1;
+    if (D_004A1224 == 0)
+        D_004A1224 = (char*)operator_new_tag(0x80000, D_0045A7F0, 0x100, 0);
+    return D_004A1224;
+}
+#endif
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_001526D0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+extern "C" int func_0014E048(void* be);
+extern char* D_004A1224;
+
+extern "C" char* func_001526D0(void)
+{
+    return D_004A1224 + func_0014E048(cBE_getBE());
+}
+#endif
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00152700);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern void* D_004A1220;
+
+extern "C" void func_00152700(void)
+{
+    if (D_004A1220)
+        cMemMan_free(D_004A1220);
+    D_004A1220 = 0;
+}
+#endif
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00152728);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern char* D_004A1224;
+
+extern "C" void func_00152728(void)
+{
+    if (D_004A1224)
+        cMemMan_free(D_004A1224);
+    D_004A1224 = 0;
+    D_004A1228 = 0;
+}
+#endif
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00152758);
+#ifdef SKIP_ASM
+int func_00152948(void* self);
+// PORT: the unit defines func_00152700(void); this caller passes self in $a0.
+void func_00152700_s(void* self) __asm__("func_00152700");
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+extern "C" int func_003E62D0(void* buf, int n, int seed);
+extern void* D_004A1220;
+struct sSaveHdr_2758 { int w[0x288 / 4]; };
+extern sSaveHdr_2758 D_00535898;
+extern char D_00535C18[];
+struct sCharTbl_2758 { char pad[0x10]; unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 22; unsigned char f13; char pad14[8]; };
+extern sCharTbl_2758 D_00535B20[];
+struct sSaveBits_2758 { unsigned a : 1; unsigned b : 8; unsigned rest : 23; };
+struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
+
+extern "C" void* func_00152758(void* self)
+{
+    int size = func_00152948(self);
+    func_00152700_s(self);
+    D_004A1220 = operator_new_tag(size, D_0045A7F0, 0x100, 0);
+    char* p = (char*)D_004A1220;
+    *(sSaveHdr_2758*)p = D_00535898;
+    p += sizeof(sSaveHdr_2758);
+    func_0041605C(p, D_00535C18, 0xA28);
+    p += 0xA28;
+    sSaveBits6_2758 bits;
+    for (int i = 0; i < 6; i++) {
+        bits.e[i].a = D_00535B20[i].b1;
+        bits.e[i].b = D_00535B20[i].f13;
+    }
+    *(sSaveBits6_2758*)p = bits;
+    p += sizeof(sSaveBits6_2758);
+    int crc = func_003E62D0(D_004A1220, size - 4, 0xFBEA);
+    __builtin_memcpy(p, &crc, 4);
+    return D_004A1220;
+}
+#endif
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00152948__FPv);
+#ifdef SKIP_ASM
+int func_00152948(void* self)
+{
+    return 0xCCC;
+}
+#endif
+
+INCLUDE_ASM("be/beintsavefile", func_00152950);
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00152BA8);
+#ifdef SKIP_ASM
+extern "C" int func_00152BA8()
+{
+    return 0x9B61;
+}
+#endif
+
+INCLUDE_ASM("be/beintsavefile", func_00152BB0);
+
+INCLUDE_ASM("be/beintsavefile", func_00152DE0);
+
+//100%
+INCLUDE_ASM("be/beintsavefile", func_00153050);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+void cMemMan_free(void*);
+extern void* D_004A1220;
+
+extern "C" void func_00153050(void)
+{
+    operator_delete((int*)D_004A121C);
+    D_004A121C = 0;
+    if (D_004A1220)
+        cMemMan_free(D_004A1220);
+    D_004A1220 = 0;
+}
+#endif
+
