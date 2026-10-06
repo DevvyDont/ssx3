@@ -40,6 +40,10 @@ $ . venv/bin/activate
 
 ## Progress
 
+![Decompilation progress: functions and code bytes matched](docs/progress.svg)
+
+Every function is in one of four states: **green** matches the original byte-for-byte (objdiff scores it 100%), **yellow** has an attempt at 90-99%, **red** has an attempt below 90%, and **gray** hasn't been attempted yet. The top bar counts functions; the bottom bar weighs them by code size, so large functions count for more. The image is regenerated as functions are matched.
+
 Non-matching functions live under `asm/nonmatchings/`; anything not in that
 directory has already been decompiled and matches the original binary
 byte-for-byte. Progress is tracked with [objdiff](tools/objdiff), which
@@ -59,13 +63,7 @@ The first step is a full dual build (everything compiles twice, once as
 reference bytes and once from our current source) so it's slower than a
 normal `ninja` build; only rerun it when you want a fresh number.
 
-Snapshot as of 2026-08-02:
-
-| | matching | partial | total | % matching |
-|---|---|---|---|---|
-| Functions | 1,433 | 151 | 12,930 | 11.08% |
-| Code bytes | 27,560 | — | 3,195,184 | 0.86% |
-| Data bytes | 1,152 | — | 500,792 | 0.23% |
+The bars above are the current snapshot (regenerated as matches land).
 
 "Partial" functions have a real C implementation (not a raw `INCLUDE_ASM`
 stub) that compiles but doesn't yet byte-match — see the `//XX%` comment
