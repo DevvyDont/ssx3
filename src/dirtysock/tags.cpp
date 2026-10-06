@@ -474,7 +474,58 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetCrypt);
+#ifdef SKIP_ASM
+extern unsigned char D_004961C0[];
+extern unsigned char D_004962C0[];
+extern char D_004A4A88[];
+extern "C" int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
+
+extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int len, const unsigned char* key, const char* defval)
+{
+    int count;
+    const char* p;
+    const unsigned char* kbase = key;
+    const unsigned char* k;
+    int prev;
+    if (data == 0) {
+        return -1;
+    }
+    if (*data != '$') {
+        return cDirtysock_tag_TagFieldGetString(data, buf, len, defval);
+    }
+    if (kbase == 0 || *kbase == 0) {
+        kbase = (const unsigned char*)D_004A4A88;
+    }
+    if (buf == 0) {
+        for (count = 0, p = data + 1; (unsigned char)p[0] >= '0' && (unsigned char)p[1] >= '0'; count++) {
+            p += 2;
+        }
+        return count;
+    }
+    count = 1;
+    if (len <= 0) {
+        return -1;
+    }
+    p = data + 1;
+    k = kbase;
+    prev = 0;
+    for (; count < len && (unsigned char)p[0] >= '0' && (unsigned char)p[1] >= '0'; count++) {
+        unsigned int c = *k ^ (D_004961C0[(unsigned char)p[0]] | D_004962C0[(unsigned char)p[1]]);
+        if (*++k == 0) {
+            k = kbase;
+        }
+        *buf++ = ((c << 5) | (c >> 3)) ^ prev;
+        int hi = D_004961C0[(unsigned char)p[0]];
+        int lo = D_004962C0[(unsigned char)p[1]];
+        prev = lo | hi;
+        p += 2;
+    }
+    *buf = 0;
+    return count - 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetTime);
