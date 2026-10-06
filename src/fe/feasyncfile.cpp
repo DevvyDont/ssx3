@@ -1605,7 +1605,113 @@ extern "C" void func_001A66A8(void* self, unsigned int index, int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A6978);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" void func_001A5FB8(void* self, int sel);
+extern "C" int func_001A6070(void* self, int sel);
+extern "C" void func_001A66A8(void* self, unsigned int index, int flag);
+extern "C" void func_001A6CA0(void* self);
+struct sOwner1A6E70;
+extern "C" void func_001A6E70(sOwner1A6E70* self);
+extern "C" void func_001A71B0(void* self, unsigned int index, const char* name, int a3);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" int func_002624F8(void* self, int id);
+extern "C" const char* func_002625C8(void* self, int idx);
+extern "C" void func_0039B760(void* self, unsigned char a1);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern char D_00461590[];
+
+static inline void* GetSession_001A6978()
+{
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    return D_004A3328;
+}
+
+struct sIntVec_001A6978 {
+    int f0;
+    int* mBegin;
+    int* mEnd;
+};
+
+struct sOwner_001A6978 {
+    char pad[0x40];
+    void* screen;
+    char pad44[0x6E4 - 0x44];
+    sIntVec_001A6978 mVec;
+    char pad6F0[0x6F4 - 0x6F0];
+    unsigned int mTop;
+};
+
+static inline unsigned int Size_001A6978(sOwner_001A6978* o) { return o->mVec.mEnd - o->mVec.mBegin; }
+
+extern "C" void func_001A6978(void* vself)
+{
+    sOwner_001A6978* self = (sOwner_001A6978*)vself;
+    if (self->screen == 0) {
+        return;
+    }
+    func_001A6E70((sOwner1A6E70*)self);
+    func_001A6CA0(self);
+    unsigned int n = Size_001A6978(self);
+    unsigned int first = self->mTop;
+    if (n >= 16) {
+        if (n - first < 15) {
+            int top = n - 15;
+            first = top;
+        }
+    }
+    int count = 0;
+    int row = 0;
+    while (row < 15 && first < Size_001A6978(self)) {
+        int id = *(int*)((char*)self->mVec.mBegin + (first << 2));
+        int idx = func_002624F8(GetSession_001A6978(), id);
+        if (idx < 0) {
+            func_001A71B0(self, row, 0, -1);
+        } else {
+            count++;
+            func_001A71B0(self, row, func_002625C8(GetSession_001A6978(), idx), idx);
+            func_001A66A8(self, row, 0);
+        }
+        row++;
+        first++;
+    }
+    cUIText* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00461590));
+    if (menu != 0) {
+        if (*(unsigned char*)((char*)menu + 0x96) != Size_001A6978(self)) {
+            func_0039B760(menu, Size_001A6978(self));
+            if (Size_001A6978(self) == 0) {
+                func_0039B760(menu, 1);
+            }
+        }
+        if (func_001A6070(self, *(unsigned char*)((char*)menu + 0x95)) != 0 && Size_001A6978(self) != 0) {
+            func_001A5FB8(self, *(unsigned char*)((char*)menu + 0x95) - *(unsigned char*)((char*)menu + 0x98));
+            func_001A66A8(self, *(unsigned char*)((char*)menu + 0x95) - *(unsigned char*)((char*)menu + 0x98), 1);
+        } else {
+            func_001A5FB8(self, -1);
+        }
+    }
+    for (row = count; row < 15; row++) {
+        func_001A71B0(self, row, 0, -1);
+        func_001A66A8(self, row, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A6C40);
