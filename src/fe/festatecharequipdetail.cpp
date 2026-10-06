@@ -682,7 +682,58 @@ extern "C" void func_0019A498(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A4E8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" char* func_0014B700(void* iface, int rider);
+extern "C" char* func_0041ACC0(const char* s, int c);
+extern "C" char* strncpy(char* dst, const char* src, int n);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_0019A498(void* self);
+extern char D_004A1958[];
+
+static inline int isDigitK19A4E8(unsigned char c)
+{
+    return c >= '0' && c <= '9';
+}
+
+extern "C" void func_0019A4E8(void* self, int flag)
+{
+    if (*(void**)((char*)self + 0x5C) == 0)
+        return;
+    func_0019A498(self);
+    releaseK199148(*(int*)((char*)self + 0xA74));
+    *(int*)((char*)self + 0xA74) = *(int*)((char*)self + 0xA70);
+    *(int*)((char*)self + 0xA70) = -1;
+    int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
+    if (idx < 0)
+        return;
+    if (idx >= *(int*)((char*)self + 0x958))
+        return;
+    char* p = *(char**)(*(char**)((char*)self + (idx << 2) + 0x124) + 0x30);
+    if (p == 0)
+        return;
+    if (flag)
+        *(int*)((char*)self + 0x95C) = 0x14;
+    else
+        *(int*)((char*)self + 0x95C) = 1;
+    char* buf = (char*)self + 0x960;
+    char* s = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), *(int*)((char*)self + 0xBC));
+    char* dot = func_0041ACC0(s, '.');
+    int len = dot - s - 1;
+    strncpy(buf, s, len);
+    buf[len] = 0;
+    while (*p != 0) {
+        if (*p >= '0' && *p <= '9')
+            break;
+        p++;
+    }
+    sprintf((char*)self + 0x960, D_004A1958, (char*)self + 0x960, p, dot);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A638);
