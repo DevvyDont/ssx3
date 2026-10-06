@@ -30,7 +30,13 @@ INCLUDE_ASM("seg/seg_1218", func_00101900);
 
 INCLUDE_ASM("seg/seg_1218", func_00101970);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00101A10);
+#ifdef SKIP_ASM
+extern "C" int func_00101A10(int arg0, int arg1) {
+    return (*(int *)((char*)(((arg1 * 0xC) + arg0)) + (0x710)));
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00101A28);
 
@@ -122,9 +128,25 @@ INCLUDE_ASM("seg/seg_1218", func_00104CC8);
 
 INCLUDE_ASM("seg/seg_1218", func_00104CF8);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104D38);
+#ifdef SKIP_ASM
+extern "C" void func_00104D38(void *arg0, void *arg1) {
+    (*(int *)((char*)(arg0) + (0x64))) = 0;
+    (*(void **)((char*)(arg0) + (0x60))) = arg1;
+    (*(int *)((char*)(arg0) + (0x54))) = (int) (*(int *)((char*)(arg1) + (0x780)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104D50);
+#ifdef SKIP_ASM
+extern "C" void func_00104D50(void *arg0, void *arg1) {
+    (*(void **)((char*)(arg0) + (0x64))) = arg1;
+    (*(int *)((char*)(arg0) + (0x60))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = (int) (*(int *)((char*)(arg1) + (8)));
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00104D68);
 
