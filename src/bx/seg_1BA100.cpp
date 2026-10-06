@@ -674,7 +674,24 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB4D8);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BB570);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB5A8);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free__FPv(int);
+
+extern "C" void func_002BB5A8(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (8)));
+    if (temp_4 != 0) {
+        if ((*(short *)((char*)(arg0) + (2))) == 0) {
+            cMemMan_free__FPv(temp_4);
+        }
+        (*(int *)((char*)(arg0) + (8))) = 0;
+    }
+    (*(short *)((char*)(arg0) + (0))) = 0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BB5F0);
 

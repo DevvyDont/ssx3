@@ -106,9 +106,29 @@ INCLUDE_ASM("seg/seg_14B10", func_00115640);
 
 INCLUDE_ASM("seg/seg_14B10", func_001158B8);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00115AB0);
+#ifdef SKIP_ASM
+extern "C" int cBE_getBE();
+extern "C" int cBE_getInterface__Fv(int, int);
+extern "C" float func_0014EFA8(int, int);
 
+extern "C" float func_00115AB0(void *arg0) {
+    return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(arg0) + (0x86C)))) * -90.0f) + 75.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00115B08);
+#ifdef SKIP_ASM
+extern "C" int cBE_getBE();
+extern "C" int cBE_getInterface__Fv(int, int);
+extern "C" float func_0014EFA8(int, int);
+
+extern "C" float func_00115B08(void *arg0) {
+    return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(arg0) + (0x86C)))) * 90.0f) - 90.0f;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_14B10", func_00115B58);
 
@@ -149,4 +169,21 @@ INCLUDE_ASM("seg/seg_14B10", func_001171A8);
 
 INCLUDE_ASM("seg/seg_14B10", func_00117248);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00117290);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free__FPv(int);
+extern "C" void operator_delete__FPi(void *);
+
+extern "C" void func_00117290(void *arg0, int arg1) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1B0)));
+    if (temp_4 != 0) {
+        cMemMan_free__FPv(temp_4);
+    }
+    if (arg1 & 1) {
+        operator_delete__FPi(arg0);
+    }
+}
+#endif

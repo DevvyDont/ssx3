@@ -6,9 +6,53 @@ INCLUDE_ASM("seg/seg_1D3510", get_uint);
 
 INCLUDE_ASM("seg/seg_1D3510", get_t3Vector);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1D3510", func_002D2628);
+#ifdef SKIP_ASM
+extern "C" int get_float(int, int);
 
+extern "C" int func_002D2628(int arg0, int arg1) {
+    int temp_2;
+    int var_16;
+    int var_17;
+    int var_18;
+
+    var_16 = arg1;
+    var_17 = 3;
+    var_18 = 0;
+    do {
+        temp_2 = get_float(arg0, var_16);
+        var_16 += 4;
+        var_17 -= 1;
+        var_18 += temp_2;
+    } while (var_17 >= 0);
+    return var_18;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1D3510", func_002D2690);
+#ifdef SKIP_ASM
+extern "C" int get_float(int, int);
+
+extern "C" int func_002D2690(int arg0, int arg1) {
+    int temp_2;
+    int var_16;
+    int var_17;
+    int var_18;
+
+    var_16 = arg1;
+    var_17 = 0xF;
+    var_18 = 0;
+    do {
+        temp_2 = get_float(arg0, var_16);
+        var_16 += 4;
+        var_17 -= 1;
+        var_18 += temp_2;
+    } while (var_17 >= 0);
+    return var_18;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D26F8);
 
@@ -692,7 +736,19 @@ extern "C" void func_002D3F70(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F78);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(int, int);
+extern "C" void func_002CAA80(int, int);
+
+extern "C" void func_002D3F78(int arg0, int arg1) {
+    func_002CA280(arg0 + 0x164, 2);
+    func_002CA280(arg0 + 0x14C, 2);
+    func_002CA280(arg0 + 0x130, 2);
+    func_002CAA80(arg0, arg1);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3FD8);
 
