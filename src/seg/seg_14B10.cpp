@@ -21,7 +21,14 @@ INCLUDE_ASM("seg/seg_14B10", func_00113CF0);
 extern "C" void func_00113D10(void) {
 }
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00113D18);
+#ifdef SKIP_ASM
+extern "C" void func_00113D18(void *arg0, void *arg1) {
+    (*(int *)((char*)(arg1) + (0xC))) = 0;
+    (*(int *)((char*)(arg0) + (4))) = 0;
+}
+#endif
 
 extern "C" void func_00113D28(void) {
 }

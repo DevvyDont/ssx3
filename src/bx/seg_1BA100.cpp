@@ -1140,13 +1140,41 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE078);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0B0);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0C8);
+#ifdef SKIP_ASM
+extern "C" void func_002BE0C8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + (8))) = -1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0D8);
+#ifdef SKIP_ASM
+extern "C" void func_002BE0D8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + (8))) = -1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0E8);
+#ifdef SKIP_ASM
+extern "C" void func_002BE0E8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + (8))) = -1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0F8);
+#ifdef SKIP_ASM
+extern "C" void func_002BE0F8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(float *)((char*)(arg0) + (8))) = 30000.0f;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BE108);
 

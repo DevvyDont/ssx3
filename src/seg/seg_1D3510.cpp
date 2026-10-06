@@ -208,7 +208,13 @@ extern "C" int func_002D3A40(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A48);
+#ifdef SKIP_ASM
+extern "C" int func_002D3A48(void *arg0) {
+    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x124)))) + (0x58)));
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A58);
 
@@ -424,7 +430,13 @@ extern "C" void func_002D3C98(void *arg0, int arg1) {
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CA0);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CB0);
+#ifdef SKIP_ASM
+extern "C" void func_002D3CB0(void *arg0, float fparg0) {
+    *(*(float **)((char*)(arg0) + (0x18))) = fparg0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
 

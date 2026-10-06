@@ -145,13 +145,25 @@ INCLUDE_ASM("seg/seg_156860", func_00258188);
 
 INCLUDE_ASM("seg/seg_156860", func_002581B8);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_002581D8);
+#ifdef SKIP_ASM
+extern "C" int func_002581D8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x124))) == 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_002581E8);
 
 INCLUDE_ASM("seg/seg_156860", func_002581F8);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00258280);
+#ifdef SKIP_ASM
+extern "C" int func_00258280(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x12C))) == 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00258290);
 

@@ -40,7 +40,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F18D8);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F1940);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
+#ifdef SKIP_ASM
+extern "C" void func_002F19F0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x94))) = arg1;
+    (*(int *)((char*)(arg0) + (0))) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
@@ -68,7 +75,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F22B0);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F22C8);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
+#ifdef SKIP_ASM
+extern "C" int *func_002F2588(int *arg0) {
+    *arg0 = 0;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2598);
 
@@ -76,7 +90,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2810);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2C30);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
+#ifdef SKIP_ASM
+extern "C" void *func_002F2D60(void *arg0) {
+    (*(int *)((char*)(arg0) + (4))) = 0;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2D70);
 

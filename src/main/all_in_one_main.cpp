@@ -203,11 +203,31 @@ extern "C" int func_001DCCC0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCC8);
+#ifdef SKIP_ASM
+extern int D_004A19CC;
 
+extern "C" void func_001DCCC8(void) {
+    D_004A19CC |= 4;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCD8);
+#ifdef SKIP_ASM
+extern "C" int func_001DCCD8(int arg0) {
+    return arg0 + 0xB5AB0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCE8);
+#ifdef SKIP_ASM
+extern "C" int func_001DCCE8(int arg0) {
+    return arg0 + 0xB5ABC;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCF8);
@@ -550,11 +570,32 @@ extern "C" int func_001DDA28(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA30);
+#ifdef SKIP_ASM
+extern "C" void func_001DDA30(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (8))) = arg1;
+    (*(int *)((char*)(arg0) + (4))) = 2;
+}
+#endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA40);
+#ifdef SKIP_ASM
+extern "C" void func_001DDA40(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (8))) = arg1;
+    (*(int *)((char*)(arg0) + (4))) = 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA50);
+#ifdef SKIP_ASM
+extern "C" void func_001DDA50(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (8))) = arg1;
+    (*(int *)((char*)(arg0) + (4))) = 3;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DDA60);
 
@@ -566,7 +607,14 @@ extern "C" int func_001DDA78(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA80);
+#ifdef SKIP_ASM
+extern "C" void func_001DDA80(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x10))) = arg1;
+    (*(int *)((char*)(arg0) + (0xC))) = 2;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DDA90);
 
@@ -1102,7 +1150,13 @@ extern "C" int func_001DE878(void) {
 
 INCLUDE_ASM("main/all_in_one_main", func_001DE880);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE890);
+#ifdef SKIP_ASM
+extern "C" void func_001DE890(void *arg0) {
+    (*(int *)((char*)(arg0) + (0x6B0))) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
