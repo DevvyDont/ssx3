@@ -68,9 +68,25 @@ extern "C" int func_0021CB68(void) {
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB70);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB90);
+#ifdef SKIP_ASM
+extern int D_004A275C;
 
+extern "C" void func_0021CB90(int arg0) {
+    D_004A275C = arg0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB98);
+#ifdef SKIP_ASM
+extern int D_004A275C;
+
+extern "C" int func_0021CB98(void) {
+    return D_004A275C;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
 
@@ -315,9 +331,21 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222428);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00222448);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002224A0);
+#ifdef SKIP_ASM
+extern "C" int func_002224A0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002224A8);
+#ifdef SKIP_ASM
+extern "C" int func_002224A8(int arg0) {
+    return arg0;
+}
+#endif
 
 extern "C" void func_002224B0(void) {
 }
