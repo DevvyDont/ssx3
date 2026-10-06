@@ -239,7 +239,15 @@ extern "C" int func_002849F0(void *arg0) {
 
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002849F8);
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A28);
+#ifdef SKIP_ASM
+extern "C" void func_00283228();
+
+extern "C" void func_00284A28(void) {
+    func_00283228();
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A48);
@@ -337,7 +345,15 @@ extern "C" int func_00284AA0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AA8);
+#ifdef SKIP_ASM
+extern "C" void func_00283228();
+
+extern "C" void func_00284AA8(void) {
+    func_00283228();
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AC8);

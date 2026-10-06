@@ -224,7 +224,15 @@ extern "C" int func_002D3A58(void **arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A68);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3A68(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A88);
@@ -242,7 +250,15 @@ extern "C" void func_002D3A90(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A98);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3A98(void) {
+    func_002CA280();
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AB8);
 
@@ -270,7 +286,15 @@ extern "C" int func_002D3AD8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AE0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3AE0(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B00);
@@ -288,7 +312,15 @@ extern "C" int func_002D3B08(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B10);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3B10(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B30);
@@ -298,7 +330,15 @@ extern "C" void func_002D3B30(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B38);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3B38(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B58);
@@ -340,7 +380,15 @@ extern "C" int func_002D3B78(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B80);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3B80(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BA0);
@@ -358,7 +406,15 @@ extern "C" int func_002D3BA8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BB0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3BB0(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BD0);
@@ -376,9 +432,25 @@ extern "C" void func_002D3BD8(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BE0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
 
+extern "C" void func_002D3BE0(void) {
+    func_002CA280();
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C00);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3C00(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C20);
@@ -396,7 +468,15 @@ extern "C" void func_002D3C28(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C30);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3C30(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C50);
@@ -414,7 +494,15 @@ extern "C" void func_002D3C58(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C60);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280();
+
+extern "C" void func_002D3C60(void) {
+    func_002CA280();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C80);
@@ -444,7 +532,13 @@ extern "C" void func_002D3CB0(void *arg0, float fparg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
+#ifdef SKIP_ASM
+extern "C" float func_002D3CC0(void *arg0) {
+    return ((*(float *)((char*)(arg0) + (0x24))) * *(*(float **)((char*)(arg0) + (0x18)))) + (*(float *)((char*)(arg0) + (0x28)));
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CE0);
 
