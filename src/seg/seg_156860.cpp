@@ -96,7 +96,28 @@ INCLUDE_ASM("seg/seg_156860", func_00256258);
 
 INCLUDE_ASM("seg/seg_156860", func_002562D0);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_002563A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void cMemMan_free__FPv_63A8(int) __asm__("cMemMan_free__FPv");
+
+extern "C" void func_002563A8(void *arg0) {
+    int temp_4;
+    int temp_4_2;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0xC)));
+    if (temp_4 != 0) {
+        cMemMan_free__FPv_63A8(temp_4);
+        (*(int *)((char*)(arg0) + (0xC))) = 0;
+    }
+    temp_4_2 = (*(int *)((char*)(arg0) + (4)));
+    if (temp_4_2 != 0) {
+        cMemMan_free__FPv_63A8(temp_4_2);
+        (*(int *)((char*)(arg0) + (4))) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_002563F8);
 

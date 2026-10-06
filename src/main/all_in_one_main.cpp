@@ -1192,7 +1192,16 @@ extern "C" int func_001DDDB8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDDC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A2028_DDC8 __asm__("D_004A2028");
+
+extern "C" int func_001DDDC8(void) {
+    return D_004A2028_DDC8 != 0;
+}
+#endif
 
 extern "C" void func_001DDDD8(void) {
 }
