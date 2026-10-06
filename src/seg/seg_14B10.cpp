@@ -42,11 +42,33 @@ INCLUDE_ASM("seg/seg_14B10", func_00113D48);
 
 INCLUDE_ASM("seg/seg_14B10", func_00113D80);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00113D88);
+#ifdef SKIP_ASM
+extern "C" void func_00258988(int);
+extern int D_004A2EEC;
+
+extern "C" void func_00113D88(void) {
+    if (D_004A2EEC != 0) {
+        func_00258988(D_004A2EEC);
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_14B10", func_00113DB0);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00113E18);
+#ifdef SKIP_ASM
+extern "C" void func_00258A48(int);
+extern int D_004A2EEC;
+
+extern "C" void func_00113E18(void) {
+    if (D_004A2EEC != 0) {
+        func_00258A48(D_004A2EEC);
+    }
+}
+#endif
 
 extern "C" void func_00113E40(void) {
 }

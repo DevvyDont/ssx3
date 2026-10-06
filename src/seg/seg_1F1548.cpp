@@ -30,7 +30,23 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F17A8);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F17D0);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1810);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free__FPv(int);
+extern "C" void func_002F8FF8__FPv();
+extern "C" void func_002FA5F8__FPv();
+extern int D_004A3BB0;
+
+extern "C" void func_002F1810(void) {
+    func_002F8FF8__FPv();
+    func_002FA5F8__FPv();
+    if (D_004A3BB0 != 0) {
+        cMemMan_free__FPv(D_004A3BB0);
+    }
+    D_004A3BB0 = 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F1850);
 
@@ -139,7 +155,16 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F4A08);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
+#ifdef SKIP_ASM
+extern "C" void func_002F5400(int, void *, int);
+extern void *D_004A28A8;
+
+extern "C" void func_002F5148(void *arg0) {
+    func_002F5400((*(int *)((char*)((*(void **)((char*)(D_004A28A8) + (0x84)))) + (0x90))), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F5180);
 

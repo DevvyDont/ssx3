@@ -249,4 +249,17 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00307308);
 
 INCLUDE_ASM("seg/seg_1FBE38", func_003074C0);
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00307568);
+#ifdef SKIP_ASM
+extern "C" void func_0030AC98(int, void *, int);
+
+extern "C" void func_00307568(void *arg0) {
+    int temp_6;
+
+    temp_6 = (*(int *)((char*)(arg0) + (0x74)));
+    if (temp_6 != 0) {
+        func_0030AC98((*(int *)((char*)(arg0) + (0x10))), arg0, temp_6);
+    }
+}
+#endif

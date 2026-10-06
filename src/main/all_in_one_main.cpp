@@ -31,17 +31,58 @@ extern "C" int func_001DBAB8(void *arg0) {
 
 INCLUDE_ASM("main/all_in_one_main", func_001DBAD8);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DBB20);
+#ifdef SKIP_ASM
+extern "C" void func_0017E418(int, int);
+
+extern "C" int func_001DBB20(void *arg0, void *arg1) {
+    func_0017E418((*(int *)((char*)(arg0) + (0x130))), (*(int *)((char*)(arg1) + (0x14))));
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DBB48);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DBB90);
+#ifdef SKIP_ASM
+extern "C" void func_0017E2F8(int, int);
 
+extern "C" int func_001DBB90(void *arg0, void *arg1) {
+    int temp_5;
+
+    temp_5 = (*(int *)((char*)(arg1) + (8)));
+    if (temp_5 >= 0) {
+        func_0017E2F8((*(int *)((char*)(arg0) + (0x130))), temp_5);
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DBBC0);
+#ifdef SKIP_ASM
+extern "C" void func_0017E290(int, int);
+
+extern "C" int func_001DBBC0(void *arg0, void *arg1) {
+    func_0017E290((*(int *)((char*)(arg0) + (0x4E0))), (*(int *)((char*)(arg1) + (8))));
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DBBE8);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DBC10);
+#ifdef SKIP_ASM
+extern "C" void func_0017E228(int, int);
+
+extern "C" int func_001DBC10(void *arg0, void *arg1) {
+    func_0017E228((*(int *)((char*)(arg0) + (0x130))), (*(int *)((char*)(arg1) + (8))));
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DBC38);
 
@@ -428,7 +469,15 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD750);
 
 INCLUDE_ASM("main/all_in_one_main", func_001DD778);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD800);
+#ifdef SKIP_ASM
+extern "C" void func_001A1CB8(int, signed char, int);
+
+extern "C" void func_001DD800(void *arg0, signed char arg1, signed char arg2) {
+    func_001A1CB8(*(*(int **)((char*)(arg0) + (0x10))), arg1, (1 << arg2) & 0xFF);
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DD840);
 

@@ -2,7 +2,19 @@
 
 INCLUDE_ASM("seg/seg_156860", cCommSystem_construct);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00255898);
+#ifdef SKIP_ASM
+extern "C" void cCommSystem__cCommSystem(int, int);
+extern int D_004A2EB8;
+
+extern "C" void func_00255898(void) {
+    if (D_004A2EB8 != 0) {
+        cCommSystem__cCommSystem(D_004A2EB8, 3);
+        D_004A2EB8 = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", cCommSystem_cCommSystem);
 
@@ -48,7 +60,16 @@ INCLUDE_ASM("seg/seg_156860", func_002560B0);
 
 INCLUDE_ASM("seg/seg_156860", func_00256188);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_002561B8);
+#ifdef SKIP_ASM
+extern "C" void func_00256228();
+
+extern "C" int func_002561B8(int arg0) {
+    func_00256228();
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_002561E0);
 
@@ -115,7 +136,19 @@ extern "C" void func_00256BD8(int arg0) {
 
 INCLUDE_ASM("seg/seg_156860", cGameComm_construct);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00256C50);
+#ifdef SKIP_ASM
+extern "C" void func_00256EE0(int, int);
+extern int D_004A2EEC;
+
+extern "C" void func_00256C50(void) {
+    if (D_004A2EEC != 0) {
+        func_00256EE0(D_004A2EEC, 3);
+        D_004A2EEC = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00256C78);
 
@@ -191,7 +224,15 @@ INCLUDE_ASM("seg/seg_156860", func_002586B0);
 
 INCLUDE_ASM("seg/seg_156860", func_00258790);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00258870);
+#ifdef SKIP_ASM
+extern "C" void func_00258870(void *arg0, int arg1, int arg2) {
+    if ((arg2 != 0) || (((*(int *)((char*)(arg0) + (0x78))) == 0) && ((*(int *)((char*)(arg0) + (0x74))) == 0)) || ((*(int *)((char*)(arg0) + (0x7C))) != 0)) {
+        (*(int *)((char*)(arg0) + (0x94))) = arg1;
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_002588A8);
 
