@@ -809,5 +809,50 @@ extern "C" void func_00359410(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00359460);
+#ifdef SKIP_ASM
+extern char D_0048F250[];
+extern "C" void func_003451C0(void* ref, int id);
+extern "C" void func_00359688(void* self, float v);
+float AIrandf(float lo, float hi);
+
+extern "C" void* func_00359460(char* self, char* desc)
+{
+    *(void**)self = D_0048F250;
+    *(unsigned int*)(self + 0xD8) = 0xFFFFFFFF;
+    *(int*)(self + 0xE0) = 0;
+    *(int*)(self + 0xDC) = 0;
+    *(int*)(self + 0xE4) = 0;
+    *(int*)(self + 0x4C) = 0;
+    *(int*)(self + 0x30) = *(int*)(desc + 0x8);
+    *(int*)(self + 0x34) = *(int*)(desc + 0xC);
+    *(float*)(self + 0x38) = *(float*)(desc + 0x14) * 0.01745329424738884f;
+    *(float*)(self + 0x40) = *(float*)(desc + 0x24) * 100.0f;
+    *(float*)(self + 0x44) = *(float*)(desc + 0x28);
+    func_003451C0(self + 0xD8, *(int*)(desc + 0x4));
+    func_00359688(self, *(float*)(desc + 0x10));
+    if (*(float*)(desc + 0x10) >= 0.0f) {
+        *(float*)(self + 0x3C) = 0.0f;
+    } else {
+        *(float*)(self + 0x3C) = *(float*)(self + 0xE4);
+    }
+    float zero = 0.0f;
+    *(int*)(self + 0x54) = *(int*)(desc + 0x20) != 0;
+    *(int*)(self + 0x50) = 0;
+    if (*(float*)(desc + 0x18) != zero) {
+        *(float*)(self + 0x3C) = *(float*)(desc + 0x18);
+    }
+    *(float*)(self + 0x3C) += AIrandf(-1.0f, 1.0f) * *(float*)(desc + 0x1C);
+    if (*(float*)(self + 0x3C) < zero || *(float*)(self + 0xE4) < *(float*)(self + 0x3C)) {
+        *(float*)(self + 0x3C) = zero;
+    }
+    *(sMpQuad*)(self + 0xB0) = D_004FF120;
+    *(sMpQuad*)(self + 0xC0) = D_004FF120;
+    *(int*)(self + 0x58) = 1;
+    *(int*)(self + 0xD0) = 0;
+    *(int*)(self + 0xD4) = 0;
+    return self;
+}
+#endif
 
