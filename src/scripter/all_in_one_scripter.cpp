@@ -315,27 +315,87 @@ extern "C" int func_00284AA0(void *arg0) {
 
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AA8);
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AC8);
+#ifdef SKIP_ASM
+extern "C" int func_00284AC8(int arg0) {
+    return arg0 + 0x18;
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AD0);
+#ifdef SKIP_ASM
+extern "C" int func_00284AD0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x10)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AD8);
+#ifdef SKIP_ASM
+extern "C" int func_00284AD8(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AE0);
+#ifdef SKIP_ASM
+extern "C" int func_00284AE0(void) {
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AE8);
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B50);
+#ifdef SKIP_ASM
+extern "C" int func_00284B50(void) {
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B58);
+#ifdef SKIP_ASM
+extern "C" int func_00284B58(int arg0) {
+    return arg0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B60);
+#ifdef SKIP_ASM
+extern "C" int func_00284B60(int arg0) {
+    return arg0 + 0x30;
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B68);
+#ifdef SKIP_ASM
+extern "C" float func_00284B68(void *arg0) {
+    return (*(float *)((char*)(arg0) + (0x70)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B70);
+#ifdef SKIP_ASM
+extern "C" float func_00284B70(void *arg0) {
+    return (*(float *)((char*)(arg0) + (0x74)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B78);
+#ifdef SKIP_ASM
+extern "C" float func_00284B78(void *arg0) {
+    return (*(float *)((char*)(arg0) + (0x78)));
+}
+#endif
 
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B80);
 

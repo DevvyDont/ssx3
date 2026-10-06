@@ -91,7 +91,13 @@ INCLUDE_ASM("seg/seg_156860", func_00256A58);
 
 INCLUDE_ASM("seg/seg_156860", func_00256AA8);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00256BA8);
+#ifdef SKIP_ASM
+extern "C" float func_00256BA8(void *arg0) {
+    return (*(float *)((char*)(arg0) + (0x10)));
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", RpcAlloc);
 
