@@ -108,7 +108,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D58);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D70);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D88);
+#ifdef SKIP_ASM
+extern "C" void func_002B9D88(void *arg0) {
+    (*(int *)((char*)(arg0) + (0x94))) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D98);
@@ -272,7 +278,14 @@ extern "C" void func_002BACC0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BACC8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_002BACC8(void *arg0) {
+    (*(long *)((char*)(arg0) + (0x400))) = (long) (*(long *)((char*)(arg0) + (0x3F8)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BACD8);
@@ -450,7 +463,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB0E0);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB130);
+#ifdef SKIP_ASM
+extern "C" void *func_002BB130(void *arg0) {
+    (*(int *)((char*)(arg0) + (4))) = 0;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BB140);
 

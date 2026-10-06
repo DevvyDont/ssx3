@@ -394,15 +394,33 @@ extern "C" void func_002D3C50(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C58);
+#ifdef SKIP_ASM
+extern "C" void func_002D3C58(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C60);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C80);
+#ifdef SKIP_ASM
+extern "C" void func_002D3C80(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C88);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C98);
+#ifdef SKIP_ASM
+extern "C" void func_002D3C98(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CA0);
 
@@ -412,15 +430,33 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CE0);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D00);
+#ifdef SKIP_ASM
+extern "C" void func_002D3D00(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D08);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D18);
+#ifdef SKIP_ASM
+extern "C" void func_002D3D18(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D20);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D40);
+#ifdef SKIP_ASM
+extern "C" int func_002D3D40(int arg0) {
+    return arg0 + 0x18;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D48);
 
@@ -432,23 +468,53 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3DB0);
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3DF8);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3E18);
+#ifdef SKIP_ASM
+extern "C" void func_002D3E18(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3E20);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EA0);
+#ifdef SKIP_ASM
+extern "C" void func_002D3EA0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x658))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EA8);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EC8);
+#ifdef SKIP_ASM
+extern "C" void func_002D3EC8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3ED0);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F48);
+#ifdef SKIP_ASM
+extern "C" void func_002D3F48(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x66C))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F50);
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F70);
+#ifdef SKIP_ASM
+extern "C" void func_002D3F70(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F78);
 
