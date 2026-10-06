@@ -8,7 +8,13 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021C678);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C6D8);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C700);
+#ifdef SKIP_ASM
+extern "C" int func_0021C700(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x4C)));
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C708);
 
@@ -52,7 +58,13 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CB08);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB40);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB68);
+#ifdef SKIP_ASM
+extern "C" int func_0021CB68(void) {
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB70);
 

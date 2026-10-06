@@ -808,51 +808,189 @@ extern "C" int func_002BC638(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC640);
+#ifdef SKIP_ASM
+extern "C" int func_002BC640(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC648);
+#ifdef SKIP_ASM
+extern "C" int func_002BC648(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC650);
+#ifdef SKIP_ASM
+extern "C" int func_002BC650(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC658);
+#ifdef SKIP_ASM
+extern "C" int func_002BC658(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC660);
+#ifdef SKIP_ASM
+extern "C" int func_002BC660(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC668);
+#ifdef SKIP_ASM
+extern "C" int func_002BC668(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC670);
+#ifdef SKIP_ASM
+extern "C" int func_002BC670(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC678);
+#ifdef SKIP_ASM
+extern "C" int func_002BC678(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC680);
+#ifdef SKIP_ASM
+extern "C" int func_002BC680(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC688);
+#ifdef SKIP_ASM
+extern "C" int func_002BC688(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC690);
+#ifdef SKIP_ASM
+extern "C" int func_002BC690(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC698);
+#ifdef SKIP_ASM
+extern "C" int func_002BC698(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6A0);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6A0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6A8);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6A8(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6B0);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6B0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6B8);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6B8(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6C0);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6C0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6C8);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6C8(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6D0);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6D0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6D8);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6D8(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6E0);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6E0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6E8);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6E8(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6F0);
+#ifdef SKIP_ASM
+extern "C" int func_002BC6F0(void) {
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6F8);
 
