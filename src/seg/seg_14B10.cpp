@@ -273,7 +273,38 @@ extern "C" void func_00113F38(void *self, float arg1) {
 
 INCLUDE_ASM("seg/seg_14B10", func_00113F88);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00114130);
+#ifdef SKIP_ASM
+extern "C" int func_0028B180();
+extern "C" void func_002F6AC8(char *, int);
+extern "C" void func_00298D90(int mgr, char* rider, int b);
+extern "C" void func_00299368(int mgr, char* rider);
+extern "C" void func_002992D8(int mgr, char* rider);
+
+extern "C" void func_00114130(char* s, int a, int b)
+{
+    if (b) func_002F6AC8(*(char**)(s + 0x77C) + 0xD20, 0);
+    if (a) {
+        if (*(float*)(s + 0x2F8) > 0.0f) {
+            if (*(float*)(s + 0x2FC) == 0.0f) {
+                float x = *(float*)(s + 0x2F8);
+                if (x > 0.6666666865348816f) *(float*)(s + 0x2FC) = 1.0f;
+                else if (x > 0.3333333432674408f) *(float*)(s + 0x2FC) = 0.625f;
+                else *(float*)(s + 0x2FC) = 0.25f;
+                func_00298D90(func_0028B180(), s, b);
+            }
+            if (*(float*)(s + 0x2E8) == 0.0f && *(int*)(s + 0x304) != 0 && *(int*)(s + 0x2F4) < 10) {
+                *(float*)(s + 0x2F8) -= 0.00150679936632514f;
+            }
+            return;
+        }
+        if (b) func_00299368(func_0028B180(), s);
+    }
+    if (*(float*)(s + 0x2FC) > 0.0f) func_002992D8(func_0028B180(), s);
+    *(float*)(s + 0x2FC) = 0.0f;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_14B10", func_00114298);
 
@@ -281,13 +312,149 @@ INCLUDE_ASM("seg/seg_14B10", func_00114CC0);
 
 INCLUDE_ASM("seg/seg_14B10", func_00114DB8);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00115168);
+#ifdef SKIP_ASM
+struct Q_5168 {
+    float x, y, z, w;
+    Q_5168() {}
+    Q_5168(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
+extern Q_5168 D_004FF130;
+extern Q_5168 D_004FF160;
+
+static inline Q_5168 AxisAngle_5168(const Q_5168& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return Q_5168(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+static inline void SetHeading_5168(char* a, float angle)
+{
+    *(Q_5168*)(a + 0x30) = D_004FF130;
+    *(Q_5168*)(a + 0x40) = AxisAngle_5168(D_004FF160, -angle);
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline Q_5168 Scale_5168(const Q_5168& v, float s)
+{
+    Q_5168 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00115168(char* s)
+{
+    *(int*)(s + 0x320) ^= 1;
+    cRiderAnimBase_changeHeadingOffset(*(void**)(s + 0x784), 3.1415927410125732f);
+    if (*(int*)(s + 0x320)) {
+        SetHeading_5168(*(char**)(s + 0x784), 3.1415927410125732f);
+    } else {
+        SetHeading_5168(*(char**)(s + 0x784), 0.0f);
+    }
+    *(int*)(*(char**)(s + 0x784) + 0x18) = *(int*)(s + 0x320);
+    *(Q_5168*)(s + 0x3A0) = Scale_5168(*(Q_5168*)(s + 0x3A0), -1.0f);
+    *(Q_5168*)(s + 0x3B0) = Scale_5168(*(Q_5168*)(s + 0x3B0), -1.0f);
+    *(float*)(s + 0x1F0) = -*(float*)(s + 0x1F0);
+    *(float*)(s + 0x1F8) = -*(float*)(s + 0x1F8);
+    *(float*)(s + 0x214) = -*(float*)(s + 0x214);
+    *(float*)(s + 0x21C) = -*(float*)(s + 0x21C);
+    *(float*)(s + 0x208) = -*(float*)(s + 0x208);
+    *(float*)(s + 0x210) = -*(float*)(s + 0x210);
+    *(float*)(s + 0x1FC) = -*(float*)(s + 0x1FC);
+    *(float*)(s + 0x204) = -*(float*)(s + 0x204);
+    *(float*)(s + 0x280) = -*(float*)(s + 0x280);
+    *(float*)(s + 0x288) = -*(float*)(s + 0x288);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_14B10", func_00115358);
 
 INCLUDE_ASM("seg/seg_14B10", func_00115640);
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_001158B8);
+#ifdef SKIP_ASM
+extern "C" float func_0031C228(float x);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_58B8(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Atan2_58B8(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+// PORT: PS2-only abs.s asm helper (fabsf off-PS2).
+static inline float Abs_58B8(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ minimum operator
+static inline float Clamp_58B8(float v, float lo, float hi)
+{
+    return v >= lo ? v <? hi : lo;
+}
+
+extern "C" void func_001158B8(void* self, float* y, float* x, float step, float eps)
+{
+    float px, py, len, ang, t, r;
+    float sc[2];
+    if (Abs_58B8(*x) <= eps) *x = 0.0f;
+    if (Abs_58B8(*y) <= eps) *y = 0.0f;
+    px = *x;
+    py = *y;
+    len = Sqrt_58B8(px * px + py * py);
+    if (len == 0.0f) return;
+    ang = Atan2_58B8(py, px);
+    t = ang / step;
+    if (ang < 0.0f) r = t + -0.5f;
+    else r = t + 0.5f;
+    func_0031BE50(&sc[0], &sc[1], (float)(int)r * step);
+    *x = Clamp_58B8(sc[1] * len, -1.0f, 1.0f);
+    *y = Clamp_58B8(sc[0] * len, -1.0f, 1.0f);
+    if (__builtin_fabsf(*x) < 0.001f) *x = 0.0f;
+    if (__builtin_fabsf(*y) < 0.001f) *y = 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00115AB0);
@@ -346,7 +513,58 @@ extern "C" int func_00116120(char *self, int arg1, int arg2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_001161D0);
+#ifdef SKIP_ASM
+struct V4_61D0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4D dot product).
+static inline float Dot4_61D0(const V4_61D0& a, const V4_61D0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: returns a value (target keeps the state in v1 across the call)
+extern "C" int cRiderAnimBase_play_61D0(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+int func_0011FE98(void* self);
+// PORT: func_0011FEC8__FPv takes a second argument; bound by asm label
+void func_0011FEC8_61D0(void* self, int on) __asm__("func_0011FEC8__FPv");
+
+extern "C" int func_001161D0(char* s, float dir)
+{
+    int st;
+    if (dir == 0.0f) return 0;
+    if (*(int*)(s + 0x328) == 3 || *(int*)(s + 0x328) == 4) return 0;
+    if (!func_0011FE98(s)) {
+        if (Dot4_61D0(*(V4_61D0*)(s + 0x1E0), *(V4_61D0*)(s + 0x3A0)) < 0.0f) return 0;
+    }
+    if (dir > 0.0f) {
+        cRiderAnimBase_play_61D0(*(void**)(s + 0x784), 0x18, 0, -1.0f);
+        *(int*)(s + 0x330) = 1;
+    } else {
+        cRiderAnimBase_play_61D0(*(void**)(s + 0x784), 0x20, 0, -1.0f);
+        *(int*)(s + 0x330) = 2;
+    }
+    func_0011FEC8_61D0(s, 1);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_001162C8);

@@ -718,7 +718,42 @@ extern "C" void func_00256A58(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00256AA8);
+#ifdef SKIP_ASM
+struct VEnt_6AA8 {
+    short delta;
+    short index;
+    void (*fn)(char*);
+};
+
+extern "C" char* func_003E6958(int id);
+
+extern "C" void func_00256AA8(char* s)
+{
+    char* st = func_003E6958(*(int*)(s + 0x1C));
+    if (st) {
+        if (*(int*)(st + 0x0) - *(int*)(st + 0x20) > 30000) {
+            *(int*)(s + 0xC) = 3;
+            *(int*)(s + 0x4) = 1;
+            return;
+        }
+        if (*(unsigned char*)(st + 0x45) == 0) {
+            VEnt_6AA8* vt = *(VEnt_6AA8**)(s + 0x8);
+            vt[2].fn(s + vt[2].delta);
+            *(int*)(s + 0x4) = 1;
+            return;
+        }
+        float f = (float)*(unsigned int*)(st + 0xC) * 0.0010000000474974513f;
+        if (f > 1.0f) f = 1.0f;
+        *(float*)(s + 0x10) = (*(float*)(s + 0x10) * 4.0f + f) * 0.20000000298023224f;
+    }
+    if (*(int*)(s + 0x14)) {
+        *(int*)(s + 0xC) = 4;
+        *(int*)(s + 0x4) = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256BA8);
@@ -781,7 +816,49 @@ extern "C" void func_00256C50(void) {
 
 INCLUDE_ASM("seg/seg_156860", func_00256C78);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00256EE0);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free_6EE0(void *) __asm__("cMemMan_free__FPv");
+extern "C" void operator_delete__FPi(int *);
+extern "C" void func_002581B8(void *arg0, int *arg1);
+extern "C" void func_003E73E0(void* p);
+
+struct PacketQueue_6EE0 {
+    int wr;                 // 0x0
+    int rd;                 // 0x4
+    int* slots[32];         // 0x8
+};
+
+static inline int* Peek_6EE0(PacketQueue_6EE0* q)
+{
+    return q->rd < q->wr ? q->slots[q->rd % 32] : 0;
+}
+
+static inline int* Pop_6EE0(PacketQueue_6EE0* q)
+{
+    return q->slots[q->rd++ % 32];
+}
+
+// PORT: the unit declares this as (int, int)
+extern "C" void func_00256EE0(int self, int flags)
+{
+    char* s = (char*)self;
+    int i;
+    if (*(void**)(s + 0x3EC)) cMemMan_free_6EE0(*(void**)(s + 0x3EC));
+    if (*(int**)(s + 0x134)) func_002581B8(s, *(int**)(s + 0x134));
+    for (i = 0; i < 4; i++) {
+        while (Peek_6EE0((PacketQueue_6EE0*)(s + 0x144) + i)) {
+            func_002581B8(s, Pop_6EE0((PacketQueue_6EE0*)(s + 0x144) + i));
+        }
+    }
+    if (*(void**)(s + 0x140)) {
+        func_003E73E0(*(void**)(s + 0x140));
+        *(void**)(s + 0x140) = 0;
+    }
+    if (flags & 1) operator_delete__FPi((int*)s);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00257038);
 
@@ -843,7 +920,65 @@ extern "C" void func_00257750(char *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_002577C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00255E40_77C8(int sys, int port) __asm__("func_00255E40");
+extern "C" void func_00257678(char *self);
+extern "C" void func_002578F8(char *self);
+extern "C" void func_002579C8(char *self);
+extern int D_004A2EB8;
+
+extern "C" int func_002577C8(char* s)
+{
+    if (*(int*)(s + 0x8) > 0) {
+        func_002579C8(s);
+        return 1;
+    }
+    if (*(int*)(s + 0x4) != 0) return 1;
+    if (*(int*)(s + 0x8C) != 0) {
+        func_002578F8(s);
+        return 1;
+    }
+    if (func_00255E40_77C8(D_004A2EB8, *(int*)(s + 0x6C)) != 0) {
+        func_00257678(s);
+        func_002578F8(s);
+        return 1;
+    }
+    if (*(int*)(s + 0x54) >= 3) {
+        *(int*)(s + 0x24) = 3;
+        func_002578F8(s);
+        return 1;
+    }
+    if (*(int*)(s + 0x4C) >= 6) {
+        *(int*)(s + 0x24) = 2;
+        func_002578F8(s);
+        return 1;
+    }
+    if (*(int*)(s + 0x58) >= 3) {
+        *(int*)(s + 0x28) = 3;
+        func_002578F8(s);
+        return 1;
+    }
+    if (*(int*)(s + 0x50) >= 6) {
+        *(int*)(s + 0x28) = 2;
+        func_002578F8(s);
+        return 1;
+    }
+    if (*(float*)(s + 0xB0) >= 3600.0f) {
+        func_00257678(s);
+        func_002578F8(s);
+        return 1;
+    }
+    if (*(int*)(s + 0x94) <= 0) return 0;
+    if (--*(int*)(s + 0x94) > 0) return 0;
+    *(int*)(s + 0x2C) = 1;
+    func_00257678(s);
+    func_002578F8(s);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002578F8);
@@ -912,9 +1047,114 @@ extern "C" void func_002579C8(char *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00257A80);
+#ifdef SKIP_ASM
+extern "C" void func_00257678(char *self);
+extern "C" void func_002578F8(char *self);
+extern void *D_004A28A8;
+extern int D_004A3ED0;
 
+extern "C" void func_00257A80(char* s)
+{
+    if (*(int*)(s + 0x24) != 0) return;
+    if (*(int*)(s + 0x74) == 0) {
+        if (*(int*)(s + 0x7C) != 0) {
+            if (*(int*)(s + 0x78) == 0 && *(int*)(s + 0x3FC) <= 0) {
+                char* g = (char*)D_004A28A8;
+                int n = ++*(int*)(s + 0xA8);
+                ++*(int*)(s + 0x60);
+                unsigned int st = *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC)) - 4;
+                if (st < 2) {
+                    if (n >= 10) *(float*)(s + 0xB0) += 1.0f;
+                    if (*(int*)(s + 0xA8) == 10) ++*(int*)(s + 0xB4);
+                }
+            }
+            if (*(int*)(s + 0x60) == 60) *(int*)(s + 0x84) = 1;
+        }
+        if (*(int*)(s + 0x80) != 0) {
+            if (*(int*)(s + 0xC) != 0) {
+                func_00257678(s);
+                func_002578F8(s);
+                return;
+            }
+            if (*(int*)(s + 0x78) == 0) ++*(int*)(s + 0x5C);
+            if (*(int*)(s + 0x5C) >= 1800) {
+                *(int*)(s + 0x2C) = 1;
+                func_00257678(s);
+                func_002578F8(s);
+                return;
+            }
+        }
+    }
+    if (D_004A3ED0 != 0) {
+        *(int*)(s + 0x24) = 1;
+        func_002578F8(s);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00257BD8);
+#ifdef SKIP_ASM
+struct Packet_7BD8 {
+    unsigned char type;
+    unsigned char flags;
+    unsigned short size;    // 0x2, includes the 4-byte header
+    char data[1];           // 0x4
+};
+
+struct PacketQueue_7BD8 {
+    int wr;                         // 0x0
+    int rd;                         // 0x4
+    Packet_7BD8* slots[32];         // 0x8
+};
+
+struct Conn_7BD8 {
+    char pad0[4];
+    int busy;                       // 0x4
+    char pad8[0x5C - 0x8];
+    int unk5C;                      // 0x5C
+    int unk60;                      // 0x60
+    char pad64[0x84 - 0x64];
+    int unk84;                      // 0x84
+    char pad88[0x94 - 0x88];
+    int unk94;                      // 0x94
+    char pad98[0xA8 - 0x98];
+    int unkA8;                      // 0xA8
+    char padAC[0x144 - 0xAC];
+    PacketQueue_7BD8 queues[2];     // 0x144
+};
+
+extern "C" void func_00257CD8(Conn_7BD8* c);
+extern "C" void func_002581B8(void *arg0, int *arg1);
+extern "C" void func_00258870(void *, int, int);
+extern "C" void func_003E6574_7BD8(void* dst, const void* src, int n) __asm__("func_003E6574");
+
+// PORT: the unit declares this as (void*, int, int, int); dst is a pointer passed as int
+extern "C" int func_00257BD8(void* self, int ch, int dst, int unused)
+{
+    Conn_7BD8* c = (Conn_7BD8*)self;
+    if (c->busy != 0) return 0;
+    func_00257CD8(c);
+    PacketQueue_7BD8* q = &c->queues[ch];
+    if (q->rd != q->wr) {
+        Packet_7BD8* p = q->slots[q->rd++ % 32];
+        int len = p->size - 4;
+        func_003E6574_7BD8((void*)dst, p->data, len);
+        func_002581B8(c, (int*)p);
+        if (ch == 0) {
+            c->unk5C = 0;
+            c->unk60 = 0;
+            c->unkA8 = 0;
+            c->unk84 = 0;
+        }
+        if (c->unk94 > 0) func_00258870(c, 0x708, 0);
+        return len;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00257CD8);
 
@@ -946,7 +1186,49 @@ extern "C" void func_00257DC0(char *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00257E98);
+#ifdef SKIP_ASM
+struct Packet_7E98 {
+    unsigned char type;     // 0x0
+    unsigned char flags;    // 0x1
+    unsigned short size;    // 0x2, includes this 4-byte header
+    char data[0xEC];        // 0x4
+};
+
+extern "C" int func_00255E00_7E98(int sys, int port, Packet_7E98* p, int size) __asm__("func_00255E00");
+extern "C" Packet_7E98* func_00258188_7E98(char* self) __asm__("func_00258188");
+extern "C" void func_003E6574_7E98(void* dst, const void* src, int n) __asm__("func_003E6574");
+extern "C" void func_00257DC0(char *self);
+extern int D_004A2EB8;
+
+struct Conn_7E98 {
+    char pad0[0x36C];
+    Packet_7E98* slots[32];     // 0x36C
+};
+
+// PORT: the unit declares this void(void*, int, int, int); the target returns a status
+extern "C" int func_00257E98_impl(char* self, int type, const void* data, int len) __asm__("func_00257E98");
+extern "C" int func_00257E98_impl(char* self, int type, const void* data, int len)
+{
+    Packet_7E98 pkt;
+    if (*(int*)(self + 4) != 0) return 0;
+    func_00257DC0(self);
+    pkt.type = type;
+    pkt.size = len + 4;
+    pkt.flags = 0;
+    func_003E6574_7E98(pkt.data, data, len);
+    if (*(int*)(self + 0x368) == *(int*)(self + 0x364)) {
+        if (func_00255E00_7E98(D_004A2EB8, *(int*)(self + 0x6C), &pkt, pkt.size)) return 1;
+    }
+    {
+        Packet_7E98* p = func_00258188_7E98(self);
+        func_003E6574_7E98(p, &pkt, pkt.size);
+        ((Conn_7E98*)self)->slots[(*(int*)(self + 0x364))++ % 32] = p;
+    }
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00257F98);
 
@@ -1404,9 +1686,104 @@ extern "C" void func_00258C50(void *arg0, int arg1) {
 
 INCLUDE_ASM("seg/seg_156860", func_00258CB0);
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00258F20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00257E98_8F20(void* self, int type, const void* data, int len) __asm__("func_00257E98");
+extern void *D_004A28A8;
 
+struct SyncMsg_8F20 {
+    unsigned char type;     // 0x0
+    int frame;              // 0x4
+    int value;              // 0x8
+};
+
+struct Ring_8F20 {
+    int v[60];
+};
+
+static inline int& RingAt_8F20(Ring_8F20* r, int frame)
+{
+    return r->v[(frame / 60) % 60];
+}
+
+extern "C" void func_00258F20(char* s, int frame, int value)
+{
+    char* gs = *(char**)((char*)D_004A28A8 + 0x84);
+    int st = **(int**)(gs + 0xC);
+    if (st != 5) {
+        if (st != 3) return;
+        if (*(int*)(gs + 0x214) != st) return;
+    }
+    if (*(int*)(s + 0x40) == 0) return;
+    if (*(int*)(s + 0x4) != 0) return;
+    if (*(int*)(s + 0x0) == 0) return;
+    if (*(int*)(s + 0xC) != 0) return;
+    RingAt_8F20((Ring_8F20*)(s + 0x410), frame) = value;
+    *(int*)(s + 0x408) = frame;
+    if (*(int*)(s + 0x400) != 0) {
+        if (*(int*)(s + 0x404) != 0) {
+            *(int*)(s + 0x404) = 0;
+            *(int*)(s + 0x400) = 0;
+        }
+    } else {
+        SyncMsg_8F20 msg;
+        msg.frame = frame;
+        msg.value = value;
+        msg.type = 4;
+        func_00257E98_8F20(s, 3, &msg, 12);
+        *(int*)(s + 0x400) = 1;
+    }
+    {
+        int f = *(int*)(s + 0x408);
+        if (f < 0) return;
+        int g = *(int*)(s + 0x40C);
+        if (g < 0) return;
+        int m = g < f ? g : f;
+        if (RingAt_8F20((Ring_8F20*)(s + 0x410), m) != RingAt_8F20((Ring_8F20*)(s + 0x500), m)) *(int*)(s + 0xC) = 1;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00259098);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_9098(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void*, int);
+extern "C" void func_0014EBB8(void* iface, int v);
+extern "C" void func_0014EBD8(void* iface, int v);
+extern "C" void func_002639E0(int a, int b, int c, int d, int e);
+extern void *D_004A28A8;
+extern char* D_004A3028;
+extern int D_00534E58[];
+
+struct VEnt_9098 {
+    short delta;
+    short index;
+    void (*fn)(char*);
+};
+
+extern "C" void func_00259098(int a0, int a1, int a2)
+{
+    char* g = D_004A3028;
+    int v;
+    if (*(int*)(g + 0xB4)) v = *(int*)(g + 0xAC);
+    else v = *(int*)(g + 0xA8);
+    void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
+    char* ri = (char*)cBE_getInterface_9098(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    D_00534E58[0] = cBENewPlayerInterface_getPlayerCharID(pi, 0);
+    func_0014EBB8(ri, *(int*)(D_004A3028 + 0x98));
+    func_0014EBD8(ri, *(int*)(D_004A3028 + 0x80));
+    {
+        VEnt_9098* vt = *(VEnt_9098**)(ri + 0xC);
+        vt[1].fn(ri + vt[1].delta);
+    }
+    func_002639E0(a0, v, *(int*)(g + 0xB4), a1, a2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00259198);

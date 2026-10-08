@@ -13,7 +13,43 @@ extern "C" void *cAIAnimEventMap_getBlendInTime(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2125C8", func_003115E0);
+#ifdef SKIP_ASM
+struct Range_15E0 {
+    short start;
+    short count;
+};
+
+struct RangeTable_15E0 {
+    Range_15E0 r[0x1B6];
+};
+
+struct Groups_15E0 {
+    int v[0x1D8];
+};
+
+extern Groups_15E0 D_00489D60;
+
+// PORT: the unit declares this as void(int); defined under an asm label with its real type
+extern "C" void func_003115E0_impl(RangeTable_15E0* t) __asm__("func_003115E0");
+extern "C" void func_003115E0_impl(RangeTable_15E0* t)
+{
+    Groups_15E0 tab = D_00489D60;
+    int prev;
+    int i, j;
+    for (j = 0x1B4; j >= 0; j--) t->r[j].count = 0;
+    prev = 0x1B6;
+    for (i = 0; i < 0x1D8; i++) {
+        int g = tab.v[i];
+        if (g != prev) {
+            prev = g;
+            t->r[g].start = i;
+        }
+        t->r[prev].count++;
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2125C8", func_00311710);
 

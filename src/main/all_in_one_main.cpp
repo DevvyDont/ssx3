@@ -1,6 +1,51 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", __sti__all_in_one_main_cpp);
+#ifdef SKIP_ASM
+struct cNullMenuItem;
+struct cSpaceMenuItem;
+
+void func_002CAA58(void*);
+extern "C" void cMenu_addItem(void *, char*, int);
+extern "C" void func_002CCF98(char*, int, int *, int);
+void cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* label);
+void cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* height);
+
+extern char D_0046D3D0[];
+extern char D_00467DA8[];
+extern char D_00467DC0[];
+extern char D_00467DC8[];
+extern int D_00467DD0[];
+extern int D_00467DD8[];
+
+extern "C" char* __sti__all_in_one_main_cpp(char* self, int* a, int* b)
+{
+    char* item0 = self + 0x138;
+    char* item1 = self + 0x154;
+    char* item2 = self + 0x170;
+    char* item3 = self + 0x18C;
+    char* item4 = self + 0x1A4;
+    char* item5 = self + 0x1C8;
+    func_002CAA58(self);
+    *(char**)(self + 0x12C) = D_0046D3D0;
+    *(int*)(self + 0x130) = *a;
+    *(int*)(self + 0x134) = *b;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, D_00467DA8);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, D_00467DC0);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)item3, (void*)0xE);
+    func_002CCF98(item4, 0, D_00467DD0, 0);
+    func_002CCF98(item5, 1, D_00467DD8, 0);
+    cMenu_addItem(self, item0, -1);
+    cMenu_addItem(self, item1, -1);
+    cMenu_addItem(self, item2, -1);
+    cMenu_addItem(self, item3, -1);
+    cMenu_addItem(self, item4, -1);
+    cMenu_addItem(self, item5, -1);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB2B0);
@@ -24,11 +69,138 @@ extern "C" void *func_001DB2B0(char *arg0, int *arg1) {
 
 INCLUDE_ASM("main/all_in_one_main", func_001DB330);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/all_in_one_main", func_001DB418);
+#ifdef SKIP_ASM
+struct MenuItem_B418 {
+    char pad0[8];
+    int index;          // 0x08
+    char padC[8];
+    int data;           // 0x14
+    char pad18[0xC];
+};
 
+struct Menu_B418 {
+    char pad0[0x2E8];
+    char sub2E8[0x518 - 0x2E8];     // 0x2E8
+    MenuItem_B418 items[4];         // 0x518
+    char item5A8[0x1C];             // 0x5A8
+    char item5C4[0x1C];             // 0x5C4
+};
+
+struct Src_B418 {
+    char pad0[0x6C];
+    int count;          // 0x6C
+    int ids[4];         // 0x70
+};
+
+extern "C" void func_002CA388(void* item, int enable);
+extern "C" void func_001DB330(void* sub, Src_B418* src);
+
+extern "C" void func_001DB418(Menu_B418* self, Src_B418* src)
+{
+    int i = 0;
+    for (; i < src->count; i++) {
+        int id = src->ids[i];
+        MenuItem_B418* it = &self->items[i];
+        it->data = id;
+        func_002CA388(it, 1);
+        it->index = i;
+    }
+    for (; i < 4; i++) {
+        func_002CA388(&self->items[i], 0);
+    }
+    func_001DB330(self->sub2E8, src);
+    func_002CA388(self->item5C4, src->count >= 2);
+    func_002CA388(self->item5A8, src->count < 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB528);
+#ifdef SKIP_ASM
+struct MenuItem_B528 {
+    char pad0[8];
+    int index;          // 0x08
+    char padC[8];
+    void* data;         // 0x14
+    char pad18[0xC];
+};
 
+struct Menu_B528 {
+    char pad0[0x168];
+    MenuItem_B528 items[12];    // 0x168
+};
+
+extern "C" int func_0025F120(void* src);
+extern "C" void* func_0025F150(void* src, int i);
+extern "C" void func_002CA388(void* item, int enable);
+extern char D_00467DE8[];
+
+extern "C" void func_001DB528(Menu_B528* self, void* src)
+{
+    int i = 0;
+    int n = func_0025F120(src);
+    for (; i < n; i++) {
+        MenuItem_B528* it = &self->items[i];
+        it->data = func_0025F150(src, i);
+        func_002CA388(it, 1);
+        it->index = i;
+    }
+    if (i == 0) {
+        self->items[0].data = D_00467DE8;
+        i = 1;
+        func_002CA388(&self->items[0], 1);
+        self->items[0].index = -1;
+    }
+    for (; i < 12; i++) {
+        func_002CA388(&self->items[i], 0);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB620);
+#ifdef SKIP_ASM
+struct MenuItem_B620 {
+    char pad0[8];
+    int index;          // 0x08
+    char padC[8];
+    void* data;         // 0x14
+    char pad18[0xC];
+};
+
+struct Menu_B620 {
+    char pad0[0x16C];
+    MenuItem_B620 items[24];    // 0x16C
+};
+
+extern "C" int func_0025F1B0(void* src);
+extern "C" void* func_0025F1E0(void* src, int i, int flags);
+extern "C" void func_002CA388(void* item, int enable);
+extern char D_00467E00[];
+
+extern "C" void func_001DB620(Menu_B620* self, void* src)
+{
+    int i = 0;
+    int n = func_0025F1B0(src);
+    for (; i < n; i++) {
+        MenuItem_B620* it = &self->items[i];
+        it->data = func_0025F1E0(src, i, 0);
+        func_002CA388(it, 1);
+        it->index = i;
+    }
+    if (i == 0) {
+        self->items[0].data = D_00467E00;
+        i = 1;
+        func_002CA388(&self->items[0], 1);
+        self->items[0].index = -1;
+    }
+    for (; i < 24; i++) {
+        func_002CA388(&self->items[i], 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB718);
@@ -640,7 +812,46 @@ extern "C" void func_001DCE20(int arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCEA0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA280(int, int);
+extern "C" void func_002CAA80(int, int);
+
+// PORT: pointers passed as int (unit declares the callees with int parameters)
+static inline void SubMenuB_CEA0(int m)
+{
+    func_002CA280(m + 0x24C, 2);
+    func_002CA280(m + 0x230, 2);
+    func_002CA280(m + 0x218, 2);
+    func_002CA280(m + 0x1FC, 2);
+    func_002CA280(m + 0x1E4, 2);
+    func_002CA280(m + 0x1C0, 2);
+    func_002CA280(m + 0x194, 2);
+    func_002CA280(m + 0x168, 2);
+    func_002CA280(m + 0x150, 2);
+    func_002CA280(m + 0x134, 2);
+    func_002CAA80(m, 2);
+}
+
+static inline void SubMenuA_CEA0(int m)
+{
+    SubMenuB_CEA0(m + 0x1FC);
+    func_002CA280(m + 0x1E4, 2);
+    func_002CA280(m + 0x1C0, 2);
+    func_002CA280(m + 0x194, 2);
+    func_002CA280(m + 0x168, 2);
+    func_002CA280(m + 0x150, 2);
+    func_002CA280(m + 0x134, 2);
+    func_002CAA80(m, 2);
+}
+
+extern "C" void func_001DCEA0(int self, int arg)
+{
+    SubMenuA_CEA0(self + 0x130);
+    func_002CAA80(self, arg);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCFC8);
