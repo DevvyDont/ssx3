@@ -8148,7 +8148,38 @@ extern "C" int func_002A7A90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A7B08);
+#ifdef SKIP_ASM
+signed char func_002A78E0(void* self);
+extern "C" int func_002A79C8(void* self);
+extern "C" int func_002A7EF0(void* self, const char* s);
+extern const char D_004A3720[];
+
+extern "C" char* func_002A7B08(void* self)
+{
+    while (**(signed char**)((char*)self + 0x8) != 0) {
+        func_002A79C8(self);
+        if (func_002A78E0(self) == '[') {
+            int n = 0;
+            if (**(signed char**)((char*)self + 0x8) != ']') {
+                do {
+                    char* dst = (char*)self + 0xC;
+                    dst[n] = func_002A78E0(self);
+                    n++;
+                } while (**(signed char**)((char*)self + 0x8) != ']');
+            }
+            if (func_002A7EF0(self, D_004A3720) == 0) {
+                char* buf = (char*)self + 0xC;
+                buf[n] = 0;
+                return buf;
+            }
+            break;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A7BF8);
