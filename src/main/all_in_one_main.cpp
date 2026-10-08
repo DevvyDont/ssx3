@@ -2,7 +2,25 @@
 
 INCLUDE_ASM("main/all_in_one_main", __sti__all_in_one_main_cpp);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB2B0);
+#ifdef SKIP_ASM
+void func_002CAA58(void*);
+extern "C" void func_002CCF98(char*, int, int *, int);
+extern "C" void cMenu_addItem(void *, char*, int);
+extern int D_00467DE0[];
+extern int D_0046D378[];
+
+extern "C" void *func_001DB2B0(char *arg0, int *arg1) {
+    func_002CAA58(arg0);
+    char *p = arg0 + 0x134;
+    *(int **)(arg0 + 0x12C) = D_0046D378;
+    *(int *)(arg0 + 0x130) = *arg1;
+    func_002CCF98(p, 0, D_00467DE0, 0);
+    cMenu_addItem(arg0, p, -1);
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("main/all_in_one_main", func_001DB330);
 
@@ -322,7 +340,22 @@ extern "C" void func_001DCAC0(void *self, int flags) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCAF0);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(void *, int);
+extern int D_0046D8C0[];
+
+extern "C" void func_001DCAF0(char *arg0, int arg1) {
+    *(int **)(arg0 + 0xC) = D_0046D8C0;
+    cBXString__cBXString(arg0 + 8, 2);
+    cBXString__cBXString(arg0 + 4, 2);
+    cBXString__cBXString(arg0, 2);
+    if (arg1 & 1) {
+        operator_delete((int*)arg0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCB60);
@@ -609,7 +642,30 @@ extern "C" void func_001DCE20(int arg0, int arg1) {
 
 INCLUDE_ASM("main/all_in_one_main", func_001DCEA0);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCFC8);
+#ifdef SKIP_ASM
+struct VEnt { short delta; short idx; void (*fn)(void*, int); };
+struct VTab { int a; int b; VEnt dtor; };
+struct Elem { char pad[0x10]; VTab *vt; char pad2[0x24 - 0x14]; };
+struct Obj { char pad[0x168]; Elem elems[4]; };
+extern "C" void func_002CA280(int, int);
+extern "C" void func_002CAA80(int, int);
+
+extern "C" void func_001DCFC8(Obj *self, int flags) {
+    if (self->elems != 0) {
+        Elem *end = self->elems + 4;
+        Elem *p = end;
+        while (self->elems != p) {
+            p--;
+            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        }
+    }
+    func_002CA280((int)self + 0x150, 2);
+    func_002CA280((int)self + 0x134, 2);
+    func_002CAA80((int)self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD060);
@@ -628,11 +684,74 @@ extern "C" void func_001DD060(int arg0, int arg1) {
 
 INCLUDE_ASM("main/all_in_one_main", func_001DD0C8);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD258);
+#ifdef SKIP_ASM
+struct VEnt_D258 { short delta; short idx; void (*fn)(void*, int); };
+struct VTab_D258 { int a; int b; VEnt_D258 dtor; };
+struct Elem_D258 { char pad[0x10]; VTab_D258 *vt; char pad2[0x24 - 0x14]; };
+struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
 
+extern "C" void func_001DD258(Obj_D258 *self, int flags) {
+    if (self->elems != 0) {
+        Elem_D258 *end = self->elems + 12;
+        Elem_D258 *p = end;
+        while (self->elems != p) {
+            p--;
+            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        }
+    }
+    func_002CA280((int)self + 0x150, 2);
+    func_002CA280((int)self + 0x134, 2);
+    func_002CAA80((int)self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD2F0);
+#ifdef SKIP_ASM
+struct VEnt_D2F0 { short delta; short idx; void (*fn)(void*, int); };
+struct VTab_D2F0 { int a; int b; VEnt_D2F0 dtor; };
+struct Elem_D2F0 { char pad[0x10]; VTab_D2F0 *vt; char pad2[0x24 - 0x14]; };
+struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
 
+extern "C" void func_001DD2F0(Obj_D2F0 *self, int flags) {
+    func_002CA280((int)self + 0x4CC, 2);
+    if (self->elems != 0) {
+        Elem_D2F0 *p = self->elems + 24;
+        while (self->elems != p) {
+            p--;
+            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        }
+    }
+    func_002CA280((int)self + 0x154, 2);
+    func_002CA280((int)self + 0x138, 2);
+    func_002CAA80((int)self, flags);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD398);
+#ifdef SKIP_ASM
+struct VEnt_D398 { short delta; short idx; void (*fn)(void*, int); };
+struct VTab_D398 { int a; int b; VEnt_D398 dtor; };
+struct Elem_D398 { char pad[0x10]; VTab_D398 *vt; char pad2[0x24 - 0x14]; };
+struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
+
+extern "C" void func_001DD398(Obj_D398 *self, int flags) {
+    if (self->elems != 0) {
+        Elem_D398 *p = self->elems + 14;
+        while (self->elems != p) {
+            p--;
+            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        }
+    }
+    func_002CA280((int)self + 0x168, 2);
+    func_002CA280((int)self + 0x150, 2);
+    func_002CA280((int)self + 0x134, 2);
+    func_002CAA80((int)self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD440);
@@ -745,7 +864,34 @@ extern "C" void func_001DD598(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD5B8);
+#ifdef SKIP_ASM
+extern "C" void func_003977E8(void *);
+extern "C" int func_0039FB30(void *, int, int);
+extern int D_0046D1A0[];
+extern int D_00494670[];
+extern int D_004949E8[];
+
+extern "C" void *func_001DD5B8(char *self) {
+    *(char **)(self + 4) = self;
+    *(char **)(self + 0) = self;
+    *(int *)(self + 0xC) = 0;
+    *(int *)(self + 0x10) = 0;
+    *(int **)(self + 8) = D_00494670;
+    func_001DD580((unsigned short*)(self + 0x14));
+    func_003977E8(self + 0x18);
+    *(int *)(self + 0x34) = 0;
+    *(int *)(self + 0x38) = 0;
+    *(int *)(self + 0x3C) = 0;
+    func_0039FB30(self + 0x40, 0, 0);
+    *(int **)(self + 0x48) = D_004949E8;
+    func_003977E8(self + 0xB4);
+    *(int *)(self + 0xD0) = 0;
+    *(int **)(self + 8) = D_0046D1A0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD648);
@@ -868,7 +1014,24 @@ extern "C" void func_001DD750(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD778);
+#ifdef SKIP_ASM
+extern "C" int func_001A1CD0(int, signed char);
+
+extern "C" void func_001DD778(char *self, signed char n) {
+    int i = 0;
+    int mask = 0xFF;
+    int h = **(int **)(self + 0x10);
+    if (n > 0) {
+        do {
+            mask &= ~func_001A1CD0(h, i);
+            i++;
+        } while (i < n);
+    }
+    *(char *)(self + 0x15) = mask;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD800);
@@ -2684,7 +2847,32 @@ extern "C" void func_001DEA20(void *self) {
 
 INCLUDE_ASM("main/all_in_one_main", func_001DEA80);
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DEAA8);
+#ifdef SKIP_ASM
+int GetHashValue32(char*);
+extern "C" void func_0039F190(int, int);
+extern char D_004A14E8[];
+extern char D_004A14F0[];
+
+extern "C" void func_001DEAA8(char *self, char *arg1, int arg2) {
+    if (arg1 != 0) {
+        if (arg2 == 5) {
+            int a = *(int*)(arg1 + 0x38);
+            if (a == GetHashValue32(D_004A14E8)) {
+                *(char*)(self + 0x48) = 1;
+                func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
+            } else {
+                int b = *(int*)(arg1 + 0x38);
+                if (b == GetHashValue32(D_004A14F0)) {
+                    *(char*)(self + 0x48) = 0;
+                    func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DEB50);
