@@ -269,7 +269,136 @@ extern "C" void func_00129160(sAiObj128A48* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_001291E0);
+#ifdef SKIP_ASM
+extern void* D_004A289C;
+extern void* D_004A28A8;
+extern "C" int func_00122278(void*);
+extern "C" void func_00122448(void*);
+extern "C" void func_001225C0(void*);
+extern "C" void func_001225F0(void*);
+void func_00122638(void*);
+extern "C" void func_002D5048(void*);
+extern "C" void func_002DB478(void*);
+extern "C" void func_002DDAB8(void*);
+extern "C" void func_002E24D0(void*);
+extern "C" void func_002E3AF8(void*);
+extern "C" void func_002E7A10(void*);
+extern "C" void func_002EA538(void*, int);
+extern "C" void func_002EB198(void*);
+extern "C" void func_002EF950(void*);
+extern "C" void func_002F1510(void*);
+void func_002F6908(void*);
+
+struct sVEntry_91E0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sHolder_91E0 {
+    char pad[0x18];
+    char* rider;
+};
+
+struct sAI_91E0 {
+    char pad0[0x14];
+    int f14;
+    char pad18[0x28 - 0x18];
+    char* list28[6];
+    sHolder_91E0* a40[2];
+    sHolder_91E0* a48[5];
+    sHolder_91E0* a5C[5];
+    sHolder_91E0* h70;
+    char pad74[0x78 - 0x74];
+    int n78;
+    int n7C;
+    int n80;
+    int n84;
+    int f88;
+    int f8C;
+};
+
+extern "C" void func_001291E0(sAI_91E0* self)
+{
+    char* riders[8];
+    char* sub[8];
+    int active[8];
+    char* ptrs[16];
+    int n;
+    int i;
+
+    for (n = 0; n < self->n78; n++) {
+        char* r = self->list28[n];
+        if (*(int*)(r + 0x884) == 0 && *(int*)(r + 0x888) == -1) {
+            char* g = (char*)D_004A289C;
+            sVEntry_91E0* vt = *(sVEntry_91E0**)(g + 0x10D8);
+            int v = vt[114].fn(g + vt[114].delta);
+            *(int*)(self->list28[n] + 0x888) = v + 4;
+        }
+    }
+    n = 0;
+    if (self->f88 > 0 && self->n7C > 0) {
+        char* x = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x34);
+        if (x != 0 && *(int*)(x + 0x70) == 0) {
+            riders[n++] = self->a40[0] ? self->a40[0]->rider : 0;
+        } else {
+            riders[n++] = self->h70 ? self->h70->rider : 0;
+        }
+    } else {
+        for (i = 0; i < self->n7C; i++) {
+            riders[n++] = self->a40[i] ? self->a40[i]->rider : 0;
+        }
+        if (self->f14 != 0) {
+            for (i = 0; i < self->n80; i++) {
+                riders[n++] = self->a48[i] ? self->a48[i]->rider : 0;
+            }
+        }
+        if (self->f8C != 0) {
+            for (i = 0; i < self->n84; i++) {
+                riders[n++] = self->a5C[i] ? self->a5C[i]->rider : 0;
+            }
+        }
+    }
+    for (i = 0; i < n; i++) {
+        active[i] = func_00122278(riders[i]);
+        sub[i] = *(char**)(riders[i] + 0x77C);
+    }
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_001225C0(riders[i]);
+    }
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_00122448(riders[i]);
+    }
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_001225F0(riders[i]);
+    }
+    for (i = 0; i < n; i++) {
+        ptrs[i] = sub[i] ? sub[i] + 0x520 : 0;
+    }
+    func_002EA538(ptrs, n);
+    for (i = 0; i < n; i++) func_002E3AF8(sub[i] + 0xB00);
+    for (i = 0; i < n; i++) func_002F6908(sub[i] + 0xD20);
+    for (i = 0; i < n; i++) func_002DDAB8(sub[i] + 0x3B0);
+    for (i = 0; i < n; i++) func_002EF950(sub[i] + 0xAD0);
+    for (i = 0; i < n; i++) func_002E7A10(sub[i] + 0x610);
+    for (i = 0; i < n; i++) func_002EB198(sub[i] + 0x9C0);
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_002DB478(sub[i] + 0x470);
+    }
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_002D5048(sub[i] + 0xAF0);
+    }
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_002E24D0(sub[i] + 0xB40);
+    }
+    for (i = 0; i < n; i++) {
+        if (active[i]) func_002F1510(sub[i] + 0xC70);
+    }
+    for (i = 0; i < n; i++) func_00122638(riders[i]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001296F8);
@@ -4724,7 +4853,277 @@ void func_00131608(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00131620);
+#ifdef SKIP_ASM
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" int func_00116378(void*);
+extern "C" int func_00116120_1620(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" int func_00131CC0(void* self);
+extern "C" int func_00106848(void*);
+extern "C" int func_00107578(void* rider, int on);
+extern "C" int func_001162C8(void*, int, int);
+extern "C" int func_001161D0(void* rider, float v);
+extern "C" int func_001163B0(void* rider, int a, int b);
+extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void func_00113E80(void*, float);
+extern "C" void func_00113F88(void* rider, float a, float b);
+extern "C" void func_00115B58(void*);
+extern "C" void func_00115D48(void*);
+extern "C" int func_00114CC0(void* rider);
+extern "C" int func_00311AE8(void*, int);
+int func_00312AA0(void* self, int i);
+unsigned int AIrand();
+
+struct sAiVec4_1620
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sAiBitsX_1620
+{
+    int pad : 20;
+    int v : 6;
+};
+
+struct sAiBitsY_1620
+{
+    int pad : 26;
+    int v : 6;
+};
+
+struct sAiBitsC_1620
+{
+    int v : 6;
+};
+
+struct sAiBitsD_1620
+{
+    int pad : 6;
+    int v : 6;
+};
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float aiDot_1620(const sAiVec4_1620& a, const sAiVec4_1620& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float aiLength_1620(const sAiVec4_1620& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float aiAbs_1620(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `<?` (min) operator.
+static inline float aiClamp_1620(float v, float lo, float hi)
+{
+    float r = lo;
+    if (v >= lo)
+        r = v <? hi;
+    return r;
+}
+
+extern "C" void func_00131620(void* self, void* in)
+{
+    float zero = 0.0f;
+    float x = ((sAiBitsX_1620*)in)->v * 0.032258063554763794f;
+    float y = ((sAiBitsY_1620*)in)->v * 0.032258063554763794f;
+    float c = ((sAiBitsC_1620*)((char*)in + 4))->v * 0.032258063554763794f;
+    char* r = *(char**)self;
+    if (aiDot_1620(*(sAiVec4_1620*)(r + 0x1E0), *(sAiVec4_1620*)(r + 0x3A0)) < zero)
+        c = zero;
+    if (func_00116378(r))
+        return;
+    if (func_00116120_1620(*(void**)self, (*(int*)in >> 12) & 1, 0))
+        return;
+    if (func_00131CC0(self))
+        return;
+    if (*(int*)in & 0x2000)
+    {
+        if (func_00107578(*(void**)self, y > 0.5f))
+            return;
+        x = aiClamp_1620(x, -0.5f, 0.5f);
+        y = 1.0f;
+        c = zero;
+    }
+    else
+    {
+        if (func_00106848(*(void**)self))
+            return;
+    }
+    int w = *(int*)in;
+    if (func_001162C8(*(void**)self, (w >> 15) & 1, (w >> 14) & 1))
+        return;
+    if (*(int*)in & 0x8000)
+    {
+        y = 1.0f;
+        c = 0.0f;
+    }
+    if (func_001161D0(*(void**)self, ((sAiBitsD_1620*)((char*)in + 4))->v * 0.032258063554763794f))
+        return;
+    int w2 = *(int*)in;
+    if (func_001163B0(*(void**)self, (w2 >> 18) & 1, (w2 >> 19) & 1))
+        x = aiClamp_1620(x, -0.5f, 0.5f);
+    int w3 = *(int*)in;
+    func_00114130(*(void**)self, (w3 >> 17) & 1, (w3 >> 16) & 1);
+    func_00113E80(*(void**)self, x);
+    func_00113F88(*(void**)self, y, c);
+    func_00115B58(*(void**)self);
+    func_00115D48(*(void**)self);
+    int cur = func_00312AA0(*(void**)(*(char**)self + 0x784), 2);
+    int anim = cur;
+    if (cur == 0x16)
+    {
+        char* r1 = *(char**)self;
+        *(int*)(r1 + 0x204) = 0;
+        *(float*)(r1 + 0x200) = 0.03333333507180214f;
+        char* r2 = *(char**)self;
+        *(int*)(r2 + 0x21C) = 0;
+        *(float*)(r2 + 0x218) = 0.03333333507180214f;
+        char* r3 = *(char**)self;
+        *(float*)(r3 + 0x224) = 0.03333333507180214f;
+        *(int*)(r3 + 0x228) = 0;
+    }
+    else if (cur == 0x15 || (*(float*)(*(char**)self + 0x2DC) == 0.0f && func_00114CC0(*(void**)self)))
+    {
+        anim = 0x15;
+        char* r1 = *(char**)self;
+        *(int*)(r1 + 0x204) = 0;
+        *(float*)(r1 + 0x200) = 0.03333333507180214f;
+        char* r2 = *(char**)self;
+        *(float*)(r2 + 0x218) = 0.03333333507180214f;
+        *(int*)(r2 + 0x21C) = 0;
+    }
+    else if (func_00311AE8(*(void**)(*(char**)self + 0x784), 2) == 10)
+    {
+        char* r1 = *(char**)self;
+        *(int*)(r1 + 0x204) = 0;
+        *(float*)(r1 + 0x200) = 0.03333333507180214f;
+    }
+    else if (func_00311AE8(*(void**)(*(char**)self + 0x784), 2) == 5)
+    {
+        char* r1 = *(char**)self;
+        *(float*)(r1 + 0x200) = 0.03333333507180214f;
+        *(float*)(r1 + 0x204) = *(float*)(r1 + 0x1F0);
+        char* r2 = *(char**)self;
+        *(float*)(r2 + 0x218) = 0.03333333507180214f;
+        *(int*)(r2 + 0x21C) = 0;
+    }
+    else
+    {
+        char* r1 = *(char**)self;
+        float spd = aiLength_1620(*(sAiVec4_1620*)(r1 + 0x1E0));
+        if (*(float*)(r1 + 0x214) == 0.0f)
+        {
+            *(float*)(r1 + 0x204) = *(float*)(r1 + 0x1F0);
+            *(float*)(r1 + 0x200) = 0.03333333507180214f;
+            if (spd < 833.3333740234375f && (y > 0.0f || aiAbs_1620(x) > 0.2f))
+            {
+                anim = 0x16;
+            }
+            else
+            {
+                char* r2 = *(char**)self;
+                if (*(int*)(r2 + 0x438) == 4)
+                {
+                    float a = aiAbs_1620(*(float*)(r2 + 0x1F0));
+                    if (*(float*)(r2 + 0x220) <= (1.0f - a) * 0.5f)
+                        anim = 0xE;
+                    else if (*(float*)(r2 + 0x2FC) > 0.0f && a < 0.30000001192092896f)
+                        anim = 8;
+                    else
+                        anim = 0xF;
+                }
+                else if (aiAbs_1620(*(float*)(r2 + 0x1FC)) > 0.6000000238418579f &&
+                         aiAbs_1620(*(float*)(r2 + 0x3B8)) > 0.699999988079071f &&
+                         (AIrand() & 1) == 0)
+                {
+                    char* r3 = *(char**)self;
+                    float v = *(float*)(r3 + 0x1FC);
+                    if (*(int*)(r3 + 0x320) != 0)
+                        v = -v;
+                    anim = v < 0.0f ? 0x10 : 0x11;
+                }
+                else
+                {
+                    char* r3 = *(char**)self;
+                    if (*(float*)(r3 + 0x220) <= (1.0f - aiAbs_1620(*(float*)(r3 + 0x1F0))) * 0.5f)
+                        anim = 5;
+                    else if (*(float*)(r3 + 0x2FC) > 0.0f)
+                        anim = 8;
+                    else if (spd < 1666.666748046875f || (unsigned int)(*(int*)(r3 + 0x438) - 2) < 2)
+                        anim = 7;
+                    else
+                        anim = 6;
+                }
+            }
+        }
+        else
+        {
+            *(float*)(r1 + 0x204) = 0.0f;
+            *(float*)(r1 + 0x200) = 0.03333333507180214f;
+            float lim = 694.4444580078125f;
+            if (cur == 0xC || cur == 0xD)
+                lim = 972.2222290039062f;
+            if (lim < spd)
+            {
+                anim = 0xB;
+            }
+            else
+            {
+                char* r2 = *(char**)self;
+                float t = *(float*)(r2 + 0x214);
+                if (aiAbs_1620(t) < 0.800000011920929f)
+                    anim = 0xB;
+                else if (t > 0.0f)
+                    anim = *(int*)(r2 + 0x320) ? 0xC : 0xD;
+                else
+                    anim = *(int*)(r2 + 0x320) ? 0xD : 0xC;
+            }
+        }
+    }
+    if (anim != cur)
+        cRiderAnimBase_play(*(void**)(*(char**)self + 0x784), anim, 0, -1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00131C30);
@@ -4896,7 +5295,108 @@ extern "C" void func_00132048(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00132060);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" int cRiderAnimBase_play_2060(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+extern "C" void func_0010E098(void*, int, float);
+extern "C" void func_00116930(void* rider);
+float func_00119918_2060(void* p, int st, float h) __asm__("func_00119918__FPvi");
+
+struct sQuat_2060
+{
+    float x, y, z, w;
+    sQuat_2060() {}
+    sQuat_2060(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+extern sQuat_2060 D_004FF130_2060 __asm__("D_004FF130");
+extern sQuat_2060 D_004FF160_2060 __asm__("D_004FF160");
+
+static inline sQuat_2060 AxisAngle_2060(const sQuat_2060& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQuat_2060(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+#define RIDER_2060 (*(char**)((char*)self + 8))
+
+static inline void setRot_2060(char* anim, float a)
+{
+    *(sQuat_2060*)(anim + 0x30) = D_004FF130_2060;
+    *(sQuat_2060*)(anim + 0x40) = AxisAngle_2060(D_004FF160_2060, -a);
+}
+
+static inline void flip_2060(void* self, int f)
+{
+    *(int*)(RIDER_2060 + 0x320) = f;
+    *(int*)(*(char**)(RIDER_2060 + 0x784) + 0x18) = f;
+    *(float*)(RIDER_2060 + 0x238) = -*(float*)(RIDER_2060 + 0x238);
+    *(float*)(RIDER_2060 + 0x240) = -*(float*)(RIDER_2060 + 0x240);
+}
+extern "C" void func_00132060(void* self, int dir)
+{
+    if (dir != 0) {
+        *(float*)self -= 1.5707964897155762f;
+        switch (*(int*)(RIDER_2060 + 0x328)) {
+    case 1:
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), -1.5707963705062866f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x31, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 3;
+        break;
+    case 2:
+        flip_2060(self, 0);
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), 1.5707963705062866f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x35, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 4;
+        break;
+    case 3:
+        flip_2060(self, 1);
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), 3.1415927410125732f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x33, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 2;
+        break;
+    case 4:
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), 0.0f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x36, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 1;
+        break;
+        }
+    } else {
+        *(float*)self += 1.5707964897155762f;
+        switch (*(int*)(RIDER_2060 + 0x328)) {
+    case 1:
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), 1.5707963705062866f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x32, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 4;
+        break;
+    case 2:
+        flip_2060(self, 0);
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), -1.5707963705062866f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x34, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 3;
+        break;
+    case 3:
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), 0.0f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x33, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 1;
+        break;
+    case 4:
+        flip_2060(self, 1);
+        setRot_2060(*(char**)(RIDER_2060 + 0x784), 3.1415927410125732f);
+        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 0x36, 0, -1.0f);
+        *(int*)(RIDER_2060 + 0x328) = 2;
+        break;
+        }
+    }
+    func_0010E098(RIDER_2060, 1, func_00119918_2060(*(void**)(RIDER_2060 + 0x790), *(int*)(RIDER_2060 + 0x328), *(float*)self));
+    func_00116930(RIDER_2060);
+}
+#undef RIDER_2060
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00132620);

@@ -2265,7 +2265,88 @@ void func_001E1548(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1550);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004A28A8;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+int cBENewPlayerInterface_getRiderCharID(void* self, int player);
+extern "C" int func_001E3A30(void* self);
+extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" void func_001E3A78(int a, int b);
+extern "C" int func_001464D0(void* iface, int a, int ch, int b, int c);
+extern "C" int func_00145EF0(void* iface, int a, int b, int c);
+unsigned int BXrand();
+
+extern "C" void func_001E1550(void)
+{
+    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int busy = n != 0 && n < 10;
+    if (busy == 0) {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        if (func_001E3A30((void*)1) == 0) {
+            if (func_001464D0(iface, 0, ch, 0, 1) == 0 && func_00145EF0(iface, 0, 0xE, 4) == 0) {
+                func_001E3A78(1, 1);
+                if (ch != 3) {
+                    func_001E2FE0(BXrand() % 3, 0);
+                } else {
+                    func_001E2FE0(BXrand() % 3 + 3, 0);
+                }
+            }
+        } else if (func_001E3A30((void*)2) == 0) {
+            if (func_001464D0(iface, 0, ch, 1, 1) == 0 && func_00145EF0(iface, 0, 0xF, 4) == 0) {
+                func_001E3A78(2, 1);
+                if (ch != 7) {
+                    func_001E2FE0(BXrand() % 3 + 6, 0);
+                } else {
+                    func_001E2FE0(BXrand() % 3 + 9, 0);
+                }
+            }
+        } else if (func_001E3A30((void*)3) == 0) {
+            if (func_001464D0(iface, 0, ch, 2, 1) == 0 && func_00145EF0(iface, 0, 0x10, 4) == 0) {
+                func_001E3A78(3, 1);
+                if (ch != 8) {
+                    func_001E2FE0(BXrand() % 3 + 0xC, 0);
+                } else {
+                    func_001E2FE0(BXrand() % 3 + 0xF, 0);
+                }
+            }
+        }
+        if (func_001E3A30((void*)4) == 0) {
+            if (func_001464D0(iface, 0, ch, 0, 0) == 0 && func_00145EF0(iface, 0, 0xE, 5) == 0) {
+                func_001E3A78(4, 1);
+                if (ch != 3) {
+                    func_001E2FE0(BXrand() % 3 + 0x12, 0);
+                } else {
+                    func_001E2FE0(BXrand() % 3 + 0x15, 0);
+                }
+            }
+        } else if (func_001E3A30((void*)5) == 0) {
+            if (func_001464D0(iface, 0, ch, 1, 0) == 0 && func_00145EF0(iface, 0, 0xF, 5) == 0) {
+                func_001E3A78(5, 1);
+                if (ch != 7) {
+                    func_001E2FE0(BXrand() % 3 + 0x18, 0);
+                } else {
+                    func_001E2FE0(BXrand() % 3 + 0x1B, 0);
+                }
+            }
+        } else if (func_001E3A30((void*)6) == 0) {
+            if (func_001464D0(iface, 0, ch, 2, 0) == 0 && func_00145EF0(iface, 0, 0x10, 5) == 0) {
+                func_001E3A78(6, 1);
+                if (ch != 8) {
+                    func_001E2FE0(BXrand() % 3 + 0x1E, 0);
+                } else {
+                    func_001E2FE0(BXrand() % 3 + 0x21, 0);
+                }
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E1A30);
 
@@ -5081,7 +5162,144 @@ extern "C" void func_001E7B88(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E7BB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0020A380(void* self);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" int func_004139F8(float f);
+extern "C" char* func_0020A1A8(int v);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+extern void* D_004A28A8;
+extern signed char D_00535BC8[];
+extern int D_004A213C;
+extern int D_00536730[];
+extern unsigned int D_00536640[];
+extern char D_0046E340[];
+extern char D_0046E818[];
+extern char D_0046E828[];
+extern char D_0046E838[];
+extern char D_0046E848[];
+extern char D_0046E858[];
+extern char D_0046E868[];
+extern char D_0046E878[];
+extern char D_0046E888[];
+extern char D_0046E7A0[];
+extern char D_004A2180[];
+extern char D_004A2188[];
+extern char D_004A2190[];
+extern char D_004A2198[];
+extern char D_004A21A0[];
+
+class cUIObj_7BB0 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int on);
+};
+
+extern "C" void func_001E7BB0(void* self)
+{
+    char buf[32];
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E340), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+    *(int*)((char*)self + 0x9C) = 0;
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E818));
+    if (obj != 0) {
+        *(int*)(obj + 0x90) |= 8;
+    }
+    int* p = *(int**)((char*)D_004A28A8 + 0xC0);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+    char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
+    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    int pl = func_00146E98(iface1, 0);
+    int mode = *p;
+    int sel = D_00536730[pl];
+    cUIState_hideObjSafe(self, D_0046E828);
+    cUIState_hideObjSafe(self, D_0046E838);
+    cUIState_hideObjSafe(self, D_0046E848);
+    cUIState_hideObjSafe(self, D_0046E858);
+    cUIObj_7BB0* o = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E868));
+    cUIText_setAsciiString((cUIText*)o, func_0020A1A8(func_004139F8(D_00536640[pl] * 0.01666666753590107f)));
+    int off = pl * 4;
+    int i;
+    for (i = 1; i < 7; i++) {
+        sprintf(buf, D_004A2198, i);
+        o = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        o->setVisible(0);
+        if (i == sel + 1) {
+            o->setVisible(1);
+        }
+    }
+    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || D_00535BC8[0x4A] == 4)) {
+        D_004A213C = 1;
+        cUIState_showObjSafe(self, D_0046E7A0);
+    } else {
+        D_004A213C = 0;
+        cUIState_hideObjSafe(self, D_0046E7A0);
+    }
+    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || D_00535BC8[0x4A] == 4)) {
+        cUIState_showObjSafe(self, D_004A2180);
+    } else {
+        cUIState_hideObjSafe(self, D_004A2180);
+    }
+    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || D_00535BC8[0x4A] == 4)) {
+        cUIState_showObjSafe(self, D_004A2188);
+    } else {
+        cUIState_hideObjSafe(self, D_004A2188);
+    }
+    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || D_00535BC8[0x4A] == 4)) {
+        cUIState_showObjSafe(self, D_004A2190);
+    } else {
+        cUIState_hideObjSafe(self, D_004A2190);
+    }
+    o = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E878));
+    int vis = 0;
+    if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
+        vis = 1;
+    }
+    if (vis) {
+        o->setVisible(1);
+    } else {
+        o->setVisible(0);
+    }
+    char* r = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + off + 0x28);
+    if (D_00535BC8[0x49] == 2
+        || *(int*)(r + 0x480) != 0
+        || D_00535BC8[0x4A] == 6 || D_00535BC8[0x4A] == 7 || D_00535BC8[0x4A] == 8) {
+        cUIState_hideObjSafe(self, D_0046E888);
+        cUIState_hideObjSafe(self, D_004A21A0);
+    } else {
+        func_00294F78(func_0028B180(), 0xE);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8098);
@@ -5224,7 +5442,164 @@ extern "C" int func_001E88F0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8920);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0020A380(void* self);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int a1);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" int func_004139F8(float f);
+extern "C" char* func_0020A1A8(int v);
+extern "C" void* func_001FD190(int v);
+extern "C" void func_003A0E90(void* text, void* p);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern signed char D_00535C12[];
+extern int D_005366A8[];
+extern int D_00536730[];
+extern int D_005366D0[];
+extern unsigned int D_00536640[];
+extern char* D_00441D10[];
+struct sIdx3_8920 {
+    int v[3];
+};
+extern sIdx3_8920 D_0046E9B0;
+extern char D_0046E8B0[];
+extern char D_0046E378[];
+extern char D_004A21B0[];
+extern char D_004A21B8[];
+extern char D_0046E5F0[];
+extern char D_0046E8C8[];
+extern char D_0046E8E0[];
+extern char D_0046E8F8[];
+extern char D_0046E908[];
+extern char D_0046E918[];
+extern char D_0046E938[];
+extern char D_0046E950[];
+extern char D_0046E970[];
+extern char D_004A2138[];
+extern char D_004A2160[];
+extern char D_0046E660[];
+extern char D_0046E670[];
+extern char D_0046E980[];
+extern char D_0046E998[];
+extern char D_0046E4C0[];
+
+class cUIObj_8920 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+    virtual void setVisible(int on);
+};
+
+extern "C" void func_001E8920(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E8B0), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E378), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+    char* p = *(char**)((char*)D_004A28A8 + 0xC0);
+    int trk = D_00535C12[0];
+    int pl = func_00146E98(iface1, 0);
+    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A21B0));
+    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E5F0));
+    t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A21B8));
+    if (trk < 12) {
+        if (trk >= 6) {
+            func_003A0E90(t, func_001FD190(trk));
+        }
+    }
+    cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E8C8));
+    cUIText* b = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E8E0));
+    cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E8F8));
+    cUIText* d = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E908));
+    if (trk >= 6 && trk <= 8) {
+        cUIText_setUnicodeStringByID(a, GetHashValue32(D_0046E918));
+        cUIText_setUnicodeStringByID(c, GetHashValue32(D_0046E938));
+        cUIText_setAsciiString(b, func_0020A1A8(func_004139F8(*(unsigned int*)(p + 0x78) * 0.01666666753590107f)));
+        if (D_005366A8[0] != 0) {
+            cUIText_setAsciiString(d, D_004A2160);
+        } else {
+            cUIText_setAsciiString(d, func_0020A1A8(func_004139F8(D_00536640[0] * 0.01666666753590107f)));
+        }
+    } else {
+        char buf[32];
+        cUIText_setUnicodeStringByID(a, GetHashValue32(D_0046E950));
+        cUIText_setUnicodeStringByID(c, GetHashValue32(D_0046E970));
+        sprintf(buf, D_004A2138, *(int*)(p + 0x7C));
+        cUIText_setAsciiString(b, buf);
+        if (D_005366A8[0] != 0) {
+            cUIText_setAsciiString(d, D_004A2160);
+        } else {
+            sprintf(buf, D_004A2138, D_00536640[0]);
+            cUIText_setAsciiString(d, buf);
+        }
+    }
+    cUIObj_8920* o = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E660));
+    int s = D_00536730[pl];
+    if (s == 0) goto yes;
+    if (s == 1) goto yes;
+    if (s == 2) goto yes;
+    if (s != 3) goto no;
+yes:
+    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E670));
+    goto done;
+no:
+    if (trk >= 6 && trk <= 8) {
+        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E980));
+    } else {
+        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E998));
+    }
+done:
+    if (D_005366D0[pl] != 0) {
+        o->setVisible(0);
+    }
+    {
+        sIdx3_8920 ids = D_0046E9B0;
+        char name[32];
+        int i;
+        for (i = 0; i < 5; i++) {
+            sprintf(name, D_0046E4C0, i);
+            o = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (o != 0) {
+                if (i < 3) {
+                    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00441D10[ids.v[i]]));
+                    *(int*)((char*)o + 0x18) = ids.v[i];
+                } else {
+                    o->setVisible(0);
+                    o->v08(1);
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8E70__FPv);
