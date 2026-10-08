@@ -1163,7 +1163,44 @@ extern "C" void func_002586B0(void *self) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_156860", func_00258790);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00257E98(void *, int, int, int);
+extern "C" void func_00258870(void *, int, int);
+extern void func_002588A8_8790(void *) __asm__("func_002588A8");
+extern "C" void func_00258790(void *self, int arg1) {
+    char buf[12];
+    if (*(int*)((char*)self + 4) == 0 && *(int*)self != 0) {
+        if (arg1 != 0) {
+            if (*(int*)((char*)self + 0x7C) == 0) {
+                func_00258870(self, 0xE4C, 1);
+            } else {
+                *(int*)((char*)self + 0x3F8) = 1;
+            }
+            buf[0] = 0;
+            *(int*)((char*)self + 0x74) = 1;
+            *(int*)((char*)self + 0x4C) = *(int*)((char*)self + 0x4C) + 1;
+            *(int*)((char*)self + 0x3FC) = 0;
+            *(int*)((char*)self + 0x5C) = 0;
+        } else {
+            buf[0] = 1;
+            *(int*)((char*)self + 0x74) = 0;
+            *(int*)((char*)self + 0x3F8) = 0;
+            *(int*)((char*)self + 0x60) = 0;
+            *(int*)((char*)self + 0x84) = 0;
+            *(int*)((char*)self + 0x5C) = 0;
+            if (*(int*)((char*)self + 0x7C) == 0) {
+                func_00258870(self, 0x708, 0);
+            } else {
+                func_002588A8_8790(self);
+            }
+        }
+        func_00257E98(self, 3, (int)buf, 0xC);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258870);
@@ -1277,7 +1314,49 @@ extern "C" void func_00258A48(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00258AE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cIface_AE0 { public: int f0, f4, f8; virtual void v0(); virtual void v1(); };
+void* cBE_getInterface_8AE0(int, int) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00260F80();
+extern "C" int func_00261460(int);
+extern "C" void func_002613C8(int);
+extern "C" void func_0025B800(int);
+extern "C" void func_00262768(int, int, int, int, int, int);
+extern "C" void func_00258BC8(void *);
+extern "C" void func_00258A48(void *);
+extern "C" void func_0014E9C0(void *, int, int);
+extern "C" void* cBE_getBE();
+extern int D_004A3328;
+extern int D_004A3028_8AE0 __asm__("D_004A3028");
+extern void *D_004A28A8;
+extern int D_00534B38[];
+extern "C" void func_00258AE0(void *self) {
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028_8AE0);
+    }
+    int t = D_004A3328;
+    if (t != 0) {
+        func_00262768(t, 1, 0, 0, 0, 0);
+    }
+    func_00258BC8(self);
+    func_00258A48(self);
+    void *i = cBE_getInterface_8AE0(*(int*)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B38[0] == 0) {
+        func_0014E9C0(i, 1, 0);
+        cIface_AE0 *o = (cIface_AE0*)cBE_getInterface_8AE0((int)cBE_getBE(), 3);
+        o->v1();
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_156860", func_00258BC8);
