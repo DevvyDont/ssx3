@@ -716,6 +716,7 @@ extern "C" void func_0021D138(void *arg0) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D160);
 #ifdef SKIP_ASM
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
 #define func_0021D160_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
@@ -2150,6 +2151,7 @@ extern "C" void* func_002223C0(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002223E8);
 #ifdef SKIP_ASM
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
 #define func_002223E8_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
