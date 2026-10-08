@@ -95,7 +95,21 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C8970);
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C8A78);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1C9348", func_002C8C30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct HS_8C30 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
+extern void func_002C8600_8C30(HS_8C30 *, int, int, int) __asm__("func_002C8600");
+extern "C" void func_002C8A78(HS_8C30 *, int, int);
+
+extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) __asm__("func_002C8C30");
+extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) {
+    func_002C8600_8C30(self, x, self->b[self->cur], self->a[self->cur]);
+    func_002C8A78(self, x, 0);
+    func_002C8600_8C30(self, x, y, 9);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1C9348", func_002C8CA8);
