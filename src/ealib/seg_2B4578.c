@@ -76,7 +76,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5440);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5450);
 
-extern "C" void func_003B5470(void) {
+void func_003B5470(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5478);
@@ -459,7 +459,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C1B80);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2268);
 
-extern "C" void func_003C2438(void) {
+void func_003C2438(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2440);
@@ -704,7 +704,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C7600);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7828);
 
-extern "C" void func_003C7AA8(void) {
+void func_003C7AA8(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7AB0);
@@ -1071,14 +1071,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1658);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1690);
 
-extern "C" void func_003D16C8(void) {
+void func_003D16C8(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16D0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16E0);
 
-extern "C" void func_003D16E8(void) {
+void func_003D16E8(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16F0);
@@ -1121,7 +1121,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2FC0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2FE0);
 
-extern "C" void func_003D3010(void) {
+void func_003D3010(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3018);
@@ -1542,12 +1542,12 @@ INCLUDE_ASM("ealib/seg_2B4578", iFILESYS_ExecCommand);
 
 INCLUDE_ASM("ealib/seg_2B4578", iFILESYS_CommandCompleteCallback);
 
-extern "C" void func_003DE4C8(void) {
+void func_003DE4C8(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", FILESYS_bypassqueuefileinfo);
 
-extern "C" void func_003DE668(void) {
+void func_003DE668(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DE670);
@@ -1880,7 +1880,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E51A0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E5268);
 
-extern "C" void func_003E5288(void) {
+void func_003E5288(void) {
 }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E5290);
