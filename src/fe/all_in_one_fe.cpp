@@ -2,7 +2,18 @@
 
 INCLUDE_ASM("fe/all_in_one_fe", __sti__all_in_one_fe_cpp);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C640);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
+extern char D_00474E08[];
+extern "C" void* func_0021C640(void *self) {
+    func_0039E2A0_xi(self, 0);
+    *(char**)((char*)self + 8) = D_00474E08;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C678);
 
@@ -81,7 +92,18 @@ extern "C" void* func_0021CAA8(void *self) {
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CAE0);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
+extern char D_00474248[];
+extern "C" void* func_0021CB08(void *self) {
+    func_0039E2A0_xi(self, 0);
+    *(char**)((char*)self + 8) = D_00474248;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CB40);
 
@@ -201,15 +223,48 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002204A0);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00220AD0);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220D38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
+extern char D_00473AA8[];
+extern "C" void* func_00220D38(void *self) {
+    func_0039E2A0_xi(self, 0);
+    *(char**)((char*)self + 8) = D_00473AA8;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00220D70);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220D98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
+extern char D_004739D8[];
+extern "C" void* func_00220D98(void *self) {
+    func_0039E2A0_xi(self, 0);
+    *(char**)((char*)self + 8) = D_004739D8;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00220DD0);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220DF8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
+extern char D_00473908[];
+extern "C" void* func_00220DF8(void *self) {
+    func_0039E2A0_xi(self, 0);
+    *(char**)((char*)self + 8) = D_00473908;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00220E30);
 
