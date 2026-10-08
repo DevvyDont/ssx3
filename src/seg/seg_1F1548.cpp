@@ -1,8 +1,117 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_cPSPVisualEffectsMan);
+#ifdef SKIP_ASM
+extern "C" void *cMemMan_alloc(int, const char *, int, int);
+extern "C" void* func_002EFF98(void*);
+extern "C" void* func_00372AA0(void*);
+void* func_003759E8(void*);
+extern char D_00487D28[];
+extern char D_00487BB8[];
+extern char D_00487BC8[];
+extern char D_00487BE0[];
+extern char D_00487BF0[];
+extern char D_00487C00[];
+extern char D_00487C10[];
+extern char D_00487C20[];
+extern char D_00487C30[];
+extern char D_00487C40[];
+extern char D_00487C50[];
+extern char D_00487C68[];
+extern char D_00487C78[];
+extern char D_00487C88[];
+extern char D_00487DC8[];
+extern char D_00487DF8[];
+extern char D_00487E28[];
+extern char D_00487E58[];
+extern char D_00487E88[];
+extern char D_00487EB8[];
+extern char D_00487FA8[];
+extern char D_00488050[];
+extern char D_004882B0[];
+extern char D_00488330[];
+extern char D_00492FA0[];
+extern char D_00492FD0[];
+extern char D_004930A0[];
+extern char D_00493178[];
+extern char D_004931A8[];
+extern char D_004A3B88[];
+extern char D_004A3B90[];
+extern char D_004A3B98[];
+extern char D_004A3BA0[];
 
+struct sMgr_0548 {
+    void* objs[17];
+    char* vptr;
+};
+
+extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
+{
+    func_002EFF98(self);
+    self->vptr = D_00487D28;
+    { void* p = cMemMan_alloc(4, D_00487BB8, 0, 0); *(char**)p = D_004931A8; self->objs[0] = p; }
+    { void* p = cMemMan_alloc(4, D_00487BC8, 0, 0); *(char**)p = D_00492FD0; self->objs[1] = p; }
+    { void* p = cMemMan_alloc(4, D_00487BE0, 0, 0); *(char**)p = D_00487EB8; self->objs[2] = p; }
+    { void* p = cMemMan_alloc(4, D_004A3B88, 0, 0); *(char**)p = D_00493178; self->objs[3] = p; }
+    { void* p = cMemMan_alloc(4, D_00487BF0, 0, 0); *(char**)p = D_00487E88; self->objs[4] = p; }
+    { void* p = cMemMan_alloc(4, D_00487C00, 0, 0); *(char**)p = D_00487E58; self->objs[5] = p; }
+    self->objs[6] = func_003759E8(cMemMan_alloc(4, D_00487C10, 0, 0));
+    { void* p = cMemMan_alloc(4, D_00487C20, 0, 0); *(char**)p = D_00492FA0; self->objs[7] = p; }
+    { void* p = cMemMan_alloc(4, D_004A3B90, 0, 0); *(char**)p = D_00487E28; self->objs[8] = p; }
+    { void* p = cMemMan_alloc(4, D_00487C30, 0, 0); *(char**)p = D_00487DF8; self->objs[9] = p; }
+    { void* p = cMemMan_alloc(4, D_00487C40, 0, 0); *(char**)p = D_00487FA8; self->objs[10] = p; }
+    { void* p = cMemMan_alloc(4, D_004A3B98, 0, 0); *(char**)p = D_00487DC8; self->objs[11] = p; }
+    { void* p = cMemMan_alloc(4, D_00487C50, 0, 0); *(char**)p = D_00488330; self->objs[12] = p; }
+    { void* p = cMemMan_alloc(4, D_00487C68, 0, 0); *(char**)p = D_00488050; self->objs[13] = p; }
+    { void* p = cMemMan_alloc(4, D_00487C78, 0, 0); *(char**)p = D_004882B0; self->objs[14] = p; }
+    { void* p = cMemMan_alloc(4, D_004A3BA0, 0, 0); *(char**)p = D_004930A0; self->objs[15] = p; }
+    self->objs[16] = func_00372AA0(cMemMan_alloc(4, D_00487C88, 0, 0));
+    return self;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F0820);
+#ifdef SKIP_ASM
+void operator_delete(int *);
+struct Obj0820 {
+    virtual ~Obj0820();
+};
+extern char D_00487D28[];
+extern char D_00487DA0[];
+
+struct sMgr_0820 {
+    Obj0820* objs[17];
+    char* vptr;
+};
+
+extern "C" void func_002F0820(sMgr_0820* self, int arg1)
+{
+    self->vptr = D_00487D28;
+    delete self->objs[0];
+    delete self->objs[1];
+    delete self->objs[2];
+    delete self->objs[3];
+    delete self->objs[4];
+    delete self->objs[5];
+    delete self->objs[6];
+    delete self->objs[7];
+    delete self->objs[8];
+    delete self->objs[9];
+    delete self->objs[10];
+    delete self->objs[11];
+    delete self->objs[12];
+    delete self->objs[13];
+    delete self->objs[14];
+    delete self->objs[15];
+    delete self->objs[16];
+    self->vptr = D_00487DA0;
+    if (arg1 & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F0A98);
@@ -216,7 +325,170 @@ extern "C" void func_002F1148(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1150);
+#ifdef SKIP_ASM
+int func_00312AA0(void* self, int i);
+extern "C" int func_00311AE8(void*, int);
+extern "C" char* func_00311B20(void*, int);
+extern "C" int func_001446A0(void*, int);
+extern int D_004A3AFC;
+
+struct sVec4_1150 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sCol_1150 {
+    float r, g, b, a;
+};
+
+struct sMat_1150 {
+    sVec4_1150 r[4];
+};
+
+extern sVec4_1150 D_004FF120;
+
+struct sFx_1150 {
+    char* owner;
+    char pad4[0xC];
+    sVec4_1150 pos[4];
+    sCol_1150 col[4];
+    float size[4];
+    int active;
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMat_1150(sMat_1150* dst, sMat_1150* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (matrix * vector).
+static inline void MulMat_1150(sVec4_1150* out, const sMat_1150* m, const sVec4_1150& v)
+{
+    sVec4_1150 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    *out = r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline void Add_1150(sVec4_1150* out, const sVec4_1150& a, const sVec4_1150& b)
+{
+    sVec4_1150 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    *out = r;
+}
+
+// PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
+static inline float randf_1150()
+{
+    D_004A3AFC = ((D_004A3AFC * 0x18FCD + 0xE9507C) & 0x7FFFFF) | 0x3F800000;
+    return *(float*)&D_004A3AFC - 1.0f;
+}
+
+static inline float randRange_1150(float lo, float hi)
+{
+    return lo + (hi - lo) * randf_1150();
+}
+
+extern "C" void func_002F1150(sFx_1150* self)
+{
+    int active = 0.0f < *(float*)(self->owner + 0x350);
+    self->active = active;
+    if (!active)
+        return;
+    int bone = *(int*)(self->owner + 0x8B0);
+    int flag = 0;
+    int a = func_00312AA0(*(void**)(self->owner + 0x784), 0);
+    int b = func_00312AA0(*(void**)(self->owner + 0x784), 1);
+    if (func_00311AE8(*(void**)(self->owner + 0x784), 1) == 0xD) {
+        if (func_001446A0(func_00311B20(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
+            flag = func_001446A0(func_00311B20(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
+        }
+    }
+    if (a == 0x146 || (b == 0x143 && flag)) {
+        if (*(int*)(self->owner + 0x320))
+            bone = *(int*)(self->owner + 0x8B0);
+        else
+            bone = *(int*)(self->owner + 0x8B8);
+    } else if (a == 0x147 || (b == 0x144 && flag)) {
+        if (*(int*)(self->owner + 0x320))
+            bone = *(int*)(self->owner + 0x8B8);
+        else
+            bone = *(int*)(self->owner + 0x8B0);
+    } else {
+        self->active = 0;
+    }
+    if (self->active) {
+        sVec4_1150 base = *(sVec4_1150*)(*(char**)(*(char**)(self->owner + 0x780) + 0x30) + (bone << 6) + 0x30);
+        sMat_1150 m;
+        CopyMat_1150(&m, &(*(sMat_1150**)(*(char**)(self->owner + 0x780) + 0x30))[bone]);
+        m.r[3] = D_004FF120;
+        sVec4_1150 v;
+        sVec4_1150 rnd;
+        {
+            sVec4_1150 dir;
+            dir.x = 8.0f;
+            dir.y = 0.0f;
+            dir.z = 0.0f;
+            dir.w = 0.0f;
+            MulMat_1150(&rnd, &m, dir);
+            Add_1150(&v, base, rnd);
+            base = v;
+        }
+        for (int i = 0; i < 4; i++) {
+            float s = *(float*)(self->owner + 0x350);
+            float a = s * 3.0f;
+            float hi = s * 15.0f + 15.0f;
+            rnd.w = 0.0f;
+            rnd.x = randRange_1150(-a, a);
+            rnd.y = randRange_1150(-a, a);
+            rnd.z = randRange_1150(-a, a);
+            Add_1150(&v, base, rnd);
+            self->pos[i] = v;
+            self->size[i] = randRange_1150(15.0f, hi);
+            float c = *(float*)(self->owner + 0x350) * 0.9f;
+            c *= randf_1150();
+            v.x = 1.0f;
+            v.y = c;
+            v.z = c;
+            v.w = c;
+            self->col[i] = *(sCol_1150*)&v;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F1510);
 
@@ -461,7 +733,76 @@ extern "C" void func_002F22B0(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F22C8);
+#ifdef SKIP_ASM
+extern "C" int func_00310C48(void*, int, const char*);
+extern char D_004879D8[];
+extern char D_004879E8[];
+extern char D_004879F8[];
+extern char D_00487A08[];
+extern char D_00487A18[];
+extern char D_00487A28[];
+extern char D_00487A38[];
+extern char D_00487A48[];
+extern char D_00487A58[];
+extern char D_00487A68[];
+extern char D_00487A78[];
+extern char D_00487A88[];
+extern char D_00487A98[];
+extern char D_00487AA8[];
+extern char D_00487AB8[];
+extern char D_00487AC8[];
+extern char D_00487AD8[];
+extern char D_00487AE8[];
+extern char D_00487AF8[];
+extern char D_004A3B00[];
+extern char D_004A3B08[];
+extern char D_004A3BB8[];
+extern char D_00487CC8[];
+
+
+struct sObj_22C8 {
+    int ready;
+    int h[26];
+    char pad[0x94 - 0x6C];
+    void* model;
+};
+
+extern "C" void func_002F22C8(sObj_22C8* self)
+{
+    self->h[0] = func_00310C48(self->model, 0, D_004A3BB8);
+    self->h[1] = func_00310C48(self->model, 0, D_004A3B08);
+    self->h[2] = func_00310C48(self->model, 0, D_00487A58);
+    self->h[3] = func_00310C48(self->model, 0, D_00487A48);
+    self->h[4] = func_00310C48(self->model, 0, D_00487A38);
+    self->h[5] = func_00310C48(self->model, 0, D_004A3B00);
+    self->h[6] = func_00310C48(self->model, 0, D_00487A68);
+    self->h[7] = func_00310C48(self->model, 0, D_00487A88);
+    self->h[8] = func_00310C48(self->model, 0, D_00487A98);
+    self->h[9] = func_00310C48(self->model, 0, D_00487AA8);
+    self->h[10] = func_00310C48(self->model, 0, D_00487AB8);
+    self->h[11] = func_00310C48(self->model, 0, D_00487AC8);
+    self->h[12] = func_00310C48(self->model, 0, D_00487AD8);
+    self->h[13] = func_00310C48(self->model, 0, D_00487AE8);
+    self->h[14] = func_00310C48(self->model, 0, D_00487AF8);
+    self->h[15] = func_00310C48(self->model, 0, D_00487A78);
+    self->h[16] = func_00310C48(self->model, 0, D_00487A18);
+    self->h[17] = func_00310C48(self->model, 0, D_004879D8);
+    self->h[18] = func_00310C48(self->model, 0, D_004879E8);
+    self->h[19] = func_00310C48(self->model, 0, D_00487A28);
+    self->h[20] = func_00310C48(self->model, 0, D_004879F8);
+    self->h[21] = func_00310C48(self->model, 0, D_00487A08);
+    self->h[22] = func_00310C48(self->model, 1, D_00487CC8);
+    self->h[23] = func_00310C48(self->model, 1, D_00487CC8);
+    self->h[24] = func_00310C48(self->model, 1, D_00487CC8);
+    self->h[25] = func_00310C48(self->model, 1, D_00487CC8);
+    for (int i = 0; i < 26; i++) {
+        // NOTE: empty in retail (likely a compiled-out per-handle assert)
+    }
+    self->ready = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
@@ -735,11 +1076,364 @@ extern "C" void *func_002F4380(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F43E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sCol_43E0 {
+    float r, g, b, a;
+};
 
+extern sCol_43E0 D_004FAB80;
+extern sCol_43E0 D_004FABA0;
+extern sCol_43E0 D_004FABC0;
+extern sCol_43E0 D_004FABE0;
+extern sCol_43E0 D_004FAC00;
+extern sCol_43E0 D_004FAC20;
+extern sCol_43E0 D_004FAC40;
+extern sCol_43E0 D_004FAC60;
+extern sCol_43E0 D_004FAC80;
+
+struct sLight_43E0 {
+    int type;
+    float a;
+    float b;
+    sCol_43E0 col;
+};
+
+struct sLightSet_43E0 {
+    char pad[0x30];
+    sLight_43E0 lights[16];
+    char pad1F0[0x10];
+    int count;
+};
+
+extern "C" void func_002F43E0_43E0(sLightSet_43E0* self) __asm__("func_002F43E0");
+extern "C" void func_002F43E0_43E0(sLightSet_43E0* self)
+{
+    self->count = 0;
+    self->lights[0].type = 1;
+    self->lights[0].a = 1.2999999523162842f;
+    self->lights[0].b = 0.03999999910593033f;
+    self->lights[0].col = D_004FAB80;
+    self->count++;
+    self->lights[1].type = 3;
+    self->lights[1].a = 0.595413327217102f;
+    self->lights[1].b = 0.03453768044710159f;
+    self->lights[1].col = D_004FABA0;
+    self->count++;
+    self->lights[2].type = 0;
+    self->lights[2].a = 0.5f;
+    self->lights[2].b = 0.20000000298023224f;
+    self->lights[2].col = D_004FABC0;
+    self->count++;
+    self->lights[3].type = 2;
+    self->lights[3].a = 0.20000000298023224f;
+    self->lights[3].b = 0.025077050551772118f;
+    self->lights[3].col = D_004FABE0;
+    self->count++;
+    self->lights[4].type = 0;
+    self->lights[4].a = 0.0f;
+    self->lights[4].b = 0.03999999910593033f;
+    self->lights[4].col = D_004FAC00;
+    self->count++;
+    self->lights[5].type = 0;
+    self->lights[5].a = -0.5141515731811523f;
+    self->lights[5].b = 0.06998095661401749f;
+    self->lights[5].col = D_004FAC20;
+    self->count++;
+    self->lights[6].type = 1;
+    self->lights[6].a = -0.40145567059516907f;
+    self->lights[6].b = 0.030118949711322784f;
+    self->lights[6].col = D_004FAC40;
+    self->count++;
+    self->lights[7].type = 3;
+    self->lights[7].a = -0.6160849332809448f;
+    self->lights[7].b = 0.03999999910593033f;
+    self->lights[7].col = D_004FAC60;
+    self->count++;
+    self->lights[8].type = 1;
+    self->lights[8].a = -1.0f;
+    self->lights[8].b = 0.0206892192363739f;
+    self->lights[8].col = D_004FAC80;
+    self->count++;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4690);
+#ifdef SKIP_ASM
+extern "C" float func_002EE268(int);
 
+struct sV2_4690 {
+    float x, y;
+    sV2_4690() {}
+    sV2_4690(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+
+static inline sV2_4690 operator-(const sV2_4690& a, const sV2_4690& b)
+{
+    return sV2_4690(a.x - b.x, a.y - b.y);
+}
+
+static inline sV2_4690 operator+(const sV2_4690& a, const sV2_4690& b)
+{
+    return sV2_4690(a.x + b.x, a.y + b.y);
+}
+
+static inline sV2_4690 operator*(const sV2_4690& a, float s)
+{
+    return sV2_4690(a.x * s, a.y * s);
+}
+
+struct sV4_4690 {
+    float x, y, z, w;
+    sV4_4690(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+struct sCol_4690 {
+    float r, g, b, a;
+};
+
+struct sLight_4690 {
+    int type;
+    float dist;
+    float size;
+    sCol_4690 col;
+};
+
+struct sFlare_4690 {
+    char pad[0x30];
+    sLight_4690 lights[16];
+    float sunX;
+    float sunY;
+    char pad1F8[0x8];
+    int count;
+    float intensity;
+};
+
+struct sGs_4690 {
+    unsigned int w0, w4, w8, wC;
+    unsigned int f10 : 16;
+    unsigned int f10hi : 16;
+    void SetF10(int v) { f10 = v; }
+};
+
+class cWorld_4690 {
+public:
+    char pad[0xE84];
+    sGs_4690* stateTop;
+    char padE88[0x1004 - 0xE88];
+    int f1004;
+    int GetF1004() { return f1004; }
+    char pad1008[0x10D8 - 0x1008];
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8();
+    virtual unsigned int GetWidth();
+    virtual unsigned int GetHeight();
+    virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
+    virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
+    virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22();
+    virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26();
+    virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30();
+    virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34();
+    virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38();
+    virtual void v39(); virtual void v40(); virtual void v41(); virtual void v42();
+    virtual void v43(); virtual void v44(); virtual void v45(); virtual void v46();
+    virtual void v47(); virtual void v48(); virtual void v49(); virtual void v50();
+    virtual void v51(); virtual void v52(); virtual void v53(); virtual void v54();
+    virtual void v55(); virtual void v56(); virtual void v57(); virtual void v58();
+    virtual void v59(); virtual void v60(); virtual void v61(); virtual void v62();
+    virtual void v63(); virtual void v64(); virtual void v65(); virtual void v66();
+    virtual void v67(); virtual void v68(); virtual void v69(); virtual void v70();
+    virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74();
+    virtual void v75(); virtual void v76();
+    virtual void DrawSprite(const sV4_4690&, const sV2_4690&, const sV2_4690&, const sV2_4690&, const sCol_4690&);
+};
+
+extern char* D_004A289C;
+
+extern "C" void func_002F4690(sFlare_4690* self)
+{
+    float cx = (float)((cWorld_4690*)D_004A289C)->GetWidth() * 0.5f;
+    float cy = (float)((cWorld_4690*)D_004A289C)->GetHeight() * 0.5f;
+    sV2_4690 center(cx, cy);
+    sV2_4690 sun(self->sunX, self->sunY);
+    sV2_4690 dir = sun - center;
+    cWorld_4690* w = (cWorld_4690*)D_004A289C;
+    w->stateTop->SetF10(w->GetF1004());
+    for (int i = 0; i < self->count; i++) {
+        sV2_4690 pos = center + dir * self->lights[i].dist;
+        sV2_4690 uv0;
+        sCol_4690 col = self->lights[i].col;
+        col.r *= self->intensity * func_002EE268(6);
+        sV2_4690 uv1;
+        switch (self->lights[i].type) {
+        case 0:
+            uv0 = sV2_4690(0.0f, 0.0f);
+            uv1 = sV2_4690(0.5f, 0.5f);
+            break;
+        case 1:
+            uv0 = sV2_4690(0.5f, 0.0f);
+            uv1 = sV2_4690(1.0f, 0.5f);
+            break;
+        case 2:
+            uv0 = sV2_4690(0.0f, 0.5f);
+            uv1 = sV2_4690(0.5f, 1.0f);
+            break;
+        case 3:
+            uv0 = sV2_4690(0.5f, 0.5f);
+            uv1 = sV2_4690(1.0f, 1.0f);
+            break;
+        default:
+            uv0 = sV2_4690(0.0f, 0.0f);
+            uv1 = sV2_4690(0.5f, 1.0f);
+            break;
+        }
+        float s = self->lights[i].size * 300.0f;
+        sV2_4690 sz(s, s);
+        ((cWorld_4690*)D_004A289C)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4A08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" float func_002EE100(int);
+extern "C" float func_002EE148(int);
+extern "C" float func_002EE190(int);
+extern "C" float func_002EE1D8(int);
+extern "C" int func_002EE220(int);
+extern "C" float func_002EE2B0(int);
+extern "C" void func_002F4690_4A08(void*, void*) __asm__("func_002F4690");
+extern char D_004FF1A0[];
+
+struct sV2_4A08 {
+    float x, y;
+    sV2_4A08(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+
+struct sV4_4A08 {
+    float x, y, z, w;
+    sV4_4A08() {}
+    sV4_4A08(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+struct sGsState_4A08 {
+    unsigned int w0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 5;
+    unsigned int f4_12 : 8;
+    unsigned int f4_20 : 2;
+    unsigned int f4_22 : 1;
+    unsigned int f4_23 : 2;
+    unsigned int f4_25 : 7;
+    unsigned int f8_0 : 5;
+    unsigned int f8_5 : 5;
+    unsigned int f8_10 : 19;
+    unsigned int f8_29 : 3;
+    unsigned int wC;
+    unsigned int f10 : 16;
+    unsigned int f10hi : 16;
+    void SetF22(int v) { f4_22 = v; }
+};
+
+extern sGsState_4A08 D_00501420_4A08 __asm__("D_00501420");
+
+class cGfx_4A08 {
+public:
+    char pad[0xE84];
+    sGsState_4A08* stateTop;
+    char padE88[0xF50 - 0xE88];
+    int texTab[(0x10D8 - 0xF50) / 4];
+    int GetTexId(int i) { return texTab[i + 0x33]; }
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void BeginScene();
+    virtual void EndScene();
+    virtual void v22(); virtual void v23(); virtual void v24();
+    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
+    virtual void Begin2D();
+    virtual void End2D();
+    virtual void v32();
+    virtual void SetTexture(void*);
+    virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
+    virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
+    virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
+    virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49();
+    virtual void v50(); virtual void v51(); virtual void v52(); virtual void v53();
+    virtual void v54(); virtual void v55(); virtual void v56(); virtual void v57();
+    virtual void v58(); virtual void v59(); virtual void v60(); virtual void v61();
+    virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
+    virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
+    virtual void v70(); virtual void v71(); virtual void v72(); virtual void v73();
+    virtual void v74(); virtual void v75(); virtual void v76();
+    virtual void DrawSprite(const sV4_4A08&, const sV2_4A08&, const sV2_4A08&, const sV2_4A08&, const sV4_4A08&);
+};
+
+extern cGfx_4A08* D_004A5B80_4A08 __asm__("D_004A5B80");
+
+struct sSun_4A08 {
+    char pad[0x2C];
+    unsigned short visible;
+    char pad2E[0x1F0 - 0x2E];
+    float sunX;
+    float sunY;
+    char pad1F8[0x204 - 0x1F8];
+    float intensity;
+};
+
+extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
+{
+    if (self->visible == 0)
+        return;
+    int id = !flag ? 6 : 7;
+    float r = func_002EE100(id);
+    float g = func_002EE148(id);
+    float b = func_002EE190(id);
+    sV4_4A08 col;
+    col = sV4_4A08(1.0f, r, g, b);
+    col.x *= self->intensity * func_002EE1D8(id);
+    float size = func_002EE2B0(id);
+    int tex = func_002EE220(id);
+    if (size == 1.0f)
+        size = 320.0f;
+    if (col.x <= 0.0f)
+        return;
+    cGfx_4A08* gfx = D_004A5B80_4A08;
+    gfx->stateTop[1] = gfx->stateTop[0];
+    gfx->stateTop++;
+    *gfx->stateTop = D_00501420_4A08;
+    gfx->BeginScene();
+    gfx->SetViewport(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
+    gfx->Begin2D();
+    gfx->SetTexture(D_004FF1A0);
+    gfx->stateTop->SetF22(1);
+    gfx->stateTop->f4_23 = 2;
+    gfx->stateTop->f4_20 = 0;
+    gfx->stateTop->f4_12 = 0x14;
+    gfx->stateTop->f4_0 = 0;
+    gfx->stateTop->f8_10 = 0;
+    gfx->stateTop->f4_2 = 7;
+    gfx->stateTop->f8_5 = 8;
+    gfx->stateTop->f10 = gfx->GetTexId(tex);
+    sV4_4A08 pos(self->sunX, self->sunY, 0.0f, 1.0f);
+    gfx->DrawSprite(pos, sV2_4A08(size, size),
+                    sV2_4A08(0.0f, 0.0f), sV2_4A08(1.0f, 1.0f), col);
+    func_002F4690_4A08(self, vp);
+    gfx->stateTop--;
+    gfx->End2D();
+    gfx->EndScene();
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
 
