@@ -1232,7 +1232,33 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA740);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA7B0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA888);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern unsigned char D_0044C480_A888[] __asm__("D_0044C480");
+
+int func_003BA888(int x) {
+    int scale = 0x1000;
+    int t;
+    while (x >= 0x4B0) {
+        x -= 0x4B0;
+        scale <<= 1;
+    }
+    while (x < -0x4AF) {
+        x += 0x4B0;
+        scale >>= 1;
+    }
+    t = (x * 0x369D) >> 16;
+    if (t <= -0x100)
+        t = -0xFF;
+    if (t < 0)
+        scale = (scale * (D_0044C480_A888[t + 0x100] + 0x100)) >> 9;
+    else
+        scale = (scale * (D_0044C480_A888[t] + 0x100)) >> 8;
+    return scale;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA938);
 
@@ -6055,7 +6081,27 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003DCA40);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DCB20);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DCBD8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int func_003DCC88_CBD8(int, int, int, int) __asm__("func_003DCC88");
+extern int func_003DCD98_CBD8(int, int, int) __asm__("func_003DCD98");
+extern int (*D_00450C10_CBD8[])(char *, int, int) __asm__("D_00450C10");
+extern char D_00495D28_CBD8[] __asm__("D_00495D28");
+extern int D_00519AB0_CBD8[] __asm__("D_00519AB0");
+extern int D_00519AE8_CBD8[] __asm__("D_00519AE8");
+
+int func_003DCBD8(int arg0, int arg1, int arg2) {
+    int r;
+    if (D_00519AB0_CBD8[0] == 0) {
+        r = D_00450C10_CBD8[1](D_00495D28_CBD8, func_003DCD98_CBD8(arg0, arg1, arg2), 0x100);
+        D_00519AE8_CBD8[0] = r;
+        return func_003DCC88_CBD8(arg0, arg1, arg2, r);
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DCC88);
 
@@ -6074,7 +6120,35 @@ int func_003DCD98(int a, int b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DCDE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003E44B0_CDE0(void) __asm__("func_003E44B0");
+extern void func_003DECA0_CDE0(int, int) __asm__("func_003DECA0");
+extern void func_003E56E0_CDE0(char *) __asm__("func_003E56E0");
+extern void func_003E6220_CDE0(char *, int) __asm__("func_003E6220");
+extern void (*D_00450C10_CDE0[])(int) __asm__("D_00450C10");
+extern void (*D_00450C18_CDE0[])(int) __asm__("D_00450C18");
+extern char D_00519AC4_CDE0[] __asm__("D_00519AC4");
+extern int *D_00519AE4_CDE0[] __asm__("D_00519AE4");
+extern int D_00519AE8_CDE0[] __asm__("D_00519AE8");
+
+void func_003DCDE0(void) {
+    int *n;
+    func_003E44B0_CDE0();
+    for (n = D_00519AE4_CDE0[0]; n != 0; n = (int *)n[5]) {
+        D_00450C10_CDE0[2](n[0]);
+        func_003DECA0_CDE0(*(int *)n[3], 0);
+    }
+    func_003E56E0_CDE0(D_00519AC4_CDE0);
+    func_003E6220_CDE0(D_00519AC4_CDE0 - 0x14, 0x38);
+    if (D_00519AE8_CDE0[0] != 0) {
+        D_00450C18_CDE0[0](D_00519AE8_CDE0[0]);
+        D_00519AE8_CDE0[0] = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DCE90);
 
