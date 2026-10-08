@@ -835,11 +835,245 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021ED48);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021F338);
+#ifdef SKIP_ASM
+struct V2_F338 { float x, y; };
+struct V4_F338 { float x, y, z, w; };
+extern V4_F338 D_004C8568;
+extern V4_F338 D_004C8588;
+extern V4_F338 D_004C85A8;
+extern V4_F338 D_004C85C8;
+extern V4_F338 D_004C85E8;
+extern "C" void func_001E91F8(void*, void*);
+extern "C" void func_001E9220(void*, void*, int);
+void func_001E9290(void*, void*);
+extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
+extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
 
+extern "C" void func_0021F338(char* self, char* obj, int n, int x, V2_F338* pos, V2_F338* scale, float alpha) {
+    if (n > 0) {
+        V4_F338 cols[5];
+        V4_F338 a;
+        V2_F338 p;
+        V2_F338 size;
+        V2_F338 sc;
+        V2_F338 dim;
+        V4_F338 col;
+        float step;
+        int i;
+        cols[0] = D_004C8568;
+        cols[1] = D_004C8588;
+        cols[2] = D_004C85A8;
+        cols[3] = D_004C85C8;
+        cols[4] = D_004C85E8;
+        func_001E91F8(obj + 0x240, &a);
+        func_001E9220(obj + 0x240, &size, *(int*)(self + 0x4A0));
+        func_001E9290(obj + 0x240, &sc);
+        if (scale) {
+            sc.x *= scale->x;
+            sc.y *= scale->y;
+        }
+        if (pos == 0) {
+            dim.x = size.x * n + (n - 1) * 2.0f;
+            dim.y = size.y;
+            func_001F10F8(self, &p, &a, &dim, &sc, obj[0x260], obj[0x261], x);
+        } else {
+            p = *pos;
+            p.x -= (size.x * n + (n - 1) * 2.0f) * sc.x * 0.5f;
+            p.y -= size.y * sc.y * 0.5f;
+        }
+        int* w = (int*)(D_004A289C->e84 + 8);
+        *w = (*w & ~0x3E0) | ((obj[0x262] << 5) & 0x3E0);
+        step = (size.x + 2.0f) * sc.x;
+        col = cols[n - 1];
+        col.x *= alpha;
+        for (i = 0; i < n; i++) {
+            func_001F1190(self, *(int*)(self + 0x4A0), &p, &size, &sc, &col);
+            p.x += step;
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021F660);
+#ifdef SKIP_ASM
+struct V2_F660 { float x, y; };
+struct V4_F660 { float x, y, z, w; };
+struct Obj_F660 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+extern char* D_004A28A8;
+extern signed char D_00535C10[];
+extern int D_00536640[];
+extern char D_0046ED68[];
+extern char D_004A2138[];
+extern V4_F660 D_004C8808;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001E91F8(void*, void*);
+extern "C" void func_001E9220(void*, void*, int);
+void func_001E9290(void*, void*);
+void func_001E91A8(void*, void*);
+extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
+extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
+extern "C" int sprintf(char*, const char*, ...);
+extern "C" void func_00392908(void*, float, float, char*);
 
+extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag) {
+    V2_F660 scale;
+    V2_F660 p;
+    V4_F660 a;
+    V2_F660 size;
+    V2_F660 sc;
+    V4_F660 c;
+    char buf[64];
+    V4_F660 col;
+    int idx = 0x42;
+    char* r = *(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + (*rider << 2) + 0x28);
+    int sz = *(int*)(self + 0x4B4);
+    if (flag) {
+        sz = *(int*)(self + 0x49C);
+        idx = 0x1B;
+    }
+    char* e = (char*)(idx * 0x24 + elems); // PORT: pointer passed as int
+    scale.x = 1.0f;
+    scale.y = 1.0f;
+    func_001E91F8(e, &a);
+    func_001E9220(e, &size, sz);
+    func_001E9290(e, &sc);
+    size.x *= sc.x;
+    size.y *= sc.y;
+    func_001F10F8(self, &p, &a, &size, &scale, e[0x20], e[0x21], x);
+    func_001E91A8(e, &c);
+    int* w = (int*)(D_004A289C->e84 + 8);
+    *w = (*w & ~0x3E0) | ((e[0x22] << 5) & 0x3E0);
+    func_001F1190(self, sz, &p, &size, &scale, &c);
+    if (flag == 0) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        signed char mode = D_00535C10[0];
+        Obj_F660* o = (Obj_F660*)(r + 0x6C0);
+        int k = o->v07();
+        int val = D_00536640[k];
+        if (mode == 0 || mode == 5) {
+            int t = (int)((float)val * 0.01666666753590107f);
+            int rem = t % 3600;
+            sprintf(buf, D_0046ED68, t / 3600, rem / 60, rem % 60);
+        } else {
+            sprintf(buf, D_004A2138, val + rider[0x7C / 4]);
+        }
+        char* t = *(char**)(self + 0x42C);
+        p.x += size.x * 0.5f;
+        p.y += size.y;
+        sc.x *= 1.907578468322754f;
+        sc.y *= 1.907578468322754f;
+        *(float*)(t + 0x38) = *(float*)(t + 0x30) * sc.x;
+        *(float*)(t + 0x3C) = *(float*)(t + 0x34) * sc.y;
+        col = D_004C8808;
+        *(V4_F660*)(*(char**)(self + 0x42C) + 0x40) = col;
+        func_00392908(*(char**)(self + 0x42C), p.x, p.y, buf);
+        t = *(char**)(self + 0x42C);
+        *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale.x;
+        *(float*)(t + 0x3C) = *(float*)(t + 0x34) * scale.y;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021F9B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct V2_F9B0 { float x, y; };
+struct V4_F9B0 { float x, y, z, w; };
+struct Obj_F9B0 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+extern char* D_004A28A8;
+extern float D_00504FB8[];
+extern V4_F9B0 D_004C8648;
+extern char D_004A2300[];
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001E91F8(void*, void*);
+extern "C" void func_001E9220(void*, void*, int);
+void func_001E9290(void*, void*);
+void func_001E91A8(void*, void*);
+extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
+extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
+extern "C" int sprintf(char*, const char*, ...);
+extern "C" int func_0022D390(void*, int);
+extern "C" int func_00153520(void*, int, int);
+extern "C" int func_00153350(void*, int);
+extern "C" void func_00391CB0(void*, float, float, char*);
+
+extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t) {
+    V2_F9B0 scale;
+    V2_F9B0 p;
+    V4_F9B0 a;
+    V2_F9B0 size;
+    V2_F9B0 sc;
+    V4_F9B0 col;
+    char buf[64];
+    char* m = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x78);
+    int id = *(int*)(m + 0x1BC);
+    if (func_0022D390(m, id)) {
+        float s = 1.0f;
+        scale.x = 1.0f;
+        scale.y = 1.0f;
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
+        if (t < 0.4399542808532715f) {
+            float u = t * 2.272963523864746f;
+            s = D_00504FB8[(int)(u * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - u * u) + 1.0f;
+        }
+        func_001E91F8(obj + 0x804, &a);
+        func_001E9220(obj + 0x804, &size, *(int*)(self + 0x4A8));
+        func_001E9290(obj + 0x804, &sc);
+        size.x *= s;
+        size.y *= s;
+        sc.x *= s;
+        sc.y *= s;
+        func_001F10F8(self, &p, &a, &size, &scale, obj[0x824], obj[0x825], x);
+        int* w = (int*)(D_004A289C->e84 + 8);
+        *w = (*w & ~0x3E0) | ((obj[0x826] << 5) & 0x3E0);
+        col.x = 1.0f;
+        col.y = 1.0f;
+        col.z = 1.0f;
+        col.w = 1.0f;
+        func_001F1190(self, *(int*)(self + 0x4A8), &p, &size, &scale, &col);
+        char* tx = *(char**)(self + 0x42C);
+        p.x += size.x;
+        p.y += (size.y - (float)*(int*)(tx + 0x14) * *(float*)(tx + 0x34) * sc.y) * 0.5f;
+        if (t > 0.4399542808532715f) {
+            func_001E91A8(obj + 0x804, &col);
+        } else {
+            col = D_004C8648;
+        }
+        char* tx2 = *(char**)(self + 0x42C);
+        *(float*)(tx2 + 0x38) = *(float*)(tx2 + 0x30) * sc.x;
+        *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
+        *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
+        Obj_F9B0* o = (Obj_F9B0*)(rider + 0x6C0);
+        sprintf(buf, D_004A2300, func_00153520(iface, o->v07(), id), func_00153350(iface, id));
+        func_00391CB0(*(char**)(self + 0x42C), p.x, p.y, buf);
+        tx = *(char**)(self + 0x42C);
+        *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;
+        *(float*)(tx + 0x3C) = *(float*)(tx + 0x34) * scale.y;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021FD38);
 
@@ -847,7 +1081,55 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002200C0);
 
 INCLUDE_ASM("fe/all_in_one_fe", func_002204A0);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220AD0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct V2_0AD0 { float x, y; };
+struct V4_0AD0 { float x, y, z, w; };
+struct Big_0AD0 { unsigned int pad0 : 20; unsigned int mode : 2; unsigned int pad1 : 10; int rest[0xA1]; };
+struct Bits_0AD0 { int a, b; unsigned int lo : 5; int v : 5; unsigned int hi : 22; };
+struct Glob_0AD0 { char pad[0x504]; int f504; };
+extern Big_0AD0 D_00535610;
+extern Glob_0AD0* D_004A28A4;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001E91F8(void*, void*);
+void func_001E9290(void*, void*);
+void func_001E91A8(void*, void*);
+extern "C" void func_001E95A0(void*, void*, void*, void*, int, int);
+
+extern "C" void func_00220AD0(char* self, char* obj, float t) {
+    V2_0AD0 a;
+    V4_0AD0 b;
+    Big_0AD0 big;
+    V4_0AD0 c;
+    V2_0AD0 d;
+    V2_0AD0 e;
+    void* p = obj + 0xAD4;
+    func_001E91F8(p, &a);
+    func_001E9290(p, &b);
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    big = D_00535610;
+    if (D_004A28A4->f504 != 0 && big.mode != 2) {
+        b.y *= 0.75f;
+        a.y -= 60.0f;
+    }
+    func_001E91A8(obj + 0xAD4, &c);
+    if (t <= 0.5f) {
+        c.x *= t * 2.0f;
+    } else {
+        c.x *= (1.0f - t) * 2.0f;
+    }
+    d.x = 2.0f;
+    d.y = 2.0f;
+    *(V2_0AD0*)(*(char**)(self + 0xB50) + 0x28) = d;
+    int* w = (int*)(D_004A289C->e84 + 8);
+    *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
+    e = a;
+    func_001E95A0(self + 0xB48, &e, &b, &c, obj[0xAF4], obj[0xAF5]);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220D38);

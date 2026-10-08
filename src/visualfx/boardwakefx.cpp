@@ -634,7 +634,238 @@ extern "C" void func_002DF4D0(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF920);
+#ifdef SKIP_ASM
+struct sWakeFxF920 {
+    char* obj;                  // 0x00
+    char pad4[0x24];            // 0x04
+    char* p28;                  // 0x28
+    char pad2C[0x4];            // 0x2C
+    sWakeVecE398 v30;           // 0x30
+    sWakeVecE398 v40;           // 0x40
+    sWakeVecE398 v50;           // 0x50
+    int i60;                    // 0x60
+    char pad64[0x10];           // 0x64
+    float f74;                  // 0x74
+    char pad78[0x8];            // 0x78
+    int i80;                    // 0x80
+    char pad84[0xC];            // 0x84
+    sWakeVecE398 col;           // 0x90
+    sWakeVecE398 pos;           // 0xA0
+    int iB0;                    // 0xB0
+    float fB4;                  // 0xB4
+    float fB8;                  // 0xB8
+    float fBC;                  // 0xBC
+    sWakeVecE398 dir;           // 0xC0
+    char* pD0;                  // 0xD0
+    int iD4;                    // 0xD4
+    char padD8[0x50];           // 0xD8
+    int i128;                   // 0x128
+    float f12C;                 // 0x12C
+};
+
+struct sWakeVtF920 {
+    short delta;
+    short index;
+    sWakeVecE398* (*fn)(void*);
+};
+struct sWakeVtIF920 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMtxF920 {
+    sWakeVecE398 r0, r1, r2, r3;
+};
+
+extern void* D_004A28A8;
+int func_0011FE98(void*);
+int func_0011FEE8(void*);
+int func_00312AA0(void*, int);
+extern "C" void func_002DF448_F920(void*) __asm__("func_002DF448");
+extern "C" void func_002DF4D0_F920(void*) __asm__("func_002DF4D0");
+extern "C" void func_002E23E0_F920(void*, void*, void*, int, int, float) __asm__("func_002E23E0");
+extern "C" void func_002E02B8_F920(void*) __asm__("func_002E02B8");
+extern "C" void func_002DFE88_F920(void*) __asm__("func_002DFE88");
+extern "C" void func_002E0EE8_F920(void*) __asm__("func_002E0EE8");
+extern "C" void func_002E1120_F920(void*) __asm__("func_002E1120");
+extern "C" void func_002E1598_F920(void*) __asm__("func_002E1598");
+extern "C" void func_002E1A80_F920(void*) __asm__("func_002E1A80");
+extern "C" void func_002E2260_F920(void*) __asm__("func_002E2260");
+extern "C" void func_002E1F70_F920(void*) __asm__("func_002E1F70");
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wakeLenF920(const sWakeVecE398& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void wakeDivEqF920(sWakeVecE398& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sWakeVecE398 wakeScaleF920(const sWakeVecE398& v, float s)
+{
+    sWakeVecE398 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sWakeVecE398 wakeAddF920(const sWakeVecE398& a, const sWakeVecE398& b)
+{
+    sWakeVecE398 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sWakeVecE398 wakeRowF920(char* o, int k)
+{
+    return ((sWakeVecE398*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + 0x8A4) << 6)))[k];
+}
+
+extern "C" void func_002DF920(sWakeFxF920* self)
+{
+    if (self->i60 != 0) {
+        func_002DF448_F920(self);
+    }
+    if (self->i80 == 0) {
+        func_002DF4D0_F920(self);
+    }
+    self->f12C = 0.0f;
+    char* obj = self->obj;
+    if (*(int*)(obj + 0x330) != 0) {
+        int s = func_00312AA0(*(void**)(obj + 0x784), 2);
+        if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
+            self->f12C = *(int*)(self->obj + 0x320) ? -1.0f : 1.0f;
+        } else {
+            self->f12C = *(int*)(self->obj + 0x320) ? 1.0f : -1.0f;
+        }
+    }
+    obj = self->obj;
+    self->fB4 = -*(float*)(obj + 0x1F0) * (1.0f - wakeAbsE398(*(float*)(obj + 0x214)));
+    if (*(int*)(obj + 0x320) != 0) {
+        self->fB4 = -self->fB4;
+    }
+    char* sub = self->obj + 0x6C0;
+    sWakeVtF920* vt = *(sWakeVtF920**)sub;
+    float sp = wakeLenF920(*vt[2].fn(sub + vt[2].delta));
+    self->fB8 = sp;
+    self->fBC = wakeAbsE398(sp);
+    self->dir = *(sWakeVecE398*)(self->obj + 0x1E0);
+    if (0.0f < sp) {
+        wakeDivEqF920(self->dir, wakeLenF920(self->dir));
+    }
+    self->iB0 = 1;
+    int st = func_0011FE98(self->obj);
+    self->iD4 = st;
+    if (st == 1 || st == 2 || st == 4 || func_0011FEE8(self->obj) == 9) {
+        self->iB0 = 0;
+    } else {
+        char* o = self->obj;
+        if (*(int*)(o + 0xAC4) != 0) {
+            int t = *(int*)(o + 0xAD0) == 0 && *(int*)(o + 0xAFC) != 0;
+            if (!t || *(int*)(o + 0xB00) == 0) {
+                self->iB0 = 0;
+            }
+        }
+    }
+    char* o = self->obj;
+    self->v50 = wakeRowF920(o, 0);
+    float acc = (self->f74 - self->fB8) * 59.999996185302734f;
+    self->v30 = wakeRowF920(o, 1);
+    self->v40 = wakeRowF920(o, 2);
+    self->pos = wakeRowF920(o, 3);
+    self->pD0 = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + *(int*)(o + 0x438) * 0xB0;
+    int x = 0;
+    if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
+        x = func_0011FEE8(o) != 9;
+    }
+    float f = acc * 0.5f;
+    char* o2 = self->obj;
+    int y = 0;
+    if (*(int*)(o2 + 0xAC4) != 0 && *(int*)(o2 + 0xAD0) == 0) {
+        y = *(int*)(o2 + 0xAFC) != 0;
+    }
+    if (y) {
+        x = 27.77777862548828f <= acc;
+        f = acc;
+    }
+    if (self->iB0 != 0 && x) {
+        sWakeVecE398 p = wakeAddF920(self->pos, wakeScaleF920(*(sWakeVecE398*)(self->obj + 0x370), 10.0f));
+        func_002E23E0_F920(self, &p, self->obj + 0x370, *(int*)(self->obj + 0x438), 1, f);
+    }
+    self->f74 = self->fB8;
+    if (self->i128 != *(int*)(self->obj + 0x898)) {
+        func_002E2550(self);
+    }
+    char* sub2 = self->obj + 0x6C0;
+    sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
+    int idx = vt2[7].fn(sub2 + vt2[7].delta);
+    sEnt_E058* e = &D_004FA398[idx];
+    sWakeVecE398 c;
+    c.x = e->col.r;
+    c.y = e->col.g;
+    c.z = e->col.b;
+    c.w = e->col.a;
+    self->col = c;
+    wakeScaleE398(self->col, self->col, 2.0f);
+    self->col.w = 1.0f;
+    if (*(int*)(self->p28 + 0x384)) func_002E02B8_F920(self);
+    if (*(int*)(self->p28 + 0x7A4)) func_002DFE88_F920(self);
+    if (*(int*)(self->p28 + 0x174)) func_002E0EE8_F920(self);
+    if (*(int*)(self->p28 + 0x9B4)) func_002E1120_F920(self);
+    if (*(int*)(self->p28 + 0xBC4)) func_002E1598_F920(self);
+    if (*(int*)(self->p28 + 0xFE4)) func_002E1A80_F920(self);
+    if (*(int*)(self->p28 + 0x1404)) func_002E2260_F920(self);
+    if (*(int*)(self->p28 + 0x11F4)) func_002E1F70_F920(self);
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DFE88);
 
@@ -727,7 +958,187 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1598);
+#ifdef SKIP_ASM
+struct sWakeFx1598 {
+    char* obj;                  // 0x00
+    float f4;                   // 0x04
+    char pad8[0x20];            // 0x08
+    char* p28;                  // 0x28
+    char pad2C[0x64];           // 0x2C
+    sWakeVecE398 col;           // 0x90
+    sWakeVecE398 pos;           // 0xA0
+    char padB0[0x20];           // 0xB0
+    char* pD0;                  // 0xD0
+    int iD4;                    // 0xD4
+    char padD8[0x8];            // 0xD8
+    float fE0;                  // 0xE0
+    char padE4[0xC];            // 0xE4
+    sWakeVecE398 vF0;           // 0xF0
+    sWakeVecE398 dir;           // 0x100
+    char pad110[0x4];           // 0x110
+    int i114;                   // 0x114
+    char pad118[0x8];           // 0x118
+    float f120;                 // 0x120
+    int i124;                   // 0x124
+};
+
+extern "C" void func_002F4118(void*, float);
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float wakeDot1598(const sWakeVecE398& a, const sWakeVecE398& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sWakeVecE398 wakeSub1598(const sWakeVecE398& a, const sWakeVecE398& b)
+{
+    sWakeVecE398 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sWakeVt1598 {
+    short delta;
+    short index;
+    sWakeVecE398* (*fn)(void*);
+};
+
+// PORT: g++ minimum operator (<?).
+static inline float wakeClamp1598(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo) {
+        r = v <? hi;
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+static inline float wakeMin1598(float a, float b)
+{
+    return a <= b ? a : b;
+}
+
+static inline sWakeVecE398* wakeVel1598(sWakeFx1598* self)
+{
+    char* sub = self->obj + 0x6C0;
+    sWakeVt1598* vt = *(sWakeVt1598**)sub;
+    return vt[2].fn(sub + vt[2].delta);
+}
+
+// PORT: g++ minimum operator (<?).
+extern "C" void func_002E1598(sWakeFx1598* self)
+{
+    char* cfg = self->pD0;
+    if (27.77777862548828f < self->fE0 && *(int*)(cfg + 0x60) != 0) {
+        int a = 6;
+        int b = 5;
+        if (*(int*)(cfg + 0x64) != 0 && 277.77777099609375f < self->fE0) {
+            a = 5;
+            b = 6;
+        }
+        if (a == 5 && *(int*)(self->obj + 0xAC4) == 0) {
+            func_002F4118(&self->vF0, self->fE0);
+        }
+        sWakeVecE398 pos = self->vF0;
+        float k = 1.0f;
+        if (a == 6) {
+            k = 0.5f;
+            wakeAddE398(pos, wakeScale0EE8(self->dir, 20.0f));
+        } else {
+            wakeAddE398(pos, wakeScale0EE8(self->dir, 45.0f));
+        }
+        float lim = 3333.33349609375f;
+        float r = wakeClamp1598(self->fE0 / lim, 0.0f, 1.0f);
+        float f = self->f4;
+        if (f < 1.0f || a == 5) {
+            if (self->iD4 == 2) {
+                if (f < 2.0f) {
+                    float n = f + (r + r) * k;
+                    self->f4 = wakeMin1598(n, 2.0f);
+                }
+            } else if (self->i114 == 0) {
+                if (f < 1.5f) {
+                    self->f4 = (f + r * (k * 1.5f)) <? 2.0f;
+                }
+            } else {
+                if (f < 1.0f) {
+                    self->f4 = (f + r * k) <? 2.0f;
+                }
+            }
+        }
+        float j = 25.0f;
+        if (*(int*)(cfg + 0x64) != 0 && self->i124 != 0) {
+            j = 60.0f;
+        }
+        float lo = -j;
+        {
+            sWakeVecE398 t;
+            t.z = 0.0f;
+            t.w = 0.0f;
+            t.x = lo + (j - lo) * wakeRandE398();
+            t.y = lo + (j - lo) * wakeRandE398();
+            wakeAddE398(pos, t);
+        }
+        sWakeVecE398* va = wakeVel1598(self);
+        sWakeVecE398* vb = wakeVel1598(self);
+        sWakeVecE398* up = (sWakeVecE398*)(self->obj + 0x370);
+        sWakeVecE398 t = wakeSub1598(*va, wakeScale0EE8(*up, wakeDot1598(*vb, *up) * 0.75f));
+        float m = 0.30000001192092896f;
+        if (self->i114 == 0) m = 0.4000000059604645f;
+        sWakeVecE398 vel = wakeScale0EE8(t, m);
+        float al = 0.5f;
+        if (self->i114 == 0) al = 1.0f;
+        if (self->f120 < al) {
+            self->f120 = al;
+        } else {
+            self->f120 = self->f120 * 0.800000011920929f + al * 0.19999998807907104f;
+        }
+        sWakeVecE398 col = self->col;
+        col.w = self->f120;
+        func_003717C0(self->p28 + a * 0x210, &pos, &vel, &col, 1, 0.01666666753590107f);
+        func_003717C0(self->p28 + b * 0x210, &self->vF0, 0, 0, 0, 0.01666666753590107f);
+        if (self->fE0 < 83.33333587646484f) {
+            self->fE0 = 0.0f;
+        } else {
+            float m = *(float*)(cfg + 0x68);
+            if (self->i124 == 0) {
+                m *= 0.4000000059604645f;
+            }
+            self->fE0 = self->fE0 * m;
+        }
+    } else {
+        func_003717C0(self->p28 + 0xC60, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        func_003717C0(self->p28 + 0xA50, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        self->fE0 = 0.0f;
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1A80);
 
