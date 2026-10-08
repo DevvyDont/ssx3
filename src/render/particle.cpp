@@ -3342,7 +3342,176 @@ extern "C" void func_00380380(void* self, char* obj, int idx, float* pos, float*
 
 INCLUDE_ASM("render/particle", func_00380518);
 
+//100%
 INCLUDE_ASM("render/particle", func_003807A0);
+#ifdef SKIP_ASM
+struct sPtRS_07A0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_07A0 {
+    sPtRS_07A0 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_07A0 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_07A0 ents[1];            // 0x80
+};
+
+struct sQuad_07A0 {
+    unsigned int w[4];
+} __attribute__((aligned(16)));
+
+struct sPtGfx_07A0 {
+    char pad_0x0[0xE84];
+    sPtRS_07A0* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_07A0* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+struct sTrail_07A0 {
+    char pad_0x0[0x20];
+    sQuad_07A0 q[0x15];             // 0x20
+    float scale;                    // 0x170 (unused here)
+    char pad_0x174[4];
+    int count;                      // 0x178
+    int head;                       // 0x17C
+    char pad_0x180[0x20];
+    sQuad_07A0* posA;               // 0x1A0
+    sQuad_07A0* posB;               // 0x1A4
+};
+
+struct sHdr_07A0 {
+    int seg;
+    int step;
+    float fstep;
+    float v;
+} __attribute__((aligned(16)));
+
+extern int D_004A44FC;
+extern int D_004A4474;
+extern char D_510[];
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_0037D968(void* self);
+
+static inline int Wrap_07A0(int i, int start, int m)
+{
+    return (i + start) % m;
+}
+
+static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
+{
+    const sQuad_07A0* src = (const sQuad_07A0*)srcp;
+    sQuad_07A0* d = (sQuad_07A0*)*pp;
+    sQuad_07A0* end = d + n;
+    while (d != end) {
+        *d++ = *src++;
+    }
+    *pp = (unsigned long*)d;
+}
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
+extern "C" void func_003807A0(sPtGfx_07A0* self, sTrail_07A0* obj)
+{
+    if (D_004A44FC != 0)
+        return;
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x100;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    int n = obj->count;
+    sHdr_07A0 hdr;
+    int done = 0;
+    hdr.step = *(int*)((char*)obj + 0x20) / n;
+    hdr.fstep = (float)hdr.step;
+    int nb = n / 64 + 1;
+    for (int i = 0; i < nb; i++) {
+        unsigned int buf = self->bufAddr;
+        unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
+        p[0] = 0x1000009A;
+        p[1] = 0;
+        p[2] = 0;
+        p[3] = (unsigned long)0xD931 << 47;
+        hdr.v = hdr.fstep * (float)(i * 64) * *(float*)((char*)obj + 0x2C);
+        int seg = obj->count - done;
+        if (seg >= 0x41)
+            seg = 0x40;
+        hdr.seg = seg;
+        p += 4;
+        CopyQuads_07A0(&p, obj->q, 0x15);
+        CopyQuads_07A0(&p, &hdr, 1);
+        int wrap = obj->head + 1;
+        int m = obj->count;
+        int s = (done + wrap) % m;
+        done += hdr.seg;
+        int over = s + hdr.seg - m;
+        if (over < 0)
+            over = 0;
+        int first = s + hdr.seg - s;
+        if (m - s < first)
+            first = m - s;
+        int pad = 0x40 - first - over;
+        sQuad_07A0* lastA;
+        sQuad_07A0* lastB;
+        if (done < m) {
+            int e = Wrap_07A0(done, wrap, m);
+            lastB = obj->posB + e;
+            lastA = obj->posA + e;
+        } else {
+            int e = Wrap_07A0(done - 1, wrap, m);
+            lastB = obj->posB + e;
+            lastA = obj->posA + e;
+        }
+        CopyQuads_07A0(&p, obj->posA + s, first);
+        if (over > 0)
+            CopyQuads_07A0(&p, obj->posA, over);
+        CopyQuads_07A0(&p, lastA, 1);
+        p = (unsigned long*)((sQuad_07A0*)p + pad);
+        CopyQuads_07A0(&p, obj->posB + s, first);
+        if (over > 0)
+            CopyQuads_07A0(&p, obj->posB, over);
+        CopyQuads_07A0(&p, lastB, 1);
+        p = (unsigned long*)((sQuad_07A0*)p + pad);
+        p[0] = (unsigned long)(((unsigned int)D_510 >> 3) | 0x14000000) << 32;
+        p[1] = (unsigned long)0x8800 << 45;
+        p += 2;
+        unsigned int next = func_0038F668(D_004A4474, p, 4);
+        self->bufAddr = next;
+        sPtRing_07A0* ring = self->ring;
+        sPtRS_07A0* rs = self->top;
+        if (ring->count < 0xA28) {
+            rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+            int key = *(int*)((char*)ring + 0x69CC0);
+            sPtEnt_07A0* e = (sPtEnt_07A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+            e->rs = *rs;
+            e->buf = buf;
+            e->next = next;
+            e->key = key;
+            e->flag = 0;
+        }
+        self->bufAddr += 0x10;
+    }
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00380CE0);
 
