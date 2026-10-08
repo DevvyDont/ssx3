@@ -6,7 +6,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B38B8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3900);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locate);
+#ifdef SKIP_ASM
+extern void func_003B3900();
+
+void SHAPE_locate(void) {
+    func_003B3900();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B39D8);
 
@@ -40,7 +48,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B4338);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B43C0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4448);
+#ifdef SKIP_ASM
+int func_003B4448(int arg0, int arg1, int arg2) {
+    return ((arg1 * arg2) + arg0) << 5;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4458);
 
@@ -54,11 +68,27 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B4708);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4740);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B47F8);
+#ifdef SKIP_ASM
+extern void func_003B4740();
+
+void func_003B47F8(void) {
+    func_003B4740();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4818);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B49B0);
+#ifdef SKIP_ASM
+extern void func_003B4818();
+
+void func_003B49B0(void) {
+    func_003B4818();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B49D0);
 
@@ -74,7 +104,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5320);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5440);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5450);
+#ifdef SKIP_ASM
+extern void func_003C60E0();
+
+int func_003B5450(void) {
+    func_003C60E0();
+    return 0;
+}
+#endif
 
 void func_003B5470(void) {
 }
@@ -87,9 +126,25 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5540);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B55F0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5860);
+#ifdef SKIP_ASM
+extern void func_003C3380();
 
+void func_003B5860(void) {
+    func_003C3380();
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5880);
+#ifdef SKIP_ASM
+extern void func_003C33E0();
+
+void func_003B5880(void) {
+    func_003C33E0();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B58A0);
 
@@ -103,15 +158,53 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5A28);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5A60);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5B20);
+#ifdef SKIP_ASM
+extern void func_003B58A0();
+extern void func_003B58D8();
+extern int func_003C4E50(int, int);
 
+int func_003B5B20(int arg0, int arg1) {
+    int temp_16;
+
+    func_003B58A0();
+    temp_16 = func_003C4E50(arg0, arg1);
+    func_003B58D8();
+    return temp_16;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5B68);
+#ifdef SKIP_ASM
+extern void func_003B58A0();
+extern void func_003B58D8();
+extern int func_003C4EC8(int);
+
+int func_003B5B68(int arg0) {
+    int temp_16;
+
+    func_003B58A0();
+    temp_16 = func_003C4EC8(arg0);
+    func_003B58D8();
+    return temp_16;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5BA0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5BD0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5C40);
+#ifdef SKIP_ASM
+extern void func_003C6240();
+
+void func_003B5C40(void) {
+    func_003C6240();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5C60);
 
@@ -181,7 +274,19 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B7A70);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7AC8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7B00);
+#ifdef SKIP_ASM
+extern int func_003B7AC8();
+extern int func_003E06B0(int, int, int);
+
+int func_003B7B00(int arg0) {
+    int temp_17;
+
+    temp_17 = func_003B7AC8();
+    return temp_17 + func_003E06B0(arg0 + 2, 1, 1);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7B48);
 
@@ -193,7 +298,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B7DE8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E10);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E38);
+#ifdef SKIP_ASM
+extern void func_003B7450(int, int, int, int, int, int, int);
+
+void func_003B7E38(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
+    func_003B7450(arg1, arg2, arg3, arg4, arg5, arg0, 1);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E70);
 
@@ -247,7 +360,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B89E0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8AB8);
+#ifdef SKIP_ASM
+extern unsigned int func_003BA6E8();
+
+unsigned int func_003B8AB8(void) {
+    return func_003BA6E8() >> 0x1F;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8AD8);
 
@@ -351,7 +472,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BC770);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC840);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC910);
+#ifdef SKIP_ASM
+extern void func_003C5E08();
+
+void func_003BC910(void) {
+    func_003C5E08();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC930);
 
@@ -504,13 +633,31 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C3780);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C38E0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3EA8);
+#ifdef SKIP_ASM
+int func_003C3EA8(void *arg0, int arg1, int *arg2) {
+    if (*arg2 == 0) {
+        *arg2 = (*(int *)((char*)(arg0) + (0x68)));
+    }
+    *(*(int **)((char*)(arg0) + (0x64))) = arg1 + ((*(int *)((char*)(arg0) + (0x68))) - *arg2);
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3EE0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C42D8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C42F8);
+#ifdef SKIP_ASM
+extern void func_003C4898();
+
+void func_003C42F8(void) {
+    func_003C4898();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4318);
 
@@ -546,7 +693,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5068);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5128);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C51E0);
+#ifdef SKIP_ASM
+int func_003C51E0(void) {
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C51E8);
 
@@ -590,13 +743,37 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5998);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5A28);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AA0);
+#ifdef SKIP_ASM
+int func_003C5AA0(void) {
+    return -5;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AA8);
+#ifdef SKIP_ASM
+int func_003C5AA8(void) {
+    return -5;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AB0);
+#ifdef SKIP_ASM
+int func_003C5AB0(void) {
+    return -5;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AB8);
+#ifdef SKIP_ASM
+int func_003C5AB8(void) {
+    return -5;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AC0);
 
@@ -608,7 +785,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5B80);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5BB8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF0);
+#ifdef SKIP_ASM
+int func_003C5BF0(void) {
+    return -5;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF8);
 
@@ -646,9 +829,52 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6288);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C62B8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C62E8);
+#ifdef SKIP_ASM
+int *func_003C62E8(void *arg0) {
+    int *temp_2;
+    int *temp_3;
 
+    temp_3 = (*(int **)((char*)(arg0) + (0)));
+    if (temp_3 != 0) {
+        temp_2 = *temp_3;
+        (*(int **)((char*)(arg0) + (0))) = temp_2;
+        if (temp_2 == 0) {
+            (*(int *)((char*)(arg0) + (4))) = 0;
+        } else {
+            (*(int *)((char*)(temp_2) + (4))) = 0;
+        }
+        (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) - 1);
+    }
+    return temp_3;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6320);
+#ifdef SKIP_ASM
+void func_003C6320(void *arg0, void *arg1) {
+    void **temp_3;
+    void *temp_3_2;
+
+    if (arg1 == (*(void **)((char*)(arg0) + (0)))) {
+        (*(void **)((char*)(arg0) + (0))) = (void *) (*(void **)((char*)(arg1) + (0)));
+    }
+    if (arg1 == (*(void ***)((char*)(arg0) + (4)))) {
+        (*(void ***)((char*)(arg0) + (4))) = (void **) (*(void ***)((char*)(arg1) + (4)));
+    }
+    temp_3 = (*(void ***)((char*)(arg1) + (4)));
+    if (temp_3 != 0) {
+        *temp_3 = (*(void **)((char*)(arg1) + (0)));
+    }
+    temp_3_2 = (*(void **)((char*)(arg1) + (0)));
+    if (temp_3_2 != 0) {
+        (*(void ***)((char*)(temp_3_2) + (4))) = (void **) (*(void ***)((char*)(arg1) + (4)));
+    }
+    (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) - 1);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6380);
 
@@ -660,7 +886,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6540);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6580);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C65E0);
+#ifdef SKIP_ASM
+int func_003C65E0(int arg0) {
+    return (arg0 << 5) + 0x9C;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C65F0);
 
@@ -676,7 +908,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6C98);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CC0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE0);
+#ifdef SKIP_ASM
+int func_003C6CE0(void) {
+    return -0xF;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE8);
 
@@ -709,9 +947,25 @@ void func_003C7AA8(void) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7AB0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7CC0);
+#ifdef SKIP_ASM
+extern void func_003B5C60();
 
+void func_003C7CC0(void) {
+    func_003B5C60();
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7CE0);
+#ifdef SKIP_ASM
+extern void func_003B5E98();
+
+void func_003C7CE0(void) {
+    func_003B5E98();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7D00);
 
@@ -757,9 +1011,43 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C8F48);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8FB0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9010);
+#ifdef SKIP_ASM
+int func_003C9010(void *arg0) {
+    int (*temp_2)();
 
+    temp_2 = (*(int (**)())((char*)(arg0) + (4)));
+    if (temp_2 != 0) {
+        temp_2();
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9040);
+#ifdef SKIP_ASM
+void func_003C9040(void *arg0) {
+    int (*temp_2)(void *);
+    void *temp_4;
+    void *temp_4_2;
+
+    temp_4 = (*(void **)((char*)(arg0) + (8)));
+    if ((temp_4 != 0) && ((*(unsigned char *)((char*)(temp_4) + (0x1B))) == 0)) {
+        func_003C9040(temp_4);
+    }
+    temp_4_2 = (*(void **)((char*)(arg0) + (0xC)));
+    if ((temp_4_2 != 0) && ((*(unsigned char *)((char*)(temp_4_2) + (0x1B))) == 0)) {
+        func_003C9040(temp_4_2);
+    }
+    temp_2 = (*(int (**)(void *))((char*)(arg0) + (4)));
+    if (temp_2 != 0) {
+        temp_2(arg0);
+    }
+    (*(signed char *)((char*)(arg0) + (0x1B))) = 1;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C90C0);
 
@@ -771,35 +1059,98 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C92B0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C92F8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9358);
+#ifdef SKIP_ASM
+int func_003C9358(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9360);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C93F8);
+#ifdef SKIP_ASM
+extern void func_003CD1D0(int);
+
+void func_003C93F8(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x28)));
+    if (temp_4 != 0) {
+        func_003CD1D0(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9420);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9518);
+#ifdef SKIP_ASM
+int func_003C9518(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9520);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C95F0);
+#ifdef SKIP_ASM
+extern void func_003CD1D0(int);
+
+void func_003C95F0(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    if (temp_4 != 0) {
+        func_003CD1D0(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9618);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C96F0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9938);
+#ifdef SKIP_ASM
+extern void func_003CD1D0(int);
+
+void func_003C9938(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x34)));
+    if (temp_4 != 0) {
+        func_003CD1D0(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9960);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C99F8);
+#ifdef SKIP_ASM
+int func_003C99F8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9A00);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9AC8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9B08);
+#ifdef SKIP_ASM
+int func_003C9B08(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9B10);
 
@@ -815,23 +1166,74 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C9E50);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9F58);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9FF8);
+#ifdef SKIP_ASM
+int func_003C9FF8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x28)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA000);
+#ifdef SKIP_ASM
+extern void func_003CCF18(int);
+
+void func_003CA000(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    if (temp_4 != 0) {
+        func_003CCF18(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA028);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA0B8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA358);
+#ifdef SKIP_ASM
+int func_003CA358(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA360);
+#ifdef SKIP_ASM
+extern void func_003CCF18(int);
+
+void func_003CA360(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    if (temp_4 != 0) {
+        func_003CCF18(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA388);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA460);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA5E8);
+#ifdef SKIP_ASM
+extern void func_003CCF18(int);
+
+void func_003CA5E8(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    if (temp_4 != 0) {
+        func_003CCF18(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA610);
 
@@ -843,7 +1245,21 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CA7B8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA870);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA8A0);
+#ifdef SKIP_ASM
+void func_003CA8A0(void *arg0, void *arg1) {
+    float temp_f1;
+    float temp_f2;
+
+    temp_f1 = (2.0f * (float) (*(int *)((char*)(arg1) + (0)))) / (float) (*(int *)((char*)(arg1) + (4)));
+    temp_f2 = 1.0f - temp_f1;
+    (*(float *)((char*)(arg0) + (0x24))) = temp_f1;
+    (*(float *)((char*)(arg0) + (0x20))) = temp_f2;
+    (*(float *)((char*)(arg0) + (0x24))) = (float) (temp_f1 * ((float) (*(int *)((char*)(arg1) + (8))) * 0.00390625f));
+    (*(float *)((char*)(arg0) + (0x20))) = (float) (temp_f2 * ((float) (*(int *)((char*)(arg1) + (8))) * 0.00390625f));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA900);
 
@@ -875,7 +1291,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CB4A8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB528);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB538);
+#ifdef SKIP_ASM
+void func_003CB538(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB540);
 
@@ -915,7 +1337,18 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CCEF0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CCF18);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CCF40);
+#ifdef SKIP_ASM
+void *func_003CCF40(void *arg0) {
+    (*(int *)((char*)(arg0) + (0xC))) = 0;
+    (*(int *)((char*)(arg0) + (8))) = 0;
+    (*(int *)((char*)(arg0) + (4))) = 0;
+    (*(int *)((char*)(arg0) + (0x98))) = 0;
+    (*(int *)((char*)(arg0) + (0x9C))) = 0;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CCF60);
 
@@ -923,7 +1356,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CCF90);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD138);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD190);
+#ifdef SKIP_ASM
+void func_003CD190(void *arg0, void *arg1) {
+    (*(float *)((char*)(arg0) + (0x98))) = (float) (*(float *)((char*)(arg1) + (0)));
+    (*(float *)((char*)(arg0) + (0x9C))) = (float) (*(float *)((char*)(arg1) + (4)));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD1A8);
 
@@ -945,7 +1385,21 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CD6F0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD878);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CDDB8);
+#ifdef SKIP_ASM
+void *func_003CDDB8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0xD44))) = 0;
+    (*(int *)((char*)(arg0) + (0xD64))) = 1;
+    (*(int *)((char*)(arg0) + (0xD54))) = 0;
+    (*(int *)((char*)(arg0) + (0xD58))) = 0;
+    (*(short *)((char*)(arg0) + (0xD50))) = 0;
+    (*(short *)((char*)(arg0) + (0xD52))) = 0;
+    (*(int *)((char*)(arg0) + (0xD5C))) = 0;
+    (*(int *)((char*)(arg0) + (0xD60))) = 0;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CDDE8);
 
@@ -953,19 +1407,51 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CDE68);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE078);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE0B8);
+#ifdef SKIP_ASM
+void func_003CE0B8(void *arg0, void *arg1) {
+    (*(int *)((char*)(arg0) + (4))) = (int) (*(int *)((char*)(arg1) + (0)));
+    (*(int *)((char*)(arg0) + (0xD5C))) = (int) (*(int *)((char*)(arg1) + (8)));
+    (*(int *)((char*)(arg0) + (0xD44))) = (int) (*(int *)((char*)(arg1) + (4)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE0D8);
+#ifdef SKIP_ASM
+void func_003CE0D8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0xD64))) = arg1;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE0E0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE118);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE198);
+#ifdef SKIP_ASM
+int func_003CE198(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A0);
+#ifdef SKIP_ASM
+int func_003CE1A0(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A8);
+#ifdef SKIP_ASM
+int func_003CE1A8(void) {
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE1B0);
 
@@ -995,11 +1481,30 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF060);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF128);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF158);
+#ifdef SKIP_ASM
+void func_003CF158(void *arg0, int *arg1) {
+    (*(float *)((char*)(arg0) + (0x1C))) = (float) ((float) *arg1 * 0.00390625f);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF178);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF298);
+#ifdef SKIP_ASM
+extern void func_003B5E98(int);
+
+void func_003CF298(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    if (temp_4 != 0) {
+        func_003B5E98(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF2C0);
 
@@ -1013,7 +1518,20 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF4D0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF5D0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF6D0);
+#ifdef SKIP_ASM
+extern void func_003B5E98(int);
+
+void func_003CF6D0(void *arg0) {
+    int temp_4;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    if (temp_4 != 0) {
+        func_003B5E98(temp_4);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF6F8);
 
@@ -1047,9 +1565,29 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0B78);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0C20);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0C78);
+#ifdef SKIP_ASM
+void func_003D0C78(int arg0, unsigned int arg1) {
+    unsigned int temp_4;
 
+    temp_4 = arg0 + 0x10;
+    if (arg1 >= temp_4) {
+        (*(int *)((char*)(temp_4) + (8))) = (int) ((*(int *)((char*)(temp_4) + (8))) | 0x04000000);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0CA0);
+#ifdef SKIP_ASM
+extern void func_003D0CC8(int);
+extern int func_003D5290();
+
+void func_003D0CA0(void) {
+    func_003D0CC8(func_003D5290());
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0CC8);
 
@@ -1076,7 +1614,13 @@ void func_003D16C8(void) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16D0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16E0);
+#ifdef SKIP_ASM
+int func_003D16E0(int arg0) {
+    return arg0;
+}
+#endif
 
 void func_003D16E8(void) {
 }
@@ -1115,9 +1659,23 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2C20);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2DF8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2FA0);
+#ifdef SKIP_ASM
+void func_003D2FA0(void) {
+    func_003D16C8();
+}
+#endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2FC0);
+#ifdef SKIP_ASM
+extern void func_003D16D0();
+
+void func_003D2FC0(void) {
+    func_003D16D0();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2FE0);
 
@@ -1182,9 +1740,25 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D53B8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5450);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003D54C8);
+#ifdef SKIP_ASM
+extern void func_003D5128(int);
 
+void func_003D54C8(void) {
+    func_003D5128(0x20);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003D54E8);
+#ifdef SKIP_ASM
+extern void func_003D5128(int);
+
+void func_003D54E8(void) {
+    func_003D5128(0x42);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5508);
 
@@ -1204,7 +1778,18 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6108);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D61E8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D62C8);
+#ifdef SKIP_ASM
+extern void func_002AF6C0(int, int);
+
+void func_003D62C8(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (4))) = arg1;
+    if ((*(signed char *)((char*)(arg0) + (0xE))) < 0) {
+        func_002AF6C0((*(int *)((char*)(arg0) + (0x54))), (int) ((*(signed char *)((char*)(arg0) + (0x34))) * arg1) / 100);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6318);
 
@@ -1246,7 +1831,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D69F0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6BC0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6C58);
+#ifdef SKIP_ASM
+int func_003D6C58(int arg0) {
+    return arg0 * 4;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6C60);
 
@@ -1256,9 +1847,29 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6CC0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6CF8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6D30);
+#ifdef SKIP_ASM
+extern int D_004A4824;
+extern int D_004A4828;
 
+void func_003D6D30(void) {
+    D_004A4824 = 0;
+    D_004A4828 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6D40);
+#ifdef SKIP_ASM
+extern int D_004A4824;
+extern int D_004A4828;
+
+void func_003D6D40(void) {
+    D_004A4824 = 0;
+    D_004A4828 = 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6D50);
 
@@ -1360,9 +1971,24 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D9ED0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D9FB0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA3A8);
+#ifdef SKIP_ASM
+void func_003DA3A8(void *arg0, int *arg1, int *arg2) {
+    *arg1 = (int) (*(unsigned char *)((char*)(arg0) + (8)));
+    *arg2 = (int) (*(unsigned char *)((char*)(arg0) + (9)));
+}
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA3C0);
+#ifdef SKIP_ASM
+extern int D_004A483C;
+
+void func_003DA3C0(int arg0) {
+    D_004A483C = arg0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA3C8);
 
@@ -1386,13 +2012,39 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003DA810);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA848);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA8E0);
+#ifdef SKIP_ASM
+extern int D_004A4838;
+
+int func_003DA8E0(int arg0) {
+    int var_2;
+
+    var_2 = 0;
+    if (D_004A4838 != 0) {
+        var_2 = (int) (arg0 * 0x64) / (int) D_004A4838;
+    }
+    return var_2;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA910);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DA9C8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DAA10);
+#ifdef SKIP_ASM
+int func_003DAA10(void *arg0, int arg1) {
+    int temp_3;
+
+    temp_3 = (*(unsigned char *)((char*)(arg0) + (4))) & 3;
+    if (((temp_3 == 1) && (arg1 == 2)) || ((temp_3 == 2) && (arg1 != temp_3))) {
+        return 1;
+    }
+    return temp_3 == 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DAA50);
 
@@ -1408,7 +2060,24 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003DACE8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DAE48);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DAFD0);
+#ifdef SKIP_ASM
+void func_003DAFD0(void *arg0) {
+    int var_3;
+    signed char *var_2;
+
+    (*(signed char *)((char*)(arg0) + (0x61))) = 0;
+    var_3 = 0xB;
+    (*(signed char *)((char*)(arg0) + (0x60))) = 0;
+    var_2 = arg0 + 0x5F;
+    do {
+        *var_2 = 0;
+        var_3 -= 1;
+        var_2 -= 8;
+    } while (var_3 >= 0);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DB008);
 
@@ -1438,13 +2107,25 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003DB9D8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DBAA8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DBAC8);
+#ifdef SKIP_ASM
+int func_003DBAC8(unsigned short *arg0, void *arg1) {
+    return *arg0 - (((*(unsigned char *)((char*)(arg1) + (1))) << 8) | (*(unsigned char *)((char*)(arg1) + (0))));
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DBAE8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DBB68);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DBC98);
+#ifdef SKIP_ASM
+int func_003DBC98(int arg0) {
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", USTR_length);
 
@@ -1634,7 +2315,24 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003DFCD8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DFD58);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003DFDD0);
+#ifdef SKIP_ASM
+void *func_003DFDD0(void *arg0, int arg1) {
+    int temp_3;
+    void *temp_2;
+
+    temp_3 = arg1 & 0xFF;
+    if (temp_3 >= (*(int *)((char*)(arg0) + (0x18)))) {
+        return 0;
+    }
+    temp_2 = (*(int *)((char*)(arg0) + (0x14))) + (temp_3 * 0x124);
+    if (arg1 == (*(int *)((char*)(temp_2) + (0)))) {
+        return ((*(int *)((char*)(temp_2) + (4))) == 0) ? 0 : temp_2;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DFE18);
 
@@ -1744,11 +2442,27 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E2168);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2190);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003E22F0);
+#ifdef SKIP_ASM
+extern void func_003E2190();
+
+void func_003E22F0(void) {
+    func_003E2190();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", FILE_loadpackatz);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", FILE_loadpackat);
+#ifdef SKIP_ASM
+extern void FILE_loadpackatz();
+
+void FILE_loadpackat(void) {
+    FILE_loadpackatz();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2490);
 
@@ -1762,7 +2476,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E2740);
 
 INCLUDE_ASM("ealib/seg_2B4578", BIG_locateentryz);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2CE0);
+#ifdef SKIP_ASM
+extern void BIG_locateentryz();
+
+void func_003E2CE0(void) {
+    BIG_locateentryz();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2D00);
 
@@ -1772,9 +2494,31 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E2D60);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2DA8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2DF0);
+#ifdef SKIP_ASM
+extern int func_003E2D00();
 
+int func_003E2DF0(int arg0) {
+    int temp_2;
+
+    temp_2 = func_003E2D00();
+    return (temp_2 == 0) ? 0 : (arg0 + temp_2);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2E20);
+#ifdef SKIP_ASM
+extern int func_003E2D30();
+
+int func_003E2E20(int arg0) {
+    int temp_2;
+
+    temp_2 = func_003E2D30();
+    return (temp_2 == 0) ? 0 : (arg0 + temp_2);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E2E50);
 
@@ -1798,7 +2542,23 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E33B0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E3478);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E34E8);
+#ifdef SKIP_ASM
+extern void func_003E48D8(int, int, int, int);
+extern void func_00428168(int, int, int);
+
+void func_003E34E8(int arg0) {
+    int temp_4;
+
+    temp_4 = arg0 & 0xFFFFFF;
+    if ((arg0 >> 0x18) == 1) {
+        func_003E48D8(temp_4, 0, 0, 0);
+        return;
+    }
+    func_00428168(temp_4, 0, 2);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E3538);
 
@@ -1878,7 +2638,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E50C8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E51A0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003E5268);
+#ifdef SKIP_ASM
+extern void func_003E51A0();
+
+void func_003E5268(void) {
+    func_003E51A0();
+}
+#endif
 
 void func_003E5288(void) {
 }
@@ -1899,13 +2667,44 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E5580);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E55E0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E5678);
+#ifdef SKIP_ASM
+extern void func_00423BE0();
+
+void func_003E5678(void) {
+    func_00423BE0();
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E5698);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E56E0);
+#ifdef SKIP_ASM
+extern void func_00423DB0(int);
 
+void func_003E56E0(void *arg0) {
+    func_00423DB0((*(int *)((char*)(arg0) + (0xC))));
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", MUTEX_lock);
+#ifdef SKIP_ASM
+extern int func_00423C90();
+extern void func_00423DE0(int);
+
+void MUTEX_lock(void *arg0) {
+    if ((*(int *)((char*)(arg0) + (4))) == func_00423C90()) {
+        (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) + 1);
+        return;
+    }
+    func_00423DE0((*(int *)((char*)(arg0) + (0xC))));
+    (*(int *)((char*)(arg0) + (4))) = func_00423C90();
+    (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) + 1);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", MUTEX_unlock);
 
@@ -1953,7 +2752,15 @@ INCLUDE_ASM("ealib/seg_2B4578", SYSTEM_abortmessage);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E6188);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E61F8);
+#ifdef SKIP_ASM
+extern void func_003E6188(int, int);
+
+void func_003E61F8(int arg0, int arg1) {
+    func_003E6188(arg1, arg0);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E6220);
 
@@ -2065,21 +2872,81 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003E8778);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8968);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8A28);
+#ifdef SKIP_ASM
+extern int func_003EEC88(int, int);
+
+int func_003E8A28(int arg0, unsigned int arg1, int arg2) {
+    int temp_4;
+
+    if (arg1 < 8U) {
+        temp_4 = (*(int *)((char*)(((arg1 * 0x14) + arg0)) + (0x310)));
+        if (temp_4 != 0) {
+            return func_003EEC88(temp_4, arg2) != 0;
+        }
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8A70);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8AF8);
+#ifdef SKIP_ASM
+void func_003E8AF8(void *arg0, int arg1) {
+    if (arg1 == 0x706C6179) {
+        (*(int *)((char*)(arg0) + (0x2CC))) = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8B10);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8D70);
+#ifdef SKIP_ASM
+int func_003E8D70(void *arg0, int arg1) {
+    int var_6;
+    void **var_4;
+    void *temp_2;
+    void *temp_3;
+
+    var_6 = 0;
+    var_4 = arg0 + 0x53C;
+    if ((*(int *)((char*)(arg0) + (0x53C))) != 0) {
+        do {
+            temp_3 = *var_4;
+            if (((*(int *)((char*)(temp_3) + (0))) == arg1) || (arg1 == -1)) {
+                (*(int *)((char*)(temp_3) + (0x38))) = 0;
+                var_6 = 1;
+            }
+            temp_2 = *var_4;
+            var_4 = temp_2 + 0x40;
+        } while ((*(int *)((char*)(temp_2) + (0x40))) != 0);
+    }
+    return var_6;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8DC0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8F08);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8FB8);
+#ifdef SKIP_ASM
+int func_003E8FB8(void *arg0) {
+    int temp_2;
+    int temp_3;
+
+    temp_2 = (*(int *)((char*)(arg0) + (8)));
+    temp_3 = temp_2 & (temp_2 - 1);
+    (*(int *)((char*)(arg0) + (8))) = temp_3;
+    return temp_2 ^ temp_3;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003E8FD0);
 
@@ -2099,4 +2966,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003EAEB8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003EB090);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003EB190);
+#ifdef SKIP_ASM
+int func_003EB190(void) {
+    return 0;
+}
+#endif
