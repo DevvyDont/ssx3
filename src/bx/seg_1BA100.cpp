@@ -15,7 +15,13 @@ extern "C" int func_002B9138(int *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9140);
+#ifdef SKIP_ASM
+extern "C" int func_002B9140(void *arg0) {
+    return *(volatile int *)((char*)arg0 + 0x1C);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9150);
@@ -174,11 +180,116 @@ extern "C" void func_002B9368(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B93B8);
+#ifdef SKIP_ASM
+struct Rec_93B8 { signed char v; char pad[0x17]; };
+struct Q_93B8 { int a, b, c, d; };
+struct Obj_93B8 {
+    int pad0;
+    Rec_93B8 cur;
+    volatile int idx;
+    Rec_93B8* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_93B8* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
 
+extern "C" void func_002B93B8(Obj_93B8* p) {
+    p->recs[p->idx] = p->cur;
+    p->arr24[p->idx] = 0;
+    p->p34[p->idx] = 0;
+    p->vals[p->idx] = p->recs[p->idx].v;
+    p->p3C[p->idx] = 0;
+    func_00416210((char*)p + p->idx * 8 + 0x40, 0, 8);
+    p->p60[p->idx] = 0;
+    p->p64[p->idx] = 0;
+    p->p68[p->idx] = 0;
+    p->p6C[p->idx] = 0;
+    p->q70[p->idx].b = 0;
+    p->q70[p->idx].a = 100;
+    p->q70[p->idx].c = 90;
+    p->q70[p->idx].d = 50;
+    p->p74[p->idx] = 0;
+    p->p80[p->idx] = 0;
+    p->p84[p->idx] = 0;
+    p->p78[p->idx] = 127;
+    p->p7C[p->idx] = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B95B0);
+#ifdef SKIP_ASM
+struct Rec_95B0 { signed char v; char pad[0x17]; };
+struct Q_95B0 { int a, b, c, d; };
+struct Obj_95B0 {
+    int pad0;
+    Rec_95B0 cur;
+    volatile int idx;
+    Rec_95B0* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_95B0* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
 
+extern "C" void func_002B95B0(Obj_95B0* p) {
+    p->idx++;
+    p->recs[p->idx] = p->cur;
+    p->arr24[p->idx] = 0;
+    p->p34[p->idx] = 0;
+    p->vals[p->idx] = p->recs[p->idx].v;
+    p->p3C[p->idx] = 0;
+    func_00416210((char*)p + p->idx * 8 + 0x40, 0, 8);
+    p->p60[p->idx] = 0;
+    p->p64[p->idx] = 0;
+    p->p68[p->idx] = 0;
+    p->p6C[p->idx] = 0;
+    p->q70[p->idx].b = 0;
+    p->q70[p->idx].a = 100;
+    p->q70[p->idx].c = 90;
+    p->q70[p->idx].d = 50;
+    p->p74[p->idx] = 0;
+    p->p80[p->idx] = 0;
+    p->p84[p->idx] = 0;
+    p->p78[p->idx] = 127;
+    p->p7C[p->idx] = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B97B8);
+#ifdef SKIP_ASM
+extern "C" void func_002B97B8(void *arg0) {
+    *(volatile int *)((char*)arg0 + 0x1C) = *(volatile int *)((char*)arg0 + 0x1C) - 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B97D0);
@@ -198,9 +309,45 @@ extern "C" void func_002B97F0(void *arg0, signed char arg1) {
 
 INCLUDE_ASM("bx/seg_1BA100", func_002B9810);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B98A8);
+#ifdef SKIP_ASM
+#define MIN_98A8(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_98A8(a, b) ((a) >= (b) ? (a) : (b))
+struct Rec_98A8 { unsigned char v; char pad[0x17]; };
+struct Obj_98A8 {
+    char pad0[0x1C];
+    volatile int idx;
+    Rec_98A8* recs;
+    char pad24[0x14];
+    int* vals;
+};
 
+extern "C" void func_002B98A8(Obj_98A8* p, float f) {
+    p->vals[p->idx] = (int)MAX_98A8(MIN_98A8(p->vals[p->idx] * f, 127.0f), 0.0f);
+    p->recs[p->idx].v = MAX_98A8(MIN_98A8(p->vals[p->idx], 127), 0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B99E8);
+#ifdef SKIP_ASM
+#define MIN_99E8(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_99E8(a, b) ((a) >= (b) ? (a) : (b))
+struct Rec_99E8 { unsigned char v; char pad[0x17]; };
+struct Obj_99E8 {
+    char pad0[0x1C];
+    volatile int idx;
+    Rec_99E8* recs;
+    char pad24[0x14];
+    int* vals;
+};
+
+extern "C" void func_002B99E8(Obj_99E8* p, int n) {
+    p->vals[p->idx] = MAX_99E8(MIN_99E8(p->vals[p->idx] * n / 127, 127), 0);
+    p->recs[p->idx].v = MAX_99E8(MIN_99E8(p->vals[p->idx], 127), 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9B48);
@@ -568,9 +715,119 @@ extern "C" void func_002B9FD8(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FF8);
+#ifdef SKIP_ASM
+struct Rec_9FF8 { signed char v; char pad[0x17]; };
+struct Q_9FF8 { int a, b, c, d; };
+struct Obj_9FF8 {
+    int pad0;
+    Rec_9FF8 cur;
+    volatile int idx;
+    Rec_9FF8* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_9FF8* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
 
+
+struct Outer_9FF8 { char pad[0x1D8]; Obj_9FF8 sub; };
+extern "C" void func_002B9FF8(Outer_9FF8** arg) {
+    Outer_9FF8* o = *arg;
+    Obj_9FF8* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BA208);
+#ifdef SKIP_ASM
+struct Rec_A208 { signed char v; char pad[0x17]; };
+struct Q_A208 { int a, b, c, d; };
+struct Obj_A208 {
+    int pad0;
+    Rec_A208 cur;
+    volatile int idx;
+    Rec_A208* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_A208* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+
+struct Outer_A208 { char pad[0x1D8]; Obj_A208 sub; };
+struct Arg_A208 { Outer_A208* o; int* vals; };
+extern "C" void func_002BA208(Arg_A208* arg, int v) {
+    Outer_A208* o = arg->o;
+    Obj_A208* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BA448);
 
@@ -871,7 +1128,31 @@ extern "C" int func_002BADC8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BADD0);
+#ifdef SKIP_ASM
+struct Item_ADD0 { Item_ADD0* next; int pad; int type; };
+struct List_ADD0 { int count; Item_ADD0* items[1]; };
+struct Node_ADD0 { Node_ADD0* child[8]; int pad[2]; Item_ADD0* items; };
+
+extern "C" void func_002BADD0(Node_ADD0* node, List_ADD0** out) {
+    Item_ADD0* it;
+    for (it = node->items; it != 0; it = it->next) {
+        if (it->type == 5) {
+            List_ADD0* l = *out;
+            l->items[l->count++] = it;
+        }
+    }
+    if (node->child[0]) func_002BADD0(node->child[0], out);
+    if (node->child[1]) func_002BADD0(node->child[1], out);
+    if (node->child[2]) func_002BADD0(node->child[2], out);
+    if (node->child[3]) func_002BADD0(node->child[3], out);
+    if (node->child[4]) func_002BADD0(node->child[4], out);
+    if (node->child[5]) func_002BADD0(node->child[5], out);
+    if (node->child[6]) func_002BADD0(node->child[6], out);
+    if (node->child[7]) func_002BADD0(node->child[7], out);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAEE8);
@@ -1993,11 +2274,106 @@ extern "C" void func_002BCE08(void *self, void *p, float f) {
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BCEA8);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCF38);
+#ifdef SKIP_ASM
+struct VEnt_CF38 { short delta; short idx; int (*fn)(void*); };
+struct Pair_CF38 { float cur; float tgt; };
+struct Obj_CF38 { int pad0; char* vt; Pair_CF38 p[6]; };
+struct Src_CF38 { int pad0; float v[6]; };
 
+extern "C" void func_002BCF38(Obj_CF38* self, Src_CF38* src, float t) {
+    VEnt_CF38* e;
+    float inv;
+    e = (VEnt_CF38*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+    t = t * t;
+    inv = 1.0f - t;
+    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
+    self->p[0].tgt = src->v[0];
+    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
+    self->p[1].tgt = src->v[1];
+    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
+    self->p[2].tgt = src->v[2];
+    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
+    self->p[3].tgt = src->v[3];
+    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
+    self->p[4].tgt = src->v[4];
+    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
+    self->p[5].tgt = src->v[5];
+    e = (VEnt_CF38*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD068);
+#ifdef SKIP_ASM
+struct VEnt_D068 { short delta; short idx; int (*fn)(void*); };
+struct VEntV_D068 { short delta; short idx; void (*fn)(void*); };
+struct Pair_D068 { float cur; float tgt; };
+struct Obj_D068 { int pad0; char* vt; Pair_D068 p[7]; };
+struct Src_D068 { int pad0; float v[7]; };
 
+extern "C" void func_002BD068(Obj_D068* self, Src_D068* src, float t) {
+    VEnt_D068* e;
+    float inv;
+    e = (VEnt_D068*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+    t = t * t;
+    inv = 1.0f - t;
+    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
+    self->p[0].tgt = src->v[0];
+    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
+    self->p[1].tgt = src->v[1];
+    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
+    self->p[2].tgt = src->v[2];
+    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
+    self->p[3].tgt = src->v[3];
+    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
+    self->p[4].tgt = src->v[4];
+    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
+    self->p[5].tgt = src->v[5];
+    self->p[6].cur = t * src->v[6] + inv * self->p[6].cur;
+    self->p[6].tgt = src->v[6];
+    {
+        VEntV_D068* e2 = (VEntV_D068*)(self->vt + 0x218);
+        e2->fn((char*)self + e2->delta);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD1B8);
+#ifdef SKIP_ASM
+struct VEnt_D1B8 { short delta; short idx; int (*fn)(void*); };
+struct Pair_D1B8 { float cur; float tgt; };
+struct Obj_D1B8 { int pad0; char* vt; Pair_D1B8 p[6]; };
+struct Src_D1B8 { int pad0; float v[6]; };
+
+extern "C" void func_002BD1B8(Obj_D1B8* self, Src_D1B8* src, float t) {
+    VEnt_D1B8* e;
+    float inv;
+    e = (VEnt_D1B8*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+    t = t * t;
+    inv = 1.0f - t;
+    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
+    self->p[0].tgt = src->v[0];
+    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
+    self->p[1].tgt = src->v[1];
+    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
+    self->p[2].tgt = src->v[2];
+    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
+    self->p[3].tgt = src->v[3];
+    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
+    self->p[4].tgt = src->v[4];
+    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
+    self->p[5].tgt = src->v[5];
+    e = (VEnt_D1B8*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD2E8);
@@ -2013,7 +2389,44 @@ extern "C" void func_002BD2E8(void *self, void *p, float f) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD378);
+#ifdef SKIP_ASM
+struct VEnt_D378 { short delta; short idx; int (*fn)(void*); };
+struct Pair_D378 { float cur; float tgt; };
+struct IPair_D378 { int cur; int tgt; };
+struct Obj_D378 { int pad0; char* vt; Pair_D378 p[6]; IPair_D378 i6; Pair_D378 q[2]; };
+struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
+
+extern "C" void func_002BD378(Obj_D378* self, Src_D378* src, float t) {
+    VEnt_D378* e;
+    float inv;
+    e = (VEnt_D378*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+    t = t * t;
+    inv = 1.0f - t;
+    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
+    self->p[0].tgt = src->v[0];
+    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
+    self->p[1].tgt = src->v[1];
+    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
+    self->p[2].tgt = src->v[2];
+    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
+    self->p[3].tgt = src->v[3];
+    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
+    self->p[4].tgt = src->v[4];
+    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
+    self->p[5].tgt = src->v[5];
+    self->i6.cur = (int)(t * src->i6 + inv * self->i6.cur);
+    self->i6.tgt = src->i6;
+    self->q[0].cur = t * src->w[0] + inv * self->q[0].cur;
+    self->q[0].tgt = src->w[0];
+    self->q[1].cur = t * src->w[1] + inv * self->q[1].cur;
+    self->q[1].tgt = src->w[1];
+    e = (VEnt_D378*)(self->vt + 0x218);
+    e->fn((char*)self + e->delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD518);
@@ -2489,11 +2902,88 @@ extern "C" void func_002BE4B0(int arg0, void **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE518);
+#ifdef SKIP_ASM
+struct VEnt_E518 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_E518 { char* vt; };
 
+static inline void Wr_E518(Stream_E518* s, void* p, int n) {
+    VEnt_E518* e = (VEnt_E518*)(s->vt + 0x10);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BE518(char* self, Stream_E518* s) {
+    Wr_E518(s, self + 0x8, 4);
+    Wr_E518(s, self, 4);
+    Wr_E518(s, self + 0x10, 4);
+    Wr_E518(s, self, 4);
+    Wr_E518(s, self + 0x18, 4);
+    Wr_E518(s, self, 4);
+    Wr_E518(s, self + 0x20, 4);
+    Wr_E518(s, self, 4);
+    Wr_E518(s, self + 0x28, 4);
+    Wr_E518(s, self, 4);
+    Wr_E518(s, self + 0x30, 4);
+    Wr_E518(s, self, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE698);
+#ifdef SKIP_ASM
+struct VEnt_E698 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_E698 { char* vt; };
 
+static inline void Wr_E698(Stream_E698* s, void* p, int n) {
+    VEnt_E698* e = (VEnt_E698*)(s->vt + 0x10);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BE698(char* self, Stream_E698* s) {
+    Wr_E698(s, self + 0x8, 4);
+    Wr_E698(s, self, 4);
+    Wr_E698(s, self + 0x10, 4);
+    Wr_E698(s, self, 4);
+    Wr_E698(s, self + 0x18, 4);
+    Wr_E698(s, self, 4);
+    Wr_E698(s, self + 0x20, 4);
+    Wr_E698(s, self, 4);
+    Wr_E698(s, self + 0x28, 4);
+    Wr_E698(s, self, 4);
+    Wr_E698(s, self + 0x30, 4);
+    Wr_E698(s, self, 4);
+    Wr_E698(s, self + 0x38, 4);
+    Wr_E698(s, self, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE850);
+#ifdef SKIP_ASM
+struct VEnt_E850 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_E850 { char* vt; };
+
+static inline void Wr_E850(Stream_E850* s, void* p, int n) {
+    VEnt_E850* e = (VEnt_E850*)(s->vt + 0x10);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BE850(char* self, Stream_E850* s) {
+    Wr_E850(s, self + 0x8, 4);
+    Wr_E850(s, self, 4);
+    Wr_E850(s, self + 0x10, 4);
+    Wr_E850(s, self, 4);
+    Wr_E850(s, self + 0x18, 4);
+    Wr_E850(s, self, 4);
+    Wr_E850(s, self + 0x20, 4);
+    Wr_E850(s, self, 4);
+    Wr_E850(s, self + 0x28, 4);
+    Wr_E850(s, self, 4);
+    Wr_E850(s, self + 0x30, 4);
+    Wr_E850(s, self, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE9D0);
@@ -2509,7 +2999,38 @@ extern "C" void func_002BE9D0(int arg0, void **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BEA38);
+#ifdef SKIP_ASM
+struct VEnt_EA38 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_EA38 { char* vt; };
+
+static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
+    VEnt_EA38* e = (VEnt_EA38*)(s->vt + 0x10);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BEA38(char* self, Stream_EA38* s) {
+    Wr_EA38(s, self + 0x8, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x10, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x18, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x20, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x28, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x30, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x38, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x40, 4);
+    Wr_EA38(s, self, 4);
+    Wr_EA38(s, self + 0x48, 4);
+    Wr_EA38(s, self, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BEC60);
@@ -2525,7 +3046,32 @@ extern "C" void func_002BEC60(int arg0, void **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BECC8);
+#ifdef SKIP_ASM
+struct VEnt_ECC8 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_ECC8 { char* vt; };
+
+static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
+    VEnt_ECC8* e = (VEnt_ECC8*)(s->vt + 0x10);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BECC8(char* self, Stream_ECC8* s) {
+    Wr_ECC8(s, self + 0x8, 8);
+    Wr_ECC8(s, self, 4);
+    Wr_ECC8(s, self + 0x18, 8);
+    Wr_ECC8(s, self, 4);
+    Wr_ECC8(s, self + 0x28, 8);
+    Wr_ECC8(s, self, 4);
+    Wr_ECC8(s, self + 0x38, 8);
+    Wr_ECC8(s, self, 4);
+    Wr_ECC8(s, self + 0x48, 4);
+    Wr_ECC8(s, self, 4);
+    Wr_ECC8(s, self + 0x50, 4);
+    Wr_ECC8(s, self, 4);
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BEE48);
 
@@ -2617,11 +3163,88 @@ extern "C" void func_002BF518(int arg0, void **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BF580);
+#ifdef SKIP_ASM
+struct VEnt_F580 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_F580 { char* vt; };
 
+static inline void Wr_F580(Stream_F580* s, void* p, int n) {
+    VEnt_F580* e = (VEnt_F580*)(s->vt + 0x8);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BF580(char* self, Stream_F580* s) {
+    Wr_F580(s, self + 0x8, 4);
+    Wr_F580(s, self, 4);
+    Wr_F580(s, self + 0x10, 4);
+    Wr_F580(s, self, 4);
+    Wr_F580(s, self + 0x18, 4);
+    Wr_F580(s, self, 4);
+    Wr_F580(s, self + 0x20, 4);
+    Wr_F580(s, self, 4);
+    Wr_F580(s, self + 0x28, 4);
+    Wr_F580(s, self, 4);
+    Wr_F580(s, self + 0x30, 4);
+    Wr_F580(s, self, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BF700);
+#ifdef SKIP_ASM
+struct VEnt_F700 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_F700 { char* vt; };
 
+static inline void Wr_F700(Stream_F700* s, void* p, int n) {
+    VEnt_F700* e = (VEnt_F700*)(s->vt + 0x8);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BF700(char* self, Stream_F700* s) {
+    Wr_F700(s, self + 0x8, 4);
+    Wr_F700(s, self, 4);
+    Wr_F700(s, self + 0x10, 4);
+    Wr_F700(s, self, 4);
+    Wr_F700(s, self + 0x18, 4);
+    Wr_F700(s, self, 4);
+    Wr_F700(s, self + 0x20, 4);
+    Wr_F700(s, self, 4);
+    Wr_F700(s, self + 0x28, 4);
+    Wr_F700(s, self, 4);
+    Wr_F700(s, self + 0x30, 4);
+    Wr_F700(s, self, 4);
+    Wr_F700(s, self + 0x38, 4);
+    Wr_F700(s, self, 4);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BF8B8);
+#ifdef SKIP_ASM
+struct VEnt_F8B8 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_F8B8 { char* vt; };
+
+static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
+    VEnt_F8B8* e = (VEnt_F8B8*)(s->vt + 0x8);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BF8B8(char* self, Stream_F8B8* s) {
+    Wr_F8B8(s, self + 0x8, 4);
+    Wr_F8B8(s, self, 4);
+    Wr_F8B8(s, self + 0x10, 4);
+    Wr_F8B8(s, self, 4);
+    Wr_F8B8(s, self + 0x18, 4);
+    Wr_F8B8(s, self, 4);
+    Wr_F8B8(s, self + 0x20, 4);
+    Wr_F8B8(s, self, 4);
+    Wr_F8B8(s, self + 0x28, 4);
+    Wr_F8B8(s, self, 4);
+    Wr_F8B8(s, self + 0x30, 4);
+    Wr_F8B8(s, self, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BFA38);
@@ -2637,7 +3260,38 @@ extern "C" void func_002BFA38(int arg0, void **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BFAA0);
+#ifdef SKIP_ASM
+struct VEnt_FAA0 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_FAA0 { char* vt; };
+
+static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
+    VEnt_FAA0* e = (VEnt_FAA0*)(s->vt + 0x8);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BFAA0(char* self, Stream_FAA0* s) {
+    Wr_FAA0(s, self + 0x8, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x10, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x18, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x20, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x28, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x30, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x38, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x40, 4);
+    Wr_FAA0(s, self, 4);
+    Wr_FAA0(s, self + 0x48, 4);
+    Wr_FAA0(s, self, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BFCC8);
@@ -2653,7 +3307,32 @@ extern "C" void func_002BFCC8(int arg0, void **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BFD30);
+#ifdef SKIP_ASM
+struct VEnt_FD30 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct Stream_FD30 { char* vt; };
+
+static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
+    VEnt_FD30* e = (VEnt_FD30*)(s->vt + 0x8);
+    e->fn((char*)s + e->delta, p, n);
+}
+
+extern "C" void func_002BFD30(char* self, Stream_FD30* s) {
+    Wr_FD30(s, self + 0x8, 8);
+    Wr_FD30(s, self, 4);
+    Wr_FD30(s, self + 0x18, 8);
+    Wr_FD30(s, self, 4);
+    Wr_FD30(s, self + 0x28, 8);
+    Wr_FD30(s, self, 4);
+    Wr_FD30(s, self + 0x38, 8);
+    Wr_FD30(s, self, 4);
+    Wr_FD30(s, self + 0x48, 4);
+    Wr_FD30(s, self, 4);
+    Wr_FD30(s, self + 0x50, 4);
+    Wr_FD30(s, self, 4);
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BFEB0);
 
