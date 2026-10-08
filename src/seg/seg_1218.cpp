@@ -312,7 +312,40 @@ INCLUDE_ASM("seg/seg_1218", func_00101888);
 
 INCLUDE_ASM("seg/seg_1218", func_00101900);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00101970);
+#ifdef SKIP_ASM
+struct sNode_1970 { int key; int pad; int ref; sNode_1970* next; };
+struct sC_1970 { int x, a, b; };
+struct sSelf_1970 {
+    char pad0[0x708];
+    sC_1970 arrC[6];
+    char pad1[0x754 - 0x750];
+    char pad2[0xB54 - 0x754];
+    sNode_1970* freeList;
+    sNode_1970* used;
+};
+extern "C" void func_00101970(sSelf_1970* self, int* key) {
+    sNode_1970* prev = 0;
+    sNode_1970* n = self->used;
+    while (n) {
+        if (n->key == *key) {
+            if (--n->ref == 0) {
+                if (prev) prev->next = n->next;
+                else self->used = n->next;
+                n->next = self->freeList;
+                self->freeList = n;
+                if (self->used == 0) {
+                    for (int k = 0; k < 6; k++) { self->arrC[k].a = 0; self->arrC[k].b = 0; }
+                }
+            }
+            return;
+        }
+        prev = n;
+        n = n->next;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00101A10);
@@ -519,7 +552,30 @@ extern "C" void func_00103AA0(void* self, sObj_3AA0* o)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00103BE0);
+#ifdef SKIP_ASM
+extern char* D_004A3E7C;
+extern "C" void func_00313C50(void*, int, int);
+extern "C" void func_00313CF0(void*, int, float);
+extern "C" int func_00313800(void*, float);
+extern "C" void func_003145F8(void*, void*);
+extern "C" int func_00103BE0(void* self, void* x, char* anim, int a, int b, float dt, float v)
+{
+    if (v < 0.0f) {
+        func_00313C50(anim, 0, *(int*)(D_004A3E7C + b * 4 + 0x1030));
+        func_00313CF0(anim, 0, -v * *(float*)(anim + 0x10));
+    } else {
+        func_00313C50(anim, 0, *(int*)(D_004A3E7C + a * 4 + 0x1030));
+        func_00313CF0(anim, 0, v * *(float*)(anim + 0x10));
+    }
+    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103CC8);
@@ -643,7 +699,32 @@ extern "C" int func_00103FF8(void* self, void* x, char* anim, int a, float dt, i
 
 INCLUDE_ASM("seg/seg_1218", func_00104110);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104178);
+#ifdef SKIP_ASM
+extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
+extern "C" int func_00104178(char* self, void* x, int* anim, float dt)
+{
+    char* p = *(char**)(self + 0x60);
+    float v = *(float*)(p + 0x1FC);
+    if (*(int*)(p + 0x320) != 0)
+        v = -v;
+    int a, b, c, d, e;
+    int s = *anim;
+    if (s == 6) {
+        a = 0xE; b = 0xD; c = 0xA; d = 0xB; e = 0xC;
+    } else if (s == 8) {
+        a = 0x16; b = 0x15; c = 0x12; d = 0x13; e = 0x14;
+    } else if (s == 14) {
+        a = 0x20; b = 0x1F; c = 0x1B; d = 0x1D; e = 0x1E;
+    } else if (s != 15) {
+        a = 9; b = 8; c = 5; d = 6; e = 7;
+    } else {
+        a = 0x20; b = 0x1F; c = 0x1C; d = 0x1D; e = 0x1E;
+    }
+    return func_00103E28(self, x, (char*)anim, a, b, c, d, e, dt, v);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00104238);
 
@@ -651,27 +732,196 @@ INCLUDE_ASM("seg/seg_1218", func_001042A8);
 
 INCLUDE_ASM("seg/seg_1218", func_001042E0);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104358);
+#ifdef SKIP_ASM
+// PORT: PS2 abs.s helper (stands in for fabsf).
+static inline float vAbs_4358(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
+    char* p = *(char**)(self + 0x60);
+    float b = vAbs_4358(*(float*)(p + 0x2A4));
+    float a = vAbs_4358(*(float*)(p + 0x2B0));
+    float m = (a < b) ? b : a;
+    func_00313CF0(anim, 0, m * *(float*)(anim + 0x10));
+    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_001043F8);
 
 INCLUDE_ASM("seg/seg_1218", func_001045B8);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001045D8);
+#ifdef SKIP_ASM
+extern "C" int func_001045D8(char* self, void* x, char* anim, float dt) {
+    func_00313CF0(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)(*(char**)(self + 0x60) + 0x77C) + 0x2A0));
+    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00104660);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001046B0);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, float dt, float w, int c);
+extern "C" int func_001046B0(char* self, void* x, int* anim, float dt)
+{
+    float v = *(float*)(*(char**)(self + 0x60) + 0x274);
+    v = v + v - 1.0f;
+    float w;
+    if (v >= -1.0f) {
+        w = v <? 1.0f;
+    } else {
+        w = -1.0f;
+    }
+    int a, b, c;
+    a = 0x3C;
+    if (*anim != 0x1C) {
+        b = 0x3A; c = 0x3B;
+    } else {
+        a = 0x31; b = 0x30; c = 0x32;
+    }
+    return func_00103CC8(self, x, (char*)anim, a, b, dt, w, c);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104728);
+#ifdef SKIP_ASM
+// PORT: `<?` is the g++ minimum operator (EE min.s).
+static inline float clamp_4728(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
+    float v;
+    int s = *(int*)anim;
+    if (s == 0x19 || s == 0x21) {
+        v = clamp_4728(1.0f - *(float*)(*(char**)(self + 0x60) + 0x268), 0.0f, 1.0f);
+    } else {
+        v = *(float*)(*(char**)(self + 0x60) + 0x268);
+    }
+    func_00313CF0(anim, 0, v * *(float*)(anim + 0x10));
+    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001047F0);
+#ifdef SKIP_ASM
+// PORT: PS2 abs.s helper (stands in for fabsf).
+static inline float vAbs_47F0(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+// PORT: `<?` is the g++ minimum operator (EE min.s).
+static inline float clamp_47F0(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
+    float v;
+    int s = *(int*)anim;
+    if (s == 0x25) {
+        v = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+    } else if (s == 0x26) {
+        v = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+    } else {
+        v = vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+    }
+    func_00313CF0(anim, 0, clamp_47F0(v, 0.0f, 1.0f) * *(float*)(anim + 0x10));
+    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001048C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_003135B0_48C0(void*, int, float) __asm__("func_003135B0");
+extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
+    float t = dt * 0.01666666753590107f;
+    int done;
+    if (func_003135B0_48C0(anim, 0, t) != 0) {
+        done = 1;
+    } else {
+        done = func_00313800(anim, t);
+    }
+    if (done == 0) {
+        return 0;
+    }
+    func_003145F8(x, anim);
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104940);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_003135B0_4940(void*, int, float) __asm__("func_003135B0");
+extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
+    float t = dt * 0.01666666753590107f;
+    int done;
+    if (func_003135B0_4940(anim, 0, t) != 0) {
+        done = 1;
+    } else {
+        done = func_00313800(anim, t);
+    }
+    if (done == 0) {
+        return 0;
+    }
+    func_003145F8(x, anim);
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001049C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_003135B0_49C0(void*, int, float) __asm__("func_003135B0");
+extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
+    float t = dt * 0.01666666753590107f;
+    int done;
+    if (func_003135B0_49C0(anim, 0, t) != 0) {
+        done = 1;
+    } else {
+        done = func_00313800(anim, t);
+    }
+    if (done == 0) {
+        return 0;
+    }
+    func_003145F8(x, anim);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00104A40);
 
@@ -719,9 +969,40 @@ extern "C" void func_00104D50(void *arg0, void *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104D68);
+#ifdef SKIP_ASM
+class cStream_4D68 {
+public:
+    virtual void Read(void* dst, int n);
+};
+extern "C" void func_003147F0(void*, cStream_4D68*);
+extern "C" void func_00104D68(char* self, cStream_4D68* s) {
+    s->Read(self, 0x50);
+    for (int i = 0; i < 6; i++) {
+        func_003147F0(*(char**)(self + 0x50) + i * 8, s);
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104DE0);
+#ifdef SKIP_ASM
+class cStream_4DE0 {
+public:
+    virtual void v0();
+    virtual void Read(void* dst, int n);
+};
+extern "C" void func_00314668(void*);
+extern "C" void func_00314880(void*, cStream_4DE0*);
+extern "C" void func_00104DE0(char* self, cStream_4DE0* s) {
+    s->Read(self, 0x50);
+    for (int i = 0; i < 6; i++) {
+        func_00314668(*(char**)(self + 0x50) + i * 8);
+        func_00314880(*(char**)(self + 0x50) + i * 8, s);
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00104E70);
 
@@ -1296,11 +1577,66 @@ extern "C" int func_0010B980(char* self, float* speed, int* below, int* o3, int*
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010BB18);
+#ifdef SKIP_ASM
+struct sHit_BB18 { int type; int val; float lim; int d; };
+extern "C" int func_0010BB18(void* self_, float* out, int* ok) {
+    char* self = (char*)self_;
+    sHit_BB18 buf[12];
+    char* rider = *(char**)(self + 0x18);
+    char* q = *(char**)(rider + 0xAB8);
+    char* vt = *(char**)(q + 0x34);
+    int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(q + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 600.0f);
+    for (int i = 0; i < n; i++) {
+        if (buf[i].type == 0x11) {
+            *out = (float)buf[i].val * 27.777780532836914f;
+            *ok = buf[i].lim <= *(float*)(*(char**)(self + 0x18) + 0x4C4);
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010BBF8);
+#ifdef SKIP_ASM
+struct sHit_BBF8 { int type; int val; int d[2]; };
+extern "C" int func_0010BBF8(void* self_, int* out) {
+    char* self = (char*)self_;
+    sHit_BBF8 buf[12];
+    char* rider = *(char**)(self + 0x18);
+    char* q = *(char**)(rider + 0xAB8);
+    char* vt = *(char**)(q + 0x34);
+    int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(q + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
+    *out = 0;
+    for (int i = 0; i < n; i++) {
+        if (buf[i].type == 0x13) {
+            *out = buf[i].val > 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010BC98);
+#ifdef SKIP_ASM
+struct sHit_BC98 { int type; int d[3]; };
+extern "C" int func_0010BC98(char* self) {
+    sHit_BC98 buf[12];
+    char* rider = *(char**)(self + 0x18);
+    char* q = *(char**)(rider + 0xAB8);
+    char* vt = *(char**)(q + 0x34);
+    int n = (*(int (**)(char*, sHit_BC98*, int, float, float))(vt + 0xC))(q + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4));
+    for (int i = 0; i < n; i++) {
+        if (buf[i].type == 0xF) return 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_0010BD10);
 
@@ -1343,16 +1679,145 @@ extern "C" void func_0010BFA8(sObj_BFA8* self, int a, int b, int c, int d)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C0A8);
+#ifdef SKIP_ASM
+struct sVec4_C0A8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sPad_C0A8 {
+    unsigned int pad0 : 16;
+    unsigned int b16 : 1;
+    unsigned int b17 : 1;
+    unsigned int pad18 : 8;
+    int w0 : 6;
+};
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_C0A8(const sVec4_C0A8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+extern "C" void func_0010C0A8(void* self, void* padp)
+{
+    sPad_C0A8* pad = (sPad_C0A8*)padp;
+    float len = vLen_C0A8(*(sVec4_C0A8*)(*(char**)((char*)self + 0x18) + 0x1E0));
+    float s = 0.97f;
+    if (len < 833.3334350585938f)
+        s = 1.0f;
+    if (*(float*)((char*)self + 0xDF8) < 20.0f)
+        s = 0.0f;
+    pad->w0 = (int)(s * 31.0f);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C140);
+#ifdef SKIP_ASM
+struct sVec4_C140 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sPad_C140 {
+    unsigned int pad0 : 16;
+    unsigned int b16 : 1;
+    unsigned int b17 : 1;
+    unsigned int pad18 : 8;
+    int w0 : 6;
+};
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_C140(const sVec4_C140& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+extern "C" void func_0010C140(void* self, void* padp)
+{
+    sPad_C140* pad = (sPad_C140*)padp;
+    float len = vLen_C140(*(sVec4_C140*)(*(char**)((char*)self + 0x18) + 0x1E0));
+    float s = 0.97f;
+    if (len < 833.3334350585938f)
+        s = 1.0f;
+    pad->w0 = (int)(s * 31.0f);
+    pad->b16 = 1;
+    pad->b17 = 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C1D0);
+#ifdef SKIP_ASM
+extern "C" int func_0010C1D0(void* self) {
+    unsigned int r = AIrand();
+    float thr = *(float*)((char*)self + 0xDFC) * 100.0f;
+    return thr <= (float)(r % 100U);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C258);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144BE0(void* iface);
+extern "C" int func_0010C258(void* self) {
+    if (*(unsigned int*)(*(char**)((char*)self + 0x18) + 0xB2C) & 1) {
+        if (func_00144BE0(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
+            unsigned int r = AIrand();
+            float thr = *(float*)((char*)self + 0xDFC) * 100.0f;
+            return (float)(r % 100U) < thr;
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C320);
+#ifdef SKIP_ASM
+extern "C" int func_0010C320(void* self) {
+    unsigned int r = AIrand();
+    float thr = *(float*)((char*)self + 0xDFC) * 70.0f + 30.0f;
+    return (float)(r % 100U) < thr;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C3B8);
+#ifdef SKIP_ASM
+extern "C" int func_0010C3B8(void* self) {
+    unsigned int r = AIrand();
+    float thr = *(float*)((char*)self + 0xDFC) * 40.0f + 60.0f;
+    return (float)(r % 100U) < thr;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_0010C450);

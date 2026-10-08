@@ -402,7 +402,35 @@ extern "C" int func_0021CB98(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_CBA0(void*, int) __asm__("func_0039E2A0");
+extern "C" void func_0020EAA0(void*);
+extern char D_00474160[];
+struct sElem_CBA0 {
+    void* operator new[](unsigned int, void* p) { return p; }
+    char pad[8];
+    char sub[0x84];
+    sElem_CBA0() { func_0020EAA0(sub); }
+};
+
+extern "C" void *func_0021CBA0(void *arg0) {
+    char* self = (char*)arg0;
+    func_0039E2A0_CBA0(self, 0);
+    *(char**)(self + 8) = D_00474160;
+    new (self + 0x48) sElem_CBA0[2];
+    *(int*)(self + 0x474) = -1;
+    *(float*)(self + 0x478) = 1.0f;
+    *(float*)(self + 0x47C) = 1.0f;
+    *(int*)(self + 0x480) = 0;
+    *(int*)(self + 0x484) = 0;
+    *(float*)(self + 0x488) = 1.0f;
+    *(float*)(self + 0x48C) = 1.0f;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CC40);
@@ -1205,7 +1233,29 @@ extern "C" void *func_002212C8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221350);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1350(void*, int) __asm__("func_0039E2A0");
+extern char D_00473320[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221350(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1350(arg0, arg1);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473320;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    new ((char*)arg0 + 0x9C) Elem[8];
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002213D8);
