@@ -382,7 +382,25 @@ extern "C" int func_0021CB98(void) {
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CC40);
+#ifdef SKIP_ASM
+extern "C" void func_0020EB08(void *, int);
+extern "C" void func_0039E390(void *, int);
+extern char D_00474160[];
+
+extern "C" void func_0021CC40(void *arg0, int arg1) {
+    (*(char **)((char*)(arg0) + (8))) = D_00474160;
+    if ((char*)arg0 + 0x48 != 0) {
+        char *p = (char*)arg0 + 0x48 + 0x118;
+        while ((char*)arg0 + 0x48 != p) {
+            p -= 0x8C;
+            func_0020EB08(p + 8, 2);
+        }
+    }
+    func_0039E390(arg0, arg1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CCC8);
