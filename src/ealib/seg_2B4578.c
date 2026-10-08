@@ -252,7 +252,51 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B49D0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4D00);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4DD8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Sub_4DD8 {
+    char pad00[0x8];
+    short f08;
+    char pad0A[0x14 - 0xA];
+    float f14;
+    char pad18[0x1C - 0x18];
+    char f1C;
+    char pad1D[0x2B - 0x1D];
+    char f2B;
+    char pad2C[0xA0 - 0x2C];
+};
+struct Cfg_4DD8 {
+    char pad00[0x20];
+    struct Sub_4DD8 sub;
+    char padC0[0xD4 - 0xC0];
+};
+struct G_4DD8 {
+    struct Cfg_4DD8 cfg;
+    struct Sub_4DD8 saved;
+};
+extern struct G_4DD8 D_0050A8E8_4DD8 __asm__("D_0050A8E8");
+extern int D_0044C45C;
+extern int D_0044C460;
+extern int func_003C0C90_4DD8() __asm__("func_003C0C90");
+
+int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) __asm__("func_003B4DD8");
+
+int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) {
+    if (D_0044C45C == 0) {
+        D_0044C460 = func_003C0C90_4DD8();
+        D_0044C45C = 1;
+        D_0050A8E8_4DD8.cfg.sub.f08 = 0x10;
+        D_0050A8E8_4DD8.cfg.sub.f2B = 0x5A;
+        D_0050A8E8_4DD8.cfg.sub.f1C = 1;
+        D_0050A8E8_4DD8.cfg.sub.f14 = -1.0f;
+        D_0050A8E8_4DD8.saved = D_0050A8E8_4DD8.cfg.sub;
+    }
+    *out = D_0050A8E8_4DD8.cfg;
+    return D_0044C460;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4FC0);
 
@@ -643,7 +687,87 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5F98);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6098);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6300);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct E_6300 {
+    void *p;
+    char pad04[0xE];
+    short f12;
+    char pad14[0x8C - 0x14];
+};
+struct R_6300 {
+    void *p0;
+    int p4;
+    int p8;
+    char fC;
+};
+struct G_6300 {
+    char pad000[0x28];
+    unsigned short f28;
+    char pad02A[0x17E - 0x2A];
+    short f17E;
+    char pad180[0x1F0 - 0x180];
+    struct E_6300 *f1F0;
+    struct R_6300 *f1F4;
+};
+extern struct G_6300 D_0050A8E8_6300 __asm__("D_0050A8E8");
+extern void func_003B58A0_6300() __asm__("func_003B58A0");
+extern void func_003B58D8_6300() __asm__("func_003B58D8");
+extern void func_003B5F98_6300(void *buf, int n) __asm__("func_003B5F98");
+extern int func_003B64D8_6300(int i) __asm__("func_003B64D8");
+extern void func_003B89E0_6300(void *p) __asm__("func_003B89E0");
+extern int func_003BAAC0_6300(char **pp, void *buf) __asm__("func_003BAAC0");
+extern void func_003C4D78_6300(int a, int p) __asm__("func_003C4D78");
+extern char *func_003C6540_6300(void *p, int i) __asm__("func_003C6540");
+
+int func_003B6300(int arg0) {
+    char buf[0xD0];
+    char *q;
+    void *obj;
+    int i;
+    int r;
+
+    if (arg0 == -1) {
+        for (i = 0; i < D_0050A8E8_6300.f28; i++) {
+            func_003B6300(i);
+        }
+        return 0;
+    }
+    if (func_003B64D8_6300(arg0) != 0) {
+        return -8;
+    }
+    func_003B58A0_6300();
+    obj = D_0050A8E8_6300.f1F4[arg0].p0;
+    for (i = 0; i < D_0050A8E8_6300.f17E; i++) {
+        struct E_6300 *e = &D_0050A8E8_6300.f1F0[i];
+        if (e->f12 == arg0) {
+            func_003B89E0_6300(e->p);
+        }
+    }
+    for (i = 0; i < *(unsigned short *)((char *)obj + 6); i++) {
+        q = func_003C6540_6300(obj, i);
+        if (q != 0) {
+            q += 4;
+            do {
+                r = func_003BAAC0_6300(&q, buf);
+                func_003B5F98_6300(buf, 2);
+            } while (r != 0);
+        }
+    }
+    if (D_0050A8E8_6300.f1F4[arg0].p4 != 0) {
+        func_003C4D78_6300(0x100, D_0050A8E8_6300.f1F4[arg0].p4);
+    }
+    if (D_0050A8E8_6300.f1F4[arg0].p8 != 0) {
+        func_003C4D78_6300(8, D_0050A8E8_6300.f1F4[arg0].p8);
+    }
+    D_0050A8E8_6300.f1F4[arg0].p0 = 0;
+    D_0050A8E8_6300.f1F4[arg0].fC = 0;
+    func_003B58D8_6300();
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B64D8);
 
@@ -1423,7 +1547,91 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8F78);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9140);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B91E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Ch_91E0 {
+    char pad00[0x8];
+    unsigned char *p8;
+    unsigned char *pC;
+    char pad10[0x16 - 0x10];
+    short f16;
+    char pad18[0x20 - 0x18];
+    unsigned short f20;
+    char pad22[0x26 - 0x22];
+    unsigned char f26;
+    char pad27[0x70 - 0x27];
+};
+struct V_91E0 {
+    int h;
+    signed char ch;
+    signed char x;
+    char pad[2];
+};
+struct G_91E0 {
+    struct Ch_91E0 ch[16];
+    struct V_91E0 v[24];
+};
+struct Bits_91E0 {
+    unsigned int a : 10;
+    unsigned int b : 7;
+};
+extern struct G_91E0 D_0050A120_91E0 __asm__("D_0050A120");
+extern void func_003B85F0(int, unsigned int);
+extern int func_003BC570_91E0(int v) __asm__("func_003BC570");
+
+void func_003B91E0(int h, struct Bits_91E0 *bits, int x, int cmd) {
+    struct V_91E0 *p = (struct V_91E0 *)&D_0050A120_91E0;
+    struct Ch_91E0 *e = (struct Ch_91E0 *)((char *)p + h * 0x70);
+    unsigned char *s;
+    int i;
+
+    if (cmd == 20) {
+        unsigned char *t = e->p8 + 1;
+        e->p8 = t;
+        e->pC = t;
+        return;
+    } else if (cmd == 30) {
+        if (e->f26 >= 0x7F) {
+            e->f26 = *e->p8;
+        }
+        if (e->f26 != 0) {
+            e->f26--;
+            e->p8 = e->pC;
+            return;
+        }
+    } else if (cmd == 7) {
+        s = e->p8;
+        p = (struct V_91E0 *)((char *)p + 0x700);
+        i = 0x17;
+        bits->b = *s;
+        e->p8 = s + 1;
+        do {
+            if (p->ch == h && p->x == x) {
+                func_003B85F0(p->h, (unsigned int)(bits->b * e->f16) >> 7);
+            }
+            i--;
+            p++;
+        } while (i >= 0);
+        return;
+    } else if (cmd == 10) {
+        p = (struct V_91E0 *)((char *)p + 0x700);
+        i = 0x17;
+        bits->a = func_003BC570_91E0(*e->p8++) >> 6;
+        do {
+            if (p->ch == h && p->x == x) {
+                int v = ((*(unsigned int *)bits & 0x3FF) << 6) + e->f20;
+                func_003B8C00(p->h, (unsigned short)v, 0);
+            }
+            i--;
+            p++;
+        } while (i >= 0);
+        return;
+    }
+    e->p8++;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B93C8);
@@ -2038,7 +2246,55 @@ void func_003BCAE8(int arg0, int n) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BCBA0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BD078);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003C06B0_D078(int a0, float *buf, void *p, signed char *tbl) __asm__("func_003C06B0");
+extern signed char D_0044DD00_D078[] __asm__("D_0044DD00");
+extern int D_0044C760_D078[] __asm__("D_0044C760");
+extern signed char D_0044DD38_D078[] __asm__("D_0044DD38");
+extern void *D_0050AC68;
+
+void func_003BD078(int a0, signed char *out, signed char *out8) {
+    float buf[8];
+    float max;
+    float min;
+    float scale;
+    int i;
+    int n;
+    int idx;
+
+    max = 0.0f;
+    min = 0.0f;
+    func_003C06B0_D078(a0, buf, (char *)D_0050AC68 + 0x6C, D_0044DD00_D078);
+    for (i = 0; i < 8; i++) {
+        if (max < buf[i]) {
+            max = buf[i];
+        } else if (buf[i] < min) {
+            min = buf[i];
+        }
+    }
+    min = -min;
+    if (max < min) {
+        max = min;
+    }
+    if (max < 4.0f) {
+        idx = D_0044DD38_D078[(int)max];
+    } else {
+        n = (int)((float)*(int *)&max * 6.524646209982166e-07f) - 0x2B8;
+        idx = n + 1;
+        if (max < (float)D_0044C760_D078[n]) {
+            idx = n;
+        }
+    }
+    *out = idx;
+    scale = 1.0f / (float)D_0044C760_D078[idx] * 28.571428298950195f;
+    for (i = 0; i < 8; i++) {
+        out8[i] = (int)(buf[i] * scale);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BD220);
 
@@ -2172,7 +2428,146 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BFD60);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BFE80);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BFFA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (butterfly add/sub of matrix rows, scaled per lane).
+void func_003BFFA0(void *in, void *scale, void *out) {
+    __asm__ volatile(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2       $vf15, 0x0(%1)\n"
+        "lqc2       $vf16, 0x30(%1)\n"
+        "lqc2       $vf1, 0x0(%0)\n"
+        "lqc2       $vf2, 0x10(%0)\n"
+        "lqc2       $vf3, 0x20(%0)\n"
+        "lqc2       $vf4, 0x30(%0)\n"
+        "lqc2       $vf5, 0x80(%0)\n"
+        "lqc2       $vf6, 0x90(%0)\n"
+        "lqc2       $vf7, 0xA0(%0)\n"
+        "lqc2       $vf8, 0xB0(%0)\n"
+        "vadd.xyzw  $vf9, $vf1, $vf5\n"
+        "vadd.xyzw  $vf10, $vf2, $vf6\n"
+        "vadd.xyzw  $vf11, $vf3, $vf7\n"
+        "vadd.xyzw  $vf12, $vf4, $vf8\n"
+        "vmulx.xyzw $vf9, $vf9, $vf15x\n"
+        "vmuly.xyzw $vf10, $vf10, $vf15y\n"
+        "vmulz.xyzw $vf11, $vf11, $vf15z\n"
+        "vmulw.xyzw $vf12, $vf12, $vf15w\n"
+        "sqc2       $vf9, 0x0(%2)\n"
+        "sqc2       $vf10, 0x10(%2)\n"
+        "sqc2       $vf11, 0x20(%2)\n"
+        "sqc2       $vf12, 0x30(%2)\n"
+        "vsub.xyzw  $vf9, $vf8, $vf4\n"
+        "vsub.xyzw  $vf10, $vf7, $vf3\n"
+        "vsub.xyzw  $vf11, $vf6, $vf2\n"
+        "vsub.xyzw  $vf12, $vf5, $vf1\n"
+        "vmulx.xyzw $vf9, $vf9, $vf16x\n"
+        "vmuly.xyzw $vf10, $vf10, $vf16y\n"
+        "vmulz.xyzw $vf11, $vf11, $vf16z\n"
+        "vmulw.xyzw $vf12, $vf12, $vf16w\n"
+        "sqc2       $vf9, 0xC0(%2)\n"
+        "sqc2       $vf10, 0xD0(%2)\n"
+        "sqc2       $vf11, 0xE0(%2)\n"
+        "sqc2       $vf12, 0xF0(%2)\n"
+        "lqc2       $vf15, 0x10(%1)\n"
+        "lqc2       $vf16, 0x20(%1)\n"
+        "lqc2       $vf1, 0x40(%0)\n"
+        "lqc2       $vf2, 0x50(%0)\n"
+        "lqc2       $vf3, 0x60(%0)\n"
+        "lqc2       $vf4, 0x70(%0)\n"
+        "lqc2       $vf5, 0xC0(%0)\n"
+        "lqc2       $vf6, 0xD0(%0)\n"
+        "lqc2       $vf7, 0xE0(%0)\n"
+        "lqc2       $vf8, 0xF0(%0)\n"
+        "vadd.xyzw  $vf9, $vf1, $vf5\n"
+        "vadd.xyzw  $vf10, $vf2, $vf6\n"
+        "vadd.xyzw  $vf11, $vf3, $vf7\n"
+        "vadd.xyzw  $vf12, $vf4, $vf8\n"
+        "vmulx.xyzw $vf9, $vf9, $vf15x\n"
+        "vmuly.xyzw $vf10, $vf10, $vf15y\n"
+        "vmulz.xyzw $vf11, $vf11, $vf15z\n"
+        "vmulw.xyzw $vf12, $vf12, $vf15w\n"
+        "sqc2       $vf9, 0x40(%2)\n"
+        "sqc2       $vf10, 0x50(%2)\n"
+        "sqc2       $vf11, 0x60(%2)\n"
+        "sqc2       $vf12, 0x70(%2)\n"
+        "vsub.xyzw  $vf9, $vf8, $vf4\n"
+        "vsub.xyzw  $vf10, $vf7, $vf3\n"
+        "vsub.xyzw  $vf11, $vf6, $vf2\n"
+        "vsub.xyzw  $vf12, $vf5, $vf1\n"
+        "vmulx.xyzw $vf9, $vf9, $vf16x\n"
+        "vmuly.xyzw $vf10, $vf10, $vf16y\n"
+        "vmulz.xyzw $vf11, $vf11, $vf16z\n"
+        "vmulw.xyzw $vf12, $vf12, $vf16w\n"
+        "sqc2       $vf9, 0x80(%2)\n"
+        "sqc2       $vf10, 0x90(%2)\n"
+        "sqc2       $vf11, 0xA0(%2)\n"
+        "sqc2       $vf12, 0xB0(%2)\n"
+        "lqc2       $vf1, 0x40(%1)\n"
+        "lqc2       $vf2, 0x50(%1)\n"
+        "lqc2       $vf9, 0x180(%0)\n"
+        "lqc2       $vf10, 0x190(%0)\n"
+        "lqc2       $vf11, 0x1A0(%0)\n"
+        "lqc2       $vf12, 0x1B0(%0)\n"
+        "lqc2       $vf13, 0x1C0(%0)\n"
+        "lqc2       $vf14, 0x1D0(%0)\n"
+        "lqc2       $vf15, 0x1E0(%0)\n"
+        "lqc2       $vf16, 0x1F0(%0)\n"
+        "vmulx.xyzw $vf9, $vf9, $vf1x\n"
+        "vmuly.xyzw $vf10, $vf10, $vf1y\n"
+        "vmulz.xyzw $vf11, $vf11, $vf1z\n"
+        "vmulw.xyzw $vf12, $vf12, $vf1w\n"
+        "vmulx.xyzw $vf13, $vf13, $vf2x\n"
+        "vmuly.xyzw $vf14, $vf14, $vf2y\n"
+        "vmulz.xyzw $vf15, $vf15, $vf2z\n"
+        "vmulw.xyzw $vf16, $vf16, $vf2w\n"
+        "lqc2       $vf4, 0x130(%0)\n"
+        "lqc2       $vf3, 0x120(%0)\n"
+        "lqc2       $vf2, 0x110(%0)\n"
+        "lqc2       $vf1, 0x100(%0)\n"
+        "vsub.xyzw  $vf5, $vf4, $vf12\n"
+        "vsub.xyzw  $vf6, $vf3, $vf11\n"
+        "vsub.xyzw  $vf7, $vf2, $vf10\n"
+        "vsub.xyzw  $vf8, $vf1, $vf9\n"
+        "vadd.xyzw  $vf1, $vf1, $vf9\n"
+        "vadd.xyzw  $vf2, $vf2, $vf10\n"
+        "vadd.xyzw  $vf3, $vf3, $vf11\n"
+        "vadd.xyzw  $vf4, $vf4, $vf12\n"
+        "sqc2       $vf1, 0x100(%2)\n"
+        "sqc2       $vf2, 0x110(%2)\n"
+        "sqc2       $vf3, 0x120(%2)\n"
+        "sqc2       $vf4, 0x130(%2)\n"
+        "sqc2       $vf5, 0x1C0(%2)\n"
+        "sqc2       $vf6, 0x1D0(%2)\n"
+        "sqc2       $vf7, 0x1E0(%2)\n"
+        "sqc2       $vf8, 0x1F0(%2)\n"
+        "lqc2       $vf4, 0x170(%0)\n"
+        "lqc2       $vf3, 0x160(%0)\n"
+        "lqc2       $vf2, 0x150(%0)\n"
+        "lqc2       $vf1, 0x140(%0)\n"
+        "vsub.xyzw  $vf5, $vf4, $vf16\n"
+        "vsub.xyzw  $vf6, $vf3, $vf15\n"
+        "vsub.xyzw  $vf7, $vf2, $vf14\n"
+        "vsub.xyzw  $vf8, $vf1, $vf13\n"
+        "vadd.xyzw  $vf1, $vf1, $vf13\n"
+        "vadd.xyzw  $vf2, $vf2, $vf14\n"
+        "vadd.xyzw  $vf3, $vf3, $vf15\n"
+        "vadd.xyzw  $vf4, $vf4, $vf16\n"
+        "sqc2       $vf1, 0x140(%2)\n"
+        "sqc2       $vf2, 0x150(%2)\n"
+        "sqc2       $vf3, 0x160(%2)\n"
+        "sqc2       $vf4, 0x170(%2)\n"
+        "sqc2       $vf5, 0x180(%2)\n"
+        "sqc2       $vf6, 0x190(%2)\n"
+        "sqc2       $vf7, 0x1A0(%2)\n"
+        "sqc2       $vf8, 0x1B0(%2)\n"
+        ".set pop\n"
+        :
+        : "r"(in), "r"(scale), "r"(out)
+        : "memory");
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C01A0);
 
@@ -2549,7 +2944,85 @@ void func_003C2438(void) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2440);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C25E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct E_25E0 {
+    char pad00[0x4];
+    short h[14];
+    unsigned short f20;
+    char pad22;
+    unsigned char n;
+    unsigned short flags;
+    char pad26[0x8A - 0x26];
+    unsigned short f8A;
+};
+struct G_25E0 {
+    char pad000[0x2A];
+    unsigned short f2A;
+    unsigned short f2C;
+    char pad02E;
+    unsigned char f2F;
+    unsigned char f30;
+    char pad031[0x49 - 0x31];
+    unsigned char f49;
+    char pad04A[0x1F0 - 0x4A];
+    struct E_25E0 *f1F0;
+};
+struct A8_25E0 {
+    int a;
+    short v;
+    short b;
+};
+struct B16_25E0 {
+    int a;
+    short v;
+    char pad[10];
+};
+struct T_25E0 {
+    char pad[0x20];
+    struct A8_25E0 a[48];
+    struct B16_25E0 b[1];
+};
+struct H_25E0 {
+    char pad[0xCB0];
+    struct T_25E0 *tbl;
+};
+extern struct G_25E0 D_0050A8E8_25E0 __asm__("D_0050A8E8");
+extern struct H_25E0 D_0050AD00_25E0 __asm__("D_0050AD00");
+extern void func_003C8A88_25E0(int a, unsigned int v) __asm__("func_003C8A88");
+
+int func_003C25E0(int idx) {
+    struct E_25E0 *e = &D_0050A8E8_25E0.f1F0[idx];
+    unsigned int v;
+    int i;
+
+    if (e->flags & 8) {
+        v = (unsigned int)((e->f20 << 12) / 48000 * e->f8A) >> 12;
+        if (v >= 0x4000) {
+            v = 0x3FFF;
+        }
+        for (i = 0; i < e->n; i++) {
+            D_0050AD00_25E0.tbl->a[e->h[i]].v = v;
+            if (D_0050A8E8_25E0.f49 == 2) {
+                D_0050AD00_25E0.tbl->a[e->h[i] + 0x18].v = v;
+            }
+        }
+    } else if (e->flags & 0x100) {
+        v = (unsigned int)((e->f20 << 12) / D_0050A8E8_25E0.f2C * e->f8A) >> 12;
+        for (i = 0; i < e->n; i++) {
+            D_0050AD00_25E0.tbl->b[e->h[i] - D_0050A8E8_25E0.f30].v = v;
+        }
+    } else {
+        v = (unsigned int)((e->f20 << 12) / D_0050A8E8_25E0.f2A * e->f8A) >> 8;
+        for (i = 0; i < e->n; i++) {
+            func_003C8A88_25E0(e->h[i] - (D_0050A8E8_25E0.f30 + D_0050A8E8_25E0.f2F), v);
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C27E0);
 
@@ -3921,7 +4394,76 @@ void func_003C7828(void *arg0, void *arg1, float fparg0, float fparg1) {
 void func_003C7AA8(void) {
 }
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7AB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Obj_7AB0 {
+    int (*fn)(struct Obj_7AB0 *self, int a, int b, void *c, int d);
+};
+struct Snd_7AB0 {
+    char pad00[0x3C];
+    float f3C;
+};
+struct G_7AB0 {
+    char pad000[0x5];
+    unsigned char n;
+    char pad006[0xF - 0x6];
+    signed char on[1];
+    char pad010[0xB0 - 0x10];
+    int fB0;
+    struct Snd_7AB0 *snd;
+    char pad0B8[0xD0 - 0xB8];
+    void *names[(0x1E0 - 0xD0) / 4];
+    void (*set)(int a, struct Snd_7AB0 *snd, void *name, float v);
+};
+struct S_7AB0 {
+    char pad00[0x4];
+    float cur[6];
+    float want[6];
+    float a[1];
+    float b[1];
+    float f3C;
+    struct Obj_7AB0 *obj;
+};
+extern struct G_7AB0 D_00515B40_7AB0 __asm__("D_00515B40");
+extern char D_00515D80_7AB0[] __asm__("D_00515D80");
+extern void func_003C7828_7AB0(struct Snd_7AB0 *snd, void *name, float from, float to) __asm__("func_003C7828");
+
+int func_003C7AB0(struct S_7AB0 *s) {
+    int i;
+
+    if (s->obj->fn(s->obj, 0x10, D_00515B40_7AB0.fB0, D_00515B40_7AB0.snd, 0) <= 0) {
+        for (i = 0; i < 1; i++) {
+            s->a[i] = s->b[i];
+        }
+        for (i = 0; i < D_00515B40_7AB0.n; i++) {
+            s->cur[i] = s->want[i];
+        }
+        return 0;
+    }
+    s->f3C = D_00515B40_7AB0.snd->f3C;
+    for (i = 0; i < 1; i++) {
+        if (D_00515B40_7AB0.on[i] != 0) {
+            if (s->a[i] != s->b[i]) {
+                func_003C7828_7AB0(D_00515B40_7AB0.snd, D_00515D80_7AB0, s->a[i], s->b[i]);
+                s->a[i] = s->b[i];
+            } else if (s->b[i] != 0.0f) {
+                D_00515B40_7AB0.set(0x10, D_00515B40_7AB0.snd, D_00515D80_7AB0, s->b[i]);
+            }
+        }
+    }
+    for (i = 0; i < D_00515B40_7AB0.n; i++) {
+        if (s->cur[i] != s->want[i]) {
+            func_003C7828_7AB0(D_00515B40_7AB0.snd, D_00515B40_7AB0.names[i], s->cur[i], s->want[i]);
+            s->cur[i] = s->want[i];
+        } else if (s->want[i] != 0.0f) {
+            D_00515B40_7AB0.set(0x10, D_00515B40_7AB0.snd, D_00515B40_7AB0.names[i], s->want[i]);
+        }
+    }
+    return 0x10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7CC0);
@@ -5390,7 +5932,76 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CBEC8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC070);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC630);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Hdr_C630 {
+    int f0;
+    int f4;
+    int cnt[6];
+    int len[6];
+};
+struct G_C630 {
+    char pad00[0x5];
+    unsigned char n;
+    char pad06[0xF - 0x6];
+    signed char fF;
+    void *f10;
+};
+extern struct Hdr_C630 D_005175C0_C630 __asm__("D_005175C0");
+extern int D_005175C8_C630[] __asm__("D_005175C8");
+extern struct G_C630 D_00515B40_C630 __asm__("D_00515B40");
+extern int D_0044E870_C630[] __asm__("D_0044E870");
+extern int D_0044E898;
+extern int D_00515D54;
+extern int D_00515D58;
+extern unsigned char *D_005175F8;
+extern unsigned char *D_005175FC;
+extern void func_003CBC58();
+extern void func_003CC848_C630(void) __asm__("func_003CC848");
+extern void func_003C51E8_C630(void *dst, void *src, int size) __asm__("func_003C51E8");
+extern int func_003C72F8_C630(void *p, int size) __asm__("func_003C72F8");
+extern void func_003CC070_C630(int a, unsigned char *data) __asm__("func_003CC070");
+
+void func_003CC630(int a0, unsigned char *data) {
+    unsigned char *p = data + 0x38;
+    int n;
+    int i;
+    int j;
+    int k;
+
+    func_003CC848_C630();
+    D_0044E898 = 1;
+    func_003C51E8_C630(&D_005175C0_C630, data, 0x38);
+    n = D_00515B40_C630.n - 1;
+    if (func_003C72F8_C630(&D_005175C0_C630.cnt[n], 4) != 0) {
+        D_00515D58 = D_00515B40_C630.n;
+    } else {
+        while (func_003C72F8_C630(&D_005175C8_C630[n], 4) == 0) {
+            n--;
+        }
+        D_00515D58 = n + 1;
+    }
+    D_00515D54 = D_00515D58;
+    for (i = 0; i < n; i++) {
+        k = func_003C72F8_C630(&D_005175C8_C630[i], 4);
+        for (j = 0; j < k; j++) {
+            p += D_0044E870_C630[*p];
+        }
+        p += func_003C72F8_C630(&D_005175C8_C630[i + 6], 4) * 12;
+    }
+    D_005175F8 = p;
+    k = func_003C72F8_C630(&D_005175C8_C630[n], 4);
+    for (j = 0; j < k; j++) {
+        p += D_0044E870_C630[*p];
+    }
+    D_005175FC = p;
+    func_003CC070_C630(a0, data);
+    D_00515B40_C630.f10 = func_003CBC58;
+    D_00515B40_C630.fF = 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC848);
@@ -5984,7 +6595,150 @@ void func_003CEB90(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEBE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (FIR filter over 4-float blocks: 12x4 banded matrix times sliding window).
+void func_003CEBE8(char *p, int n, int src, int dst) {
+    if (*(signed char *)(p + 0xFC) != 0) {
+        float *m = (float *)p;
+        float a = m[0xE0 / 4];
+        float b = m[0xE4 / 4];
+        float c = m[0xE8 / 4];
+        float d = m[0xEC / 4];
+        float e = m[0xF0 / 4];
+        m[0] = a;
+        m[5] = a;
+        m[10] = a;
+        m[15] = a;
+        m[4] = b;
+        m[9] = b;
+        m[14] = b;
+        m[19] = b;
+        m[8] = c;
+        m[13] = c;
+        m[18] = c;
+        m[23] = c;
+        m[12] = d;
+        m[17] = d;
+        m[22] = d;
+        m[27] = d;
+        m[16] = e;
+        m[21] = e;
+        m[26] = e;
+        m[31] = e;
+        m[20] = d;
+        m[25] = d;
+        m[30] = d;
+        m[35] = d;
+        m[24] = c;
+        m[29] = c;
+        m[34] = c;
+        m[39] = c;
+        m[28] = b;
+        m[33] = b;
+        m[38] = b;
+        m[43] = b;
+        m[32] = a;
+        m[37] = a;
+        m[42] = a;
+        m[47] = a;
+        *(signed char *)(p + 0xFC) = 0;
+    }
+    __asm__ volatile(
+        ".set push\n"
+        ".set noreorder\n"
+        "move         $6, %1\n"
+        "move         $4, %0\n"
+        "move         $5, %2\n"
+        "sll          $6, $6, 2\n"
+        "move         $7, %3\n"
+        "move         $8, %4\n"
+        "add          $6, $6, $7\n"
+        "lqc2         $vf1, 0x0($4)\n"
+        "lqc2         $vf2, 0x10($4)\n"
+        "lqc2         $vf3, 0x20($4)\n"
+        "lqc2         $vf4, 0x30($4)\n"
+        "lqc2         $vf5, 0x40($4)\n"
+        "lqc2         $vf6, 0x50($4)\n"
+        "lqc2         $vf7, 0x60($4)\n"
+        "lqc2         $vf8, 0x70($4)\n"
+        "lqc2         $vf9, 0x80($4)\n"
+        "lqc2         $vf10, 0x90($4)\n"
+        "lqc2         $vf11, 0xA0($4)\n"
+        "lqc2         $vf12, 0xB0($4)\n"
+        "lqc2         $vf20, 0x0($5)\n"
+        "lqc2         $vf21, 0x10($5)\n"
+        "1:\n"
+        "lqc2         $vf22, 0x0($7)\n"
+        "lqc2         $vf23, 0x10($7)\n"
+        "lqc2         $vf24, 0x20($7)\n"
+        "lqc2         $vf25, 0x30($7)\n"
+        "vmulax.xyzw  ACC, $vf1, $vf20x\n"
+        "vmadday.xyzw ACC, $vf2, $vf20y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf20z\n"
+        "vmaddaw.xyzw ACC, $vf4, $vf20w\n"
+        "vmaddax.xyzw ACC, $vf5, $vf21x\n"
+        "vmadday.xyzw ACC, $vf6, $vf21y\n"
+        "vmaddaz.xyzw ACC, $vf7, $vf21z\n"
+        "vmaddaw.xyzw ACC, $vf8, $vf21w\n"
+        "vmaddax.xyzw ACC, $vf9, $vf22x\n"
+        "vmadday.xyzw ACC, $vf10, $vf22y\n"
+        "vmaddaz.xyzw ACC, $vf11, $vf22z\n"
+        "vmaddw.xyzw  $vf28, $vf12, $vf22w\n"
+        "vmulax.xyzw  ACC, $vf1, $vf21x\n"
+        "vmadday.xyzw ACC, $vf2, $vf21y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf21z\n"
+        "vmaddaw.xyzw ACC, $vf4, $vf21w\n"
+        "vmaddax.xyzw ACC, $vf5, $vf22x\n"
+        "vmadday.xyzw ACC, $vf6, $vf22y\n"
+        "vmaddaz.xyzw ACC, $vf7, $vf22z\n"
+        "vmaddaw.xyzw ACC, $vf8, $vf22w\n"
+        "vmaddax.xyzw ACC, $vf9, $vf23x\n"
+        "vmadday.xyzw ACC, $vf10, $vf23y\n"
+        "vmaddaz.xyzw ACC, $vf11, $vf23z\n"
+        "vmaddw.xyzw  $vf29, $vf12, $vf23w\n"
+        "vmulax.xyzw  ACC, $vf1, $vf22x\n"
+        "vmadday.xyzw ACC, $vf2, $vf22y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf22z\n"
+        "vmaddaw.xyzw ACC, $vf4, $vf22w\n"
+        "vmaddax.xyzw ACC, $vf5, $vf23x\n"
+        "vmadday.xyzw ACC, $vf6, $vf23y\n"
+        "vmaddaz.xyzw ACC, $vf7, $vf23z\n"
+        "vmaddaw.xyzw ACC, $vf8, $vf23w\n"
+        "vmaddax.xyzw ACC, $vf9, $vf24x\n"
+        "vmadday.xyzw ACC, $vf10, $vf24y\n"
+        "vmaddaz.xyzw ACC, $vf11, $vf24z\n"
+        "vmaddw.xyzw  $vf30, $vf12, $vf24w\n"
+        "vmulax.xyzw  ACC, $vf1, $vf23x\n"
+        "vmadday.xyzw ACC, $vf2, $vf23y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf23z\n"
+        "vmaddaw.xyzw ACC, $vf4, $vf23w\n"
+        "vmaddax.xyzw ACC, $vf5, $vf24x\n"
+        "vmadday.xyzw ACC, $vf6, $vf24y\n"
+        "vmaddaz.xyzw ACC, $vf7, $vf24z\n"
+        "vmaddaw.xyzw ACC, $vf8, $vf24w\n"
+        "vmaddax.xyzw ACC, $vf9, $vf25x\n"
+        "vmadday.xyzw ACC, $vf10, $vf25y\n"
+        "vmaddaz.xyzw ACC, $vf11, $vf25z\n"
+        "vmaddw.xyzw  $vf31, $vf12, $vf25w\n"
+        "addi         $7, $7, 0x40\n"
+        "sqc2         $vf28, 0x0($8)\n"
+        "sqc2         $vf29, 0x10($8)\n"
+        "sqc2         $vf30, 0x20($8)\n"
+        "sqc2         $vf31, 0x30($8)\n"
+        "vmove.xyzw   $vf20, $vf24\n"
+        "vmove.xyzw   $vf21, $vf25\n"
+        "bne          $6, $7, 1b\n"
+        "addi         $8, $8, 0x40\n"
+        "sqc2         $vf20, 0x0($5)\n"
+        "sqc2         $vf21, 0x10($5)\n"
+        ".set pop\n"
+        :
+        : "r"(p), "r"(n), "r"(p + 0xC0), "r"(src), "r"(dst)
+        : "$4", "$5", "$6", "$7", "$8", "memory");
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEE08);
@@ -7311,7 +8065,120 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D4BB0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4C40);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4F10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Str_4F10 {
+    char pad00[0x3];
+    unsigned char f3;
+    char pad04[0xD - 0x4];
+    signed char fD;
+    signed char fE;
+    char pad0F[0x15 - 0xF];
+    signed char f15;
+    char pad16[0x1D - 0x16];
+    signed char f1D;
+    char pad1E[0x24 - 0x1E];
+    int f24;
+    char pad28[0x2F - 0x28];
+    unsigned char f2F;
+    int f30;
+    char pad34[0x36 - 0x34];
+    short f36;
+    char pad38[0x48 - 0x38];
+    unsigned int f48;
+    unsigned int f4C;
+    char pad50[0x54 - 0x50];
+    int f54;
+};
+struct Mgr_4F10 {
+    char pad00[0xC];
+    unsigned int fC;
+    unsigned int f10;
+    char pad14[0x58 - 0x14];
+    struct Str_4F10 *slot[24];
+};
+extern struct Mgr_4F10 *D_0044F420_4F10 __asm__("D_0044F420");
+extern unsigned char D_0044F434_4F10 __asm__("D_0044F434");
+extern unsigned int D_0044F438_4F10 __asm__("D_0044F438");
+extern void func_002AE9F8_4F10(int h, int a) __asm__("func_002AE9F8");
+extern int func_002AEBD0_4F10(int h) __asm__("func_002AEBD0");
+extern int func_002AF428_4F10(int h) __asm__("func_002AF428");
+extern int func_003D1E80_4F10(void) __asm__("func_003D1E80");
+extern void func_003D3D20_4F10(unsigned int i) __asm__("func_003D3D20");
+extern int func_003D4950_4F10(struct Str_4F10 *s) __asm__("func_003D4950");
+extern void func_003D5A98_4F10(struct Str_4F10 *s) __asm__("func_003D5A98");
+extern void func_003D5CC0_4F10(struct Str_4F10 *s) __asm__("func_003D5CC0");
+extern void func_003D5EE8_4F10(struct Str_4F10 *s) __asm__("func_003D5EE8");
+
+void func_003D4F10(void) {
+    int isB = D_0044F434_4F10 == 'B';
+    unsigned int step;
+    unsigned int i;
+    struct Str_4F10 *s;
+    unsigned int end;
+    int ok;
+    int r;
+    int skip;
+
+    if (isB) {
+        step = D_0044F420_4F10->f10;
+    } else {
+        step = D_0044F420_4F10->fC;
+    }
+    if (!isB) {
+        func_003D1E80_4F10();
+    }
+    for (i = 0; i < 24; i++) {
+        s = D_0044F420_4F10->slot[i];
+        if (s == 0 || s->f3 != 0) {
+            continue;
+        }
+        ok = 0;
+        end = D_0044F438_4F10 + s->f24;
+        if (s->f36 >= 0) {
+            ok = s->f30 != 0;
+        }
+        if (ok) {
+            if (s->fD >= 0) {
+                func_003D5A98_4F10(s);
+            }
+            if (s->f15 >= 0) {
+                func_003D5CC0_4F10(s);
+            }
+            if (s->f1D >= 0) {
+                func_003D5EE8_4F10(s);
+            }
+        }
+        if ((s->f2F != 0) != isB || !ok) {
+            continue;
+        }
+        if (s->f4C != 0) {
+            if (D_0044F438_4F10 + (step >> 1) >= s->f4C) {
+                func_002AE9F8_4F10(s->f54, 0);
+                s->f4C = 0;
+            }
+        } else if (func_002AEBD0_4F10(s->f54) != 0) {
+            r = func_003D4950_4F10(s);
+            if (s->f48 != 0) {
+                end += step;
+                skip = end < s->f48;
+            } else {
+                skip = s->f24 < r;
+            }
+            if (!skip) {
+                if (s->fE == 0 && func_002AF428_4F10(s->f54) == 0) {
+                    s->fE = -1;
+                }
+                func_003D3D20_4F10(i);
+            }
+        }
+    }
+    while (!isB && func_003D1E80_4F10() != 0) {
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5128);
 
