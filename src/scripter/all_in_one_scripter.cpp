@@ -159,7 +159,20 @@ extern "C" int func_00284898(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002848A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00283228_48A0(void *) __asm__("func_00283228");
+extern char D_00482360[];
+extern char D_00482398[];
+
+extern "C" void func_002848A0(void *arg0) {
+    *(char **)((char*)arg0 + 0x10) = D_00482360;
+    *(char **)((char*)arg0 + 0xC) = D_00482398;
+    func_00283228_48A0(arg0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002848D0);
@@ -169,7 +182,24 @@ extern "C" int func_002848D0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002848D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00283228_48D8(void *, int) __asm__("func_00283228");
+void operator_delete(int *);
+extern char D_004822E0[];
+extern char D_00482318[];
+
+extern "C" void func_002848D8(void *arg0, int arg1) {
+    *(char **)((char*)arg0 + 0x18) = D_00482318;
+    *(char **)((char*)arg0 + 0x0) = D_004822E0;
+    func_00283228_48D8((char*)arg0 + 0xC, 0);
+    if (arg1 & 1) {
+        operator_delete((int *)arg0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284940);
@@ -187,7 +217,24 @@ extern "C" int func_00284948(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284950);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00283228_4950(void *, int) __asm__("func_00283228");
+void operator_delete(int *);
+extern char D_00482260[];
+extern char D_00482298[];
+
+extern "C" void func_00284950(void *arg0, int arg1) {
+    *(char **)((char*)arg0 + 0x18) = D_00482298;
+    *(char **)((char*)arg0 + 0x0) = D_00482260;
+    func_00283228_4950((char*)arg0 + 0xC, 0);
+    if (arg1 & 1) {
+        operator_delete((int *)arg0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_002849B8);
@@ -387,7 +434,24 @@ extern "C" int func_00284AE0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00283228_4AE8(void *, int) __asm__("func_00283228");
+void operator_delete(int *);
+extern char D_00481FD8[];
+extern char D_00482018[];
+
+extern "C" void func_00284AE8(void *arg0, int arg1) {
+    *(char **)((char*)arg0 + 0x18) = D_00482018;
+    *(char **)((char*)arg0 + 0x0) = D_00481FD8;
+    func_00283228_4AE8((char*)arg0 + 0xC, 0);
+    if (arg1 & 1) {
+        operator_delete((int *)arg0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B50);
