@@ -46,6 +46,13 @@ DRIVER_PATH_FLAG = f"-B{CC_DIR}/lib/gcc-lib/ee/2.95.3/"
 
 # See tools/cc/README.md for how these were gathered
 COMMON_CFLAGS = "-O2"
+# Fork-only: per-unit extra compiler flags. EA's support library (ealib/) was built with -G0 (no $gp small data:
+# globals and float constants are addressed with lui/%lo and lui/ori/mtc1), except one embedded module at
+# 0x3D6498-0x3DBAE8 (ealib/seg_2D7498) that uses $gp and default flags. Evidence: notes/stuck.md "ealib".
+UNIT_CFLAGS = {
+    "ealib/seg_2B4578": "-G0",
+    "ealib/seg_2DCAE8": "-G0",
+}
 COMMON_CXXFLAGS = ""
 
 # splat's generated INCLUDE_ASM macro emits `.include "FOLDER/NAME.s"` relative
@@ -345,12 +352,15 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
             else:
                 build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
+            unit_flags = UNIT_CFLAGS.get(seg.name, "")
             if dual_objects:
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
+                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry,
+                      extra_flags=unit_flags or None)
                 flags, inc = current_c_flags(entry)
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags=flags, implicit=inc)
+                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current",
+                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc)
             else:
-                build(entry.object_path, entry.src_paths, "cc")
+                build(entry.object_path, entry.src_paths, "cc", extra_flags=unit_flags or None)
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)

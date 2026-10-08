@@ -519,6 +519,10 @@ segments:
       - [0x2ad800, cpp, world/wscriptcache]
 
       - [0x2b4578, c, ealib/seg_2B4578]
+
+      - [0x2d7498, c, ealib/seg_2D7498]
+
+      - [0x2dcae8, c, ealib/seg_2DCAE8]
       
       - [0x2ec198, cpp, dirtysock/tags]
       
