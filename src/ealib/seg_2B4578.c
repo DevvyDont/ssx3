@@ -3752,7 +3752,32 @@ int func_003C7388(struct S_7388 *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7480);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct S24_7480 { int w[6]; };
+struct S16_7480 { int w[4]; };
+struct T_7480 { struct S24_7480 a, b, c, d, e; struct S16_7480 f; int pad[2]; struct S16_7480 g; };
+extern struct T_7480 D_0050AB20_7480 __asm__("D_0050AB20");
+extern struct S24_7480 D_0044E1C8_7480 __asm__("D_0044E1C8");
+extern struct S24_7480 D_0044E1E0_7480 __asm__("D_0044E1E0");
+extern struct S24_7480 D_0044E1F8_7480 __asm__("D_0044E1F8");
+extern struct S24_7480 D_0044E210_7480 __asm__("D_0044E210");
+extern struct S24_7480 D_0044E228_7480 __asm__("D_0044E228");
+extern struct S16_7480 D_0044E240_7480 __asm__("D_0044E240");
+extern struct S16_7480 D_0044E250_7480 __asm__("D_0044E250");
+
+void func_003C7480(void) {
+    D_0050AB20_7480.a = D_0044E1C8_7480;
+    D_0050AB20_7480.b = D_0044E1E0_7480;
+    D_0050AB20_7480.c = D_0044E1F8_7480;
+    D_0050AB20_7480.d = D_0044E210_7480;
+    D_0050AB20_7480.e = D_0044E228_7480;
+    D_0050AB20_7480.f = D_0044E240_7480;
+    D_0050AB20_7480.g = D_0044E250_7480;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7600);
 
@@ -4997,7 +5022,52 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CAA28);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAB28);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAC88);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003C51E8_AC88(void *, void *, int) __asm__("func_003C51E8");
+extern void func_003CAA28_AC88(void *, void *, void *, int, int) __asm__("func_003CAA28");
+
+void func_003CAC88(char *arg0, char **arg1, int arg2) {
+    char *v18;
+    char *v20;
+    if (*(int *)(arg0 + 0x34) > 0) {
+        v18 = arg0 + 0x40;
+        v20 = *arg1;
+    } else {
+        v18 = *arg1;
+        v20 = v18 + *(int *)(arg0 + 0x2C) * 4;
+    }
+    if (arg2 == 0) {
+        func_003C51E8_AC88(arg0 + 0x838, v18, *(int *)(arg0 + 0x2C) * 4);
+        *(int *)(arg0 + 0x30) = *(int *)(arg0 + 0x30) - *(int *)(arg0 + 0x2C);
+        *(int *)(arg0 + 0x38) = *(int *)(arg0 + 0x2C);
+        *arg1 = v20;
+    } else {
+        if (arg2 > 0) {
+            int t = arg2 * 4;
+            func_003C51E8_AC88(arg0 + 0x838, v18, t);
+            func_003CAA28_AC88(v18, v20, arg0 + (t + 0x838), *(int *)(arg0 + 0x2C), arg2);
+            *(int *)(arg0 + 0x30) = *(int *)(arg0 + 0x30) - *(int *)(arg0 + 0x2C);
+            *(int *)(arg0 + 0x38) = *(int *)(arg0 + 0x2C) + arg2;
+            *arg1 = v20;
+        } else {
+            int m, d, n;
+            func_003CAA28_AC88(v18, v20, arg0 + 0x838, *(int *)(arg0 + 0x2C), arg2);
+            m = *(int *)(arg0 + 0x2C);
+            func_003C51E8_AC88(arg0 + ((m * 4) + 0x838), v20 - arg2 * 4, (m + arg2) * 4);
+            n = *(int *)(arg0 + 0x2C);
+            d = n * 2;
+            *(int *)(arg0 + 0x30) = *(int *)(arg0 + 0x30) - d;
+            *(int *)(arg0 + 0x38) = d + arg2;
+            *arg1 = v20 + n * 4;
+        }
+    }
+    *(int *)(arg0 + 0x34) = 0;
+    *(int *)(arg0 + 0x3C) = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CADF0);
