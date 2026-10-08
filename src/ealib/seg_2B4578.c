@@ -1390,7 +1390,37 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BC968);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BCA28);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BCAE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+typedef struct { char p0[6]; unsigned short pos; unsigned char *buf; } BW_CAE8;
+extern BW_CAE8 *D_0050AC68_CAE8[] __asm__("D_0050AC68");
+
+void func_003BCAE8(int arg0, int n) {
+    unsigned int v = arg0 << (0x20 - n);
+    int byte;
+    int room;
+    int take;
+    int rem;
+    v = v >> (0x20 - n);
+    while (n > 0) {
+        byte = D_0050AC68_CAE8[0]->pos >> 3;
+        if (byte & 1)
+            byte = byte - 1;
+        else
+            byte = byte + 1;
+        room = 8 - (D_0050AC68_CAE8[0]->pos & 7);
+        if (room == 8)
+            D_0050AC68_CAE8[0]->buf[byte] = 0;
+        take = (room >= n) ? n : room;
+        rem = n - take;
+        D_0050AC68_CAE8[0]->buf[byte] |= (v >> rem) << (room - take);
+        n = rem;
+        D_0050AC68_CAE8[0]->pos += take;
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BCBA0);
 
@@ -3513,7 +3543,31 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CAB28);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAC88);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CADF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003C51E8_ADF0(int, void *, int) __asm__("func_003C51E8");
+
+int func_003CADF0(void *arg0, int *arg1, int *arg2) {
+    int temp_16;
+    int temp_16_2;
+    int temp_20;
+    int temp_3;
+
+    temp_16_2 = (*(int *)((char*)(arg0) + (0x38)));
+    temp_3 = *arg1;
+    temp_16 = temp_16_2;
+    if (temp_16_2 >= temp_3) temp_16 = temp_3;
+    temp_20 = temp_16 * 4;
+    func_003C51E8_ADF0(*arg2, arg0 + (((*(int *)((char*)(arg0) + (0x3C))) * 4) + 0x838), temp_20);
+    (*(int *)((char*)(arg0) + (0x3C))) = (int) ((*(int *)((char*)(arg0) + (0x3C))) + temp_16);
+    (*(int *)((char*)(arg0) + (0x38))) = (int) ((*(int *)((char*)(arg0) + (0x38))) - temp_16);
+    *arg1 -= temp_16;
+    *arg2 += temp_20;
+    return temp_16;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAEA0);
 
