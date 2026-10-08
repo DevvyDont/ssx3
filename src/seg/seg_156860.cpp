@@ -1130,7 +1130,38 @@ extern "C" void func_002583A8(S83A8 *self, int arg1, int arg2) {
 
 INCLUDE_ASM("seg/seg_156860", cGameComm_syncGame);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_156860", func_002586B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* cBE_getInterface_86B0(int, int) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00257E98(void *, int, int, int);
+extern "C" void func_00258870(void *, int, int);
+extern "C" void func_002570D8(void *);
+extern "C" void THREAD_yieldticks(int);
+extern void *D_004A28A8;
+extern char D_00534B30[];
+static inline int rd8(char *p) { return *(int*)(p + 8); }
+extern "C" void func_002586B0(void *self) {
+    char buf[12];
+    cBE_getInterface_86B0(*(int*)((char*)D_004A28A8 + 0x78), 7);
+    if (rd8(D_00534B30) != 0) {
+        buf[0] = 3;
+        func_00257E98(self, 3, (int)buf, 0xC);
+    }
+    func_00258870(self, 0xE10, 0);
+    while (*(int*)((char*)self + 0x3F4) == 0 && *(int*)((char*)self + 4) == 0) {
+        func_002570D8(self);
+        THREAD_yieldticks(1);
+    }
+    *(int*)((char*)self + 0x94) = 0;
+    if (*(int*)((char*)self + 4) == 0 && rd8(D_00534B30) == 0) {
+        buf[0] = 3;
+        func_00257E98(self, 3, (int)buf, 0xC);
+    }
+    *(int*)((char*)self + 0xAC) = 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_00258790);
 

@@ -1,10 +1,76 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("seg/seg_218AE8", func_00317AE8);
+#ifdef SKIP_ASM
+extern "C" void func_00317AE8(char *self, float x) {
+    if (*(int*)(self + 0x10) == 0) {
+        *(float*)(self + 8) = *(float*)(self + 0xC) = x;
+    } else {
+        if (x < *(float*)(self + 8)) *(float*)(self + 8) = x;
+        if (*(float*)(self + 0xC) < x) *(float*)(self + 0xC) = x;
+    }
+    *(float*)(self + 0) = *(float*)(self + 0) + x;
+    *(float*)(self + 4) = *(float*)(self + 4) + x * x;
+    *(int*)(self + 0x10) = *(int*)(self + 0x10) + 1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_218AE8", func_00317B50);
 
+//100%
 INCLUDE_ASM("seg/seg_218AE8", func_00317C48);
+#ifdef SKIP_ASM
+struct sVec4_7C48 { float x, y, z, w; } __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_7C48(sVec4_7C48 a, sVec4_7C48 b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sVec4_7C48 mk_7C48(char *p)
+{
+    sVec4_7C48 v = *(sVec4_7C48*)p;
+    v.w = 0.0f;
+    return v;
+}
+
+// PORT: abs.s asm helper
+static inline float fabs_7C48(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" int func_00317C48(char *a, char *b) {
+    float d = *(float*)(a + 0xC);
+    if (d == 0.0f) {
+        if (fabs_7C48(*(float*)(b + 0xC)) > 0.1f) return 0;
+    } else {
+        float r = *(float*)(b + 0xC) / d;
+        if (r > 1.001f) return 0;
+        if (r < 0.999f) return 0;
+    }
+    if (vu0Dot_7C48(mk_7C48(a), mk_7C48(b)) < 0.999f) return 0;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_218AE8", func_00317D10);

@@ -1039,9 +1039,70 @@ extern "C" void func_002BB390(void *self, int flags) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB3F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void ASYNCFILE_release_B3F0(int, int *, int *) __asm__("ASYNCFILE_release");
+extern "C" void func_002523A8_B3F0(int) __asm__("func_002523A8");
+extern "C" void func_003B47F8_B3F0(int, int) __asm__("func_003B47F8");
+extern "C" int func_003B4818_B3F0(int) __asm__("func_003B4818");
+extern "C" int func_003DF980_B3F0(int) __asm__("func_003DF980");
+extern "C" void func_003E6574_B3F0(int, int, int) __asm__("func_003E6574");
+int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
+extern char D_004A3868[];
+extern "C" void func_002BB3F0(void *self_) {
+    char *self = (char*)self_;
+    short st = *(short*)self;
+    if (st == 1 && func_003DF980_B3F0(*(int*)(self + 4)) == st) {
+        int sp0 = 0;
+        int sp4 = 0;
+        ASYNCFILE_release_B3F0(*(int*)(self + 4), &sp0, &sp4);
+        if (sp0 != 0) {
+            if (sp4 > 0) {
+                int t = func_003B4818_B3F0(sp0);
+                if (t > 0) {
+                    int r = operator_new_B3F0(t, D_004A3868, 0x20000000, 0);
+                    *(int*)(self + 8) = r;
+                    func_003B47F8_B3F0(sp0, r);
+                } else {
+                    int r = operator_new_B3F0(sp4, D_004A3868, 0x20000000, 0);
+                    *(int*)(self + 8) = r;
+                    func_003E6574_B3F0(r, sp0, sp4);
+                }
+                func_002523A8_B3F0(sp0);
+            }
+        }
+        *(short*)self = 2;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB4D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sBXStr_B4D8 { char *p; int pad[3]; sBXStr_B4D8() {} };
+extern "C" void func_003186D0_B4D8(sBXStr_B4D8*, const char*, int) __asm__("func_003186D0");
+extern "C" void func_00318630_B4D8(sBXStr_B4D8*, sBXStr_B4D8*, const char*) __asm__("func_00318630");
+extern "C" int func_003DF690_B4D8(const char*, int) __asm__("func_003DF690");
+extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
+extern char D_004A3870[];
+extern char D_004A3878[];
+extern "C" void func_002BB4D8_B4D8(void *self, int arg) __asm__("func_002BB4D8");
+extern "C" void func_002BB4D8_B4D8(void *self, int arg) {
+    sBXStr_B4D8 a;
+    sBXStr_B4D8 b;
+    *(short*)((char*)self + 2) = 0;
+    func_003186D0_B4D8(&b, D_004A3870, arg);
+    func_00318630_B4D8(&a, &b, D_004A3878);
+    *(int*)((char*)self + 4) = func_003DF690_B4D8(a.p, 0);
+    cBXString_dt_B4D8(&a, 2);
+    cBXString_dt_B4D8(&b, 2);
+    int n = *(int*)((char*)self + 4);
+    *(short*)((char*)self + 0) = n <= 0 ? 2 : 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB570);
@@ -1824,7 +1885,37 @@ extern "C" void *func_002BC980(void *arg0) {
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BC9B0);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCAF8);
+#ifdef SKIP_ASM
+extern char D_00484058[];
+#define F_CAF8(o) (*(float*)(self + (o)))
+extern "C" void* func_002BCAF8(char *self) {
+    *(char**)(self + 4) = D_00484058;
+    F_CAF8(0) = -99999.0f;
+    F_CAF8(0x8) = F_CAF8(0xC) = 0.0f;
+    F_CAF8(0x10) = F_CAF8(0x14) = 6.0f;
+    F_CAF8(0x18) = F_CAF8(0x1C) = 0.0f;
+    F_CAF8(0x20) = F_CAF8(0x24) = 0.0f;
+    F_CAF8(0x28) = F_CAF8(0x2C) = 0.0f;
+    F_CAF8(0x30) = F_CAF8(0x34) = 10.0f;
+    F_CAF8(0x38) = F_CAF8(0x3C) = 1.0f;
+    F_CAF8(0x40) = F_CAF8(0x44) = 1.0f;
+    F_CAF8(0x48) = F_CAF8(0x4C) = 0.0f;
+    F_CAF8(0x50) = F_CAF8(0x54) = 0.0f;
+    F_CAF8(0x58) = F_CAF8(0x5C) = 0.0f;
+    F_CAF8(0x60) = F_CAF8(0x64) = 1.0f;
+    F_CAF8(0x68) = F_CAF8(0x6C) = 1.0f;
+    F_CAF8(0x70) = F_CAF8(0x74) = 1.0f;
+    F_CAF8(0x78) = F_CAF8(0x7C) = 1.0f;
+    F_CAF8(0x80) = F_CAF8(0x84) = 0.05999999865889549f;
+    F_CAF8(0x88) = F_CAF8(0x8C) = 1.0f;
+    F_CAF8(0x90) = F_CAF8(0x94) = 1.0f;
+    F_CAF8(0x98) = F_CAF8(0x9C) = 1.0f;
+    return self;
+}
+#undef F_CAF8
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCBD0);
@@ -1842,13 +1933,63 @@ extern "C" void *func_002BCBD0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCC00);
+#ifdef SKIP_ASM
+class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BCC00(void *self, void *p, float f) {
+    cCC00 *o = (cCC00*)self;
+    o->vt();
+    f = f * f;
+    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
+    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    *(int*)((char*)self + 0x10) = (int)(f * (float)*(int*)((char*)p + 8) + (1.0f - f) * (float)*(int*)((char*)self + 0x10));
+    *(int*)((char*)self + 0x14) = *(int*)((char*)p + 8);
+    o->vt();
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCCC8);
+#ifdef SKIP_ASM
+class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BCCC8(void *self, void *p, float f) {
+    cCCC8 *o = (cCCC8*)self;
+    o->vt();
+    f = f * f;
+    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
+    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    o->vt();
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCD68);
+#ifdef SKIP_ASM
+class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BCD68(void *self, void *p, float f) {
+    cCD68 *o = (cCD68*)self;
+    o->vt();
+    f = f * f;
+    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
+    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    o->vt();
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCE08);
+#ifdef SKIP_ASM
+class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BCE08(void *self, void *p, float f) {
+    cCE08 *o = (cCE08*)self;
+    o->vt();
+    f = f * f;
+    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
+    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    o->vt();
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BCEA8);
 
@@ -1858,17 +1999,74 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BD068);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BD1B8);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD2E8);
+#ifdef SKIP_ASM
+class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BD2E8(void *self, void *p, float f) {
+    cD2E8 *o = (cD2E8*)self;
+    o->vt();
+    f = f * f;
+    *(float*)((char*)self + 8) = f * *(float*)((char*)p + 4) + (1.0f - f) * *(float*)((char*)self + 8);
+    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 4);
+    o->vt();
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BD378);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD518);
+#ifdef SKIP_ASM
+class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BD518(void *self, void *p, float f) {
+    cD518 *o = (cD518*)self;
+    o->vt();
+    f = f * f;
+    *(float*)((char*)self + 8) = f * *(float*)((char*)p + 4) + (1.0f - f) * *(float*)((char*)self + 8);
+    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 4);
+    o->vt();
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD5A8);
+#ifdef SKIP_ASM
+struct sP_D5A8 { float x, y; };
+class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BD5A8(void *self, void *p, float f) {
+    cD5A8 *o = (cD5A8*)self;
+    o->vt();
+    f = f * f;
+    *(sP_D5A8*)((char*)self + 8) = *(sP_D5A8*)((char*)p + 4);
+    *(sP_D5A8*)((char*)self + 0x18) = *(sP_D5A8*)((char*)p + 0xC);
+    *(sP_D5A8*)((char*)self + 0x28) = *(sP_D5A8*)((char*)p + 0x14);
+    *(sP_D5A8*)((char*)self + 0x38) = *(sP_D5A8*)((char*)p + 0x1C);
+    *(float*)((char*)self + 0x48) = f * *(float*)((char*)p + 0x24) + (1.0f - f) * *(float*)((char*)self + 0x48);
+    *(float*)((char*)self + 0x4C) = *(float*)((char*)p + 0x24);
+    *(float*)((char*)self + 0x50) = f * *(float*)((char*)p + 0x28) + (1.0f - f) * *(float*)((char*)self + 0x50);
+    *(float*)((char*)self + 0x54) = *(float*)((char*)p + 0x28);
+    o->vt();
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BD698);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD968);
+#ifdef SKIP_ASM
+class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BD968(void *self, void *p, float f) {
+    cD968 *o = (cD968*)self;
+    o->vt();
+    f = f * f;
+    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
+    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    *(float*)((char*)self + 0x10) = f * *(float*)((char*)p + 8) + (1.0f - f) * *(float*)((char*)self + 0x10);
+    *(float*)((char*)self + 0x14) = *(float*)((char*)p + 8);
+    o->vt();
+}
+#endif
 
 extern "C" void func_002BDA28(void) {
 }
@@ -1961,11 +2159,48 @@ extern "C" int func_002BDB10(void *arg0, void *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDB38);
+#ifdef SKIP_ASM
+extern "C" int func_002BDB38(void *a, void *b) {
+    if (*(float*)((char*)a + 8) != *(float*)((char*)b + 4)) return 0;
+    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 8)) return 0;
+    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
+    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
+    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
+    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDBD0);
+#ifdef SKIP_ASM
+extern "C" int func_002BDBD0(void *a, void *b) {
+    if (*(float*)((char*)a + 0x8) != *(float*)((char*)b + 0x4)) return 0;
+    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 0x8)) return 0;
+    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
+    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
+    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
+    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+    if (*(float*)((char*)a + 0x38) != *(float*)((char*)b + 0x1C)) return 0;
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDC78);
+#ifdef SKIP_ASM
+extern "C" int func_002BDC78(void *a, void *b) {
+    if (*(float*)((char*)a + 8) != *(float*)((char*)b + 4)) return 0;
+    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 8)) return 0;
+    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
+    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
+    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
+    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDD10);
@@ -1981,7 +2216,22 @@ extern "C" int func_002BDD10(void *arg0, void *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDD38);
+#ifdef SKIP_ASM
+extern "C" int func_002BDD38(void *a, void *b) {
+    if (*(float*)((char*)a + 0x8) != *(float*)((char*)b + 0x4)) return 0;
+    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 0x8)) return 0;
+    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
+    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
+    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
+    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+    if (*(int*)((char*)a + 0x38) != *(int*)((char*)b + 0x1C)) return 0;
+    if (*(float*)((char*)a + 0x40) != *(float*)((char*)b + 0x20)) return 0;
+    if (*(float*)((char*)a + 0x48) != *(float*)((char*)b + 0x24)) return 0;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDE08);
@@ -1997,7 +2247,21 @@ extern "C" int func_002BDE08(void *arg0, void *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDE30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
+extern "C" int func_002BDE30(char *a, char *b) {
+    if (func_002BB100_DE30(a + 8, b + 4)) return 0;
+    if (func_002BB100_DE30(a + 0x18, b + 0xC)) return 0;
+    if (func_002BB100_DE30(a + 0x28, b + 0x14)) return 0;
+    if (func_002BB100_DE30(a + 0x38, b + 0x1C)) return 0;
+    if (*(float*)(a + 0x48) != *(float*)(b + 0x24)) return 0;
+    if (*(float*)(a + 0x50) != *(float*)(b + 0x28)) return 0;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
 
@@ -2153,7 +2417,21 @@ extern "C" void func_002BE2C8(void *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE2D8);
+#ifdef SKIP_ASM
+struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BE2D8(char *self, char *s) {
+    VE_E2D8 *e = &(*(VE_E2D8 **)s)[2];
+    e->fn(s + e->delta, self + 8, 4);
+    e = &(*(VE_E2D8 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_E2D8 **)s)[2];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_E2D8 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE378);
@@ -2251,9 +2529,37 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BECC8);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BEE48);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BF2A0);
+#ifdef SKIP_ASM
+struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BF2A0(char *self, char *s) {
+    VE_F2A0 *e = &(*(VE_F2A0 **)s)[2];
+    e->fn(s + e->delta, self + 8, 4);
+    e = &(*(VE_F2A0 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_F2A0 **)s)[2];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_F2A0 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BF340);
+#ifdef SKIP_ASM
+struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BF340(char *self, char *s) {
+    VE_F340 *e = &(*(VE_F340 **)s)[1];
+    e->fn(s + e->delta, self + 8, 4);
+    e = &(*(VE_F340 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_F340 **)s)[1];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_F340 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BF3E0);
@@ -2351,4 +2657,18 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BFD30);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BFEB0);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002C0308);
+#ifdef SKIP_ASM
+struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002C0308(char *self, char *s) {
+    VE_0308 *e = &(*(VE_0308 **)s)[1];
+    e->fn(s + e->delta, self + 8, 4);
+    e = &(*(VE_0308 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_0308 **)s)[1];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_0308 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+}
+#endif
