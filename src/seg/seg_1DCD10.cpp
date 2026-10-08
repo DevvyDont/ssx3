@@ -2,9 +2,89 @@
 
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBD10);
 
+//100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBEE0);
+#ifdef SKIP_ASM
+struct Pre_BEE0 { char pad[0x10D8]; };
+class Mgr_BEE0 : Pre_BEE0 {
+public:
+  virtual void v1();
+  virtual void v2();
+  virtual void v3();
+  virtual void v4();
+  virtual void v5();
+  virtual void v6();
+  virtual void v7();
+  virtual void v8();
+  virtual void v9();
+  virtual void v10();
+  virtual void v11();
+  virtual void v12();
+  virtual void v13();
+  virtual void v14();
+  virtual void v15();
+  virtual void v16();
+  virtual void v17();
+  virtual void v18();
+  virtual void v19();
+  virtual void v20();
+  virtual void v21();
+  virtual void v22();
+  virtual void v23();
+  virtual void v24();
+  virtual void v25();
+  virtual void v26();
+  virtual void v27();
+  virtual void v28();
+  virtual void v29();
+  virtual void v30();
+  virtual void v31();
+  virtual void v32();
+  virtual void v33();
+  virtual void v34();
+  virtual void v35();
+  virtual void v36();
+  virtual void v37();
+  virtual void v38();
+  virtual void v39();
+  virtual void v40();
+  virtual void v41();
+  virtual void v42();
+  virtual void v43();
+  virtual void v44();
+  virtual void v45();
+  virtual void v46();
+  virtual void v47();
+  virtual void v48();
+  virtual void v48b();
+  virtual void v50(int);
+};
+extern Mgr_BEE0 *D_004A5B80;
+void operator_delete(int *);
+extern "C" void func_002DBEE0(int *self, int flags) {
+    Mgr_BEE0 *m = D_004A5B80;
+    int i;
+    for (i = 0; i < 0x51; i++) {
+        int *slot = (int*)((char*)m + 0xF50) + i;
+        if (*slot != -1) {
+            m->v50(*slot);
+            *slot = -1;
+        }
+    }
+    if (flags & 1) operator_delete(self);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBF80);
+#ifdef SKIP_ASM
+extern char D_00488308[];
+extern "C" void *func_002DBF80(int *self) {
+    self[0] = 0;
+    *(char**)((char*)self + 4) = D_00488308;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBF98);
