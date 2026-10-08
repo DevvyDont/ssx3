@@ -3357,7 +3357,23 @@ int func_003C5F18(int arg0, float f) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5F70);
+#ifdef SKIP_ASM
+extern void func_003B4DD8(void *);
+
+int func_003C5F70(int arg0, float *arg1) {
+    unsigned char buf[0xE0];
+
+    *arg1 = 0.0f;
+    if (arg0 == 0) {
+        func_003B4DD8(buf);
+        *arg1 = (float)buf[0x4B] * 0.01f;
+        return 0;
+    }
+    return -5;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5FD0);
@@ -5501,7 +5517,22 @@ void func_003CD260(B_D260 *b, int k) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD2B0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD518);
+#ifdef SKIP_ASM
+void func_003CD518(void *arg0) {
+    int var_2;
+    void *var_4;
+
+    var_4 = arg0;
+    var_2 = 0x6A;
+    do {
+        var_2 -= 2;
+        (*(float *)((char*)(var_4) + (0))) = (float) ((((*(float *)((char*)(var_4) + (-4))) + (*(float *)((char*)(var_4) + (4)))) * 0.59738594f) + (((*(float *)((char*)(var_4) + (-0xC))) + (*(float *)((char*)(var_4) + (0xC)))) * -0.11459156f) + (((*(float *)((char*)(var_4) + (-0x14))) + (*(float *)((char*)(var_4) + (0x14)))) * 0.01803268f));
+        var_4 += 8;
+    } while (var_2 >= 0);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD590);
 
@@ -6099,7 +6130,26 @@ int func_003CF998(char *arg0) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF9D8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CFA98);
+#ifdef SKIP_ASM
+float func_003CFA98(float fparg0) {
+    float temp_f0;
+    float temp_f1;
+    float temp_f2;
+    float temp_f4;
+    float temp_f5;
+    float temp_f6;
+
+    temp_f0 = fparg0 * 0.5f;
+    temp_f1 = temp_f0 * -0.25f * fparg0;
+    temp_f2 = temp_f1 * -0.5f * fparg0;
+    temp_f4 = temp_f2 * -0.625f * fparg0;
+    temp_f5 = temp_f4 * -0.7f * fparg0;
+    temp_f6 = temp_f5 * -0.75f * fparg0;
+    return temp_f0 + 1.0f + temp_f1 + temp_f2 + temp_f4 + temp_f5 + temp_f6 + (temp_f6 * -0.7857f * fparg0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CFB38);
