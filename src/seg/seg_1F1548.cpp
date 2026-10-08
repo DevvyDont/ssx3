@@ -754,7 +754,27 @@ extern "C" void func_002F5148(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F5180);
+#ifdef SKIP_ASM
+extern "C" void cWorldLightMan_initLightCache(void *);
+struct cWorldPainterManArg;
+void *cWorldPainterMan_getQuery(void *, cWorldPainterManArg *);
+extern char D_004A5598;
+extern void *D_004A28A8;
+struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
+struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
+
+extern "C" void *func_002F5180(void *arg0, int arg1) {
+    new ((char*)arg0 + 0x10) A5180[8];
+    new ((char*)arg0 + 0x210) B5180[32];
+    *(int *)arg0 = arg1;
+    cWorldLightMan_initLightCache(arg0);
+    char *t = *(char **)(*(char **)((char*)D_004A28A8 + 0x84) + 0x10);
+    *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&D_004A5598);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F5230);
