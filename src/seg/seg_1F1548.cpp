@@ -813,7 +813,90 @@ extern "C" int *func_002F2588(int *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2598);
+#ifdef SKIP_ASM
+extern int D_004A3AFC;
+// NOTE: tunables are float members of global records; splat names each field separately.
+struct sTun_2598 {
+    float v;
+};
+extern sTun_2598 D_004A428C_2598 __asm__("D_004A428C");
+extern sTun_2598 D_004A4290_2598 __asm__("D_004A4290");
+extern sTun_2598 D_004A4294_2598 __asm__("D_004A4294");
+extern sTun_2598 D_004A429C_2598 __asm__("D_004A429C");
+extern sTun_2598 D_004A42CC_2598 __asm__("D_004A42CC");
+
+struct sV2_2598 {
+    float x, y;
+    sV2_2598() {}
+    sV2_2598(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sV4_2598 {
+    float x, y, z, w;
+    sV4_2598() {}
+    sV4_2598(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+extern sV4_2598 D_005046E0;
+extern sV4_2598 D_005046F0;
+extern sV2_2598 D_004A5960[]; // PORT: 8-byte object, declared unsized so it is not $gp-addressed
+
+struct sPart_2598 {
+    int active;
+    sV2_2598 pos;
+    sV2_2598 size;
+    sV2_2598 vel;
+    int age;
+    float life;
+    sV4_2598 color;
+    float angle;
+    float spin;
+};
+
+// PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
+static inline float randf_2598()
+{
+    D_004A3AFC = ((D_004A3AFC * 0x18FCD + 0xE9507C) & 0x7FFFFF) | 0x3F800000;
+    return *(float*)&D_004A3AFC - 1.0f;
+}
+
+static inline float randRange_2598(float lo, float hi)
+{
+    return lo + (hi - lo) * randf_2598();
+}
+
+static inline sV4_2598 operator*(const sV4_2598& a, float s)
+{
+    return sV4_2598(a.x * s, a.y * s, a.z * s, a.w * s);
+}
+
+static inline sV4_2598 operator+(const sV4_2598& a, const sV4_2598& b)
+{
+    return sV4_2598(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
+}
+
+extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range) __asm__("func_002F2598");
+extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range)
+{
+    float maxY = range->y;
+    float maxX = range->x;
+    float x = randRange_2598(D_004A4294_2598.v, maxX);
+    float v = x + randRange_2598(-D_004A429C_2598.v, D_004A429C_2598.v);
+    float y = (v >= D_004A4294_2598.v) ? (v <? maxY) : D_004A4294_2598.v; // PORT: g++ <? operator
+    p->age = 0;
+    p->life = randRange_2598(D_004A428C_2598.v, D_004A4290_2598.v);
+    p->active = 1;
+    p->size = sV2_2598(x, y);
+    p->pos = pos;
+    p->vel = D_004A5960[0];
+    p->angle = randf_2598() * 360.0f;
+    p->spin = randRange_2598(-D_004A42CC_2598.v, D_004A42CC_2598.v);
+    float t = randf_2598();
+    p->color = D_005046E0 * (1.0f - t) + D_005046F0 * t;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2810);
 
@@ -828,7 +911,111 @@ extern "C" void *func_002F2D60(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2D70);
+#ifdef SKIP_ASM
+extern int D_004A3AFC;
+// NOTE: tunables are float members of global records; splat names each field separately.
+struct sTun_2D70 {
+    float v;
+};
+extern sTun_2D70 D_004A42D8_2D70 __asm__("D_004A42D8");
+extern sTun_2D70 D_004A42DC_2D70 __asm__("D_004A42DC");
+extern sTun_2D70 D_004A42E0_2D70 __asm__("D_004A42E0");
+extern sTun_2D70 D_004A42E4_2D70 __asm__("D_004A42E4");
+extern sTun_2D70 D_004A42E8_2D70 __asm__("D_004A42E8");
+extern sTun_2D70 D_004A4318_2D70 __asm__("D_004A4318");
+
+struct sV2_2D70 {
+    float x, y;
+    sV2_2D70() {}
+    sV2_2D70(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sV4_2D70 {
+    float x, y, z, w;
+    sV4_2D70() {}
+    sV4_2D70(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+extern sV4_2D70 D_00504700;
+extern sV4_2D70 D_00504710;
+extern sV2_2D70 D_004A5960_2D70[] __asm__("D_004A5960"); // PORT: 8-byte object, declared unsized so it is not $gp-addressed
+
+struct sPart_2D70 {
+    int dead;
+    int active;
+    sV2_2D70 pos;
+    sV2_2D70 size;
+    sV2_2D70 vel;
+    int age;
+    float life;
+    sV4_2D70 color;
+    float angle;
+    float spin;
+    int f40;
+    int f44;
+    int f48;
+};
+
+// PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
+static inline float randf_2D70()
+{
+    D_004A3AFC = ((D_004A3AFC * 0x18FCD + 0xE9507C) & 0x7FFFFF) | 0x3F800000;
+    return *(float*)&D_004A3AFC - 1.0f;
+}
+
+static inline float randRange_2D70(float lo, float hi)
+{
+    return lo + (hi - lo) * randf_2D70();
+}
+
+static inline float randSym_2D70(const float s)
+{
+    return randRange_2D70(-s, s);
+}
+
+static inline float clamp_2D70(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo; // PORT: g++ <? operator
+}
+
+static inline sV4_2D70 operator*(const sV4_2D70& a, float s)
+{
+    return sV4_2D70(a.x * s, a.y * s, a.z * s, a.w * s);
+}
+
+static inline sV4_2D70 operator+(const sV4_2D70& a, const sV4_2D70& b)
+{
+    return sV4_2D70(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
+}
+
+extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __asm__("func_002F2D70");
+extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n)
+{
+    float x = randRange_2D70(D_004A42E0_2D70.v, D_004A42E4_2D70.v);
+    float v = x + randSym_2D70(D_004A42E8_2D70.v);
+    float y = clamp_2D70(v, D_004A42E0_2D70.v, D_004A42E4_2D70.v);
+    for (int i = 0; i < n; i++) {
+        x *= 0.699999988079071f;
+        y *= 0.699999988079071f;
+    }
+    p->age = 0;
+    p->life = randRange_2D70(D_004A42D8_2D70.v, D_004A42DC_2D70.v);
+    p->active = 1;
+    p->size = sV2_2D70(x, y);
+    p->pos = pos;
+    p->vel = D_004A5960_2D70[0];
+    float t = randf_2D70();
+    p->color = D_00504700 * (1.0f - t) + D_00504710 * t;
+    p->angle = randf_2D70() * 360.0f;
+    p->spin = randSym_2D70(D_004A4318_2D70.v);
+    p->f40 = 0;
+    p->f44 = 0;
+    p->f48 = 0;
+    p->dead = 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F3030);
 
