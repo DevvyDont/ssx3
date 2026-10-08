@@ -94,11 +94,317 @@ extern "C" float func_00100250(void* self, const sVec4_0250* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00100348);
+#ifdef SKIP_ASM
+struct sV4_0348
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+class cObj_0348 {
+public:
+    virtual void vm1();
+    virtual sV4_0348* GetDir();
+    virtual void v1();
+    virtual void v2();
+    virtual sV4_0348* GetPos();
+};
+
+extern sV4_0348 D_004FF160_v0348 __asm__("D_004FF160");
+extern "C" float func_0031C228(float);
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sV4_0348 Cross_0348(const sV4_0348& a, const sV4_0348& b)
+{
+    sV4_0348 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_0348 Sub_0348(const sV4_0348& a, const sV4_0348& b)
+{
+    sV4_0348 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_0348 Scale_0348(const sV4_0348& v, float s)
+{
+    sV4_0348 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_0348 Norm_0348(const sV4_0348& v)
+{
+    sV4_0348 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_0348(const sV4_0348& a, const sV4_0348& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_0348(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Atan2_0348(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            r += 3.1415927410125732f;
+        else
+            r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+static inline cObj_0348* Obj_0348(char* self) { return (cObj_0348*)(*(char**)(self + 0x18) + 0x6C0); }
+
+extern "C" float func_00100348_0348(char* self, sV4_0348* target) __asm__("func_00100348");
+extern "C" float func_00100348_0348(char* self, sV4_0348* target)
+{
+    sV4_0348 up = *(sV4_0348*)(*(char**)(self + 0x18) + 0x1C0);
+    if (up.z <= 0.0f)
+        up = D_004FF160_v0348;
+    sV4_0348 fwd = *Obj_0348(self)->GetDir();
+    sV4_0348 side = Cross_0348(fwd, up);
+    sV4_0348 d = Sub_0348(*target, *Obj_0348(self)->GetPos());
+    d.z = 0.0f;
+    d = Norm_0348(d);
+    d = Norm_0348(Sub_0348(d, Scale_0348(up, Dot_0348(d, up))));
+    float x = Dot_0348(d, fwd);
+    float y = Dot_0348(d, side);
+    float a = Atan2_0348(y, x);
+    float t = Abs_0348(a) * 6.289702415466309f;
+    if (t < 0.019999999552965164f) {
+        t = 0.0f;
+    } else {
+        if (t > 0.9800000190734863f)
+            t = 0.9800000190734863f;
+        if (a < 0.0f)
+            t = -t;
+    }
+    return t;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00100610);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00100680);
+#ifdef SKIP_ASM
+struct sV4_0680 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPad_0680 {
+    unsigned int pad0 : 17;
+    unsigned int b17 : 1;
+    unsigned int pad18 : 2;
+    int b20 : 6;
+    unsigned int pad26 : 6;
+    int w0 : 6;
+    int w6 : 6;
+};
+
+class cObj_0680;
+typedef void (cObj_0680::*Fn_0680)();
+extern "C" Fn_0680 D_0043CF20_0680[4] __asm__("D_0043CF20");
+
+class cAI_0680 {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual int Busy();
+};
+
+struct sRiders_0680 {
+    char pad[0x28];
+    char* riders[1];
+};
+
+struct sGame_0680 {
+    char pad[0xC];
+    sRiders_0680* list;
+};
+
+struct sWorld_0680 {
+    char pad[0x84];
+    sGame_0680* game;
+};
+
+extern sWorld_0680* D_004A28A8_0680 __asm__("D_004A28A8");
+
+extern "C" void func_00100610_0680(sV4_0680*, void*) __asm__("func_00100610");
+extern "C" float func_00100348_0680(void*, sV4_0680*) __asm__("func_00100348");
+extern "C" int func_0010BB18_0680(void*, float*, int*) __asm__("func_0010BB18");
+extern "C" int func_0010BBF8_0680(void*, int*) __asm__("func_0010BBF8");
+extern "C" void func_0010C140_0680(void*, void*) __asm__("func_0010C140");
+extern "C" void func_0010C0A8_0680(void*, void*) __asm__("func_0010C0A8");
+extern "C" int func_0010B980_0680(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("func_0010B980");
+extern "C" int func_0010BD10_0680(char* self, int* out) __asm__("func_0010BD10");
+extern "C" void func_00100680_0680(char* self, sPad_0680* pad) __asm__("func_00100680");
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_0680(const sV4_0680& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern "C" void func_00100680_0680(char* self, sPad_0680* pad)
+{
+    sV4_0680 v;
+    int x;
+    int y;
+    int below, o3, o4, o5, o6;
+    int z;
+    func_00100610_0680(&v, self);
+    pad->b20 = (int)(func_00100348_0680(self, &v) * 31.0f);
+    if (func_0010BB18_0680(self, (float*)(self + 0xDF0), &x)) {
+        float sp = *(float*)(self + 0xDF0);
+        float len = Len_0680(*(sV4_0680*)(*(char**)(self + 0x18) + 0x1E0));
+        if (sp + 138.88890075683594f < len) {
+            if (x)
+                pad->w0 = 0x1F;
+        } else if (len < sp - 138.88890075683594f) {
+            if (x)
+                func_0010C140_0680(self, pad);
+            else
+                func_0010C0A8_0680(self, pad);
+        }
+    } else if (func_0010BBF8_0680(self, &y)) {
+        float s = 1.0f;
+        if (y)
+            s = -1.0f;
+        int c = *(int*)(self + 0xE40);
+        if (c == 0) {
+            pad->w6 = (int)(-s * 31.0f);
+            *(int*)(self + 0xE40) = 60;
+        } else if (c > 0) {
+            *(int*)(self + 0xE40) = c - 1;
+            if (c - 1 <= 0)
+                *(int*)(self + 0xE40) = -1;
+            pad->w6 = (int)(-s * 31.0f);
+        } else {
+            pad->w6 = (int)(s * 31.0f);
+        }
+    } else {
+        *(int*)(self + 0xE40) = 0;
+        char* r = *(char**)(self + 0x18);
+        if (*(float*)(r + 0x2F8) >= 0.8999999761581421f && *(float*)(r + 0x2F0) > 0.0f && *(float*)(self + 0xDF8) > 50.0f)
+            pad->b17 = 1;
+        func_0010C0A8_0680(self, pad);
+    }
+    float* spd = (float*)(self + 0xDF0);
+    z = 0;
+    if (func_0010B980_0680(self, spd, &below, &o3, &o4, &o5, &o6)) {
+        *(int*)(self + 0xE70) = -1;
+        *(Fn_0680*)(self + 0xF44) = D_0043CF20_0680[0];
+        *(short*)(self + 0xF38) = 0;
+    } else if (func_0010BD10_0680(self, &z)) {
+        if (z) {
+            *(Fn_0680*)(self + 0xF44) = D_0043CF20_0680[3];
+            *(short*)(self + 0xF38) = 3;
+        } else if (!((cAI_0680*)(D_004A28A8_0680->game->list->riders[*(int*)((char*)spd + 0x80)] + 0x6C0))->Busy()) {
+            *(Fn_0680*)(self + 0xF44) = D_0043CF20_0680[2];
+            *(short*)(self + 0xF38) = 2;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_001009E0);
@@ -188,7 +494,187 @@ extern "C" void func_001009E0(char* self, sPad_09E0* pad)
 
 INCLUDE_ASM("seg/seg_1218", func_00100B90);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00100F88);
+#ifdef SKIP_ASM
+struct sV4_0F88 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPad_0F88 {
+    unsigned int pad0 : 20;
+    int b20 : 6;
+};
+
+struct sRec_0F88 {
+    int active;
+    int pad4;
+    float dist;
+    float angle;
+    char pad10[0x24 - 0x10];
+};
+
+class cObj_0F88;
+typedef void (cObj_0F88::*Fn_0F88)();
+extern "C" Fn_0F88 D_0043CF20_0F88[4] __asm__("D_0043CF20");
+
+class cAI_0F88 {
+public:
+    virtual void vm1();
+    virtual sV4_0F88* GetVel();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual int Ready();
+};
+
+class cRiderBase_0F88 {
+public:
+    char pad[0x6C0];
+};
+
+class cRider_0F88 : public cRiderBase_0F88, public cAI_0F88 {
+};
+
+struct sRiders_0F88 {
+    char pad[0x28];
+    cRider_0F88* riders[1];
+};
+
+struct sGame_0F88 {
+    char pad[0xC];
+    sRiders_0F88* list;
+};
+
+struct sWorld_0F88 {
+    char pad[0x84];
+    sGame_0F88* game;
+};
+
+struct sCtl_0F88 {
+    float speed;
+    char pad4[0x80 - 4];
+    int target;
+};
+
+extern sWorld_0F88* D_004A28A8_0F88 __asm__("D_004A28A8");
+
+extern "C" void func_00100610_0F88(sV4_0F88*, void*) __asm__("func_00100610");
+extern "C" float func_00100348_0F88(void*, sV4_0F88*) __asm__("func_00100348");
+extern "C" void func_0010C140_0F88(void*, void*) __asm__("func_0010C140");
+extern "C" void func_0010C0A8_0F88(void*, void*) __asm__("func_0010C0A8");
+extern "C" int func_0010B980_0F88(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("func_0010B980");
+extern "C" int func_0010BD10_0F88(char* self, int* out) __asm__("func_0010BD10");
+extern "C" float func_0031C228(float);
+extern "C" void func_00112A50(void*, int);
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_0F88(const sV4_0F88& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_0F88(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (float -> int -> float truncation).
+static inline float Trunc_0F88(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+static inline float Floor_0F88(float x)
+{
+    float t = Trunc_0F88(x);
+    if (x < t)
+        t -= 1.0f;
+    return t;
+}
+
+static inline sRec_0F88* Rec_0F88(char* self) { return &((sRec_0F88*)*(char**)(self + 0x18))[*(int*)(self + 0xE70)]; }
+
+extern "C" void func_00100F88(char* self, sPad_0F88* pad)
+{
+    sV4_0F88 v;
+    int below, o3, o4, o5, o6;
+    int z;
+    sCtl_0F88* ctl = (sCtl_0F88*)(self + 0xDF0);
+    sRec_0F88* rec = Rec_0F88(self);
+    cRider_0F88* tgt = D_004A28A8_0F88->game->list->riders[ctl->target];
+    float diff = rec->angle - *(float*)(*(char**)(self + 0x18) + 0x4CC);
+    float ang = diff - Floor_0F88(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+    float mySpd = Len_0F88(*(sV4_0F88*)(*(char**)(self + 0x18) + 0x1E0));
+    float hisSpd = Len_0F88(*tgt->GetVel());
+    float steer = 0.0f;
+    if (Abs_0F88(ang) > 1.5707964897155762f) {
+        func_00100610_0F88(&v, self);
+        steer = func_00100348_0F88(self, &v);
+        if (mySpd < hisSpd)
+            func_0010C140_0F88(self, pad);
+        else
+            func_0010C0A8_0F88(self, pad);
+    } else {
+        float d = Rec_0F88(self)->dist;
+        float lim;
+        if (d == 0.0f) {
+            lim = 1.5707963705062866f;
+        } else {
+            lim = func_0031C228(150.0f / d);
+            if (d < 0.0f)
+                lim += 3.1415927410125732f;
+        }
+        if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
+            func_00100610_0F88(&v, self);
+            steer = func_00100348_0F88(self, &v);
+            func_0010C0A8_0F88(self, pad);
+        } else if (tgt->Ready()) {
+            if (*(int*)((char*)tgt + 0xAB8) == *(int*)(*(char**)(self + 0x18) + 0xAB8))
+                func_00112A50(*(char**)(self + 0x18), 0);
+            func_00100610_0F88(&v, self);
+            steer = func_00100348_0F88(self, &v);
+            func_0010C0A8_0F88(self, pad);
+        }
+    }
+    pad->b20 = (int)(steer * 31.0f);
+    z = 0;
+    if (func_0010B980_0F88(self, (float*)(self + 0xDF0), &below, &o3, &o4, &o5, &o6)) {
+        *(int*)(self + 0xE70) = -1;
+        *(Fn_0F88*)(self + 0xF44) = D_0043CF20_0F88[0];
+        *(short*)(self + 0xF38) = 0;
+    } else if (!func_0010BD10_0F88(self, &z)) {
+        *(Fn_0F88*)(self + 0xF44) = D_0043CF20_0F88[1];
+        *(short*)(self + 0xF38) = 1;
+    } else if (z) {
+        *(Fn_0F88*)(self + 0xF44) = D_0043CF20_0F88[3];
+        *(short*)(self + 0xF38) = 3;
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00101310);
 
@@ -1416,11 +1902,564 @@ INCLUDE_ASM("seg/seg_1218", func_00107578);
 
 INCLUDE_ASM("seg/seg_1218", func_00107888);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00107E70);
+#ifdef SKIP_ASM
+struct sV4_7E70 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
+struct sInfo_7E70 {
+    sV4_7E70 pos;
+    sV4_7E70 dir;
+    sV4_7E70 normal;
+    float speed;
+} __attribute__((aligned(16)));
+
+struct sRec_7E70 {
+    int active;
+    int pad4;
+    float dist;
+    float angle;
+    char pad10[0x24 - 0x10];
+};
+
+class cAI_7E70 {
+public:
+    virtual void vm1();
+    virtual sV4_7E70* GetDir();
+    virtual void v1();
+    virtual void v2();
+    virtual sV4_7E70* GetPos();
+};
+
+int func_0011FEE8_7E70(void*) __asm__("func_0011FEE8__FPv");
+int func_0011FE98(void*);
+int AIrand();
+extern "C" int func_001231A8(void*);
+extern "C" void cAirPredictor_startLaunchIntoAir(void*, sV4_7E70*, sV4_7E70*, float);
+extern "C" void func_0010EB30_7E70(char*, int, int, int, sInfo_7E70*) __asm__("func_0010EB30");
+extern "C" void func_00108388_7E70(char*, sInfo_7E70*, int) __asm__("func_00108388");
+extern "C" void func_0010E468(void*, void*);
+extern "C" void func_0010E2E8(void*, void*);
+extern "C" void func_0010E3A8(void*, void*);
+extern "C" void func_0010E228(void*, void*);
+extern float D_004A4C84_7E70 __asm__("D_004A4C84");
+extern int D_005308D0_7E70[] __asm__("D_005308D0");
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_7E70(const sV4_7E70& a, const sV4_7E70& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_7E70(const sV4_7E70& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_7E70 Add_7E70(const sV4_7E70& a, const sV4_7E70& b)
+{
+    sV4_7E70 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddEq_7E70(sV4_7E70& a, const sV4_7E70& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_7E70 Sub_7E70(const sV4_7E70& a, const sV4_7E70& b)
+{
+    sV4_7E70 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_7E70 Scale_7E70(const sV4_7E70& v, float s)
+{
+    sV4_7E70 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_7E70 Norm_7E70(const sV4_7E70& v)
+{
+    sV4_7E70 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_7E70(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: `<?` is the g++ minimum operator (EE min.s).
+static inline float Clamp_7E70(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+
+static inline sV4_7E70 Get_7E70(char* p) { return *(sV4_7E70*)p; }
+
+extern "C" void func_00107E70(char* self, char* other, sV4_7E70* n, int flag, float speed)
+{
+    if (func_0011FEE8_7E70(self) == 10)
+        return;
+    float absSpd = Abs_7E70(speed);
+    float lim = 555.5555419921875f;
+    float s = Clamp_7E70(speed, -lim, lim);
+    sV4_7E70 imp = Scale_7E70(*n, s);
+    if (func_001231A8(self)) {
+        AddEq_7E70(*(sV4_7E70*)(self + 0x1E0),
+                   Sub_7E70(imp, Scale_7E70(*(sV4_7E70*)(self + 0x370), Dot_7E70(imp, *(sV4_7E70*)(self + 0x370)))));
+    } else {
+        AddEq_7E70(*(sV4_7E70*)(self + 0x1E0), imp);
+        if (func_0011FE98(self) == 1 || (func_0011FE98(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
+            cAI_7E70* ai = (cAI_7E70*)(self + 0x6C0);
+            sV4_7E70* pos = ai->GetPos();
+            cAirPredictor_startLaunchIntoAir(*(void**)(self + 0x788), pos, ai->GetDir(), *(float*)(self + 0x2E4));
+            if (Dot_7E70(*n, Get_7E70(self + 0x1C0)) * s > 0.0f)
+                absSpd = 0.0f;
+        }
+    }
+    if (func_0011FE98(self) == 2)
+        return;
+    if (func_0011FEE8_7E70(self) == 9)
+        return;
+    if (absSpd < 39.99532699584961f)
+        return;
+    float r = ((sRec_7E70*)self)[*(int*)(other + 0x86C)].dist;
+    sInfo_7E70 info;
+    info.pos = Add_7E70(*(sV4_7E70*)(self + 0x110), Scale_7E70(*n, r));
+    info.dir = Norm_7E70(*(sV4_7E70*)(self + 0x1E0));
+    info.normal = *n;
+    info.speed = s;
+    if ((D_005308D0_7E70[0] >> 5) & 1)
+        absSpd = 599.9739990234375f;
+    if (absSpd > 599.9739990234375f) {
+        float dz = Dot_7E70(Get_7E70(self + 0x160), *n);
+        float dy = Dot_7E70(Get_7E70(self + 0x170), *n);
+        float dx = Dot_7E70(Get_7E70(self + 0x180), *n);
+        int anim;
+        if (Abs_7E70(dz) < Abs_7E70(dy) && Abs_7E70(dx) < Abs_7E70(dy)) {
+            if (dy < 0.0f) {
+                unsigned int k;
+                if (Len_7E70(*(sV4_7E70*)(self + 0x1E0)) > D_004A4C84_7E70)
+                    k = (unsigned int)AIrand() % 6;
+                else
+                    k = (unsigned int)AIrand() % 3;
+                if (k == 0)
+                    anim = 0x14E;
+                else if (k == 1)
+                    anim = 0x14F;
+                else if (k == 2)
+                    anim = 0x151;
+                else if (k == 3)
+                    anim = 0x14D;
+                else
+                    anim = 0x150;
+            } else {
+                anim = (AIrand() & 1) == 0 ? 0x14A : 0x14B;
+            }
+        } else if (Abs_7E70(dz) < Abs_7E70(dx) && Abs_7E70(dy) < Abs_7E70(dx)) {
+            anim = 0x14B;
+        } else if (dz < 0.0f) {
+            anim = 0x149;
+        } else {
+            anim = 0x148;
+        }
+        func_0010EB30_7E70(self, anim, flag, 0, &info);
+        if (flag)
+            func_0010E468(self, other);
+        else
+            func_0010E2E8(self, other);
+    } else {
+        func_00108388_7E70(self, &info, 0);
+        if (flag)
+            func_0010E3A8(self, other);
+        else
+            func_0010E228(self, other);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00108388);
+#ifdef SKIP_ASM
+struct sV4_8388
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
+int func_0011FE98(void*);
+int func_0011FEE8_8388(void*) __asm__("func_0011FEE8__FPv");
+void func_0011FEC8_8388(void* self, int v) __asm__("func_0011FEC8__FPv");
+int AIrand();
+extern "C" void func_00131348(void*);
+extern "C" void cRiderAnimBase_play(void*, int, int, float);
+extern "C" void* func_0028B180();
+extern "C" void func_002A0E70(void*, void*, int);
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_8388(const sV4_8388& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_8388(const sV4_8388& a, const sV4_8388& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_8388(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline sV4_8388 Get_8388(char* p) { return *(sV4_8388*)p; }
+
+extern "C" void func_00108388(char* self, char* info, int flag)
+{
+    if (func_0011FE98(self) != 0 && func_0011FE98(self) != 4)
+        return;
+    if (func_0011FEE8_8388(self) == 1) {
+        func_00131348(*(char**)(self + 0x77C) + 0x1D0);
+    } else if (func_0011FEE8_8388(self) != 0 && func_0011FEE8_8388(self) != 2 && func_0011FEE8_8388(self) != 7) {
+        return;
+    }
+    int played = 0;
+    float d = Dot_8388(Get_8388(self + 0x1B0), *(sV4_8388*)(info + 0x20));
+    if (d > 0.7071067690849304f) {
+        cRiderAnimBase_play(*(void**)(self + 0x784), 0x37, 0, -1.0f);
+    } else if (d < -0.7071067690849304f) {
+        cRiderAnimBase_play(*(void**)(self + 0x784), 0x38, 0, -1.0f);
+    } else {
+        float side = Dot_8388(Get_8388(self + 0x1A0), *(sV4_8388*)(info + 0x20));
+        if (*(int*)(self + 0x320))
+            side = -side;
+        if (*(float*)(info + 0x30) < 1111.111083984375f && Len_8388(*(sV4_8388*)(self + 0x1E0)) > 1388.888916015625f &&
+            func_0011FE98(self) != 4) {
+            float a = *(float*)(self + 0x2DC);
+            if (Abs_8388(a) < 6.2831854820251465f) {
+                if (a < 0.0f)
+                    *(float*)(self + 0x2DC) += (int)((unsigned int)AIrand() % 3) * -3.1415927410125732f;
+                else if (a > 0.0f)
+                    *(float*)(self + 0x2DC) += (int)((unsigned int)AIrand() % 3) * 3.1415927410125732f;
+                else
+                    *(float*)(self + 0x2DC) += ((int)((unsigned int)AIrand() % 5) - 2) * 3.1415927410125732f;
+            }
+            cRiderAnimBase_play(*(void**)(self + 0x784), side < 0.0f ? 0x3A : 0x3C, 0, -1.0f);
+            played = 1;
+        } else {
+            cRiderAnimBase_play(*(void**)(self + 0x784), side < 0.0f ? 0x39 : 0x3B, 0, -1.0f);
+        }
+    }
+    if (flag)
+        func_002A0E70(func_0028B180(), self, played);
+    func_0011FEC8_8388(self, 3);
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001086B8);
+#ifdef SKIP_ASM
+struct sV4_86B8
+{
+    float x, y, z, w;
+    sV4_86B8() {}
+    sV4_86B8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct sNode_86B8 {
+    sV4_86B8 pos;
+    float qx, qy, qz, qw;
+};
+
+struct sPath_86B8 {
+    char pad[0x2C];
+    sNode_86B8* nodes;
+};
+
+struct sHit_86B8 {
+    sV4_86B8 pos;
+    char pad[0x80 - 0x10];
+};
+
+extern "C" int func_00334680_86B8(void*, sV4_86B8*, sV4_86B8*, int, float) __asm__("func_00334680");
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_86B8 Add_86B8(const sV4_86B8& a, const sV4_86B8& b)
+{
+    sV4_86B8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_86B8 Sub_86B8(const sV4_86B8& a, const sV4_86B8& b)
+{
+    sV4_86B8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_86B8 Scale_86B8(const sV4_86B8& v, float s)
+{
+    sV4_86B8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline sV4_86B8 Div_86B8(const sV4_86B8& v, float s)
+{
+    sV4_86B8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_86B8(const sV4_86B8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_86B8(const sV4_86B8& a, const sV4_86B8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: `<?` is the g++ minimum operator (EE min.s).
+static inline float Clamp_86B8(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+
+static inline float Lerp_86B8(float a, float b, float t)
+{
+    return t * a + (1.0f - t) * b;
+}
+
+static inline sV4_86B8 Fwd_86B8(const sNode_86B8* n)
+{
+    return sV4_86B8(1.0f - (n->qy * n->qy + n->qz * n->qz) * 2.0f,
+                    (n->qx * n->qy + n->qw * n->qz) * 2.0f,
+                    (n->qx * n->qz - n->qw * n->qy) * 2.0f,
+                    0.0f);
+}
+
+extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir) __asm__("func_001086B8");
+extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir)
+{
+    sNode_86B8* n = &(*(sPath_86B8**)(self + 0x780))->nodes[*(int*)(self + 0x8A0)];
+    const sV4_86B8& fwd = Fwd_86B8(n);
+    sV4_86B8 pos = Add_86B8(n->pos, *(sV4_86B8*)(self + 0x9D0));
+    float t = *(float*)(self + 0x25C);
+    float nearR = Lerp_86B8(50.0f, 30.0f, t);
+    float farR;
+    if (!*(int*)(self + 0x330))
+        farR = Lerp_86B8(170.0f, 100.0f, t);
+    else
+        farR = Lerp_86B8(170.0f, 50.0f, t);
+    float proj = Dot_86B8(fwd, Sub_86B8(*tgt, pos));
+    float lo = nearR - farR;
+    float hi = farR - nearR;
+    sV4_86B8 d = Sub_86B8(Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(proj, lo, hi))), *tgt);
+    if (Len_86B8(d) <= nearR)
+        return 1;
+    float dd = Dot_86B8(*dir, fwd);
+    float den = 1.0f - dd * dd;
+    if (den < 0.0010000000474974513f)
+        return 0;
+    sV4_86B8 b = Div_86B8(Sub_86B8(pos, *tgt), den);
+    float u = Dot_86B8(b, Sub_86B8(Scale_86B8(*dir, dd), fwd));
+    sV4_86B8 p = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(u, lo, hi)));
+    sHit_86B8 hit;
+    if (!func_00334680_86B8(*(void**)(self + 0x860), &p, &hit.pos, 1, 300.0f))
+        return 0;
+    d = Sub_86B8(p, hit.pos);
+    return Len_86B8(d) <= nearR;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00108A48);
@@ -1642,7 +2681,127 @@ extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010AA70);
+#ifdef SKIP_ASM
+struct sV4_AA70
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRec_AA70 {
+    int type;
+    int flags;
+    float a;
+    float b;
+};
+
+class cTrack_AA70 {
+public:
+    char pad[0x34];
+    virtual int Query(sRec_AA70* buf, int max, float x, float y);
+};
+
+struct sPad_AA70 {
+    unsigned int pad0 : 13;
+    unsigned int b13 : 1;
+    unsigned int b14 : 1;
+    int b15 : 6;
+    int b21 : 6;
+    unsigned int pad27 : 5;
+    int w0 : 6;
+};
+
+extern "C" sV4_AA70 func_0026AB20_AA70(cTrack_AA70*, int, float) __asm__("func_0026AB20");
+extern "C" float func_00100348_AA70(void*, sV4_AA70*) __asm__("func_00100348");
+
+// PORT: PS2-only VU0 inline asm (vector length via vsqrt).
+static inline float Len_AA70(const sV4_AA70& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_AA70 Sub_AA70(const sV4_AA70& a, const sV4_AA70& b)
+{
+    sV4_AA70 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_AA70 Scale_AA70(const sV4_AA70& v, float s)
+{
+    sV4_AA70 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+extern "C" void func_0010AA70(char* self, sPad_AA70* pad)
+{
+    sRec_AA70 buf[12];
+    char* rider = *(char**)(self + 0x18);
+    cTrack_AA70* trk = *(cTrack_AA70**)(rider + 0xAB8);
+    int n = trk->Query(buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
+    int sel = -1;
+    if (Len_AA70(*(sV4_AA70*)(*(char**)(self + 0x18) + 0x1E0)) < *(float*)(self + 0xDF0) - 138.88890075683594f)
+        pad->b14 = 1;
+    if (*(int*)(self + 0xE1C)) {
+        sV4_AA70 a = Sub_AA70(*(sV4_AA70*)(self + 0xE60), *(sV4_AA70*)(self + 0xE50));
+        sV4_AA70 b = Sub_AA70(*(sV4_AA70*)(*(char**)(self + 0x18) + 0x110), *(sV4_AA70*)(self + 0xE50));
+        if (Len_AA70(b) < Len_AA70(a) - 50.0f)
+            pad->b13 = 1;
+        return;
+    }
+    for (int i = 0; i < n; i++) {
+        if (buf[i].type == 0x10) {
+            sel = i;
+            pad->b13 = 1;
+            break;
+        }
+    }
+    float* ctl = (float*)(self + 0xDF0);
+    if (sel != -1) {
+        char* r = *(char**)(self + 0x18);
+        sV4_AA70 half = Sub_AA70(*(sV4_AA70*)(r + 0x490), *(sV4_AA70*)(r + 0x110));
+        half = Scale_AA70(half, 0.5f);
+        sV4_AA70 pos = func_0026AB20_AA70(trk, 0, buf[sel].b);
+        sV4_AA70 d = Sub_AA70(pos, half);
+        pad->w0 = (int)(func_00100348_AA70(self, &d) * 31.0f);
+    }
+    pad->b15 = (int)(ctl[0x12] * 31.0f);
+    pad->b21 = (int)(ctl[0x13] * 31.0f);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_0010AD78);
