@@ -53,6 +53,17 @@ UNIT_CFLAGS = {
     "ealib/seg_2B4578": "-G0",
     "ealib/seg_2DCAE8": "-G0",
 }
+# Fork-only: per-unit compiler. EA's embedded $gp module (ealib/seg_2D7498, 0x3D6498-0x3DBAE8) was built with an
+# older SN build, ee-gcc 2.95.3-114 (its non-leaf functions save ra with sq; 107 and 114 reproduce all 48 landed
+# functions plus the sq-ra prologues, 136 does not). Local copy from the decomp.me PS2 compiler bundle; if it is
+# missing the unit falls back to the default compiler (and those functions just don't match).
+UNIT_CC = {
+    "ealib/seg_2D7498": f"{TOOLS_DIR}/cc/eegcc-2.95.3-114",
+}
+for _u, _d in list(UNIT_CC.items()):
+    if not os.path.isfile(f"{_d}/bin/ee-gcc2953.exe"):
+        print(f"warning: {_d} missing; {_u} builds with the default compiler")
+        del UNIT_CC[_u]
 COMMON_CXXFLAGS = ""
 
 # splat's generated INCLUDE_ASM macro emits `.include "FOLDER/NAME.s"` relative
@@ -292,6 +303,12 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
+        "cc_unit",
+        description="cc $in ($ccdir)",
+        command=f"{COMPILE_C_RULE.replace(CC_DIR, '$ccdir')} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
+    ninja.rule(
         "cpp",
         description="cpp $in",
         command=f"{COMPILE_CXX_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
@@ -353,14 +370,15 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             unit_flags = UNIT_CFLAGS.get(seg.name, "")
+            task, tvars = ("cc_unit", {"ccdir": UNIT_CC[seg.name]}) if seg.name in UNIT_CC else ("cc", None)
             if dual_objects:
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry,
-                      extra_flags=unit_flags or None)
+                build(entry.object_path, entry.src_paths, task, out_dir="obj/target", collect_objdiff=True, orig_entry=entry,
+                      extra_flags=unit_flags or None, variables=tvars)
                 flags, inc = current_c_flags(entry)
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current",
-                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc)
+                build(entry.object_path, entry.src_paths, task, out_dir="obj/current",
+                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc, variables=tvars)
             else:
-                build(entry.object_path, entry.src_paths, "cc", extra_flags=unit_flags or None)
+                build(entry.object_path, entry.src_paths, task, extra_flags=unit_flags or None, variables=tvars)
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
