@@ -1,24 +1,732 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", checkActiveNode);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern char *D_004A3DD8_AE38 __asm__("D_004A3DD8");
+extern char D_00489618_AE38[] __asm__("D_00489618");
+extern char D_00489628_AE38[] __asm__("D_00489628");
+extern char D_00489638_AE38[] __asm__("D_00489638");
+extern char D_00489648_AE38[] __asm__("D_00489648");
+extern "C" void func_003578A8_AE38(void*, int, void*, void*, void*) __asm__("func_003578A8");
+extern "C" void func_00351B40_AE38(void*, int, void*, void*, int, void*) __asm__("func_00351B40");
+extern "C" void func_00342C08_AE38(void*, int, void*, void*, void*) __asm__("func_00342C08");
+extern "C" void cDeadFadeNode_cDeadFadeNode_AE38(void*, int, void*, void*, void*) __asm__("cDeadFadeNode_cDeadFadeNode");
+struct N_AE38 { int p0, p1, p2; virtual ~N_AE38(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37(); };
+extern "C" int checkActiveNode(void *a, int type, void *buf) {
+    N_AE38 *n = (N_AE38*)a;
+    if (n->v10(9) || n->v10(6) || n->v10(22))
+        return 1;
+    if (n->v10(type)) {
+        n->v37();
+        return 1;
+    }
+    char *o = *(char**)((char*)n + 0x18);
+    switch (type) {
+    case 13:
+        *(int*)(o + 0xC) = 0;
+        func_003578A8_AE38(cMemMan_alloc(0x2C, D_00489618_AE38, 0x20000000, 0), 1, o, buf, n);
+        return -1;
+    case 11:
+        *(int*)(o + 0xC) = 0;
+        func_00351B40_AE38(cMemMan_alloc(0x6C0, D_00489628_AE38, 0x20000000, 0), 1, o, buf, *(int*)(D_004A3DD8_AE38 + 0x294), n);
+        return -1;
+    case 0:
+        *(int*)(o + 0xC) = 0;
+        func_00342C08_AE38(cMemMan_alloc(0x34, D_00489638_AE38, 0x20000000, 0), 1, o, buf, n);
+        return -1;
+    case 22:
+        *(int*)(o + 0xC) = 0;
+        cDeadFadeNode_cDeadFadeNode_AE38(cMemMan_alloc(0x3C, D_00489648_AE38, 0x20000000, 0), 1, o, buf, n);
+        return -1;
+    }
+    delete n;
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB060);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_B060 __asm__("D_004A3DD8");
+extern char **D_004A47B8_B060 __asm__("D_004A47B8");
+static inline char *refToPtr_B060(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_B060(unsigned i) { if (i == 0) return 0; return refToPtr_B060(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00359228_B060(void*, int, void*, void*) __asm__("func_00359228");
+extern char D_00489658_B060[] __asm__("D_00489658");
+struct V3_B060 { float x, y, z; };
+extern V3_B060 D_004C9098_B060 __asm__("D_004C9098");
+struct Tag_B060 { char c; Tag_B060() {} Tag_B060(const Tag_B060 &o) : c(o.c) {} };
+extern unsigned D_B060[] __asm__("D_004FB390");
+extern int D_004A55C0;
+extern const int D_00445E70[];
+extern "C" void* func_003E6574_B060(void*, void*, int) __asm__("func_003E6574");
+struct Ent_B060 { int idx; int val; int pad; int type; };
+extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
+    if (D_004A55C0 == 0) {
+        D_B060[0] = 0xFFFFFFFF;
+        ((int*)D_B060)[1] = 1;
+        ((int*)D_B060)[2] = 0;
+        *(float*)&D_B060[3] = -1.0f;
+        *(float*)&D_B060[4] = -1.0f;
+        *(float*)&D_B060[5] = 30.0f;
+        ((int*)D_B060)[6] = 0;
+        *(float*)&D_B060[7] = -1.0f;
+        ((int*)D_B060)[8] = 0;
+        ((int*)D_B060)[9] = 0;
+        D_004A55C0 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_B060*)((char*)D_B060 + 40)) = Tag_B060((*(Tag_B060*)((char*)D_B060 + 40)));
+    }
+    unsigned buf64[11];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_B060(buf, D_B060, 44);
+    Ent_B060 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445E70[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_B060 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_B060 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_B060(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_B060;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 2, buf))
+        return D_004C9098_B060;
+    func_00359228_B060(cMemMan_alloc(0x70, D_00489658_B060, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_B060;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB270);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_B270 __asm__("D_004A3DD8");
+extern char **D_004A47B8_B270 __asm__("D_004A47B8");
+static inline char *refToPtr_B270(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_B270(unsigned i) { if (i == 0) return 0; return refToPtr_B270(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00358C80_B270(void*, int, void*, void*) __asm__("func_00358C80");
+extern char D_00489668_B270[] __asm__("D_00489668");
+struct V3_B270 { float x, y, z; };
+extern V3_B270 D_004C9098_B270 __asm__("D_004C9098");
+struct Tag_B270 { char c; Tag_B270() {} Tag_B270(const Tag_B270 &o) : c(o.c) {} };
+extern unsigned D_B270[] __asm__("D_004FB3C0");
+extern int D_004A55C4;
+extern const int D_00445E98[];
+extern "C" void* func_003E6574_B270(void*, void*, int) __asm__("func_003E6574");
+struct Ent_B270 { int idx; int val; int pad; int type; };
+extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
+    if (D_004A55C4 == 0) {
+        D_B270[0] = 0xFFFFFFFF;
+        ((int*)D_B270)[1] = 1;
+        ((int*)D_B270)[2] = 0;
+        *(float*)&D_B270[3] = -1.0f;
+        *(float*)&D_B270[4] = 30.0f;
+        *(float*)&D_B270[5] = 30.0f;
+        ((int*)D_B270)[6] = 0;
+        *(float*)&D_B270[7] = -1.0f;
+        ((int*)D_B270)[8] = 0;
+        ((int*)D_B270)[9] = 0;
+        *(float*)&D_B270[10] = 31.0f;
+        *(float*)&D_B270[11] = -1.0f;
+        *(float*)&D_B270[12] = 30.0f;
+        ((int*)D_B270)[13] = 0;
+        D_004A55C4 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_B270*)((char*)D_B270 + 56)) = Tag_B270((*(Tag_B270*)((char*)D_B270 + 56)));
+    }
+    unsigned buf64[15];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_B270(buf, D_B270, 60);
+    Ent_B270 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445E98[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_B270 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_B270 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_B270(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_B270;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 3, buf))
+        return D_004C9098_B270;
+    func_00358C80_B270(cMemMan_alloc(0x88, D_00489668_B270, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_B270;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB498);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_B498 __asm__("D_004A3DD8");
+extern char **D_004A47B8_B498 __asm__("D_004A47B8");
+static inline char *refToPtr_B498(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_B498(unsigned i) { if (i == 0) return 0; return refToPtr_B498(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_003421A0_B498(void*, int, void*, void*) __asm__("func_003421A0");
+extern char D_00489678_B498[] __asm__("D_00489678");
+struct V3_B498 { float x, y, z; };
+extern V3_B498 D_004C9098_B498 __asm__("D_004C9098");
+struct Tag_B498 { char c; Tag_B498() {} Tag_B498(const Tag_B498 &o) : c(o.c) {} };
+extern unsigned D_B498[] __asm__("D_004FB400");
+extern int D_004A55C8;
+extern const int D_00445ED0[];
+extern "C" void* func_003E6574_B498(void*, void*, int) __asm__("func_003E6574");
+struct Ent_B498 { int idx; int val; int pad; int type; };
+extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
+    if (D_004A55C8 == 0) {
+        D_B498[0] = 0xFFFFFFFF;
+        *(float*)&D_B498[1] = 0.6000000238418579f;
+        ((int*)D_B498)[2] = 0;
+        *(float*)&D_B498[3] = 60.0f;
+        *(float*)&D_B498[4] = 0.019999999552965164f;
+        *(float*)&D_B498[5] = -10.0f;
+        *(float*)&D_B498[6] = 0.6000000238418579f;
+        ((int*)D_B498)[7] = 0;
+        *(float*)&D_B498[8] = -1.0f;
+        *(float*)&D_B498[9] = -1.0f;
+        D_004A55C8 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_B498*)((char*)D_B498 + 40)) = Tag_B498((*(Tag_B498*)((char*)D_B498 + 40)));
+    }
+    unsigned buf64[11];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_B498(buf, D_B498, 44);
+    Ent_B498 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445ED0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_B498 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_B498 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_B498(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_B498;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 4, buf))
+        return D_004C9098_B498;
+    func_003421A0_B498(cMemMan_alloc(0x80, D_00489678_B498, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_B498;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB6B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_B6B8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_B6B8 __asm__("D_004A47B8");
+static inline char *refToPtr_B6B8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_B6B8(unsigned i) { if (i == 0) return 0; return refToPtr_B6B8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00343010_B6B8(void*, int, void*, void*) __asm__("func_00343010");
+extern char D_00489688_B6B8[] __asm__("D_00489688");
+struct V3_B6B8 { float x, y, z; };
+extern V3_B6B8 D_004C9098_B6B8 __asm__("D_004C9098");
+struct Tag_B6B8 { char c; Tag_B6B8() {} Tag_B6B8(const Tag_B6B8 &o) : c(o.c) {} };
+extern unsigned D_B6B8[] __asm__("D_004FB430");
+extern int D_004A55CC;
+extern const int D_00445EF8[];
+extern "C" void* func_003E6574_B6B8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_B6B8 { int idx; int val; int pad; int type; };
+extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
+    if (D_004A55CC == 0) {
+        D_B6B8[0] = 0xFFFFFFFF;
+        *(float*)&D_B6B8[1] = 100.0f;
+        float z = 0.0f;
+        *(float*)&D_B6B8[2] = z;
+        *(float*)&D_B6B8[3] = z;
+        ((int*)D_B6B8)[4] = 0;
+        ((int*)D_B6B8)[5] = 0;
+        ((int*)D_B6B8)[6] = 0;
+        ((int*)D_B6B8)[7] = 0;
+        ((int*)D_B6B8)[8] = 0;
+        ((int*)D_B6B8)[9] = 0;
+        ((int*)D_B6B8)[10] = 0;
+        ((int*)D_B6B8)[11] = 0;
+        D_004A55CC = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_B6B8*)((char*)D_B6B8 + 48)) = Tag_B6B8((*(Tag_B6B8*)((char*)D_B6B8 + 48)));
+    }
+    unsigned buf64[13];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_B6B8(buf, D_B6B8, 52);
+    Ent_B6B8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445EF8[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_B6B8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_B6B8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_B6B8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_B6B8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 15, buf))
+        return D_004C9098_B6B8;
+    func_00343010_B6B8(cMemMan_alloc(0x48, D_00489688_B6B8, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_B6B8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB8D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_B8D0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_B8D0 __asm__("D_004A47B8");
+static inline char *refToPtr_B8D0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_B8D0(unsigned i) { if (i == 0) return 0; return refToPtr_B8D0(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00343768_B8D0(void*, int, void*, void*) __asm__("func_00343768");
+extern char D_004A3BE8_B8D0[] __asm__("D_004A3BE8");
+struct V3_B8D0 { float x, y, z; };
+extern V3_B8D0 D_004C9098_B8D0 __asm__("D_004C9098");
+struct Tag_B8D0 { char c; Tag_B8D0() {} Tag_B8D0(const Tag_B8D0 &o) : c(o.c) {} };
+extern unsigned D_B8D0[] __asm__("D_004FB468");
+extern int D_004A55D0;
+extern int D_004A3BE0_B8D0[2] __asm__("D_004A3BE0");
+extern "C" void* func_003E6574_B8D0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_B8D0 { int idx; int val; int pad; int type; };
+extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
+    if (D_004A55D0 == 0) {
+        D_B8D0[0] = 0xFFFFFFFF;
+        ((int*)D_B8D0)[1] = 3;
+        D_004A55D0 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_B8D0*)((char*)D_B8D0 + 8)) = Tag_B8D0((*(Tag_B8D0*)((char*)D_B8D0 + 8)));
+    }
+    unsigned buf64[3];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_B8D0(buf, D_B8D0, 12);
+    Ent_B8D0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004A3BE0_B8D0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_B8D0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_B8D0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_B8D0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_B8D0;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 7, buf))
+        return D_004C9098_B8D0;
+    func_00343768_B8D0(cMemMan_alloc(0x24, D_004A3BE8_B8D0, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_B8D0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FBAB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_BAB0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_BAB0 __asm__("D_004A47B8");
+static inline char *refToPtr_BAB0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_BAB0(unsigned i) { if (i == 0) return 0; return refToPtr_BAB0(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_0034EC58_BAB0(void*, int, void*, void*) __asm__("func_0034EC58");
+extern char D_00489698_BAB0[] __asm__("D_00489698");
+struct V3_BAB0 { float x, y, z; };
+extern V3_BAB0 D_004C9098_BAB0 __asm__("D_004C9098");
+struct Tag_BAB0 { char c; Tag_BAB0() {} Tag_BAB0(const Tag_BAB0 &o) : c(o.c) {} };
+extern unsigned D_BAB0[] __asm__("D_004FB478");
+extern int D_004A55D4;
+extern const int D_00445F28[];
+extern "C" void* func_003E6574_BAB0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_BAB0 { int idx; int val; int pad; int type; };
+extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
+    if (D_004A55D4 == 0) {
+        D_BAB0[0] = 0xFFFFFFFF;
+        *(float*)&D_BAB0[1] = 10.0f;
+        *(float*)&D_BAB0[2] = 10.0f;
+        *(float*)&D_BAB0[3] = 40.0f;
+        *(float*)&D_BAB0[4] = 10.0f;
+        *(float*)&D_BAB0[5] = 0.20000000298023224f;
+        *(float*)&D_BAB0[6] = 10.0f;
+        D_004A55D4 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_BAB0*)((char*)D_BAB0 + 28)) = Tag_BAB0((*(Tag_BAB0*)((char*)D_BAB0 + 28)));
+    }
+    unsigned buf64[8];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_BAB0(buf, D_BAB0, 32);
+    Ent_BAB0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445F28[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_BAB0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_BAB0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_BAB0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_BAB0;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 14, buf))
+        return D_004C9098_BAB0;
+    func_0034EC58_BAB0(cMemMan_alloc(0x7C, D_00489698_BAB0, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_BAB0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FBCB8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_BCB8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_BCB8 __asm__("D_004A47B8");
+static inline char *refToPtr_BCB8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_BCB8(unsigned i) { if (i == 0) return 0; return refToPtr_BCB8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00341AA0_BCB8(void*, int, int, void*, void*) __asm__("func_00341AA0");
+extern char D_004896A8_BCB8[] __asm__("D_004896A8");
+struct V3_BCB8 { float x, y, z; };
+extern V3_BCB8 D_004C9098_BCB8 __asm__("D_004C9098");
+struct Tag_BCB8 { char c; Tag_BCB8() {} Tag_BCB8(const Tag_BCB8 &o) : c(o.c) {} };
+extern unsigned D_BCB8[] __asm__("D_004FB498");
+extern int D_004A55D8;
+extern const int D_00445F48[];
+extern "C" void* func_003E6574_BCB8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_BCB8 { int idx; int val; int pad; int type; };
+extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
+    if (D_004A55D8 == 0) {
+        D_BCB8[0] = 0xFFFFFFFF;
+        ((int*)D_BCB8)[1] = 1;
+        ((int*)D_BCB8)[2] = 0;
+        *(float*)&D_BCB8[3] = -1.0f;
+        *(float*)&D_BCB8[4] = -1.0f;
+        *(float*)&D_BCB8[5] = 30.0f;
+        ((int*)D_BCB8)[6] = 0;
+        *(float*)&D_BCB8[7] = -1.0f;
+        ((int*)D_BCB8)[8] = 0;
+        ((int*)D_BCB8)[9] = 0;
+        D_004A55D8 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_BCB8*)((char*)D_BCB8 + 40)) = Tag_BCB8((*(Tag_BCB8*)((char*)D_BCB8 + 40)));
+    }
+    unsigned buf64[11];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_BCB8(buf, D_BCB8, 44);
+    Ent_BCB8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445F48[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_BCB8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_BCB8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_BCB8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_BCB8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 1, buf))
+        return D_004C9098_BCB8;
+    func_00341AA0_BCB8(cMemMan_alloc(0x6C, D_004896A8_BCB8, 0x20000000, 0), 1, 1, obj, buf);
+    return D_004C9098_BCB8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FBEC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_BEC8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_BEC8 __asm__("D_004A47B8");
+static inline char *refToPtr_BEC8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_BEC8(unsigned i) { if (i == 0) return 0; return refToPtr_BEC8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00341388_BEC8(void*, int, int, void*, void*) __asm__("func_00341388");
+extern char D_004A3BF0_BEC8[] __asm__("D_004A3BF0");
+struct V3_BEC8 { float x, y, z; };
+extern V3_BEC8 D_004C9098_BEC8 __asm__("D_004C9098");
+struct Tag_BEC8 { char c; Tag_BEC8() {} Tag_BEC8(const Tag_BEC8 &o) : c(o.c) {} };
+extern unsigned D_BEC8[] __asm__("D_004FB4C8");
+extern int D_004A55DC;
+extern const int D_00445F70[];
+extern "C" void* func_003E6574_BEC8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_BEC8 { int idx; int val; int pad; int type; };
+extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
+    if (D_004A55DC == 0) {
+        D_BEC8[0] = 0xFFFFFFFF;
+        ((int*)D_BEC8)[1] = 0;
+        *(float*)&D_BEC8[2] = 1.0f;
+        float z = 0.0f;
+        *(float*)&D_BEC8[3] = z;
+        *(float*)&D_BEC8[4] = 1.0f;
+        *(float*)&D_BEC8[5] = z;
+        *(float*)&D_BEC8[6] = 1.0f;
+        *(float*)&D_BEC8[7] = z;
+        D_004A55DC = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_BEC8*)((char*)D_BEC8 + 32)) = Tag_BEC8((*(Tag_BEC8*)((char*)D_BEC8 + 32)));
+    }
+    unsigned buf64[9];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_BEC8(buf, D_BEC8, 36);
+    Ent_BEC8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445F70[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_BEC8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_BEC8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_BEC8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_BEC8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 8, buf))
+        return D_004C9098_BEC8;
+    func_00341388_BEC8(cMemMan_alloc(0x50, D_004A3BF0_BEC8, 0x20000000, 0), 1, 8, obj, buf);
+    return D_004C9098_BEC8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC0D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_C0D0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_C0D0 __asm__("D_004A47B8");
+static inline char *refToPtr_C0D0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_C0D0(unsigned i) { if (i == 0) return 0; return refToPtr_C0D0(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00356DB0_C0D0(void*, int, void*, int, bool) __asm__("func_00356DB0");
+extern char D_004A3BF8_C0D0[] __asm__("D_004A3BF8");
+struct V3_C0D0 { float x, y, z; };
+extern V3_C0D0 D_004C9098_C0D0 __asm__("D_004C9098");
+struct Tag_C0D0 { char c; Tag_C0D0() {} Tag_C0D0(const Tag_C0D0 &o) : c(o.c) {} };
+extern unsigned D_C0D0[] __asm__("D_004FB4F0");
+extern int D_004A55E0;
+extern const int D_00445F90[];
+extern "C" void* func_003E6574_C0D0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_C0D0 { int idx; int val; int pad; int type; };
+extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
+    if (D_004A55E0 == 0) {
+        D_C0D0[0] = 0xFFFFFFFF;
+        ((int*)D_C0D0)[1] = 0;
+        ((int*)D_C0D0)[2] = 0;
+        D_004A55E0 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_C0D0*)((char*)D_C0D0 + 12)) = Tag_C0D0((*(Tag_C0D0*)((char*)D_C0D0 + 12)));
+    }
+    unsigned buf64[4];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_C0D0(buf, D_C0D0, 16);
+    Ent_C0D0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445F90[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_C0D0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_C0D0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_C0D0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_C0D0;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 17, buf))
+        return D_004C9098_C0D0;
+    func_00356DB0_C0D0(cMemMan_alloc(0x2C, D_004A3BF8_C0D0, 0x20000000, 0), 1, obj, buf[1], buf[2] != 0);
+    return D_004C9098_C0D0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC2C0);
@@ -141,33 +849,1123 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC5D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_C5D8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_C5D8 __asm__("D_004A47B8");
+static inline char *refToPtr_C5D8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_C5D8(unsigned i) { if (i == 0) return 0; return refToPtr_C5D8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void cDeadFadeNode_cDeadFadeNode_C5D8(void*, int, void*, void*, int) __asm__("cDeadFadeNode_cDeadFadeNode");
+extern char D_004896D8_C5D8[] __asm__("D_004896D8");
+struct V3_C5D8 { float x, y, z; };
+extern V3_C5D8 D_004C9098_C5D8 __asm__("D_004C9098");
+struct Tag_C5D8 { char c; Tag_C5D8() {} Tag_C5D8(const Tag_C5D8 &o) : c(o.c) {} };
+extern unsigned D_C5D8[] __asm__("D_004FB510");
+extern int D_004A55E8;
+extern const int D_00445FA0[];
+extern "C" void* func_003E6574_C5D8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_C5D8 { int idx; int val; int pad; int type; };
+extern "C" V3_C5D8 func_002FC5D8(int n, Ent_C5D8 *e) {
+    if (D_004A55E8 == 0) {
+        D_C5D8[0] = 0xFFFFFFFF;
+        ((int*)D_C5D8)[1] = 0;
+        *(float*)&D_C5D8[2] = 2.0f;
+        *(float*)&D_C5D8[3] = 25.0f;
+        D_004A55E8 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_C5D8*)((char*)D_C5D8 + 16)) = Tag_C5D8((*(Tag_C5D8*)((char*)D_C5D8 + 16)));
+    }
+    unsigned buf64[5];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_C5D8(buf, D_C5D8, 20);
+    Ent_C5D8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445FA0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_C5D8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_C5D8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_C5D8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_C5D8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 22, buf))
+        return D_004C9098_C5D8;
+    cDeadFadeNode_cDeadFadeNode_C5D8(cMemMan_alloc(0x3C, D_004896D8_C5D8, 0x20000000, 0), 1, obj, buf, 0);
+    return D_004C9098_C5D8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC7D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_C7D0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_C7D0 __asm__("D_004A47B8");
+static inline char *refToPtr_C7D0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_C7D0(unsigned i) { if (i == 0) return 0; return refToPtr_C7D0(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00342C08_C7D0(void*, int, void*, void*, int) __asm__("func_00342C08");
+extern char D_004896E8_C7D0[] __asm__("D_004896E8");
+struct V3_C7D0 { float x, y, z; };
+extern V3_C7D0 D_004C9098_C7D0 __asm__("D_004C9098");
+struct Tag_C7D0 { char c; Tag_C7D0() {} Tag_C7D0(const Tag_C7D0 &o) : c(o.c) {} };
+extern unsigned D_C7D0[] __asm__("D_004FB528");
+extern int D_004A55EC;
+extern const int D_00445FB0[];
+extern "C" void* func_003E6574_C7D0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_C7D0 { int idx; int val; int pad; int type; };
+extern "C" V3_C7D0 func_002FC7D0(int n, Ent_C7D0 *e) {
+    if (D_004A55EC == 0) {
+        D_C7D0[0] = 0xFFFFFFFF;
+        *(float*)&D_C7D0[1] = 1.0f;
+        ((int*)D_C7D0)[2] = 1;
+        ((int*)D_C7D0)[3] = -1;
+        D_004A55EC = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_C7D0*)((char*)D_C7D0 + 16)) = Tag_C7D0((*(Tag_C7D0*)((char*)D_C7D0 + 16)));
+    }
+    unsigned buf64[5];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_C7D0(buf, D_C7D0, 20);
+    Ent_C7D0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445FB0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_C7D0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_C7D0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_C7D0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_C7D0;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 0, buf))
+        return D_004C9098_C7D0;
+    func_00342C08_C7D0(cMemMan_alloc(0x34, D_004896E8_C7D0, 0x20000000, 0), 1, obj, buf, 0);
+    return D_004C9098_C7D0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC9C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_C9C8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_C9C8 __asm__("D_004A47B8");
+static inline char *refToPtr_C9C8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_C9C8(unsigned i) { if (i == 0) return 0; return refToPtr_C9C8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_0034ADD8_C9C8(void*, int, void*, void*) __asm__("func_0034ADD8");
+extern char D_004A3C08_C9C8[] __asm__("D_004A3C08");
+struct V3_C9C8 { float x, y, z; };
+extern V3_C9C8 D_004C9098_C9C8 __asm__("D_004C9098");
+struct Tag_C9C8 { char c; Tag_C9C8() {} Tag_C9C8(const Tag_C9C8 &o) : c(o.c) {} };
+extern unsigned D_C9C8[] __asm__("D_004FB540");
+extern int D_004A55F0;
+extern const int D_00445FC0[];
+extern "C" void* func_003E6574_C9C8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_C9C8 { int idx; int val; int pad; int type; };
+extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
+    if (D_004A55F0 == 0) {
+        D_C9C8[0] = 0xFFFFFFFF;
+        ((int*)D_C9C8)[1] = 1;
+        ((int*)D_C9C8)[2] = 0;
+        ((int*)D_C9C8)[3] = 0;
+        *(float*)&D_C9C8[4] = 1.0f;
+        *(float*)&D_C9C8[5] = 25.0f;
+        *(float*)&D_C9C8[6] = 1.0f;
+        *(float*)&D_C9C8[7] = 1.0f;
+        float z = 0.0f;
+        *(float*)&D_C9C8[8] = z;
+        *(float*)&D_C9C8[9] = 1.0f;
+        *(float*)&D_C9C8[10] = 1.0f;
+        *(float*)&D_C9C8[11] = z;
+        *(float*)&D_C9C8[12] = 1.0f;
+        *(float*)&D_C9C8[13] = 1.0f;
+        *(float*)&D_C9C8[14] = z;
+        *(float*)&D_C9C8[15] = 1.0f;
+        *(float*)&D_C9C8[16] = z;
+        *(float*)&D_C9C8[17] = z;
+        *(float*)&D_C9C8[18] = z;
+        *(float*)&D_C9C8[19] = z;
+        *(float*)&D_C9C8[20] = z;
+        *(float*)&D_C9C8[21] = z;
+        *(float*)&D_C9C8[22] = z;
+        *(float*)&D_C9C8[23] = z;
+        *(float*)&D_C9C8[24] = z;
+        ((int*)D_C9C8)[25] = 0;
+        D_004A55F0 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_C9C8*)((char*)D_C9C8 + 104)) = Tag_C9C8((*(Tag_C9C8*)((char*)D_C9C8 + 104)));
+    }
+    unsigned buf64[27];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_C9C8(buf, D_C9C8, 108);
+    Ent_C9C8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00445FC0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_C9C8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_C9C8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_C9C8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_C9C8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 10, buf))
+        return D_004C9098_C9C8;
+    func_0034ADD8_C9C8(cMemMan_alloc(0x1C, D_004A3C08_C9C8, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_C9C8;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1FBE38", func_002FCC20);
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FCDC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_CDC8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_CDC8 __asm__("D_004A47B8");
+static inline char *refToPtr_CDC8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_CDC8(unsigned i) { if (i == 0) return 0; return refToPtr_CDC8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00346350_CDC8(void*, int, void*, void*) __asm__("func_00346350");
+extern char D_004896F8_CDC8[] __asm__("D_004896F8");
+struct V3_CDC8 { float x, y, z; };
+extern V3_CDC8 D_004C9098_CDC8 __asm__("D_004C9098");
+struct Tag_CDC8 { char c; Tag_CDC8() {} Tag_CDC8(const Tag_CDC8 &o) : c(o.c) {} };
+extern unsigned D_CDC8[] __asm__("D_004FB5C0");
+extern int D_004A55F8;
+extern const int D_00446038[];
+extern "C" void* func_003E6574_CDC8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_CDC8 { int idx; int val; int pad; int type; };
+extern "C" V3_CDC8 func_002FCDC8(int n, Ent_CDC8 *e) {
+    if (D_004A55F8 == 0) {
+        *(float*)&D_CDC8[0] = 500.0f;
+        *(float*)&D_CDC8[1] = 1.0f;
+        *(float*)&D_CDC8[2] = 2400.0f;
+        *(float*)&D_CDC8[3] = 0.10000000149011612f;
+        *(float*)&D_CDC8[4] = 0.10000000149011612f;
+        *(float*)&D_CDC8[5] = 10.0f;
+        ((int*)D_CDC8)[6] = 0;
+        ((int*)D_CDC8)[7] = 16;
+        D_CDC8[8] = 0xFFFFFFFF;
+        D_004A55F8 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_CDC8*)((char*)D_CDC8 + 36)) = Tag_CDC8((*(Tag_CDC8*)((char*)D_CDC8 + 36)));
+    }
+    unsigned buf64[10];
+    unsigned *buf = buf64;
+    buf64[8] = 0xFFFFFFFF;
+    func_003E6574_CDC8(buf, D_CDC8, 40);
+    Ent_CDC8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446038[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[8];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_CDC8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_CDC8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_CDC8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_CDC8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 5, buf))
+        return D_004C9098_CDC8;
+    func_00346350_CDC8(cMemMan_alloc(0xB0, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
+    return D_004C9098_CDC8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FCFF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_CFF0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_CFF0 __asm__("D_004A47B8");
+static inline char *refToPtr_CFF0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_CFF0(unsigned i) { if (i == 0) return 0; return refToPtr_CFF0(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00351B40_CFF0(void*, int, void*, void*, int, int) __asm__("func_00351B40");
+extern char D_00489708_CFF0[] __asm__("D_00489708");
+struct V3_CFF0 { float x, y, z; };
+extern V3_CFF0 D_004C9098_CFF0 __asm__("D_004C9098");
+struct Tag_CFF0 { char c; Tag_CFF0() {} Tag_CFF0(const Tag_CFF0 &o) : c(o.c) {} };
+extern unsigned D_CFF0[] __asm__("D_004FB5E8");
+extern int D_004A55FC;
+extern const int D_00446060[];
+extern "C" void* func_003E6574_CFF0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_CFF0 { int idx; int val; int pad; int type; };
+extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
+    if (D_004A55FC == 0) {
+        D_CFF0[0] = 0xFFFFFFFF;
+        ((int*)D_CFF0)[1] = 0;
+        *(float*)&D_CFF0[2] = 0.10000000149011612f;
+        *(float*)&D_CFF0[3] = 1.0f;
+        *(float*)&D_CFF0[4] = 2.0f;
+        *(float*)&D_CFF0[5] = 600.0f;
+        *(float*)&D_CFF0[6] = 600.0f;
+        *(float*)&D_CFF0[7] = 300.0f;
+        float z = 0.0f;
+        *(float*)&D_CFF0[8] = z;
+        *(float*)&D_CFF0[9] = z;
+        *(float*)&D_CFF0[10] = z;
+        *(float*)&D_CFF0[11] = 360.0f;
+        *(float*)&D_CFF0[12] = -1.0f;
+        D_CFF0[13] = 0xFFFFFFFF;
+        ((int*)D_CFF0)[14] = -1;
+        D_004A55FC = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_CFF0*)((char*)D_CFF0 + 60)) = Tag_CFF0((*(Tag_CFF0*)((char*)D_CFF0 + 60)));
+    }
+    unsigned buf64[16];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[13] = 0xFFFFFFFF;
+    func_003E6574_CFF0(buf, D_CFF0, 64);
+    Ent_CFF0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446060[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_CFF0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_CFF0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_CFF0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_CFF0;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 11, buf))
+        return D_004C9098_CFF0;
+    func_00351B40_CFF0(cMemMan_alloc(0x6C0, D_00489708_CFF0, 0x20000000, 0), 1, obj, buf, *(int*)(D_004A3DD8_CFF0 + 0x294), 0);
+    return D_004C9098_CFF0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD250);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_D250 __asm__("D_004A3DD8");
+extern char **D_004A47B8_D250 __asm__("D_004A47B8");
+extern char *D_004A28A8_D250 __asm__("D_004A28A8");
+extern "C" void func_00355DB8_D250(void*, void*, int, int) __asm__("func_00355DB8");
+struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+struct V3_D250 { float x, y, z; };
+extern V3_D250 D_004C9098_D250 __asm__("D_004C9098");
+struct Tag_D250 { char c; Tag_D250() {} Tag_D250(const Tag_D250 &o) : c(o.c) {} };
+extern unsigned D_D250[] __asm__("D_004FB628");
+extern int D_004A5600;
+extern const int D_004460A0[];
+extern "C" void* func_003E6574_D250(void*, void*, int) __asm__("func_003E6574");
+struct Ent_D250 { int idx; int val; int pad; int type; };
+extern "C" V3_D250 func_002FD250(int n, Ent_D250 *e) {
+    if (D_004A5600 == 0) {
+        D_D250[0] = 0xFFFFFFFF;
+        *(float*)&D_D250[1] = 1.0f;
+        *(float*)&D_D250[2] = 0.699999988079071f;
+        *(float*)&D_D250[3] = 0.5f;
+        D_004A5600 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_D250*)((char*)D_D250 + 16)) = Tag_D250((*(Tag_D250*)((char*)D_D250 + 16)));
+    }
+    unsigned buf64[5];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_D250(buf, D_D250, 20);
+    Ent_D250 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004460A0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_D250 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_D250 + 8))[id & 0xFF];
+        unsigned i;
+        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+            obj = 0;
+        else
+            obj = (char*)(i << 2);
+    }
+    O_D250 *p = *(O_D250**)(obj + 0xC);
+    if (p) {
+        if (p->v16())
+            func_00355DB8_D250(p, buf, *(int*)(D_004A3DD8_D250 + 0x298), *(int*)(D_004A3DD8_D250 + 0x294));
+    }
+    return D_004C9098_D250;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD420);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_D420 __asm__("D_004A3DD8");
+extern char **D_004A47B8_D420 __asm__("D_004A47B8");
+static inline char *refToPtr_D420(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_D420(unsigned i) { if (i == 0) return 0; return refToPtr_D420(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_003578A8_D420(void*, int, void*, void*, int) __asm__("func_003578A8");
+void operator_delete(int*);
+extern char D_00489718_D420[] __asm__("D_00489718");
+extern char D_00489730_D420[] __asm__("D_00489730");
+struct V3_D420 { float x, y, z; };
+extern V3_D420 D_004C9098_D420 __asm__("D_004C9098");
+struct Tag_D420 { char c; Tag_D420() {} Tag_D420(const Tag_D420 &o) : c(o.c) {} };
+extern unsigned D_D420[] __asm__("D_004FB640");
+extern int D_004A5604;
+extern const int D_004460B0[];
+extern "C" void* func_003E6574_D420(void*, void*, int) __asm__("func_003E6574");
+struct Ent_D420 { int idx; int val; int pad; int type; };
+extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
+    if (D_004A5604 == 0) {
+        ((int*)D_D420)[0] = 1;
+        ((int*)D_D420)[1] = 0;
+        *(float*)&D_D420[2] = -1.0f;
+        *(float*)&D_D420[3] = 1.0f;
+        *(float*)&D_D420[4] = 4.0f;
+        float z = 0.0f;
+        *(float*)&D_D420[5] = z;
+        *(float*)&D_D420[6] = z;
+        *(float*)&D_D420[7] = z;
+        *(float*)&D_D420[8] = z;
+        *(float*)&D_D420[9] = z;
+        *(float*)&D_D420[10] = z;
+        *(float*)&D_D420[11] = z;
+        *(float*)&D_D420[12] = z;
+        *(float*)&D_D420[13] = z;
+        *(float*)&D_D420[14] = z;
+        *(float*)&D_D420[15] = z;
+        *(float*)&D_D420[16] = z;
+        *(float*)&D_D420[17] = z;
+        *(float*)&D_D420[18] = z;
+        *(float*)&D_D420[19] = z;
+        *(float*)&D_D420[20] = z;
+        *(float*)&D_D420[21] = z;
+        *(float*)&D_D420[22] = z;
+        *(float*)&D_D420[23] = z;
+        *(float*)&D_D420[24] = z;
+        *(float*)&D_D420[25] = z;
+        *(float*)&D_D420[26] = z;
+        *(float*)&D_D420[27] = z;
+        *(float*)&D_D420[28] = z;
+        *(float*)&D_D420[29] = z;
+        *(float*)&D_D420[30] = z;
+        *(float*)&D_D420[31] = z;
+        *(float*)&D_D420[32] = z;
+        *(float*)&D_D420[33] = 1.0f;
+        *(float*)&D_D420[34] = z;
+        *(float*)&D_D420[35] = z;
+        *(float*)&D_D420[36] = z;
+        *(float*)&D_D420[37] = 1.0f;
+        *(float*)&D_D420[38] = 1.0f;
+        *(float*)&D_D420[39] = 1.0f;
+        *(float*)&D_D420[40] = 1.0f;
+        *(float*)&D_D420[41] = 1.0f;
+        *(float*)&D_D420[42] = z;
+        *(float*)&D_D420[43] = z;
+        *(float*)&D_D420[44] = z;
+        *(float*)&D_D420[45] = 1.0f;
+        *(float*)&D_D420[46] = z;
+        *(float*)&D_D420[47] = z;
+        *(float*)&D_D420[48] = z;
+        ((int*)D_D420)[49] = 16;
+        ((int*)D_D420)[50] = 0;
+        *(float*)&D_D420[51] = z;
+        ((int*)D_D420)[52] = 1;
+        *(float*)&D_D420[53] = 20.0f;
+        D_D420[54] = 0xFFFFFFFF;
+        D_004A5604 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_D420*)((char*)D_D420 + 0xDC)) = Tag_D420((*(Tag_D420*)((char*)D_D420 + 0xDC)));
+    }
+    unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489718_D420, 0x20000000, 0);
+    buf[54] = 0xFFFFFFFF;
+    func_003E6574_D420(buf, D_D420, 0xE0);
+    Ent_D420 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004460B0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[54];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_D420 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_D420 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_D420(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0) {
+        operator_delete((int*)buf);
+        return D_004C9098_D420;
+    }
+    void *p = *(void**)(obj + 0xC);
+    if (p) {
+        int r = checkActiveNode(p, 13, buf);
+        if (r != 0) {
+            if (r > 0)
+                operator_delete((int*)buf);
+            return D_004C9098_D420;
+        }
+    }
+    if (*(float*)&buf[7] > *(float*)&buf[5])
+        *(float*)&buf[7] = *(float*)&buf[5];
+    func_003578A8_D420(cMemMan_alloc(0x2C, D_00489730_D420, 0x20000000, 0), 1, obj, buf, 0);
+    return D_004C9098_D420;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD758);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_D758 __asm__("D_004A3DD8");
+extern char **D_004A47B8_D758 __asm__("D_004A47B8");
+extern char *D_004A28A8_D758 __asm__("D_004A28A8");
+struct V4_D758 { float x, y, z, w; V4_D758() {} V4_D758(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} } __attribute__((aligned(16)));
+struct M4_D758 { V4_D758 r[4]; };
+struct Sh_D758 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual V4_D758 *v05(); virtual M4_D758 *v06(); };
+extern "C" void func_003558B8_D758(void*, V4_D758*) __asm__("func_003558B8");
+struct Lvl_D758 { char pad[0x28]; char *sh[1]; };
+static inline Sh_D758 *shape_D758(int k) {
+    Lvl_D758 *lvl = *(Lvl_D758**)(*(char**)(D_004A28A8_D758 + 0x84) + 0xC);
+    char *q = lvl->sh[k];
+    return (Sh_D758*)(q ? q + 0x6C0 : 0);
+}
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
+static inline V4_D758 mtxApply_D758(M4_D758 *m, const V4_D758 &v) {
+    V4_D758 out;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf8, %1\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(out)
+        : "m"(v), "r"(m)
+        : "memory");
+    return out;
+}
+// PORT: PS2-only VU0 inline asm (vector add in place).
+static inline void vAddTo_D758(V4_D758 &a, const V4_D758 &b) {
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+struct O_D758 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+struct V3_D758 { float x, y, z; };
+extern V3_D758 D_004C9098_D758 __asm__("D_004C9098");
+struct Tag_D758 { char c; Tag_D758() {} Tag_D758(const Tag_D758 &o) : c(o.c) {} };
+extern unsigned D_D758[] __asm__("D_004FB720");
+extern int D_004A5608;
+extern const int D_00446190[];
+extern "C" void* func_003E6574_D758(void*, void*, int) __asm__("func_003E6574");
+struct Ent_D758 { int idx; int val; int pad; int type; };
+extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
+    if (D_004A5608 == 0) {
+        D_D758[0] = 0xFFFFFFFF;
+        ((int*)D_D758)[1] = -1;
+        float z = 0.0f;
+        *(float*)&D_D758[2] = z;
+        *(float*)&D_D758[3] = z;
+        *(float*)&D_D758[4] = z;
+        D_004A5608 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_D758*)((char*)D_D758 + 20)) = Tag_D758((*(Tag_D758*)((char*)D_D758 + 20)));
+    }
+    unsigned buf64[6];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_D758(buf, D_D758, 24);
+    Ent_D758 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446190[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_D758 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_D758 + 8))[id & 0xFF];
+        unsigned i;
+        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+            obj = 0;
+        else
+            obj = (char*)(i << 2);
+    }
+    O_D758 *p = *(O_D758**)(obj + 0xC);
+    if (p) {
+        if (p->v16()) {
+            int k = buf[1];
+            if (k != -1) {
+                V4_D758 pos = *shape_D758(k)->v05();
+                M4_D758 *m = shape_D758(buf[1])->v06();
+                vAddTo_D758(pos, mtxApply_D758(m, V4_D758(*(float*)&buf[2], *(float*)&buf[3], *(float*)&buf[4], 0.0f)));
+                func_003558B8_D758(p, &pos);
+            }
+        }
+    }
+    return D_004C9098_D758;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_D9F8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_D9F8 __asm__("D_004A47B8");
+extern char *D_004A28A8_D9F8 __asm__("D_004A28A8");
+struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
+extern "C" void func_00355978_D9F8(void*, int, int, V4_D9F8*) __asm__("func_00355978");
+struct O_D9F8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+static inline char *refToPtr_D9F8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_D9F8(unsigned i) { if (i == 0) return 0; return refToPtr_D9F8(i); }
+struct V3_D9F8 { float x, y, z; };
+extern V3_D9F8 D_004C9098_D9F8 __asm__("D_004C9098");
+struct Tag_D9F8 { char c; Tag_D9F8() {} Tag_D9F8(const Tag_D9F8 &o) : c(o.c) {} };
+extern unsigned D_D9F8[] __asm__("D_004FB738");
+extern int D_004A560C;
+extern const int D_004461A8[];
+extern "C" void* func_003E6574_D9F8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_D9F8 { int idx; int val; int pad; int type; };
+extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
+    if (D_004A560C == 0) {
+        D_D9F8[0] = 0xFFFFFFFF;
+        D_D9F8[1] = 0xFFFFFFFF;
+        ((int*)D_D9F8)[2] = 0;
+        float z = 0.0f;
+        *(float*)&D_D9F8[3] = z;
+        *(float*)&D_D9F8[4] = z;
+        *(float*)&D_D9F8[5] = z;
+        D_004A560C = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_D9F8*)((char*)D_D9F8 + 24)) = Tag_D9F8((*(Tag_D9F8*)((char*)D_D9F8 + 24)));
+    }
+    unsigned buf64[7];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[1] = 0xFFFFFFFF;
+    func_003E6574_D9F8(buf, D_D9F8, 28);
+    Ent_D9F8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004461A8[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_D9F8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_D9F8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_D9F8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    unsigned id2 = buf[1];
+    if (~id2 != 0) {
+        char *s2 = (*(char***)((char*)*D_004A47B8_D9F8 + 8))[id2 & 0xFF];
+        unsigned i2;
+        char *o2;
+        if (!s2 || (i2 = ((unsigned*)*(char**)(s2 + 0x1C))[id2 >> 8] >> 8) == 0)
+            o2 = 0;
+        else
+            o2 = (char*)(i2 << 2);
+        O_D9F8 *q = o2 ? *(O_D9F8**)(o2 + 0xC) : 0;
+        if (q && !q->v10(6)) {
+            O_D9F8 *p = *(O_D9F8**)(obj + 0xC);
+            if (p && p->v16()) {
+                int k = *(int*)((char*)q + 0x18);
+                V4_D9F8 v(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
+                func_00355978_D9F8(p, k, buf[2], &v);
+            }
+        }
+    }
+    return D_004C9098_D9F8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_DC60 __asm__("D_004A3DD8");
+extern char **D_004A47B8_DC60 __asm__("D_004A47B8");
+extern char *D_004A28A8_DC60 __asm__("D_004A28A8");
+struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
+extern "C" void func_00355978_DC60(void*, int, int, V4_DC60*) __asm__("func_00355978");
+struct O_DC60 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+static inline char *refToPtr_DC60(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_DC60(unsigned i) { if (i == 0) return 0; return refToPtr_DC60(i); }
+struct V3_DC60 { float x, y, z; };
+extern V3_DC60 D_004C9098_DC60 __asm__("D_004C9098");
+struct Tag_DC60 { char c; Tag_DC60() {} Tag_DC60(const Tag_DC60 &o) : c(o.c) {} };
+extern unsigned D_DC60[] __asm__("D_004FB758");
+extern int D_004A5610;
+extern const int D_004461C0[];
+extern "C" void* func_003E6574_DC60(void*, void*, int) __asm__("func_003E6574");
+struct Ent_DC60 { int idx; int val; int pad; int type; };
+extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
+    if (D_004A5610 == 0) {
+        D_DC60[0] = 0xFFFFFFFF;
+        D_DC60[1] = 0xFFFFFFFF;
+        ((int*)D_DC60)[2] = 0;
+        float z = 0.0f;
+        *(float*)&D_DC60[3] = z;
+        *(float*)&D_DC60[4] = z;
+        *(float*)&D_DC60[5] = z;
+        D_004A5610 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_DC60*)((char*)D_DC60 + 24)) = Tag_DC60((*(Tag_DC60*)((char*)D_DC60 + 24)));
+    }
+    unsigned buf64[7];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[1] = 0xFFFFFFFF;
+    func_003E6574_DC60(buf, D_DC60, 28);
+    Ent_DC60 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004461C0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_DC60 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_DC60 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_DC60(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (~buf[1] != 0) {
+        O_DC60 *q = *(O_DC60**)(obj + 0xC);
+        if (q && !q->v10(6)) {
+            unsigned id2 = buf[1];
+            char *s2 = (*(char***)((char*)*D_004A47B8_DC60 + 8))[id2 & 0xFF];
+            unsigned i2;
+            char *o2;
+            if (!s2 || (i2 = ((unsigned*)*(char**)(s2 + 0x1C))[id2 >> 8] >> 8) == 0)
+                o2 = 0;
+            else
+                o2 = (char*)(i2 << 2);
+            O_DC60 *p = o2 ? *(O_DC60**)(o2 + 0xC) : 0;
+            if (p && p->v16()) {
+                int k = *(int*)((char*)q + 0x18);
+                V4_DC60 v(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
+                func_00355978_DC60(p, k, buf[2], &v);
+            }
+        }
+    }
+    return D_004C9098_DC60;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FDED0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_DED0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_DED0 __asm__("D_004A47B8");
+extern char *D_004A28A8_DED0 __asm__("D_004A28A8");
+extern "C" void func_00355AD0_DED0(void*, void*) __asm__("func_00355AD0");
+struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+static inline char *refToPtr_DED0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
+struct V3_DED0 { float x, y, z; };
+extern V3_DED0 D_004C9098_DED0 __asm__("D_004C9098");
+struct Tag_DED0 { char c; Tag_DED0() {} Tag_DED0(const Tag_DED0 &o) : c(o.c) {} };
+extern unsigned D_DED0[] __asm__("D_004FB778");
+extern int D_004A5614;
+extern const int D_004461D8[];
+extern "C" void* func_003E6574_DED0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_DED0 { int idx; int val; int pad; int type; };
+extern "C" V3_DED0 func_002FDED0(int n, Ent_DED0 *e) {
+    if (D_004A5614 == 0) {
+        D_DED0[0] = 0xFFFFFFFF;
+        D_DED0[1] = 0xFFFFFFFF;
+        ((int*)D_DED0)[2] = 1;
+        ((int*)D_DED0)[3] = 3;
+        *(float*)&D_DED0[4] = 20.0f;
+        float z = 0.0f;
+        *(float*)&D_DED0[5] = z;
+        *(float*)&D_DED0[6] = z;
+        *(float*)&D_DED0[7] = z;
+        ((int*)D_DED0)[8] = 1;
+        *(float*)&D_DED0[9] = z;
+        *(float*)&D_DED0[10] = z;
+        D_004A5614 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_DED0*)((char*)D_DED0 + 44)) = Tag_DED0((*(Tag_DED0*)((char*)D_DED0 + 44)));
+    }
+    unsigned buf64[12];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[1] = 0xFFFFFFFF;
+    func_003E6574_DED0(buf, D_DED0, 48);
+    Ent_DED0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004461D8[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_DED0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_DED0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_DED0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (~buf[1] != 0) {
+        O_DED0 *p = *(O_DED0**)(obj + 0xC);
+        if (p) {
+            if (p->v16())
+                func_00355AD0_DED0(p, buf);
+        }
+    }
+    return D_004C9098_DED0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE0C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_E0C0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_E0C0 __asm__("D_004A47B8");
+extern char *D_004A28A8_E0C0 __asm__("D_004A28A8");
+extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpline");
+struct O_E0C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+static inline char *refToPtr_E0C0(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_E0C0(unsigned i) { if (i == 0) return 0; return refToPtr_E0C0(i); }
+struct V3_E0C0 { float x, y, z; };
+extern V3_E0C0 D_004C9098_E0C0 __asm__("D_004C9098");
+struct Tag_E0C0 { char c; Tag_E0C0() {} Tag_E0C0(const Tag_E0C0 &o) : c(o.c) {} };
+extern unsigned D_E0C0[] __asm__("D_004FB7A8");
+extern int D_004A5618;
+extern const int D_00446208[];
+extern "C" void* func_003E6574_E0C0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_E0C0 { int idx; int val; int pad; int type; };
+extern "C" V3_E0C0 func_002FE0C0(int n, Ent_E0C0 *e) {
+    if (D_004A5618 == 0) {
+        D_E0C0[0] = 0xFFFFFFFF;
+        D_E0C0[1] = 0xFFFFFFFF;
+        ((int*)D_E0C0)[2] = 3;
+        *(float*)&D_E0C0[3] = 20.0f;
+        float z = 0.0f;
+        *(float*)&D_E0C0[4] = z;
+        *(float*)&D_E0C0[5] = z;
+        *(float*)&D_E0C0[6] = 1.0f;
+        *(float*)&D_E0C0[7] = z;
+        *(float*)&D_E0C0[8] = z;
+        *(float*)&D_E0C0[9] = z;
+        ((int*)D_E0C0)[10] = 1;
+        ((int*)D_E0C0)[11] = 2;
+        D_004A5618 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_E0C0*)((char*)D_E0C0 + 48)) = Tag_E0C0((*(Tag_E0C0*)((char*)D_E0C0 + 48)));
+    }
+    unsigned buf64[13];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[1] = 0xFFFFFFFF;
+    func_003E6574_E0C0(buf, D_E0C0, 52);
+    Ent_E0C0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446208[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_E0C0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_E0C0 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_E0C0(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (~buf[1] != 0) {
+        O_E0C0 *p = *(O_E0C0**)(obj + 0xC);
+        if (p) {
+            if (p->v16())
+                cMoveNode_addSpline_E0C0(p, buf);
+        }
+    }
+    return D_004C9098_E0C0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_E2C0 __asm__("D_004A3DD8");
+extern char **D_004A47B8_E2C0 __asm__("D_004A47B8");
+extern char *D_004A28A8_E2C0 __asm__("D_004A28A8");
+extern "C" void func_00355B90_E2C0(void*, void*) __asm__("func_00355B90");
+struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+struct V3_E2C0 { float x, y, z; };
+extern V3_E2C0 D_004C9098_E2C0 __asm__("D_004C9098");
+struct Tag_E2C0 { char c; Tag_E2C0() {} Tag_E2C0(const Tag_E2C0 &o) : c(o.c) {} };
+extern unsigned D_E2C0[] __asm__("D_004FB7E0");
+extern int D_004A561C;
+extern const int D_00446238[];
+extern "C" void* func_003E6574_E2C0(void*, void*, int) __asm__("func_003E6574");
+struct Ent_E2C0 { int idx; int val; int pad; int type; };
+extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
+    if (D_004A561C == 0) {
+        D_E2C0[0] = 0xFFFFFFFF;
+        ((int*)D_E2C0)[1] = 5;
+        float z = 0.0f;
+        *(float*)&D_E2C0[2] = z;
+        *(float*)&D_E2C0[3] = z;
+        *(float*)&D_E2C0[4] = 0.016666699200868607f;
+        *(float*)&D_E2C0[5] = 0.016666699200868607f;
+        *(float*)&D_E2C0[6] = 1.0f;
+        *(float*)&D_E2C0[7] = z;
+        *(float*)&D_E2C0[8] = z;
+        *(float*)&D_E2C0[9] = z;
+        *(float*)&D_E2C0[10] = z;
+        *(float*)&D_E2C0[11] = 1.0f;
+        D_004A561C = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_E2C0*)((char*)D_E2C0 + 48)) = Tag_E2C0((*(Tag_E2C0*)((char*)D_E2C0 + 48)));
+    }
+    unsigned buf64[13];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_E2C0(buf, D_E2C0, 52);
+    Ent_E2C0 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446238[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_E2C0 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_E2C0 + 8))[id & 0xFF];
+        unsigned i;
+        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+            obj = 0;
+        else
+            obj = (char*)(i << 2);
+    }
+    O_E2C0 *p = *(O_E2C0**)(obj + 0xC);
+    if (p) {
+        if (p->v16())
+            func_00355B90_E2C0(p, buf);
+    }
+    return D_004C9098_E2C0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
@@ -231,11 +2029,396 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_E668 __asm__("D_004A3DD8");
+extern char **D_004A47B8_E668 __asm__("D_004A47B8");
+extern char *D_004A28A8_E668 __asm__("D_004A28A8");
+extern "C" void func_00355C50_E668(void*, void*) __asm__("func_00355C50");
+struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+struct V3_E668 { float x, y, z; };
+extern V3_E668 D_004C9098_E668 __asm__("D_004C9098");
+struct Tag_E668 { char c; Tag_E668() {} Tag_E668(const Tag_E668 &o) : c(o.c) {} };
+extern unsigned D_E668[] __asm__("D_004FB830");
+extern int D_004A5624;
+extern const int D_00446280[];
+extern "C" void* func_003E6574_E668(void*, void*, int) __asm__("func_003E6574");
+struct Ent_E668 { int idx; int val; int pad; int type; };
+extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
+    if (D_004A5624 == 0) {
+        D_E668[0] = 0xFFFFFFFF;
+        ((int*)D_E668)[1] = 1;
+        float z = 0.0f;
+        *(float*)&D_E668[2] = z;
+        *(float*)&D_E668[3] = 0.10000000149011612f;
+        *(float*)&D_E668[4] = 20.0f;
+        *(float*)&D_E668[5] = z;
+        *(float*)&D_E668[6] = z;
+        *(float*)&D_E668[7] = 1.0f;
+        D_004A5624 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_E668*)((char*)D_E668 + 32)) = Tag_E668((*(Tag_E668*)((char*)D_E668 + 32)));
+    }
+    unsigned buf64[9];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_E668(buf, D_E668, 36);
+    Ent_E668 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446280[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_E668 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_E668 + 8))[id & 0xFF];
+        unsigned i;
+        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+            obj = 0;
+        else
+            obj = (char*)(i << 2);
+    }
+    O_E668 *p = *(O_E668**)(obj + 0xC);
+    if (p) {
+        if (p->v16())
+            func_00355C50_E668(p, buf);
+    }
+    return D_004C9098_E668;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", cViewer_addParticle);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_E840 __asm__("D_004A3DD8");
+extern char **D_004A47B8_E840 __asm__("D_004A47B8");
+static inline char *refToPtr_E840(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_E840(unsigned i) { if (i == 0) return 0; return refToPtr_E840(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_003578A8_E840(void*, int, void*, void*, int) __asm__("func_003578A8");
+void operator_delete(int*);
+extern char D_00489740_E840[] __asm__("D_00489740");
+extern char D_00489730_E840[] __asm__("D_00489730");
+struct V4_E840 { float x, y, z, w; } __attribute__((aligned(16)));
+struct Sh_E840 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual V4_E840 *v05(); };
+struct Ent_E840x { char pad[0x18]; char *obj; };
+struct Lvl_E840 { char pad[0x40]; Ent_E840x *a1[12]; Ent_E840x *a2[3]; int n1; int pad80[2]; int n2; };
+struct O_E840 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual char *v24(); };
+extern char *D_004A28A4_E840 __asm__("D_004A28A4");
+extern char *D_004A28A8_E840 __asm__("D_004A28A8");
+extern "C" void cMoveNode_addParticle_E840(void*, void*) __asm__("cMoveNode_addParticle");
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline V4_E840 vSub_E840(const V4_E840 &a, const V4_E840 &b) {
+    V4_E840 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_E840(const V4_E840 &v) {
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+static inline Lvl_E840 *lvl_E840() { return *(Lvl_E840**)(*(char**)(D_004A28A8_E840 + 0x84) + 0xC); }
+static inline Sh_E840 *shape_E840(Ent_E840x *e) { return (Sh_E840*)(e->obj + 0x6C0); }
+static inline int nearViewer_E840(const V4_E840 &pos) {
+    int notEdit = *(int*)(D_004A28A4_E840 + 0x550) != 2;
+    if (notEdit)
+        return 1;
+    int n = lvl_E840()->n1;
+    for (int i = 0; i < n; i++) {
+        V4_E840 d = vSub_E840(pos, *shape_E840(lvl_E840()->a1[i])->v05());
+        if (vLen_E840(d) < 30000.0f)
+            return 1;
+    }
+    n = lvl_E840()->n2;
+    for (int i = 0; i < n; i++) {
+        V4_E840 d = vSub_E840(pos, *shape_E840(lvl_E840()->a2[i])->v05());
+        if (vLen_E840(d) < 30000.0f)
+            return 1;
+    }
+    return 0;
+}
+struct V3_E840 { float x, y, z; };
+extern V3_E840 D_004C9098_E840 __asm__("D_004C9098");
+struct Tag_E840 { char c; Tag_E840() {} Tag_E840(const Tag_E840 &o) : c(o.c) {} };
+extern unsigned D_E840[] __asm__("D_004FB858");
+extern int D_004A5628;
+extern const int D_004462A0[];
+extern "C" void* func_003E6574_E840(void*, void*, int) __asm__("func_003E6574");
+struct Ent_E840 { int idx; int val; int pad; int type; };
+extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *e) {
+    if (D_004A5628 == 0) {
+        ((int*)D_E840)[0] = 1;
+        ((int*)D_E840)[1] = 0;
+        *(float*)&D_E840[2] = -1.0f;
+        *(float*)&D_E840[3] = 1.0f;
+        *(float*)&D_E840[4] = 4.0f;
+        float z = 0.0f;
+        *(float*)&D_E840[5] = z;
+        *(float*)&D_E840[6] = z;
+        *(float*)&D_E840[7] = z;
+        *(float*)&D_E840[8] = z;
+        *(float*)&D_E840[9] = z;
+        *(float*)&D_E840[10] = z;
+        *(float*)&D_E840[11] = z;
+        *(float*)&D_E840[12] = z;
+        *(float*)&D_E840[13] = z;
+        *(float*)&D_E840[14] = z;
+        *(float*)&D_E840[15] = z;
+        *(float*)&D_E840[16] = z;
+        *(float*)&D_E840[17] = z;
+        *(float*)&D_E840[18] = z;
+        *(float*)&D_E840[19] = z;
+        *(float*)&D_E840[20] = z;
+        *(float*)&D_E840[21] = z;
+        *(float*)&D_E840[22] = z;
+        *(float*)&D_E840[23] = z;
+        *(float*)&D_E840[24] = z;
+        *(float*)&D_E840[25] = z;
+        *(float*)&D_E840[26] = z;
+        *(float*)&D_E840[27] = z;
+        *(float*)&D_E840[28] = z;
+        *(float*)&D_E840[29] = z;
+        *(float*)&D_E840[30] = z;
+        *(float*)&D_E840[31] = z;
+        *(float*)&D_E840[32] = z;
+        *(float*)&D_E840[33] = 1.0f;
+        *(float*)&D_E840[34] = z;
+        *(float*)&D_E840[35] = z;
+        *(float*)&D_E840[36] = z;
+        *(float*)&D_E840[37] = 1.0f;
+        *(float*)&D_E840[38] = 1.0f;
+        *(float*)&D_E840[39] = 1.0f;
+        *(float*)&D_E840[40] = 1.0f;
+        *(float*)&D_E840[41] = 1.0f;
+        *(float*)&D_E840[42] = z;
+        *(float*)&D_E840[43] = z;
+        *(float*)&D_E840[44] = z;
+        *(float*)&D_E840[45] = 1.0f;
+        *(float*)&D_E840[46] = z;
+        *(float*)&D_E840[47] = z;
+        *(float*)&D_E840[48] = z;
+        ((int*)D_E840)[49] = 16;
+        ((int*)D_E840)[50] = 0;
+        *(float*)&D_E840[51] = z;
+        ((int*)D_E840)[52] = 1;
+        *(float*)&D_E840[53] = 20.0f;
+        D_E840[54] = 0xFFFFFFFF;
+        D_004A5628 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_E840*)((char*)D_E840 + 0xDC)) = Tag_E840((*(Tag_E840*)((char*)D_E840 + 0xDC)));
+    }
+    unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489740_E840, 0x20000000, 0);
+    buf[54] = 0xFFFFFFFF;
+    func_003E6574_E840(buf, D_E840, 0xE0);
+    Ent_E840 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004462A0[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    if (*(float*)&buf[7] > *(float*)&buf[5])
+        *(float*)&buf[7] = *(float*)&buf[5];
+    unsigned id = buf[54];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_E840 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_E840 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_E840(i);
+            r = t;
+        }
+        obj = r;
+    }
+    O_E840 *p = *(O_E840**)(obj + 0xC);
+    if (p) {
+        if (p->v16()) {
+            V4_E840 pos = *(V4_E840*)(p->v24() + 0x30);
+            if (nearViewer_E840(pos)) {
+                cMoveNode_addParticle_E840(p, buf);
+                return D_004C9098_E840;
+            }
+        }
+    } else {
+        V4_E840 pos = *(V4_E840*)(obj + 0x40);
+        if (nearViewer_E840(pos)) {
+            func_003578A8_E840(cMemMan_alloc(0x2C, D_00489730_E840, 0x20000000, 0), 1, obj, buf, 0);
+            return D_004C9098_E840;
+        }
+    }
+    operator_delete((int*)buf);
+    return D_004C9098_E840;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FEE98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_EE98 __asm__("D_004A3DD8");
+extern char **D_004A47B8_EE98 __asm__("D_004A47B8");
+static inline char *refToPtr_EE98(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_EE98(unsigned i) { if (i == 0) return 0; return refToPtr_EE98(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+struct V4_EE98 { float x, y, z, w; V4_EE98(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
+struct O_EE98 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
+extern "C" void cMoveNode_addDynamicParticle_EE98(void*, void*, int, V4_EE98*) __asm__("cMoveNode_addDynamicParticle");
+void operator_delete(int*);
+extern char D_00489750_EE98[] __asm__("D_00489750");
+struct V3_EE98 { float x, y, z; };
+extern V3_EE98 D_004C9098_EE98 __asm__("D_004C9098");
+struct Tag_EE98 { char c; Tag_EE98() {} Tag_EE98(const Tag_EE98 &o) : c(o.c) {} };
+extern unsigned D_EE98[] __asm__("D_004FB938");
+extern int D_004A562C;
+extern const int D_00446380[];
+extern "C" void* func_003E6574_EE98(void*, void*, int) __asm__("func_003E6574");
+struct Ent_EE98 { int idx; int val; int pad; int type; };
+extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
+    if (D_004A562C == 0) {
+        ((int*)D_EE98)[0] = 1;
+        ((int*)D_EE98)[1] = 0;
+        *(float*)&D_EE98[2] = -1.0f;
+        *(float*)&D_EE98[3] = 1.0f;
+        *(float*)&D_EE98[4] = 4.0f;
+        float z = 0.0f;
+        *(float*)&D_EE98[5] = z;
+        *(float*)&D_EE98[6] = z;
+        *(float*)&D_EE98[7] = z;
+        *(float*)&D_EE98[8] = z;
+        *(float*)&D_EE98[9] = z;
+        *(float*)&D_EE98[10] = z;
+        *(float*)&D_EE98[11] = z;
+        *(float*)&D_EE98[12] = z;
+        *(float*)&D_EE98[13] = z;
+        *(float*)&D_EE98[14] = z;
+        *(float*)&D_EE98[15] = z;
+        *(float*)&D_EE98[16] = z;
+        *(float*)&D_EE98[17] = z;
+        *(float*)&D_EE98[18] = z;
+        *(float*)&D_EE98[19] = z;
+        *(float*)&D_EE98[20] = z;
+        *(float*)&D_EE98[21] = z;
+        *(float*)&D_EE98[22] = z;
+        *(float*)&D_EE98[23] = z;
+        *(float*)&D_EE98[24] = z;
+        *(float*)&D_EE98[25] = z;
+        *(float*)&D_EE98[26] = z;
+        *(float*)&D_EE98[27] = z;
+        *(float*)&D_EE98[28] = z;
+        *(float*)&D_EE98[29] = z;
+        *(float*)&D_EE98[30] = z;
+        *(float*)&D_EE98[31] = z;
+        *(float*)&D_EE98[32] = z;
+        *(float*)&D_EE98[33] = 1.0f;
+        *(float*)&D_EE98[34] = z;
+        *(float*)&D_EE98[35] = z;
+        *(float*)&D_EE98[36] = z;
+        *(float*)&D_EE98[37] = 1.0f;
+        *(float*)&D_EE98[38] = 1.0f;
+        *(float*)&D_EE98[39] = 1.0f;
+        *(float*)&D_EE98[40] = 1.0f;
+        *(float*)&D_EE98[41] = 1.0f;
+        *(float*)&D_EE98[42] = z;
+        *(float*)&D_EE98[43] = z;
+        *(float*)&D_EE98[44] = z;
+        *(float*)&D_EE98[45] = 1.0f;
+        *(float*)&D_EE98[46] = z;
+        *(float*)&D_EE98[47] = z;
+        *(float*)&D_EE98[48] = z;
+        ((int*)D_EE98)[49] = 16;
+        ((int*)D_EE98)[50] = 0;
+        *(float*)&D_EE98[51] = z;
+        ((int*)D_EE98)[52] = 1;
+        *(float*)&D_EE98[53] = 20.0f;
+        D_EE98[54] = 0xFFFFFFFF;
+        ((int*)D_EE98)[55] = 0;
+        *(float*)&D_EE98[56] = z;
+        *(float*)&D_EE98[57] = z;
+        *(float*)&D_EE98[58] = z;
+        D_004A562C = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_EE98*)((char*)D_EE98 + 0xEC)) = Tag_EE98((*(Tag_EE98*)((char*)D_EE98 + 0xEC)));
+    }
+    unsigned *buf = (unsigned*)cMemMan_alloc(0xF0, D_00489750_EE98, 0x20000000, 0);
+    buf[54] = 0xFFFFFFFF;
+    func_003E6574_EE98(buf, D_EE98, 0xF0);
+    Ent_EE98 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446380[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    if (*(float*)&buf[7] > *(float*)&buf[5])
+        *(float*)&buf[7] = *(float*)&buf[5];
+    unsigned id = buf[54];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_EE98 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_EE98 + 8))[id & 0xFF];
+        unsigned i;
+        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+            obj = 0;
+        else
+            obj = (char*)(i << 2);
+    }
+    O_EE98 *p = *(O_EE98**)(obj + 0xC);
+    if (p && p->v16()) {
+        float one = 1.0f;
+        V4_EE98 v(*(float*)&buf[56], *(float*)&buf[57], *(float*)&buf[58], one);
+        cMoveNode_addDynamicParticle_EE98(p, buf, buf[55], &v);
+        return D_004C9098_EE98;
+    }
+    operator_delete((int*)buf);
+    return D_004C9098_EE98;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF1C8);
@@ -302,9 +2485,198 @@ extern "C" V3_F1C8 func_002FF1C8(int n, Ent_F1C8 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF390);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_F390 __asm__("D_004A3DD8");
+extern char **D_004A47B8_F390 __asm__("D_004A47B8");
+static inline char *refToPtr_F390(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_F390(unsigned i) { if (i == 0) return 0; return refToPtr_F390(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00348D98_F390(void*, void*, void*) __asm__("func_00348D98");
+extern char D_00489768_F390[] __asm__("D_00489768");
+struct V3_F390 { float x, y, z; };
+extern V3_F390 D_004C9098_F390 __asm__("D_004C9098");
+struct Tag_F390 { char c; Tag_F390() {} Tag_F390(const Tag_F390 &o) : c(o.c) {} };
+extern unsigned D_F390[] __asm__("D_004FBA38");
+extern int D_004A5634;
+extern const int D_00446480[];
+extern "C" void* func_003E6574_F390(void*, void*, int) __asm__("func_003E6574");
+struct Ent_F390 { int idx; int val; int pad; int type; };
+extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
+    if (D_004A5634 == 0) {
+        D_F390[0] = 0xFFFFFFFF;
+        D_F390[1] = 0xFFFFFFFF;
+        D_F390[2] = 0xFFFFFFFF;
+        D_F390[3] = 0xFFFFFFFF;
+        D_F390[4] = 0xFFFFFFFF;
+        D_F390[5] = 0xFFFFFFFF;
+        D_F390[6] = 0xFFFFFFFF;
+        D_F390[7] = 0xFFFFFFFF;
+        D_F390[8] = 0xFFFFFFFF;
+        ((int*)D_F390)[9] = -1;
+        ((int*)D_F390)[10] = -1;
+        ((int*)D_F390)[11] = -1;
+        ((int*)D_F390)[12] = -1;
+        ((int*)D_F390)[13] = -1;
+        ((int*)D_F390)[14] = -1;
+        ((int*)D_F390)[15] = -1;
+        ((int*)D_F390)[16] = -1;
+        ((int*)D_F390)[17] = 1;
+        *(float*)&D_F390[18] = 0.5f;
+        *(float*)&D_F390[19] = 0.5f;
+        *(float*)&D_F390[20] = 1.0f;
+        D_004A5634 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_F390*)((char*)D_F390 + 84)) = Tag_F390((*(Tag_F390*)((char*)D_F390 + 84)));
+    }
+    unsigned buf64[22];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[1] = 0xFFFFFFFF;
+    buf64[2] = 0xFFFFFFFF;
+    buf64[3] = 0xFFFFFFFF;
+    buf64[4] = 0xFFFFFFFF;
+    buf64[5] = 0xFFFFFFFF;
+    buf64[6] = 0xFFFFFFFF;
+    buf64[7] = 0xFFFFFFFF;
+    buf64[8] = 0xFFFFFFFF;
+    func_003E6574_F390(buf, D_F390, 88);
+    Ent_F390 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446480[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_F390 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_F390 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_F390(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_F390;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 20, buf))
+        return D_004C9098_F390;
+    func_00348D98_F390(cMemMan_alloc(0x80, D_00489768_F390, 0x20000000, 0), obj, buf);
+    return D_004C9098_F390;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF5E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *D_004A3DD8_F5E8 __asm__("D_004A3DD8");
+extern char **D_004A47B8_F5E8 __asm__("D_004A47B8");
+static inline char *refToPtr_F5E8(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_F5E8(unsigned i) { if (i == 0) return 0; return refToPtr_F5E8(i); }
+extern "C" int checkActiveNode(void*, int, void*);
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00349B48_F5E8(void*, void*, void*) __asm__("func_00349B48");
+extern char D_00489778_F5E8[] __asm__("D_00489778");
+struct V3_F5E8 { float x, y, z; };
+extern V3_F5E8 D_004C9098_F5E8 __asm__("D_004C9098");
+struct Tag_F5E8 { char c; Tag_F5E8() {} Tag_F5E8(const Tag_F5E8 &o) : c(o.c) {} };
+extern unsigned D_F5E8[] __asm__("D_004FBA90");
+extern int D_004A5638;
+extern const int D_004464D8[];
+extern "C" void* func_003E6574_F5E8(void*, void*, int) __asm__("func_003E6574");
+struct Ent_F5E8 { int idx; int val; int pad; int type; };
+extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
+    if (D_004A5638 == 0) {
+        D_F5E8[0] = 0xFFFFFFFF;
+        D_F5E8[1] = 0xFFFFFFFF;
+        D_F5E8[2] = 0xFFFFFFFF;
+        D_F5E8[3] = 0xFFFFFFFF;
+        D_F5E8[4] = 0xFFFFFFFF;
+        D_F5E8[5] = 0xFFFFFFFF;
+        D_F5E8[6] = 0xFFFFFFFF;
+        D_F5E8[7] = 0xFFFFFFFF;
+        D_F5E8[8] = 0xFFFFFFFF;
+        ((int*)D_F5E8)[9] = -1;
+        ((int*)D_F5E8)[10] = -1;
+        ((int*)D_F5E8)[11] = -1;
+        ((int*)D_F5E8)[12] = -1;
+        ((int*)D_F5E8)[13] = -1;
+        ((int*)D_F5E8)[14] = -1;
+        ((int*)D_F5E8)[15] = -1;
+        ((int*)D_F5E8)[16] = -1;
+        ((int*)D_F5E8)[17] = 1;
+        *(float*)&D_F5E8[18] = 0.5f;
+        *(float*)&D_F5E8[19] = 0.5f;
+        *(float*)&D_F5E8[20] = 1.0f;
+        D_004A5638 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        (*(Tag_F5E8*)((char*)D_F5E8 + 84)) = Tag_F5E8((*(Tag_F5E8*)((char*)D_F5E8 + 84)));
+    }
+    unsigned buf64[22];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    buf64[1] = 0xFFFFFFFF;
+    buf64[2] = 0xFFFFFFFF;
+    buf64[3] = 0xFFFFFFFF;
+    buf64[4] = 0xFFFFFFFF;
+    buf64[5] = 0xFFFFFFFF;
+    buf64[6] = 0xFFFFFFFF;
+    buf64[7] = 0xFFFFFFFF;
+    buf64[8] = 0xFFFFFFFF;
+    func_003E6574_F5E8(buf, D_F5E8, 88);
+    Ent_F5E8 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004464D8[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_F5E8 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_F5E8 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_F5E8(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_F5E8;
+    void *p = *(void**)(obj + 0xC);
+    if (p && checkActiveNode(p, 21, buf))
+        return D_004C9098_F5E8;
+    *(float*)&buf[20] *= 0.0010000000474974513f;
+    func_00349B48_F5E8(cMemMan_alloc(0x80, D_00489778_F5E8, 0x20000000, 0), obj, buf);
+    return D_004C9098_F5E8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF850);
@@ -410,7 +2782,77 @@ extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FFB50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Flag_FB50 { char c; Flag_FB50() {} Flag_FB50(const Flag_FB50& o) : c(o.c) {} };
+extern unsigned D_004A5648_FB50 __asm__("D_004A5648");
+extern Flag_FB50 D_004A564C_FB50 __asm__("D_004A564C");
+extern int D_004A5650_FB50 __asm__("D_004A5650");
+extern int D_004A3C10_FB50[2] __asm__("D_004A3C10");
+extern char *D_004A3DD8_FB50 __asm__("D_004A3DD8");
+extern char **D_004A47B8_FB50 __asm__("D_004A47B8");
+static inline char *refToPtr_FB50(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_FB50(unsigned i) { if (i == 0) return 0; return refToPtr_FB50(i); }
+extern "C" void* cMemMan_alloc(int, void*, int, int);
+extern "C" void func_00350E90_FB50(void*, void*) __asm__("func_00350E90");
+extern char D_004A3C18_FB50[] __asm__("D_004A3C18");
+struct O_FB50 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
+struct V3_FB50 { float x, y, z; };
+extern V3_FB50 D_004C9098_FB50 __asm__("D_004C9098");
+extern "C" void* func_003E6574_FB50(void*, void*, int) __asm__("func_003E6574");
+struct Ent_FB50 { int idx; int val; int pad; int type; };
+extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
+    if (D_004A5650_FB50 == 0) {
+        D_004A5648_FB50 = 0xFFFFFFFF;
+        D_004A5650_FB50 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb 0(sp)).
+        D_004A564C_FB50 = Flag_FB50(D_004A564C_FB50);
+    }
+    unsigned buf64[2];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_FB50(buf, &D_004A5648_FB50, 8);
+    Ent_FB50 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004A3C10_FB50[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)(D_004A3DD8_FB50 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_FB50 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_FB50(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj == 0)
+        return D_004C9098_FB50;
+    O_FB50 *p = *(O_FB50**)(obj + 0xC);
+    if (p) {
+        if (p->v10(16) || p->v10(6))
+            return D_004C9098_FB50;
+        p->v01(3);
+    }
+    func_00350E90_FB50(cMemMan_alloc(0x1C, D_004A3C18_FB50, 0x20000000, 0), obj);
+    return D_004C9098_FB50;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_002FFD58);
@@ -787,7 +3229,77 @@ extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00300770);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Flag_0770 { char c; Flag_0770() {} Flag_0770(const Flag_0770& o) : c(o.c) {} };
+extern unsigned D_004A5688_0770 __asm__("D_004A5688");
+extern Flag_0770 D_004A568C_0770 __asm__("D_004A568C");
+extern int D_004A5690_0770 __asm__("D_004A5690");
+extern int D_004A3C40_0770[2] __asm__("D_004A3C40");
+extern int *D_004A3DD8_0770 __asm__("D_004A3DD8");
+extern char **D_004A47B8_0770 __asm__("D_004A47B8");
+extern char *D_004A28A8_0770 __asm__("D_004A28A8");
+struct O_0770 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
+struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
+struct Lvl_0770 { char pad[0x28]; char *sh[1]; };
+static inline char *refToPtr_0770(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_0770(unsigned i) { if (i == 0) return 0; return refToPtr_0770(i); }
+struct V3_0770 { float x, y, z; };
+extern V3_0770 D_004C9098_0770 __asm__("D_004C9098");
+extern "C" void* func_003E6574_0770(void*, void*, int) __asm__("func_003E6574");
+struct Ent_0770 { int idx; int val; int pad; int type; };
+extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
+    if (D_004A5690_0770 == 0) {
+        D_004A5688_0770 = 0xFFFFFFFF;
+        D_004A5690_0770 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb 0(sp)).
+        D_004A568C_0770 = Flag_0770(D_004A568C_0770);
+    }
+    unsigned buf64[2];
+    unsigned *buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574_0770(buf, &D_004A5688_0770, 8);
+    Ent_0770 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004A3C40_0770[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = *(char**)((char*)D_004A3DD8_0770 + 0x290);
+    } else {
+        char *s = (*(char***)((char*)*D_004A47B8_0770 + 8))[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            char *t = conv_0770(i);
+            r = t;
+        }
+        obj = r;
+    }
+    int k = *D_004A3DD8_0770;
+    if (k >= 0 && obj) {
+        O_0770 *p = *(O_0770**)(obj + 0xC);
+        void *v = obj + 0x10;
+        if (p)
+            v = p->v24();
+        Lvl_0770 *lvl = *(Lvl_0770**)(*(char**)(D_004A28A8_0770 + 0x84) + 0xC);
+        ((Sh_0770*)(lvl->sh[k] + 0x6C0))->v10(v);
+    }
+    return D_004C9098_0770;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1FBE38", func_00300948);
 
