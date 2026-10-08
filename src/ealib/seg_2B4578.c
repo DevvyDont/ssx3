@@ -5178,7 +5178,29 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003DEA48);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003DEB50);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003DEBF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int func_003DD4E8_EBF0(int, int, int, int) __asm__("func_003DD4E8");
+extern void func_003DD1D8_EBF0(int) __asm__("func_003DD1D8");
+extern int func_003DCE90_EBF0(int) __asm__("func_003DCE90");
+extern int func_003DD310_EBF0(int) __asm__("func_003DD310");
+
+int func_003DEBF0_impl(int a0, int a1, int a2, int *a3) __asm__("func_003DEBF0");
+int func_003DEBF0_impl(int a0, int a1, int a2, int *a3) {
+    int ok = 0;
+    int h = func_003DD4E8_EBF0(a0, a1, a2, 0);
+    if (h != 0) {
+        func_003DD1D8_EBF0(h);
+        ok = func_003DCE90_EBF0(h) == 1;
+        *a3 = func_003DD310_EBF0(h);
+    } else {
+        *a3 = 0;
+    }
+    return ok;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003DEC60);
