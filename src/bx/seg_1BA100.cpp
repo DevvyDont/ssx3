@@ -263,7 +263,14 @@ extern "C" void func_002B9C28(void *p, int v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9C40);
+#ifdef SKIP_ASM
+extern "C" void func_002B9C40(void *arg0) {
+    int *base = *(int **)((char *)arg0 + 0x34);
+    base[*(int *)((char *)arg0 + 0x1C)] = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9C60);
@@ -291,7 +298,15 @@ extern "C" void func_002B9CC8(void *p, int v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9CE0);
+#ifdef SKIP_ASM
+struct V8_9CE0 { int a, b; };
+extern "C" void func_002B9CE0(char *arg0, V8_9CE0 arg1) {
+    V8_9CE0 *d = (V8_9CE0 *)(arg0 + *(int *)(arg0 + 0x1C) * 8);
+    d[8] = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D10);
@@ -309,11 +324,32 @@ extern "C" void func_002B9D28(void *p, int v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D40);
+#ifdef SKIP_ASM
+extern "C" void func_002B9D40(void *arg0, int arg1) {
+    int *base = *(int **)((char *)arg0 + 0x7C);
+    base[*(int *)((char *)arg0 + 0x1C)] = arg1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D58);
+#ifdef SKIP_ASM
+extern "C" void func_002B9D58(void *arg0, int arg1) {
+    int *base = *(int **)((char *)arg0 + 0x80);
+    base[*(int *)((char *)arg0 + 0x1C)] = arg1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D70);
+#ifdef SKIP_ASM
+extern "C" void func_002B9D70(void *arg0, int arg1) {
+    int *base = *(int **)((char *)arg0 + 0x84);
+    base[*(int *)((char *)arg0 + 0x1C)] = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D88);
@@ -413,23 +449,87 @@ extern "C" int func_002B9E20(void *arg0) {
 
 INCLUDE_ASM("bx/seg_1BA100", func_002B9E28);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9E70);
+#ifdef SKIP_ASM
+extern "C" void func_00289DF0(void*, int);
+extern "C" void func_002B9E70(void *a) {
+    func_00289DF0(a, 0);
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9E90);
+#ifdef SKIP_ASM
+extern "C" void func_00289DF0(void*, int);
+extern "C" void func_002B9E90(void *a) {
+    func_00289DF0(a, 1);
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9EB0);
+#ifdef SKIP_ASM
+struct S9EB0 { int a; char pad[0x5C]; };
+extern "C" int func_002B9EB0(void *arg0, int arg1) {
+    S9EB0 *base = *(S9EB0 **)((char *)arg0 + 0xACC);
+    return base[arg1].a;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9EC8);
+#ifdef SKIP_ASM
+struct S9EC8 { int a; char pad[0x5C]; };
+extern "C" int func_002B9EC8(void *arg0, int arg1) {
+    S9EC8 *base = *(S9EC8 **)((char *)arg0 + 0xACC);
+    return base[arg1].a == 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9EE8);
+#ifdef SKIP_ASM
+struct S9EE8 { int a; char pad[0x5C]; };
+extern "C" int func_002B9EE8(void *arg0, int arg1) {
+    S9EE8 *base = *(S9EE8 **)((char *)arg0 + 0xACC);
+    return base[arg1].a == 2;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002B9F08);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9F88);
+#ifdef SKIP_ASM
+struct S9F88 { int a; int b; char pad[0x58]; };
+extern "C" int func_002B9F88(void *arg0, int arg1) {
+    S9F88 *base = *(S9F88 **)((char *)arg0 + 0xACC);
+    bool ne = base[arg1].a != 1;
+    if (!ne) {
+        return base[arg1].b;
+    }
+    return -1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FB8);
+#ifdef SKIP_ASM
+extern "C" void func_002B9FB8(void *arg0, int arg1) {
+    int *base = *(int **)((char *)arg0 + 4);
+    base[*(int *)(*(char **)arg0 + 0x1F4)] = arg1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FD8);
+#ifdef SKIP_ASM
+extern "C" void func_002B9FD8(void *arg0, int arg1) {
+    int *base = *(int **)((char *)arg0 + 8);
+    base[*(int *)(*(char **)arg0 + 0x1F4)] = arg1;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FF8);
 
@@ -491,7 +591,14 @@ extern "C" int func_002BAC70(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC78);
+#ifdef SKIP_ASM
+struct S78 { char x[0xB]; };
+extern "C" void *func_002BAC78(void *arg0) {
+    return (S78 *)((char *)arg0 + 0x124) + *(int *)((char *)arg0 + 0x3F0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC90);
@@ -802,7 +909,14 @@ extern "C" void func_002BB318(void *arg0, int arg1, int arg2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB348);
+#ifdef SKIP_ASM
+extern "C" void func_002BB570(void*, int, int);
+extern "C" void func_002BB348(void *arg0, int arg1, int arg2) {
+    func_002BB570((char*)*(void **)((char *)arg0 + 4) + arg1 * 12, arg1, arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB370);
@@ -822,7 +936,18 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB3F0);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BB4D8);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB570);
+#ifdef SKIP_ASM
+extern "C" void func_002BB5F0(void *);
+
+extern "C" void func_002BB570(void *arg0, int arg1, int arg2) {
+    (*(short *)((char*)(arg0) + (2))) = 1;
+    (*(short *)((char*)(arg0) + (0))) = 2;
+    (*(int *)((char*)(arg0) + (8))) = arg2;
+    func_002BB5F0(arg0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB5A8);
@@ -1381,15 +1506,72 @@ extern "C" int func_002BC6F0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6F8);
+#ifdef SKIP_ASM
+extern char D_00485AF8[];
+extern "C" void *func_002BC6F8(void *arg0) {
+    *(char **)((char *)arg0 + 4) = D_00485AF8;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(int *)((char *)arg0 + 0xC) = -1;
+    *(int *)((char *)arg0 + 8) = -1;
+    *(int *)((char *)arg0 + 0x14) = -1;
+    *(int *)((char *)arg0 + 0x10) = -1;
+    return arg0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC728);
+#ifdef SKIP_ASM
+extern char D_004858C0[];
+extern "C" void *func_002BC728(void *arg0) {
+    *(char **)((char *)arg0 + 4) = D_004858C0;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(int *)((char *)arg0 + 0xC) = -1;
+    *(int *)((char *)arg0 + 8) = -1;
+    return arg0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC750);
+#ifdef SKIP_ASM
+extern char D_00485688[];
+extern "C" void *func_002BC750(void *arg0) {
+    *(char **)((char *)arg0 + 4) = D_00485688;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(int *)((char *)arg0 + 0xC) = -1;
+    *(int *)((char *)arg0 + 8) = -1;
+    return arg0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC778);
+#ifdef SKIP_ASM
+extern char D_00485450[];
+extern "C" void *func_002BC778(void *arg0) {
+    *(char **)((char *)arg0 + 4) = D_00485450;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(int *)((char *)arg0 + 0xC) = -1;
+    *(int *)((char *)arg0 + 8) = -1;
+    return arg0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC7A0);
+#ifdef SKIP_ASM
+extern char D_00485218[];
+extern "C" void *func_002BC7A0(void *arg0) {
+    *(char **)((char *)arg0 + 4) = D_00485218;
+    *(float *)((char *)arg0 + 0xC) = 30000.0f;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(float *)((char *)arg0 + 8) = 30000.0f;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BC7C8);
 
@@ -1397,17 +1579,55 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC830);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BC890);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC8E8);
+#ifdef SKIP_ASM
+extern char D_00484938[];
+extern "C" void *func_002BC8E8(void *arg0) {
+    float zero = 0.0f;
+    *(char **)((char *)arg0 + 4) = D_00484938;
+    *(float *)((char *)arg0 + 0xC) = zero;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(float *)((char *)arg0 + 8) = zero;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BC910);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC980);
+#ifdef SKIP_ASM
+extern char D_004844C8[];
+extern "C" void *func_002BC980(void *arg0) {
+    float one = 1.0f;
+    *(char **)((char *)arg0 + 4) = D_004844C8;
+    *(float *)((char *)arg0 + 0xC) = one;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(float *)((char *)arg0 + 8) = one;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BC9B0);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BCAF8);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCBD0);
+#ifdef SKIP_ASM
+extern char D_00483E20[];
+extern "C" void *func_002BCBD0(void *arg0) {
+    float zero = 0.0f;
+    *(char **)((char *)arg0 + 4) = D_00483E20;
+    *(int *)((char *)arg0 + 0xC) = 0;
+    *(int *)((char *)arg0 + 0x8) = 0;
+    *(float *)((char *)arg0 + 0) = -99999.0f;
+    *(float *)((char *)arg0 + 0x14) = zero;
+    *(float *)((char *)arg0 + 0x10) = zero;
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BCC00);
 
@@ -1479,7 +1699,16 @@ extern "C" void func_002BDA88(void) {
 extern "C" void func_002BDA90(void) {
 }
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDA98);
+#ifdef SKIP_ASM
+extern "C" int func_002BDA98(void *arg0, void *arg1) {
+    if ((*(int *)((char*)(arg0) + (8))) != (*(int *)((char*)(arg1) + (4)))) {
+        return 0;
+    }
+    return (*(int *)((char*)(arg0) + (0x10))) == (*(int *)((char*)(arg1) + (8)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDAC8);
@@ -1559,7 +1788,19 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDE30);
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE078);
+#ifdef SKIP_ASM
+extern "C" int func_002BE078(void *arg0, void *arg1) {
+    if ((*(int *)((char*)(arg0) + (8))) != (*(int *)((char*)(arg1) + (4)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x10))) != (*(float *)((char*)(arg1) + (8)))) {
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0B0);
@@ -1607,11 +1848,48 @@ extern "C" void func_002BE0F8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE108);
+#ifdef SKIP_ASM
+extern "C" void func_002BE108(void *arg0) {
+    (*(float *)((char*)(arg0) + (0x10))) = 3000.0f;
+    (*(float *)((char*)(arg0) + (0x18))) = 30000.0f;
+    (*(float *)((char*)(arg0) + (0x20))) = 0.43f;
+    (*(float *)((char*)(arg0) + (0x28))) = 0.55f;
+    (*(float *)((char*)(arg0) + (0x30))) = 0.71f;
+    (*(int *)((char*)(arg0) + (8))) = 0;
+    (*(int *)((char*)(arg0) + (0))) = 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE140);
+#ifdef SKIP_ASM
+extern "C" void func_002BE140(void *arg0) {
+    *(float *)((char *)arg0 + 0x8) = 1.0f;
+    *(float *)((char *)arg0 + 0x10) = 1.0f;
+    *(float *)((char *)arg0 + 0x18) = 1.0f;
+    *(float *)((char *)arg0 + 0x20) = 1.0f;
+    *(float *)((char *)arg0 + 0x28) = 1.0f;
+    *(int *)((char *)arg0 + 0x30) = 0;
+    *(int *)((char *)arg0 + 0x38) = 0;
+    *(int *)((char *)arg0 + 0x0) = 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE170);
+#ifdef SKIP_ASM
+extern "C" void func_002BE170(void *arg0) {
+    *(float *)((char *)arg0 + 0x8) = 1.0f;
+    *(float *)((char *)arg0 + 0x10) = 1.0f;
+    *(float *)((char *)arg0 + 0x18) = 1.0f;
+    *(int *)((char *)arg0 + 0x20) = 0;
+    *(int *)((char *)arg0 + 0x28) = 0;
+    *(int *)((char *)arg0 + 0x30) = 0;
+    *(int *)((char *)arg0 + 0x0) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE198);
@@ -1622,7 +1900,22 @@ extern "C" void func_002BE198(void *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE1A8);
+#ifdef SKIP_ASM
+extern "C" void func_002BE1A8(void *arg0) {
+    *(int *)((char *)arg0 + 0x8) = 0;
+    *(int *)((char *)arg0 + 0x10) = 0;
+    *(float *)((char *)arg0 + 0x18) = 1.0f;
+    *(float *)((char *)arg0 + 0x20) = 1.0f;
+    *(float *)((char *)arg0 + 0x28) = 1.0f;
+    *(float *)((char *)arg0 + 0x30) = 1.0f;
+    *(int *)((char *)arg0 + 0x38) = 0;
+    *(float *)((char *)arg0 + 0x40) = 1.0f;
+    *(float *)((char *)arg0 + 0x48) = 1.0f;
+    *(int *)((char *)arg0 + 0x0) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE1E0);
