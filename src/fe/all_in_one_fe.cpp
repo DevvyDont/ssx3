@@ -210,7 +210,29 @@ extern "C" void func_0021C928(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C950);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_C950(void*) __asm__("func_0039E2A0");
+extern char D_004748F8[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_0021C950(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_C950(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004748F8;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0x9C))) = 1;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C9C0);
@@ -494,7 +516,28 @@ extern "C" void func_0021CE00(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CE28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_CE28(void*) __asm__("func_0039E2A0");
+extern char D_00473ED8[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_0021CE28(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_CE28(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473ED8;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CE90);
@@ -509,7 +552,32 @@ extern "C" void func_0021CE90(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CEB8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_CEB8(void*) __asm__("func_0039E2A0");
+int GetHashValue32(char*);
+extern char D_00473E00[];
+extern char D_00474E08[];
+extern char D_0046E340[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_0021CEB8(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_CEB8(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xA0))) = 1;
+    (*(char **)((char*)(arg0) + (8))) = D_00473E00;
+    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(D_0046E340);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CF38);
@@ -524,7 +592,32 @@ extern "C" void func_0021CF38(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CF60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_CF60(void*) __asm__("func_0039E2A0");
+int GetHashValue32(char*);
+extern char D_00473D28[];
+extern char D_00474E08[];
+extern char D_0046E340[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_0021CF60(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_CF60(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xA0))) = 1;
+    (*(char **)((char*)(arg0) + (8))) = D_00473D28;
+    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(D_0046E340);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CFE0);
@@ -539,7 +632,28 @@ extern "C" void func_0021CFE0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D008);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_D008(void*) __asm__("func_0039E2A0");
+extern char D_00473C50[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_0021D008(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_D008(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473C50;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D070);
@@ -563,7 +677,28 @@ extern "C" void *func_0021D070(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D0D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_D0D0(void*) __asm__("func_0039E2A0");
+extern char D_00473B78[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_0021D0D0(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_D0D0(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473B78;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D138);
@@ -767,7 +902,28 @@ extern "C" void func_00220EB8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220EE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_0EE0(void*) __asm__("func_0039E2A0");
+extern char D_00473760[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00220EE0(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_0EE0(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473760;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220F48);
@@ -791,7 +947,30 @@ extern "C" void *func_00220F48(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00220FA8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void *func_001F7548(void*);
+extern void *func_0039E2A0_0FA8(void*) __asm__("func_0039E2A0");
+extern char D_00473688[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00220FA8(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_0FA8(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473688;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    func_001F7548(arg0);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221018);
@@ -828,7 +1007,30 @@ extern "C" void *func_00221040(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002210A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void *func_001F7738(void*);
+extern void *func_0039E2A0_10A0(void*) __asm__("func_0039E2A0");
+extern char D_004735B0[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_002210A0(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_10A0(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004735B0;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    func_001F7738(arg0);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221110);
@@ -856,7 +1058,28 @@ extern "C" void func_00221138(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221160);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1160(void*) __asm__("func_0039E2A0");
+extern char D_004734D0[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221160(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1160(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004734D0;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002211C8);
@@ -880,7 +1103,30 @@ extern "C" void *func_002211C8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221228);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void *func_002006B8(void*);
+extern void *func_0039E2A0_1228(void*) __asm__("func_0039E2A0");
+extern char D_004733F8[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221228(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1228(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004733F8;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    func_002006B8((char*)arg0 + 0x9C);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221298);
@@ -897,7 +1143,31 @@ extern "C" void* func_00221298(void *self) {
 extern "C" void func_002212C0(void) {
 }
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002212C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_12C8(void*, int) __asm__("func_0039E2A0");
+extern char D_00473320[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+inline void* operator new[](unsigned int, void* p) { return p; }
+struct Elem { Elem() {} };
+
+extern "C" void *func_002212C8(void *arg0) {
+    func_0039E2A0_12C8(arg0, 0);
+    (*(int *)((char*)(arg0) + (0x98))) = 0;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473320;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    new ((char*)arg0 + 0x9C) Elem[8];
+    return arg0;
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_00221350);
 
@@ -938,7 +1208,28 @@ extern "C" void *func_00221408(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221468);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1468(void*) __asm__("func_0039E2A0");
+extern char D_00473248[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221468(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1468(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473248;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002214D0);
@@ -974,7 +1265,29 @@ extern "C" void *func_002214F8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221558);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1558(void*) __asm__("func_0039E2A0");
+extern char D_00473170[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221558(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1558(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473170;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002215C8);
@@ -1011,7 +1324,29 @@ extern "C" void *func_002215F0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221658);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1658(void*) __asm__("func_0039E2A0");
+extern char D_00473098[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221658(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1658(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00473098;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002216C8);
@@ -1048,7 +1383,29 @@ extern "C" void *func_002216F0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221758);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1758(void*) __asm__("func_0039E2A0");
+extern char D_00472FC0[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221758(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1758(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472FC0;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002217C8);
@@ -1085,7 +1442,29 @@ extern "C" void *func_002217F0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221858);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1858(void*) __asm__("func_0039E2A0");
+extern char D_00472EE8[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221858(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1858(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472EE8;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002218C8);
@@ -1122,7 +1501,29 @@ extern "C" void *func_002218F0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221958);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1958(void*) __asm__("func_0039E2A0");
+extern char D_00472E10[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221958(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1958(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472E10;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002219C8);
@@ -1159,7 +1560,29 @@ extern "C" void *func_002219F0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221A58);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1A58(void*) __asm__("func_0039E2A0");
+extern char D_00472D38[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221A58(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1A58(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472D38;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221AC8);
@@ -1196,7 +1619,29 @@ extern "C" void *func_00221AF0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221B58);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1B58(void*) __asm__("func_0039E2A0");
+extern char D_00472C60[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221B58(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1B58(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472C60;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xC4))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221BC8);
@@ -1222,7 +1667,28 @@ extern "C" void* func_00221BF0(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221C18);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1C18(void*) __asm__("func_0039E2A0");
+extern char D_00472B88[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221C18(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1C18(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472B88;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221C80);
@@ -1246,7 +1712,30 @@ extern "C" void *func_00221C80(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221CE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1CE0(void*) __asm__("func_0039E2A0");
+extern char D_00472AB0[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221CE0(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1CE0(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472AB0;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    (*(int *)((char*)(arg0) + (0xA0))) = 1;
+    (*(int *)((char*)(arg0) + (0x9C))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221D58);
@@ -1300,7 +1789,28 @@ extern "C" void* func_00221DF0(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221E18);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1E18(void*) __asm__("func_0039E2A0");
+extern char D_00472850[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221E18(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1E18(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472850;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221E80);
@@ -1314,7 +1824,28 @@ extern "C" void* func_00221E80(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221EA8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1EA8(void*) __asm__("func_0039E2A0");
+extern char D_00472778[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221EA8(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1EA8(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472778;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221F10);
@@ -1328,7 +1859,28 @@ extern "C" void* func_00221F10(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221F38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1F38(void*) __asm__("func_0039E2A0");
+extern char D_004726A0[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221F38(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1F38(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004726A0;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221FA0);
@@ -1342,7 +1894,28 @@ extern "C" void* func_00221FA0(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221FC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_1FC8(void*) __asm__("func_0039E2A0");
+extern char D_004725C8[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00221FC8(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_1FC8(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004725C8;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222030);
@@ -1416,7 +1989,28 @@ extern "C" void *func_00222100(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222160);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_2160(void*) __asm__("func_0039E2A0");
+extern char D_004721E0[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00222160(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_2160(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_004721E0;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002221C8);
@@ -1442,7 +2036,28 @@ extern "C" void* func_002221F0(void *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222218);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_2218(void*) __asm__("func_0039E2A0");
+extern char D_00472108[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00222218(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_2218(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00472108;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222280);
@@ -1497,7 +2112,28 @@ extern "C" void *func_002222F8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222358);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void *func_0039E2A0_2358(void*) __asm__("func_0039E2A0");
+extern char D_00471EA8[];
+extern char D_00474E08[];
+extern unsigned short D_004A2088[];
+
+extern "C" void *func_00222358(void *arg0, int arg1, int arg2) {
+    func_0039E2A0_2358(arg0);
+    (*(int *)((char*)(arg0) + (0x98))) = arg2;
+    (*(int *)((char*)(arg0) + (0x48))) = 0;
+    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    unsigned short t = D_004A2088[0];
+    (*(char **)((char*)(arg0) + (8))) = D_00471EA8;
+    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002223C0);
