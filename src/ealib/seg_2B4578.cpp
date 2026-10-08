@@ -1,0 +1,2102 @@
+#include "common.h"
+
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B38B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3900);
+
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locate);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B39D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B39F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3A10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3A50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3BB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3CCC);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3CD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3D40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3DA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B3E40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4010);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4218);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B42B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4338);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B43C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4448);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4458);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4478);
+
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cloneat);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4690);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4708);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4740);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B47F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4818);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B49B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B49D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4DD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B4FC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5158);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5320);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5440);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5450);
+
+extern "C" void func_003B5470(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5478);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B54E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5540);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B55F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5860);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5880);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B58A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B58D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5910);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5948);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5A28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5A60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5B20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5B68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5BA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5BD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5C40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5C60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5E98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5F60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B5F98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6098);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6300);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B64D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6528);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6548);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B65D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6670);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6788);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6820);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B68B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6948);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B69D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6A38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6A70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6AD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6B10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7080);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B70F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B71D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7410);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7450);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B76E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7818);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7838);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B78D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B78F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7A70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7AC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7B00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7B48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7C40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7D80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7DE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7E10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7E38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7E70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7EB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7F18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7F60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7FB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8010);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8050);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B80A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B80E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8120);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8160);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8218);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8290);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B82B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B83A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B84E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8530);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B85F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B86C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8700);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8790);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8838);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B88C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8978);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B89E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8AB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8AD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8C00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8CC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8D30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8D98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8DE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8EE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B8F78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9140);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B91E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B93C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B94B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B96B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B97D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9880);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B98C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9920);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9A00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9B68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9C20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9DC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9E48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9F38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B9FC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA020);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA078);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA0B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA550);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA6E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA740);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA7B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA888);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BA938);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BAA00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BAAC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BB0C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BB140);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BB588);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BB820);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BBDA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC000);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC0B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC4C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC530);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC570);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC588);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC5C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC6B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC770);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC840);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC910);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC930);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BC968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BCA28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BCAE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BCBA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BD078);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BD220);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BD5B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BD9C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BDE08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BE6E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BECA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BED30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF0F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF3E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF440);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF4C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF5A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF6B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF800);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF8D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BF960);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BFAC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BFB90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BFC50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BFD60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BFE80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003BFFA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C01A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C03E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C04F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0564);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C05E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0640);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C06B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C07A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0858);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C08F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C09B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0A60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0B10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0BE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0C18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0C90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C0E28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C1298);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C1578);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C15D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C1638);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C1980);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C19A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C1B80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C2268);
+
+extern "C" void func_003C2438(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C2440);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C25E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C27E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C2A50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C2EC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3010);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C30C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3178);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3250);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3300);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3358);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3380);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C33E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3450);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3500);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C35F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C36A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C36C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3728);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3780);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C38E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3EA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C3EE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C42D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C42F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4318);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C43C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4450);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C45E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4668);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4788);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4898);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4918);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4978);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4A38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4AF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4B70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4D78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4E50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C4EC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5068);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5128);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C51E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C51E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C52C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C52F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5330);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5368);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C53A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C53D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5410);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5468);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C54C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5538);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5600);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5648);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5660);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5710);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5788);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C57F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5880);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5908);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5998);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5A28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5AA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5AA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5AB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5AB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5AC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5AF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5B30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5B80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5BB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5C30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5DF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5E08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5E30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5E58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5ED0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5F18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5F70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C5FD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6018);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6040);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C60E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6158);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6240);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6278);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6288);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C62B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C62E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6320);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6380);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C64A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6500);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6540);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6580);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C65E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C65F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6620);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6760);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6AB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6C28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6C98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6CC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6DA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6DE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7010);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7080);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7138);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7218);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C72A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C72F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7388);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7480);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7600);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7828);
+
+extern "C" void func_003C7AA8(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7AB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7CC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7CE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C7D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8018);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8128);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8148);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8158);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C83A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8430);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8468);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8560);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8598);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C85D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8A40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8A88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8B40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8B80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8C30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8E28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8EC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8F48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C8FB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9010);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9040);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C90C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9188);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9268);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C92B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C92F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9358);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9360);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C93F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9420);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9518);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9520);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C95F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9618);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C96F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9938);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9960);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C99F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9A00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9AC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9B08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9B10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9BC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9C08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9D28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9DA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9E50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9F58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C9FF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA000);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA028);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA0B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA358);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA360);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA388);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA460);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA5E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA610);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA6A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA7A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA7B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA870);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA8A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA900);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA990);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CA9D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CAA28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CAB28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CAC88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CADF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CAEA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CAFD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB110);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB1A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB280);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB328);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB4A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB528);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB538);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CB540);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBB28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBB78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBC00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBC10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBC20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBC58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CBEC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC070);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC630);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC848);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC878);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC918);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC928);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CC938);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCA08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCA38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCEF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCF18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCF40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCF60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CCF90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD138);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD190);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD1A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD1D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD1F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD260);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD2B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD518);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD590);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD690);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD6F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CD878);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CDDB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CDDE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CDE68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE078);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE0B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE0D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE0E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE118);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE198);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE1B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE378);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE410);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CE7C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEB90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEBE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEE08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEE88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEED0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEF20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEFB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CEFF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF060);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF128);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF158);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF178);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF298);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF2C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF300);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF408);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF498);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF4D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF5D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF6D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF6F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF740);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF798);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF7B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF7D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF958);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF998);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CF9D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CFA98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CFB38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CFB68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CFB98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003CFC30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0B18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0B78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0C20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0C78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0CA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0CC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0D70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D0ED0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1038);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D11B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1470);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D15C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1608);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1658);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1690);
+
+extern "C" void func_003D16C8(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D16D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D16E0);
+
+extern "C" void func_003D16E8(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D16F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1940);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1A88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1BA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1D28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1E80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D1F80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2068);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2138);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D21C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2218);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2290);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2350);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D25F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2A68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2C20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2DF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2FA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2FC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D2FE0);
+
+extern "C" void func_003D3010(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3018);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3030);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3058);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D30A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3140);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D31E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D32A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D32B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3658);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D37A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3900);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3C90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D3D20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4050);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D41A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4898);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4900);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4950);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D49D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4A50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4B00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4BB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4C40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D4F10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5128);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5290);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5330);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D53B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5450);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D54C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D54E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5508);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5698);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5800);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5A98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5CC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D5EE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6108);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D61E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D62C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6318);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6360);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6378);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D63F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6448);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6498);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6618);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D66C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D66F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6748);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6768);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6778);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D67F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6840);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6940);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6988);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D69A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D69F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6BC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6C58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6C60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6CA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6CC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6CF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6D30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6D40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6D50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6DB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6E30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6EE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D6F80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7038);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D70B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7110);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D71D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D72A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7418);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D76F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7760);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7A50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7B98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7C38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7D58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D7EC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8008);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8028);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8040);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D80B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8158);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8170);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8190);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D81F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8278);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D82B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8330);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D83B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8460);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D84A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8500);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8530);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8540);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8598);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D85C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8780);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D88C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8CB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D8E58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9088);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D93C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D95B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9830);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9A40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9AC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9BD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9ED0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003D9FB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA3A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA3C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA3C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA3F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA418);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA4E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA578);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA5C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA6B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA718);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA750);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA810);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA848);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA8E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA910);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DA9C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAA10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAA50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAAB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAB58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAC20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DACA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DACE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAE48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DAFD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB008);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB040);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB208);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB3B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB3E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB440);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB4D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB5C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB790);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB838);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB978);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB9A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DB9D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBAA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBAC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBAE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBB68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBC98);
+
+INCLUDE_ASM("ealib/seg_2B4578", USTR_length);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBCD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBD18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBDB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBDD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", USTR_copy);
+
+INCLUDE_ASM("ealib/seg_2B4578", USTR_ncopy);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBE90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBED0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBEF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DBFD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DC038);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DC068);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DC148);
+
+INCLUDE_ASM("ealib/seg_2B4578", USTR_vsprintf);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DC9F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCA40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCB20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCBD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCC88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCD98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCDE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCE90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCF10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCF40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCF70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DCFC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD148);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD1D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD310);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD438);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD4E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD5A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD648);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD720);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD7E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD878);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DD8E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDA10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDAC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDC00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDC30);
+
+INCLUDE_ASM("ealib/seg_2B4578", FILESYS_atomic);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDE50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDE78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DDF80);
+
+INCLUDE_ASM("ealib/seg_2B4578", iFILESYS_ExecCommand);
+
+INCLUDE_ASM("ealib/seg_2B4578", iFILESYS_CommandCompleteCallback);
+
+extern "C" void func_003DE4C8(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", FILESYS_bypassqueuefileinfo);
+
+extern "C" void func_003DE668(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE670);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE7B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE800);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE8C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE910);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE928);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DE9B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEA48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEB50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEBF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEC60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEC80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DECA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DECF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DED50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEDC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEE18);
+
+INCLUDE_ASM("ealib/seg_2B4578", queueadd);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEED8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEF40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DEF70);
+
+INCLUDE_ASM("ealib/seg_2B4578", releaserequest);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF028);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF0B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF0F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF1E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF2C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF3C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF488);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF570);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF690);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF748);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF808);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF8E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DF980);
+
+INCLUDE_ASM("ealib/seg_2B4578", ASYNCFILE_release);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFAF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFBD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFC08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFC48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFCD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFD58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFDD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFE18);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFE88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003DFED0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E00D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0118);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0170);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0270);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E03D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E06B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E06D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0948);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0A28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0AD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0B28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0B98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0BF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0C58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0C88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0D80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E0E90);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1110);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E12E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E13E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E14C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E14F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1530);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1580);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E15B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E15E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E16B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1700);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1728);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1798);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E17D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1810);
+
+INCLUDE_ASM("ealib/seg_2B4578", FILE_load);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1908);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1948);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1A10);
+
+INCLUDE_ASM("ealib/seg_2B4578", FILE_loadsizez);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1AD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1B68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1BB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1C00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1C98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1D68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1EC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1F08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E1F48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2030);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2130);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2168);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2190);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E22F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", FILE_loadpackatz);
+
+INCLUDE_ASM("ealib/seg_2B4578", FILE_loadpackat);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2490);
+
+INCLUDE_ASM("ealib/seg_2B4578", BIG_typeofheader);
+
+INCLUDE_ASM("ealib/seg_2B4578", BIG_sizeofheader);
+
+INCLUDE_ASM("ealib/seg_2B4578", BIG_debuginfo);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2740);
+
+INCLUDE_ASM("ealib/seg_2B4578", BIG_locateentryz);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2CE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2D00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2D30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2D60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2DA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2DF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2E20);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2E50);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2EE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2F70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E2FC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3020);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3098);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3208);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E32F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3350);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E33B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3478);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E34E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3538);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3588);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E35B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3618);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E36F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3758);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E39A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3AD8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3B00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3BE0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E3D78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4000);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4040);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E44B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4508);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4648);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E48D8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E49B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4A10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4A30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4AA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4AF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4D68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4DB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4E98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4EA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4EE8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4F08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4F40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4F80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E4FB0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5008);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5018);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5068);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5098);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E50C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E51A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5268);
+
+extern "C" void func_003E5288(void) {
+}
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5290);
+
+INCLUDE_ASM("ealib/seg_2B4578", THREAD_yieldticks);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5398);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5440);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5498);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5508);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5580);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E55E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5678);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5698);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E56E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", MUTEX_lock);
+
+INCLUDE_ASM("ealib/seg_2B4578", MUTEX_unlock);
+
+INCLUDE_ASM("ealib/seg_2B4578", SYNCTASK_init);
+
+INCLUDE_ASM("ealib/seg_2B4578", SYNCTASK_add);
+
+INCLUDE_ASM("ealib/seg_2B4578", SYNCTASK_del);
+
+INCLUDE_ASM("ealib/seg_2B4578", SYNCTASK_run);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5A10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5A78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5AA8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5B60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5C60);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5C78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5D30);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5D78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5DC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5E38);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5E88);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5EF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5F48);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5F98);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E5FF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", REAL_abortmessage);
+
+INCLUDE_ASM("ealib/seg_2B4578", SYSTEM_abortmessage);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6188);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E61F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6220);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6240);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E62B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E62D0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6328);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6428);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6448);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6574);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E665C);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6690);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E66F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E67F8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6878);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6958);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6A70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6B10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6C80);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6D78);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6E08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6E70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6ED8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6F40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E6FC8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7038);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E70B8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7120);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E71B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7218);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E72A0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7340);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E73E0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7450);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E74E8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7500);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E76A8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7718);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E77F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7918);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7AC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7B00);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7BA0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7C40);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7F58);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7F70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E7FF0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E80C0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E81C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8248);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8260);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8368);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E85B0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8650);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8688);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8778);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8968);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8A28);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8A70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8AF8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8B10);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8D70);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8DC0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8F08);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8FB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E8FD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E9160);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E9378);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E94F0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E9590);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003E95C8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003EAE68);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003EAEB8);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003EB090);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003EB190);
