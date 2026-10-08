@@ -2676,7 +2676,30 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5880);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5908);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5998);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003B4DD8_5998(void *) __asm__("func_003B4DD8");
+extern void func_003B4FC0_5998(void *) __asm__("func_003B4FC0");
+
+int func_003C5998(int arg0, float f) {
+    char sp[0xE0];
+    func_003B4DD8_5998(sp);
+    switch (arg0) {
+    case 0:
+        *(signed char *)(sp + 0x40) = (int)(f * 100.0f);
+        break;
+    case 1:
+        *(signed char *)(sp + 0x41) = (int)(f * 100.0f);
+        break;
+    default:
+        return -5;
+    }
+    func_003B4FC0_5998(sp);
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5A28);
 
