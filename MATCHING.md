@@ -11,9 +11,9 @@ Snapshot as of 2026-10-14.
 
 | | Count | % of total |
 |---|---|---|
-| Matching | 62 | 0.12% |
+| Matching | 81 | 0.16% |
 | Partial | 10 | 0.02% |
-| Not started | 52,061 | 99.86% |
+| Not started | 52,042 | 99.83% |
 | **Total** | **52,133** | |
 
 (Total here may differ slightly from the function count in README.md's progress table — that one comes from objdiff's own aggregate report, this one from summing every unit's individual symbol list, and the two count a handful of duplicated/weak symbols differently.)
@@ -26,8 +26,11 @@ Only files with at least one Matching or Partial function are listed here; files
 |---|---|---|---|---|
 | `bx/bxstring` | 39 | 5 | 0 | 44 |
 | `bxrandom` | 10 | 0 | 0 | 10 |
+| `be/beintcharacter` | 9 | 0 | 11 | 20 |
 | `hashvalue` | 6 | 0 | 0 | 6 |
+| `main/sectionman` | 6 | 0 | 6 | 12 |
 | `visualfx/crowdrender2d` | 1 | 5 | 7 | 13 |
+| `fe/festatetransition` | 4 | 0 | 1 | 5 |
 | `md5` | 4 | 0 | 0 | 4 |
 | `data/vutext` | 1 | 0 | 0 | 1 |
 | `dirtysock/tags` | 1 | 0 | 39 | 40 |
@@ -258,7 +261,19 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `be/beintcharacter`
 
-0 matching, 0 partial, 20 not started (20 total)
+9 matching, 0 partial, 11 not started (20 total)
+
+| Function | Status | Match % | Size |
+|---|---|---|---|
+| `cBECharacterInterface::getWeight(int)` | Matching | 100.00% | 60 |
+| `cBECharacterInterface::isGoofy(int)` | Matching | 100.00% | 56 |
+| `cBECharacterInterface::func_0014F100` | Matching | 100.00% | 8 |
+| `cBECharacterInterface::getBloodType(int)` | Matching | 100.00% | 48 |
+| `cBECharacterInterface::isFemale(int)` | Matching | 100.00% | 56 |
+| `cBECharacterInterface::getAge(int)` | Matching | 100.00% | 60 |
+| `cBECharacterInterface::getHeight(int)` | Matching | 100.00% | 48 |
+| `cBECharacterInterface::getNationality(int)` | Matching | 100.00% | 48 |
+| `cBECharacterInterface::func_0014F210(int)` | Matching | 100.00% | 60 |
 
 ### `be/beintecon`
 
@@ -550,7 +565,14 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `fe/festatetransition`
 
-0 matching, 0 partial, 5 not started (5 total)
+4 matching, 0 partial, 1 not started (5 total)
+
+| Function | Status | Match % | Size |
+|---|---|---|---|
+| `cFEStateBackground::onCreateScreen` | Matching | 100.00% | 96 |
+| `cFEStateTransition::onCreateScreen` | Matching | 100.00% | 120 |
+| `cFEStateTransition::onScreenEvent(cUIScreen *, unsigned int)` | Matching | 100.00% | 168 |
+| `cFEStateTransition::func_001946A8(int)` | Matching | 100.00% | 140 |
 
 ### `fe/festatetrophyroom`
 
@@ -671,7 +693,16 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `main/sectionman`
 
-0 matching, 0 partial, 12 not started (12 total)
+6 matching, 0 partial, 6 not started (12 total)
+
+| Function | Status | Match % | Size |
+|---|---|---|---|
+| `cSectionMan::func_0022E228` | Matching | 100.00% | 76 |
+| `cSectionMan::func_0022E278` | Matching | 100.00% | 16 |
+| `cSectionMan::func_0022E288(tSectionNode *)` | Matching | 100.00% | 16 |
+| `cSectionMan::func_0022E298(int)` | Matching | 100.00% | 172 |
+| `cSectionMan::func_0022E348(tSectionNode *)` | Matching | 100.00% | 24 |
+| `cSectionMan::func_0022E360(tSectionNode *, tSectionNode *)` | Matching | 100.00% | 84 |
 
 ### `main/ssxapp`
 
