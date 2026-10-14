@@ -30,7 +30,7 @@ CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
 DRIVER_PATH_FLAG = f"-B{CC_DIR}/lib/gcc-lib/ee/2.95.3/"
 
 # See tools/cc/README.md for how these were gathered
-COMMON_CFLAGS = "-O2 -fno-builtin"
+COMMON_CFLAGS = "-O2"
 COMMON_CXXFLAGS = "-fno-exceptions"
 
 COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"

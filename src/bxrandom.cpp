@@ -1,6 +1,7 @@
 #include "common.h"
 
-extern "C" void* memcpy(void* dst, const void* src, uint size);
+// Hand-written quadword block copy, separate from libc memcpy
+extern "C" void* func_003E6574(void* dst, const void* src, uint size);
 
 void cBxPseudoRng_Seed(uint* state, uint seed);
 uint cBxPseudoRng_NextInt(uint* state);
@@ -47,19 +48,19 @@ float func_00317890(float param_1, float param_2)
 // Saves the gameplay generator state
 void func_003178E0(uint* out)
 {
-    memcpy(out, D_004FF030, sizeof(D_004FF030));
+    func_003E6574(out, D_004FF030, sizeof(D_004FF030));
 }
 
 // Restores the gameplay generator state
 void func_00317908(uint* in)
 {
-    memcpy(D_004FF030, in, sizeof(D_004FF030));
+    func_003E6574(D_004FF030, in, sizeof(D_004FF030));
 }
 
 // Gets the seed-0 gameplay generator state
 void func_00317930(uint* out)
 {
-    memcpy(out, D_0048DCB0, sizeof(D_0048DCB0));
+    func_003E6574(out, D_0048DCB0, sizeof(D_0048DCB0));
 }
 
 void cBxPseudoRng_Seed(uint* state, uint seed)
