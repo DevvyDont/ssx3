@@ -5,11 +5,14 @@ tHashName64_getHashValue__FPUlPc = 0x00317690; //type:func
 
 BXsrand__FUi = 0x003177C8; //type:func
 BXrand__Fv = 0x003177F0; //type:func
-AIrand = 0x00317810; //type:func
+AIrand__Fv = 0x00317810; //type:func
 AIrandf__Fff = 0x00317830; //type:func
 func_00317890__Fff = 0x00317890; //type:func
-cBxPseudoRng_Seed = 0x00317958; //type:func
-cBxPseudoRng_NextInt = 0x00317a08; //type:func
+func_003178E0__FPUi = 0x003178E0; //type:func
+func_00317908__FPUi = 0x00317908; //type:func
+func_00317930__FPUi = 0x00317930; //type:func
+cBxPseudoRng_Seed__FPUiUi = 0x00317958; //type:func
+cBxPseudoRng_NextInt__FPUi = 0x00317a08; //type:func
 
 cCrowdAnim2D_update = 0x002DBAC0; //type:func
 cCrowdAnim2D_advanceFrame = 0x002DBA08; //type:func
@@ -118,6 +121,7 @@ cBEAggressionInterface_getThis = 0x00155A50; //type:func
 cRiderAnimBase_changeHeadingOffset = 0x00311B48; //type:func
 cRiderAnimBase_changeOrientationOffset = 0x00311BF0; //type:func
 strlen = 0x00416810; //type:func
+memcpy = 0x003E6574; //type:func
 cAnimModel_addModelPartLOD = 0x0030D8B8; //type:func
 cAnimSequence_fadeWeight = 0x00313A10; //type:func
 cBECharacterInterface_getWeight = 0x0014EF30; //type:func
