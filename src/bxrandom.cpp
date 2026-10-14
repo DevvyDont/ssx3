@@ -11,6 +11,7 @@ extern uint D_004FF030[6];
 // Gameplay generator state after seeding with 0
 extern const uint D_0048DCB0[6];
 
+//https://decomp.me/scratch/ViFdz
 void BXsrand(uint seed)
 {
 	cBxPseudoRng_Seed(D_004FF018, seed);

@@ -2,6 +2,8 @@ tHashName32_getHashValue__FPUiPc = 0x00317618; //type:func
 GetHashValue32__FPc = 0x00317670; //type:func
 GetHashValue64__FPc = 0x003176F0; //type:func
 tHashName64_getHashValue__FPUlPc = 0x00317690; //type:func
+func_00317710__FP8tHash128Pc = 0x00317710; //type:func
+func_00317798__FPc = 0x00317798; //type:func
 
 BXsrand__FUi = 0x003177C8; //type:func
 BXrand__Fv = 0x003177F0; //type:func

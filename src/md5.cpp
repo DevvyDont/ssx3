@@ -6,7 +6,7 @@ INCLUDE_ASM("md5", md5_process);
 
 INCLUDE_ASM("md5", md5_init);
 #ifdef SKIP_ASM
-void md5_init(int* param_1)
+void md5_init(md5_state_t* state)
 {
 	return;
 }
