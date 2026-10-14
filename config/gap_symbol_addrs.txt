@@ -11785,3 +11785,6 @@ lbl_003E5120 = 0x003E5120; //type:label
 lbl_003E5128 = 0x003E5128; //type:label
 lbl_003E5130 = 0x003E5130; //type:label
 lbl_003E5138 = 0x003E5138; //type:label
+
+// --- src/seg/seg_21A1C0.cpp ---
+func_00319910 = 0x00319910; //type:func
