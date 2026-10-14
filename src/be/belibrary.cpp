@@ -1,6 +1,6 @@
 #include "common.h"
 
-INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID);
+INCLUDE_ASM("be/belibrary", getCharacterID__10cBELibraryi);
 
 INCLUDE_ASM("be/belibrary", func_0014A0B0);
 

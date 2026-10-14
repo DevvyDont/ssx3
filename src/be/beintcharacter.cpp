@@ -1,21 +1,49 @@
-#include "common.h"
+#include "be/beintcharacter.h"
 
-INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight);
+int cBECharacterInterface::getWeight(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].weight;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014EF70);
+bool cBECharacterInterface::isGoofy(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].goofy != 0;
+}
 
+// Not yet decompiled: its switch over cheat characters needs a jump table in
+// .rodata, which is still one unsplit block
 INCLUDE_ASM("be/beintcharacter", func_0014EFA8);
 
-INCLUDE_ASM("be/beintcharacter", func_0014F100);
+void cBECharacterInterface::func_0014F100()
+{
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F108);
+char* cBECharacterInterface::getBloodType(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].bloodType;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F138);
+bool cBECharacterInterface::isFemale(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].female != 0;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F170);
+int cBECharacterInterface::getAge(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].age;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F1B0);
+char* cBECharacterInterface::getHeight(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].height;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F1E0);
+char* cBECharacterInterface::getNationality(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].nationality;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F210);
+int cBECharacterInterface::func_0014F210(int slot)
+{
+    return D_00530970[cBELibrary::getCharacterID(slot)].unk84;
+}
