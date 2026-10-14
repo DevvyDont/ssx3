@@ -2,6 +2,7 @@
 #define BEINTCHARACTER_H
 
 #include "common.h"
+#include "be/belibrary.h"
 
 // One row of DATA/BE/CHARDB.DBL: 0x88 bytes per rider
 struct cBECharacterData {
@@ -21,12 +22,6 @@ struct cBECharacterData {
 
 // Indexed by character id 0..9
 extern cBECharacterData D_00530970[10];
-
-class cBELibrary {
-public:
-    // Character id of the rider in the given setup slot
-    static int getCharacterID(int slot);
-};
 
 // Character queries by setup slot
 class cBECharacterInterface {

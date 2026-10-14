@@ -1,8 +1,6 @@
 #include "be/beintcharacter.h"
 
 class cBE;
-// Cheat character worn in the slot, 0 for none
-extern "C" int func_0014A0B0(int slot);
 extern "C" cBE* cBE_getBE();
 extern "C" void* cBE_getInterface(cBE* be, int index);
 extern "C" int cBENewPlayerInterface_isMissionMan(int slot);
@@ -24,7 +22,7 @@ bool cBECharacterInterface::isGoofy(int slot)
 float cBECharacterInterface::getModelScale(int slot)
 {
     int id = cBELibrary::getCharacterID(slot);
-    int cheat = func_0014A0B0(slot);
+    int cheat = cBELibrary::getCheatCharacter(slot);
 
     cBE_getInterface(cBE_getBE(), 0);
     // In Conquer the Mountain the player keeps the base rider's scale
