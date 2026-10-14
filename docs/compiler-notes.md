@@ -58,3 +58,24 @@ global addresses being split into `lui`/`addiu`, which the game needs
 
 If another SN ee-gcc build turns up (e.g. from a ProDG for PS2 3.x
 install), test it on the snippet above first.
+
+## Assembler padding in INCLUDE_ASM code
+
+`INCLUDE_ASM` code goes through the compiler, so the SN assembler (`ee/bin/as.exe`)
+assembles it. That assembler has a workaround for the R5900 short-loop
+erratum. It pads some backward branches with nops even under
+`.set noreorder`. For example, in `main/game` it puts 4 nops before
+`bnel $20, $0, .L0022DC10` at `0x0022DCF8`, although the loop body there is
+about 58 instructions. The trigger is not fully understood: a minimal
+label-then-branch loop reproduces it, but other short patterns tested don't.
+There is no command-line option or `.set` directive that turns it off.
+
+Modern binutils (`mips-linux-gnu-as -march=5900`) has the opposite problem.
+It assembles the included code correctly, but in compiled C it adds hazard
+nops after `mtc1` and similar, because it treats the R5900 as having no
+coprocessor interlocks. A leading `.set mips4` stops those nops, but it
+also disables EE-only instructions (`lq`, `sq` and the VU0 macros), and no
+ordering of `.set mips4` and `.set arch=r5900` fixes both.
+
+So the build keeps the SN assembler, and the 32 units it would pad stay as
+`asm` segments (listed in [splits.md](splits.md)).
