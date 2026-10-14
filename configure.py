@@ -471,7 +471,20 @@ def main():
     ld = Path(LD_PATH)
     ld_text = ld.read_text()
     assert "_gp = 0x0;" in ld_text
-    ld.write_text(ld_text.replace("_gp = 0x0;", f"_gp = 0x{GP_VALUE:X};"))
+    ld_text = ld_text.replace("_gp = 0x0;", f"_gp = 0x{GP_VALUE:X};")
+    # Data gets its own output section without padding: every data chunk is an
+    # exact byte range of the original, but sections like .rodata and .lit4
+    # are only 1- or 4-aligned per object, while the code needs SUBALIGN(8)
+    data_start = "        main_DATA_START = .;\n"
+    assert data_start in ld_text
+    ld_text = ld_text.replace(data_start,
+        "    }\n"
+        "    .main_data : AT(main_ROM_START + SIZEOF(.main)) SUBALIGN(1)\n"
+        "    {\n" + data_start)
+    rom_pos = "    __romPos += SIZEOF(.main);\n"
+    assert rom_pos in ld_text
+    ld_text = ld_text.replace(rom_pos, "    __romPos += SIZEOF(.main) + SIZEOF(.main_data);\n")
+    ld.write_text(ld_text)
 
     linker_entries = split.linker_writer.entries
 
