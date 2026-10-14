@@ -34,7 +34,7 @@ options:
   section_order: [".text", ".vutext", ".data", ".rodata", ".lit4", ".sbss", ".bss"]
   auto_link_sections: [".data", ".rodata", ".bss"]
 
-  subalign: 4
+  subalign: 8
 
 segments:
   - name: elf_header
