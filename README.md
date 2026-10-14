@@ -14,7 +14,8 @@ You will need:
 
 ### Debian/Ubuntu
 
-`# apt install -y binutils-mips-linux-gnu ninja-build wine`  
+`# dpkg --add-architecture i386 && apt update`  
+`# apt install -y binutils-mips-linux-gnu ninja-build wine wine32:i386`  
 
 Download required tools:  
 

@@ -37,7 +37,7 @@ int GetHashValue32(char* param_1) {
 
 //99.17%
 //https://decomp.me/scratch/ZrcdK
-INCLUDE_ASM("hashvalue", GetHashValue64__FPc);
+INCLUDE_ASM("hashvalue", tHashName64_getHashValue__FPUlPc);
 #ifdef SKIP_ASM
 ulong tHashName64_getHashValue(ulong* out, char* str) {
     //char md5[96];
@@ -54,7 +54,7 @@ ulong tHashName64_getHashValue(ulong* out, char* str) {
 
 //100%
 //https://decomp.me/scratch/I4NLb
-INCLUDE_ASM("hashvalue", tHashName64_getHashValue__FPUlPc);
+INCLUDE_ASM("hashvalue", GetHashValue64__FPc);
 #ifdef SKIP_ASM
 ulong GetHashValue64(char* str) {
     char hash[8];

@@ -31,7 +31,7 @@ DRIVER_PATH_FLAG = f"-B{CC_DIR}/lib/gcc-lib/ee/2.95.3/"
 
 # See tools/cc/README.md for how these were gathered
 COMMON_CFLAGS = "-O2"
-COMMON_CXXFLAGS = ""
+COMMON_CXXFLAGS = "-fno-exceptions"
 
 COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"
 COMPILE_CXX_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -xc++ -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} {COMMON_CXXFLAGS} $in"
@@ -247,18 +247,19 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, "as", out_dir="obj/current", extra_flags="-DSKIP_ASM")
             else:
                 build(entry.object_path, entry.src_paths, "as")
-        elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
-            if dual_objects:
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags="-DSKIP_ASM")
-            else:
-                build(entry.object_path, entry.src_paths, "cc")
+        # CommonSegCpp subclasses CommonSegC, so it has to be checked first
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags="-DSKIP_ASM")
             else:
                 build(entry.object_path, entry.src_paths, "cpp")
+        elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
+            if dual_objects:
+                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
+                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+            else:
+                build(entry.object_path, entry.src_paths, "cc")
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "as", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
@@ -379,9 +380,7 @@ def main():
 
     do_clean = (args.clean or args.only_clean) or False
 
-    # FIXME: Set skip_checksum to False once builds are able
-    # to match; it has been temporairly enabled here.
-    do_skip_checksum = args.skip_checksum or True
+    do_skip_checksum = args.skip_checksum
     do_objects = args.objects or False
 
     if do_clean:

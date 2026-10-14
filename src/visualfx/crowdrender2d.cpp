@@ -1,5 +1,4 @@
 #include "visualfx/crowdrender2d.h"
-#include <stdint.h>
 
 //100%
 //https://decomp.me/scratch/pOTwa
@@ -49,7 +48,7 @@ int cCrowdRender2D_purge(int *param_1)
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_constructCrowdAnim2D__FPv);
 #ifdef SKIP_ASM
 
-void* cMemMan_alloc(int a, const char* b, uint32_t c, int d);
+void* cMemMan_alloc(int a, const char* b, uint c, int d);
 
 void* cCrowdRender2D_constructCrowdAnim2D(void* param) {
 	void* memory = cMemMan_alloc(0x20, D_004875D8, 0x20000000, 0);
