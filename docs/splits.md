@@ -1,6 +1,6 @@
 # File splits
 
-`config/ssx3_us.yaml` splits the code into 169 named translation units.
+`config/ssx3_us.yaml` splits the code into 169 named translation units, all `cpp` except `sce/crt0`.
 Six of them (`visualfx/crowdrender2d`, `hashvalue`, `bxrandom`, `bx/bxstring`,
 `md5`, `dirtysock/tags`) were split by hand. The other 162 take their
 boundaries from the segment ranges in `docs/notes/functions/`. Those ranges
@@ -60,13 +60,13 @@ Names come from the notes. These 35 are not in the prototype file list in
 `bx/bxstringctor` looks wrong: per the notes, its functions are path queries,
 not string code.
 
-## Units kept as assembly
+## Units on the older assembler
 
-These 32 units are `asm` segments (`asm/<name>.s`) instead of `cpp`.
-Built through `INCLUDE_ASM`, they come out larger than the original, because
-the SN assembler pads some backward branches with nops (see
-[compiler-notes.md](compiler-notes.md)). Making one of them `cpp` means solving
-that first.
+These 32 units are assembled with `bin/ee-as.exe` instead of the
+driver's assembler, because the driver's assembler pads some of their
+INCLUDE_ASM code with nops that the game doesn't have. They are listed as
+`SN_AS_2000_UNITS` in `configure.py`; see
+[compiler-notes.md](compiler-notes.md) before decompiling in one of them.
 
 - `ai/control/handplantcontrol`
 - `be/beintnewrace`

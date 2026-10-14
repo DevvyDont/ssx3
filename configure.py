@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import re
 import shutil
 import sys
 import json
@@ -42,6 +43,50 @@ COMMON_CXXFLAGS = "-fno-exceptions"
 COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"
 COMPILE_CXX_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -xc++ -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} {COMMON_CXXFLAGS} $in"
 
+# The compiler driver assembles with ee/bin/as.exe (May 2001). Its R5900
+# short-loop workaround pads true short loops just as the original build did,
+# but it also pads some long loops in INCLUDE_ASM code, which the game doesn't
+# have. The older bin/ee-as.exe (Aug 2000) never pads, so units whose
+# INCLUDE_ASM code gets misfired on are compiled to assembly and assembled with
+# it instead. -mips4 stops it adding hazard nops after mtc1, which the original
+# build also doesn't have. Compiled C in these units won't get the short-loop
+# padding, so see docs/compiler-notes.md before decompiling in one of them.
+SN_AS_2000 = f"{CC_DIR}/bin/ee-as.exe -O2 -mabi=eabi -mips4"
+SN_AS_2000_UNITS = {
+    "ai/control/handplantcontrol",
+    "be/beintnewrace",
+    "be/belibrary",
+    "be/beintecon",
+    "be/beintmission",
+    "be/beintreward",
+    "camera/trigger/cameratriggerman",
+    "fe/festateprofile",
+    "fe/feasyncfile",
+    "fe/festaterewards",
+    "fe/fepopupmisc",
+    "fe/ovstatehud",
+    "fe/ovtemplatepausemenu",
+    "fe/ovstatepause",
+    "fe/uitemplatemap",
+    "fe/ovstatemap",
+    "main/ssxapp",
+    "main/game",
+    "main/gamestate",
+    "main/gamemode",
+    "replay/replaycache",
+    "sound/soundsys",
+    "visualfx/avalanche",
+    "visualfx/boardtrailfx",
+    "animation/animmodel",
+    "bx/cubicspline",
+    "input/inputparse",
+    "intersect/aifwddiff",
+    "render/graphicsman",
+    "render/particle",
+    "render/lightman",
+    "render/font",
+}
+
 CATEGORY_MAP = {
     "sce": "Libs",
     "data": "Data",
@@ -51,6 +96,23 @@ WINE = "wine"
 if sys.platform == "linux" or sys.platform == "linux2":
     COMPILE_C_RULE = f"{WINE} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WINE} {COMPILE_CXX_RULE}"
+    SN_AS_2000 = f"{WINE} {SN_AS_2000}"
+
+def fix_new_stubs(paths):
+    """
+    Tidy source files splat has just generated: use the INCLUDE_ASM paths
+    relative to asm/nonmatchings, and turn the empty C bodies it writes for
+    functions that only return back into INCLUDE_ASM, since compiled as C++
+    they would get mangled names.
+    """
+    for path in paths:
+        unit = path.relative_to("src").with_suffix("").as_posix()
+        text = path.read_text()
+        text = text.replace(f'INCLUDE_ASM("{ROOT}/asm/nonmatchings/', 'INCLUDE_ASM("')
+        text = re.sub(r"^void (\w+)\(void\) \{\n\}\n",
+                      lambda m: f'INCLUDE_ASM("{unit}", {m.group(1)});\n', text, flags=re.M)
+        path.write_text(text)
+
 
 def clean():
     files_to_clean = [
@@ -218,6 +280,13 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
+        "cpp_as2000",
+        description="cpp $in",
+        command=f"{COMPILE_CXX_RULE.replace(' -c ', ' -S ')} $cflags -o $out.s && "
+        f"{SN_AS_2000} $out.s -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
+    ninja.rule(
         "ld",
         description="link $out",
         command=f"{cross}ld {ld_args}",
@@ -255,11 +324,12 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, "as")
         # CommonSegCpp subclasses CommonSegC, so it has to be checked first
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
+            rule = "cpp_as2000" if seg.name in SN_AS_2000_UNITS else "cpp"
             if dual_objects:
-                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                build(entry.object_path, entry.src_paths, rule, out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
+                build(entry.object_path, entry.src_paths, rule, out_dir="obj/current", extra_flags="-DSKIP_ASM")
             else:
-                build(entry.object_path, entry.src_paths, "cpp")
+                build(entry.object_path, entry.src_paths, rule)
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
@@ -394,7 +464,9 @@ def main():
         if args.only_clean:
             return
 
+    existing_src = set(Path("src").rglob("*.cpp"))
     split.main([YAML_FILE], modes="all", verbose=False)
+    fix_new_stubs(set(Path("src").rglob("*.cpp")) - existing_src)
 
     ld = Path(LD_PATH)
     ld_text = ld.read_text()

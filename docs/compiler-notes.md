@@ -61,21 +61,38 @@ install), test it on the snippet above first.
 
 ## Assembler padding in INCLUDE_ASM code
 
-`INCLUDE_ASM` code goes through the compiler, so the SN assembler (`ee/bin/as.exe`)
-assembles it. That assembler has a workaround for the R5900 short-loop
-erratum. It pads some backward branches with nops even under
-`.set noreorder`. For example, in `main/game` it puts 4 nops before
-`bnel $20, $0, .L0022DC10` at `0x0022DCF8`, although the loop body there is
-about 58 instructions. The trigger is not fully understood: a minimal
-label-then-branch loop reproduces it, but other short patterns tested don't.
-There is no command-line option or `.set` directive that turns it off.
+The SN ProDG 3.01 bundle (https://github.com/AngheloAlf/SN-Systems-ProDG_for_PS2_3.01,
+fetched by `scripts/setup.sh`) contains two builds of GNU as 2.9-ee-991111b:
 
-Modern binutils (`mips-linux-gnu-as -march=5900`) has the opposite problem.
-It assembles the included code correctly, but in compiled C it adds hazard
-nops after `mtc1` and similar, because it treats the R5900 as having no
-coprocessor interlocks. A leading `.set mips4` stops those nops, but it
-also disables EE-only instructions (`lq`, `sq` and the VU0 macros), and no
-ordering of `.set mips4` and `.set arch=r5900` fixes both.
+| Binary | Date | Short-loop padding | Hazard nop after `mtc1` |
+|---|---|---|---|
+| `ee/bin/as.exe` (what the compiler driver runs) | May 2001 | yes | no |
+| `bin/ee-as.exe` | Aug 2000 | no | yes, unless `-mips4` |
 
-So the build keeps the SN assembler, and the 32 units it would pad stay as
-`asm` segments (listed in [splits.md](splits.md)).
+The 2001 build has a workaround for the R5900 short-loop erratum: it pads
+loops shorter than 6 instructions with nops. The game was built with it.
+For example, the decompiled `cDirtysock_tag__TagFieldSetupAppend` only
+matches with the padding nop in its copy loop. However, in `INCLUDE_ASM`
+code (`.set noreorder`) it also pads some long loops. In `main/game` it puts
+4 nops before `bnel $20, $0, .L0022DC10` at `0x0022DCF8`, although the loop
+is about 58 instructions. The game has no such padding.
+
+So `configure.py` uses both:
+
+- By default, objects are built through the driver, i.e. the 2001
+  assembler.
+- The 32 units in `SN_AS_2000_UNITS` contain INCLUDE_ASM code that the 2001
+  build mispads. Their source is compiled to assembly and assembled with
+  `bin/ee-as.exe -O2 -mabi=eabi -mips4`. `-mips4` stops it adding a hazard
+  nop after `mtc1`, which the game also doesn't have. It does not disable
+  EE instructions in this assembler.
+
+Caveat: compiled C in those 32 units gets no short-loop padding. Once a
+decompiled function there has a short loop, it won't match until that unit
+is back on the 2001 assembler. That is only possible once its mispadded
+INCLUDE_ASM functions are decompiled, or the trigger is understood well
+enough to avoid it.
+
+Modern binutils is no substitute. It never pads, but it needs `.set mips4`
+to skip the `mtc1` hazard nops, and `.set mips4` disables `lq`/`sq` and the
+VU0 macros. No ordering of `.set mips4` and `.set arch=r5900` fixes both.
