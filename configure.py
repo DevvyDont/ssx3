@@ -17,6 +17,12 @@ TOOLS_DIR = ROOT / "tools"
 OUTDIR = "out"
 
 YAML_FILE = ROOT / "config" / "ssx3_us.yaml"
+
+# The game's $gp. Not given to splat as gp_value, since that makes it emit
+# %gp_rel() in the nonmatching asm, which the old assembler that INCLUDE_ASM
+# goes through can't parse. Compiled C still needs _gp to resolve its
+# gp-relative accesses, so it is patched into the linker script instead.
+GP_VALUE = 0x004A30F0
 BASENAME = "SLUS_207.72"
 LD_PATH = f"{BASENAME}.ld"
 ELF_PATH = f"{OUTDIR}/{BASENAME}"
@@ -389,6 +395,11 @@ def main():
             return
 
     split.main([YAML_FILE], modes="all", verbose=False)
+
+    ld = Path(LD_PATH)
+    ld_text = ld.read_text()
+    assert "_gp = 0x0;" in ld_text
+    ld.write_text(ld_text.replace("_gp = 0x0;", f"_gp = 0x{GP_VALUE:X};"))
 
     linker_entries = split.linker_writer.entries
 
