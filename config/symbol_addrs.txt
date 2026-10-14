@@ -811,3 +811,4 @@ func_0022E298__11cSectionMani = 0x0022E298; //type:func
 func_0022E348__11cSectionManP12tSectionNode = 0x0022E348; //type:func
 func_0022E360__11cSectionManP12tSectionNodeT1 = 0x0022E360; //type:func
 func_001946A8__18cFEStateTransitioni = 0x001946A8; //type:func
+getModelScale__21cBECharacterInterfacei = 0x0014EFA8; //type:func

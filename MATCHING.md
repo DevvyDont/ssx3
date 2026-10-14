@@ -11,10 +11,10 @@ Snapshot as of 2026-10-14.
 
 | | Count | % of total |
 |---|---|---|
-| Matching | 81 | 0.24% |
+| Matching | 82 | 0.21% |
 | Partial | 10 | 0.03% |
-| Not started | 33,172 | 99.73% |
-| **Total** | **33,263** | |
+| Not started | 38,297 | 99.76% |
+| **Total** | **38,389** | |
 
 (Total here may differ slightly from the function count in README.md's progress table — that one comes from objdiff's own aggregate report, this one from summing every unit's individual symbol list, and the two count a handful of duplicated/weak symbols differently.)
 
@@ -24,16 +24,16 @@ Only files with at least one Matching or Partial function are listed here; files
 
 | File | Matching | Partial | Not started | Total |
 |---|---|---|---|---|
-| `bx/bxstring` | 39 | 5 | 0 | 44 |
+| `bx/bxstring` | 39 | 5 | 2 | 46 |
+| `be/beintcharacter` | 10 | 0 | 0 | 10 |
 | `bxrandom` | 10 | 0 | 0 | 10 |
-| `be/beintcharacter` | 9 | 0 | 11 | 20 |
 | `hashvalue` | 6 | 0 | 0 | 6 |
-| `main/sectionman` | 6 | 0 | 6 | 12 |
-| `visualfx/crowdrender2d` | 1 | 5 | 7 | 13 |
+| `main/sectionman` | 6 | 0 | 7 | 13 |
+| `visualfx/crowdrender2d` | 1 | 5 | 6 | 12 |
 | `fe/festatetransition` | 4 | 0 | 1 | 5 |
 | `md5` | 4 | 0 | 0 | 4 |
 | `data/vutext` | 1 | 0 | 0 | 1 |
-| `dirtysock/tags` | 1 | 0 | 39 | 40 |
+| `dirtysock/tags` | 1 | 0 | 44 | 45 |
 
 ## Full per-file breakdown
 
@@ -45,23 +45,23 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `1121A0`
 
-0 matching, 0 partial, 183 not started (183 total)
+0 matching, 0 partial, 178 not started (178 total)
 
 ### `1218`
 
-0 matching, 0 partial, 168 not started (168 total)
+0 matching, 0 partial, 110 not started (110 total)
 
 ### `13D808`
 
-0 matching, 0 partial, 241 not started (241 total)
+0 matching, 0 partial, 137 not started (137 total)
 
 ### `14B10`
 
-0 matching, 0 partial, 68 not started (68 total)
+0 matching, 0 partial, 56 not started (56 total)
 
 ### `152718`
 
-0 matching, 0 partial, 595 not started (595 total)
+0 matching, 0 partial, 514 not started (514 total)
 
 ### `1763B8`
 
@@ -69,7 +69,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `182F30`
 
-0 matching, 0 partial, 167 not started (167 total)
+0 matching, 0 partial, 162 not started (162 total)
 
 ### `1BA100`
 
@@ -93,7 +93,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `1FBE38`
 
-0 matching, 0 partial, 169 not started (169 total)
+0 matching, 0 partial, 125 not started (125 total)
 
 ### `2125C8`
 
@@ -113,7 +113,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `21A1C0`
 
-0 matching, 0 partial, 61 not started (61 total)
+0 matching, 0 partial, 55 not started (55 total)
 
 ### `21E5A8`
 
@@ -129,7 +129,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `29F8B8`
 
-0 matching, 0 partial, 17 not started (17 total)
+0 matching, 0 partial, 11 not started (11 total)
 
 ### `2A15E8`
 
@@ -137,15 +137,15 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `2A7D50`
 
-0 matching, 0 partial, 77 not started (77 total)
+0 matching, 0 partial, 63 not started (63 total)
 
 ### `2AD800`
 
-0 matching, 0 partial, 1342 not started (1342 total)
+0 matching, 0 partial, 1200 not started (1200 total)
 
 ### `2EEF50`
 
-0 matching, 0 partial, 1655 not started (1655 total)
+0 matching, 0 partial, 1428 not started (1428 total)
 
 ### `4EC80`
 
@@ -157,11 +157,11 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `54088`
 
-0 matching, 0 partial, 18 not started (18 total)
+0 matching, 0 partial, 4 not started (4 total)
 
 ### `57338`
 
-0 matching, 0 partial, 41 not started (41 total)
+0 matching, 0 partial, 13 not started (13 total)
 
 ### `6CF20`
 
@@ -169,11 +169,11 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `7BCC8`
 
-0 matching, 0 partial, 19 not started (19 total)
+0 matching, 0 partial, 4 not started (4 total)
 
 ### `84DE0`
 
-0 matching, 0 partial, 9 not started (9 total)
+0 matching, 0 partial, 2 not started (2 total)
 
 ### `87B50`
 
@@ -181,7 +181,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `923B8`
 
-0 matching, 0 partial, 59 not started (59 total)
+0 matching, 0 partial, 18 not started (18 total)
 
 ### `966F8`
 
@@ -197,76 +197,77 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `CF758`
 
-0 matching, 0 partial, 9 not started (9 total)
+0 matching, 0 partial, 4 not started (4 total)
 
 ### `D76B0`
 
-0 matching, 0 partial, 386 not started (386 total)
+0 matching, 0 partial, 361 not started (361 total)
 
 ### `ai/ai`
 
-0 matching, 0 partial, 269 not started (269 total)
+0 matching, 0 partial, 528 not started (528 total)
 
 ### `ai/airpredictor`
 
-0 matching, 0 partial, 10 not started (10 total)
+0 matching, 0 partial, 23 not started (23 total)
 
 ### `ai/computer`
 
-0 matching, 0 partial, 160 not started (160 total)
+0 matching, 0 partial, 178 not started (178 total)
 
 ### `ai/control/handplantcontrol`
 
-0 matching, 0 partial, 233 not started (233 total)
+0 matching, 0 partial, 500 not started (500 total)
 
 ### `ai/motion/wipeoutmotion`
 
-0 matching, 0 partial, 16 not started (16 total)
+0 matching, 0 partial, 58 not started (58 total)
 
 ### `ai/rider`
 
-0 matching, 0 partial, 168 not started (168 total)
+0 matching, 0 partial, 253 not started (253 total)
 
 ### `ai/ridermetrix`
 
-0 matching, 0 partial, 73 not started (73 total)
+0 matching, 0 partial, 162 not started (162 total)
 
 ### `animation/animmodel`
 
-0 matching, 0 partial, 34 not started (34 total)
+0 matching, 0 partial, 50 not started (50 total)
 
 ### `animation/animsequencer`
 
-0 matching, 0 partial, 44 not started (44 total)
+0 matching, 0 partial, 47 not started (47 total)
 
 ### `animation/gameanimmap`
 
-0 matching, 0 partial, 18 not started (18 total)
+0 matching, 0 partial, 219 not started (219 total)
 
 ### `animation/rideranimbase`
 
-0 matching, 0 partial, 60 not started (60 total)
+0 matching, 0 partial, 47 not started (47 total)
 
 ### `be/bedbreward`
 
-0 matching, 0 partial, 146 not started (146 total)
+0 matching, 0 partial, 207 not started (207 total)
 
 ### `be/beintaggression`
 
-0 matching, 0 partial, 10 not started (10 total)
+0 matching, 0 partial, 12 not started (12 total)
 
 ### `be/beintbagt`
 
-0 matching, 0 partial, 31 not started (31 total)
+0 matching, 0 partial, 25 not started (25 total)
 
 ### `be/beintcharacter`
 
-9 matching, 0 partial, 11 not started (20 total)
+10 matching, 0 partial, 0 not started (10 total)
 
 | Function | Status | Match % | Size |
 |---|---|---|---|
 | `cBECharacterInterface::getWeight(int)` | Matching | 100.00% | 60 |
 | `cBECharacterInterface::isGoofy(int)` | Matching | 100.00% | 56 |
+| `cBECharacterInterface::getModelScale(int)` | Matching | 100.00% | 344 |
 | `cBECharacterInterface::func_0014F100` | Matching | 100.00% | 8 |
 | `cBECharacterInterface::getBloodType(int)` | Matching | 100.00% | 48 |
 | `cBECharacterInterface::isFemale(int)` | Matching | 100.00% | 56 |
@@ -277,51 +278,51 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `be/beintecon`
 
-0 matching, 0 partial, 53 not started (53 total)
+0 matching, 0 partial, 40 not started (40 total)
 
 ### `be/beintmission`
 
-0 matching, 0 partial, 50 not started (50 total)
+0 matching, 0 partial, 51 not started (51 total)
 
 ### `be/beintnetwork`
 
-0 matching, 0 partial, 19 not started (19 total)
+0 matching, 0 partial, 21 not started (21 total)
 
 ### `be/beintnewrace`
 
-0 matching, 0 partial, 59 not started (59 total)
+0 matching, 0 partial, 49 not started (49 total)
 
 ### `be/beintoption`
 
-0 matching, 0 partial, 17 not started (17 total)
+0 matching, 0 partial, 20 not started (20 total)
 
 ### `be/beintplayer`
 
-0 matching, 0 partial, 123 not started (123 total)
+0 matching, 0 partial, 115 not started (115 total)
 
 ### `be/beintreward`
 
-0 matching, 0 partial, 173 not started (173 total)
+0 matching, 0 partial, 115 not started (115 total)
 
 ### `be/beintsavefile`
 
-0 matching, 0 partial, 12 not started (12 total)
+0 matching, 0 partial, 15 not started (15 total)
 
 ### `be/beintscore`
 
-0 matching, 0 partial, 34 not started (34 total)
+0 matching, 0 partial, 28 not started (28 total)
 
 ### `be/beintstat`
 
-0 matching, 0 partial, 15 not started (15 total)
+0 matching, 0 partial, 18 not started (18 total)
 
 ### `be/belibrary`
 
-0 matching, 0 partial, 90 not started (90 total)
+0 matching, 0 partial, 98 not started (98 total)
 
 ### `bx/bxstring`
 
-39 matching, 5 partial, 0 not started (44 total)
+39 matching, 5 partial, 2 not started (46 total)
 
 | Function | Status | Match % | Size |
 |---|---|---|---|
@@ -372,19 +373,19 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `bx/bxstringctor`
 
-0 matching, 0 partial, 99 not started (99 total)
+0 matching, 0 partial, 106 not started (106 total)
 
 ### `bx/cubicspline`
 
-0 matching, 0 partial, 76 not started (76 total)
+0 matching, 0 partial, 77 not started (77 total)
 
 ### `bx/execman`
 
-0 matching, 0 partial, 31 not started (31 total)
+0 matching, 0 partial, 34 not started (34 total)
 
 ### `bx/ps2main`
 
-0 matching, 0 partial, 18 not started (18 total)
+0 matching, 0 partial, 63 not started (63 total)
 
 ### `bxrandom`
 
@@ -405,31 +406,31 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `camera/camera`
 
-0 matching, 0 partial, 238 not started (238 total)
+0 matching, 0 partial, 713 not started (713 total)
 
 ### `camera/cameraalgolist`
 
-0 matching, 0 partial, 3 not started (3 total)
+0 matching, 0 partial, 4 not started (4 total)
 
 ### `camera/cameraalgorithms`
 
-0 matching, 0 partial, 38 not started (38 total)
+0 matching, 0 partial, 43 not started (43 total)
 
 ### `camera/cameracontroller`
 
-0 matching, 0 partial, 15 not started (15 total)
+0 matching, 0 partial, 18 not started (18 total)
 
 ### `camera/script/scriptcontroller`
 
-0 matching, 0 partial, 41 not started (41 total)
+0 matching, 0 partial, 111 not started (111 total)
 
 ### `camera/trigger/cameratriggerfactory`
 
-0 matching, 0 partial, 150 not started (150 total)
+0 matching, 0 partial, 729 not started (729 total)
 
 ### `camera/trigger/cameratriggerman`
 
-0 matching, 0 partial, 96 not started (96 total)
+0 matching, 0 partial, 32 not started (32 total)
 
 ### `data/33DE00.data`
 
@@ -2489,7 +2490,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `dirtysock/tags`
 
-1 matching, 0 partial, 39 not started (40 total)
+1 matching, 0 partial, 44 not started (45 total)
 
 | Function | Status | Match % | Size |
 |---|---|---|---|
@@ -2497,107 +2498,107 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `fe/debugfe`
 
-0 matching, 0 partial, 156 not started (156 total)
+0 matching, 0 partial, 208 not started (208 total)
 
 ### `fe/feasyncfile`
 
-0 matching, 0 partial, 818 not started (818 total)
+0 matching, 0 partial, 1273 not started (1273 total)
 
 ### `fe/fepopup`
 
-0 matching, 0 partial, 190 not started (190 total)
+0 matching, 0 partial, 207 not started (207 total)
 
 ### `fe/fepopupmisc`
 
-0 matching, 0 partial, 435 not started (435 total)
+0 matching, 0 partial, 394 not started (394 total)
 
 ### `fe/fereal`
 
-0 matching, 0 partial, 112 not started (112 total)
+0 matching, 0 partial, 84 not started (84 total)
 
 ### `fe/feridermanager`
 
-0 matching, 0 partial, 61 not started (61 total)
+0 matching, 0 partial, 69 not started (69 total)
 
 ### `fe/festateaudiooptions`
 
-0 matching, 0 partial, 13 not started (13 total)
+0 matching, 0 partial, 39 not started (39 total)
 
 ### `fe/festatebigradio`
 
-0 matching, 0 partial, 56 not started (56 total)
+0 matching, 0 partial, 62 not started (62 total)
 
 ### `fe/festatebonusmaterial`
 
-0 matching, 0 partial, 5 not started (5 total)
+0 matching, 0 partial, 10 not started (10 total)
 
 ### `fe/festatebuyattrib`
 
-0 matching, 0 partial, 31 not started (31 total)
+0 matching, 0 partial, 124 not started (124 total)
 
 ### `fe/festatecharequipdetail`
 
-0 matching, 0 partial, 102 not started (102 total)
+0 matching, 0 partial, 134 not started (134 total)
 
 ### `fe/festatecharselect`
 
-0 matching, 0 partial, 25 not started (25 total)
+0 matching, 0 partial, 62 not started (62 total)
 
 ### `fe/festatecharsetup`
 
-0 matching, 0 partial, 9 not started (9 total)
+0 matching, 0 partial, 22 not started (22 total)
 
 ### `fe/festatecredits`
 
-0 matching, 0 partial, 10 not started (10 total)
+0 matching, 0 partial, 24 not started (24 total)
 
 ### `fe/festatedebug`
 
-0 matching, 0 partial, 3 not started (3 total)
+0 matching, 0 partial, 16 not started (16 total)
 
 ### `fe/festatelegal`
 
-0 matching, 0 partial, 4 not started (4 total)
+0 matching, 0 partial, 5 not started (5 total)
 
 ### `fe/festateload`
 
-0 matching, 0 partial, 13 not started (13 total)
+0 matching, 0 partial, 16 not started (16 total)
 
 ### `fe/festateloadhint`
 
-0 matching, 0 partial, 48 not started (48 total)
+0 matching, 0 partial, 32 not started (32 total)
 
 ### `fe/festateloadscreen`
 
-0 matching, 0 partial, 34 not started (34 total)
+0 matching, 0 partial, 37 not started (37 total)
 
 ### `fe/festatelodge`
 
-0 matching, 0 partial, 13 not started (13 total)
+0 matching, 0 partial, 44 not started (44 total)
 
 ### `fe/festateoptions`
 
-0 matching, 0 partial, 59 not started (59 total)
+0 matching, 0 partial, 66 not started (66 total)
 
 ### `fe/festateprofile`
 
-0 matching, 0 partial, 26 not started (26 total)
+0 matching, 0 partial, 43 not started (43 total)
 
 ### `fe/festaterewards`
 
-0 matching, 0 partial, 94 not started (94 total)
+0 matching, 0 partial, 131 not started (131 total)
 
 ### `fe/festateriderbio`
 
-0 matching, 0 partial, 11 not started (11 total)
+0 matching, 0 partial, 23 not started (23 total)
 
 ### `fe/festateriderbiodetail`
 
-0 matching, 0 partial, 9 not started (9 total)
+0 matching, 0 partial, 313 not started (313 total)
 
 ### `fe/festatestore`
 
-0 matching, 0 partial, 20 not started (20 total)
+0 matching, 0 partial, 49 not started (49 total)
 
 ### `fe/festatetransition`
 
@@ -2612,55 +2613,55 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `fe/festatetrophyroom`
 
-0 matching, 0 partial, 36 not started (36 total)
+0 matching, 0 partial, 56 not started (56 total)
 
 ### `fe/messagecenter`
 
-0 matching, 0 partial, 23 not started (23 total)
+0 matching, 0 partial, 58 not started (58 total)
 
 ### `fe/ovstateenterlodge`
 
-0 matching, 0 partial, 27 not started (27 total)
+0 matching, 0 partial, 82 not started (82 total)
 
 ### `fe/ovstatehud`
 
-0 matching, 0 partial, 84 not started (84 total)
+0 matching, 0 partial, 245 not started (245 total)
 
 ### `fe/ovstatelodge`
 
-0 matching, 0 partial, 22 not started (22 total)
+0 matching, 0 partial, 117 not started (117 total)
 
 ### `fe/ovstatemap`
 
-0 matching, 0 partial, 30 not started (30 total)
+0 matching, 0 partial, 56 not started (56 total)
 
 ### `fe/ovstatepause`
 
-0 matching, 0 partial, 79 not started (79 total)
+0 matching, 0 partial, 243 not started (243 total)
 
 ### `fe/ovstatereplay`
 
-0 matching, 0 partial, 17 not started (17 total)
+0 matching, 0 partial, 26 not started (26 total)
 
 ### `fe/ovstates`
 
-0 matching, 0 partial, 22 not started (22 total)
+0 matching, 0 partial, 24 not started (24 total)
 
 ### `fe/ovstatetrophy`
 
-0 matching, 0 partial, 24 not started (24 total)
+0 matching, 0 partial, 51 not started (51 total)
 
 ### `fe/ovtemplatedialog`
 
-0 matching, 0 partial, 56 not started (56 total)
+0 matching, 0 partial, 43 not started (43 total)
 
 ### `fe/ovtemplatepausemenu`
 
-0 matching, 0 partial, 33 not started (33 total)
+0 matching, 0 partial, 30 not started (30 total)
 
 ### `fe/uitemplatemap`
 
-0 matching, 0 partial, 52 not started (52 total)
+0 matching, 0 partial, 336 not started (336 total)
 
 ### `hashvalue`
 
@@ -2677,59 +2678,59 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `input/inputmap`
 
-0 matching, 0 partial, 21 not started (21 total)
+0 matching, 0 partial, 24 not started (24 total)
 
 ### `input/inputparse`
 
-0 matching, 0 partial, 184 not started (184 total)
+0 matching, 0 partial, 97 not started (97 total)
 
 ### `intersect/aifwddiff`
 
-0 matching, 0 partial, 21 not started (21 total)
+0 matching, 0 partial, 31 not started (31 total)
 
 ### `intersect/riderspheretree`
 
-0 matching, 0 partial, 77 not started (77 total)
+0 matching, 0 partial, 111 not started (111 total)
 
 ### `intersect/worldsphtree`
 
-0 matching, 0 partial, 86 not started (86 total)
+0 matching, 0 partial, 219 not started (219 total)
 
 ### `luno/lunovm`
 
-0 matching, 0 partial, 71 not started (71 total)
+0 matching, 0 partial, 97 not started (97 total)
 
 ### `main/debugmenu`
 
-0 matching, 0 partial, 94 not started (94 total)
+0 matching, 0 partial, 288 not started (288 total)
 
 ### `main/game`
 
-0 matching, 0 partial, 67 not started (67 total)
+0 matching, 0 partial, 44 not started (44 total)
 
 ### `main/gameload`
 
-0 matching, 0 partial, 105 not started (105 total)
+0 matching, 0 partial, 87 not started (87 total)
 
 ### `main/gamemode`
 
-0 matching, 0 partial, 68 not started (68 total)
+0 matching, 0 partial, 62 not started (62 total)
 
 ### `main/gamerender`
 
-0 matching, 0 partial, 8 not started (8 total)
+0 matching, 0 partial, 14 not started (14 total)
 
 ### `main/gamestate`
 
-0 matching, 0 partial, 79 not started (79 total)
+0 matching, 0 partial, 84 not started (84 total)
 
 ### `main/loadscreens_prestart`
 
-0 matching, 0 partial, 34 not started (34 total)
+0 matching, 0 partial, 128 not started (128 total)
 
 ### `main/sectionman`
 
-6 matching, 0 partial, 6 not started (12 total)
+6 matching, 0 partial, 7 not started (13 total)
 
 | Function | Status | Match % | Size |
 |---|---|---|---|
@@ -2742,11 +2743,11 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `main/ssxapp`
 
-0 matching, 0 partial, 58 not started (58 total)
+0 matching, 0 partial, 96 not started (96 total)
 
 ### `main/ssxappdtor`
 
-0 matching, 0 partial, 197 not started (197 total)
+0 matching, 0 partial, 199 not started (199 total)
 
 ### `md5`
 
@@ -2761,43 +2762,43 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `object/animnode`
 
-0 matching, 0 partial, 9 not started (9 total)
+0 matching, 0 partial, 15 not started (15 total)
 
 ### `object/bucketman`
 
-0 matching, 0 partial, 19 not started (19 total)
+0 matching, 0 partial, 20 not started (20 total)
 
 ### `object/deadfadenode`
 
-0 matching, 0 partial, 13 not started (13 total)
+0 matching, 0 partial, 14 not started (14 total)
 
 ### `object/debouncenode`
 
-0 matching, 0 partial, 44 not started (44 total)
+0 matching, 0 partial, 49 not started (49 total)
 
 ### `object/effectlink`
 
-0 matching, 0 partial, 30 not started (30 total)
+0 matching, 0 partial, 37 not started (37 total)
 
 ### `object/flagset`
 
-0 matching, 0 partial, 36 not started (36 total)
+0 matching, 0 partial, 62 not started (62 total)
 
 ### `object/flexbridgenode`
 
-0 matching, 0 partial, 17 not started (17 total)
+0 matching, 0 partial, 40 not started (40 total)
 
 ### `object/flexrailnode`
 
-0 matching, 0 partial, 34 not started (34 total)
+0 matching, 0 partial, 38 not started (38 total)
 
 ### `object/floatingnode`
 
-0 matching, 0 partial, 10 not started (10 total)
+0 matching, 0 partial, 13 not started (13 total)
 
 ### `object/instanceman`
 
-0 matching, 0 partial, 25 not started (25 total)
+0 matching, 0 partial, 27 not started (27 total)
 
 ### `object/instancenode`
 
@@ -2805,15 +2806,15 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `object/modifierblock`
 
-0 matching, 0 partial, 37 not started (37 total)
+0 matching, 0 partial, 51 not started (51 total)
 
 ### `object/movenode`
 
-0 matching, 0 partial, 96 not started (96 total)
+0 matching, 0 partial, 102 not started (102 total)
 
 ### `object/multiparticle`
 
-0 matching, 0 partial, 33 not started (33 total)
+0 matching, 0 partial, 45 not started (45 total)
 
 ### `object/objnode`
 
@@ -2821,7 +2822,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `object/railmodifier`
 
-0 matching, 0 partial, 401 not started (401 total)
+0 matching, 0 partial, 463 not started (463 total)
 
 ### `object/spline3d`
 
@@ -2829,31 +2830,31 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `object/splinemodifier`
 
-0 matching, 0 partial, 35 not started (35 total)
+0 matching, 0 partial, 59 not started (59 total)
 
 ### `object/spring`
 
-0 matching, 0 partial, 4 not started (4 total)
+0 matching, 0 partial, 5 not started (5 total)
 
 ### `path/pathsys`
 
-0 matching, 0 partial, 24 not started (24 total)
+0 matching, 0 partial, 99 not started (99 total)
 
 ### `render/bezierman`
 
-0 matching, 0 partial, 20 not started (20 total)
+0 matching, 0 partial, 32 not started (32 total)
 
 ### `render/font`
 
-0 matching, 0 partial, 446 not started (446 total)
+0 matching, 0 partial, 517 not started (517 total)
 
 ### `render/graphicsman`
 
-0 matching, 0 partial, 59 not started (59 total)
+0 matching, 0 partial, 95 not started (95 total)
 
 ### `render/irradiance`
 
-0 matching, 0 partial, 2 not started (2 total)
+0 matching, 0 partial, 5 not started (5 total)
 
 ### `render/lightman`
 
@@ -2861,27 +2862,27 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `render/particle`
 
-0 matching, 0 partial, 258 not started (258 total)
+0 matching, 0 partial, 349 not started (349 total)
 
 ### `render/ps2graphicsman`
 
-0 matching, 0 partial, 78 not started (78 total)
+0 matching, 0 partial, 47 not started (47 total)
 
 ### `replay/frameptr`
 
-0 matching, 0 partial, 56 not started (56 total)
+0 matching, 0 partial, 42 not started (42 total)
 
 ### `replay/playbackman`
 
-0 matching, 0 partial, 47 not started (47 total)
+0 matching, 0 partial, 56 not started (56 total)
 
 ### `replay/replay`
 
-0 matching, 0 partial, 44 not started (44 total)
+0 matching, 0 partial, 45 not started (45 total)
 
 ### `replay/replaycache`
 
-0 matching, 0 partial, 214 not started (214 total)
+0 matching, 0 partial, 268 not started (268 total)
 
 ### `sce/crt0`
 
@@ -2889,51 +2890,51 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `scripter/datamanager`
 
-0 matching, 0 partial, 57 not started (57 total)
+0 matching, 0 partial, 62 not started (62 total)
 
 ### `scripter/ssxscriptengine`
 
-0 matching, 0 partial, 234 not started (234 total)
+0 matching, 0 partial, 220 not started (220 total)
 
 ### `sound/asyncsys`
 
-0 matching, 0 partial, 23 not started (23 total)
+0 matching, 0 partial, 25 not started (25 total)
 
 ### `sound/bankmanager`
 
-0 matching, 0 partial, 92 not started (92 total)
+0 matching, 0 partial, 99 not started (99 total)
 
 ### `sound/bankmonitor`
 
-0 matching, 0 partial, 213 not started (213 total)
+0 matching, 0 partial, 242 not started (242 total)
 
 ### `sound/icepick/worldtriggermanager`
 
-0 matching, 0 partial, 66 not started (66 total)
+0 matching, 0 partial, 138 not started (138 total)
 
 ### `sound/ps2soundman`
 
-0 matching, 0 partial, 3 not started (3 total)
+0 matching, 0 partial, 17 not started (17 total)
 
 ### `sound/soundsys`
 
-0 matching, 0 partial, 407 not started (407 total)
+0 matching, 0 partial, 383 not started (383 total)
 
 ### `sound/ssxAudio`
 
-0 matching, 0 partial, 105 not started (105 total)
+0 matching, 0 partial, 145 not started (145 total)
 
 ### `sound/streamsys`
 
-0 matching, 0 partial, 87 not started (87 total)
+0 matching, 0 partial, 93 not started (93 total)
 
 ### `ui/uiengine`
 
-0 matching, 0 partial, 36 not started (36 total)
+0 matching, 0 partial, 46 not started (46 total)
 
 ### `ui/uilistbox`
 
-0 matching, 0 partial, 16 not started (16 total)
+0 matching, 0 partial, 19 not started (19 total)
 
 ### `ui/uimenu`
 
@@ -2941,7 +2942,7 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `ui/uiscreen`
 
-0 matching, 0 partial, 77 not started (77 total)
+0 matching, 0 partial, 68 not started (68 total)
 
 ### `ui/uistatestack`
 
@@ -2949,23 +2950,23 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `ui/uithing`
 
-0 matching, 0 partial, 42 not started (42 total)
+0 matching, 0 partial, 33 not started (33 total)
 
 ### `ui/uivector`
 
-0 matching, 0 partial, 317 not started (317 total)
+0 matching, 0 partial, 364 not started (364 total)
 
 ### `util/locale`
 
-0 matching, 0 partial, 16 not started (16 total)
+0 matching, 0 partial, 19 not started (19 total)
 
 ### `util/menu`
 
-0 matching, 0 partial, 206 not started (206 total)
+0 matching, 0 partial, 235 not started (235 total)
 
 ### `util/objectinterface`
 
-0 matching, 0 partial, 25 not started (25 total)
+0 matching, 0 partial, 31 not started (31 total)
 
 ### `util/statemachine`
 
@@ -2973,27 +2974,27 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `visualfx/angerfx`
 
-0 matching, 0 partial, 11 not started (11 total)
+0 matching, 0 partial, 21 not started (21 total)
 
 ### `visualfx/avalanche`
 
-0 matching, 0 partial, 35 not started (35 total)
+0 matching, 0 partial, 70 not started (70 total)
 
 ### `visualfx/boardsparkfx`
 
-0 matching, 0 partial, 5 not started (5 total)
+0 matching, 0 partial, 32 not started (32 total)
 
 ### `visualfx/boardtrailfx`
 
-0 matching, 0 partial, 35 not started (35 total)
+0 matching, 0 partial, 55 not started (55 total)
 
 ### `visualfx/boardwakefx`
 
-0 matching, 0 partial, 84 not started (84 total)
+0 matching, 0 partial, 269 not started (269 total)
 
 ### `visualfx/crowdrender2d`
 
-1 matching, 5 partial, 7 not started (13 total)
+1 matching, 5 partial, 6 not started (12 total)
 
 | Function | Status | Match % | Size |
 |---|---|---|---|
@@ -3006,27 +3007,27 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `visualfx/lensfx`
 
-0 matching, 0 partial, 50 not started (50 total)
+0 matching, 0 partial, 65 not started (65 total)
 
 ### `visualfx/renderstateman`
 
-0 matching, 0 partial, 55 not started (55 total)
+0 matching, 0 partial, 63 not started (63 total)
 
 ### `visualfx/worldlightman`
 
-0 matching, 0 partial, 147 not started (147 total)
+0 matching, 0 partial, 464 not started (464 total)
 
 ### `world/world`
 
-0 matching, 0 partial, 19 not started (19 total)
+0 matching, 0 partial, 25 not started (25 total)
 
 ### `world/worldview`
 
-0 matching, 0 partial, 102 not started (102 total)
+0 matching, 0 partial, 65 not started (65 total)
 
 ### `worldpainter/quadtree`
 
-0 matching, 0 partial, 222 not started (222 total)
+0 matching, 0 partial, 266 not started (266 total)
 
 ### `worldpainter/worldpainterman`
 
@@ -3034,21 +3035,21 @@ Every unit, including ones with no progress yet. Matching and Partial functions 
 
 ### `worldpainter/worldpaintermanquery`
 
-0 matching, 0 partial, 76 not started (76 total)
+0 matching, 0 partial, 145 not started (145 total)
 
 ### `worldpainter/worldpainterqueryctor`
 
-0 matching, 0 partial, 18 not started (18 total)
+0 matching, 0 partial, 39 not started (39 total)
 
 ### `wscript/wscriptcompile`
 
-0 matching, 0 partial, 5 not started (5 total)
+0 matching, 0 partial, 6 not started (6 total)
 
 ### `wscript/wscriptman`
 
-0 matching, 0 partial, 182 not started (182 total)
+0 matching, 0 partial, 237 not started (237 total)
 
 ### `wscript/wscriptprocess`
 
-0 matching, 0 partial, 88 not started (88 total)
+0 matching, 0 partial, 69 not started (69 total)
 

@@ -127,18 +127,45 @@ mismatches: a class's vtable is emitted by one file but referenced by
 constructors and destructors elsewhere. Unreferenced data between two units'
 items is given to the earlier unit, which may be wrong.
 
-All chunks are standalone asm objects (`asm/data/<unit>.<section>.s`), placed
-by `configure.py` in an output section without padding (`.main_data`,
-`SUBALIGN(1)`), since each chunk is an exact byte range of the original.
+Each chunk starts as a standalone asm object (`asm/data/<unit>.<section>.s`).
+`configure.py` places the data in an output section without padding
+(`.main_data`, `SUBALIGN(1)`), since each chunk is an exact byte range of the
+original.
 
 ### Decompiling functions that use data
 
 Compiled C emits its own float constants, jump tables and strings into its
-object. That data is already in the unit's asm chunk, so once a decompiled
-function needs any, the unit's chunk has to become the cpp object's
-(`[addr, .rodata, unit]` with a leading dot). The object must then emit the
-whole chunk in the original order. The C functions emit their own data; the
-data of functions still under INCLUDE_ASM has to come from their .s files.
-Doing that means moving each function's data into its nonmatching .s (what
-splat's `migrate_rodata_to_functions` does for .rodata, extended to .lit4),
-which is the next piece of tooling to write.
+object, in the order the functions appear. So for a unit with decompiled
+code, its `.lit4`, `.rodata` and `.sdata` have to come from the cpp object,
+not from the standalone chunk. `configure.py` (`migrate_unit_data`) does this
+for every cpp unit on each configure:
+
+- Each item in the chunk is appended, in a `.section` block, to the
+  nonmatching .s of the first INCLUDE_ASM function that references it, so
+  INCLUDE_ASM emits it in the original place. The linker script then takes
+  that section from the cpp object instead of the chunk.
+- `.lit4` words and jump tables that no INCLUDE_ASM function references are
+  dropped: only decompiled functions can be using them, and the compiler
+  emits them again. Other unreferenced items stay with the preceding
+  function.
+- A unit with no INCLUDE_ASM functions left takes all of its data from the
+  compiled C.
+- If giving the items to their functions would change the chunk's byte
+  order, the chunk stays standalone. `obj/standalone_data.txt` lists these
+  (38 chunks, all "data order differs from function order"). Functions in
+  them can still be decompiled if they use no data from that section.
+
+`.data` is not migrated. Vtables and other initialised data still come from
+the chunks, so constructors and destructors that would make the compiler
+emit a vtable can't be decompiled yet.
+
+Decompiled float constants match as long as each function's literals are in
+the original order (the compiler emits one `.lit4` word per `li.s`, in
+instruction order, with no merging). `be/beintcharacter`'s
+`getModelScale`, with a jump table and eight `.lit4` constants, is the first
+function matched this way.
+
+Jump table targets in the asm use `jlabel` (`include/macro.inc`), a global
+label that isn't typed as a function, so it doesn't split the function in
+objdiff. The SN assembler gives it the object type, so
+`scripts/diff_func.sh` disassembles with `-D`.

@@ -37,6 +37,8 @@ options:
   auto_link_sections: [".data", ".rodata", ".bss"]
 
   subalign: 8
+  # Jump table targets are code labels, not functions
+  asm_jtbl_label_macro: jlabel
 
 segments:
   - name: elf_header

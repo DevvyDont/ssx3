@@ -3,6 +3,14 @@
     .type \label, @function
     \label:
 .endm
+# A jump table target inside a function. Global, so a jump table that is
+# still in a data chunk object can reach it, but not typed as a function,
+# so it doesn't split the function. (The SN assembler makes it an object
+# symbol, so scripts/diff_func.sh disassembles with -D.)
+.macro jlabel label
+    .global \label
+    \label:
+.endm
 .macro dlabel label
     .global \label
     \label:

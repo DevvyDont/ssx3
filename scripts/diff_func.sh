@@ -9,10 +9,10 @@ sym=$2
 cd "$(dirname "$0")/.."
 
 dump() {
-	mips-linux-gnu-objdump -drz -m mips:5900 --no-show-raw-insn "$1" |
-		awk -v s="<$sym>:" '$2 == s { p = 1; next } p && /^[0-9a-f]+ </ { p = 0 } p' |
+	mips-linux-gnu-objdump -Drz -j .text -m mips:5900 --no-show-raw-insn "$1" |
+		awk -v s="<$sym>:" '$2 == s { p = 1; next } p && /^[0-9a-f]+ <[^.]/ { p = 0 } p && !/^[0-9a-f]+ <\./ && !/^$/' |
 		sed -E 's/^ +[0-9a-f]+:\t//; s/[0-9a-f]+ <[^>]*>/<addr>/; s/^\t+[0-9a-f]+: (R_MIPS_GPREL16)\t.*/\t\t\1/; s/^\t+[0-9a-f]+: (R_)/\t\t\1/; s/-?[0-9]+\(gp\)/<gp>(gp)/' |
-		grep -v "R_MIPS_GPREL16"
+		grep -v "R_MIPS_GPREL16\|R_MIPS_LITERAL"
 }
 
 # Optional third argument: an object to use in place of the unit's current one

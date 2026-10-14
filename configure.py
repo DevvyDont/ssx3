@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import bisect
 import os
 import re
 import shutil
@@ -112,6 +113,136 @@ def fix_new_stubs(paths):
         text = re.sub(r"^void (\w+)\(void\) \{\n\}\n",
                       lambda m: f'INCLUDE_ASM("{unit}", {m.group(1)});\n', text, flags=re.M)
         path.write_text(text)
+
+
+# Data sections whose per-unit chunks are handed to the unit's cpp object
+MIGRATED_DATA = ("lit4", "rodata", "sdata")
+
+
+def exact_float(line):
+    """
+    Write a .float/.double data line as .word with the original bits, from
+    the bytes in its comment: the SN assembler flushes denormals to zero.
+    """
+    m = re.match(r"(\s*/\* [0-9A-F]+ [0-9A-F]{8} ([0-9A-F]+) \*/) \.(float|double) ", line)
+    if not m:
+        return line
+    raw = bytes.fromhex(m.group(2))
+    words = [int.from_bytes(raw[i:i + 4], "little") for i in range(0, len(raw), 4)]
+    return f"{m.group(1)} .word " + ", ".join(f"0x{w:08X}" for w in words)
+
+
+def migrate_unit_data(ld_text):
+    """
+    Hand each cpp unit's .lit4/.rodata/.sdata chunk to its compiled object.
+
+    Each data item in the chunk is appended (in a .section block) to the
+    nonmatching .s of the first INCLUDE_ASM function that references it, so
+    INCLUDE_ASM emits it into the object's section in the same order the
+    original compiler did, while decompiled functions emit their own. Items
+    referenced by no INCLUDE_ASM function stay with the preceding function,
+    except .lit4 words and jump tables, which only decompiled code (whose
+    compiler output regenerates them) can be using. A fully decompiled unit
+    emits all its data itself. A unit is migrated only if
+    this reproduces the chunk's byte order; otherwise the chunk stays a
+    standalone asm object. Returns the updated linker script.
+    """
+    yaml_text = YAML_FILE.read_text()
+    subs = re.findall(r"- \[0x([0-9a-fA-F]+), (\.?\w+)(?:, ([^\]#]+?))?\]", yaml_text)
+    cpp_units = {n.strip() for _, t, n in subs if t == "cpp" and n}
+    symbols = {
+        m.group(1): int(m.group(2), 16)
+        for m in re.finditer(r"^(\S+)\s*=\s*0x([0-9A-Fa-f]+);", (ROOT / "config/symbol_addrs.txt").read_text(), re.M)
+    }
+    line_addr = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8})(?: [0-9A-F]+)? \*/")
+
+    def sym_addr(sym):
+        sym = sym.strip()
+        off = 0
+        m = re.match(r"(\S+)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)$", sym)
+        if m:
+            sym, off = m.group(1), int(m.group(2), 0)
+        m = re.search(r"_([0-9A-F]{8})$", sym)
+        if m:
+            return int(m.group(1), 16) + off
+        return symbols[sym] + off if sym in symbols else None
+
+    migrated = 0
+    skipped = []
+    starts_all = [int(a, 16) + 0xFF000 for a, _, _ in subs]
+    for typ in MIGRATED_DATA:
+        for k, (_, t, name) in enumerate(subs):
+            name = (name or "").strip()
+            chunk_end = starts_all[k + 1] if k + 1 < len(subs) else 0xFFFFFFFF
+            if t != typ or name not in cpp_units:
+                continue
+            chunk = Path(f"asm/data/{name}.{typ}.s")
+            src = Path(f"src/{name}.cpp")
+            if not chunk.exists() or not src.exists():
+                continue
+
+            # Items: (address, symbol, lines)
+            items = []
+            for block in re.split(r"\n(?=nonmatching )", chunk.read_text()):
+                if not block.startswith("nonmatching "):
+                    continue
+                # .align lines stay: some are the padding after strings. The
+                # chunk start is the original object's, so aligning relative
+                # to the section start gives the original layout
+                lines = [exact_float(l) for l in block.split("\n")[1:] if l.strip()]
+                addrs = [int(m.group(1), 16) for l in lines for m in [line_addr.search(l)] if m]
+                assert addrs, f"no address for {block.split()[1]} in {chunk}"
+                items.append((addrs[0], block.split()[1], lines))
+            if not items:
+                continue
+            starts = [a for a, _, _ in items]
+
+            # With every function decompiled, the compiled object makes all
+            # of the chunk's data itself and nothing is appended
+            funcs = re.findall(r'INCLUDE_ASM\("[^"]+", ([^)]+)\);', src.read_text())
+            owner = {}
+            for index, func in enumerate(funcs):
+                text = Path(f"asm/nonmatchings/{name}/{func}.s").read_text()
+                targets = [sym_addr(m.group(1)) for m in re.finditer(r"%lo\(([^)]+)\)", text)]
+                targets += [GP_VALUE + int(m.group(1), 0) for m in re.finditer(r"(-?0x[0-9A-Fa-f]+|-?\d+)\(\$28\)", text)]
+                for target in targets:
+                    if target is None or not starts[0] <= target < chunk_end:
+                        continue
+                    i = bisect.bisect_right(starts, target) - 1
+                    owner.setdefault(i, index)
+
+            blocks = {}
+            order = []
+            current = None
+            for i, (addr, sym, lines) in enumerate(items):
+                if i in owner:
+                    current = owner[i]
+                elif typ == "lit4" or sym.startswith("jtbl_"):
+                    continue
+                if not funcs:
+                    continue
+                if current is None:
+                    current = min(owner.values()) if owner else 0
+                order.append(current)
+                blocks.setdefault(current, []).extend(lines)
+            if any(a > b for a, b in zip(order, order[1:])):
+                skipped.append((name, typ, "data order differs from function order"))
+                continue
+
+            for index, lines in blocks.items():
+                path = Path(f"asm/nonmatchings/{name}/{funcs[index]}.s")
+                path.write_text(path.read_text().rstrip("\n") + "\n\n.section ." + typ + "\n"
+                                + "\n".join(lines) + "\n.section .text\n")
+            obj = f"obj/src/{name}.cpp.o(.{typ});"
+            ld_text = ld_text.replace(f"        {obj}\n", "")
+            chunk_line = f"        obj/asm/data/{name}.{typ}.s.o(.{typ});\n"
+            assert chunk_line in ld_text, chunk_line
+            ld_text = ld_text.replace(chunk_line, f"        {obj}\n")
+            migrated += 1
+    print(f"Data chunks handed to cpp objects: {migrated}, left standalone: {len(skipped)}")
+    (ROOT / "obj").mkdir(exist_ok=True)
+    (ROOT / "obj" / "standalone_data.txt").write_text("".join(f"{n}\t.{t}\t{why}\n" for n, t, why in skipped))
+    return ld_text
 
 
 def clean():
@@ -472,6 +603,7 @@ def main():
     ld_text = ld.read_text()
     assert "_gp = 0x0;" in ld_text
     ld_text = ld_text.replace("_gp = 0x0;", f"_gp = 0x{GP_VALUE:X};")
+    ld_text = migrate_unit_data(ld_text)
     # Data gets its own output section without padding: every data chunk is an
     # exact byte range of the original, but sections like .rodata and .lit4
     # are only 1- or 4-aligned per object, while the code needs SUBALIGN(8)
