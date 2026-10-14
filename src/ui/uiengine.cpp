@@ -8,7 +8,7 @@ INCLUDE_ASM("ui/uiengine", func_00397B70);
 
 INCLUDE_ASM("ui/uiengine", cUIEngine_loadFile);
 
-INCLUDE_ASM("ui/uiengine", cUIEngine_addScreenByHashName);
+INCLUDE_ASM("ui/uiengine", addScreenByHashName__9cUIEngineP8cUIStateUii);
 
 INCLUDE_ASM("ui/uiengine", func_00397DF8);
 

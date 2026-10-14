@@ -14,7 +14,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getPrimaryThread);
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_jumpToFrame);
 
-INCLUDE_ASM("ui/uiscreen", cUIScreen_playFrame);
+INCLUDE_ASM("ui/uiscreen", playFrame__9cUIScreenii);
 
 INCLUDE_ASM("ui/uiscreen", func_0039C978);
 

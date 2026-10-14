@@ -110,7 +110,7 @@ def unwrap(path):
             print(f"{name}: no object to compare, left wrapped")
             return m.group(0)
         n = sum(1 for line in diff.splitlines()
-                if re.search(r"[^\t]\s+[|<>](\s|$)", line) and not re.match(r"^nop\s+<$", line))
+                if re.search(r"[^\t]\s+[|<>](\s|$)", line) and not re.match(r"^(nop)?\s*<$", line))
         if n:
             print(f"{name}: {n} differing lines, left wrapped")
             return m.group(0)
