@@ -4,6 +4,11 @@
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
+// 4-byte colour (byte aligned: copied with lwl/lwr).
+struct sFontRGBA {
+    unsigned char r, g, b, a;
+};
+
 // The 0x14-byte render-state block at the top of the stack at + 0xE84.
 struct sFontRS {
     int w0;
@@ -648,7 +653,12 @@ extern "C" void func_00392A60(void* self, const char* str, float x, float y)
     func_00391CB0(self, x - w, y, (sMat00391C48*)str);
 }
 
-INCLUDE_ASM("render/font", func_00392AD0);
+// Draws a string right-aligned at x: measures it with the font's scale (+ 0x38, + 0x3C) first.
+extern "C" void func_00392AD0(void* self, const unsigned short* s, float x, float y)
+{
+    float w = func_003921F0(self, s, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    func_00391E30(self, x - w, y, (void*)s);
+}
 
 //100%
 extern void* D_004A3E90;
@@ -1631,7 +1641,16 @@ INCLUDE_ASM("render/font", func_003949A0);
 
 INCLUDE_ASM("render/font", func_00394A20);
 
-INCLUDE_ASM("render/font", func_00394AD8);
+extern "C" float func_00394AD8(float a, float b)
+{
+    if (a < 5000.0f) {
+        return 1.0f;
+    }
+    if (b <= 3750.0f) {
+        return 1.0f;
+    }
+    return 1.0f - (b - 3750.0f) * 0.0008f;
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -2630,7 +2649,14 @@ extern "C" int func_00396058(void)
     return (*(volatile unsigned long*)0x12001000 >> 13) & 0x1;
 }
 
-INCLUDE_ASM("render/font", func_00396080);
+// Requests a GS FINISH-style event (CSR bit 3), waits for it, then returns CSR bit 13.
+extern "C" int func_00396080(void)
+{
+    *(volatile unsigned long*)0x12001000 = 8;
+    while (!(*(volatile unsigned long*)0x12001000 & 8)) {
+    }
+    return (*(volatile unsigned long*)0x12001000 >> 13) & 0x1;
+}
 
 extern "C" void func_00382AF0(void* a, void* b, int c);
 
@@ -3220,11 +3246,14 @@ extern "C" void func_00396720(void* self, int i, cQuad128** a, cQuad128** b, int
     *c = *(int**)((char*)self + 0x204) + idx;
 }
 
-INCLUDE_ASM("render/font", func_00396770);
-
-struct sFontRGBA {
-    unsigned char r, g, b, a;
-};
+extern "C" void func_00396770(void* self, int i, cQuad128* a, cQuad128* b, sFontRGBA* c)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *a = (*(cQuad128**)((char*)self + 0x1A0))[idx];
+    *b = (*(cQuad128**)((char*)self + 0x1A4))[idx];
+    *c = (*(sFontRGBA**)((char*)self + 0x204))[idx];
+}
 
 extern "C" sFontRGBA* func_003967D8(sFontRGBA* out, void* self, int i)
 {
