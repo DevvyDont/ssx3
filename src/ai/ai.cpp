@@ -831,7 +831,9 @@ INCLUDE_ASM("ai/ai", func_0012A4D0);
 
 INCLUDE_ASM("ai/ai", func_0012A4F0);
 
-INCLUDE_ASM("ai/ai", func_0012A558);
+extern "C" void func_0012A558()
+{
+}
 
 INCLUDE_ASM("ai/ai", func_0012A560);
 

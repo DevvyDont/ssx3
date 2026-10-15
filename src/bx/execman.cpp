@@ -30,25 +30,55 @@ void cExecutionMan_postpause()
 
 INCLUDE_ASM("bx/execman", func_00320960);
 
-INCLUDE_ASM("bx/execman", func_00320970);
+extern "C" void func_00320970(void* self, float value)
+{
+    *(float*)((char*)self + 0x24) = value;
+}
 
-INCLUDE_ASM("bx/execman", func_00320978);
+extern "C" int func_00320978(void* self)
+{
+    return *(int*)((char*)self + 0x10);
+}
 
-INCLUDE_ASM("bx/execman", func_00320980);
+extern "C" float func_00320980(void* self)
+{
+    return *(float*)((char*)self + 0x14);
+}
 
-INCLUDE_ASM("bx/execman", func_00320988);
+extern "C" float func_00320988(void* self)
+{
+    return *(float*)((char*)self + 0x24);
+}
 
-INCLUDE_ASM("bx/execman", func_00320990);
+extern "C" float func_00320990(void* self)
+{
+    return *(float*)((char*)self + 0x2C);
+}
 
-INCLUDE_ASM("bx/execman", func_00320998);
+extern "C" int func_00320998(void* self)
+{
+    return *(int*)((char*)self + 0x1C);
+}
 
-INCLUDE_ASM("bx/execman", func_003209A0);
+extern "C" int func_003209A0(void* self)
+{
+    return *(int*)((char*)self + 0x18);
+}
 
-INCLUDE_ASM("bx/execman", func_003209A8);
+extern "C" int func_003209A8(void* self)
+{
+    return *(int*)((char*)self + 0xC);
+}
 
-INCLUDE_ASM("bx/execman", func_003209B0);
+extern "C" void func_003209B0(void* self, int value)
+{
+    *(int*)((char*)self + 0xC) = value;
+}
 
-INCLUDE_ASM("bx/execman", func_003209B8);
+extern "C" int func_003209B8(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
 INCLUDE_ASM("bx/execman", func_003209C0);
 
@@ -60,11 +90,22 @@ INCLUDE_ASM("bx/execman", func_00320A60);
 
 INCLUDE_ASM("bx/execman", func_00320A90);
 
-INCLUDE_ASM("bx/execman", func_00320AC0);
+extern "C" void* func_00320AC0(void* self)
+{
+    return (char*)self + 0x38;
+}
 
-INCLUDE_ASM("bx/execman", func_00320AC8);
+extern int D_004A5B64;
 
-INCLUDE_ASM("bx/execman", func_00320AD0);
+extern "C" int func_00320AC8()
+{
+    return D_004A5B64;
+}
+
+extern "C" void func_00320AD0(void* self, int value)
+{
+    *(int*)((char*)self + 0x34) = value;
+}
 
 //100%
 // deleting destructor: reset the vtable, free when bit 0 of flags is set

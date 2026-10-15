@@ -1623,7 +1623,9 @@ extern "C" int func_0019BEE8(void* self)
     return 0;
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE0);
+extern "C" void func_0019BFE0()
+{
+}
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
 

@@ -36,7 +36,9 @@ extern "C" bool func_0014EF70(void* self, int riderIndex)
 INCLUDE_ASM("be/beintcharacter", func_0014EFA8);
 
 
-INCLUDE_ASM("be/beintcharacter", func_0014F100);
+extern "C" void func_0014F100()
+{
+}
 
 INCLUDE_ASM("be/beintcharacter", func_0014F108);
 

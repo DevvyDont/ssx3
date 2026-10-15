@@ -553,7 +553,9 @@ extern "C" void func_002ADEE8(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002ADF58);
+extern "C" void func_002ADF58()
+{
+}
 
 //100%
 int BXrand();
@@ -1893,9 +1895,15 @@ INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B07C0);
 
-INCLUDE_ASM("sound/bankmonitor", func_002B07E8);
+extern "C" void func_002B07E8(void* self, int value)
+{
+    *(int*)((char*)self + 0x8C4) = value;
+}
 
-INCLUDE_ASM("sound/bankmonitor", func_002B07F0);
+extern "C" void func_002B07F0(void* self, int value)
+{
+    *(int*)((char*)self + 0x8C8) = value;
+}
 
 //100%
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
@@ -2171,7 +2179,12 @@ extern "C" int func_002B1220(void* self, int i)
     return -1;
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B1248);
+extern "C" void func_002AB1A0(void* p);
+
+extern "C" void func_002B1248(void* self)
+{
+    func_002AB1A0(*(void**)((char*)self + 0x0));
+}
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1268);
 

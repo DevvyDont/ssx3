@@ -1746,27 +1746,60 @@ extern "C" sHPC140738* func_00140738(sHPC140738* self)
     return self;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140868);
+extern "C" void func_00140868(void* self, int value)
+{
+    *(int*)((char*)self + 0x87C) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140870);
+extern "C" int func_00140870(void* self)
+{
+    return *(int*)((char*)self + 0x87C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140878);
+extern "C" float func_00140878(void* self)
+{
+    return *(float*)((char*)self + 0x5A4);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140880);
+extern "C" int func_00140880(void* self)
+{
+    return *(int*)((char*)self + 0x5A8);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140888);
+extern "C" int func_00140888(void* self)
+{
+    return *(int*)((char*)self + 0x5AC);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140890);
+extern "C" float func_00140890(void* self)
+{
+    return *(float*)((char*)self + 0x750);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140898);
+extern "C" float func_00140898(void* self)
+{
+    return *(float*)((char*)self + 0x754);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408A0);
+extern "C" float func_001408A0(void* self)
+{
+    return *(float*)((char*)self + 0x758);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408A8);
+extern "C" float func_001408A8(void* self)
+{
+    return *(float*)((char*)self + 0x75C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408B0);
+extern "C" void* func_001408B0(void* self)
+{
+    return (char*)self + 0x400;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408B8);
+extern "C" int func_001408B8(void* self)
+{
+    return *(int*)((char*)self + 0xAA0);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408C0);
 
@@ -1780,7 +1813,10 @@ void* func_001408F0(void* self)
     return (char*)self + 0x110;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408F8);
+extern "C" void* func_001408F8(void* self)
+{
+    return (char*)self + 0x110;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140900);
 
@@ -1798,39 +1834,84 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140958);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140968);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A28);
+extern "C" int func_00140A28(void* self)
+{
+    return *(int*)((char*)self + 0x780);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A30);
+extern "C" int func_00140A30(void* self)
+{
+    return *(int*)((char*)self + 0x784);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A38);
+extern "C" int func_00140A38(void* self)
+{
+    return *(int*)((char*)self + 0x77C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A40);
+extern "C" int func_00140A40(void* self)
+{
+    return *(int*)((char*)self + 0x430);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A48);
+extern "C" int func_00140A48(void* self)
+{
+    return *(int*)((char*)self + 0x434);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A70);
+extern "C" void* func_00140A70(void* self)
+{
+    return (char*)self + 0xAAC;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A78);
+extern "C" void* func_00140A78(void* self)
+{
+    return (char*)self + 0x490;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A80);
+extern "C" void* func_00140A80(void* self)
+{
+    return (char*)self + 0x4A0;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A88);
+extern "C" int func_00140A88(void* self)
+{
+    return *(int*)((char*)self + 0xAB4);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A90);
+extern "C" void func_00140A90(void* self, int value)
+{
+    *(int*)((char*)self + 0xAB4) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A98);
+extern "C" int func_00140A98(void* self)
+{
+    return *(int*)((char*)self + 0xAB8);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AA0);
+extern "C" void func_00140AA0(void* self, int value)
+{
+    *(int*)((char*)self + 0xAB8) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AA8);
+extern "C" void func_00140AA8(void* self, float value)
+{
+    *(float*)((char*)self + 0x4D8) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AB0);
+extern "C" void func_00140AB0(void* self, int value)
+{
+    *(int*)((char*)self + 0xE8) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AB8);
+extern "C" int func_00140AB8(void* self)
+{
+    return *(int*)((char*)self + 0xE8);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AC0);
 
@@ -1840,21 +1921,45 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140AF0);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B18);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B40);
+extern "C" void func_00140B40(void* self, int value)
+{
+    *(int*)((char*)self + 0x474) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B48);
+extern "C" int func_00140B48(void* self)
+{
+    return *(int*)((char*)self + 0x474);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B50);
+extern "C" void func_00140B50(void* self, int value)
+{
+    *(int*)((char*)self + 0x478) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B58);
+extern "C" int func_00140B58(void* self)
+{
+    return *(int*)((char*)self + 0x478);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B60);
+extern "C" void func_00140B60(void* self, int value)
+{
+    *(int*)((char*)self + 0x47C) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B68);
+extern "C" int func_00140B68(void* self)
+{
+    return *(int*)((char*)self + 0x47C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B70);
+extern "C" void func_00140B70(void* self, int value)
+{
+    *(int*)((char*)self + 0x480) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B78);
+extern "C" int func_00140B78(void* self)
+{
+    return *(int*)((char*)self + 0x480);
+}
 
 //100%
 int func_00140B80(void* self)
@@ -1862,11 +1967,20 @@ int func_00140B80(void* self)
     return *(int*)((char*)self + 0x86C);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B88);
+extern "C" void func_00140B88(void* self, int value)
+{
+    *(int*)((char*)self + 0x86C) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B90);
+extern "C" int func_00140B90(void* self)
+{
+    return *(int*)((char*)self + 0x870);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B98);
+extern "C" void func_00140B98(void* self, int value)
+{
+    *(int*)((char*)self + 0x870) = value;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BA0);
 
@@ -1884,33 +1998,69 @@ extern "C" int func_00140BC8(void* self)
     return *(int*)((char*)self + 0x874) ^ 1;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BD8);
+extern "C" int func_00140BD8(void* self)
+{
+    return *(int*)((char*)self + 0x878);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BE0);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C00);
+extern "C" int func_00140C00(void* self)
+{
+    return *(int*)((char*)self + 0x884);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C08);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C18);
+extern "C" int func_00140C18(void* self)
+{
+    return *(int*)((char*)self + 0x888);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C20);
+extern "C" void func_00140C20(void* self, int value)
+{
+    *(int*)((char*)self + 0x888) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C28);
+extern "C" int func_00140C28(void* self)
+{
+    return *(int*)((char*)self + 0x3FC);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C30);
+extern "C" void func_00140C30(void* self, int value)
+{
+    *(int*)((char*)self + 0x3FC) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C38);
+extern "C" int func_00140C38(void* self)
+{
+    return *(int*)((char*)self + 0x790);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C40);
+extern "C" int func_00140C40(void* self)
+{
+    return *(int*)((char*)self + 0x788);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C48);
+extern "C" int func_00140C48(void* self)
+{
+    return *(int*)((char*)self + 0x774);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C50);
+extern "C" void func_00140C50(void* self, int value)
+{
+    *(int*)((char*)self + 0x774) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C58);
+extern "C" int func_00140C58(void* self)
+{
+    return *(int*)((char*)self + 0x778);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C60);
+extern "C" void func_00140C60(void* self, int value)
+{
+    *(int*)((char*)self + 0x778) = value;
+}
 
 //100%
 void func_00140C68(void* self)
@@ -1932,19 +2082,37 @@ void func_00140C80(void* self)
 {
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C88);
+extern "C" int func_00140C88(void* self)
+{
+    return *(int*)((char*)self + 0x898);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C90);
+extern "C" int func_00140C90(void* self)
+{
+    return *(int*)((char*)self + 0x78C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C98);
+extern "C" int func_00140C98(void* self)
+{
+    return *(int*)((char*)self + 0xAA8);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA0);
+extern "C" float func_00140CA0(void* self)
+{
+    return *(float*)((char*)self + 0x5B4);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA8);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD0);
+extern "C" int func_00140CD0(void* self)
+{
+    return *(int*)((char*)self + 0xB00);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD8);
+extern "C" int func_00140CD8(void* self)
+{
+    return *(int*)((char*)self + 0xAC4);
+}
 
 //100%
 void* func_00140CE0(void* self)
@@ -1952,33 +2120,66 @@ void* func_00140CE0(void* self)
     return self;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CE8);
+extern "C" int func_00140CE8(void* self)
+{
+    return *(int*)((char*)self + 0xB18);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CF0);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D10);
+extern "C" void func_00140D10(void* self, int value)
+{
+    *(int*)((char*)self + 0xB20) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D18);
+extern "C" void func_00140D18(void* self, float value)
+{
+    *(float*)((char*)self + 0xB24) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D20);
+extern "C" void func_00140D20(void* self, int value)
+{
+    *(int*)((char*)self + 0xB28) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D28);
+extern "C" void func_00140D28(void* self, int value)
+{
+    *(int*)((char*)self + 0xB30) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D30);
+extern "C" void func_00140D30(void* self, int value)
+{
+    *(int*)((char*)self + 0xB34) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D38);
+extern "C" void func_00140D38(void* self, int value)
+{
+    *(int*)((char*)self + 0x308) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D40);
+extern "C" int func_00140D40(void* self)
+{
+    return *(int*)((char*)self + 0x304);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D48);
+extern "C" int func_00140D48(void* self)
+{
+    return *(int*)((char*)self + 0xB20);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D50);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D60);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D70);
+extern "C" int func_00140D70(void* self)
+{
+    return *(int*)((char*)self + 0xB30);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D78);
+extern "C" int func_00140D78(void* self)
+{
+    return *(int*)((char*)self + 0x308);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D80);
 
@@ -1986,13 +2187,25 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140EE0);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141040);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411A0);
+extern "C" int func_001411A0(void* self)
+{
+    return *(int*)((char*)self + 0x44);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411A8);
+extern "C" void* func_001411A8(void* self)
+{
+    return (char*)self + 0x50;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411B0);
+extern "C" int func_001411B0(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411B8);
+extern "C" void* func_001411B8(void* self)
+{
+    return (char*)self + 0x30;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411C0);
 
@@ -2106,13 +2319,25 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001428F0);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142A50);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00143FF0);
+extern "C" int func_00143FF0(void* self)
+{
+    return *(int*)((char*)self + 0xDE0);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00143FF8);
+extern "C" int func_00143FF8(void* self)
+{
+    return *(int*)((char*)self + 0xDE4);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144000);
+extern "C" void func_00144000(void* self, int value)
+{
+    *(int*)((char*)self + 0xF40) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144008);
+extern "C" int func_00144008(void* self)
+{
+    return *(int*)((char*)self + 0xE70);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144010);
 
@@ -2123,17 +2348,35 @@ void func_00144068(void* self)
 {
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144070);
+extern "C" int func_00144070(void* self)
+{
+    return *(int*)((char*)self + 0xA8);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144078);
+extern "C" int func_00144078(void* self)
+{
+    return *(int*)((char*)self + 0x78);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144080);
+extern "C" int func_00144080(void* self)
+{
+    return *(int*)((char*)self + 0x7C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144088);
+extern "C" int func_00144088(void* self)
+{
+    return *(int*)((char*)self + 0x80);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144090);
+extern "C" int func_00144090(void* self)
+{
+    return *(int*)((char*)self + 0x84);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144098);
+extern "C" int func_00144098(void* self)
+{
+    return *(int*)((char*)self + 0x88);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440A0);
 
@@ -2145,37 +2388,73 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001440D0);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440E0);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440F0);
+extern "C" void func_001440F0(void* self, int value)
+{
+    *(int*)((char*)self + 0x14) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440F8);
+extern "C" void func_001440F8(void* self, int value)
+{
+    *(int*)((char*)self + 0x8C) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144100);
+extern "C" int func_00144100(void* self)
+{
+    return *(int*)((char*)self + 0x8C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144108);
+extern "C" int func_00144108(void* self)
+{
+    return *(int*)((char*)self + 0x8);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144110);
+extern "C" void func_00144110(void* self, int value)
+{
+    *(int*)((char*)self + 0x8) = value;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144118);
+extern "C" int func_00144118(void* self)
+{
+    return *(int*)((char*)self + 0xC);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144120);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144130);
+extern "C" void func_00144130(void* self, int value)
+{
+    *(int*)((char*)self + 0xC) = value;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144138);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144158);
+extern "C" int func_00144158(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144160);
+extern "C" int func_00144160(void* self)
+{
+    return *(int*)((char*)self + 0x1C);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144168);
+extern "C" void func_00144168(void* self, int value)
+{
+    *(int*)((char*)self + 0x1C) = value;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144170);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144180);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
+extern "C" int func_00144190(void* self)
+{
+    return *(int*)((char*)self + 0x18);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144198);
+extern "C" int func_00144198(void* self)
+{
+    return *(int*)((char*)self + 0xA4);
+}
 
 //100%
 int func_001441A0(void* self, void* a1)
@@ -2300,7 +2579,10 @@ extern "C" bool func_001446B8(void* self, int bit)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446D0);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446E0);
+extern "C" int func_001446E0(void* self)
+{
+    return *(int*)((char*)self + 0xDF0);
+}
 
 //100%
 float func_001446E8(void* self)

@@ -11,17 +11,32 @@ INCLUDE_ASM("animation/gameanimmap", func_003150F8);
 
 extern "C" void* func_003150F8(int, int);
 
-INCLUDE_ASM("animation/gameanimmap", func_003158B8);
+extern "C" float func_003158B8(void* self)
+{
+    return *(float*)((char*)self + 0x1C);
+}
 
 INCLUDE_ASM("animation/gameanimmap", func_003158C0);
 
-INCLUDE_ASM("animation/gameanimmap", func_003158C8);
+extern "C" void* func_003158C8(void* self)
+{
+    return (char*)self + 0x30;
+}
 
-INCLUDE_ASM("animation/gameanimmap", func_003158D0);
+extern "C" int func_003158D0(void* self)
+{
+    return *(int*)((char*)self + 0x18);
+}
 
-INCLUDE_ASM("animation/gameanimmap", func_003158D8);
+extern "C" void func_003158D8(void* self, int value)
+{
+    *(int*)((char*)self + 0x18) = value;
+}
 
-INCLUDE_ASM("animation/gameanimmap", func_003158E0);
+extern "C" void func_003158E0(void* self, float value)
+{
+    *(float*)((char*)self + 0x1C) = value;
+}
 
 INCLUDE_ASM("animation/gameanimmap", func_003158E8);
 

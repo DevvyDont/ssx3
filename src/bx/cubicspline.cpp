@@ -678,7 +678,9 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
     return mi;
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031FE28);
+extern "C" void func_0031FE28()
+{
+}
 
 INCLUDE_ASM("bx/cubicspline", func_0031FE30);
 
@@ -761,7 +763,9 @@ int func_003200C0(void* self)
     return func_0031ED60(self);
 }
 
-INCLUDE_ASM("bx/cubicspline", func_003200E0);
+extern "C" void func_003200E0()
+{
+}
 
 //100%
 void* func_003200E8(void* self)

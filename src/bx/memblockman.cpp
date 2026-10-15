@@ -127,7 +127,9 @@ extern "C" void func_00319CC8(void)
     MUTEX_unlock(D_00538B00);
 }
 
-INCLUDE_ASM("bx/memblockman", func_00319D08);
+extern "C" void func_00319D08()
+{
+}
 
 //100%
 void func_00319D10(void* self)
@@ -360,7 +362,9 @@ extern "C" void func_0031A200(void)
 
 INCLUDE_ASM("bx/memblockman", func_0031A258);
 
-INCLUDE_ASM("bx/memblockman", func_0031A260);
+extern "C" void func_0031A260()
+{
+}
 
 //100%
 // PORT: PS2-only VU0 FPU-flag probe: builds two float4s from flag bits and multiplies them on VU0.

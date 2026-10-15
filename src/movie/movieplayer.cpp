@@ -38,7 +38,10 @@ extern "C" int func_0023C898(void* self)
 
 INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
 
-INCLUDE_ASM("movie/movieplayer", func_0023C8B8);
+extern "C" int func_0023C8B8(void* self)
+{
+    return *(int*)((char*)self + 0xDC);
+}
 
 INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
 

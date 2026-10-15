@@ -59,6 +59,10 @@ extern "C" void func_00243838(void* self, int flags)
 
 INCLUDE_ASM("main/streampause", func_002438B0);
 
-INCLUDE_ASM("main/streampause", func_002438E0);
+extern "C" void func_002438E0()
+{
+}
 
-INCLUDE_ASM("main/streampause", func_002438E8);
+extern "C" void func_002438E8()
+{
+}

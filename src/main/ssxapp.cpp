@@ -321,7 +321,12 @@ extern "C" void* func_00227F80()
     return cMCOverlayManager_getManager();
 }
 
-INCLUDE_ASM("main/ssxapp", func_00227FA0);
+extern "C" void func_0023C850();
+
+extern "C" void func_00227FA0()
+{
+    func_0023C850();
+}
 
 //100%
 void operator_delete(int* p);

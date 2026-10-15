@@ -73,9 +73,13 @@ INCLUDE_ASM("util/objectinterface", func_002D20F8);
 
 INCLUDE_ASM("util/objectinterface", func_002D2100);
 
-INCLUDE_ASM("util/objectinterface", func_002D2138);
+extern "C" void func_002D2138()
+{
+}
 
-INCLUDE_ASM("util/objectinterface", func_002D2140);
+extern "C" void func_002D2140()
+{
+}
 
 INCLUDE_ASM("util/objectinterface", func_002D2148);
 

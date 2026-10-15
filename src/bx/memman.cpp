@@ -50,4 +50,9 @@ void cMemMan_free(void* ptr)
 
 INCLUDE_ASM("bx/memman", func_00317EE0);
 
-INCLUDE_ASM("bx/memman", func_00317F18);
+extern "C" void func_00319CC8();
+
+extern "C" void func_00317F18()
+{
+    func_00319CC8();
+}

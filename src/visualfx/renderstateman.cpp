@@ -1204,7 +1204,9 @@ extern "C" void* func_002F0368(void* self)
     return self;
 }
 
-INCLUDE_ASM("visualfx/renderstateman", func_002F0388);
+extern "C" void func_002F0388()
+{
+}
 
 //100%
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);

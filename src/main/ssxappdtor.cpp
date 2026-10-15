@@ -12,49 +12,97 @@ extern "C" void cSSXApp__cSSXApp(void* self, int flags)
     cAppMan__cAppMan(self, flags);
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00243950);
+extern "C" int func_00243950(void* self)
+{
+    return *(int*)((char*)self + 0x78);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00243958);
+extern "C" int func_00243958(void* self)
+{
+    return *(int*)((char*)self + 0x7C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00243960);
+extern "C" int func_00243960(void* self)
+{
+    return *(int*)((char*)self + 0x80);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00243968);
+extern "C" int func_00243968(void* self)
+{
+    return *(int*)((char*)self + 0x84);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00243970);
+extern "C" int func_00243970(void* self)
+{
+    return *(int*)((char*)self + 0x88);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00243978);
+extern "C" int func_00243978(void* self)
+{
+    return *(int*)((char*)self + 0x8C);
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_00243980);
 
 INCLUDE_ASM("main/ssxappdtor", func_00243990);
 
-INCLUDE_ASM("main/ssxappdtor", func_002439A0);
+extern "C" int func_002439A0(void* self)
+{
+    return *(int*)((char*)self + 0xC0);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002439A8);
+extern "C" void* func_002439A8(void* self)
+{
+    return (char*)self + 0xC4;
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002439B0);
+extern "C" void* func_002439B0(void* self)
+{
+    return (char*)self + 0xC8;
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002439B8);
+extern "C" int func_002439B8(void* self)
+{
+    return *(int*)((char*)self + 0xD0);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002439C0);
+extern "C" int func_002439C0(void* self)
+{
+    return *(int*)((char*)self + 0x9C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002439C8);
+extern "C" int func_002439C8(void* self)
+{
+    return *(int*)((char*)self + 0xA4);
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_002439D0);
 
-INCLUDE_ASM("main/ssxappdtor", func_002439D8);
+extern "C" int func_002439D8(void* self)
+{
+    return *(int*)((char*)self + 0xA0);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002439E0);
+extern "C" void func_002439E0(void* self, int value)
+{
+    *(int*)((char*)self + 0xA0) = value;
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_002439E8);
 
-INCLUDE_ASM("main/ssxappdtor", func_002439F8);
+extern "C" void func_002439F8(void* self)
+{
+    *(int*)((char*)self + 0x84) = 0;
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_00243A00);
 
 INCLUDE_ASM("main/ssxappdtor", func_00243A10);
 
-INCLUDE_ASM("main/ssxappdtor", func_00243A38);
+extern "C" int func_00243A38(void* self)
+{
+    return *(int*)((char*)self + 0x11C);
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -359,7 +407,10 @@ extern "C" void func_00244028(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00244058);
+extern "C" void func_00244058(void* self, int value)
+{
+    *(int*)((char*)self + 0x18) = value;
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -434,9 +485,13 @@ extern "C" void func_002441C8(int* self, int flags)
 
 INCLUDE_ASM("main/ssxappdtor", func_002441F8);
 
-INCLUDE_ASM("main/ssxappdtor", func_00244230);
+extern "C" void func_00244230()
+{
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244238);
+extern "C" void func_00244238()
+{
+}
 
 //100%
 extern int D_004428F0[];
@@ -450,67 +505,160 @@ extern "C" void func_00244240(int id)
     D_005366E8[D_004A2A54] = id;
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00244278);
+extern "C" int func_00244278(void* self)
+{
+    return *(int*)((char*)self + 0x214);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244280);
+extern "C" int func_00244280(void* self)
+{
+    return *(int*)((char*)self + 0x218);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244288);
+extern "C" int func_00244288(void* self)
+{
+    return *(int*)((char*)self + 0x200);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244290);
+extern "C" int func_00244290(void* self)
+{
+    return *(int*)((char*)self + 0x20);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244298);
+extern "C" int func_00244298(void* self)
+{
+    return *(int*)((char*)self + 0x10);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442A0);
+extern "C" int func_002442A0(void* self)
+{
+    return *(int*)((char*)self + 0x24);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442A8);
+extern "C" int func_002442A8(void* self)
+{
+    return *(int*)((char*)self + 0xA4);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442B0);
+extern "C" int func_002442B0(void* self)
+{
+    return *(int*)((char*)self + 0xC);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442B8);
+extern "C" int func_002442B8(void* self)
+{
+    return *(int*)((char*)self + 0x48);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442C0);
+extern "C" int func_002442C0(void* self)
+{
+    return *(int*)((char*)self + 0x28);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442C8);
+extern "C" int func_002442C8(void* self)
+{
+    return *(int*)((char*)self + 0x2C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442D0);
+extern "C" int func_002442D0(void* self)
+{
+    return *(int*)((char*)self + 0x44);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442D8);
+extern "C" int func_002442D8(void* self)
+{
+    return *(int*)((char*)self + 0x4C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442E0);
+extern "C" int func_002442E0(void* self)
+{
+    return *(int*)((char*)self + 0x50);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442E8);
+extern "C" int func_002442E8(void* self)
+{
+    return *(int*)((char*)self + 0x54);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442F0);
+extern "C" int func_002442F0(void* self)
+{
+    return *(int*)((char*)self + 0x64);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_002442F8);
+extern "C" int func_002442F8(void* self)
+{
+    return *(int*)((char*)self + 0x70);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244300);
+extern "C" int func_00244300(void* self)
+{
+    return *(int*)((char*)self + 0x74);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244308);
+extern "C" int func_00244308(void* self)
+{
+    return *(int*)((char*)self + 0x34);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244310);
+extern "C" int func_00244310(void* self)
+{
+    return *(int*)((char*)self + 0x78);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244318);
+extern "C" int func_00244318(void* self)
+{
+    return *(int*)((char*)self + 0x7C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244320);
+extern "C" int func_00244320(void* self)
+{
+    return *(int*)((char*)self + 0x14);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244328);
+extern "C" int func_00244328(void* self)
+{
+    return *(int*)((char*)self + 0x38);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244330);
+extern "C" int func_00244330(void* self)
+{
+    return *(int*)((char*)self + 0x3C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244338);
+extern "C" int func_00244338(void* self)
+{
+    return *(int*)((char*)self + 0x40);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244340);
+extern "C" int func_00244340(void* self)
+{
+    return *(int*)((char*)self + 0x88);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244348);
+extern "C" int func_00244348(void* self)
+{
+    return *(int*)((char*)self + 0x8C);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244350);
+extern "C" int func_00244350(void* self)
+{
+    return *(int*)((char*)self + 0x90);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244358);
+extern "C" int func_00244358(void* self)
+{
+    return *(int*)((char*)self + 0x94);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244360);
+extern "C" int func_00244360(void* self)
+{
+    return *(int*)((char*)self + 0x224);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244368);
+extern "C" int func_00244368(void* self)
+{
+    return *(int*)((char*)self + 0x84);
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_00244370);
 
@@ -793,13 +941,25 @@ extern "C" void func_00244720(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00244750);
+extern "C" int func_00244750(void* self)
+{
+    return *(int*)((char*)self + 0x434);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244758);
+extern "C" int func_00244758(void* self)
+{
+    return *(int*)((char*)self + 0x130);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244760);
+extern "C" int func_00244760(void* self)
+{
+    return *(int*)((char*)self + 0xBC);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244768);
+extern "C" int func_00244768(void* self)
+{
+    return *(int*)((char*)self + 0xC0);
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_00244770);
 
@@ -807,27 +967,58 @@ INCLUDE_ASM("main/ssxappdtor", func_00244790);
 
 INCLUDE_ASM("main/ssxappdtor", func_002447B0);
 
-INCLUDE_ASM("main/ssxappdtor", func_002447C0);
+extern "C" int func_002447C0(void* self)
+{
+    return *(int*)((char*)self + 0x43C);
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_002447C8);
 
 INCLUDE_ASM("main/ssxappdtor", func_002447D8);
 
-INCLUDE_ASM("main/ssxappdtor", func_002447F0);
+extern "C" void func_002C2508(void* p);
 
-INCLUDE_ASM("main/ssxappdtor", func_00244810);
+extern "C" void func_002447F0(void* self)
+{
+    func_002C2508((char*)self + 0x276);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244830);
+extern "C" void func_002C2540(void* p);
 
-INCLUDE_ASM("main/ssxappdtor", func_00244838);
+extern "C" void func_00244810(void* self)
+{
+    func_002C2540((char*)self + 0x276);
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244840);
+extern "C" void* func_00244830(void* self)
+{
+    return (char*)self + 0x276;
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244848);
+extern "C" void func_00244838(void* self, int value)
+{
+    *(int*)((char*)self + 0x11C) = value;
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244850);
+extern "C" void func_00244840(void* self, int value)
+{
+    *(int*)((char*)self + 0x120) = value;
+}
 
-INCLUDE_ASM("main/ssxappdtor", func_00244858);
+extern "C" void func_00244848(void* self, int value)
+{
+    *(int*)((char*)self + 0x124) = value;
+}
+
+extern "C" void func_00244850(void* self, int value)
+{
+    *(int*)((char*)self + 0x128) = value;
+}
+
+extern "C" void func_00244858(void* self, int value)
+{
+    *(int*)((char*)self + 0x12C) = value;
+}
 
 //100%
 void func_00244860(void* self)
@@ -931,7 +1122,9 @@ extern "C" void func_00244A18(void* self)
 
 extern "C" void* func_0039E390(void* self);
 
-INCLUDE_ASM("main/ssxappdtor", func_00244A38);
+extern "C" void func_00244A38()
+{
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_00244A40);
 

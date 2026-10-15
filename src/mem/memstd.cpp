@@ -120,7 +120,9 @@ INCLUDE_ASM("mem/memstd", func_00251CF0);
 
 INCLUDE_ASM("mem/memstd", func_00251CF8);
 
-INCLUDE_ASM("mem/memstd", func_00251D00);
+extern "C" void func_00251D00()
+{
+}
 
 INCLUDE_ASM("mem/memstd", func_00251D08);
 
@@ -391,9 +393,15 @@ INCLUDE_ASM("mem/memstd", func_002523D0);
 
 INCLUDE_ASM("mem/memstd", func_002525F8);
 
-INCLUDE_ASM("mem/memstd", func_00252648);
+extern "C" int func_00252648(void* self)
+{
+    return *(int*)((char*)self + -0xC);
+}
 
-INCLUDE_ASM("mem/memstd", func_00252650);
+extern "C" unsigned short func_00252650(void* self)
+{
+    return *(unsigned short*)((char*)self + -0xE);
+}
 
 //100%
 int func_00252658(void* self)
@@ -1245,13 +1253,23 @@ INCLUDE_ASM("mem/memstd", func_00255750);
 
 INCLUDE_ASM("mem/memstd", func_00255778);
 
-INCLUDE_ASM("mem/memstd", func_002557A0);
+extern "C" int func_002557A0(int a0, int a1)
+{
+    return a1;
+}
 
-INCLUDE_ASM("mem/memstd", func_002557A8);
+extern "C" void func_002557A8()
+{
+}
 
-INCLUDE_ASM("mem/memstd", func_002557B0);
+extern "C" int func_002557B0(int a0, int a1)
+{
+    return a1;
+}
 
-INCLUDE_ASM("mem/memstd", func_002557B8);
+extern "C" void func_002557B8()
+{
+}
 
 //99.38%
 void* func_002557C0(void* self)

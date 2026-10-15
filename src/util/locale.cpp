@@ -54,7 +54,9 @@ extern "C" void func_00195A50(void* self, signed char i)
     }
 }
 
-INCLUDE_ASM("util/locale", func_00195A98);
+extern "C" void func_00195A98()
+{
+}
 
 //100%
 extern "C" void func_00195948(void* self);

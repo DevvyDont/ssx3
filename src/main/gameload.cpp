@@ -453,7 +453,9 @@ int func_002306A8(void* self, int i)
 
 INCLUDE_ASM("main/gameload", func_002306B8);
 
-INCLUDE_ASM("main/gameload", func_00230E90);
+extern "C" void func_00230E90()
+{
+}
 
 //100%
 extern "C" int func_00231CF0(void* self);

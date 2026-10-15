@@ -103,7 +103,10 @@ extern "C" void func_0039B760(void* self, char a1)
     *(char*)((char*)self + 0x98) = 0;
 }
 
-INCLUDE_ASM("ui/uimenu", func_0039B7A8);
+extern "C" void func_0039B7A8(void* self, int value)
+{
+    *(int*)((char*)self + 0x9C) = value;
+}
 
 //100%
 extern "C" void* func_00397870(void* list, unsigned char i);

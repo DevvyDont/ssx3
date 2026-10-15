@@ -216,7 +216,10 @@ INCLUDE_ASM("ui/uivector", func_003A4778);
 
 INCLUDE_ASM("ui/uivector", func_003A4790);
 
-INCLUDE_ASM("ui/uivector", func_003A47A0);
+extern "C" void func_003A47A0(void* self, short value)
+{
+    *(short*)((char*)self + 0xA) = value;
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -250,13 +253,25 @@ extern "C" void func_003A47F8(int* self, int flags)
 
 extern "C" void cListNode_removeFromList(void*);
 
-INCLUDE_ASM("ui/uivector", func_003A4848);
+extern "C" int func_003A4848(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4850);
+extern "C" int func_003A4850(void* self)
+{
+    return *(int*)((char*)self + 0x4);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4858);
+extern "C" void func_003A4858(void* self, int value)
+{
+    *(int*)((char*)self + 0x0) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4860);
+extern "C" void func_003A4860(void* self, int value)
+{
+    *(int*)((char*)self + 0x4) = value;
+}
 
 //100%
 extern "C" void func_003A4868(void* self)
@@ -286,7 +301,10 @@ INCLUDE_ASM("ui/uivector", func_003A4900);
 
 INCLUDE_ASM("ui/uivector", func_003A4940);
 
-INCLUDE_ASM("ui/uivector", func_003A4950);
+extern "C" int func_003A4950(void* self)
+{
+    return *(int*)((char*)self + 0xC);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4958);
 
@@ -344,9 +362,15 @@ extern "C" void func_003A4A88(void* self, int enable)
 
 INCLUDE_ASM("ui/uivector", func_003A4AA8);
 
-INCLUDE_ASM("ui/uivector", func_003A4AC8);
+extern "C" int func_003A4AC8(void* self)
+{
+    return *(int*)((char*)self + 0x18);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4AD0);
+extern "C" void func_003A4AD0(void* self, int value)
+{
+    *(int*)((char*)self + 0x18) = value;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4AD8);
 
@@ -364,13 +388,22 @@ extern "C" void func_003A4AF8(void* self, sVec4* in)
     *(sVec4*)((char*)self + 0x1C) = *in;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4B20);
+extern "C" void* func_003A4B20(void* self)
+{
+    return (char*)self + 0x1C;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4B28);
 
-INCLUDE_ASM("ui/uivector", func_003A4B50);
+extern "C" void func_003A4B50(void* self, float value)
+{
+    *(float*)((char*)self + 0x34) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4B58);
+extern "C" float func_003A4B58(void* self)
+{
+    return *(float*)((char*)self + 0x34);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4B60);
 
@@ -380,9 +413,15 @@ INCLUDE_ASM("ui/uivector", func_003A4B90);
 
 INCLUDE_ASM("ui/uivector", func_003A4BB8);
 
-INCLUDE_ASM("ui/uivector", func_003A4BC8);
+extern "C" void func_003A4BC8(void* self, int value)
+{
+    *(int*)((char*)self + 0x38) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4BD0);
+extern "C" int func_003A4BD0(void* self)
+{
+    return *(int*)((char*)self + 0x38);
+}
 
 //100%
 int func_003A4BD8(void* self)
@@ -405,9 +444,15 @@ void func_003A4BF0(void* self)
 {
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4BF8);
+extern "C" void func_003A4BF8(void* self, int value)
+{
+    *(int*)((char*)self + 0x40) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4C00);
+extern "C" int func_003A4C00(void* self)
+{
+    return *(int*)((char*)self + 0x40);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4C08);
 
@@ -417,7 +462,10 @@ INCLUDE_ASM("ui/uivector", func_003A4C48);
 
 INCLUDE_ASM("ui/uivector", func_003A4C68);
 
-INCLUDE_ASM("ui/uivector", func_003A4C88);
+extern "C" int func_003A4C88(void* self)
+{
+    return *(int*)((char*)self + 0x5C);
+}
 
 //100%
 // 12 bytes, 4-byte aligned (copied with ldl/ldr + lw). Float fields are a guess.
@@ -505,11 +553,17 @@ extern "C" void* func_0039FC48(void*);
 
 INCLUDE_ASM("ui/uivector", func_003A4DA8);
 
-INCLUDE_ASM("ui/uivector", func_003A4DD8);
+extern "C" void func_003A4DD8()
+{
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4DE0);
+extern "C" void func_003A4DE0()
+{
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4DE8);
+extern "C" void func_003A4DE8()
+{
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4DF0);
 
@@ -542,11 +596,17 @@ INCLUDE_ASM("ui/uivector", func_003A4F28);
 
 INCLUDE_ASM("ui/uivector", func_003A4F38);
 
-INCLUDE_ASM("ui/uivector", func_003A4F58);
+extern "C" int func_003A4F58(void* self)
+{
+    return *(int*)((char*)self + 0x7C);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4F60);
 
-INCLUDE_ASM("ui/uivector", func_003A4F70);
+extern "C" int func_003A4F70(void* self)
+{
+    return *(int*)((char*)self + 0x78);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A4F78);
 
@@ -570,9 +630,19 @@ int func_003A50F8(void* self)
 
 INCLUDE_ASM("ui/uivector", func_003A5100);
 
-INCLUDE_ASM("ui/uivector", func_003A5120);
+extern "C" void func_00397858(void* p);
 
-INCLUDE_ASM("ui/uivector", func_003A5140);
+extern "C" void func_003A5120(void* self)
+{
+    func_00397858((char*)self + 0x74);
+}
+
+extern "C" void func_00397870(void* p);
+
+extern "C" void func_003A5140(void* self)
+{
+    func_00397870((char*)self + 0x74);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5160);
 
@@ -638,21 +708,45 @@ INCLUDE_ASM("ui/uivector", func_003A53B0);
 
 INCLUDE_ASM("ui/uivector", func_003A53C0);
 
-INCLUDE_ASM("ui/uivector", func_003A53E0);
+extern "C" unsigned char func_003A53E0(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x95);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A53E8);
+extern "C" unsigned char func_003A53E8(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x98);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A53F0);
+extern "C" unsigned char func_003A53F0(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x96);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A53F8);
+extern "C" void func_003A53F8(void* self, char value)
+{
+    *(char*)((char*)self + 0x95) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5400);
+extern "C" void func_003A5400(void* self, char value)
+{
+    *(char*)((char*)self + 0x96) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5408);
+extern "C" void func_003A5408(void* self, char value)
+{
+    *(char*)((char*)self + 0x98) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5410);
+extern "C" int func_003A5410(void* self)
+{
+    return *(int*)((char*)self + 0xA0);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5418);
+extern "C" unsigned char func_003A5418(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x95);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5420);
 
@@ -686,11 +780,17 @@ extern "C" void* func_003A5508(void* self)
     return self;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5528);
+extern "C" int func_003A5528(void* self)
+{
+    return *(int*)((char*)self + 0x78);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5530);
 
-INCLUDE_ASM("ui/uivector", func_003A5580);
+extern "C" int func_003A5580(void* self)
+{
+    return *(int*)((char*)self + 0x7C);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5588);
 
@@ -741,29 +841,62 @@ INCLUDE_ASM("ui/uivector", func_003A5758);
 
 INCLUDE_ASM("ui/uivector", func_003A5780);
 
-INCLUDE_ASM("ui/uivector", func_003A57A8);
+extern "C" unsigned char func_003A57A8(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x319);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A57B0);
+extern "C" unsigned char func_003A57B0(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x318);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A57B8);
 
-INCLUDE_ASM("ui/uivector", func_003A5800);
+extern "C" void func_003A5800(void* self, int value)
+{
+    *(int*)((char*)self + 0xC) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5808);
+extern "C" int func_003A5808(void* self)
+{
+    return *(int*)((char*)self + 0xC);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5810);
+extern "C" int func_003A5810(void* self)
+{
+    return *(int*)((char*)self + 0x10);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5818);
+extern "C" void func_003A5818(void* self, char value)
+{
+    *(char*)((char*)self + 0x14) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5820);
+extern "C" signed char func_003A5820(void* self)
+{
+    return *(signed char*)((char*)self + 0x14);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5828);
+extern "C" void func_003A5828(void* self, char value)
+{
+    *(char*)((char*)self + 0x15) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5830);
+extern "C" unsigned char func_003A5830(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x15);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5838);
+extern "C" int func_003A5838(void* self)
+{
+    return *(int*)((char*)self + 0x18);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5840);
+extern "C" void func_003A5840(void* self, int value)
+{
+    *(int*)((char*)self + 0x18) = value;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5848);
 
@@ -850,15 +983,30 @@ int func_003A5AD8(void* self)
     return 0;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5AE0);
+extern "C" void func_003A5AE0(void* self, int value)
+{
+    *(int*)((char*)self + 0x20) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5AE8);
+extern "C" int func_003A5AE8(void* self)
+{
+    return *(int*)((char*)self + 0x20);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5AF0);
+extern "C" int func_003A5AF0(void* self)
+{
+    return *(int*)((char*)self + 0x40);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5AF8);
+extern "C" void func_003A5AF8(void* self, char value)
+{
+    *(char*)((char*)self + 0x44) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5B00);
+extern "C" signed char func_003A5B00(void* self)
+{
+    return *(signed char*)((char*)self + 0x44);
+}
 
 //100%
 void func_003A5B08(void* self)
@@ -934,7 +1082,10 @@ INCLUDE_ASM("ui/uivector", func_003A5CD0);
 
 INCLUDE_ASM("ui/uivector", func_003A5CF0);
 
-INCLUDE_ASM("ui/uivector", func_003A5D10);
+extern "C" void* func_003A5D10(void* self)
+{
+    return (char*)self + 0x40;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5D18);
 
@@ -942,7 +1093,10 @@ INCLUDE_ASM("ui/uivector", func_003A5D38);
 
 INCLUDE_ASM("ui/uivector", func_003A5D48);
 
-INCLUDE_ASM("ui/uivector", func_003A5D58);
+extern "C" int func_003A5D58(void* self)
+{
+    return *(int*)((char*)self + 0xD0);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5D60);
 
@@ -1012,7 +1166,10 @@ INCLUDE_ASM("ui/uivector", func_003A5F08);
 
 INCLUDE_ASM("ui/uivector", func_003A5F30);
 
-INCLUDE_ASM("ui/uivector", func_003A5F58);
+extern "C" int func_003A5F58(void* self)
+{
+    return *(int*)((char*)self + 0xB0);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5F60);
 
@@ -1024,23 +1181,44 @@ int func_003A6000(void* self)
     return 0x21;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6008);
+extern "C" void func_003A6008(void* self, int value)
+{
+    *(int*)((char*)self + 0x74) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6010);
+extern "C" void func_003A6010(void* self, int value)
+{
+    *(int*)((char*)self + 0x78) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6018);
+extern "C" void func_003A6018(void* self, int value)
+{
+    *(int*)((char*)self + 0x7C) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6020);
+extern "C" void func_003A6020(void* self, int value)
+{
+    *(int*)((char*)self + 0x80) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6028);
+extern "C" void func_003A6028(void* self, int value)
+{
+    *(int*)((char*)self + 0x84) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6030);
+extern "C" void func_003A6030(void* self, int value)
+{
+    *(int*)((char*)self + 0x88) = value;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A6038);
 
 INCLUDE_ASM("ui/uivector", func_003A6088);
 
-INCLUDE_ASM("ui/uivector", func_003A60D8);
+extern "C" int func_003A60D8(void* self)
+{
+    return *(int*)((char*)self + 0xC0);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A60E0);
 
@@ -1052,13 +1230,25 @@ int func_003A6168(void* self)
     return 0x19;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6170);
+extern "C" void func_003A6170(void* self, int value)
+{
+    *(int*)((char*)self + 0x74) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6178);
+extern "C" void func_003A6178(void* self, int value)
+{
+    *(int*)((char*)self + 0x78) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6180);
+extern "C" int func_003A6180(void* self)
+{
+    return *(int*)((char*)self + 0x7C);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6188);
+extern "C" void func_003A6188(void* self, int value)
+{
+    *(int*)((char*)self + 0x80) = value;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A6190);
 
@@ -1070,15 +1260,30 @@ int func_003A6220(void* self)
     return 0x16;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6228);
+extern "C" int func_003A6228(void* self)
+{
+    return *(int*)((char*)self + 0x74);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6230);
+extern "C" void func_003A6230(void* self, int value)
+{
+    *(int*)((char*)self + 0x74) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6238);
+extern "C" void func_003A6238(void* self, int value)
+{
+    *(int*)((char*)self + 0x78) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6240);
+extern "C" void func_003A6240(void* self, int value)
+{
+    *(int*)((char*)self + 0x88) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A6248);
+extern "C" void func_003A6248(void* self, int value)
+{
+    *(int*)((char*)self + 0x8C) = value;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A6250);
 
@@ -1149,17 +1354,35 @@ INCLUDE_ASM("ui/uivector", func_003A6490);
 
 INCLUDE_ASM("ui/uivector", func_003A64A0);
 
-INCLUDE_ASM("ui/uivector", func_003A64C8);
+extern "C" void func_003A64C8(void* self, int value)
+{
+    *(int*)((char*)self + 0xB8) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A64D0);
+extern "C" void func_003A64D0(void* self, short value)
+{
+    *(short*)((char*)self + 0xC6) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A64D8);
+extern "C" unsigned short func_003A64D8(void* self)
+{
+    return *(unsigned short*)((char*)self + 0xC6);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A64E0);
+extern "C" unsigned short func_003A64E0(void* self)
+{
+    return *(unsigned short*)((char*)self + 0xC8);
+}
 
-INCLUDE_ASM("ui/uivector", func_003A64E8);
+extern "C" void func_003A64E8(void* self, short value)
+{
+    *(short*)((char*)self + 0xC4) = value;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A64F0);
+extern "C" unsigned short func_003A64F0(void* self)
+{
+    return *(unsigned short*)((char*)self + 0xC4);
+}
 
 INCLUDE_ASM("ui/uivector", func_003A64F8);
 

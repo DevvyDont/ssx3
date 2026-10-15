@@ -16,11 +16,15 @@ void* cLightMan_construct()
     return mem;
 }
 
-INCLUDE_ASM("render/lightman", func_0038DC20);
+extern "C" void func_0038DC20()
+{
+}
 
 INCLUDE_ASM("render/lightman", func_0038DC28);
 
-INCLUDE_ASM("render/lightman", func_0038DC48);
+extern "C" void func_0038DC48()
+{
+}
 
 //100%
 void func_0038DC50(void* self)

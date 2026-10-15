@@ -353,9 +353,15 @@ INCLUDE_ASM("path/pathsys", func_0026BAE8);
 
 INCLUDE_ASM("path/pathsys", func_0026C3D0);
 
-INCLUDE_ASM("path/pathsys", func_0026C400);
+extern "C" int func_0026C400(void* self)
+{
+    return *(int*)((char*)self + 0x4);
+}
 
-INCLUDE_ASM("path/pathsys", func_0026C408);
+extern "C" int func_0026C408(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
 //100%
 void func_0026C410(void* self)
@@ -369,11 +375,20 @@ void func_0026C418(void* self)
 
 extern "C" void* func_0026BAE8(int, int);
 
-INCLUDE_ASM("path/pathsys", func_0026C420);
+extern "C" int func_0026C420(void* self)
+{
+    return *(int*)((char*)self + 0x38);
+}
 
-INCLUDE_ASM("path/pathsys", func_0026C428);
+extern "C" int func_0026C428(void* self)
+{
+    return *(int*)((char*)self + 0x3C);
+}
 
-INCLUDE_ASM("path/pathsys", func_0026C430);
+extern "C" float func_0026C430(void* self)
+{
+    return *(float*)((char*)self + 0x38);
+}
 
 //99.38%
 void* func_0026C438(void* self)

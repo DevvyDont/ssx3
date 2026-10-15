@@ -1022,19 +1022,34 @@ extern "C" void func_002721D0(int* self, int flags)
 
 INCLUDE_ASM("replay/replaycache", func_00272200);
 
-INCLUDE_ASM("replay/replaycache", func_00272210);
+extern "C" int func_00272210(void* self)
+{
+    return *(int*)((char*)self + 0x4);
+}
 
 INCLUDE_ASM("replay/replaycache", func_00272218);
 
 INCLUDE_ASM("replay/replaycache", func_00272228);
 
-INCLUDE_ASM("replay/replaycache", func_00272238);
+extern "C" int func_00272238(void* self)
+{
+    return *(int*)((char*)self + 0x10);
+}
 
-INCLUDE_ASM("replay/replaycache", func_00272240);
+extern "C" int func_00272240(void* self)
+{
+    return *(int*)((char*)self + 0x10);
+}
 
-INCLUDE_ASM("replay/replaycache", func_00272248);
+extern "C" void func_00272248(void* self, int value)
+{
+    *(int*)((char*)self + 0x0) = value;
+}
 
-INCLUDE_ASM("replay/replaycache", func_00272250);
+extern "C" void func_00272250(void* self, int value)
+{
+    *(int*)((char*)self + 0x4) = value;
+}
 
 //100%
 void operator_delete(int* p);
@@ -2353,7 +2368,10 @@ int func_00274348(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00274358);
 
-INCLUDE_ASM("replay/replaycache", func_00274380);
+extern "C" int func_00274380(void* self)
+{
+    return *(int*)((char*)self + 0x18);
+}
 
 //100%
 int func_00274388(void* self)
@@ -2361,13 +2379,19 @@ int func_00274388(void* self)
     return *(int*)((char*)*(void**)((char*)self + 0x10) + 0x4);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274398);
+extern "C" int func_00274398(void* self)
+{
+    return *(int*)((char*)self + 0x4);
+}
 
 INCLUDE_ASM("replay/replaycache", func_002743A0);
 
 INCLUDE_ASM("replay/replaycache", func_002743B0);
 
-INCLUDE_ASM("replay/replaycache", func_002743C0);
+extern "C" int func_002743C0(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
 //100%
 unsigned char func_002743C8(void* self)
@@ -2563,7 +2587,10 @@ void func_00274830_impl(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274860);
+extern "C" void func_00274860(void* self, int value)
+{
+    *(int*)((char*)self + 0x1C) = value;
+}
 
 INCLUDE_ASM("replay/replaycache", func_00274868);
 
@@ -2735,11 +2762,20 @@ extern "C" void* func_00274C38(void* self)
     return 0;
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274C58);
+extern "C" int func_00274C58(void* self)
+{
+    return *(int*)((char*)self + 0x4);
+}
 
-INCLUDE_ASM("replay/replaycache", func_00274C60);
+extern "C" int func_00274C60(void* self)
+{
+    return *(int*)((char*)self + 0x8);
+}
 
-INCLUDE_ASM("replay/replaycache", func_00274C68);
+extern "C" unsigned char func_00274C68(void* self)
+{
+    return *(unsigned char*)((char*)self + 0x1);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct sRcTrack4C70 {

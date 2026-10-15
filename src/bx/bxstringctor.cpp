@@ -56,9 +56,15 @@ struct sShortPad16 { short v; int pad[3]; };
 extern sShortPad16 D_004A2FB0;
 extern "C" void func_0025D6C0(int);
 
-INCLUDE_ASM("bx/bxstringctor", func_00268A80);
+extern "C" int func_00268A80(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
-INCLUDE_ASM("bx/bxstringctor", func_00268A88);
+extern "C" int func_00268A88(void* self)
+{
+    return *(int*)((char*)self + 0x0);
+}
 
 //100%
 extern "C" void func_00268A90(void* self, void* a1, int a2)
@@ -1857,7 +1863,10 @@ void func_0026ADA0(void* self)
 
 INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
 
-INCLUDE_ASM("bx/bxstringctor", func_0026ADE8);
+extern "C" int func_0026ADE8(void* self)
+{
+    return *(int*)((char*)self + 0x4C);
+}
 
 //100%
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg

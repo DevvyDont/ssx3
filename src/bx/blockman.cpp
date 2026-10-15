@@ -9,4 +9,6 @@ INCLUDE_ASM("bx/blockman", func_00316C00);
 
 INCLUDE_ASM("bx/blockman", func_00316C60);
 
-INCLUDE_ASM("bx/blockman", func_00316CC8);
+extern "C" void func_00316CC8()
+{
+}

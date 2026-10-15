@@ -21,7 +21,9 @@ extern "C" void cCameraTriggerMan_cleanupOnExit(void* self)
     cCamera_resetChaseControllerSwitches();
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA08);
+extern "C" void func_0016CA08()
+{
+}
 
 //100%
 void func_0016CA10(void* self)
@@ -245,7 +247,10 @@ struct cCameraTriggerStack {
     int field_0x4;
 };
 
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D1F8);
+extern "C" int func_0016D1F8(int a0)
+{
+    return a0;
+}
 
 //100%
 void cCameraTriggerStack_init(cCameraTriggerStack* self)

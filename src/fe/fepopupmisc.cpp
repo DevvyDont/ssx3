@@ -383,7 +383,10 @@ void* func_001DF750(void* self)
     return func_001A85D0(self);
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
+extern "C" int func_001DF778(void* self)
+{
+    return *(int*)((char*)self + 0x6D0);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DF780);
 
@@ -427,11 +430,20 @@ int func_001DF8E0(void* self)
 extern void* D_0046A618[];
 extern "C" void* func_0039E390(void*);
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8E8);
+extern "C" int func_001DF8E8(void* self)
+{
+    return *(int*)((char*)self + 0x6DC);
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8F0);
+extern "C" int func_001DF8F0(void* self)
+{
+    return *(int*)((char*)self + 0x6E0);
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8F8);
+extern "C" int func_001DF8F8(void* self)
+{
+    return *(int*)((char*)self + 0x6E4);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DF900);
 
@@ -448,21 +460,42 @@ int func_001DF988(void* self)
     return 0x1;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
+extern "C" void func_001DF990(void* self, int value)
+{
+    *(int*)((char*)self + 0x54) = value;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
+extern "C" void func_001DF998(void* self, int value)
+{
+    *(int*)((char*)self + 0x64) = value;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
+extern "C" void func_001DF9A0(void* self, int value)
+{
+    *(int*)((char*)self + 0x50) = value;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9A8);
+extern "C" int func_001DF9A8(void* self)
+{
+    return *(int*)((char*)self + 0x50);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9B0);
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
+extern "C" int func_001DF9C0(void* self)
+{
+    return *(int*)((char*)self + 0xA60);
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
+extern "C" void func_001DF9C8(void* self, int value)
+{
+    *(int*)((char*)self + 0xAE4) = value;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9D0);
+extern "C" int func_001DF9D0(void* self)
+{
+    return *(int*)((char*)self + 0xAE4);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9D8);
 
@@ -483,7 +516,10 @@ extern "C" void func_001DFA10(void* self, int flags)
     func_0039E390_dtor(self, flags);
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA70);
+extern "C" int func_001DFA70(void* self)
+{
+    return *(int*)((char*)self + 0x8F0);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA78);
 
@@ -833,11 +869,20 @@ int func_001E0028(void* self)
     return 0x1;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0030);
+extern "C" void func_001E0030(void* self, int value)
+{
+    *(int*)((char*)self + 0x270) = value;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0038);
+extern "C" void func_001E0038(void* self, int value)
+{
+    *(int*)((char*)self + 0x258) = value;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0040);
+extern "C" void func_001E0040(void* self, int value)
+{
+    *(int*)((char*)self + 0x254) = value;
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E0048);
 
@@ -889,7 +934,10 @@ void* func_001E02A0(void* self)
 extern void* D_00469518[];
 extern "C" void* func_0039E390(void*);
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E02C8);
+extern "C" int func_001E02C8(void* self)
+{
+    return *(int*)((char*)self + 0x4C);
+}
 
 //100%
 void* func_001E02D0(void* self)
@@ -1017,7 +1065,10 @@ void* func_001E0548(void* self)
     return func_0039E390(self);
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0570);
+extern "C" int func_001E0570(void* self)
+{
+    return *(int*)((char*)self + 0x74);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E0578);
 
@@ -1028,7 +1079,10 @@ void* func_001E05B0(void* self)
     return func_0039E390(self);
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E05D8);
+extern "C" int func_001E05D8(void* self)
+{
+    return *(int*)((char*)self + 0x16C);
+}
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E05E0);
 
@@ -1828,7 +1882,9 @@ void* func_001E12D0(void* self)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E12F0);
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E1450);
+extern "C" void func_001E1450()
+{
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern int D_004A20C0;

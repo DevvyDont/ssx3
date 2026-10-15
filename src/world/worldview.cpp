@@ -83,7 +83,10 @@ extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
 
 INCLUDE_ASM("world/worldview", func_003A9A48);
 
-INCLUDE_ASM("world/worldview", func_003A9A90);
+extern "C" void* func_003A9A90(void* self)
+{
+    return (char*)self + 0x220;
+}
 
 //100%
 extern "C" void* func_003A9A98(void* self, int a1)

@@ -434,7 +434,9 @@ extern "C" void cFEStateBuyAttrib_updateBank(void* self)
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5300);
 
-INCLUDE_ASM("fe/festatebuyattrib", func_001F54A8);
+extern "C" void func_001F54A8()
+{
+}
 
 //100%
 extern void* D_00473838[];

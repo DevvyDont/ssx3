@@ -570,7 +570,10 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
     }
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AE2F8);
+extern "C" void func_003AE2F8(void* self, int value)
+{
+    *(int*)((char*)self + 0x70) = value;
+}
 
 //100%
 struct sWSVtE300 {
@@ -1129,7 +1132,10 @@ INCLUDE_ASM("world/wscriptcache", func_003AF230);
 
 INCLUDE_ASM("world/wscriptcache", func_003AF258);
 
-INCLUDE_ASM("world/wscriptcache", func_003AF2F8);
+extern "C" int func_003AF2F8(void* self)
+{
+    return *(int*)((char*)self + 0x4);
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF300);
 
@@ -1145,31 +1151,70 @@ INCLUDE_ASM("world/wscriptcache", func_003AF7F0);
 
 INCLUDE_ASM("world/wscriptcache", func_003B0340);
 
-INCLUDE_ASM("world/wscriptcache", func_003B03A8);
+extern "C" void func_003B03A8(void* self, int value)
+{
+    *(int*)((char*)self + 0x0) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03B0);
+extern "C" void func_003B03B0(void* self, int value)
+{
+    *(int*)((char*)self + 0x4) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03B8);
+extern "C" void func_003B03B8(void* self, int value)
+{
+    *(int*)((char*)self + 0x8) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03C0);
+extern "C" void func_003B03C0(void* self, int value)
+{
+    *(int*)((char*)self + 0xC) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03C8);
+extern "C" void func_003B03C8(void* self, int value)
+{
+    *(int*)((char*)self + 0x10) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03D0);
+extern "C" void func_003B03D0(void* self, int value)
+{
+    *(int*)((char*)self + 0x14) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03D8);
+extern "C" void func_003B03D8(void* self, int value)
+{
+    *(int*)((char*)self + 0x18) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03E0);
+extern "C" void func_003B03E0(void* self, int value)
+{
+    *(int*)((char*)self + 0x1C) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03E8);
+extern "C" void func_003B03E8(void* self, int value)
+{
+    *(int*)((char*)self + 0x20) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03F0);
+extern "C" void func_003B03F0(void* self, char value)
+{
+    *(char*)((char*)self + 0x24) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B03F8);
+extern "C" void func_003B03F8(void* self, char value)
+{
+    *(char*)((char*)self + 0x25) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B0400);
+extern "C" void func_003B0400(void* self, char value)
+{
+    *(char*)((char*)self + 0x26) = value;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003B0408);
+extern "C" void func_003B0408(void* self, char value)
+{
+    *(char*)((char*)self + 0x27) = value;
+}
 
 //100%
 void* func_003B0410(void* self)
