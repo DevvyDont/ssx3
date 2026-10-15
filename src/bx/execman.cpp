@@ -1,10 +1,32 @@
 #include "common.h"
 
-INCLUDE_ASM("bx/execman", cExecutionMan__cExecutionMan);
+struct cExecutionMan {
+    int field_0x0;
+    int field_0x4;
+    void* field_0x8;
+};
 
-INCLUDE_ASM("bx/execman", cExecutionMan_prepause);
+extern void* D_0048DC30[16];
+void operator_delete(int* ptr);
 
-INCLUDE_ASM("bx/execman", cExecutionMan_postpause);
+//100%
+void cExecutionMan__cExecutionMan(cExecutionMan* self, int flags)
+{
+    self->field_0x8 = D_0048DC30;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+
+//100%
+void cExecutionMan_prepause()
+{
+}
+
+//100%
+void cExecutionMan_postpause()
+{
+}
 
 INCLUDE_ASM("bx/execman", func_00320960);
 
@@ -44,20 +66,59 @@ INCLUDE_ASM("bx/execman", func_00320AC8);
 
 INCLUDE_ASM("bx/execman", func_00320AD0);
 
-INCLUDE_ASM("bx/execman", func_00320AD8);
+//100%
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00320AD8(cExecutionMan* self, int flags)
+{
+    self->field_0x8 = D_0048DC30;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
 
-INCLUDE_ASM("bx/execman", func_00320B08);
+extern "C" void* func_00423C90(void* self);
 
-INCLUDE_ASM("bx/execman", func_00320B28);
+//100%
+void* func_00320B08(void* self)
+{
+    return func_00423C90(self);
+}
 
-INCLUDE_ASM("bx/execman", func_00320B48);
+extern "C" void* func_00320550(int, int);
+
+//100%
+void* func_00320B28(void* self)
+{
+    return func_00320550(1, 0xffff);
+}
+
+extern "C" void* func_00320550(int, int);
+
+//100%
+void* func_00320B48(void* self)
+{
+    return func_00320550(0, 0xffff);
+}
 
 INCLUDE_ASM("bx/execman", func_00320B68);
 
-INCLUDE_ASM("bx/execman", func_00320BF0);
+//100%
+extern "C" void* func_00320FA8(int, int, int);
+
+extern "C" void* func_00320BF0(void* self, int a1)
+{
+    return func_00320FA8(*(int*)((char*)self + 0x4), *(int*)self, a1);
+}
+
+extern "C" void* func_00321108(int, int, int);
 
 INCLUDE_ASM("bx/execman", func_00320C18);
 
-INCLUDE_ASM("bx/execman", func_00320C48);
+//100%
+void* func_00320C48(void* self, int a1)
+{
+    return func_00321108(*(int*)((char*)self + 0x4), *(int*)self, a1);
+}
+
 
 INCLUDE_ASM("bx/execman", func_00320C70);

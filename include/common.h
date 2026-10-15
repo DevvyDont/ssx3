@@ -4,7 +4,6 @@
 // Just include the Splat header for now.
 #include "include_asm.h"
 
-typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 

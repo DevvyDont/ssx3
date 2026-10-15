@@ -1,85 +1,88 @@
-#include "ui/uiscreen.h"
+#include "common.h"
 
-// Screen and event names
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char D_0045FFD8[];
+
+extern "C" void cFEStateBackground_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FFD8), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+}
+
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern char D_0045FFE8[];
 extern char D_0045FFF8[];
+
+extern "C" void cFEStateTransition_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* engine2;
+    *(void**)((char*)self + 0x48) = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FFE8), 0);
+    engine2 = *(void**)((char*)self + 0x10);
+    *(void**)((char*)self + 0x4C) = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(D_0045FFF8), 0);
+}
+
+//100%
+int GetHashValue32(char* str);
 extern char D_004A1360[];
 extern char D_004A17B8[];
 
-extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void* sound, int event);
-
-class cFEStateBackground {
-public:
-    cUIEngine* getEngine() { return m_engine; }
-    void onCreateScreen();
-
-    char pad0[0x10];
-    cUIEngine* m_engine;
-};
-
-class cFEStateTransition {
-public:
-    cUIEngine* getEngine() { return m_engine; }
-    void onCreateScreen();
-    int onScreenEvent(cUIScreen* screen, uint event);
-    int func_001946A8(int which);
-
-    char pad0[0x10];
-    cUIEngine* m_engine;
-    char pad14[0x8];
-    int m_flags;
-    char pad20[0x28];
-    cUIScreen* m_screen0;
-    cUIScreen* m_screen1;
-};
-
-void cFEStateBackground::onCreateScreen()
+extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id)
 {
-    cUIScreen* screen = getEngine()->addScreenByHashName((cUIState*)this, GetHashValue32(D_0045FFD8), 0);
-    if (screen)
-        screen->playFrame(0, 0);
-}
-
-void cFEStateTransition::onCreateScreen()
-{
-    m_screen0 = getEngine()->addScreenByHashName((cUIState*)this, GetHashValue32(D_0045FFE8), 0);
-    m_screen1 = getEngine()->addScreenByHashName((cUIState*)this, GetHashValue32(D_0045FFF8), 0);
-}
-
-int cFEStateTransition::onScreenEvent(cUIScreen* screen, uint event)
-{
-    uint show = GetHashValue32(D_004A1360);
-    uint hide = GetHashValue32(D_004A17B8);
-
-    if (event == show) {
-        m_flags &= ~8;
-        screen->m_flags &= ~0x40;
-    } else if (event == hide) {
-        m_flags |= 8;
-        screen->m_flags |= 0x40;
+    int h1 = GetHashValue32(D_004A1360);
+    int h2 = GetHashValue32(D_004A17B8);
+    if (id == h1) {
+        *(int*)((char*)self + 0x1C) &= ~8;
+        *(int*)((char*)screen + 0x54) &= ~0x40;
+    } else if (id == h2) {
+        *(int*)((char*)self + 0x1C) |= 8;
+        *(int*)((char*)screen + 0x54) |= 0x40;
     }
     return 0;
 }
 
-// Starts transition 0 (with UI sound 15) or 1 (the silent white fade)
-int cFEStateTransition::func_001946A8(int which)
+//100%
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+
+extern "C" int func_001946A8(void* self, int which)
 {
     if (which == 0) {
-        if (m_screen0) {
-            m_screen0->m_flags |= 0x40;
-            m_screen0->playFrame(0, 0);
-            func_00294F78(func_0028B180(), 15);
+        void* screen = *(void**)((char*)self + 0x48);
+        if (screen != 0) {
+            *(int*)((char*)screen + 0x54) |= 0x40;
+            cUIScreen_playFrame(*(void**)((char*)self + 0x48), 0, 0);
+            func_00294F78(func_0028B180(), 0xF);
         }
     } else if (which == 1) {
-        if (m_screen1) {
-            m_screen1->m_flags |= 0x40;
-            m_screen1->playFrame(0, 0);
+        void* screen = *(void**)((char*)self + 0x4C);
+        if (screen != 0) {
+            *(int*)((char*)screen + 0x54) |= 0x40;
+            cUIScreen_playFrame(*(void**)((char*)self + 0x4C), 0, 0);
         }
     }
     return 0;
 }
 
-// Constructor; stores the vtable pointer, so it waits until .data is split
-INCLUDE_ASM("fe/festatetransition", func_00194738);
+//100%
+extern "C" void* func_0039E2A0(void* self);
+extern void* D_0046BAB8[];
+
+extern "C" void* func_00194738(void* self)
+{
+    func_0039E2A0(self);
+    *(void***)((char*)self + 0x8) = D_0046BAB8;
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    return self;
+}
+

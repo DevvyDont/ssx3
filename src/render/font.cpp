@@ -1,52 +1,776 @@
 #include "common.h"
 
-INCLUDE_ASM("render/font", cFont_linkFont);
+// R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
+// single lq/sq pair instead of word-by-word.
+typedef int cQuad128 __attribute__((mode(TI)));
+
+//100%
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+struct sFontTexHdr;
+extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img);
+extern char D_004A46F8[];
+
+struct sGlyph_1788 {
+    unsigned short code;    // 0x0
+    unsigned char w;        // 0x2
+    unsigned char h;        // 0x3
+    unsigned short u;       // 0x4
+    unsigned short v;       // 0x6
+    unsigned char adv;      // 0x8
+    unsigned char xoff;     // 0x9
+    signed char yoff;       // 0xA
+    char pad;
+};
+
+struct sPad_1788 {
+    float x, y;
+};
+
+struct sFont_1788 {
+    int count;              // 0x0
+    sGlyph_1788* table;     // 0x4
+    sGlyph_1788* def;       // 0x8
+    int first;              // 0xC
+    int last;               // 0x10
+    int maxH;               // 0x14
+    sPad_1788 pad;          // 0x18
+};
+
+extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
+{
+    sFont_1788* self = (sFont_1788*)vself;
+    char* data = (char*)vdata;
+    sGlyph_1788* src = (sGlyph_1788*)(data + *(int*)(data + 0x14));
+    sPad_1788 p;
+    p.x = (float)data[0x10];
+    p.y = (float)data[0x11];
+    self->pad = p;
+    self->count = *(short*)(data + 0xA);
+    self->table = (sGlyph_1788*)operator_new_tag(self->count * 12, D_004A46F8, flags, 0);
+    int space = 0;
+    self->maxH = 0;
+    self->last = self->first = src->code;
+    for (int i = 0; i < self->count; i++) {
+        self->table[i].code = src[i].code;
+        self->table[i].w = src[i].w;
+        self->table[i].h = src[i].h;
+        self->table[i].u = src[i].u;
+        self->table[i].v = src[i].v;
+        self->table[i].adv = src[i].adv;
+        self->table[i].xoff = src[i].xoff;
+        self->table[i].yoff = src[i].yoff;
+        if (i != 0 && self->table[i].code == self->last + 1) {
+            self->last = self->table[i].code;
+        }
+        if (self->table[i].code == ' ') {
+            space = i;
+        }
+        if (self->table[i].code == 0xAC) {
+            self->def = &self->table[i];
+        }
+        if (self->table[i].code == 0xA0) {
+            self->table[i].w = src[space].w;
+            self->table[i].h = src[space].h;
+            self->table[i].u = src[space].u;
+            self->table[i].v = src[space].v;
+            self->table[i].adv = src[space].adv;
+            self->table[i].xoff = src[space].xoff;
+            self->table[i].yoff = src[space].yoff;
+        }
+        if (self->maxH < self->table[i].h + self->table[i].yoff) {
+            self->maxH = self->table[i].h + self->table[i].yoff;
+        }
+    }
+    cFont_downloadTexture((char*)self, (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
+}
 
 INCLUDE_ASM("render/font", func_003919E8);
 
-INCLUDE_ASM("render/font", cFont_downloadTexture);
+//100%
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void func_003E6574(void* dst, const void* src, int n);
+extern char D_00492F40[];
+extern char D_00492F50[];
+void cMemMan_free(void*);
 
-INCLUDE_ASM("render/font", func_00391C48);
+struct sFontVEntryDL {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, void*, int, int, int, int, int, void*, int, int, int);
+};
 
-INCLUDE_ASM("render/font", func_00391CB0);
+struct sFontCtxDL {
+    char pad_0x0[0x10D8];
+    sFontVEntryDL* vtable;      // 0x10D8
+};
 
-INCLUDE_ASM("render/font", func_00391E30);
+extern sFontCtxDL* D_004A5B80_DL __asm__("D_004A5B80");
 
-INCLUDE_ASM("render/font", func_00391FB0);
+struct sFontTexHdr {
+    int f0;
+    short w;        // 0x4
+    short h;        // 0x6
+    int f8;
+    int flags;      // 0xC
+    int offset;     // 0x10
+};
 
-INCLUDE_ASM("render/font", func_003921F0);
+struct sFontUV {
+    float u, v;
+};
 
-INCLUDE_ASM("render/font", func_00392430);
+extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img)
+{
+    sFontCtxDL* g = D_004A5B80_DL;
+    int p2 = 1;
+    do {
+        p2 <<= 1;
+    } while (p2 <= img->h);
+    sFontUV uv;
+    uv.v = 1.0f / p2;
+    uv.u = 1.0f / img->w;
+    *(sFontUV*)(self + 0x20) = uv;
+    unsigned char* pix = (unsigned char*)operator_new_tag((img->w * p2) >> 1, D_00492F40, 0x100, 0);
+    unsigned char* pal = (unsigned char*)operator_new_tag(0x40, D_00492F50, 0x100, 0);
+    func_003E6448(pix, 0, (img->w * p2) >> 1);
+    func_003E6448(pal, 0, 0x40);
+    char* src;
+    if (img->flags & 0x1000)
+        src = (char*)img + img->offset;
+    else
+        src = (char*)img + 0x10;
+    func_003E6574(pix, src, (img->w * img->h) >> 1);
+    int i;
+    signed char* p;
+    for (i = 0, p = (signed char*)pal; i < 16; i++) {
+        p[0] = -0x80;
+        p[1] = -0x80;
+        p[2] = -0x80;
+        p[3] = (i << 7) / 15;
+        p += 4;
+    }
+    sFontVEntryDL* vt = g->vtable;
+    *(int*)(self + 0x60) = vt[47].fn((char*)g + vt[47].delta, pix, self + 0x64, img->w, p2, 0, 0xB, 1, pal, 0, 1, -1);
+    if (pix != 0)
+        cMemMan_free(pix);
+    if (pal != 0)
+        cMemMan_free(pal);
+}
+
+//100%
+struct sMat00391C48 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+extern sMat00391C48 D_00500CA0;
+extern "C" void func_004186C8(sMat00391C48* m);
+extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m);
+
+extern "C" void func_00391C48(void* self, float x, float y)
+{
+    func_004186C8(&D_00500CA0);
+    func_00391CB0(self, x, y, &D_00500CA0);
+}
+
+//100%
+struct sFontRS1CB0 {
+    int field_0x0;          // 0x0
+    int field_0x4;          // 0x4
+    int flags;              // 0x8, bits 5..9 = alpha level
+    int field_0xC;          // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sFontVEntry1CB0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, sMat00391C48*, void*, float, float, float, float, float, float, float);
+};
+
+struct sFontCtx1CB0 {
+    char pad_0x0[0xE84];
+    sFontRS1CB0* top;           // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sFontVEntry1CB0* vtable;    // 0x10D8
+};
+
+extern sFontCtx1CB0* D_004A5B80;
+
+struct sFontPos1CB0 {
+    float x, y, z, w;
+    sFontPos1CB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+static inline int fontGetTex(void* s)
+{
+    return *(int*)((char*)s + 0x60);
+}
+
+extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m)
+{
+    sFontCtx1CB0* g = D_004A5B80;
+    char* s = (char*)self;
+    g->top->tex = fontGetTex(self);
+    sFontPos1CB0 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
+                     y + *(float*)(s + 0x1C) * *(float*)(s + 0x3C), 0.0f, 0.0f);
+    if (*(float*)(s + 0x28) != 0.0f || *(float*)(s + 0x2C) != 0.0f) {
+        sFontRS1CB0* top = g->top;
+        int saved = (unsigned)(top->flags & 0x3E0) >> 5;
+        int a = saved - 1;
+        if (a < 0) a = 0;
+        top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
+        sFontVEntry1CB0* vt = g->vtable;
+        vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x50,
+                  pos.x + *(float*)(s + 0x28), pos.y + *(float*)(s + 0x2C),
+                  *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+        sFontRS1CB0* top2 = g->top;
+        top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
+    }
+    sFontVEntry1CB0* vt = g->vtable;
+    vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x40, pos.x, pos.y,
+              *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+}
+
+//100%
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sFontRS1E30 {
+    int field_0x0;          // 0x0
+    int field_0x4;          // 0x4
+    int flags;              // 0x8, bits 5..9 = alpha level
+    int field_0xC;          // 0xC
+    short tex;              // 0x10
+    short pad;
+};
+
+struct sFontVEntry1E30 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, void*, void*, float, float, float, float, float, float, float);
+};
+
+struct sFontCtx1E30 {
+    char pad_0x0[0xE84];
+    sFontRS1E30* top;           // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sFontVEntry1E30* vtable;    // 0x10D8
+};
+
+extern sFontCtx1E30* D_004A5B80_1E30 __asm__("D_004A5B80");
+
+struct sFontPos1E30 {
+    float x, y, z, w;
+    sFontPos1E30(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+static inline int fontGetTex1E30(void* s)
+{
+    return *(int*)((char*)s + 0x60);
+}
+
+extern "C" void func_00391E30(void* self, float x, float y, void* m)
+{
+    sFontCtx1E30* g = D_004A5B80_1E30;
+    char* s = (char*)self;
+    g->top->tex = fontGetTex1E30(self);
+    sFontPos1E30 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
+                     y + *(float*)(s + 0x1C) * *(float*)(s + 0x3C), 0.0f, 0.0f);
+    if (*(float*)(s + 0x28) != 0.0f || *(float*)(s + 0x2C) != 0.0f) {
+        sFontRS1E30* top = g->top;
+        int saved = (unsigned)(top->flags & 0x3E0) >> 5;
+        int a = saved - 1;
+        if (a < 0) a = 0;
+        top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
+        sFontVEntry1E30* vt = g->vtable;
+        vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x50,
+                  pos.x + *(float*)(s + 0x28), pos.y + *(float*)(s + 0x2C),
+                  *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+        sFontRS1E30* top2 = g->top;
+        top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
+    }
+    sFontVEntry1E30* vt = g->vtable;
+    vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x40, pos.x, pos.y,
+              *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+}
+
+//100%
+struct sGlyph1FB0 {
+    unsigned short code;    // 0x0
+    unsigned char w;        // 0x2
+    unsigned char h;        // 0x3
+    int f4;
+    signed char adv;        // 0x8
+    signed char xoff;       // 0x9
+    signed char yoff;       // 0xA
+    char pad;
+};
+
+struct sFontRes1FB0 {
+    int count;              // 0x0
+    sGlyph1FB0* table;      // 0x4
+    sGlyph1FB0* def;        // 0x8
+    int first;              // 0xC
+    int last;               // 0x10
+    char pad_0x14[0x28 - 0x14];
+    float padX;             // 0x28
+    float padY;             // 0x2C
+};
+
+struct sRect1FB0 {
+    float x0, y0, x1, y1;
+};
+
+static inline sGlyph1FB0* sFontRes1FB0_find(sFontRes1FB0* f, int c)
+{
+    if (c < f->first)
+        return 0;
+    if (c <= f->last)
+        return f->table + c - f->first;
+    int lo = f->last - f->first;
+    int hi = f->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph1FB0* p = f->table + mid;
+        if (c == p->code)
+            return p;
+        if (c < p->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return f->def;
+}
+
+// PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
+extern "C" float func_00391FB0(void* f_, const char* s, void* r_, int mono, float sx, float sy)
+{
+    sFontRes1FB0* f = (sFontRes1FB0*)f_;
+    sRect1FB0* r = (sRect1FB0*)r_;
+    sRect1FB0 tmp;
+    sRect1FB0* rc = r ? r : &tmp;
+    rc->x0 = 0.0f;
+    rc->y0 = 0.0f;
+    rc->x1 = 0.0f;
+    rc->y1 = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    for (; *s; s++) {
+        sGlyph1FB0* g = sFontRes1FB0_find(f, *(unsigned char*)s);
+        if (g) {
+            float adv = g->adv * sx;
+            rc->x0 = (x + g->xoff * sx) <? rc->x0;
+            rc->y0 = (y + g->yoff * sy) <? rc->y0;
+            rc->y1 = (y + (g->yoff + g->h) * sy) >? rc->y1;
+            float nx;
+            if (!mono) {
+                rc->x1 = (x + (g->xoff + g->w) * sx) >? rc->x1;
+                nx = x + adv;
+            } else {
+                rc->x1 = (x + adv) >? rc->x1;
+                nx = x + adv;
+            }
+            x = nx;
+        }
+    }
+    rc->x1 = rc->x1 + rc->x0;
+    rc->y1 = rc->y1 + rc->y0;
+    if (f->padX < 0.0f) {
+        rc->x0 = rc->x0 - f->padX;
+        rc->x1 = rc->x1 - f->padX;
+    } else {
+        rc->x1 = rc->x1 + f->padX;
+    }
+    if (f->padY < 0.0f) {
+        rc->y0 = rc->y0 - f->padY;
+        rc->y1 = rc->y1 - f->padY;
+    } else {
+        rc->y1 = rc->y1 + f->padY;
+    }
+    return rc->x1;
+}
+
+//100%
+struct sGlyph21F0 {
+    unsigned short code;    // 0x0
+    unsigned char w;        // 0x2
+    unsigned char h;        // 0x3
+    int f4;
+    signed char adv;        // 0x8
+    signed char xoff;       // 0x9
+    signed char yoff;       // 0xA
+    char pad;
+};
+
+struct sFontRes21F0 {
+    int count;              // 0x0
+    sGlyph21F0* table;      // 0x4
+    sGlyph21F0* def;        // 0x8
+    int first;              // 0xC
+    int last;               // 0x10
+    char pad_0x14[0x28 - 0x14];
+    float padX;             // 0x28
+    float padY;             // 0x2C
+};
+
+struct sRect21F0 {
+    float x0, y0, x1, y1;
+};
+
+static inline sGlyph21F0* sFontRes21F0_find(sFontRes21F0* f, int c)
+{
+    if (c < f->first)
+        return 0;
+    if (c <= f->last)
+        return f->table + c - f->first;
+    int lo = f->last - f->first;
+    int hi = f->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph21F0* p = f->table + mid;
+        if (c == p->code)
+            return p;
+        if (c < p->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return f->def;
+}
+
+// PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
+extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
+{
+    sFontRes21F0* f = (sFontRes21F0*)f_;
+    sRect21F0* r = (sRect21F0*)r_;
+    sRect21F0 tmp;
+    sRect21F0* rc = r ? r : &tmp;
+    rc->x0 = 0.0f;
+    rc->y0 = 0.0f;
+    rc->x1 = 0.0f;
+    rc->y1 = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    for (; *s; s++) {
+        sGlyph21F0* g = sFontRes21F0_find(f, *s);
+        if (g) {
+            float adv = g->adv * sx;
+            rc->x0 = (x + g->xoff * sx) <? rc->x0;
+            rc->y0 = (y + g->yoff * sy) <? rc->y0;
+            rc->y1 = (y + (g->yoff + g->h) * sy) >? rc->y1;
+            float nx;
+            if (!mono) {
+                rc->x1 = (x + (g->xoff + g->w) * sx) >? rc->x1;
+                nx = x + adv;
+            } else {
+                rc->x1 = (x + adv) >? rc->x1;
+                nx = x + adv;
+            }
+            x = nx;
+        }
+    }
+    rc->x1 = rc->x1 + rc->x0;
+    rc->y1 = rc->y1 + rc->y0;
+    if (f->padX < 0.0f) {
+        rc->x0 = rc->x0 - f->padX;
+        rc->x1 = rc->x1 - f->padX;
+    } else {
+        rc->x1 = rc->x1 + f->padX;
+    }
+    if (f->padY < 0.0f) {
+        rc->y0 = rc->y0 - f->padY;
+        rc->y1 = rc->y1 - f->padY;
+    } else {
+        rc->y1 = rc->y1 + f->padY;
+    }
+    return rc->x1;
+}
+
+//100%
+struct sGlyph2430 {
+    unsigned short code;    // 0x0
+    unsigned char w;        // 0x2
+    unsigned char h;        // 0x3
+    int f4;
+    signed char adv;        // 0x8
+    signed char xoff;       // 0x9
+    signed char yoff;       // 0xA
+    char pad;
+};
+
+struct sFontRes2430 {
+    int count;              // 0x0
+    sGlyph2430* table;      // 0x4
+    sGlyph2430* def;        // 0x8
+    int first;              // 0xC
+    int last;               // 0x10
+    char pad_0x14[0x28 - 0x14];
+    float padX;             // 0x28
+    float padY;             // 0x2C
+};
+
+static inline sGlyph2430* sFontRes2430_find(sFontRes2430* f, int c)
+{
+    if (c < f->first)
+        return 0;
+    if (c <= f->last)
+        return f->table + c - f->first;
+    int lo = f->last - f->first;
+    int hi = f->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph2430* p = f->table + mid;
+        if (c == p->code)
+            return p;
+        if (c < p->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return f->def;
+}
+
+// PORT: PS2-only abs.s asm helper (fabsf off-PS2).
+static inline float fabs_2430(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Copy as much of str into dst as fits in width; returns where the next line starts (0 when done).
+extern "C" char* func_00392430(void* f_, const char* str, char* dst, int max, float sx, float width)
+{
+    sFontRes2430* f = (sFontRes2430*)f_;
+    width -= fabs_2430(f->padX);
+    if (width < 0.0f)
+        width = 0.0f;
+    const char* start = str;
+    float w = 0.0f;
+    float pend = w;
+    int lastSpace = -1;
+    int n = 0;
+    int k = 0;
+    while (*str) {
+        int sp = *str == ' ';
+        if (sp) {
+            if (width <= w) {
+                dst[lastSpace + 1] = 0;
+                const char* p = start + lastSpace;
+                do
+                    p++;
+                while (*p == ' ');
+                return (char*)p;
+            }
+            if (k > 0 && start[k - 1] != ' ')
+                lastSpace = k - 1;
+        }
+        sGlyph2430* g = sFontRes2430_find(f, *(unsigned char*)str);
+        if (g) {
+            float right = (g->xoff + g->w) * sx;
+            w += pend + right;
+            pend = g->adv * sx - right;
+        }
+        if (width <= w) {
+            if (lastSpace == -1) {
+                dst[n] = 0;
+                return (char*)str;
+            }
+        }
+        dst[n] = *str;
+        n++;
+        k++;
+        str++;
+        if (n == max - 1)
+            break;
+    }
+    if (width <= w) {
+        dst[lastSpace + 1] = 0;
+        const char* p = start + lastSpace;
+        do
+            p++;
+        while (*p == ' ');
+        return (char*)p;
+    }
+    dst[n] = 0;
+    return 0;
+}
 
 INCLUDE_ASM("render/font", func_00392680);
 
-INCLUDE_ASM("render/font", func_00392908);
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+extern "C" void func_00392908(void* self, const char* str, float x, float y)
+{
+    float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
+}
 
 INCLUDE_ASM("render/font", func_00392980);
 
-INCLUDE_ASM("render/font", func_003929F8);
+//100%
+extern void* D_004A3E90;
+extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
+extern "C" void cBXString__cBXString(void* self, int flags);
 
-INCLUDE_ASM("render/font", func_00392A60);
+struct sBXStr_29F8 {
+    char* p;
+};
+
+extern "C" void func_003929F8(void* self, const char* fmt, void* ap, float x, float y)
+{
+    sBXStr_29F8 s;
+    s.p = (char*)D_004A3E90;
+    func_003191C0(&s, fmt, ap);
+    func_00392908(self, s.p, x, y);
+    cBXString__cBXString(&s, 2);
+}
+
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+extern "C" void func_00392A60(void* self, const char* str, float x, float y)
+{
+    float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    func_00391CB0(self, x - w, y, (sMat00391C48*)str);
+}
 
 INCLUDE_ASM("render/font", func_00392AD0);
 
-INCLUDE_ASM("render/font", func_00392B40);
+//100%
+extern void* D_004A3E90;
+extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
+extern "C" void cBXString__cBXString(void* self, int flags);
 
-INCLUDE_ASM("render/font", func_00392BA8);
+struct sBXStr_2B40 {
+    char* p;
+};
 
-INCLUDE_ASM("render/font", func_00392C60);
+extern "C" void func_00392B40(void* self, const char* fmt, void* ap, float x, float y)
+{
+    sBXStr_2B40 s;
+    s.p = (char*)D_004A3E90;
+    func_003191C0(&s, fmt, ap);
+    func_00392A60(self, s.p, x, y);
+    cBXString__cBXString(&s, 2);
+}
 
-INCLUDE_ASM("render/font", func_00392D18);
+//100%
+struct sGlyph {
+    unsigned short code;
+    char pad_0x2[6];
+    signed char width;
+    char pad_0x9[3];
+};
+
+struct sGlyphTable {
+    int count;
+    sGlyph* glyphs;
+    sGlyph* fallback;
+    int first;
+    int last;
+};
+
+static inline sGlyph* findGlyph(sGlyphTable* t, int c)
+{
+    if (c < t->first)
+        return 0;
+    if (c <= t->last)
+        return t->glyphs + c - t->first;
+    int lo = t->last - t->first;
+    int hi = t->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph* g = &t->glyphs[mid];
+        if (c == g->code)
+            return g;
+        if (c < g->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return t->fallback;
+}
+
+extern "C" float func_00392BA8(sGlyphTable* t, char c)
+{
+    sGlyph* g = findGlyph(t, c);
+    if (g)
+        return g->width;
+    return 0.0f;
+}
+
+//100%
+extern "C" float func_00392C60(sGlyphTable* t, unsigned short c)
+{
+    sGlyph* g = findGlyph(t, c);
+    if (g)
+        return g->width;
+    return 0.0f;
+}
+
+//100%
+struct sFontVec3 {
+    float x, y, z;
+};
+
+struct sFontQuad {
+    int v[4];
+} __attribute__((aligned(16)));
+
+struct sFontState {
+    sFontVec3 field_0x0;    // 0x0
+    int count;              // 0xc
+    sFontVec3 vecs[5];      // 0x10
+    sFontQuad quads[5];     // 0x50
+    int field_0xa0;         // 0xa0
+    int field_0xa4;         // 0xa4
+};
+
+extern "C" void func_00392D18(sFontState* self)
+{
+    sFontVec3 t;
+    t.x = 0.0f;
+    t.y = 0.0f;
+    t.z = 0.0f;
+    self->count = 0;
+    self->field_0x0 = t;
+    self->field_0xa0 = 0;
+    self->field_0xa4 = 0;
+}
 
 INCLUDE_ASM("render/font", func_00392D58);
 
-INCLUDE_ASM("render/font", func_00392D90);
+//100%
+extern "C" void func_00392D90(sFontState* self, sFontQuad* q, sFontVec3* v)
+{
+    self->vecs[self->count] = *v;
+    self->quads[self->count] = *q;
+    self->count++;
+}
 
 INCLUDE_ASM("render/font", func_00392DE0);
 
-INCLUDE_ASM("render/font", func_00392DE8);
+//100%
+void func_00392DE8(void* self, int val)
+{
+    *(int*)((char*)self + 0xA4) = val;
+}
 
-INCLUDE_ASM("render/font", func_00392DF0);
+//100%
+extern "C" float func_0031BF60(float a);
+
+extern "C" void* func_00392DF0(void* self)
+{
+    int i;
+    for (i = 0; i < 0x280; i++) {
+        ((float*)self)[i] = func_0031BF60((float)i * 0.01227184571325779f);
+    }
+    return self;
+}
 
 INCLUDE_ASM("render/font", func_00392E60);
 
@@ -56,21 +780,52 @@ INCLUDE_ASM("render/font", func_00393008);
 
 INCLUDE_ASM("render/font", func_00393048);
 
-INCLUDE_ASM("render/font", func_00393FA8);
+//100%
+void func_00393FA8(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00393FB0);
+//100%
+int func_00393FB0(void* self)
+{
+    return 0;
+}
 
-INCLUDE_ASM("render/font", func_00393FB8);
+//100%
+extern "C" void func_00393FB8(void* self, int a1, int a2)
+{
+    *(float*)self = (float)a1;
+    *(float*)((char*)self + 0x4) = (float)a2;
+}
 
-INCLUDE_ASM("render/font", func_00393FD8);
+//100%
+extern "C" int func_00393FD8(void* self)
+{
+    return (int)*(float*)self;
+}
 
-INCLUDE_ASM("render/font", func_00393FF0);
+//100%
+extern "C" int func_00393FF0(void* self)
+{
+    return (int)*(float*)((char*)self + 0x4);
+}
 
-INCLUDE_ASM("render/font", func_00394008);
+//100%
+void func_00394008(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394010);
+//100%
+int func_00394010(void* self)
+{
+    return 0x1;
+}
 
-INCLUDE_ASM("render/font", func_00394018);
+//100%
+int func_00394018(void* self)
+{
+    return 0x1;
+}
 
 INCLUDE_ASM("render/font", func_00394020);
 
@@ -156,17 +911,41 @@ INCLUDE_ASM("render/font", func_00394280);
 
 INCLUDE_ASM("render/font", func_00394290);
 
-INCLUDE_ASM("render/font", func_003942A0);
+//100%
+extern "C" void* func_003942A0(void* self)
+{
+    *(float*)self = 1.0f;
+    *(float*)((char*)self + 0x4) = 1.0f;
+    *(int*)((char*)self + 0x8) = 0;
+    *(float*)((char*)self + 0xc) = 1.0f;
+    return self;
+}
 
-INCLUDE_ASM("render/font", func_003942C0);
+//100%
+void func_003942C0(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003942C8);
+//100%
+void func_003942C8(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003942D0);
+//100%
+void func_003942D0(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003942D8);
+//100%
+void* func_003942D8(void* self)
+{
+    return (char*)self + 0xED8;
+}
 
-INCLUDE_ASM("render/font", func_003942E0);
+//100%
+void func_003942E0(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_003942E8);
 
@@ -200,55 +979,125 @@ INCLUDE_ASM("render/font", func_00394588);
 
 INCLUDE_ASM("render/font", func_00394598);
 
-INCLUDE_ASM("render/font", func_003945B8);
+//100%
+void func_003945B8(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003945C0);
+//100%
+void func_003945C0(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003945C8);
+//100%
+void func_003945C8(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003945D0);
+//100%
+void func_003945D0(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003945D8);
+//100%
+void func_003945D8(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003945E0);
+//100%
+void func_003945E0(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003945E8);
+//100%
+void func_003945E8(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_003945F0);
 
 INCLUDE_ASM("render/font", func_003945F8);
 
-INCLUDE_ASM("render/font", func_00394610);
+//100%
+void func_00394610(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394618);
+//100%
+void func_00394618(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394620);
+//100%
+void func_00394620(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394628);
+//100%
+void func_00394628(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394630);
+//100%
+void func_00394630(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394638);
+//100%
+void func_00394638(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394640);
+//100%
+void func_00394640(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394648);
+//100%
+void func_00394648(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394650);
+//100%
+void func_00394650(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394658);
+//100%
+void func_00394658(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394660);
+//100%
+void func_00394660(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394668);
+//100%
+void func_00394668(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394670);
+//100%
+void func_00394670(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394678);
+//100%
+int func_00394678(void* self)
+{
+    return 0;
+}
 
-INCLUDE_ASM("render/font", func_00394680);
+//100%
+void func_00394680(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394688);
+//100%
+void func_00394688(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_00394690);
 
@@ -266,7 +1115,10 @@ INCLUDE_ASM("render/font", func_003946D0);
 
 INCLUDE_ASM("render/font", func_003946D8);
 
-INCLUDE_ASM("render/font", func_003946E8);
+//100%
+void func_003946E8(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_003946F0);
 
@@ -290,43 +1142,148 @@ INCLUDE_ASM("render/font", func_00394A20);
 
 INCLUDE_ASM("render/font", func_00394AD8);
 
-INCLUDE_ASM("render/font", func_00394B38);
+//100%
+void operator_delete(int* ptr);
 
-INCLUDE_ASM("render/font", func_00394B68);
+extern char D_00493938[];
+
+extern "C" void func_00394B38(int* self, int flags)
+{
+    *(void**)((char*)self + 0x4) = D_00493938;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+
+//100%
+void func_00394B68(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_00394B70);
 
-INCLUDE_ASM("render/font", func_00394B78);
+//100%
+void func_00394B78(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394B80);
+//100%
+void func_00394B80(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394B88);
+//100%
+void func_00394B88(void* self, float val)
+{
+    *(float*)((char*)self + 0x0) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394B90);
+//100%
+float func_00394B90(void* self)
+{
+    return *(float*)((char*)self + 0x0);
+}
 
-INCLUDE_ASM("render/font", func_00394B98);
+//100%
+class cFontVirt {
+public:
+    int field_0x0;
+    // vptr lands at 0x4 (g++ 2.95 places it after the class's own data);
+    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22(int, int, int, int, int);
+};
 
-INCLUDE_ASM("render/font", func_00394BC0);
+extern "C" void func_00394B98(cFontVirt* self, int a, int b, int c, int d, int e)
+{
+    self->v22(a, b, c, d, e);
+}
 
-INCLUDE_ASM("render/font", func_00394BC8);
+//100%
+void func_00394BC0(void* self, float val)
+{
+    *(float*)((char*)self + 0x33C) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394BD0);
+//100%
+void func_00394BC8(void* self, float val)
+{
+    *(float*)((char*)self + 0x340) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394BD8);
+//100%
+float func_00394BD0(void* self)
+{
+    return *(float*)((char*)self + 0x33C);
+}
 
-INCLUDE_ASM("render/font", func_00394BE0);
+//100%
+float func_00394BD8(void* self)
+{
+    return *(float*)((char*)self + 0x340);
+}
 
-INCLUDE_ASM("render/font", func_00394BE8);
+//100%
+void func_00394BE0(void* self, int val)
+{
+    *(int*)((char*)self + 0x354) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394BF0);
+//100%
+void func_00394BE8(void* self, int val)
+{
+    *(int*)((char*)self + 0x344) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394BF8);
+//100%
+void func_00394BF0(void* self, int val)
+{
+    *(int*)((char*)self + 0x34C) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394C00);
+//100%
+void func_00394BF8(void* self, int val)
+{
+    *(int*)((char*)self + 0x350) = val;
+}
 
-INCLUDE_ASM("render/font", func_00394C08);
+//100%
+int func_00394C00(void* self)
+{
+    return *(int*)((char*)self + 0x344);
+}
 
-INCLUDE_ASM("render/font", func_00394C10);
+//100%
+int func_00394C08(void* self)
+{
+    return *(int*)((char*)self + 0x34C);
+}
+
+//100%
+int func_00394C10(void* self)
+{
+    return *(int*)((char*)self + 0x350);
+}
 
 INCLUDE_ASM("render/font", func_00394C18);
 
@@ -336,65 +1293,383 @@ INCLUDE_ASM("render/font", func_00394C38);
 
 INCLUDE_ASM("render/font", func_00394C40);
 
-INCLUDE_ASM("render/font", func_00394C48);
+//100%
+void func_00394C48(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394C50);
+//100%
+void func_00394C50(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394C58);
+//100%
+void func_00394C58(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394C60);
+//100%
+void func_00394C60(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394C68);
+extern "C" void* func_0038AE28(void* self);
 
-INCLUDE_ASM("render/font", func_00394C88);
+//100%
+void* func_00394C68(void* self)
+{
+    return func_0038AE28(self);
+}
 
-INCLUDE_ASM("render/font", func_00394C98);
+//100%
+void* func_00394C88(void* self, int a1)
+{
+    return ((char*)*(void**)((char*)self + 0x4) + a1 * 4);
+}
 
-INCLUDE_ASM("render/font", func_00394CE8);
+//100%
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern const char D_00491FA0[];
 
-INCLUDE_ASM("render/font", func_00394D10);
+extern "C" void func_00394C98(void* self, int n)
+{
+    *(int*)((char*)self + 0x8) = n;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = n + 0x32;
+    *(void**)((char*)self + 0x4) = operator_new_tag((n + 0x32) * 4, D_00491FA0, 0, 0);
+}
 
-INCLUDE_ASM("render/font", func_00394D18);
+//100%
+void cMemMan_free(void*);
 
-INCLUDE_ASM("render/font", func_00394D30);
+extern "C" void func_00394CE8(void* self)
+{
+    void* p = *(void**)((char*)self + 0x4);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+}
 
-INCLUDE_ASM("render/font", func_00394D38);
+//100%
+void func_00394D10(void* self)
+{
+    *(int*)((char*)self + 0xC) = 0;
+}
 
-INCLUDE_ASM("render/font", func_00394D40);
+//100%
+extern "C" char* func_00394D18(void* self)
+{
+    return *(char**)((char*)self + 0x8) + (*(int*)((char*)self + 0xC))++;
+}
 
-INCLUDE_ASM("render/font", func_00394D48);
+//100%
+void func_00394D30(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394D50);
+//100%
+void func_00394D38(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00394ED0);
+//100%
+void func_00394D40(void* self)
+{
+}
+
+//100%
+void func_00394D48(void* self)
+{
+}
+
+//100%
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+struct sFontTexKey {
+    char block[0x10];       // 0x0
+    short ids[2];           // 0x10
+    sFontTexKey()
+    {
+        for (unsigned int i = 0; i < 2; i++) {
+            ids[i] = -1;
+        }
+        func_00416210(block, 0, 0x10);
+    }
+};
+
+struct sFontGlyph80 {
+    sFontTexKey key;        // 0x0
+    char pad_0x14[0x6C];
+};
+
+struct sFontGlyph18 {
+    sFontTexKey key;        // 0x0
+    int field_0x14;
+};
+
+struct sFontEmpty24 {
+    int a;
+    sFontEmpty24() {}
+};
+
+struct sFontEmptyC {
+    int a;
+    sFontEmptyC() {}
+};
+
+struct sFontCache {
+    char pad_0x0[0x80];
+    sFontGlyph80 glyphs[0xA28];     // 0x80
+    int field_0x51480;
+    sFontGlyph18 small[0x400];      // 0x51484
+    sFontEmpty24 e1[0x800];         // 0x57484
+    char pad_0x59484[0x69CA8 - 0x59484];
+    sFontTexKey key;                // 0x69CA8
+    sFontEmptyC e2[0xC];            // 0x69CBC
+    sFontCache() {}
+};
+
+inline void* operator new(unsigned int, void* p) { return p; }
+
+extern "C" void* func_00394D50(void* self)
+{
+    new (self) sFontCache;
+    return self;
+}
+
+//100%
+struct sGlyphKey {
+    int k[4];
+    int v;
+};
+
+struct sGlyphEntry {
+    sGlyphKey key;          // 0x00
+    sGlyphEntry* next;      // 0x14
+};
+
+struct sGlyphCache {
+    char pad_0x00[0x51480];
+    int count;                  // 0x51480
+    sGlyphEntry entries[3755];  // 0x51484
+    char pad_0x6748C[0x14];
+    sGlyphEntry* buckets[256];  // 0x674A0
+};
+
+static inline int glyphKeyEq(const int* a, const int* b)
+{
+    unsigned int i;
+    for (i = 0; i < 4; i++) {
+        if (a[i] != b[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+extern "C" sGlyphEntry* func_00394ED0(sGlyphCache* self, sGlyphKey* key, unsigned char hash)
+{
+    sGlyphEntry** pp = &self->buckets[hash];
+    while (*pp != 0) {
+        sGlyphEntry* e = *pp;
+        if (glyphKeyEq(e->key.k, key->k)) {
+            if (e == self->buckets[hash]) {
+                return e;
+            }
+            *pp = e->next;
+            e->next = self->buckets[hash];
+            self->buckets[hash] = e;
+            return e;
+        }
+        pp = &e->next;
+    }
+    sGlyphEntry* e = &self->entries[self->count++];
+    e->key = *key;
+    e->next = self->buckets[hash];
+    self->buckets[hash] = e;
+    return e;
+}
 
 INCLUDE_ASM("render/font", func_00395000);
 
-INCLUDE_ASM("render/font", func_003950C0);
+//100%
+struct sVec50C0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
 
-INCLUDE_ASM("render/font", func_00395268);
+struct sMat50C0 {
+    float m[16];
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sMat50C0& operator=(const sMat50C0& o)
+    {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
 
-INCLUDE_ASM("render/font", func_00395288);
+struct sPair50C0 {
+    int a, b;
+};
 
-INCLUDE_ASM("render/font", func_00395318);
+struct sFontState50C0 {
+    float f00, f04, f08, f0C, f10, f14, f18, f1C;
+    int i20;
+    float f24, f28, f2C;
+    sVec50C0 v30, v40, v50;
+    sMat50C0 m60, mA0, mE0, m120;
+    sVec50C0 v160, v170;
+    sMat50C0 m180, m1C0;
+    sVec50C0 v200, v210;
+    sPair50C0 p220;
+    int i228;
+};
 
-INCLUDE_ASM("render/font", func_00395320);
+// Compiler-generated member-wise assignment of the font render state.
+extern "C" sFontState50C0* func_003950C0(sFontState50C0* self, const sFontState50C0* o)
+{
+    *self = *o;
+    return self;
+}
 
-INCLUDE_ASM("render/font", func_00395328);
+extern "C" void* func_003695D8(void* self);
 
-INCLUDE_ASM("render/font", func_00395330);
+//100%
+void* func_00395268(void* self)
+{
+    return func_003695D8(self);
+}
 
-INCLUDE_ASM("render/font", func_00395350);
+//100%
+extern "C" void* func_003691F8(void* self);
+extern void* D_00493260[];
 
-INCLUDE_ASM("render/font", func_00395370);
+inline void* operator new[](unsigned int, void* p) { return p; }
 
-INCLUDE_ASM("render/font", func_003953B0);
+struct sRenderSlot5288 {
+    float v[4];
+    sRenderSlot5288() {}
+};
 
-INCLUDE_ASM("render/font", func_003953B8);
+extern "C" void* func_00395288(void* self)
+{
+    func_003691F8(self);
+    *(void***)((char*)self + 0x10D8) = D_00493260;
+    new ((char*)self + 0x10E0) sRenderSlot5288[12];
+    new ((char*)self + 0x11A0) sRenderSlot5288[8];
+    new ((char*)self + 0x1220) sRenderSlot5288[2];
+    new ((char*)self + 0x1240) sRenderSlot5288[2];
+    new ((char*)self + 0x1260) sRenderSlot5288[4];
+    return self;
+}
+
+//100%
+int func_00395318(void* self)
+{
+    return *(int*)((char*)self + 0x59C4);
+}
+
+//100%
+int func_00395320(void* self)
+{
+    return *(int*)((char*)self + 0x5A4C);
+}
+
+//100%
+int func_00395328(void* self)
+{
+    return *(int*)((char*)self + 0x59C8);
+}
+
+// 0xa4-byte elements reached through a pointer at self+0x59cc, indexed by
+// the counter at self+0x59c8
+struct sFontEntry {
+    char pad_0x00[0x88];
+    int field_0x88;
+    int field_0x8c;
+    char pad_0x90[0x14];
+};
+
+//100%
+extern "C" int func_00395330(void* self)
+{
+    int i = *(int*)((char*)self + 0x59c8);
+    sFontEntry* p = *(sFontEntry**)((char*)self + 0x59cc);
+    return p[i].field_0x88;
+}
+
+//100%
+extern "C" int func_00395350(void* self)
+{
+    int i = *(int*)((char*)self + 0x59c8);
+    sFontEntry* p = *(sFontEntry**)((char*)self + 0x59cc);
+    return p[i].field_0x8c;
+}
+
+//100%
+struct sFontVEntry23 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, float, float, float, float);
+};
+
+extern "C" void func_00395370(void* self, float* v, int a2)
+{
+    sFontVEntry23* vt = *(sFontVEntry23**)((char*)self + 0x10D8);
+    vt[23].fn((char*)self + vt[23].delta, a2, v[0], v[1], v[2], v[3]);
+}
+
+//100%
+void* func_003953B0(void* self)
+{
+    return (char*)self + 0x6B94;
+}
+
+//100%
+extern "C" void func_003956B0(void* self);
+
+// Fetch the current (combined) matrix into out and return out.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void* func_003953B8(void* out, void* self)
+{
+    func_003956B0(self);
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(out), "r"((char*)self + 0x58A0)
+        : "memory");
+    return out;
+}
 
 INCLUDE_ASM("render/font", func_00395418);
 
-INCLUDE_ASM("render/font", func_00395420);
+//100%
+void func_00395420(void* self)
+{
+    *(int*)((char*)self + 0x13EC) = 0;
+}
 
 INCLUDE_ASM("render/font", func_00395428);
 
@@ -406,13 +1681,32 @@ INCLUDE_ASM("render/font", func_00395470);
 
 INCLUDE_ASM("render/font", func_00395498);
 
-INCLUDE_ASM("render/font", func_003954D0);
+//100%
+struct sFontBlockA0 {
+    float f[40];
+} __attribute__((aligned(16)));
 
-INCLUDE_ASM("render/font", func_00395500);
+extern "C" void func_003954D0(void* self, sFontBlockA0* src)
+{
+    *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
+}
 
-INCLUDE_ASM("render/font", func_00395508);
+//100%
+void* func_00395500(void* self)
+{
+    return (char*)self + 0x6BB0;
+}
 
-INCLUDE_ASM("render/font", func_00395510);
+//100%
+void func_00395508(void* self)
+{
+}
+
+//100%
+int func_00395510(void* self)
+{
+    return *(int*)((char*)self + 0x5A74);
+}
 
 INCLUDE_ASM("render/font", func_00395518);
 
@@ -450,37 +1744,281 @@ INCLUDE_ASM("render/font", func_00395660);
 
 INCLUDE_ASM("render/font", func_00395688);
 
-INCLUDE_ASM("render/font", func_003956B0);
+//100%
+extern "C" void func_0037D968(void* self);
+
+extern "C" void func_003956B0(void* self)
+{
+    if (*(int*)((char*)self + 0x6B90) == 0) {
+        func_0037D968(self);
+    }
+}
 
 INCLUDE_ASM("render/font", func_003956D8);
 
-INCLUDE_ASM("render/font", func_003956E0);
+//100%
+void func_003956E0(void* self, int val)
+{
+    *(int*)((char*)self + 0x6D14) = val;
+}
 
-INCLUDE_ASM("render/font", func_003956E8);
+//100%
+// Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_003956E8(void* self)
+{
+    char* top = *(char**)((char*)self + 0x13e4);
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(top + 0x40), "r"(top)
+        : "memory");
+    *(char**)((char*)self + 0x13e4) += 0x40;
+    *(int*)((char*)self + 0x13e0) += 1;
+}
 
-INCLUDE_ASM("render/font", func_00395730);
+//100%
+void func_00395730(void* self)
+{
+    *(int*)((char*)self + 0x6b90) = 0;
+    *(char**)((char*)self + 0x13e4) -= 0x40;
+    *(int*)((char*)self + 0x13e0) -= 1;
+}
 
 INCLUDE_ASM("render/font", func_00395750);
 
-INCLUDE_ASM("render/font", func_00395C38);
+//100%
+// Load matrix m into the top of the matrix stack and clear the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_00395C38(void* self, void* m)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(m)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
 
-INCLUDE_ASM("render/font", func_00395C68);
+//100%
+int func_00395C68(void* self)
+{
+    return *(int*)((char*)self + 0x13E4);
+}
 
-INCLUDE_ASM("render/font", func_00395C70);
+//100%
+// Multiply the top of the matrix stack by m in place (top = top * m) and clear
+// the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
+extern "C" void func_00395C70(void* self, void* m)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(m)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
 
-INCLUDE_ASM("render/font", func_00395CF0);
+//100%
+extern char D_004FF1A0[];
 
-INCLUDE_ASM("render/font", func_00395D28);
+// Load the matrix D_004FF1A0 (likely identity) into the top of the matrix stack
+// and clear the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+extern "C" void func_00395CF0(void* self)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(D_004FF1A0)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
 
-INCLUDE_ASM("render/font", func_00395D60);
+//100%
+// Translate the top matrix of the stack: row 3 = top * v (v is a 4-vector),
+// then clear the cached flag at 0x6b90.
+// PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
+// needs a C fallback.
+extern "C" void func_00395D28(void* self, void* v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, 0x0(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(v)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+
+//100%
+struct sFontRotMat {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
+extern "C" void func_00395D60(void* self, float* axis, float angle)
+{
+    sFontRotMat r;
+    float s;
+    float c;
+    char* top = *(char**)((char*)self + 0x13e4);
+    func_0031BE50(&s, &c, angle);
+    float t = 1.0f - c;
+    float x = axis[0];
+    float y = axis[1];
+    float z = axis[2];
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[3][3] = 1.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(top), "r"(&r)
+        : "memory");
+    *(int*)((char*)self + 0x6b90) = 0;
+}
+
+extern "C" void* func_003826E0(void* self);
 
 INCLUDE_ASM("render/font", func_00395ED8);
 
-INCLUDE_ASM("render/font", func_00395F60);
+//100%
+void* func_00395F60(void* self)
+{
+    return func_003826E0(self);
+}
 
-INCLUDE_ASM("render/font", func_00395F80);
+extern "C" void* func_00382730(void* self);
 
-INCLUDE_ASM("render/font", func_00395FA0);
+//100%
+void* func_00395F80(void* self)
+{
+    return func_00382730(self);
+}
+
+//100%
+void func_00395FA0(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_00395FA8);
 
@@ -490,11 +2028,28 @@ INCLUDE_ASM("render/font", func_00396080);
 
 INCLUDE_ASM("render/font", func_003960E8);
 
-INCLUDE_ASM("render/font", func_00396108);
+//100%
+int func_00396108(void* self)
+{
+    return *(int*)((char*)self + 0x1C8);
+}
 
-INCLUDE_ASM("render/font", func_00396110);
+//100%
+extern "C" void func_00396110(void* self, float range)
+{
+    *(float*)((char*)self + 0x194) = range;
+    *(float*)((char*)self + 0x198) = 32767.0f / range;
+}
 
-INCLUDE_ASM("render/font", func_00396128);
+//100%
+extern "C" void func_00396128(void* self)
+{
+    int i;
+    for (i = 0; i < 2; i++) {
+        ((int*)((char*)self + 0x1f4c))[i] = -1;
+    }
+    *(int*)((char*)self + 0x1f54) = -1;
+}
 
 INCLUDE_ASM("render/font", func_00396160);
 
@@ -504,7 +2059,18 @@ INCLUDE_ASM("render/font", func_00396198);
 
 INCLUDE_ASM("render/font", func_003961A0);
 
-INCLUDE_ASM("render/font", func_003961A8);
+//100%
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_003961A8(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
 INCLUDE_ASM("render/font", func_003961D8);
 
@@ -600,7 +2166,18 @@ INCLUDE_ASM("render/font", func_003964A8);
 
 INCLUDE_ASM("render/font", func_003964B8);
 
-INCLUDE_ASM("render/font", func_003964C8);
+//100%
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_003964C8(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
 INCLUDE_ASM("render/font", func_003964F8);
 
@@ -664,7 +2241,18 @@ INCLUDE_ASM("render/font", func_003967D8);
 
 INCLUDE_ASM("render/font", func_00396820);
 
-INCLUDE_ASM("render/font", func_00396838);
+//100%
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396838(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
 INCLUDE_ASM("render/font", func_00396868);
 
@@ -678,19 +2266,58 @@ INCLUDE_ASM("render/font", func_003968A8);
 
 INCLUDE_ASM("render/font", func_003968B8);
 
-INCLUDE_ASM("render/font", func_003968C8);
+//100%
+void func_003968C8(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_003968D0);
+//100%
+extern "C" void func_003968D0(void* self, int a1, void* a2)
+{
+    cQuad128* p = *(cQuad128**)((char*)self + 0x8);
+    p[a1] = *(cQuad128*)a2;
+}
 
-INCLUDE_ASM("render/font", func_003968E8);
+//100%
+void operator_delete(int* ptr);
 
-INCLUDE_ASM("render/font", func_00396918);
+extern char D_00488680[];
 
-INCLUDE_ASM("render/font", func_00396920);
+extern "C" void func_003968E8(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
-INCLUDE_ASM("render/font", func_00396928);
+//100%
+void func_00396918(void* self)
+{
+}
 
-INCLUDE_ASM("render/font", func_00396958);
+//100%
+void func_00396920(void* self)
+{
+}
+
+//100%
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396928(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+
+//100%
+void func_00396958(void* self)
+{
+}
 
 INCLUDE_ASM("render/font", func_00396960);
 
@@ -712,7 +2339,18 @@ INCLUDE_ASM("render/font", func_003969E0);
 
 INCLUDE_ASM("render/font", func_003969F0);
 
-INCLUDE_ASM("render/font", func_00396A00);
+//100%
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396A00(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
 INCLUDE_ASM("render/font", func_00396A30);
 
@@ -752,7 +2390,20 @@ INCLUDE_ASM("render/font", func_00396B40);
 
 INCLUDE_ASM("render/font", func_00396C30);
 
-INCLUDE_ASM("render/font", func_00396D30);
+//100%
+void operator_delete(int* ptr);
+
+extern char D_00488680[];
+
+extern "C" void func_00396D30(int* self, int flags)
+{
+    *(void**)self = D_00488680;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
+
+extern "C" void* func_00393048(int, int);
 
 INCLUDE_ASM("render/font", func_00396D60);
 
@@ -860,8 +2511,23 @@ INCLUDE_ASM("render/font", func_003970D8);
 
 INCLUDE_ASM("render/font", func_003970E8);
 
-INCLUDE_ASM("render/font", func_003970F8);
+//99.38%
+void* func_003970F8(void* self)
+{
+    return func_00393048(1, 0xffff);
+}
 
-INCLUDE_ASM("render/font", func_00397118);
+extern "C" void* func_00393048(int, int);
 
-INCLUDE_ASM("render/font", func_00397138);
+//99.38%
+void* func_00397118(void* self)
+{
+    return func_00393048(0, 0xffff);
+}
+
+//100%
+void func_00397138(void* self, int val)
+{
+    *(int*)((char*)self + 0x0) = val;
+}
+

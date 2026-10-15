@@ -1,82 +1,113 @@
-#include "main/sectionman.h"
+#include "common.h"
 
-// Not yet decompiled: its switch over courses needs a jump table in .rodata,
-// which is still one unsplit block
 INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
 
-// Puts every node on the free list and empties the active list
-void cSectionMan::func_0022E228()
+//100%
+struct sSectionNode {
+    int field_0x0;
+    sSectionNode* next; // 0x4
+};
+
+struct sSectionMan {
+    sSectionNode nodes[50]; // 0x0
+    int field_0x190;
+    int field_0x194;
+    sSectionNode* freeList; // 0x198
+    int field_0x19c;
+    int field_0x1a0;
+};
+
+extern "C" void func_0022E228(sSectionMan* self)
 {
     int i;
-
-    m_free = m_nodes;
+    self->freeList = self->nodes;
     for (i = 0; i < 50; i++) {
-        m_nodes[i].value = 49;
-        m_nodes[i].next = &m_nodes[i + 1];
+        self->nodes[i].field_0x0 = 49;
+        self->nodes[i].next = &self->nodes[i + 1];
     }
-    m_unk190 = 49;
-    m_unk194 = 0;
-    m_active = 0;
-    m_activeCount = 0;
+    self->field_0x190 = 49;
+    self->field_0x194 = 0;
+    self->field_0x19c = 0;
+    self->field_0x1a0 = 0;
 }
 
-// Takes a node off the free list
-tSectionNode* cSectionMan::func_0022E278()
+//100%
+struct sSectionLink {
+    int pad0;
+    sSectionLink* next; // 0x4
+};
+
+void* func_0022E278(void* self)
 {
-    tSectionNode* node = m_free;
-    m_free = node->next;
+    sSectionLink* node = *(sSectionLink**)((char*)self + 0x198);
+    *(sSectionLink**)((char*)self + 0x198) = node->next;
     return node;
 }
 
-// Returns a node to the free list
-void cSectionMan::func_0022E288(tSectionNode* node)
+//100%
+int func_0022E288(void* self, void* a1)
 {
-    node->next = m_free;
-    m_free = node;
+    int t0 = *(int*)((char*)self + 0x198);
+    *(int*)((char*)a1 + 0x4) = t0;
+    *(int*)((char*)self + 0x198) = (int)a1;
+    return t0;
 }
 
-// Appends value to the active list, removing any entries already holding it
-void cSectionMan::func_0022E298(int value)
-{
-    tSectionNode* prev = 0;
-    tSectionNode* node = m_active;
+//100% - objdiff report; single-function view differs only in a relocation name
+struct sSectionNode_E298 {
+    int id;
+    sSectionNode_E298* next; // 0x4
+};
 
-    while (node) {
-        if (node->value == value) {
-            tSectionNode* next = node->next;
-            func_0022E360(prev, node);
-            node = next;
+void* func_0022E278(void* self);
+extern "C" void func_0022E360(void* self, void* prev, void* node);
+
+extern "C" void func_0022E298(void* self, int id)
+{
+    sSectionNode_E298* n = *(sSectionNode_E298**)((char*)self + 0x19C);
+    sSectionNode_E298* prev = 0;
+    while (n != 0) {
+        if (n->id == id) {
+            sSectionNode_E298* cur = n;
+            n = n->next;
+            func_0022E360(self, prev, cur);
         } else {
-            prev = node;
-            node = node->next;
+            prev = n;
+            n = n->next;
         }
     }
-
-    node = func_0022E278();
-    node->value = value;
-    node->next = 0;
-    if (prev)
-        prev->next = node;
-    else
-        m_active = node;
-    m_activeCount++;
+    n = (sSectionNode_E298*)func_0022E278(self);
+    n->id = id;
+    n->next = 0;
+    if (prev != 0) {
+        prev->next = n;
+    } else {
+        *(sSectionNode_E298**)((char*)self + 0x19C) = n;
+    }
+    *(int*)((char*)self + 0x1A0) += 1;
 }
 
-// Next active node after prev, or the first one when prev is null
-tSectionNode* cSectionMan::func_0022E348(tSectionNode* prev)
+//100%
+extern "C" int func_0022E348(void* self, void* a1)
 {
-    if (prev)
-        return prev->next;
-    return m_active;
+    if (a1 != 0) {
+        return *(int*)((char*)a1 + 0x4);
+    }
+    return *(int*)((char*)self + 0x19c);
 }
 
-// Unlinks node (which follows prev) from the active list and frees it
-void cSectionMan::func_0022E360(tSectionNode* prev, tSectionNode* node)
+//100% - objdiff report; single-function view differs only in a relocation name
+// PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
+void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
+
+extern "C" void func_0022E360(void* self, void* prev, void* node)
 {
-    if (prev == 0)
-        m_active = node->next;
-    else
-        prev->next = node->next;
-    func_0022E288(node);
-    m_activeCount--;
+    if (prev == 0) {
+        *(int*)((char*)self + 0x19C) = *(int*)((char*)node + 0x4);
+    } else {
+        *(int*)((char*)prev + 0x4) = *(int*)((char*)node + 0x4);
+    }
+    func_0022E288_v(self, node);
+    *(int*)((char*)self + 0x1A0) = *(int*)((char*)self + 0x1A0) - 1;
 }
+

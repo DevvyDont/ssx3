@@ -1,0 +1,361 @@
+#include "common.h"
+
+INCLUDE_ASM("seg/seg_1C9348", HUFF_about);
+
+//100%
+extern "C" unsigned func_002C8468(unsigned char *p, int n) {
+    unsigned r = 0;
+    while (n--) {
+        r = (r << 8) + *p++;
+    }
+    return r;
+}
+
+//100%
+extern "C" unsigned func_002C8468(unsigned char *p, int n);
+
+extern "C" int func_002C84A0(unsigned char *p) {
+    int r = 0;
+    if (func_002C8468(p, 2) == 0x30FB
+        || func_002C8468(p, 2) == 0x31FB
+        || func_002C8468(p, 2) == 0x32FB
+        || func_002C8468(p, 2) == 0x33FB
+        || func_002C8468(p, 2) == 0x34FB
+        || func_002C8468(p, 2) == 0x35FB) {
+        r = 100;
+    }
+    return r;
+}
+
+//100%
+extern "C" unsigned func_002C8468(unsigned char *p, int n);
+
+extern "C" void func_002C8550(unsigned char *p) {
+    if (func_002C8468(p, 2) & 0x100) {
+        func_002C8468(p + 5, 3);
+    } else {
+        func_002C8468(p + 2, 3);
+    }
+}
+
+//100%
+extern "C" int func_002C76C0(int, int);
+
+extern "C" int func_002C85A0(int a, int b, int c) {
+    return func_002C76C0(a, c);
+}
+
+//100%
+extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n) {
+    unsigned char *end = src + n;
+    int prev = 0;
+    if (src < end) {
+        do {
+            int c = *src++;
+            *dst++ = c - prev;
+            prev = c;
+        } while (src < end);
+    }
+}
+
+//100%
+struct HuffOut_8600 {
+    unsigned char* buf;
+    int pos;
+};
+
+struct HuffState_8600 {
+    char pad0[0x2D64];
+    unsigned int mask[17];   // 0x2D64
+    unsigned int bitcount;   // 0x2DA8
+    unsigned int bitbuf;     // 0x2DAC
+    char pad2DB0[0x2DE4 - 0x2DB0];
+    int nbytes;              // 0x2DE4
+};
+
+// PORT: the unit declares this with other parameter types; defined under an asm label
+extern "C" void func_002C8600_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
+extern "C" void func_002C8600_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len)
+{
+    if (len > 16) {
+        func_002C8600_impl(s, out, code >> 16, len - 16);
+        func_002C8600_impl(s, out, code, 16);
+        return;
+    }
+    s->bitcount += len;
+    s->bitbuf += (code & s->mask[len]) << (24 - s->bitcount);
+    while (s->bitcount >= 8) {
+        out->buf[out->pos] = (unsigned char)(s->bitbuf >> 16);
+        out->pos++;
+        s->bitbuf <<= 8;
+        s->bitcount -= 8;
+        s->nbytes++;
+    }
+}
+
+//100%
+struct HS_86F8 { char pad[0x1524]; int l[0x208]; int r[0x208]; int a[256]; };
+extern "C" void func_002C86F8(HS_86F8 *self, unsigned i, int d) {
+    if (i < 0x100) {
+        self->a[i] = d;
+        return;
+    }
+    func_002C86F8(self, self->l[i], d + 1);
+    func_002C86F8(self, self->r[i], d + 1);
+}
+
+INCLUDE_ASM("seg/seg_1C9348", func_002C8770);
+
+INCLUDE_ASM("seg/seg_1C9348", func_002C8970);
+
+//100%
+struct HuffState_8A78 {
+    char pad0[0xD44];
+    unsigned int len[252];      // 0xD44
+    unsigned int base[252];     // 0x1134
+};
+
+struct HuffOut_8A78;
+
+extern "C" void func_002C8600_8A78(HuffState_8A78* s, HuffOut_8A78* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
+
+// PORT: the unit declares this with other parameter types; defined under an asm label
+extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v) __asm__("func_002C8A78");
+extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v)
+{
+    unsigned int base;
+    unsigned int bits;
+    if (v < 0xFC) {
+        bits = s->len[v];
+        base = s->base[v];
+    } else if (v < 0x1FC) {
+        bits = 6;
+        base = 0xFC;
+    } else if (v < 0x3FC) {
+        bits = 7;
+        base = 0x1FC;
+    } else if (v < 0x7FC) {
+        bits = 8;
+        base = 0x3FC;
+    } else if (v < 0xFFC) {
+        bits = 9;
+        base = 0x7FC;
+    } else if (v < 0x1FFC) {
+        bits = 10;
+        base = 0xFFC;
+    } else if (v < 0x3FFC) {
+        bits = 11;
+        base = 0x1FFC;
+    } else if (v < 0x7FFC) {
+        bits = 12;
+        base = 0x3FFC;
+    } else if (v < 0xFFFC) {
+        bits = 13;
+        base = 0x7FFC;
+    } else if (v < 0x1FFFC) {
+        bits = 14;
+        base = 0xFFFC;
+    } else if (v < 0x3FFFC) {
+        bits = 15;
+        base = 0x1FFFC;
+    } else if (v < 0x80000) {
+        bits = 16;
+        base = 0x3FFFC;
+    } else if (v < 0x100000) {
+        bits = 17;
+        base = 0x80000;
+    } else {
+        bits = 18;
+        base = 0x100000;
+    }
+    func_002C8600_8A78(s, out, 1, bits + 1);
+    func_002C8600_8A78(s, out, v - base, bits + 2);
+}
+
+//100% - objdiff report; single-function view differs only in a relocation name
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct HS_8C30 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
+extern void func_002C8600_8C30(HS_8C30 *, int, int, int) __asm__("func_002C8600");
+extern "C" void func_002C8A78(HS_8C30 *, int, int);
+
+extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) __asm__("func_002C8C30");
+extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) {
+    func_002C8600_8C30(self, x, self->b[self->cur], self->a[self->cur]);
+    func_002C8A78(self, x, 0);
+    func_002C8600_8C30(self, x, y, 9);
+}
+
+//100% - objdiff report; single-function view differs only in a relocation name
+struct HS_8CA8 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
+extern "C" void func_002C8600(HS_8CA8 *, int, int, int);
+extern "C" void func_002C8C30(HS_8CA8 *, int, int);
+
+extern "C" void func_002C8CA8(HS_8CA8 *self, int x, int idx) {
+    if (idx == self->cur) {
+        func_002C8C30(self, x, idx);
+        return;
+    }
+    func_002C8600(self, x, self->b[idx], self->a[idx]);
+}
+
+//100%
+struct HuffState_8CF8 {
+    char pad0[0xD44];
+    unsigned int len[252];      // 0xD44
+    unsigned int base[252];     // 0x1134
+};
+
+extern "C" void func_002C8CF8(HuffState_8CF8* s)
+{
+    unsigned int i;
+    for (i = 0; i < 4; i++) {
+        s->len[i] = 0;
+        s->base[i] = 0;
+    }
+    for (; i < 12; i++) {
+        s->len[i] = 1;
+        s->base[i] = 4;
+    }
+    for (; i < 28; i++) {
+        s->len[i] = 2;
+        s->base[i] = 12;
+    }
+    for (; i < 60; i++) {
+        s->len[i] = 3;
+        s->base[i] = 28;
+    }
+    for (; i < 124; i++) {
+        s->len[i] = 4;
+        s->base[i] = 60;
+    }
+    for (; i < 252; i++) {
+        s->len[i] = 5;
+        s->base[i] = 124;
+    }
+}
+
+INCLUDE_ASM("seg/seg_1C9348", func_002C8E48);
+
+INCLUDE_ASM("seg/seg_1C9348", func_002C9A48);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct HuffBuf_9F60 {
+    char* buf;
+    int len;
+};
+
+struct HuffState_9F60 {
+    char pad0[0x2D64];
+    unsigned int mask[17];      // 0x2D64
+    unsigned int bitcount;      // 0x2DA8
+    unsigned int bitbuf;        // 0x2DAC
+    char* src;                  // 0x2DB0
+    char* srcend;               // 0x2DB4
+    int srclen;                 // 0x2DB8
+    char pad2DBC[0x2DE4 - 0x2DBC];
+    int nbytes;                 // 0x2DE4
+    int remaining;              // 0x2DE8
+};
+
+extern "C" void func_002C8CF8_9F60(HuffState_9F60* s) __asm__("func_002C8CF8");
+extern "C" void func_002C8600_9F60(HuffState_9F60* s, HuffBuf_9F60* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
+extern "C" void func_002C8E48(void* s, int a, int b);
+extern "C" void func_002C9A48(void* s, void* out, int a);
+
+extern "C" int func_002C9F60(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* out, int len, int mode)
+{
+    unsigned int i;
+    unsigned int code;
+    s->bitcount = 0;
+    s->bitbuf = 0;
+    s->mask[0] = 0;
+    for (i = 1; i < 17; i++) {
+        s->mask[i] = s->mask[i - 1] * 2 + 1;
+    }
+    func_002C8CF8_9F60(s);
+    s->src = in->buf;
+    {
+        int n = in->len;
+        s->srclen = n;
+        s->remaining = n;
+        s->srcend = s->src + n;
+    }
+    out->len = 0;
+    s->bitcount = 0;
+    s->bitbuf = 0;
+    s->nbytes = 0;
+    func_002C8E48(s, 0x39, 0xF);
+    if (len == in->len) {
+        code = 0;
+        if (mode == 0) code = 0x30FB;
+        else if (mode == 1) code = 0x32FB;
+        else if (mode == 2) code = 0x34FB;
+        func_002C8600_9F60(s, out, code, 16);
+        func_002C8600_9F60(s, out, in->len, 24);
+    } else {
+        code = 0;
+        if (mode == 0) code = 0x31FB;
+        else if (mode == 1) code = 0x33FB;
+        else if (mode == 2) code = 0x35FB;
+        func_002C8600_9F60(s, out, code, 16);
+        func_002C8600_9F60(s, out, len, 24);
+        func_002C8600_9F60(s, out, in->len, 24);
+    }
+    func_002C9A48(s, out, 0x39);
+    return out->len;
+}
+
+//100%
+extern "C" void* cMemMan_alloc(int size, const char* name, int flags, int align);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void*);
+void operator_delete(int* ptr);
+extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n);
+extern "C" int func_002C9F60_A100(void* s, void* in, void* out, int len, int mode) __asm__("func_002C9F60");
+extern char D_00486600[];
+extern char D_00486618[];
+
+struct HuffBuf_A100 {
+    void* buf;
+    int len;
+};
+
+extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
+{
+    void* tmp = 0;
+    int mode = 0;
+    int result = 0;
+    void* s;
+    if (opts) mode = *opts;
+    s = cMemMan_alloc(0x31EC, D_00486600, 0x20000000, 0);
+    if (s) {
+        HuffBuf_A100 in;
+        HuffBuf_A100 out;
+        switch (mode) {
+        case 1:
+            tmp = operator_new_tag(len, D_00486618, 0x20000000, 0);
+            func_002C85C0((unsigned char*)src, (unsigned char*)tmp, len);
+            in.buf = tmp;
+            break;
+        case 2:
+            tmp = operator_new_tag(len, D_00486618, 0x20000000, 0);
+            func_002C85C0((unsigned char*)src, (unsigned char*)tmp, len);
+            func_002C85C0((unsigned char*)tmp, (unsigned char*)tmp, len);
+            in.buf = tmp;
+            break;
+        case 0:
+        default:
+            in.buf = src;
+            break;
+        }
+        in.len = len;
+        out.buf = dst;
+        out.len = len;
+        result = func_002C9F60_A100(s, &in, &out, len, mode);
+        if (tmp) cMemMan_free(tmp);
+        operator_delete((int*)s);
+    }
+    return result;
+}

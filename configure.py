@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import argparse
-import bisect
 import os
-import re
 import shutil
+import subprocess
 import sys
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Set, Union
 
@@ -18,75 +18,63 @@ ROOT = Path(__file__).parent.resolve()
 TOOLS_DIR = ROOT / "tools"
 OUTDIR = "out"
 
-YAML_FILE = ROOT / "config" / "ssx3_us.yaml"
-
-# The game's $gp. Not given to splat as gp_value, since that makes it emit
-# %gp_rel() in the nonmatching asm, which the old assembler that INCLUDE_ASM
-# goes through can't parse. Compiled C still needs _gp to resolve its
-# gp-relative accesses, so it is patched into the linker script instead.
-GP_VALUE = 0x004A30F0
+# Kept relative (not ROOT / ...) so splat resolves base_path relatively too;
+# otherwise it bakes this machine's absolute path into generated files like
+# include/macro.inc's ".include" directives.
+YAML_FILE = Path("config") / "ssx3_us.yaml"
 BASENAME = "SLUS_207.72"
 LD_PATH = f"{BASENAME}.ld"
 ELF_PATH = f"{OUTDIR}/{BASENAME}"
 MAP_PATH = f"{OUTDIR}/{BASENAME}.map"
 PRE_ELF_PATH = f"{OUTDIR}/{BASENAME}.elf"
 
-COMMON_INCLUDES = "-Iinclude -isystem include/sdk/ee -isystem include/gcc"
+# tools/macos/include supplies the few standard headers the sources need
+# (<stdint.h>). Without it the compiler falls back to the host's /usr/include:
+# missing on macOS, and glibc's headers on Linux, which it can't parse.
+COMMON_INCLUDES = "-Iinclude -isystem include/sdk/ee -isystem include/gcc -isystem tools/macos/include"
 
 
-CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
+# The compiler is SN V1.36 with its dormant `vec_mark` insn switched on (see tools/patch_vecmark.py):
+# the retail code shows EA's compiler emitted it in every empty array-ctor loop. The patched copy is
+# generated from the stock download on first configure.
+STOCK_CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36"
+CC_DIR = f"{TOOLS_DIR}/cc/eegcc-2.95.3-V1.36-vecmark"
+if not os.path.isdir(CC_DIR) and os.path.isdir(STOCK_CC_DIR):
+    subprocess.run([sys.executable, f"{TOOLS_DIR}/patch_vecmark.py", STOCK_CC_DIR, CC_DIR], check=True)
 DRIVER_PATH_FLAG = f"-B{CC_DIR}/lib/gcc-lib/ee/2.95.3/"
 
 # See tools/cc/README.md for how these were gathered
 COMMON_CFLAGS = "-O2"
+# Fork-only: per-unit extra compiler flags. EA's support library (ealib/) was built with -G0 (no $gp small data:
+# globals and float constants are addressed with lui/%lo and lui/ori/mtc1), except one embedded module at
+# 0x3D6498-0x3DBAE8 (ealib/seg_2D7498) that uses $gp and default flags. Evidence: notes/stuck.md "ealib".
+UNIT_CFLAGS = {
+    "ealib/seg_2B4578": "-G0",
+    "ealib/seg_2DCAE8": "-G0",
+}
+# Fork-only: per-unit compiler. EA's embedded $gp module (ealib/seg_2D7498, 0x3D6498-0x3DBAE8) was built with an
+# older SN build, ee-gcc 2.95.3-114 (its non-leaf functions save ra with sq; 107 and 114 reproduce all 48 landed
+# functions plus the sq-ra prologues, 136 does not). Local copy from the decomp.me PS2 compiler bundle; if it is
+# missing the unit falls back to the default compiler (and those functions just don't match).
+UNIT_CC = {
+    "ealib/seg_2D7498": f"{TOOLS_DIR}/cc/eegcc-2.95.3-114",
+}
+for _u, _d in list(UNIT_CC.items()):
+    if not os.path.isfile(f"{_d}/bin/ee-gcc2953.exe"):
+        print(f"warning: {_d} missing; {_u} builds with the default compiler")
+        del UNIT_CC[_u]
+# The game's objects have no exception frame info: without -fno-exceptions every C++ object gets
+# 0x18 bytes of .data the original doesn't have
 COMMON_CXXFLAGS = "-fno-exceptions"
 
-COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"
-COMPILE_CXX_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -xc++ -c {COMMON_INCLUDES} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} {COMMON_CXXFLAGS} $in"
 
-# The compiler driver assembles with ee/bin/as.exe (May 2001). Its R5900
-# short-loop workaround pads true short loops just as the original build did,
-# but it also pads some long loops in INCLUDE_ASM code, which the game doesn't
-# have. The older bin/ee-as.exe (Aug 2000) never pads, so units whose
-# INCLUDE_ASM code gets misfired on are compiled to assembly and assembled with
-# it instead. -mips4 stops it adding hazard nops after mtc1, which the original
-# build also doesn't have. Compiled C in these units won't get the short-loop
-# padding, so see docs/compiler-notes.md before decompiling in one of them.
-SN_AS_2000 = f"{CC_DIR}/bin/ee-as.exe -O2 -mabi=eabi -mips4"
-SN_AS_2000_UNITS = {
-    "ai/control/handplantcontrol",
-    "be/beintnewrace",
-    "be/belibrary",
-    "be/beintecon",
-    "be/beintmission",
-    "be/beintreward",
-    "camera/trigger/cameratriggerman",
-    "fe/festateprofile",
-    "fe/feasyncfile",
-    "fe/festaterewards",
-    "fe/fepopupmisc",
-    "fe/ovstatehud",
-    "fe/ovtemplatepausemenu",
-    "fe/ovstatepause",
-    "fe/uitemplatemap",
-    "fe/ovstatemap",
-    "main/ssxapp",
-    "main/game",
-    "main/gamestate",
-    "main/gamemode",
-    "replay/replaycache",
-    "sound/soundsys",
-    "visualfx/avalanche",
-    "visualfx/boardtrailfx",
-    "animation/animmodel",
-    "bx/cubicspline",
-    "input/inputparse",
-    "intersect/aifwddiff",
-    "render/graphicsman",
-    "render/particle",
-    "render/lightman",
-    "render/font",
-}
+# splat's generated INCLUDE_ASM macro emits `.include "FOLDER/NAME.s"` relative
+# to the nonmatchings dir (no longer hardcodes "asm/nonmatchings/"), so the
+# internal assembler needs that dir on its include search path.
+ASM_INCLUDE_FLAG = "-Wa,-Iasm/nonmatchings"
+
+COMPILE_C_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -c {COMMON_INCLUDES} {ASM_INCLUDE_FLAG} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} $in"
+COMPILE_CXX_RULE = f"{CC_DIR}/bin/ee-gcc2953.exe -xc++ -c {COMMON_INCLUDES} {ASM_INCLUDE_FLAG} {DRIVER_PATH_FLAG} {COMMON_CFLAGS} {COMMON_CXXFLAGS} $in"
 
 CATEGORY_MAP = {
     "sce": "Libs",
@@ -97,153 +85,14 @@ WINE = "wine"
 if sys.platform == "linux" or sys.platform == "linux2":
     COMPILE_C_RULE = f"{WINE} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WINE} {COMPILE_CXX_RULE}"
-    SN_AS_2000 = f"{WINE} {SN_AS_2000}"
-
-def fix_new_stubs(paths):
-    """
-    Tidy source files splat has just generated: use the INCLUDE_ASM paths
-    relative to asm/nonmatchings, and turn the empty C bodies it writes for
-    functions that only return back into INCLUDE_ASM, since compiled as C++
-    they would get mangled names.
-    """
-    for path in paths:
-        unit = path.relative_to("src").with_suffix("").as_posix()
-        text = path.read_text()
-        text = text.replace(f'INCLUDE_ASM("{ROOT}/asm/nonmatchings/', 'INCLUDE_ASM("')
-        text = re.sub(r"^void (\w+)\(void\) \{\n\}\n",
-                      lambda m: f'INCLUDE_ASM("{unit}", {m.group(1)});\n', text, flags=re.M)
-        path.write_text(text)
-
-
-# Data sections whose per-unit chunks are handed to the unit's cpp object
-MIGRATED_DATA = ("lit4", "rodata", "sdata")
-
-
-def exact_float(line):
-    """
-    Write a .float/.double data line as .word with the original bits, from
-    the bytes in its comment: the SN assembler flushes denormals to zero.
-    """
-    m = re.match(r"(\s*/\* [0-9A-F]+ [0-9A-F]{8} ([0-9A-F]+) \*/) \.(float|double) ", line)
-    if not m:
-        return line
-    raw = bytes.fromhex(m.group(2))
-    words = [int.from_bytes(raw[i:i + 4], "little") for i in range(0, len(raw), 4)]
-    return f"{m.group(1)} .word " + ", ".join(f"0x{w:08X}" for w in words)
-
-
-def migrate_unit_data(ld_text):
-    """
-    Hand each cpp unit's .lit4/.rodata/.sdata chunk to its compiled object.
-
-    Each data item in the chunk is appended (in a .section block) to the
-    nonmatching .s of the first INCLUDE_ASM function that references it, so
-    INCLUDE_ASM emits it into the object's section in the same order the
-    original compiler did, while decompiled functions emit their own. Items
-    referenced by no INCLUDE_ASM function stay with the preceding function,
-    except .lit4 words and jump tables, which only decompiled code (whose
-    compiler output regenerates them) can be using. A fully decompiled unit
-    emits all its data itself. A unit is migrated only if
-    this reproduces the chunk's byte order; otherwise the chunk stays a
-    standalone asm object. Returns the updated linker script.
-    """
-    yaml_text = YAML_FILE.read_text()
-    subs = re.findall(r"- \[0x([0-9a-fA-F]+), (\.?\w+)(?:, ([^\]#]+?))?\]", yaml_text)
-    cpp_units = {n.strip() for _, t, n in subs if t == "cpp" and n}
-    symbols = {
-        m.group(1): int(m.group(2), 16)
-        for m in re.finditer(r"^(\S+)\s*=\s*0x([0-9A-Fa-f]+);", (ROOT / "config/symbol_addrs.txt").read_text(), re.M)
-    }
-    line_addr = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8})(?: [0-9A-F]+)? \*/")
-
-    def sym_addr(sym):
-        sym = sym.strip()
-        off = 0
-        m = re.match(r"(\S+)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)$", sym)
-        if m:
-            sym, off = m.group(1), int(m.group(2), 0)
-        m = re.search(r"_([0-9A-F]{8})$", sym)
-        if m:
-            return int(m.group(1), 16) + off
-        return symbols[sym] + off if sym in symbols else None
-
-    migrated = 0
-    skipped = []
-    starts_all = [int(a, 16) + 0xFF000 for a, _, _ in subs]
-    for typ in MIGRATED_DATA:
-        for k, (_, t, name) in enumerate(subs):
-            name = (name or "").strip()
-            chunk_end = starts_all[k + 1] if k + 1 < len(subs) else 0xFFFFFFFF
-            if t != typ or name not in cpp_units:
-                continue
-            chunk = Path(f"asm/data/{name}.{typ}.s")
-            src = Path(f"src/{name}.cpp")
-            if not chunk.exists() or not src.exists():
-                continue
-
-            # Items: (address, symbol, lines)
-            items = []
-            for block in re.split(r"\n(?=nonmatching )", chunk.read_text()):
-                if not block.startswith("nonmatching "):
-                    continue
-                # .align lines stay: some are the padding after strings. The
-                # chunk start is the original object's, so aligning relative
-                # to the section start gives the original layout
-                lines = [exact_float(l) for l in block.split("\n")[1:] if l.strip()]
-                addrs = [int(m.group(1), 16) for l in lines for m in [line_addr.search(l)] if m]
-                assert addrs, f"no address for {block.split()[1]} in {chunk}"
-                items.append((addrs[0], block.split()[1], lines))
-            if not items:
-                continue
-            starts = [a for a, _, _ in items]
-
-            # With every function decompiled, the compiled object makes all
-            # of the chunk's data itself and nothing is appended
-            funcs = re.findall(r'INCLUDE_ASM\("[^"]+", ([^)]+)\);', src.read_text())
-            owner = {}
-            for index, func in enumerate(funcs):
-                text = Path(f"asm/nonmatchings/{name}/{func}.s").read_text()
-                targets = [sym_addr(m.group(1)) for m in re.finditer(r"%lo\(([^)]+)\)", text)]
-                targets += [GP_VALUE + int(m.group(1), 0) for m in re.finditer(r"(-?0x[0-9A-Fa-f]+|-?\d+)\(\$28\)", text)]
-                for target in targets:
-                    if target is None or not starts[0] <= target < chunk_end:
-                        continue
-                    i = bisect.bisect_right(starts, target) - 1
-                    owner.setdefault(i, index)
-
-            blocks = {}
-            order = []
-            current = None
-            for i, (addr, sym, lines) in enumerate(items):
-                if i in owner:
-                    current = owner[i]
-                elif typ == "lit4" or sym.startswith("jtbl_"):
-                    continue
-                if not funcs:
-                    continue
-                if current is None:
-                    current = min(owner.values()) if owner else 0
-                order.append(current)
-                blocks.setdefault(current, []).extend(lines)
-            if any(a > b for a, b in zip(order, order[1:])):
-                skipped.append((name, typ, "data order differs from function order"))
-                continue
-
-            for index, lines in blocks.items():
-                path = Path(f"asm/nonmatchings/{name}/{funcs[index]}.s")
-                path.write_text(path.read_text().rstrip("\n") + "\n\n.section ." + typ + "\n"
-                                + "\n".join(lines) + "\n.section .text\n")
-            obj = f"obj/src/{name}.cpp.o(.{typ});"
-            ld_text = ld_text.replace(f"        {obj}\n", "")
-            chunk_line = f"        obj/asm/data/{name}.{typ}.s.o(.{typ});\n"
-            assert chunk_line in ld_text, chunk_line
-            ld_text = ld_text.replace(chunk_line, f"        {obj}\n")
-            migrated += 1
-    print(f"Data chunks handed to cpp objects: {migrated}, left standalone: {len(skipped)}")
-    (ROOT / "obj").mkdir(exist_ok=True)
-    (ROOT / "obj" / "standalone_data.txt").write_text("".join(f"{n}\t.{t}\t{why}\n" for n, t, why in skipped))
-    return ld_text
-
+elif sys.platform == "darwin":
+    # macOS: run the Windows compiler with wibo (decompals/wibo, the
+    # `wibo-macos` release asset; runs under Rosetta 2 on Apple Silicon)
+    # instead of Wine. Uses $WIBO, else tools/wibo/wibo, else `wibo` on PATH.
+    _wibo_local = TOOLS_DIR / "wibo" / "wibo"
+    WIBO = os.environ.get("WIBO") or (str(_wibo_local) if _wibo_local.exists() else "wibo")
+    COMPILE_C_RULE = f"{WIBO} {COMPILE_C_RULE}"
+    COMPILE_CXX_RULE = f"{WIBO} {COMPILE_CXX_RULE}"
 
 def clean():
     files_to_clean = [
@@ -272,8 +121,131 @@ compiler_type = "gcc"
 [preserve_macros]
 
 [decompme.compilers]
-"tools/cc/eegcc-2.95.3-V1.36/bin/gcc" = "eegcc-2.95.3-V1.36"
+"tools/cc/eegcc-2.95.3-V1.36-vecmark/bin/gcc" = "eegcc-2.95.3-V1.36"
 """)
+
+
+GP_VALUE = 0x004A30F0
+
+
+def link_unit_lit4(ld_text):
+    """
+    Link each C/C++ unit's .lit4 chunk (scripts/split_data.py) from the unit's object.
+
+    Compiled C emits its own float constants (`li.s`), one per load, in instruction order, and so does
+    the unit's asm after inline_lit4_loads, so the object's .lit4 is the original chunk. Returns the
+    updated linker script.
+    """
+    yaml_text = YAML_FILE.read_text()
+    subs = re.findall(r"- \[0x([0-9a-fA-F]+), (\w+)(?:, ([^\]#]+?))?\]", yaml_text)
+    code_units = {n.strip(): t for _, t, n in subs if t in ("cpp", "c") and n}
+    for _, t, name in subs:
+        name = (name or "").strip()
+        if t != "lit4" or name not in code_units:
+            continue
+        obj = f"obj/src/{name}.{code_units[name]}.o(.lit4);"
+        chunk_line = f"        obj/asm/data/{name}.lit4.s.o(.lit4);\n"
+        assert chunk_line in ld_text, chunk_line
+        ld_text = ld_text.replace(chunk_line, f"        {obj}\n")
+    return ld_text
+
+
+def patch_linker_script():
+    """Link .lit4 from the C objects, and put the data in its own output section without padding."""
+    ld_text = Path(LD_PATH).read_text()
+    ld_text = link_unit_lit4(ld_text)
+    # Each data chunk is an exact byte range of the original, so the data objects are only 4-aligned
+    # per object, while the code needs SUBALIGN(8)
+    data_start = "        main_DATA_START = .;\n"
+    assert data_start in ld_text
+    ld_text = ld_text.replace(data_start, "    }\n"
+                              "    .main_data : AT(main_ROM_START + SIZEOF(.main)) SUBALIGN(1)\n"
+                              "    {\n" + data_start)
+    rom_pos = "    __romPos += SIZEOF(.main);\n"
+    assert rom_pos in ld_text
+    ld_text = ld_text.replace(rom_pos, "    __romPos += SIZEOF(.main) + SIZEOF(.main_data);\n")
+    Path(LD_PATH).write_text(ld_text)
+
+
+BRANCH = re.compile(r"^(\s*/\* [0-9A-F]+ [0-9A-F]{8} ([0-9A-F]{8}) \*/\s+)"
+                    r"(b|beqz|bnez|beq|bne|beql|bnel|blez|bgtz|bltz|bgez|blezl|bgtzl|bltzl|bgezl|bc1f|bc1t|bc1fl|bc1tl)"
+                    r"(\s+.*)$", re.M)
+
+
+def freeze_asm_branches():
+    """Write every branch in the split asm as a .word of its original encoding.
+
+    The SN assembler the game was built with (ee/bin/as.exe, May 2001) pads short loops with nops, as a
+    workaround for an R5900 erratum. The asm already contains the padding the original build added, but the
+    assembler pads some of its loops again (depending on where they sit in the section), so those functions
+    come out too long. It only pads what it sees as a loop branch, so with the branches written as data it
+    leaves the asm alone, while compiled C still gets padded. Branch targets are local to each function, so
+    the encodings are position independent.
+    """
+    frozen = 0
+    for f in Path("asm").rglob("*.s"):
+        text = f.read_text()
+        if "/*" not in text:
+            continue
+
+        def sub(m):
+            nonlocal frozen
+            frozen += 1
+            word = int.from_bytes(bytes.fromhex(m.group(2)), "little")
+            return f"{m.group(1)}.word 0x{word:08X} /* {m.group(3)}{m.group(4).rstrip()} */"
+
+        new = BRANCH.sub(sub, text)
+        if new != text:
+            f.write_text(new)
+    print(f"Froze {frozen} asm branches")
+
+
+def inline_lit4_loads():
+    """Make the asm generate its own float constants, the way compiled C does.
+
+    The compiler never names float literals: it emits `li.s` and the assembler puts the value in the
+    object's .lit4 (R_MIPS_LITERAL), one entry per load, in instruction order. splat instead loads the
+    retail pool entry by name (`lwc1 $fN, (D_x)`, gp-relative). Each such load becomes `li.s $fN, value`,
+    which assembles to the same single lwc1, so each unit's .lit4 comes out of its object in the original
+    order whether its functions are asm or C, and objdiff can compare the two. A value li.s can't express
+    (zero low half, which gas expands to lui+mtc1, or not a normal float) is written as a .word in .lit4
+    just before a load of it by its gp offset. Every .lit4 load in the game is a gp-relative lwc1, one per
+    constant.
+    """
+    import struct
+
+    values = {}
+    for f in Path("asm/data").rglob("*.lit4.s"):
+        for addr, word in re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", f.read_text()):
+            values[addr] = bytes.fromhex(word)
+    load = re.compile(r"^(\s*/\* [0-9A-F]+ [0-9A-F]{8} [0-9A-F]{8} \*/\s+)lwc1(\s+)(\$f\d+), "
+                      r"\((D_([0-9A-F]{8}))\) /\* gp_rel: \(D_[0-9A-F]{8}\) \*/", re.M)
+    counts = [0, 0]
+    for f in Path("asm/nonmatchings").rglob("*.s"):
+        text = f.read_text()
+        if "gp_rel" not in text:
+            continue
+
+        def sub(m):
+            raw = values.get(m.group(5))
+            if raw is None:
+                return m.group(0)
+            word = int.from_bytes(raw, "little")
+            exponent = (word >> 23) & 0xFF
+            if word & 0xFFFF and 0 < exponent < 0xFF:
+                counts[0] += 1
+                value = struct.unpack("<f", raw)[0]
+                return f"{m.group(1)}li.s{m.group(2)}{m.group(3)}, {value!r} /* lit4: {m.group(4)} */"
+            counts[1] += 1
+            offset = int(m.group(5), 16) - GP_VALUE
+            return (f".section .lit4\n    .word 0x{word:08X}\n.section .text\n"
+                    f"{m.group(1)}lwc1{m.group(2)}{m.group(3)}, {offset}($28) /* lit4: {m.group(4)} */")
+
+        new = load.sub(sub, text)
+        if new != text:
+            f.write_text(new)
+    print(f"lit4: {counts[0]} asm loads made li.s, {counts[1]} written with their .word")
+
 
 def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_only=False, dual_objects=False):
     """
@@ -294,6 +266,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         extra_flags: str = "",
         collect_objdiff: bool = False,
         orig_entry=None,
+        implicit: List[str] = None,
     ):
         """
         Helper function to build objects.
@@ -343,6 +316,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 rule=task,
                 inputs=[str(s) for s in src_paths],
                 variables=build_vars,
+                implicit=implicit or [],
                 implicit_outputs=implicit_outputs,
             )
             # Collect for objdiff.json if requested
@@ -390,12 +364,20 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
 
     cross = "mips-linux-gnu-"
 
-    ld_args = "-EL -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -Map $mapfile -T $in -o $out"
+    ld_args = "-EL -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -T obj/address_syms.ld -Map $mapfile -T $in -o $out"
+
+    as_cpp = "cpp"
+    as_filter = ""
+    if sys.platform == "darwin":
+        # Apple's /usr/bin/cpp mis-parses `-isystem DIR`; use clang directly.
+        # Also normalise $t0-$t7 to numeric names (see tools/macos/o32_gpr_names.pl).
+        as_cpp = "clang -E -x assembler-with-cpp"
+        as_filter = "perl -p tools/macos/o32_gpr_names.pl | "
 
     ninja.rule(
         "as",
         description="as $in",
-        command=f"cpp {COMMON_INCLUDES} $in -o  - | {cross}as -no-pad-sections -EL -march=5900 -mabi=eabi -Iinclude -o $out",
+        command=f"{as_cpp} {COMMON_INCLUDES} $in -o  - | {as_filter}{cross}as -no-pad-sections -EL -march=5900 -mabi=eabi -Iinclude -o $out",
     )
 
     ninja.rule(
@@ -405,22 +387,33 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
+        "cc_unit",
+        description="cc $in ($ccdir)",
+        command=f"{COMPILE_C_RULE.replace(CC_DIR, '$ccdir')} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
+    ninja.rule(
         "cpp",
         description="cpp $in",
         command=f"{COMPILE_CXX_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
     )
 
     ninja.rule(
-        "cpp_as2000",
-        description="cpp $in",
-        command=f"{COMPILE_CXX_RULE.replace(' -c ', ' -S ')} $cflags -o $out.s && "
-        f"{SN_AS_2000} $out.s -o $out && {cross}strip $out -N dummy-symbol-name",
+        "address_syms",
+        description="address_syms $out",
+        command="python3 tools/address_syms.py $out $in",
     )
 
     ninja.rule(
         "ld",
         description="link $out",
         command=f"{cross}ld {ld_args}",
+    )
+
+    ninja.rule(
+        "asmoff",
+        description="asmoff $out",
+        command="python3 tools/asm_offsets.py $src $in $out",
     )
 
     ninja.rule(
@@ -434,6 +427,18 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         description="elf $out",
         command=f"{cross}objcopy $in $out -O binary",
     )
+
+    def current_c_flags(entry):
+        """-DSKIP_ASM plus the target offsets of the unit's INCLUDE_ASM functions (tools/asm_offsets.py), so
+        every C function in obj/current sits at its obj/target offset: SN's assembler pads short loops
+        depending on position, so a matched function only reproduces the target bytes there."""
+        obj = Path(entry.object_path)
+        stem = obj.with_suffix("").stem if obj.suffix == ".o" else obj.stem
+        src = str(entry.src_paths[0])
+        inc = f"obj/offsets/{stem}/asm_offsets.inc"
+        ninja.build(outputs=[inc], rule="asmoff", inputs=[f"obj/target/{stem}.o"], implicit=[src],
+                    variables={"src": src})
+        return f"-DSKIP_ASM -DASM_OFFSETS -Wa,-Iobj/offsets/{stem}", [inc]
 
     # Add recipes for everything
     for entry in linker_entries:
@@ -453,20 +458,25 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, "as", out_dir="obj/current", extra_flags="-DSKIP_ASM")
             else:
                 build(entry.object_path, entry.src_paths, "as")
-        # CommonSegCpp subclasses CommonSegC, so it has to be checked first
+        # Before CommonSegC: CommonSegCpp is a subclass of it
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
-            rule = "cpp_as2000" if seg.name in SN_AS_2000_UNITS else "cpp"
             if dual_objects:
-                build(entry.object_path, entry.src_paths, rule, out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, rule, out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags=flags, implicit=inc)
             else:
-                build(entry.object_path, entry.src_paths, rule)
+                build(entry.object_path, entry.src_paths, "cpp")
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
+            unit_flags = UNIT_CFLAGS.get(seg.name, "")
+            task, tvars = ("cc_unit", {"ccdir": UNIT_CC[seg.name]}) if seg.name in UNIT_CC else ("cc", None)
             if dual_objects:
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                build(entry.object_path, entry.src_paths, "cc", out_dir="obj/current", extra_flags="-DSKIP_ASM")
+                build(entry.object_path, entry.src_paths, task, out_dir="obj/target", collect_objdiff=True, orig_entry=entry,
+                      extra_flags=unit_flags or None, variables=tvars)
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, task, out_dir="obj/current",
+                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc, variables=tvars)
             else:
-                build(entry.object_path, entry.src_paths, "cc")
+                build(entry.object_path, entry.src_paths, task, extra_flags=unit_flags or None, variables=tvars)
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "as", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
@@ -530,10 +540,17 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         return
 
     ninja.build(
+        "obj/address_syms.ld",
+        "address_syms",
+        LD_PATH,
+        implicit=sorted(str(obj) for obj in built_objects),
+    )
+
+    ninja.build(
         PRE_ELF_PATH,
         "ld",
         LD_PATH,
-        implicit=[str(obj) for obj in built_objects],
+        implicit=[str(obj) for obj in built_objects] + ["obj/address_syms.ld"],
         variables={"mapfile": MAP_PATH},
     )
 
@@ -595,30 +612,14 @@ def main():
         if args.only_clean:
             return
 
-    existing_src = set(Path("src").rglob("*.cpp"))
-    split.main([YAML_FILE], modes="all", verbose=False)
-    fix_new_stubs(set(Path("src").rglob("*.cpp")) - existing_src)
-
-    ld = Path(LD_PATH)
-    ld_text = ld.read_text()
-    assert "_gp = 0x0;" in ld_text
-    ld_text = ld_text.replace("_gp = 0x0;", f"_gp = 0x{GP_VALUE:X};")
-    ld_text = migrate_unit_data(ld_text)
-    # Data gets its own output section without padding: every data chunk is an
-    # exact byte range of the original, but sections like .rodata and .lit4
-    # are only 1- or 4-aligned per object, while the code needs SUBALIGN(8)
-    data_start = "        main_DATA_START = .;\n"
-    assert data_start in ld_text
-    ld_text = ld_text.replace(data_start,
-        "    }\n"
-        "    .main_data : AT(main_ROM_START + SIZEOF(.main)) SUBALIGN(1)\n"
-        "    {\n" + data_start)
-    rom_pos = "    __romPos += SIZEOF(.main);\n"
-    assert rom_pos in ld_text
-    ld_text = ld_text.replace(rom_pos, "    __romPos += SIZEOF(.main) + SIZEOF(.main_data);\n")
-    ld.write_text(ld_text)
+    # No cache: segments loaded from the cache aren't scanned, so the symbols
+    # they reference would be left out of undefined_syms_auto.txt
+    split.main([YAML_FILE], modes="all", verbose=False, use_cache=False)
 
     linker_entries = split.linker_writer.entries
+    inline_lit4_loads()
+    patch_linker_script()
+    freeze_asm_branches()
 
     if do_objects:
         build_stuff(linker_entries, skip_checksum=True, objects_only=True, dual_objects=True)

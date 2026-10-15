@@ -8,6 +8,10 @@ options:
   base_path: ../
   platform: ps2
   compiler: EEGCC
+  # $gp as set by crt0 (`daddu $gp, $a0` with $a0 = &D_004A30F0, passed to SetupThread).
+  # Lets splat symbolize $gp-relative accesses as %gp_rel(sym) instead of raw offsets.
+  gp_value: 0x004A30F0
+  use_gp_rel_macro_nonmatching: False
 
   asm_path: asm
   src_path: src/
@@ -16,29 +20,40 @@ options:
   # Put 'hasm' splits in src/
   hasm_in_src_path: True
 
-  rodata_string_guesser_level: 0
+  rodata_string_guesser_level: 2
+  # Only ASCII strings: a string decoded from another encoding (EUC-JP by
+  # default) is written back as UTF-8, which changes its bytes
+  string_encoding: ASCII
+  data_string_encoding: ASCII
 
   find_file_boundaries: False
-  # Data chunks stay standalone asm objects for now; see docs/splits.md
-  migrate_rodata_to_functions: False
   disasm_unknown: True
   named_regs_for_c_funcs: False
+
+  # This project hand-maintains include/include_asm.h (needs a SKIP_ASM guard
+  # for the dual obj/target vs obj/current objdiff build, which splat's
+  # generic auto-generated template doesn't have) plus include/macro.inc and
+  # include/labels.inc, so don't let splat regenerate/overwrite them.
+  generate_asm_macros_files: False
 
   create_undefined_funcs_auto: True
   undefined_funcs_auto_path: config/undefined_funcs_auto.txt
   create_undefined_syms_auto: True
   undefined_syms_auto_path: config/undefined_syms_auto.txt
 
-  symbol_addrs_path: [ config/symbol_addrs.txt, config/lib_symbol_addrs.txt ]
+  # Symbols outside every segment (.bss) get padded names, like the asm uses
+  symbol_name_format_no_rom: $VRAM
+
+  symbol_addrs_path: [ config/symbol_addrs.txt, config/lib_symbol_addrs.txt, config/gap_symbol_addrs.txt ]
 
   extensions_path: tools/splat_ext
 
   section_order: [".text", ".vutext", ".data", ".rodata", ".lit4", ".sdata", ".sbss", ".bss"]
   auto_link_sections: [".data", ".rodata", ".bss"]
 
+  # Functions are 8-aligned: a unit ending in C has no trailing nop, so the
+  # next object has to be aligned to 8 to reproduce the padding
   subalign: 8
-  # Jump table targets are code labels, not functions
-  asm_jtbl_label_macro: jlabel
 
 segments:
   - name: elf_header
@@ -49,485 +64,494 @@ segments:
     type: code
     start: 0x1000
     vram: 0x100000
-    bss_size: 0x099EDB # I think?
+    # bss_size removed for local link test
     align: 4
     subsegments:
       - [0x1000, asm, sce/crt0]
-      - [0x1218, asm]
-      - [0xd4f8, cpp, ai/computer]
-      - [0x14198, cpp, ai/airpredictor]
-      - [0x14b10, asm]
-      - [0x182e0, cpp, ai/ridermetrix]
-      - [0x1c698, cpp, ai/rider]
-      - [0x296a0, cpp, ai/ai]
-      - [0x37c40, cpp, ai/motion/wipeoutmotion]
-      - [0x39b48, cpp, ai/control/handplantcontrol]
-      - [0x458d8, cpp, be/beintnewrace]
-      - [0x46930, cpp, be/beintplayer]
-      - [0x49f50, cpp, be/beintstat]
-      - [0x4b080, cpp, be/belibrary]
-      - [0x4ec80, asm]
-      - [0x4f0e0, cpp, be/beintnetwork]
-      - [0x4ff30, cpp, be/beintcharacter]
-      - [0x50250, cpp, be/beintoption]
-      - [0x50900, cpp, be/beintbagt]
-      - [0x518d8, cpp, be/beintecon]
-      - [0x53398, asm]
-      - [0x53638, cpp, be/beintsavefile]
-      - [0x54088, asm]
-      - [0x542a0, cpp, be/beintmission]
-      - [0x55948, cpp, be/beintscore]
-      - [0x56a50, cpp, be/beintaggression]
-      - [0x57338, asm]
-      - [0x579c0, cpp, be/beintreward]
-      - [0x5bd58, cpp, be/bedbreward]
-      - [0x5d988, cpp, camera/cameraalgolist]
-      - [0x5dba0, cpp, camera/cameracontroller]
-      - [0x5e078, cpp, camera/cameraalgorithms]
-      - [0x5ec18, cpp, camera/camera]
-      - [0x69fe8, cpp, camera/script/scriptcontroller]
-      - [0x6cf20, asm]
-      - [0x6d9b0, cpp, camera/trigger/cameratriggerman]
-      - [0x722b0, cpp, camera/trigger/cameratriggerfactory]
-      - [0x7bcc8, asm]
-      - [0x7d5f8, cpp, fe/debugfe]
-      - [0x81b60, cpp, fe/festatedebug]
-      - [0x82148, cpp, fe/festatecharselect]
-      - [0x83928, cpp, fe/festatecharsetup]
-      - [0x842a8, cpp, fe/festateriderbio]
-      - [0x84de0, asm]
-      - [0x85668, cpp, fe/festatestore]
-      - [0x86a98, cpp, fe/festatecredits]
-      - [0x87658, cpp, fe/festateload]
-      - [0x87b50, asm]
-      - [0x88c50, cpp, fe/festatelegal]
-      - [0x89800, cpp, fe/festateoptions]
-      - [0x8fad8, cpp, fe/festateprofile]
-      - [0x918c0, cpp, fe/festateriderbiodetail]
-      - [0x923b8, asm]
-      - [0x93d80, cpp, fe/festatebigradio]
-      - [0x95528, cpp, fe/festatetransition]
-      - [0x95778, cpp, fe/ovstates]
-      - [0x964d8, cpp, fe/festatebonusmaterial]
-      - [0x966f8, asm]
-      - [0x969a8, cpp, util/locale]
-      - [0x97540, cpp, fe/festateaudiooptions]
-      - [0x97f98, cpp, fe/messagecenter]
-      - [0x99db8, cpp, fe/festatecharequipdetail]
-      - [0x9f680, cpp, fe/feridermanager]
-      - [0xa1648, asm]
-      - [0xa1720, cpp, fe/fereal]
-      - [0xa4090, asm]
-      - [0xa46e8, cpp, fe/feasyncfile]
-      - [0xc68e8, cpp, fe/fepopup]
-      - [0xcf758, asm]
-      - [0xd00b0, cpp, fe/festaterewards]
-      - [0xd3678, cpp, fe/ovstatelodge]
-      - [0xd5368, cpp, fe/festatetrophyroom]
-      - [0xd76b0, asm]
-      - [0xdfb90, cpp, fe/fepopupmisc]
-      - [0xe9ff0, cpp, fe/ovstatehud]
-      - [0xf4790, cpp, fe/festatelodge]
-      - [0xf5830, cpp, fe/festatebuyattrib]
-      - [0xf8198, cpp, fe/ovstateenterlodge]
-      - [0xf9168, cpp, fe/ovtemplatepausemenu]
-      - [0xfa188, cpp, fe/ovstatepause]
-      - [0x101218, asm]
-      - [0x101700, cpp, fe/uitemplatemap]
-      - [0x1096a8, cpp, fe/ovstatemap]
-      - [0x10b778, cpp, fe/ovtemplatedialog]
-      - [0x10ee30, cpp, fe/ovstatereplay]
-      - [0x10f938, cpp, fe/ovstatetrophy]
-      - [0x1121a0, asm]
-      - [0x1237d0, cpp, luno/lunovm]
-      - [0x127830, cpp, main/ssxapp]
-      - [0x12d078, cpp, main/game]
-      - [0x12f180, cpp, main/sectionman]
-      - [0x12f3b8, cpp, main/gamerender]
-      - [0x12fbc8, cpp, main/gameload]
-      - [0x133348, cpp, main/loadscreens_prestart]
-      - [0x134438, cpp, fe/festateloadscreen]
-      - [0x135ad0, cpp, main/gamestate]
-      - [0x138cf8, cpp, main/gamemode]
-      - [0x13d808, asm]
-      - [0x1448f0, cpp, main/ssxappdtor]
-      - [0x146950, cpp, fe/festateloadhint]
-      - [0x148e60, cpp, main/debugmenu]
-      - [0x152718, asm]
-      - [0x169890, cpp, bx/bxstringctor]
-      - [0x16c310, cpp, path/pathsys]
-      - [0x16d458, cpp, replay/playbackman]
-      - [0x16ebf0, cpp, replay/replay]
-      - [0x16f908, cpp, replay/frameptr]
-      - [0x171070, cpp, replay/replaycache]
-      - [0x1763b8, asm]
-      - [0x176828, cpp, scripter/datamanager]
-      - [0x179358, cpp, scripter/ssxscriptengine]
-      - [0x182f30, asm]
-      - [0x185bb0, cpp, sound/ssxAudio]
-      - [0x18b1e8, cpp, sound/asyncsys]
-      - [0x18c588, cpp, sound/bankmanager]
-      - [0x190d00, cpp, sound/soundsys]
-      - [0x1aa350, cpp, sound/ps2soundman]
-      - [0x1aa9d8, cpp, sound/streamsys]
-      - [0x1add08, cpp, sound/bankmonitor]
-      - [0x1b5b08, cpp, sound/icepick/worldtriggermanager]
-      - [0x1ba100, asm]
-      - [0x1c13e8, cpp, worldpainter/worldpainterman]
-      - [0x1c1408, cpp, worldpainter/worldpainterqueryctor]
-      - [0x1c1a58, cpp, worldpainter/worldpaintermanquery]
-      - [0x1c27d0, cpp, worldpainter/quadtree]
-      - [0x1c7f78, cpp, util/statemachine]
-      - [0x1c9348, asm]
-      - [0x1cb258, cpp, util/menu]
-      - [0x1d2ce0, cpp, util/objectinterface]
-      - [0x1d3510, asm]
-      - [0x1d58f0, cpp, visualfx/angerfx]
-      - [0x1d6778, cpp, visualfx/avalanche]
-      - [0x1db390, cpp, visualfx/boardsparkfx]
-      - [0x1dc6d8, cpp, visualfx/crowdrender2d]
-      - [0x1dcd10, asm]
-      - [0x1ddb88, cpp, visualfx/boardwakefx]
-      - [0x1e91e8, cpp, visualfx/boardtrailfx]
-      - [0x1ed3e0, cpp, visualfx/lensfx]
-      - [0x1ef7c8, cpp, visualfx/renderstateman]
-      - [0x1f1548, asm]
-      - [0x1f6298, cpp, visualfx/worldlightman]
-      - [0x1fbe38, asm]
-      - [0x208598, cpp, wscript/wscriptprocess]
-      - [0x20a4c8, cpp, wscript/wscriptman]
-      - [0x20e8b8, cpp, animation/animmodel]
-      - [0x2125c8, asm]
-      - [0x2128d0, cpp, animation/rideranimbase]
-      - [0x214a10, cpp, animation/animsequencer]
-      - [0x215cb0, asm]
-      - [0x2160b0, cpp, animation/gameanimmap]
-      - [0x217898, asm]
-      - [0x218618, cpp, hashvalue]
-      - [0x2187c8, cpp, bxrandom]
-      - [0x218ae8, asm]
-      - [0x218fe8, cpp, bx/bxstring]
-      - [0x21a1c0, asm]
-      - [0x21bdb0, cpp, bx/ps2main]
-      - [0x21d350, cpp, md5]
-      - [0x21e5a8, asm]
-      - [0x21e660, cpp, bx/cubicspline]
-      - [0x221920, cpp, bx/execman]
-      - [0x221ca0, cpp, input/inputmap]
-      - [0x2227d0, cpp, input/inputparse]
-      - [0x228890, cpp, intersect/aifwddiff]
-      - [0x22a910, cpp, intersect/riderspheretree]
-      - [0x2313f0, cpp, intersect/worldsphtree]
-      - [0x243d10, cpp, object/debouncenode]
-      - [0x2464e8, cpp, object/spline3d]
-      - [0x246700, cpp, object/effectlink]
-      - [0x2476a0, cpp, object/flexbridgenode]
-      - [0x249b90, cpp, object/flexrailnode]
-      - [0x24c228, cpp, object/flagset]
-      - [0x24f448, cpp, object/animnode]
-      - [0x24feb8, cpp, object/floatingnode]
-      - [0x250b90, cpp, object/instancenode]
-      - [0x251750, cpp, object/deadfadenode]
-      - [0x252030, cpp, wscript/wscriptcompile]
-      - [0x252270, cpp, object/instanceman]
-      - [0x253aa8, cpp, object/modifierblock]
-      - [0x254f00, cpp, object/spring]
-      - [0x255688, cpp, object/objnode]
-      - [0x2559e0, cpp, object/bucketman]
-      - [0x2562d8, cpp, object/movenode]
-      - [0x259020, cpp, object/multiparticle]
-      - [0x25a5d8, cpp, object/splinemodifier]
-      - [0x25d0e8, cpp, object/railmodifier]
-      - [0x268150, cpp, render/ps2graphicsman]
-      - [0x26a8e0, cpp, render/graphicsman]
-      - [0x271c60, cpp, render/particle]
-      - [0x28bcd0, cpp, render/irradiance]
-      - [0x28be10, asm]
-      - [0x28bef8, cpp, render/bezierman]
-      - [0x28ebd0, cpp, render/lightman]
-      - [0x292788, cpp, render/font]
-      - [0x298140, asm]
-      - [0x298ad8, cpp, ui/uiengine]
-      - [0x29b3f8, cpp, ui/uilistbox]
-      - [0x29bd38, cpp, ui/uimenu]
-      - [0x29d518, cpp, ui/uiscreen]
-      - [0x29f8b8, asm]
-      - [0x2a0238, cpp, ui/uistatestack]
-      - [0x2a0f78, cpp, ui/uithing]
-      - [0x2a15e8, asm]
-      - [0x2a44c0, cpp, ui/uivector]
-      - [0x2a7688, cpp, world/world]
-      - [0x2a7d50, asm]
-      - [0x2aa800, cpp, world/worldview]
-      - [0x2ad800, asm]
-      - [0x2ec198, cpp, dirtysock/tags]
-      - [0x2eef50, asm]
+        
+      - [0x1218, cpp, seg/seg_1218]
 
+      - [0xd4f8, cpp, ai/computer]
+
+      - [0x14198, cpp, ai/airpredictor]
+
+      - [0x14b10, cpp, seg/seg_14B10]
+
+      - [0x182e0, cpp, ai/ridermetrix]
+
+      - [0x1c698, cpp, ai/rider]
+
+      - [0x296a0, cpp, ai/ai]
+
+      - [0x37c40, cpp, ai/motion/wipeoutmotion]
+
+      - [0x39b48, cpp, ai/control/handplantcontrol]
+
+      - [0x458d8, cpp, be/beintnewrace]
+
+      - [0x46930, cpp, be/beintplayer]
+
+      - [0x49f50, cpp, be/beintstat]
+
+      - [0x4b080, cpp, be/belibrary]
+
+      - [0x4ec80, cpp, be/be]
+
+      - [0x4f0e0, cpp, be/beintnetwork]
+
+      - [0x4ff30, cpp, be/beintcharacter]
+
+      - [0x50250, cpp, be/beintoption]
+
+      - [0x50900, cpp, be/beintbagt]
+
+      - [0x518d8, cpp, be/beintecon]
+
+      - [0x53398, cpp, be/bedbprofile]
+
+      - [0x53638, cpp, be/beintsavefile]
+
+      - [0x54088, cpp, be/bestate]
+
+      - [0x542a0, cpp, be/beintmission]
+
+      - [0x55948, cpp, be/beintscore]
+
+      - [0x56a50, cpp, be/beintaggression]
+
+      - [0x57338, cpp, be/beprepoststate]
+
+      - [0x579c0, cpp, be/beintreward]
+
+      - [0x5bd58, cpp, be/bedbreward]
+
+      - [0x5d988, cpp, camera/cameraalgolist]
+
+      - [0x5dba0, cpp, camera/cameracontroller]
+
+      - [0x5e078, cpp, camera/cameraalgorithms]
+
+      - [0x5ec18, cpp, camera/camera]
+
+      - [0x69fe8, cpp, camera/script/scriptcontroller]
+
+      - [0x6cf20, cpp, camera/trigger/cameratriggerlist]
+
+      - [0x6d428, cpp, seg/seg_6D428]
+
+      - [0x6d5a8, cpp, camera/trigger/cameratriggervolumes]
+
+      - [0x6d628, cpp, camera/trigger/triggeralgorithms]
+
+      - [0x6d9b0, cpp, camera/trigger/cameratriggerman]
+
+      - [0x722b0, cpp, camera/trigger/cameratriggerfactory]
+
+      - [0x7bcc8, cpp, main/loadscreens]
+
+      - [0x7d5f8, cpp, fe/debugfe]
+
+      - [0x81b60, cpp, fe/festatedebug]
+
+      - [0x82148, cpp, fe/festatecharselect]
+
+      - [0x83928, cpp, fe/festatecharsetup]
+
+      - [0x842a8, cpp, fe/festateriderbio]
+
+      - [0x84de0, cpp, wscript/wscriptmission]
+
+      - [0x85668, cpp, fe/festatestore]
+
+      - [0x86a98, cpp, fe/festatecredits]
+
+      - [0x87658, cpp, fe/festateload]
+
+      - [0x87b50, cpp, fe/fememcard]
+
+      - [0x88c50, cpp, fe/festatelegal]
+
+      - [0x89800, cpp, fe/festateoptions]
+
+      - [0x8fad8, cpp, fe/festateprofile]
+
+      - [0x918c0, cpp, fe/festateriderbiodetail]
+
+      - [0x923b8, cpp, fe/festateruleselect]
+
+      - [0x93d80, cpp, fe/festatebigradio]
+
+      - [0x95528, cpp, fe/festatetransition]
+
+      - [0x95778, cpp, fe/ovstates]
+
+      - [0x964d8, cpp, fe/festatebonusmaterial]
+
+      - [0x966f8, cpp, fe/festatecharequip]
+
+      - [0x969a8, cpp, util/locale]
+
+      - [0x97540, cpp, fe/festateaudiooptions]
+
+      - [0x97f98, cpp, fe/messagecenter]
+
+      - [0x99db8, cpp, fe/festatecharequipdetail]
+
+      - [0x9f680, cpp, fe/feridermanager]
+
+      - [0xa1648, cpp, fe/feflowstate]
+
+      - [0xa1720, cpp, fe/fereal]
+
+      - [0xa4090, cpp, fe/festateselectmp]
+
+      - [0xa4258, cpp, fe/ovstatemission]
+
+      - [0xa46e8, cpp, fe/feasyncfile]
+
+      - [0xc68e8, cpp, fe/fepopup]
+
+      - [0xcf758, cpp, seg/seg_CF758]
+
+      - [0xd00b0, cpp, fe/festaterewards]
+
+      - [0xd3678, cpp, fe/ovstatelodge]
+
+      - [0xd5368, cpp, fe/festatetrophyroom]
+
+      - [0xd76b0, cpp, fe/fememcardcallbacks]
+
+      - [0xdadb8, cpp, fe/festatenethelppopup]
+
+      - [0xdc148, cpp, main/all_in_one_main]
+
+      - [0xdfb90, cpp, fe/fepopupmisc]
+
+      - [0xe9ff0, cpp, fe/ovstatehud]
+
+      - [0xf4790, cpp, fe/festatelodge]
+
+      - [0xf5830, cpp, fe/festatebuyattrib]
+
+      - [0xf8198, cpp, fe/ovstateenterlodge]
+
+      - [0xf9168, cpp, fe/ovtemplatepausemenu]
+
+      - [0xfa188, cpp, fe/ovstatepause]
+
+      - [0x101218, cpp, fe/ovstaterewardslist]
+
+      - [0x101700, cpp, fe/uitemplatemap]
+
+      - [0x1096a8, cpp, fe/ovstatemap]
+
+      - [0x10b778, cpp, fe/ovtemplatedialog]
+
+      - [0x10ee30, cpp, fe/ovstatereplay]
+
+      - [0x10f938, cpp, fe/ovstatetrophy]
+
+      - [0x1121a0, cpp, fe/ovstateprofile]
+
+      - [0x1137e8, cpp, fe/all_in_one_fe]
+
+      - [0x1237d0, cpp, luno/lunovm]
+
+      - [0x127830, cpp, main/ssxapp]
+
+      - [0x12d078, cpp, main/game]
+
+      - [0x12f180, cpp, main/sectionman]
+
+      - [0x12f3b8, cpp, main/gamerender]
+
+      - [0x12fbc8, cpp, main/gameload]
+
+      - [0x133348, cpp, main/loadscreens_prestart]
+
+      - [0x134438, cpp, fe/festateloadscreen]
+
+      - [0x135ad0, cpp, main/gamestate]
+
+      - [0x138cf8, cpp, main/gamemode]
+
+      - [0x13d808, cpp, movie/movieplayer]
+
+      - [0x143d10, cpp, main/streampause]
+
+      - [0x1448f0, cpp, main/ssxappdtor]
+
+      - [0x146950, cpp, fe/festateloadhint]
+
+      - [0x148e60, cpp, main/debugmenu]
+
+      - [0x152718, cpp, mem/memstd]
+
+      - [0x156860, cpp, seg/seg_156860]
+
+      - [0x15a288, cpp, dirtysock/tagsunk]
+
+      - [0x169890, cpp, bx/bxstringctor]
+
+      - [0x16c310, cpp, path/pathsys]
+
+      - [0x16d458, cpp, replay/playbackman]
+
+      - [0x16ebf0, cpp, replay/replay]
+
+      - [0x16f908, cpp, replay/frameptr]
+
+      - [0x171070, cpp, replay/replaycache]
+
+      - [0x1763b8, cpp, scripter/scanimmgr]
+
+      - [0x176828, cpp, scripter/datamanager]
+
+      - [0x179358, cpp, scripter/ssxscriptengine]
+
+      - [0x182f30, cpp, scripter/bxscriptengine]
+
+      - [0x184450, cpp, scripter/scsndmgr]
+
+      - [0x1848e8, cpp, scripter/videngine]
+
+      - [0x184e60, cpp, scripter/all_in_one_scripter]
+
+      - [0x185bb0, cpp, sound/ssxAudio]
+
+      - [0x18b1e8, cpp, sound/asyncsys]
+
+      - [0x18c588, cpp, sound/bankmanager]
+
+      - [0x190d00, cpp, sound/soundsys]
+
+      - [0x1aa350, cpp, sound/ps2soundman]
+
+      - [0x1aa9d8, cpp, sound/streamsys]
+
+      - [0x1add08, cpp, sound/bankmonitor]
+
+      - [0x1b5b08, cpp, sound/icepick/worldtriggermanager]
+
+      - [0x1ba100, cpp, bx/seg_1BA100]
+
+      - [0x1c13a8, cpp, worldpainter/worldpainterquery]
+
+      - [0x1c13e8, cpp, worldpainter/worldpainterman]
+
+      - [0x1c1408, cpp, worldpainter/worldpainterqueryctor]
+
+      - [0x1c1a58, cpp, worldpainter/worldpaintermanquery]
+
+      - [0x1c27d0, cpp, worldpainter/quadtree]
+
+      - [0x1c7f78, cpp, util/statemachine]
+
+      - [0x1c9348, cpp, seg/seg_1C9348]
+
+      - [0x1cb258, cpp, util/menu]
+
+      - [0x1d2ce0, cpp, util/objectinterface]
+
+      - [0x1d3510, cpp, seg/seg_1D3510]
+
+      - [0x1d58f0, cpp, visualfx/angerfx]
+
+      - [0x1d6778, cpp, visualfx/avalanche]
+
+      - [0x1db390, cpp, visualfx/boardsparkfx]
+
+      - [0x1dc6d8, cpp, visualfx/crowdrender2d]
+      
+      - [0x1dcd10, cpp, seg/seg_1DCD10]
+
+      - [0x1ddb88, cpp, visualfx/boardwakefx]
+
+      - [0x1e91e8, cpp, visualfx/boardtrailfx]
+
+      - [0x1ed3e0, cpp, visualfx/lensfx]
+
+      - [0x1ef7c8, cpp, visualfx/renderstateman]
+
+      - [0x1f1548, cpp, seg/seg_1F1548]
+
+      - [0x1f6298, cpp, visualfx/worldlightman]
+
+      - [0x1fbe38, cpp, seg/seg_1FBE38]
+
+      - [0x208598, cpp, wscript/wscriptprocess]
+
+      - [0x20a4c8, cpp, wscript/wscriptman]
+
+      - [0x20e8b8, cpp, animation/animmodel]
+
+      - [0x2125c8, cpp, seg/seg_2125C8]
+
+      - [0x2128d0, cpp, animation/rideranimbase]
+
+      - [0x214a10, cpp, animation/animsequencer]
+
+      - [0x215cb0, cpp, animation/mdfarchive]
+
+      - [0x2160b0, cpp, animation/gameanimmap]
+
+      - [0x217898, cpp, bx/bigfile]
+
+      - [0x217a48, cpp, bx/blockman]
+
+      - [0x217cd0, cpp, bx/appman]
+
+      - [0x218618, cpp, hashvalue]
+      
+      - [0x2187c8, cpp, bx/bxrandom]
+      
+      - [0x218ae8, cpp, seg/seg_218AE8]
+
+      - [0x218d20, cpp, bx/memman]
+
+      - [0x218f38, cpp, seg/seg_218F38]
+
+      - [0x218fe8, cpp, bx/bxstring]
+
+      - [0x21a1c0, asm]
+
+      - [0x21aa30, cpp, bx/memblockman]
+
+      - [0x21bdb0, cpp, bx/ps2main]
+
+      - [0x21d350, cpp, md5]
+      
+      - [0x21e5a8, cpp, seg/seg_21E5A8]
+
+      - [0x21e660, cpp, bx/cubicspline]
+
+      - [0x221920, cpp, bx/execman]
+
+      - [0x221ca0, cpp, input/inputmap]
+
+      - [0x2227d0, cpp, input/inputparse]
+
+      - [0x228890, cpp, intersect/aifwddiff]
+
+      - [0x22a910, cpp, intersect/riderspheretree]
+
+      - [0x2313f0, cpp, intersect/worldsphtree]
+
+      - [0x243d10, cpp, object/debouncenode]
+
+      - [0x2464e8, cpp, object/spline3d]
+
+      - [0x246700, cpp, object/effectlink]
+
+      - [0x2476a0, cpp, object/flexbridgenode]
+
+      - [0x249b90, cpp, object/flexrailnode]
+
+      - [0x24c228, cpp, object/flagset]
+
+      - [0x24f448, cpp, object/animnode]
+
+      - [0x24feb8, cpp, object/floatingnode]
+
+      - [0x250b90, cpp, object/instancenode]
+
+      - [0x251750, cpp, object/deadfadenode]
+
+      - [0x252030, cpp, wscript/wscriptcompile]
+
+      - [0x252270, cpp, object/instanceman]
+
+      - [0x253aa8, cpp, object/modifierblock]
+
+      - [0x254f00, cpp, object/spring]
+
+      - [0x255688, cpp, object/objnode]
+
+      - [0x2559e0, cpp, object/bucketman]
+
+      - [0x2562d8, cpp, object/movenode]
+
+      - [0x259020, cpp, object/multiparticle]
+
+      - [0x25a5d8, cpp, object/splinemodifier]
+
+      - [0x25d0e8, cpp, object/railmodifier]
+
+      - [0x268150, cpp, render/ps2graphicsman]
+
+      - [0x26a8e0, cpp, render/graphicsman]
+
+      - [0x271c60, cpp, render/particle]
+
+      - [0x28bcd0, cpp, render/irradiance]
+
+      - [0x28be10, cpp, render/ps2lightman]
+
+      - [0x28be60, cpp, render/ps2bezierman]
+
+      - [0x28bef8, cpp, render/bezierman]
+
+      - [0x28ebd0, cpp, render/lightman]
+
+      - [0x292788, cpp, render/font]
+
+      - [0x298140, cpp, ui/uianimation]
+
+      - [0x298718, cpp, util/list]
+
+      - [0x298ad8, cpp, ui/uiengine]
+
+      - [0x29b3f8, cpp, ui/uilistbox]
+
+      - [0x29bd38, cpp, ui/uimenu]
+
+      - [0x29d518, cpp, ui/uiscreen]
+
+      - [0x29f8b8, cpp, ui/uistate]
+
+      - [0x2a0238, cpp, ui/uistatestack]
+
+      - [0x2a0f78, cpp, ui/uithing]
+
+      - [0x2a15e8, cpp, ui/uitext]
+
+      - [0x2a44c0, cpp, ui/uivector]
+
+      - [0x2a7688, cpp, world/world]
+
+      - [0x2a7d50, cpp, world/streamman]
+
+      - [0x2a8598, cpp, world/worldcache]
+
+      - [0x2aa800, cpp, world/worldview]
+
+      - [0x2ad800, cpp, world/wscriptcache]
+
+      - [0x2b4578, c, ealib/seg_2B4578]
+
+      - [0x2d7498, c, ealib/seg_2D7498]
+
+      - [0x2dcae8, c, ealib/seg_2DCAE8]
+      
+      - [0x2ec198, cpp, dirtysock/tags]
+      
+      - [0x2eef50, asm]
+      
       # --- .vutext
       - [0x32f590, textbin, vutext]
 
       # --- .data
-      # (one chunk per unit in link order; boundaries fitted from code references)
       - [0x33de00, data]
-      - [0x33df40, data]
-      - [0x33e388, data, ai/ridermetrix]
-      - [0x33e788, data, ai/ai]
-      - [0x33e8f8, data, be/beintnewrace]
-      - [0x340b28, data, be/beintstat]
-      - [0x341550, data, be/beintecon]
-      - [0x341770, data, be/beintmission]
-      - [0x341ed0, data, be/beintscore]
-      - [0x341f48, data, be/beintreward]
-      - [0x341f68, data, fe/festatecharselect]
-      - [0x341fb8, data, fe/festateoptions]
-      - [0x342008, data]
-      - [0x342108, data, fe/festatebigradio]
-      - [0x342128, data, fe/festatebonusmaterial]
-      - [0x342138, data, util/locale]
-      - [0x3421a0, data, fe/messagecenter]
-      - [0x342218, data, fe/festatecharequipdetail]
-      - [0x342248, data, fe/fereal]
-      - [0x342258, data, fe/feasyncfile]
-      - [0x342390, data, fe/fepopup]
-      - [0x342440, data, fe/festaterewards]
-      - [0x342540, data, fe/ovstatelodge]
-      - [0x342600, data, fe/festatetrophyroom]
-      - [0x342630, data, fe/fepopupmisc]
-      - [0x342af8, data, fe/festatelodge]
-      - [0x342b40, data, fe/festatebuyattrib]
-      - [0x342bc0, data, fe/ovtemplatepausemenu]
-      - [0x342c68, data, fe/ovstatepause]
-      - [0x342d10, data, fe/ovtemplatedialog]
-      - [0x342d38, data]
-      - [0x342f38, data, luno/lunovm]
-      - [0x343100, data, main/ssxapp]
-      - [0x343150, data, main/game]
-      - [0x3438d8, data, main/gameload]
-      - [0x343928, data, main/loadscreens_prestart]
-      - [0x343a18, data]
-      - [0x3463d0, data, bx/bxstringctor]
-      - [0x346428, data, path/pathsys]
-      - [0x346438, data, replay/frameptr]
-      - [0x346488, data, scripter/ssxscriptengine]
-      - [0x346898, data, sound/soundsys]
-      - [0x346940, data, worldpainter/quadtree]
-      - [0x346ab0, data, util/menu]
-      - [0x346d38, data, visualfx/crowdrender2d]
-      - [0x346e30, data, visualfx/worldlightman]
-      - [0x346e40, data]
-      - [0x347990, data]
-      - [0x34bf80, data, animation/rideranimbase]
-      - [0x34bf98, data, intersect/riderspheretree]
-      - [0x34bfd0, data, object/flagset]
-      - [0x34bff0, data, object/objnode]
-      - [0x34c080, data, object/railmodifier]
-      - [0x34c200, data, render/ps2graphicsman]
-      - [0x34c420, data, render/graphicsman]
-      - [0x34c430, data, render/particle]
-      - [0x34c9d0, data, render/bezierman]
-      - [0x34c9e0, data, render/lightman]
-      - [0x34d1e0, data]
-      - [0x34d218, data]
-      - [0x3522b0, data]
 
       # --- .rodata
-      # (one chunk per unit in link order; boundaries fitted from code references,
-      # see docs/splits.md)
       - [0x357900, rodata]
-      - [0x357950, rodata]
-      - [0x357a90, rodata, ai/computer]
-      - [0x357c58, rodata]
-      - [0x358820, rodata, ai/ridermetrix]
-      - [0x3588a8, rodata, ai/rider]
-      - [0x358f00, rodata, ai/ai]
-      - [0x359710, rodata, ai/control/handplantcontrol]
-      - [0x35b0f0, rodata, be/beintnewrace]
-      - [0x35b1d8, rodata, be/beintplayer]
-      - [0x35b2b0, rodata, be/beintstat]
-      - [0x35b2f8, rodata, be/belibrary]
-      - [0x35b638, rodata]
-      - [0x35b648, rodata, be/beintnetwork]
-      - [0x35b660, rodata, be/beintcharacter]
-      - [0x35b6b0, rodata, be/beintoption]
-      - [0x35b6d8, rodata, be/beintbagt]
-      - [0x35b718, rodata, be/beintecon]
-      - [0x35b7c0, rodata]
-      - [0x35b7e0, rodata, be/beintsavefile]
-      - [0x35b810, rodata]
-      - [0x35b848, rodata, be/beintmission]
-      - [0x35b858, rodata, be/beintscore]
-      - [0x35b898, rodata, be/beintaggression]
-      - [0x35b8a8, rodata]
-      - [0x35b938, rodata, be/beintreward]
-      - [0x35bb78, rodata, be/bedbreward]
-      - [0x35c1f0, rodata, camera/cameraalgolist]
-      - [0x35c220, rodata, camera/cameracontroller]
-      - [0x35c250, rodata, camera/cameraalgorithms]
-      - [0x35c748, rodata, camera/camera]
-      - [0x35ce88, rodata, camera/script/scriptcontroller]
-      - [0x35cf30, rodata]
-      - [0x35cf80, rodata, camera/trigger/cameratriggerman]
-      - [0x35d0b0, rodata, camera/trigger/cameratriggerfactory]
-      - [0x35de30, rodata]
-      - [0x35dec0, rodata, fe/debugfe]
-      - [0x35e570, rodata, fe/festatedebug]
-      - [0x35e600, rodata, fe/festatecharselect]
-      - [0x35e7c0, rodata, fe/festatecharsetup]
-      - [0x35e870, rodata, fe/festateriderbio]
-      - [0x35e940, rodata]
-      - [0x35e9d8, rodata, fe/festatestore]
-      - [0x35eb80, rodata, fe/festatecredits]
-      - [0x35ec50, rodata, fe/festateload]
-      - [0x35ec70, rodata]
-      - [0x35ed10, rodata, fe/festatelegal]
-      - [0x35ed20, rodata, fe/festateoptions]
-      - [0x35f240, rodata, fe/festateprofile]
-      - [0x35f398, rodata, fe/festateriderbiodetail]
-      - [0x360a80, rodata]
-      - [0x360cc8, rodata, fe/festatebigradio]
-      - [0x361030, rodata, fe/ovstates]
-      - [0x361168, rodata, fe/festatebonusmaterial]
-      - [0x3611f0, rodata]
-      - [0x3613f0, rodata, util/locale]
-      - [0x361420, rodata, fe/festateaudiooptions]
-      - [0x361588, rodata, fe/messagecenter]
-      - [0x3617a8, rodata, fe/festatecharequipdetail]
-      - [0x361a00, rodata, fe/feridermanager]
-      - [0x361b80, rodata]
-      - [0x361b90, rodata, fe/fereal]
-      - [0x3623b8, rodata]
-      - [0x362430, rodata, fe/feasyncfile]
-      - [0x366fa8, rodata, fe/fepopup]
-      - [0x367bb8, rodata]
-      - [0x367d88, rodata, fe/festaterewards]
-      - [0x368208, rodata, fe/ovstatelodge]
-      - [0x3686c8, rodata, fe/festatetrophyroom]
-      - [0x3687b8, rodata]
-      - [0x36ed60, rodata, fe/fepopupmisc]
-      - [0x36f9d8, rodata, fe/ovstatehud]
-      - [0x36fdc0, rodata, fe/festatelodge]
-      - [0x36fff8, rodata, fe/festatebuyattrib]
-      - [0x3704d0, rodata, fe/ovstateenterlodge]
-      - [0x370818, rodata, fe/ovtemplatepausemenu]
-      - [0x3708d8, rodata, fe/ovstatepause]
-      - [0x3714b8, rodata]
-      - [0x3714c8, rodata, fe/uitemplatemap]
-      - [0x3727f8, rodata, fe/ovstatemap]
-      - [0x372a10, rodata, fe/ovtemplatedialog]
-      - [0x372c08, rodata, fe/ovstatereplay]
-      - [0x372cd8, rodata, fe/ovstatetrophy]
-      - [0x372d50, rodata]
-      - [0x37a790, rodata, luno/lunovm]
-      - [0x37a918, rodata, main/ssxapp]
-      - [0x37c3a0, rodata, main/game]
-      - [0x37c4e0, rodata, main/sectionman]
-      - [0x37c538, rodata, main/gamerender]
-      - [0x37c548, rodata, main/gameload]
-      - [0x37c8c8, rodata, main/loadscreens_prestart]
-      - [0x37cfb0, rodata, fe/festateloadscreen]
-      - [0x37d038, rodata, main/gamestate]
-      - [0x37d0a8, rodata, main/gamemode]
-      - [0x37d128, rodata]
-      - [0x37d6d8, rodata, main/ssxappdtor]
-      - [0x37eb50, rodata, fe/festateloadhint]
-      - [0x37ebf8, rodata, main/debugmenu]
-      - [0x3810a8, rodata]
-      - [0x3823c0, rodata, bx/bxstringctor]
-      - [0x382438, rodata, path/pathsys]
-      - [0x382550, rodata, replay/playbackman]
-      - [0x3825f0, rodata, replay/replay]
-      - [0x382730, rodata, replay/frameptr]
-      - [0x3827b0, rodata, replay/replaycache]
-      - [0x382a80, rodata]
-      - [0x382ab8, rodata, scripter/datamanager]
-      - [0x382bb0, rodata, scripter/ssxscriptengine]
-      - [0x382f48, rodata]
-      - [0x383820, rodata, sound/ssxAudio]
-      - [0x383988, rodata, sound/asyncsys]
-      - [0x383998, rodata, sound/bankmanager]
-      - [0x383aa0, rodata, sound/soundsys]
-      - [0x384178, rodata, sound/ps2soundman]
-      - [0x384218, rodata, sound/streamsys]
-      - [0x384238, rodata, sound/bankmonitor]
-      - [0x384c68, rodata]
-      - [0x384cb8, rodata, worldpainter/worldpainterqueryctor]
-      - [0x386f98, rodata, worldpainter/quadtree]
-      - [0x387500, rodata, util/statemachine]
-      - [0x3875c8, rodata]
-      - [0x387630, rodata, util/menu]
-      - [0x388480, rodata]
-      - [0x388518, rodata, visualfx/angerfx]
-      - [0x388538, rodata, visualfx/avalanche]
-      - [0x388588, rodata, visualfx/boardsparkfx]
-      - [0x3885c0, rodata, visualfx/crowdrender2d]
-      - [0x388918, rodata]
-      - [0x388968, rodata, visualfx/boardwakefx]
-      - [0x388b20, rodata, visualfx/boardtrailfx]
-      - [0x388b78, rodata, visualfx/renderstateman]
-      - [0x388bb8, rodata]
-      - [0x389648, rodata, visualfx/worldlightman]
-      - [0x38a618, rodata]
-      - [0x38a850, rodata, wscript/wscriptprocess]
-      - [0x38a908, rodata, wscript/wscriptman]
-      - [0x38ac80, rodata, animation/animmodel]
-      - [0x38ad60, rodata]
-      - [0x38b4e0, rodata, animation/rideranimbase]
-      - [0x38b5b0, rodata, animation/animsequencer]
-      - [0x38b5d0, rodata]
-      - [0x38e840, rodata]
-      - [0x38e850, rodata, bx/bxstring]
-      - [0x38e860, rodata]
-      - [0x38ea88, rodata, bx/ps2main]
-      - [0x38eb38, rodata, bx/cubicspline]
-      - [0x38ec30, rodata, bx/execman]
-      - [0x38ed00, rodata, input/inputmap]
-      - [0x38edd8, rodata, input/inputparse]
-      - [0x38f4f8, rodata, intersect/aifwddiff]
-      - [0x38f540, rodata, intersect/riderspheretree]
-      - [0x38f550, rodata, intersect/worldsphtree]
-      - [0x38f738, rodata, object/debouncenode]
-      - [0x38f778, rodata, object/flexbridgenode]
-      - [0x38f808, rodata, object/flexrailnode]
-      - [0x38f850, rodata, object/flagset]
-      - [0x38f860, rodata, object/animnode]
-      - [0x38f890, rodata, object/floatingnode]
-      - [0x38f8a8, rodata, object/deadfadenode]
-      - [0x38f8c0, rodata, wscript/wscriptcompile]
-      - [0x38f8d0, rodata, object/modifierblock]
-      - [0x38f9c8, rodata, object/spring]
-      - [0x38f9d8, rodata, object/movenode]
-      - [0x38fa20, rodata, object/multiparticle]
-      - [0x38fa30, rodata, object/splinemodifier]
-      - [0x38fa60, rodata, object/railmodifier]
-      - [0x393068, rodata, render/ps2graphicsman]
-      - [0x393638, rodata, render/graphicsman]
-      - [0x393650, rodata, render/particle]
-      - [0x393e68, rodata, render/irradiance]
-      - [0x393ea0, rodata, render/bezierman]
-      - [0x393ee0, rodata, render/lightman]
-      - [0x393f40, rodata, render/font]
-      - [0x394d60, rodata]
-      - [0x394d80, rodata, ui/uiengine]
-      - [0x394dd0, rodata, ui/uilistbox]
-      - [0x394e00, rodata, ui/uiscreen]
-      - [0x394fc0, rodata]
-      - [0x394fe0, rodata, ui/uithing]
-      - [0x395078, rodata]
-      - [0x3950c8, rodata, ui/uivector]
-      - [0x395d58, rodata, world/world]
-      - [0x395d90, rodata]
-      - [0x395f10, rodata, world/worldview]
-      - [0x396070, rodata]
-      - [0x396fc0, rodata, dirtysock/tags]
-      - [0x397a58, rodata]
       
       - [0x39c080, rodatabin, gcc_except_table]
       
-      # --- .lit4 (one chunk per unit, in link order)
-      - [0x39c100, lit4]
+      - [0x39c100, lit4, seg/seg_1218]
       - [0x39c31c, lit4, ai/computer]
       - [0x39c47c, lit4, ai/airpredictor]
-      - [0x39c4b0, lit4]
+      - [0x39c4b0, lit4, seg/seg_14B10]
       - [0x39c5dc, lit4, ai/ridermetrix]
       - [0x39c734, lit4, ai/rider]
       - [0x39c8ac, lit4, ai/ai]
@@ -542,21 +566,21 @@ segments:
       - [0x39dba8, lit4, camera/script/scriptcontroller]
       - [0x39dca8, lit4, camera/trigger/cameratriggerman]
       - [0x39dcb4, lit4, camera/trigger/cameratriggerfactory]
-      - [0x39e5d0, lit4]
+      - [0x39e5d0, lit4, main/loadscreens]
       - [0x39e5d4, lit4, fe/debugfe]
       - [0x39e6c8, lit4, fe/festatecharselect]
       - [0x39e6e4, lit4, fe/festatecharsetup]
-      - [0x39e6f0, lit4]
+      - [0x39e6f0, lit4, wscript/wscriptmission]
       - [0x39e6fc, lit4, fe/festatestore]
       - [0x39e704, lit4, fe/festatecredits]
       - [0x39e708, lit4, fe/festateoptions]
-      - [0x39e724, lit4]
-      - [0x39e738, lit4]
+      - [0x39e724, lit4, fe/festateruleselect]
+      - [0x39e738, lit4, fe/festatecharequip]
       - [0x39e740, lit4, fe/festatecharequipdetail]
       - [0x39e780, lit4, fe/fereal]
       - [0x39e784, lit4, fe/feasyncfile]
       - [0x39e7e8, lit4, fe/fepopup]
-      - [0x39e7fc, lit4]
+      - [0x39e7fc, lit4, main/all_in_one_main]
       - [0x39e940, lit4, fe/fepopupmisc]
       - [0x39e974, lit4, fe/ovstatehud]
       - [0x39eba4, lit4, fe/festatebuyattrib]
@@ -566,7 +590,7 @@ segments:
       - [0x39ebe8, lit4, fe/ovstatemap]
       - [0x39ebf8, lit4, fe/ovstatereplay]
       - [0x39ebfc, lit4, fe/ovstatetrophy]
-      - [0x39ec48, lit4]
+      - [0x39ec48, lit4, fe/all_in_one_fe]
       - [0x39edec, lit4, luno/lunovm]
       - [0x39ef00, lit4, main/ssxapp]
       - [0x39ef14, lit4, main/game]
@@ -576,49 +600,54 @@ segments:
       - [0x39ef7c, lit4, fe/festateloadscreen]
       - [0x39ef80, lit4, main/gamestate]
       - [0x39ef94, lit4, main/gamemode]
-      - [0x39efa8, lit4]
+      - [0x39efa8, lit4, movie/movieplayer]
+      - [0x39efd4, lit4, main/streampause]
       - [0x39f0e8, lit4, fe/festateloadhint]
       - [0x39f0ec, lit4, main/debugmenu]
-      - [0x39f344, lit4]
+      - [0x39f344, lit4, mem/memstd]
+      - [0x39f56c, lit4, seg/seg_156860]
+      - [0x39f57c, lit4, dirtysock/tagsunk]
       - [0x39f698, lit4, bx/bxstringctor]
       - [0x39f6b4, lit4, path/pathsys]
       - [0x39f7d0, lit4, replay/playbackman]
       - [0x39f7d8, lit4, replay/replaycache]
       - [0x39f8ec, lit4, scripter/datamanager]
       - [0x39f8fc, lit4, scripter/ssxscriptengine]
-      - [0x39f96c, lit4]
+      - [0x39f96c, lit4, scripter/bxscriptengine]
+      - [0x39f97c, lit4, scripter/all_in_one_scripter]
       - [0x39fa90, lit4, sound/ssxAudio]
       - [0x39fb18, lit4, sound/bankmanager]
       - [0x39fb2c, lit4, sound/soundsys]
       - [0x39fb90, lit4, sound/streamsys]
       - [0x39fb9c, lit4, sound/bankmonitor]
       - [0x39fba8, lit4, sound/icepick/worldtriggermanager]
-      - [0x39fcdc, lit4]
+      - [0x39fcdc, lit4, bx/seg_1BA100]
+      - [0x39fe64, lit4, worldpainter/worldpainterquery]
       - [0x39fe68, lit4, worldpainter/worldpainterqueryctor]
       - [0x39fe74, lit4, worldpainter/worldpaintermanquery]
       - [0x39ff88, lit4, worldpainter/quadtree]
       - [0x3a00f0, lit4, util/menu]
       - [0x3a0158, lit4, util/objectinterface]
-      - [0x3a015c, lit4]
+      - [0x3a015c, lit4, seg/seg_1D3510]
       - [0x3a03b8, lit4, visualfx/angerfx]
       - [0x3a03dc, lit4, visualfx/avalanche]
       - [0x3a043c, lit4, visualfx/boardsparkfx]
-      - [0x3a0498, lit4]
+      - [0x3a0498, lit4, seg/seg_1DCD10]
       - [0x3a04ac, lit4, visualfx/boardwakefx]
       - [0x3a0720, lit4, visualfx/boardtrailfx]
       - [0x3a0778, lit4, visualfx/lensfx]
       - [0x3a07b0, lit4, visualfx/renderstateman]
-      - [0x3a07c0, lit4]
+      - [0x3a07c0, lit4, seg/seg_1F1548]
       - [0x3a083c, lit4, visualfx/worldlightman]
-      - [0x3a0d54, lit4]
+      - [0x3a0d54, lit4, seg/seg_1FBE38]
       - [0x3a0d8c, lit4, wscript/wscriptman]
       - [0x3a0eb4, lit4, animation/animmodel]
       - [0x3a0ebc, lit4, animation/rideranimbase]
       - [0x3a0ecc, lit4, animation/animsequencer]
       - [0x3a0ed0, lit4, animation/gameanimmap]
-      - [0x3a11f4, lit4]
-      - [0x3a1200, lit4]
-      - [0x3a1210, lit4]
+      - [0x3a11f4, lit4, bx/appman]
+      - [0x3a1200, lit4, seg/seg_218AE8]
+      - [0x3a1210, lit4, bx/memblockman]
       - [0x3a1218, lit4, bx/ps2main]
       - [0x3a12a8, lit4, bx/cubicspline]
       - [0x3a12b4, lit4, input/inputparse]
@@ -643,152 +672,23 @@ segments:
       - [0x3a1a5c, lit4, render/font]
       - [0x3a1ba8, lit4, ui/uiengine]
       - [0x3a1bb0, lit4, ui/uithing]
-      - [0x3a1bfc, lit4]
+      - [0x3a1bfc, lit4, ui/uitext]
       - [0x3a1c00, lit4, ui/uivector]
-      - [0x3a1d2c, lit4]
+      - [0x3a1d2c, lit4, world/worldcache]
       - [0x3a1d30, lit4, world/worldview]
-      - [0x3a1d44, lit4]
-      - [0x3a1e58, lit4]  # padding
+      - [0x3a1d44, lit4, world/wscriptcache]
+      - [0x3a1e58, lit4]
 
-      # --- .sdata (one chunk per unit; boundaries fitted from code references)
+      # .lit4 (real ELF size 0x5d58) was previously undersized/unbounded here,
+      # silently swallowing .sdata and .sbss content and misclassifying their
+      # pointer/data globals as float literals. Bounded properly per the
+      # original ELF's real section headers (readelf -S disc/SLUS_207.72).
       - [0x3a1e80, sdata]
-      - [0x3a1e90, sdata]
-      - [0x3a2078, sdata, ai/ridermetrix]
-      - [0x3a2080, sdata, ai/rider]
-      - [0x3a2108, sdata, ai/ai]
-      - [0x3a2120, sdata, ai/control/handplantcontrol]
-      - [0x3a21b4, sdata, be/beintnewrace]
-      - [0x3a21c0, sdata, be/beintplayer]
-      - [0x3a21c8, sdata, be/beintstat]
-      - [0x3a21cc, sdata, be/belibrary]
-      - [0x3a21ec, sdata]
-      - [0x3a2204, sdata, be/beintnetwork]
-      - [0x3a220c, sdata, be/beintoption]
-      - [0x3a2210, sdata, be/beintbagt]
-      - [0x3a2214, sdata, be/beintecon]
-      - [0x3a221c, sdata, be/beintsavefile]
-      - [0x3a222c, sdata]
-      - [0x3a2244, sdata, be/beintscore]
-      - [0x3a224c, sdata, be/beintaggression]
-      - [0x3a2254, sdata]
-      - [0x3a2260, sdata, be/beintreward]
-      - [0x3a2270, sdata, be/bedbreward]
-      - [0x3a227c, sdata, camera/camera]
-      - [0x3a2290, sdata, camera/trigger/cameratriggerfactory]
-      - [0x3a22a0, sdata]
-      - [0x3a22c0, sdata, fe/debugfe]
-      - [0x3a2370, sdata, fe/festatedebug]
-      - [0x3a2398, sdata, fe/festatecharselect]
-      - [0x3a2410, sdata, fe/festatecharsetup]
-      - [0x3a2418, sdata]
-      - [0x3a2458, sdata, fe/festatestore]
-      - [0x3a24b0, sdata, fe/festateload]
-      - [0x3a24c0, sdata]
-      - [0x3a24d0, sdata, fe/festateoptions]
-      - [0x3a25e8, sdata, fe/festateprofile]
-      - [0x3a2610, sdata, fe/festateriderbiodetail]
-      - [0x3a26a8, sdata]
-      - [0x3a2758, sdata, fe/festatebigradio]
-      - [0x3a27c0, sdata, fe/ovstates]
-      - [0x3a2830, sdata, fe/festateaudiooptions]
-      - [0x3a28a0, sdata, fe/messagecenter]
-      - [0x3a28d8, sdata, fe/festatecharequipdetail]
-      - [0x3a2970, sdata, fe/feridermanager]
-      - [0x3a29b8, sdata, fe/fereal]
-      - [0x3a29e8, sdata]
-      - [0x3a29f0, sdata, fe/feasyncfile]
-      - [0x3a2c38, sdata, fe/fepopup]
-      - [0x3a2ee0, sdata]
-      - [0x3a2ee8, sdata, fe/festaterewards]
-      - [0x3a2f08, sdata, fe/ovstatelodge]
-      - [0x3a2fe8, sdata, fe/festatetrophyroom]
-      - [0x3a3030, sdata]
-      - [0x3a3088, sdata, fe/fepopupmisc]
-      - [0x3a31d8, sdata, fe/ovstatehud]
-      - [0x3a3318, sdata, fe/festatelodge]
-      - [0x3a3320, sdata, fe/festatebuyattrib]
-      - [0x3a33e0, sdata, fe/ovstateenterlodge]
-      - [0x3a3468, sdata, fe/ovtemplatepausemenu]
-      - [0x3a3498, sdata, fe/ovstatepause]
-      - [0x3a3594, sdata]
-      - [0x3a3598, sdata, fe/uitemplatemap]
-      - [0x3a36f0, sdata, fe/ovstatemap]
-      - [0x3a3700, sdata, fe/ovtemplatedialog]
-      - [0x3a3720, sdata, fe/ovstatereplay]
-      - [0x3a3750, sdata, fe/ovstatetrophy]
-      - [0x3a3770, sdata]
-      - [0x3a38a0, sdata, main/ssxapp]
-      - [0x3a3a18, sdata, main/game]
-      - [0x3a3a20, sdata, main/sectionman]
-      - [0x3a3a50, sdata, main/gameload]
-      - [0x3a3ab8, sdata, main/loadscreens_prestart]
-      - [0x3a3ac0, sdata, main/ssxappdtor]
-      - [0x3a3ad0, sdata, fe/festateloadhint]
-      - [0x3a3cd0, sdata, main/debugmenu]
-      - [0x3a3e38, sdata]
-      - [0x3a4408, sdata, path/pathsys]
-      - [0x3a4410, sdata, replay/playbackman]
-      - [0x3a4440, sdata, replay/replay]
-      - [0x3a4488, sdata, replay/replaycache]
-      - [0x3a4494, sdata, scripter/datamanager]
-      - [0x3a44b8, sdata, scripter/ssxscriptengine]
-      - [0x3a44f0, sdata]
-      - [0x3a4500, sdata, sound/ssxAudio]
-      - [0x3a4614, sdata, sound/asyncsys]
-      - [0x3a461c, sdata, sound/bankmanager]
-      - [0x3a4664, sdata, sound/soundsys]
-      - [0x3a4750, sdata, sound/ps2soundman]
-      - [0x3a4770, sdata, sound/streamsys]
-      - [0x3a4778, sdata, sound/bankmonitor]
-      - [0x3a4858, sdata, sound/icepick/worldtriggermanager]
-      - [0x3a4860, sdata]
-      - [0x3a4898, sdata, worldpainter/quadtree]
-      - [0x3a4980, sdata]
-      - [0x3a4998, sdata, util/menu]
-      - [0x3a4a00, sdata, util/objectinterface]
-      - [0x3a4a30, sdata, visualfx/avalanche]
-      - [0x3a4afc, sdata, visualfx/boardsparkfx]
-      - [0x3a4b00, sdata, visualfx/boardwakefx]
-      - [0x3a4b28, sdata, visualfx/boardtrailfx]
-      - [0x3a4b48, sdata, visualfx/lensfx]
-      - [0x3a4b74, sdata, visualfx/renderstateman]
-      - [0x3a4b88, sdata]
-      - [0x3a4bc0, sdata, visualfx/worldlightman]
-      - [0x3a4be8, sdata]
-      - [0x3a4df0, sdata, animation/animmodel]
-      - [0x3a4dfc, sdata]
-      - [0x3a4e78, sdata]
-      - [0x3a4e80, sdata]
-      - [0x3a4e90, sdata, bx/bxstring]
-      - [0x3a4e94, sdata]
-      - [0x3a4ed8, sdata, bx/ps2main]
-      - [0x3a4ef0, sdata, input/inputmap]
-      - [0x3a4ef8, sdata, input/inputparse]
-      - [0x3a4fc0, sdata, intersect/aifwddiff]
-      - [0x3a4fc8, sdata, intersect/riderspheretree]
-      - [0x3a4ff0, sdata, object/debouncenode]
-      - [0x3a4ff4, sdata, object/effectlink]
-      - [0x3a5008, sdata, object/flexbridgenode]
-      - [0x3a5010, sdata, object/flexrailnode]
-      - [0x3a5018, sdata, object/flagset]
-      - [0x3a5020, sdata, object/bucketman]
-      - [0x3a5028, sdata, object/movenode]
-      - [0x3a5030, sdata, object/multiparticle]
-      - [0x3a5058, sdata, object/railmodifier]
-      - [0x3a5068, sdata, render/ps2graphicsman]
-      - [0x3a51d4, sdata, render/particle]
-      - [0x3a5440, sdata, render/bezierman]
-      - [0x3a5448, sdata, render/lightman]
-      - [0x3a56f8, sdata, render/font]
-      - [0x3a5768, sdata]
-      - [0x3a5770, sdata, ui/uiengine]
-      - [0x3a5788, sdata, ui/uiscreen]
-      - [0x3a57a8, sdata]
-      - [0x3a57b8, sdata, world/world]
-      - [0x3a57d8, sdata]
-      - [0x3a5810, sdata]
-      - [0x3a5a70, sdata, dirtysock/tags]
-      - [0x3a5a94, sdata]
-      - [0x3a5bf4, sdata]  # past .sdata: the rest of the file
+
+      # .sbss (real ELF start 0x3a5c00) would go here, but splat's CommonSegSbss
+      # (a CommonSegBss subclass) isn't handled by configure.py's build_stuff
+      # dispatch, which breaks the ninja build. Leaving this range classified
+      # as .sdata instead -- still correctly generic (non-float) data, just not
+      # perfectly section-accurate for this small remaining tail.
 
   - [0x3B5E60]

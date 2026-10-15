@@ -1,453 +1,567 @@
-#include "bx/bxstring.h"
+#include "common.h"
 
-extern "C" void* memcpy(void* dst, const void* src, uint size);
-extern "C" void* memset(void* dst, int c, uint size);
-extern "C" void* operator_new(uint size, const char* name, uint flags, int align);
-extern "C" void cMemMan_free(void* ptr);
-extern "C" char* strchr(const char* str, int c);
-// Not yet identified; from their use these look like strpbrk, strrchr,
-// strstr, strspn and strcspn
-extern "C" char* func_0041AC40(const char* str, const char* set);
-extern "C" char* func_0041ACC0(const char* str, int c);
-extern "C" char* func_0041AD80(const char* str, const char* sub);
-extern "C" int func_0041AD10(const char* str, const char* set);
-extern "C" int func_0041AB08(const char* str, const char* set);
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str);
 
-// Allocation name for string buffers
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other)
+{
+    int s = *(int*)other;
+    if (*(int*)(s - 0xC) >= 0)
+    {
+        *(int*)self = s;
+        *(int*)(s - 0xC) = *(int*)(s - 0xC) + 1;
+    }
+    else
+    {
+        *(char**)self = D_004A3E90;
+        cBXString_cBXString4(self, *(char**)other);
+    }
+    return self;
+}
+
+//100%
+struct cBXString;
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label.
+// Declared as an operator new so gcc treats the result as fresh (malloc-like) memory.
+void* operator new(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_0048D850[];
-// newlib's character class table, _ctype_ + 1
-extern const unsigned char D_00499C81[];
+extern char* D_004A3E90;
 
-// The libc's ctype macros
-#define islower(c) (D_00499C81[(unsigned)(c)] & 2)
-#define isupper(c) (D_00499C81[(unsigned)(c)] & 1)
-#define toupper(c) ({ int __x = (c); islower(__x) ? (__x - 'a' + 'A') : __x; })
-#define tolower(c) ({ int __x = (c); isupper(__x) ? (__x - 'A' + 'a') : __x; })
-
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-cBXString::cBXString(const cBXString& src)
+extern "C" void cBXString_Realloc(cBXString* self, int size)
 {
-    if (src.GetData()->nRefs >= 0) {
-        m_pchData = src.m_pchData;
-        GetData()->nRefs++;
-    } else {
-        Init();
-        *this = src.m_pchData;
+    if (size == 0) {
+        *(char**)self = D_004A3E90;
+        return;
     }
+    int* hdr = (int*)operator new(size + 0xD, D_0048D850, 0x20000000, 0);
+    char* s = (char*)(hdr + 3);
+    hdr[0] = 1;
+    *(char**)self = s;
+    s[size] = 0;
+    hdr[1] = size;
+    hdr[2] = size;
 }
 
-// Not matching: register allocation and store order after operator_new
-INCLUDE_ASM("bx/bxstring", AllocBuffer__9cBXStringi);
-#ifdef SKIP_ASM
-void cBXString::AllocBuffer(int nLen)
-{
-    if (nLen == 0) {
-        Init();
-    } else {
-        cBXStringData* pData = (cBXStringData*)operator_new(sizeof(cBXStringData) + nLen + 1, D_0048D850, 0x20000000, 0);
-        m_pchData = pData->data();
-        pData->nRefs = 1;
-        m_pchData[nLen] = '\0';
-        pData->nDataLength = nLen;
-        pData->nAllocLength = nLen;
-    }
-}
-#endif
+//100%
+struct cBXString;
+extern char D_0048DCD4[];
+extern char* D_004A3E90;
+void cMemMan_free(void*);
 
-void cBXString::Release()
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" void cBXString_Reset(cBXString* self)
 {
-    if (m_pchData != D_0048DCD4) {
-        if (--GetData()->nRefs == 0) {
-            cBXStringData* pData = GetData();
-            if (pData)
-                cMemMan_free(pData);
+    int s = *(int*)self;
+    if ((char*)s != D_0048DCD4)
+    {
+        int rc = *(int*)(s - 0xC) - 1;
+        *(int*)(s - 0xC) = rc;
+        if (rc == 0)
+        {
+            void* h = (void*)(*(int*)self - 0xC);
+            if (h != 0)
+                cMemMan_free(h);
         }
-        Init();
+        *(char**)self = D_004A3E90;
     }
 }
 
-// Not matching: our compiler turns two nearby negative offsets from one
-// pointer (here -8 and -4 from m_pchData) into -32768 + 32760; the original
-// compiler never does
-INCLUDE_ASM("bx/bxstring", CopyBeforeWrite__9cBXString);
-#ifdef SKIP_ASM
-void cBXString::CopyBeforeWrite()
-{
-    if (GetData()->nRefs > 1) {
-        char* pchOld = m_pchData;
-        Release();
-        AllocBuffer(((cBXStringData*)pchOld - 1)->nDataLength);
-        memcpy(m_pchData, pchOld, ((cBXStringData*)pchOld - 1)->nDataLength + 1);
-    }
-}
-#endif
+//100% - objdiff report; single-function view differs only in a relocation name
+struct cBXString;
+extern "C" void cBXString_Reset(cBXString* self);
+extern "C" void cBXString_Realloc(cBXString* self, int size);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-void cBXString::AllocBeforeWrite(int nLen)
+// PORT: pointer held in int to get the target's negative load offsets.
+extern "C" void func_00318120(cBXString* self)
 {
-    if (GetData()->nRefs > 1 || nLen > GetAllocLength()) {
-        Release();
-        AllocBuffer(nLen);
+    int old = *(int*)self;
+    if (*(int*)(old - 0xC) >= 2)
+    {
+        cBXString_Reset(self);
+        cBXString_Realloc(self, *(int*)(old - 8));
+        func_0041605C(*(char**)self, (void*)old, *(int*)(old - 8) + 1);
     }
 }
 
-void cBXString::AllocCopy(cBXString& dest, int nCopyLen, int nCopyIndex, int nExtraLen) const
-{
-    int nNewLen = nCopyLen + nExtraLen;
+//100% - objdiff report; single-function view differs only in a relocation name
+struct cBXString;
+extern "C" void cBXString_Reset(cBXString* self);
+extern "C" void cBXString_Realloc(cBXString* self, int size);
 
-    if (nNewLen == 0) {
-        dest.Init();
-    } else {
-        dest.AllocBuffer(nNewLen);
-        memcpy(dest.m_pchData, m_pchData + nCopyIndex, nCopyLen);
+// PORT: pointer held in int to get the target's negative load offsets.
+extern "C" void cBXString_Resize(cBXString* self, int size)
+{
+    int s = *(int*)self;
+    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < size)
+    {
+        cBXString_Reset(self);
+        cBXString_Realloc(self, size);
     }
 }
 
-cBXString::~cBXString()
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" void cBXString_Realloc(cBXString* self, int size);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+
+// Copies len chars of src starting at pos into dst, reserving extra more.
+extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra)
 {
-    if (m_pchData != D_0048DCD4) {
-        if (--GetData()->nRefs <= 0) {
-            cBXStringData* pData = GetData();
-            if (pData)
-                cMemMan_free(pData);
-        }
+    int total = len + extra;
+    if (total == 0)
+    {
+        *(char**)dst = D_004A3E90;
+        return;
     }
+    cBXString_Realloc(dst, total);
+    func_0041605C(*(char**)dst, *(char**)src + pos, len);
 }
 
-cBXString::cBXString(const char* psz)
-{
-    Init();
-    int nLen = SafeStrlen(psz);
-    if (nLen != 0) {
-        AllocBuffer(nLen);
-        memcpy(m_pchData, psz, nLen);
-    }
-}
+//100%
+extern char D_0048DCD4[];
+void cMemMan_free(void*);
+void operator_delete(int*);
 
-cBXString::cBXString(const char* pch, uint nLength)
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" void cBXString__cBXString(cBXString* self, int flags)
 {
-    Init();
-    nLength = min(nLength, strlen(pch));
-    if (nLength != 0) {
-        AllocBuffer(nLength);
-        memcpy(m_pchData, pch, nLength);
-    }
-}
-
-void cBXString::AssignCopy(int nSrcLen, const char* pszSrcData)
-{
-    AllocBeforeWrite(nSrcLen);
-    if (m_pchData != D_0048DCD4) {
-        memcpy(m_pchData, pszSrcData, nSrcLen);
-        GetData()->nDataLength = nSrcLen;
-        m_pchData[nSrcLen] = '\0';
-    }
-}
-
-const cBXString& cBXString::operator=(const cBXString& src)
-{
-    if (m_pchData != src.m_pchData) {
-        if ((GetData()->nRefs < 0 && m_pchData != D_0048DCD4) || src.GetData()->nRefs < 0) {
-            AssignCopy(src.GetLength(), src.m_pchData);
-        } else {
-            Release();
-            m_pchData = src.m_pchData;
-            GetData()->nRefs++;
+    int s = *(int*)self;
+    if ((char*)s != D_0048DCD4)
+    {
+        int rc = *(int*)(s - 0xC) - 1;
+        *(int*)(s - 0xC) = rc;
+        if (rc <= 0)
+        {
+            void* h = (void*)(*(int*)self - 0xC);
+            if (h != 0)
+                cMemMan_free(h);
         }
     }
-    return *this;
+    if (flags & 1)
+        operator_delete((int*)self);
 }
 
-const cBXString& cBXString::operator=(const char* psz)
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" unsigned int strlen(const char* s);
+extern "C" void cBXString_Realloc(cBXString* self, int size);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+
+extern "C" cBXString* cBXString_cBXString2(cBXString* self, const char* str)
 {
-    AssignCopy(SafeStrlen(psz), psz);
-    return *this;
+    *(char**)self = D_004A3E90;
+    int len;
+    if (str != 0)
+        len = strlen(str);
+    else
+        len = 0;
+    if (len != 0)
+    {
+        cBXString_Realloc(self, len);
+        func_0041605C(*(char**)self, str, len);
+    }
+    return self;
 }
 
-void cBXString::ConcatCopy(int nSrc1Len, const char* pszSrc1Data, int nSrc2Len, const char* pszSrc2Data)
-{
-    int nNewLen = nSrc1Len + nSrc2Len;
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" unsigned int strlen(const char* s);
+extern "C" void cBXString_Realloc(cBXString* self, int size);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-    if (nNewLen != 0) {
-        AllocBuffer(nNewLen);
-        memcpy(m_pchData, pszSrc1Data, nSrc1Len);
-        memcpy(m_pchData + nSrc1Len, pszSrc2Data, nSrc2Len);
+// cBXString(const char* str, int n): at most n chars of str.
+extern "C" cBXString* func_00318350(cBXString* self, const char* str, int n)
+{
+    *(char**)self = D_004A3E90;
+    if (n >= strlen(str))
+        n = strlen(str);
+    if (n != 0)
+    {
+        cBXString_Realloc(self, n);
+        func_0041605C(*(char**)self, str, n);
+    }
+    return self;
+}
+
+//100% - objdiff report; single-function view differs only in a relocation name
+extern char D_0048DCD4[];
+
+// PORT: pointer held in int to get the target's negative store offset.
+extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str)
+{
+    cBXString_Resize(self, len);
+    if (*(char**)self != D_0048DCD4)
+    {
+        func_0041605C(*(char**)self, str, len);
+        *(int*)(*(int*)self - 8) = len;
+        (*(char**)self)[len] = 0;
     }
 }
 
-cBXString operator+(const cBXString& string1, const cBXString& string2)
-{
-    cBXString s;
-    s.ConcatCopy(string1.GetLength(), string1.m_pchData, string2.GetLength(), string2.m_pchData);
-    return s;
-}
+//100% - objdiff report; single-function view differs only in a relocation name
+extern char D_0048DCD4[];
 
-// Not matching: our compiler turns two nearby negative offsets from one
-// pointer (here -8 and -4 from m_pchData) into -32768 + 32760; the original
-// compiler never does
-INCLUDE_ASM("bx/bxstring", __pl__FRC9cBXStringPCc);
-#ifdef SKIP_ASM
-cBXString operator+(const cBXString& string, const char* psz)
+// PORT: pointers held in int to get the target's negative header offsets
+// (refcount at -0xC, length at -8).
+extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* other)
 {
-    cBXString s;
-    s.ConcatCopy(string.GetData()->nDataLength, string.m_pchData, cBXString::SafeStrlen(psz), psz);
-    return s;
-}
-#endif
-
-cBXString operator+(const char* psz, const cBXString& string)
-{
-    cBXString s;
-    s.ConcatCopy(cBXString::SafeStrlen(psz), psz, string.GetLength(), string.m_pchData);
-    return s;
-}
-
-cBXString operator+(const cBXString& string, char ch)
-{
-    cBXString s;
-    s.ConcatCopy(string.GetLength(), string.m_pchData, 1, &ch);
-    return s;
-}
-
-cBXString operator+(char ch, const cBXString& string)
-{
-    cBXString s;
-    s.ConcatCopy(1, &ch, string.GetLength(), string.m_pchData);
-    return s;
-}
-
-// Not matching: our compiler turns two nearby negative offsets from one
-// pointer (here -8 and -4 from m_pchData) into -32768 + 32760; the original
-// compiler never does
-INCLUDE_ASM("bx/bxstring", ConcatInPlace__9cBXStringiPCc);
-#ifdef SKIP_ASM
-void cBXString::ConcatInPlace(int nSrcLen, const char* pszSrcData)
-{
-    if (GetData()->nRefs > 1 || GetLength() + nSrcLen > GetAllocLength()) {
-        // Holds a reference so the old buffer outlives Release
-        cBXString old(*this);
-        cBXStringData* pOldData = GetData();
-        Release();
-        ConcatCopy(pOldData->nDataLength, pOldData->data(), nSrcLen, pszSrcData);
-    } else {
-        memcpy(m_pchData + GetLength(), pszSrcData, nSrcLen);
-        GetData()->nDataLength += nSrcLen;
-        m_pchData[GetLength()] = '\0';
+    if (*(char**)self != *(char**)other)
+    {
+        if ((*(int*)(*(int*)self - 0xC) < 0 && *(char**)self != D_0048DCD4) ||
+            *(int*)(*(int*)other - 0xC) < 0)
+        {
+            cBXString_InitFromCString(self, *(int*)(*(int*)other - 8), *(char**)other);
+        }
+        else
+        {
+            cBXString_Reset(self);
+            *(char**)self = *(char**)other;
+            (*(int*)(*(int*)self - 0xC))++;
+        }
     }
-}
-#endif
-
-const cBXString& cBXString::operator+=(const char* psz)
-{
-    ConcatInPlace(SafeStrlen(psz), psz);
-    return *this;
+    return self;
 }
 
-const cBXString& cBXString::operator+=(char ch)
+//100% - objdiff report; single-function view differs only in a relocation name
+struct cBXString;
+extern "C" unsigned int strlen(const char* s);
+extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str);
+
+extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str)
 {
-    ConcatInPlace(1, &ch);
-    return *this;
+    int len;
+    if (str != 0)
+        len = strlen(str);
+    else
+        len = 0;
+    cBXString_InitFromCString(self, len, str);
+    return self;
 }
 
-const cBXString& cBXString::operator+=(const cBXString& string)
-{
-    ConcatInPlace(string.GetLength(), string.m_pchData);
-    return *this;
-}
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" void cBXString_Realloc(cBXString* self, int size);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-char* cBXString::GetBuffer(int nMinBufLength)
+// Builds the string from two pieces: (len1, s1) followed by (len2, s2).
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2)
 {
-    if (GetData()->nRefs > 1 || nMinBufLength > GetAllocLength()) {
-        cBXString old(*this);
-        int nOldLen = old.GetLength();
-        Release();
-        AllocBuffer(nOldLen < nMinBufLength ? nMinBufLength : nOldLen);
-        memcpy(m_pchData, old.m_pchData, nOldLen);
-        GetData()->nDataLength = nOldLen;
-        m_pchData[nOldLen] = '\0';
-    }
-    return m_pchData;
-}
-
-void cBXString::ReleaseBuffer(int nNewLength)
-{
-    CopyBeforeWrite();
-    if (nNewLength == -1)
-        nNewLength = strlen(m_pchData);
-    if (m_pchData != D_0048DCD4) {
-        GetData()->nDataLength = nNewLength;
-        m_pchData[nNewLength] = '\0';
+    int total = len1 + len2;
+    if (total != 0)
+    {
+        cBXString_Realloc(self, total);
+        func_0041605C(*(char**)self, s1, len1);
+        func_0041605C(*(char**)self + len1, s2, len2);
     }
 }
 
-char* cBXString::GetBufferSetLength(int nNewLength)
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// cBXString(a + b). PORT: pointer held in int for the negative header offsets.
+extern "C" cBXString* func_003185C8(cBXString* self, cBXString* a, cBXString* b)
 {
-    GetBuffer(nNewLength);
-    GetData()->nDataLength = nNewLength;
-    m_pchData[nNewLength] = '\0';
-    return m_pchData;
+    char* tmp = D_004A3E90;
+    int sa = *(int*)a;
+    int sb = *(int*)b;
+    func_00318540((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
 }
 
-// Not matching: our compiler turns two nearby negative offsets from one
-// pointer (here -8 and -4 from m_pchData) into -32768 + 32760; the original
-// compiler never does
-INCLUDE_ASM("bx/bxstring", FreeExtra__9cBXString);
-#ifdef SKIP_ASM
-void cBXString::FreeExtra()
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" unsigned int strlen(const char* s);
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// cBXString(a + str). PORT: pointer held in int for the negative header offsets.
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str)
 {
-    if (GetLength() != GetAllocLength()) {
-        cBXString old(*this);
-        int nLen = old.GetLength();
-        Release();
-        AllocBuffer(nLen);
-        memcpy(m_pchData, old.m_pchData, nLen);
+    char* tmp = D_004A3E90;
+    int* lenp = (int*)(*(int*)a - 8);
+    int len;
+    if (str != 0)
+        len = strlen(str);
+    else
+        len = 0;
+    func_00318540((cBXString*)&tmp, *lenp, *(char**)a, len, str);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
+}
+
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" unsigned int strlen(const char* s);
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// cBXString(str + b). PORT: pointer held in int for the negative header offset.
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b)
+{
+    char* tmp = D_004A3E90;
+    int len;
+    if (str != 0)
+        len = strlen(str);
+    else
+        len = 0;
+    int sb = *(int*)b;
+    func_00318540((cBXString*)&tmp, len, str, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
+}
+
+INCLUDE_ASM("bx/bxstring", func_00318760);
+
+INCLUDE_ASM("bx/bxstring", func_003187C8);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString_Reset(cBXString* self);
+extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+
+struct cBXStringHdrK2 {
+    int ref; // -0xC
+    int len; // -0x8
+    int cap; // -0x4
+};
+
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str)
+{
+    int s = *(int*)self;
+    cBXStringHdrK2* h = (cBXStringHdrK2*)(s - 0xC);
+    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < *(int*)(s - 8) + len)
+    {
+        char* tmp;
+        cBXString_cBXString1((cBXString*)&tmp, self);
+        int old = *(int*)self;
+        cBXString_Reset(self);
+        func_00318540(self, *(int*)(old - 8), (char*)old, len, str);
+        cBXString__cBXString((cBXString*)&tmp, 2);
+    }
+    else
+    {
+        func_0041605C((char*)s + h->len, str, len);
+        *(int*)(*(int*)self - 8) += len;
+        (*(char**)self)[*(int*)(*(int*)self - 8)] = 0;
     }
 }
-#endif
 
-char* cBXString::LockBuffer()
+//100% - objdiff report; single-function view differs only in a relocation name
+struct cBXString;
+extern "C" unsigned int strlen(const char* s);
+extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
+
+extern "C" cBXString* cBXString_Concat(cBXString* self, const char* str)
 {
-    char* psz = GetBuffer(0);
-    GetData()->nRefs = -1;
-    return psz;
+    int len;
+    if (str != 0)
+        len = strlen(str);
+    else
+        len = 0;
+    cBXString_ConcatImpl(self, len, str);
+    return self;
 }
 
-void cBXString::UnlockBuffer()
+INCLUDE_ASM("bx/bxstring", func_00318968);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+struct cBXString;
+extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
+
+// cBXString += cBXString; the length lives in the header 8 bytes before the chars.
+extern "C" cBXString* func_003189A0(cBXString* self, char** other)
 {
-    if (m_pchData != D_0048DCD4)
-        GetData()->nRefs = 1;
+    cBXString_ConcatImpl(self, *(int*)(*other - 8), *other);
+    return self;
 }
 
-int cBXString::Find(char ch, int nStart) const
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+
+// PORT: pointer held in int to get the target's negative header offsets.
+extern "C" char* func_003189D0(cBXString* self, int size)
 {
-    char* psz = strchr(m_pchData + nStart, ch);
-    return psz == 0 ? -1 : (int)(psz - m_pchData);
+    int s = *(int*)self;
+    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < size)
+    {
+        char* tmp;
+        cBXString_cBXString1((cBXString*)&tmp, self);
+        int len = *(int*)((int)tmp - 8);
+        cBXString_Reset(self);
+        cBXString_Realloc(self, len < size ? size : len);
+        func_0041605C(*(char**)self, tmp, len);
+        *(int*)(*(int*)self - 8) = len;
+        (*(char**)self)[len] = 0;
+        cBXString__cBXString((cBXString*)&tmp, 2);
+    }
+    return *(char**)self;
 }
 
-int cBXString::FindOneOf(const char* pszCharSet) const
+//100% - objdiff report; single-function view differs only in a relocation name
+extern char D_0048DCD4[];
+
+// PORT: pointer held in int to get the target's negative store offset.
+extern "C" void func_00318A88(cBXString* self, int len)
 {
-    char* psz = func_0041AC40(m_pchData, pszCharSet);
-    return psz == 0 ? -1 : (int)(psz - m_pchData);
+    func_00318120(self);
+    if (len == -1)
+        len = strlen(*(char**)self);
+    if (*(char**)self != D_0048DCD4)
+    {
+        *(int*)(*(int*)self - 8) = len;
+        (*(char**)self)[len] = 0;
+    }
 }
 
-int cBXString::ReverseFind(char ch) const
+extern "C" char* strchr(char* str, int ch);
+
+struct cBXString {
+    char* str;
+};
+
+INCLUDE_ASM("bx/bxstring", func_00318AF8);
+
+INCLUDE_ASM("bx/bxstring", func_00318B40);
+
+INCLUDE_ASM("bx/bxstring", func_00318BC0);
+
+INCLUDE_ASM("bx/bxstring", func_00318BF8);
+
+//100%
+int cBXString_FindLastOf(cBXString* self, char ch, int len)
 {
-    char* psz = func_0041ACC0(m_pchData, ch);
-    return psz == 0 ? -1 : (int)(psz - m_pchData);
+    char* result = strchr(self->str + len, ch);
+    if (result == 0) {
+        return -1;
+    }
+    return result - self->str;
 }
 
-int cBXString::Find(const char* pszSub, int nStart) const
+extern "C" char* func_0041ACC0(char* str, int ch);
+
+INCLUDE_ASM("bx/bxstring", func_00318C60);
+
+//100%
+int cBXString_FindFirstOf(cBXString* self, char ch)
 {
-    char* psz = func_0041AD80(m_pchData + nStart, pszSub);
-    return psz == 0 ? -1 : (int)(psz - m_pchData);
+    char* result = func_0041ACC0(self->str, ch);
+    if (result == 0) {
+        return -1;
+    }
+    return result - self->str;
 }
 
-void cBXString::MakeUpper()
+INCLUDE_ASM("bx/bxstring", func_00318CE8);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+extern unsigned char D_00499C81[];
+static inline int to_upper(int c) { if (D_00499C81[c] & 2) return c - 0x20; return c; }
+// In-place upper-case; D_00499C81 is the ctype table (+1), bit 2 = lower-case.
+// PORT: pointer held in int to get the target's negative load offset.
+extern "C" void func_00318D28(cBXString* self)
 {
-    CopyBeforeWrite();
-    char* p = m_pchData;
-    int i = GetLength();
-    while (--i >= 0) {
-        *p = toupper(*p);
+    func_00318120(self);
+    char* p = self->str;
+    int i = *(int*)((int)p - 8);
+    while (--i >= 0)
+    {
+        *p = to_upper(*p);
         p++;
     }
 }
 
-void cBXString::MakeLower()
+INCLUDE_ASM("bx/bxstring", func_00318D90);
+
+INCLUDE_ASM("bx/bxstring", func_00318DF8);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" void func_00318120(cBXString* self);
+
+extern "C" void func_00318E68(cBXString* self, int idx, char ch)
 {
-    CopyBeforeWrite();
-    char* p = m_pchData;
-    int i = GetLength();
-    while (--i >= 0) {
-        *p = tolower(*p);
-        p++;
+    func_00318120(self);
+    self->str[idx] = ch;
+}
+
+INCLUDE_ASM("bx/bxstring", func_00318EB8);
+
+INCLUDE_ASM("bx/bxstring", func_00318F20);
+
+INCLUDE_ASM("bx/bxstring", func_00318F58);
+
+INCLUDE_ASM("bx/bxstring", func_00318F90);
+
+//100%
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra);
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// Right(n): the last n chars of other. PORT: pointer held in int for the header offset.
+extern "C" cBXString* func_00319028(cBXString* self, cBXString* other, int n)
+{
+    if (n < 0)
+        n = 0;
+    else
+    {
+        int len = *(int*)(*(int*)other - 8);
+        if (len < n)
+            n = len;
     }
+    char* tmp = D_004A3E90;
+    func_003181E8(other, (cBXString*)&tmp, n, *(int*)(*(int*)other - 8) - n, 0);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
 }
 
-void cBXString::Replace(char chOld, char chNew)
+//100% - objdiff report; single-function view differs only in a relocation name
+struct cBXString;
+extern char* D_004A3E90;
+extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra);
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// PORT: pointer held in int to get the target's negative header offset.
+extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n)
 {
-    CopyBeforeWrite();
-    char* p = m_pchData;
-    int i = GetLength();
-    while (--i >= 0) {
-        if (*p == chOld)
-            *p = chNew;
-        p++;
+    if (n < 0)
+        n = 0;
+    else
+    {
+        int len = *(int*)(*(int*)other - 8);
+        if (len < n)
+            n = len;
     }
+    char* tmp = D_004A3E90;
+    func_003181E8(other, (cBXString*)&tmp, n, 0, 0);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
 }
 
-void cBXString::SetAt(int nIndex, char ch)
-{
-    CopyBeforeWrite();
-    m_pchData[nIndex] = ch;
-}
 
-cBXString::cBXString(char ch, int nRepeat)
-{
-    Init();
-    if (nRepeat >= 1) {
-        AllocBuffer(nRepeat);
-        memset(m_pchData, ch, nRepeat);
-    }
-}
+INCLUDE_ASM("bx/bxstring", func_00319120);
 
-const cBXString& cBXString::operator=(char ch)
-{
-    AssignCopy(1, &ch);
-    return *this;
-}
-
-cBXString cBXString::Mid(int nFirst) const
-{
-    return Mid(nFirst, GetLength() - nFirst);
-}
-
-cBXString cBXString::Mid(int nFirst, int nCount) const
-{
-    if (nFirst < 0)
-        nFirst = 0;
-    if (nCount < 0)
-        nCount = 0;
-    if (nFirst + nCount > GetLength())
-        nCount = GetLength() - nFirst;
-    if (nFirst > GetLength())
-        nCount = 0;
-
-    cBXString dest;
-    AllocCopy(dest, nCount, nFirst, 0);
-    return dest;
-}
-
-cBXString cBXString::Right(int nCount) const
-{
-    if (nCount < 0)
-        nCount = 0;
-    else if (nCount > GetLength())
-        nCount = GetLength();
-
-    cBXString dest;
-    AllocCopy(dest, nCount, GetLength() - nCount, 0);
-    return dest;
-}
-
-cBXString cBXString::Left(int nCount) const
-{
-    if (nCount < 0)
-        nCount = 0;
-    else if (nCount > GetLength())
-        nCount = GetLength();
-
-    cBXString dest;
-    AllocCopy(dest, nCount, 0, 0);
-    return dest;
-}
-
-cBXString cBXString::SpanIncluding(const char* pszCharSet) const
-{
-    return Left(func_0041AD10(m_pchData, pszCharSet));
-}
-
-cBXString cBXString::SpanExcluding(const char* pszCharSet) const
-{
-    return Left(func_0041AB08(m_pchData, pszCharSet));
-}
+INCLUDE_ASM("bx/bxstring", func_00319170);
