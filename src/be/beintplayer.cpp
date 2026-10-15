@@ -422,9 +422,133 @@ extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
     return 0;
 }
 
-INCLUDE_ASM("be/beintplayer", func_001466A0);
+struct sMode_0043D950
+{
+    char pad_0x00[0x54];
+    int kind; // 0x54
+    char pad_0x58[0x64 - 0x58];
+};
+extern sMode_0043D950 D_0043D950[];
 
-INCLUDE_ASM("be/beintplayer", func_001468B0);
+// PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
+extern "C" int func_001466A0(void* self, int index)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    signed char c = D_00534FE0[id].mCharID;
+    int kind = D_0043D950[D_005305B0[0x10]].kind;
+    if (((signed char*)D_005305B0)[0x48] == 5) {
+        switch (kind) {
+        case 0:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 6) & 1;
+        }
+        case 1:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 7) & 1;
+        }
+        case 2:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 8) & 1;
+        }
+        }
+    } else {
+        switch (kind) {
+        case 0:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 9) & 1;
+        }
+        case 1:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 10) & 1;
+        }
+        case 2:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 11) & 1;
+        }
+        }
+    }
+    return 0;
+}
+
+// PORT: 64-bit `long` flag word (8 bytes on EE); use uint64_t off-PS2.
+struct sProfBits68B0
+{
+    unsigned long low : 6;
+    unsigned long b6 : 1;
+    unsigned long b7 : 1;
+    unsigned long b8 : 1;
+    unsigned long b9 : 1;
+    unsigned long b10 : 1;
+    unsigned long b11 : 1;
+    unsigned long rest : 52;
+};
+
+extern "C" void func_001468B0(void* self, int index, int c, int kind, int flag, int value)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    if (flag) {
+        switch (kind) {
+        case 0:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            ((sProfBits68B0*)(p + 0x278))->b6 = value;
+            break;
+        }
+        case 1:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            ((sProfBits68B0*)(p + 0x278))->b7 = value;
+            break;
+        }
+        case 2:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            ((sProfBits68B0*)(p + 0x278))->b8 = value;
+            break;
+        }
+        }
+    } else {
+        switch (kind) {
+        case 0:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            ((sProfBits68B0*)(p + 0x278))->b9 = value;
+            break;
+        }
+        case 1:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            ((sProfBits68B0*)(p + 0x278))->b10 = value;
+            break;
+        }
+        case 2:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            ((sProfBits68B0*)(p + 0x278))->b11 = value;
+            break;
+        }
+        }
+    }
+}
 
 INCLUDE_ASM("be/beintplayer", func_00146A70);
 
