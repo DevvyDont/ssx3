@@ -3279,7 +3279,39 @@ extern "C" void func_001A9710(void* self, int a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A97B8);
+//100%
+int func_001A94E0_jt(void*, void*, int) __asm__("func_001A94E0");
+int func_001A9438_jt(void*, void*, int) __asm__("func_001A9438");
+int func_001A9268_jt(void*, void*, int) __asm__("func_001A9268");
+int func_001A92D8_jt(void*, void*, int) __asm__("func_001A92D8");
+int func_001A9578_jt(void*, void*, int) __asm__("func_001A9578");
+int func_001A9638_jt(void*, void*, int) __asm__("func_001A9638");
+int func_001A9668_jt(void*, void*, int) __asm__("func_001A9668");
+int func_001A9710_jt(void*, void*, int) __asm__("func_001A9710");
+int func_001A93D0_jt(void*, void*, int) __asm__("func_001A93D0");
+
+extern "C" int func_001A97B8(void* self, void* msg, int a2)
+{
+    if (msg == *(void**)((char*)self + 0x69C))
+        return func_001A94E0_jt(self, msg, a2);
+    switch (*(int*)((char*)msg + 0x18)) {
+    case 0x832:
+        return func_001A9438_jt(self, msg, a2);
+    case 0x833:
+        return func_001A9268_jt(self, msg, a2);
+    case 0x834:
+        return func_001A92D8_jt(self, msg, a2);
+    case 0x837:
+        return func_001A9578_jt(self, msg, a2);
+    case 0x836:
+        return func_001A9638_jt(self, msg, a2);
+    case 0x83D:
+        return func_001A9668_jt(self, msg, a2);
+    case 0x83E:
+        return func_001A9710_jt(self, msg, a2);
+    }
+    return func_001A93D0_jt(self, msg, a2);
+}
 
 //100%
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -8680,7 +8712,41 @@ extern "C" void func_001B5CF8(void* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B5D58);
+//100%
+int func_001B5CF8_jt(void*, void*, int) __asm__("func_001B5CF8");
+int func_001B55B0_jt(void*, void*, int) __asm__("func_001B55B0");
+int func_001B5740_jt(void*, void*, int) __asm__("func_001B5740");
+int func_001B5830_jt(void*, void*, int) __asm__("func_001B5830");
+int func_001B5A58_jt(void*, void*, int) __asm__("func_001B5A58");
+int func_001B4C40_jt(void*, void*, int) __asm__("func_001B4C40");
+int func_001B4C00_jt(void*, void*, int) __asm__("func_001B4C00");
+int func_001B5BD8_jt(void*, void*, int) __asm__("func_001B5BD8");
+int func_001A97B8_jt(void*, void*, int) __asm__("func_001A97B8");
+
+extern "C" int func_001B5D58(void* self, void* msg, int a2)
+{
+    switch (*(int*)((char*)msg + 0x18)) {
+    case 0x81C:
+        return func_001B5CF8_jt(self, msg, a2);
+    case 0x80E:
+        return func_001B55B0_jt(self, msg, a2);
+    case 0x81B:
+        return func_001B5740_jt(self, msg, a2);
+    case 0x81A:
+        return func_001B5830_jt(self, msg, a2);
+    case 0x82C:
+        return func_001B5A58_jt(self, msg, a2);
+    case 0x840:
+    case 0x841:
+    case 0x842:
+        return func_001B4C40_jt(self, msg, a2);
+    case 0x843:
+        return func_001B4C00_jt(self, msg, a2);
+    case 0x844:
+        return func_001B5BD8_jt(self, msg, a2);
+    }
+    return func_001A97B8_jt(self, msg, a2);
+}
 
 //100%
 int GetHashValue32(char* str);
