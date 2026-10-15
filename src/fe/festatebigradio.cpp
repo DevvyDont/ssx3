@@ -183,7 +183,50 @@ extern "C" void func_00193C00(void* self, void* popup)
     func_001DA510(popup, 3, GetHashValue32(D_0045FE98), 1);
 }
 
-INCLUDE_ASM("fe/festatebigradio", func_00193CF8);
+//100%
+extern int D_004A1A70;
+extern void* D_004A33CC;
+extern "C" void func_001927B0(void* p);
+extern "C" void func_00265458(void* self, int id);
+
+static inline int isOn00193CF8()
+{
+    return D_004A1A70 == 1;
+}
+
+extern "C" int func_00193CF8(char* self, unsigned char* item, int kind)
+{
+    char* a = self + 0x6D0;
+    char* list;
+    int first = 0;
+    if (*(unsigned char**)a == item) {
+        list = a;
+        first = 1;
+    } else {
+        list = self + 0x704;
+        if (*(unsigned char**)list != item)
+            list = 0;
+    }
+    switch (kind) {
+    case 8:
+    case 9:
+        return 0x100;
+    case 5:
+        if (isOn00193CF8() && first)
+            func_00265458(D_004A33CC, item[0x95]);
+        func_001927B0(list);
+        return 0x101;
+    case 6:
+        if (*(int*)(self + 0x6F8) == 0 || *(int*)(self + 0x72C) == 0)
+            return 1;
+        return 0x101;
+    case 7:
+        if (isOn00193CF8())
+            return 0;
+        break;
+    }
+    return 0x101;
+}
 
 INCLUDE_ASM("fe/festatebigradio", func_00193DE0);
 
