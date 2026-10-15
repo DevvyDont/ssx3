@@ -1,7 +1,16 @@
 # SSX 3 PC port
 
-This directory is the start of a native PC build of SSX 3. Nothing from the game runs yet. It holds the
-platform layer that the decompiled code will run on:
+Everything under `port/` is licensed under the GNU GPL v3 or later ([LICENSE](LICENSE)), because it links
+PS2Recomp's GPL-3 runtime. The decompilation outside `port/` keeps its own license.
+
+This directory is the start of a native PC build of SSX 3. It holds two things:
+
+- **`recomp/`** builds the game on the [PS2Recomp](https://github.com/ran-j/PS2Recomp) runtime: the retail
+  ELF is translated to C++ at build time and linked against a patched 32-bit runtime. This boots the game
+  today. See [recomp/README.md](recomp/README.md).
+- **`src/`** is the native platform layer that the decompiled code will run on. It doesn't run game code yet.
+
+The native platform layer:
 
 - **`src/ps2os/eemem`** maps EE memory at its PS2 addresses inside a 32-bit process: main RAM from
   `0x00100000`, its uncached mirrors at `0x20100000` and `0x30100000`, and the scratchpad at `0x70000000`.
