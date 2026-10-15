@@ -398,7 +398,82 @@ extern "C" void func_0013AD20(void* self)
     *(int*)(s + 0x40) = 0;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013ADC0);
+extern "C" sVec4HP func_0013BD80(void* self, sVec4HP* p);
+extern "C" float func_0031C228(float); // atan
+
+// PORT: PS2-only VU0 inline asm (3D cross product, w = 0).
+static inline sVec4HP vu0Cross_13ADC0(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product, by-value first operand).
+static inline float vu0DotV_13ADC0(sVec4HP a, const sVec4HP& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// atan2(y, x) built on a single-argument atan.
+static inline float Atan2_13ADC0(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        return y >= 0.0f ? 1.5707964f : -1.5707964f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            r += 3.1415927f;
+        else
+            r -= 3.1415927f;
+    }
+    return r;
+}
+
+static inline float Clamp_13ADC0(float x, float lo, float hi)
+{
+    return (lo <= x) ? (x <? hi) : lo;
+}
+
+// Signed angle (clamped to +-45 degrees) between the rider's velocity at +0x1B0 and the target direction p.
+extern "C" void func_0013ADC0(char* self, sVec4HP* p)
+{
+    sVec4HP v = func_0013BD80(self, p);
+    sVec4HP c = vu0Cross_13ADC0(v, *p);
+    char* rider = *(char**)(self + 0x50);
+    *(float*)(self + 0x1C) = Atan2_13ADC0(vu0DotV_13ADC0(*(sVec4HP*)(rider + 0x1B0), c),
+                                          vu0DotV_13ADC0(*(sVec4HP*)(rider + 0x1B0), *p));
+    float lim = 0.7853982448577881f;
+    *(float*)(self + 0x1C) = Clamp_13ADC0(*(float*)(self + 0x1C), -lim, lim);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013AF28);
 
