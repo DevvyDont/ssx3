@@ -281,7 +281,57 @@ extern "C" void func_0017D688(sDebugFE17D688* self)
 
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 
-INCLUDE_ASM("fe/debugfe", func_0017DA30);
+//100%
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025C610(void* self);
+extern "C" void func_002CC3B8(void* a, void* b);
+
+extern "C" void func_0017DA30(char* self, int a1)
+{
+    *(int*)(self + 0x1C14) = a1;
+    switch (*(int*)(self + 0x4)) {
+    case 2:
+        *(int*)(self + 0x4) = 0x12;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 4:
+        *(int*)(self + 0x4) = 0x14;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 5:
+        if (*(int*)((char*)D_004A28A8 + 0x74)) {
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(const char**)((char*)D_004A28A8 + 0xC4));
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)((char*)D_004A28A8 + 0xC8));
+            func_0025C610(D_004A3028);
+            break;
+        }
+        *(int*)(self + 0x4) = 0x15;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 7:
+        *(int*)(self + 0x4) = 0x16;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 8:
+        *(int*)(self + 0x4) = 0x16;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 9:
+        *(int*)(self + 0x4) = 0x16;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 11:
+        *(int*)(self + 0x4) = 0x17;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 13:
+        *(int*)(self + 0x4) = 0x18;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    }
+}
 
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 
