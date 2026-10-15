@@ -1101,7 +1101,29 @@ extern "C" void func_0027A860(void* self, int online, int intro)
     func_0028E8C0(func_0028B180(), 0x14, 1);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027A9F0);
+//100%
+int func_00279148_jt(void* self, int i, int a) __asm__("func_00279148");
+void func_00279070_jt(void* self, int i, int a, int b) __asm__("func_00279070");
+
+extern "C" int func_0027A9F0(void* self)
+{
+    int r = 0;
+    switch (func_00279148_jt(self, 1, 0)) {
+    case 12: case 18:
+        r = 3;
+        break;
+    case 13: case 19:
+        r = 2;
+        break;
+    case 14: case 20:
+        r = 1;
+        break;
+    case 15: case 16: case 17:
+        break;
+    }
+    func_00279070_jt(self, 1, r, 1);
+    return r != 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: the unit defines func_00279148 as void, but it returns func_00276998's

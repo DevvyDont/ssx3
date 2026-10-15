@@ -10978,7 +10978,30 @@ extern "C" void func_001BA9F8(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001BAA88);
+//100%
+int func_001BB158_jt(void*, void*, int) __asm__("func_001BB158");
+int func_001BB0E8_jt(void*, void*, int) __asm__("func_001BB0E8");
+int func_001BB098_jt(void*, void*, int) __asm__("func_001BB098");
+int func_001BADE8_jt(void*, void*, int) __asm__("func_001BADE8");
+int func_001BAED8_jt(void*, void*, int) __asm__("func_001BAED8");
+int func_001A97B8_jt(void*, void*, int) __asm__("func_001A97B8");
+
+extern "C" int func_001BAA88(void* self, void* msg, int a2)
+{
+    switch (*(int*)((char*)msg + 0x18)) {
+    case 0x81F:
+        return func_001BB158_jt(self, msg, a2);
+    case 0x821:
+        return func_001BB0E8_jt(self, msg, a2);
+    case 0x822:
+        return func_001BB098_jt(self, msg, a2);
+    case 0x80E:
+        return func_001BADE8_jt(self, msg, a2);
+    case 0x82C:
+        return func_001BAED8_jt(self, msg, a2);
+    }
+    return func_001A97B8_jt(self, msg, a2);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

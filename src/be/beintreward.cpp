@@ -312,7 +312,33 @@ extern "C" int func_00156EE0(void* self, int a1, int a2)
 
 INCLUDE_ASM("be/beintreward", func_00157080);
 
-INCLUDE_ASM("be/beintreward", func_00157210);
+//100%
+int func_001572B0(void* self);
+int func_001572D0(void* self);
+int func_001572F0(void* self);
+int func_00157310(void* self);
+int func_00157330(void* self);
+
+extern "C" int func_00157210(void* self, int kind)
+{
+    switch (kind) {
+    case 3:
+        return func_001572B0(self);
+    case 4:
+        return func_001572D0(self);
+    case 5:
+        return func_001572F0(self);
+    case 6:
+        return func_00157330(self);
+    case 7:
+        return func_00157310(self);
+    case 8:
+        return 0x14;
+    case 9:
+        break;
+    }
+    return 0;
+}
 
 extern "C" void* func_0015A478(void* self);
 
