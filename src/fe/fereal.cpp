@@ -653,7 +653,33 @@ extern "C" void* func_001A2E20(void* self)
     return self;
 }
 
-INCLUDE_ASM("fe/fereal", func_001A2E58);
+//100%
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void* snd, int a);
+
+extern "C" void func_001A2E58(void* self, int which)
+{
+    switch (which) {
+    case 1:
+        func_00294F78(func_0028B180(), 2);
+        break;
+    case 2:
+        func_00294F78(func_0028B180(), 3);
+        break;
+    case 3:
+        func_00294F78(func_0028B180(), 1);
+        break;
+    case 4:
+        func_00294F78(func_0028B180(), 4);
+        break;
+    case 5:
+        func_00294F78(func_0028B180(), 0);
+        break;
+    case 6:
+        func_00294F78(func_0028B180(), 0);
+        break;
+    }
+}
 
 //100%
 void* func_0039E288(void* self);
@@ -667,7 +693,33 @@ extern "C" void* func_001A2F38(void* self)
     return self;
 }
 
-INCLUDE_ASM("fe/fereal", func_001A2F70);
+//100%
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void* snd, int a);
+
+extern "C" void func_001A2F70(void* self, int which)
+{
+    switch (which) {
+    case 1:
+        func_00294F78(func_0028B180(), 11);
+        break;
+    case 2:
+        func_00294F78(func_0028B180(), 12);
+        break;
+    case 3:
+        func_00294F78(func_0028B180(), 10);
+        break;
+    case 4:
+        func_00294F78(func_0028B180(), 13);
+        break;
+    case 5:
+        func_00294F78(func_0028B180(), 9);
+        break;
+    case 6:
+        func_00294F78(func_0028B180(), 9);
+        break;
+    }
+}
 
 
 INCLUDE_ASM("fe/fereal", func_001A3050);

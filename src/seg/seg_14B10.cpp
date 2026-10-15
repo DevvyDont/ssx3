@@ -12,7 +12,60 @@ extern "C" void cAI_setAIState(void *arg0, int arg1) {
     }
 }
 
-INCLUDE_ASM("seg/seg_14B10", cAI_forceAIState);
+//100%
+extern char D_00456C58[];
+extern char D_00456C68[];
+extern char D_004A0E90[];
+extern char D_00456C78[];
+extern char D_004A0E98[];
+extern char D_004A0EA0[];
+extern char D_00456C88[];
+// The unit declares cAI_forceAIState with one arg; bind the real 2-arg form here.
+void cAI_forceAIState_2(char* self, int state) __asm__("cAI_forceAIState");
+
+void cAI_forceAIState_2(char* self, int state)
+{
+    switch (state) {
+    case 1:
+        *(int*)(self + 0x0) = 1;
+        *(char**)(self + 0xA0) = D_00456C58;
+        *(char**)(self + 0x98) = self + 0xAC;
+        return;
+    case 2:
+        *(int*)(self + 0x0) = 2;
+        *(char**)(self + 0xA0) = D_00456C68;
+        *(char**)(self + 0x98) = self + 0xB0;
+        return;
+    case 3:
+        *(int*)(self + 0x0) = 3;
+        *(char**)(self + 0xA0) = D_004A0E90;
+        *(char**)(self + 0x98) = self + 0xB4;
+        return;
+    case 4:
+        *(int*)(self + 0x0) = 4;
+        *(char**)(self + 0xA0) = D_00456C78;
+        *(char**)(self + 0x98) = self + 0xBC;
+        return;
+    case 5:
+        *(int*)(self + 0x0) = 5;
+        *(char**)(self + 0xA0) = D_004A0E98;
+        *(char**)(self + 0x98) = self + 0xC0;
+        return;
+    case 6:
+        *(int*)(self + 0x0) = 6;
+        *(char**)(self + 0xA0) = D_004A0EA0;
+        *(char**)(self + 0x98) = self + 0xC4;
+        return;
+    case 7:
+        *(int*)(self + 0x0) = 7;
+        *(char**)(self + 0xA0) = D_00456C88;
+        *(char**)(self + 0x98) = self + 0xC8;
+        return;
+    }
+    *(char**)(self + 0x98) = 0;
+    *(char**)(self + 0xA0) = 0;
+    *(int*)(self + 0x0) = 0;
+}
 
 //100%
 class cAIState_3C20 {
