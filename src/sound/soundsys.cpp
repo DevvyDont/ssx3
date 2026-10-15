@@ -878,7 +878,27 @@ INCLUDE_ASM("sound/soundsys", func_00293350);
 
 INCLUDE_ASM("sound/soundsys", func_00293410);
 
-INCLUDE_ASM("sound/soundsys", func_002934D0);
+//100%
+extern "C" int func_002934D0(void* self, unsigned int kind, void* rider)
+{
+    int r;
+    switch (kind) {
+    case 3:
+        r = func_0011FE98(rider) == 4 ? 2 : 0;
+        break;
+    case 1: case 2:
+        r = 1;
+        break;
+    case 4: case 5: case 6: case 7: case 8:
+        r = 2;
+        break;
+    case 0:
+    default:
+        r = 0;
+        break;
+    }
+    return r;
+}
 
 INCLUDE_ASM("sound/soundsys", func_00293538);
 
@@ -5229,7 +5249,19 @@ extern "C" int func_002A1E20(void* self, unsigned int kind)
 
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
 
-INCLUDE_ASM("sound/soundsys", func_002A1FA0);
+//100%
+extern "C" int func_002A1FA0(void* self, void* obj)
+{
+    if (func_00123168(obj) != 0)
+        return 0;
+    switch (func_00123128(obj)) {
+    case 1: case 2: case 4: case 6:
+        return 2;
+    case 0: case 3: case 5: case 7: case 8: case 9:
+        return 1;
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_0029F0D8(void* self);
