@@ -4,6 +4,16 @@
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
+// The 0x14-byte render-state block at the top of the stack at + 0xE84.
+struct sFontRS {
+    int w0;
+    int w4;
+    int w8;
+    int wC;
+    int w10;
+};
+
+
 //100%
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -742,7 +752,12 @@ extern "C" void func_00392D18(sFontState* self)
     self->field_0xa4 = 0;
 }
 
-INCLUDE_ASM("render/font", func_00392D58);
+extern "C" void func_00392D58(sFontVec3* a, sFontVec3* b)
+{
+    a->x += b->x;
+    a->y += b->y;
+    a->z += b->z;
+}
 
 //100%
 extern "C" void func_00392D90(sFontState* self, sFontQuad* q, sFontVec3* v)
@@ -775,11 +790,39 @@ extern "C" void* func_00392DF0(void* self)
     return self;
 }
 
-INCLUDE_ASM("render/font", func_00392E60);
+struct sFont2E60 {
+    int cur;        // 0x0
+    int f4;
+    int start;      // 0x8
+    int fC;
+    int f10;
+    int f14;
+    int b;          // 0x18
+    int a;          // 0x1C
+    int c;          // 0x20
+    int d;          // 0x24
+    int hasD;       // 0x28
+    int one;        // 0x2C
+};
+
+extern "C" void func_00392E60(sFont2E60* self, int a, int b, int c, int d)
+{
+    self->start = self->cur;
+    self->cur += 0x10;
+    self->b = b;
+    self->a = a;
+    self->c = c;
+    self->d = d;
+    self->hasD = d != 0;
+    self->one = 1;
+}
 
 INCLUDE_ASM("render/font", func_00392E98);
 
-INCLUDE_ASM("render/font", func_00393008);
+extern "C" void* func_00393008(void* self, ...)
+{
+    return self;
+}
 
 INCLUDE_ASM("render/font", func_00393048);
 
@@ -1251,16 +1294,13 @@ void func_003942E0(void* self)
 {
 }
 
-INCLUDE_ASM("render/font", func_003942E8);
+extern sFontRS D_00501420;
 
-// The 0x14-byte render-state block at the top of the stack at + 0xE84.
-struct sFontRS {
-    int w0;
-    int w4;
-    int w8;
-    int wC;
-    int w10;
-};
+// Resets the current render-state block to the defaults.
+extern "C" void func_003942E8(void* self)
+{
+    **(sFontRS**)((char*)self + 0xE84) = D_00501420;
+}
 
 extern "C" void func_00394328(void* self, sFontRS* in)
 {
@@ -1290,15 +1330,42 @@ extern "C" void func_00394398(void* self, int value)
     rs->w8 = (rs->w8 & ~0x3E0) | ((value << 5) & 0x3E0);
 }
 
-INCLUDE_ASM("render/font", func_003943C0);
+struct sFontQ16 {
+    int v[4];
+};
 
-INCLUDE_ASM("render/font", func_00394418);
+extern "C" void func_003943C0(void* self, sFontQ16 q, int i)
+{
+    ((sFontQ16*)((char*)self + 0xF04))[i] = q;
+}
 
-INCLUDE_ASM("render/font", func_00394470);
+extern "C" sFontQ16 func_00394418(void* self, sFontQ16 q, int i)
+{
+    return ((sFontQ16*)((char*)self + 0xF04))[i];
+}
 
-INCLUDE_ASM("render/font", func_003944A8);
+extern "C" void func_00394470(void* self, int value, int i)
+{
+    sFontRS* rs = *(sFontRS**)((char*)self + 0xE84);
+    int shift = i * 5 + 2;
+    int mask = 0x1F << shift;
+    rs->w4 = (rs->w4 & ~mask) | ((value << shift) & mask);
+}
 
-INCLUDE_ASM("render/font", func_003944F8);
+extern "C" void func_003944A8(void* self, int a, int b)
+{
+    (*(sFontRS**)((char*)self + 0xE84))->w4 = ((*(sFontRS**)((char*)self + 0xE84))->w4 & ~3) | (a & 3);
+    (*(sFontRS**)((char*)self + 0xE84))->w8 =
+        ((*(sFontRS**)((char*)self + 0xE84))->w8 & 0xE00003FF) | ((b << 10) & 0x1FFFFC00);
+}
+
+extern "C" void func_003944F8(void* self, int value, int i)
+{
+    sFontRS* rs = *(sFontRS**)((char*)self + 0xE84);
+    int shift = i * 2 + 2;
+    int mask = 3 << shift;
+    rs->w0 = (rs->w0 & ~mask) | ((value << shift) & mask);
+}
 
 extern "C" void func_00394530(void* self, int value)
 {
@@ -1522,7 +1589,13 @@ extern "C" void func_00394770(void* self, short value, int i)
     ((sFontRSBlock*)*(char**)((char*)self + 0xE84))->s10[i] = value;
 }
 
-INCLUDE_ASM("render/font", func_00394788);
+// Pushes a copy of the current render-state block.
+extern "C" void func_00394788(void* self)
+{
+    sFontRS* rs = *(sFontRS**)((char*)self + 0xE84);
+    rs[1] = rs[0];
+    *(char**)((char*)self + 0xE84) += 0x14;
+}
 
 // Pops one 0x14-byte render-state block.
 extern "C" void func_003947C8(void* self)
@@ -2142,7 +2215,13 @@ extern "C" void func_00395470(void* self, int value)
     rs->w0 = (rs->w0 & ~0xC00) | ((value << 10) & 0xC00);
 }
 
-INCLUDE_ASM("render/font", func_00395498);
+extern "C" void func_00395498(void* self, unsigned char value, int i)
+{
+    sFontRS* rs = *(sFontRS**)((char*)self + 0xE84);
+    int shift = i * 8 + 12;
+    int mask = 0xFF << shift;
+    rs->w0 = (rs->w0 & ~mask) | ((value << shift) & mask);
+}
 
 //100%
 struct sFontBlockA0 {
@@ -3099,19 +3178,61 @@ extern "C" int func_00396610(void* self)
     return *(int*)((char*)self + 0x1E0);
 }
 
-INCLUDE_ASM("render/font", func_00396618);
+// Ring buffers of quadwords at + 0x1A0 / + 0x1A4 (size at + 0x178, head at + 0x17C).
+extern "C" cQuad128* func_00396618(cQuad128* out, void* self, int i)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *out = (*(cQuad128**)((char*)self + 0x1A0))[idx];
+    return out;
+}
 
-INCLUDE_ASM("render/font", func_00396658);
+extern "C" cQuad128* func_00396658(cQuad128* out, void* self, int i)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *out = (*(cQuad128**)((char*)self + 0x1A4))[idx];
+    return out;
+}
 
-INCLUDE_ASM("render/font", func_00396698);
+extern "C" void func_00396698(void* self, int i, cQuad128** a, cQuad128** b)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *a = *(cQuad128**)((char*)self + 0x1A0) + idx;
+    *b = *(cQuad128**)((char*)self + 0x1A4) + idx;
+}
 
-INCLUDE_ASM("render/font", func_003966D8);
+extern "C" void func_003966D8(void* self, int i, cQuad128* a, cQuad128* b)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *a = (*(cQuad128**)((char*)self + 0x1A0))[idx];
+    *b = (*(cQuad128**)((char*)self + 0x1A4))[idx];
+}
 
-INCLUDE_ASM("render/font", func_00396720);
+extern "C" void func_00396720(void* self, int i, cQuad128** a, cQuad128** b, int** c)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *a = *(cQuad128**)((char*)self + 0x1A0) + idx;
+    *b = *(cQuad128**)((char*)self + 0x1A4) + idx;
+    *c = *(int**)((char*)self + 0x204) + idx;
+}
 
 INCLUDE_ASM("render/font", func_00396770);
 
-INCLUDE_ASM("render/font", func_003967D8);
+struct sFontRGBA {
+    unsigned char r, g, b, a;
+};
+
+extern "C" sFontRGBA* func_003967D8(sFontRGBA* out, void* self, int i)
+{
+    int head = *(int*)((char*)self + 0x17C) + 1;
+    int idx = (i + head) % *(int*)((char*)self + 0x178);
+    *out = (*(sFontRGBA**)((char*)self + 0x204))[idx];
+    return out;
+}
 
 extern void* D_004930A0[];
 
