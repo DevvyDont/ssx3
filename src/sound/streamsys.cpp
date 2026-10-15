@@ -55,7 +55,14 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* s
 
 INCLUDE_ASM("sound/streamsys", func_002A9C00);
 
-INCLUDE_ASM("sound/streamsys", func_002A9DD8);
+extern "C" void* func_002A9DD8(void* self, int handle)
+{
+    *(int*)((char*)self + 0x8) = handle;
+    *(void**)self = 0;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    return self;
+}
 
 //100%
 void cMemMan_free(void*);
@@ -189,9 +196,6 @@ int func_002AA068_impl(void* self, int a1, int* out)
     return r;
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AA0C0);
-
-//100% - objdiff report; single-function view differs only in a relocation name
 struct func_002AA1B8_sStatus;
 extern "C" void func_002AA068(void* self, func_002AA1B8_sStatus* out, int flags);
 
@@ -202,6 +206,17 @@ struct func_002AA108_sStatus {
     int c;
 };
 
+extern "C" float func_002AA0C0(void* self)
+{
+    func_002AA108_sStatus st;
+    func_002AA068(self, (func_002AA1B8_sStatus*)&st, 0);
+    if (st.state == 2) {
+        return (float)st.a;
+    }
+    return 0.0f;
+}
+
+//100% - objdiff report; single-function view differs only in a relocation name
 extern "C" float func_002AA108(void* self)
 {
     func_002AA108_sStatus st;
@@ -212,9 +227,19 @@ extern "C" float func_002AA108(void* self)
     return 0.0f;
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AA150);
+extern "C" int func_002AA150(void* self, int n)
+{
+    int buf[4];
+    func_002AA020(self, buf);
+    return buf[2] >= n;
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AA188);
+extern "C" int func_002AA188(void* self)
+{
+    func_002AA108_sStatus st;
+    func_002AA068(self, (func_002AA1B8_sStatus*)&st, 0);
+    return st.state == 1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct func_002AA1B8_sStatus {
@@ -233,17 +258,45 @@ extern "C" int func_002AA1B8(void* self)
     return st.state == 2;
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AA1E8);
+extern "C" void func_003B7D80(int h, int a1);
+
+extern "C" void func_002AA1E8(void* self)
+{
+    int buf[4];
+    func_002AA020(self, buf);
+    func_003B7D80(buf[1], 0);
+}
 
 INCLUDE_ASM("sound/streamsys", func_002AA210);
 
-INCLUDE_ASM("sound/streamsys", func_002AA240);
+extern "C" void func_002AA240(void* self, int h)
+{
+    func_003B7D80(h, 0);
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AA260);
+extern "C" float func_002AA260(void* self)
+{
+    func_002AA108_sStatus st;
+    func_002AA068(self, (func_002AA1B8_sStatus*)&st, 0);
+    if (st.state == 2) {
+        return (float)(st.a + st.b);
+    }
+    return 0.0f;
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AA2B0);
+extern "C" void func_002AA2B0(void* self)
+{
+    func_003B58A0();
+    func_003B7FB8(*(int*)((char*)self + 0x8), 0);
+    func_003B58D8();
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AA2E8);
+extern "C" void func_002AA2E8(void* self)
+{
+    func_003B58A0();
+    func_003B7FB8(*(int*)((char*)self + 0x8), 0x1000);
+    func_003B58D8();
+}
 
 //100%
 extern "C" int func_003B78D8(int h, int a, int buf, int off);
@@ -281,7 +334,16 @@ extern "C" int func_002AA428(void* self)
     return buf[0];
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AA448);
+extern "C" int func_003B80E0(int h, int a1);
+
+extern "C" int func_002AA448(void* self, int a1)
+{
+    int r;
+    func_003B58A0();
+    r = func_003B80E0(*(int*)((char*)self + 0x8), a1);
+    func_003B58D8();
+    return r;
+}
 
 //100%
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
@@ -529,7 +591,13 @@ extern "C" int func_002AAD78(void* self, int i, int a, int b, int c)
     return -1;
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AADC0);
+extern "C" int func_002AA398(void* self, int a1, int a2, int a3);
+
+extern "C" int func_002AADC0(sStreamSysA490* self, int i, int a2, int a3, int a4)
+{
+    void* e = self->items[i];
+    return e ? func_002AA398(e, a2, a3, a4) : -1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_002AA428(void*);
@@ -564,15 +632,53 @@ extern "C" float func_002AAE78(void* self, int i)
     return func_002AA108(e);
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AAEC0);
+extern "C" float func_002AAEC0(sStreamSysA490* self, int i)
+{
+    if (i < 0 || self->items[i] == 0) {
+        return 0.0f;
+    }
+    return func_002AA260(self->items[i]);
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AAF08);
+extern "C" int func_002AAF08(sStreamSysA490* self, int i, int n)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        return func_002AA150(e, n);
+    }
+    return 0;
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AAF40);
+extern "C" int func_002AAF40(sStreamSysA490* self, int i)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        return func_002AA188(e);
+    }
+    return 0;
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AAF78);
+int func_003B7C40_st(int h, int* out) __asm__("func_003B7C40");
 
-INCLUDE_ASM("sound/streamsys", func_002AAFD0);
+extern "C" int func_002AAF78(void* self, int h)
+{
+    int st[4];
+    int r;
+    func_003B58A0();
+    r = func_003B7C40_st(h, st);
+    func_003B58D8();
+    return st[0] == 3 || r < 0;
+}
+
+extern "C" int func_002AAFD0(void* self, int h)
+{
+    int st[4];
+    int r;
+    func_003B58A0();
+    r = func_003B7C40_st(h, st);
+    func_003B58D8();
+    return st[0] == 2 && r >= 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_002AA1B8(void*);
@@ -586,9 +692,21 @@ extern "C" int func_002AB028(void* self, int i)
     return 0;
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AB060);
+extern "C" void func_002AB060(sStreamSysA490* self, int i)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        func_002AA1E8(e);
+    }
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AB098);
+extern "C" void func_002AB098(sStreamSysA490* self, int i, int h)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        func_002AA240(e, h);
+    }
+}
 
 //100%
 extern "C" void func_002AB0D0(void* self, int i, int val)
@@ -599,9 +717,22 @@ extern "C" void func_002AB0D0(void* self, int i, int val)
     }
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AB0F0);
+extern "C" void func_002AB0F0(sStreamSysA490* self, int i, int vol)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        func_002A9F30(e, vol);
+    }
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AB128);
+extern "C" int func_002AB128(sStreamSysA490* self, int i)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        return *(int*)((char*)e + 0x8);
+    }
+    return -1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_002AA210(void*);
@@ -621,9 +752,22 @@ int func_002AB188(void* self, int a1)
     return *(int*)((char*)*(void**)((char*)self + 0x8) + a1 * 4);
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AB1A0);
+extern "C" int func_002AB1A0(void* self, void* p)
+{
+    func_003B7D80(*(int*)((char*)p + 0x1C), 0);
+    return 1;
+}
 
-INCLUDE_ASM("sound/streamsys", func_002AB1C8);
+extern "C" int func_002AA448(void* self, int a1);
+
+extern "C" int func_002AB1C8(sStreamSysA490* self, int i, int a2)
+{
+    void* e = self->items[i];
+    if (e != 0) {
+        return func_002AA448(e, a2);
+    }
+    return -1;
+}
 
 //100%
 extern "C" void* func_002ADE88(void* self, int heap);
@@ -971,7 +1115,18 @@ extern "C" int func_002ABB80(void* self)
     return 1;
 }
 
-INCLUDE_ASM("sound/streamsys", func_002ABBD8);
+struct sVec3_2ABBD8 {
+    float x, y, z;
+};
+
+// Squared distance between two points.
+extern "C" float func_002ABBD8(void* self, sVec3_2ABBD8* a, sVec3_2ABBD8* b)
+{
+    float dx = a->x - b->x;
+    float dy = a->y - b->y;
+    float dz = a->z - b->z;
+    return dx * dx + dy * dy + dz * dz;
+}
 
 //100%
 // PORT: the unit declares func_002ABC18 as void*(int); the body takes (int, float, float).
