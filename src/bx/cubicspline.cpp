@@ -696,7 +696,43 @@ extern "C" void func_0031FE28()
 {
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031FE30);
+//100%
+void func_0031EEE8_c(void* ms, char* av) __asm__("func_0031EEE8");
+
+extern "C" int func_0031FE30(void** ms, int which, unsigned int val)
+{
+    char* s = (char*)*ms;
+    func_0031EEE8_c(ms, s);
+    switch (which) {
+    case 1: {
+        // dlmalloc mallopt(M_MXFAST): set_max_fast(av, request2size(val))
+        if (val <= 0x50) {
+            *(unsigned int*)s = ((val == 0) ? 8
+                : ((val + 0x13 < 0x10) ? 0x10 : (val + 0x13) & ~0xF))
+                | (*(unsigned int*)s & 3);
+            return 1;
+        }
+        return 0;
+    }
+    case -1:
+        *(unsigned int*)(s + 0x344) = val;
+        return 1;
+    case -2:
+        *(unsigned int*)(s + 0x348) = val;
+        return 1;
+    case -3:
+        *(unsigned int*)(s + 0x34C) = val;
+        return 1;
+    case -4:
+        if (val != 0)
+            return 0;
+        *(unsigned int*)(s + 0x354) = 0;
+        return 1;
+    case 0:
+        break;
+    }
+    return 0;
+}
 
 //100%
 void* func_0031FF20(void* self)
