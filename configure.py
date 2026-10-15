@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import bisect
 import os
 import shutil
 import subprocess
@@ -94,6 +95,15 @@ elif sys.platform == "darwin":
     COMPILE_C_RULE = f"{WIBO} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WIBO} {COMPILE_CXX_RULE}"
 
+# C is compiled to asm first, so tools/jt_sections.py can give each jump table its own section (see
+# link_c_jump_tables), then assembled by the same driver: the same as.exe a plain -c would run.
+ASSEMBLE_RULE = COMPILE_C_RULE.split(" -c ")[0] + f" -c -x assembler {ASM_INCLUDE_FLAG} {DRIVER_PATH_FLAG}"
+
+
+def compile_command(rule):
+    return (f"{rule.replace(' -c ', ' -S ')} $cflags -o $out.s && python3 tools/jt_sections.py $out.s && "
+            f"{ASSEMBLE_RULE} $cflags $out.s -o $out && rm $out.s")
+
 def clean():
     files_to_clean = [
         ".splache",
@@ -150,10 +160,113 @@ def link_unit_lit4(ld_text):
     return ld_text
 
 
+ROM_TO_VRAM = 0x100000 - 0x1000
+ADDR_LINE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8})(?: [0-9A-F]{8})? \*/")
+JTBL = re.compile(r"^dlabel (jtbl_([0-9A-F]{8}))\n(.*?)^enddlabel \1$", re.M | re.S)
+JTBL_WORD = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/ \.word (?:\.L|lbl_|0x)([0-9A-F]{8})")
+
+
+def c_jump_tables(rodata_path):
+    """
+    The jump tables of C functions: the tables no asm refers to any more. Returns {table address:
+    (end address, unit name, k)}, where the table is the unit's k-th (tools/jt_sections.py) and the end
+    is past its last entry (a table can be followed by padding, which stays in the asm).
+    """
+    yaml_text = YAML_FILE.read_text()
+    units = [(int(a, 16) + ROM_TO_VRAM, t, (n or "").strip())
+             for a, t, n in re.findall(r"- \[0x([0-9a-fA-F]+), (\w+)(?:, ([^\]#]+?))?\]", yaml_text)
+             if t in ("c", "cpp", "asm", "hasm")]
+    # The asm the build uses: the C units' INCLUDE_ASM functions (asm/nonmatchings can hold stale files
+    # of functions since decompiled) and the asm units
+    used = [f for f in Path("asm").rglob("*.s") if f != rodata_path and "nonmatchings" not in f.parts]
+    for _, kind, name in units:
+        if kind in ("c", "cpp"):
+            for d, fn in re.findall(r'^INCLUDE_ASM\("([^"]+)", (\w+)\);', Path(f"src/{name}.{kind}").read_text(), re.M):
+                used.append(Path(f"asm/nonmatchings/{d}/{fn}.s"))
+    referenced = set()
+    for f in used:
+        referenced.update(re.findall(r"jtbl_[0-9A-F]{8}", f.read_text()))
+    starts = [u[0] for u in units]
+    tables = {}
+    for m in JTBL.finditer(rodata_path.read_text()):
+        if m.group(1) in referenced:
+            continue
+        # Entries are code addresses; a 0 after them is padding
+        words = [w for w in JTBL_WORD.findall(m.group(3)) if int(w[1], 16) >= 0x100000]
+        assert words, m.group(1)
+        _, kind, name = units[bisect.bisect_right(starts, int(words[0][1], 16)) - 1]
+        assert kind in ("c", "cpp"), f"{m.group(1)} belongs to no asm and no C unit"
+        tables[int(m.group(2), 16)] = (int(words[-1][0], 16) + 4, f"{name}.{kind}")
+    per_unit = {}
+    for addr in sorted(tables):
+        end, unit = tables[addr]
+        tables[addr] = (end, unit, per_unit.get(unit, 0))
+        per_unit[unit] = per_unit.get(unit, 0) + 1
+    return tables
+
+
+def link_c_jump_tables(ld_text):
+    """
+    Link each C function's jump table from its object, at its retail address.
+
+    The compiler puts a switch's table in .rodata (in its own section, .rodata.jt<k>, after
+    tools/jt_sections.py), but the game's .rodata is one asm object. That object is cut into parts
+    (.rodata.p<n>) around the C tables, with the tables' asm taken out, and the linker script puts each
+    C table between its parts. The parts are linked unaligned, so in every part after the first each
+    piece of data is placed by its offset from the part's start (.org) instead of by .align.
+    """
+    rodata_path = next(Path("asm/data").glob("*.rodata.s"))
+    start = int(rodata_path.name.split(".")[0], 16) + ROM_TO_VRAM
+    tables = c_jump_tables(rodata_path)
+    if not tables:
+        return ld_text
+    obj_line = f"        obj/{rodata_path}.o(.rodata);\n"
+    assert obj_line in ld_text, obj_line
+    out, pending, links = [], [], [obj_line]
+    part, part_start, skip_until = 0, start, None
+    for line in rodata_path.read_text().split("\n"):
+        m = ADDR_LINE.match(line)
+        addr = int(m.group(1), 16) if m else None
+        if skip_until is not None:
+            if addr is not None and addr + 4 >= skip_until:
+                skip_until = None
+            continue
+        label = re.match(r"(?:dlabel|enddlabel|nonmatching) (jtbl_([0-9A-F]{8}))$", line)
+        if label and int(label.group(2), 16) in tables:
+            if line.startswith("dlabel"):
+                table = int(label.group(2), 16)
+                end, unit, k = tables[table]
+                out.append(f".org 0x{table - part_start:X}")
+                out.extend(l for l in pending if not (part and l.startswith(".align")))
+                pending = []
+                part += 1
+                out.append(f'.section .rodata.p{part}, "a"')
+                links.append(f"        obj/src/{unit}.o(.rodata.jt{k});\n")
+                links.append(f"        obj/{rodata_path}.o(.rodata.p{part});\n")
+                part_start, skip_until = end, end
+            continue
+        if part == 0:
+            out.append(line)
+        elif addr is not None:
+            out.append(f".org 0x{addr - part_start:X}")
+            out.extend(l for l in pending if not l.startswith(".align"))
+            out.append(line)
+            pending = []
+        elif re.match(r"(dlabel|nonmatching|\.align) ", line):
+            pending.append(line)
+        else:
+            out.append(line)
+    out.extend(l for l in pending if not l.startswith(".align"))
+    rodata_path.write_text("\n".join(out))
+    print(f"rodata: {len(tables)} jump tables linked from C")
+    return ld_text.replace(obj_line, "".join(links))
+
+
 def patch_linker_script():
     """Link .lit4 from the C objects, and put the data in its own output section without padding."""
     ld_text = Path(LD_PATH).read_text()
     ld_text = link_unit_lit4(ld_text)
+    ld_text = link_c_jump_tables(ld_text)
     # Each data chunk is an exact byte range of the original, so the data objects are only 4-aligned
     # per object, while the code needs SUBALIGN(8)
     data_start = "        main_DATA_START = .;\n"
@@ -383,19 +496,19 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     ninja.rule(
         "cc",
         description="cc $in",
-        command=f"{COMPILE_C_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+        command=f"{compile_command(COMPILE_C_RULE)} && {cross}strip $out -N dummy-symbol-name",
     )
 
     ninja.rule(
         "cc_unit",
         description="cc $in ($ccdir)",
-        command=f"{COMPILE_C_RULE.replace(CC_DIR, '$ccdir')} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+        command=f"{compile_command(COMPILE_C_RULE).replace(CC_DIR, '$ccdir')} && {cross}strip $out -N dummy-symbol-name",
     )
 
     ninja.rule(
         "cpp",
         description="cpp $in",
-        command=f"{COMPILE_CXX_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+        command=f"{compile_command(COMPILE_CXX_RULE)} && {cross}strip $out -N dummy-symbol-name",
     )
 
     ninja.rule(

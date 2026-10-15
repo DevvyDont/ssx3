@@ -39,9 +39,30 @@ reproduce each unit's `.lit4` with any mix of C and asm:
   links each C unit's `.lit4` from its object instead of the chunk.
 
 The decompiled C refers to everything in `.data`, `.rodata` and `.sdata` by
-symbol (`extern`), so those sections stay whole asm objects. Once C emits
-data of its own there (string literals, jump tables from `switch`), those
-sections need the same per-unit treatment.
+symbol (`extern`), so those sections stay whole asm objects, except for jump
+tables (below). String literals in C would still need the same per-unit
+treatment.
+
+## Jump tables (.rodata)
+
+A `switch` compiled to a jump table puts the table in `.rodata`. To link
+those from C:
+
+- C is compiled with `-S`, then `tools/jt_sections.py` moves each jump table
+  into its own section (`.rodata.jt0`, `.rodata.jt1`, ... in the order the
+  compiler emits them), and the same driver assembles the result.
+- `configure.py` (`link_c_jump_tables`) finds the tables no asm uses any more
+  (their function is now C). It cuts each one out of the asm `.rodata`, which
+  splits that file into parts (`.rodata.p1`, ...), and the linker script
+  places the C table between the parts at its retail address. The k-th table
+  of a unit by address is the unit's `.rodata.jtk`.
+- The parts are linked unaligned, so in every part after the first, each
+  item is placed with `.org` (its offset from the part's start) instead of
+  `.align`.
+
+So a `switch` function is matched like any other: write the C, remove the
+`INCLUDE_ASM`, and `./configure.py && ninja` has to end with `OK`. Rerun
+configure whenever an `INCLUDE_ASM` is removed, as before.
 
 The data chunks are exact byte ranges, so the data is linked in its own
 output section without padding (`.main_data`, `SUBALIGN(1)`).

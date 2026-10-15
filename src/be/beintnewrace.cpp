@@ -585,7 +585,23 @@ extern "C" int func_00145750(void* self)
     return 3;
 }
 
-INCLUDE_ASM("be/beintnewrace", func_00145818);
+//100%
+extern "C" int func_00145818(void* self, unsigned int i)
+{
+    switch (i) {
+    case 14: case 15: case 16:
+        return 4;
+    case 0: case 1: case 2: case 3: case 4:
+        return 0;
+    case 5: case 6: case 7:
+        return 1;
+    case 8: case 9: case 10:
+        return 2;
+    case 11: case 12: case 13:
+        return 3;
+    }
+    return 4;
+}
 
 INCLUDE_ASM("be/beintnewrace", func_00145870);
 
