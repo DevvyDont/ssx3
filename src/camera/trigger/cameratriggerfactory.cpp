@@ -2594,7 +2594,45 @@ extern "C" int func_0017A0B8(func_0017A028_sMgr* self, int i)
     return i;
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A158);
+//100%
+// Callers declare the 3rd arg as a pointer; it is really a category index.
+int func_0017A158_d(int* self, int i, unsigned int kind) __asm__("func_0017A158");
+
+int func_0017A158_d(int* self, int i, unsigned int kind)
+{
+    int v;
+    if (i < 0 || i >= self[0])
+        return 0;
+    v = *(int*)((char*)self + i * 0x8C + 0x84);
+    switch (kind) {
+    case 0:
+        if (v >= 0 && v <= 4)
+            return 1;
+        break;
+    case 1:
+        if (v >= 5 && v <= 7)
+            return 1;
+        break;
+    case 2:
+        if (v >= 8 && v <= 10)
+            return 1;
+        break;
+    case 3:
+        if (v >= 11 && v <= 13)
+            return 1;
+        break;
+    case 5:
+    case 6:
+        if (v >= 14 && v <= 16)
+            return 1;
+        break;
+    case 4:
+        if (func_00144CC0(cBE_getInterface_Fv(cBE_getBE(), 0), v) == 0)
+            return 1;
+        break;
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_0017A158(int* self, int i, void* key);
