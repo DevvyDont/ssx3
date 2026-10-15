@@ -726,7 +726,10 @@ extern "C" int func_0012A180(sAiObj128A48* self)
 
 INCLUDE_ASM("ai/ai", func_0012A1F0);
 
-INCLUDE_ASM("ai/ai", func_0012A240);
+extern "C" int func_0012A240(int* self)
+{
+    return *self == 5;
+}
 
 //100%
 struct sAiObj12A250
@@ -827,7 +830,13 @@ extern "C" void func_0012A490(void)
     }
 }
 
-INCLUDE_ASM("ai/ai", func_0012A4D0);
+extern char D_004D33A0[];
+extern "C" void func_0026ADE8(void* p);
+
+extern "C" void func_0012A4D0()
+{
+    func_0026ADE8(D_004D33A0);
+}
 
 INCLUDE_ASM("ai/ai", func_0012A4F0);
 
@@ -953,7 +962,17 @@ extern "C" int func_0012ACF8(sAiObj12ACF8* self)
     return result;
 }
 
-INCLUDE_ASM("ai/ai", func_0012AD70);
+extern "C" void func_0012AD70(void* self)
+{
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x88); i++) {
+        char* r = *(char**)(((char**)((char*)self + 0x70))[i] + 0x18);
+        if (*(int*)(r + 0x884)) {
+            *(int*)(r + 0x884) = 0;
+            *(int*)(r + 0x888) = -1;
+        }
+    }
+}
 
 INCLUDE_ASM("ai/ai", func_0012ADC0);
 
@@ -1057,7 +1076,14 @@ extern "C" void func_0012B030(void* self)
     *(int*)((char*)self + 0x10) = 0;
 }
 
-INCLUDE_ASM("ai/ai", func_0012B060);
+extern "C" void func_0010F3B8(void* self);
+
+extern "C" void func_0012B060(void* self)
+{
+    cAI_purgeMissionRiders(self);
+    func_0010F3B8(self);
+    *(int*)((char*)self + 0x10) = 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_00154A58(int rider, int a);

@@ -626,9 +626,30 @@ extern "C" int func_0010D8F8(void* self)
     return -1;
 }
 
-INCLUDE_ASM("ai/computer", func_0010D938);
+extern "C" int func_0010DEB0(void* self);
+float func_00113128(void* self);
 
-INCLUDE_ASM("ai/computer", func_0010D990);
+extern "C" int func_0010D938(void* self)
+{
+    int p = func_0010DEB0(self);
+    if (p == 0)
+        return 0;
+    float d = func_00113128((void*)p) - *(float*)(*(char**)((char*)self + 0x18) + 0x4D0);
+    if (d < *(float*)(*(char**)((char*)self + 0x18) + 0xDC))
+        return 1;
+    return 0;
+}
+
+extern "C" int func_0010D990(void* self)
+{
+    int p = func_0010DEB0(self);
+    if (p == 0)
+        return 0;
+    float d = func_00113128((void*)p) - *(float*)(*(char**)((char*)self + 0x18) + 0x4D0);
+    if (*(float*)(*(char**)((char*)self + 0x18) + 0xE0) < d)
+        return 1;
+    return 0;
+}
 
 //100%
 extern "C" int func_0010D9E8(void* self, int a1)
@@ -1377,7 +1398,17 @@ extern "C" void func_0010F878(sComputer_0010F878* self)
 
 INCLUDE_ASM("ai/computer", func_0010F998);
 
-INCLUDE_ASM("ai/computer", func_0010FBF0);
+// Number of riders whose value at +0xAB8 is v
+extern "C" int func_0010FBF0(void* self, int v)
+{
+    int n = 0;
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x78); i++) {
+        if (*(int*)(((char**)((char*)self + 0x28))[i] + 0xAB8) == v)
+            n++;
+    }
+    return n;
+}
 
 //100%
 struct sVEntry0010FC30 {
@@ -1449,9 +1480,26 @@ INCLUDE_ASM("ai/computer", func_00111630);
 
 INCLUDE_ASM("ai/computer", func_00111728);
 
-INCLUDE_ASM("ai/computer", func_00111830);
+extern char* D_00459D70[];
+extern char D_00456C48[];
 
-INCLUDE_ASM("ai/computer", func_00111860);
+extern "C" char* func_00111830(void* self)
+{
+    unsigned int i = *(unsigned int*)((char*)self + 0xDE0);
+    if (i >= 7)
+        return D_00456C48;
+    return D_00459D70[i];
+}
+
+extern char* D_00459DC8[];
+
+extern "C" char* func_00111860(void* self)
+{
+    unsigned int i = *(unsigned int*)((char*)self + 0xDE4);
+    if (i >= 15)
+        return D_00456C48;
+    return D_00459DC8[i];
+}
 
 //100%
 extern "C" void func_002DCF28(void*);
