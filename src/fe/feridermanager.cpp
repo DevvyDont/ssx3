@@ -392,17 +392,43 @@ INCLUDE_ASM("fe/feridermanager", func_0019F578);
 
 INCLUDE_ASM("fe/feridermanager", func_0019F5E8);
 
-INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
+struct sFrmQuad { int x[4]; } __attribute__((aligned(16)));
 
-INCLUDE_ASM("fe/feridermanager", func_0019F6C8);
+// The manager's slot index table
+struct sFrmSlots {
+    char pad_0x000[0xC7C];
+    int slot[1];    // 0xC7C
+};
 
-INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
+// Slot i's 32-byte entry in the table at +0x8 -> +0x2C, via the index table at +0xC7C
+extern "C" char* func_0019F6A8(char* self, int i)
+{
+    return *(char**)(*(char**)(self + 0x8) + 0x2C) + ((sFrmSlots*)self)->slot[i] * 32;
+}
 
-INCLUDE_ASM("fe/feridermanager", func_0019F718);
+extern "C" void func_0019F6C8(char* self, int i, sFrmQuad* v)
+{
+    *(sFrmQuad*)(((sFrmSlots*)self)->slot[i] * 32 + *(char**)(*(char**)(self + 0x8) + 0x2C)) = *v;
+}
+
+extern "C" char* func_0019F6F0(char* self, int i)
+{
+    return *(char**)(*(char**)(self + 0x8) + 0x2C) + ((sFrmSlots*)self)->slot[i] * 32 + 0x10;
+}
+
+extern "C" void func_0019F718(char* self, int i, sFrmQuad* v)
+{
+    *(sFrmQuad*)(((sFrmSlots*)self)->slot[i] * 32 + *(char**)(*(char**)(self + 0x8) + 0x2C) + 0x10) = *v;
+}
 
 INCLUDE_ASM("fe/feridermanager", func_0019F740);
 
-INCLUDE_ASM("fe/feridermanager", func_0019F760);
+extern "C" void func_00312AB0(void* p, int a);
+
+extern "C" void func_0019F760(char* self)
+{
+    func_00312AB0(*(void**)(self + 0xC), 2);
+}
 
 //100%
 extern "C" void* cBE_getBE();
@@ -927,7 +953,10 @@ extern "C" void* func_001A0548(void* self, int a1)
     return (char*)self + a1 * 0xce0;
 }
 
-INCLUDE_ASM("fe/feridermanager", func_001A0558);
+extern "C" int func_001A0558(char* self, int i)
+{
+    return *(int*)(self + i * 0xCE0 + 0xCC8);
+}
 
 //100%
 extern "C" void func_0019E538(void* slot, int v);

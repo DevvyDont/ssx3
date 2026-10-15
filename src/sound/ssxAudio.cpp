@@ -990,11 +990,28 @@ extern "C" void* func_00287968(void* self, int a1, int a2)
     return (char*)self + ((a2 << 2) + 0x636C);
 }
 
-INCLUDE_ASM("sound/ssxAudio", func_002879A0);
+// The audio system's 16-byte entries
+struct sAudioEntries {
+    char pad_0x0000[0x62BC];
+    float entry[1][4];  // 0x62BC
+};
 
-INCLUDE_ASM("sound/ssxAudio", func_002879B0);
+extern "C" void* func_002879A0(char* self, int i)
+{
+    return ((sAudioEntries*)self)->entry[i];
+}
 
-INCLUDE_ASM("sound/ssxAudio", func_002879E0);
+void func_00287700_if(void*, int, float) __asm__("func_00287700");
+
+extern "C" void func_002879B0(char* self, int i)
+{
+    func_00287700_if(self, i, ((sAudioEntries*)self)->entry[i][0] + 0.09090909f);
+}
+
+extern "C" void func_002879E0(char* self, int i)
+{
+    func_00287700_if(self, i, ((sAudioEntries*)self)->entry[i][0] - 0.09090909f);
+}
 
 //100%
 extern float D_004A352C;
@@ -1730,13 +1747,28 @@ extern "C" void func_00288D18(void* self, int mode)
 
 INCLUDE_ASM("sound/ssxAudio", func_00288F60);
 
+extern "C" void func_00288F60(void* self, int i);
+
 INCLUDE_ASM("sound/ssxAudio", func_00289398);
 
-INCLUDE_ASM("sound/ssxAudio", func_002893C8);
+// Next of six entries, wrapping
+extern "C" void func_002893C8(char* self)
+{
+    if (++*(int*)(self + 0x6470) == 6)
+        *(int*)(self + 0x6470) = 0;
+    func_00288F60(self, *(int*)(self + 0x6470));
+}
 
 INCLUDE_ASM("sound/ssxAudio", func_00289400);
 
-INCLUDE_ASM("sound/ssxAudio", func_00289448);
+extern void* D_004A52D4;
+extern "C" void func_002B6950(void* p, int a, int b);
+
+extern "C" int func_00289448()
+{
+    func_002B6950(D_004A52D4, 1, 0);
+    return 1;
+}
 
 //100%
 extern "C" int BXFILE_exists(char* name);
@@ -1929,7 +1961,14 @@ extern "C" void func_00289830(void* self, float v)
     }
 }
 
-INCLUDE_ASM("sound/ssxAudio", func_00289880);
+extern "C" void func_00289880(char* self)
+{
+    float one = 1.0f;
+    *(int*)(self + 0x6C58) = 0;
+    *(float*)(self + 0x6C6C) = one;
+    *(int*)(self + 0x6C60) = 0;
+    *(float*)(self + 0x6C64) = one - *(float*)(self + 0x6C68);
+}
 
 //100%
 extern "C" int func_0028D960(void* self);
