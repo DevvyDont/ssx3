@@ -653,7 +653,12 @@ extern "C" void func_00392908(void* self, const char* str, float x, float y)
     func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
 }
 
-INCLUDE_ASM("render/font", func_00392980);
+// Draws a string centred on x.
+extern "C" void func_00392980(void* self, const unsigned short* s, float x, float y)
+{
+    float w = func_003921F0(self, s, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    func_00391E30(self, x - w * 0.5f, y, (void*)s);
+}
 
 //100%
 extern void* D_004A3E90;
@@ -1619,7 +1624,15 @@ void func_003946E8(void* self)
 {
 }
 
-INCLUDE_ASM("render/font", func_003946F0);
+extern "C" void func_003946F0(void* self, int a, int b, int c)
+{
+    int bitsA = (a << 23) & 0x1800000;
+    (*(sFontRS**)((char*)self + 0xE84))->w4 = ((*(sFontRS**)((char*)self + 0xE84))->w4 & 0xFE7FFFFF) | bitsA;
+    int bitsB = (b << 20) & 0x300000;
+    (*(sFontRS**)((char*)self + 0xE84))->w4 = ((*(sFontRS**)((char*)self + 0xE84))->w4 & 0xFFCFFFFF) | bitsB;
+    int bitsC = (c << 12) & 0xFF000;
+    (*(sFontRS**)((char*)self + 0xE84))->w4 = ((*(sFontRS**)((char*)self + 0xE84))->w4 & 0xFFF00FFF) | bitsC;
+}
 
 struct sFontRSBlock {
     char pad[0x10];
