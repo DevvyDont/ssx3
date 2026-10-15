@@ -429,6 +429,8 @@ extern "C" void cGame_exit(void* self, int toFrontEnd)
 }
 #endif
 
+INCLUDE_ASM("main/gameload", func_00230558);
+
 //100%
 INCLUDE_ASM("main/gameload", func_002305C8);
 #ifdef SKIP_ASM
@@ -486,6 +488,8 @@ int func_002306A8(void* self, int i)
 #endif
 
 INCLUDE_ASM("main/gameload", func_002306B8);
+
+INCLUDE_ASM("main/gameload", func_00230E90);
 
 //100%
 INCLUDE_ASM("main/gameload", func_00230E98);
@@ -571,6 +575,8 @@ void func_00231278(void* self, int val)
     *(int*)((char*)self + 0x208) = val;
 }
 #endif
+
+INCLUDE_ASM("main/gameload", func_00231280);
 
 //100%
 INCLUDE_ASM("main/gameload", func_002312D8);
@@ -798,6 +804,8 @@ extern "C" int func_00231AB8(void* self)
     return r;
 }
 #endif
+
+INCLUDE_ASM("main/gameload", func_00231B50);
 
 //100%
 INCLUDE_ASM("main/gameload", func_00231C70);

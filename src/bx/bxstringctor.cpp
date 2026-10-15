@@ -33,6 +33,8 @@ cBXString2* cBXString_cBXString(cBXString2* self)
 }
 #endif
 
+INCLUDE_ASM("bx/bxstringctor", func_002688E0);
+
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268950);
 #ifdef SKIP_ASM
@@ -59,6 +61,10 @@ INCLUDE_ASM("bx/bxstringctor", func_002689B8);
 struct sShortPad16 { short v; int pad[3]; };
 extern sShortPad16 D_004A2FB0;
 extern "C" void func_0025D6C0(int);
+
+INCLUDE_ASM("bx/bxstringctor", func_00268A80);
+
+INCLUDE_ASM("bx/bxstringctor", func_00268A88);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268A90);
@@ -344,6 +350,8 @@ extern "C" void func_00268E28(void* self, void* a1, int a2)
     func_0025E7F0(a2 + D_004A31B8.v);
 }
 #endif
+
+INCLUDE_ASM("bx/bxstringctor", func_00268E50);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268E78);
@@ -1625,6 +1633,8 @@ extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
 }
 #endif
 
+INCLUDE_ASM("bx/bxstringctor", func_0026A000);
+
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A068__FPv);
 #ifdef SKIP_ASM
@@ -1694,6 +1704,8 @@ extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
     return func_0026AC88(self, lo, hi);
 }
 #endif
+
+INCLUDE_ASM("bx/bxstringctor", func_0026A138);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A180);
@@ -1842,6 +1854,10 @@ done:
     return out;
 }
 #endif
+
+INCLUDE_ASM("bx/bxstringctor", func_0026A920);
+
+INCLUDE_ASM("bx/bxstringctor", func_0026A970);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A9B0);
@@ -2046,6 +2062,8 @@ extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
 }
 #endif
 
+INCLUDE_ASM("bx/bxstringctor", func_0026AD00);
+
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AD70);
 #ifdef SKIP_ASM
@@ -2067,6 +2085,10 @@ void func_0026ADA0(void* self)
 {
 }
 #endif
+
+INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
+
+INCLUDE_ASM("bx/bxstringctor", func_0026ADE8);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
@@ -2093,6 +2115,8 @@ extern "C" void func_0026ADF0(void* self)
     func_0026B880(self, p);
 }
 #endif
+
+INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF00);

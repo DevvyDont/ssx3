@@ -639,6 +639,8 @@ int func_0011FE98(void* self)
 
 extern "C" void* func_00111538(int);
 
+INCLUDE_ASM("ai/rider", func_0011FEA8);
+
 //100%
 INCLUDE_ASM("ai/rider", func_0011FEC8__FPv);
 #ifdef SKIP_ASM
@@ -656,6 +658,10 @@ int func_0011FEE8(void* self)
     return *(int*)((char*)*(void**)((char*)self + 0x77c) + 0xde4);
 }
 #endif
+
+INCLUDE_ASM("ai/rider", func_0011FEF8);
+
+INCLUDE_ASM("ai/rider", func_0011FF18);
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011FF48);
@@ -681,6 +687,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBECharacterInterface_getWeight(void* iface, int character);
 extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character, int stat);
+
+INCLUDE_ASM("ai/rider", func_0011FF70);
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_getMass);
@@ -867,6 +875,8 @@ extern "C" void func_00120E88(void* self)
     func_002ECF78(*(void**)((char*)self + 0x890));
 }
 #endif
+
+INCLUDE_ASM("ai/rider", func_00120EB8);
 
 //100%
 INCLUDE_ASM("ai/rider", func_00120ED8);
@@ -1310,6 +1320,8 @@ extern "C" void func_00121F30(char* self)
 }
 #endif
 
+INCLUDE_ASM("ai/rider", func_00122048);
+
 //100%
 INCLUDE_ASM("ai/rider", func_00122088);
 #ifdef SKIP_ASM
@@ -1561,6 +1573,8 @@ extern "C" void func_001225F0(void* self)
 
 extern "C" void* func_002F2088(int);
 
+INCLUDE_ASM("ai/rider", func_00122618);
+
 //100%
 INCLUDE_ASM("ai/rider", func_00122638__FPv);
 #ifdef SKIP_ASM
@@ -1581,6 +1595,8 @@ extern "C" void func_00122658(void* self)
     func_003E6448((char*)self + 0x794, 0, 0x20);
 }
 #endif
+
+INCLUDE_ASM("ai/rider", func_00122680);
 
 //100%
 INCLUDE_ASM("ai/rider", func_00122898);
@@ -1805,6 +1821,8 @@ extern "C" float* func_00122C28(float* out, void* rider)
     return out;
 }
 #endif
+
+INCLUDE_ASM("ai/rider", func_00122C88);
 
 //100%
 INCLUDE_ASM("ai/rider", func_00122C98);

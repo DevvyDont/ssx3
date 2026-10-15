@@ -136,6 +136,8 @@ extern "C" float func_00149208(void* self, int rider, int value)
 }
 #endif
 
+INCLUDE_ASM("be/beintstat", func_001492F0);
+
 //100%
 INCLUDE_ASM("be/beintstat", func_001493D8);
 #ifdef SKIP_ASM
@@ -465,3 +467,5 @@ extern "C" void func_00149A88(void* self, signed char idx)
 
 INCLUDE_ASM("be/beintstat", func_00149BB8);
 
+
+INCLUDE_ASM("be/beintstat", func_0014A078);

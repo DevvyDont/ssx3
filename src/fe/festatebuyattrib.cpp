@@ -470,6 +470,8 @@ extern "C" void cFEStateBuyAttrib_updateBank(void* self)
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5300);
 
+INCLUDE_ASM("fe/festatebuyattrib", func_001F54A8);
+
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F54B0);
 #ifdef SKIP_ASM
@@ -1218,6 +1220,8 @@ extern "C" void func_001F6840(void* self, char* name, const char* str)
 #endif
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
+
+INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6F30);
