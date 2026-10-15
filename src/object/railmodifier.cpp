@@ -1270,7 +1270,15 @@ INCLUDE_ASM("object/railmodifier", func_0035FDD0);
 
 INCLUDE_ASM("object/railmodifier", func_0035FE10);
 
-INCLUDE_ASM("object/railmodifier", func_00360700);
+extern char D_00491F00[];
+
+extern "C" void* func_00360700(void* self)
+{
+    *(int*)((char*)self + 0x4) = 0;
+    *(void**)((char*)self + 0xC) = D_00491F00;
+    *(int*)((char*)self + 0x8) = 0;
+    return self;
+}
 
 //100%
 void func_00360720(void* self)
@@ -1365,13 +1373,27 @@ extern "C" short func_003607B0(void* self)
     return *(short*)((char*)self + 0x10);
 }
 
-INCLUDE_ASM("object/railmodifier", func_003607B8);
+extern "C" void func_003607B8(void* self)
+{
+    *(unsigned short*)((char*)self + 0x12) |= 1;
+}
 
-INCLUDE_ASM("object/railmodifier", func_003607C8);
+extern "C" int func_003607C8(void* self)
+{
+    return *(unsigned short*)((char*)self + 0x12) & 1;
+}
 
-INCLUDE_ASM("object/railmodifier", func_003607D8);
+extern "C" void func_003607D8(void* self)
+{
+    *(unsigned short*)((char*)self + 0x12) &= ~1;
+}
 
-INCLUDE_ASM("object/railmodifier", func_003607E8);
+extern int D_0044AFF0[];
+
+extern "C" int func_003607E8(int i)
+{
+    return D_0044AFF0[i];
+}
 
 //100%
 struct sRailVEntryU800 {
@@ -1405,11 +1427,24 @@ int func_00360880(void* self)
     return *(int*)((char*)self + 0x14);
 }
 
-INCLUDE_ASM("object/railmodifier", func_00360888);
+extern int D_004A5B78;
+extern int D_004A5B7C;
 
-INCLUDE_ASM("object/railmodifier", func_00360898);
+extern "C" void func_00360888()
+{
+    D_004A5B78 = 1;
+    D_004A5B7C = 1;
+}
 
-INCLUDE_ASM("object/railmodifier", func_003608B0);
+extern "C" int func_00360898()
+{
+    return D_004A5B78++;
+}
+
+extern "C" int func_003608B0()
+{
+    return D_004A5B7C++;
+}
 
 extern int D_004A5B78;
 
@@ -1425,9 +1460,15 @@ extern "C" int func_003608D0()
     return D_004A5B7C;
 }
 
-INCLUDE_ASM("object/railmodifier", func_003608D8);
+extern "C" void func_003608D8(int v)
+{
+    D_004A5B78 = v;
+}
 
-INCLUDE_ASM("object/railmodifier", func_003608E0);
+extern "C" void func_003608E0(int v)
+{
+    D_004A5B7C = v;
+}
 
 //100%
 class cRailVirt {
@@ -1917,8 +1958,14 @@ int func_00360BF8(void* self)
 void func_00360C00(void* self)
 {
 }
+extern void* D_004913B8[];
 
-INCLUDE_ASM("object/railmodifier", func_00360C08);
+extern "C" void* func_00360C08(void* self)
+{
+    *(void**)((char*)self + 0x4) = D_004913B8;
+    *(int*)((char*)self + 0x0) = 1;
+    return self;
+}
 
 //100%
 extern void* D_004913B8[];
@@ -2092,29 +2139,108 @@ extern "C" void* func_003553C0(void*);
 
 INCLUDE_ASM("object/railmodifier", func_00360DE8);
 
-INCLUDE_ASM("object/railmodifier", func_00360E30);
+extern "C" int func_00360E30(void* self)
+{
+    int* p = *(int**)((char*)self + 0x1C);
+    if (p != 0) {
+        return p[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM("object/railmodifier", func_00360E50);
+extern "C" int func_00360E50(void* self)
+{
+    int* p = *(int**)((char*)self + 0x1C);
+    int r = 0;
+    if (p != 0) {
+        r = p[1] != 0;
+    }
+    return r;
+}
 
-INCLUDE_ASM("object/railmodifier", func_00360E70);
+extern "C" int func_00360E70(void* self)
+{
+    int* p = *(int**)((char*)self + 0x1C);
+    int r = 0;
+    if (p != 0) {
+        r = p[2] != 0;
+    }
+    return r;
+}
 
 INCLUDE_ASM("object/railmodifier", func_00360E90);
 
 INCLUDE_ASM("object/railmodifier", func_00360ED0);
 
-INCLUDE_ASM("object/railmodifier", func_00360F20);
+extern "C" void func_003530D0(void* block);
 
-INCLUDE_ASM("object/railmodifier", func_00360F48);
+extern "C" void func_00360F20(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_003530D0(block);
+    }
+}
 
-INCLUDE_ASM("object/railmodifier", func_00360F70);
+extern "C" void func_00353118(void* block);
 
-INCLUDE_ASM("object/railmodifier", func_00360F98);
+extern "C" void func_00360F48(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_00353118(block);
+    }
+}
 
-INCLUDE_ASM("object/railmodifier", func_00360FC0);
+extern "C" void func_00353150(void* block);
 
-INCLUDE_ASM("object/railmodifier", func_00360FE8);
+extern "C" void func_00360F70(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_00353150(block);
+    }
+}
 
-INCLUDE_ASM("object/railmodifier", func_00361010);
+extern "C" void func_00353188(void* block);
+
+extern "C" void func_00360F98(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_00353188(block);
+    }
+}
+
+extern "C" void func_00353278(void* block);
+
+extern "C" void func_00360FC0(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_00353278(block);
+    }
+}
+
+extern "C" void func_003531D0(void* block);
+
+extern "C" void func_00360FE8(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_003531D0(block);
+    }
+}
+
+extern "C" void func_00353228(void* block);
+
+extern "C" void func_00361010(void* self)
+{
+    void* block = *(void**)((char*)self + 0x1C);
+    if (block != 0) {
+        func_00353228(block);
+    }
+}
 
 //100%
 void* func_00361038(void* self)
@@ -2186,7 +2312,11 @@ extern "C" sElem003610E0* func_003610E0(void* self, int i)
     return &(*(sElem003610E0**)((char*)self + 0x44))[i];
 }
 
-INCLUDE_ASM("object/railmodifier", func_00361140);
+extern "C" void func_00361140(void* self)
+{
+    *(float*)((char*)self + 0x8) = 10000000000.0f;
+    *(float*)((char*)self + 0xC) = 10000000000.0f;
+}
 
 //100%
 void* func_00361150(void* self)
@@ -2297,7 +2427,10 @@ INCLUDE_ASM("object/railmodifier", func_00361378);
 
 INCLUDE_ASM("object/railmodifier", func_003613B0);
 
-INCLUDE_ASM("object/railmodifier", func_003613F0);
+extern "C" void func_003613F0(void* self, float* out)
+{
+    *out = *(float*)((char*)self + 0x70);
+}
 
 //100%
 extern "C" void func_0034DBA8(void* self, int flags);
@@ -2484,7 +2617,10 @@ extern "C" int func_003615C0(void* self, int a1)
 
 INCLUDE_ASM("object/railmodifier", func_003615D8);
 
-INCLUDE_ASM("object/railmodifier", func_00361750);
+extern "C" int func_00361750(void* self)
+{
+    return *(int*)((char*)self + 0x5C) == 0;
+}
 
 extern "C" float func_00361760(void* self)
 {
@@ -3408,7 +3544,19 @@ extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int h)
     pkt->qwc += 2;
 }
 
-INCLUDE_ASM("object/railmodifier", func_00362448);
+struct sDwordList362448 {
+    int count;
+    unsigned long* cur;
+};
+
+// Append the dword pair {0, 0x3F} to the list.
+extern "C" void func_00362448(sDwordList362448* list)
+{
+    list->cur[0] = 0;
+    list->cur[1] = 0x3F;
+    list->cur += 2;
+    list->count++;
+}
 
 INCLUDE_ASM("object/railmodifier", func_00362478);
 
@@ -3966,25 +4114,14 @@ extern "C" void func_00365FA8(void* self)
     *(void**)((char*)self + 0x1FF0) = self;
 }
 
-// 0x1c-byte elements reached through a pointer at self+0x1ff0, indexed by
-// the cursor at self+0x23dc (which the function then advances)
-struct sRailLink {
-    char pad_0x00[0x10];
-    int field_0x10;
-    char pad_0x14[0x8];
-};
-
-//95.0% - logic verified correct; the target puts the mult result in v1 and
-// ours lands in v0. Reordering the locals does not shift the allocation.
-INCLUDE_ASM("object/railmodifier", func_00365FE8);
-#ifdef SKIP_ASM
-extern "C" void func_00365FE8(void* self)
+//100%
+// Pop a link index off the free list headed at f23DC.
+extern "C" int func_00365FE8(sRailModE40* self)
 {
-    int i = *(int*)((char*)self + 0x23dc);
-    sRailLink* b = *(sRailLink**)((char*)self + 0x1ff0);
-    *(int*)((char*)self + 0x23dc) = b[i].field_0x10;
+    int i = self->f23DC;
+    self->f23DC = self->links[i].next;
+    return i;
 }
-#endif
 
 //100%
 struct sRailNode {
