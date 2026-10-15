@@ -1,5 +1,9 @@
 #include "common.h"
 
+extern "C" int func_00151A88(void* character, int id);
+extern "C" void func_00152368(void* character, int a, int b);
+extern "C" int func_0014DAC0(void* self, int a, int b, int* out);
+
 extern int D_005305B0[];
 
 struct sCharEntry {
@@ -63,7 +67,9 @@ int cBELibrary_getRiderIndex(int flag)
     }
 }
 
-INCLUDE_ASM("be/belibrary", func_0014A180);
+extern "C" void func_0014A180()
+{
+}
 
 INCLUDE_ASM("be/belibrary", func_0014A188);
 
@@ -149,7 +155,11 @@ extern "C" int func_0014AC50(int a0)
     return cBELibrary_getProfileIndex(a0);
 }
 
-INCLUDE_ASM("be/belibrary", func_0014AC70);
+extern "C" int func_0014AC70(void* self, int slot, int* character)
+{
+    *character = cBELibrary_getCharacterID(slot);
+    return cBELibrary_getProfileIndex(slot);
+}
 
 //100%
 extern int D_004A6CA8[];
@@ -161,7 +171,11 @@ extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src)
     func_003E6574(p + 0x290, src, 0x834);
 }
 
-INCLUDE_ASM("be/belibrary", func_0014ACF8);
+extern "C" void* func_0014AD28(void* self, int profile, int character);
+extern "C" int func_0014ACF8(void* self, int profile, int character)
+{
+    return func_00151A88(func_0014AD28(self, profile, character), character);
+}
 
 //100%
 extern int D_004A6CA8[];
@@ -288,7 +302,10 @@ extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
 
 INCLUDE_ASM("be/belibrary", func_0014B0F0);
 
-INCLUDE_ASM("be/belibrary", func_0014B170);
+extern "C" void func_0014B170(void* self, int profile, int character, int a, int b)
+{
+    func_00152368((char*)D_004A6CA8 + profile * 0x9B50 + character * 0xF88, a, b);
+}
 
 INCLUDE_ASM("be/belibrary", func_0014B1B0);
 
@@ -484,11 +501,23 @@ void* func_0014BDB8(void* self)
     return (void*)D_004A6750;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014BDC8);
+extern "C" void func_0014C548(sBEGroupTable* table, int a, int b, int value);
+extern "C" void func_0014BDC8(int a, int b, int value)
+{
+    func_0014C548((sBEGroupTable*)D_004A6750, a, b, value);
+}
 
-INCLUDE_ASM("be/belibrary", func_0014BE00);
+extern "C" void func_0014C590(sBEGroupTable* table, int a, int b, int value);
+extern "C" void func_0014BE00(int a, int b, int value)
+{
+    func_0014C590((sBEGroupTable*)D_004A6750, a, b, value);
+}
 
-INCLUDE_ASM("be/belibrary", func_0014BE38);
+extern "C" void func_0014C5D8(sBEGroupTable* table, int a, int b, int value);
+extern "C" void func_0014BE38(int a, int b, int value)
+{
+    func_0014C5D8((sBEGroupTable*)D_004A6750, a, b, value);
+}
 
 //100%
 extern "C" int func_00317F60(const char* name);
@@ -704,11 +733,23 @@ extern "C" void func_0014C488(sBEKeyTableG2* self)
     }
 }
 
-INCLUDE_ASM("be/belibrary", func_0014C548);
+extern "C" void func_0014C548(sBEGroupTable* table, int a, int b, int value)
+{
+    int i = func_0014D448(table, a, b);
+    ((char*)&table->entries[i])[0x10] = value;
+}
 
-INCLUDE_ASM("be/belibrary", func_0014C590);
+extern "C" void func_0014C590(sBEGroupTable* table, int a, int b, int value)
+{
+    int i = func_0014D448(table, a, b);
+    table->entries[i].pad_0x01[0] = value;
+}
 
-INCLUDE_ASM("be/belibrary", func_0014C5D8);
+extern "C" void func_0014C5D8(sBEGroupTable* table, int a, int b, int value)
+{
+    int i = func_0014D448(table, a, b);
+    *(short*)((char*)&table->entries[i] + 0xC) = value;
+}
 
 //100%
 extern "C" void* func_0014C620(void* self)
@@ -1079,13 +1120,28 @@ extern "C" void* func_0014D9D0(sBELibTables* self, int i)
     return self->field_0x4 + self->index0[i] * 0x38;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014DA08);
+extern "C" int func_0014DA08(sBEGroupTable* self, int i)
+{
+    return self->groupFirst[i];
+}
 
-INCLUDE_ASM("be/belibrary", func_0014DA18);
+struct sBEGroupTable20C {
+    char pad_0x000[0x20C];
+    int values[30]; // 0x20C
+};
+
+extern "C" int func_0014DA18(sBEGroupTable20C* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("be/belibrary", func_0014DA28);
 
-INCLUDE_ASM("be/belibrary", func_0014DAA0);
+extern "C" int func_0014DAA0(void* self, int a, int b)
+{
+    int out;
+    return func_0014DAC0(self, a, b, &out);
+}
 
 INCLUDE_ASM("be/belibrary", func_0014DAC0);
 
