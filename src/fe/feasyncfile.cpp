@@ -3279,7 +3279,39 @@ extern "C" void func_001A9710(void* self, int a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A97B8);
+//100%
+int func_001A94E0_jt(void*, void*, int) __asm__("func_001A94E0");
+int func_001A9438_jt(void*, void*, int) __asm__("func_001A9438");
+int func_001A9268_jt(void*, void*, int) __asm__("func_001A9268");
+int func_001A92D8_jt(void*, void*, int) __asm__("func_001A92D8");
+int func_001A9578_jt(void*, void*, int) __asm__("func_001A9578");
+int func_001A9638_jt(void*, void*, int) __asm__("func_001A9638");
+int func_001A9668_jt(void*, void*, int) __asm__("func_001A9668");
+int func_001A9710_jt(void*, void*, int) __asm__("func_001A9710");
+int func_001A93D0_jt(void*, void*, int) __asm__("func_001A93D0");
+
+extern "C" int func_001A97B8(void* self, void* msg, int a2)
+{
+    if (msg == *(void**)((char*)self + 0x69C))
+        return func_001A94E0_jt(self, msg, a2);
+    switch (*(int*)((char*)msg + 0x18)) {
+    case 0x832:
+        return func_001A9438_jt(self, msg, a2);
+    case 0x833:
+        return func_001A9268_jt(self, msg, a2);
+    case 0x834:
+        return func_001A92D8_jt(self, msg, a2);
+    case 0x837:
+        return func_001A9578_jt(self, msg, a2);
+    case 0x836:
+        return func_001A9638_jt(self, msg, a2);
+    case 0x83D:
+        return func_001A9668_jt(self, msg, a2);
+    case 0x83E:
+        return func_001A9710_jt(self, msg, a2);
+    }
+    return func_001A93D0_jt(self, msg, a2);
+}
 
 //100%
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -3809,7 +3841,45 @@ extern "C" void func_001AB108(void* self)
 
 INCLUDE_ASM("fe/feasyncfile", func_001AB178);
 
-INCLUDE_ASM("fe/feasyncfile", func_001AB288);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern char D_00461618[];
+extern char D_00462780[];
+extern char D_004627A0[];
+extern char D_004627D8[];
+
+extern "C" void func_001AB288(void* self, int code)
+{
+    void* p = func_001A9C50(self);
+    char* sub = (char*)p + 0xBC;
+    *(int*)((char*)p + 0xBC) = 1;
+    func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+    *(int*)((char*)p + 0x150) = 0x837;
+    *(int*)((char*)p + 0x14C) = 6;
+    *(int*)((char*)p + 0x170) = 0;
+    switch (code) {
+    case 0xF1:
+    case 0xFA:
+    case 0x10C:
+    case 0x113:
+        *(int*)(sub + 0x8) = GetHashValue32(D_00462780);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0x112:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627A0);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0xEE:
+    case 0xF8:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627D8);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    }
+    func_001A9BC0(self, p);
+}
 
 //100%
 extern "C" void* func_001A9C50(void* self);
@@ -5335,7 +5405,51 @@ extern "C" void func_001AF428(cFEVObj_001AF428* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001AF470);
+//100%
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00461C60[];
+void* func_001B0F60_470(void* self, int a1) __asm__("func_001B0F60");
+void func_001A8A40_470(void* self, void* obj) __asm__("func_001A8A40");
+void func_001AF688_470(void* self) __asm__("func_001AF688");
+void func_001AB178_470(void* self, int code) __asm__("func_001AB178");
+void func_001AB108_470(void* self) __asm__("func_001AB108");
+void func_001AFA60_470(void* screen, void* msg) __asm__("func_001AFA60");
+void func_001AFD88_470(void* screen, void* msg) __asm__("func_001AFD88");
+int func_001A8E40_470(void* self, int code, void* msg) __asm__("func_001A8E40");
+
+extern "C" int func_001AF470(char* self, int code, void* msg)
+{
+    switch (code) {
+    case 0xF3:
+        func_001A8A40_470(self, func_001B0F60_470(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)(self + 0x10)));
+        break;
+    case 0xED:
+    case 0xEE:
+    case 0xF0:
+    case 0xF1:
+    case 0xF2:
+    case 0x10C:
+    case 0x112:
+    case 0x113:
+        func_001AF688_470(self);
+        func_001AB178_470(self, code);
+        break;
+    case 0x110:
+        func_001AB108_470(self);
+        break;
+    case 0xE3:
+        func_001AFA60_470(*(void**)(self + 0x40), msg);
+        break;
+    case 0xE5:
+        func_001AFD88_470(*(void**)(self + 0x40), msg);
+        break;
+    default:
+        return func_001A8E40_470(self, code, msg);
+    case 0xEF:
+        break;
+    }
+    return 0;
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -8680,7 +8794,41 @@ extern "C" void func_001B5CF8(void* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B5D58);
+//100%
+int func_001B5CF8_jt(void*, void*, int) __asm__("func_001B5CF8");
+int func_001B55B0_jt(void*, void*, int) __asm__("func_001B55B0");
+int func_001B5740_jt(void*, void*, int) __asm__("func_001B5740");
+int func_001B5830_jt(void*, void*, int) __asm__("func_001B5830");
+int func_001B5A58_jt(void*, void*, int) __asm__("func_001B5A58");
+int func_001B4C40_jt(void*, void*, int) __asm__("func_001B4C40");
+int func_001B4C00_jt(void*, void*, int) __asm__("func_001B4C00");
+int func_001B5BD8_jt(void*, void*, int) __asm__("func_001B5BD8");
+int func_001A97B8_jt(void*, void*, int) __asm__("func_001A97B8");
+
+extern "C" int func_001B5D58(void* self, void* msg, int a2)
+{
+    switch (*(int*)((char*)msg + 0x18)) {
+    case 0x81C:
+        return func_001B5CF8_jt(self, msg, a2);
+    case 0x80E:
+        return func_001B55B0_jt(self, msg, a2);
+    case 0x81B:
+        return func_001B5740_jt(self, msg, a2);
+    case 0x81A:
+        return func_001B5830_jt(self, msg, a2);
+    case 0x82C:
+        return func_001B5A58_jt(self, msg, a2);
+    case 0x840:
+    case 0x841:
+    case 0x842:
+        return func_001B4C40_jt(self, msg, a2);
+    case 0x843:
+        return func_001B4C00_jt(self, msg, a2);
+    case 0x844:
+        return func_001B5BD8_jt(self, msg, a2);
+    }
+    return func_001A97B8_jt(self, msg, a2);
+}
 
 //100%
 int GetHashValue32(char* str);
