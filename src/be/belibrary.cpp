@@ -192,13 +192,45 @@ extern "C" void* func_0014AD50(void* self, int rider)
     return func_0014AD28(self, profile, func_0014AC30(rider));
 }
 
-INCLUDE_ASM("be/belibrary", func_0014ADA8);
+struct sBEBoltOn {
+    unsigned short id;
+    unsigned short flags;
+};
 
-INCLUDE_ASM("be/belibrary", func_0014ADD8);
+// Bolt-ons of one character in one profile
+struct sBEBoltCharacter {
+    char pad_0x000[0x28C];
+    int count;                 // 0x28C
+    sBEBoltOn items[525];      // 0x290
+    char pad_0xAC4[0xF88 - 0xAC4];
+};
+
+// Per profile (player 1, player 2, none), per character
+extern sBEBoltCharacter gBoltCharacters[3][10] __asm__("D_004A6CA8");
+
+extern "C" sBEBoltOn* func_0014ADA8(void* self, int profile, int character, int index)
+{
+    char* table = (char*)gBoltCharacters;
+    return &((sBEBoltCharacter*)(table + (profile * sizeof(gBoltCharacters[0]) + character * sizeof(sBEBoltCharacter))))->items[index];
+}
+
+
+extern "C" sBEBoltOn* func_0014ADD8(void* self, int slot, int index)
+{
+    int character = 0;
+    int profile = func_0014AC70(self, slot, &character);
+    return func_0014ADA8(self, profile, character, index);
+}
 
 INCLUDE_ASM("be/belibrary", func_0014AE28);
 
-INCLUDE_ASM("be/belibrary", func_0014AE60);
+extern "C" sBEBoltOn* func_0014AE28(void* self, int profile, int character, int* count);
+extern "C" sBEBoltOn* func_0014AE60(void* self, int slot, int* count)
+{
+    int character;
+    int profile = func_0014AC70(self, slot, &character);
+    return func_0014AE28(self, profile, character, count);
+}
 
 //100%
 extern int D_004A6CA8[];
@@ -307,7 +339,12 @@ extern "C" void func_0014B170(void* self, int profile, int character, int a, int
     func_00152368((char*)D_004A6CA8 + profile * 0x9B50 + character * 0xF88, a, b);
 }
 
-INCLUDE_ASM("be/belibrary", func_0014B1B0);
+extern "C" void func_0014B1B0(void* self, int slot, int a, int b)
+{
+    int character = 0;
+    int profile = func_0014AC70(self, slot, &character);
+    func_00152368((char*)D_004A6CA8 + profile * 0x9B50 + character * 0xF88, a, b);
+}
 
 INCLUDE_ASM("be/belibrary", func_0014B218);
 
@@ -423,7 +460,12 @@ INCLUDE_ASM("be/belibrary", func_0014B700);
 
 INCLUDE_ASM("be/belibrary", func_0014B7A8);
 
-INCLUDE_ASM("be/belibrary", func_0014B920);
+extern "C" int func_0014B7A8(void* self, int profile, int character, int a);
+extern "C" int func_0014B920(void* self, int slot, int a)
+{
+    int profile = func_0014AC50(slot);
+    return func_0014B7A8(self, profile, func_0014AC30(slot), a);
+}
 
 //100%
 extern "C" void* cBE_getBE();
@@ -477,7 +519,11 @@ extern "C" int func_0014B988(void* self, int a, int b, sBEEntry38_14B988* e0, ch
 extern void* D_004A6750[];
 extern "C" void* func_0014C6A0(void*);
 
-INCLUDE_ASM("be/belibrary", func_0014BBA0);
+extern "C" int func_0014BBA0(void* self, int slot, sBEEntry38_14B988* a, char* b)
+{
+    int profile = func_0014AC50(slot);
+    return func_0014B988(self, profile, func_0014AC30(slot), a, b);
+}
 
 INCLUDE_ASM("be/belibrary", func_0014BC18);
 
