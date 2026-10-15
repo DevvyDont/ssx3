@@ -35,7 +35,22 @@ extern "C" void func_0017D008(void* self, int idx)
 
 INCLUDE_ASM("fe/debugfe", func_0017D0A8);
 
-INCLUDE_ASM("fe/debugfe", func_0017D1B8);
+//100%
+extern "C" int func_0017D1B8(void* self, int a1, unsigned int a2)
+{
+    int r = 5;
+    if (a1 == 2)
+        r = 4;
+    switch (a2) {
+    case 0: case 4: case 5: case 6:
+        r = 0;
+        break;
+    case 1: case 2: case 3:
+        r = 1;
+        break;
+    }
+    return r;
+}
 
 //100%
 extern void* D_0046D740[];

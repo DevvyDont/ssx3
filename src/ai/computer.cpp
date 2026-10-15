@@ -1454,7 +1454,36 @@ extern "C" void func_001112B8(void* self, int v)
     func_00111380(self, old);
 }
 
-INCLUDE_ASM("ai/computer", func_001112F8);
+//100%
+extern "C" void func_0013F410(void*, int);
+// These take (self) in their own units; here the caller's second argument is passed through
+void func_00139A18_pass(void*, int) __asm__("func_00139A18__FPv");
+void func_00136F28_pass(void*, int) __asm__("func_00136F28__FPv");
+extern "C" void func_0013C5A0(void*, int);
+extern "C" void func_00139178(void*, int);
+
+extern "C" void func_001112F8(char* self, int a1)
+{
+    switch (*(int*)(self + 0xDE0)) {
+    case 0:
+        func_0013F410(self, a1);
+        break;
+    case 1:
+        func_00139A18_pass(self + 0x20, a1);
+        break;
+    case 2:
+        func_00136F28_pass(self + 0x30, a1);
+        break;
+    case 3:
+        break;
+    case 4:
+        func_0013C5A0(self + 0xB0, a1);
+        break;
+    case 5:
+        func_00139178(self + 0x110, a1);
+        break;
+    }
+}
 
 INCLUDE_ASM("ai/computer", func_00111380);
 
