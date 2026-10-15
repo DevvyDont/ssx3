@@ -842,7 +842,23 @@ extern "C" void func_00292A50(void* self, int id)
     func_00292508(self, id, n);
 }
 
-INCLUDE_ASM("sound/soundsys", func_00292AE8);
+extern sSndKey8_10E0 D_004A36A8[];
+void func_002ADDE0_k(void* bm, long key) __asm__("func_002ADDE0");
+
+struct sSsVt2AE8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00292AE8(void* self, int a1)
+{
+    char* m = **(char***)((char*)self + 0x118);
+    sSsVt2AE8* vt = *(sSsVt2AE8**)(m + 0xAB0);
+    char* obj = m + 0x1D8;
+    vt[4].fn(obj + vt[4].delta, a1);
+    func_002ADDE0_k(**(char***)((char*)self + 0x118) + 0x1D8, D_004A36A8[0].v);
+}
 
 INCLUDE_ASM("sound/soundsys", func_00292B48);
 
@@ -5822,7 +5838,25 @@ extern "C" void func_002A39E0(void* self)
     }
 }
 
-INCLUDE_ASM("sound/soundsys", func_002A3AA0);
+int func_003B7C40_st(int h, int* out) __asm__("func_003B7C40");
+extern "C" void func_002A73A8(void* self, int a1, int i);
+
+extern "C" int func_002A3AA0(void* self, void* obj)
+{
+    int st[4];
+    int r;
+    func_003B58A0();
+    r = func_003B7C40_st(*(int*)((char*)obj + 0x1C), st);
+    func_003B58D8();
+    if (r < 0) {
+        return 0;
+    }
+    if (st[0] != 3) {
+        return 0;
+    }
+    func_002A73A8(self, 0, 0);
+    return 1;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
