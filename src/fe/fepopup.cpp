@@ -1765,7 +1765,40 @@ extern "C" int func_001CA150(void* self)
     return n - 1;
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CA180);
+//100%
+char* func_00397870_180(void* list, int i) __asm__("func_00397870");
+typedef void (*tSetStyle_1CA180)(void*, void*);
+
+extern "C" int func_001CA180(char* self, unsigned char* item, int code)
+{
+    switch (code) {
+    case 5: {
+        int i;
+        int sel = item[0x95];
+        for (i = 0; i < item[0x96]; i++) {
+            char* w = func_00397870_180(item + 0x74, i);
+            if (w == *(char**)(self + 0x88))
+                w = *(char**)(self + 0x84);
+            if (i == sel) {
+                char* vt = *(char**)(w + 0x8);
+                ((tSetStyle_1CA180)*(void**)(vt + 0x5C))(w + *(short*)(vt + 0x58), self + 0x32C);
+            } else {
+                char* vt = *(char**)(w + 0x8);
+                ((tSetStyle_1CA180)*(void**)(vt + 0x5C))(w + *(short*)(vt + 0x58), self + 0x33C);
+            }
+        }
+        return 0x101;
+    }
+    case 8:
+    case 9:
+        return 0;
+    case 7:
+        return *(int*)(self + 0x310) ? 0x101 : 0;
+    case 6:
+        return *(int*)(self + 0xB8) ? 0 : 0x101;
+    }
+    return 0x101;
+}
 
 INCLUDE_ASM("fe/fepopup", func_001CA298);
 
