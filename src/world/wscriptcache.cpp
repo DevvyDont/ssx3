@@ -58,9 +58,22 @@ extern "C" void func_003AC8F0(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AC980);
+extern "C" void func_003ACAD0(void* entry);
 
-INCLUDE_ASM("world/wscriptcache", func_003AC9E0);
+// Updates every 12-byte entry of the list
+extern "C" void func_003AC980(void* self)
+{
+    unsigned int i;
+    for (i = 0; i < *(unsigned int*)((char*)self + 0x8); i++)
+        func_003ACAD0(*(char**)((char*)self + 0x4) + i * 12);
+}
+
+extern "C" void func_003ACBB8(void* entry, int a);
+
+extern "C" void func_003AC9E0(void* self, int i, int a)
+{
+    func_003ACBB8(*(char**)((char*)self + 0x4) + i * 12, a);
+}
 
 //100%
 struct sWScriptCacheItem {
@@ -330,7 +343,10 @@ void* func_003AD230(void* self)
     return func_002E27E8(self);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AD250);
+extern "C" void* func_003AD250(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AD290);
 
@@ -826,7 +842,14 @@ void* func_003AE958(void* self)
     return func_003AE888(self, 0x1000);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AE978);
+extern "C" int func_003AEF48(void* self, int a);
+
+extern "C" int func_003AE978(void** self, int a)
+{
+    if (*self)
+        return func_003AEF48(*self, a);
+    return 0;
+}
 
 //100%
 extern "C" void func_003B58A0();
@@ -1092,7 +1115,21 @@ extern "C" int func_003AEEF8(void* self)
     return 0;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AEF48);
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B7E70(int handle, int a);
+
+extern "C" int func_003AEF48(void* self, int a)
+{
+    int r;
+    if (*(int*)((char*)self + 0xC) != -1) {
+        func_003B58A0();
+        r = func_003B7E70(*(int*)((char*)self + 0xC), a);
+        func_003B58D8();
+        return r;
+    }
+    return 0;
+}
 
 //100%
 extern "C" void func_003B58A0();
@@ -1122,13 +1159,24 @@ extern "C" int func_003AEFA8(void* self)
 
 extern void* D_00456890[];
 
-INCLUDE_ASM("world/wscriptcache", func_003AF010);
+extern "C" void* func_003AF010(void* self)
+{
+    *(int*)((char*)self + 0x0) = 0;
+    *(int*)((char*)self + 0x4) = 0;
+    return self;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF020);
 
 INCLUDE_ASM("world/wscriptcache", func_003AF0C8);
 
-INCLUDE_ASM("world/wscriptcache", func_003AF230);
+// Entry i of the 0x34-byte entries, or 0 past the count
+extern "C" void* func_003AF230(void* self, unsigned int i)
+{
+    if (*(unsigned int*)((char*)self + 0x4) < i)
+        return 0;
+    return *(char**)self + i * 0x34;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF258);
 
