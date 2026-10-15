@@ -17,9 +17,13 @@ or any disc file.
   - callback stacks kept clear of the main thread's stack;
   - GS CSR FIFO status;
   - a resident-module list for `sceSifSearchModuleByName`;
+  - MPEG movies that pull their data through the game's Nodata callback, and end when the stream does;
+  - a way for a game to move the runtime's scratch allocations out of its own heap;
+  - the debug panel hidden until F1 is pressed (or `PS2X_DEBUG_UI=1`);
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
-  answers the module search, and routes `isceSifSendCmd`.
+  answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
+  0x80000-0x100000 gap below the ELF, since the game's own allocator owns everything above it.
 - `ssx3.toml.in` is the translator config (the analyzer's stub and entry lists). `gen_funcs.py` and
   `function_splits.txt` produce its function map.
 
@@ -31,13 +35,17 @@ On Debian/Ubuntu:
 ```bash
 sudo dpkg --add-architecture i386 && sudo apt update
 sudo apt install g++-multilib cmake ninja-build libgl-dev:i386 libx11-dev:i386 libxrandr-dev:i386 \
-    libxinerama-dev:i386 libxcursor-dev:i386 libxi-dev:i386
+    libxinerama-dev:i386 libxcursor-dev:i386 libxi-dev:i386 \
+    libavcodec-dev:i386 libavformat-dev:i386 libavutil-dev:i386 libswresample-dev:i386 libswscale-dev:i386
 cmake -S port/recomp -B port/recomp/build -G Ninja -DSSX3PC_ELF=/path/to/SLUS_207.72 -DSSX3PC_RUNTIME_JOBS=4
 ninja -C port/recomp/build
 ```
 
 The translator turns about 14,700 functions into the same number of C++ files, so the runtime build is long.
 Each compile job needs up to about 3 GB of memory, and that's what `SSX3PC_RUNTIME_JOBS` is for.
+
+FFmpeg plays the game's movies. Pass `-DSSX3PC_FFMPEG=OFF` to build without it (the game then waits forever on
+the first movie), or `-DSSX3PC_PKG_CONFIG_PATH=...` if your 32-bit FFmpeg lives elsewhere.
 
 ## Running
 
@@ -56,9 +64,14 @@ These debug switches print to stderr:
 | `PS2X_SIF_LOG=1` | SIF commands in both directions |
 | `PS2X_CD_LOG=1` | CD reads |
 | `PS2X_FILE_LOG=1` | the game's file lookups and their results |
+| `PS2X_MPEG_LOG=1` | MPEG callbacks, data fed to the decoder, and the end of each movie |
+| `PS2X_HEAP_LOG=1` | the runtime's scratch allocations |
+| `PS2X_DUMP_RDRAM=file` with `PS2X_DUMP_RDRAM_TICK=n` | EE RAM, written to `file` at frame `n` |
+
+Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 
 ## Status
 
-The game loads its IOP modules, sets up the app manager, loads its sound banks and enters the front end. It
-then waits on files that the test disc image didn't have: `MUSIC.BIG`, `MUSIC2.BIG`, `UI/MAPGFX.BIG` and
-`DATA/MOVIES`. Getting past that needs the full disc.
+With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
+input through the front end: the main menu, character select and the 3D character setup screen all draw.
+Sound has not been tested yet.
