@@ -1292,7 +1292,33 @@ extern "C" void func_0028F000(void* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028F108);
 
-INCLUDE_ASM("sound/bankmanager", func_0028F140);
+//100%
+typedef void (*tModeFn_28F140)(void*, int);
+
+extern "C" void func_0028F140(char* self, unsigned int mode)
+{
+    int r;
+    if (mode == *(unsigned int*)(self + 0x6290))
+        return;
+    *(unsigned int*)(self + 0x6290) = mode;
+    switch (mode) {
+    case 0: r = *(int*)(self + 0x534) == -1 ? 0 : 9; break;
+    case 1: r = 1; break;
+    case 3: r = 3; break;
+    case 4: r = 4; break;
+    case 5: r = 5; break;
+    case 6: r = 6; break;
+    case 7: r = 7; break;
+    case 8: r = 8; break;
+    case 2: case 9: r = 2; break;
+    default: r = -1; break;
+    }
+    if (r >= 0) {
+        char* vt = *(char**)(self + 0x5558);
+        char* o = self + 0x118;
+        ((tModeFn_28F140)*(void**)(vt + 0x24))(o + *(short*)(vt + 0x20), r);
+    }
+}
 
 INCLUDE_ASM("sound/bankmanager", func_0028F200);
 
