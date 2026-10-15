@@ -5,7 +5,10 @@ void cGameAnimMap_testResolve()
 {
 }
 
-INCLUDE_ASM("animation/gameanimmap", func_003150B8);
+extern "C" void* func_003150B8(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("animation/gameanimmap", func_003150F8);
 

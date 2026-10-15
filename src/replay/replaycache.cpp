@@ -1003,7 +1003,10 @@ extern "C" void func_00271708(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00271758);
 
-INCLUDE_ASM("replay/replaycache", func_002718A8);
+extern "C" void* func_002718A8(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("replay/replaycache", func_002718E8);
 

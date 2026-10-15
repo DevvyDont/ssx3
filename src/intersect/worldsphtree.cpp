@@ -1497,7 +1497,10 @@ extern "C" float func_003378C0(void* self, char* q, sHit_003378C0* out, int a3)
 
 INCLUDE_ASM("intersect/worldsphtree", func_00337A48);
 
-INCLUDE_ASM("intersect/worldsphtree", func_003388E0);
+extern "C" void* func_003388E0(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("intersect/worldsphtree", func_00338920);
 

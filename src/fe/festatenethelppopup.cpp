@@ -293,7 +293,10 @@ void func_001DA530(void* self, int i, int value)
     *(int*)((char*)self + (i << 2) + 0x58) = value;
 }
 
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA540);
+extern "C" void* func_001DA540(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA580);
 

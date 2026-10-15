@@ -148,7 +148,10 @@ extern "C" int func_00283BB8(void* self)
     return *p;
 }
 
-INCLUDE_ASM("scripter/videngine", func_00283BE0);
+extern "C" void* func_00283BE0(void* p, ...)
+{
+    return p;
+}
 
 //100%
 void func_00283C20(void* self)

@@ -675,7 +675,10 @@ extern "C" int func_002F6B38(void* self)
     return *(unsigned char*)((char*)self + 0x7) & 0x70;
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F6B48);
+extern "C" void* func_002F6B48(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B88);
 
@@ -1402,7 +1405,10 @@ void func_002F8FF8(void* self)
 {
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F9000);
+extern "C" void* func_002F9000(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F9040);
 
@@ -1421,7 +1427,10 @@ void func_002FA5F8(void* self)
 {
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002FA600);
+extern "C" void* func_002FA600(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("visualfx/worldlightman", func_002FA640);
 

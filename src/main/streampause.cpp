@@ -16,7 +16,10 @@ cStreamPause* cStreamPause_construct()
     return self;
 }
 
-INCLUDE_ASM("main/streampause", func_00242D50);
+extern "C" void* func_00242D50(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("main/streampause", func_00242D90);
 

@@ -1689,7 +1689,10 @@ extern "C" float* func_00122C28(float* out, void* rider)
     return out;
 }
 
-INCLUDE_ASM("ai/rider", func_00122C88);
+extern "C" float func_00122C88()
+{
+    return 0.9250819683074951f;
+}
 
 //100%
 extern "C" int func_00122C98(void* self)

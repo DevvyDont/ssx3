@@ -347,7 +347,10 @@ extern "C" void func_0026BA88(void* dst, void* src)
     }
 }
 
-INCLUDE_ASM("path/pathsys", func_0026BAA8);
+extern "C" void* func_0026BAA8(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("path/pathsys", func_0026BAE8);
 

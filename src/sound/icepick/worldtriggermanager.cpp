@@ -1104,7 +1104,10 @@ extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, 
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
 
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83B8);
+extern "C" void* func_002B83B8(void* p, ...)
+{
+    return p;
+}
 
 //100%
 extern "C" void func_002BADD0(void* node, void* list);

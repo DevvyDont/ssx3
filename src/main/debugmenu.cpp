@@ -947,7 +947,10 @@ void* func_0024D6B0(void* self)
     return func_002CBFD0(self);
 }
 
-INCLUDE_ASM("main/debugmenu", func_0024D6D0);
+extern "C" void* func_0024D6D0(void* p, ...)
+{
+    return p;
+}
 
 //100%
 extern "C" void func_002CA280(void* p, int flags);
@@ -1811,7 +1814,10 @@ void* func_00250A80(void* self)
     return func_002CBFD0(self);
 }
 
-INCLUDE_ASM("main/debugmenu", func_00250AA0);
+extern "C" void* func_00250AA0(void* p, ...)
+{
+    return p;
+}
 
 //100%
 extern "C" void func_002CA280(void* p, int flags);

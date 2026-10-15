@@ -2891,7 +2891,10 @@ extern "C" void func_001635C0()
 {
 }
 
-INCLUDE_ASM("camera/camera", func_001635C8);
+extern "C" float func_001635C8()
+{
+    return 0.0f;
+}
 
 extern "C" int func_001635D8()
 {
@@ -3655,7 +3658,10 @@ extern "C" void* func_001673A0(void* self, void* a1)
     return self;
 }
 
-INCLUDE_ASM("camera/camera", func_001673B8);
+extern "C" void* func_001673B8(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("camera/camera", func_001673F8);
 

@@ -1224,7 +1224,10 @@ float func_0011A0C0(void* self)
     return 0.0f;
 }
 
-INCLUDE_ASM("ai/ridermetrix", func_0011A0D0);
+extern "C" float func_0011A0D0()
+{
+    return 0.0f;
+}
 
 //100%
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);

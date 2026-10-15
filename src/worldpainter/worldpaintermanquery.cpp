@@ -20,7 +20,10 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AA0);
 
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AF0);
 
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0B30);
+extern "C" void* func_002C0B30(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0B70);
 
