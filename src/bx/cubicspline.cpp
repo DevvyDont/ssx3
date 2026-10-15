@@ -547,7 +547,12 @@ INCLUDE_ASM("bx/cubicspline", func_0031F4E8);
 
 INCLUDE_ASM("bx/cubicspline", func_0031F718);
 
-INCLUDE_ASM("bx/cubicspline", func_0031F7F0);
+extern "C" int func_0031ED60(void* self);
+
+extern "C" int func_0031F7F0(void* self)
+{
+    return func_0031ED60(self);
+}
 
 INCLUDE_ASM("bx/cubicspline", func_0031F810);
 
@@ -737,7 +742,12 @@ extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit lon
 
 extern "C" int func_0031F2C8(void* self);
 
-INCLUDE_ASM("bx/cubicspline", func_00320038);
+extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+
+extern "C" void* func_00320038(void* ms, unsigned int bytes)
+{
+    return func_0031E818(ms, bytes);
+}
 
 //99.29%
 int func_00320058(void* self)

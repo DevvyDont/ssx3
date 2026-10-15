@@ -1950,7 +1950,12 @@ int func_0027C098(void* self)
     return *(int*)((char*)self + 0x20);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0A0);
+extern "C" void* func_002742E0(void* self);
+
+extern "C" void* func_0027C0A0(void* self)
+{
+    return func_002742E0(self);
+}
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0C0);
 
@@ -1989,7 +1994,12 @@ int func_0027C2A8(void* self)
     return *(int*)((char*)self + 0x20);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2B0);
+extern "C" void* func_002742E0(void* self);
+
+extern "C" void* func_0027C2B0(void* self)
+{
+    return func_002742E0(self);
+}
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2D0);
 
@@ -2028,7 +2038,12 @@ int func_0027C4B8(void* self)
     return *(int*)((char*)self + 0x20);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4C0);
+extern "C" void* func_002742E0(void* self);
+
+extern "C" void* func_0027C4C0(void* self)
+{
+    return func_002742E0(self);
+}
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4E0);
 
@@ -2066,7 +2081,12 @@ int func_0027C6A0(void* self)
     return *(int*)((char*)self + 0x20);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6A8);
+extern "C" void* func_002742E0(void* self);
+
+extern "C" void* func_0027C6A8(void* self)
+{
+    return func_002742E0(self);
+}
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6C8);
 
@@ -2104,7 +2124,12 @@ int func_0027C888(void* self)
     return *(int*)((char*)self + 0x20);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C890);
+extern "C" void* func_002742E0(void* self);
+
+extern "C" void* func_0027C890(void* self)
+{
+    return func_002742E0(self);
+}
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C8B0);
 

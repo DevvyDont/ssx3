@@ -1195,9 +1195,19 @@ void* func_00272510(void* self)
     return func_002724E8(self);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272530);
+extern "C" void* func_002724E8(void* self);
 
-INCLUDE_ASM("replay/replaycache", func_00272550);
+extern "C" void* func_00272530(void* self)
+{
+    return func_002724E8(self);
+}
+
+extern "C" void* func_002724E8(void* self);
+
+extern "C" void* func_00272550(void* self)
+{
+    return func_002724E8(self);
+}
 
 INCLUDE_ASM("replay/replaycache", func_00272570);
 
@@ -1466,11 +1476,26 @@ extern "C" void* func_00272CC0(void* self, int a1)
     return *(int*)(p + 0xc) != 0 ? p + 0x8 : 0;
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272CE0);
+extern "C" int func_00274C58(void* self);
 
-INCLUDE_ASM("replay/replaycache", func_00272D00);
+extern "C" int func_00272CE0(void* self)
+{
+    return func_00274C58(self);
+}
 
-INCLUDE_ASM("replay/replaycache", func_00272D20);
+extern "C" int func_00274C60(void* self);
+
+extern "C" int func_00272D00(void* self)
+{
+    return func_00274C60(self);
+}
+
+extern "C" unsigned char func_00274C68(void* self);
+
+extern "C" unsigned char func_00272D20(void* self)
+{
+    return func_00274C68(self);
+}
 
 INCLUDE_ASM("replay/replaycache", func_00272D40);
 
