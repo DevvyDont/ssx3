@@ -255,7 +255,30 @@ extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int pe
     return cBENewPlayerInterface_isPeakLocked(self, profile, cBELibrary_getCharacterID(rider), peak);
 }
 
-INCLUDE_ASM("be/beintplayer", func_00146070);
+// PORT: 64-bit `long` flag word (8 bytes on EE); use uint64_t off-PS2.
+struct sCharFlags64_00146070
+{
+    unsigned long low : 12;
+    unsigned long f12 : 1;
+    unsigned long f13 : 1;
+    unsigned long rest : 50;
+};
+
+extern "C" void func_00146070(void* self, int index, int which, int value)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    signed char c = D_00534FE0[id].mCharID;
+    if (which == 1) {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sCharFlags64_00146070*)(p + 0x278))->f12 = value;
+    } else {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sCharFlags64_00146070*)(p + 0x278))->f13 = value;
+    }
+}
 
 //100%
 int cBELibrary_getProfileIndex(int);
