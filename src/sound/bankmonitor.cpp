@@ -299,7 +299,17 @@ extern "C" void func_002AD650(void* self, int id, float v)
 
 INCLUDE_ASM("sound/bankmonitor", func_002AD730);
 
-INCLUDE_ASM("sound/bankmonitor", func_002AD7A8);
+// Number of the 64 voices for which func_002ABB80 returns 0 (free voices).
+extern "C" int func_002AD7A8(void* self)
+{
+    int n = 0;
+    for (int i = 0; i < 64; i++) {
+        if (func_002ABB80((char*)*(void**)((char*)self + 0x8EC) + i * 0xC0) == 0) {
+            n++;
+        }
+    }
+    return n;
+}
 
 //100%
 struct sBankVoice {
@@ -748,7 +758,31 @@ extern "C" void func_002AE1F0(int* self)
     self[0] = -1;
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002AE230);
+// Find a slot: with a < 0 the first unused one (f8 < 0), otherwise the one with
+// f8 == a and (b < 0 or f0 == b). Returns -8 when none matches.
+extern "C" int func_002AE230(int a, int b)
+{
+    int i;
+    for (i = 0; i < 24; i++) {
+        sBankMonSlot28_E048* e = &D_004D3EF8_E048[i];
+        if (a < 0) {
+            if (e->f8 >= 0) {
+                continue;
+            }
+            return i;
+        }
+        if (e->f8 != a) {
+            continue;
+        }
+        if (b < 0) {
+            return i;
+        }
+        if (e->f0 == b) {
+            return i;
+        }
+    }
+    return -8;
+}
 
 extern "C" int func_002AE290()
 {
@@ -3360,7 +3394,17 @@ extern "C" sBankEntry64* func_002B4150(sBankMonitor934* self, int i)
     return &self->c[i];
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B4180);
+// func_002B42B8 is defined later in the unit with its own monitor type.
+void func_002B42B8_v(void* self, int a, int b) __asm__("func_002B42B8");
+
+extern "C" void func_002B4180(void* self, int n)
+{
+    *(int*)((char*)self + 0x3F0) = -1;
+    func_002B42B8_v(self, 0, 0);
+    for (int i = 0; i < n; i++) {
+        func_002B42B8_v(self, 0, 0);
+    }
+}
 
 INCLUDE_ASM("sound/bankmonitor", func_002B41E8);
 
@@ -3435,7 +3479,25 @@ extern "C" void func_002B43D8(void* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002B4470);
 
-INCLUDE_ASM("sound/bankmonitor", func_002B44D8);
+// 64-bit bank id stored word-aligned; read with an unaligned 64-bit load and
+// passed in a single register.
+struct sBankId_44D8 {
+    long v;
+} __attribute__((packed));
+extern char D_004A3838[];
+extern char D_004A3840[];
+void func_002ADDE0_id(void* bm, long id) __asm__("func_002ADDE0");
+
+extern "C" void func_002B4708(void* self);
+
+extern "C" void func_002B44D8(void* self)
+{
+    if (*(void**)((char*)self + 0x408) != 0) {
+        func_002ADDE0_id(**(char***)self + 0x1D8, ((sBankId_44D8*)D_004A3838)->v);
+        func_002ADDE0_id(**(char***)self + 0x1D8, ((sBankId_44D8*)D_004A3840)->v);
+        func_002B4708(self);
+    }
+}
 
 struct sVEntry_2B4540 {
     short delta;
