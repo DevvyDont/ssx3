@@ -171,6 +171,8 @@ INCLUDE_ASM("bx/ps2main", func_0031B748);
 
 INCLUDE_ASM("bx/ps2main", func_0031B7A8);
 
+INCLUDE_ASM("bx/ps2main", func_0031B9B0);
+
 INCLUDE_ASM("bx/ps2main", func_0031BB30);
 
 //100%

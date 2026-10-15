@@ -729,7 +729,13 @@ extern "C" int func_002F6B38(void* self)
 }
 #endif
 
+INCLUDE_ASM("visualfx/worldlightman", func_002F6B48);
+
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B88);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7A60);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A68__FPv);
@@ -739,6 +745,44 @@ void* func_002F7A68(void* self)
     return self;
 }
 #endif
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7AB0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7AB8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7AD8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7AE0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B00);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B08);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B28);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B30);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B50);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B58);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B78);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7BA0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7BC8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7BD0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7BD8);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BE0);
@@ -787,6 +831,90 @@ void func_002F7C30(void* self)
 {
 }
 #endif
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7C70);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7C80);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7C90);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7CA0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7CB0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7CC0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7CD0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7CE0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7CF0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D00);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D10);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D20);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D30);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D40);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D50);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D60);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D70);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D80);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7D90);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7DA0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7DB0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7DC0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7DD0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7DE0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7DF0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E00);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E10);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E20);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E30);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E40);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E50);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E60);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E70);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E90);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7E98);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7EA0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7EA8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7EC8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7EF0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7EF8);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7F00);
@@ -848,6 +976,18 @@ extern "C" void func_002F7F90(void* self, int flags)
 }
 #endif
 
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FC0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FC8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FD0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FD8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FE0);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FE8);
+
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FF0__FPv);
 #ifdef SKIP_ASM
@@ -856,6 +996,8 @@ int func_002F7FF0(void* self)
     return *(int*)((char*)self + 0x74);
 }
 #endif
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F7FF8);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8000);
@@ -886,6 +1028,8 @@ extern "C" void func_002F8030(void* self, int flags)
     }
 }
 #endif
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F8060);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F80D8);
@@ -940,6 +1084,8 @@ void func_002F8168(void* self)
 }
 #endif
 
+INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
+
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8188);
 #ifdef SKIP_ASM
@@ -965,6 +1111,10 @@ void* func_002F81B8(void* self)
     return func_003546C8(self);
 }
 #endif
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F81D8);
+
+INCLUDE_ASM("visualfx/worldlightman", func_002F81E0);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81F0);
@@ -1118,6 +1268,8 @@ void func_002F8FF8(void* self)
 }
 #endif
 
+INCLUDE_ASM("visualfx/worldlightman", func_002F9000);
+
 INCLUDE_ASM("visualfx/worldlightman", func_002F9040);
 
 extern "C" void* func_002F9040(int, int);
@@ -1140,6 +1292,8 @@ void func_002FA5F8(void* self)
 {
 }
 #endif
+
+INCLUDE_ASM("visualfx/worldlightman", func_002FA600);
 
 INCLUDE_ASM("visualfx/worldlightman", func_002FA640);
 

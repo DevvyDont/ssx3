@@ -53,6 +53,8 @@ extern "C" int func_00314D60(int* a, int* b)
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D98);
 
+INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
+
 //100%
 INCLUDE_ASM("animation/mdfarchive", func_00314DD8);
 #ifdef SKIP_ASM
@@ -175,3 +177,4 @@ extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
 }
 #endif
 
+INCLUDE_ASM("animation/mdfarchive", func_00315070);

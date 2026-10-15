@@ -98,6 +98,8 @@ extern "C" int func_001509F8(void* self, int rider)
 }
 #endif
 
+INCLUDE_ASM("be/beintecon", func_00150A58);
+
 //100%
 INCLUDE_ASM("be/beintecon", func_00150A90);
 #ifdef SKIP_ASM
@@ -117,6 +119,8 @@ extern "C" int func_00150A90(void* self, int a, int b, int amount)
     return *(int*)(p + 0xAC4);
 }
 #endif
+
+INCLUDE_ASM("be/beintecon", func_00150AE0);
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00150B48);
@@ -159,6 +163,8 @@ int func_00150E50(void* self, int a1)
     return ((sEconTable*)D_00440550)->entries[a1].value;
 }
 #endif
+
+INCLUDE_ASM("be/beintecon", func_00150E68);
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00151040);
@@ -256,6 +262,8 @@ extern "C" int func_001511B0(void* self, int level)
     }
 }
 #endif
+
+INCLUDE_ASM("be/beintecon", func_001511E8);
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00151368);
@@ -528,6 +536,10 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
 }
 #endif
 
+INCLUDE_ASM("be/beintecon", func_00151BD0);
+
+INCLUDE_ASM("be/beintecon", func_00151C20);
+
 //100%
 INCLUDE_ASM("be/beintecon", func_00151C48);
 #ifdef SKIP_ASM
@@ -705,3 +717,6 @@ extern "C" int func_001521F0(sEconItems_1521F0* self)
 }
 #endif
 
+INCLUDE_ASM("be/beintecon", func_00152340);
+
+INCLUDE_ASM("be/beintecon", func_00152368);

@@ -102,6 +102,8 @@ struct cCameraTriggerList2 {
     int count; // 0x4
 };
 
+INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C0D8);
+
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_insert__FP19cCameraTriggerList2Pvi);
 #ifdef SKIP_ASM
@@ -149,6 +151,8 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
 #endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_loadFromBuffer);
+
+INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C388);
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_initHeader__FP18cCameraTriggerList);

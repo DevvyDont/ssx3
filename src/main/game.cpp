@@ -621,3 +621,4 @@ extern "C" int func_0022E0E0(void* self, int a1)
 }
 #endif
 
+INCLUDE_ASM("main/game", func_0022E118);

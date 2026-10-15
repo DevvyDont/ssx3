@@ -19,6 +19,12 @@ void* cLightMan_construct()
 }
 #endif
 
+INCLUDE_ASM("render/lightman", func_0038DC20);
+
+INCLUDE_ASM("render/lightman", func_0038DC28);
+
+INCLUDE_ASM("render/lightman", func_0038DC48);
+
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC50__FPv);
 #ifdef SKIP_ASM
@@ -221,6 +227,24 @@ extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, flo
 }
 #endif
 
+INCLUDE_ASM("render/lightman", func_0038E0A8);
+
+INCLUDE_ASM("render/lightman", func_0038E118);
+
+INCLUDE_ASM("render/lightman", func_0038E200);
+
+INCLUDE_ASM("render/lightman", func_0038E2E8);
+
+INCLUDE_ASM("render/lightman", func_0038E468);
+
+INCLUDE_ASM("render/lightman", func_0038E5E8);
+
+INCLUDE_ASM("render/lightman", func_0038E738);
+
+INCLUDE_ASM("render/lightman", func_0038E880);
+
+INCLUDE_ASM("render/lightman", func_0038EA60);
+
 //100%
 INCLUDE_ASM("render/lightman", func_0038EC40);
 #ifdef SKIP_ASM
@@ -284,6 +308,8 @@ extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, floa
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
 #endif
+
+INCLUDE_ASM("render/lightman", func_0038ED90);
 
 INCLUDE_ASM("render/lightman", func_0038EE78);
 
@@ -359,6 +385,8 @@ extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
 }
 #endif
 
+INCLUDE_ASM("render/lightman", func_0038F560);
+
 //100%
 INCLUDE_ASM("render/lightman", func_0038F598);
 #ifdef SKIP_ASM
@@ -431,6 +459,8 @@ extern "C" void func_0038F6A8(void* self)
 }
 #endif
 
+INCLUDE_ASM("render/lightman", func_0038F6D0);
+
 //100%
 INCLUDE_ASM("render/lightman", func_0038F708);
 #ifdef SKIP_ASM
@@ -497,6 +527,8 @@ void* func_0038F800(void* self)
 }
 #endif
 
+INCLUDE_ASM("render/lightman", func_0038F820);
+
 //100%
 INCLUDE_ASM("render/lightman", func_0038F930);
 #ifdef SKIP_ASM
@@ -522,6 +554,8 @@ extern "C" int func_0038F930(void* self, unsigned char* src, unsigned char* dst)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("render/lightman", func_0038F9C0);
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038FC48);
@@ -584,6 +618,8 @@ extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsig
     return 0;
 }
 #endif
+
+INCLUDE_ASM("render/lightman", func_0038FED0);
 
 INCLUDE_ASM("render/lightman", func_00390198);
 
@@ -945,6 +981,8 @@ extern "C" int func_003914F8(void)
     return r;
 }
 #endif
+
+INCLUDE_ASM("render/lightman", func_00391508);
 
 //100%
 INCLUDE_ASM("render/lightman", func_003915E8);
