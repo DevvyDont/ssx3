@@ -405,7 +405,27 @@ extern "C" void func_0022D640(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("main/game", func_0022D668);
+//100%
+extern "C" void func_0022D668(char* self, int arg)
+{
+    if (arg != 0) {
+        switch (*(int*)(self + 0x1B4)) {
+        case 0:
+            *(int*)(self + 0x1B8) = arg;
+            *(int*)(self + 0x1B4) = 3;
+            break;
+        case 1:
+            *(int*)(self + 0x1B4) = 3;
+            break;
+        case 2:
+            *(int*)(self + 0x1B4) = 4;
+            break;
+        case 3:
+        case 4:
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM("main/game", func_0022D6C8);
 

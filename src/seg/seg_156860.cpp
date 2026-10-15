@@ -584,7 +584,26 @@ extern "C" void func_00256998(void *arg0) {
     }
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00256A00);
+//100%
+extern "C" void func_00256A58(void* arg0);
+extern "C" void func_00256AA8(char* s);
+
+extern "C" void func_00256A00(char* self)
+{
+    switch (*(int*)(self + 0xC)) {
+    case 0:
+        break;
+    case 1:
+        func_00256A58(self);
+        break;
+    case 2:
+        func_00256AA8(self);
+        break;
+    case 3:
+    case 4:
+        break;
+    }
+}
 
 //100%
 extern "C" int func_003E66F0(int, int, int);
