@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SSX 3 (SLUS_207.72) overrides for the PS2Recomp runtime.
 #include "game_overrides.h"
+#include "ps2_guest_scratch.h"
 #include "ps2_runtime.h"
 #include "ps2_runtime_macros.h"
 
@@ -122,6 +123,11 @@ namespace
 
     void applySsx3(PS2Runtime &runtime)
     {
+        // SSX 3's dlmalloc grows from the end of the ELF image over the whole
+        // SetupHeap range, so the runtime's own scratch allocations go in the
+        // 0x80000-0x100000 gap below the ELF, which the game never uses.
+        g_ps2xGuestScratch = {0x00080000u, 0x00100000u};
+
         if (std::getenv("PS2X_FILE_LOG"))
         {
             g_fileInfoOriginal = runtime.lookupFunction(0x003DE4D0u);

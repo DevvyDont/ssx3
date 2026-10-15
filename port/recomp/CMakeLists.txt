@@ -26,6 +26,9 @@ set(SSX3PC_PYTHON "${CMAKE_CURRENT_SOURCE_DIR}/../../venv/bin/python" CACHE FILE
 set(SSX3PC_RUNTIME_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type of the runtime")
 set(SSX3PC_RUNTIME_JOBS "" CACHE STRING
     "Parallel jobs for the runtime build (the generated code needs about 3 GB per job)")
+option(SSX3PC_FFMPEG "Build the runtime with FFmpeg, which plays the game's movies" ON)
+set(SSX3PC_PKG_CONFIG_PATH "/usr/lib/i386-linux-gnu/pkgconfig" CACHE STRING
+    "pkg-config path for the 32-bit FFmpeg libraries")
 
 include(ExternalProject)
 
@@ -104,6 +107,13 @@ add_custom_command(
 add_custom_target(ssx3_recompiled DEPENDS "${GEN_DIR}/register_functions.cpp")
 
 # 5. The 32-bit runtime with the generated code and our overrides.
+if(SSX3PC_FFMPEG)
+    set(RUNTIME_FFMPEG ON)
+    set(RUNTIME_ENV ${CMAKE_COMMAND} -E env "PKG_CONFIG_PATH=${SSX3PC_PKG_CONFIG_PATH}")
+else()
+    set(RUNTIME_FFMPEG OFF)
+    set(RUNTIME_ENV "")
+endif()
 set(RUNTIME_BUILD_ARGS --target ps2EntryRunner)
 if(SSX3PC_RUNTIME_JOBS)
     list(APPEND RUNTIME_BUILD_ARGS -j ${SSX3PC_RUNTIME_JOBS})
@@ -113,6 +123,7 @@ ExternalProject_Add(ssx3pc_runtime
     DOWNLOAD_COMMAND ""
     SOURCE_DIR "${SRC_DIR}"
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/runtime"
+    CMAKE_COMMAND ${RUNTIME_ENV} ${CMAKE_COMMAND}
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${SSX3PC_RUNTIME_BUILD_TYPE}
         "-DCMAKE_C_FLAGS=-m32 -msse4.2"
@@ -123,11 +134,11 @@ ExternalProject_Add(ssx3pc_runtime
         -DPS2X_BUILD_RUNTIME=ON
         -DPS2X_BUILD_TEST=OFF
         -DPS2X_BUILD_STUDIO=OFF
-        -DPS2X_ENABLE_FFMPEG=OFF
+        -DPS2X_ENABLE_FFMPEG=${RUNTIME_FFMPEG}
         -DPS2X_ENABLE_SCCACHE=OFF
         -DPS2X_RUNNER_SOURCE_DIR=${GEN_DIR}
         -DPS2X_RUNNER_EXTRA_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}/ssx3_overrides.cpp
-    BUILD_COMMAND ${CMAKE_COMMAND} --build . ${RUNTIME_BUILD_ARGS}
+    BUILD_COMMAND ${RUNTIME_ENV} ${CMAKE_COMMAND} --build . ${RUNTIME_BUILD_ARGS}
     BUILD_ALWAYS ON
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/runtime/ps2xRuntime/ps2EntryRunner")
