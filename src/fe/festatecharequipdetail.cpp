@@ -2598,7 +2598,10 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
+extern "C" int func_0019E208(char* self, int a, int b)
+{
+    return *(int*)(self + (a * 0x12000 + b * 0x120)) == 2;
+}
 
 //100%
 struct sEquipSlot120 {
@@ -2634,9 +2637,15 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E380);
+extern "C" int func_0019E380(char* self, int a, int b)
+{
+    return *(int*)(self + (a * 0x12000 + b * 0x120) + 0x110);
+}
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3A8);
+extern "C" int func_0019E3A8(char* self, int a, int b)
+{
+    return *(int*)(self + (a * 0x12000 + b * 0x120) + 0x114);
+}
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
 

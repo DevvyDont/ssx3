@@ -1905,25 +1905,77 @@ extern "C" sPair_B7B8 func_0016B7B8(char* p)
     return func_0031B748_B7B8(&m);
 }
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BC88);
+// PORT: g++ `<?` (min) operator; needs std::min on a modern compiler.
+extern "C" void func_0016BC88(float* p)
+{
+    float lo = 5.0f;
+    float hi = 80.0f;
+    *p = *p >= lo ? (*p <? hi) : lo;
+}
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BCB8);
+// PORT: g++ `<?` (min) operator; needs std::min on a modern compiler.
+extern "C" void func_0016BCB8(float* p)
+{
+    float lo = -3000.0f;
+    float hi = 3000.0f;
+    *p = *p >= lo ? (*p <? hi) : lo;
+}
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BCE0);
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BD30);
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDA0);
+extern "C" void func_0016BCE0(float* p);
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDE8);
+// The same in degrees
+extern "C" void func_0016BDA0(float* p)
+{
+    float r = *p * 0.017453294f;
+    func_0016BCE0(&r);
+    *p = r * 57.295776f;
+}
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE30);
+extern "C" void func_0016BD30(float* p);
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE60);
+// The same in degrees
+extern "C" void func_0016BDE8(float* p)
+{
+    float r = *p * 0.017453294f;
+    func_0016BD30(&r);
+    *p = r * 57.295776f;
+}
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE90);
+// PORT: g++ `<?` (min) operator; needs std::min on a modern compiler.
+extern "C" void func_0016BE30(float* p)
+{
+    float lo = -180.0f;
+    float hi = 180.0f;
+    *p = *p >= lo ? (*p <? hi) : lo;
+}
 
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEC0);
+// PORT: g++ `<?` (min) operator; needs std::min on a modern compiler.
+extern "C" void func_0016BE60(float* p)
+{
+    float lo = 0.0f;
+    float hi = 10.0f;
+    *p = *p >= lo ? (*p <? hi) : lo;
+}
+
+// PORT: g++ `<?` (min) operator; needs std::min on a modern compiler.
+extern "C" void func_0016BE90(float* p)
+{
+    float lo = 0.0f;
+    float hi = 30.0f;
+    *p = *p >= lo ? (*p <? hi) : lo;
+}
+
+// PORT: g++ `<?` (min) operator; needs std::min on a modern compiler.
+extern "C" void func_0016BEC0(float* p)
+{
+    float lo = -10000.0f;
+    float hi = 10000.0f;
+    *p = *p >= lo ? (*p <? hi) : lo;
+}
 
 //100%
 void* func_0016BEE8(void* self)
