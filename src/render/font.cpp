@@ -100,7 +100,36 @@ extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
     cFont_downloadTexture((char*)self, (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
 }
 
-INCLUDE_ASM("render/font", func_003919E8);
+void cMemMan_free(void*);
+
+struct sFontVEntry19E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sFontCtx19E8 {
+    char pad[0x10D8];
+    sFontVEntry19E8* vtable;    // 0x10D8
+};
+
+extern sFontCtx19E8* D_004A5B80_19E8 __asm__("D_004A5B80");
+
+// Frees the glyph table and releases the downloaded texture (+ 0x60).
+extern "C" void func_003919E8(void* self)
+{
+    if (*(void**)((char*)self + 0x4) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x4));
+    }
+    *(void**)((char*)self + 0x4) = 0;
+    // volatile: keeps this store out of the following branch's delay slot, as in the original.
+    *(volatile int*)((char*)self + 0x0) = 0;
+    if (*(int*)((char*)self + 0x60) < 0) {
+        return;
+    }
+    sFontCtx19E8* g = D_004A5B80_19E8;
+    g->vtable[50].fn((char*)g + g->vtable[50].delta, *(int*)((char*)self + 0x60));
+}
 
 //100%
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -1535,7 +1564,10 @@ void func_00394688(void* self)
 {
 }
 
-INCLUDE_ASM("render/font", func_00394690);
+extern "C" void* func_00394690(void)
+{
+    return D_004A5B80;
+}
 
 extern "C" void func_00394698(void* self, int value)
 {
@@ -3880,15 +3912,50 @@ extern "C" int* func_00396FD0()
     return &D_004A4674;
 }
 
-INCLUDE_ASM("render/font", func_00396FE0);
+// Packs the global colour (floats in [0, 1]) into an opaque 0xAARRGGBB word.
+extern float D_004A45E4_f __asm__("D_004A45E4");
+extern float D_004A45E8_f __asm__("D_004A45E8");
+extern float D_004A45EC_f __asm__("D_004A45EC");
 
-INCLUDE_ASM("render/font", func_00397038);
+extern "C" unsigned int func_00396FE0(void)
+{
+    int r = (int)(D_004A45E4_f * 255.0f);
+    int g = (int)(D_004A45E8_f * 255.0f);
+    int b = (int)(D_004A45EC_f * 255.0f);
+    return 0xFF000000 | (r << 16) | (g << 8) | b;
+}
 
-INCLUDE_ASM("render/font", func_00397048);
+extern float D_004A469C;
+extern float D_004A46A0;
+extern float D_004A46A4;
+extern float D_004A46A8;
 
-INCLUDE_ASM("render/font", func_00397058);
+extern "C" float func_00397038(void)
+{
+    return D_004A469C * D_004A46A0;
+}
 
-INCLUDE_ASM("render/font", func_00397068);
+extern "C" float func_00397048(void)
+{
+    return D_004A469C * D_004A46A4;
+}
+
+extern "C" float func_00397058(void)
+{
+    return D_004A469C * D_004A46A8;
+}
+
+// The same three words are declared as ints above; these are their float views.
+extern float D_004A45F0_f __asm__("D_004A45F0");
+extern float D_004A45F4_f __asm__("D_004A45F4");
+extern float D_004A45F8_f __asm__("D_004A45F8");
+
+extern "C" void func_00397068(float v)
+{
+    D_004A45F8_f = v;
+    D_004A45F4_f = v;
+    D_004A45F0_f = v;
+}
 
 extern int D_004A4678;
 
