@@ -40,14 +40,50 @@ extern "C" void func_0014F100()
 {
 }
 
-INCLUDE_ASM("be/beintcharacter", func_0014F108);
+// One row of the character table (DATA/BE/CHARDB.DBL): 0x88 bytes per rider
+struct sBECharacterData {
+    char longName[0x20];
+    char firstName[0x10];   // 0x20
+    char nickname[0x10];    // 0x30
+    int weight;             // 0x40
+    int goofy;              // 0x44
+    int modelSize;          // 0x48: model scale in percent
+    char bloodType[0x10];   // 0x4C
+    int female;             // 0x5C
+    int age;                // 0x60
+    char height[0x10];      // 0x64
+    char nationality[0x10]; // 0x74
+    int unk84;              // 0x84
+};
 
-INCLUDE_ASM("be/beintcharacter", func_0014F138);
+extern sBECharacterData gCharacterData[10] __asm__("D_00530970");
 
-INCLUDE_ASM("be/beintcharacter", func_0014F170);
+extern "C" char* func_0014F108(void* self, int riderIndex)
+{
+    return gCharacterData[cBELibrary_getCharacterID(riderIndex)].bloodType;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F1B0);
+extern "C" bool func_0014F138(void* self, int riderIndex)
+{
+    return gCharacterData[cBELibrary_getCharacterID(riderIndex)].female != 0;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F1E0);
+extern "C" int func_0014F170(void* self, int riderIndex)
+{
+    return gCharacterData[cBELibrary_getCharacterID(riderIndex)].age;
+}
 
-INCLUDE_ASM("be/beintcharacter", func_0014F210);
+extern "C" char* func_0014F1B0(void* self, int riderIndex)
+{
+    return gCharacterData[cBELibrary_getCharacterID(riderIndex)].height;
+}
+
+extern "C" char* func_0014F1E0(void* self, int riderIndex)
+{
+    return gCharacterData[cBELibrary_getCharacterID(riderIndex)].nationality;
+}
+
+extern "C" int func_0014F210(void* self, int riderIndex)
+{
+    return gCharacterData[cBELibrary_getCharacterID(riderIndex)].unk84;
+}
