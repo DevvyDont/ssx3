@@ -956,7 +956,56 @@ extern "C" void func_001A4FB0(void* self, int id, void* msg)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A5010);
+//100%
+int func_001A98B0(void* self);
+extern "C" void func_001AB3D0(void* self, int a1, int a2);
+extern "C" void func_001A5898(void* self);
+extern "C" void func_001A54D8(void* self);
+extern "C" void func_001A52B0(void* self);
+extern "C" void func_001A6978(void* self);
+extern "C" void func_001A4CE8(void* self, void* src);
+extern "C" void func_001A4FB0(void* self, int id, void* msg);
+extern "C" void func_001A4D90(void* self);
+int func_001A8E40_5010(void* self, int code, void* msg) __asm__("func_001A8E40");
+
+extern "C" int func_001A5010(char* self, int code, void* msg)
+{
+    switch (code) {
+    case 0x107:
+        func_001A5898(self);
+    case 0xEA:
+    case 0xEC:
+    case 0xED:
+    case 0xEF:
+    case 0xF1:
+    case 0x106:
+    case 0x109:
+    case 0x10A:
+    case 0x10B:
+    case 0x112:
+    case 0x113:
+        if (*(int*)(self + 0x6AC) != 0)
+            break;
+        func_001A54D8(self);
+        func_001A52B0(self);
+        func_001A6978(self);
+        func_001AB3D0(self, func_001A98B0(self), 0);
+        break;
+    case 0x10E:
+        func_001A4D90(self);
+        break;
+    case 0xE3:
+        func_001A4CE8(self, msg);
+        break;
+    case 0x102:
+        func_001A4FB0(self, code, msg);
+        break;
+    default:
+        func_001AB3D0(self, func_001A98B0(self), 0);
+        return func_001A8E40_5010(self, code, msg);
+    }
+    return 0;
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -10056,7 +10105,71 @@ INCLUDE_ASM("fe/feasyncfile", func_001B7E40);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B8238);
 
-INCLUDE_ASM("fe/feasyncfile", func_001B83C0);
+//100%
+extern void* D_004A28A8;
+extern char D_004A12C0[];
+extern char D_00464608[];
+extern char D_00464628[];
+extern char D_00464640[];
+extern char D_004644F0[];
+int GetHashValue32(char* str);
+void func_002C2718_3C0(unsigned short* dst, const char* src, int n) __asm__("func_002C2718");
+int func_002C26D0_3C0(unsigned short* dst, const unsigned short* fmt, ...) __asm__("func_002C26D0");
+
+typedef const unsigned short* (*tByHash_1B83C0)(void*, int);
+
+struct sAsync_1B83C0 {
+    char pad[0x6DC];
+    int mode;
+    char pad2[0x702 - 0x6E0];
+    unsigned short text[1];
+};
+
+extern "C" void func_001B83C0(sAsync_1B83C0* self)
+{
+    unsigned short buf[16];
+    func_002C2718_3C0(buf, D_004A12C0, 1);
+    switch (self->mode) {
+    case 3:
+    {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        const unsigned short* fmt = ((tByHash_1B83C0)*(void**)(vt + 0x24))(o, GetHashValue32(D_00464608));
+        func_002C26D0_3C0(self->text, fmt, buf);
+    }
+        break;
+    case 9:
+    case 17:
+    case 28:
+    {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        const unsigned short* fmt = ((tByHash_1B83C0)*(void**)(vt + 0x24))(o, GetHashValue32(D_00464628));
+        func_002C26D0_3C0(self->text, fmt, buf);
+    }
+        break;
+    case 23:
+    {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        const unsigned short* fmt = ((tByHash_1B83C0)*(void**)(vt + 0x24))(o, GetHashValue32(D_00464640));
+        func_002C26D0_3C0(self->text, fmt, buf);
+    }
+        break;
+    case 15:
+    {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        const unsigned short* fmt = ((tByHash_1B83C0)*(void**)(vt + 0x24))(o, GetHashValue32(D_004644F0));
+        func_002C26D0_3C0(self->text, fmt, buf);
+    }
+        break;
+    }
+}
 
 INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
 

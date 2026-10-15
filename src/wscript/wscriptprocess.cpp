@@ -134,7 +134,79 @@ extern "C" void func_003077F8(func_003077F8_cProc* self)
     }
 }
 
-INCLUDE_ASM("wscript/wscriptprocess", func_003078C0);
+//100%
+typedef void (*tOp_3078C0)(void*);
+
+// Script process: dispatch one opcode to the matching virtual handler.
+extern "C" void func_003078C0(void* proc, void* cmd_)
+{
+    char* self = (char*)proc;
+    unsigned short* cmd = (unsigned short*)cmd_;
+    switch (*cmd) {
+    case 0:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x3C))(self + *(short*)(vt + 0x38));
+        }
+        break;
+    case 1:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x44))(self + *(short*)(vt + 0x40));
+        }
+        break;
+    case 2:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x4C))(self + *(short*)(vt + 0x48));
+        }
+        break;
+    case 3:
+        *(unsigned short**)(*(char**)(self + 0x10) + 0x29C) = cmd + 2;
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x54))(self + *(short*)(vt + 0x50));
+        }
+        *(unsigned short**)(*(char**)(self + 0x10) + 0x29C) = 0;
+        break;
+    case 4:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x5C))(self + *(short*)(vt + 0x58));
+        }
+        break;
+    case 5:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x64))(self + *(short*)(vt + 0x60));
+        }
+        break;
+    case 6:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x6C))(self + *(short*)(vt + 0x68));
+        }
+        break;
+    case 7:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x74))(self + *(short*)(vt + 0x70));
+        }
+        break;
+    case 8:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x7C))(self + *(short*)(vt + 0x78));
+        }
+        break;
+    case 9:
+        {
+            char* vt = *(char**)(self + 0x5C);
+            ((tOp_3078C0)*(void**)(vt + 0x84))(self + *(short*)(vt + 0x80));
+        }
+        break;
+    }
+}
 
 //100%
 struct cWScriptProcEntry {

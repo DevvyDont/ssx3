@@ -623,7 +623,55 @@ extern "C" void func_003A82C8(func_003A82C8_sCache* self)
     }
 }
 
-INCLUDE_ASM("world/worldcache", func_003A8330);
+//100%
+void func_003A7010_330(void* self, int i) __asm__("func_003A7010");
+void func_003A8528_330(void* self, int i) __asm__("func_003A8528");
+
+struct sWCEntry_3A8330 {
+    int state;
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+};
+
+struct sWC_3A8330 {
+    char pad[0x300];
+    char sub[0xEC];
+    unsigned int count;
+    sWCEntry_3A8330 entries[1];
+};
+
+// Flush every cache slot: release loaded ones, then clear the slot.
+extern "C" void func_003A8330(void* self_)
+{
+    sWC_3A8330* self = (sWC_3A8330*)self_;
+    unsigned int i;
+    for (i = 0; i < self->count; i++) {
+        switch (self->entries[i].state) {
+        case 2:
+            func_003A7010_330(self->sub, i);
+            self->entries[i].state = 4;
+            func_003A8528_330(self, i);
+            break;
+        case 3:
+        case 4:
+            self->entries[i].state = 4;
+            func_003A8528_330(self, i);
+            break;
+        case 0:
+        case 1:
+            break;
+        }
+        self->entries[i].state = 0;
+        self->entries[i].b = 0;
+        self->entries[i].a = 0;
+        self->entries[i].d = 0;
+        self->entries[i].e = 0;
+        self->entries[i].c = 0;
+    }
+}
 
 //100%
 struct sWCSlot {

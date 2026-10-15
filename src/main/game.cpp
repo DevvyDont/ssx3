@@ -415,7 +415,46 @@ extern "C" void func_0022D3D8(void* self, int i)
         func_0022E298(self);
 }
 
-INCLUDE_ASM("main/game", func_0022D478);
+//100%
+void func_0022E298_478(void* self, int i) __asm__("func_0022E298");
+void func_003A99D8_478(void* mgr, int handle) __asm__("func_003A99D8");
+
+extern "C" void func_0022D478(void* self_, int i)
+{
+    char* self = (char*)self_;
+    int changed;
+    if (D_00442168[i].field_0x4 < 0)
+        return;
+    changed = 0;
+    switch (D_00442168[i].field_0x8) {
+    case 0:
+        D_00442168[i].field_0x8 = 4;
+        changed = 1;
+        break;
+    case 7:
+        D_00442168[i].field_0x8 = 4;
+        changed = 1;
+        break;
+    case 3:
+        D_00442168[i].field_0x8 = 4;
+        changed = 1;
+        break;
+    case 6:
+        D_00442168[i].field_0x8 = 8;
+        changed = 1;
+        break;
+    case 1:
+    case 5:
+        D_00442168[i].field_0x8 = 2;
+        func_003A99D8_478(*(char**)*(char**)(*(char**)(self + 0x1B0) + 0x10) + 0x10, D_00442168[i].field_0x4);
+        changed = 1;
+        break;
+    case 8:
+        break;
+    }
+    if (changed)
+        func_0022E298_478(self, i);
+}
 
 //100%
 extern "C" void func_0022E298(void*);

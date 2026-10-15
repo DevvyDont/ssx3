@@ -23,7 +23,57 @@ void* cBEPostRaceState_getState(void* self)
     return D_004A1254;
 }
 
-INCLUDE_ASM("be/beprepoststate", func_00156390);
+//100%
+void* cBENewRaceInterface_getThis();
+void* cBENewPlayerInterface_getThis();
+extern "C" void* func_0014EDD8();
+extern "C" void* func_00147F78();
+void* cBEOptionInterface_getThis();
+void* cBESaveInterface_getThis();
+void* cBENetworkInterface_getThis();
+void* cBEScoreInterface_getThis();
+extern "C" void* func_0014ABE0();
+void* cBEBAGTInterface_getThis();
+void* cBEEconInterface_getThis();
+void* cBEMissionInterface_getThis();
+void* cBEAggressionInterface_getThis();
+void* cBERewardInterface_getThis();
+
+// Backend interface lookup by kind.
+extern "C" void* func_00156390(void* self, unsigned int kind)
+{
+    switch (kind) {
+    case 0:
+        return cBENewRaceInterface_getThis();
+    case 1:
+        return cBENewPlayerInterface_getThis();
+    case 2:
+        return func_0014EDD8();
+    case 3:
+        return func_00147F78();
+    case 4:
+        return cBEOptionInterface_getThis();
+    case 5:
+        return cBESaveInterface_getThis();
+    case 7:
+        return cBENetworkInterface_getThis();
+    case 8:
+        return cBEScoreInterface_getThis();
+    case 9:
+        return func_0014ABE0();
+    case 6:
+        return cBEBAGTInterface_getThis();
+    case 11:
+        return cBEEconInterface_getThis();
+    case 10:
+        return cBEMissionInterface_getThis();
+    case 12:
+        return cBEAggressionInterface_getThis();
+    case 13:
+        return cBERewardInterface_getThis();
+    }
+    return 0;
+}
 
 //100%
 extern void* D_004A11C0;
@@ -108,7 +158,57 @@ void* cBEPreRaceState_getState(void* self)
     return D_004A1258;
 }
 
-INCLUDE_ASM("be/beprepoststate", func_001565C8);
+//100%
+void* cBENewRaceInterface_getThis();
+void* cBENewPlayerInterface_getThis();
+extern "C" void* func_0014EDD8();
+extern "C" void* func_00147F78();
+void* cBEOptionInterface_getThis();
+void* cBESaveInterface_getThis();
+void* cBENetworkInterface_getThis();
+void* cBEScoreInterface_getThis();
+extern "C" void* func_0014ABE0();
+void* cBEBAGTInterface_getThis();
+void* cBEEconInterface_getThis();
+void* cBEMissionInterface_getThis();
+void* cBEAggressionInterface_getThis();
+void* cBERewardInterface_getThis();
+
+// Backend interface lookup by kind.
+extern "C" void* func_001565C8(void* self, unsigned int kind)
+{
+    switch (kind) {
+    case 0:
+        return cBENewRaceInterface_getThis();
+    case 1:
+        return cBENewPlayerInterface_getThis();
+    case 2:
+        return func_0014EDD8();
+    case 3:
+        return func_00147F78();
+    case 4:
+        return cBEOptionInterface_getThis();
+    case 5:
+        return cBESaveInterface_getThis();
+    case 7:
+        return cBENetworkInterface_getThis();
+    case 8:
+        return cBEScoreInterface_getThis();
+    case 9:
+        return func_0014ABE0();
+    case 6:
+        return cBEBAGTInterface_getThis();
+    case 11:
+        return cBEEconInterface_getThis();
+    case 10:
+        return cBEMissionInterface_getThis();
+    case 12:
+        return cBEAggressionInterface_getThis();
+    case 13:
+        return cBERewardInterface_getThis();
+    }
+    return 0;
+}
 
 //100%
 extern void* D_004A11B4;
