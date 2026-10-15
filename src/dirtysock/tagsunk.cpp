@@ -7598,7 +7598,10 @@ extern "C" int func_00267D88(void* self)
     return *(int*)((char*)self + 0x0);
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00267D90);
+extern "C" void func_00267D90(void* self)
+{
+    *(int*)((char*)self + 0x4) = 0x1;
+}
 
 extern "C" int func_00267DA0(void* self)
 {

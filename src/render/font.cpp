@@ -852,79 +852,343 @@ extern "C" int func_00394038(void* self)
 
 INCLUDE_ASM("render/font", func_00394040);
 
-INCLUDE_ASM("render/font", func_00394050);
+struct sfunc_00394050 {
+    char pad[0xC];
+    int values[1];
+};
+
+extern "C" int func_00394050(sfunc_00394050* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("render/font", func_00394060);
 
-INCLUDE_ASM("render/font", func_00394070);
+struct sfunc_00394070 {
+    char pad[0x2C];
+    int values[1];
+};
+
+extern "C" int func_00394070(sfunc_00394070* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("render/font", func_00394080);
 
-INCLUDE_ASM("render/font", func_00394090);
+struct sfunc_00394090 {
+    char pad[0x4C];
+    int values[1];
+};
+
+extern "C" int func_00394090(sfunc_00394090* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("render/font", func_003940A0);
 
-INCLUDE_ASM("render/font", func_003940B0);
+struct sfunc_003940B0 {
+    char pad[0x6C];
+    int values[1];
+};
+
+extern "C" int func_003940B0(sfunc_003940B0* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("render/font", func_003940C0);
 
-INCLUDE_ASM("render/font", func_003940D0);
+struct sfunc_003940D0 {
+    char pad[0x8C];
+    int values[1];
+};
 
-INCLUDE_ASM("render/font", func_003940E0);
+extern "C" int func_003940D0(sfunc_003940D0* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_003940F0);
+struct sfunc_003940E0 {
+    char pad[0xAC];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394100);
+extern "C" void func_003940E0(sfunc_003940E0* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_00394110);
+struct sfunc_003940F0 {
+    char pad[0xAC];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394120);
+extern "C" float func_003940F0(sfunc_003940F0* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_00394130);
+struct sfunc_00394100 {
+    char pad[0xCC];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394140);
+extern "C" void func_00394100(sfunc_00394100* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_00394150);
+struct sfunc_00394110 {
+    char pad[0xCC];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394160);
+extern "C" float func_00394110(sfunc_00394110* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_00394170);
+struct sfunc_00394120 {
+    char pad[0xEC];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394180);
+extern "C" void func_00394120(sfunc_00394120* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_00394190);
+struct sfunc_00394130 {
+    char pad[0xEC];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_003941A0);
+extern "C" float func_00394130(sfunc_00394130* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_003941B0);
+struct sfunc_00394140 {
+    char pad[0x10C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_003941C0);
+extern "C" void func_00394140(sfunc_00394140* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_003941D0);
+struct sfunc_00394150 {
+    char pad[0x10C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_003941E0);
+extern "C" float func_00394150(sfunc_00394150* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_003941F0);
+struct sfunc_00394160 {
+    char pad[0x12C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394200);
+extern "C" void func_00394160(sfunc_00394160* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_00394210);
+struct sfunc_00394170 {
+    char pad[0x12C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394220);
+extern "C" float func_00394170(sfunc_00394170* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_00394230);
+struct sfunc_00394180 {
+    char pad[0x14C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394240);
+extern "C" void func_00394180(sfunc_00394180* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_00394250);
+struct sfunc_00394190 {
+    char pad[0x14C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394260);
+extern "C" float func_00394190(sfunc_00394190* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("render/font", func_00394270);
+struct sfunc_003941A0 {
+    char pad[0x16C];
+    float values[1];
+};
 
-INCLUDE_ASM("render/font", func_00394280);
+extern "C" void func_003941A0(sfunc_003941A0* self, int i, float value)
+{
+    self->values[i] = value;
+}
 
-INCLUDE_ASM("render/font", func_00394290);
+struct sfunc_003941B0 {
+    char pad[0x16C];
+    float values[1];
+};
+
+extern "C" float func_003941B0(sfunc_003941B0* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_003941C0 {
+    char pad[0x18C];
+    float values[1];
+};
+
+extern "C" void func_003941C0(sfunc_003941C0* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_003941D0 {
+    char pad[0x18C];
+    float values[1];
+};
+
+extern "C" float func_003941D0(sfunc_003941D0* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_003941E0 {
+    char pad[0x1AC];
+    float values[1];
+};
+
+extern "C" void func_003941E0(sfunc_003941E0* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_003941F0 {
+    char pad[0x1AC];
+    float values[1];
+};
+
+extern "C" float func_003941F0(sfunc_003941F0* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_00394200 {
+    char pad[0x1CC];
+    float values[1];
+};
+
+extern "C" void func_00394200(sfunc_00394200* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_00394210 {
+    char pad[0x1CC];
+    float values[1];
+};
+
+extern "C" float func_00394210(sfunc_00394210* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_00394220 {
+    char pad[0x1EC];
+    float values[1];
+};
+
+extern "C" void func_00394220(sfunc_00394220* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_00394230 {
+    char pad[0x1EC];
+    float values[1];
+};
+
+extern "C" float func_00394230(sfunc_00394230* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_00394240 {
+    char pad[0x20C];
+    float values[1];
+};
+
+extern "C" void func_00394240(sfunc_00394240* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_00394250 {
+    char pad[0x20C];
+    float values[1];
+};
+
+extern "C" float func_00394250(sfunc_00394250* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_00394260 {
+    char pad[0x22C];
+    float values[1];
+};
+
+extern "C" void func_00394260(sfunc_00394260* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_00394270 {
+    char pad[0x22C];
+    float values[1];
+};
+
+extern "C" float func_00394270(sfunc_00394270* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_00394280 {
+    char pad[0x24C];
+    float values[1];
+};
+
+extern "C" void func_00394280(sfunc_00394280* self, int i, float value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_00394290 {
+    char pad[0x24C];
+    float values[1];
+};
+
+extern "C" float func_00394290(sfunc_00394290* self, int i)
+{
+    return self->values[i];
+}
 
 //100%
 extern "C" void* func_003942A0(void* self)
@@ -1135,9 +1399,25 @@ extern "C" int func_003946A0(void* self)
     return *(int*)((char*)self + 0x10A8);
 }
 
-INCLUDE_ASM("render/font", func_003946A8);
+struct sfunc_003946A8 {
+    char pad[0x10B0];
+    int values[1];
+};
 
-INCLUDE_ASM("render/font", func_003946B8);
+extern "C" void func_003946A8(sfunc_003946A8* self, int i, int value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_003946B8 {
+    char pad[0x10B0];
+    int values[1];
+};
+
+extern "C" int func_003946B8(sfunc_003946B8* self, int i)
+{
+    return self->values[i];
+}
 
 extern "C" void func_003946C8(void* self, int value)
 {
@@ -1149,7 +1429,10 @@ extern "C" int func_003946D0(void* self)
     return *(int*)((char*)self + 0x10AC);
 }
 
-INCLUDE_ASM("render/font", func_003946D8);
+extern "C" void func_003946D8(void* self)
+{
+    *(int*)((char*)self + 0xF44) = 0x1;
+}
 
 //100%
 void func_003946E8(void* self)
@@ -1166,9 +1449,25 @@ INCLUDE_ASM("render/font", func_003947C8);
 
 INCLUDE_ASM("render/font", func_003947D8);
 
-INCLUDE_ASM("render/font", func_003948B0);
+struct sfunc_003948B0 {
+    char pad[0xF50];
+    int values[1];
+};
 
-INCLUDE_ASM("render/font", func_003948C0);
+extern "C" void func_003948B0(sfunc_003948B0* self, int i, int value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_003948C0 {
+    char pad[0xF50];
+    int values[1];
+};
+
+extern "C" int func_003948C0(sfunc_003948C0* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("render/font", func_003948D0);
 
@@ -1816,7 +2115,10 @@ extern "C" int func_00395560(void* self)
     return *(int*)((char*)self + 0x5A3C);
 }
 
-INCLUDE_ASM("render/font", func_00395568);
+extern "C" void func_00395568(void* self)
+{
+    *(int*)((char*)self + 0x59E8) = 0x1;
+}
 
 extern "C" void func_00395578(void* self)
 {

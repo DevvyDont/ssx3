@@ -1910,7 +1910,15 @@ extern "C" void func_0030D300(void* self, int value)
     *(int*)((char*)self + 0x290) = value;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D308);
+struct sfunc_0030D308 {
+    char pad[0x3CC];
+    int values[1];
+};
+
+extern "C" int func_0030D308(sfunc_0030D308* self, int i)
+{
+    return self->values[i];
+}
 
 extern "C" int func_0030D318(void* self)
 {
@@ -2002,7 +2010,10 @@ extern "C" int func_0030D460(void* self)
     return *(int*)((char*)self + 0x4);
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D468);
+extern "C" void func_0030D468(void* self)
+{
+    *(int*)((char*)self + 0x0) = 0x3;
+}
 
 extern "C" int func_0030D478(void* self)
 {

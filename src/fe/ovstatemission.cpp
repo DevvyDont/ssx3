@@ -114,7 +114,10 @@ void func_001A34A8(void* self)
 {
 }
 
-INCLUDE_ASM("fe/ovstatemission", func_001A34B0);
+extern "C" int func_001A34B0()
+{
+    return -0x1;
+}
 
 INCLUDE_ASM("fe/ovstatemission", func_001A34B8);
 

@@ -3216,7 +3216,10 @@ extern "C" void func_00241D40(void* self, int mode, void* buf)
     }
 }
 
-INCLUDE_ASM("movie/movieplayer", func_00241DC0);
+extern "C" int func_00241DC0()
+{
+    return 0x30;
+}
 
 //100%
 extern "C" void func_002C26D0(void* dst, void* src, int n);

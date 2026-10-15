@@ -725,7 +725,10 @@ extern "C" void func_002AE1F0(int* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE230);
 
-INCLUDE_ASM("sound/bankmonitor", func_002AE290);
+extern "C" int func_002AE290()
+{
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

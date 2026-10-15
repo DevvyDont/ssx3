@@ -137,7 +137,10 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
 
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_loadFromBuffer);
 
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C388);
+extern "C" int func_0016C388()
+{
+    return 0x10;
+}
 
 //100%
 void cCameraTriggerList_initHeader(cCameraTriggerList* self)

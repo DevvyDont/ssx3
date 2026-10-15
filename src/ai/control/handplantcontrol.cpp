@@ -1982,9 +1982,15 @@ extern "C" void func_00140B98(void* self, int value)
     *(int*)((char*)self + 0x870) = value;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BA0);
+extern "C" void func_00140BA0(void* self)
+{
+    *(int*)((char*)self + 0x874) = 0x1;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BB0);
+extern "C" void func_00140BB0(void* self)
+{
+    *(int*)((char*)self + 0x878) = 0x1;
+}
 
 //100%
 int func_00140BC0(void* self)
@@ -2167,9 +2173,15 @@ extern "C" int func_00140D48(void* self)
     return *(int*)((char*)self + 0xB20);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D50);
+extern "C" int func_00140D50(void* self)
+{
+    return *(int*)((char*)self + 0xB2C) & 0x1;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D60);
+extern "C" int func_00140D60(void* self)
+{
+    return (*(int*)((char*)self + 0xB2C) >> 1) & 0x1;
+}
 
 extern "C" int func_00140D70(void* self)
 {
@@ -2378,15 +2390,55 @@ extern "C" int func_00144098(void* self)
     return *(int*)((char*)self + 0x88);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440A0);
+struct sfunc_001440A0 {
+    char pad[0x28];
+    int values[1];
+};
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440B0);
+extern "C" int func_001440A0(sfunc_001440A0* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440C0);
+struct sfunc_001440B0 {
+    char pad[0x40];
+    int values[1];
+};
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440D0);
+extern "C" int func_001440B0(sfunc_001440B0* self, int i)
+{
+    return self->values[i];
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001440E0);
+struct sfunc_001440C0 {
+    char pad[0x48];
+    int values[1];
+};
+
+extern "C" int func_001440C0(sfunc_001440C0* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_001440D0 {
+    char pad[0x5C];
+    int values[1];
+};
+
+extern "C" int func_001440D0(sfunc_001440D0* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_001440E0 {
+    char pad[0x70];
+    int values[1];
+};
+
+extern "C" int func_001440E0(sfunc_001440E0* self, int i)
+{
+    return self->values[i];
+}
 
 extern "C" void func_001440F0(void* self, int value)
 {
@@ -2442,9 +2494,25 @@ extern "C" void func_00144168(void* self, int value)
     *(int*)((char*)self + 0x1C) = value;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144170);
+struct sfunc_00144170 {
+    char pad[0x20];
+    int values[1];
+};
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144180);
+extern "C" void func_00144170(sfunc_00144170* self, int i, int value)
+{
+    self->values[i] = value;
+}
+
+struct sfunc_00144180 {
+    char pad[0x20];
+    int values[1];
+};
+
+extern "C" int func_00144180(sfunc_00144180* self, int i)
+{
+    return self->values[i];
+}
 
 extern "C" int func_00144190(void* self)
 {

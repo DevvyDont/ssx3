@@ -114,7 +114,10 @@ extern "C" cListNode* func_00397870(cList* list, int count)
     return 0;
 }
 
-INCLUDE_ASM("util/list", func_003978E8);
+extern "C" int func_003978E8()
+{
+    return 0;
+}
 
 //100%
 void cList_addToFront(cList* list, cListNode* newNode)

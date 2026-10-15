@@ -42,9 +42,25 @@ extern "C" int func_00243978(void* self)
     return *(int*)((char*)self + 0x8C);
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00243980);
+struct sfunc_00243980 {
+    char pad[0xB0];
+    int values[1];
+};
 
-INCLUDE_ASM("main/ssxappdtor", func_00243990);
+extern "C" int func_00243980(sfunc_00243980* self, int i)
+{
+    return self->values[i];
+}
+
+struct sfunc_00243990 {
+    char pad[0xB8];
+    int values[1];
+};
+
+extern "C" int func_00243990(sfunc_00243990* self, int i)
+{
+    return self->values[i];
+}
 
 extern "C" int func_002439A0(void* self)
 {
@@ -76,7 +92,10 @@ extern "C" int func_002439C8(void* self)
     return *(int*)((char*)self + 0xA4);
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_002439D0);
+extern "C" int func_002439D0()
+{
+    return 0x2;
+}
 
 extern "C" int func_002439D8(void* self)
 {
@@ -116,7 +135,10 @@ extern "C" void func_00243A40(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00243A70);
+extern "C" void func_00243A70(void* self)
+{
+    *(int*)((char*)self + 0x8) = 0x1;
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -137,7 +159,10 @@ void func_00243AB0(void* self)
 
 INCLUDE_ASM("main/ssxappdtor", func_00243AB8);
 
-INCLUDE_ASM("main/ssxappdtor", func_00243AD8);
+extern "C" void func_00243AD8(void* self)
+{
+    *(int*)((char*)self + 0x4) = 0x1;
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -179,7 +204,15 @@ extern "C" void func_00243B80(int* self, int flags)
 
 INCLUDE_ASM("main/ssxappdtor", func_00243BB0);
 
-INCLUDE_ASM("main/ssxappdtor", func_00243BF0);
+struct sfunc_00243BF0 {
+    char pad[0x10];
+    int values[1];
+};
+
+extern "C" int func_00243BF0(sfunc_00243BF0* self, int i)
+{
+    return self->values[i];
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -196,7 +229,15 @@ extern "C" void func_00243C00(int* self, int flags)
 
 INCLUDE_ASM("main/ssxappdtor", func_00243C30);
 
-INCLUDE_ASM("main/ssxappdtor", func_00243C70);
+struct sfunc_00243C70 {
+    char pad[0x10];
+    int values[1];
+};
+
+extern "C" int func_00243C70(sfunc_00243C70* self, int i)
+{
+    return self->values[i];
+}
 
 //100%
 void operator_delete(int* ptr);
@@ -762,7 +803,12 @@ extern "C" void func_002444F0(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00244520);
+extern int D_004A2C70;
+
+extern "C" void func_00244520(int value)
+{
+    D_004A2C70 = value;
+}
 
 //100%
 void func_00244528(void* self)
@@ -972,7 +1018,10 @@ extern "C" int func_002447C0(void* self)
     return *(int*)((char*)self + 0x43C);
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_002447C8);
+extern "C" void func_002447C8(void* self)
+{
+    *(int*)((char*)self + 0x440) = 0x1;
+}
 
 INCLUDE_ASM("main/ssxappdtor", func_002447D8);
 

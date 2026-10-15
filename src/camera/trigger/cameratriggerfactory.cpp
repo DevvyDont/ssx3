@@ -1104,7 +1104,10 @@ extern "C" void func_00176318()
 {
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176320);
+extern "C" int func_00176320()
+{
+    return 0;
+}
 
 //100%
 extern void* D_0045BDE0[];

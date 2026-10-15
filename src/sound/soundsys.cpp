@@ -1656,7 +1656,10 @@ extern "C" void func_00298D00(void* self, void* obj)
     }
 }
 
-INCLUDE_ASM("sound/soundsys", func_00298D88);
+extern "C" int func_00298D88()
+{
+    return 0x1;
+}
 
 INCLUDE_ASM("sound/soundsys", func_00298D90);
 

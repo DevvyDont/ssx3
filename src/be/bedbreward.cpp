@@ -187,7 +187,10 @@ INCLUDE_ASM("be/bedbreward", func_0015BF38);
 
 INCLUDE_ASM("be/bedbreward", func_0015BF60);
 
-INCLUDE_ASM("be/bedbreward", func_0015BF88);
+extern "C" int func_0015BF88()
+{
+    return 0;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015BF90);
 
@@ -273,15 +276,30 @@ INCLUDE_ASM("be/bedbreward", func_0015C328);
 
 INCLUDE_ASM("be/bedbreward", func_0015C338);
 
-INCLUDE_ASM("be/bedbreward", func_0015C358);
+extern char D_00534D48[];
+
+extern "C" void* func_0015C358()
+{
+    return D_00534D48;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C368);
 
-INCLUDE_ASM("be/bedbreward", func_0015C388);
+extern char D_00534DC0[];
+
+extern "C" void* func_0015C388()
+{
+    return D_00534DC0;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C398);
 
-INCLUDE_ASM("be/bedbreward", func_0015C3B8);
+extern char D_00534E38[];
+
+extern "C" void* func_0015C3B8()
+{
+    return D_00534E38;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C3C8);
 
@@ -295,21 +313,49 @@ INCLUDE_ASM("be/bedbreward", func_0015C408);
 
 INCLUDE_ASM("be/bedbreward", func_0015C418);
 
-INCLUDE_ASM("be/bedbreward", func_0015C4D0);
+extern char D_00534E60[];
+
+extern "C" void* func_0015C4D0()
+{
+    return D_00534E60;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C4E0);
 
-INCLUDE_ASM("be/bedbreward", func_0015C598);
+extern char D_00534F0C[];
 
-INCLUDE_ASM("be/bedbreward", func_0015C5A8);
+extern "C" void* func_0015C598()
+{
+    return D_00534F0C;
+}
 
-INCLUDE_ASM("be/bedbreward", func_0015C5B8);
+extern char D_00534FC8[];
+
+extern "C" void* func_0015C5A8()
+{
+    return D_00534FC8;
+}
+
+extern char D_00534FB8[];
+
+extern "C" void* func_0015C5B8()
+{
+    return D_00534FB8;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C5C8);
 
-INCLUDE_ASM("be/bedbreward", func_0015C600);
+extern char D_00534FD8[];
 
-INCLUDE_ASM("be/bedbreward", func_0015C610);
+extern "C" void* func_0015C600()
+{
+    return D_00534FD8;
+}
+
+extern "C" int func_0015C610()
+{
+    return 0x8;
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C618);
 
@@ -353,7 +399,15 @@ INCLUDE_ASM("be/bedbreward", func_0015C760);
 
 INCLUDE_ASM("be/bedbreward", func_0015C788);
 
-INCLUDE_ASM("be/bedbreward", func_0015C7B0);
+struct sfunc_0015C7B0 {
+    char pad[0x18];
+    int values[1];
+};
+
+extern "C" int func_0015C7B0(sfunc_0015C7B0* self, int i)
+{
+    return self->values[i];
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015C7C0);
 

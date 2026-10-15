@@ -2893,9 +2893,15 @@ extern "C" void func_001635C0()
 
 INCLUDE_ASM("camera/camera", func_001635C8);
 
-INCLUDE_ASM("camera/camera", func_001635D8);
+extern "C" int func_001635D8()
+{
+    return 0;
+}
 
-INCLUDE_ASM("camera/camera", func_001635E0);
+extern "C" int func_001635E0()
+{
+    return 0;
+}
 
 extern int D_004A4DD8;
 
@@ -3052,7 +3058,10 @@ extern "C" void func_001643A8(void* self, void* info, float a, float b, float c)
 
 INCLUDE_ASM("camera/camera", func_001646A0);
 
-INCLUDE_ASM("camera/camera", func_00164868);
+extern "C" int func_00164868()
+{
+    return 0;
+}
 
 extern int D_004A4DE0;
 
@@ -3914,7 +3923,10 @@ extern "C" void func_00168010()
 {
 }
 
-INCLUDE_ASM("camera/camera", func_00168018);
+extern "C" int func_00168018()
+{
+    return 0x3D;
+}
 
 extern "C" int func_00168020(void* self)
 {

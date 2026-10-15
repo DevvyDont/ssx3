@@ -360,7 +360,10 @@ extern "C" void func_0031A200(void)
     }
 }
 
-INCLUDE_ASM("bx/memblockman", func_0031A258);
+extern "C" int func_0031A258()
+{
+    return 0;
+}
 
 extern "C" void func_0031A260()
 {

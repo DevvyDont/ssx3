@@ -529,7 +529,10 @@ int func_001DFA88(void* self)
     return 0;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA90);
+extern "C" int func_001DFA90(void* self)
+{
+    return (*(int*)((char*)self + 0x48) >> 3) & 0x1;
+}
 
 //100%
 int func_001DFAA0(void* self)
@@ -543,7 +546,10 @@ int func_001DFAA8(void* self)
     return 0;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAB0);
+extern "C" int func_001DFAB0(void* self)
+{
+    return (*(int*)((char*)self + 0x48) >> 1) & 0x1;
+}
 
 //100%
 void func_001DFAC0(void* self)
@@ -851,11 +857,20 @@ int func_001DFFC8(void* self, void* other)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001DFFD0);
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0008);
+extern "C" int func_001E0008()
+{
+    return 0;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0010);
+extern "C" int func_001E0010()
+{
+    return 0;
+}
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E0018);
+extern "C" int func_001E0018()
+{
+    return 0x1;
+}
 
 //100%
 int func_001E0020(void* self)

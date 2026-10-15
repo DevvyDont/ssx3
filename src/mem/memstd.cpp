@@ -116,9 +116,15 @@ INCLUDE_ASM("mem/memstd", func_00251BB0);
 
 INCLUDE_ASM("mem/memstd", func_00251C38);
 
-INCLUDE_ASM("mem/memstd", func_00251CF0);
+extern "C" int func_00251CF0()
+{
+    return 0;
+}
 
-INCLUDE_ASM("mem/memstd", func_00251CF8);
+extern "C" int func_00251CF8()
+{
+    return 0;
+}
 
 extern "C" void func_00251D00()
 {
@@ -376,7 +382,10 @@ extern "C" int func_002522B0(sMemBlock002522B0* blk)
     return ok;
 }
 
-INCLUDE_ASM("mem/memstd", func_002523A0);
+extern "C" int func_002523A0()
+{
+    return 0x1;
+}
 
 //100%
 void cMemMan_free(void*);
