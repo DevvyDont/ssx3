@@ -2296,7 +2296,49 @@ INCLUDE_ASM("render/particle", func_0037BA50);
 
 INCLUDE_ASM("render/particle", func_0037BB10);
 
-INCLUDE_ASM("render/particle", func_0037BC40);
+//100%
+// GS memory pages (32 units each) for three buffers of the given pixel formats.
+extern "C" int func_0037BC40(void* self, int w, int h, int fmt0, int fmt1, int fmt2)
+{
+    int bw = (w + 0x3F) >> 6;
+    int a;
+    int b;
+    int c;
+    switch (fmt0) {
+    case 0x00: case 0x01: case 0x30: case 0x31:
+        a = bw * ((h + 0x1F) >> 5);
+        break;
+    case 0x02: case 0x0A: case 0x32: case 0x3A:
+        a = bw * ((h + 0x3F) >> 6);
+        break;
+    default:
+        a = 0;
+        break;
+    }
+    switch (fmt1) {
+    case 0x00: case 0x01: case 0x30: case 0x31:
+        b = bw * ((h + 0x1F) >> 5);
+        break;
+    case 0x02: case 0x0A: case 0x32: case 0x3A:
+        b = bw * ((h + 0x3F) >> 6);
+        break;
+    default:
+        b = 0;
+        break;
+    }
+    switch (fmt2) {
+    case 0x30: case 0x31:
+        c = bw * ((h + 0x1F) >> 5);
+        break;
+    case 0x32: case 0x3A:
+        c = bw * ((h + 0x3F) >> 6);
+        break;
+    default:
+        c = 0;
+        break;
+    }
+    return (a + b + c) << 5;
+}
 
 //100%
 extern "C" int func_0037BD38(void* self, unsigned int kind, int c)
