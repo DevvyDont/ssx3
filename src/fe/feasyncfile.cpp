@@ -325,7 +325,41 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A3DC8);
+//100%
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_1A3DC8(void* self, void* a1, void* a2) __asm__("func_001A8500");
+extern void* D_00467F28_vt[] __asm__("D_00467F28");
+extern int D_004A3E90;
+
+struct sAlloc_1A3DC8 {
+    sAlloc_1A3DC8() {}
+    sAlloc_1A3DC8(const sAlloc_1A3DC8&) {}
+};
+
+// The zeroed triple at 0x6E8 looks like an STL vector; its constructor takes an
+// allocator temporary, which is what leaves the unused stack slot.
+static inline void InitVec_1A3DC8(void* self, const sAlloc_1A3DC8& a = sAlloc_1A3DC8())
+{
+    *(int*)((char*)self + 0x6E8) = 0;
+    *(int*)((char*)self + 0x6EC) = 0;
+    *(int*)((char*)self + 0x6F0) = 0;
+}
+
+extern "C" void* func_001A3DC8(void* self, void* a1, void* a2)
+{
+    func_001A8500_1A3DC8(self, a1, a2);
+    int d = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_00467F28_vt;
+    *(int*)((char*)self + 0x6D0) = d;
+    *(int*)((char*)self + 0x6D4) = d;
+    *(int*)((char*)self + 0x6DC) = 0;
+    *(int*)((char*)self + 0x6E0) = d;
+    InitVec_1A3DC8(self);
+    *(int*)((char*)self + 0x6F4) = 0;
+    *(int*)((char*)self + 0x6F8) = -1;
+    *(int*)((char*)self + 0xC) = 0x46;
+    return self;
+}
 
 //100%
 extern "C" void func_00260F80();
@@ -909,7 +943,18 @@ extern "C" void func_001A4E28(void* self, void* msg)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A4FB0);
+//100%
+extern "C" void func_001A4FB0(void* self, int id, void* msg)
+{
+    if (*(int*)((char*)self + 0x1C) & 6) {
+        if (*(int*)(*(char**)((char*)self + 0x6A0) + 0x18) == 0x807)
+            func_001A4E28(self, msg);
+        else
+            func_001A8E40_msg(self, id, msg);
+    } else {
+        func_001A8E40_msg(self, id, msg);
+    }
+}
 
 INCLUDE_ASM("fe/feasyncfile", func_001A5010);
 
@@ -1166,7 +1211,25 @@ extern "C" int func_001A56D0(sOwner1A56D0* self, const char* name)
     return 0;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A5768);
+//100%
+struct sOwner1A5768 {
+    char pad[0x6E8];
+    char*** mBegin;
+    char*** mEnd;
+};
+
+static inline unsigned int Count1A5768(sOwner1A5768* s) { return s->mEnd - s->mBegin; }
+
+extern "C" int func_001A5768(sOwner1A5768* self, const char* name)
+{
+    unsigned int i;
+    for (i = 0; i < Count1A5768(self); i++) {
+        if (func_0041AA88(**(char***)((char*)self->mBegin + (i << 2)), name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 //100%
 extern "C" int func_0041AA88(const char* a, const char* b);
@@ -1811,7 +1874,43 @@ extern "C" void func_001A71B0(void* self, unsigned int index, const char* name, 
 
 INCLUDE_ASM("fe/feasyncfile", func_001A7390);
 
-INCLUDE_ASM("fe/feasyncfile", func_001A77A0);
+//100%
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_1A77A0(void* self, int a1, void* owner) __asm__("func_001A8500");
+extern void* D_00467E18_vt[] __asm__("D_00467E18");
+
+struct sCol_001A77A0 {
+    float r, g, b, a;
+    sCol_001A77A0(const float& r_, const float& g_, const float& b_, const float& a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+struct sAlloc_1A77A0 {
+    sAlloc_1A77A0() {}
+    sAlloc_1A77A0(const sAlloc_1A77A0&) {}
+};
+
+// The zeroed triple at 0x6DC looks like an STL vector; its constructor takes an
+// allocator temporary, which is what leaves the unused stack slot.
+static inline void InitVec_1A77A0(void* self, const sAlloc_1A77A0& a = sAlloc_1A77A0())
+{
+    *(int*)((char*)self + 0x6DC) = 0;
+    *(int*)((char*)self + 0x6E0) = 0;
+    *(int*)((char*)self + 0x6E4) = 0;
+}
+
+// PORT: callers pass the text as an int (see the declaration in func_001ABB30).
+extern "C" void* func_001A77A0(void* self, int a1, void* owner, int text)
+{
+    func_001A8500_1A77A0(self, a1, owner);
+    *(void***)((char*)self + 0x8) = D_00467E18_vt;
+    cBXString_cBXString2((char*)self + 0x6D0, (const char*)text);
+    *(int*)((char*)self + 0x6E8) = 1;
+    *(int*)((char*)self + 0xC) = 0x49;
+    *(int*)((char*)self + 0x6D4) = 0;
+    InitVec_1A77A0(self);
+    *(sCol_001A77A0*)((char*)self + 0x6EC) = sCol_001A77A0(1.0f, 1.0f, 1.0f, 1.0f);
+    return self;
+}
 
 //100%
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -2839,7 +2938,15 @@ extern "C" void func_001A9090(void* self, int a1, int a2, int a3, int a4, int a5
     func_001CB418(*(void**)((char*)self + 0x69C), a3);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A90F0);
+//100%
+extern "C" void cKeyboardPopup_setStatic(void* p, int a);
+
+extern "C" void func_001A90F0(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+{
+    func_001A91B0(self, a1, a4, a5, a6);
+    cKeyboardPopup_setStatic(*(void**)((char*)self + 0x69C), a2);
+    func_001CB418(*(void**)((char*)self + 0x69C), a3);
+}
 
 //100%
 extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
@@ -11355,7 +11462,22 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB9B0);
 
 extern "C" void* func_001BBC40(void* self);
 
-INCLUDE_ASM("fe/feasyncfile", func_001BBA18);
+//100%
+// Rough e-mail address check: the string must contain an '@' and a '.'.
+extern "C" int func_001BBA18(void* self, const char* s)
+{
+    int at = 0;
+    int dot = 0;
+    int len = strlen(s);
+    int i;
+    for (i = 0; i < len; i++) {
+        if (s[i] == '@')
+            at = 1;
+        else if (s[i] == '.')
+            dot = 1;
+    }
+    return at && dot;
+}
 
 //100%
 int func_001BBAA8(void* self)
@@ -14021,7 +14143,12 @@ extern "C" void func_001C0138(void* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C0218);
+//100%
+extern "C" void func_001C0218(void* self, void* a1, int a2)
+{
+    if (a2 != 15)
+        func_001A97B8(self, a1, a2);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -14096,7 +14223,20 @@ extern "C" void* func_001C0358(void* self, int a1, int a2)
     return 0;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C03D0);
+//100%
+// PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
+void* func_001A8500_1C03D0(void* self, int a1, int a2) __asm__("func_001A8500");
+extern void* D_0046AC38[];
+
+extern "C" void* func_001C03D0(void* self, int a1, int a2)
+{
+    func_001A8500_1C03D0(self, a1, a2);
+    *(int*)((char*)self + 0xC) = 0x43;
+    *(void***)((char*)self + 0x8) = D_0046AC38;
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(int*)((char*)self + 0x6D8) = 0;
+    return self;
+}
 
 //100%
 extern void* D_0046AC38[];
@@ -14113,7 +14253,17 @@ extern "C" void* func_001C0418(void* self, int a1)
     return self;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C0460);
+extern "C" void* func_001A8500_2(void* self, int a1, int a2) __asm__("func_001A8500");
+extern void* D_0046AC38[];
+
+extern "C" void* func_001C0460(void* self)
+{
+    func_001A8500_2(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_0046AC38;
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(int*)((char*)self + 0x6D8) = 0;
+    return self;
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -15984,7 +16134,15 @@ extern "C" void* func_001C5018(void* self, int a1)
     return self;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C5058);
+extern "C" void* func_001A8500_2(void* self, int a1, int a2) __asm__("func_001A8500");
+extern void* D_00468168[];
+
+extern "C" void* func_001C5058(void* self)
+{
+    func_001A8500_2(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00468168;
+    return self;
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -16318,7 +16476,16 @@ void func_001C57C0(void* self, int a1, int a2)
     s->mSlots[a1].mState = 3;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C57E0);
+//100%
+struct sPair_1C57E0 {
+    int a;
+    int b;
+};
+
+extern "C" void func_001C57E0(void* self, int i, sPair_1C57E0* src)
+{
+    ((sPair_1C57E0*)((char*)self + 0x24))[i] = *src;
+}
 
 //100%
 extern "C" void* func_001C5800(void* self, int a1)
@@ -16326,7 +16493,24 @@ extern "C" void* func_001C5800(void* self, int a1)
     return (char*)self + ((a1 << 3) + 0x24);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C5810);
+//100%
+struct sEntry_1C5810 {
+    int kind;
+    int a;
+    int b;
+};
+
+struct sOwner_1C5810 {
+    char pad_0x00[0x54];
+    sEntry_1C5810 entries[1];
+};
+
+extern "C" void func_001C5810(sOwner_1C5810* self, int i, int a, int b)
+{
+    self->entries[i].a = a;
+    self->entries[i].kind = 2;
+    self->entries[i].b = b;
+}
 
 //100%
 struct cFEAsyncReq {
@@ -16364,7 +16548,11 @@ extern "C" void func_001C5878(void* self, int a1, int a2, int a3)
     s->mReqs[a1].mExtra = a3;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C58A0);
+//100%
+extern "C" void func_001C58A0(void* self, int i, sEntry_1C5810* src)
+{
+    ((sEntry_1C5810*)((char*)self + 0x54))[i] = *src;
+}
 
 //100%
 extern "C" void* func_001C58D0(void* self, int a1)
