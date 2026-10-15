@@ -1,6 +1,31 @@
 #include "common.h"
 
-INCLUDE_ASM("be/bedbreward", cBERewardDB_init);
+extern "C" int func_00317F60(const char* name);
+extern "C" int func_003E1BB8(const char* name, void* buf, int size);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_0015A818(void* self, void* data);
+extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
+extern const char* D_004A1270;
+extern const char D_0045AB78[];
+extern void* D_004A28A8;
+
+// Loads the reward database: synchronously when flag is 0, otherwise as an async sound-bank request.
+extern "C" void cBERewardDB_init(void* self, int flag)
+{
+    if (flag == 0)
+    {
+        unsigned int size = func_00317F60(D_004A1270);
+        char* buf = new (D_0045AB78, 0, 0) char[size];
+        func_003E1BB8(D_004A1270, buf, size);
+        func_0015A818(self, buf);
+        *(int*)self = -1;
+    }
+    else
+    {
+        *(int*)self = func_0019DA10(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70, 0, D_004A1270, 0xA, flag, 0);
+    }
+}
 
 //100%
 extern void* D_004A28A8;
@@ -65,7 +90,22 @@ extern "C" void func_0015AE00(sBEDB_0015AE00* self)
     self->f4C = 0;
 }
 
-INCLUDE_ASM("be/bedbreward", func_0015AEC0);
+extern "C" int func_0019E238(void* self, int bank, int handle);
+extern "C" void* func_0019E330(void* self, int bank, int handle);
+
+extern "C" void func_0015AEC0(sBEDB_0015AE00* self)
+{
+    if (self->handle >= 0)
+    {
+        char* snd = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+        if (func_0019E238(snd, 0, self->handle))
+        {
+            func_0015A818(self, func_0019E330(snd, 0, self->handle));
+            func_0019DC20(snd, 0, self->handle);
+            self->handle = -1;
+        }
+    }
+}
 
 INCLUDE_ASM("be/bedbreward", func_0015AF40);
 
@@ -286,9 +326,22 @@ extern "C" void func_0015BD30()
     D_004A120C = 0;
 }
 
-INCLUDE_ASM("be/bedbreward", func_0015BD58);
+// Whole 0x288-byte reward settings block at 0x00535610.
+struct sRewardSettings
+{
+    int w[0x288 / 4];
+};
+extern sRewardSettings D_00535610_all __asm__("D_00535610");
 
-INCLUDE_ASM("be/bedbreward", func_0015BE10);
+extern "C" sRewardSettings func_0015BD58()
+{
+    return D_00535610_all;
+}
+
+extern "C" void func_0015BE10(void* self, sRewardSettings* src)
+{
+    D_00535610_all = *src;
+}
 
 // Packed reward/option flags word at 0x00535610.
 struct sRewardFlags
@@ -620,7 +673,17 @@ extern "C" int func_0015C408()
     return D_00534E5C[0];
 }
 
-INCLUDE_ASM("be/bedbreward", func_0015C418);
+struct sRewardBlockAC
+{
+    int w[0xAC / 4];
+};
+extern sRewardBlockAC D_00534E60_blk __asm__("D_00534E60");
+extern sRewardBlockAC D_00534F0C_blk __asm__("D_00534F0C");
+
+extern "C" void func_0015C418(void* self, sRewardBlockAC* src)
+{
+    D_00534E60_blk = *src;
+}
 
 extern char D_00534E60[];
 
@@ -629,7 +692,10 @@ extern "C" void* func_0015C4D0()
     return D_00534E60;
 }
 
-INCLUDE_ASM("be/bedbreward", func_0015C4E0);
+extern "C" void func_0015C4E0(void* self, sRewardBlockAC* src)
+{
+    D_00534F0C_blk = *src;
+}
 
 extern char D_00534F0C[];
 
