@@ -2687,7 +2687,32 @@ void func_00395FA0(void* self)
 {
 }
 
-INCLUDE_ASM("render/font", func_00395FA8);
+// Cohen-Sutherland style outcode of a point against the clip box at + 0x6B70 (min) / + 0x6B80 (max).
+// A point behind the eye (w < 0) gets its bits flipped.
+extern "C" int func_00395FA8(void* self, float* p)
+{
+    char* c = (char*)self;
+    int code = p[0] < *(float*)(c + 0x6B70) ? 2 : 0;
+    if (*(float*)(c + 0x6B80) < p[0]) {
+        code |= 1;
+    }
+    if (p[1] < *(float*)(c + 0x6B74)) {
+        code |= 8;
+    }
+    if (*(float*)(c + 0x6B84) < p[1]) {
+        code |= 4;
+    }
+    if (p[3] < 0.0f) {
+        return code ^ 0x2F;
+    }
+    if (*(float*)(c + 0x6B78) < p[2]) {
+        code |= 0x20;
+    }
+    if (p[2] < *(float*)(c + 0x6B88)) {
+        code |= 0x10;
+    }
+    return code;
+}
 
 extern "C" int func_00396058(void)
 {
