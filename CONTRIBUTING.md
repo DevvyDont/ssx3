@@ -45,12 +45,18 @@ even before it's fully matched.
 3. Build with `ninja` and compare your output against the target using
    [objdiff](tools/objdiff) (`tools/objdiff/objdiff-cli`, or the GUI build for
    your platform) to check for a byte-perfect match.
-4. If you're stuck, paste the target asm and a first-pass decompilation into
+4. Once it matches, link it: remove the `INCLUDE_ASM` line above your C and
+   the `#ifdef SKIP_ASM` / `#endif` around it (for many functions at once,
+   `scripts/unwrap_matched.py` does this from an objdiff report). Then
+   `./configure.py && ninja` has to end with `out/SLUS_207.72: OK`. If it
+   doesn't, the function doesn't really match in place (objdiff can miss
+   things like alignment): wrap it again.
+5. If you're stuck, paste the target asm and a first-pass decompilation into
    [decomp.me](https://decomp.me) or run it through the
    [permuter](https://github.com/simonlindholm/decomp-permuter) locally
    (`permuter_settings.toml` at the repo root configures it — this file is
    gitignored since settings are per-machine).
-5. Functions that don't split cleanly into a single file, or that you
+6. Functions that don't split cleanly into a single file, or that you
    haven't sorted into the right file yet, can go in `src/uncollated/` in the
    meantime (see `src/uncollated/readme.md`).
 
@@ -69,7 +75,7 @@ valid as a spreadsheet sync.
 
 ## Submitting a PR
 
-- Make sure `ninja` still builds cleanly.
+- Make sure `ninja` still builds cleanly and ends with `out/SLUS_207.72: OK`.
 - Run objdiff on any function you touched and mention the match result
   (matched / still non-matching but closer / etc.) in the PR description.
 - Keep unrelated formatting or reordering out of the diff — it makes the

@@ -36,7 +36,16 @@ $ . venv/bin/activate
 
 ## Building
 
-`ninja` should do the trick.
+`ninja` should do the trick. It links `out/SLUS_207.72` from the decompiled C
+of every matched function and the original asm of the rest, and checks that
+its sha1 matches the retail executable (`config/checksum.sha1`):
+
+```
+out/SLUS_207.72: OK
+```
+
+See [docs/linking.md](docs/linking.md) for what it takes for C and asm to
+link back into a byte-identical executable.
 
 ## Progress
 
