@@ -125,6 +125,48 @@ compiler_type = "gcc"
 """)
 
 
+GP_VALUE = 0x004A30F0
+
+
+def link_unit_lit4(ld_text):
+    """
+    Link each C/C++ unit's .lit4 chunk (scripts/split_data.py) from the unit's object.
+
+    Compiled C emits its own float constants (`li.s`), one per load, in instruction order, and so does
+    the unit's asm after inline_lit4_loads, so the object's .lit4 is the original chunk. Returns the
+    updated linker script.
+    """
+    yaml_text = YAML_FILE.read_text()
+    subs = re.findall(r"- \[0x([0-9a-fA-F]+), (\w+)(?:, ([^\]#]+?))?\]", yaml_text)
+    code_units = {n.strip(): t for _, t, n in subs if t in ("cpp", "c") and n}
+    for _, t, name in subs:
+        name = (name or "").strip()
+        if t != "lit4" or name not in code_units:
+            continue
+        obj = f"obj/src/{name}.{code_units[name]}.o(.lit4);"
+        chunk_line = f"        obj/asm/data/{name}.lit4.s.o(.lit4);\n"
+        assert chunk_line in ld_text, chunk_line
+        ld_text = ld_text.replace(chunk_line, f"        {obj}\n")
+    return ld_text
+
+
+def patch_linker_script():
+    """Link .lit4 from the C objects, and put the data in its own output section without padding."""
+    ld_text = Path(LD_PATH).read_text()
+    ld_text = link_unit_lit4(ld_text)
+    # Each data chunk is an exact byte range of the original, so the data objects are only 4-aligned
+    # per object, while the code needs SUBALIGN(8)
+    data_start = "        main_DATA_START = .;\n"
+    assert data_start in ld_text
+    ld_text = ld_text.replace(data_start, "    }\n"
+                              "    .main_data : AT(main_ROM_START + SIZEOF(.main)) SUBALIGN(1)\n"
+                              "    {\n" + data_start)
+    rom_pos = "    __romPos += SIZEOF(.main);\n"
+    assert rom_pos in ld_text
+    ld_text = ld_text.replace(rom_pos, "    __romPos += SIZEOF(.main) + SIZEOF(.main_data);\n")
+    Path(LD_PATH).write_text(ld_text)
+
+
 BRANCH = re.compile(r"^(\s*/\* [0-9A-F]+ [0-9A-F]{8} ([0-9A-F]{8}) \*/\s+)"
                     r"(b|beqz|bnez|beq|bne|beql|bnel|blez|bgtz|bltz|bgez|blezl|bgtzl|bltzl|bgezl|bc1f|bc1t|bc1fl|bc1tl)"
                     r"(\s+.*)$", re.M)
@@ -158,45 +200,52 @@ def freeze_asm_branches():
     print(f"Froze {frozen} asm branches")
 
 
-def rewrite_lit4_loads_for_objdiff():
-    """Objects mode only: turn `lwc1 $fN, (D_x)` loads of .lit4 pool entries back into `li.s $fN, value`.
+def inline_lit4_loads():
+    """Make the asm generate its own float constants, the way compiled C does.
 
-    The compiler never names float literals: it emits `li.s` and the assembler puts the value in
-    the object's own .lit4 (R_MIPS_LITERAL). splat instead references the retail pool entry by name
-    (GPREL16 to an external D_ symbol), which no C can reproduce. Rewriting the target asm the same
-    way the original toolchain built it makes the two comparable; the instruction bytes are
-    unchanged (one gp-relative lwc1). Values with a zero low half are skipped, because gas would
-    expand those to lui+mtc1. Never used for the linked ELF: its .lit4 layout comes from the split
-    .lit4 data segment.
+    The compiler never names float literals: it emits `li.s` and the assembler puts the value in the
+    object's .lit4 (R_MIPS_LITERAL), one entry per load, in instruction order. splat instead loads the
+    retail pool entry by name (`lwc1 $fN, (D_x)`, gp-relative). Each such load becomes `li.s $fN, value`,
+    which assembles to the same single lwc1, so each unit's .lit4 comes out of its object in the original
+    order whether its functions are asm or C, and objdiff can compare the two. A value li.s can't express
+    (zero low half, which gas expands to lui+mtc1, or not a normal float) is written as a .word in .lit4
+    just before a load of it by its gp offset. Every .lit4 load in the game is a gp-relative lwc1, one per
+    constant.
     """
-    import re
     import struct
 
-    lit4_files = list(Path("asm/data").glob("*.lit4.s"))
     values = {}
-    for f in lit4_files:
-        for addr, word in re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/\s+\.float", f.read_text()):
-            raw = bytes.fromhex(word)
-            if int.from_bytes(raw, "little") & 0xFFFF:
-                values[addr] = struct.unpack("<f", raw)[0]
-    load = re.compile(r"lwc1(\s+)(\$f\d+), \((D_([0-9A-F]{8}))\) /\* gp_rel: \(D_[0-9A-F]{8}\) \*/")
-    rewritten = 0
+    for f in Path("asm/data").rglob("*.lit4.s"):
+        for addr, word in re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", f.read_text()):
+            values[addr] = bytes.fromhex(word)
+    load = re.compile(r"^(\s*/\* [0-9A-F]+ [0-9A-F]{8} [0-9A-F]{8} \*/\s+)lwc1(\s+)(\$f\d+), "
+                      r"\((D_([0-9A-F]{8}))\) /\* gp_rel: \(D_[0-9A-F]{8}\) \*/", re.M)
+    counts = [0, 0]
     for f in Path("asm/nonmatchings").rglob("*.s"):
         text = f.read_text()
         if "gp_rel" not in text:
             continue
 
         def sub(m):
-            nonlocal rewritten
-            if m.group(4) not in values:
+            raw = values.get(m.group(5))
+            if raw is None:
                 return m.group(0)
-            rewritten += 1
-            return f"li.s{m.group(1)}{m.group(2)}, {values[m.group(4)]!r} /* lit4: {m.group(3)} */"
+            word = int.from_bytes(raw, "little")
+            exponent = (word >> 23) & 0xFF
+            if word & 0xFFFF and 0 < exponent < 0xFF:
+                counts[0] += 1
+                value = struct.unpack("<f", raw)[0]
+                return f"{m.group(1)}li.s{m.group(2)}{m.group(3)}, {value!r} /* lit4: {m.group(4)} */"
+            counts[1] += 1
+            offset = int(m.group(5), 16) - GP_VALUE
+            return (f".section .lit4\n    .word 0x{word:08X}\n.section .text\n"
+                    f"{m.group(1)}lwc1{m.group(2)}{m.group(3)}, {offset}($28) /* lit4: {m.group(4)} */")
 
         new = load.sub(sub, text)
         if new != text:
             f.write_text(new)
-    print(f"lit4: rewrote {rewritten} literal loads to li.s for objdiff")
+    print(f"lit4: {counts[0]} asm loads made li.s, {counts[1]} written with their .word")
+
 
 def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_only=False, dual_objects=False):
     """
@@ -493,7 +542,8 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     ninja.build(
         "obj/address_syms.ld",
         "address_syms",
-        sorted(str(obj) for obj in built_objects),
+        LD_PATH,
+        implicit=sorted(str(obj) for obj in built_objects),
     )
 
     ninja.build(
@@ -567,10 +617,11 @@ def main():
     split.main([YAML_FILE], modes="all", verbose=False, use_cache=False)
 
     linker_entries = split.linker_writer.entries
+    inline_lit4_loads()
+    patch_linker_script()
     freeze_asm_branches()
 
     if do_objects:
-        rewrite_lit4_loads_for_objdiff()
         build_stuff(linker_entries, skip_checksum=True, objects_only=True, dual_objects=True)
     else:
         build_stuff(linker_entries, do_skip_checksum)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Define the address-named symbols the objects use but nothing defines.
 
-    tools/address_syms.py OUT.ld OBJECT...
+    tools/address_syms.py OUT.ld LINKER_SCRIPT
 
 Decompiled C refers to globals by their splat names (D_004FF160, D_828,
 func_0014A0B0, possibly mangled as func_0014A0B0__Fi). When no asm still
@@ -17,7 +17,9 @@ NAME = re.compile(r"^(?:D|func|lbl|jtbl)_([0-9A-F]{1,8})(?:__\w*)?$")
 
 
 def main():
-    out, objects = sys.argv[1], sys.argv[2:]
+    out, script = sys.argv[1], sys.argv[2]
+    with open(script) as f:
+        objects = sorted(set(re.findall(r"^\s*(obj/\S+\.o)\(", f.read(), re.M)))
     defined, undefined = set(), set()
     for i in range(0, len(objects), 200):
         nm = subprocess.run(["mips-linux-gnu-nm", *objects[i:i + 200]], capture_output=True, text=True, check=True)
