@@ -1521,7 +1521,11 @@ extern "C" void func_0013F880(void* self, void* obj)
     vt[2].fn((char*)obj + vt[2].delta, self, 0x18);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8B8);
+// Variadic no-op (probably a stripped debug print); returns its first argument.
+extern "C" void* func_0013F8B8(void* a, ...)
+{
+    return a;
+}
 
 //100%
 struct sSortObj_F8F8 {
@@ -1571,7 +1575,18 @@ extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSort
     }
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013FAD8);
+struct sSortObj_F8F8;
+extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSortObj_F8F8** buf, void* cmp);
+
+// Sorts [first, last) into buf (merge sort for 2+ entries, plain copy for one).
+extern "C" void func_0013FAD8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSortObj_F8F8** buf, void* cmp)
+{
+    int n = last - first;
+    if (n >= 2)
+        func_0013F8F8(first, last, buf, cmp);
+    else if (n == 1)
+        *buf = *first;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013FB20);
 
@@ -1801,11 +1816,20 @@ extern "C" int func_001408B8(void* self)
     return *(int*)((char*)self + 0xAA0);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408C0);
+extern "C" sVec4HP func_001408C0(char* self)
+{
+    return *(sVec4HP*)(self + 0x1B0);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408D0);
+extern "C" sVec4HP func_001408D0(char* self)
+{
+    return *(sVec4HP*)(self + 0x1A0);
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408E0);
+extern "C" sVec4HP func_001408E0(char* self)
+{
+    return *(sVec4HP*)(self + 0x1C0);
+}
 
 //100%
 void* func_001408F0(void* self)
@@ -1818,7 +1842,10 @@ extern "C" void* func_001408F8(void* self)
     return (char*)self + 0x110;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140900);
+extern "C" sVec4HP func_00140900(char* self)
+{
+    return *(sVec4HP*)(self + 0x120);
+}
 
 //100%
 void* func_00140910(void* self)
@@ -1826,11 +1853,41 @@ void* func_00140910(void* self)
     return (char*)self + 0x1E0;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140918);
+extern "C" void func_00140918(char* self, sVec4HP* v)
+{
+    *(sVec4HP*)(self + 0x1E0) = *v;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140928);
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMat_HP(void* d, void* s)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140958);
+// Returns the 4x4 matrix at +0x160 (hidden return pointer in out).
+extern "C" void* func_00140928(void* out, char* self)
+{
+    CopyMat_HP(out, self + 0x160);
+    return out;
+}
+
+extern "C" sVec4HP func_00140958(char* self)
+{
+    return *(sVec4HP*)(self + 0x370);
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140968);
 
@@ -1859,9 +1916,16 @@ extern "C" int func_00140A48(void* self)
     return *(int*)((char*)self + 0x434);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
+extern "C" int func_00140A50(void* self)
+{
+    return *(int*)((char*)self + 0x434) < 0x11;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
+extern "C" int func_00140A60(void* self)
+{
+    int v = *(int*)((char*)self + 0x434);
+    return v >= 0xB && v <= 0xD;
+}
 
 extern "C" void* func_00140A70(void* self)
 {
@@ -1913,13 +1977,26 @@ extern "C" int func_00140AB8(void* self)
     return *(int*)((char*)self + 0xE8);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AC0);
+extern "C" void func_00140AC0(void* self)
+{
+    *(float*)((char*)self + 0x470) = -1.0f;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AD0);
+extern "C" void func_00140AD0(void* self)
+{
+    if (*(float*)((char*)self + 0x470) < 0.0f)
+        *(float*)((char*)self + 0x470) = 0.0f;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140AF0);
+extern "C" int func_00140AF0(void* self)
+{
+    return *(float*)((char*)self + 0x470) >= 0.0f;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B18);
+extern "C" int func_00140B18(void* self)
+{
+    return *(float*)((char*)self + 0x470) >= 10.0f;
+}
 
 extern "C" void func_00140B40(void* self, int value)
 {
@@ -2009,14 +2086,21 @@ extern "C" int func_00140BD8(void* self)
     return *(int*)((char*)self + 0x878);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BE0);
+extern "C" int func_00140BE0(void* self)
+{
+    return *(int*)((char*)self + 0x874) != 0 && *(int*)((char*)self + 0x87C) != 0;
+}
 
 extern "C" int func_00140C00(void* self)
 {
     return *(int*)((char*)self + 0x884);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C08);
+extern "C" void func_00140C08(void* self, int value)
+{
+    *(int*)((char*)self + 0x884) = value;
+    *(int*)((char*)self + 0x888) = -1;
+}
 
 extern "C" int func_00140C18(void* self)
 {
@@ -2108,7 +2192,10 @@ extern "C" float func_00140CA0(void* self)
     return *(float*)((char*)self + 0x5B4);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA8);
+extern "C" int func_00140CA8(void* self)
+{
+    return *(int*)((char*)self + 0xAC4) != 0 && *(int*)((char*)self + 0xAD0) == 0 && *(int*)((char*)self + 0xAFC) != 0;
+}
 
 extern "C" int func_00140CD0(void* self)
 {
@@ -2131,7 +2218,13 @@ extern "C" int func_00140CE8(void* self)
     return *(int*)((char*)self + 0xB18);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CF0);
+extern "C" void func_00120D58(void* self);
+
+extern "C" void func_00140CF0(void* self, int value)
+{
+    *(int*)((char*)self + 0x304) = value;
+    func_00120D58(self);
+}
 
 extern "C" void func_00140D10(void* self, int value)
 {
@@ -2351,9 +2444,22 @@ extern "C" int func_00144008(void* self)
     return *(int*)((char*)self + 0xE70);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144010);
+extern "C" int func_00144010(void* self, float t)
+{
+    return *(int*)((char*)self + 0xE20) != 0 && t < 1.0f;
+}
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144040);
+struct sBytes8_HP
+{
+    char b[8];
+};
+extern sBytes8_HP D_0043CF20_b8[] __asm__("D_0043CF20");
+
+extern "C" void func_00144040(char* self, int i)
+{
+    *(sBytes8_HP*)(self + 0xF44) = D_0043CF20_b8[i];
+    *(short*)(self + 0xF38) = i;
+}
 
 //100%
 void func_00144068(void* self)
@@ -2470,14 +2576,21 @@ extern "C" int func_00144118(void* self)
     return *(int*)((char*)self + 0xC);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144120);
+extern "C" void func_00144120(void* self)
+{
+    (*(int*)((char*)self + 0xC))++;
+}
 
 extern "C" void func_00144130(void* self, int value)
 {
     *(int*)((char*)self + 0xC) = value;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144138);
+// Frame counter at +0xC converted to whole seconds (60 fps).
+extern "C" int func_00144138(void* self)
+{
+    return (int)((float)*(int*)((char*)self + 0xC) * (1.0f / 60.0f));
+}
 
 extern "C" int func_00144158(void* self)
 {
@@ -2619,7 +2732,17 @@ void* func_00144610(void* self)
     return func_00311958(self);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144630);
+extern "C" void cRiderAnimBase_cRiderAnimBase(void* self);
+extern char D_00458458[];
+
+extern "C" void* func_00144630(char* self)
+{
+    cRiderAnimBase_cRiderAnimBase(self);
+    *(void**)(self + 0x58) = D_00458458;
+    *(int*)(self + 0x60) = 0;
+    *(int*)(self + 0x64) = 0;
+    return self;
+}
 
 //100%
 // PORT: ulong is 64-bit here
@@ -2645,7 +2768,11 @@ extern "C" bool func_001446B8(void* self, int bit)
     return (*(ulong*)((char*)self + 0x8) & mask) != 0;
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446D0);
+extern "C" void func_001446D0(void* self, int a, int b)
+{
+    *(int*)((char*)self + 0xDF0) = a;
+    *(int*)((char*)self + 0xDF4) = b;
+}
 
 extern "C" int func_001446E0(void* self)
 {
