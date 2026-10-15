@@ -2552,7 +2552,23 @@ extern "C" void func_001E1550(void)
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E1A30);
+//100%
+extern "C" int func_001E1A30(int a, int b)
+{
+    switch (a) {
+    case 0: return b == 0;
+    case 1: return b == 1;
+    case 2: return b == 2;
+    case 3: return b == 3;
+    case 4: return b == 4;
+    case 5: return b == 5;
+    case 6: return b == 6;
+    case 7: return b == 7;
+    case 8: return b == 8;
+    case 9: return b == 9;
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label

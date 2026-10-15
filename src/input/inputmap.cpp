@@ -222,7 +222,30 @@ extern "C" void* func_003215F8(void* self)
     return p;
 }
 
-INCLUDE_ASM("input/inputmap", func_00321638);
+//100%
+extern "C" void func_00321638(char* self, int* node)
+{
+    if (node == 0)
+        return;
+    switch (node[0]) {
+    case 18: case 19: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32: case 33:
+        func_00321638(self, (int*)node[1]);
+        break;
+    case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 20: case 21:
+        func_00321638(self, (int*)node[1]);
+        func_00321638(self, (int*)node[2]);
+        break;
+    case 5:
+        func_00321638(self, (int*)node[1]);
+        func_00321638(self, (int*)node[2]);
+        func_00321638(self, (int*)node[3]);
+        break;
+    case 0: case 1: case 2: case 3: case 4: case 22: case 23:
+        break;
+    }
+    node[1] = *(int*)(self + 0xE0);
+    *(int**)(self + 0xE0) = node;
+}
 
 //100%
 extern "C" int func_0041AB78(const char* a, const char* b, int n);

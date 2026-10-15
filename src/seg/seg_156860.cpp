@@ -768,7 +768,31 @@ extern "C" void func_00256EE0(int self, int flags)
     if (flags & 1) operator_delete__FPi((int*)s);
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00257038);
+//100%
+extern "C" void func_00258330(void* self);
+extern "C" void func_00258870(void*, int, int);
+extern "C" void func_0031AD18();
+
+extern "C" void func_00257038(char* self, int v)
+{
+    switch (v) {
+    case 14:
+        func_00258330(self);
+        func_00258870(self, 0xE10, 0);
+        func_0031AD18();
+        break;
+    case 15:
+        *(int*)(self + 0x84) = 0;
+        *(int*)(self + 0x78) = 0;
+        break;
+    case 1: case 3: case 5: case 7: case 9: case 11: case 13:
+        func_00258870(self, 0x708, 0);
+        break;
+    case 2: case 4: case 6: case 8: case 10: case 12:
+        break;
+    }
+    *(int*)(self + 0x70) = v;
+}
 
 INCLUDE_ASM("seg/seg_156860", func_002570D8);
 
