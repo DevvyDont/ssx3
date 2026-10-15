@@ -878,7 +878,27 @@ INCLUDE_ASM("sound/soundsys", func_00293350);
 
 INCLUDE_ASM("sound/soundsys", func_00293410);
 
-INCLUDE_ASM("sound/soundsys", func_002934D0);
+//100%
+extern "C" int func_002934D0(void* self, unsigned int kind, void* rider)
+{
+    int r;
+    switch (kind) {
+    case 3:
+        r = func_0011FE98(rider) == 4 ? 2 : 0;
+        break;
+    case 1: case 2:
+        r = 1;
+        break;
+    case 4: case 5: case 6: case 7: case 8:
+        r = 2;
+        break;
+    case 0:
+    default:
+        r = 0;
+        break;
+    }
+    return r;
+}
 
 INCLUDE_ASM("sound/soundsys", func_00293538);
 
@@ -4298,12 +4318,30 @@ extern "C" int func_0029F198(void* self)
     return 1;
 }
 
-INCLUDE_ASM("sound/soundsys", func_0029F2B0);
+//100%
+extern "C" int func_0029F2B0(int kind, int busy)
+{
+    if (busy == 0) {
+        switch (kind) {
+        case 6: return 1;
+        case 3: return 2;
+        case 0: return 4;
+        case 8: return 8;
+        case 1: return 0x10;
+        case 4: return 0x20;
+        case 9: return 0x80;
+        case 7: return 0x40;
+        case 5: return 0x100;
+        case 2: return 0x200;
+        }
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_00123128(void*);
 extern "C" int func_00123168(void*);
-extern "C" void func_0029F2B0(int, int);
+extern "C" int func_0029F2B0(int, int);
 
 extern "C" void func_0029F330(void* self)
 {
@@ -5203,7 +5241,7 @@ INCLUDE_ASM("sound/soundsys", func_002A1BD8);
 //100%
 extern "C" int func_00123128(void*);
 extern "C" int func_00123168(void*);
-extern "C" void func_002A1DA0(void* self, int a, int b);
+extern "C" int func_002A1DA0(void* self, int a, int b);
 
 extern "C" void func_002A1D48(void* self, void* obj)
 {
@@ -5211,13 +5249,55 @@ extern "C" void func_002A1D48(void* self, void* obj)
     func_002A1DA0(self, a, func_00123168(obj));
 }
 
-INCLUDE_ASM("sound/soundsys", func_002A1DA0);
+//100%
+extern "C" int func_002A1DA0(void* self, int kind, int busy)
+{
+    if (busy == 0) {
+        switch (kind) {
+        case 6: return 1;
+        case 3: return 2;
+        case 0: return 4;
+        case 8: return 8;
+        case 1: return 0x10;
+        case 4: return 0x20;
+        case 9: return 0x40;
+        case 7: return 0x80;
+        case 5: return 0x100;
+        case 2: return 0x200;
+        }
+    }
+    return 0x1000;
+}
 
-INCLUDE_ASM("sound/soundsys", func_002A1E20);
+//100%
+extern "C" int func_002A1E20(void* self, unsigned int kind)
+{
+    switch (kind) {
+    case 0: case 1: case 5: case 8: case 11: case 14: case 17: case 18:
+        return 1;
+    case 2: case 3: case 6: case 9: case 12: case 15: case 19: case 20:
+        return 2;
+    case 4: case 7: case 10: case 13: case 16: case 21:
+        return 4;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
 
-INCLUDE_ASM("sound/soundsys", func_002A1FA0);
+//100%
+extern "C" int func_002A1FA0(void* self, void* obj)
+{
+    if (func_00123168(obj) != 0)
+        return 0;
+    switch (func_00123128(obj)) {
+    case 1: case 2: case 4: case 6:
+        return 2;
+    case 0: case 3: case 5: case 7: case 8: case 9:
+        return 1;
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_0029F0D8(void* self);

@@ -680,7 +680,11 @@ extern "C" void func_003A84F8(void* self, int a1, int a2)
     *(int*)((char*)self + 0x3f4) = a2;
 }
 
-INCLUDE_ASM("world/worldcache", func_003A8510);
+//100%
+extern "C" int func_003A8510(void* self, int i)
+{
+    return *(int*)((char*)self + i * 0x18 + 0x3F4);
+}
 
 INCLUDE_ASM("world/worldcache", func_003A8528);
 

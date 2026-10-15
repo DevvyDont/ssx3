@@ -143,7 +143,13 @@ extern "C" void* func_00144BF0()
 
 INCLUDE_ASM("be/beintnewrace", func_00144C10);
 
-INCLUDE_ASM("be/beintnewrace", func_00144C30);
+//100%
+extern sPad16 D_0043D994;
+
+extern "C" void* func_00144C30(void* self, int i)
+{
+    return (char*)&D_0043D994 + i * 0x64;
+}
 
 //100%
 extern "C" void* func_00144C48(void* self, int a1)
@@ -383,7 +389,11 @@ extern "C" void* func_00145340()
     return (char*)&D_0043E97C + D_00535C12[0] * 0x54;
 }
 
-INCLUDE_ASM("be/beintnewrace", func_00145360);
+//100%
+extern "C" void* func_00145360(void* self, int i)
+{
+    return (char*)&D_0043E97C + i * 0x54;
+}
 
 //100%
 extern signed char D_00535C11[];
@@ -575,9 +585,61 @@ extern "C" int func_00145750(void* self)
     return 3;
 }
 
-INCLUDE_ASM("be/beintnewrace", func_00145818);
+//100%
+extern "C" int func_00145818(void* self, unsigned int i)
+{
+    switch (i) {
+    case 14: case 15: case 16:
+        return 4;
+    case 0: case 1: case 2: case 3: case 4:
+        return 0;
+    case 5: case 6: case 7:
+        return 1;
+    case 8: case 9: case 10:
+        return 2;
+    case 11: case 12: case 13:
+        return 3;
+    }
+    return 4;
+}
 
-INCLUDE_ASM("be/beintnewrace", func_00145870);
+//100%
+extern "C" int func_00145870(void* self, unsigned int i)
+{
+    switch (i) {
+    case 14: case 15: case 16:
+        return 12;
+    case 0: case 1: case 2: case 3: case 4:
+        return 0;
+    case 5: case 6: case 7:
+        return 1;
+    case 8: case 9: case 10:
+        return 3;
+    case 11: case 12: case 13:
+        return 2;
+    }
+    return 12;
+}
 
 
-INCLUDE_ASM("be/beintnewrace", func_001458C8);
+//100%
+extern "C" int func_001458C8(void* self, unsigned int i)
+{
+    switch (i) {
+    case 0:
+        return 0;
+    case 1:
+        return 1;
+    case 2:
+        return 3;
+    case 3:
+        return 2;
+    case 4:
+        return 5;
+    case 5:
+        return 6;
+    case 12: case 13:
+        return 4;
+    }
+    return 0;
+}

@@ -41,11 +41,21 @@ extern "C" void func_00311958(void* self, int flags)
         operator_delete((int*)self);
 }
 
-INCLUDE_ASM("animation/rideranimbase", func_003119E8);
+//100%
+extern "C" void* func_003119E8(void* self, int i)
+{
+    return *(char**)((char*)self + 0x50) + (i << 3);
+}
 
 INCLUDE_ASM("animation/rideranimbase", func_003119F8);
 
-INCLUDE_ASM("animation/rideranimbase", func_00311A30);
+//100%
+extern "C" void func_00311860(void* p);
+
+extern "C" void func_00311A30(void* self, void* p)
+{
+    func_00311860(p);
+}
 
 //100%
 extern "C" void func_00314668(void* self);

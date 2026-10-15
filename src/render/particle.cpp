@@ -2298,7 +2298,21 @@ INCLUDE_ASM("render/particle", func_0037BB10);
 
 INCLUDE_ASM("render/particle", func_0037BC40);
 
-INCLUDE_ASM("render/particle", func_0037BD38);
+//100%
+extern "C" int func_0037BD38(void* self, unsigned int kind, int c)
+{
+    switch (kind) {
+    case 0: case 1: case 10: case 48: case 49: case 58:
+        if ((unsigned int)(c - '0') < 2 || c == ':')
+            return 1;
+        break;
+    case 2: case 50:
+        if (c == '2')
+            return 1;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("render/particle", func_0037BD98);
 

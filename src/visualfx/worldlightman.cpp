@@ -699,7 +699,11 @@ void* func_002F7A68(void* self)
     return self;
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
+//100%
+extern "C" int func_002F7A70(void* self)
+{
+    return *(int*)((char*)self + 0x4) > 0;
+}
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
 
@@ -1254,7 +1258,12 @@ void func_002F8168(void* self)
 {
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
+//100%
+extern "C" int func_002F8170(long* self, int bit)
+{
+    long mask = 1L << bit;
+    return (*self & mask) != 0;
+}
 
 //100%
 extern void* D_00488680[];

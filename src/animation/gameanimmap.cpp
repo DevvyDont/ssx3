@@ -19,7 +19,11 @@ extern "C" float func_003158B8(void* self)
     return *(float*)((char*)self + 0x1C);
 }
 
-INCLUDE_ASM("animation/gameanimmap", func_003158C0);
+//100%
+extern "C" long func_003158C0(void* self)
+{
+    return *(long*)((char*)self + 0x20);
+}
 
 extern "C" void* func_003158C8(void* self)
 {
@@ -45,13 +49,26 @@ INCLUDE_ASM("animation/gameanimmap", func_003158E8);
 
 INCLUDE_ASM("animation/gameanimmap", func_00315988);
 
-INCLUDE_ASM("animation/gameanimmap", func_003159A0);
+//100%
+extern "C" void func_003159A0(void* self, long v)
+{
+    *(long*)((char*)self + 0x20) = v;
+}
 
-INCLUDE_ASM("animation/gameanimmap", func_003159A8);
+//100%
+extern "C" void func_003159A8(void* self)
+{
+    *(long*)((char*)self + 0x20) = -1;
+}
 
 INCLUDE_ASM("animation/gameanimmap", func_003159B8);
 
-INCLUDE_ASM("animation/gameanimmap", func_003159E8);
+//100%
+extern "C" int func_003159E8(long* self, int bit)
+{
+    long mask = 1L << bit;
+    return (*self & mask) != 0;
+}
 
 //99.38%
 void* func_00315A00(void* self)

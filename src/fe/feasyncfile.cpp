@@ -3041,7 +3041,24 @@ extern "C" void func_001A92D8(void* self, int a1, unsigned int kind)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A93D0);
+//100%
+extern "C" void func_0039F190(void* self, int a1);
+
+extern "C" void func_001A93D0(void* self_, int a1, int msg, int a3)
+{
+    char* self = (char*)self_;
+    switch (msg) {
+    case 15: case 16: case 17: case 18: case 20:
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 22:
+        if (a1 == *(int*)(self + 0x6A0))
+            *(int*)(self + 0x6A0) = 0;
+        break;
+    case 19: case 21:
+        break;
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

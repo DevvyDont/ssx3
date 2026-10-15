@@ -93,7 +93,14 @@ cListNode* cList_first(cList* list)
     return (head->prev == head) ? 0 : head;
 }
 
-INCLUDE_ASM("util/list", func_00397858);
+//100%
+extern "C" void* func_00397858(void* self)
+{
+    void** p = *(void***)((char*)self + 0xC);
+    if (*p == p)
+        return 0;
+    return p;
+}
 
 //100%
 extern "C" cListNode* func_00397870(cList* list, int count)

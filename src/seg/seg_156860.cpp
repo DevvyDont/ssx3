@@ -358,7 +358,31 @@ extern "C" void func_002563A8(void *arg0) {
     }
 }
 
-INCLUDE_ASM("seg/seg_156860", func_002563F8);
+//100%
+extern "C" void func_00256460(char* self);
+extern "C" void func_00256510(char* self);
+extern "C" void func_002565E0(char* self);
+
+extern "C" void func_002563F8(char* self)
+{
+    switch (*(int*)self) {
+    case 0:
+        break;
+    case 1:
+        func_00256460(self);
+        break;
+    case 2:
+        func_00256510(self);
+        break;
+    case 3:
+        break;
+    case 4:
+        func_002565E0(self);
+        break;
+    case 5:
+        break;
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -584,7 +608,26 @@ extern "C" void func_00256998(void *arg0) {
     }
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00256A00);
+//100%
+extern "C" void func_00256A58(void* arg0);
+extern "C" void func_00256AA8(char* s);
+
+extern "C" void func_00256A00(char* self)
+{
+    switch (*(int*)(self + 0xC)) {
+    case 0:
+        break;
+    case 1:
+        func_00256A58(self);
+        break;
+    case 2:
+        func_00256AA8(self);
+        break;
+    case 3:
+    case 4:
+        break;
+    }
+}
 
 //100%
 extern "C" int func_003E66F0(int, int, int);

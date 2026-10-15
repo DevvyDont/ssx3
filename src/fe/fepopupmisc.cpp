@@ -3195,7 +3195,25 @@ extern "C" void func_001E2A08(int charID, int level)
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E2B38);
+//100%
+extern "C" int func_001E2B38(int charID)
+{
+    switch (charID) {
+    case 0: return 12;
+    case 1: return 13;
+    case 2: return 14;
+    case 3: return 15;
+    case 4: return 16;
+    case 5: return 17;
+    case 6: return 18;
+    case 7: return 19;
+    case 8: return 20;
+    case 9: return 21;
+    case 10:
+    default:
+        return 61;
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

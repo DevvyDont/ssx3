@@ -2014,7 +2014,22 @@ extern "C" void func_001FF700(void* self, void* a1, int key)
     }
 }
 
-INCLUDE_ASM("fe/ovstatepause", func_001FF748);
+//100%
+extern "C" int func_001FF748(char* self, int a1, int msg, int a3)
+{
+    switch (msg) {
+    case 4:
+        func_001FFD08(self, a3);
+        return 1;
+    case 7: case 8: case 9:
+        return 0;
+    case 2: case 3:
+        if (*(int*)(self + 0x9C) < 10)
+            return 0;
+    default:
+        return 0x101;
+    }
+}
 
 INCLUDE_ASM("fe/ovstatepause", func_001FF7B8);
 
