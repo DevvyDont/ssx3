@@ -762,7 +762,10 @@ extern "C" void* func_00372AA0(sPtObj_2AA0* self)
     return self;
 }
 
-INCLUDE_ASM("render/particle", func_00372B20);
+extern "C" int func_00372B20(int* a, int* b)
+{
+    return *a - *b;
+}
 
 //100%
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -2400,9 +2403,16 @@ extern "C" void func_0037C570(void* self, sPartColour_C570* c)
 
 INCLUDE_ASM("render/particle", func_0037C638);
 
-INCLUDE_ASM("render/particle", func_0037C720);
+extern "C" void func_0037C720(char* self, float f)
+{
+    float one = 1.0f;
+    *(int*)(self + 0x59F8) = func_004139F8((one - clamp_C570(f, one)) * 128.0f);
+}
 
-INCLUDE_ASM("render/particle", func_0037C770);
+extern "C" float func_0037C770(char* self)
+{
+    return 1.0f - (float)*(unsigned int*)(self + 0x59F8) * 0.0078125f;
+}
 
 //100%
 extern "C" void func_003E6448(void* dst, int c, int n);
@@ -4221,9 +4231,26 @@ INCLUDE_ASM("render/particle", func_00385EB0);
 
 INCLUDE_ASM("render/particle", func_00386128);
 
-INCLUDE_ASM("render/particle", func_003865D8);
+// Pushes node onto the list at *head (next pointer at +0x8)
+extern "C" void func_003865D8(char* node, char** head)
+{
+    *(char**)(node + 0x8) = *head;
+    *head = node;
+}
 
-INCLUDE_ASM("render/particle", func_003865E8);
+// Walks the list (next at +0x8), calling each node's virtual function with 3
+extern "C" void func_003865E8(char* node)
+{
+    char* next;
+    while (node) {
+        next = *(char**)(node + 0x8);
+        if (node) {
+            char* vt = *(char**)(node + 0x4);
+            (*(void (**)(char*, int))(vt + 0xC))(node + *(short*)(vt + 0x8), 3);
+        }
+        node = next;
+    }
+}
 
 //100%
 extern "C" void func_0036ABA0(void* self, int a1);
@@ -4480,9 +4507,31 @@ extern "C" void func_00389590(sPartVec4* a, sPartVec4* b, sPartVec4* c, float s)
     }
 }
 
-INCLUDE_ASM("render/particle", func_00389620);
+// dst[i].w += src[i].w * s for 10 vectors
+extern "C" void func_00389620(float* dst, float* src, float s)
+{
+    int i;
+    src += 3;
+    dst += 3;
+    for (i = 9; i >= 0; i--) {
+        *dst += *src * s;
+        src += 4;
+        dst += 4;
+    }
+}
 
-INCLUDE_ASM("render/particle", func_00389660);
+// Multiplies each of 10 vectors by another's components rotated by one
+extern "C" void func_00389660(float* dst, float* src)
+{
+    int i;
+    for (i = 9; i >= 0; i--) {
+        dst[0] *= src[1];
+        dst[1] *= src[2];
+        dst[2] *= src[3];
+        dst[3] *= src[0];
+        dst += 4;
+    }
+}
 
 INCLUDE_ASM("render/particle", func_003896C0);
 
