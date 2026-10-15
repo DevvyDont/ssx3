@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -42,11 +40,8 @@ extern "C" void cFEStateCredits_onCreateScreen(void* self)
         vt[9].fn(t + vt[9].delta, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_003A1F18(void* self, int id);
@@ -149,11 +144,8 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* a1)
     }
     func_00186518(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00185F40);
-#ifdef SKIP_ASM
 extern "C" void func_00391E30(void* self, float x, float y, void* m);
 extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy);
 extern "C" void* func_0039E6B8(void* self);
@@ -309,11 +301,8 @@ extern "C" void func_00185F40(char* self)
     }
     func_0039E6B8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001863B8);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E510(void* self);
 
 extern "C" void func_001863B8(void* self)
@@ -321,11 +310,8 @@ extern "C" void func_001863B8(void* self)
     *(int*)((char*)self + 0x60) += *(int*)((char*)self + 0x64);
     func_0039E510(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001863E8);
-#ifdef SKIP_ASM
 struct sVEntry001863E8 {
     short delta;
     short index;
@@ -350,11 +336,8 @@ extern "C" int func_001863E8(void* self, void* pad)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00186478);
-#ifdef SKIP_ASM
 extern "C" int func_00186478(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
@@ -365,11 +348,8 @@ extern "C" int func_00186478(void* self, int a1, unsigned int a2)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001864B0);
-#ifdef SKIP_ASM
 struct sVEntry001864B0 {
     short delta;
     short index;
@@ -388,11 +368,8 @@ extern "C" void func_001864B0(void* self, void* item, int msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00186518);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
@@ -419,11 +396,8 @@ extern "C" void func_00186518(void* self, void* a1)
     }
     func_0039E4C0(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001865A8);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
@@ -443,11 +417,8 @@ extern "C" void func_001865A8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00186610);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_002006B8(void* self);
 extern void* D_0046BD28[];
@@ -460,5 +431,4 @@ extern "C" void* func_00186610(void* self)
     func_002006B8((char*)self + 0x48);
     return self;
 }
-#endif
 

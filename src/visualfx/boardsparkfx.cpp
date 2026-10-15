@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_cBoardSparkFX);
-#ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEntBS {
     short delta;
@@ -237,7 +235,6 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
     func_002DAA78(self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DA8E8);
 
@@ -246,8 +243,6 @@ INCLUDE_ASM("visualfx/boardsparkfx", func_002DAA78);
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DABC8);
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", func_002DB478);
-#ifdef SKIP_ASM
 extern "C" void func_00371688(void* self, int a1);
 
 struct sRS_B478 {
@@ -347,5 +342,4 @@ extern "C" void func_002DB478(char* self)
         pop_B478(D_004A289C);
     }
 }
-#endif
 

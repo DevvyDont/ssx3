@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", cFE_cFE);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* func_00231CD0(void* self);
@@ -40,11 +38,8 @@ extern "C" void* cFE_cFE(void* self)
     *(cFEObjK1956F8_1**)((char*)self + 0xB5AA0) = new (D_00460200, 0, 0) cFEObjK1956F8_1(1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_001957D0);
-#ifdef SKIP_ASM
 void operator_delete(int* p);
 extern "C" void func_00397B70(void* p, int flags);
 extern "C" void func_0036A020(void* p);
@@ -74,11 +69,8 @@ extern "C" void func_001957D0(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_00195880);
-#ifdef SKIP_ASM
 extern void* D_0046BF98[];
 extern void* D_0046D848[];
 extern "C" void* func_001DCC40(void* p);
@@ -97,11 +89,8 @@ extern "C" void* func_00195880(void* self)
     func_00416210((char*)self + 8, 0, 0x50);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_001958F0);
-#ifdef SKIP_ASM
 extern void* D_0046BF98[];
 extern void* D_0046D848[];
 extern "C" void func_00195948(void* self);
@@ -116,11 +105,8 @@ extern "C" void func_001958F0(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_00195948);
-#ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, int i);
 
 extern "C" void func_00195948(void* self)
@@ -130,5 +116,4 @@ extern "C" void func_00195948(void* self)
         func_00195A50(self, i);
     }
 }
-#endif
 

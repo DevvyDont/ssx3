@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_00536668[];
 extern int* D_004A2C6C;
@@ -128,11 +126,8 @@ extern "C" int* cGameModeMan_getGM(void)
     }
     return D_004A2C6C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_002380E8);
-#ifdef SKIP_ASM
 class cMode2380E8 {
 public:
     virtual ~cMode2380E8();
@@ -152,15 +147,12 @@ extern "C" void func_002380E8(void)
     }
     D_004A2C6C = 0;
 }
-#endif
 
 INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
 
 INCLUDE_ASM("main/gamemode", func_002382B8);
 
 //100%
-INCLUDE_ASM("main/gamemode", cGameModeMan_restartHeat);
-#ifdef SKIP_ASM
 struct sVEntry_002382D8 {
     short delta;
     short index;
@@ -180,22 +172,16 @@ extern "C" void cGameModeMan_restartHeat(void* self)
         D_005366D0[i] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238348__FPv);
-#ifdef SKIP_ASM
 int func_00238348(void* self)
 {
     int t0 = *(int*)((char*)self + 0x74);
     *(int*)((char*)self + 0x70) = t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238358);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern void* D_00536668[];
 extern unsigned int D_00536640[];
@@ -246,11 +232,8 @@ extern "C" void func_00238358(void* self, int idx, int a2)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238510);
-#ifdef SKIP_ASM
 struct sVEntry_00238510 {
     short delta;
     short index;
@@ -265,11 +248,8 @@ extern "C" void func_00238510(void* self, int a, int b)
     sVEntry_00238510* vt = *(sVEntry_00238510**)obj;
     vt[6].fn((char*)obj + vt[6].delta, a, b);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238550);
-#ifdef SKIP_ASM
 struct sVEntry_00238550 {
     short delta;
     short index;
@@ -284,11 +264,8 @@ extern "C" void func_00238550(void* self, int a, int b)
     sVEntry_00238550* vt = *(sVEntry_00238550**)obj;
     vt[7].fn((char*)obj + vt[7].delta, a, b);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238590);
-#ifdef SKIP_ASM
 struct sVEntry_00238590 {
     short delta;
     short index;
@@ -303,15 +280,12 @@ extern "C" void func_00238590(void* self, int a, int b)
     sVEntry_00238590* vt = *(sVEntry_00238590**)obj;
     vt[9].fn((char*)obj + vt[9].delta, a, b);
 }
-#endif
 
 INCLUDE_ASM("main/gamemode", func_002385D0);
 
 INCLUDE_ASM("main/gamemode", func_002388A0);
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238B70);
-#ifdef SKIP_ASM
 extern int D_00536730[];
 extern int D_00536708[];
 extern "C" int func_00245E30(const void* a, const void* b);
@@ -328,11 +302,8 @@ extern "C" void func_00238B70(void* self, int n)
     func_00418EF8(D_00536708, n, 4, func_00245E30);
     func_00418EF8(D_00536730, n, 4, func_00245EC0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238BF8);
-#ifdef SKIP_ASM
 extern int D_00536730[];
 extern int D_00536708[];
 extern "C" int func_00245E78(const void* a, const void* b);
@@ -349,11 +320,8 @@ extern "C" void func_00238BF8(void* self, int n)
     func_00418EF8(D_00536708, n, 4, func_00245E78);
     func_00418EF8(D_00536730, n, 4, func_00245EC0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238C80);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
 struct sGM00238C80 {
@@ -413,11 +381,8 @@ extern "C" void func_00238C80(void* self)
     sVEntry00238C80* e = &(*(sVEntry00238C80**)self)[5];
     e->fn((char*)self + e->delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238D30);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern int D_00536730[];
 extern int D_00536708[];
@@ -433,11 +398,8 @@ extern "C" void func_00238D30(void)
     func_00416210(D_005366A8, 0, 0x28);
     func_00416210(D_005366D0, 0, 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238DA8);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern int D_00536730[];
 extern int D_00536708[];
@@ -453,11 +415,8 @@ extern "C" void func_00238DA8(void)
     func_00416210(D_005366A8, 0, 0x28);
     func_00416210(D_005366D0, 0, 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238E20);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -631,15 +590,12 @@ extern "C" void func_00238E20(sScore_238E20* self)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("main/gamemode", func_00239230);
 
 INCLUDE_ASM("main/gamemode", func_002398E8);
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239938);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -690,11 +646,8 @@ extern "C" void func_00239938(void)
         ((sGM_239938*)D_004A2C70)->a18[1] = list[n - 1];
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239AA0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -755,11 +708,8 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
     }
     func_00238B70(D_004A2C70, nA + nB);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239CE0);
-#ifdef SKIP_ASM
 struct sScoreTable239CE0 {
     int f0;
     int tbl[8][10];
@@ -773,11 +723,8 @@ extern "C" int func_00239CE0(sScoreTable239CE0* self, int col, int row)
     }
     return self->tbl[row][col];
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239D18);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 class cGameModeStream {
 public:
@@ -789,21 +736,15 @@ extern "C" void func_00239D18(void* self, cGameModeStream* s)
 {
     s->v01((char*)self + 0x4, 0xA0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239D50);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_00239D50(void* self, cGameModeStream* s)
 {
     s->v02((char*)self + 0x4, 0xA0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239D88);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -876,13 +817,10 @@ extern "C" void func_00239D88(void* self)
     *(short*)((char*)self + 0x4) = 0;
     *(short*)((char*)self + 0x6) = 0;
 }
-#endif
 
 INCLUDE_ASM("main/gamemode", func_00239EC8);
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A070);
-#ifdef SKIP_ASM
 extern char* D_004A2C70;
 extern void* D_004A28A8;
 
@@ -909,11 +847,8 @@ extern "C" int func_0023A070(char* self, int player, int secs)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A108);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1117,11 +1052,8 @@ extern "C" void func_0023A108(sMode_23A108* self)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A4F0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1167,43 +1099,31 @@ extern "C" void func_0023A4F0(void* self)
     *(int*)((char*)self + 0x50) = arr[8];
     *(int*)((char*)self + 0x54) = arr[9];
 }
-#endif
 
 INCLUDE_ASM("main/gamemode", func_0023A668);
 
 INCLUDE_ASM("main/gamemode", func_0023A760);
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC10__FPv);
-#ifdef SKIP_ASM
 void func_0023AC10(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC18);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023AC18(void* self, cGameModeStream* s)
 {
     s->v01(self, 0xD0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC50);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023AC50(void* self, cGameModeStream* s)
 {
     s->v02(self, 0xD0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC88);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1285,11 +1205,8 @@ extern "C" void func_0023AC88(void* self)
     }
     ((sGM_23AC88*)D_004A2C70)->f84 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AE00);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern char* D_004A2C70;
 extern unsigned int D_00536640[];
@@ -1368,33 +1285,24 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
         *(int*)(D_004A2C70 + 0x9C) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B038);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023B038(void* self, cGameModeStream* s)
 {
     s->v01(self, 0x2C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B070);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023B070(void* self, cGameModeStream* s)
 {
     s->v02(self, 0x2C);
 }
-#endif
 
 INCLUDE_ASM("main/gamemode", func_0023B0A8);
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B170);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1460,11 +1368,8 @@ extern "C" void func_0023B170(void* self)
     gm2->f94 = 0;
     gm2->f6C = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B268);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1569,11 +1474,8 @@ extern "C" void func_0023B268(void* self)
     gm3->f9C = 0;
     *(short*)((char*)self + 8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B468);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1647,11 +1549,8 @@ extern "C" void func_0023B468(void* self, int p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B5F8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1681,11 +1580,8 @@ extern "C" int func_0023B5F8(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B6C0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1769,11 +1665,8 @@ extern "C" void func_0023B6C0(void* self)
         ((sGM_23B6C0*)D_004A2C70)->a40[func_00146E98(player, 0) + 1] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B8C8);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1890,11 +1783,8 @@ extern "C" void func_0023B8C8(void* self, int idx)
     }
     *(int*)(Rider_23B8C8(idx) + 0x100) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023BB98);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -1981,11 +1871,8 @@ extern "C" void func_0023BB98(void* self)
         ((sGM_23BB98*)D_004A2C70)->a40[func_00146E98(player, 0) + 1] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023BDB8);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -2091,11 +1978,8 @@ extern "C" void func_0023BDB8(void* self, int idx)
         *(int*)(Rider_23BDB8(idx) + 0x100) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C0D0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -2196,11 +2080,8 @@ extern "C" void func_0023C0D0(void* self)
     gm4->f9C = 0;
     *(short*)((char*)self + 8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C2D8);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -2283,11 +2164,8 @@ extern "C" void func_0023C2D8(void* self, int idx)
     }
     ((sGM_23C2D8*)D_004A2C70)->f9C = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C560);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2317,11 +2195,8 @@ extern "C" int func_0023C560(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C618);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -2407,11 +2282,8 @@ extern "C" void func_0023C618(void* self)
     gm2->f74 = 1;
     gm2->f94 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C770);
-#ifdef SKIP_ASM
 extern "C" unsigned int func_00237CD8(void);
 
 extern "C" void func_0023C770(int* arr, unsigned int n)
@@ -2425,5 +2297,4 @@ extern "C" void func_0023C770(int* arr, unsigned int n)
         arr[b] = t;
     }
 }
-#endif
 

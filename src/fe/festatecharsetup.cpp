@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onCreateScreen);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -107,11 +105,8 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
         o->enable(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182C08);
-#ifdef SKIP_ASM
 extern "C" void func_001831D0(void* self, int a1);
 void* func_0039E4A0(void* self);
 
@@ -120,11 +115,8 @@ extern "C" void func_00182C08(void* self)
     func_001831D0(self, 0);
     func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182C38);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E510(void* self);
 extern "C" void func_00182EC0(void* self);
 
@@ -133,20 +125,14 @@ extern "C" void func_00182C38(void* self)
     func_0039E510(self);
     func_00182EC0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182C68);
-#ifdef SKIP_ASM
 extern "C" int func_00182C68(void* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182C80);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001887A0(void* self, void* engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
@@ -200,11 +186,8 @@ extern "C" void func_00182C80(void* self, void* item, unsigned int event)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182DB8);
-#ifdef SKIP_ASM
 struct cUIText;
 struct sVec4_182DB8 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sCam_182DB8 { char pad[0x10]; float fov; };
@@ -244,13 +227,10 @@ extern "C" void func_00182DB8(void* self)
     *(int*)((char*)self + 0x48) = 1;
     func_00182EC0(self);
 }
-#endif
 
 INCLUDE_ASM("fe/festatecharsetup", func_00182EC0);
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_001831D0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
@@ -269,11 +249,8 @@ extern "C" void func_001831D0(void* self, int on)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00183238);
-#ifdef SKIP_ASM
 extern "C" void* func_001828C0(void* self, void* engine, signed char idx);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern void* D_0046CD90[];
@@ -288,5 +265,4 @@ extern "C" void* func_00183238(void* self, void* engine, signed char idx)
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }
-#endif
 

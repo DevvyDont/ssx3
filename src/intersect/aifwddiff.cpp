@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_00340970(void* self);
@@ -41,11 +39,8 @@ extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
     self->lru = self->entries;
     self->buckets = (sCacheEntry_7890**)operator_new_tag(self->count * 4, D_0048E508, 0x80000000, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_003279D0);
-#ifdef SKIP_ASM
 struct sFwdDiffList;
 struct sFwdDiffLink;
 struct sFwdDiffTable;
@@ -91,11 +86,8 @@ extern "C" void func_003279D0(sCache_279D0* self, void* src, sCacheNode_279D0** 
     func_00327C00(self, src, n);
     *out = n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327AC0);
-#ifdef SKIP_ASM
 struct sFwdDiffLink {
     int pad0;
     sFwdDiffLink* next;   // 0x4
@@ -123,13 +115,10 @@ extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n)
     list->head->prev->next = n;
     list->head->prev = n;
 }
-#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00327B30);
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327BB0);
-#ifdef SKIP_ASM
 struct sFwdDiffNode {
     unsigned int key;
     int pad4;
@@ -158,11 +147,8 @@ extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node)
         link = &cur->next;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327C00);
-#ifdef SKIP_ASM
 extern "C" void func_00391418(void* t, void* a);
 extern "C" void func_00327C68(void* self, void* a);
 extern "C" void func_003914F8(void* t);
@@ -178,11 +164,8 @@ extern "C" void func_00327C00(void* self, void* a1, void* a2)
     func_003914F8(t);
     func_00391480(t, (char*)a2 + 0x10);
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
-#ifdef SKIP_ASM
 extern "C" void func_00327C68(void* self, void* a)
 {
     float* p = (float*)((char*)a + 0x650);
@@ -202,11 +185,8 @@ extern "C" void func_00327C68(void* self, void* a)
         p += 16;
     } while (n-- > 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327CC8);
-#ifdef SKIP_ASM
 struct sQuad_27CC8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -235,11 +215,8 @@ extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* s
     self->blkp = &self->blk;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327DA8);
-#ifdef SKIP_ASM
 extern "C" void func_003E6574(void* dst, void* src, int n);
 
 extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
@@ -282,11 +259,8 @@ extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
     self->q = v;
     return p - buf;
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327F18);
-#ifdef SKIP_ASM
 extern "C" int func_0032DF28(void* self);
 extern "C" int func_0032CDB0(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
 
@@ -323,11 +297,8 @@ extern "C" int func_00327F18(void* self, sShape_27F18* shape, int a2, int a3)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328030);
-#ifdef SKIP_ASM
 extern "C" float func_0032C590(void* self);
 extern "C" int func_0032CA78(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6);
 
@@ -401,15 +372,12 @@ extern "C" int func_00328030(void* self, sVec4_28030* p, void* a2, void* a3, sVe
     }
     return func_0032CA78(self, p, a2, a3, dir, a5, a6);
 }
-#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00328170);
 
 INCLUDE_ASM("intersect/aifwddiff", func_003281D0);
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328360);
-#ifdef SKIP_ASM
 struct sCell_00328360 {
     int level;
     int x, y, z;
@@ -471,11 +439,8 @@ extern "C" int func_00328360(sCell_00328360* c, sBox_00328360* b)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_003284B8);
-#ifdef SKIP_ASM
 void operator_delete(int* p);
 
 struct sItem_003284B8 {
@@ -538,11 +503,8 @@ extern "C" void func_003284B8(sNode_003284B8* node, int idx, sItem_003284B8* ite
         *ch = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328660);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_003E6448(void* p, int v, int n);
@@ -593,13 +555,10 @@ extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* ite
     }
     node->lists[idx].push(item);
 }
-#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00328808);
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328C20);
-#ifdef SKIP_ASM
 struct sNode_8C20 {
     sNode_8C20* child[2][2][2];         // 0x00
     sList_00328660 lists[3];            // 0x20
@@ -660,11 +619,8 @@ extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, s
     }
     func_00328660((sNode_00328660*)root->node, idx, item, cell, &root->cell);
 }
-#endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328F28);
-#ifdef SKIP_ASM
 struct sVec4_8F28 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -788,7 +744,6 @@ extern "C" void func_00328F28(sCell_8F28* c, sBox_8F28* b)
         *c = Parent_8F28(*c);
     }
 }
-#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_003291E0);
 

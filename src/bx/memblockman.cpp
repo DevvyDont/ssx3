@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("bx/memblockman", cMemMan_initialize);
-#ifdef SKIP_ASM
 extern void* D_00538B00[16];
 extern char D_004FF250[];
 extern unsigned int D_004A3EBC;
@@ -21,11 +19,8 @@ extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
     D_004A3EB8 = 1;
     cMemBlockMan_initialize();
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319A90);
-#ifdef SKIP_ASM
 extern "C" void* func_00319E48(unsigned int size);
 extern "C" void func_003E6220(void* p, unsigned int n);
 extern char D_004FF250[];
@@ -50,11 +45,8 @@ extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags,
         func_003E6220(p, size);
     return p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319B48);
-#ifdef SKIP_ASM
 extern "C" int func_0031A088(void* p);
 extern "C" void func_00319F68(void* p);
 extern char D_004FF250[];
@@ -75,11 +67,8 @@ extern "C" void func_00319B48(void* p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319B98);
-#ifdef SKIP_ASM
 extern "C" int func_0031A130(void* self);
 void func_0031FBB8(void* list, void* item);
 extern char D_004FF250[];
@@ -90,11 +79,8 @@ extern "C" void func_00319B98(void* self)
         func_0031FBB8(D_004FF250, self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/memblockman", cMemMan_internalResizeBlock);
-#ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
@@ -127,11 +113,8 @@ extern "C" void* cMemMan_internalResizeBlock(void* old, unsigned int size)
     cMemMan_freeBlockK2(old);
     return p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319CC8);
-#ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void func_0031A200(void);
@@ -143,30 +126,21 @@ extern "C" void func_00319CC8(void)
     func_0031A200();
     MUTEX_unlock(D_00538B00);
 }
-#endif
 
 INCLUDE_ASM("bx/memblockman", func_00319D08);
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319D10__FPv);
-#ifdef SKIP_ASM
 void func_00319D10(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319D18__FPv);
-#ifdef SKIP_ASM
 int func_00319D18(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", cMemBlockMan_initialize);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* func_003200E8(void* p);
 void* func_00320120(void* p);
@@ -202,11 +176,8 @@ extern "C" void cMemBlockMan_initialize(void)
     D_004A5B58 = func_00320270(cMemMan_alloc(0x20004, D_0048DA78, 0x7000000, 0));
     D_004A3EC8 = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319E48);
-#ifdef SKIP_ASM
 extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top);
 // PORT: the pool allocators are bound with their real (pool, align) arity; the
 // symbols are named __FPv upstream.
@@ -251,11 +222,8 @@ extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align)
         size = 0x201;
     return func_00319A90(size, align > 7 ? align : 8, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319F68);
-#ifdef SKIP_ASM
 void func_00320488(void* pool, void** p);
 void func_00320498(void* pool, void** p);
 void func_003204A8(void* pool, void** p);
@@ -294,11 +262,8 @@ extern "C" void func_00319F68(void* p)
     else if (inPool_319F68<0x20000>(D_004A5B58, p))
         func_00320500(D_004A5B58, (void**)p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A088);
-#ifdef SKIP_ASM
 extern void* D_004A5B50;
 extern void* D_004A5B58;
 extern void* D_004A5B5C;
@@ -328,11 +293,8 @@ extern "C" int func_0031A088(void* p)
         return 1;
     return func_0031A088_in(p, D_004A5B58, 0x20000);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A130);
-#ifdef SKIP_ASM
 extern void* D_004A5B50;
 extern void* D_004A5B58;
 extern void* D_004A5B5C;
@@ -364,11 +326,8 @@ extern "C" int func_0031A130(void* p)
         return 0x200;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A200);
-#ifdef SKIP_ASM
 extern int D_004A3EC8;
 extern void* D_004A5B50;
 extern void* D_004A5B58;
@@ -398,15 +357,12 @@ extern "C" void func_0031A200(void)
         func_00320548_1(D_004A5B58);
     }
 }
-#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031A258);
 
 INCLUDE_ASM("bx/memblockman", func_0031A260);
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A268);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 FPU-flag probe: builds two float4s from flag bits and multiplies them on VU0.
 extern "C" void func_0031A268(int flags)
 {
@@ -443,11 +399,8 @@ extern "C" void func_0031A268(int flags)
         : "m"(a[0]), "m"(b[0])
         : "$8", "$9");
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A308);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 state save (VF1-VF31, MAC/status/Q/clip flags, ACC) to a 0x210-byte buffer.
 extern "C" void func_0031A308(void* buf)
 {
@@ -502,11 +455,8 @@ extern "C" void func_0031A308(void* buf)
         : "r"(buf)
         : "$8", "$9", "memory");
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/memblockman", func_0031A3C0);
-#ifdef SKIP_ASM
 extern "C" void func_0031A268(int status);
 
 // PORT: PS2-only VU0 state restore (inverse of func_0031A308): VF1-VF31, flags, ACC.
@@ -569,11 +519,8 @@ extern "C" void func_0031A3C0(void* buf)
         : "r"(buf)
         : "$8", "$9", "memory");
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A490);
-#ifdef SKIP_ASM
 // PORT: PS2-only handler trampoline: saves/restores all 32 FPU registers around the
 // handler call and re-enables interrupts (sync; ei). Needs a native replacement off-PS2.
 extern "C" int func_0031A490(int arg, void (*handler)(int))
@@ -679,11 +626,8 @@ extern "C" int func_0031A490(int arg, void (*handler)(int))
     __asm__ __volatile__("sync\n\tei");
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A6B8);
-#ifdef SKIP_ASM
 extern int D_004A3ECC;
 extern "C" void func_00423C30(int, int);
 
@@ -691,13 +635,10 @@ extern "C" void func_0031A6B8(void)
 {
     func_00423C30(D_004A3ECC, 0x65);
 }
-#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031A6D8);
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A920);
-#ifdef SKIP_ASM
 extern "C" void func_00424880(int);
 extern "C" void func_00423AA0(int, int);
 extern "C" int func_004248E8(int);
@@ -726,11 +667,8 @@ extern "C" void func_0031A920(void* self)
     func_00423DB0(*(int*)((char*)self + 0x18));
     func_00423DB0(*(int*)((char*)self + 0xC));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/memblockman", func_0031A9D8);
-#ifdef SKIP_ASM
 extern "C" void func_0031A3C0(void* buf);
 
 extern "C" void func_0031A9D8(void* self)
@@ -739,22 +677,16 @@ extern "C" void func_0031A9D8(void* self)
         func_0031A3C0((char*)self + 0x14080);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/memblockman", func_0031AA18);
-#ifdef SKIP_ASM
 extern "C" void func_0031AA18(void* self)
 {
     if (*(int*)((char*)self + 0x14048) != 0) {
         func_0031A308((char*)self + 0x14080);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AA58);
-#ifdef SKIP_ASM
 extern "C" void* func_00423DE0(int);
 extern "C" int func_00423DF0(int);
 
@@ -782,11 +714,8 @@ extern "C" void func_0031AA58(void* self)
     sMemBlkVEntryB* vt2 = *(sMemBlkVEntryB**)((char*)self + 0x8);
     vt2[12].fn((char*)self + vt2[12].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AAC8);
-#ifdef SKIP_ASM
 extern "C" void func_00423DC0(int);
 
 extern "C" void func_0031AAC8(void* self)
@@ -795,41 +724,29 @@ extern "C" void func_0031AAC8(void* self)
         func_00423DC0(*(int*)((char*)self + 0x18));
     }
 }
-#endif
 
 extern "C" void* func_00423DE0(int);
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AAF0__FPv);
-#ifdef SKIP_ASM
 void* func_0031AAF0(void* self)
 {
     return func_00423DE0(*(int*)((char*)self + 0xc));
 }
-#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031AB10);
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031ABC0__FPv);
-#ifdef SKIP_ASM
 void func_0031ABC0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031ABC8__FPv);
-#ifdef SKIP_ASM
 int func_0031ABC8(void* self)
 {
     return 0x3C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031ABD0);
-#ifdef SKIP_ASM
 void* func_00317520();
 extern "C" void func_00423DD0(int);
 
@@ -840,11 +757,8 @@ extern "C" void func_0031ABD0(void)
         func_00423DD0(*(int*)(app + 0x4034));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AC08);
-#ifdef SKIP_ASM
 extern "C" void* func_00423DE0(int);
 extern "C" void func_00423CD0(int);
 extern "C" void func_00423CC0();
@@ -860,11 +774,8 @@ extern "C" void func_0031AC08(void* self)
     func_00423CD0(*(int*)((char*)self + 0x10));
     func_00423CC0();
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AC60);
-#ifdef SKIP_ASM
 struct sMemJobVEntry {
     short delta;
     short index;
@@ -883,11 +794,8 @@ extern "C" void func_0031AC60(void* self)
     func_00423CD0(*(int*)((char*)self + 0x10));
     func_00423CC0();
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031ACD8);
-#ifdef SKIP_ASM
 extern "C" void func_00423DC0(int);
 
 extern "C" void func_0031ACD8(void* self, int a1)
@@ -895,33 +803,24 @@ extern "C" void func_0031ACD8(void* self, int a1)
     *(int*)((char*)self + 0x14048) = a1;
     func_00423DC0(*(int*)((char*)self + 0x14044));
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AD00);
-#ifdef SKIP_ASM
 extern "C" int func_0031AD00(void* self)
 {
     return *(int*)((char*)self + 0x14048) == 0;
 }
-#endif
 
 extern "C" unsigned int D_004A3ED0;
 
 //99.5% - single $gp-relative sw; SN's assembler doesn't support %gp_rel(),
 // so our object always carries a real relocation here while the target's
 // raw disassembly has the offset already baked in as a literal immediate.
-INCLUDE_ASM("bx/memblockman", func_0031AD18);
-#ifdef SKIP_ASM
 extern "C" void func_0031AD18()
 {
     D_004A3ED0 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031AD20);
-#ifdef SKIP_ASM
 extern int D_00519C40[];
 extern int D_004A3ED4;
 extern "C" int func_00402618(int cmd, int* out);
@@ -946,5 +845,4 @@ extern "C" int func_0031AD20(void)
     }
     return 0;
 }
-#endif
 

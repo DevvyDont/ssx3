@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cCamera_cCamera(void* self, int idx);
 extern "C" void func_0015DFD8(void* self, int mode);
@@ -85,11 +83,8 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
     self->f1C = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E550);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern char* D_004A289C;
 
@@ -195,11 +190,8 @@ extern "C" void func_0022E550(cGameViewMan22E550* self)
         (**(sSlots22E550***)(*(char**)((char*)D_004A28A8 + 0x84) + 0x10))->e[1].active = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E730);
-#ifdef SKIP_ASM
 struct sVEntry0022E730 {
     short delta;
     short index;
@@ -230,11 +222,8 @@ extern "C" void func_0022E730(sList0022E730* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E7C8);
-#ifdef SKIP_ASM
 struct sVEntry_0022E7C8 {
     short delta;
     short index;
@@ -251,11 +240,8 @@ extern "C" void func_0022E7C8(void* self)
         vt[4].fn((char*)o + vt[4].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", cGameViewMan_updateAll);
-#ifdef SKIP_ASM
 struct sVEntry_0022E840 {
     short delta;
     short index;
@@ -271,11 +257,8 @@ extern "C" void cGameViewMan_updateAll(void* self)
         vt[3].fn((char*)v + vt[3].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E8B8);
-#ifdef SKIP_ASM
 extern "C" void func_0015EC98(void* p);
 
 extern "C" void func_0022E8B8(void* self)
@@ -285,11 +268,8 @@ extern "C" void func_0022E8B8(void* self)
         func_0015EC98(((void**)((char*)self + 0x4))[i]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E920);
-#ifdef SKIP_ASM
 struct sRenderList {
     int field_0x0;
     void* items[3];
@@ -306,11 +286,8 @@ extern "C" int func_0022E920(sRenderList* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E968);
-#ifdef SKIP_ASM
 extern char D_0047D110[];
 extern char D_0047D168[];
 extern char D_0047D1C0[];
@@ -396,5 +373,4 @@ extern "C" char* func_0022E968(char* self)
     }
     return self;
 }
-#endif
 

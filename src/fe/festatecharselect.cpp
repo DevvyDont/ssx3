@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
-#ifdef SKIP_ASM
 struct sVec4_181148 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sCam_181148 { char pad[0x10]; float fov; };
 int GetHashValue32(char* str);
@@ -41,11 +39,8 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     *(int*)((char*)self + 0x58) = 0;
     *(int*)((char*)self + 0x60) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181238);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern signed char D_00535C11[];
 extern "C" void* cBE_getBE();
@@ -64,11 +59,8 @@ extern "C" void func_00181238(void* self)
     }
     func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_001812A8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -83,11 +75,8 @@ extern "C" int func_001812A8(void* self, int on)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181308);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -121,22 +110,16 @@ extern "C" void func_00181308(void* self, int a1)
     func_00181EF0(self);
     func_0039E4C0(self, a1);
 }
-#endif
 
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181400__FPv);
-#ifdef SKIP_ASM
 void* func_00181400(void* self)
 {
     return func_0039E6B8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181420);
-#ifdef SKIP_ASM
 extern "C" void func_00181EF0(void* self);
 extern "C" void* func_0039E510(void* self);
 
@@ -145,11 +128,8 @@ extern "C" void func_00181420(void* self)
     func_00181EF0(self);
     func_0039E510(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181450);
-#ifdef SKIP_ASM
 struct sPadVtI_1450 { short delta; short index; int (*fn)(void*); };
 struct sPadVtF_1450 { short delta; short index; float (*fn)(void*); };
 
@@ -220,11 +200,8 @@ extern "C" int func_00181450(char* self, char* pad)
     }
     return changed;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -303,13 +280,10 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatecharselect", func_001817E8);
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181BD0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
@@ -400,13 +374,10 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
     func_0039C428(ob, total / 7);
     func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, rider, charID, 0);
 }
-#endif
 
 INCLUDE_ASM("fe/festatecharselect", func_00181EF0);
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182220);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -476,11 +447,8 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
     self->f15 = func_001A1CD0(*(void**)self->owner, self->player);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182420);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045D780[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -495,13 +463,10 @@ extern "C" void func_00182420(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetCreate);
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182690);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" void* cBE_getBE();
@@ -560,11 +525,8 @@ extern "C" void func_00182690(void* self, void* menu, unsigned int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182808);
-#ifdef SKIP_ASM
 extern "C" void func_00182870(void* self);
 
 extern "C" int func_00182808(void* self, int a1, unsigned int msg, int value)
@@ -582,11 +544,8 @@ extern "C" int func_00182808(void* self, int a1, unsigned int msg, int value)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182870);
-#ifdef SKIP_ASM
 extern "C" void func_00182870(void* self)
 {
     int i;
@@ -600,11 +559,8 @@ extern "C" void func_00182870(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_001828C0);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern void* D_0046CE60[];
@@ -619,5 +575,4 @@ extern "C" void* func_001828C0(void* self, void* engine, signed char idx)
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }
-#endif
 

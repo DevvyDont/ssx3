@@ -3,8 +3,6 @@
 INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_cRenderTogglesMenu);
 
 //100%
-INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_cVisualEffectsTestMenu);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -97,11 +95,8 @@ extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x464, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cPlantsMenu_cPlantsMenu);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -174,13 +169,10 @@ extern "C" void* cPlantsMenu_cPlantsMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x398, -1);
     return self;
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", cLightGlowMenu_cLightGlowMenu);
 
 //100%
-INCLUDE_ASM("main/debugmenu", cDepthFogMenu_cDepthFogMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -237,11 +229,8 @@ extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x2C4, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cHeightFogMenu_cHeightFogMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -275,11 +264,8 @@ extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x1C8, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cDetailSystemMenu_cDetailSystemMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -344,11 +330,8 @@ extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x334, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cShellRendererMenu_cShellRendererMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -409,13 +392,10 @@ extern "C" void* cShellRendererMenu_cShellRendererMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x2EC, -1);
     return self;
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", cScreenTintMenu_cScreenTintMenu);
 
 //100%
-INCLUDE_ASM("main/debugmenu", cShadowMenu_cShadowMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -476,11 +456,8 @@ extern "C" void* cShadowMenu_cShadowMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x2FC, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_cSnowSurfaceMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -530,13 +507,10 @@ extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x294, -1);
     return self;
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_cBoardTrailMenu);
 
 //100%
-INCLUDE_ASM("main/debugmenu", cFlagsMenu_cFlagsMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -565,11 +539,8 @@ extern "C" void* cFlagsMenu_cFlagsMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x194, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -654,11 +625,8 @@ extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x418, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_cSnowfallTogglesMenu);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -731,13 +699,10 @@ extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self)
     cMenu_addItem(self, (char*)self + 0xFEC, -1);
     return self;
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_cSplashTogglesMenu);
 
 //100%
-INCLUDE_ASM("main/debugmenu", cTubeMenu_cTubeMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -783,11 +748,8 @@ extern "C" void* cTubeMenu_cTubeMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x25C, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cPathArrowMenu_cPathArrowMenu);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -876,11 +838,8 @@ extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x458, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_cVisualEffectsMainMenu);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -971,35 +930,26 @@ extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x324, -1);
     return self;
 }
-#endif
 
 extern "C" void* func_002CBF60(void* self);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D690__FPv);
-#ifdef SKIP_ASM
 void* func_0024D690(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 extern "C" void* func_002CBFD0(void* self);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D6B0__FPv);
-#ifdef SKIP_ASM
 void* func_0024D6B0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", func_0024D6D0);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D710);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1056,11 +1006,8 @@ extern "C" void func_0024D710(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D998);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1087,11 +1034,8 @@ extern "C" void func_0024D998(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DAB8);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1130,11 +1074,8 @@ extern "C" void func_0024DAB8(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DC68);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1163,11 +1104,8 @@ extern "C" void func_0024DC68(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DD70);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1217,11 +1155,8 @@ extern "C" void func_0024DD70(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DFA0);
-#ifdef SKIP_ASM
 extern "C" void func_0024DFA0(void* self, int flags)
 {
     func_002CA280((char*)self + 0x59C, 2);
@@ -1250,11 +1185,8 @@ extern "C" void func_0024DFA0(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E0F8);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1279,11 +1211,8 @@ extern "C" void func_0024E0F8(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E200);
-#ifdef SKIP_ASM
 static inline void dtorSubMenuItem_24E200(void* p)
 {
     func_002CAA80((char*)p + 0x18, 2);
@@ -1318,11 +1247,8 @@ extern "C" void func_0024E200(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E388);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1414,11 +1340,8 @@ extern "C" void func_0024E388(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E7C8);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1444,13 +1367,10 @@ extern "C" void func_0024E7C8(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", func_0024E8D8);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F6C0);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1477,47 +1397,32 @@ extern "C" void func_0024F6C0(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F7E0__FPv);
-#ifdef SKIP_ASM
 void* func_0024F7E0(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F800__FPv);
-#ifdef SKIP_ASM
 void* func_0024F800(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F820__FPv);
-#ifdef SKIP_ASM
 void* func_0024F820(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F840__FPv);
-#ifdef SKIP_ASM
 void* func_0024F840(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F860);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1539,65 +1444,44 @@ extern "C" void func_0024F860(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F940__FPv);
-#ifdef SKIP_ASM
 void* func_0024F940(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F960__FPv);
-#ifdef SKIP_ASM
 void* func_0024F960(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F980__FPv);
-#ifdef SKIP_ASM
 void* func_0024F980(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F9A0__FPv);
-#ifdef SKIP_ASM
 void* func_0024F9A0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F9C0__FPv);
-#ifdef SKIP_ASM
 void* func_0024F9C0(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F9E0__FPv);
-#ifdef SKIP_ASM
 void* func_0024F9E0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FA00);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1610,29 +1494,20 @@ extern "C" void func_0024FA00(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FA78__FPv);
-#ifdef SKIP_ASM
 void* func_0024FA78(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FA98__FPv);
-#ifdef SKIP_ASM
 void* func_0024FA98(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FAB8);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1652,29 +1527,20 @@ extern "C" void func_0024FAB8(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FB80__FPv);
-#ifdef SKIP_ASM
 void* func_0024FB80(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FBA0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FBA0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FBC0);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1693,47 +1559,32 @@ extern "C" void func_0024FBC0(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FC80__FPv);
-#ifdef SKIP_ASM
 void* func_0024FC80(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FCA0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FCA0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FCC0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FCC0(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FCE0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FCE0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FD00);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1752,29 +1603,20 @@ extern "C" void func_0024FD00(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FDC0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FDC0(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FDE0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FDE0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FE00);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1791,47 +1633,32 @@ extern "C" void func_0024FE00(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FEA8__FPv);
-#ifdef SKIP_ASM
 void* func_0024FEA8(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FEC8__FPv);
-#ifdef SKIP_ASM
 void* func_0024FEC8(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FEE8__FPv);
-#ifdef SKIP_ASM
 void* func_0024FEE8(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FF08__FPv);
-#ifdef SKIP_ASM
 void* func_0024FF08(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FF28);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -1843,83 +1670,56 @@ extern "C" void func_0024FF28(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FF90__FPv);
-#ifdef SKIP_ASM
 void* func_0024FF90(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FFB0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FFB0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FFD0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FFD0(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FFF0__FPv);
-#ifdef SKIP_ASM
 void* func_0024FFF0(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250010__FPv);
-#ifdef SKIP_ASM
 void* func_00250010(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250030__FPv);
-#ifdef SKIP_ASM
 void* func_00250030(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250050__FPv);
-#ifdef SKIP_ASM
 void* func_00250050(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250070__FPv);
-#ifdef SKIP_ASM
 void* func_00250070(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250090);
-#ifdef SKIP_ASM
 extern "C" void func_00250090(void* self, int flags)
 {
     func_002CA280((char*)self + 0x25C, 2);
@@ -1932,71 +1732,50 @@ extern "C" void func_00250090(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250128__FPv);
-#ifdef SKIP_ASM
 void* func_00250128(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250148__FPv);
-#ifdef SKIP_ASM
 void* func_00250148(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250168__FPv);
-#ifdef SKIP_ASM
 void* func_00250168(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250188__FPv);
-#ifdef SKIP_ASM
 void* func_00250188(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 extern "C" void* func_0024E8D8(int, int);
 
 //99.38%
-INCLUDE_ASM("main/debugmenu", func_002501A8__FPv);
-#ifdef SKIP_ASM
 void* func_002501A8(void* self)
 {
     return func_0024E8D8(1, 0xffff);
 }
-#endif
 
 extern "C" void* func_0024E8D8(int, int);
 
 //99.38%
-INCLUDE_ASM("main/debugmenu", func_002501C8__FPv);
-#ifdef SKIP_ASM
 void* func_002501C8(void* self)
 {
     return func_0024E8D8(0, 0xffff);
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", cAvalancheMenu_cAvalancheMenu);
 
 //100%
-INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu);
-#ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 void* func_002CAA58(void* self);
@@ -2019,31 +1798,22 @@ extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
     cMenu_addItem(self, (char*)self + 0x164, -1);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250A60__FPv);
-#ifdef SKIP_ASM
 void* func_00250A60(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250A80__FPv);
-#ifdef SKIP_ASM
 void* func_00250A80(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", func_00250AA0);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250AE0);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -2085,31 +1855,22 @@ extern "C" void func_00250AE0(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 INCLUDE_ASM("main/debugmenu", func_00250CB0);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_002515F0__FPv);
-#ifdef SKIP_ASM
 void* func_002515F0(void* self)
 {
     return func_002CBF60(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00251610__FPv);
-#ifdef SKIP_ASM
 void* func_00251610(void* self)
 {
     return func_002CBFD0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00251630);
-#ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
 extern "C" void func_002CAA80(void* self, int flags);
 
@@ -2120,33 +1881,24 @@ extern "C" void func_00251630(void* self, int flags)
     func_002CA280((char*)self + 0x130, 2);
     func_002CAA80(self, flags);
 }
-#endif
 
 extern "C" void* func_00250CB0(int, int);
 
 //99.38%
-INCLUDE_ASM("main/debugmenu", func_00251690__FPv);
-#ifdef SKIP_ASM
 void* func_00251690(void* self)
 {
     return func_00250CB0(1, 0xffff);
 }
-#endif
 
 extern "C" void* func_00250CB0(int, int);
 
 //99.38%
-INCLUDE_ASM("main/debugmenu", func_002516B0__FPv);
-#ifdef SKIP_ASM
 void* func_002516B0(void* self)
 {
     return func_00250CB0(0, 0xffff);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", MEM_initblock);
-#ifdef SKIP_ASM
 extern "C" void* MEM_initblock(void* self, int p1, void* p2, int p3, short p4, int p5, int p6)
 {
     *(short*)self = 0x424d;
@@ -2156,7 +1908,6 @@ extern "C" void* MEM_initblock(void* self, int p1, void* p2, int p3, short p4, i
     *(int*)((char*)self + 0xc) = p5;
     return (char*)p2 + 0x10;
 }
-#endif
 
 
 INCLUDE_ASM("main/debugmenu", func_002516F0);

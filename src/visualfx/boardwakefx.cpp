@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_cBoardWakeFX);
-#ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEntBW {
     short delta;
@@ -82,13 +80,10 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg)
     func_002DCF28((sWakeDCF28*)self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DCDA0);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DCF28);
-#ifdef SKIP_ASM
 struct sWakeElemDCF28 {
     int a;
     float b;
@@ -163,15 +158,12 @@ extern "C" void func_002DCF28(sWakeDCF28* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DD0B8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DDAB8);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DDD30);
-#ifdef SKIP_ASM
 struct sVecDD30 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -312,11 +304,8 @@ extern "C" void func_002DDD30(sWakeDD30* self, sVecDD30* pos, float width)
     }
     e->width = width;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE058);
-#ifdef SKIP_ASM
 struct sCol_E058 {
     float a, r, g, b;
 };
@@ -408,11 +397,8 @@ extern "C" void func_002DE058(sWake_E058* self)
     }
     self->frame++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE368);
-#ifdef SKIP_ASM
 struct sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -427,11 +413,8 @@ extern "C" void func_002DE368(void* self)
     *(sVec4*)((char*)self + 0x20) = D_004FF120;
     *(sVec4*)((char*)self + 0x10) = D_004FF120;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE398);
-#ifdef SKIP_ASM
 extern int D_004A3AFC;
 
 struct sWakeVecE398 {
@@ -495,15 +478,12 @@ extern "C" void func_002DE398(char* self, sWakeVecE398* out)
     t = tmp;
     wakeAddE398(*out, t);
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE4A8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF1C8);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
-#ifdef SKIP_ASM
 extern "C" void func_002E26B8(void* self);
 extern "C" void func_002E2550(void* self);
 
@@ -529,11 +509,8 @@ extern "C" void func_002DF3B0(void* self)
     }
     func_002E2550(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF448);
-#ifdef SKIP_ASM
 struct sVEntry2DF448 {
     short delta;
     short index;
@@ -567,11 +544,8 @@ extern "C" void func_002DF448(func_002DF448_sFx* self)
     }
     self->f60 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF4D0);
-#ifdef SKIP_ASM
 extern const char D_004879D8[];
 extern const char D_004879E8[];
 extern const char D_004879F8[];
@@ -632,11 +606,8 @@ extern "C" void func_002DF4D0(char* self)
     }
     *(int*)(self + 0x80) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF920);
-#ifdef SKIP_ASM
 struct sWakeFxF920 {
     char* obj;                  // 0x00
     char pad4[0x24];            // 0x04
@@ -865,15 +836,12 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     if (*(int*)(self->p28 + 0x1404)) func_002E2260_F920(self);
     if (*(int*)(self->p28 + 0x11F4)) func_002E1F70_F920(self);
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DFE88);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E02B8);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E0EE8);
-#ifdef SKIP_ASM
 struct sWakeFx0EE8 {
     char* obj;                  // 0x00
     char pad4[0x24];            // 0x04
@@ -954,15 +922,12 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
         func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E10B8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E1598);
-#ifdef SKIP_ASM
 struct sWakeFx1598 {
     char* obj;                  // 0x00
     float f4;                   // 0x04
@@ -1140,13 +1105,10 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         self->fE0 = 0.0f;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1A80);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E1F70);
-#ifdef SKIP_ASM
 struct sWakeFx1F70 {
     char* obj;                  // 0x00
     char pad4[0xC];             // 0x04
@@ -1228,11 +1190,8 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
         func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2260);
-#ifdef SKIP_ASM
 struct sWakeMtx2260 {
     sWakeVecE398 row[4];
 };
@@ -1311,13 +1270,10 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E23E0);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E24D0);
-#ifdef SKIP_ASM
 extern "C" void func_00371688(void* self, int mode);
 
 struct func_002E24D0_sWake {
@@ -1346,11 +1302,8 @@ extern "C" void func_002E24D0(func_002E24D0_sFx* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
-#ifdef SKIP_ASM
 #define S28(off) (*(int*)((char*)*(void**)((char*)self + 0x28) + (off)))
 
 extern "C" void func_002E2550(void* self)
@@ -1402,11 +1355,8 @@ extern "C" void func_002E2550(void* self)
     }
 }
 #undef S28
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E26B8);
-#ifdef SKIP_ASM
 struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); };
 
 extern "C" void func_002E26B8(void* vself)
@@ -1442,11 +1392,8 @@ extern "C" void func_002E26B8(void* vself)
         vt[3].fn(o + vt[3].delta, *(char**)(self + 0x2C) + 0x570, *(float*)(b + 0xCB8));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E27E8);
-#ifdef SKIP_ASM
 extern "C" float func_002E27E8(int type)
 {
     switch (type) {
@@ -1459,20 +1406,14 @@ extern "C" float func_002E27E8(int type)
     }
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2860__FPv);
-#ifdef SKIP_ASM
 void* func_002E2860(void* self)
 {
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2868);
-#ifdef SKIP_ASM
 struct sV3_2868 { float x, y, z; };
 struct sV4_2868 { float x, y, z, w; sV4_2868(const float& a, const float& b, const float& c, const float& d) { x = a; y = b; z = c; w = d; } };
 struct sV2_2868 { float x, y; sV2_2868() { x = 0.0f; y = 0.0f; } sV2_2868(const float& a, const float& b) { x = a; y = b; } };
@@ -1682,13 +1623,10 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
     sPart_2868* p = self->part;
     ctx->Draw(sV4_2868(p->pos.x, p->pos.y, p->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->rot, 2);
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2B00);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2E18);
-#ifdef SKIP_ASM
 struct sBWVEntry2E18 {
     short delta;
     short index;
@@ -1763,20 +1701,14 @@ extern "C" void* func_002E2E18(void* self)
     D_004A3B18 = 1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2F98__FPvi);
-#ifdef SKIP_ASM
 void func_002E2F98(void* self, int i)
 {
     *(int*)((char*)self + (i << 2) + 0x60) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2FA8);
-#ifdef SKIP_ASM
 struct sWakePoint {
     int a;
     int pad04;
@@ -1801,11 +1733,8 @@ extern "C" void func_002E2FA8(sWakeFx* self, int v, int i)
     self->points[i][n].c = 0;
     self->counts[i]++;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
-#ifdef SKIP_ASM
 extern "C" void func_002E2FA8(sWakeFx* self, int v, int i);
 
 extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int unused, int i)
@@ -1815,11 +1744,8 @@ extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int unused, i
         func_002E2FA8(self, vals[n], i);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3060);
-#ifdef SKIP_ASM
 struct sBWVEntry2 {
     short delta;
     short index;
@@ -1842,11 +1768,8 @@ extern "C" void func_002E3060(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E30D0);
-#ifdef SKIP_ASM
 extern "C" void func_002E3338(void* self, int i);
 extern "C" void func_002E3478(void* self, int i);
 
@@ -1855,18 +1778,14 @@ extern "C" void func_002E30D0(void* self, int i)
     func_002E3338(self, i);
     func_002E3478(self, i);
 }
-#endif
 
 extern "C" void* func_002E3130(void* self);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3110__FPv);
-#ifdef SKIP_ASM
 void* func_002E3110(void* self)
 {
     return func_002E3130(self);
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3130);
 
@@ -1875,8 +1794,6 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E3338);
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3478);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3578);
-#ifdef SKIP_ASM
 struct sWakeRState {
     int f0;
     unsigned a0 : 2;
@@ -1918,22 +1835,16 @@ extern "C" void func_002E3578(void)
     setA2_3578(ctx, 7);
     setB5_3578(ctx, 7);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3668);
-#ifdef SKIP_ASM
 extern char* D_004A289C;
 
 extern "C" void func_002E3668(void)
 {
     *(char**)(D_004A289C + 0xE84) -= 0x14;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3680);
-#ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEnt3680 {
     short delta;
@@ -1986,13 +1897,10 @@ extern "C" void* func_002E3680(void* self, int inChrg)
     func_002E3930((sWakeFade_3930*)self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E37D0);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3930);
-#ifdef SKIP_ASM
 struct sWakeVec4_3930 {
     float x;
     float y;
@@ -2023,11 +1931,8 @@ extern "C" void func_002E3930(sWakeFade_3930* self)
     self->c = self->a;
     self->f4 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E39D8);
-#ifdef SKIP_ASM
 extern "C" float func_0031C040(float x);
 extern float D_004A55AC;
 
@@ -2061,13 +1966,10 @@ extern "C" void func_002E39D8(sWkCol39D8* self)
     self->out[2] = s * self->a[2] + u * self->b[2];
     self->out[3] = s * self->a[3] + u * self->b[3];
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3AF8);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4228);
-#ifdef SKIP_ASM
 extern "C" void* func_00354648(void* self, void* a1);
 extern "C" void* func_00282CD0(void* self);
 extern "C" void func_00283298(void* self);
@@ -2098,11 +2000,8 @@ extern "C" void* func_002E4228(void* self, void* a1, int a2)
     func_00283298((char*)self + 0x10);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E42D0);
-#ifdef SKIP_ASM
 struct sBWVEntry1 {
     short delta;
     short index;
@@ -2131,11 +2030,8 @@ extern "C" void func_002E42D0(void* self, int flags)
     func_00283228(m, 0);
     func_003546C8(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4370);
-#ifdef SKIP_ASM
 struct sBWVEntry4370 {
     short delta;
     short index;
@@ -2196,13 +2092,10 @@ extern "C" int func_002E4370_def(void* self, int a1, void* o1, void* o2, float f
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E44C8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E44F0);
-#ifdef SKIP_ASM
 // PORT: the unit declares func_002E4370 as void; this caller returns its int result.
 extern "C" int func_002E4370_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2) __asm__("func_002E4370");
 
@@ -2215,22 +2108,16 @@ extern "C" int func_002E44F0(void* self, int a1, int a2, float f)
     *(float*)((char*)self + 0x5C) = f;
     return 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4540);
-#ifdef SKIP_ASM
 extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 
 extern "C" void func_002E4540(void* self, int a1, int a3, int a5, float f2)
 {
     func_002E4370(self, a1, 0, a3, 0.0f, 0.0f, 1, a5, f2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4578);
-#ifdef SKIP_ASM
 struct sBWVEntryI_4578 {
     short delta;
     short index;
@@ -2274,11 +2161,8 @@ extern "C" void func_002E4578(void* self)
         *(int*)((char*)self + 0x78) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4638);
-#ifdef SKIP_ASM
 extern "C" void func_002E4638(void* self, int up)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
@@ -2293,11 +2177,8 @@ extern "C" void func_002E4638(void* self, int up)
         *(int*)((char*)self + 0x40) -= 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4678);
-#ifdef SKIP_ASM
 extern "C" float func_002E4678(void* self)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
@@ -2310,11 +2191,8 @@ extern "C" float func_002E4678(void* self)
     }
     return v;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E46C8);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern char* D_004A5B64;
 
@@ -2345,11 +2223,8 @@ extern "C" void func_002E46C8(char* self)
         func_002E4578(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E47E8);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern char* D_004A5B80;
 extern "C" void func_002EB8F0(void);
@@ -2497,11 +2372,8 @@ extern "C" void func_002E47E8(sFade47E8* self)
     ctx->vtable[22].fn((char*)ctx + ctx->vtable[22].delta);
     ctx->top--;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4B98);
-#ifdef SKIP_ASM
 struct sWakeParams_4B98 {
     int mode;
     float a;
@@ -2530,11 +2402,8 @@ extern "C" void func_002E4B98(void* self)
     }
     *(float*)((char*)self + 0x48) = p->level;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4C60);
-#ifdef SKIP_ASM
 void func_00283440(void*);
 extern "C" void func_002E4578(void* self);
 
@@ -2543,11 +2412,8 @@ extern "C" void func_002E4C60(void* self)
     func_00283440((char*)self + 0x10);
     func_002E4578(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);
-#ifdef SKIP_ASM
 extern "C" int func_002E4C90(void* self)
 {
     int r = 0;
@@ -2556,11 +2422,8 @@ extern "C" int func_002E4C90(void* self)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4CB0);
-#ifdef SKIP_ASM
 extern int D_00538850[];
 
 extern "C" void func_002E4CB0(void)
@@ -2570,11 +2433,8 @@ extern "C" void func_002E4CB0(void)
         D_00538850[i] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4CE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sWakePoolEntry {
     char data[0x64];
@@ -2595,11 +2455,8 @@ extern "C" sWakePoolEntry* func_002E4CE8(void)
     }
     return D_004A3B1C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4D30);
-#ifdef SKIP_ASM
 struct sWakeSlot {
     char pad[0x64];
 };
@@ -2620,23 +2477,17 @@ extern "C" void func_002E4D30(void* p)
         }
     }
 }
-#endif
 
 extern void* D_004880E0[];
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4D70__FPv);
-#ifdef SKIP_ASM
 void* func_002E4D70(void* self)
 {
     *(int*)self = (int)(void*)D_004880E0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4D88);
-#ifdef SKIP_ASM
 struct sVec4D88 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -2741,22 +2592,16 @@ extern "C" void* func_002E4D88(char* self, int a1, int a2, float f0, float f1, f
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4F10__FPv);
-#ifdef SKIP_ASM
 void func_002E4F10(void* self)
 {
     *(int*)((char*)self + 0x94) = 0;
     *(int*)((char*)self + 0xb0) = 1;
     *(int*)((char*)self + 0x90) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4F28);
-#ifdef SKIP_ASM
 void operator_delete(int* p);
 
 extern "C" void func_002E4F28(int* self, int flags)
@@ -2765,13 +2610,10 @@ extern "C" void func_002E4F28(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4F50);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5430);
-#ifdef SKIP_ASM
 struct sWakeVec5430 {
     float x, y, z, w;
     sWakeVec5430() {}
@@ -2823,11 +2665,8 @@ extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* d)
     wakeWrap5430(z, pz, self->size);
     self->pos = sWakeVec5430(x, y, z, 1.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E55D8);
-#ifdef SKIP_ASM
 struct sMat_6008;
 extern char* D_004A289C;
 
@@ -3085,11 +2924,8 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5920);
-#ifdef SKIP_ASM
 extern void* D_00487FD8[];
 extern "C" void func_00319CC8(void);
 extern void* D_004A28A8;
@@ -3139,11 +2975,8 @@ extern "C" void* func_002E5920(sWake5920* self, void* a1)
     func_00319CC8();
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5D18);
-#ifdef SKIP_ASM
 extern void* D_00487FD8[];
 extern "C" void func_00319CC8(void);
 extern "C" void func_002E4F28(int* self, int flags);
@@ -3163,11 +2996,8 @@ extern "C" void func_002E5D18(void* self, int flags)
     func_00319CC8();
     func_003546C8(self, flags);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern int D_004A473C;
 extern float D_004A4740;
@@ -3252,11 +3082,8 @@ extern "C" void func_002E5DA0(void* self)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6008);
-#ifdef SKIP_ASM
 struct sV4_6008 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -3405,11 +3232,8 @@ extern "C" void func_002E6008(sWakeFx_6008* self)
     }
     ctx->top--;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E62C8);
-#ifdef SKIP_ASM
 void func_002E4F10(void*);
 
 extern "C" void func_002E62C8(void* self)
@@ -3422,11 +3246,8 @@ extern "C" void func_002E62C8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6320);
-#ifdef SKIP_ASM
 extern const sVt9_3680 D_00488550;
 extern const sVt22_3680 D_00488598;
 extern char D_00487B08[];
@@ -3477,13 +3298,10 @@ extern "C" void* func_002E6320(void* self, int inChrg)
     func_002E6640(self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6640);
-#ifdef SKIP_ASM
 struct sWakeVec4 {
     float x;
     float y;
@@ -3511,7 +3329,6 @@ extern "C" void func_002E6640(void* self)
     *(int*)((char*)self + 0x3A4) = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x14 : 0x12;
     *(int*)((char*)self + 0x3A8) = 0;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E66B8);
 

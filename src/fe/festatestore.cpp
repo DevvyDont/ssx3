@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_costVisible);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
@@ -46,11 +44,8 @@ extern "C" void cFEStateUberTrick_costVisible(void* self, int on)
         d->setVisible(on);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184780);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
@@ -86,11 +81,8 @@ extern "C" void func_00184780(void* self, int on)
         w->v09(on);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_trickVisible);
-#ifdef SKIP_ASM
 extern char D_0045D9F8[];
 extern char D_0045DA08[];
 extern char D_0045DA18[];
@@ -126,11 +118,8 @@ extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
         w->v09(on);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_001849B0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -212,11 +201,8 @@ extern "C" void func_001849B0(void* self)
     cFEStateUberTrick_costVisible(self, 0);
     func_00184780(self, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184B70);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void func_001A0570(void* self, int a1, int a2);
 void* func_0039E4A0(void* self);
@@ -229,11 +215,8 @@ extern "C" void func_00184B70(void* self)
     }
     func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184BB8);
-#ifdef SKIP_ASM
 extern "C" void cWScriptMan_checkGate(void* self);
 
 extern "C" int func_00184BB8(void* self, int on)
@@ -243,11 +226,8 @@ extern "C" int func_00184BB8(void* self, int on)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184BE0);
-#ifdef SKIP_ASM
 struct sVEntry00184BE0 {
     short delta;
     short index;
@@ -276,11 +256,8 @@ extern "C" void func_00184BE0(void* self, int a1)
     }
     func_0039E4C0(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184C60);
-#ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void* func_001A0548(void* self, int idx);
 extern "C" void func_00311A50(void* anim);
@@ -376,11 +353,8 @@ extern "C" void func_00184C60(char* self)
     }
     func_0039E510(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184F40);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
@@ -427,11 +401,8 @@ extern "C" void func_00184F40(void* self, void* item, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetCreate);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -499,13 +470,10 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
         *(void**)((char*)self + 0x50) = widget;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatestore", func_00185268);
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_001859D8);
-#ifdef SKIP_ASM
 extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
 {
     if (a1 == *(int*)((char*)self + 0x50)) {
@@ -522,11 +490,8 @@ extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00185A18);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046BDF8[];
 
@@ -542,18 +507,14 @@ extern "C" void* func_00185A18(void* self)
     *(int*)((char*)self + 0x48) = 0;
     return self;
 }
-#endif
 
 extern void* D_0046D0D0[];
 extern "C" void* func_0039E390(void*);
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00185A70__FPv);
-#ifdef SKIP_ASM
 void* func_00185A70(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
     return func_0039E390(self);
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_gainFocus);
-#ifdef SKIP_ASM
 struct sVec4HP {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -44,7 +42,6 @@ extern "C" void cHandplantMotion_gainFocus(char* self)
     char* rider = *(char**)(self + 0xA0);
     *(sVec4HP*)(rider + 0x1E0) = vu0DivHP(vu0SubHP(*(sVec4HP*)(self + 0x30), *(sVec4HP*)(rider + 0x110)), *(float*)(self + 0x84));
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00138BA0);
 
@@ -55,19 +52,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001391A8);
 extern "C" void* func_0011E150(int, int);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139528__FPv);
-#ifdef SKIP_ASM
 void* func_00139528(void* self)
 {
     return func_0011E150(*(int*)((char*)self + 0xa0), 0);
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139548);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139970);
-#ifdef SKIP_ASM
 struct sVEntry00139970 {
     short delta;
     short index;
@@ -79,11 +71,8 @@ extern "C" void func_00139970(void* self, void* obj)
     sVEntry00139970* vt = *(sVEntry00139970**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0xA0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001399A8);
-#ifdef SKIP_ASM
 struct sVEntry001399A8 {
     short delta;
     short index;
@@ -95,11 +84,8 @@ extern "C" void func_001399A8(void* self, void* obj)
     sVEntry001399A8* vt = *(sVEntry001399A8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0xA0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001399E0);
-#ifdef SKIP_ASM
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
 extern "C" void func_001399E0(void* self, int state)
@@ -108,19 +94,13 @@ extern "C" void func_001399E0(void* self, int state)
     char* r = *(char**)((char*)self + 0x4);
     cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, 3333.33349609375f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139A18__FPv);
-#ifdef SKIP_ASM
 void func_00139A18(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139A20);
-#ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
 extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
@@ -233,13 +213,10 @@ extern "C" void func_00139A20(void* p)
 done:
     cRider_updateOrientationImplicit(*(void**)(self + 0x4));
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139C88);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013A7B0);
-#ifdef SKIP_ASM
 extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 
@@ -313,11 +290,8 @@ extern "C" float func_0013A7B0(void* self, char* hit)
     }
     return d;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013A8F8);
-#ifdef SKIP_ASM
 // PORT: cRiderAnimBase_play is declared void elsewhere; callers here match only with an int return.
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 
@@ -333,11 +307,8 @@ extern "C" void func_0013A8F8(void* self, float v)
         cRiderAnimBase_play_i(*(void**)(*(char**)((char*)self + 0x4) + 0x784), 0x40, 0, -1.0f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013A968);
-#ifdef SKIP_ASM
 extern "C" void func_0013A968(void* self, float v)
 {
     if (v < -2222.22216796875f)
@@ -360,13 +331,10 @@ extern "C" void func_0013A968(void* self, float v)
             cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x3D, 0, -1.0f);
     }
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013AA48);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013ACB0);
-#ifdef SKIP_ASM
 struct sVEntry0013ACB0 {
     short delta;
     short index;
@@ -378,11 +346,8 @@ extern "C" void func_0013ACB0(void* self, void* obj)
     sVEntry0013ACB0* vt = *(sVEntry0013ACB0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013ACE8);
-#ifdef SKIP_ASM
 struct sVEntry0013ACE8 {
     short delta;
     short index;
@@ -394,11 +359,8 @@ extern "C" void func_0013ACE8(void* self, void* obj)
     sVEntry0013ACE8* vt = *(sVEntry0013ACE8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013AD20);
-#ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* q);
 struct sQuadHP_0013AD20 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -435,7 +397,6 @@ extern "C" void func_0013AD20(void* self)
     *(sQuadHP_0013AD20*)(s + 0x30) = *(sQuadHP_0013AD20*)(*(char**)(s + 0x50) + 0x110);
     *(int*)(s + 0x40) = 0;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013ADC0);
 
@@ -444,8 +405,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013AF28);
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013BD80);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013BFA8);
-#ifdef SKIP_ASM
 extern "C" void func_00114298(void* rider, float v);
 // PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void func_0011E150_v(void* rider, int a1) __asm__("func_0011E150");
@@ -535,13 +494,10 @@ extern "C" void func_0013BFA8(void* self)
     if (*(float*)(r + 0x2E4) < len)
         vu0ScaleEq_BFA8(*(sVec4_BFA8*)(r + 0x1E0), *(float*)(r + 0x2E4) / len);
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C140);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C5A0);
-#ifdef SKIP_ASM
 extern "C" void func_0013C5A0(void* self)
 {
     char* a = *(char**)((char*)self + 0x50);
@@ -552,11 +508,8 @@ extern "C" void func_0013C5A0(void* self)
     *(float*)(b + 0x260) = 0.03333333507180214f;
     *(int*)(*(char**)((char*)self + 0x50) + 0x5AC) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C5E0);
-#ifdef SKIP_ASM
 struct sVEntry0013C5E0 {
     short delta;
     short index;
@@ -568,11 +521,8 @@ extern "C" void func_0013C5E0(void* self, void* obj)
     sVEntry0013C5E0* vt = *(sVEntry0013C5E0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x50);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C618);
-#ifdef SKIP_ASM
 struct sVEntry0013C618 {
     short delta;
     short index;
@@ -584,11 +534,8 @@ extern "C" void func_0013C618(void* self, void* obj)
     sVEntry0013C618* vt = *(sVEntry0013C618**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x50);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C650);
-#ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
 struct sVEntry_13C650 { short delta; short index; void* fn; };
@@ -629,11 +576,8 @@ extern "C" void* func_0013C650(void* self, int inChrg)
     *(int*)(*(char**)((char*)self + 0x18) + 0x31C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C7A8);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" int func_001298C8();
 
@@ -693,15 +637,12 @@ extern "C" void func_0013C7A8(sHpCtl_13C7A8* self)
         f = 0.699999988079071f;
     vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), f <? 1.0f);
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C878);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C948);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013CCF0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -793,11 +734,8 @@ extern "C" float func_0013CCF0(void* self, sHpCfg_13CCF0* cfg, float a)
     return ((-a * f8) * (c + lift) * f12 * f2 - drag) * f5;
 }
 #undef RIDER
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013D028);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -861,11 +799,8 @@ extern "C" float func_0013D028(void* self, float* v, float a, float b, float c)
         a = a * (one / (s * 4.008637428283691f + one));
     return a;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013D1B8);
-#ifdef SKIP_ASM
 extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
 extern void* D_004FF120[];
 
@@ -1153,13 +1088,10 @@ extern "C" int func_0013D1B8(void* self, sHit_13D1B8* out, float* dist)
 }
 #undef RV
 #undef RIDER
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D818);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F178);
-#ifdef SKIP_ASM
 extern "C" void func_00114298(void* rider, float v);
 // PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void func_0011E150_v13F178(void* rider, int a1) __asm__("func_0011E150");
@@ -1333,11 +1265,8 @@ extern "C" void func_0013F178(void* self)
     char* r5 = RIDER_13F178;
     *(float*)(r5 + 0x750) = absf_13F178(*(float*)(r5 + 0x214));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F410);
-#ifdef SKIP_ASM
 extern "C" int func_001298C8();
 
 extern "C" void func_0013F410(void* self)
@@ -1356,11 +1285,8 @@ extern "C" void func_0013F410(void* self)
     else
         *(int*)((char*)self + 0x14) = func_001298C8();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F488);
-#ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int func_0011FEE8(void* rider);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
@@ -1568,11 +1494,8 @@ extern "C" void func_0013F488(void* self)
 }
 #undef RV
 #undef RIDER
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F848);
-#ifdef SKIP_ASM
 struct sVEntry0013F848 {
     short delta;
     short index;
@@ -1584,11 +1507,8 @@ extern "C" void func_0013F848(void* self, void* obj)
     sVEntry0013F848* vt = *(sVEntry0013F848**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F880);
-#ifdef SKIP_ASM
 struct sVEntry0013F880 {
     short delta;
     short index;
@@ -1600,13 +1520,10 @@ extern "C" void func_0013F880(void* self, void* obj)
     sVEntry0013F880* vt = *(sVEntry0013F880**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x18);
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8B8);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8F8);
-#ifdef SKIP_ASM
 struct sSortObj_F8F8 {
     char pad[0x78];
     unsigned int key;   // 0x78
@@ -1653,15 +1570,12 @@ extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSort
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013FAD8);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013FB20);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140680);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern void* D_00459CC8[];
@@ -1673,134 +1587,89 @@ extern "C" void func_00140680(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 extern void* D_004FF120[];
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406B0__FPv);
-#ifdef SKIP_ASM
 void* func_001406B0(void* self)
 {
     return (void*)D_004FF120;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406C0__FPv);
-#ifdef SKIP_ASM
 int func_001406C0(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406C8__FPv);
-#ifdef SKIP_ASM
 void func_001406C8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406D0__FPv);
-#ifdef SKIP_ASM
 void* func_001406D0(void* self)
 {
     return (void*)D_004FF120;
 }
-#endif
 
 extern void* D_004FF1A0[];
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406E0__FPv);
-#ifdef SKIP_ASM
 void* func_001406E0(void* self)
 {
     return (void*)D_004FF1A0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406F0__FPv);
-#ifdef SKIP_ASM
 int func_001406F0(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406F8__FPv);
-#ifdef SKIP_ASM
 int func_001406F8(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140700__FPv);
-#ifdef SKIP_ASM
 int func_00140700(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140708__FPv);
-#ifdef SKIP_ASM
 void func_00140708(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140710__FPv);
-#ifdef SKIP_ASM
 void func_00140710(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140718__FPv);
-#ifdef SKIP_ASM
 void func_00140718(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140720__FPv);
-#ifdef SKIP_ASM
 void func_00140720(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140728__FPv);
-#ifdef SKIP_ASM
 void func_00140728(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140730__FPv);
-#ifdef SKIP_ASM
 void func_00140730(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140738);
-#ifdef SKIP_ASM
 struct sHPC140738 {
     char pad0[0x1F0];
     int v[19][3];           // 0x1F0
@@ -1876,7 +1745,6 @@ extern "C" sHPC140738* func_00140738(sHPC140738* self)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140868);
 
@@ -1907,26 +1775,20 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001408D0);
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408E0);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001408F0__FPv);
-#ifdef SKIP_ASM
 void* func_001408F0(void* self)
 {
     return (char*)self + 0x110;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408F8);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140900);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140910__FPv);
-#ifdef SKIP_ASM
 void* func_00140910(void* self)
 {
     return (char*)self + 0x1E0;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140918);
 
@@ -1995,13 +1857,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140B70);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B78);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B80__FPv);
-#ifdef SKIP_ASM
 int func_00140B80(void* self)
 {
     return *(int*)((char*)self + 0x86C);
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B88);
 
@@ -2014,22 +1873,16 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140BA0);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BB0);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BC0__FPv);
-#ifdef SKIP_ASM
 int func_00140BC0(void* self)
 {
     return *(int*)((char*)self + 0x874);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BC8);
-#ifdef SKIP_ASM
 extern "C" int func_00140BC8(void* self)
 {
     return *(int*)((char*)self + 0x874) ^ 1;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BD8);
 
@@ -2060,36 +1913,24 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140C58);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C60);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C68__FPv);
-#ifdef SKIP_ASM
 void func_00140C68(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C70__FPv);
-#ifdef SKIP_ASM
 void func_00140C70(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C78__FPv);
-#ifdef SKIP_ASM
 void func_00140C78(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140C80__FPv);
-#ifdef SKIP_ASM
 void func_00140C80(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C88);
 
@@ -2106,13 +1947,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD0);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD8);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CE0__FPv);
-#ifdef SKIP_ASM
 void* func_00140CE0(void* self)
 {
     return self;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CE8);
 
@@ -2161,8 +1999,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001411C0);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141320);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141480);
-#ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
 struct sVEntry_00141480 { short delta; short index; void* fn; };
@@ -2200,7 +2036,6 @@ extern "C" void* func_00141480(void* self, int inChrg)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001415C8);
 
@@ -2223,8 +2058,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001420C8);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142228);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00142388);
-#ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
 struct sVEntry_00142388 { short delta; short index; void* fn; };
@@ -2262,7 +2095,6 @@ extern "C" void* func_00142388(void* self, int inChrg)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001424D0);
 
@@ -2287,12 +2119,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144010);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144040);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144068__FPv);
-#ifdef SKIP_ASM
 void func_00144068(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144070);
 
@@ -2349,8 +2178,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144198);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001441A0__FPvT0);
-#ifdef SKIP_ASM
 int func_001441A0(void* self, void* a1)
 {
     int t0 = 2;
@@ -2358,13 +2185,10 @@ int func_001441A0(void* self, void* a1)
     *(int*)((char*)self + 0x704) = (int)((char*)*(void**)((char*)self + 0x704) - 0x1);
     return t0;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001441B8);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144368);
-#ifdef SKIP_ASM
 struct sKey_144368 {
     int level;
     int x;
@@ -2439,24 +2263,18 @@ extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_14436
     k.x--;
     if (node->child[1]) func_00144368(self, node->child[1], &k);
 }
-#endif
 
 extern "C" void* func_00311958(void* self);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144610__FPv);
-#ifdef SKIP_ASM
 void* func_00144610(void* self)
 {
     return func_00311958(self);
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144630);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
 extern "C" void func_00144670(void* self, int bit)
 {
@@ -2465,60 +2283,44 @@ extern "C" void func_00144670(void* self, int bit)
     *(ulong*)self = a & ~mask;
     *(ulong*)((char*)self + 0x8) |= mask & a;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);
-#ifdef SKIP_ASM
 extern "C" bool func_001446A0(void* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     return (*(ulong*)self & mask) != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446B8);
-#ifdef SKIP_ASM
 extern "C" bool func_001446B8(void* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     return (*(ulong*)((char*)self + 0x8) & mask) != 0;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446D0);
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446E0);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446E8__FPv);
-#ifdef SKIP_ASM
 float func_001446E8(void* self)
 {
     return 0.0f;
 }
-#endif
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446F8);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001448A8);
-#ifdef SKIP_ASM
 extern "C" int func_001448A8(void* self)
 {
     return *(int*)((char*)self + 0x70) == 3;
 }
-#endif
 
 extern "C" void* func_0013FB20(int, int);
 
 //99.38%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001448B8__FPv);
-#ifdef SKIP_ASM
 void* func_001448B8(void* self)
 {
     return func_0013FB20(1, 0xffff);
 }
-#endif
 

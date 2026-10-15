@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("object/splinemodifier", cSplineModifier_cSplineModifier);
-#ifdef SKIP_ASM
 class cStream003595D8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -54,22 +52,16 @@ extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier
     self->field_0xd4 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_00359688);
-#ifdef SKIP_ASM
 // PORT: callers declare func_00359688(void* self); the body also takes the speed in $f12.
 extern "C" void func_00359688_impl(void* self, float speed) __asm__("func_00359688");
 extern "C" void func_00359688_impl(void* self, float speed)
 {
     *(float*)((char*)self + 0x48) = speed * 27.77777862548828f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_00359698);
-#ifdef SKIP_ASM
 extern "C" float func_002D1C70();
 
 struct cSplineModifier_9698 {
@@ -142,13 +134,10 @@ extern "C" void func_00359698(cSplineModifier_9698* self)
     }
     self->dirty = 1;
 }
-#endif
 
 INCLUDE_ASM("object/splinemodifier", func_00359830);
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_00359CF8);
-#ifdef SKIP_ASM
 struct sSmVec4_9CF8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -349,11 +338,8 @@ extern "C" void func_00359CF8(cSplineModifier_9CF8* self, sSmBody_9CF8* body)
     vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(d, w)));
     vu0AddTo_9CF8(body->rot, w);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/splinemodifier", func_00359EB8);
-#ifdef SKIP_ASM
 extern "C" void func_00359688(void* self);
 
 extern "C" void func_00359EB8(void* self, int msg)
@@ -371,11 +357,8 @@ extern "C" void func_00359EB8(void* self, int msg)
         *(int*)((char*)self + 0x54) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_00359F30);
-#ifdef SKIP_ASM
 class cStream00359F30 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -389,11 +372,8 @@ extern "C" void func_00359F30(void* self, cStream00359F30* stream)
     stream->v01((char*)self + 0x10, 0x50);
     func_00345538((char*)self + 0xD8, stream);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_00359F88);
-#ifdef SKIP_ASM
 struct sSmQuad4_359F88 {
     float x, y, z, w;
     sSmQuad4_359F88(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
@@ -449,11 +429,8 @@ extern "C" void* func_00359F88(char* self, char* desc, char* model)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A118);
-#ifdef SKIP_ASM
 class cStream0035A118 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -511,11 +488,8 @@ extern "C" cMultiSplineModifier_A118* func_0035A118(cMultiSplineModifier_A118* s
     self->field_0x30 = 1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A250);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 void* cObjectInterface_getInstanceMan();
@@ -555,13 +529,10 @@ extern "C" void func_0035A250(cMultiSplineModifier_A250* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_allocNodes);
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A3F0);
-#ifdef SKIP_ASM
 void* cObjectInterface_getInstanceMan();
 extern "C" void* func_00351170(void* man);
 
@@ -572,11 +543,8 @@ extern "C" void func_0035A3F0(void* self)
         (*(void***)((char*)self + 0x44))[i] = func_00351170(cObjectInterface_getInstanceMan());
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupNodes);
-#ifdef SKIP_ASM
 struct sInstanceStruct;
 void* cObjectInterface_getInstanceMan();
 void cInstanceMan_copyInstance(void* man, sInstanceStruct* inst, void* tmpl);
@@ -610,20 +578,14 @@ extern "C" void cMultiSplineModifier_setupNodes(void* p)
         self->insts[i]->flags &= ~0x100;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A550);
-#ifdef SKIP_ASM
 extern "C" void func_0035A550(void* self, float speed)
 {
     *(float*)((char*)self + 0x14) = speed * 27.77777862548828f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A560);
-#ifdef SKIP_ASM
 extern "C" float func_002D1C70();
 
 extern "C" void func_0035A560(void* self)
@@ -637,26 +599,20 @@ extern "C" void func_0035A560(void* self)
     }
     *(int*)((char*)self + 0x30) = 1;
 }
-#endif
 
 extern "C" void* func_0035AC20(void* self);
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A5D8__FPv);
-#ifdef SKIP_ASM
 void* func_0035A5D8(void* self)
 {
     return func_0035AC20(self);
 }
-#endif
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupOverlapSystem);
 
 INCLUDE_ASM("object/splinemodifier", func_0035A780);
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A918);
-#ifdef SKIP_ASM
 struct sSmVec4_A918 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -773,33 +729,24 @@ extern "C" void func_0035A918(cMultiSpline_A918* self)
         setMax_A918((sSmInst_A918*)self->insts[i], self->elems[i].box.max);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035AAD0__FPv);
-#ifdef SKIP_ASM
 void* func_0035AAD0(void* self)
 {
     void* t0 = (char*)*(void**)((char*)self + 0x34) + 0x1;
     *(int*)((char*)self + 0x34) = (int)t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035AAE0__FPv);
-#ifdef SKIP_ASM
 void* func_0035AAE0(void* self)
 {
     void* t0 = (char*)*(void**)((char*)self + 0x34) - 0x1;
     *(int*)((char*)self + 0x34) = (int)t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035AAF0);
-#ifdef SKIP_ASM
 struct sSmVEntryV_AAF0 {
     short delta;
     short index;
@@ -825,11 +772,8 @@ extern "C" void* func_0035AAF0(void* self, void* item)
     }
     return (char*)item + 0x10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035AB60);
-#ifdef SKIP_ASM
 struct sSmVEntryI_AB60 {
     short delta;
     short index;
@@ -860,11 +804,8 @@ extern "C" int func_0035AB60(void* self, void* item)
     vt[33].fn((char*)obj + vt[33].delta, (char*)item + 0x10, *(int*)((char*)self + 0x38));
     return *(int*)((char*)self + 0x38);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035ABF0);
-#ifdef SKIP_ASM
 class cSplineVirt {
 public:
     int field_0x0;
@@ -928,15 +869,12 @@ extern "C" int func_0035ABF0(void* self)
     cSplineVirt* o = *(cSplineVirt**)((char*)*(void**)((char*)self + 0x40) + 0xC);
     return o->v51();
 }
-#endif
 
 INCLUDE_ASM("object/splinemodifier", func_0035AC20);
 
 INCLUDE_ASM("object/splinemodifier", func_0035B200);
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B418);
-#ifdef SKIP_ASM
 struct sSmVec4_35B418 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1019,11 +957,8 @@ extern "C" void func_0035B418(cMultiSpline_35B418* self)
         func_00345430((char*)self + 0x48, (char*)self + 0x20);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B5A8);
-#ifdef SKIP_ASM
 class cStream0035B5A8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -1046,11 +981,8 @@ extern "C" void func_0035B5A8(void* self, cStream0035B5A8* stream)
         stream->v01((*(char***)((char*)self + 0x44))[i] + 0x78, 4);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B670);
-#ifdef SKIP_ASM
 extern "C" void func_0035B670(void* self, void* node)
 {
     void* h = *(void**)self;
@@ -1061,11 +993,8 @@ extern "C" void func_0035B670(void* self, void* node)
     *(void**)node = *(void**)self;
     *(void**)self = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B690);
-#ifdef SKIP_ASM
 struct sSplineLink {
     sSplineLink* next; // 0x0
     sSplineLink* prev; // 0x4
@@ -1080,11 +1009,8 @@ extern "C" void func_0035B690(sSplineLink* link, sSplineLink* other)
     other->prev = link;
     link->next = other;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B6D0);
-#ifdef SKIP_ASM
 extern "C" void func_0035B6D0(sSplineLink* link)
 {
     if (link->next != 0) {
@@ -1096,11 +1022,8 @@ extern "C" void func_0035B6D0(sSplineLink* link)
     link->next = 0;
     link->prev = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B708);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void* func_002D1BE0();
 extern "C" void* func_002D1BD8();
@@ -1345,11 +1268,8 @@ extern "C" char* func_0035B708(char* self, sSmDesc_B708* desc, sSmModel_B708* mo
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035BA88);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void* func_002D1BE0();
 
@@ -1501,13 +1421,10 @@ extern "C" char* func_0035BA88(char* self, cSmStream_BA88* src)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("object/splinemodifier", func_0035BD70);
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035C040);
-#ifdef SKIP_ASM
 struct sSmVec4_C040 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1600,5 +1517,4 @@ extern "C" void func_0035C040(sSmMod_C040* self)
         vecAddEq_C040(self->box.max, pad);
     }
 }
-#endif
 

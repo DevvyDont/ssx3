@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_cScriptCameraController);
-#ifdef SKIP_ASM
 extern "C" void* cCameraController_cCameraController(void* self, void* arg);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0027D5E8(void* mem, void* script);
@@ -28,11 +26,8 @@ extern "C" void* cScriptCameraController_cScriptCameraController(void* self, voi
     *(int*)((char*)self + 0x18) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001690D0);
-#ifdef SKIP_ASM
 extern "C" void func_002832D8(void* p);
 extern "C" void func_0015CC10(void* self, int flags);
 void cMemMan_free(void* p);
@@ -57,11 +52,8 @@ extern "C" void func_001690D0(void* self, int flags)
         cMemMan_free(*(void**)((char*)self + 0x1C));
     func_0015CC10(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addCamera);
-#ifdef SKIP_ASM
 int func_002743C8(void* self);
 void func_001694A8(void* self, int val);
 extern "C" void* func_001694B8(void* self);
@@ -101,11 +93,8 @@ extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
     func_00169340_3(self, ctl, 1);
     *(int*)(self + 0x18) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001692D8);
-#ifdef SKIP_ASM
 struct sScrAlgoNode {
     int key;              // 0x0
     char pad_0x04[0x10];
@@ -134,22 +123,16 @@ extern "C" void func_001692D8(void* self, void* algo)
             *(int*)((char*)self + 0x18) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169340);
-#ifdef SKIP_ASM
 extern "C" void cCameraAlgoList_insert(void*, void*, float);
 
 extern "C" void func_00169340(void* self, void* algo)
 {
     cCameraAlgoList_insert(*(void**)((char*)self + 0x8), algo, 1.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169368);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001694B0 returns a pointer (the unit declares it int); bind a pointer-returning alias.
 char* func_001694B0_K2(void* self) __asm__("func_001694B0__FPv");
@@ -189,11 +172,8 @@ extern "C" void func_00169368(void* self)
         n = n->next;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169418);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_0045BDE0[];
 extern void* D_0045C8B8[];
@@ -233,29 +213,20 @@ extern "C" void* func_00169418(void* p)
     self->v20 = D_004FF130_K9418;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001694A8__FPvi);
-#ifdef SKIP_ASM
 void func_001694A8(void* self, int val)
 {
     *(int*)((char*)self + 0x14) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001694B0__FPv);
-#ifdef SKIP_ASM
 int func_001694B0(void* self)
 {
     return *(int*)((char*)self + 0x14);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_001694B8);
-#ifdef SKIP_ASM
 struct func_001694B8_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* D_0045C850[];
@@ -275,11 +246,8 @@ extern "C" void* func_001694B8(void* self)
     *(int*)((char*)self + 0x40) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169518);
-#ifdef SKIP_ASM
 class cScriptCtlVirt {
 public:
     char pad[0x10];
@@ -296,11 +264,8 @@ extern "C" void func_00169518(cScriptCtlVirt* self)
 {
     self->v05();
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169540);
-#ifdef SKIP_ASM
 class cScriptCtlVirt2 {
 public:
     char pad[0x10];
@@ -314,11 +279,8 @@ extern "C" void func_00169540(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169570);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C098(void* cam);
 extern "C" void func_0027C0F0(void* cam, void* out);
@@ -445,11 +407,8 @@ extern "C" void func_00169570(char* p)
     func_00160028(p + 0x74, self->r6C);
     func_00160130(p + 0x74, self->r70);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169828);
-#ifdef SKIP_ASM
 struct sV_9828 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -617,11 +576,8 @@ extern "C" sPair_9828 func_00169828(char* p)
     RotAxis_9828(&m, D_004FF160_9828, *(float*)(p + 0x44));
     return func_0031B748_9828(&m);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169CF8);
-#ifdef SKIP_ASM
 extern void* D_0045C7E8[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
@@ -639,29 +595,20 @@ extern "C" void* func_00169CF8(void* self)
     *(int*)((char*)self + 0x48) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169D58);
-#ifdef SKIP_ASM
 extern "C" void func_00169D58(cScriptCtlVirt* self)
 {
     self->v05();
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169D80);
-#ifdef SKIP_ASM
 extern "C" void func_00169D80(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169DB0);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C2A8(void* cam);
 extern "C" void func_0027C300(void* cam, void* out);
@@ -773,11 +720,8 @@ extern "C" void func_00169DB0(char* p)
     func_00160028(p + 0x74, self->r6C);
     func_00160130(p + 0x74, self->r70);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169F88);
-#ifdef SKIP_ASM
 struct sV_9F88 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -945,11 +889,8 @@ extern "C" sPair_9F88 func_00169F88(char* p)
     RotAxis_9F88(&m, D_004FF160_9F88, *(float*)(p + 0x44));
     return func_0031B748_9F88(&m);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A458);
-#ifdef SKIP_ASM
 extern void* D_0045C780[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
@@ -967,29 +908,20 @@ extern "C" void* func_0016A458(void* self)
     *(int*)((char*)self + 0x48) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A4B8);
-#ifdef SKIP_ASM
 extern "C" void func_0016A4B8(cScriptCtlVirt* self)
 {
     self->v05();
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A4E0);
-#ifdef SKIP_ASM
 extern "C" void func_0016A4E0(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A510);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C4B8(void* cam);
 extern "C" char* func_00279F18(void* self, int a1, int a2);
@@ -1168,11 +1100,8 @@ extern "C" void func_0016A510(char* p)
     func_00160028(p + 0x70, self->r68);
     func_00160130(p + 0x70, self->r6C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A868);
-#ifdef SKIP_ASM
 struct sV_A868 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1340,11 +1269,8 @@ extern "C" sPair_A868 func_0016A868(char* p)
     RotAxis_A868(&m, D_004FF160_A868, *(float*)(p + 0x44));
     return func_0031B748_A868(&m);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD38);
-#ifdef SKIP_ASM
 extern void* D_0045C718[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
@@ -1362,11 +1288,8 @@ extern "C" void* func_0016AD38(void* self)
     *(int*)((char*)self + 0x48) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD98);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C6A0(void* cam);
 extern "C" char* func_00279F18(void* self, int a1, int a2);
@@ -1563,20 +1486,14 @@ extern "C" void func_0016AD98(char* p)
     func_00160028(p + 0x70, self->r68);
     func_00160130(p + 0x70, self->r6C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016B150);
-#ifdef SKIP_ASM
 extern "C" void func_0016B150(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016B180);
-#ifdef SKIP_ASM
 struct sVec4_B180 {
     float x, y, z, w;
     sVec4_B180() {}
@@ -1818,11 +1735,8 @@ extern "C" void func_0016B180(char* p)
     func_00160028(p + 0x70, self->r68);
     func_00160130(p + 0x70, self->r6C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016B7B8);
-#ifdef SKIP_ASM
 struct sV_B7B8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1990,7 +1904,6 @@ extern "C" sPair_B7B8 func_0016B7B8(char* p)
     RotAxis_B7B8(&m, D_004FF160_B7B8, *(float*)(p + 0x44));
     return func_0031B748_B7B8(&m);
 }
-#endif
 
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BC88);
 
@@ -2013,18 +1926,13 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE90);
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEC0);
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEE8__FPv);
-#ifdef SKIP_ASM
 void* func_0016BEE8(void* self)
 {
     *(int*)self = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEF8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_0016BEF8(void* self, int flags)
@@ -2033,5 +1941,4 @@ extern "C" void func_0016BEF8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 

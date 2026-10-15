@@ -5,8 +5,6 @@
 typedef int cQuad128 __attribute__((mode(TI)));
 
 //100%
-INCLUDE_ASM("render/font", cFont_linkFont);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct sFontTexHdr;
@@ -86,13 +84,10 @@ extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
     }
     cFont_downloadTexture((char*)self, (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003919E8);
 
 //100%
-INCLUDE_ASM("render/font", cFont_downloadTexture);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_003E6448(void* dst, int c, int n);
@@ -164,11 +159,8 @@ extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img)
     if (pal != 0)
         cMemMan_free(pal);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391C48);
-#ifdef SKIP_ASM
 struct sMat00391C48 {
     float m[4][4];
 } __attribute__((aligned(16)));
@@ -182,11 +174,8 @@ extern "C" void func_00391C48(void* self, float x, float y)
     func_004186C8(&D_00500CA0);
     func_00391CB0(self, x, y, &D_00500CA0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391CB0);
-#ifdef SKIP_ASM
 struct sFontRS1CB0 {
     int field_0x0;          // 0x0
     int field_0x4;          // 0x4
@@ -245,11 +234,8 @@ extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m)
     vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x40, pos.x, pos.y,
               *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391E30);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sFontRS1E30 {
     int field_0x0;          // 0x0
@@ -309,11 +295,8 @@ extern "C" void func_00391E30(void* self, float x, float y, void* m)
     vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x40, pos.x, pos.y,
               *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391FB0);
-#ifdef SKIP_ASM
 struct sGlyph1FB0 {
     unsigned short code;    // 0x0
     unsigned char w;        // 0x2
@@ -408,11 +391,8 @@ extern "C" float func_00391FB0(void* f_, const char* s, void* r_, int mono, floa
     }
     return rc->x1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003921F0);
-#ifdef SKIP_ASM
 struct sGlyph21F0 {
     unsigned short code;    // 0x0
     unsigned char w;        // 0x2
@@ -507,11 +487,8 @@ extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int 
     }
     return rc->x1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392430);
-#ifdef SKIP_ASM
 struct sGlyph2430 {
     unsigned short code;    // 0x0
     unsigned char w;        // 0x2
@@ -620,13 +597,10 @@ extern "C" char* func_00392430(void* f_, const char* str, char* dst, int max, fl
     dst[n] = 0;
     return 0;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00392680);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/font", func_00392908);
-#ifdef SKIP_ASM
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
 extern "C" void func_00392908(void* self, const char* str, float x, float y)
@@ -634,13 +608,10 @@ extern "C" void func_00392908(void* self, const char* str, float x, float y)
     float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
     func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00392980);
 
 //100%
-INCLUDE_ASM("render/font", func_003929F8);
-#ifdef SKIP_ASM
 extern void* D_004A3E90;
 extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -657,11 +628,8 @@ extern "C" void func_003929F8(void* self, const char* fmt, void* ap, float x, fl
     func_00392908(self, s.p, x, y);
     cBXString__cBXString(&s, 2);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/font", func_00392A60);
-#ifdef SKIP_ASM
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
 extern "C" void func_00392A60(void* self, const char* str, float x, float y)
@@ -669,13 +637,10 @@ extern "C" void func_00392A60(void* self, const char* str, float x, float y)
     float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
     func_00391CB0(self, x - w, y, (sMat00391C48*)str);
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00392AD0);
 
 //100%
-INCLUDE_ASM("render/font", func_00392B40);
-#ifdef SKIP_ASM
 extern void* D_004A3E90;
 extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -692,11 +657,8 @@ extern "C" void func_00392B40(void* self, const char* fmt, void* ap, float x, fl
     func_00392A60(self, s.p, x, y);
     cBXString__cBXString(&s, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392BA8);
-#ifdef SKIP_ASM
 struct sGlyph {
     unsigned short code;
     char pad_0x2[6];
@@ -740,11 +702,8 @@ extern "C" float func_00392BA8(sGlyphTable* t, char c)
         return g->width;
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392C60);
-#ifdef SKIP_ASM
 extern "C" float func_00392C60(sGlyphTable* t, unsigned short c)
 {
     sGlyph* g = findGlyph(t, c);
@@ -752,11 +711,8 @@ extern "C" float func_00392C60(sGlyphTable* t, unsigned short c)
         return g->width;
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392D18);
-#ifdef SKIP_ASM
 struct sFontVec3 {
     float x, y, z;
 };
@@ -785,35 +741,26 @@ extern "C" void func_00392D18(sFontState* self)
     self->field_0xa0 = 0;
     self->field_0xa4 = 0;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00392D58);
 
 //100%
-INCLUDE_ASM("render/font", func_00392D90);
-#ifdef SKIP_ASM
 extern "C" void func_00392D90(sFontState* self, sFontQuad* q, sFontVec3* v)
 {
     self->vecs[self->count] = *v;
     self->quads[self->count] = *q;
     self->count++;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00392DE0);
 
 //100%
-INCLUDE_ASM("render/font", func_00392DE8__FPvi);
-#ifdef SKIP_ASM
 void func_00392DE8(void* self, int val)
 {
     *(int*)((char*)self + 0xA4) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392DF0);
-#ifdef SKIP_ASM
 extern "C" float func_0031BF60(float a);
 
 extern "C" void* func_00392DF0(void* self)
@@ -824,7 +771,6 @@ extern "C" void* func_00392DF0(void* self)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00392E60);
 
@@ -835,75 +781,51 @@ INCLUDE_ASM("render/font", func_00393008);
 INCLUDE_ASM("render/font", func_00393048);
 
 //100%
-INCLUDE_ASM("render/font", func_00393FA8__FPv);
-#ifdef SKIP_ASM
 void func_00393FA8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FB0__FPv);
-#ifdef SKIP_ASM
 int func_00393FB0(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FB8);
-#ifdef SKIP_ASM
 extern "C" void func_00393FB8(void* self, int a1, int a2)
 {
     *(float*)self = (float)a1;
     *(float*)((char*)self + 0x4) = (float)a2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FD8);
-#ifdef SKIP_ASM
 extern "C" int func_00393FD8(void* self)
 {
     return (int)*(float*)self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FF0);
-#ifdef SKIP_ASM
 extern "C" int func_00393FF0(void* self)
 {
     return (int)*(float*)((char*)self + 0x4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394008__FPv);
-#ifdef SKIP_ASM
 void func_00394008(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394010__FPv);
-#ifdef SKIP_ASM
 int func_00394010(void* self)
 {
     return 0x1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394018__FPv);
-#ifdef SKIP_ASM
 int func_00394018(void* self)
 {
     return 0x1;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00394020);
 
@@ -990,8 +912,6 @@ INCLUDE_ASM("render/font", func_00394280);
 INCLUDE_ASM("render/font", func_00394290);
 
 //100%
-INCLUDE_ASM("render/font", func_003942A0);
-#ifdef SKIP_ASM
 extern "C" void* func_003942A0(void* self)
 {
     *(float*)self = 1.0f;
@@ -1000,48 +920,32 @@ extern "C" void* func_003942A0(void* self)
     *(float*)((char*)self + 0xc) = 1.0f;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942C0__FPv);
-#ifdef SKIP_ASM
 void func_003942C0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942C8__FPv);
-#ifdef SKIP_ASM
 void func_003942C8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942D0__FPv);
-#ifdef SKIP_ASM
 void func_003942D0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942D8__FPv);
-#ifdef SKIP_ASM
 void* func_003942D8(void* self)
 {
     return (char*)self + 0xED8;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942E0__FPv);
-#ifdef SKIP_ASM
 void func_003942E0(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003942E8);
 
@@ -1076,193 +980,124 @@ INCLUDE_ASM("render/font", func_00394588);
 INCLUDE_ASM("render/font", func_00394598);
 
 //100%
-INCLUDE_ASM("render/font", func_003945B8__FPv);
-#ifdef SKIP_ASM
 void func_003945B8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945C0__FPv);
-#ifdef SKIP_ASM
 void func_003945C0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945C8__FPv);
-#ifdef SKIP_ASM
 void func_003945C8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945D0__FPv);
-#ifdef SKIP_ASM
 void func_003945D0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945D8__FPv);
-#ifdef SKIP_ASM
 void func_003945D8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945E0__FPv);
-#ifdef SKIP_ASM
 void func_003945E0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945E8__FPv);
-#ifdef SKIP_ASM
 void func_003945E8(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003945F0);
 
 INCLUDE_ASM("render/font", func_003945F8);
 
 //100%
-INCLUDE_ASM("render/font", func_00394610__FPv);
-#ifdef SKIP_ASM
 void func_00394610(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394618__FPv);
-#ifdef SKIP_ASM
 void func_00394618(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394620__FPv);
-#ifdef SKIP_ASM
 void func_00394620(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394628__FPv);
-#ifdef SKIP_ASM
 void func_00394628(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394630__FPv);
-#ifdef SKIP_ASM
 void func_00394630(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394638__FPv);
-#ifdef SKIP_ASM
 void func_00394638(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394640__FPv);
-#ifdef SKIP_ASM
 void func_00394640(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394648__FPv);
-#ifdef SKIP_ASM
 void func_00394648(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394650__FPv);
-#ifdef SKIP_ASM
 void func_00394650(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394658__FPv);
-#ifdef SKIP_ASM
 void func_00394658(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394660__FPv);
-#ifdef SKIP_ASM
 void func_00394660(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394668__FPv);
-#ifdef SKIP_ASM
 void func_00394668(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394670__FPv);
-#ifdef SKIP_ASM
 void func_00394670(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394678__FPv);
-#ifdef SKIP_ASM
 int func_00394678(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394680__FPv);
-#ifdef SKIP_ASM
 void func_00394680(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394688__FPv);
-#ifdef SKIP_ASM
 void func_00394688(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00394690);
 
@@ -1281,12 +1116,9 @@ INCLUDE_ASM("render/font", func_003946D0);
 INCLUDE_ASM("render/font", func_003946D8);
 
 //100%
-INCLUDE_ASM("render/font", func_003946E8__FPv);
-#ifdef SKIP_ASM
 void func_003946E8(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003946F0);
 
@@ -1311,8 +1143,6 @@ INCLUDE_ASM("render/font", func_00394A20);
 INCLUDE_ASM("render/font", func_00394AD8);
 
 //100%
-INCLUDE_ASM("render/font", func_00394B38);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00493938[];
@@ -1324,55 +1154,37 @@ extern "C" void func_00394B38(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394B68__FPv);
-#ifdef SKIP_ASM
 void func_00394B68(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00394B70);
 
 //100%
-INCLUDE_ASM("render/font", func_00394B78__FPv);
-#ifdef SKIP_ASM
 void func_00394B78(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394B80__FPv);
-#ifdef SKIP_ASM
 void func_00394B80(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394B88__FPvf);
-#ifdef SKIP_ASM
 void func_00394B88(void* self, float val)
 {
     *(float*)((char*)self + 0x0) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394B90__FPv);
-#ifdef SKIP_ASM
 float func_00394B90(void* self)
 {
     return *(float*)((char*)self + 0x0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394B98);
-#ifdef SKIP_ASM
 class cFontVirt {
 public:
     int field_0x0;
@@ -1406,106 +1218,72 @@ extern "C" void func_00394B98(cFontVirt* self, int a, int b, int c, int d, int e
 {
     self->v22(a, b, c, d, e);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BC0__FPvf);
-#ifdef SKIP_ASM
 void func_00394BC0(void* self, float val)
 {
     *(float*)((char*)self + 0x33C) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BC8__FPvf);
-#ifdef SKIP_ASM
 void func_00394BC8(void* self, float val)
 {
     *(float*)((char*)self + 0x340) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BD0__FPv);
-#ifdef SKIP_ASM
 float func_00394BD0(void* self)
 {
     return *(float*)((char*)self + 0x33C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BD8__FPv);
-#ifdef SKIP_ASM
 float func_00394BD8(void* self)
 {
     return *(float*)((char*)self + 0x340);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BE0__FPvi);
-#ifdef SKIP_ASM
 void func_00394BE0(void* self, int val)
 {
     *(int*)((char*)self + 0x354) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BE8__FPvi);
-#ifdef SKIP_ASM
 void func_00394BE8(void* self, int val)
 {
     *(int*)((char*)self + 0x344) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BF0__FPvi);
-#ifdef SKIP_ASM
 void func_00394BF0(void* self, int val)
 {
     *(int*)((char*)self + 0x34C) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BF8__FPvi);
-#ifdef SKIP_ASM
 void func_00394BF8(void* self, int val)
 {
     *(int*)((char*)self + 0x350) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C00__FPv);
-#ifdef SKIP_ASM
 int func_00394C00(void* self)
 {
     return *(int*)((char*)self + 0x344);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C08__FPv);
-#ifdef SKIP_ASM
 int func_00394C08(void* self)
 {
     return *(int*)((char*)self + 0x34C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C10__FPv);
-#ifdef SKIP_ASM
 int func_00394C10(void* self)
 {
     return *(int*)((char*)self + 0x350);
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00394C18);
 
@@ -1516,60 +1294,40 @@ INCLUDE_ASM("render/font", func_00394C38);
 INCLUDE_ASM("render/font", func_00394C40);
 
 //100%
-INCLUDE_ASM("render/font", func_00394C48__FPv);
-#ifdef SKIP_ASM
 void func_00394C48(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C50__FPv);
-#ifdef SKIP_ASM
 void func_00394C50(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C58__FPv);
-#ifdef SKIP_ASM
 void func_00394C58(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C60__FPv);
-#ifdef SKIP_ASM
 void func_00394C60(void* self)
 {
 }
-#endif
 
 extern "C" void* func_0038AE28(void* self);
 
 //100%
-INCLUDE_ASM("render/font", func_00394C68__FPv);
-#ifdef SKIP_ASM
 void* func_00394C68(void* self)
 {
     return func_0038AE28(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C88__FPvi);
-#ifdef SKIP_ASM
 void* func_00394C88(void* self, int a1)
 {
     return ((char*)*(void**)((char*)self + 0x4) + a1 * 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_00491FA0[];
@@ -1581,11 +1339,8 @@ extern "C" void func_00394C98(void* self, int n)
     *(int*)((char*)self + 0x10) = n + 0x32;
     *(void**)((char*)self + 0x4) = operator_new_tag((n + 0x32) * 4, D_00491FA0, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394CE8);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 extern "C" void func_00394CE8(void* self)
@@ -1595,61 +1350,40 @@ extern "C" void func_00394CE8(void* self)
         cMemMan_free(p);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D10__FPv);
-#ifdef SKIP_ASM
 void func_00394D10(void* self)
 {
     *(int*)((char*)self + 0xC) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D18);
-#ifdef SKIP_ASM
 extern "C" char* func_00394D18(void* self)
 {
     return *(char**)((char*)self + 0x8) + (*(int*)((char*)self + 0xC))++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D30__FPv);
-#ifdef SKIP_ASM
 void func_00394D30(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D38__FPv);
-#ifdef SKIP_ASM
 void func_00394D38(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D40__FPv);
-#ifdef SKIP_ASM
 void func_00394D40(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D48__FPv);
-#ifdef SKIP_ASM
 void func_00394D48(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D50);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
 struct sFontTexKey {
@@ -1703,11 +1437,8 @@ extern "C" void* func_00394D50(void* self)
     new (self) sFontCache;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394ED0);
-#ifdef SKIP_ASM
 struct sGlyphKey {
     int k[4];
     int v;
@@ -1759,13 +1490,10 @@ extern "C" sGlyphEntry* func_00394ED0(sGlyphCache* self, sGlyphKey* key, unsigne
     self->buckets[hash] = e;
     return e;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00395000);
 
 //100%
-INCLUDE_ASM("render/font", func_003950C0);
-#ifdef SKIP_ASM
 struct sVec50C0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1816,22 +1544,16 @@ extern "C" sFontState50C0* func_003950C0(sFontState50C0* self, const sFontState5
     *self = *o;
     return self;
 }
-#endif
 
 extern "C" void* func_003695D8(void* self);
 
 //100%
-INCLUDE_ASM("render/font", func_00395268__FPv);
-#ifdef SKIP_ASM
 void* func_00395268(void* self)
 {
     return func_003695D8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395288);
-#ifdef SKIP_ASM
 extern "C" void* func_003691F8(void* self);
 extern void* D_00493260[];
 
@@ -1853,34 +1575,24 @@ extern "C" void* func_00395288(void* self)
     new ((char*)self + 0x1260) sRenderSlot5288[4];
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395318__FPv);
-#ifdef SKIP_ASM
 int func_00395318(void* self)
 {
     return *(int*)((char*)self + 0x59C4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395320__FPv);
-#ifdef SKIP_ASM
 int func_00395320(void* self)
 {
     return *(int*)((char*)self + 0x5A4C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395328__FPv);
-#ifdef SKIP_ASM
 int func_00395328(void* self)
 {
     return *(int*)((char*)self + 0x59C8);
 }
-#endif
 
 // 0xa4-byte elements reached through a pointer at self+0x59cc, indexed by
 // the counter at self+0x59c8
@@ -1892,30 +1604,22 @@ struct sFontEntry {
 };
 
 //100%
-INCLUDE_ASM("render/font", func_00395330);
-#ifdef SKIP_ASM
 extern "C" int func_00395330(void* self)
 {
     int i = *(int*)((char*)self + 0x59c8);
     sFontEntry* p = *(sFontEntry**)((char*)self + 0x59cc);
     return p[i].field_0x88;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395350);
-#ifdef SKIP_ASM
 extern "C" int func_00395350(void* self)
 {
     int i = *(int*)((char*)self + 0x59c8);
     sFontEntry* p = *(sFontEntry**)((char*)self + 0x59cc);
     return p[i].field_0x8c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395370);
-#ifdef SKIP_ASM
 struct sFontVEntry23 {
     short delta;
     short index;
@@ -1927,20 +1631,14 @@ extern "C" void func_00395370(void* self, float* v, int a2)
     sFontVEntry23* vt = *(sFontVEntry23**)((char*)self + 0x10D8);
     vt[23].fn((char*)self + vt[23].delta, a2, v[0], v[1], v[2], v[3]);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003953B0__FPv);
-#ifdef SKIP_ASM
 void* func_003953B0(void* self)
 {
     return (char*)self + 0x6B94;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003953B8);
-#ifdef SKIP_ASM
 extern "C" void func_003956B0(void* self);
 
 // Fetch the current (combined) matrix into out and return out.
@@ -1964,18 +1662,14 @@ extern "C" void* func_003953B8(void* out, void* self)
         : "memory");
     return out;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00395418);
 
 //100%
-INCLUDE_ASM("render/font", func_00395420__FPv);
-#ifdef SKIP_ASM
 void func_00395420(void* self)
 {
     *(int*)((char*)self + 0x13EC) = 0;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00395428);
 
@@ -1988,8 +1682,6 @@ INCLUDE_ASM("render/font", func_00395470);
 INCLUDE_ASM("render/font", func_00395498);
 
 //100%
-INCLUDE_ASM("render/font", func_003954D0);
-#ifdef SKIP_ASM
 struct sFontBlockA0 {
     float f[40];
 } __attribute__((aligned(16)));
@@ -1998,33 +1690,23 @@ extern "C" void func_003954D0(void* self, sFontBlockA0* src)
 {
     *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395500__FPv);
-#ifdef SKIP_ASM
 void* func_00395500(void* self)
 {
     return (char*)self + 0x6BB0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395508__FPv);
-#ifdef SKIP_ASM
 void func_00395508(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395510__FPv);
-#ifdef SKIP_ASM
 int func_00395510(void* self)
 {
     return *(int*)((char*)self + 0x5A74);
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00395518);
 
@@ -2063,8 +1745,6 @@ INCLUDE_ASM("render/font", func_00395660);
 INCLUDE_ASM("render/font", func_00395688);
 
 //100%
-INCLUDE_ASM("render/font", func_003956B0);
-#ifdef SKIP_ASM
 extern "C" void func_0037D968(void* self);
 
 extern "C" void func_003956B0(void* self)
@@ -2073,22 +1753,16 @@ extern "C" void func_003956B0(void* self)
         func_0037D968(self);
     }
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003956D8);
 
 //100%
-INCLUDE_ASM("render/font", func_003956E0__FPvi);
-#ifdef SKIP_ASM
 void func_003956E0(void* self, int val)
 {
     *(int*)((char*)self + 0x6D14) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003956E8);
-#ifdef SKIP_ASM
 // Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void func_003956E8(void* self)
@@ -2111,24 +1785,18 @@ extern "C" void func_003956E8(void* self)
     *(char**)((char*)self + 0x13e4) += 0x40;
     *(int*)((char*)self + 0x13e0) += 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395730__FPv);
-#ifdef SKIP_ASM
 void func_00395730(void* self)
 {
     *(int*)((char*)self + 0x6b90) = 0;
     *(char**)((char*)self + 0x13e4) -= 0x40;
     *(int*)((char*)self + 0x13e0) -= 1;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00395750);
 
 //100%
-INCLUDE_ASM("render/font", func_00395C38);
-#ifdef SKIP_ASM
 // Load matrix m into the top of the matrix stack and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void func_00395C38(void* self, void* m)
@@ -2149,20 +1817,14 @@ extern "C" void func_00395C38(void* self, void* m)
         : "memory");
     *(int*)((char*)self + 0x6b90) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395C68__FPv);
-#ifdef SKIP_ASM
 int func_00395C68(void* self)
 {
     return *(int*)((char*)self + 0x13E4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395C70);
-#ifdef SKIP_ASM
 // Multiply the top of the matrix stack by m in place (top = top * m) and clear
 // the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
@@ -2204,11 +1866,8 @@ extern "C" void func_00395C70(void* self, void* m)
         : "memory");
     *(int*)((char*)self + 0x6b90) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395CF0);
-#ifdef SKIP_ASM
 extern char D_004FF1A0[];
 
 // Load the matrix D_004FF1A0 (likely identity) into the top of the matrix stack
@@ -2232,11 +1891,8 @@ extern "C" void func_00395CF0(void* self)
         : "memory");
     *(int*)((char*)self + 0x6b90) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395D28);
-#ifdef SKIP_ASM
 // Translate the top matrix of the stack: row 3 = top * v (v is a 4-vector),
 // then clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
@@ -2261,11 +1917,8 @@ extern "C" void func_00395D28(void* self, void* v)
         : "memory");
     *(int*)((char*)self + 0x6b90) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395D60);
-#ifdef SKIP_ASM
 struct sFontRotMat {
     float m[4][4];
 } __attribute__((aligned(16)));
@@ -2343,39 +1996,29 @@ extern "C" void func_00395D60(void* self, float* axis, float angle)
         : "memory");
     *(int*)((char*)self + 0x6b90) = 0;
 }
-#endif
 
 extern "C" void* func_003826E0(void* self);
 
 INCLUDE_ASM("render/font", func_00395ED8);
 
 //100%
-INCLUDE_ASM("render/font", func_00395F60__FPv);
-#ifdef SKIP_ASM
 void* func_00395F60(void* self)
 {
     return func_003826E0(self);
 }
-#endif
 
 extern "C" void* func_00382730(void* self);
 
 //100%
-INCLUDE_ASM("render/font", func_00395F80__FPv);
-#ifdef SKIP_ASM
 void* func_00395F80(void* self)
 {
     return func_00382730(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395FA0__FPv);
-#ifdef SKIP_ASM
 void func_00395FA0(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00395FA8);
 
@@ -2386,27 +2029,19 @@ INCLUDE_ASM("render/font", func_00396080);
 INCLUDE_ASM("render/font", func_003960E8);
 
 //100%
-INCLUDE_ASM("render/font", func_00396108__FPv);
-#ifdef SKIP_ASM
 int func_00396108(void* self)
 {
     return *(int*)((char*)self + 0x1C8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396110);
-#ifdef SKIP_ASM
 extern "C" void func_00396110(void* self, float range)
 {
     *(float*)((char*)self + 0x194) = range;
     *(float*)((char*)self + 0x198) = 32767.0f / range;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396128);
-#ifdef SKIP_ASM
 extern "C" void func_00396128(void* self)
 {
     int i;
@@ -2415,7 +2050,6 @@ extern "C" void func_00396128(void* self)
     }
     *(int*)((char*)self + 0x1f54) = -1;
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00396160);
 
@@ -2426,8 +2060,6 @@ INCLUDE_ASM("render/font", func_00396198);
 INCLUDE_ASM("render/font", func_003961A0);
 
 //100%
-INCLUDE_ASM("render/font", func_003961A8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2439,7 +2071,6 @@ extern "C" void func_003961A8(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003961D8);
 
@@ -2536,8 +2167,6 @@ INCLUDE_ASM("render/font", func_003964A8);
 INCLUDE_ASM("render/font", func_003964B8);
 
 //100%
-INCLUDE_ASM("render/font", func_003964C8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2549,7 +2178,6 @@ extern "C" void func_003964C8(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("render/font", func_003964F8);
 
@@ -2614,8 +2242,6 @@ INCLUDE_ASM("render/font", func_003967D8);
 INCLUDE_ASM("render/font", func_00396820);
 
 //100%
-INCLUDE_ASM("render/font", func_00396838);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2627,7 +2253,6 @@ extern "C" void func_00396838(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00396868);
 
@@ -2642,26 +2267,18 @@ INCLUDE_ASM("render/font", func_003968A8);
 INCLUDE_ASM("render/font", func_003968B8);
 
 //100%
-INCLUDE_ASM("render/font", func_003968C8__FPv);
-#ifdef SKIP_ASM
 void func_003968C8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003968D0);
-#ifdef SKIP_ASM
 extern "C" void func_003968D0(void* self, int a1, void* a2)
 {
     cQuad128* p = *(cQuad128**)((char*)self + 0x8);
     p[a1] = *(cQuad128*)a2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_003968E8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2673,27 +2290,18 @@ extern "C" void func_003968E8(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396918__FPv);
-#ifdef SKIP_ASM
 void func_00396918(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396920__FPv);
-#ifdef SKIP_ASM
 void func_00396920(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396928);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2705,15 +2313,11 @@ extern "C" void func_00396928(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396958__FPv);
-#ifdef SKIP_ASM
 void func_00396958(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00396960);
 
@@ -2736,8 +2340,6 @@ INCLUDE_ASM("render/font", func_003969E0);
 INCLUDE_ASM("render/font", func_003969F0);
 
 //100%
-INCLUDE_ASM("render/font", func_00396A00);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2749,7 +2351,6 @@ extern "C" void func_00396A00(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("render/font", func_00396A30);
 
@@ -2790,8 +2391,6 @@ INCLUDE_ASM("render/font", func_00396B40);
 INCLUDE_ASM("render/font", func_00396C30);
 
 //100%
-INCLUDE_ASM("render/font", func_00396D30);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
@@ -2803,7 +2402,6 @@ extern "C" void func_00396D30(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 extern "C" void* func_00393048(int, int);
 
@@ -2914,31 +2512,22 @@ INCLUDE_ASM("render/font", func_003970D8);
 INCLUDE_ASM("render/font", func_003970E8);
 
 //99.38%
-INCLUDE_ASM("render/font", func_003970F8__FPv);
-#ifdef SKIP_ASM
 void* func_003970F8(void* self)
 {
     return func_00393048(1, 0xffff);
 }
-#endif
 
 extern "C" void* func_00393048(int, int);
 
 //99.38%
-INCLUDE_ASM("render/font", func_00397118__FPv);
-#ifdef SKIP_ASM
 void* func_00397118(void* self)
 {
     return func_00393048(0, 0xffff);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/font", func_00397138__FPvi);
-#ifdef SKIP_ASM
 void func_00397138(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }
-#endif
 

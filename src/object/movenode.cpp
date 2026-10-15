@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("object/movenode", cMoveNode_cMoveNode);
-#ifdef SKIP_ASM
 struct sSerVEntry_55298 {
     short delta;
     short index;
@@ -42,11 +40,8 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
     *(unsigned short*)((char*)self + 0x12) |= 1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003553C0);
-#ifdef SKIP_ASM
 extern char D_00491028[];
 extern "C" void func_003567E0(void* self);
 extern "C" void func_00352AE8(void* block, int flags);
@@ -62,11 +57,8 @@ extern "C" void func_003553C0(void* self, int flags)
     }
     func_0034FBF0(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355420);
-#ifdef SKIP_ASM
 struct sMoveNodeVEntryI {
     short delta;
     short index;
@@ -86,7 +78,6 @@ extern "C" int func_00355420(void* self)
     sMoveNodeVEntryI* vt = *(sMoveNodeVEntryI**)node;
     return vt[8].fn((char*)node + vt[8].delta);
 }
-#endif
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 struct tModifierBlock;
@@ -99,18 +90,13 @@ struct cMoveNode {
 };
 
 //100%
-INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
-#ifdef SKIP_ASM
 void cMoveNode_addModifierBlock(cMoveNode* self)
 {
     void* mem = cMemMan_alloc(0x28, D_0048E9D8, 0x20000000, 0);
     self->field_0x1C = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003554B0);
-#ifdef SKIP_ASM
 struct sMoveNodeVEntryV54B0 {
     short delta;
     short index;
@@ -134,11 +120,8 @@ extern "C" void func_003554B0(cMoveNode* self, void* mod)
     unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
     *f = (*f & ~0x20u) | 0x40;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355550);
-#ifdef SKIP_ASM
 extern "C" void func_00353118(void* block);
 
 extern "C" void func_00355550(cMoveNode* self, void* v)
@@ -150,11 +133,8 @@ extern "C" void func_00355550(cMoveNode* self, void* v)
     }
     *(void**)((char*)self->field_0x1C + 0x4) = v;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003555A8);
-#ifdef SKIP_ASM
 extern "C" void func_00353150(void* block);
 
 extern "C" void func_003555A8(cMoveNode* self, void* v)
@@ -166,11 +146,8 @@ extern "C" void func_003555A8(cMoveNode* self, void* v)
     }
     *(void**)((char*)self->field_0x1C + 0x8) = v;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355600);
-#ifdef SKIP_ASM
 extern "C" void func_00353188(void* block);
 
 extern "C" void func_00355600(cMoveNode* self, void* v)
@@ -182,14 +159,11 @@ extern "C" void func_00355600(cMoveNode* self, void* v)
     }
     *(void**)((char*)self->field_0x1C + 0xC) = v;
 }
-#endif
 
 struct cEffectLink;
 void cEffectLink_add(cEffectLink* link, cEffectLink* other);
 
 //99.74%
-INCLUDE_ASM("object/movenode", cMoveNode_addEffectModifier__FP9cMoveNodePv);
-#ifdef SKIP_ASM
 void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
 {
     if (self->field_0x1C == 0) {
@@ -197,11 +171,8 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
     }
     cEffectLink_add((cEffectLink*)((char*)self->field_0x1C + 0x10), (cEffectLink*)effect);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003556A8);
-#ifdef SKIP_ASM
 extern "C" void func_0035B670(void* list, void* item);
 
 extern "C" void func_003556A8(cMoveNode* self, void* item)
@@ -211,11 +182,8 @@ extern "C" void func_003556A8(cMoveNode* self, void* item)
     }
     func_0035B670((char*)self->field_0x1C + 0x1C, item);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003556F8);
-#ifdef SKIP_ASM
 extern "C" void func_00352C70(void* block);
 extern "C" int func_00352E50(void* block);
 
@@ -228,11 +196,8 @@ extern "C" void func_003556F8(cMoveNode* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355748);
-#ifdef SKIP_ASM
 extern "C" void func_00352D20(void*);
 
 extern "C" void func_00355748(cMoveNode* self)
@@ -241,11 +206,8 @@ extern "C" void func_00355748(cMoveNode* self)
         func_00352D20(self->field_0x1C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355770);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 extern "C" int func_002D1B30(int);
 void func_0034FE00(void*, int, int, int);
@@ -288,33 +250,24 @@ extern "C" void func_00355770(cMoveNode* self, int a1, int a2, int a3)
         func_0034FE00(self, a1, a2, a3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355858);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 
 extern "C" void func_00355858(void* self, float secs)
 {
     *(int*)((char*)self + 0x20) = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355878__FPvT0);
-#ifdef SKIP_ASM
 float func_00355878(void* self, void* a1)
 {
     float t0 = *(float*)((char*)a1 + 0x4);
     *(float*)((char*)self + 0x24) = t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355888);
-#ifdef SKIP_ASM
 struct sMnVEntryF {
     short delta;
     short index;
@@ -326,11 +279,8 @@ extern "C" void func_00355888(void* self, void* a1)
     sMnVEntryF* vt = *(sMnVEntryF**)((char*)self + 0xC);
     vt[41].fn((char*)self + vt[41].delta, *(float*)((char*)a1 + 0x4));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_003558B8);
-#ifdef SKIP_ASM
 struct sMoveQuad;
 extern char D_0048E8F0[];
 extern "C" void* func_00356EB8(void* self, sMoveQuad* pos);
@@ -340,11 +290,8 @@ extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 {
     func_003554B0(self, func_00356EB8(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), pos));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355918);
-#ifdef SKIP_ASM
 extern char D_0048E8F0[];
 extern "C" void* func_00356F10(void* mem, void* desc);
 extern "C" void func_003554B0(cMoveNode* self, void* mod);
@@ -353,11 +300,8 @@ extern "C" void func_00355918(cMoveNode* self, void* desc)
 {
     func_003554B0(self, func_00356F10(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), desc));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355978);
-#ifdef SKIP_ASM
 struct sMoveQuad;
 extern char D_0048E8E0[];
 extern "C" void* func_00357038(void* self, void* a1, void* a2, sMoveQuad* pos);
@@ -367,11 +311,8 @@ extern "C" void func_00355978(cMoveNode* self, void* a1, void* a2, sMoveQuad* po
 {
     func_003554B0(self, func_00357038(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_003559F8);
-#ifdef SKIP_ASM
 extern char D_0048E918[];
 extern "C" void* func_003572E0(void* self, void* owner, void* a2, float f0, float f1);
 extern "C" void func_003554B0(cMoveNode* self, void* mod);
@@ -381,11 +322,8 @@ extern "C" void func_003559F8(cMoveNode* self, void* a1, float f0, float f1)
     func_003554B0(self, func_003572E0(cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
                                       *(void**)((char*)self + 0x18), a1, f0, f1));
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355A78);
-#ifdef SKIP_ASM
 extern int D_004A3AC4;
 extern char D_0048E928[];
 extern "C" void* func_00357750(void* self, void* src);
@@ -397,11 +335,8 @@ extern "C" void func_00355A78(cMoveNode* self)
         func_003554B0(self, func_00357750(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), *(void**)((char*)self + 0x18)));
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355AD0);
-#ifdef SKIP_ASM
 extern char D_0048E8D0[];
 extern "C" void* func_00359460(void* mem, void* desc);
 extern "C" void func_003554B0(cMoveNode* self, void* mod);
@@ -410,11 +345,8 @@ extern "C" void func_00355AD0(cMoveNode* self, void* desc)
 {
     func_003554B0(self, func_00359460(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), desc));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", cMoveNode_addSpline);
-#ifdef SKIP_ASM
 extern char D_0048E9E8[];
 extern "C" void* func_00359F88(void* mem, void* desc, void* owner);
 extern "C" void func_003554B0(cMoveNode* self, void* mod);
@@ -424,11 +356,8 @@ extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
     func_003554B0(self, func_00359F88(cMemMan_alloc(0x58, D_0048E9E8, 0x20000000, 0), desc,
                                       *(void**)((char*)self + 0x18)));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355B90);
-#ifdef SKIP_ASM
 extern char D_0048E940[];
 extern "C" void* func_0035F6E8(void* mem, void* desc);
 extern "C" void func_00355550(cMoveNode* self, void* mod);
@@ -437,11 +366,8 @@ extern "C" void func_00355B90(cMoveNode* self, void* desc)
 {
     func_00355550(self, func_0035F6E8(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), desc));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355BF0);
-#ifdef SKIP_ASM
 extern char D_0048E958[];
 extern "C" void* func_0035F0B8(void* mem, void* desc, void* owner);
 extern "C" void func_003555A8(cMoveNode* self, void* mod);
@@ -450,11 +376,8 @@ extern "C" void func_00355BF0(cMoveNode* self, void* desc)
 {
     func_003555A8(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, *(void**)((char*)self + 0x18)));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355C50);
-#ifdef SKIP_ASM
 extern char D_0048E968[];
 extern "C" void* func_00342768(void* mem, void* desc, void* owner);
 extern "C" void func_00355600(cMoveNode* self, void* mod);
@@ -463,11 +386,8 @@ extern "C" void func_00355C50(cMoveNode* self, void* desc)
 {
     func_00355600(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, *(void**)((char*)self + 0x18)));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", cMoveNode_addParticle);
-#ifdef SKIP_ASM
 extern char D_0048E978[];
 extern "C" void* func_003458C0(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
@@ -477,11 +397,8 @@ extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
     cMoveNode_addEffectModifier(self, func_003458C0(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), desc,
                                                     *(void**)((char*)self + 0x18)));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", cMoveNode_addDynamicParticle);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void* func_00345C90(void* mem, void* desc, void* inst, int index, void* a4);
 extern const char D_0048E990[];
@@ -494,11 +411,8 @@ extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int in
     }
     cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, *(void**)((char*)self + 0x18), index, a4));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355DB8);
-#ifdef SKIP_ASM
 extern char D_0048E908[];
 extern "C" void* func_0035DA70(void* mem, void* a1, void* a2, void* a3);
 extern "C" void func_003554B0(cMoveNode* self, void* mod);
@@ -507,11 +421,8 @@ extern "C" void func_00355DB8(cMoveNode* self, void* a1, void* a2, void* a3)
 {
     func_003554B0(self, func_0035DA70(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), a1, a2, a3));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355E38);
-#ifdef SKIP_ASM
 extern char D_0048E9B8[];
 extern "C" int func_00353418(void* self, int id);
 extern "C" void* func_0035B708(void* mem, void* desc, void* owner);
@@ -526,11 +437,8 @@ extern "C" void func_00355E38(cMoveNode* self, void* desc)
     func_003556A8(self, func_0035B708(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), desc,
                                       *(void**)((char*)self + 0x18)));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", cMoveNode_addHalo);
-#ifdef SKIP_ASM
 extern char D_0048E9A8[];
 extern "C" void* func_00346120(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
@@ -540,11 +448,8 @@ extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
     cMoveNode_addEffectModifier(self, func_00346120(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), desc,
                                                     *(void**)((char*)self + 0x18)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355F10);
-#ifdef SKIP_ASM
 extern "C" void func_00356020(cMoveNode* self, cMoveNode* other);
 
 struct sMat44_355F10 {
@@ -617,11 +522,8 @@ extern "C" void func_00355F10(cMoveNode* self, void* srcv)
     sNodeVEntryV_355F10* vv = *(sNodeVEntryV_355F10**)((char*)self + 0xC);
     vv[50].fn((char*)self + vv[50].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356020);
-#ifdef SKIP_ASM
 extern "C" void func_00353398(void* block, void* other);
 
 extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
@@ -633,7 +535,6 @@ extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
         func_00353398(self->field_0x1C, (char*)other->field_0x1C + 0x10);
     }
 }
-#endif
 
 INCLUDE_ASM("object/movenode", func_00356078);
 
@@ -642,8 +543,6 @@ INCLUDE_ASM("object/movenode", func_003560C0);
 INCLUDE_ASM("object/movenode", func_00356128);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356198);
-#ifdef SKIP_ASM
 int func_0034FCE0(void* self);
 extern "C" int func_00352ED0(void* block);
 extern "C" void func_00352F08(void* block);
@@ -691,11 +590,8 @@ extern "C" void func_00356198(void* selfv)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356298);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMoveQuad;
 extern sMoveQuad D_004FF1A0[];
@@ -988,7 +884,6 @@ extern "C" void func_00356298(cMnNode_6298* self)
     sMnGfxVt_6298* vt = gfx->vt;
     ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, *(float*)((char*)self + 0x24));
 }
-#endif
 
 INCLUDE_ASM("object/movenode", func_00356608);
 
@@ -999,8 +894,6 @@ INCLUDE_ASM("object/movenode", func_003567E0);
 INCLUDE_ASM("object/movenode", func_003568B0);
 
 //100%
-INCLUDE_ASM("object/movenode", func_003569D0);
-#ifdef SKIP_ASM
 extern "C" int func_00352B88(void*);
 
 extern "C" int func_003569D0(cMoveNode* self)
@@ -1010,11 +903,8 @@ extern "C" int func_003569D0(cMoveNode* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356A00);
-#ifdef SKIP_ASM
 extern "C" int func_00352B88(void*);
 
 extern "C" int func_00356A00(cMoveNode* self)
@@ -1024,11 +914,8 @@ extern "C" int func_00356A00(cMoveNode* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356A28);
-#ifdef SKIP_ASM
 struct sMoveNodeVEntryA28 {
     short delta;
     short index;
@@ -1048,11 +935,8 @@ extern "C" int func_00356A28(void* self)
     sMoveNodeVEntryA28* vt = *(sMoveNodeVEntryA28**)node;
     return vt[20].fn((char*)node + vt[20].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356A70);
-#ifdef SKIP_ASM
 struct sMoveNodeVEntryA70 {
     short delta;
     short index;
@@ -1072,11 +956,8 @@ extern "C" int func_00356A70(void* self, int a, int b, int c, int d)
     sMoveNodeVEntryA70* vt = *(sMoveNodeVEntryA70**)node;
     return vt[21].fn((char*)node + vt[21].delta, a, b, c, d);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356AB8);
-#ifdef SKIP_ASM
 extern "C" void func_00353020(void*);
 
 extern "C" void func_00356AB8(cMoveNode* self)
@@ -1085,11 +966,8 @@ extern "C" void func_00356AB8(cMoveNode* self)
         func_00353020(self->field_0x1C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356AE0);
-#ifdef SKIP_ASM
 extern "C" void func_00353098(void*);
 
 extern "C" void func_00356AE0(cMoveNode* self)
@@ -1098,11 +976,8 @@ extern "C" void func_00356AE0(cMoveNode* self)
         func_00353098(self->field_0x1C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356B08);
-#ifdef SKIP_ASM
 extern "C" void func_00352F40(void*);
 
 extern "C" void func_00356B08(cMoveNode* self)
@@ -1111,11 +986,8 @@ extern "C" void func_00356B08(cMoveNode* self)
         func_00352F40(self->field_0x1C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356B30);
-#ifdef SKIP_ASM
 struct sSerVEntry_56B30 {
     short delta;
     short index;
@@ -1146,13 +1018,10 @@ void func_00356B30_2(void* self, void* stream)
         func_00353448(block, stream);
     }
 }
-#endif
 
 INCLUDE_ASM("object/movenode", func_00356BF0);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356C48);
-#ifdef SKIP_ASM
 struct sMnVEntryI6C48 {
     short delta;
     short index;
@@ -1178,11 +1047,8 @@ extern "C" int func_00356C48(cMoveNode* self, void* a1)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356CC8);
-#ifdef SKIP_ASM
 struct sMnVEntryI6CC8 {
     short delta;
     short index;
@@ -1208,11 +1074,8 @@ extern "C" int func_00356CC8(cMoveNode* self, void* a1)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356D48);
-#ifdef SKIP_ASM
 extern "C" int func_00356D48(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
@@ -1229,11 +1092,8 @@ extern "C" int func_00356D48(void* self)
     }
     return *(int*)((char*)**(void***)((char*)self + 0x1C) + 0x34);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356DB0);
-#ifdef SKIP_ASM
 struct sMoveFlags_6DB0 {
     char pad_0x00[0x8];
     unsigned int w;     // 0x8
@@ -1256,11 +1116,8 @@ extern "C" void* func_00356DB0(void* self, void* a1, void* a2, int a3, int a4)
     }
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00356E60);
-#ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self);
 extern void* D_00490E80[];
 
@@ -1270,22 +1127,16 @@ extern "C" void* func_00356E60(void* self)
     *(void***)((char*)self + 0xC) = D_00490E80;
     return self;
 }
-#endif
 
 extern "C" void* func_00356B30(void* self);
 
 //99.29%
-INCLUDE_ASM("object/movenode", func_00356E98__FPv);
-#ifdef SKIP_ASM
 void* func_00356E98(void* self)
 {
     return func_00356B30(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356EB8);
-#ifdef SKIP_ASM
 struct sMoveQuad {
     float v[4];
 } __attribute__((aligned(16)));
@@ -1316,11 +1167,8 @@ extern "C" void* func_00356EB8(void* self, sMoveQuad* pos)
     *(sMoveQuad*)((char*)self + 0x80) = *(sMoveQuad*)((char*)self + 0x30);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356F10);
-#ifdef SKIP_ASM
 struct sMoveQuad2 {
     float v[4];
 } __attribute__((aligned(16)));
@@ -1350,11 +1198,8 @@ extern "C" void* func_00356F10(void* self, void* src)
     *(int*)((char*)self + 0x44) = 1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356F68);
-#ifdef SKIP_ASM
 struct sMnVEntrySer6F68 {
     short delta;
     short index;
@@ -1386,24 +1231,18 @@ extern "C" void* func_00356F68_ret(void* self, void* stream)
     *(int*)((char*)self + 0x44) = 1;
     return self;
 }
-#endif
 
 typedef int cQuad128 __attribute__((mode(TI)));
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356FF0);
-#ifdef SKIP_ASM
 extern "C" void func_00356FF0(void* self)
 {
     cQuad128 v = *(cQuad128*)((char*)self + 0x30);
     *(int*)((char*)self + 0x44) = 0;
     *(cQuad128*)((char*)self + 0x80) = v;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357000);
-#ifdef SKIP_ASM
 class func_00357000_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -1414,11 +1253,8 @@ extern "C" void func_00357000(void* self, func_00357000_cObj* obj)
 {
     obj->v01((char*)self + 0x10, 0x40);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357038);
-#ifdef SKIP_ASM
 extern char D_0048F508[];
 
 extern "C" void* func_00357038(void* self, void* a1, void* a2, sMoveQuad* pos)
@@ -1429,11 +1265,8 @@ extern "C" void* func_00357038(void* self, void* a1, void* a2, sMoveQuad* pos)
     *(void**)((char*)self + 0x90) = a2;
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357090);
-#ifdef SKIP_ASM
 struct sMnVEntrySer7090 {
     short delta;
     short index;
@@ -1459,11 +1292,8 @@ extern "C" void* func_00357090(void* self, void* stream)
     *(void**)((char*)self + 0xA0) = r->fn((char*)stream + r->delta);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357108);
-#ifdef SKIP_ASM
 struct sMnVec4_357108 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1561,11 +1391,8 @@ extern "C" void func_00357108(char* self)
     }
     *(int*)(self + 0x44) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357210);
-#ifdef SKIP_ASM
 struct sMnVEntry7210 {
     short delta;
     short index;
@@ -1588,11 +1415,8 @@ extern "C" void func_00357210(void* self, void* obj)
     vt[42].fn((char*)q + vt[42].delta, obj);
     *(int*)((char*)obj + 0x5C) = saved;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357278);
-#ifdef SKIP_ASM
 struct sMnVEntry7278a {
     short delta;
     short index;
@@ -1614,11 +1438,8 @@ extern "C" void func_00357278(void* self, void* stream)
     sMnVEntry7278b* vt2 = *(sMnVEntry7278b**)stream;
     vt2[5].fn((char*)stream + vt2[5].delta, *(void**)((char*)self + 0xA0));
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003572E0);
-#ifdef SKIP_ASM
 extern char D_0048F420[];
 
 extern "C" void* func_003572E0(void* self, void* a1, void* mat, float f40, float speed)
@@ -1651,11 +1472,8 @@ extern "C" void* func_003572E0(void* self, void* a1, void* mat, float f40, float
     *(sMoveQuad*)(s + 0x10) = v;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357358);
-#ifdef SKIP_ASM
 struct sMnVEntrySer7358 {
     short delta;
     short index;
@@ -1683,11 +1501,8 @@ extern "C" void* func_00357358(void* self, void* stream)
     *(int*)((char*)self + 0x50) = 1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003573F8);
-#ifdef SKIP_ASM
 extern "C" float func_002D1C70();
 extern "C" void* func_002D1B58(int id);
 
@@ -1789,24 +1604,18 @@ extern "C" void func_003573F8(sMnMover_3573F8* self)
     }
     self->moved = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357528);
-#ifdef SKIP_ASM
 extern "C" void func_00357528(void* self)
 {
     cQuad128 v = *(cQuad128*)((char*)self + 0x10);
     *(int*)((char*)self + 0x50) = 0;
     *(cQuad128*)((char*)self + 0x90) = v;
 }
-#endif
 
 INCLUDE_ASM("object/movenode", func_00357538);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357660);
-#ifdef SKIP_ASM
 struct sMnVEntryI7660 {
     short delta;
     short index;
@@ -1831,11 +1640,8 @@ extern "C" int func_00357660(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003576D0);
-#ifdef SKIP_ASM
 struct sMnVEntryPtr76D0 {
     short delta;
     short index;
@@ -1857,11 +1663,8 @@ extern "C" void func_003576D0(void* self, void* stream)
     e = &(*(sMnVEntrySer76D0**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x60, 0x40);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357750);
-#ifdef SKIP_ASM
 extern void* D_0048F338[];
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
@@ -1887,11 +1690,8 @@ extern "C" void* func_00357750(void* self, void* src)
         : "memory");
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357798);
-#ifdef SKIP_ASM
 struct sMnVEntrySer7798 {
     short delta;
     short index;
@@ -1919,11 +1719,8 @@ extern "C" void* func_00357798(void* self, void* stream)
     func_002D1CF0_2(*(void**)((char*)self + 0x80), (char*)self + 0x40);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357820);
-#ifdef SKIP_ASM
 // PORT: the project names this func_002D1CF0__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
@@ -1932,11 +1729,8 @@ extern "C" void func_00357820(void* self)
 {
     func_002D1CF0_2(*(void**)((char*)self + 0x80), (char*)self + 0x40);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357848);
-#ifdef SKIP_ASM
 struct sMnVEntry7848a {
     short delta;
     short index;
@@ -1956,11 +1750,8 @@ extern "C" void func_00357848(void* self, void* stream)
     sMnVEntry7848b* vt2 = *(sMnVEntry7848b**)stream;
     vt2[1].fn((char*)stream + vt2[1].delta, (char*)self + 0x10, 0x30);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_003578A8);
-#ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void func_00355F10(cMoveNode* self, void* a1);
 extern void* D_0048EE60[];
@@ -1973,11 +1764,8 @@ extern "C" void* func_003578A8(cMoveNode* self, void* a1, void* a2, void* partic
     cMoveNode_addParticle(self, particle);
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357918);
-#ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self);
 extern void* D_0048EE60[];
 
@@ -1987,11 +1775,8 @@ extern "C" void* func_00357918(void* self)
     *(void***)((char*)self + 0xC) = D_0048EE60;
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357950);
-#ifdef SKIP_ASM
 struct sMnDtorVEntry7950 {
     short delta;
     short index;
@@ -2012,20 +1797,14 @@ extern "C" void func_00357950(void* self)
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
-#endif
 
 //99.29%
-INCLUDE_ASM("object/movenode", func_003579A8__FPv);
-#ifdef SKIP_ASM
 void* func_003579A8(void* self)
 {
     return func_00356B30(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003579C8);
-#ifdef SKIP_ASM
 extern void* D_004A4028;
 
 extern "C" void* func_003579C8(void* self)
@@ -2037,11 +1816,8 @@ extern "C" void* func_003579C8(void* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357A00);
-#ifdef SKIP_ASM
 extern void* D_004A4028;
 extern "C" void func_00357FA0(void* p, int flags);
 void operator_delete(int* ptr);
@@ -2060,11 +1836,8 @@ extern "C" void func_00357A00(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357A78);
-#ifdef SKIP_ASM
 extern char D_0048EA00[];
 extern "C" void* func_00357DD8(void* mem, void* a1, void* a2);
 
@@ -2075,33 +1848,24 @@ extern "C" void func_00357A78(void* self, int i, void* a2, void* a3)
         *slot = func_00357DD8(cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), a2, a3);
     }
 }
-#endif
 
 extern "C" void* func_003581B8(int, int);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357AE8__FPvii);
-#ifdef SKIP_ASM
 void* func_00357AE8(void* self, int a1, int a2)
 {
     return func_003581B8(*(int*)((char*)self + (a1 << 2)), a2);
 }
-#endif
 
 extern "C" void* func_003581F0(int, int);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357B10__FPvii);
-#ifdef SKIP_ASM
 void* func_00357B10(void* self, int a1, int a2)
 {
     return func_003581F0(*(int*)((char*)self + (a1 << 2)), a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357B38);
-#ifdef SKIP_ASM
 extern "C" void func_00357FA0(void* p, int flags);
 
 extern "C" void func_00357B38(void** self)
@@ -2114,11 +1878,8 @@ extern "C" void func_00357B38(void** self)
         self[i] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357B90);
-#ifdef SKIP_ASM
 extern "C" void func_00358140(void* p, void* arg);
 
 extern "C" void func_00357B90(void** self, void* arg)
@@ -2130,11 +1891,8 @@ extern "C" void func_00357B90(void** self, void* arg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357BF8);
-#ifdef SKIP_ASM
 extern "C" void func_00358120(void* p);
 
 extern "C" void func_00357BF8(void** self)
@@ -2146,11 +1904,8 @@ extern "C" void func_00357BF8(void** self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357C50);
-#ifdef SKIP_ASM
 extern "C" void func_00358260(void* p);
 
 extern "C" void func_00357C50(void** self)
@@ -2162,11 +1917,8 @@ extern "C" void func_00357C50(void** self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357CA8);
-#ifdef SKIP_ASM
 struct sMnVEntrySer7CA8 {
     short delta;
     short index;
@@ -2187,11 +1939,8 @@ extern "C" void func_00357CA8(void** self, void* stream)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357D28);
-#ifdef SKIP_ASM
 struct sMnVEntrySer7D28 {
     short delta;
     short index;
@@ -2215,11 +1964,8 @@ extern "C" void func_00357D28(void** self, void* stream)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357DD8);
-#ifdef SKIP_ASM
 struct sQuad_7DD8 {
     float v[4];
 
@@ -2272,11 +2018,8 @@ extern "C" void* func_00357DD8(void* mem, void* a1, void* a2)
     self->pos = sQuad_7DD8(d->pos[0], d->pos[1], d->pos[2], 0.0f);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357E80);
-#ifdef SKIP_ASM
 extern "C" void func_00370AF8(void* self, void* stream);
 
 struct sMnSerVEntry_357E80 {
@@ -2309,11 +2052,8 @@ extern "C" void* func_00357E80(void* mem, void* stream)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357FA0);
-#ifdef SKIP_ASM
 struct sMnDtorVEntry7FA0 {
     short delta;
     short index;
@@ -2339,5 +2079,4 @@ extern "C" void func_00357FA0(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 

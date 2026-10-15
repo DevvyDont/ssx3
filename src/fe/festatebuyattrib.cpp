@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0046EFF8[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -39,11 +37,8 @@ extern "C" void cFEStateBuyAttrib_onCreateScreen(void* self)
     cFEStateBuyAttrib_updateBank(self);
     func_0028F140(func_0028B180(), 3);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetCreate);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -67,11 +62,8 @@ extern "C" void cFEStateBuyAttrib_onWidgetCreate(void* self, void* widget)
         *(int*)((char*)widget + 0x18) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F49D0);
-#ifdef SKIP_ASM
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
 
 extern "C" int func_001F49D0(void* self, int on)
@@ -81,11 +73,8 @@ extern "C" int func_001F49D0(void* self, int on)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F49F8);
-#ifdef SKIP_ASM
 struct sVEntry001F49F8 {
     short delta;
     short index;
@@ -101,13 +90,10 @@ extern "C" void func_001F49F8(void* self)
     sVEntry001F49F8* vt = *(sVEntry001F49F8**)((char*)obj + 8);
     vt[7].fn((char*)obj + vt[7].delta, 1);
 }
-#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F4A38);
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4A60);
-#ifdef SKIP_ASM
 extern "C" void func_001F5300(void* self);
 
 extern "C" void func_001F4A60(void* self, void* sender, int msg)
@@ -118,11 +104,8 @@ extern "C" void func_001F4A60(void* self, void* sender, int msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4A90);
-#ifdef SKIP_ASM
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -190,11 +173,8 @@ extern "C" void func_001F4A90(char* self, char* obj, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4C30);
-#ifdef SKIP_ASM
 // PORT: func_0039E508__FPv is called with (self, widget) here; bind the 2-arg form to that symbol.
 void func_0039E508_2(void* self, void* w) __asm__("func_0039E508__FPv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -287,11 +267,8 @@ extern "C" void func_001F4C30(sBuyAttrib_4C30* self, char* w)
         cFEStateBuyAttrib_updateExperienceDisplay(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateLevels);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -326,11 +303,8 @@ extern "C" void cFEStateBuyAttrib_updateLevels(void* p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateCostPerLevel);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -366,11 +340,8 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateExperienceDisplay);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -428,11 +399,8 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateTotalCost);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -447,11 +415,8 @@ extern "C" void cFEStateBuyAttrib_updateTotalCost(void* self)
         cUIText_setAsciiString(text, func_00198AF0(*(int*)((char*)self + 0xA0)));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateBank);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -466,15 +431,12 @@ extern "C" void cFEStateBuyAttrib_updateBank(void* self)
         cUIText_setAsciiString(text, func_00198AF0(*(int*)((char*)self + 0xA4)));
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F5300);
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F54A8);
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F54B0);
-#ifdef SKIP_ASM
 extern void* D_00473838[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -488,11 +450,8 @@ extern "C" void* func_001F54B0(void* self)
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0046F168[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -526,11 +485,8 @@ extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
     func_001F5A38(self);
     func_0028F140(func_0028B180(), 8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F55C0);
-#ifdef SKIP_ASM
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 
 extern "C" int func_001F55C0(void* self, int on)
@@ -540,11 +496,8 @@ extern "C" int func_001F55C0(void* self, int on)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F55E8);
-#ifdef SKIP_ASM
 extern "C" void func_00186518(void* self);
 extern "C" void cFEStateCareerStats_setupMenuFocus(void* self, int focus);
 
@@ -553,11 +506,8 @@ extern "C" void func_001F55E8(void* self)
     func_00186518(self);
     cFEStateCareerStats_setupMenuFocus(self, *(int*)((char*)self + 0x48));
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5618);
-#ifdef SKIP_ASM
 extern "C" int func_001F5618(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
@@ -568,11 +518,8 @@ extern "C" int func_001F5618(void* self, int a1, unsigned int a2)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5650);
-#ifdef SKIP_ASM
 struct sVEntry001F5650 {
     short delta;
     short index;
@@ -599,11 +546,8 @@ extern "C" void func_001F5650(void* self, void* item, int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onInputBegin);
-#ifdef SKIP_ASM
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 extern "C" void cFEStateCareerStats_setupMenuFocus(void* self, int focus);
 extern "C" void func_001F5A38(void* self);
@@ -749,11 +693,8 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
         p->vt[2].fn((char*)p + p->vt[2].delta, msg);
     return handled;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5A38);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
@@ -805,11 +746,8 @@ extern "C" void func_001F5A38(void* self)
         vt[9].fn(o + vt[9].delta, show);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupMenuFocus);
-#ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 extern "C" void cFEStateCareerStats_setupRidersBest(void* self);
@@ -867,11 +805,8 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupHighlightsList);
-#ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -981,11 +916,8 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(void* vself)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F60E0);
-#ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1089,11 +1021,8 @@ extern "C" void func_001F60E0(void* vself)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6490);
-#ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1200,11 +1129,8 @@ extern "C" void func_001F6490(void* vself)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6840);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1217,15 +1143,12 @@ extern "C" void func_001F6840(void* self, char* name, const char* str)
         cUIText_setAsciiString(text, str);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
 
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6F30);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 extern "C" int func_00146E98(void* player, int idx);
 extern "C" int func_00157B08(void* reward, int id, int n);
@@ -1277,5 +1200,4 @@ extern "C" void func_001F6F30(void* vself)
         }
     }
 }
-#endif
 

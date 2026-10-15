@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
-#ifdef SKIP_ASM
 extern "C" void func_00116FA8(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -32,11 +30,8 @@ extern "C" void cRiderMetrix_linkToRider(char* self, char* rider)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001173B8);
-#ifdef SKIP_ASM
 struct sRiderMetrixEntry_001173B8
 {
     int state;
@@ -60,11 +55,8 @@ extern "C" void func_001173B8(sRiderMetrix_001173B8* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117400);
-#ifdef SKIP_ASM
 struct sRiderMetrixEntry_00117400
 {
     int type;
@@ -106,11 +98,8 @@ extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
     }
     return rmBitTest00117400(self->bits, type);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001174B0);
-#ifdef SKIP_ASM
 struct sVEntry001174B0 {
     short delta;
     short index;
@@ -122,11 +111,8 @@ extern "C" void func_001174B0(void* self, void* obj)
     sVEntry001174B0* vt = *(sVEntry001174B0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x1AC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001174E8);
-#ifdef SKIP_ASM
 struct sVEntry001174E8 {
     short delta;
     short index;
@@ -138,22 +124,16 @@ extern "C" void func_001174E8(void* self, void* obj)
     sVEntry001174E8* vt = *(sVEntry001174E8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x1AC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117520);
-#ifdef SKIP_ASM
 extern "C" void func_00117520(void* self, int a1)
 {
     int delta = a1 - *(int*)((char*)self + 0x1c8);
     *(int*)((char*)self + 0x1c8) = a1;
     *(int*)((char*)self + 0x198) += delta;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_00117540);
-#ifdef SKIP_ASM
 extern "C" void func_001175B8(char* self);
 extern "C" void func_003E6448(void* dst, int value, int size);
 extern "C" void func_00117838(void* self);
@@ -172,11 +152,8 @@ extern "C" void func_00117540(char* self)
     func_003E6448(self + 0x1B8, 0, 8);
     *(int*)(self + 0x1C0) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001175B8);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int value, int size);
 
 extern "C" void func_001175B8(char* self)
@@ -185,11 +162,8 @@ extern "C" void func_001175B8(char* self)
     *(int*)(self + 0x18C) = -1;
     *(int*)(self + 0x198) = *(int*)(self + 0x1C8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001175F8);
-#ifdef SKIP_ASM
 extern "C" void func_001179E0(void* self, int type);
 
 extern "C" void func_001175F8(void* self)
@@ -199,11 +173,8 @@ extern "C" void func_001175F8(void* self)
     *(int*)((char*)self + 0xA0) = 0;
     *(float*)((char*)self + 0xA4) = -1.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117638);
-#ifdef SKIP_ASM
 extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
 
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
@@ -242,32 +213,23 @@ extern "C" void func_00117638(void* self, int points)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001176F8);
-#ifdef SKIP_ASM
 extern "C" void func_001176F8(void* self)
 {
     *(float*)((char*)self + 0xa4) = -1.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117708);
-#ifdef SKIP_ASM
 // PORT: g++ >? (max) operator, removed in GCC 4.3.
 extern "C" void func_00117708(void* self, float seconds)
 {
     *(float*)((char*)self + 0xa4) = *(float*)((char*)self + 0xa4) >? seconds;
 }
-#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117718);
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117838);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int value, int size);
 
 extern "C" void func_00117838(void* p)
@@ -311,50 +273,35 @@ extern "C" void func_00117838(void* p)
     *(int*)(self + 0x98) = 0;
     func_003E6448(self + 0x60, 0, 0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117900__FPv);
-#ifdef SKIP_ASM
 float func_00117900(void* self)
 {
     return *(float*)((char*)self + 0x14);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117908);
-#ifdef SKIP_ASM
 extern "C" int func_00117908(void* self)
 {
     int v = (int)(*(float*)((char*)self + 0x1C) * 10000.0f + 5.0f);
     return v - v % 10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117948);
-#ifdef SKIP_ASM
 extern "C" int func_00117948(void* self)
 {
     int v = (int)(*(float*)((char*)self + 0x1C4) * *(float*)((char*)self + 0x14) * 10000.0f + 5.0f);
     return v - v % 10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117990);
-#ifdef SKIP_ASM
 extern "C" int func_00117990(void* self)
 {
     int v = (int)(*(float*)((char*)self + 0x1C4) * *(float*)((char*)self + 0x18) * *(float*)((char*)self + 0x14) * 10000.0f + 5.0f);
     return v - v % 10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001179E0);
-#ifdef SKIP_ASM
 struct sMetrixSlot {
     int type;
     char pad_0x04[0x98];
@@ -387,11 +334,8 @@ extern "C" void func_001179E0(void* self_, int type)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117A58);
-#ifdef SKIP_ASM
 struct sMetrixSlotR {
     int type;
     float total;
@@ -434,11 +378,8 @@ extern "C" int func_00117A58(void* self_, int type)
     }
     return bestIdx;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_00117AE8);
-#ifdef SKIP_ASM
 struct sMetrixSlotAE8 {
     char pad_0x00[0x9C];
 };
@@ -457,11 +398,8 @@ int func_00117AE8_impl(void* self, int a, const char* b, float c, int d)
     func_00117048(&(*(sMetrixSlotAE8**)((char*)self + 0x1B0))[idx], a, b, c, d);
     return idx;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_00117B88);
-#ifdef SKIP_ASM
 struct sMetrixSlotB88 {
     char pad_0x00[0x9C];
 };
@@ -480,11 +418,8 @@ int func_00117B88_impl(void* self, int type, int value, int arg, float duration)
     func_001170A8(&(*(sMetrixSlotB88**)((char*)self + 0x1B0))[idx], type, value, duration, arg);
     return idx;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_00117C28);
-#ifdef SKIP_ASM
 extern "C" void func_00117718(void*);
 extern "C" void* func_0028B180();
 struct sGradeStep_119210;
@@ -644,13 +579,10 @@ extern "C" void func_00117C28(sMetrix17C28* self)
     self->dirty = 1;
     func_00290F58(func_0028B180(), self->rider, self->mult);
 }
-#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00117FE0);
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00118FF8);
-#ifdef SKIP_ASM
 struct sTrickId;
 extern "C" void gGenTrickName(char* buf, sTrickId* id, int size);
 extern "C" void func_00117AE8(void* self, int a, const char* b, float c, int d);
@@ -664,11 +596,8 @@ extern "C" void func_00118FF8(void* self, sTrickId* id, int repeat)
     func_00117AE8(self, 0, buf, 3.0f, repeat);
     func_00309918(D_004A3DD8, id);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119068);
-#ifdef SKIP_ASM
 struct sMetrixRecent {
     char pad_0x00[0x60];
     int recent[3];
@@ -691,11 +620,8 @@ extern "C" void func_00119068(void* self_, int value)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001190F0);
-#ifdef SKIP_ASM
 struct sTrickId;
 
 struct sTrickId190F0 {
@@ -756,11 +682,8 @@ extern "C" int func_001190F0(void* self_, sTrickId* id_)
     self->histIdx %= 10;
     return count;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119210);
-#ifdef SKIP_ASM
 extern "C" void func_001179E0(void* self, int type);
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
 
@@ -791,11 +714,8 @@ extern "C" int func_00119210(void* self, int* idx, sGradeStep_119210* tbl, int t
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119310);
-#ifdef SKIP_ASM
 extern "C" int func_00119310(void* self, int points)
 {
     if (points < 1000)
@@ -820,11 +740,8 @@ extern "C" int func_00119310(void* self, int points)
     }
     return 5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119368);
-#ifdef SKIP_ASM
 extern "C" int func_0011A7A8(void* self);
 
 extern "C" float func_00119368(void* self, int a1)
@@ -837,24 +754,18 @@ extern "C" float func_00119368(void* self, int a1)
         return *(float*)(*(char**)((char*)self + 0x1AC) + 0x2F8) * -0.10000000149011612f;
     return *(float*)(*(char**)((char*)self + 0x1AC) + 0x2F8) * -0.699999988079071f;
 }
-#endif
 
 extern "C" void func_00117718(void*);
 
 //99.38% - identical instructions; jal addend differs only because the
 // callee sits at a different .text offset in our object than in the target
-INCLUDE_ASM("ai/ridermetrix", func_001193E0);
-#ifdef SKIP_ASM
 extern "C" float func_001193E0(void* self)
 {
     func_00117718(self);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119400);
-#ifdef SKIP_ASM
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
 
 extern "C" float func_00119400(char* self)
@@ -863,11 +774,8 @@ extern "C" float func_00119400(char* self)
     func_00117B88(self, 0x2C, 0, 0, 1.5f);
     return 1.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119448);
-#ifdef SKIP_ASM
 extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
 
 extern "C" float func_00119448(char* self, float value)
@@ -884,11 +792,8 @@ extern "C" float func_00119448(char* self, float value)
     }
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001194C0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void* func_0028B180();
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
@@ -922,11 +827,8 @@ extern "C" float func_001194C0(char* self, int a1)
     }
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001195A8);
-#ifdef SKIP_ASM
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
 
 extern "C" float func_001195A8(void* self, int value)
@@ -934,11 +836,8 @@ extern "C" float func_001195A8(void* self, int value)
     func_00117B88(self, 0x2A, value, 0, 5.0f);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001195D8);
-#ifdef SKIP_ASM
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
 
 extern "C" float func_001195D8(void* self, int value)
@@ -946,11 +845,8 @@ extern "C" float func_001195D8(void* self, int value)
     func_00117B88(self, 0x2B, value, 0, 5.0f);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119608);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -987,11 +883,8 @@ extern "C" float func_00119608(void* self, int pts)
     *(int*)((char*)self + 0x198) += v;
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119708);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1017,11 +910,8 @@ extern "C" float func_00119708(char* self, int id)
     func_001176F8(self);
     return zero;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_001197D8);
-#ifdef SKIP_ASM
 extern "C" void func_00119068(void* self_, int value);
 
 // PORT: g++ >? (max) operator.
@@ -1050,11 +940,8 @@ extern "C" float func_001197D8(void* p, int v)
     *(float*)(self + 0x44) += t;
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119898);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm (float absolute value).
 static inline float metrixAbs_00119898(float x)
 {
@@ -1075,11 +962,8 @@ float func_00119898_impl(void* self, float x)
     *(float*)((char*)self + 0x14) = *(float*)((char*)self + 0x14) >? 0.0f;
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001198D8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm (float absolute value).
 static inline float metrixAbs_001198D8(float x)
 {
@@ -1097,23 +981,17 @@ extern "C" float func_001198D8(void* self, float x)
     *(float*)((char*)self + 0x14) = *(float*)((char*)self + 0x14) >? 0.0f;
     return 0.0f;
 }
-#endif
 
 extern "C" void* func_00119898(void*);
 
 //99.29%
-INCLUDE_ASM("ai/ridermetrix", func_00119918__FPvi);
-#ifdef SKIP_ASM
 void* func_00119918(void* self, int a1)
 {
     *(int*)((char*)self + 0x20) = a1;
     return func_00119898(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119938__FPvii);
-#ifdef SKIP_ASM
 float func_00119938(void* self, int a1, int a2)
 {
     *(float*)((char*)self + 0x6c) = 0.0f;
@@ -1123,11 +1001,8 @@ float func_00119938(void* self, int a1, int a2)
     *(int*)((char*)self + 0x5c) = 1;
     return *(float*)((char*)self + 0x6c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119958);
-#ifdef SKIP_ASM
 extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
 extern "C" float func_00119958(void* self, int v)
@@ -1144,11 +1019,8 @@ extern "C" float func_00119958(void* self, int v)
     *(float*)((char*)self + 0x30) = s30;
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_001199F8);
-#ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 extern "C" float func_001199F8(char* self, int v)
 {
@@ -1158,11 +1030,8 @@ extern "C" float func_001199F8(char* self, int v)
     func_001176F8(self);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119A38);
-#ifdef SKIP_ASM
 extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
 extern "C" float func_00119A38(void* self)
@@ -1178,11 +1047,8 @@ extern "C" float func_00119A38(void* self)
     *(float*)((char*)self + 0x30) = s30;
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119AD8);
-#ifdef SKIP_ASM
 // PORT: prototype mismatch (see func_00119898).
 float func_00119898_impl(void* self, float x) __asm__("func_00119898");
 
@@ -1191,11 +1057,8 @@ extern "C" float func_00119AD8(void* self, int a1)
     *(int*)((char*)self + 0x28) = a1;
     return func_00119898_impl(self, *(float*)((char*)self + 0x34) + 3.1415927410125732f);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_00119B08);
-#ifdef SKIP_ASM
 extern "C" int func_0011A7A8(void* self);
 extern "C" int func_00117948(void* self);
 
@@ -1218,11 +1081,8 @@ extern "C" float func_00119B08(void* self, int flag)
     func_001175F8(self);
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
-#ifdef SKIP_ASM
 extern "C" float func_00119BB0(void* self, int a1)
 {
     float r;
@@ -1235,11 +1095,8 @@ extern "C" float func_00119BB0(void* self, int a1)
         r = 0.0f;
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119BF0);
-#ifdef SKIP_ASM
 extern "C" float func_00119BF0(void* self, int a1)
 {
     *(int*)((char*)self + 0x7C) = a1;
@@ -1249,11 +1106,8 @@ extern "C" float func_00119BF0(void* self, int a1)
     func_001176F8(self);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119C38);
-#ifdef SKIP_ASM
 extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
 extern "C" void func_00117838(void* self);
 
@@ -1265,11 +1119,8 @@ extern "C" float func_00119C38(void* self)
     *(int*)((char*)self + 0x30) = 0;
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ridermetrix", func_00119C98);
-#ifdef SKIP_ASM
 extern "C" void func_0011A168(void* self, int a, int b, int c, int d);
 
 extern "C" float func_00119C98(void* self, int v)
@@ -1291,11 +1142,8 @@ extern "C" float func_00119C98(void* self, int v)
     func_001176F8(self);
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119D40);
-#ifdef SKIP_ASM
 extern "C" void func_00117838(void* self);
 extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
@@ -1330,11 +1178,8 @@ extern "C" float func_00119D40(void* self, int stance, int alternate, int style,
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119E38);
-#ifdef SKIP_ASM
 extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
 extern "C" float func_00119E38(void* self, int a, int b)
@@ -1360,7 +1205,6 @@ extern "C" float func_00119E38(void* self, int a, int b)
     *(int*)((char*)self + 0x30) = 0;
     return r;
 }
-#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_00119EF8);
 
@@ -1368,29 +1212,21 @@ extern "C" void func_00117AE8(void* self, int a, const char* b, float c, int d);
 extern const char D_00457888[];
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAutoResetSurface__FPv);
-#ifdef SKIP_ASM
 float cRiderMetrix_evAutoResetSurface(void* self)
 {
     func_00117AE8(self, 0x33, D_00457888, 1.5f, 0);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A0C0__FPv);
-#ifdef SKIP_ASM
 float func_0011A0C0(void* self)
 {
     return 0.0f;
 }
-#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011A0D0);
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A0E0);
-#ifdef SKIP_ASM
 extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
 
 extern "C" float func_0011A0E0(void* self)
@@ -1398,11 +1234,8 @@ extern "C" float func_0011A0E0(void* self)
     func_00117B88(self, 0x1A, 0, 0, 1.0f);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A110);
-#ifdef SKIP_ASM
 extern "C" void func_00119EF8(void* self, int kind, int amount);
 extern "C" float func_0011A110(void* self, int amount)
 {
@@ -1410,11 +1243,8 @@ extern "C" float func_0011A110(void* self, int amount)
     func_00119EF8(self, 4, amount);
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A168);
-#ifdef SKIP_ASM
 struct sTrickId;
 extern "C" int func_0011A8C8(void* self, sTrickId* id, int stance, int alternate, int style, int flag);
 extern "C" int func_0011B1A8(void* self, sTrickId* id);
@@ -1446,7 +1276,6 @@ extern "C" void func_0011A168(void* self, int stance, int alternate, int style, 
         func_00118FF8(self, id, func_001190F0(self, id) > 0);
     }
 }
-#endif
 
 // 8-byte packed trick identity built by func_0011A8C8
 struct sTrickId {
@@ -1509,8 +1338,6 @@ static inline int func_roundDegrees(int deg)
 // Trick landing commit: names and scores the trick that just ended, updates
 // the run statistics and the combo, and returns the meter delta.
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A228);
-#ifdef SKIP_ASM
 extern "C" float func_0011A228(void* self, int stance, int alternate, int style, int flag, int takeoff)
 {
     sTrickId id;
@@ -1628,11 +1455,8 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
     }
     return delta;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A7A8);
-#ifdef SKIP_ASM
 extern "C" int func_00117908(void* self);
 extern "C" int func_00117948(void* self);
 extern "C" void func_001179E0(void* self, int type);
@@ -1665,13 +1489,10 @@ extern "C" int func_0011A7A8(void* self)
     func_001179E0(self, 4);
     return n;
 }
-#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011A8C8);
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011B1A8);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int value, int size);
 
 struct sTrickBonus_11B1A8
@@ -1725,11 +1546,8 @@ extern "C" int func_0011B1A8(void* self, sTrickId* id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011B2C0);
-#ifdef SKIP_ASM
 extern float D_004A6310[2][3][4][2];
 
 extern "C" void func_0011B2C0(void)
@@ -1748,18 +1566,14 @@ extern "C" void func_0011B2C0(void)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ai/ridermetrix", func_0011B3F8);
 
 extern "C" void* func_0041AA88(void* self);
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011B678__FPv);
-#ifdef SKIP_ASM
 void* func_0011B678(void* self)
 {
     return func_0041AA88(self);
 }
-#endif
 

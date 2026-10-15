@@ -55,8 +55,6 @@ extern sRaceEntry18 D_0043E250[];
 extern sPad16 D_0043E7D0;
 
 //99.58%
-INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBENewRaceInterface_getThis()
 {
     if (D_004A11B4 == 0) {
@@ -67,11 +65,8 @@ void* cBENewRaceInterface_getThis()
     }
     return D_004A11B4;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144928);
-#ifdef SKIP_ASM
 struct sRaceSettings_00144928
 {
     int data[0x4C / 4];
@@ -83,22 +78,16 @@ extern "C" void func_00144928(void)
 {
     D_005305B0 = *(sRaceSettings_00144928*)&D_00535BC8;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_001449E8);
-#ifdef SKIP_ASM
 extern sRaceSettings_00144928 D_005305B0;
 
 extern "C" void func_001449E8(void)
 {
     *(sRaceSettings_00144928*)&D_00535BC8 = D_005305B0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberHumans__FPvi);
-#ifdef SKIP_ASM
 void cBENewRaceInterface_setNumberHumans(void* self, int humans)
 {
     D_00535BC8.field_0x34 = humans;
@@ -108,11 +97,8 @@ void cBENewRaceInterface_setNumberHumans(void* self, int humans)
         D_00535BC8.arr2[i] = i;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberMission__FPvi);
-#ifdef SKIP_ASM
 void cBENewRaceInterface_setNumberMission(void* self, int mission)
 {
     int a = D_00535BC8.field_0x34;
@@ -120,11 +106,8 @@ void cBENewRaceInterface_setNumberMission(void* self, int mission)
     D_00535BC8.field_0x38 = mission;
     D_00535BC8.field_0x30 = a + b + mission;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144B20);
-#ifdef SKIP_ASM
 extern "C" char* strcpy(char*, const char*);
 extern char D_0043E6EC[];
 
@@ -139,87 +122,60 @@ extern "C" void func_00144B20(void* self, const char* name)
     strcpy(p2 + *(int*)(g + 0x40) * 0x64, name);
     strcpy(D_0043E6EC, name);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144BC0);
-#ifdef SKIP_ASM
 extern "C" void* func_00144BC0()
 {
     return (char*)&D_0043D950[0] + D_00535C08.value * 0x64;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144BE0);
-#ifdef SKIP_ASM
 extern "C" int func_00144BE0()
 {
     return D_00535C08.value;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144BF0);
-#ifdef SKIP_ASM
 extern "C" void* func_00144BF0()
 {
     return (char*)&D_0043D954 + D_00535C08.value * 0x64;
 }
-#endif
 
 INCLUDE_ASM("be/beintnewrace", func_00144C10);
 
 INCLUDE_ASM("be/beintnewrace", func_00144C30);
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144C48);
-#ifdef SKIP_ASM
 extern "C" void* func_00144C48(void* self, int a1)
 {
     return (char*)&D_0043D984 + a1 * 0x64;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144C60);
-#ifdef SKIP_ASM
 extern "C" void* func_00144C60(void* self, int a1)
 {
     return (char*)&D_0043D954 + a1 * 0x64;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144C78);
-#ifdef SKIP_ASM
 extern "C" int func_00144C78(void* self, int a1)
 {
     return D_0043D950[a1].field_0x54;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144C98);
-#ifdef SKIP_ASM
 extern "C" int func_00144C98()
 {
     return D_0043D950[D_00535C08.value].field_0x54;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144CC0);
-#ifdef SKIP_ASM
 extern "C" int func_00144CC0(void* self, int a1)
 {
     return D_0043D950[a1].field_0x58;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144CE0);
-#ifdef SKIP_ASM
 struct sRaceEntryFull_00144CE0 {
     int field_0x0;
     char pad_0x04[0x58];
@@ -237,49 +193,34 @@ extern "C" int func_00144CE0(void* self, int a1)
     }
     return 22;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D18);
-#ifdef SKIP_ASM
 extern "C" int func_00144D18(void* self, int a1)
 {
     return D_0043D950[a1].field_0x60;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D38);
-#ifdef SKIP_ASM
 extern "C" void* func_00144D38(void* self, int a1)
 {
     return (char*)&D_0043E254 + a1 * 0x18;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D50);
-#ifdef SKIP_ASM
 extern "C" int func_00144D50(void* self, int a1)
 {
     return D_0043E250[a1].field_0x14;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D70__FPvii);
-#ifdef SKIP_ASM
 void* func_00144D70(void* self, int a1, int a2)
 {
     *(int*)((char*)(void*)&D_00535BC8 + a1 * 4) = a2;
     *(int*)((char*)((char*)(void*)&D_00535BC8 + a2 * 4) + 0x18) = a1;
     return ((char*)(void*)&D_00535BC8 + a1 * 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberAI);
-#ifdef SKIP_ASM
 // Max AI riders per [gameType][eventKind] (7 event kinds per row).
 extern unsigned int D_0043D8F8[][7];
 
@@ -291,11 +232,8 @@ extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
     signed char gameType = *(signed char*)((char*)&D_00535BC8 + 0x49);
     return (unsigned int)count <= D_0043D8F8[gameType][eventKind];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
-#ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int a1);
@@ -378,11 +316,8 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145108);
-#ifdef SKIP_ASM
 extern "C" void func_00145108(void* self, int mode)
 {
     sRaceInterfaceGlobal* g = &D_00535BC8;
@@ -406,11 +341,8 @@ extern "C" void func_00145108(void* self, int mode)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
-#ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 
 struct sGameEvent_001451E8
@@ -441,11 +373,8 @@ extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
     }
     return e.kind == *((signed char*)Race_1451E8() + 0x48);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145340);
-#ifdef SKIP_ASM
 extern signed char D_00535C12[];
 extern sPad16 D_0043E97C;
 
@@ -453,13 +382,10 @@ extern "C" void* func_00145340()
 {
     return (char*)&D_0043E97C + D_00535C12[0] * 0x54;
 }
-#endif
 
 INCLUDE_ASM("be/beintnewrace", func_00145360);
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145378);
-#ifdef SKIP_ASM
 extern signed char D_00535C11[];
 extern char D_0043E707[]; // 0x43-byte records at an odd address
 
@@ -467,31 +393,22 @@ extern "C" void* func_00145378()
 {
     return D_0043E707 + D_00535C11[0] * 0x43;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145398);
-#ifdef SKIP_ASM
 extern signed char D_00535C10[];
 
 extern "C" void* func_00145398()
 {
     return (char*)&D_0043E7D0 + D_00535C10[0] * 0x3c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_001453B8);
-#ifdef SKIP_ASM
 extern "C" void* func_001453B8(void* self, int a1)
 {
     return (char*)&D_0043E7D0 + a1 * 0x3c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_001453D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" unsigned int func_00237CD8(void);
 
@@ -526,11 +443,8 @@ extern "C" int func_001453D0(void* self, int kind, int place, int mode)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_001454F8);
-#ifdef SKIP_ASM
 extern "C" int func_00145600(void* self, int a1, int a2);
 extern int D_004A11BC;
 
@@ -572,11 +486,8 @@ extern "C" int func_001454F8(void* self, int kind)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_001455D0);
-#ifdef SKIP_ASM
 struct sRaceTableEntry_00440D18
 {
     char pad_0x00[4];
@@ -592,44 +503,32 @@ extern "C" int func_001455D0(void* self, int a1, int a2)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x4;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145600);
-#ifdef SKIP_ASM
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 extern "C" int func_00145600(void* self, int a1, int a2)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x6;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145630);
-#ifdef SKIP_ASM
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 extern "C" int func_00145630(void* self, int a1, int a2)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x12 * 100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145668);
-#ifdef SKIP_ASM
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 extern "C" int func_00145668(void* self, int a1, int a2, int a3)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x8[a3];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_001456A0);
-#ifdef SKIP_ASM
 struct sRacePair_001456A0
 {
     short a;
@@ -654,11 +553,8 @@ extern "C" int func_001456A0(void* self, int idx, int mode)
         return D_00440E80[(short)idx + 3].b * 100;
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145750);
-#ifdef SKIP_ASM
 void* cBENewPlayerInterface_getThis();
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" int func_00146E98(void* self, int a1);
@@ -678,7 +574,6 @@ extern "C" int func_00145750(void* self)
     }
     return 3;
 }
-#endif
 
 INCLUDE_ASM("be/beintnewrace", func_00145818);
 

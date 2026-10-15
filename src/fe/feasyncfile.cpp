@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_Load3PeakPic);
-#ifdef SKIP_ASM
 struct cFEAsyncManager;
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -27,11 +25,8 @@ extern "C" void cFEAsyncManager_Load3PeakPic(cFEAsyncManager* self, int slot, in
     files->mFiles[slot].mParam = param;
     cFEAsyncManager_SetFileStatus(self, slot, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_Load1PeakPic);
-#ifdef SKIP_ASM
 struct cFEAsyncManager;
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -56,11 +51,8 @@ extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int
     files->mFiles[slot].mParam = param;
     cFEAsyncManager_SetFileStatus(self, slot, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A37F8);
-#ifdef SKIP_ASM
 extern char D_004A1A08[];
 extern char D_004A1A10[];
 extern "C" void* cBE_getBE();
@@ -78,11 +70,8 @@ extern "C" void func_001A37F8(cFEAsyncManager* self, int id, int slot, int param
         cFEAsyncManager_SetFileStatus(self, slot, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_UnloadFEAsyncFile);
-#ifdef SKIP_ASM
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 void cMemMan_free(void* p);
@@ -129,7 +118,6 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     }
 }
-#endif
 
 struct cFEAsyncFileEntry {
     char pad_0x00[0x114];
@@ -142,26 +130,18 @@ struct cFEAsyncManager {
 };
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_GetFileStatus__FP15cFEAsyncManageri);
-#ifdef SKIP_ASM
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index)
 {
     return self->mFiles[index].mStatus;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_SetFileStatus__FP15cFEAsyncManagerii);
-#ifdef SKIP_ASM
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
 {
     self->mFiles[index].mStatus = status;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A39F0);
-#ifdef SKIP_ASM
 struct sFE39F0File {
     char name[0x100];
     char* data;    // 0x100
@@ -245,11 +225,8 @@ extern "C" void func_001A39F0(cFEAsyncManager* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3BF0);
-#ifdef SKIP_ASM
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 
 extern "C" int func_001A3BF0(cFEAsyncManager* self)
@@ -262,11 +239,8 @@ extern "C" int func_001A3BF0(cFEAsyncManager* self)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3C50);
-#ifdef SKIP_ASM
 struct sFE3C50File {
     char name[0x100];
     void* data;    // 0x100
@@ -309,11 +283,8 @@ extern "C" void func_001A3C50(cFEAsyncManager* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_LoadDataFile);
-#ifdef SKIP_ASM
 struct sFEAsyncFile {
     char name[0x100];
     void* data;    // 0x100
@@ -353,13 +324,10 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
         cFEAsyncManager_SetFileStatus(self, idx, 3);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A3DC8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3E30);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -381,13 +349,10 @@ extern "C" void func_001A3E30()
     }
     func_00262768(D_004A3328, 1, 10, 0, 0, 0);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A3EA0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3F68);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -406,11 +371,8 @@ extern "C" void func_001A3F68(void* self)
         func_001A6978(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3FE0);
-#ifdef SKIP_ASM
 extern void* D_004A5B64;
 extern "C" void func_001A6978(void* self);
 extern "C" void* func_001A8770(void* self);
@@ -427,11 +389,8 @@ extern "C" void func_001A3FE0(void* self)
         func_001A8770(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4040);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -459,11 +418,8 @@ extern "C" void func_001A4040(void* self, void* menu)
     func_001DA510(menu, 3, GetHashValue32(D_004614E8), 1);
     func_001DA510(menu, 4, GetHashValue32(D_00461500), 6);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4170);
-#ifdef SKIP_ASM
 struct sVE1A4170 {
     short delta;
     short index;
@@ -484,11 +440,8 @@ extern "C" int func_001A4170(void* self, void* obj)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A41C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -538,11 +491,8 @@ extern "C" void func_001A41C0(void* self, cUIText* text)
         *(int*)((char*)text + 0x14) |= 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4300);
-#ifdef SKIP_ASM
 extern "C" void func_001A6978(void* self);
 
 extern "C" int func_001A4300(void* self, int a1, int a2, int a3)
@@ -554,13 +504,10 @@ extern "C" int func_001A4300(void* self, int a1, int a2, int a3)
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A4330);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4670);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -594,20 +541,14 @@ extern "C" int func_001A4670(void* self, int idx)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4740);
-#ifdef SKIP_ASM
 extern "C" int func_001A4740(void* self, int a1)
 {
     return *(int*)((char*)self + 0x6f4) + a1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4750);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -644,11 +585,8 @@ extern "C" void func_001A4750(void* self)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4810);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -688,11 +626,8 @@ extern "C" void func_001A4810(void* self, void* a1)
         func_0025E6D0(D_004A3028, name);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4928);
-#ifdef SKIP_ASM
 extern void* D_004A3028;
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" void func_001A9890(void* self, const char* str);
@@ -711,11 +646,8 @@ extern "C" void func_001A4928(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A49A0);
-#ifdef SKIP_ASM
 extern "C" void func_001A5898(void* self);
 extern "C" void func_001A6978(void* self);
 extern "C" void func_001ABB30(void* self, int a1, void* a2, int a3);
@@ -761,11 +693,8 @@ extern "C" void func_001A49A0(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4B20);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 int func_001A98B0(void* self);
 extern "C" void func_001A5898(void* self);
@@ -810,11 +739,8 @@ extern "C" void func_001A4B20(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4C58);
-#ifdef SKIP_ASM
 class cFEVObj_001A4C58 {
 public:
     int field_0x0;
@@ -875,11 +801,8 @@ extern "C" void func_001A4C58(cFEVObj_001A4C58* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4CE8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void* func_001A9C50(void* self);
@@ -902,11 +825,8 @@ extern "C" void func_001A4CE8(void* self, void* src)
     *(int*)((char*)p + 0x150) = 0x809;
     func_001A9BC0(self, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4D90);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -925,11 +845,8 @@ extern "C" void func_001A4D90(void* self)
     *(int*)((char*)p + 0x150) = 0x808;
     func_001A9BC0(self, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4E28);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -991,15 +908,12 @@ extern "C" void func_001A4E28(void* self, void* msg)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A4FB0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A5010);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A5128);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -1065,11 +979,8 @@ extern "C" void func_001A5128(void* self, int pos, int count)
     thumb->v09(1);
     track->v09(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A52B0);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -1125,11 +1036,8 @@ extern "C" void func_001A52B0(void* self)
         *(int*)((char*)self + 0x6F8) = -1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A5450);
-#ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* func_0041610C(void* dst, void* src, int n);
 
@@ -1159,11 +1067,8 @@ extern "C" void func_001A5450(sOwner1A5450* self)
     func_0041610C(first, last, (char*)finish - (char*)last);
     self->mVec.mEnd -= last - first;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A54D8);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -1238,11 +1143,8 @@ extern "C" void func_001A54D8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A56D0);
-#ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 
 struct sOwner1A56D0 {
@@ -1263,13 +1165,10 @@ extern "C" int func_001A56D0(sOwner1A56D0* self, const char* name)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A5768);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A5800);
-#ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 
 struct sOwner1A5800 {
@@ -1290,13 +1189,10 @@ extern "C" int func_001A5800(sOwner1A5800* self, char** name)
     }
     return -1;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A5898);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A5FB8);
-#ifdef SKIP_ASM
 struct sVE1A5FB8 {
     short delta;
     short index;
@@ -1324,11 +1220,8 @@ extern "C" void func_001A5FB8(void* self, int sel)
         func_001A66A8(self, sel, i == sel);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A6070);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -1423,11 +1316,8 @@ extern "C" int func_001A6070(void* self, int idx)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A63C8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -1489,11 +1379,8 @@ extern "C" void func_001A63C8(void* self, unsigned int index, int state)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A6618);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
 struct cUIText;
@@ -1513,11 +1400,8 @@ extern "C" void func_001A6618(void* self, unsigned int index, const char* str, i
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A66A8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -1605,11 +1489,8 @@ extern "C" void func_001A66A8(void* self, unsigned int index, int flag)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A6978);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -1713,11 +1594,8 @@ extern "C" void func_001A6978(void* vself)
         func_001A66A8(self, row, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A6C40);
-#ifdef SKIP_ASM
 extern char D_00461590[];
 int GetHashValue32(char* str);
 struct cUIText;
@@ -1733,11 +1611,8 @@ extern "C" void func_001A6C40(void* self, int idx)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A6CA0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -1820,11 +1695,8 @@ extern "C" void func_001A6CA0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A6E70);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -1881,13 +1753,10 @@ extern "C" void func_001A6E70(sOwner1A6E70* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A6F70);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A71B0);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -1939,15 +1808,12 @@ extern "C" void func_001A71B0(void* self, unsigned int index, const char* name, 
     }
     func_001A6618(self, index, name, a3);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A7390);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A77A0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7848);
-#ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* func_0041610C(void* dst, void* src, int n);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
@@ -2013,11 +1879,8 @@ extern "C" void func_001A7848(sOwner1A7848* self, int flags)
     cBXString__cBXString(self->str, 2);
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7970);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -2087,22 +1950,16 @@ extern "C" void func_001A7970(void* self)
         *(char**)(o + 0xB8) = a;
     }
 }
-#endif
 
 extern "C" void* func_001A8770(void* self);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7B20__FPv);
-#ifdef SKIP_ASM
 void* func_001A7B20(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7B40);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -2124,19 +1981,13 @@ extern "C" void func_001A7B40()
     }
     func_00262768(D_004A3328, 1, 10, 0, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7BB0__FPv);
-#ifdef SKIP_ASM
 void func_001A7BB0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7BB8);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -2208,11 +2059,8 @@ extern "C" void func_001A7BB8(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7D10);
-#ifdef SKIP_ASM
 extern "C" void func_001A81F0(void* self);
 
 extern "C" int func_001A7D10(void* self, int a1, int a2, int a3)
@@ -2224,11 +2072,8 @@ extern "C" int func_001A7D10(void* self, int a1, int a2, int a3)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7D40);
-#ifdef SKIP_ASM
 extern "C" void func_001A7F78(void* self);
 extern "C" void func_001A81F0(void* self);
 extern "C" void* func_001A8E40(void* self);
@@ -2241,11 +2086,8 @@ extern "C" void* func_001A7D40(void* self, int msg)
     }
     return func_001A8E40(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7D90);
-#ifdef SKIP_ASM
 class cFEVObj_001A7D90 {
 public:
     int field_0x0;
@@ -2294,11 +2136,8 @@ extern "C" int func_001A7D90(cFEVObj_001A7D90* self)
     func_001A81F0(self);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7DD8);
-#ifdef SKIP_ASM
 extern "C" void* func_0041610C(void* dst, void* src, int n);
 
 struct sVE1A7DD8 {
@@ -2358,11 +2197,8 @@ extern "C" void func_001A7DD8(void* selfp, void* item)
         func_001DB918(v2, self->mVec.mEnd, &x);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A7ED8);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void func_001A7DD8(void* self, void* item);
@@ -2385,11 +2221,8 @@ extern "C" void func_001A7ED8(void* self, const char* name)
     func_001A7DD8(self, Init_001A7ED8((char*)cMemMan_alloc(0x10, D_00461A08, 0x20000000, 0),
                                       *(const char**)((char*)D_004A3028 + 0x80), name, D_004A1408));
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7F78);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
@@ -2446,11 +2279,8 @@ extern "C" void func_001A7F78(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A81F0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -2545,11 +2375,8 @@ extern "C" void func_001A81F0(void* self)
     func_001A83D8((sList1A83D8*)list, 0x28, 8, count, top, sel, *(int*)((char*)self + 0x6E8), 0);
     *(int*)((char*)self + 0x6E8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A83D8);
-#ifdef SKIP_ASM
 extern "C" void func_003A1F90(void* list, int a1);
 
 struct sList1A83D8 {
@@ -2599,15 +2426,12 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A8500);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A85D0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A86E8);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -2633,19 +2457,13 @@ extern "C" void func_001A86E8(int on)
         func_00261408(D_004A3328);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8768__FPv);
-#ifdef SKIP_ASM
 void func_001A8768(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8770);
-#ifdef SKIP_ASM
 class cFEAsync1A8770 {
 public:
     char pad[0x8];
@@ -2690,11 +2508,8 @@ extern "C" void* func_001A8770(void* self)
     func_0039E510(self);
     return func_001A8B88(self, 0x114, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A87D0);
-#ifdef SKIP_ASM
 struct sVE1A87D0 {
     short delta;
     short index;
@@ -2710,20 +2525,14 @@ extern "C" void func_001A87D0(void* self, int a1)
     func_0039E4C0(self, a1);
     *(int*)((char*)self + 0x48) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8828__FPv);
-#ifdef SKIP_ASM
 int func_001A8828(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8830);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -2789,11 +2598,8 @@ extern "C" void func_001A8830(cFEVObj_001A8830* self)
         func_00262768(GetSession_001A8830(), 0, 1, 0, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8918);
-#ifdef SKIP_ASM
 class cFEVObj_001A8918 {
 public:
     char pad[0x8];
@@ -2838,11 +2644,8 @@ extern "C" void func_001A8918(void* self, int a1, int msg)
         func_0039F290(*(char**)((char*)self + 0x10) + 0x18, p);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A89B0);
-#ifdef SKIP_ASM
 class cFEMsg_001A89B0 {
 public:
     int field_0x0;
@@ -2864,11 +2667,8 @@ extern "C" void* func_001A89B0(void* self, cFEMsg_001A89B0* msg)
     }
     return msg;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8A40);
-#ifdef SKIP_ASM
 class cFEVObj_001A8A40 {
 public:
     char pad[0x8];
@@ -2926,11 +2726,8 @@ extern "C" int func_001A8A40_r(void* self, void* obj)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8AE8);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is probably the game's overloaded operator new(size, tag, flags, align). Calling it as
 // operator new gives gcc's malloc-like (REG_NOALIAS) aliasing that the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -2978,15 +2775,12 @@ extern "C" void func_001A8AE8(void* self, cFEVObj_001A8AE8* obj)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A8B88);
 
 INCLUDE_ASM("fe/feasyncfile", func_001A8E40);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8F98);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -3032,11 +2826,8 @@ extern "C" void func_001A8F98(void* self)
     func_0025B800(D_004A3028);
     func_002636F0(func_002591B8(), 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9090);
-#ifdef SKIP_ASM
 extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CCF00(void* p, int a);
 extern "C" void func_001CB418(void* p, int a);
@@ -3047,13 +2838,10 @@ extern "C" void func_001A9090(void* self, int a1, int a2, int a3, int a4, int a5
     func_001CCF00(*(void**)((char*)self + 0x69C), a2);
     func_001CB418(*(void**)((char*)self + 0x69C), a3);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A90F0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9150);
-#ifdef SKIP_ASM
 extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CD020(void* p, int a);
 extern "C" void func_001CB418(void* p, int a);
@@ -3064,11 +2852,8 @@ extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5
     func_001CD020(*(void**)((char*)self + 0x69C), a2);
     func_001CB418(*(void**)((char*)self + 0x69C), a3);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A91B0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void func_0039F290(void* list, void* item);
@@ -3084,11 +2869,8 @@ extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4)
     func_001CD088(*(void**)((char*)self + 0x69C), a4);
     *(int*)((char*)self + 0x6A4) = a1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A9268);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
@@ -3106,11 +2888,8 @@ extern "C" void func_001A9268(void* self, int a1, int a2)
         func_001A93D0_3(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A92D8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
@@ -3154,13 +2933,10 @@ extern "C" void func_001A92D8(void* self, int a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A93D0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A9438);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cFEVObj_001A9438 {
 public:
@@ -3216,19 +2992,13 @@ extern "C" void func_001A9438(void* self, int a1, int a2)
         func_001A93D0_3(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A94D8__FPv);
-#ifdef SKIP_ASM
 void func_001A94D8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A94E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cFEVObj_001A94E0 {
 public:
@@ -3285,11 +3055,8 @@ extern "C" void func_001A94E0(void* self, int a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9578);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
@@ -3319,11 +3086,8 @@ extern "C" void func_001A9578(void* self, int a1, int a2)
         func_001A93D0_3(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9638);
-#ifdef SKIP_ASM
 extern "C" void func_001A93D0(void* self, int a1, int a2, int a3);
 
 extern "C" void func_001A9638(void* self, int a1, int a2, int a3)
@@ -3338,11 +3102,8 @@ extern "C" void func_001A9638(void* self, int a1, int a2, int a3)
         break;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A9668);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
@@ -3367,11 +3128,8 @@ extern "C" void func_001A9668(void* self, int a1, int a2)
         func_001A93D0_3(self, a1, a2);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A9710);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
@@ -3396,33 +3154,24 @@ extern "C" void func_001A9710(void* self, int a1, int a2)
         func_001A93D0_3(self, a1, a2);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A97B8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9890);
-#ifdef SKIP_ASM
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 
 extern "C" void func_001A9890(void* self, const char* str)
 {
     cBXString_cBXString4((char*)self + 0x6C0, str);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A98B0__FPv);
-#ifdef SKIP_ASM
 int func_001A98B0(void* self)
 {
     return *(int*)((char*)self + 0x6C0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A98B8);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
 struct sFEPassword1A98B8 {
@@ -3444,11 +3193,8 @@ extern "C" void func_001A98B8(void* self, const char* str)
     }
     s->text[len] = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9930);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001A9C50(void* self);
@@ -3484,11 +3230,8 @@ extern "C" void func_001A9930(void* self)
         func_001A9BC0(self, p);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9A18);
-#ifdef SKIP_ASM
 class cUIListBox_001A9A18 {
 public:
     char pad[0x8];
@@ -3517,11 +3260,8 @@ extern "C" void func_001A9A18(void* self, cUIListBox_001A9A18* box, int value)
     func_0039A7A8(box, value == 0);
     box->v09(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9AB8);
-#ifdef SKIP_ASM
 class cUIListBox_001A9AB8 {
 public:
     char pad[0x8];
@@ -3550,11 +3290,8 @@ extern "C" void func_001A9AB8(void* self, cUIListBox_001A9AB8* box, int value)
     func_0039A7A8(box, value == 0);
     box->v09(1);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001A9B58);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001A3DC8(void* mem, void* engine, void* owner);
 extern "C" void func_0039F290(void* list, void* item);
@@ -3566,11 +3303,8 @@ extern "C" void func_001A9B58(void* self)
     *(int*)((char*)p + 0x18) = 0x833;
     func_0039F290((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9BC0);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FAE8(void* list);
 extern "C" void func_0039F290(void* list, void* item);
 extern "C" void func_001C5DD8(void* self);
@@ -3587,11 +3321,8 @@ extern "C" void func_001A9BC0(void* self, void* popup)
         func_001C5DD8(*(void**)((char*)self + 0x6A0));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A9C50);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cScreenPopup_cScreenPopup(void* mem, void* engine, void* owner);
 extern "C" void func_001C5630(void* self);
@@ -3611,13 +3342,10 @@ extern "C" void* func_001A9C50(void* self)
     }
     return *(void**)((char*)self + 0x6A0);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A9CC0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AA9B0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -3669,11 +3397,8 @@ extern "C" void func_001AA9B0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AAB68);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -3803,11 +3528,8 @@ extern "C" void func_001AAB68(void* self)
         cUIText_setAsciiString((cUIText*)text, D_004A1390);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AAD50);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -3877,11 +3599,8 @@ extern "C" void func_001AAD50(void* screen, int slot, int ping)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AAF90);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A28A8;
 extern char D_00462688[];
@@ -3944,11 +3663,8 @@ extern "C" int func_001AAF90(void* self, void* msg)
     }
     return (*(cLocStr_001AAF90**)((char*)D_004A28A8 + 0x8C))->v04(h);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AB108);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -3966,15 +3682,12 @@ extern "C" void func_001AB108(void* self)
     *(int*)((char*)p + 0x164) = 0;
     func_001A9BC0(self, p);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AB178);
 
 INCLUDE_ASM("fe/feasyncfile", func_001AB288);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AB370);
-#ifdef SKIP_ASM
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001AB478(void* self, void* popup, int a1, int a2, int a3);
 
@@ -3984,11 +3697,8 @@ extern "C" void func_001AB370(void* self, int a1, int a2)
     *(int*)((char*)self + 0x6C4) = 1;
     func_001AB478(self, p, a1, a2, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AB3D0);
-#ifdef SKIP_ASM
 extern "C" void func_001AB478(void* self, void* popup, int a1, int a2, int a3);
 extern "C" int func_001CA150(void* popup);
 
@@ -4009,13 +3719,10 @@ extern "C" void func_001AB3D0(void* self, int a1, int a2)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AB478);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001ABB30);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -4066,11 +3773,8 @@ extern "C" void func_001ABB30(void* p, int a1, void* a2, int a3)
         *(int*)(self->f69C + 0x438) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABC50);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -4098,13 +3802,10 @@ extern "C" void func_001ABC50(sFEObj_001ABC50* self, int a1, int a2)
     }
     func_00261EF8(D_004A3328, a1, 1, a2);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001ABCD0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABE58);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -4132,11 +3833,8 @@ extern "C" void func_001ABE58(sFEObj_001ABE58* self, int a1, int a2)
     }
     func_00261EF8(D_004A3328, a1, 0, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABED8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -4158,11 +3856,8 @@ extern "C" void func_001ABED8(void* self)
     //E
     func_001A9BC0(self, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABF70);
-#ifdef SKIP_ASM
 extern "C" void* func_001A8500(void* self);
 extern void* D_0046B6F8[];
 
@@ -4172,11 +3867,8 @@ extern "C" void* func_001ABF70(void* self)
     *(void***)((char*)self + 0x8) = D_0046B6F8;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABFA8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A1A78[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -4192,11 +3884,8 @@ extern "C" void* func_001ABFA8(void* self)
     }
     return screen;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC010);
-#ifdef SKIP_ASM
 extern void* D_00469068[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
@@ -4214,11 +3903,8 @@ extern "C" void* func_001AC010(void* self, int a1)
     *(int*)((char*)self + 0x6A8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC068);
-#ifdef SKIP_ASM
 extern void* D_00469068[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
@@ -4230,11 +3916,8 @@ extern "C" void func_001AC068(void* self, int flags)
     cBXString__cBXString((char*)self + 0x6DC, 2);
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC0B8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -4256,20 +3939,14 @@ extern "C" void func_001AC0B8(void* self)
     cBXString_cBXString4((char*)D_004A3028 + 0x4C, D_004A1408);
     func_001A8768(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC150__FPv);
-#ifdef SKIP_ASM
 void* func_001AC150(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC170);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -4333,11 +4010,8 @@ extern "C" void func_001AC170(void* self, cUIText* text)
         *(int*)((char*)text + 0x18) = 4;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC2B8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
@@ -4362,11 +4036,8 @@ extern "C" int func_001AC2B8(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC360);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
@@ -4391,13 +4062,10 @@ extern "C" int func_001AC360(void* self)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AC408);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC448);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001A9C50(void* self);
@@ -4421,11 +4089,8 @@ extern "C" int func_001AC448(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC4F0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -4445,22 +4110,16 @@ extern "C" void func_001AC4F0(void* self, void* popup)
     func_001DA510(popup, 1, GetHashValue32(D_00462C50), 0);
     func_001DA510(popup, 2, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC5A8);
-#ifdef SKIP_ASM
 extern "C" int func_001AC5A8(void* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AC5C0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC920);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001AC9C0(void* self, void* a1, int a2);
 extern "C" void func_001ACA88(void* self, void* a1, int a2);
@@ -4487,11 +4146,8 @@ extern "C" void func_001AC920(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC9C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
@@ -4523,11 +4179,8 @@ extern "C" void func_001AC9C0(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ACA88);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -4561,11 +4214,8 @@ extern "C" void func_001ACA88(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ACB48);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -4613,11 +4263,8 @@ extern "C" void func_001ACB48(void* self, void* a1, int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ACCD0);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001AD130(void* self, int a1);
@@ -4647,11 +4294,8 @@ extern "C" void func_001ACCD0(void* self, void* a1, int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ACDD0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" int strlen(const char* s);
@@ -4704,11 +4348,8 @@ extern "C" void func_001ACDD0(void* self)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ACEF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -4783,11 +4424,8 @@ extern "C" int func_001ACEF8(void* self, int id, int a2)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD130);
-#ifdef SKIP_ASM
 extern void* D_00468F50[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -4800,11 +4438,8 @@ extern "C" void* func_001AD130(void* self, int a1)
     *(int*)((char*)self + 0x6D0) = 0;
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001AD178);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -4821,20 +4456,14 @@ extern "C" void func_001AD178(void* self)
     }
     func_001A8768(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD1E8__FPv);
-#ifdef SKIP_ASM
 void* func_001AD1E8(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD208);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
@@ -4868,11 +4497,8 @@ extern "C" void func_001AD208(void* self, const char* name)
         func_0025D1B8(D_004A3028, name);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD308);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -4900,11 +4526,8 @@ extern "C" void func_001AD308(void* self, cUIText* text)
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00462E40));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD3E8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -4952,11 +4575,8 @@ extern "C" void func_001AD3E8(void* self, cUIText* text)
         ((cFEVObj_001AD3E8*)item)->v09(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD4F0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -4980,13 +4600,10 @@ extern "C" void func_001AD4F0(void* self, void* menu)
     func_001DA510(menu, 2, GetHashValue32(D_00462C50), 0);
     func_001DA510(menu, 3, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AD5E8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD8C0);
-#ifdef SKIP_ASM
 class cFEVObj_001AD8C0 {
 public:
     int field_0x0;
@@ -5043,11 +4660,8 @@ extern "C" void func_001AD8C0(cFEVObj_001AD8C0* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD930);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
@@ -5065,11 +4679,8 @@ extern "C" void func_001AD930(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD9C8);
-#ifdef SKIP_ASM
 extern void* D_004A3028;
 extern "C" void func_0025D428(void* self, void* a1);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
@@ -5083,13 +4694,10 @@ extern "C" void func_001AD9C8(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001ADA30);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ADC30);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -5148,13 +4756,10 @@ extern "C" void func_001ADC30(void* self, int a2)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001ADDD0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ADE88);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -5214,11 +4819,8 @@ extern "C" void func_001ADE88(void* self)
         func_001A9930(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ADFB8);
-#ifdef SKIP_ASM
 class func_001ADFB8_cObj {
 public:
     char pad[0x8];
@@ -5261,26 +4863,20 @@ extern "C" int func_001ADFB8(func_001ADFB8_cObj* self)
     self->v32();
     return 1;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001ADFE8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AE0E0__FPv);
-#ifdef SKIP_ASM
 void* func_001AE0E0(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AE100);
 
 INCLUDE_ASM("fe/feasyncfile", func_001AE128);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AE680);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -5329,13 +4925,10 @@ extern "C" void func_001AE680(void* self)
         nvt[1].fn(nr + nvt[1].delta);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AE7A0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AEBF0);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -5357,11 +4950,8 @@ extern "C" void func_001AEBF0()
     }
     func_00262768(D_004A3328, 1, 7, *(int*)((char*)D_004A3028 + 0x98), 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AEC60);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 struct cUIText;
@@ -5482,13 +5072,10 @@ extern "C" void func_001AEC60(void* self, int on)
     }
     (*(cFEVObj_001AEC60**)(s + 0x6DC))->v08(on);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AF098);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF208);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -5560,11 +5147,8 @@ extern "C" void func_001AF208(void* self, cUIText* item, int on)
         b->v09(on);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF3E0);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_0039F698(void* p);
 
@@ -5575,11 +5159,8 @@ extern "C" int func_001AF3E0(void* self, void* a1, int a2)
     }
     return func_001A97B8(self, a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF428);
-#ifdef SKIP_ASM
 class cFEVObj_001AF428 {
 public:
     int field_0x0;
@@ -5629,13 +5210,10 @@ extern "C" void func_001AF428(cFEVObj_001AF428* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AF470);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF568);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -5681,11 +5259,8 @@ extern "C" void func_001AF568(void* self)
         func_001AEC60(self, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF688);
-#ifdef SKIP_ASM
 class cUIObj_001AF688 {
 public:
     char pad[0x8];
@@ -5718,11 +5293,8 @@ extern "C" void func_001AF688(void* self)
         func_001AEC60(self, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF728);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -5808,11 +5380,8 @@ extern "C" void func_001AF728(void* self, void* track, void* screen)
         cUIText_setAsciiString(t, func_00144BF0(track));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AF930);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -5844,11 +5413,8 @@ extern "C" void func_001AF930(void* screen)
         Clear1AF930(screen, D_00463538);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AFA60);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -5948,11 +5514,8 @@ extern "C" void func_001AFA60(void* screen, char* msg)
     }
     cBXString__cBXString(&s, 2);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001AFD88);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -5969,11 +5532,8 @@ extern "C" void func_001AFD88(void* self, void* a1)
         func_001AAD50(self, 0, *(int*)((char*)a1 + 0xC));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AFE08);
-#ifdef SKIP_ASM
 extern void* D_00468D20[];
 extern int D_004A4E88;
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
@@ -5990,13 +5550,10 @@ extern "C" void* func_001AFE08(void* self, int a1, int a2, const char* name)
     D_004A4E88 = 0;
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AFE68);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B00B8);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -6018,20 +5575,14 @@ extern "C" void func_001B00B8(void* self)
     }
     func_00262768(D_004A3328, 1, 8, *(int*)((char*)self + 0x6D0), 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0130__FPv);
-#ifdef SKIP_ASM
 void* func_001B0130(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0150);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 struct cUIText;
@@ -6162,11 +5713,8 @@ extern "C" void func_001B0150(void* self, cFEVObj_001B0150* obj)
         *(int*)(o + 0x14) |= 0x80;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0538);
-#ifdef SKIP_ASM
 extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001B0C08(void* self);
 extern "C" void func_001B0E10(void* self);
@@ -6200,11 +5748,8 @@ extern "C" void func_001B0538(void* self, void* obj, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B05E0);
-#ifdef SKIP_ASM
 class cFEVObj_001B05E0 {
 public:
     int field_0x0;
@@ -6254,11 +5799,8 @@ extern "C" void func_001B05E0(cFEVObj_001B05E0* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0628);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_0039F698(void* p);
 
@@ -6269,11 +5811,8 @@ extern "C" int func_001B0628(void* self, void* a1, int a2)
     }
     return func_001A97B8(self, a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0670);
-#ifdef SKIP_ASM
 class cFEVObj_001B0670 {
 public:
     int field_0x0;
@@ -6325,15 +5864,12 @@ extern "C" int func_001B0670(cFEVObj_001B0670* self, int a1)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B06E0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0708);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0850);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 struct cUIText;
@@ -6450,11 +5986,8 @@ extern "C" void func_001B0850(void* self, void* iface, void* screen)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0C08);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -6505,13 +6038,10 @@ extern "C" void func_001B0C08(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0D30);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0E10);
-#ifdef SKIP_ASM
 extern "C" void func_001B0C08(void* self);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -6558,11 +6088,8 @@ extern "C" void func_001B0E10(void* self)
     sVE1B0E10* vt = *(sVE1B0E10**)(obj + 0x8);
     vt[17].fn(obj + vt[17].delta, self, 0x14);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0F28);
-#ifdef SKIP_ASM
 extern signed char D_00440F68[];
 
 extern "C" int func_001B0F28(int c)
@@ -6575,11 +6102,8 @@ extern "C" int func_001B0F28(int c)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0F60);
-#ifdef SKIP_ASM
 extern void* D_00468C10[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -6593,11 +6117,8 @@ extern "C" void* func_001B0F60(void* self, int a1)
     *(int*)((char*)self + 0x6D8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0FB0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -6618,20 +6139,14 @@ extern "C" void func_001B0FB0(void* self)
         func_001B1B98(self, i, 1, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1048__FPv);
-#ifdef SKIP_ASM
 void* func_001B1048(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1068);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_0039A738(void* a);
@@ -6656,11 +6171,8 @@ extern "C" int func_001B1068(void* self, int a1)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B10F8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -6734,11 +6246,8 @@ extern "C" void func_001B10F8(void* self, cUIText* text)
         box->v11(sVec4_001B10F8(1.0f, 0.0f, 0.0f, 0.0f));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1280);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -6842,11 +6351,8 @@ extern "C" void func_001B1280(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B14D8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -6866,11 +6372,8 @@ extern "C" void func_001B14D8(void* self, void* popup)
     func_001DA510(popup, 1, GetHashValue32(D_004638B0), 0);
     func_001DA510(popup, 2, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1590);
-#ifdef SKIP_ASM
 class cFEVObj_001B1590 {
 public:
     int field_0x0;
@@ -6892,13 +6395,10 @@ extern "C" bool func_001B1590(void* self, cFEVObj_001B1590* obj)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B15D8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1760);
-#ifdef SKIP_ASM
 class cFEVText_001B1760 {
 public:
     char pad[0x8];
@@ -6932,11 +6432,8 @@ extern "C" void func_001B1760(void* self, int player)
         cUIText_setAsciiString(text, str);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1808);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -7014,13 +6511,10 @@ extern "C" void func_001B1808(void* self)
         o->v09(1);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B1A08);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1B10);
-#ifdef SKIP_ASM
 extern "C" void func_001B1760(void* self, int index);
 extern "C" void func_001B1B98(void* self, int index, int a2, int a3);
 
@@ -7034,11 +6528,8 @@ extern "C" void func_001B1B10(void* self, int sel, int flag)
         func_001B1B98(self, i, flag, i == sel);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1B98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 struct cUIText;
@@ -7148,11 +6639,8 @@ extern "C" void func_001B1B98(void* self, int index, int a2, int a3)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B1EC0);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001B1F18(void* self, void* a1, int a2);
 
@@ -7170,11 +6658,8 @@ extern "C" void func_001B1EC0(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1F18);
-#ifdef SKIP_ASM
 extern void* D_004A33CC;
 extern "C" void func_00265768(void* self, int a1);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
@@ -7190,11 +6675,8 @@ extern "C" void func_001B1F18(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1F88);
-#ifdef SKIP_ASM
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" char* strcpy(char* dst, const char* src);
@@ -7242,24 +6724,18 @@ extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* self, int a1)
     strcpy(self->name, *(const char**)((char*)D_004A3028 + 0x80));
     return self;
 }
-#endif
 
 extern void* D_0046AE58[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2048__FPv);
-#ifdef SKIP_ASM
 void* func_001B2048(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046AE58;
     return func_001A85D0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2070);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -7332,11 +6808,8 @@ extern "C" void func_001B2070(void* self)
     *(cUIText**)(*(char**)((char*)self + 0x6EC) + 0x84) = f;
     *(int*)(*(char**)((char*)self + 0x6EC) + 0x88) = two;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B22A0);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -7364,11 +6837,8 @@ extern "C" void func_001B22A0()
 {
     func_00262768(GetSession_001B22A0(), 1, 3, func_0025DA90(D_004A3028), 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2320);
-#ifdef SKIP_ASM
 extern void* D_004A5B64;
 extern "C" void func_001B3BF0(void* self);
 extern "C" void* func_001A8770(void* self);
@@ -7380,11 +6850,8 @@ extern "C" void func_001B2320(void* self)
     }
     func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2378);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 struct cUIText;
@@ -7489,11 +6956,8 @@ extern "C" void func_001B2378(void* vself, int a1)
     func_001B3BF0(self);
     cBXString__cBXString(&s, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B25E0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
 extern "C" void func_002C2508(void* str, int a1);
@@ -7557,15 +7021,12 @@ extern "C" void func_001B25E0(const char* src, void* out)
     UIAsciiToUnicode(wext, ext);
     func_002C2688(out, wext);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B27B0);
 
 INCLUDE_ASM("fe/feasyncfile", func_001B2CD0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2DA0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -7591,11 +7052,8 @@ extern "C" void func_001B2DA0(void* self, void* menu)
     func_001DA510(menu, 4, GetHashValue32(D_004614E8), 1);
     func_001DA510(menu, 5, GetHashValue32(D_00463BF0), 8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2EB8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -7697,13 +7155,10 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B31A0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B33D8);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -7740,11 +7195,8 @@ extern "C" void func_001B33D8(void* self)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B3490);
-#ifdef SKIP_ASM
 class cFEVObj_001B3490 {
 public:
     int field_0x0;
@@ -7786,11 +7238,8 @@ extern "C" int func_001B3490(sFEObj_001B3490* self, int a1)
     }
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B3528);
-#ifdef SKIP_ASM
 extern "C" void func_001B3BF0(void* self);
 extern "C" void func_001A87D0(void* self, int a1);
 
@@ -7799,11 +7248,8 @@ extern "C" void func_001B3528(void* self, int a1)
     func_001B3BF0(self);
     func_001A87D0(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B3568);
-#ifdef SKIP_ASM
 extern "C" void func_001B2378(void* self, int a1);
 
 extern "C" int func_001B3568(void* self, void* sender, int event, int value)
@@ -7820,13 +7266,10 @@ extern "C" int func_001B3568(void* self, void* sender, int event, int value)
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B35B0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B3760);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B0F60(void* self, int a1);
@@ -7843,11 +7286,8 @@ extern "C" void func_001B3760(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B37D8);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B0F60(void* self, int a1);
@@ -7864,11 +7304,8 @@ extern "C" void func_001B37D8(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B3850);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001B35B0(void* self, void* a1, int a2);
 extern "C" void func_001B3760(void* self, void* a1, int a2);
@@ -7891,11 +7328,8 @@ extern "C" void func_001B3850(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B38D0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
@@ -7917,11 +7351,8 @@ extern "C" int func_001B38D0(void* self, void* obj)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B3978);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -7949,13 +7380,10 @@ extern "C" void func_001B3978(void* self, void* name)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B3A30);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B3BF0);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001AAD50(void* self, int a1, int a2);
 extern "C" int func_0025F1B0(void* self);
@@ -8022,11 +7450,8 @@ extern "C" void func_001B3BF0(void* p)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B3D20);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -8115,11 +7540,8 @@ extern "C" void func_001B3D20(void* self, int idx, int on)
     func_001B27B0(self, *(int*)((char*)sel + 0x18));
     sel->v11(sCol1B3D20(1.0f, 1.0f, 1.0f, 1.0f));
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B3F78);
-#ifdef SKIP_ASM
 class cFEVObj_001B3F78 {
 public:
     virtual void v01();
@@ -8158,11 +7580,8 @@ extern "C" void* func_001B3F78(void* mem, int a1)
     *(int*)((char*)mem + 0x6E0) = -1;
     return mem;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4018);
-#ifdef SKIP_ASM
 extern void* D_00468B00[];
 void cMemMan_free(void* p);
 extern "C" void func_002C2300(void* p);
@@ -8195,11 +7614,8 @@ extern "C" void func_001B4018(void* self, int flags)
     }
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B40D0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -8224,11 +7640,8 @@ extern "C" void func_001B40D0(void* self)
     func_001B5268(self, 0);
     func_0028FC38(func_0028B180());
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4168);
-#ifdef SKIP_ASM
 void* func_0039E4A0(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028FC58(void*);
@@ -8238,22 +7651,16 @@ extern "C" void func_001B4168(void* self)
     func_0039E4A0(self);
     func_0028FC58(func_0028B180());
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4198__FPv);
-#ifdef SKIP_ASM
 void func_001B4198(void* self)
 {
     *(int*)((char*)self + 0x708) = 6;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B41A8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B43A8);
-#ifdef SKIP_ASM
 // D_004A1B78 is declared earlier in the unit (cFEVObj_001B3F78*, see func_001B3F78)
 extern "C" void func_001B4888(void* self, int a1, int a2, int a3);
 extern "C" void func_001B4CD8(void* self);
@@ -8333,13 +7740,10 @@ extern "C" void func_001B43A8(void* self)
         func_001B4888(self, 0x840, 2, -1);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B4470);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B45E8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001A9C50(void* self);
@@ -8459,11 +7863,8 @@ extern "C" void func_001B45E8(void* self)
         *(int*)((char*)self + 0x708) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B47C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -8500,11 +7901,8 @@ extern "C" void func_001B47C0(void* self, int a1)
     // end
     func_001A9BC0(self, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4888);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -8593,11 +7991,8 @@ extern "C" void func_001B4888(void* self, int a1, int a2, int a3)
     *(int*)(sub + 0xA8) = 0;
     func_001A9BC0(self, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4C00);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_001B4C00(void* self, void* a1, int a2)
 {
@@ -8609,11 +8004,8 @@ extern "C" int func_001B4C00(void* self, void* a1, int a2)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4C40);
-#ifdef SKIP_ASM
 extern int D_004A1B80;
 extern "C" void func_001B47C0(void* self, int a1);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
@@ -8636,13 +8028,10 @@ extern "C" void func_001B4C40(void* self, void* a1, unsigned int a2)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B4CD8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4FA0);
-#ifdef SKIP_ASM
 extern "C" void func_001B4888(void* self, int a1, int a2, int a3);
 extern "C" void func_001B5068(void* self, int a1);
 extern "C" int func_0039F698(void* p);
@@ -8668,11 +8057,8 @@ extern "C" void func_001B4FA0(void* self, int err)
     }
     func_001B5068(self, -1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5068);
-#ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_0039A670(void* self);
 
@@ -8723,11 +8109,8 @@ extern "C" void func_001B5068(void* self, int a1)
         cUIMenu_setSelectedByIndex(*(void**)((char*)self + 0x6F4), 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5268);
-#ifdef SKIP_ASM
 extern int D_004A1B80;
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_0039A670(void* self);
@@ -8755,11 +8138,8 @@ extern "C" void func_001B5268(void* obj, int a1)
     func_001B47C0(obj, 1);
     self->f708 = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B52C8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern char D_00463F98[];
@@ -8844,11 +8224,8 @@ extern "C" void func_001B52C8(void* self, cUIText* item)
         *(cUIText**)((char*)self + 0x6EC) = item;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B54B8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -8872,11 +8249,8 @@ extern "C" void func_001B54B8(void* self, void* menu)
     func_001DA510(menu, 3, GetHashValue32(D_00464068), 2);
     func_001DA510(menu, 4, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B55B0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -8948,11 +8322,8 @@ extern "C" void func_001B55B0(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5740);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -9004,11 +8375,8 @@ extern "C" void func_001B5740(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5830);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // func_001A97B8 returns void (its asm never sets $2); the unit declares it int
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
@@ -9095,13 +8463,10 @@ extern "C" void func_001B5830(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B5A58);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5BD8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -9163,11 +8528,8 @@ extern "C" void func_001B5BD8(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5CF8);
-#ifdef SKIP_ASM
 class cFEVObj_001B5CF8 {
 public:
     int field_0x0;
@@ -9193,13 +8555,10 @@ extern "C" void func_001B5CF8(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B5D58);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B5E28);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void USTR_copy(void* dst, void* src);
 extern "C" int USTR_length(void* s);
@@ -9290,22 +8649,16 @@ extern "C" int func_001B5E28(void* self, int id, int a2)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6078__FPv);
-#ifdef SKIP_ASM
 int func_001B6078(void* self)
 {
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B6080);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B60A8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00194A60(void* mem, int a1);
@@ -9389,11 +8742,8 @@ extern "C" void func_001B60A8(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6288);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void cMemMan_free(void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -9450,11 +8800,8 @@ extern "C" sFEObj_001B6288* func_001B6288(sFEObj_001B6288* self, int a1, int a2)
     self->f6A8 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6368);
-#ifdef SKIP_ASM
 extern void* D_004689F0[];
 void cMemMan_free(void* p);
 extern "C" void func_002563A8(void* p);
@@ -9477,11 +8824,8 @@ extern "C" void func_001B6368(void* self, int flags)
     }
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B63E8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
@@ -9551,11 +8895,8 @@ extern "C" void func_001B63E8(void* self)
     }
     func_00256258(*(void**)((char*)self + 0x6D0), mode);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B65C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -9600,11 +8941,8 @@ extern "C" void func_001B65C0(void* self, cUIText* text)
         obj->v09(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B66B8);
-#ifdef SKIP_ASM
 class cFEVObj_001B66B8 {
 public:
     char pad[0x8];
@@ -9626,11 +8964,8 @@ extern "C" int func_001B66B8(void* self, cFEVObj_001B66B8* obj)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6740);
-#ifdef SKIP_ASM
 class func_001B6740_cObj {
 public:
     char pad[0x8];
@@ -9664,11 +8999,8 @@ extern "C" int func_001B6740(void* self, int a1, int a2)
 {
     return (*(func_001B6740_cObj**)((char*)self + 0x20))->v24(a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6770);
-#ifdef SKIP_ASM
 extern "C" void func_001A8918(void* self, int a1, int msg);
 
 extern "C" void func_001B6770(void* self, int a1, int msg)
@@ -9677,11 +9009,8 @@ extern "C" void func_001B6770(void* self, int a1, int msg)
         func_001A8918(self, a1, msg);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6798);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -9787,13 +9116,10 @@ extern "C" void func_001B6798(void* self)
     func_002563F8(*(void**)(s + 0x6D0));
     func_001A8770(self);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B6A90);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6AB8);
-#ifdef SKIP_ASM
 extern void* D_004688E0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -9808,24 +9134,18 @@ extern "C" void* func_001B6AB8(void* self, int a1, int a2, int a3, int a4, int a
     *(int*)((char*)self + 0xC) = 0x45;
     return self;
 }
-#endif
 
 extern void* D_004688E0[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6B28__FPv);
-#ifdef SKIP_ASM
 void* func_001B6B28(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_004688E0;
     return func_001A85D0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6B50);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004642B0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -9841,11 +9161,8 @@ extern "C" void* func_001B6B50(void* self)
     }
     return screen;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6BB8);
-#ifdef SKIP_ASM
 class cFEVText_001B6BB8 {
 public:
     char pad[0x8];
@@ -9883,11 +9200,8 @@ extern "C" void func_001B6BB8(void* self, void* obj)
         *(int*)((char*)obj + 0x90) |= 8;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6C98);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -9945,11 +9259,8 @@ extern "C" int func_001B6C98(void* self, int on)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6E10);
-#ifdef SKIP_ASM
 class func_001B6E10_cObj {
 public:
     char pad[0x8];
@@ -9983,11 +9294,8 @@ extern "C" int func_001B6E10(void* self, int a1, int a2)
 {
     return (*(func_001B6E10_cObj**)((char*)self + 0x20))->v24(a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6E40);
-#ifdef SKIP_ASM
 class cFEVObj_001B6E40 {
 public:
     int field_0x0;
@@ -10028,13 +9336,10 @@ extern "C" void func_001B6E40(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B6EA8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6ED0);
-#ifdef SKIP_ASM
 extern "C" void* func_001ABF70(void* self);
 extern "C" void* func_001B70D0(void*, int);
 // PORT: the unit declares func_001B70D0 as returning void*; it returns nothing useful
@@ -10090,11 +9395,8 @@ extern "C" void* func_001B6ED0(void* self, int a1, void* owner, int mode, int na
     func_00265880();
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7030);
-#ifdef SKIP_ASM
 extern void* D_004687D0[];
 extern void* D_0046B6F8[];
 extern "C" void func_002658B8();
@@ -10108,24 +9410,18 @@ extern "C" void func_001B7030(void* self, int flags)
     *(void***)((char*)self + 0x8) = D_0046B6F8;
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 extern "C" void* func_001ABFA8(void* self);
 
 //99.29%
-INCLUDE_ASM("fe/feasyncfile", func_001B7088__FPv);
-#ifdef SKIP_ASM
 void* func_001B7088(void* self)
 {
     return func_001ABFA8(self);
 }
-#endif
 
 extern "C" void* func_001B7778(void*);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B70A8__FPv);
-#ifdef SKIP_ASM
 void* func_001B70A8(void* self)
 {
     int t0 = 0;
@@ -10133,13 +9429,10 @@ void* func_001B70A8(void* self)
     *(signed char*)((char*)self + 0x6f1) = (signed char)t0;
     return func_001B7778(self);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B70D0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7650);
-#ifdef SKIP_ASM
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
@@ -10177,11 +9470,8 @@ extern "C" void func_001B7650(void* self, int a1, int a2, int b0, int b1, int a5
     *(int*)(sub + 0x98) = 1;
     func_001A9BC0(self, p);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7778);
-#ifdef SKIP_ASM
 extern "C" void func_00265F18(void*);
 extern "C" void* func_00265F68(void*);
 
@@ -10190,22 +9480,16 @@ extern "C" void* func_001B7778(void* self)
     func_00265F18((char*)self + 0x6E0);
     return func_00265F68((char*)self + 0x6F1);
 }
-#endif
 
 extern "C" void* func_001B70D0(void*, int);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B77A8__FPv);
-#ifdef SKIP_ASM
 void* func_001B77A8(void* self)
 {
     return func_001B70D0(self, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B77C8);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 
@@ -10226,11 +9510,8 @@ extern "C" void func_001B77C8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7820);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
@@ -10258,11 +9539,8 @@ extern "C" void func_001B7820(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B78F0);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 
@@ -10279,11 +9557,8 @@ extern "C" void func_001B78F0(void* self)
         func_001B70D0(self, 9);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7938);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
@@ -10311,11 +9586,8 @@ extern "C" void func_001B7938(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7A08);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 
@@ -10332,11 +9604,8 @@ extern "C" void func_001B7A08(void* self)
         func_001B70D0(self, 0xF);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7A50);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 
@@ -10353,11 +9622,8 @@ extern "C" void func_001B7A50(void* self)
         func_001B70D0(self, 0x11);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7A98);
-#ifdef SKIP_ASM
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
 extern "C" int func_004165A8(const char* a, const char* b);
@@ -10404,11 +9670,8 @@ extern "C" void func_001B7A98(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7BC0);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 void* func_001B70A8(void* self);
@@ -10427,11 +9690,8 @@ extern "C" void func_001B7BC0(void* self)
         func_001B70D0(self, 0x17);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7C28);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 
@@ -10448,11 +9708,8 @@ extern "C" void func_001B7C28(void* self)
         func_001B70D0(self, 0x1C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7C70);
-#ifdef SKIP_ASM
 extern int* D_004A33D0;
 extern "C" void* func_001B70D0(void*, int);
 
@@ -10469,7 +9726,6 @@ extern "C" void func_001B7C70(void* self)
         func_001B70D0(self, 0x1C);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B7CB8);
 
@@ -10482,8 +9738,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001B83C0);
 INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8860);
-#ifdef SKIP_ASM
 class func_001B8860_cObj {
 public:
     char pad[0x8];
@@ -10517,11 +9771,8 @@ extern "C" int func_001B8860(void* self, int a1, int a2)
 {
     return (*(func_001B8860_cObj**)((char*)self + 0x20))->v24(a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8890);
-#ifdef SKIP_ASM
 extern "C" int func_001B8890(void* self, int id)
 {
     switch (id) {
@@ -10536,11 +9787,8 @@ extern "C" int func_001B8890(void* self, int id)
     }
     return 28;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B88F0);
-#ifdef SKIP_ASM
 extern void* D_004686C0[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
@@ -10564,11 +9812,8 @@ extern "C" void* func_001B88F0(void* self, int a1, int a2)
     *(int*)((char*)self + 0x6A8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8960);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -10591,20 +9836,14 @@ extern "C" void func_001B8960(void* self)
     }
     func_001A8768(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B89E8__FPv);
-#ifdef SKIP_ASM
 void* func_001B89E8(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8A08);
-#ifdef SKIP_ASM
 struct sVE1B8A08 {
     short delta;
     short index;
@@ -10639,11 +9878,8 @@ extern "C" int func_001B8A08(void* self, int a1)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8AA0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -10714,13 +9950,10 @@ extern "C" void func_001B8AA0(void* self, cUIText* text)
         *(cUIText**)((char*)self + 0x6F0) = text;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B8C38);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9088);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -10750,11 +9983,8 @@ extern "C" void func_001B9088(void* self, void* menu)
     func_001DA510(menu, 4, GetHashValue32(D_00464910), 2);
     *(int*)((char*)menu + 0x64) = GetHashValue32(D_00464930);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B91C8);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001AD130(void* self, int a1);
@@ -10783,13 +10013,10 @@ extern "C" void func_001B91C8(void* self, void* a1, int kind)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B92C8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B9428);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001B91C8(void* self, void* a1, int a2);
 extern "C" void func_001B92C8(void* self, void* a1, int a2);
@@ -10808,11 +10035,8 @@ extern "C" void func_001B9428(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9488);
-#ifdef SKIP_ASM
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
 int GetHashValue32(char* str);
@@ -10841,13 +10065,10 @@ extern "C" int func_001B9488(void* self, int a1, int a2)
     }
     return func_001A8E40_3i(self, a1, a2);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B9558);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B95C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00462B88[];
 struct cUIText;
@@ -10861,11 +10082,8 @@ extern "C" void func_001B95C0(void* self)
         cUIText_setAsciiString(text, **(const char***)((char*)self + 0x6D0));
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B9610);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00462BA0[];
 struct cUIText;
@@ -10881,11 +10099,8 @@ extern "C" void func_001B9610(void* self)
         cUIText_setAsciiString(text, (char*)self + 0x5C);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B9678);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004647F8[];
 struct cUIText;
@@ -10901,11 +10116,8 @@ extern "C" void func_001B9678(void* self)
         cUIText_setAsciiString(text, (char*)self + 0x5C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B96E0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00464838[];
 struct cUIText;
@@ -10922,11 +10134,8 @@ extern "C" void func_001B96E0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9740);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -10943,11 +10152,8 @@ extern "C" void func_001B9740(void* self)
         func_0039A7A8(box, out);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B97B0);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -10964,11 +10170,8 @@ extern "C" void func_001B97B0(void* self)
         func_0039A7A8(box, out);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9820);
-#ifdef SKIP_ASM
 struct cUIText;
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -11009,11 +10212,8 @@ extern "C" void func_001B9820(void* self)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9950);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -11099,11 +10299,8 @@ extern "C" void func_001B9950(void* self, cUIText* text, char* str)
         cUIText_setAsciiString(text, str);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9B18);
-#ifdef SKIP_ASM
 struct sObj1B9B18 {
     char data[0xD0];
 };
@@ -11162,11 +10359,8 @@ extern "C" int func_001B9B18(void* self)
     func_001C5750(&o, 2);
     return ok;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9CD8);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
 extern "C" int func_001B9CD8(void* self, const char* str)
@@ -11184,11 +10378,8 @@ extern "C" int func_001B9CD8(void* self, const char* str)
     }
     return hasAt && hasDot;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9D68);
-#ifdef SKIP_ASM
 struct sObj1B9D68 {
     char data[0xD0];
 };
@@ -11269,11 +10460,8 @@ done:
     func_001C5750(&o, 2);
     return ok;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9F68);
-#ifdef SKIP_ASM
 extern "C" int func_001B9F68(void* self, signed char val, signed char lo, signed char hi)
 {
     if (val <= hi && val >= lo) {
@@ -11281,11 +10469,8 @@ extern "C" int func_001B9F68(void* self, signed char val, signed char lo, signed
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B9FA0);
-#ifdef SKIP_ASM
 struct sObj1B9FA0 {
     char data[0xD0];
 };
@@ -11343,13 +10528,10 @@ extern "C" int func_001B9FA0(void* self)
     func_001C5750(&o, 2);
     return ok;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BA110);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA178);
-#ifdef SKIP_ASM
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString_Reset(void* self);
 
@@ -11371,11 +10553,8 @@ extern "C" void func_001BA178(void* self)
     *(int*)(*(char**)((char*)self + 0x6D0) + 0x44) = 0;
     *(int*)(*(char**)((char*)self + 0x6D0) + 0x48) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA218);
-#ifdef SKIP_ASM
 extern "C" void* cBXString_operatorE(void* self, void* other);
 
 extern "C" void func_001BA218(void* self)
@@ -11386,11 +10565,8 @@ extern "C" void func_001BA218(void* self)
     *(int*)(*(char**)((char*)self + 0x6D0) + 0x38) = *(int*)((char*)self + 0x6E0);
     *(int*)(*(char**)((char*)self + 0x6D0) + 0x3C) = *(int*)((char*)self + 0x6E4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA280);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -11420,11 +10596,8 @@ extern "C" void func_001BA280(void* self)
         func_0025BF18(D_004A3028, *(void**)((char*)self + 0x6D0));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA358);
-#ifdef SKIP_ASM
 extern "C" int func_004165A8(const char* a, const char* b);
 
 extern "C" void func_001BA358(void* self)
@@ -11440,11 +10613,8 @@ extern "C" void func_001BA358(void* self)
         *(int*)(d + 0x48) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA3E0);
-#ifdef SKIP_ASM
 extern void* D_004685B0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -11457,11 +10627,8 @@ extern "C" void* func_001BA3E0(void* self, int a1)
     *(int*)((char*)self + 0x6A8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA428);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -11506,20 +10673,14 @@ extern "C" void func_001BA428(sFEObj_001BA428* self)
     func_001A8768(self);
     self->f6D4 = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA4E0__FPv);
-#ifdef SKIP_ASM
 void* func_001BA4E0(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA500);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001BB520(void* self, void* box, int flag);
 extern "C" void func_001BB5D0(void* self, void* box, int a2);
@@ -11547,11 +10708,8 @@ extern "C" void func_001BA500(void* self, void* box)
         func_001BB520(self, box, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA618);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -11639,11 +10797,8 @@ extern "C" void func_001BA618(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA8B8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -11673,11 +10828,8 @@ extern "C" void func_001BA8B8(void* self, void* menu)
     func_001DA510(menu, 4, GetHashValue32(D_00464910), 2);
     *(int*)((char*)menu + 0x64) = GetHashValue32(D_00464930);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA9F8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -11701,13 +10853,10 @@ extern "C" void func_001BA9F8(void* self, int a1)
         func_0025B9C8(D_004A3028, (char*)D_004A3028 + 0x260);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BAA88);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BAB28);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -11757,11 +10906,8 @@ extern "C" int func_001BAB28(void* self, int id, int a2)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BAC90);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -11805,11 +10951,8 @@ extern "C" void func_001BAC90(void* self, void* msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BADE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -11852,13 +10995,10 @@ extern "C" void func_001BADE8(void* self, void* a1, int a2)
         func_001A97B8_v(self, a1, a2);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BAED8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB098);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001BBAC8(void* self, int state);
 
@@ -11871,11 +11011,8 @@ extern "C" void func_001BB098(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB0E8);
-#ifdef SKIP_ASM
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001BA9F8(void* self, int a1);
@@ -11890,11 +11027,8 @@ extern "C" void func_001BB0E8(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB158);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -11941,11 +11075,8 @@ extern "C" void func_001BB158(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB2D0);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -11962,11 +11093,8 @@ extern "C" void func_001BB2D0(void* self)
         func_0039A7A8(box, out);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB340);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -11983,11 +11111,8 @@ extern "C" void func_001BB340(void* self)
         func_0039A7A8(box, out);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB3B0);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
 struct cUIText;
@@ -12007,11 +11132,8 @@ extern "C" void func_001BB3B0(void* self)
         func_0039A7A8(box, (unsigned char)(*(int*)(*(char**)((char*)self + 0x6D0) + 0x30) - 0x6C));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB440);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -12028,11 +11150,8 @@ extern "C" void func_001BB440(void* self)
         func_0039A7A8(box, out);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB4B0);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -12049,11 +11168,8 @@ extern "C" void func_001BB4B0(void* self)
         func_0039A7A8(box, out);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB520);
-#ifdef SKIP_ASM
 class cFEVBox_001BB520 {
 public:
     char pad[0x8];
@@ -12085,11 +11201,8 @@ extern "C" void func_001BB520(void* self, void* box, int flag)
     func_0039A7A8(box, out);
     ((cFEVBox_001BB520*)box)->v09(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB5D0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" int func_0039A768(void* self, int key, unsigned char* out);
@@ -12143,11 +11256,8 @@ extern "C" void func_001BB5D0(void* self, void* box, int a2)
     func_0039A7A8(box, 1);
     ((cFEVObj_001BB5D0*)box)->v09(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB798);
-#ifdef SKIP_ASM
 class cFEVBox_001BB798 {
 public:
     char pad[0x8];
@@ -12180,11 +11290,8 @@ extern "C" void func_001BB798(void* self, void* box, int value)
     func_0039A7A8(box, (unsigned char)(value - 0x6C));
     ((cFEVBox_001BB798*)box)->v09(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB840);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_001BB9B0(void* self, int month, int year);
 extern "C" void func_0039A670(void* self);
@@ -12230,11 +11337,8 @@ extern "C" void func_001BB840(void* self, void* box, int month, int year, int se
     func_0039A7A8(box, idx);
     ((cFEVObj_001BB840*)box)->v09(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BB968);
-#ifdef SKIP_ASM
 extern "C" int func_001BB968(void* self, int year)
 {
     int leap = 0;
@@ -12246,7 +11350,6 @@ extern "C" int func_001BB968(void* self, int year)
     }
     return leap;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BB9B0);
 
@@ -12255,19 +11358,14 @@ extern "C" void* func_001BBC40(void* self);
 INCLUDE_ASM("fe/feasyncfile", func_001BBA18);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBAA8__FPv);
-#ifdef SKIP_ASM
 int func_001BBAA8(void* self)
 {
     return (func_001BBC40(self) != 0);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BBAC8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBC40);
-#ifdef SKIP_ASM
 struct sObj1BBC40 {
     char data[0xD0];
 };
@@ -12302,11 +11400,8 @@ extern "C" int func_001BBC40_r(void* self)
     func_001C5750(&o, 2);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBD08);
-#ifdef SKIP_ASM
 extern void* D_004684A0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -12320,11 +11415,8 @@ extern "C" void* func_001BBD08(void* self, int a1, int a2)
     *(int*)((char*)self + 0x6A8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBD60);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -12345,20 +11437,14 @@ extern "C" void func_001BBD60(void* self)
     func_001BC400(self);
     func_001A8768(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBDE0__FPv);
-#ifdef SKIP_ASM
 void* func_001BBDE0(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBE00);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -12394,11 +11480,8 @@ extern "C" void func_001BBE00(void* self, cUIText* text)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBF18);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
@@ -12496,11 +11579,8 @@ extern "C" void func_001BBF18(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC190);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -12527,11 +11607,8 @@ extern "C" void func_001BC190(void* self, void* menu)
     func_001DA510(menu, 1, GetHashValue32(D_00462C50), 0);
     func_001DA510(menu, 2, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC290);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -12550,11 +11627,8 @@ extern "C" void func_001BC290(void* self)
     func_001A9BC0(self, p);
     func_0025B9C8(D_004A3028, (char*)D_004A3028 + 0x260);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC300);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
@@ -12588,11 +11662,8 @@ extern "C" void func_001BC300(void* self, const char* name)
         func_0025D1B8(D_004A3028, name);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC400);
-#ifdef SKIP_ASM
 class cFEVText_001BC400 {
 public:
     char pad[0x8];
@@ -12639,11 +11710,8 @@ extern "C" void func_001BC400(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC4F0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -12702,11 +11770,8 @@ extern "C" int func_001BC4F0(void* self, int id, int a2)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC6A0);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001BC728(void* self, void* a1, int a2);
 extern "C" void func_001BC818(void* self, void* a1, int a2);
@@ -12729,11 +11794,8 @@ extern "C" void func_001BC6A0(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC728);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -12776,11 +11838,8 @@ extern "C" void func_001BC728(void* self, void* a1, int a2)
         func_001A97B8_v(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BC818);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -12827,13 +11886,10 @@ extern "C" void func_001BC818(void* self, void* a1, int kind)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BC990);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCB58);
-#ifdef SKIP_ASM
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern void* D_0046A7F8[];
@@ -12888,11 +11944,8 @@ extern "C" sFEObj_001BCB58* func_001BCB58(sFEObj_001BCB58* self, int a1)
     self->f72C = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCC30);
-#ifdef SKIP_ASM
 class cFEVObj_001BCC30 {
 public:
     int field_0x0;
@@ -12942,11 +11995,8 @@ extern "C" void func_001BCC30(cFEVObj_001BCC30* self)
         self->v28();
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCCA8);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -12968,11 +12018,8 @@ extern "C" void func_001BCCA8()
     }
     func_00262768(D_004A3328, 1, 2, 0, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCD18);
-#ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 // PORT: func_001BDF60's own definition takes an sFESlots1BDF60* (defined later); bound by asm label.
 void func_001BDF60_1BDC18(void* self, int id) __asm__("func_001BDF60");
@@ -13015,20 +12062,14 @@ extern "C" int func_001BCD18(void* self, int reset)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCE18__FPv);
-#ifdef SKIP_ASM
 void* func_001BCE18(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCE38);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -13166,13 +12207,10 @@ extern "C" void func_001BCE38(void* self, cFEVObj_001BCE38* obj)
         *(int*)(o + 0x18) = i;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BD1B8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD428);
-#ifdef SKIP_ASM
 extern "C" void func_001BD540(void* self, int a1, void* a2);
 
 extern "C" void func_001BD428(void* self)
@@ -13182,11 +12220,8 @@ extern "C" void func_001BD428(void* self)
         func_001BD540(self, *(int*)((char*)self + 0xB80), p + 0x74);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD460);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -13223,11 +12258,8 @@ extern "C" void func_001BD460(sFEObj_001BD460* self, int a1, const char* str)
     char* s = self->fB80;
     cBXString_cBXString4(s, func_0025F150(D_004A3028, a1));
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD540);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -13263,11 +12295,8 @@ extern "C" void func_001BD540(void* self, int a1, void* a2)
     // PORT: the unit declares a1 as int; it is the name string
     cBXString_cBXString4(((sFEObj_001BD540*)self)->fB80, (const char*)a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD610);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
@@ -13305,13 +12334,10 @@ extern "C" void func_001BD610(void* self, int a1, int a2, int a3)
         func_0025DAC0(g, a2, name, strlen(extra) != 0 ? extra : 0);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BD738);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD848);
-#ifdef SKIP_ASM
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void func_001BDA88(void* self, int a2);
@@ -13335,11 +12361,8 @@ extern "C" void func_001BD848(void* self, int a1, int a2)
         func_001A8E40_3(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD8C8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
@@ -13402,11 +12425,8 @@ extern "C" void func_001BD8C8(void* self, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDA88);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001A9C50(void* self);
@@ -13464,11 +12484,8 @@ extern "C" void func_001BDA88(void* self, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDC18);
-#ifdef SKIP_ASM
 // PORT: func_001BDF60's own definition takes an sFESlots1BDF60* (defined later); bound by asm label.
 void func_001BDF60_1BDC18(void* self, int id) __asm__("func_001BDF60");
 extern "C" void func_001BE3A8(void* self, int id);
@@ -13494,13 +12511,10 @@ extern "C" int func_001BDC18(void* self, void* obj, int msg, int a3)
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BDCA0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001BDCF8);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001BD610(void* self, int a1, int a2, int a3);
 
@@ -13513,11 +12527,8 @@ extern "C" void func_001BDCF8(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDD60);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
@@ -13536,11 +12547,8 @@ extern "C" void func_001BDD60(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001BDDE8);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001BDCF8(void* self, void* a1, int a2);
 extern "C" void func_001BDD60(void* self, void* a1, int a2);
@@ -13559,11 +12567,8 @@ extern "C" void func_001BDDE8(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDE48);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -13589,11 +12594,8 @@ extern "C" void func_001BDE48(void* self, void* menu)
     func_001DA510(menu, 4, GetHashValue32(D_00461458), 2);
     func_001DA510(menu, 5, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDF60);
-#ifdef SKIP_ASM
 class cFEVObj_001BDF60 {
 public:
     int field_0x0;
@@ -13628,11 +12630,8 @@ extern "C" void func_001BDF60(sFESlots1BDF60* self, int id)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDFD8);
-#ifdef SKIP_ASM
 class cFEVObj_001BDFD8 {
 public:
     int field_0x0;
@@ -13655,11 +12654,8 @@ extern "C" void func_001BDFD8(void* self)
         ((cFEVObj_001BDFD8**)((char*)self + 0x730))[i]->v09(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE038);
-#ifdef SKIP_ASM
 struct sListBox1BE038 {
     char pad[0x318];
     unsigned char count;    // 0x318
@@ -13685,11 +12681,8 @@ extern "C" void func_001BE038(sFELists1BE038* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE0A8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cBXString;
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -13809,11 +12802,8 @@ extern "C" void func_001BE0A8(void* self)
     cBXString__cBXString(&base, 2);
     cBXString__cBXString(&name, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE3A8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" int func_0039A738(void* a);
@@ -13893,11 +12883,8 @@ extern "C" void func_001BE3A8(void* p, int id)
         func_0025D770(D_004A3028, -1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE510);
-#ifdef SKIP_ASM
 extern "C" void func_001BE540(void*);
 extern "C" void func_001BE720(void*);
 
@@ -13906,11 +12893,8 @@ extern "C" void func_001BE510(void* self)
     func_001BE540(self);
     func_001BE720(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE540);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -13996,11 +12980,8 @@ extern "C" void func_001BE540_2(void* self, int page)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE720);
-#ifdef SKIP_ASM
 class cFEVObj_001BE720 {
 public:
     char pad[0x8];
@@ -14028,11 +13009,8 @@ extern "C" void func_001BE720(void* self)
         (*(cFEVObj_001BE720**)((char*)self + 0x72C))->v09(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE7D8);
-#ifdef SKIP_ASM
 extern void* D_0046A6E8[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
@@ -14049,11 +13027,8 @@ extern "C" void* func_001BE7D8(void* self, int a1, int a2)
     *(int*)((char*)self + 0xC) = 0x47;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE828);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004651E0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -14069,20 +13044,14 @@ extern "C" void* func_001BE828(void* self)
     }
     return screen;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE890__FPv);
-#ifdef SKIP_ASM
 void* func_001BE890(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE8B0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -14128,20 +13097,14 @@ extern "C" void func_001BE8B0(void* self, cUIText* text)
         *(int*)((char*)text + 0x18) = 3;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEA30__FPv);
-#ifdef SKIP_ASM
 int func_001BEA30(void* self)
 {
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEA38);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -14242,11 +13205,8 @@ extern "C" void func_001BEA38(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEC78);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001A9C50(void* self);
@@ -14272,11 +13232,8 @@ extern "C" int func_001BEC78(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BED28);
-#ifdef SKIP_ASM
 class func_001BED28_cObj {
 public:
     char pad[0x8];
@@ -14310,11 +13267,8 @@ extern "C" int func_001BED28(void* self, int a1, int a2)
 {
     return (*(func_001BED28_cObj**)((char*)self + 0x20))->v24(a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BED58);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -14336,11 +13290,8 @@ extern "C" void func_001BED58(void* self, void* popup)
     func_001DA510(popup, 2, GetHashValue32(D_00462C50), 0);
     func_001DA510(popup, 3, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEE30);
-#ifdef SKIP_ASM
 extern void* D_00468388[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -14354,11 +13305,8 @@ extern "C" void* func_001BEE30(void* self, int a1)
     *(int*)((char*)self + 0x6A8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEE78);
-#ifdef SKIP_ASM
 extern void* D_00468388[];
 void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
@@ -14373,11 +13321,8 @@ extern "C" void func_001BEE78(void* self, int flags)
     }
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001BEED0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -14394,20 +13339,14 @@ extern "C" void func_001BEED0(void* self)
     }
     func_001A8768(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEF40__FPv);
-#ifdef SKIP_ASM
 void* func_001BEF40(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEF60);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void func_003A0E90(cUIText* text, char* str);
@@ -14524,11 +13463,8 @@ extern "C" void func_001BEF60(void* self, cFEVObj_001BEF60* t)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BF228);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -14575,11 +13511,8 @@ extern "C" int func_001BF228(void* self, int id, int a2)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BF378);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -14613,11 +13546,8 @@ extern "C" void func_001BF378(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BF438);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -14691,11 +13621,8 @@ extern "C" void func_001BF438(void* self, void* a1, int kind)
         func_001A97B8(self, a1, kind);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BF5A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_001A8A40_r(void* self, void* obj) __asm__("func_001A8A40");
@@ -14745,11 +13672,8 @@ extern "C" void func_001BF5A8(void* self, void* a1, int kind)
         break;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001BF6C0);
-#ifdef SKIP_ASM
 class cFEVObj_001BF6C0 {
 public:
     int field_0x0;
@@ -14810,11 +13734,8 @@ extern "C" void func_001BF6C0(cFEVObj_001BF6C0* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BF758);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(void* s);
 extern "C" int strlen(const char* s);
@@ -14928,11 +13849,8 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFAE0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -14954,11 +13872,8 @@ extern "C" void func_001BFAE0(void* self, void* popup)
     func_001DA510(popup, 2, GetHashValue32(D_004614E8), 1);
     func_001DA510(popup, 3, GetHashValue32(D_00464910), 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFBB8);
-#ifdef SKIP_ASM
 extern void* D_0046AD48[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -14970,11 +13885,8 @@ extern "C" void* func_001BFBB8(void* self, int a1)
     *(void***)((char*)self + 0x8) = D_0046AD48;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFBF8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -15002,20 +13914,14 @@ extern "C" void func_001BFBF8(void* self)
     }
     func_0028F140(func_0028B180(), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFCA0__FPv);
-#ifdef SKIP_ASM
 void* func_001BFCA0(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFCC0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00465408[];
 extern char D_00465420[];
@@ -15042,11 +13948,8 @@ extern "C" void func_001BFCC0(void* self, void* obj)
         *(int*)((char*)obj + 0x18) = 5;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFD98);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -15068,13 +13971,10 @@ extern "C" void func_001BFD98(void* self, void* popup)
     func_001DA510(popup, 2, GetHashValue32(D_00461458), 2);
     func_001DA510(popup, 3, GetHashValue32(D_004654C0), 1);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001BFE70);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0138);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -15120,13 +14020,10 @@ extern "C" void func_001C0138(void* self, void* a1, int a2)
         func_001A97B8_v(self, a1, a2);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0218);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0240);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
@@ -15156,11 +14053,8 @@ extern "C" void func_001C0240(void* self, void* a1, int a2)
         func_001A97B8_v(self, a1, a2);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001C02F8);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001C0138(void* self, void* a1, int a2);
 extern "C" void func_001C0240(void* self, void* a1, int a2);
@@ -15179,11 +14073,8 @@ extern "C" void func_001C02F8(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001C0358);
-#ifdef SKIP_ASM
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -15204,13 +14095,10 @@ extern "C" void* func_001C0358(void* self, int a1, int a2)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C03D0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0418);
-#ifdef SKIP_ASM
 extern void* D_0046AC38[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -15224,13 +14112,10 @@ extern "C" void* func_001C0418(void* self, int a1)
     *(int*)((char*)self + 0x6D8) = 0;
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0460);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C04A8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -15254,13 +14139,10 @@ extern "C" void func_001C04A8(void* self)
         *(int*)((char*)text + 0x90) |= 8;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0540);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0A28);
-#ifdef SKIP_ASM
 extern void* D_0046AC38[];
 void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
@@ -15275,11 +14157,8 @@ extern "C" void func_001C0A28(void* self, int flags)
     }
     func_001A85D0_dtor(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0A80);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -15297,20 +14176,14 @@ extern "C" void func_001C0A80(void* self)
     }
     func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0B08);
-#ifdef SKIP_ASM
 extern "C" int func_001C0B08(void* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0B20);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -15397,11 +14270,8 @@ extern "C" int func_001C0B20(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0CE0);
-#ifdef SKIP_ASM
 extern char D_004619B8[];
 int GetHashValue32(char* str);
 
@@ -15412,24 +14282,18 @@ extern "C" void func_001C0CE0(void* self, void* item)
         *(int*)((char*)item + 0x14) |= 1;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C0D28);
 
 extern "C" void* func_001A8E40(void* self);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0E88__FPv);
-#ifdef SKIP_ASM
 void* func_001C0E88(void* self)
 {
     return func_001A8E40(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0EA8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -15447,11 +14311,8 @@ extern "C" void func_001C0EA8(void* self, void* popup)
     func_001DA510(popup, 0, GetHashValue32(D_004657C0), 8);
     func_001DA510(popup, 1, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0F40);
-#ifdef SKIP_ASM
 extern void* D_0046AB28[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -15479,11 +14340,8 @@ extern "C" void* func_001C0F40(void* self, int a1, int a2)
     *(int*)((char*)self + 0x71C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0FC0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -15501,11 +14359,8 @@ extern "C" void func_001C0FC0(void* self)
         func_003E6448(D_005308B8, 0, 0x20);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1038);
-#ifdef SKIP_ASM
 extern "C" void* func_001A8770(void* self);
 extern "C" void* func_001C1038(void* self)
 {
@@ -15517,11 +14372,8 @@ extern "C" void* func_001C1038(void* self)
     }
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1080);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A1A80[];
 extern char D_004657F8[];
@@ -15630,11 +14482,8 @@ extern "C" void func_001C1080(void* self, cFEVObj_001C1080* obj)
         obj->v09(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C13E0);
-#ifdef SKIP_ASM
 class cFEVText_001C13E0 {
 public:
     char pad[0x8];
@@ -15668,11 +14517,8 @@ extern "C" void func_001C13E0(void* self, int show)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1488);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -15694,11 +14540,8 @@ extern "C" void func_001C1488(void* self, void* popup)
     func_001DA510(popup, 2, GetHashValue32(D_00462C50), 0);
     func_001DA510(popup, 3, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1560);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -15807,29 +14650,20 @@ extern "C" void func_001C1560(void* self, int a1, unsigned int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C17D8__FPv);
-#ifdef SKIP_ASM
 int func_001C17D8(void* self)
 {
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C17E0);
-#ifdef SKIP_ASM
 extern "C" int func_001C17E0(void* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C17F8);
-#ifdef SKIP_ASM
 class cFEVObj_001C17F8 {
 public:
     char pad[0x8];
@@ -15862,13 +14696,10 @@ extern "C" void func_001C17F8(void* self, int on)
     (*(cFEVObj_001C17F8**)((char*)self + 0x72C))->v08(on);
     (*(cFEVObj_001C17F8**)((char*)self + 0x730))->v08(on);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C19C8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1B48);
-#ifdef SKIP_ASM
 extern "C" int func_001C1B88(void* self, void* a1, int a2);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
@@ -15882,11 +14713,8 @@ extern "C" int func_001C1B48(void* self, void* a1, int a2)
     }
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001C1B88);
-#ifdef SKIP_ASM
 class cFEVText_001C1B88 {
 public:
     char pad[0x8];
@@ -15924,11 +14752,8 @@ extern "C" int func_001C1B88(void* self, void* a1, int a2)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1C50);
-#ifdef SKIP_ASM
 extern void* D_0046AA18[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -15940,11 +14765,8 @@ extern "C" void* func_001C1C50(void* self, int a1)
     *(void***)((char*)self + 0x8) = D_0046AA18;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1C90);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -15964,20 +14786,14 @@ extern "C" void func_001C1C90(void* self)
         func_001A9930(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1D10__FPv);
-#ifdef SKIP_ASM
 void* func_001C1D10(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1D30);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -15999,11 +14815,8 @@ extern "C" void func_001C1D30(void* self, void* popup)
     func_001DA510(popup, 2, GetHashValue32(D_00461458), 2);
     func_001DA510(popup, 3, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1E08);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00465A80[];
 extern char D_00465A90[];
@@ -16024,13 +14837,10 @@ extern "C" void func_001C1E08(void* self, void* obj)
         *(int*)((char*)obj + 0x18) = 3;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C1EA8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C20F8);
-#ifdef SKIP_ASM
 extern void* D_0046A908[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -16042,11 +14852,8 @@ extern "C" void* func_001C20F8(void* self, int a1)
     *(void***)((char*)self + 0x8) = D_0046A908;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2138);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -16062,20 +14869,14 @@ extern "C" void func_001C2138(void* self)
     }
     *(int*)((char*)self + 0x6D0) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C21A0__FPv);
-#ifdef SKIP_ASM
 void* func_001C21A0(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C21C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -16097,11 +14898,8 @@ extern "C" void func_001C21C0(void* self, void* popup)
     func_001DA510(popup, 2, GetHashValue32(D_004614E8), 1);
     func_001DA510(popup, 3, GetHashValue32(D_00465B88), 7);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2298);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -16155,11 +14953,8 @@ extern "C" void func_001C2298(sOwner1C2298* self, cUIText* text)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C23C0);
-#ifdef SKIP_ASM
 class cFEVObj_001C23C0 {
 public:
     int field_0x0;
@@ -16208,11 +15003,8 @@ extern "C" int func_001C23C0(cFEVObj_001C23C0* self, int a1)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2418);
-#ifdef SKIP_ASM
 extern "C" void func_001C2468(void* self, int i);
 
 extern "C" void func_001C2418(void* self)
@@ -16222,11 +15014,8 @@ extern "C" void func_001C2418(void* self)
         func_001C2468(self, i);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2468);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -16275,11 +15064,8 @@ extern "C" void func_001C2468(void* self, int idx)
     func_001C2578(self, *(void**)((char*)self + (idx << 2) + 0x6D4), s.str);
     cBXString__cBXString(&s, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2578);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -16366,13 +15152,10 @@ extern "C" void func_001C2578(void* self, void* vtext, char* str)
         cUIText_setAsciiString(text, str);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C2740);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2A18);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int strlen(const char* s);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -16421,11 +15204,8 @@ extern "C" void func_001C2A18(void* self)
         func_001C2468(self, idx);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2B48);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001C2C50(void* self, void* a1, int a2);
 extern "C" void func_001C2BA8(void* self, void* a1, int a2);
@@ -16444,11 +15224,8 @@ extern "C" void func_001C2B48(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2BA8);
-#ifdef SKIP_ASM
 class cBEVIface_001C2BA8 {
 public:
     int f0;
@@ -16477,11 +15254,8 @@ extern "C" void func_001C2BA8(void* self, void* a1, int a2)
         func_001A97B8(self, a1, a2);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001C2C50);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0018D7F0(void* mem, int engine, int a2, int a3, int a4);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -16506,11 +15280,8 @@ extern "C" void func_001C2C50(void* self, void* a1, int a2)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2D18);
-#ifdef SKIP_ASM
 extern void* D_00468278[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -16538,13 +15309,10 @@ extern "C" void* func_001C2D18(void* self, int a1)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C2D90);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2E00);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -16561,11 +15329,8 @@ extern "C" void func_001C2E00(void* self)
         func_001C3310(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2E70);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -16587,20 +15352,14 @@ extern "C" void func_001C2E70()
     }
     func_00262768(D_004A3328, 1, 5, 0, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2EE0__FPv);
-#ifdef SKIP_ASM
 void* func_001C2EE0(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2F00);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_0039AB00(void* self, int a1);
@@ -16715,11 +15474,8 @@ extern "C" void func_001C2F00(void* self, cFEVObj_001C2F00* obj)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C32B8);
-#ifdef SKIP_ASM
 class cFEVObj_001C32B8 {
 public:
     int field_0x0;
@@ -16768,13 +15524,10 @@ extern "C" int func_001C32B8(cFEVObj_001C32B8* self, int a1)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C3310);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C3570);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -16798,13 +15551,10 @@ extern "C" void func_001C3570(void* self, void* menu)
     func_001DA510(menu, 3, GetHashValue32(D_00465DF8), 8);
     func_001DA510(menu, 4, GetHashValue32(D_004614E8), 1);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C3668);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C3D68);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -16869,13 +15619,10 @@ extern "C" void func_001C3D68(void* self, int pos, int count)
     thumb->v09(1);
     track->v09(1);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C3EE8);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4538);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -16930,11 +15677,8 @@ extern "C" void func_001C4538(void* self, int on)
         Show_001C4538(self, D_00465E20, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C47A8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
@@ -17005,11 +15749,8 @@ extern "C" void func_001C47A8(void* self)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C49C8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
@@ -17071,11 +15812,8 @@ extern "C" void func_001C49C8(void* self)
     }
     func_001C3310(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4B78);
-#ifdef SKIP_ASM
 extern void* D_004A3028;
 extern "C" void func_0025E348(void* self, int slot);
 
@@ -17084,11 +15822,8 @@ extern "C" void func_001C4B78(void* self, int slot)
     *(int*)((char*)self + 0x6E8) = 0;
     func_0025E348(D_004A3028, slot);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4B98);
-#ifdef SKIP_ASM
 extern "C" void func_001C3310(void* self);
 
 extern "C" int func_001C4B98(void* self, void* a1, int a2, int a3)
@@ -17103,11 +15838,8 @@ extern "C" int func_001C4B98(void* self, void* a1, int a2, int a3)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4BD8);
-#ifdef SKIP_ASM
 // PORT: func_0039E508__FPv is called with (self, pad) here; bind the 2-arg form to that symbol.
 void func_0039E508_2(void* self, void* pad) __asm__("func_0039E508__FPv");
 extern "C" void func_001C4D28(void* self);
@@ -17137,11 +15869,8 @@ extern "C" void func_001C4BD8(void* self, char* pad)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4CD8);
-#ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
 extern "C" void* func_001C4CD8(void* self, int msg)
@@ -17153,11 +15882,8 @@ extern "C" void* func_001C4CD8(void* self, int msg)
     }
     return func_001A8E40(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4D28);
-#ifdef SKIP_ASM
 extern char D_004A5A58;
 
 struct sVE1C4D28 {
@@ -17199,11 +15925,8 @@ extern "C" void func_001C4D28(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4E40);
-#ifdef SKIP_ASM
 extern char D_004A5A58;
 
 struct sVE1C4E40 {
@@ -17245,13 +15968,10 @@ extern "C" void func_001C4E40(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C4F58);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5018);
-#ifdef SKIP_ASM
 extern void* D_00468168[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -17263,13 +15983,10 @@ extern "C" void* func_001C5018(void* self, int a1)
     *(void***)((char*)self + 0x8) = D_00468168;
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C5058);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5098);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -17287,11 +16004,8 @@ extern "C" void func_001C5098(void* self)
         func_0025E0C8(D_004A3028, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5108);
-#ifdef SKIP_ASM
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -17313,20 +16027,14 @@ extern "C" void func_001C5108()
     }
     func_00262768(D_004A3328, 1, 4, 0, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5178__FPv);
-#ifdef SKIP_ASM
 void* func_001C5178(void* self)
 {
     return func_001A8770(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5198);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -17384,11 +16092,8 @@ extern "C" int func_001C5198(void* self, int on)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5310);
-#ifdef SKIP_ASM
 extern char D_00465F48[];
 int GetHashValue32(char* str);
 
@@ -17412,11 +16117,8 @@ extern "C" void func_001C5310(void* self, cFEVObj_001C5310* item)
         item->v07(1);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001C5368);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -17444,20 +16146,14 @@ extern "C" void func_001C5368(void* self, int a1, unsigned int msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5420);
-#ifdef SKIP_ASM
 extern "C" int func_001C5420(void* self, void* a1, int a2)
 {
     return a2 == 4 ? 0 : 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5430);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 struct cBXString;
@@ -17504,11 +16200,8 @@ extern "C" void* func_001C5430(void* self, int msg, int a2)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5540);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001DA510(void* self, int i, int a, int b);
 void func_001DA528(void* self, int val);
@@ -17528,11 +16221,8 @@ extern "C" void func_001C5540(void* self, void* popup)
     func_001DA510(popup, 1, GetHashValue32(D_004614E8), 1);
     func_001DA510(popup, 2, GetHashValue32(D_00461458), 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C55F8);
-#ifdef SKIP_ASM
 extern "C" void func_001C5630(void* self);
 extern void* D_0046CCA8[];
 
@@ -17542,11 +16232,8 @@ extern "C" void* func_001C55F8(void* self)
     func_001C5630(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5630);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
 struct sVec3_1C5630 {
@@ -17584,11 +16271,8 @@ extern "C" void func_001C5630(void* self)
     *(int*)((char*)self + 0xC0) = 0;
     *(int*)((char*)self + 0xB4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5750);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046CCA8[];
 
@@ -17599,11 +16283,8 @@ extern "C" void func_001C5750(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5780__FPvii);
-#ifdef SKIP_ASM
 struct cFEAsyncSlot {
     int mState; // 0x0
     int mValue; // 0x4
@@ -17620,46 +16301,34 @@ void func_001C5780(void* self, int a1, int a2)
     s->mSlots[a1].mValue = a2;
     s->mSlots[a1].mState = 2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C57A0__FPvii);
-#ifdef SKIP_ASM
 void func_001C57A0(void* self, int a1, int a2)
 {
     cFEAsyncSlots* s = (cFEAsyncSlots*)self;
     s->mSlots[a1].mValue = a2;
     s->mSlots[a1].mState = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C57C0__FPvii);
-#ifdef SKIP_ASM
 void func_001C57C0(void* self, int a1, int a2)
 {
     cFEAsyncSlots* s = (cFEAsyncSlots*)self;
     s->mSlots[a1].mValue = a2;
     s->mSlots[a1].mState = 3;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C57E0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5800);
-#ifdef SKIP_ASM
 extern "C" void* func_001C5800(void* self, int a1)
 {
     return (char*)self + ((a1 << 3) + 0x24);
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C5810);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5838);
-#ifdef SKIP_ASM
 struct cFEAsyncReq {
     int mState; // 0x0
     int mValue; // 0x4
@@ -17678,21 +16347,15 @@ extern "C" void func_001C5838(void* self, int a1, int a2, int a3)
     s->mReqs[a1].mState = 1;
     s->mReqs[a1].mExtra = a3;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5860);
-#ifdef SKIP_ASM
 extern "C" void func_001C5860(void* self, int a1)
 {
     char* p = (char*)self + a1 * 0xc;
     *(int*)(p + 0x54) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5878);
-#ifdef SKIP_ASM
 extern "C" void func_001C5878(void* self, int a1, int a2, int a3)
 {
     cFEAsyncReqs* s = (cFEAsyncReqs*)self;
@@ -17700,16 +16363,12 @@ extern "C" void func_001C5878(void* self, int a1, int a2, int a3)
     s->mReqs[a1].mState = 3;
     s->mReqs[a1].mExtra = a3;
 }
-#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001C58A0);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C58D0);
-#ifdef SKIP_ASM
 extern "C" void* func_001C58D0(void* self, int a1)
 {
     return (char*)self + (a1 * 0xc + 0x54);
 }
-#endif
 

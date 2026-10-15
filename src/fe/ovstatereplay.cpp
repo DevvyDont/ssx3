@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00471BF0[];
 extern char D_00471C08[];
@@ -45,15 +43,12 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatereplay", func_0020DF10);
 
 INCLUDE_ASM("fe/ovstatereplay", func_0020DF38);
 
 //100%
-INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onUpdate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
@@ -121,13 +116,10 @@ extern "C" void cOVState_REPLAY_onUpdate(void* p)
     cOVState_REPLAY_setupCameraName(self);
     cOVState_REPLAY_setupTicker(self);
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupCameraName);
 
 //100%
-INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupTicker);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_00471CC8[];
@@ -153,22 +145,16 @@ extern "C" void cOVState_REPLAY_setupTicker(void* self)
         *(sVec3_20E818*)(obj + 0x44) = pos;
     }
 }
-#endif
 
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/ovstatereplay", func_0020E8E0__FPv);
-#ifdef SKIP_ASM
 void* func_0020E8E0(void* self)
 {
     return func_0039E6B8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatereplay", func_0020E900);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void func_00231840(void* game, int a);
 extern "C" void func_0039E510(void* self);
@@ -178,5 +164,4 @@ extern "C" void func_0020E900(void* self)
     func_00231840(*(void**)((char*)D_004A28A8 + 0x84), 1);
     func_0039E510(self);
 }
-#endif
 

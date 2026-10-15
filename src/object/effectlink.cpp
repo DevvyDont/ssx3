@@ -6,8 +6,6 @@ struct cEffectLink {
 };
 
 //100%
-INCLUDE_ASM("object/effectlink", cEffectLink_add__FP11cEffectLinkT0);
-#ifdef SKIP_ASM
 void cEffectLink_add(cEffectLink* link, cEffectLink* other)
 {
     if (link->next != 0) {
@@ -17,11 +15,8 @@ void cEffectLink_add(cEffectLink* link, cEffectLink* other)
     other->next = link->next;
     link->next = other;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345720);
-#ifdef SKIP_ASM
 extern "C" void func_00345720(cEffectLink* link, cEffectLink* other)
 {
     while (link->next != 0) {
@@ -31,11 +26,8 @@ extern "C" void func_00345720(cEffectLink* link, cEffectLink* other)
     other->prev = link;
     link->next = other;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345760);
-#ifdef SKIP_ASM
 extern "C" void func_00345760(cEffectLink* link)
 {
     if (link->next != 0) {
@@ -47,11 +39,8 @@ extern "C" void func_00345760(cEffectLink* link)
     link->next = 0;
     link->prev = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345798);
-#ifdef SKIP_ASM
 extern int D_004A3FF4;
 extern void* D_004912F8[];
 
@@ -71,11 +60,8 @@ extern "C" void* func_00345798(void* self, int a1)
     D_004A3FF4++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003457C8);
-#ifdef SKIP_ASM
 extern int D_004A3FF4;
 extern void* D_004912F8[];
 
@@ -102,11 +88,8 @@ extern "C" void* func_003457C8(void* p, void* obj)
     D_004A3FF4++;
     return p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345828);
-#ifdef SKIP_ASM
 extern int D_004A3FF4;
 extern void* D_004912F8[];
 extern void* D_00491340[];
@@ -129,11 +112,8 @@ extern "C" void func_00345828(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345890);
-#ifdef SKIP_ASM
 struct sEffVEntry {
     short delta;
     short index;
@@ -145,11 +125,8 @@ extern "C" void func_00345890(void* self, void* obj)
     sEffVEntry* vt = *(sEffVEntry**)obj;
     vt[5].fn((char*)obj + vt[5].delta, *(void**)((char*)self + 0xC));
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003458C0);
-#ifdef SKIP_ASM
 extern "C" void* func_00345798(void* self, int a1);
 extern "C" void* func_00370018(void* self);
 extern "C" void func_003705E0(void* self, void* mat, int a2);
@@ -207,11 +184,8 @@ extern "C" void* func_003458C0(void* self, int a1, int owner)
     D_004A3FF8++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003459A8);
-#ifdef SKIP_ASM
 void* operator_new1(int size);
 extern "C" void func_00370AF8(void* self, void* stream);
 extern char D_004FF1A0[];
@@ -246,11 +220,8 @@ extern "C" void* func_003459A8(void* self, void* stream)
     D_004A3FF8++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345AD0);
-#ifdef SKIP_ASM
 extern int D_004A3FF8;
 extern void* D_004912B0[];
 void operator_delete(int*);
@@ -269,11 +240,8 @@ extern "C" void func_00345AD0(void* self, int flags)
     func_00370758((int*)(s + 0x50), 2);
     func_00345828(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345B40);
-#ifdef SKIP_ASM
 extern "C" void func_00370788(void* self, float dt);
 
 extern "C" void func_00345B40(void* self)
@@ -291,11 +259,8 @@ extern "C" void func_00345B40(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345BC8);
-#ifdef SKIP_ASM
 extern "C" void func_003708C0(void*);
 
 extern "C" void func_00345BC8(void* self)
@@ -304,11 +269,8 @@ extern "C" void func_00345BC8(void* self)
         func_003708C0((char*)self + 0x50);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/effectlink", func_00345BF0);
-#ifdef SKIP_ASM
 struct sEffectLinkVEntry5BF0 {
     short delta;
     short index;
@@ -330,11 +292,8 @@ extern "C" void func_00345BF0(void* self, void* stream)
         func_00370AA8((char*)self + 0x50, stream);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345C90);
-#ifdef SKIP_ASM
 extern "C" void* func_00345798(void* self, int a1);
 extern "C" void* func_00370B60(void* self);
 extern "C" void func_00370DC8(void* self, void* target, float t);
@@ -395,11 +354,8 @@ extern "C" sEff00345C90* func_00345C90(sEff00345C90* self, sTarget00345C90* t, i
     self->f18 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345D80);
-#ifdef SKIP_ASM
 void* operator_new1(int size);
 struct cStream00371318;
 extern "C" void func_00371318(void* self, cStream00371318* stream);
@@ -434,11 +390,8 @@ extern "C" sEff00345C90* func_00345D80(sEff00345C90* self, void* stream)
     D_004A3FFC++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345E88);
-#ifdef SKIP_ASM
 extern int D_004A3FFC;
 extern void* D_00491268[];
 void operator_delete(int*);
@@ -457,11 +410,8 @@ extern "C" void func_00345E88(void* self, int flags)
     func_00370C08(s + 0x60, 2);
     func_00345828(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345EF8);
-#ifdef SKIP_ASM
 struct sEffVec4_5EF8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -515,11 +465,8 @@ extern "C" void func_00345EF8(sEffectLink5EF8* self)
     self->worldA = effMtxApply5EF8(&m, &self->localA);
     self->worldB = effMtxApply5EF8(&m, &self->localB);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345F90);
-#ifdef SKIP_ASM
 struct sEffectLink5EF8;
 extern "C" void func_00345EF8(sEffectLink5EF8* self);
 extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
@@ -550,20 +497,14 @@ extern "C" void func_00345F90(void* self)
     }
     *(int*)(s + 0x18) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346060__FPv);
-#ifdef SKIP_ASM
 void func_00346060(void* self)
 {
     *(int*)((char*)self + 0x14) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346070);
-#ifdef SKIP_ASM
 extern "C" void func_00371380(void*, int);
 
 extern "C" void func_00346070(void* self)
@@ -572,11 +513,8 @@ extern "C" void func_00346070(void* self)
         func_00371380((char*)self + 0x60, 7);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/effectlink", func_003460A0);
-#ifdef SKIP_ASM
 struct sEffectLinkVEntry60A0 {
     short delta;
     short index;
@@ -596,11 +534,8 @@ extern "C" void func_003460A0(void* self, void* stream)
         func_003712B8((char*)self + 0x60, stream);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346120);
-#ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* D_00491220[];
 extern "C" void* func_00345798(void* self, int a1);
@@ -647,11 +582,8 @@ extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int a2)
     D_004A4000++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003461C0);
-#ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* D_00491220[];
 extern "C" void* func_003457C8(void* p, void* obj);
@@ -671,11 +603,8 @@ extern "C" void* func_003461C0(void* self, void* stream)
     D_004A4000++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346228);
-#ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* D_00491220[];
 extern "C" void func_00345828(void* self, int flags);
@@ -691,11 +620,8 @@ extern "C" void func_00346228(void* self, int flags)
     D_004A4000--;
     func_00345828(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346258);
-#ifdef SKIP_ASM
 // Advance a rotation angle (degrees) by an integer step, wrapping to 0 at +/-360.
 extern "C" void func_00346258(void* self)
 {
@@ -705,11 +631,8 @@ extern "C" void func_00346258(void* self)
         *(float*)((char*)self + 0x30) = 0.0f;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003462A0);
-#ifdef SKIP_ASM
 struct sEffVec4_62A0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -730,11 +653,8 @@ extern "C" void func_003462A0(void* self)
     func_002D1D10(&v, p, *(int*)((char*)self + 0x24),
                   *(float*)((char*)self + 0x20), *(float*)((char*)self + 0x30));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/effectlink", func_00346300);
-#ifdef SKIP_ASM
 struct sEffectLinkVEntry {
     short delta;
     short index;
@@ -749,11 +669,8 @@ extern "C" void func_00346300(void* self, void* stream)
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346350);
-#ifdef SKIP_ASM
 struct sEffV3_346350 {
     float x, y, z;
     sEffV3_346350() {}
@@ -826,11 +743,8 @@ extern "C" void* func_00346350(void* self, int a1, int a2, int a3)
     *f = (*f & 0xFFFFFFDF) | 0x40;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003464E0);
-#ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern "C" void* func_00353E80(void* self, void* stream);
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
@@ -855,11 +769,8 @@ extern "C" void* func_003464E0(void* self, void* a1, void* stream)
     func_003475D8(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346568);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void* ptr);
 extern "C" void* func_002D1BE0();
@@ -925,5 +836,4 @@ extern "C" void func_00346568(char* self, int flags)
     func_00353DB8(self + 0x50, 2);
     func_0034FBF0(self, flags);
 }
-#endif
 

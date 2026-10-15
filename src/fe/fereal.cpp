@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/fereal", cFECustom_cFECustom);
-#ifdef SKIP_ASM
 struct sVE0720 {
     short delta;
     short index;
@@ -32,11 +30,8 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A07C8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045FFF8[];
 struct sVEntry001A07C8 {
@@ -57,35 +52,26 @@ extern "C" int func_001A07C8(void* self, int a1, int hash)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("fe/fereal", cFECustom_getNextState);
 
 INCLUDE_ASM("fe/fereal", func_001A16C0);
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1CB8);
-#ifdef SKIP_ASM
 extern "C" void func_001A1CB8(void* self, int a1, int val)
 {
     char* p = (char*)self + (signed char)a1;
     *(char*)(p + 0x8) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1CD0);
-#ifdef SKIP_ASM
 extern "C" unsigned char func_001A1CD0(void* self, int a1)
 {
     char* p = (char*)self + (signed char)a1;
     return *(unsigned char*)(p + 0x8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1CE8);
-#ifdef SKIP_ASM
 extern "C" void* cFE_cFE(void* self);
 void func_00263660(void* p);
 void func_00263998(void* p);
@@ -102,11 +88,8 @@ extern "C" void* func_001A1CE8(void* self)
     *(int*)((char*)self + 0xB5ADC) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1D50);
-#ifdef SKIP_ASM
 extern void* D_0046D7C0[];
 extern "C" void func_002639B0(void* self, int flags);
 extern "C" void func_00263678(void* self, int flags);
@@ -119,15 +102,12 @@ extern "C" void func_001A1D50(void* self, int flags)
     func_00263678((char*)self + 0xB5AB0, 2);
     func_001957D0(self, flags);
 }
-#endif
 
 INCLUDE_ASM("fe/fereal", func_001A1DC0);
 
 INCLUDE_ASM("fe/fereal", cRealFE_load);
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2128);
-#ifdef SKIP_ASM
 extern "C" void* func_00231CF0(void* self);
 extern "C" void func_00253418(void* p, int a1);
 extern "C" void func_001A06B0(void* flow);
@@ -150,11 +130,8 @@ extern "C" int func_001A2128(void* self)
     func_001A06B0(&D_004A4E80);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2190);
-#ifdef SKIP_ASM
 struct sVEntry001A2190 {
     short delta;
     short index;
@@ -185,11 +162,8 @@ extern "C" void func_001A2190(void* self)
     *(int*)(st + 0x80) = 0;
     func_00286200(func_0028B180());
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2208);
-#ifdef SKIP_ASM
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00253890(void* h, int a1);
 extern "C" void func_00398018(void* ui);
@@ -384,11 +358,8 @@ extern "C" int func_001A2208(void* self)
     func_00285BF8(func_0028B180(), 0, 0.019999999552965164f);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A27A0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -530,11 +501,8 @@ noh:
             }
         }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", cRealFE_loadCharAnimations);
-#ifdef SKIP_ASM
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
 extern "C" void func_003DEDC0(void* handle, int arg);
 extern "C" void* func_00311250(void* self, void* src);
@@ -563,11 +531,8 @@ extern "C" void cRealFE_loadCharAnimations(void)
     cGameAnimMap_testResolve_p(D_004A3E7C);
     func_003DEDC0(handle, 0x64);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2BC0);
-#ifdef SKIP_ASM
 extern void** D_004A3DF8;
 extern void* D_004A3E7C;
 extern "C" void func_00314FE8(void* a, void* b);
@@ -589,11 +554,8 @@ extern "C" void func_001A2BC0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", cRealFE_loadStartState);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
@@ -678,11 +640,8 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2E20);
-#ifdef SKIP_ASM
 void* func_0039E288(void* self);
 extern void* D_00469348[];
 
@@ -693,13 +652,10 @@ extern "C" void* func_001A2E20(void* self)
     *(int*)((char*)self + 0x4) = 0;
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/fereal", func_001A2E58);
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2F38);
-#ifdef SKIP_ASM
 void* func_0039E288(void* self);
 extern void* D_00469318[];
 
@@ -710,7 +666,6 @@ extern "C" void* func_001A2F38(void* self)
     *(int*)((char*)self + 0x4) = 0;
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/fereal", func_001A2F70);
 

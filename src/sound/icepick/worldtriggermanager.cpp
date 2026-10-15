@@ -6,8 +6,6 @@ extern const char D_00483588[];
 extern void* D_004A52D4;
 
 //99.88%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_Init__Fv);
-#ifdef SKIP_ASM
 void WORLDTRIGGERMANAGER_Init()
 {
     if (D_004A52D4 == 0) {
@@ -15,11 +13,8 @@ void WORLDTRIGGERMANAGER_Init()
         D_004A52D4 = cWorldTriggerManager_cWorldTriggerManager(mem);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B48);
-#ifdef SKIP_ASM
 extern "C" void func_002B5988(char** self, int flags);
 
 extern "C" void func_002B4B48()
@@ -29,11 +24,8 @@ extern "C" void func_002B4B48()
     }
     D_004A52D4 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B70);
-#ifdef SKIP_ASM
 extern unsigned char D_004A35A8[];
 
 extern "C" void* func_002B4B70(void* self)
@@ -58,11 +50,8 @@ extern "C" void* func_002B4B70(void* self)
     *(int*)((char*)self + 0x6C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4BE0);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_002B4BE0(int* self, int flags)
@@ -71,11 +60,8 @@ extern "C" void func_002B4BE0(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C08);
-#ifdef SKIP_ASM
 extern "C" int func_002B4C08(void* self, int a1, int a2, int a3)
 {
     if (a1 == *(int*)((char*)self + 0x4)
@@ -85,13 +71,10 @@ extern "C" int func_002B4C08(void* self, int a1, int a2, int a3)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C38);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5758);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_002A72D8(void* snd, int id, float t);
 extern "C" void func_002AD5F0(void* self, int idx, int a2, float v);
@@ -115,22 +98,16 @@ extern "C" void func_002B5758(sWorldTrigger70* t)
     *(int*)((char*)self + 0x64) = 0;
     *(int*)((char*)self + 0x6C) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5818);
-#ifdef SKIP_ASM
 extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
 extern "C" int func_002B5818(void* self, int idx, int* type, int* a, int* b, int c, int d)
 {
     return func_002B63D0(D_004A52D4, idx, type, a, b, c, d);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5838);
-#ifdef SKIP_ASM
 extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
 extern "C" int func_002B5838(void* self, int idx)
@@ -141,22 +118,16 @@ extern "C" int func_002B5838(void* self, int idx)
     func_002B63D0(D_004A52D4, idx, &type, &a, &b, 0, 1);
     return type == 5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5878);
-#ifdef SKIP_ASM
 extern "C" int func_002B65B0(void* self, int idx, char* dst);
 
 extern "C" int func_002B5878(void* self, int idx, char* dst)
 {
     return func_002B65B0(D_004A52D4, idx, dst);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5898);
-#ifdef SKIP_ASM
 extern unsigned char D_004A35A8[];
 
 extern "C" void func_002B5898(void* self)
@@ -170,11 +141,8 @@ extern "C" void func_002B5898(void* self)
     *(int*)((char*)self + 0x64) = 0;
     *(int*)((char*)self + 0x6c) = 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_cWorldTriggerManager);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_002B4B70(void* self);
@@ -204,11 +172,8 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
     cWorldTriggerManager_LoadTriggerInfo(self);
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5988);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
@@ -227,11 +192,8 @@ extern "C" void func_002B5988(char** self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_LoadTriggerInfo);
-#ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
 extern "C" char* func_003E22F0(const char* name, int a1);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -276,13 +238,10 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B40);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B90);
-#ifdef SKIP_ASM
 struct sWorldTrigger70 {
     int active;
     char pad[0x30];
@@ -299,11 +258,8 @@ extern "C" sWorldTrigger70* func_002B5B90(sWorldTrigger70** self)
     }
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5BC0);
-#ifdef SKIP_ASM
 extern "C" int func_002B4C08(void* self, int a1, int a2, int a3);
 
 extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int a, int b, int c)
@@ -315,11 +271,8 @@ extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int a, int b, 
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5C68);
-#ifdef SKIP_ASM
 struct sWtVec3 { float x, y, z; };
 struct sWtVec4 {
     float x, y, z, w;
@@ -350,11 +303,8 @@ extern "C" void func_002B5C68(sWorldTrigger70** self, int a, int b, int c, int d
         *(int*)(t + 0x34) = 1;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5D78);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_004165A8(const void* a, const void* b);
 // PORT: func_0029B960__FPv is an empty stub whose caller passes (mgr, name).
@@ -382,11 +332,8 @@ extern "C" void func_002B5D78(sWorldTrigger70** self)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5E68);
-#ifdef SKIP_ASM
 extern "C" void func_002B5758(sWorldTrigger70* t);
 
 extern "C" void func_002B5E68(void* self)
@@ -398,13 +345,10 @@ extern "C" void func_002B5E68(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5ED8);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
 extern "C" int func_002B6740(void* self, void* obj);
@@ -539,11 +483,8 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B63D0);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_002ADF60(int a);
 extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int arg);
@@ -598,11 +539,8 @@ extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6550);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
 
@@ -618,22 +556,16 @@ extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int a
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B65B0);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6628__FPv);
-#ifdef SKIP_ASM
 int func_002B6628(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6630);
-#ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 extern unsigned char D_004A35A8[];
 
@@ -647,11 +579,8 @@ extern "C" int func_002B6630(sWorldTrigger70** self, int id)
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B66E8);
-#ifdef SKIP_ASM
 extern "C" int func_002B66E8(sWorldTrigger70** self, int a1, int a2, sWorldTrigger70* except)
 {
     for (int i = 0; i < 40; i++) {
@@ -664,11 +593,8 @@ extern "C" int func_002B66E8(sWorldTrigger70** self, int a1, int a2, sWorldTrigg
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6740);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B1C8(void);
 extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, int* o3);
 extern "C" int func_002B67D8(void* self, unsigned int i);
@@ -688,11 +614,8 @@ extern "C" int func_002B6740(void* self, void* obj)
     }
     return func_002B67D8(self, ids[3]) != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B67D8);
-#ifdef SKIP_ASM
 struct sTriggerRef {
     int id;
     void* obj;
@@ -706,11 +629,8 @@ extern "C" int func_002B67D8(void* self, unsigned int i)
     sTriggerRef* refs = *(sTriggerRef**)((char*)self + 0x33c);
     return *(int*)((char*)refs[i].obj + 0x4) == 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6808);
-#ifdef SKIP_ASM
 struct sTriggerIdCache {
     int unk0;
     int ids[200];       // 0x4
@@ -736,11 +656,8 @@ extern "C" int func_002B6808(sTriggerIdCache* self, int id)
     self->lastResult = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6868);
-#ifdef SKIP_ASM
 extern "C" void func_002B6868(sTriggerIdCache* self, int id)
 {
     if (func_002B6808(self, id) == 0) {
@@ -751,11 +668,8 @@ extern "C" void func_002B6868(sTriggerIdCache* self, int id)
         self->lastId = -1;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B68D0);
-#ifdef SKIP_ASM
 extern "C" void func_002B5E68(void* self);
 void func_002B6900(void* self);
 
@@ -764,11 +678,8 @@ extern "C" void func_002B68D0(void* self)
     func_002B5E68(self);
     func_002B6900(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6900__FPv);
-#ifdef SKIP_ASM
 void func_002B6900(void* self)
 {
     *(int*)((char*)self + 0x330) = 0;
@@ -776,15 +687,12 @@ void func_002B6900(void* self)
     *(int*)((char*)self + 0x328) = -1;
     *(int*)((char*)self + 0x32c) = -1;
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6918);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6950);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6988);
-#ifdef SKIP_ASM
 extern "C" int func_002B6988(void* self, unsigned int i)
 {
     if (i < 2) {
@@ -793,11 +701,8 @@ extern "C" int func_002B6988(void* self, unsigned int i)
     sTriggerRef* refs = *(sTriggerRef**)((char*)self + 0x33c);
     return *(int*)((char*)refs[i].obj + 0x8) == 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B69B8);
-#ifdef SKIP_ASM
 struct sWtmVEntryF {
     short delta;
     short index;
@@ -819,13 +724,10 @@ extern "C" int func_002B69B8(void* self, void* src, void* state)
     *(int*)((char*)state + 0x6C) = below;
     return r;
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A38);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A68);
-#ifdef SKIP_ASM
 extern "C" void func_002B6A68(sWorldTrigger70** self)
 {
     for (int i = 0; i < 40; i++) {
@@ -834,11 +736,8 @@ extern "C" void func_002B6A68(sWorldTrigger70** self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6AA0);
-#ifdef SKIP_ASM
 struct sQuad6AA0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -864,11 +763,8 @@ extern "C" sTriggerSlots* func_002B6AA0(sTriggerSlots* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6AE0);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_002B6AE0(int* self, int flags)
@@ -877,11 +773,8 @@ extern "C" void func_002B6AE0(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B08);
-#ifdef SKIP_ASM
 extern "C" void func_002B6B50(void*);
 
 extern "C" int func_002B6B08(void* self, int a1)
@@ -891,26 +784,20 @@ extern "C" int func_002B6B08(void* self, int a1)
     }
     return 1;
 }
-#endif
 
 extern "C" void func_002B6C20(void*);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B30);
-#ifdef SKIP_ASM
 extern "C" void func_002B6B30(void* self, int a1)
 {
     if (a1 != 0) {
         func_002B6C20(self);
     }
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B50);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6C20);
-#ifdef SKIP_ASM
 struct sWtmEnt18 {
     char pad[0xC];
     int active;
@@ -938,11 +825,8 @@ int func_002B6C20_impl(void* self, sWtmEntList* list)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6C90);
-#ifdef SKIP_ASM
 struct sTriggerEntry18 {
     int unk0;
     int unk4;
@@ -963,11 +847,8 @@ extern "C" int func_002B6C90(void* self, int a1, sTriggerEntry18* entries, int n
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6CF8);
-#ifdef SKIP_ASM
 struct sWtmEnt18;
 
 struct sVec3_2B6CF8 {
@@ -1018,11 +899,8 @@ extern "C" void func_002B6CF8(void* self, sWtmEnt18* e, sVec3_2B6CF8* lo, sVec3_
     hi->y += *(float*)(obj + 0x44);
     hi->z += *(float*)(obj + 0x48);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6F40);
-#ifdef SKIP_ASM
 // PORT: sqrt.s (sqrtf without errno check)
 static inline float wtSqrt_2B6F40(float v)
 {
@@ -1116,7 +994,6 @@ extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7318);
 
@@ -1125,8 +1002,6 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7410);
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B75D0);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B77C0);
-#ifdef SKIP_ASM
 struct sTriggerIdSlot120 {
     int count;
     int ids[71];
@@ -1152,15 +1027,12 @@ extern "C" void func_002B77C0(sTriggerIdSlot120* self, int id)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7848);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7908);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8190);
-#ifdef SKIP_ASM
 extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, int* o3)
 {
     int* hdr = *(int**)(*(char**)((char*)obj + 0x8C) + 0x10);
@@ -1229,15 +1101,12 @@ extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, 
         }
     }
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83B8);
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83F8);
-#ifdef SKIP_ASM
 extern "C" void func_002BADD0(void* node, void* list);
 
 struct sOctKey83F8 {
@@ -1346,7 +1215,6 @@ extern "C" void func_002B83F8(void* self, sOctList83F8** partial, sOctList83F8**
         if (node->child[1]) func_002B83F8(self, partial, inside, pos, node->child[1], &k);
     }
 }
-#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8818);
 

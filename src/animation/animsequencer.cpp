@@ -8,19 +8,14 @@ struct cAnimSequence {
 };
 
 //100%
-INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeWeight__FP13cAnimSequenceff);
-#ifdef SKIP_ASM
 void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target)
 {
     self->mCurrentWeight = weight;
     self->mTargetWeight = target;
     self->mFadeSpeed = 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313A20);
-#ifdef SKIP_ASM
 extern "C" void func_00313A20(void* self, float v)
 {
     if (*(float*)((char*)self + 0x98) != 0.0f || *(float*)((char*)self + 0x9C) == 0.0f || v < *(float*)((char*)self + 0x9C))
@@ -30,11 +25,8 @@ extern "C" void func_00313A20(void* self, float v)
     *(float*)((char*)self + 0x98) = 0.0f;
     *(int*)((char*)self + 0xA0) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313A70);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0048A5B0[];
 
@@ -56,11 +48,8 @@ extern "C" void func_00313A70(void* self, int key, float weight)
     n->next = old;
     n->active = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313AD8);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0048A5B0[];
 
@@ -82,13 +71,10 @@ extern "C" void func_00313AD8(void* self, int key)
     n->next = old;
     n->unk8 = 0;
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00313B38);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313BA8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 struct sSeqNode313BA8
 {
@@ -115,11 +101,8 @@ extern "C" void func_00313BA8(void* self, int key)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313C08);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_00313C08(char* self)
@@ -131,11 +114,8 @@ extern "C" void func_00313C08(char* self)
         operator_delete((int*)node);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313C50);
-#ifdef SKIP_ASM
 extern void** D_004A3DF8;
 
 struct sSeqEntry_00313C50
@@ -174,46 +154,34 @@ extern "C" void func_00313C50(void* self, int i, int anim)
         s->dirty = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313CF0);
-#ifdef SKIP_ASM
 extern "C" void func_00313CF0(void* self, int a1, float val)
 {
     char* p = (char*)self + a1 * 0x1c;
     *(float*)(p + 0x8) = val;
     *(int*)((char*)self + 0xc4) = 1;
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00313D10);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313D28);
-#ifdef SKIP_ASM
 extern "C" void func_00313D28(void* self, int a1, float val)
 {
     char* p = (char*)self + a1 * 0x1c;
     *(float*)(p + 0x14) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313D40);
-#ifdef SKIP_ASM
 extern "C" void func_00313D40(void* self, int a1, int val)
 {
     char* p = (char*)self + a1 * 0x1c;
     *(int*)(p + 0x1c) = val;
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00313D58);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313D70);
-#ifdef SKIP_ASM
 struct sSeqTrack_00313D70
 {
     char pad0[0x8];
@@ -251,11 +219,8 @@ extern "C" float func_00313D70(sSeq_00313D70* self, int i)
     }
     return w;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313DD0);
-#ifdef SKIP_ASM
 struct sVEntry_313DD0 {
     short delta;
     short index;
@@ -305,11 +270,8 @@ extern "C" void func_00313DD0(void* node, cAsStream* stream)
         Ser_313DD0(s, p, 0x10);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314050);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0048A5B0[];
 
@@ -359,21 +321,15 @@ extern "C" void func_00314050(void* node, void* stream)
         tail = p;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003142E8__FPv);
-#ifdef SKIP_ASM
 void func_003142E8(void* self)
 {
     *(int*)self = 0;
     *(void**)((char*)self + 0x4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003142F8);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0048A5C0[];
 
@@ -398,11 +354,8 @@ extern "C" void* func_003142F8(void* seq, int arg)
     self->mCount++;
     return node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314368);
-#ifdef SKIP_ASM
 // Same layout as the unit's cAnimSequenceNode / cAnimSequencer (declared later in the unit).
 struct sSeqNode_00314368 {
     char pad_0x00[0xC8];
@@ -432,13 +385,10 @@ extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node
     node->next = 0;
     self->mCount++;
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_003143C8);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314418);
-#ifdef SKIP_ASM
 struct sSeq_00314418;
 extern "C" float func_00313D70_314418(sSeq_00314418* self, int i) __asm__("func_00313D70");
 
@@ -510,11 +460,8 @@ extern "C" int func_00314418(void* self, sSeqState_314418* out)
     }
     return count;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314518);
-#ifdef SKIP_ASM
 extern "C" void* func_003142F8(void* seq, int arg);
 extern "C" void func_00313C50(void* self, int i, int anim);
 
@@ -526,11 +473,8 @@ extern "C" void* func_00314518(void* self, int arg, int anim, float val)
     func_00313D40(node, 0, 0);
     return node;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314588);
-#ifdef SKIP_ASM
 extern "C" void* func_003142F8(void* seq, int arg);
 extern "C" void func_00313C50(void* self, int i, int anim);
 
@@ -542,11 +486,8 @@ extern "C" void* func_00314588(void* self, int arg, int anim, float val)
     func_00313D40(node, 0, 1);
     return node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003145F8);
-#ifdef SKIP_ASM
 struct sSeqNode_003145F8 {
     char pad_0x00[0xC8];
     sSeqNode_003145F8* next; // 0xC8
@@ -576,11 +517,8 @@ extern "C" void func_003145F8(sSequencer_003145F8* self, sSeqNode_003145F8* node
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314668);
-#ifdef SKIP_ASM
 struct sSeqNode_00314668 {
     char pad_0x00[0xC8];
     sSeqNode_00314668* next; // 0xC8
@@ -605,11 +543,8 @@ extern "C" void func_00314668(sSequencer_00314668* self)
         self->mCount--;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003146D0);
-#ifdef SKIP_ASM
 extern "C" void func_003146D0(void* self, float v)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
@@ -617,11 +552,8 @@ extern "C" void func_003146D0(void* self, float v)
         func_00313A20(node, v);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314718);
-#ifdef SKIP_ASM
 extern "C" void func_00313BA8(void* self, int v);
 
 extern "C" void func_00314718(void* self, int v)
@@ -631,7 +563,6 @@ extern "C" void func_00314718(void* self, int v)
         func_00313BA8(node, v);
     }
 }
-#endif
 
 struct cAnimSequenceNode {
     char pad_0x00[0xC8];
@@ -644,8 +575,6 @@ struct cAnimSequencer {
 };
 
 //100%
-INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getSequence__FP14cAnimSequenceri);
-#ifdef SKIP_ASM
 cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 {
     cAnimSequenceNode* cur = self->mFirstSequence;
@@ -654,15 +583,12 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
     }
     return cur;
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314788);
 
 INCLUDE_ASM("animation/animsequencer", func_003147B8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_003147F0);
-#ifdef SKIP_ASM
 class cAsStream {
 public:
     virtual void serialize(void* data, int size);
@@ -690,11 +616,8 @@ extern "C" void func_003147F0(sSequencer_003147F0* self, cAsStream* s)
         n = n->next;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314880);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_003E6448(void* dst, int value, int size);
@@ -730,21 +653,15 @@ extern "C" void func_00314880(void* self, void* stream)
         func_00314368((sSequencer_00314368*)self, (sSeqNode_00314368*)node);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314978__FPv);
-#ifdef SKIP_ASM
 void* func_00314978(void* self)
 {
     *(int*)self = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314988);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_003149D0(void** self);
 
@@ -756,11 +673,8 @@ extern "C" void func_00314988(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003149D0);
-#ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 
 extern "C" void func_003149D0(void** self)
@@ -774,13 +688,10 @@ extern "C" void func_003149D0(void** self)
     self[2] = 0;
     self[3] = 0;
 }
-#endif
 
 extern "C" void* func_00314AA0(void*);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314A18__FPvi);
-#ifdef SKIP_ASM
 // PORT: asm label (same binding the unit uses for func_00314AA0's two-argument body).
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
 
@@ -789,23 +700,17 @@ void func_00314A18(void* self, int a1)
     *(int*)self = a1;
     func_00314AA0_impl(self, (char*)a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314A40__FPv);
-#ifdef SKIP_ASM
 void* func_00314A40(void* self)
 {
     *(int*)self = 0;
     return func_00314AA0(self);
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314A60);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314AA0);
-#ifdef SKIP_ASM
 // The original had the same mismatch: callers (func_00314A18/func_00314A40, the
 // latter already 100%) see the one-argument declaration above and leave $5 as-is,
 // while the definition takes two. The asm label binds this two-argument body to
@@ -818,7 +723,6 @@ void func_00314AA0_impl(void* self, char* data)
     *(char**)((char*)self + 0x8) = data + *(short*)(data + 0x6);
     *(char**)((char*)self + 0xC) = data + *(int*)(data + 0x8);
 }
-#endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314AC0);
 
@@ -827,8 +731,6 @@ INCLUDE_ASM("animation/animsequencer", func_00314AE0);
 INCLUDE_ASM("animation/animsequencer", func_00314B70);
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314C00);
-#ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
 
@@ -856,7 +758,6 @@ extern "C" void* func_00314C00(sMdfArchive* self, const char* name)
     }
     return 0;
 }
-#endif
 
 
 INCLUDE_ASM("animation/animsequencer", func_00314C98);

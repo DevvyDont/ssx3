@@ -3,8 +3,6 @@
 INCLUDE_ASM("ui/uitext", cUIText_render2D);
 
 //100%
-INCLUDE_ASM("ui/uitext", cUIText_deleteText);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 extern "C" void cUIText_deleteText(void* self)
@@ -19,13 +17,10 @@ extern "C" void cUIText_deleteText(void* self)
         *(void**)((char*)self + 0xB4) = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uitext", cUIText_getNumTextLines);
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0C00);
-#ifdef SKIP_ASM
 extern "C" int func_003A0C00(void* self)
 {
     if (((*(int*)((char*)self + 0x74) >> 3) & 1) == 0) {
@@ -33,11 +28,8 @@ extern "C" int func_003A0C00(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0C28);
-#ifdef SKIP_ASM
 extern "C" int func_003A0C28(void* self)
 {
     if (((*(int*)((char*)self + 0x74) >> 3) & 1) != 0) {
@@ -45,7 +37,6 @@ extern "C" int func_003A0C28(void* self)
     }
     return 0;
 }
-#endif
 
 struct cUITextManager {
     char pad_0x00[0x28];
@@ -64,18 +55,13 @@ struct cUIText {
 extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str);
 
 //100%
-INCLUDE_ASM("ui/uitext", cUIText_setAsciiString__FP7cUITextPCc);
-#ifdef SKIP_ASM
 void cUIText_setAsciiString(cUIText* self, const char* str)
 {
     self->field_0xB0 = 0;
     cUIText_setAsciiStringPrivate(self, str);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", cUIText_setAsciiStringPrivate);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
 extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
@@ -119,11 +105,8 @@ extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str)
         cUIText_setUnicodeStringPrivate(self, buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0D00);
-#ifdef SKIP_ASM
 extern "C" void* func_003A04F0(void* self);
 extern "C" float func_00392C60(void* font, unsigned short ch);
 extern "C" int USTR_length(unsigned short* s);
@@ -172,11 +155,8 @@ extern "C" void func_003A0D00(void* self, unsigned short* str)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0E90);
-#ifdef SKIP_ASM
 extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
 
 extern "C" void func_003A0E90(void* self, const unsigned short* str)
@@ -184,24 +164,18 @@ extern "C" void func_003A0E90(void* self, const unsigned short* str)
     *(int*)((char*)self + 0xB0) = 0;
     cUIText_setUnicodeStringPrivate(self, str);
 }
-#endif
 
 INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringPrivate);
 
 //100%
-INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringByID__FP7cUITexti);
-#ifdef SKIP_ASM
 void cUIText_setUnicodeStringByID(cUIText* self, int id)
 {
     self->field_0xB0 = id;
     cUITextManager* mgr = self->mMgr;
     mgr->fn((char*)self + mgr->field_0x28, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1030);
-#ifdef SKIP_ASM
 extern "C" void* func_003A04F0(void* self);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
 
@@ -242,13 +216,10 @@ extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
         *out = D_004FF0D8;
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uitext", func_003A10F0);
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1148);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
 extern "C" void* func_003977E8(void* self);
 extern "C" void func_003A1310(void* self, char a1);
@@ -271,11 +242,8 @@ extern "C" void* func_003A1148(void* self, int a1, int a2)
     func_003A1310(self, 0);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A11B8);
-#ifdef SKIP_ASM
 // PORT: func_0039FE00 really takes (self, data); other units declare it with one argument.
 void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
 // PORT: called with only self here (the unit declares two arguments).
@@ -321,11 +289,8 @@ extern "C" void func_003A11B8(sUIText11B8* self, sUIData11B8* data)
                                    data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A12D0);
-#ifdef SKIP_ASM
 extern "C" int func_003A12D0(void* self)
 {
     void* p = *(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
@@ -334,11 +299,8 @@ extern "C" int func_003A12D0(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1310);
-#ifdef SKIP_ASM
 extern "C" void func_003A1310(void* self, char a1)
 {
     if (a1 == 0) {
@@ -353,11 +315,8 @@ extern "C" void func_003A1310(void* self, char a1)
         *(char*)((char*)self + 0x8B) = 7;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1360);
-#ifdef SKIP_ASM
 extern "C" void func_003A1CF0(void* self, void* a1);
 
 class func_003A1360_cVirtA {
@@ -395,11 +354,8 @@ extern "C" void func_003A1360(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A13E0);
-#ifdef SKIP_ASM
 struct sUIInputVE13E0 {
     short delta;
     short index;
@@ -478,11 +434,8 @@ extern "C" int func_003A13E0(sUIText13E0* self, char* input)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1588);
-#ifdef SKIP_ASM
 extern "C" int func_003A12D0(void* self);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
 extern "C" void func_0039FEB8(void* self, void* pos, void* size);
@@ -609,11 +562,8 @@ extern "C" void func_003A1588(sText_1588* self, float x, float y)
         func_0039DA20(self->scroll, self->top, rows, self->count);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A18C0);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 extern "C" void func_003A18C0(void* self, void* a1)
@@ -633,11 +583,8 @@ extern "C" void func_003A18C0(void* self, void* a1)
     *(unsigned short*)((char*)self + 0xC6) = 0;
     *(unsigned short*)((char*)self + 0xC8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1958);
-#ifdef SKIP_ASM
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -659,11 +606,8 @@ extern "C" int func_003A1958(void* self)
     *(void***)((char*)self + 0xBC) = arr;
     return old;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A19F8);
-#ifdef SKIP_ASM
 extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str);
 extern "C" void func_002C2540(void* dst, void* src);
 
@@ -724,11 +668,8 @@ extern "C" void func_003A19F8(void* self, char* str)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeString);
-#ifdef SKIP_ASM
 extern "C" int func_003A1958(void* self);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
@@ -743,13 +684,10 @@ extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str)
     USTR_copy(copy, str);
     (*(unsigned short***)((char*)self + 0xBC))[idx] = copy;
 }
-#endif
 
 INCLUDE_ASM("ui/uitext", func_003A1C80);
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1CF0);
-#ifdef SKIP_ASM
 extern "C" void func_003A18C0(void*, void*);
 extern "C" void func_003A1D30(void*, void*);
 
@@ -758,11 +696,8 @@ extern "C" void func_003A1CF0(void* self, void* a1)
     func_003A18C0(self, a1);
     func_003A1D30(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1D30);
-#ifdef SKIP_ASM
 extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str);
 
 extern "C" void func_003A1D30(void* self, void* vstr)
@@ -816,11 +751,8 @@ extern "C" void func_003A1D30(void* self, void* vstr)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1F18);
-#ifdef SKIP_ASM
 extern "C" void func_003A1D30(void*, void*);
 
 class func_003A1F18_cVirtA {
@@ -856,11 +788,8 @@ extern "C" void func_003A1F18(void* self, int id)
         ((func_003A1F18_cVirtB*)self)->v05(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1F90);
-#ifdef SKIP_ASM
 extern "C" void func_003A1F90(void* self, int idx)
 {
     if (*(void***)((char*)self + 0xBC) != 0) {
@@ -882,11 +811,8 @@ extern "C" void func_003A1F90(void* self, int idx)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A2068);
-#ifdef SKIP_ASM
 extern "C" int func_003A2068(void* self, int i)
 {
     int* arr = *(int**)((char*)self + 0xBC);
@@ -895,7 +821,6 @@ extern "C" int func_003A2068(void* self, int i)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ui/uitext", func_003A20A0);
 
@@ -908,8 +833,6 @@ INCLUDE_ASM("ui/uitext", func_003A2A00);
 INCLUDE_ASM("ui/uitext", func_003A2BC8);
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A3280);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
 extern void* D_004941B8[];
 
@@ -944,11 +867,8 @@ extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
     self->unk8C = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A32F0);
-#ifdef SKIP_ASM
 extern "C" void func_0039FC48(void* self, int flags);
 extern void* D_004941B8[];
 
@@ -972,11 +892,8 @@ extern "C" void func_003A32F0(void* self, int flags)
     }
     func_0039FC48(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A3398);
-#ifdef SKIP_ASM
 struct func_003A3398_sColor {
     float r;
     float g;
@@ -1000,5 +917,4 @@ extern "C" void func_003A3398(void* self, func_003A3398_sColor* c)
         (*(func_003A3398_sColor**)((char*)self + 0x7C))[i] = tmp;
     }
 }
-#endif
 

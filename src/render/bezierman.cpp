@@ -5,20 +5,15 @@ void* cPSPBezierMan_cPSPBezierMan(void* self);
 extern const char D_00492EA0[];
 
 //99.23%
-INCLUDE_ASM("render/bezierman", cBezierMan_construct__Fv);
-#ifdef SKIP_ASM
 void* cBezierMan_construct()
 {
     void* mem = cMemMan_alloc(0x9C90, D_00492EA0, 0, 0);
     return cPSPBezierMan_cPSPBezierMan(mem);
 }
-#endif
 
 INCLUDE_ASM("render/bezierman", func_0038AF30);
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B0F8);
-#ifdef SKIP_ASM
 void func_0038D660(void*);
 void cMemMan_free(void*);
 
@@ -35,22 +30,16 @@ extern "C" void func_0038B0F8(void* self)
         cMemMan_free(*(void**)((char*)self + 0x448));
     }
 }
-#endif
 
 extern "C" void* func_003739D0(void*);
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B158__FPv);
-#ifdef SKIP_ASM
 void* func_0038B158(void* self)
 {
     return func_003739D0((char*)self + 0x10);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B178__FPv);
-#ifdef SKIP_ASM
 void func_0038B178(void* self)
 {
     *(int*)((char*)self + 0x458) = 0;
@@ -58,11 +47,8 @@ void func_0038B178(void* self)
     *(int*)((char*)self + 0x4a60) = 0;
     *(int*)((char*)self + 0x4d84) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B190);
-#ifdef SKIP_ASM
 struct sBezPatch_B190 {
     void* obj;              // 0x0
     int extra;              // 0x4
@@ -145,11 +131,8 @@ extern "C" void func_0038B190(sBezMan_B190* m, sBezObj_B190* o, unsigned char* t
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B338);
-#ifdef SKIP_ASM
 extern int D_004A44D4;
 
 struct sBezVEntry_B338 {
@@ -165,7 +148,6 @@ extern "C" void func_0038B338(void* self, void* a, void* b, void* c, void* d)
         vt[22].fn((char*)self + vt[22].delta, a, b, c, d, 0);
     }
 }
-#endif
 
 INCLUDE_ASM("render/bezierman", func_0038B370);
 
@@ -174,8 +156,6 @@ INCLUDE_ASM("render/bezierman", func_0038C590);
 INCLUDE_ASM("render/bezierman", func_0038C788);
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038CA08);
-#ifdef SKIP_ASM
 extern void* D_004A5B80;
 extern "C" unsigned int func_0037DF88(void* self, void* a1, void* a2);
 
@@ -198,7 +178,6 @@ extern "C" void func_0038CA08(void* self, void* obj)
     b.w = 1.0f;
     func_0037DF88(D_004A5B80, &a, &b);
 }
-#endif
 
 INCLUDE_ASM("render/bezierman", func_0038CA70);
 
@@ -209,8 +188,6 @@ INCLUDE_ASM("render/bezierman", func_0038D168);
 INCLUDE_ASM("render/bezierman", func_0038D448);
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038D638);
-#ifdef SKIP_ASM
 class cBezierVirt {
 public:
     int field_0x0;
@@ -239,21 +216,15 @@ extern "C" void func_0038D638(cBezierVirt* self)
 {
     self->v17();
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038D660__FPv);
-#ifdef SKIP_ASM
 void func_0038D660(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/bezierman", func_0038D668);
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038D690);
-#ifdef SKIP_ASM
 struct sVec3_D690 { float x, y, z; };
 struct sQuad_D690 { long lo; long hi; } __attribute__((aligned(16)));
 struct sRS_D690 {
@@ -352,11 +323,8 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
     }
     *handle += 0x10;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/bezierman", func_0038D968);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRS_D968 {
     int field_0x0;
@@ -439,5 +407,4 @@ extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* a1)
     }
     ctx->top--;
 }
-#endif
 

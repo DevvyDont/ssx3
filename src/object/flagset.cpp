@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern char D_0048E850[];
 unsigned int BXrand();
@@ -136,11 +134,8 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     sFsMesh_CM* m = self->mesh;
     m->vt[6].fn((char*)m + m->vt[6].delta, verts, col, uv);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034B7B8);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 void cMemMan_free(void*);
 
@@ -166,11 +161,8 @@ extern "C" void func_0034B7B8(void* self)
         *(void**)(s + 0x74) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034B818);
-#ifdef SKIP_ASM
 extern int D_004A4240;
 extern "C" void* func_002D1CB0();
 extern "C" int func_002D1C98();
@@ -249,11 +241,8 @@ extern "C" void func_0034B818(void* elem)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034B9B0);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern char* D_004A47B8;
 extern int D_004A4244;
@@ -389,13 +378,10 @@ extern "C" void func_0034B9B0(sFlagSetEntry* e)
     }
     TOP_34B9B0(ctx)--;
 }
-#endif
 
 INCLUDE_ASM("object/flagset", func_0034BCA0);
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C2E0);
-#ifdef SKIP_ASM
 struct sFlagSetVEntryC2E0a {
     short delta;
     short index;
@@ -426,11 +412,8 @@ extern "C" void func_0034C2E0(void* elem, void* stream)
         e2->fn((char*)stream + e2->delta, self->items[i]);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C378);
-#ifdef SKIP_ASM
 struct sFlagSetVEntryC378a {
     short delta;
     short index;
@@ -459,11 +442,8 @@ extern "C" void func_0034C378(void* elem, void* stream)
         cFlagSet_CreateMesh(self, self->items[0]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C428);
-#ifdef SKIP_ASM
 extern "C" void* func_00354648(void* self, void* a1);
 extern "C" void* func_0034AF38(void* self);
 extern void* D_0048FB80[];
@@ -497,11 +477,8 @@ extern "C" sFlagSet_C428* func_0034C428(sFlagSet_C428* self, void* a1)
     self->field_0x10 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C4B8);
-#ifdef SKIP_ASM
 extern "C" void func_003546C8(void* self, int flags);
 extern void* D_0048FB80[];
 
@@ -535,11 +512,8 @@ extern "C" void func_0034C4B8(sFlagSet_C4B8* self, int flags)
     }
     func_003546C8(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C548);
-#ifdef SKIP_ASM
 struct sFlagSetElem_C548 {
     char pad0[0x5C];
     int active; // 0x5C
@@ -572,11 +546,8 @@ extern "C" void func_0034C548(sFlagSet_C548* self, void* node, void* desc)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C600);
-#ifdef SKIP_ASM
 struct sFlagSetElem_C600 {
     char pad0[0x5C];
     int active; // 0x5C
@@ -600,11 +571,8 @@ extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C668);
-#ifdef SKIP_ASM
 struct sFlagSetElem_C668 {
     char pad0[0x5C];
     int active; // 0x5C
@@ -672,11 +640,8 @@ extern "C" void func_0034C668(sFlagSet_C668* self)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C7F8);
-#ifdef SKIP_ASM
 struct sFlagSetEntry {
     char pad_0x0[0x5C];
     int active; // 0x5C
@@ -700,11 +665,8 @@ extern "C" void func_0034C7F8(sFlagSetOwner* self)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C848);
-#ifdef SKIP_ASM
 struct sFlagSetElem_C848 {
     char data[0x188];
 };
@@ -723,11 +685,8 @@ extern "C" void func_0034C848(sFlagSet_C848* self, void* arg)
         func_0034C2E0(&self->elems[i], arg);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C898);
-#ifdef SKIP_ASM
 struct sFlagSetElem_C898 {
     char data[0x188];
 };
@@ -746,13 +705,10 @@ extern "C" void func_0034C898(sFlagSet_C898* self, void* arg)
         func_0034C378(&self->elems[i], arg);
     }
 }
-#endif
 
 INCLUDE_ASM("object/flagset", func_0034C8E8);
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CAB8);
-#ifdef SKIP_ASM
 struct sFlagBlock_CAB8 {
     unsigned int w[4];
 };
@@ -799,11 +755,8 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
     self->field_0x3c = 4;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CB80);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern void* D_0048FA00[];
 extern "C" void func_0034FBF0(void* self, int flags);
@@ -826,11 +779,8 @@ extern "C" void func_0034CB80(void* self, int flags)
     }
     func_0034FBF0(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CBE8);
-#ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern "C" void func_0034D1E8(void* self);
 extern void* D_0048FA00[];
@@ -858,11 +808,8 @@ extern "C" void* func_0034CBE8(void* self, void* a1, void* stream)
     func_0034D1E8(self);
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034CC80);
-#ifdef SKIP_ASM
 class cFlagObj_CC80 {
 public:
     int f0, f4, f8;
@@ -939,11 +886,8 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag)
         func_0034CAB8(m, 1, obj, self + 0x1C, flag, force);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CDE8);
-#ifdef SKIP_ASM
 extern "C" void func_0034D6F0(void* self, float dt);
 
 extern "C" void func_0034CDE8(void* self, int on, float dt)
@@ -959,11 +903,8 @@ extern "C" void func_0034CDE8(void* self, int on, float dt)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CE48);
-#ifdef SKIP_ASM
 extern "C" void func_0034CC80(char* self, char* obj, int flag);
 extern "C" void func_0034CF98(void* self);
 
@@ -1020,11 +961,8 @@ extern "C" void func_0034CE48(char* self)
     }
     func_0034CF98(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CF98);
-#ifdef SKIP_ASM
 extern float D_0044AFD0[];
 
 struct sFsVec4_CF98 {
@@ -1127,11 +1065,8 @@ extern "C" void func_0034CF98(void* p)
     sFlagVEntry_CF98* e = &m->vt[3];
     e->fn((char*)m + e->delta, pts);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D1E8);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern "C" void func_0034CF98(void* self);
 
@@ -1233,11 +1168,8 @@ extern "C" void func_0034D1E8(void* p)
     m->vt[6].fn((char*)m + m->vt[6].delta, pos, col, uv);
     func_0034CF98(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D650);
-#ifdef SKIP_ASM
 extern "C" void func_0034D6F0(void* self, float dt);
 
 struct sFsVec4_D650 {
@@ -1274,15 +1206,12 @@ extern "C" void func_0034D650(void* self, void* obj)
     if (*(int*)(s + 0x38) == 0) *(int*)(s + 0x38) = 4;
     if (*(int*)(s + 0x3C) == 0) *(int*)(s + 0x3C) = 4;
 }
-#endif
 
 INCLUDE_ASM("object/flagset", func_0034D6F0);
 
 INCLUDE_ASM("object/flagset", func_0034D778);
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D960);
-#ifdef SKIP_ASM
 struct sSerVEntry_0034D960 {
     short delta;
     short index;
@@ -1297,11 +1226,8 @@ extern "C" void func_0034D960(void* self, void* stream)
     sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x24);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D9B0);
-#ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void cAnimNode_setAnimMeshCache(void* self);
 extern "C" float func_00351508(void* p);
@@ -1342,13 +1268,10 @@ extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force
     func_0034E348((sFlagOwner_E348*)self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("object/flagset", func_0034DAC8);
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034DBA8);
-#ifdef SKIP_ASM
 struct sFlagVEntry_DBA8 {
     short delta;
     short index;
@@ -1399,11 +1322,8 @@ extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034DC90);
-#ifdef SKIP_ASM
 struct sFlagSetVEntry_DC90a {
     short delta;
     short index;
@@ -1433,13 +1353,10 @@ extern "C" void func_0034DC90(void* self)
     vt2[33].fn(objB, r, *(int*)((char*)self + 0x44));
     *(unsigned short*)((char*)self + 0x26) &= ~1;
 }
-#endif
 
 INCLUDE_ASM("object/flagset", func_0034DD18);
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034E320);
-#ifdef SKIP_ASM
 extern char D_004FF1A0[];
 
 extern "C" void* func_0034E320(void* self, int i) {
@@ -1449,11 +1366,8 @@ extern "C" void* func_0034E320(void* self, int i) {
     }
     return base + i * 0xD0 + 0x90;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034E348);
-#ifdef SKIP_ASM
 struct sFlagSetVEntry_E348 {
     short delta;
     short index;
@@ -1489,11 +1403,8 @@ extern "C" void func_0034E348(sFlagOwner_E348* self)
     }
     self->dirty = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034E3D8);
-#ifdef SKIP_ASM
 struct sSerVEntry_0034E3D8 {
     short delta;
     short index;
@@ -1511,5 +1422,4 @@ extern "C" void func_0034E3D8(void* self, void* stream)
     e = &(*(sSerVEntry_0034E3D8**)stream)[1];
     e->fn((char*)stream + e->delta, &dummy, 4);
 }
-#endif
 

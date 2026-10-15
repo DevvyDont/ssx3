@@ -11,8 +11,6 @@ struct cWorldView {
 };
 
 //100%
-INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
-#ifdef SKIP_ASM
 int cWorldView_getNumSections(cWorldView* self)
 {
     if (self->mSections == 0) {
@@ -20,11 +18,8 @@ int cWorldView_getNumSections(cWorldView* self)
     }
     return self->mSections->mNumSections;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9820);
-#ifdef SKIP_ASM
 extern "C" void* func_003A9820(cWorldView* self, unsigned int i)
 {
     cWorldViewSectionList* list = self->mSections;
@@ -33,7 +28,6 @@ extern "C" void* func_003A9820(cWorldView* self, unsigned int i)
     }
     return *(char**)((char*)self + 0x8) + i * 0x58;
 }
-#endif
 
 struct cWorldViewEntry {
     char pad_0x00[0x14];
@@ -41,8 +35,6 @@ struct cWorldViewEntry {
 };
 
 //100%
-INCLUDE_ASM("world/worldview", cWorldView_isSectionLoaded__FP10cWorldViewi);
-#ifdef SKIP_ASM
 int cWorldView_isSectionLoaded(cWorldView* self, int section)
 {
     if (self->mSections == 0 || (unsigned int)section >= (unsigned int)self->mSections->mNumSections) {
@@ -51,11 +43,8 @@ int cWorldView_isSectionLoaded(cWorldView* self, int section)
     cWorldViewEntry* entry = (cWorldViewEntry*)((char*)self + section * 8);
     return (unsigned int)(entry->field_0x14 - 5) < 2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9890);
-#ifdef SKIP_ASM
 extern "C" int func_003A9890(cWorldView* self, unsigned int i)
 {
     cWorldViewSectionList* list = self->mSections;
@@ -64,15 +53,12 @@ extern "C" int func_003A9890(cWorldView* self, unsigned int i)
     }
     return *(int*)((char*)self + (i << 3) + 0x14) == 0;
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003A98C8);
 
 INCLUDE_ASM("world/worldview", func_003A9958);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A99D8);
-#ifdef SKIP_ASM
 extern "C" void func_003A8F10(void* world, unsigned int i);
 struct func_003A99D8_sEntry { int state; int field_0x4; };
 struct func_003A99D8_sView { void* world; cWorldViewSectionList* mSections; };
@@ -94,37 +80,28 @@ extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003A9A48);
 
 INCLUDE_ASM("world/worldview", func_003A9A90);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9A98);
-#ifdef SKIP_ASM
 extern "C" void* func_003A9A98(void* self, int a1)
 {
     return (char*)(*(void**)((char*)self + 0x10)) + a1 * 0x44;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9AB0__FPv);
-#ifdef SKIP_ASM
 int func_003A9AB0(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003A9AC0);
 
 INCLUDE_ASM("world/worldview", func_003A9BB8);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9D60);
-#ifdef SKIP_ASM
 struct sWVSlot_9D60 {
     int state;
     int f4;
@@ -179,13 +156,10 @@ extern "C" void func_003A9D60(sWV_9D60* self, int cam)
         *(int*)((char*)self + cam * 0x50 + 0x244) = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003A9E50);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldview", func_003AA028);
-#ifdef SKIP_ASM
 extern "C" float func_003A9E50(void* self, void* pos, void* bmin, void* bmax);
 extern "C" int func_003A8618(void* self, int a1);
 extern "C" void func_003A8448(void* self, int i, float f);
@@ -297,13 +271,10 @@ extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
             func_003AA028(self_, ((sSection_A028*)sec_)->child1, cam, loaded);
     }
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003AA2D8);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA2F0);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int c, int n);
 
 struct func_003AA2F0_sEntry {
@@ -360,11 +331,8 @@ func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
     D_00508F50.flags = (((D_00508F50.flags | 1) & ~4) | 2) << 16;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA3F0);
-#ifdef SKIP_ASM
 class func_003AA3F0_cObj {
 public:
     char pad00[0x8];
@@ -385,11 +353,8 @@ extern "C" int func_003AA3F0(func_003AA3F0_cObj* self, void* a1)
     self->v06(a1);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA438);
-#ifdef SKIP_ASM
 class func_003AA438_cObj {
 public:
     char pad00[0x8];
@@ -439,11 +404,8 @@ extern "C" int func_003AA438(func_003AA438_cObj* self, void* a1)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA520);
-#ifdef SKIP_ASM
 class func_003AA520_cObj {
 public:
     char pad00[0x8];
@@ -469,11 +431,8 @@ extern "C" int func_003AA520(func_003AA520_cObj* self, void* a1, int base)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA5C8);
-#ifdef SKIP_ASM
 class func_003AA5C8_cObj {
 public:
     char pad00[0x8];
@@ -502,11 +461,8 @@ extern "C" int func_003AA5C8(func_003AA5C8_cObj* self, void* a1)
     self->v15(a1);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA608);
-#ifdef SKIP_ASM
 class func_003AA608_cObj {
 public:
     char pad00[0x8];
@@ -561,21 +517,15 @@ extern "C" int func_003AA608(func_003AA608_cObj* self, void* a1)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA6E8);
-#ifdef SKIP_ASM
 extern "C" int func_003AA6E8(void* self, void* a1)
 {
     *(int*)((char*)a1 + 0x20) += (int)a1;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA700);
-#ifdef SKIP_ASM
 // PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
 extern "C" int func_003AA700(void* self, void* a1)
 {
@@ -592,11 +542,8 @@ extern "C" int func_003AA700(void* self, void* a1)
     *(int*)((char*)a1 + 0x84) = 0;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA758);
-#ifdef SKIP_ASM
 // PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
 extern "C" int func_003AA758(void* self, void* a1)
 {
@@ -607,11 +554,8 @@ extern "C" int func_003AA758(void* self, void* a1)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA780);
-#ifdef SKIP_ASM
 // PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
 extern "C" int func_003AA780(void* self, int n, int* data)
 {
@@ -635,11 +579,8 @@ extern "C" int func_003AA780(void* self, int n, int* data)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA830);
-#ifdef SKIP_ASM
 class func_003AA830_cObj {
 public:
     char pad00[0x8];
@@ -669,23 +610,17 @@ extern "C" int func_003AA830(func_003AA830_cObj* self, void* a1, int base)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA8D8);
-#ifdef SKIP_ASM
 extern "C" int func_003AA8D8(void* self, void* a1, int a2)
 {
     *(int*)((char*)a1 + 0x4) += a2;
     return 1;
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003AA8F0);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA960);
-#ifdef SKIP_ASM
 struct func_003AA960_sNode {
     char pad[0x60];
     int prev;       // 0x60 (index fixed up into a pointer)
@@ -726,11 +661,8 @@ extern "C" int func_003AA960(void* self, void* list)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAA08);
-#ifdef SKIP_ASM
 extern "C" void func_0032C540(void* self);
 extern "C" int func_00327DA8(void* self, char* data, void* ctx);
 
@@ -804,11 +736,8 @@ extern "C" int func_003AAA08(void* self, void* ctx, sChunk_3AAA08* c)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AABD8);
-#ifdef SKIP_ASM
 // PORT: func_003AD230__FPv is declared (void*) but takes a flags int and returns a float.
 float func_003AD230_f(int flags) __asm__("func_003AD230__FPv");
 
@@ -836,11 +765,8 @@ extern "C" int func_003AABD8(void* self, func_003AABD8_sObj* obj)
     obj->max[2] = obj->pos[2] + r;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAC50);
-#ifdef SKIP_ASM
 extern "C" int func_003AAC50(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0xC) & 0x100) {
@@ -857,11 +783,8 @@ extern "C" int func_003AAC50(void* self, void* obj)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AACA8);
-#ifdef SKIP_ASM
 extern "C" int func_003AACA8(void* self, void* a1)
 {
     if (*(int*)((char*)a1 + 0xC) & 0x100) {
@@ -874,13 +797,10 @@ extern "C" int func_003AACA8(void* self, void* a1)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003AACE0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldview", func_003AAD98);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_003AA2F0(void* self);
 extern char D_00494F70[];
@@ -893,11 +813,8 @@ extern "C" void* func_003AAD98()
     *(void***)((char*)p + 0x8) = D_00495090;
     return p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AADE8);
-#ifdef SKIP_ASM
 void func_003AAE60(void*);
 void operator_delete(int*);
 extern void* D_00495090[];
@@ -912,11 +829,8 @@ extern "C" void func_003AADE8(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAE40);
-#ifdef SKIP_ASM
 extern char*** D_004A47B8;
 
 extern "C" void func_003AAE40(void* self, int a1)
@@ -926,23 +840,17 @@ extern "C" void func_003AAE40(void* self, int a1)
     *(char****)self = w;
     *(int*)((char*)self + 0x10) = *(short*)(**w + 0x2A);
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAE60__FPv);
-#ifdef SKIP_ASM
 void func_003AAE60(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003AAE68);
 
 INCLUDE_ASM("world/worldview", func_003AB498);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABE40);
-#ifdef SKIP_ASM
 struct func_003ABE40_sTab {
     int f0;
     unsigned int* entries;
@@ -996,11 +904,8 @@ extern "C" int func_003ABE40(func_003ABE40_cObj* self, void* a1)
     func_003ABF20(self, a1);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABF20);
-#ifdef SKIP_ASM
 extern "C" void func_003ABF50(void* self, void* a1);
 
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
@@ -1010,11 +915,8 @@ extern "C" int func_003ABF20(void* self, void* a1)
     func_003ABF50(self, a1);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABF50);
-#ifdef SKIP_ASM
 extern "C" void func_003ABFC0(void* self, void* item, void* list);
 
 struct func_003ABF50_sEntry {
@@ -1046,11 +948,8 @@ int func_003ABF50_impl(void* self, func_003ABF50_sList* list)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABFC0);
-#ifdef SKIP_ASM
 extern "C" void func_003AC048(void* self, void* obj, void* list, int index);
 
 // PORT: the unit declares func_003ABFC0 as returning void (func_003ABF50 calls it that way),
@@ -1066,13 +965,10 @@ int func_003ABFC0_impl(void* self, void* item, void* list)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003AC048);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC2A8);
-#ifdef SKIP_ASM
 struct func_003AC2A8_sRes {
     int f0;
     int f4;
@@ -1122,11 +1018,8 @@ extern "C" int func_003AC2A8(func_003AC2A8_cObj* self, void* a1)
     func_003AC358(self, a1);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC358);
-#ifdef SKIP_ASM
 struct func_003AC358_sObj {
     char pad[0x1C];
     int count;
@@ -1167,15 +1060,12 @@ extern "C" int func_003AC358(void* self, void* a1)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("world/worldview", func_003AC438);
 
 INCLUDE_ASM("world/worldview", func_003AC508);
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC7C8);
-#ifdef SKIP_ASM
 extern "C" void cWScriptCache_init(void* self, int a1);
 
 extern "C" void* func_003AC7C8(void* self, int a1)
@@ -1185,5 +1075,4 @@ extern "C" void* func_003AC7C8(void* self, int a1)
     cWScriptCache_init(self, 1);
     return self;
 }
-#endif
 

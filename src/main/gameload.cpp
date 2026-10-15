@@ -3,8 +3,6 @@
 INCLUDE_ASM("main/gameload", cGame_load);
 
 //100%
-INCLUDE_ASM("main/gameload", cGame_loadTrack);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -152,13 +150,10 @@ extern "C" void cGame_loadTrack(char* self)
     cBXString__cBXString(&dir, 2);
     cBXString__cBXString(&name, 2);
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_0022FA98);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230050);
-#ifdef SKIP_ASM
 class cMgr230050 {
 public:
     int pad;
@@ -215,11 +210,8 @@ extern "C" void func_00230050(void* self)
     D_004A45D8 = 1;
     D_004A43C8 = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_002300F0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0026CA90(void* a);
 extern "C" void func_00309030(void* a);
@@ -248,11 +240,8 @@ extern "C" void func_002300F0(void* self)
     func_00309F18(D_004A3DD8);
     func_00308C60(*(void**)((char*)self + 0x30));
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230180);
-#ifdef SKIP_ASM
 extern "C" void func_0022E7C8(void* self);
 extern "C" void func_0026F228(void* self);
 extern "C" void func_002789E0(void* self);
@@ -307,11 +296,8 @@ extern "C" void func_00230180(void* self)
     func_00308C60(*(void**)((char*)self + 0x30));
     func_00287108(func_0028B180());
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/gameload", cGame_restart);
-#ifdef SKIP_ASM
 extern "C" void func_00230180(void* self);
 extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
@@ -340,11 +326,8 @@ extern "C" void cGame_restart(void* self)
     func_00231250(self, 1, 2, 1);
     func_002870A0(func_0028B180());
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230338);
-#ifdef SKIP_ASM
 extern "C" void func_00230338(void* self)
 {
     void* a = *(void**)((char*)self + 0xC);
@@ -355,11 +338,8 @@ extern "C" void func_00230338(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230360);
-#ifdef SKIP_ASM
 extern "C" void func_00358700(int kind);
 extern "C" void func_00229408(void* self, int id);
 extern "C" void func_00343C08(void* self, int arg);
@@ -391,13 +371,10 @@ extern "C" void func_00230360(void* self, int id)
     }
     func_00308FE0(*(void**)((char*)self + 0x30), id);
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_00230430);
 
 //100%
-INCLUDE_ASM("main/gameload", cGame_exit);
-#ifdef SKIP_ASM
 struct cAppMan;
 void cReplay_stopAutoReplay(void* self);
 extern "C" void func_00258AE0(void* p);
@@ -427,13 +404,10 @@ extern "C" void cGame_exit(void* self, int toFrontEnd)
         cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232738(cMemMan_alloc(8, D_0047B788, 0x100, 0)));
     }
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_00230558);
 
 //100%
-INCLUDE_ASM("main/gameload", func_002305C8);
-#ifdef SKIP_ASM
 extern "C" void func_0026F980(void* a);
 void func_002CC0B8(void* a, int b);
 extern "C" void func_002CC460(void* a);
@@ -449,11 +423,8 @@ extern "C" void func_002305C8(void* self)
     func_002CC460(*(void**)((char*)self + 0xA4));
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230640);
-#ifdef SKIP_ASM
 extern "C" void func_003550A0(void* mgr, int id);
 struct sGp2898 { int a, b; };
 extern sGp2898 D_004A5988; // target: raw $gp+0x2898 (splat doesn't symbolize it)
@@ -467,33 +438,24 @@ extern "C" void func_00230640(void)
         func_003550A0(mgr, D_004428D8[i]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230698__FPvi);
-#ifdef SKIP_ASM
 int func_00230698(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x5C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_002306A8__FPvi);
-#ifdef SKIP_ASM
 int func_002306A8(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x68);
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_002306B8);
 
 INCLUDE_ASM("main/gameload", func_00230E90);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230E98);
-#ifdef SKIP_ASM
 extern "C" int func_00231CF0(void* self);
 void func_00278718(void* self);
 void func_001F3170(void* self);
@@ -548,13 +510,10 @@ extern "C" int func_00230E98(void* self)
     func_001F3170(*(void**)((char*)self + 0x94));
     return 1;
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_00230F40);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231250);
-#ifdef SKIP_ASM
 extern "C" void func_00230F40(void* self);
 
 extern "C" void func_00231250(void* self, int a, int b, int refresh)
@@ -565,22 +524,16 @@ extern "C" void func_00231250(void* self, int a, int b, int refresh)
         func_00230F40(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231278__FPvi);
-#ifdef SKIP_ASM
 void func_00231278(void* self, int val)
 {
     *(int*)((char*)self + 0x208) = val;
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_00231280);
 
 //100%
-INCLUDE_ASM("main/gameload", func_002312D8);
-#ifdef SKIP_ASM
 struct sVEntry_002312D8 {
     short delta;
     short index;
@@ -599,11 +552,8 @@ extern "C" int func_002312D8(void* self)
     sVEntry_002312D8* vt = *(sVEntry_002312D8**)((char*)p + 0xC);
     return vt[8].fn((char*)p + vt[8].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231320);
-#ifdef SKIP_ASM
 extern "C" void func_00233AA0(void* p);
 
 extern "C" void func_00231320(void* self)
@@ -613,11 +563,8 @@ extern "C" void func_00231320(void* self)
         func_00233AA0(p);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231348);
-#ifdef SKIP_ASM
 struct cSerObj_00231348 {
     int f0, f4, f8;
     virtual void v01();
@@ -678,13 +625,10 @@ extern "C" void func_00231348(void* self, cStream_00231348* stream)
     func_00236728((char*)self + 0x1B8, stream);
     func_002361C8_s((char*)self + 0x1DC, stream);
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_002314D0);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231840);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern void* D_004A2EEC;
 extern int D_004A2E9C;
@@ -780,11 +724,8 @@ extern "C" int func_00231840(char* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231AB8);
-#ifdef SKIP_ASM
 extern "C" int func_00278DA0(void* a);
 extern void* D_004A28A4;
 
@@ -803,13 +744,10 @@ extern "C" int func_00231AB8(void* self)
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_00231B50);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231C70);
-#ifdef SKIP_ASM
 extern "C" int func_00231CF0(void* self);
 extern char* D_004A5B64;
 
@@ -820,22 +758,16 @@ extern "C" int func_00231C70(void* self)
     }
     return 0;
 }
-#endif
 
 extern "C" void* func_00231D18(void* self);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231CB0__FPv);
-#ifdef SKIP_ASM
 void* func_00231CB0(void* self)
 {
     return func_00231D18(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231CD0);
-#ifdef SKIP_ASM
 extern char D_0047D980[];
 
 extern "C" void* func_00231CD0(void* self)
@@ -845,21 +777,15 @@ extern "C" void* func_00231CD0(void* self)
     *(int*)((char*)self + 8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231CF0);
-#ifdef SKIP_ASM
 extern "C" int func_00231CF0(void* self)
 {
     *(int*)((char*)self + 8) = 1;
     return *(float*)((char*)self + 4) >= 0.20000000298023224f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231D18);
-#ifdef SKIP_ASM
 // PORT: the unit declares this void*-returning; the body returns nothing meaningful.
 extern "C" void* func_00231D18(void* self)
 {
@@ -872,11 +798,8 @@ extern "C" void* func_00231D18(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231D60);
-#ifdef SKIP_ASM
 extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 extern int D_004A28AC;
 extern char D_004FF1A0[];
@@ -984,11 +907,8 @@ extern "C" int func_00231D60(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231F80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float floorf_231F80(float x)
 {
@@ -1005,15 +925,12 @@ extern "C" void func_00231F80(float* t)
     *t += 0.01666666753590107f;
     *t -= floorf_231F80(*t);
 }
-#endif
 
 INCLUDE_ASM("main/gameload", func_00231FC0);
 
 extern void* D_0047D938[];
 
 //100%
-INCLUDE_ASM("main/gameload", func_00232328__FPv);
-#ifdef SKIP_ASM
 void* func_00232328(void* self)
 {
     int t0 = 0;
@@ -1022,5 +939,4 @@ void* func_00232328(void* self)
     *(int*)((char*)self + 0x8) = t0;
     return self;
 }
-#endif
 

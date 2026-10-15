@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_load);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_3438(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -117,11 +115,8 @@ extern "C" void cFELoadScreen_load(void* self)
     func_0039F400(*(char**)((char*)self + 0xC) + 0x18, screen);
     *(int*)((char*)self + 0x18) = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233640);
-#ifdef SKIP_ASM
 int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
 int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
 extern "C" int func_00146E98(void* player, int idx);
@@ -199,13 +194,10 @@ extern "C" void func_00233640(void* self, int type)
     }
     cBigFile__cBigFile(&bf, 2);
 }
-#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233930);
-#ifdef SKIP_ASM
 struct cGame00233930 {
     char pad[0x10D8];
     virtual void v01();
@@ -287,11 +279,8 @@ extern "C" void func_00233930(void* self)
     func_0036A020(D_004A289C);
     func_0028FA98(func_0028B180(), 1.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_002339F8);
-#ifdef SKIP_ASM
 struct sVEntryI002339F8 {
     short delta;
     short index;
@@ -322,11 +311,8 @@ extern "C" int func_002339F8(void* self)
     vt2[20].fn(g + vt2[20].delta);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233A70);
-#ifdef SKIP_ASM
 extern "C" void func_00398038(void*);
 void func_00231CB0(void*);
 
@@ -335,11 +321,8 @@ extern "C" void func_00233A70(void* self)
     func_00398038(*(void**)((char*)self + 0xC));
     func_00231CB0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233AA0);
-#ifdef SKIP_ASM
 extern void* D_004A2C68;
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 
@@ -350,13 +333,10 @@ extern "C" void func_00233AA0(void* self)
         func_00231250(D_004A2C68, a, *(int*)((char*)self + 4), 0);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_00233AD0);
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233AF0);
-#ifdef SKIP_ASM
 struct sVEntry_func_00233AF0 {
     short delta;
     short index;
@@ -372,11 +352,8 @@ void* func_00233AF0_2(void* self, void* obj)
     sVEntry_func_00233AF0* vt = *(sVEntry_func_00233AF0**)obj;
     return vt[1].fn((char*)obj + vt[1].delta, self, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B28);
-#ifdef SKIP_ASM
 struct sVEntry_func_00233B28 {
     short delta;
     short index;
@@ -392,11 +369,8 @@ void* func_00233B28_2(void* self, void* obj)
     sVEntry_func_00233B28* vt = *(sVEntry_func_00233B28**)obj;
     return vt[2].fn((char*)obj + vt[2].delta, self, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B60);
-#ifdef SKIP_ASM
 extern void* D_004A2C68;
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 
@@ -404,59 +378,41 @@ extern "C" void func_00233B60(void)
 {
     func_00231250(D_004A2C68, 0xA, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B88__FPv);
-#ifdef SKIP_ASM
 void func_00233B88(void* self)
 {
 }
-#endif
 
 extern "C" void* func_00233AF0(void* self);
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B90__FPv);
-#ifdef SKIP_ASM
 void* func_00233B90(void* self)
 {
     return func_00233AF0(self);
 }
-#endif
 
 extern "C" void* func_00233B28(void* self);
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233BB0__FPv);
-#ifdef SKIP_ASM
 void* func_00233BB0(void* self)
 {
     return func_00233B28(self);
 }
-#endif
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233BD0__FPv);
-#ifdef SKIP_ASM
 void* func_00233BD0(void* self)
 {
     return func_00233AF0(self);
 }
-#endif
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233BF0__FPv);
-#ifdef SKIP_ASM
 void* func_00233BF0(void* self)
 {
     return func_00233B28(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233C10);
-#ifdef SKIP_ASM
 extern void* D_0047D6E8[];
 extern void* D_0047D5E0[];
 extern void* D_004A2C68;
@@ -473,11 +429,8 @@ extern "C" void* func_00233C10(void* self)
     *(int*)((char*)self + 0x14) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
-#ifdef SKIP_ASM
 extern void* D_004A2C68;
 extern void* D_004A28A4;
 extern void* D_004A28A8;
@@ -502,11 +455,8 @@ extern "C" void func_00233C50(void* self)
         *(int*)((char*)p + 0x90) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233CD8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -687,11 +637,8 @@ extern "C" void func_00233CD8(void* self)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234008);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sLoadScreen00234008 {
     int state;
@@ -718,11 +665,8 @@ extern "C" void func_00234008(sLoadScreen00234008* self)
     func_00278DE8(D_004A28A4, 1);
     self->state = 7;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_002340B8);
-#ifdef SKIP_ASM
 struct sVEntry_func_002340B8 {
     short delta;
     short index;
@@ -737,11 +681,8 @@ extern "C" void func_002340B8(void* self, void* stream)
     e = &(*(sVEntry_func_002340B8**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_00234120);
-#ifdef SKIP_ASM
 struct sVEntry_func_00234120 {
     short delta;
     short index;
@@ -756,11 +697,8 @@ extern "C" void func_00234120(void* self, void* stream)
     e = &(*(sVEntry_func_00234120**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234188);
-#ifdef SKIP_ASM
 extern void* D_0047D6E8[];
 extern void* D_0047D530[];
 extern void* D_004A2C68;
@@ -779,11 +717,8 @@ extern "C" void* func_00234188(void* self)
     *(int*)((char*)self + 0x8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_002341D0);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_41D0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -865,13 +800,10 @@ extern "C" void func_002341D0(void* self, int mode)
     }
     *(int*)((char*)self + 0x1C) = 0;
 }
-#endif
 
 INCLUDE_ASM("fe/festateloadscreen", func_002343B0);
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234750);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_4750(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -962,11 +894,8 @@ extern "C" void func_00234750(void* self)
         t->slot[otherSide_234750(*(char**)(x + 4))].f0 = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234910);
-#ifdef SKIP_ASM
 extern void* D_004A28A4;
 extern "C" int func_00278F68(void* self, int i, int a, int b);
 
@@ -988,11 +917,8 @@ extern "C" void func_00234910(void* self)
         *(int*)((char*)self + 0x14) = 1;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_00234990);
-#ifdef SKIP_ASM
 // PORT: the unit declares func_00233AF0 as `void* (void*)`; the body also uses $a1 (obj).
 void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
 
@@ -1014,11 +940,8 @@ extern "C" void func_00234990(void* self, void* stream)
     e = &(*(sVEntry_func_00234990**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_00234A30);
-#ifdef SKIP_ASM
 // PORT: the unit declares func_00233B28 as `void* (void*)`; the body also uses $a1 (obj).
 void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
 
@@ -1040,5 +963,4 @@ extern "C" void func_00234A30(void* self, void* stream)
     e = &(*(sVEntry_func_00234A30**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
 }
-#endif
 

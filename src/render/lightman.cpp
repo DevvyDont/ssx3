@@ -8,8 +8,6 @@ struct cPSPLightMan;
 cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self);
 
 //100%
-INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
-#ifdef SKIP_ASM
 void* cLightMan_construct()
 {
     void* mem = cMemMan_alloc(0x14, D_00492EE0, 0, 0);
@@ -17,7 +15,6 @@ void* cLightMan_construct()
     *(void**)mem = D_00493650;
     return mem;
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038DC20);
 
@@ -26,40 +23,26 @@ INCLUDE_ASM("render/lightman", func_0038DC28);
 INCLUDE_ASM("render/lightman", func_0038DC48);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC50__FPv);
-#ifdef SKIP_ASM
 void func_0038DC50(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC58__FPv);
-#ifdef SKIP_ASM
 void func_0038DC58(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC60__FPv);
-#ifdef SKIP_ASM
 void func_0038DC60(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC68__FPv);
-#ifdef SKIP_ASM
 void func_0038DC68(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC70);
-#ifdef SKIP_ASM
 struct sV3_DC70 {
     float x, y, z;
     sV3_DC70() {}
@@ -145,11 +128,8 @@ extern "C" void func_0038DC70(cLightSrc_DC70* self, sLight_DC70* lights, int n, 
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DEE8);
-#ifdef SKIP_ASM
 class cObj0038DEE8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -165,11 +145,8 @@ extern "C" void func_0038DEE8(cObj0038DEE8* obj, int a, int b, float f)
 {
     func_0038DC50_3(obj->v02(a), b, f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DF38);
-#ifdef SKIP_ASM
 class cObj0038DF38 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -185,11 +162,8 @@ extern "C" void func_0038DF38(cObj0038DF38* obj, int a, int b, int c, float f)
 {
     func_0038DC58_4(obj->v02(a), b, c, f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DF98);
-#ifdef SKIP_ASM
 class cObj0038DF98 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -205,11 +179,8 @@ extern "C" void func_0038DF98(cObj0038DF98* obj, int a, int b, int c, float f, i
 {
     func_0038DC60_5(obj->v02(a), b, c, f, d);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038E008);
-#ifdef SKIP_ASM
 class cObj0038E008 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -225,7 +196,6 @@ extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, flo
 {
     func_0038DC68_8(obj->v02(a), b, c, d, x, y, e, z);
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038E0A8);
 
@@ -246,8 +216,6 @@ INCLUDE_ASM("render/lightman", func_0038E880);
 INCLUDE_ASM("render/lightman", func_0038EA60);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038EC40);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sLmQuadVec4 {
     float x, y, z, w;
@@ -307,15 +275,12 @@ extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, floa
     sLmQuadVEntry* vt = g->vtable;
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038ED90);
 
 INCLUDE_ASM("render/lightman", func_0038EE78);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F2A8);
-#ifdef SKIP_ASM
 extern float D_004A4458;
 
 struct sLmCell_F2A8 {
@@ -332,13 +297,10 @@ extern "C" sLmCell_F2A8* func_0038F2A8(float* pos)
     int i = (int)(D_004A4458 * d);
     return &D_00504D80[i % 8];
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038F300);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F460);
-#ifdef SKIP_ASM
 struct sLightRing {
     int field_0x0;
     int count;        // 0x4
@@ -369,11 +331,8 @@ extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags)
     r->size[i] = size;
     return r->result[i];
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/lightman", func_0038F4F8);
-#ifdef SKIP_ASM
 extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags);
 extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
 
@@ -383,13 +342,10 @@ extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
     func_00371D10(addr, r, size >> 4, flags);
     return r;
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038F560);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F598);
-#ifdef SKIP_ASM
 struct sLightDma_F598 {
     int field_0x0;
     int count;              // 0x4
@@ -428,11 +384,8 @@ unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags)
     self->cur = (cur + 1) % self->count;
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/lightman", func_0038F668);
-#ifdef SKIP_ASM
 struct sLmStack {
     char pad_0x00[0xC];
     int depth;          // 0x0C
@@ -448,22 +401,16 @@ extern "C" void func_0038F668(sLmStack* self, int end, int arg)
     int size = end - base;
     func_0038F598(self, size + (-size & 0xF), arg, base);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F6A8);
-#ifdef SKIP_ASM
 extern "C" void func_0038F6A8(void* self)
 {
     *(int*)((char*)self + 0xC) = (*(int*)((char*)self + 0xC) + 1) % *(int*)((char*)self + 0x4);
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038F6D0);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F708);
-#ifdef SKIP_ASM
 extern int D_004A5B84;
 extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
 
@@ -472,11 +419,8 @@ extern "C" int func_0038F708(unsigned int madr, int size, int flags)
     func_00371D10(madr, D_004A5B84, size >> 4, flags);
     return D_004A5B84;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F738);
-#ifdef SKIP_ASM
 extern int D_004A5B84;
 extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
 
@@ -484,54 +428,39 @@ extern "C" void func_0038F738(unsigned int madr, int size, int flags)
 {
     func_00371DD8(D_004A5B84, madr, size >> 4, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F768);
-#ifdef SKIP_ASM
 // PORT: polls PS2 hardware register 0x1000D000 directly; needs a platform shim.
 extern "C" void func_0038F768(void)
 {
     while (*(volatile int*)0x1000D000 & 0x100) {
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F7B0);
-#ifdef SKIP_ASM
 // PORT: polls PS2 hardware register 0x1000D400 directly; needs a platform shim.
 extern "C" void func_0038F7B0(void)
 {
     while (*(volatile int*)0x1000D400 & 0x100) {
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F7F8__FPv);
-#ifdef SKIP_ASM
 void func_0038F7F8(void* self)
 {
 }
-#endif
 
 extern "C" void* func_002BB6B8(void* self);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F800__FPv);
-#ifdef SKIP_ASM
 void* func_0038F800(void* self)
 {
     return func_002BB6B8(self);
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038F820);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F930);
-#ifdef SKIP_ASM
 extern int D_0044BDE0[];
 
 extern "C" int func_0038F930(void* self, unsigned char* src, unsigned char* dst)
@@ -553,13 +482,10 @@ extern "C" int func_0038F930(void* self, unsigned char* src, unsigned char* dst)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038F9C0);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038FC48);
-#ifdef SKIP_ASM
 struct sRow16_FC48 {
     unsigned char b[16];
 };
@@ -617,15 +543,12 @@ extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsig
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_0038FED0);
 
 INCLUDE_ASM("render/lightman", func_00390198);
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390458);
-#ifdef SKIP_ASM
 extern float D_004A45E4;
 extern float D_004A45E8;
 extern float D_004A45EC;
@@ -652,11 +575,8 @@ extern "C" void func_00390458(void* self, int idx)
     *(float*)(e + 0x10) = D_004A45F4;
     *(float*)(e + 0x14) = D_004A45F8;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_003904A0);
-#ifdef SKIP_ASM
 extern int D_004A45D8;
 extern int D_004A45DC;
 extern void* D_004A4474;
@@ -685,13 +605,10 @@ extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
     *addr = func_0038F668_r(ring, mark, 4);
     func_00368138(*(void**)((char*)self + 0x18F4), pkt);
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_003905E8);
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390C20);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern int D_004A44C0;
 extern int D_004A44C8;
@@ -711,11 +628,8 @@ extern "C" void func_00390C20()
         D_004A44C8 = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390C60);
-#ifdef SKIP_ASM
 extern int D_004A460C;
 extern int D_004A46B4;
 extern int D_004A4698;
@@ -820,11 +734,8 @@ extern "C" void func_00390C60()
         *(float*)&D_004A469C = 0.0f;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390EC8);
-#ifdef SKIP_ASM
 extern int D_004A460C;
 extern int D_004A4698;
 extern int D_004A469C;
@@ -840,11 +751,8 @@ extern "C" void func_00390EC8(float t)
         D_004A46B4 = (int)(t * 0.0018072288949042559f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390EF8);
-#ifdef SKIP_ASM
 extern int D_004A460C;
 extern int D_004A46B4;
 
@@ -856,13 +764,10 @@ extern "C" int func_00390EF8()
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_00390F20);
 
 //100%
-INCLUDE_ASM("render/lightman", func_003912A8);
-#ifdef SKIP_ASM
 extern char D_0043BD00[];
 extern "C" void func_00424020(int);
 
@@ -879,11 +784,8 @@ extern "C" void func_003912A8(void)
     }
     func_00424020(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00391360);
-#ifdef SKIP_ASM
 extern char D_0043CCA0[];
 extern "C" void func_00424020(int);
 
@@ -900,11 +802,8 @@ extern "C" void func_00391360(void)
     }
     func_00424020(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00391418);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (lqc2 x16 into vf1-vf16, then vcallmsr of the
 // microprogram at VU0 micro-memory address 0); the PC port needs a C version.
 extern "C" void func_00391418(void* self, void* m)
@@ -940,11 +839,8 @@ extern "C" void func_00391418(void* self, void* m)
         : "r"(m)
         : "$2", "memory");
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00391480);
-#ifdef SKIP_ASM
 struct sQuad16 {
     int w[4];
 } __attribute__((aligned(16)));
@@ -968,11 +864,8 @@ extern "C" void func_00391480(void* self, sQuad16* dst)
         dst += 10;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_003914F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 integer register read (vi1); the PC port needs a C fallback.
 extern "C" int func_003914F8(void)
 {
@@ -980,13 +873,10 @@ extern "C" int func_003914F8(void)
     __asm__ __volatile__("cfc2.i %0, $vi1" : "=r"(r));
     return r;
 }
-#endif
 
 INCLUDE_ASM("render/lightman", func_00391508);
 
 //100%
-INCLUDE_ASM("render/lightman", func_003915E8);
-#ifdef SKIP_ASM
 struct sLmVec2_15E8 {
     float x, y;
 
@@ -1045,11 +935,8 @@ extern "C" sLmLight_15E8* func_003915E8(sLmLight_15E8* self, const char* name, i
     func_00391708(self, name, flags);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_003916C0);
-#ifdef SKIP_ASM
 extern "C" void func_003919E8(void* self);
 void operator_delete(int* ptr);
 
@@ -1060,11 +947,8 @@ extern "C" void func_003916C0(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00391708);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void cFont_linkFont(void* self, void* data, int flags);
@@ -1082,5 +966,4 @@ extern "C" void func_00391708(void* self, const char* name, int flags)
         cMemMan_free(data);
     }
 }
-#endif
 

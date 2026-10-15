@@ -6,8 +6,6 @@ extern const char D_0047C128[];
 extern void* D_004A2C74;
 
 //99.53%
-INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getManager__Fv);
-#ifdef SKIP_ASM
 void* cMCOverlayManager_getManager()
 {
     if (D_004A2C74 == 0) {
@@ -16,13 +14,10 @@ void* cMCOverlayManager_getManager()
     }
     return D_004A2C74;
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023C850);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C860);
-#ifdef SKIP_ASM
 struct sMovieObj_23C860 {
     char pad[0x748];
     virtual void v01();
@@ -34,16 +29,12 @@ extern "C" void func_0023C860()
     delete (sMovieObj_23C860*)D_004A2C74;
     D_004A2C74 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C898);
-#ifdef SKIP_ASM
 extern "C" int func_0023C898(void* self)
 {
     return *(int*)((char*)self + 0x130) == 1;
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
 
@@ -52,8 +43,6 @@ INCLUDE_ASM("movie/movieplayer", func_0023C8B8);
 INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C8D0);
-#ifdef SKIP_ASM
 extern "C" int func_0023C8D0(void* self)
 {
     // masks applied as separate statements; folding them into one
@@ -63,11 +52,8 @@ extern "C" int func_0023C8D0(void* self)
     v &= -481;
     return v != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C8F0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -124,11 +110,8 @@ extern "C" void func_0023C8F0(void* self, int mode)
     func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
     func_002C26D0_v(s + 0x1B4, fmt, desc, name);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CA28);
-#ifdef SKIP_ASM
 struct sMovieVEntryCA28 {
     short delta;
     short index;
@@ -142,11 +125,8 @@ extern "C" void func_0023CA28(void* self, int a, int b, int c)
     vt[29].fn((char*)obj + vt[29].delta, a, b, c);
     *(int*)((char*)self + 0xE8) = c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CA70);
-#ifdef SKIP_ASM
 struct sMovieVEntry {
     short delta;
     short index;
@@ -159,11 +139,8 @@ extern "C" void func_0023CA70(void* self)
     sMovieVEntry* vt = *(sMovieVEntry**)obj;
     vt[32].fn((char*)obj + vt[32].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CAA0);
-#ifdef SKIP_ASM
 struct sMovieVEntryCAA0 {
     short delta;
     short index;
@@ -181,11 +158,8 @@ void func_0023CAA0_impl(void* self, int a)
     vt[19].fn((char*)obj + vt[19].delta, a);
     *(int*)((char*)self + 0xF0) = a;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CAE8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -242,11 +216,8 @@ extern "C" void func_0023CAE8(void* self, int mode, int a2)
     func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
     func_002C26D0_v(s + 0x1B4, fmt, desc, name);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CC20);
-#ifdef SKIP_ASM
 extern "C" void func_0023CC20(void* self)
 {
     if (*(int*)((char*)self + 0x118) != 0) {
@@ -255,22 +226,16 @@ extern "C" void func_0023CC20(void* self)
         vt[43].fn((char*)obj + vt[43].delta);
     }
 }
-#endif
 
 extern "C" void* func_0023CAA0(void* self);
 
 //99.29%
-INCLUDE_ASM("movie/movieplayer", func_0023CC58__FPv);
-#ifdef SKIP_ASM
 void* func_0023CC58(void* self)
 {
     return func_0023CAA0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CC78);
-#ifdef SKIP_ASM
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
@@ -311,11 +276,8 @@ extern "C" void func_0023CC78(void* self, int n, char* dst)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_setTitleString);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -379,13 +341,10 @@ extern "C" void cMCOverlayManager_setTitleString(void* self, int n)
     mvt[45].fn(o + mvt[45].delta, out);
     func_002C2508((char*)self + 0x234, out);
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023CF38);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023D570);
-#ifdef SKIP_ASM
 extern "C" void* func_0023D570(void* self, int mode)
 {
     char* s = (char*)self;
@@ -400,11 +359,8 @@ extern "C" void* func_0023D570(void* self, int mode)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023D5A8);
-#ifdef SKIP_ASM
 extern "C" void* func_002C22C8(void);
 
 extern "C" void func_0023D5A8(void* self)
@@ -418,11 +374,8 @@ extern "C" void func_0023D5A8(void* self)
     *(float*)(s + 0x114) = 0.016669999808073044f;
 //END
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023D5E8);
-#ifdef SKIP_ASM
 extern "C" void func_002C2300(void*);
 
 extern "C" void func_0023D5E8(void* self)
@@ -430,11 +383,8 @@ extern "C" void func_0023D5E8(void* self)
     func_002C2300(*(void**)((char*)self + 0x434));
     *(void**)((char*)self + 0x434) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023D618);
-#ifdef SKIP_ASM
 extern "C" void func_0023D7D8(void* self);
 extern "C" void func_0023D660(void* self);
 
@@ -449,11 +399,8 @@ extern "C" void func_0023D618(void* self)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023D660);
-#ifdef SKIP_ASM
 extern "C" int func_00241AC0(void* self);
 extern "C" void func_0023E268(void* self);
 extern "C" void func_0023E320(void* self);
@@ -516,15 +463,12 @@ extern "C" void func_0023D660(void* self)
         func_0023E320(self);
     }
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023D7A8);
 
 INCLUDE_ASM("movie/movieplayer", func_0023D7D8);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E268);
-#ifdef SKIP_ASM
 struct sMovieVEntryE268a {
     short delta;
     short index;
@@ -546,19 +490,13 @@ extern "C" void func_0023E268(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0x32);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E2C0__FPv);
-#ifdef SKIP_ASM
 void func_0023E2C0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E2C8);
-#ifdef SKIP_ASM
 struct sMovieVEntryE2C8a {
     short delta;
     short index;
@@ -580,11 +518,8 @@ extern "C" void func_0023E2C8(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0x33);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E320);
-#ifdef SKIP_ASM
 struct sMovieVEntryE320a {
     short delta;
     short index;
@@ -622,11 +557,8 @@ extern "C" void func_0023E320(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E3C0);
-#ifdef SKIP_ASM
 struct sMovieVEntryE3C0a {
     short delta;
     short index;
@@ -650,11 +582,8 @@ extern "C" void func_0023E3C0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E428);
-#ifdef SKIP_ASM
 struct sMovieVEntryE428 {
     short delta;
     short index;
@@ -676,11 +605,8 @@ extern "C" void func_0023E428(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E498);
-#ifdef SKIP_ASM
 struct sMovieVEntryE498a {
     short delta;
     short index;
@@ -702,19 +628,13 @@ extern "C" void func_0023E498(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0x34);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E4F0__FPv);
-#ifdef SKIP_ASM
 void func_0023E4F0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E4F8);
-#ifdef SKIP_ASM
 struct sMovieVEntryE4F8 {
     short delta;
     short index;
@@ -728,11 +648,8 @@ extern "C" void func_0023E4F8(void* self)
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E540);
-#ifdef SKIP_ASM
 extern "C" int func_00241CD8(void* self);
 extern "C" void func_0023EB50(void* self);
 extern "C" void func_00241FD0(void* self);
@@ -827,11 +744,8 @@ extern "C" void func_0023E540(void* self)
     }
 }
 #undef S_E540
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E820);
-#ifdef SKIP_ASM
 struct sMovieVEntryE820 {
     short delta;
     short index;
@@ -853,13 +767,10 @@ extern "C" void func_0023E820(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_0023E8A0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023EA30);
-#ifdef SKIP_ASM
 extern int D_004A2C78;
 extern "C" void func_00241180(void* self, int a1);
 
@@ -884,11 +795,8 @@ extern "C" void func_0023EA30(void* self, int v)
     sMovieVEntryEA30* vt = *(sMovieVEntryEA30**)(s + 0x748);
     vt[1].fn(s + vt[1].delta, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023EA90);
-#ifdef SKIP_ASM
 extern "C" int func_0023C8D0(void* self);
 extern "C" void func_0023FAE0(void* self);
 void func_0023FB18(void* self, int val);
@@ -934,11 +842,8 @@ extern "C" void func_0023EA90(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023EB50);
-#ifdef SKIP_ASM
 struct sMovieVEntry2 {
     short delta;
     short index;
@@ -950,11 +855,8 @@ extern "C" void func_0023EB50(void* self)
     sMovieVEntry2* vt = *(sMovieVEntry2**)((char*)self + 0x748);
     vt[1].fn((char*)self + vt[1].delta, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023EB80);
-#ifdef SKIP_ASM
 struct sMovieVEntryEB80 {
     short delta;
     short index;
@@ -976,11 +878,8 @@ extern "C" void func_0023EB80(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023EC00);
-#ifdef SKIP_ASM
 extern "C" void func_0023EB50(void* self);
 extern "C" int func_00241CD8(void* self);
 // PORT: the target calls func_00241FB0 as a void function here (the unit defines it returning void*).
@@ -1077,11 +976,8 @@ extern "C" void func_0023EC00(void* self)
         post_EC00(s, 0x1D);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023EF68);
-#ifdef SKIP_ASM
 class cMovieSub434 {
 public:
     virtual int v01();
@@ -1199,11 +1095,8 @@ extern "C" void func_0023EF68(void* self)
         *(int*)((char*)self + 0xC4) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F050);
-#ifdef SKIP_ASM
 extern "C" void func_0023F050(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1218,11 +1111,8 @@ extern "C" void func_0023F050(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F0F8);
-#ifdef SKIP_ASM
 extern "C" void func_0023EA30(void* self, int v);
 extern "C" void func_0023FB20(void* self, int v);
 
@@ -1234,11 +1124,8 @@ extern "C" void func_0023F0F8(void* self)
         *(int*)((char*)self + 0x338) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F150);
-#ifdef SKIP_ASM
 struct sMovieVEntryF150 {
     short delta;
     short index;
@@ -1262,11 +1149,8 @@ extern "C" void func_0023F150(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F1D8);
-#ifdef SKIP_ASM
 struct sMovieVEntryF1D8 {
     short delta;
     short index;
@@ -1288,11 +1172,8 @@ extern "C" void func_0023F1D8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F258);
-#ifdef SKIP_ASM
 struct sMovieVEntryF258 {
     short delta;
     short index;
@@ -1314,21 +1195,15 @@ extern "C" void func_0023F258(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F2D8);
-#ifdef SKIP_ASM
 extern "C" void func_0023F2D8(void* self)
 {
     sMovieVEntry2* vt = *(sMovieVEntry2**)((char*)self + 0x748);
     vt[1].fn((char*)self + vt[1].delta, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F308);
-#ifdef SKIP_ASM
 struct sMovieVEntryF308a {
     short delta;
     short index;
@@ -1357,11 +1232,8 @@ extern "C" void func_0023F308(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0xF);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F3A0);
-#ifdef SKIP_ASM
 struct sMovieVEntryF3A0a {
     short delta;
     short index;
@@ -1390,11 +1262,8 @@ extern "C" void func_0023F3A0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F438);
-#ifdef SKIP_ASM
 extern "C" void func_0023F438(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1410,11 +1279,8 @@ extern "C" void func_0023F438(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F4F8);
-#ifdef SKIP_ASM
 struct sMovieVEntryF4F8a {
     short delta;
     short index;
@@ -1443,11 +1309,8 @@ extern "C" void func_0023F4F8(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0x11);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F578);
-#ifdef SKIP_ASM
 extern "C" void func_0023CC20(void* self);
 extern "C" void func_00241180(void* self, int a1);
 
@@ -1560,11 +1423,8 @@ extern "C" void func_0023F578(char* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023F698);
-#ifdef SKIP_ASM
 extern "C" void func_0023EB50(void* self);
 extern "C" int func_00241CD8(void* self);
 extern "C" void func_00242050(void* self);
@@ -1705,11 +1565,8 @@ extern "C" void func_0023F698(void* self)
         post_F698(s, 0x18);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FAE0);
-#ifdef SKIP_ASM
 extern "C" void func_0023FB20(void* self, int v);
 
 extern "C" void func_0023FAE0(void* self)
@@ -1722,20 +1579,14 @@ extern "C" void func_0023FAE0(void* self)
     }
     func_0023FB20(self, *(int*)((char*)self + 0x428));
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FB18__FPvi);
-#ifdef SKIP_ASM
 void func_0023FB18(void* self, int val)
 {
     *(int*)((char*)self + 0x428) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FB20);
-#ifdef SKIP_ASM
 extern "C" void func_0023FB20(void* self, int v)
 {
     *(int*)((char*)self + 0x42C) = v;
@@ -1743,11 +1594,8 @@ extern "C" void func_0023FB20(void* self, int v)
     sMovieVEntry2* vt = *(sMovieVEntry2**)obj;
     vt[5].fn((char*)obj + vt[5].delta, v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FB58);
-#ifdef SKIP_ASM
 struct sMovieVEntryFB58 {
     short delta;
     short index;
@@ -1767,11 +1615,8 @@ extern "C" void* func_0023FB58(void* self)
     vt[1].fn((char*)self + vt[1].delta, 0);
     return func_0023D570(self, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FBB8);
-#ifdef SKIP_ASM
 extern "C" void func_0023FBB8(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1787,11 +1632,8 @@ extern "C" void func_0023FBB8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FC70);
-#ifdef SKIP_ASM
 struct sMovieVEntryFC70a {
     short delta;
     short index;
@@ -1818,11 +1660,8 @@ extern "C" void func_0023FC70(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FD08);
-#ifdef SKIP_ASM
 extern "C" void func_0023EA30(void* self, int v);
 
 extern "C" void func_0023FD08(void* self)
@@ -1830,11 +1669,8 @@ extern "C" void func_0023FD08(void* self)
     func_0023EA30(self, 1);
     (*(void (**)())((char*)self + 0x38))();
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FD40);
-#ifdef SKIP_ASM
 extern "C" void func_0023EA30(void* self, int v);
 extern "C" void func_0023EA90(void* self);
 
@@ -1933,11 +1769,8 @@ extern "C" void func_0023FD40(char* self)
         setState_23FD40(self, 0xD);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FE70);
-#ifdef SKIP_ASM
 struct sMovieVEntryFE70 {
     short delta;
     short index;
@@ -1961,11 +1794,8 @@ extern "C" void func_0023FE70(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FF00);
-#ifdef SKIP_ASM
 extern "C" void func_0023FF00(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1984,21 +1814,15 @@ extern "C" void func_0023FF00(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FFC0);
-#ifdef SKIP_ASM
 extern "C" void func_0023FFC0(void* self)
 {
     sMovieVEntry2* vt = *(sMovieVEntry2**)((char*)self + 0x748);
     vt[1].fn((char*)self + vt[1].delta, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FFF0);
-#ifdef SKIP_ASM
 extern "C" void func_0023FFF0(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2016,11 +1840,8 @@ extern "C" void func_0023FFF0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002400B0);
-#ifdef SKIP_ASM
 struct sMovieVEntry00B0a {
     short delta;
     short index;
@@ -2046,11 +1867,8 @@ extern "C" void func_002400B0(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0x20);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240130);
-#ifdef SKIP_ASM
 extern "C" void func_0023CA70(void* self);
 extern "C" void func_00241240(void* self);
 
@@ -2162,13 +1980,10 @@ extern "C" void func_00240130(void* self)
         me->v01(0x24);
     }
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_002402D0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002405D0);
-#ifdef SKIP_ASM
 extern "C" void func_002405D0(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2184,11 +1999,8 @@ extern "C" void func_002405D0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240688);
-#ifdef SKIP_ASM
 extern "C" void func_0023EA30(void* self, int v);
 
 extern "C" void func_00240688(void* self)
@@ -2212,11 +2024,8 @@ extern "C" void func_00240688(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240768);
-#ifdef SKIP_ASM
 struct sMovieVEntry0768a {
     short delta;
     short index;
@@ -2245,11 +2054,8 @@ extern "C" void func_00240768(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240800);
-#ifdef SKIP_ASM
 struct sMovieVEntry0800 {
     short delta;
     short index;
@@ -2268,11 +2074,8 @@ extern "C" void func_00240800(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240860);
-#ifdef SKIP_ASM
 class cMovieDecoder_240860 {
 public:
     virtual void v01();
@@ -2385,11 +2188,8 @@ extern "C" void func_00240860(char* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240960);
-#ifdef SKIP_ASM
 struct sMovieVEntry0960a {
     short delta;
     short index;
@@ -2413,11 +2213,8 @@ extern "C" void func_00240960(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002409C8);
-#ifdef SKIP_ASM
 extern "C" void func_002409C8(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2439,11 +2236,8 @@ extern "C" void func_002409C8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240AB0);
-#ifdef SKIP_ASM
 extern "C" void func_0023EA30(void* self, int v);
 extern "C" void func_0023EA90(void* self);
 
@@ -2468,11 +2262,8 @@ extern "C" void func_00240AB0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240B88);
-#ifdef SKIP_ASM
 extern "C" void func_00240B88(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2487,11 +2278,8 @@ extern "C" void func_00240B88(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240C30);
-#ifdef SKIP_ASM
 struct sMovieVEntry0C30 {
     short delta;
     short index;
@@ -2509,21 +2297,15 @@ extern "C" void func_00240C30(void* self)
         *(int*)((char*)self + 0x338) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240C90);
-#ifdef SKIP_ASM
 extern "C" void func_00240C90(void* self)
 {
     sMovieVEntry2* vt = *(sMovieVEntry2**)((char*)self + 0x748);
     vt[1].fn((char*)self + vt[1].delta, 6);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240CC0);
-#ifdef SKIP_ASM
 extern "C" void func_00240CC0(void* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2543,11 +2325,8 @@ extern "C" void func_00240CC0(void* self)
         (*(cMovieSub434**)((char*)self + 0x434))->v05(*(int*)((char*)self + 0x428));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240D90);
-#ifdef SKIP_ASM
 class cMovieDecoder_240D90 {
 public:
     virtual void v01();
@@ -2659,42 +2438,30 @@ extern "C" void func_00240D90(char* self)
         setState_240D90(self, 0x2E);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240EB0);
-#ifdef SKIP_ASM
 extern "C" void func_00240EB0(void* self)
 {
     sMovieVEntry2* vt = *(sMovieVEntry2**)((char*)self + 0x748);
     vt[1].fn((char*)self + vt[1].delta, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240EE0);
-#ifdef SKIP_ASM
 extern "C" void func_00240EE0(void* self)
 {
     sMovieVEntry2* vt = *(sMovieVEntry2**)((char*)self + 0x748);
     vt[1].fn((char*)self + vt[1].delta, 6);
 }
-#endif
 
 extern "C" void* func_0023FB58(void* self);
 
 //99.29%
-INCLUDE_ASM("movie/movieplayer", func_00240F10__FPv);
-#ifdef SKIP_ASM
 void* func_00240F10(void* self)
 {
     return func_0023FB58(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00240F30);
-#ifdef SKIP_ASM
 struct sMovieVEntry0F30 {
     short delta;
     short index;
@@ -2716,13 +2483,10 @@ extern "C" void func_00240F30(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00240FB0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241000);
-#ifdef SKIP_ASM
 extern int D_004A2C78;
 
 struct sMovieVEntry1000 {
@@ -2739,26 +2503,20 @@ extern "C" void func_00241000(void* self, int a, int b, int c)
     vt[37].fn((char*)o + vt[37].delta, a, b, c);
     *(int*)((char*)self + 0xE4) = c;
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241050);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002410A0);
-#ifdef SKIP_ASM
 extern "C" void func_002410A0(void* self)
 {
     void* obj = *(void**)((char*)self + 0x434);
     sMovieVEntry* vt = *(sMovieVEntry**)obj;
     vt[12].fn((char*)obj + vt[12].delta);
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_002410D0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241138);
-#ifdef SKIP_ASM
 extern int D_004A2C78;
 
 struct sMovieVEntry1138 {
@@ -2776,11 +2534,8 @@ extern "C" void func_00241138(void* self, int a, int b)
     sMovieVEntry1138* vt = *(sMovieVEntry1138**)o;
     vt[41].fn((char*)o + vt[41].delta, a, b);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241180);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2C78;
 extern "C" void func_0023D570_v(void* self, int v) __asm__("func_0023D570");
@@ -2812,11 +2567,8 @@ extern "C" void func_00241180(void* self, int a1)
         vt2[1].fn((char*)self + vt2[1].delta, 0x14);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241200);
-#ifdef SKIP_ASM
 struct sMovieVEntry3 {
     short delta;
     short index;
@@ -2830,11 +2582,8 @@ extern "C" void func_00241200(void* self, int a, int n)
     sMovieVEntry3* vt = *(sMovieVEntry3**)obj;
     vt[30].fn((char*)obj + vt[30].delta, a, n);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241240);
-#ifdef SKIP_ASM
 struct sMovieVEntry1240a {
     short delta;
     short index;
@@ -2856,11 +2605,8 @@ extern "C" void func_00241240(void* self)
     vt2[1].fn((char*)self + vt2[1].delta, 0x24);
     (*(void (**)())((char*)self + 0x2C))();
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002412A0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2891,11 +2637,8 @@ extern "C" void func_002412A0(void* self)
     func_002C26D0_v(text, fmt, desc, name, *(int*)((char*)self + 0xF8) + 1);
     func_00241000_r(self, text, a, b);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241380);
-#ifdef SKIP_ASM
 struct sMovieVEntry1380 {
     short delta;
     short index;
@@ -2922,11 +2665,8 @@ extern "C" void func_00241380(void* self)
     vt = *(sMovieVEntry1380**)o;
     vt[3].fn((char*)o + vt[3].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241400);
-#ifdef SKIP_ASM
 class cMovieDecoder_241400 {
 public:
     virtual void v01();
@@ -3025,11 +2765,8 @@ extern "C" void func_00241400(char* self)
     }
     *(int*)(self + 0xE0) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241540);
-#ifdef SKIP_ASM
 class cMovieDecoder_241540 {
 public:
     virtual void v01();
@@ -3128,15 +2865,12 @@ extern "C" void func_00241540(char* self)
     }
     *(int*)(self + 0xE0) = 0;
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241678);
 
 INCLUDE_ASM("movie/movieplayer", func_002416C0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceDisplayString);
-#ifdef SKIP_ASM
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
 extern "C" void* func_002C2508(void* dst, void* src);
@@ -3272,23 +3006,17 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* self, int idx, ch
         func_002C26D0_v(dst, Loc_241710(D_0047C360), buf);
     }
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241928);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002419D8);
-#ifdef SKIP_ASM
 extern "C" int func_002419D8(void* self, int a1)
 {
     char* p = (char*)self + a1 * 0xe0;
     return *(int*)(p + 0x354);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceTotalString);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
 extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
@@ -3320,24 +3048,18 @@ extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int 
         func_002C26D0_v(dst, fmt, self->dev[idx].f14, str);
     }
 }
-#endif
 
 struct sPad16 { char x; int pad[3]; };
 extern sPad16 D_0047C3A8;
 extern "C" void func_002C2540(void*, void*);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241AA0);
-#ifdef SKIP_ASM
 extern "C" void func_00241AA0(void* self)
 {
     func_002C2540(self, &D_0047C3A8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241AC0);
-#ifdef SKIP_ASM
 struct sMovieVEntry1AC0 {
     short delta;
     short index;
@@ -3357,11 +3079,8 @@ extern "C" int func_00241AC0(void* self)
     }
     return *(int*)((char*)self + 0x424);
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241B20);
-#ifdef SKIP_ASM
 class cMovieSub434_1B20 {
 public:
     virtual int v01();
@@ -3455,11 +3174,8 @@ extern "C" sMovieFlags_1B20 func_00241B20_s(void* self)
     s.f = 0;
     return s;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("movie/movieplayer", func_00241CD8);
-#ifdef SKIP_ASM
 extern "C" int func_00241B20(void* self);
 
 extern "C" int func_00241CD8(void* self)
@@ -3475,11 +3191,8 @@ extern "C" int func_00241CD8(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241D40);
-#ifdef SKIP_ASM
 extern "C" void func_002C2540(void*, void*);
 extern char D_004A2CA8[];
 extern char D_004A2CB0[];
@@ -3499,13 +3212,10 @@ extern "C" void func_00241D40(void* self, int mode, void* buf)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241DC0);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241DC8);
-#ifdef SKIP_ASM
 extern "C" void func_002C26D0(void* dst, void* src, int n);
 extern char D_004A2C28[];
 
@@ -3515,24 +3225,18 @@ extern "C" void func_00241DC8(void* self, void* dst, int n)
     func_002C2540(buf, D_004A2C28);
     func_002C26D0(dst, buf, n + 1);
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00241E18);
 
 extern "C" void* func_002420C8(void*, int);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241FB0__FPv);
-#ifdef SKIP_ASM
 void* func_00241FB0(void* self)
 {
     return func_002420C8(self, *(int*)((char*)self + 0x42c));
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241FD0);
-#ifdef SKIP_ASM
 struct sMovieVEntry1FD0a {
     short delta;
     short index;
@@ -3560,11 +3264,8 @@ extern "C" void func_00241FD0(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 0x35);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00242050);
-#ifdef SKIP_ASM
 struct sMovieVEntry2050a {
     short delta;
     short index;
@@ -3592,11 +3293,8 @@ extern "C" void func_00242050(void* self)
         vt2[1].fn((char*)self + vt2[1].delta, 3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002420C8);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* p, int c, int n);
 
 class cMovieSub434_20C8 {
@@ -3728,13 +3426,10 @@ extern "C" void func_002420C8_v(void* self, int i)
         me->slots[me->cur].e = (*(cMovieSub434_20C8**)((char*)self + 0x434))->v20();
     (*(cMovieSub434_20C8**)((char*)self + 0x434))->v70(i, name, 100);
 }
-#endif
 
 INCLUDE_ASM("movie/movieplayer", func_00242288);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002424C8);
-#ifdef SKIP_ASM
 extern int D_004A2C78;
 extern void* D_0047CBD8[];
 void operator_delete(int*);
@@ -3747,11 +3442,8 @@ extern "C" void func_002424C8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00242500__FPv);
-#ifdef SKIP_ASM
 void* func_00242500(void* self)
 {
     int t0 = 0;
@@ -3761,11 +3453,8 @@ void* func_00242500(void* self)
     *(int*)self = t0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00242518);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 
 extern "C" void func_00242518(void* self, int flags)
@@ -3774,11 +3463,8 @@ extern "C" void func_00242518(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00242540);
-#ifdef SKIP_ASM
 struct sMovieNode {
     char pad_0x0[0xbc];
     sMovieNode* next; // 0xbc
@@ -3800,11 +3486,8 @@ extern "C" void func_00242540(sMovieList* list, sMovieNode* node)
     list->head = node;
     list->count++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00242570);
-#ifdef SKIP_ASM
 extern "C" void func_00242570(sMovieList* list, sMovieNode* node)
 {
     if (node->prev != 0) {
@@ -3818,11 +3501,8 @@ extern "C" void func_00242570(sMovieList* list, sMovieNode* node)
     }
     list->count--;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002425C0);
-#ifdef SKIP_ASM
 extern "C" void func_002429B0(void* self, const void* eye, void* frustum);
 extern "C" void func_00229F88(int index, void* v, void* m);
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
@@ -4020,11 +3700,8 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
         func_00229F88(i, &self->ents[i].view->normal, (char*)self->ents[i].view + 0x60);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00242978);
-#ifdef SKIP_ASM
 // qsort-style comparator: orders by the float at +0x4, ascending.
 extern "C" int func_00242978(const void* a, const void* b)
 {
@@ -4038,11 +3715,8 @@ extern "C" int func_00242978(const void* a, const void* b)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002429B0);
-#ifdef SKIP_ASM
 struct sVec4_29B0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -4155,5 +3829,4 @@ extern "C" void func_002429B0(void* self, const void* eyep, void* fp)
     makePlane_29B0(f, 2, eye, f->corner[2], f->corner[3]);
     makePlane_29B0(f, 3, eye, f->corner[3], f->corner[0]);
 }
-#endif
 

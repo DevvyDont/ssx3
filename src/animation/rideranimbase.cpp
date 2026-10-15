@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void func_003142E8(void* self);
@@ -22,11 +20,8 @@ extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self)
     func_00311A50(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311958);
-#ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* p);
 extern "C" void func_00314668(void* self);
@@ -45,7 +40,6 @@ extern "C" void func_00311958(void* self, int flags)
     if (flags & 1)
         operator_delete((int*)self);
 }
-#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_003119E8);
 
@@ -54,8 +48,6 @@ INCLUDE_ASM("animation/rideranimbase", func_003119F8);
 INCLUDE_ASM("animation/rideranimbase", func_00311A30);
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311A50);
-#ifdef SKIP_ASM
 extern "C" void func_00314668(void* self);
 
 struct sRabQuad32 {
@@ -89,11 +81,8 @@ extern "C" void func_00311A50(void* p)
     self->m20 = -1;
     //END
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311AE8);
-#ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 
 extern "C" int func_00311AE8(void* self, int i)
@@ -104,11 +93,8 @@ extern "C" int func_00311AE8(void* self, int i)
     }
     return *cAIAnimEventMap_getBlendInTime(anim);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311B20);
-#ifdef SKIP_ASM
 struct cAnimSequenceNode;
 
 struct cAnimSequencer {
@@ -123,11 +109,8 @@ extern "C" cAnimSequenceNode* func_00311B20(void* self, int i)
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
     return cAnimSequencer_getSequence(&seqs[i], 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeHeadingOffset);
-#ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 struct sRabQuat_00311B48
@@ -161,11 +144,8 @@ extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle)
     xf.rot = AxisAngle_00311B48(D_004FF160, -angle);
     cRiderAnimBase_changeOrientationOffset(self, &xf);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeOrientationOffset);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sRabQuat_00311B48 QuatMul_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
 {
@@ -265,15 +245,12 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_003
         }
     }
 }
-#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00311D88);
 
 INCLUDE_ASM("animation/rideranimbase", func_00311E38);
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311E88);
-#ifdef SKIP_ASM
 extern "C" void func_00314718(void* self, int v);
 extern "C" void func_003146D0(void* self, float v);
 
@@ -283,13 +260,10 @@ extern "C" void func_00311E88(char* self, int i, float v)
     func_003146D0(*(char**)(self + 0x50) + (i << 3), v);
     *(int*)(self + (i << 2)) = 0x1B6;
 }
-#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00311F00);
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003123C0);
-#ifdef SKIP_ASM
 struct sVEntry003123C0 {
     short delta;
     short index;
@@ -313,11 +287,8 @@ extern "C" void func_003123C0(char* self, int a1, float t)
     }
     func_00312598(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312490);
-#ifdef SKIP_ASM
 extern "C" int func_001446A0(void* self, int mask);
 
 struct sVEntry00312490 {
@@ -355,11 +326,8 @@ extern "C" void func_00312490(char* self)
         vt[3].fn(self + vt[3].delta, list[k].seq, list[k].node);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312598);
-#ifdef SKIP_ASM
 struct sAnimState_00312598
 {
     char data[0x50];
@@ -380,13 +348,10 @@ extern "C" void func_00312598(void* p, int a1)
     }
     func_0030F2B0(*(void**)(self + 0x54), n, states, a1);
 }
-#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312660);
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312790);
-#ifdef SKIP_ASM
 struct sVEntry00312790 {
     short delta;
     short index;
@@ -406,11 +371,8 @@ extern "C" float func_00312790(char* self, int a1)
     char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
     return (*(unsigned short*)(q + 0xC) - 1) * 0.03333333507180214f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312820);
-#ifdef SKIP_ASM
 struct sVEntry00312820 {
     short delta;
     short index;
@@ -443,11 +405,8 @@ extern "C" float func_00312820(char* self, int a1, int frame)
     }
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
-#ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern int D_0048D808[];
@@ -477,11 +436,8 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
     int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
     return *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, h, flags, D_0048D808[slot], blend);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", func_003129E0);
-#ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern int D_0048D808[];
@@ -495,41 +451,29 @@ extern "C" void func_003129E0(char* self, int anim, int a2, float blend)
     }
     *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, a2, 1, D_0048D808[slot], blend);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312AA0__FPvi);
-#ifdef SKIP_ASM
 int func_00312AA0(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2));
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312AB0);
-#ifdef SKIP_ASM
 extern "C" float func_00312AB0(void* self, int i)
 {
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
     cAnimSequenceNode* node = cAnimSequencer_getSequence(&seqs[i], 0);
     return *(float*)((char*)node + 0x8) / *(float*)((char*)node + 0x10);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312AE8);
-#ifdef SKIP_ASM
 extern "C" int func_00312AE8(void* self, int i)
 {
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
     return *(int*)((char*)cAnimSequencer_getSequence(&seqs[i], 0) + 0xC0);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", func_00312B18);
-#ifdef SKIP_ASM
 struct cAnimSequence;
 void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
 extern "C" void func_003145F8(void* seq, void* node);
@@ -551,11 +495,8 @@ extern "C" int func_00312B18(void* self, cAnimSequencer* seq, char* node, int an
     }
     return anim;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", func_00312BD0);
-#ifdef SKIP_ASM
 extern "C" void func_00144670(void* self, int bit);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
@@ -564,15 +505,12 @@ extern "C" void func_00312BD0(void* self, void* unused, void* rider, int anim)
     func_00144670((char*)rider + 0xB0, 0x3F);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
 }
-#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_00312C20);
 
 INCLUDE_ASM("animation/rideranimbase", func_003130A8);
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313508);
-#ifdef SKIP_ASM
 struct sAnimSlot_00313508
 {
     char pad0[0x14];
@@ -637,11 +575,8 @@ extern "C" sRiderAnim_00313508* func_00313508(sRiderAnim_00313508* self, int own
 {
     return new (self) sRiderAnim_00313508(owner);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003135B0);
-#ifdef SKIP_ASM
 struct sAnimEvents_00313868;
 struct sAnimEvents_00313938;
 extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to);
@@ -745,11 +680,8 @@ extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
     self->tracks[i].time = t;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313800);
-#ifdef SKIP_ASM
 struct sBlend_00313800
 {
     char pad0[0x94];
@@ -784,11 +716,8 @@ extern "C" int func_00313800(sBlend_00313800* self, float dt)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313868);
-#ifdef SKIP_ASM
 struct sAnimEvent_00313868
 {
     int bit;                        // 0x0
@@ -837,11 +766,8 @@ extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313938);
-#ifdef SKIP_ASM
 struct sAnimEvent_00313938
 {
     int bit;                        // 0x0
@@ -873,11 +799,8 @@ extern "C" void func_00313938(sAnimEvents_00313938* self, float time)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003139A8);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
 extern "C" void func_003139A8(sAnimEvents_00313938* self)
 {
@@ -893,5 +816,4 @@ extern "C" void func_003139A8(sAnimEvents_00313938* self)
         }
     }
 }
-#endif
 

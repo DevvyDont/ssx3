@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045DD30[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -19,11 +17,8 @@ extern "C" void cFEStateOptions_onCreateScreen(void* self)
     *(int*)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x4C) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188870);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A14F8[];
 extern char D_004A1500[];
@@ -56,11 +51,8 @@ extern "C" void func_00188870(void* self, void* item)
         *(int*)((char*)item + 0x18) = 0x22;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188980);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -182,11 +174,8 @@ extern "C" void func_00188980(sOpt_188980* self, char* widget, unsigned int even
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188C58);
-#ifdef SKIP_ASM
 extern int D_004A3484;
 
 extern "C" int func_00188C58(void* self, void* a1)
@@ -194,11 +183,8 @@ extern "C" int func_00188C58(void* self, void* a1)
     D_004A3484 = *(unsigned char*)((char*)a1 + 4);
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188C68);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_00397870(void* list, int index);
 extern char D_004A1530[];
@@ -226,11 +212,8 @@ extern "C" int func_00188C68(void* self, void* menu, unsigned int key, int index
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188D08);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
@@ -290,11 +273,8 @@ extern "C" void func_00188D08(void* self, char* popup, int event)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188E58);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
@@ -321,11 +301,8 @@ extern "C" void func_00188E58(void* self)
     D_004A14D0 = 0;
     *(int*)((char*)self + 0x4C) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188EE8);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046C6F0[];
 
@@ -336,24 +313,18 @@ extern "C" void* func_00188EE8(void* self)
     *(int*)((char*)self + 0xC) = 0x1C;
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onCreateScreen);
 
 extern "C" void* func_0039E4C0(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_001895F0__FPv);
-#ifdef SKIP_ASM
 void* func_001895F0(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189610);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -451,29 +422,20 @@ extern "C" void func_00189610(void* self, char* popup, int event)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189958);
-#ifdef SKIP_ASM
 extern "C" int func_00189958(void* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189970);
-#ifdef SKIP_ASM
 extern "C" int func_00189970(void* self, int a1, int a2)
 {
     return a2 ? 0x100 : 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetEvent);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -621,13 +583,10 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", func_00189D60);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A258);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046C620[];
 extern int D_004A14D4;
@@ -640,11 +599,8 @@ extern "C" void* func_0018A258(void* self)
     D_004A14D4 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -694,11 +650,8 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
         c->setEnabled(on ^ 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A3D8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -773,20 +726,14 @@ extern "C" void func_0018A3D8(void* self, char* popup, int event)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A870__FPv);
-#ifdef SKIP_ASM
 void* func_0018A870(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A890);
-#ifdef SKIP_ASM
 extern "C" int func_0018A890(void* self, int a1, int a2)
 {
     switch (a2) {
@@ -797,24 +744,18 @@ extern "C" int func_0018A890(void* self, int a1, int a2)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A8C0);
-#ifdef SKIP_ASM
 extern "C" int func_0018A8C0(void* self, int a1, int a2)
 {
     return a2 ? 0x100 : 0;
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018A8D0);
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018BEF8);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_00287670(void* snd);
 extern "C" int func_002876A0(void* snd);
@@ -883,11 +824,8 @@ extern "C" void func_0018BEF8(void* self, unsigned int mode)
         vt2[4].fn(sub + vt2[4].delta, s2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046C550[];
 extern int D_004A14D8;
@@ -900,11 +838,8 @@ extern "C" void* func_0018C0E8(void* self)
     D_004A14D8 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C128);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045E038[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -921,20 +856,14 @@ extern "C" void func_0018C128(void* self)
     }
     func_0018C478(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C198__FPv);
-#ifdef SKIP_ASM
 void* func_0018C198(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C1B8);
-#ifdef SKIP_ASM
 struct sVE_18C1B8 {
     short delta;
     short index;
@@ -969,11 +898,8 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C270);
-#ifdef SKIP_ASM
 extern "C" int func_0018C270(void* self, int a1, int a2)
 {
     switch (a2) {
@@ -984,11 +910,8 @@ extern "C" int func_0018C270(void* self, int a1, int a2)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C2A0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
@@ -1069,11 +992,8 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C478);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1136,11 +1056,8 @@ extern "C" void func_0018C478(void* vself)
         *(int*)(menu + 0x14) &= ~1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C658);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046C480[];
 extern int D_004A14DC;
@@ -1154,11 +1071,8 @@ extern "C" void* func_0018C658(void* self)
     D_004A14DC = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
-#ifdef SKIP_ASM
 extern "C" void cUIListBox_addEntryByStringID(void* box, int id, int idx);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 extern "C" void func_0018CDC0(void* self);
@@ -1207,11 +1121,8 @@ extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
     func_0018D108(self, 1, zero, zero);
     func_0018CDC0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C8B8);
-#ifdef SKIP_ASM
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 void* func_0039E4A0(void* self);
 
@@ -1221,11 +1132,8 @@ extern "C" void* func_0018C8B8(void* self)
     func_0018D108(self, 1, 0.0f, 0.0f);
     return func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C910);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1287,11 +1195,8 @@ extern "C" void func_0018C910(void* self, cUIObj_18C910* obj, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CA10);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1385,22 +1290,16 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
         break;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018CCE0);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CDB0);
-#ifdef SKIP_ASM
 extern "C" int func_0018CDB0(void* self, int a1, int a2)
 {
     return a2 ? 0x100 : 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CDC0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
@@ -1442,11 +1341,8 @@ extern "C" void func_0018CDC0(void* self)
         func_0039A7A8(o, vals[3]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CF50);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char* D_004A15BC;
@@ -1487,11 +1383,8 @@ extern "C" void func_0018CF50(void* self, int on)
         d->setVisible(on ^ 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D058);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E510(void* self);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 
@@ -1517,11 +1410,8 @@ extern "C" void func_0018D058(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D108);
-#ifdef SKIP_ASM
 extern char* D_004A28A0;
 
 class cSnd_18D108 {
@@ -1551,11 +1441,8 @@ extern "C" void func_0018D108(void* self, int idx, float x, float y)
         s->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (a - 100.0f) / 5000.0f) >? 0.0f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D240);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046C3B0[];
 
@@ -1567,11 +1454,8 @@ extern "C" void* func_0018D240(void* self)
     *(char*)((char*)self + 0x48) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045E0C0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -1586,11 +1470,8 @@ extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045E0D0[];
 extern char D_0045E0E0[];
@@ -1617,11 +1498,8 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
         *(int*)((char*)widget + 0x18) = 0x200;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D3C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
@@ -1642,13 +1520,10 @@ extern "C" void func_0018D3C0(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018D438);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D460);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1723,11 +1598,8 @@ extern "C" void func_0018D460(char* self, char* widget, unsigned int event)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetEvent);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039F290(void* list, void* item);
@@ -1799,11 +1671,8 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
-#ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern "C" void* func_00227F80(void* app);
 extern void* D_0046C228[];
@@ -1823,13 +1692,10 @@ extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onCreateScreen);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018DDD0);
-#ifdef SKIP_ASM
 struct cList0018DDD0 {
     virtual void v01();
     virtual void v02();
@@ -1907,11 +1773,8 @@ extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
-#ifdef SKIP_ASM
 extern "C" void* func_00227F80(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void func_0023C8F0(void* app, int a1);
@@ -2114,11 +1977,8 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E178);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A15E0[];
@@ -2142,11 +2002,8 @@ extern "C" void func_0018E178(void* self, int on)
     }
     *(int*)((char*)self + 0x234) = on;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E2C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A1458[];
@@ -2174,11 +2031,8 @@ extern "C" void func_0018E2C0(void* self, bool on)
     }
     *(int*)((char*)self + 0x220) = !on;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E368);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A15D0[];
@@ -2214,11 +2068,8 @@ extern "C" void func_0018E368(void* self, bool a, bool b)
         o->setVisible(v);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E478);
-#ifdef SKIP_ASM
 extern "C" void func_0039F4C0(void* list, void* item);
 
 struct sVEntry0018E478 {
@@ -2249,7 +2100,6 @@ extern "C" void func_0018E478(void* self)
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }
-#endif
 
 INCLUDE_ASM("fe/festateoptions", func_0018E510);
 

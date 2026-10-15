@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -87,19 +85,13 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
     cOVState_MAP_setupPlayerIndicator(self);
     cOVState_MAP_setupLocalSessionList(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_002087E8__FPv);
-#ifdef SKIP_ASM
 void func_002087E8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainTransition);
-#ifdef SKIP_ASM
 struct sV3_87F0 {
     float x, y, z;
 };
@@ -239,11 +231,8 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208B00);
-#ifdef SKIP_ASM
 struct sVEntry00208B00 {
     short delta;
     short index;
@@ -270,11 +259,8 @@ extern "C" void func_00208B00(void* self, int a1)
         o->vt[9].fn((char*)o + o->vt[9].delta, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208B78);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void func_0020A088(void* self);
@@ -286,11 +272,8 @@ extern "C" void func_00208B78(void* self)
     func_0020A088(self);
     func_0020A430(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208BB8);
-#ifdef SKIP_ASM
 struct sVEntry00208BB8 {
     short delta;
     short index;
@@ -316,22 +299,16 @@ extern "C" void func_00208BB8(void* self)
         o->vt[9].fn((char*)o + o->vt[9].delta, 0);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatemap", func_00208C28);
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208EF8);
-#ifdef SKIP_ASM
 extern "C" int func_00208EF8(void* self, int a1, int a2)
 {
     return ((unsigned int)(a2 - 8) < 2) ? 0 : 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208F10);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -348,11 +325,8 @@ extern "C" void func_00208F10(void* self)
     func_001A37F8(mgr, *func_00144BC0(iface), *(int*)((char*)self + 0xC4), 1);
     *(int*)((char*)self + 0xC8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPopup);
-#ifdef SKIP_ASM
 struct sVE_9010 {
     short delta;
     short index;
@@ -476,11 +450,8 @@ extern "C" void cOVState_MAP_setupPopup(void* selfp)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00209300);
-#ifdef SKIP_ASM
 struct sVEntry00209300 {
     short delta;
     short index;
@@ -500,11 +471,8 @@ extern "C" void func_00209300(void* self, sObj00209300* o)
         func_00209E78(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00209370);
-#ifdef SKIP_ASM
 struct sCol_9370 {
     float a, r, g, b;
 };
@@ -630,11 +598,8 @@ extern "C" void func_00209370(sMap_9370* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_002095E8);
-#ifdef SKIP_ASM
 struct sVEntry_func_002095E8 {
     short delta;
     short index;
@@ -653,11 +618,8 @@ extern "C" void func_002095E8(void* self, void* obj, int on)
         vt[11].fn((char*)obj + vt[11].delta, D_004C8B28);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00209648);
-#ifdef SKIP_ASM
 struct sVEntry_func_00209648 {
     short delta;
     short index;
@@ -676,11 +638,8 @@ extern "C" void func_00209648(void* self, void* obj, int on)
         vt[11].fn((char*)obj + vt[11].delta, D_004C8B48);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPlayerIndicator);
-#ifdef SKIP_ASM
 struct sV3_96A8 {
     float x, y, z;
     sV3_96A8() {}
@@ -804,13 +763,10 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     d->flags = (d->flags & ~0x1F00) | 0xD00;
     cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->ind);
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00209E78);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_00471850[];
@@ -869,13 +825,10 @@ extern "C" void func_00209E78(void* p)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatemap", func_00209FD0);
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A088);
-#ifdef SKIP_ASM
 class cUIObj_A088 {
 public:
     int pad[2];
@@ -918,11 +871,8 @@ extern "C" void func_0020A088(void* p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -957,11 +907,8 @@ extern "C" char* func_0020A1A8(int secs)
     }
     return D_004C6848;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A380);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A20D0[];
 extern void* D_004A28A8;
@@ -1000,11 +947,8 @@ extern "C" void func_0020A380(sSelf0020A380* self)
         e->fn(obj + e->delta, 3, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A430);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A20D0[];
 extern void* D_004A28A8;
@@ -1037,11 +981,8 @@ extern "C" void func_0020A430(void* self)
     }
     func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A4E0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1113,11 +1054,8 @@ extern "C" int func_0020A4E0(char* self)
     }
     return ret;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A6A8);
-#ifdef SKIP_ASM
 struct sVEntry0020A6A8 {
     short delta;
     short index;
@@ -1137,11 +1075,8 @@ extern "C" void func_0020A6A8(void* self, int a1, int a2)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A6F0);
-#ifdef SKIP_ASM
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void func_0039FCC8(void* self, void* anim, int mode, int v, int a4);
 
@@ -1156,5 +1091,4 @@ extern "C" void func_0020A6F0(void* self, char* objName, char* animName)
         }
     }
 }
-#endif
 

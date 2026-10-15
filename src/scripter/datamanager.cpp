@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("scripter/datamanager", cDataManager_cDataManager);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void func_00275CD0(void* self, void* node);
@@ -31,11 +29,8 @@ extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, i
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002758C0);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern char D_004825A0[];
@@ -51,11 +46,8 @@ extern "C" void func_002758C0(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275920);
-#ifdef SKIP_ASM
 void* func_00275CF8(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 struct sDmNode5B98;
@@ -96,11 +88,8 @@ extern "C" sDmNode5920* func_00275920(void* self, int a1, void* data, int size)
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275A20);
-#ifdef SKIP_ASM
 void func_00275CD0(void* self, void* node);
 
 struct sDmNode5A20 {
@@ -147,11 +136,8 @@ int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry)
     func_00275CD0(self, entry);
     return key;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00275B08);
-#ifdef SKIP_ASM
 extern "C" void func_00275A20(void* self, void* entry);
 
 struct sDmEntry275B08 {
@@ -174,15 +160,12 @@ extern "C" void func_00275B08(sDmTable275B08* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00275B78);
 
 INCLUDE_ASM("scripter/datamanager", func_00275B80);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275B98);
-#ifdef SKIP_ASM
 void* func_00275CF8(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 extern "C" char* BIG_locateentryz(void* big, int a1, int index, int* offset, int* size);
@@ -231,11 +214,8 @@ extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
     }
     return prev;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275CD0__FPvT0);
-#ifdef SKIP_ASM
 void func_00275CD0(void* self, void* node)
 {
     *(int*)((char*)node + 0x8) = 0;
@@ -246,11 +226,8 @@ void func_00275CD0(void* self, void* node)
     *(void**)((char*)node + 0x14) = *(void**)((char*)self + 0x8);
     *(void**)((char*)self + 0x8) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275CF8__FPv);
-#ifdef SKIP_ASM
 void* func_00275CF8(void* self)
 {
     void* head = *(void**)((char*)self + 0x8);
@@ -258,11 +235,8 @@ void* func_00275CF8(void* self)
     *(void**)((char*)head + 0x14) = 0;
     return head;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275D10);
-#ifdef SKIP_ASM
 extern "C" void func_00283C30(void* self);
 void func_00283C20(void* self);
 
@@ -286,11 +260,8 @@ extern "C" void* func_00275D10(void* self)
     *(int*)((char*)self + 0x8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275D90);
-#ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
 void operator_delete(int* ptr);
 
@@ -302,13 +273,10 @@ extern "C" void func_00275D90(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00275DD8);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275ED0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00277450(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
@@ -374,11 +342,8 @@ extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276048);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00277450(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
@@ -432,13 +397,10 @@ extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00276198);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276270);
-#ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
 extern "C" int func_00277450(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
@@ -484,11 +446,8 @@ extern "C" int func_00276270(char* self, int a1)
     *(int*)(self + 0xBC) = func_00277450(self, idx + 1, 0);
     return *(int*)(self + 0xA4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276388);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern void* D_004A28A4;
 extern char D_004A34A0[];
@@ -635,22 +594,16 @@ int func_00276388_impl(char* self, int fade, int notify)
     }
     return *(int*)(self + 0xA4);
 }
-#endif
 
 extern "C" void* func_00277C08(void*, int, int);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002766B0__FPvi);
-#ifdef SKIP_ASM
 void* func_002766B0(void* self, int a1)
 {
     return func_00277C08(self, a1, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002766D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00276270(char* self, int a1);
 extern "C" void func_00276868(void* self, int a1);
@@ -737,11 +690,8 @@ reset:
     func_00276868(self, 1);
     return self->state;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276868);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern char D_004A34A0[];
 int GetHashValue32(char* s);
@@ -794,11 +744,8 @@ extern "C" void func_00276868(void* p, int a1)
     *(int*)(self + 0xC4) = 0;
     *(int*)(self + 0xB4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276998);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00283D70(void* list, int i);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
@@ -812,7 +759,6 @@ extern "C" int func_00276998(void* self, int i)
     }
     return 0x1C;
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00276A08);
 
@@ -821,8 +767,6 @@ INCLUDE_ASM("scripter/datamanager", func_00276A78);
 INCLUDE_ASM("scripter/datamanager", func_00276B08);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276B98);
-#ifdef SKIP_ASM
 extern "C" void func_00277778(void* self);
 
 extern "C" int func_00276B98(void* self)
@@ -832,11 +776,8 @@ extern "C" int func_00276B98(void* self)
     }
     return *(int*)((char*)self + 0xA4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276BD8);
-#ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00282838(void* self, int a1);
 
@@ -855,22 +796,16 @@ extern "C" int func_00276BD8(void* self)
     }
     return *(int*)((char*)self + 0xBC) < 0 ? 5 : 4;
 }
-#endif
 
 extern "C" void* func_00283D28(void*);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276CA8__FPv);
-#ifdef SKIP_ASM
 void* func_00276CA8(void* self)
 {
     return func_00283D28((char*)self + 0xc);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00276CC8);
-#ifdef SKIP_ASM
 void* func_00230698(void* self, int a1);
 extern "C" void func_00276388(void* self, int a1, int a2);
 extern "C" void func_00277778(void* self);
@@ -968,11 +903,8 @@ extern "C" void func_00276CC8(char* self)
         func_00277800(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276F48);
-#ifdef SKIP_ASM
 extern "C" int func_00277450(void* self, int index, int a2);
 extern "C" void func_00277800(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
@@ -1013,11 +945,8 @@ extern "C" void func_00276F48(char* self)
         func_00277800(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277060);
-#ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 
 extern "C" int func_00277060(void* self)
@@ -1032,11 +961,8 @@ extern "C" int func_00277060(void* self)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002770C0);
-#ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 
 extern "C" int func_002770C0(void* self)
@@ -1047,15 +973,12 @@ extern "C" int func_002770C0(void* self)
     void* e = func_00283D70((char*)self + 0xC, 0);
     return (*(int*)((char*)e + 0x8) >> 2) & 1;
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00277100);
 
 INCLUDE_ASM("scripter/datamanager", func_002771A8);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002771C8);
-#ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void* func_00282BF0(void* self, int a1);
@@ -1072,13 +995,10 @@ extern "C" int func_002771C8(void* self, void* obj)
     }
     return obj == func_00282BF0(D_004A28A4, *(int*)((char*)e + 0xC));
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00277248);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277298);
-#ifdef SKIP_ASM
 extern "C" int func_00277298(void* self)
 {
     int r = 0;
@@ -1087,20 +1007,14 @@ extern "C" int func_00277298(void* self)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002772B8__FPv);
-#ifdef SKIP_ASM
 int func_002772B8(void* self)
 {
     return *(int*)((char*)self + 0xB0);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_002772C0);
-#ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" void func_002EF378(int a0);
@@ -1116,11 +1030,8 @@ extern "C" void func_002772C0(void* self, int a1, void* obj)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00277310);
-#ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" int func_00274D08(void* obj);
@@ -1136,11 +1047,8 @@ extern "C" void func_00277310(void* self, int a1, void* obj)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_002773A0);
-#ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 extern "C" void func_002776E0(void* self);
 extern "C" void func_002826D8(void* self, int a1);
@@ -1154,11 +1062,8 @@ extern "C" void func_002773A0(void* self, int a1, void* obj)
         func_002776E0(self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00277400);
-#ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" void func_002EF378(int a0);
@@ -1171,13 +1076,10 @@ extern "C" void func_00277400(void* self, int a1, void* obj)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_00277450);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277598);
-#ifdef SKIP_ASM
 struct sDmEnt7DE8;
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
@@ -1239,11 +1141,8 @@ extern "C" void func_00277598(void* selfp, int n)
         n--;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002776E0);
-#ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282798(void* self, int a1);
@@ -1266,11 +1165,8 @@ extern "C" void func_002776E0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277778);
-#ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282798(void* self, int a1);
@@ -1289,11 +1185,8 @@ extern "C" void func_00277778(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277800);
-#ifdef SKIP_ASM
 extern "C" void func_002776E0(void* self);
 extern "C" void func_00277838(void* self);
 
@@ -1304,11 +1197,8 @@ extern "C" void func_00277800(void* self)
         func_00277838(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277838);
-#ifdef SKIP_ASM
 void* func_00230698(void* self, int a1);
 extern "C" void func_00276868(void* self, int a1);
 extern "C" int func_00277450(void* self, int index, int a2);
@@ -1370,11 +1260,8 @@ extern "C" void func_00277838(void* selfp)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277980);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* func_00230698(void* self, int a1);
 char* func_0027C070(void* obj);
@@ -1465,11 +1352,8 @@ int func_00277980_impl(char* self)
     }
     return *(int*)(self + 0xB0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277C08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* D_004A28A8;
 void* func_00230698(void* self, int a1);
@@ -1570,20 +1454,14 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277DD8);
-#ifdef SKIP_ASM
 extern "C" int func_00277DD8(void* self, void* a1)
 {
     return *(int*)a1 >= 0x1d;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277DE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1610,11 +1488,8 @@ extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
     }
     return &D_004823DC[*key];
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277F08__FPv);
-#ifdef SKIP_ASM
 void func_00277F08(void* self)
 {
     *(int*)self = 0;
@@ -1622,11 +1497,8 @@ void func_00277F08(void* self)
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xc) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277F20);
-#ifdef SKIP_ASM
 extern "C" void func_00281E80(void* self);
 extern "C" void func_00283798(void* self);
 extern "C" void func_00281018(void* self);
@@ -1717,13 +1589,10 @@ extern "C" sScriptMgr_7F20* func_00277F20(sScriptMgr_7F20* self)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("scripter/datamanager", func_002780B8);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00278210);
-#ifdef SKIP_ASM
 extern "C" void* func_003E1908(const char* name, int flags);
 extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size);
 extern char* D_004A3494;
@@ -1767,11 +1636,8 @@ extern "C" void func_00278210(sDmEngine8210* self)
     self->field_0x620 = 0;
     cBXScriptEngine_SetupBXEngine(self, *self->hdr, 10, 0x4000);
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00278308);
-#ifdef SKIP_ASM
 extern "C" void func_00282020(void* self);
 extern "C" void* func_002523A8(void* self);
 
@@ -1787,5 +1653,4 @@ extern "C" void func_00278308(void* self)
     *(int*)((char*)self + 0x534) = 0;
     *(int*)((char*)self + 0x554) = 0;
 }
-#endif
 

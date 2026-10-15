@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_gainFocus);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 struct cRiderSphereTree;
@@ -88,11 +86,8 @@ extern "C" void cWipeoutMotion_gainFocus(char* self, int a1)
     *(int*)(*(char**)(self + 0x40) + 0x2DC) = 0;
     *(int*)(*(char**)(self + 0x40) + 0x2E0) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136D40);
-#ifdef SKIP_ASM
 struct sVec4WM {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -162,11 +157,8 @@ extern "C" void func_00136D40(char* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
         vu0SubWM(*(sVec4WM*)(self + 0x10), *(sVec4WM*)(self + 0x10), t);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136DE0);
-#ifdef SKIP_ASM
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -205,11 +197,8 @@ extern "C" void func_00136DE0(char* self, sVec4WM* a, sVec4WM* b)
     }
     *(int*)(self + 0x4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136E98);
-#ifdef SKIP_ASM
 extern "C" void func_00136F30();
 extern "C" void func_00137D18(void*);
 extern "C" void func_00137750(void*);
@@ -226,11 +215,8 @@ extern "C" void func_00136E98(int* self)
         func_00137750(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136EE0);
-#ifdef SKIP_ASM
 extern "C" void func_00137138();
 extern "C" void func_00138640(void*);
 extern "C" void func_00137860(void*);
@@ -247,19 +233,13 @@ extern "C" void func_00136EE0(int* self)
         func_00137860(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136F28__FPv);
-#ifdef SKIP_ASM
 void func_00136F28(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136F30);
-#ifdef SKIP_ASM
 struct sVec4_6F30 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -422,13 +402,10 @@ extern "C" void func_00136F30(sWipeout_6F30* self)
     r->quat.w += tmp.w;
     vu0NormalizeEq_6F30(self->rider->quat);
 }
-#endif
 
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137138);
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137550);
-#ifdef SKIP_ASM
 struct sVec4_7550 {
     float x, y, z, w;
     sVec4_7550() {}
@@ -522,11 +499,8 @@ extern "C" void func_00137550(char* self)
     func_00329A90(*(void**)(self + 0x44), 4, pts, radii.r, &bone->pos,
                   *(float*)(*(char**)(*(char**)(self + 0x40) + 0x780) + 0x140) * 90.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137750);
-#ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
 extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
@@ -575,7 +549,6 @@ extern "C" void func_00137750(void* p)
     vu0ScaleEqW7(*(sVec4W7*)(self + 0x30), 1.0f - dt * 1.5f);
     cRider_updateOrientationImplicit(*(void**)(self + 0x40));
 }
-#endif
 
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137860);
 
@@ -584,8 +557,6 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137D18);
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138640);
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138960);
-#ifdef SKIP_ASM
 extern "C" void* func_0032E100(void* seg, const sVec4WG& a, const sVec4WG& b, int n, float r);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 
@@ -671,11 +642,8 @@ extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
     }
     return d;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138AD8);
-#ifdef SKIP_ASM
 struct sVEntry00138AD8 {
     short delta;
     short index;
@@ -687,11 +655,8 @@ extern "C" void func_00138AD8(void* self, void* obj)
     sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138B10);
-#ifdef SKIP_ASM
 struct sVEntry00138B10 {
     short delta;
     short index;
@@ -703,5 +668,4 @@ extern "C" void func_00138B10(void* self, void* obj)
     sVEntry00138B10* vt = *(sVEntry00138B10**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x40);
 }
-#endif
 

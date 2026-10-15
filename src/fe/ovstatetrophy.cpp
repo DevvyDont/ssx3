@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", cOVStateTrophy_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -17,11 +15,8 @@ extern "C" void cOVStateTrophy_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020E9A0);
-#ifdef SKIP_ASM
 extern "C" void func_0039F400(void* list, void* item);
 
 struct sColor_20E9A0 {
@@ -79,11 +74,8 @@ extern "C" void func_0020E9A0(void* self, cUIObj_20E9A0* item, int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EAA0);
-#ifdef SKIP_ASM
 struct sRect20EAA0 {
     float x, y, w, h;
 };
@@ -103,11 +95,8 @@ extern "C" void* func_0020EAA0(void* self)
     D_004A276C++;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EB08);
-#ifdef SKIP_ASM
 extern char D_00474230[];
 extern int D_004A276C;
 extern int D_004A2768;
@@ -125,11 +114,8 @@ extern "C" void func_0020EB08(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
 extern "C" int func_00398380(void* bank, int name);
@@ -160,11 +146,8 @@ extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
     }
     func_0020EC18(self, a, r);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EC18);
-#ifdef SKIP_ASM
 extern int D_004A2764;
 extern int D_004A2768;
 extern float D_004C8CA0[];
@@ -206,11 +189,8 @@ extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r)
     ((sTrophyBox_20EC18*)self)->rect = *r;
     ((sTrophyBox_20EC18*)self)->s30 = ((sTrophyBox_20EC18*)self)->rect.h * 9.999999747378752e-05f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020ED20);
-#ifdef SKIP_ASM
 struct sTrophySlot20ED20 {
     int active;
     int pad[5];
@@ -234,7 +214,6 @@ extern "C" void func_0020ED20(void)
         D_004A2760 = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EDA0);
 
@@ -244,18 +223,13 @@ struct sPad16 { char x; int pad[3]; };
 extern sPad16 D_004C8BC8;
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_002105B0);
-#ifdef SKIP_ASM
 extern "C" void func_002105B0(int a0)
 {
     char* p = (char*)&D_004C8BC8 + a0 * 0x18;
     *(int*)p = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_002105D0);
-#ifdef SKIP_ASM
 extern char* D_004A2750;
 extern char* D_004A2754;
 extern char* D_004A2758;
@@ -270,11 +244,8 @@ extern "C" void func_002105D0(char* data)
     D_004A2758 = b;
     func_002108F8();
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210608);
-#ifdef SKIP_ASM
 extern char* D_004A2750;
 extern char* D_004A2754;
 extern char* D_004A2758;
@@ -285,11 +256,8 @@ extern "C" void func_00210608(void)
     D_004A2754 = 0;
     D_004A2758 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* D_004A2750;
 extern char* D_004A2754;
@@ -361,11 +329,8 @@ extern "C" void func_00210618(int i)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210820);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sQuad_210820 {
     float x, y, z, w;
@@ -422,11 +387,8 @@ extern "C" float func_00210820(int idx)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_002108F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sTrophySlot2108F8 {
     int active;
@@ -453,11 +415,8 @@ extern "C" void func_002108F8(void)
     }
     D_004A2760 = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210940);
-#ifdef SKIP_ASM
 struct sColor_210940 {
     float r, g, b, a;
     sColor_210940(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
@@ -538,11 +497,8 @@ extern "C" void func_00210940(void* self)
     }
     func_0020A380(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
-#ifdef SKIP_ASM
 extern int D_004A2EEC;
 extern char D_004A2560[];
 extern "C" int func_00258160(int a, char* name, int len);
@@ -562,11 +518,8 @@ extern "C" int func_00210B58(void* self, int ok)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210BD8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -615,11 +568,8 @@ extern "C" void func_00210BD8(void* self, char* name, int a)
     }
     func_001A83D8(obj, 0x1E, 8, c8, c4, c6, 0, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2EEC;
 extern char* D_net210D20 __asm__("D_004A2EEC");
@@ -646,11 +596,8 @@ extern "C" void func_00210D20(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
-#ifdef SKIP_ASM
 extern "C" void func_00210DD0(void* self, int a1, int a2)
 {
     if (a2 == 0x16) {
@@ -659,11 +606,8 @@ extern "C" void func_00210DD0(void* self, int a1, int a2)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
-#ifdef SKIP_ASM
 extern int D_004A2EEC;
 extern char D_004A2560[];
 extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
@@ -709,11 +653,8 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);
-#ifdef SKIP_ASM
 extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CCF00(void* p, int a);
 extern "C" void func_001CB418(void* p, int a);
@@ -724,11 +665,8 @@ extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5
     func_001CCF00(*(void**)((char*)self + 0xE0), a2);
     func_001CB418(*(void**)((char*)self + 0xE0), a3);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210FA0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, int a4);
 extern "C" void func_0039F290(void* list, void* item);
@@ -750,7 +688,6 @@ extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4)
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x440) = 1;
     *(int*)((char*)self + 0xDC) = a1;
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatetrophy", func_00211088);
 

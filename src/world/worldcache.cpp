@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494DC0[];
@@ -43,11 +41,8 @@ extern "C" void cWorldBlockAllocator_init(void* selfp, int count, int blockSize)
     }
     self->freeList = self->blocks;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A76C0);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
@@ -78,11 +73,8 @@ extern "C" void func_003A76C0(void* p, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7768__FPv);
-#ifdef SKIP_ASM
 void* func_003A7768(void* self)
 {
     void* item = *(void**)((char*)self + 0x10);
@@ -91,11 +83,8 @@ void* func_003A7768(void* self)
     *(int*)((char*)item + 0x10) = 1;
     return item;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7790__FPvT0);
-#ifdef SKIP_ASM
 void func_003A7790(void* self, void* item)
 {
     *(int*)((char*)item + 0x10) = 0;
@@ -103,11 +92,8 @@ void func_003A7790(void* self, void* item)
     *(void**)((char*)self + 0x10) = item;
     *(int*)((char*)self + 0x8) += 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A77B0__FPvii);
-#ifdef SKIP_ASM
 void* func_003A77B0(void* self, int a1, int a2)
 {
     int t0 = 0;
@@ -118,11 +104,8 @@ void* func_003A77B0(void* self, int a1, int a2)
     *(int*)((char*)self + 0x10) = t0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A77D0);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_003A7818(void* self);
 
@@ -133,11 +116,8 @@ extern "C" void func_003A77D0(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A7818);
-#ifdef SKIP_ASM
 void func_003A7790(void* self, void* item);
 
 extern "C" void func_003A7818(void* self)
@@ -153,11 +133,8 @@ extern "C" void func_003A7818(void* self)
         } while (next != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7878);
-#ifdef SKIP_ASM
 void* func_003A7768(void* self);
 
 struct sWCBlock_7878 {
@@ -239,11 +216,8 @@ extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
     self->cur->pos += size;
     return self->cur->data;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A7A20);
-#ifdef SKIP_ASM
 struct func_003A7A20_sCfg {
     int id;
     int size;
@@ -263,11 +237,8 @@ extern "C" void* func_003A7A20(void* self)
     }
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A7AA8);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_003A76C0(void* self, int flags);
 
@@ -288,11 +259,8 @@ extern "C" void func_003A7AA8(func_003A7AA8_sElem* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", cWorldMemoryMan_activateSectionMem);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* func_003A77B0(void* self, int section, int index);
 extern char D_00494DE8[];
@@ -309,11 +277,8 @@ extern "C" void cWorldMemoryMan_activateSectionMem(void* self, int index, int se
     *slot = func_003A77B0(cMemMan_alloc(0x14, D_00494DE8, 0x20000000, 0),
                           (int)((cWorldMemoryMan_sSection*)self + section), index);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A7B98);
-#ifdef SKIP_ASM
 extern "C" void func_003A77D0(void* self, int flags);
 
 extern "C" void func_003A7B98(void* self, int i)
@@ -325,11 +290,8 @@ extern "C" void func_003A7B98(void* self, int i)
     }
     *p = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cHullPage_cHullPage);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494E00[];
@@ -343,11 +305,8 @@ extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data)
     *(void**)((char*)self + 0xC) = operator_new_tag(n * 4, D_00494E00, 0x20000000, 0);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7C30);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
@@ -361,11 +320,8 @@ extern "C" void func_003A7C30(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldCacheTable_cWorldCacheTable);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -405,11 +361,8 @@ extern "C" void* cWorldCacheTable_cWorldCacheTable(void* selfp, void* data)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7D80);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
@@ -422,11 +375,8 @@ extern "C" void func_003A7D80(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7DD0);
-#ifdef SKIP_ASM
 extern "C" void func_003A8F80(void* self);
 extern "C" void cStreamMan_cStreamMan(void* self);
 extern char* D_004A5B64;
@@ -445,11 +395,8 @@ extern "C" void* func_003A7DD0(void* self)
     *(int*)((char*)self + 0x1BF0) = (int)((float)*(int*)(app + 0x10) * 0.10000000149011612f);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7E38);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_003A7E98(void* self);
 extern "C" void func_003A6E20(void* p, int flags);
@@ -464,11 +411,8 @@ extern "C" void func_003A7E38(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7E98);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void func_003A8330(void* self);
 extern "C" int func_003A9890(void* view, int i);
@@ -531,11 +475,8 @@ extern "C" void func_003A7E98(void* p)
         func_003A7AA8(self->f0C, 3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7F90);
-#ifdef SKIP_ASM
 extern "C" void func_003A7E98(void* self);
 
 extern "C" void func_003A7F90(void* self)
@@ -545,11 +486,8 @@ extern "C" void func_003A7F90(void* self)
     *(int*)((char*)self + 0x3EC) = 0;
     *(int*)((char*)self + 0x3E8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldCache_init);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -613,11 +551,8 @@ extern "C" int cWorldCache_init(void* self, const char* name, int arg)
     func_003A82C8((func_003A82C8_sCache*)self);
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
-#ifdef SKIP_ASM
 extern char D_00494E60[];
 extern "C" void* cWorldCacheTable_cWorldCacheTable(void* self, void* data);
 
@@ -629,11 +564,8 @@ extern "C" void cWorldCache_activateSectionMem(void* self, int i, int section)
     *slot = cWorldCacheTable_cWorldCacheTable(cMemMan_alloc(0xE8, D_00494E60, 0, 0),
         *(char**)(*(char**)self + 0x14) + i * 0x58 + 0x20);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A8230);
-#ifdef SKIP_ASM
 extern "C" void func_003A7B98(void* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
@@ -646,11 +578,8 @@ extern "C" void func_003A8230(void* self, int i)
     }
     (*(int***)((char*)self + 0x8))[i] = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8290);
-#ifdef SKIP_ASM
 extern "C" void func_003A9258(void* p);
 extern "C" void cWorldCache_updatePages(void* self);
 extern "C" void func_003A7098(void* p);
@@ -661,11 +590,8 @@ extern "C" void func_003A8290(void* self)
     cWorldCache_updatePages(self);
     func_003A7098((char*)self + 0x300);
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A82C8);
-#ifdef SKIP_ASM
 int func_003A9AB0(void*);
 
 struct func_003A82C8_sEntry {
@@ -696,13 +622,10 @@ extern "C" void func_003A82C8(func_003A82C8_sCache* self)
         self->entries[i].d = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("world/worldcache", func_003A8330);
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8448);
-#ifdef SKIP_ASM
 struct sWCSlot {
     int state;   // 0x0
     int f4;      // 0x4
@@ -738,11 +661,8 @@ extern "C" void func_003A8448(sWCSlots* self, int i, float f)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A84C8);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 
 // PORT: callers declare (void*, unsigned short); the body never masks the id
@@ -752,55 +672,40 @@ extern "C" void func_003A84C8_i(sWCSlots* self, int i)
     self->slot[i].f4 = 0;
     self->slot[i].time = *(int*)(D_004A5B64 + 0x1C) - self->timeBase;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A84F8);
-#ifdef SKIP_ASM
 extern "C" void func_003A84F8(void* self, int a1, int a2)
 {
     self = (char*)self + a1 * 0x18;
     *(int*)((char*)self + 0x3f4) = a2;
 }
-#endif
 
 INCLUDE_ASM("world/worldcache", func_003A8510);
 
 INCLUDE_ASM("world/worldcache", func_003A8528);
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8618);
-#ifdef SKIP_ASM
 extern "C" int func_003A8618(void* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     return *(int*)(p + 0x3f0) == 3;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8638);
-#ifdef SKIP_ASM
 extern "C" int func_003A8638(void* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     return *(int*)(p + 0x3f0) == 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8650);
-#ifdef SKIP_ASM
 extern "C" void func_003A8650(void* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     *(int*)(p + 0x3f0) = 3;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldCache_updatePages);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
 extern "C" void* func_003A9A98(void* self, int i);
@@ -898,7 +803,6 @@ extern "C" void cWorldCache_updatePages(void* p)
     func_003A6F88(mgr, best, data[0], *(int*)(data + 2));
     self->slot[best].state = 2;
 }
-#endif
 
 INCLUDE_ASM("world/worldcache", func_003A88A8);
 
@@ -907,8 +811,6 @@ INCLUDE_ASM("world/worldcache", func_003A89C8);
 INCLUDE_ASM("world/worldcache", cWorldCache_addBxStreamDataTest);
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8CD0);
-#ifdef SKIP_ASM
 struct sWCEntry8CD0 {
     unsigned char id;           // 0x0
     unsigned char lo;           // 0x1
@@ -984,7 +886,6 @@ extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned
         e->bits[hi] = (unsigned char)e->bits[hi] | ((a4 >> 2) << 8);
     }
 }
-#endif
 
 INCLUDE_ASM("world/worldcache", func_003A8E20);
 
@@ -993,8 +894,6 @@ INCLUDE_ASM("world/worldcache", func_003A8F10);
 INCLUDE_ASM("world/worldcache", func_003A8F80);
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8FB8);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 void func_003A9180(void* self);
 
@@ -1005,11 +904,8 @@ extern "C" void func_003A8FB8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9000);
-#ifdef SKIP_ASM
 struct sWCQuad {
     float v[4];
 } __attribute__((aligned(16)));
@@ -1100,19 +996,13 @@ extern "C" int func_003A9000(sWorldCacheMap* self, sWCHdr* hdr, int id)
     self->max = ((sWCNode*)self->sects[0].node)->max;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9180__FPv);
-#ifdef SKIP_ASM
 void func_003A9180(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9188);
-#ifdef SKIP_ASM
 struct func_003A9188_sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1166,13 +1056,10 @@ extern "C" void func_003A9188(func_003A9188_sCache* self)
     self->f2E0 = 0;
     self->f2E4 = 0;
 }
-#endif
 
 INCLUDE_ASM("world/worldcache", func_003A9258);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A9558);
-#ifdef SKIP_ASM
 extern "C" void func_003A84C8(void* cache, unsigned short id);
 
 struct func_003A9558_sNode {
@@ -1194,11 +1081,8 @@ extern "C" void func_003A9558(void** self, func_003A9558_sNode* node)
         func_003A9558(self, node->right);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A95C0);
-#ifdef SKIP_ASM
 extern "C" int func_003A8638(void* self, int a1);
 
 extern "C" void func_003A95C0(void** self, void* node, int* ok)
@@ -1217,13 +1101,10 @@ extern "C" void func_003A95C0(void** self, void* node, int* ok)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("world/worldcache", func_003A9658);
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A96E0);
-#ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
 extern "C" int func_003A96E0(void* self, int i, sWCQuad* outPos, float* outT)
@@ -1242,11 +1123,8 @@ extern "C" int func_003A96E0(void* self, int i, sWCQuad* outPos, float* outT)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9770);
-#ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
 extern "C" int func_003A9770(void* self, int i, sWCQuad* outPos, float* outT)
@@ -1265,5 +1143,4 @@ extern "C" int func_003A9770(void* self, int i, sWCQuad* outPos, float* outT)
     }
     return r;
 }
-#endif
 

@@ -14,8 +14,6 @@ struct cOVStateHUDElem {
 INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onCreateScreen);
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E9130);
-#ifdef SKIP_ASM
 struct sVEntry001E9130 {
     short delta;
     short index;
@@ -40,11 +38,8 @@ extern "C" void func_001E9130(void* self, void* item, int a2)
         func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E91A8__FPvT0);
-#ifdef SKIP_ASM
 void func_001E91A8(void* self, void* a1)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -54,11 +49,8 @@ void func_001E91A8(void* self, void* a1)
     out[2] = e->z;
     out[3] = e->w;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E91D0__FPvT0);
-#ifdef SKIP_ASM
 void func_001E91D0(void* self, void* a1)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -68,11 +60,8 @@ void func_001E91D0(void* self, void* a1)
     out[1] = e->z;
     out[2] = e->w;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E91F8);
-#ifdef SKIP_ASM
 extern "C" void func_001E91F8(void* self, void* a1)
 {
     short* in = (short*)self;
@@ -80,11 +69,8 @@ extern "C" void func_001E91F8(void* self, void* a1)
     out[0] = in[0];
     out[1] = in[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E9220);
-#ifdef SKIP_ASM
 extern "C" void func_001E9220(void* self, void* a1, void* a2)
 {
     short* in = (short*)self;
@@ -109,11 +95,8 @@ extern "C" void func_001E9220(void* self, void* a1, void* a2)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E9290__FPvT0);
-#ifdef SKIP_ASM
 float func_001E9290(void* self, void* a1)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -122,13 +105,10 @@ float func_001E9290(void* self, void* a1)
     *(float*)((char*)a1 + 0x4) = e->rangeMax;
     return t0;
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001E92A8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovstatehud", func_001E94E0);
-#ifdef SKIP_ASM
 extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" void func_001E92A8(void* self);
 struct sVec2f { float x, y; };
@@ -140,11 +120,8 @@ extern "C" void func_001E94E0(void* self, char* str, int a2, sVec2f* pos)
     *(sVec2f*)((char*)self + 0x10) = *pos;
     func_001E92A8(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovstatehud", func_001E9540);
-#ifdef SKIP_ASM
 extern "C" unsigned short* func_002C2508(unsigned short* dst, unsigned short* src);
 extern "C" void func_001E92A8(void* self);
 extern "C" void func_001E9540(void* self, unsigned short* str, int a2, sVec2f* pos)
@@ -154,7 +131,6 @@ extern "C" void func_001E9540(void* self, unsigned short* str, int a2, sVec2f* p
     *(sVec2f*)((char*)self + 0x10) = *pos;
     func_001E92A8(self);
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001E95A0);
 
@@ -169,8 +145,6 @@ INCLUDE_ASM("fe/ovstatehud", func_001EC1F0);
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onRender2D);
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F10F8);
-#ifdef SKIP_ASM
 extern "C" float func_0021E750(void* self, int align, int flags, float pos, float size, float scale);
 extern "C" float func_0021E7A8(void* self, int align, float pos, float size, float scale);
 
@@ -179,11 +153,8 @@ extern "C" void func_001F10F8(void* self, float* out, float* pos, float* size, f
     out[0] = func_0021E750(self, alignX, flags, pos[0], size[0], scale[0]);
     out[1] = func_0021E7A8(self, alignY, pos[1], size[1], scale[1]);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F1190);
-#ifdef SKIP_ASM
 struct sPos_001F1190 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -253,11 +224,8 @@ extern "C" void func_001F1190(void* self, cOVStateHUDElem* e, float* pos, float*
         vt[71].fn(D_004A289C + vt[71].delta, 4, v, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F1338);
-#ifdef SKIP_ASM
 struct sPos_001F1338 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -315,11 +283,8 @@ extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale,
     sVEnt_001F1338* vt = *(sVEnt_001F1338**)(D_004A289C + 0x10D8);
     vt[71].fn(D_004A289C + vt[71].delta, 4, v, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F14B0);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 struct sGlyphTable_1F14B0;
 extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
@@ -404,11 +369,8 @@ extern "C" void func_001F14B0(void* self, const char* str, sGlyphTable_1F14B0* f
         x += (float)(g->width + g->lead) * sc.x;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F16C0);
-#ifdef SKIP_ASM
 struct sColor_001F16C0 {
     float r, g, b, a;
 };
@@ -443,11 +405,8 @@ extern "C" void func_001F16C0(void* self, int a1, int a2, int a3, int a4, int a5
     }
     cOVStateHUD1P_renderTime(self, a1, a2, a3, a4, a5, pos, scale, &col, defs[idx].align, defs[idx].flags, a8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderTime);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001DC990(void* font, float x, float y, const char* fmt, ...);
 extern char D_004A2100[];
@@ -525,11 +484,8 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int a1, int a2, int a3, in
     if (a5 & 1)
         func_001DC990(self->font, out[0], out[1], D_004A22F8, a4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F1B30);
-#ifdef SKIP_ASM
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sVec4_001F1B30 {
@@ -604,13 +560,10 @@ extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F1
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F1E28);
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F22E8);
-#ifdef SKIP_ASM
 extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
 extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
 
@@ -686,13 +639,10 @@ extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F1
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F25E0);
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F2AA0);
-#ifdef SKIP_ASM
 extern "C" char* func_00392430(void* f, const char* str, char* dst, int max, float sx, float width);
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
@@ -783,11 +733,8 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F2DB0);
-#ifdef SKIP_ASM
 extern "C" unsigned short* func_00392680(void* f, const unsigned short* str, unsigned short* dst, int max, float sx, float width);
 extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
 extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
@@ -879,11 +826,8 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F30C0__FPv);
-#ifdef SKIP_ASM
 void* func_001F30C0(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -894,11 +838,8 @@ void* func_001F30C0(void* self)
     *(int*)&e->rangeMin = t0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F30D8);
-#ifdef SKIP_ASM
 struct sVEntry001F30D8 {
     short delta;
     short index;
@@ -930,11 +871,8 @@ extern "C" void func_001F30D8(void* p)
     self->b = 0;
     self->c = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F3170__FPv);
-#ifdef SKIP_ASM
 void func_001F3170(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -944,11 +882,8 @@ void func_001F3170(void* self)
     e->field_0x4 = t0;
     *(int*)&e->rangeMin = t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F3188);
-#ifdef SKIP_ASM
 extern "C" void func_001F3188(void* self)
 {
     if (*(int*)((char*)self + 4) != 0) {
@@ -960,22 +895,16 @@ extern "C" void func_001F3188(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatehud", func_001F31E0);
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F36C0);
-#ifdef SKIP_ASM
 extern "C" void func_001F36C0(void* self, int bit)
 {
     *(int*)((char*)self + 0x4) |= (1 << bit);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F36D8);
-#ifdef SKIP_ASM
 extern "C" void func_001F36D8(void* self, int bit)
 {
     *(int*)((char*)self + 0x4) &= ~(1 << bit);
@@ -983,11 +912,8 @@ extern "C" void func_001F36D8(void* self, int bit)
         *(int*)((char*)self + 0x8) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F3700);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1011,5 +937,4 @@ extern "C" void* func_001F3700(void* self)
     }
     return self;
 }
-#endif
 

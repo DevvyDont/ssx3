@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("worldpainter/worldpainterquery", cWorldPainterQuery_reset);
-#ifdef SKIP_ASM
 struct sWPQuery {
     float* result;          // 0x0
     char pad04[0x10];
@@ -17,5 +15,4 @@ extern "C" void cWorldPainterQuery_reset(void)
         *q->result = -99999.0f;
     }
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_003513D0(void* self);
@@ -80,11 +78,8 @@ extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034E600);
-#ifdef SKIP_ASM
 struct sVec4_E600 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -121,13 +116,10 @@ extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out)
     sVec4_E600 t = buf[idx].r[3];
     *out = t;
 }
-#endif
 
 INCLUDE_ASM("object/animnode", func_0034E698);
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034E798);
-#ifdef SKIP_ASM
 struct sVec4_E798 {
     float x, y, z, w;
     sVec4_E798() {}
@@ -336,11 +328,8 @@ extern "C" void func_0034E798(char* self)
     }
     *(int*)(self + 0x10) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034EBA0);
-#ifdef SKIP_ASM
 struct sAnimLinkList_EBA0;
 
 struct sAnimLink_EBA0 {
@@ -367,7 +356,6 @@ extern "C" int func_0034EBA0(sAnimNode_EBA0* self)
     func_002D1AC8(self->link.list);
     return link->list->head == link;
 }
-#endif
 
 INCLUDE_ASM("object/animnode", func_0034EBE0);
 
@@ -376,8 +364,6 @@ INCLUDE_ASM("object/animnode", func_0034EC58);
 INCLUDE_ASM("object/animnode", func_0034ED88);
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034EE68);
-#ifdef SKIP_ASM
 extern void* D_0048F858[];
 extern "C" void func_0034F048(void* self);
 extern "C" void func_003553C0(void* self, int flags);
@@ -390,5 +376,4 @@ extern "C" void func_0034EE68(void* self, int flags)
     operator_delete(*(int**)((char*)self + 0x74));
     func_003553C0(self, flags);
 }
-#endif
 

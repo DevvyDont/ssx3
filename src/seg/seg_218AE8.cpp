@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317AE8);
-#ifdef SKIP_ASM
 extern "C" void func_00317AE8(char *self, float x) {
     if (*(int*)(self + 0x10) == 0) {
         *(float*)(self + 8) = *(float*)(self + 0xC) = x;
@@ -14,13 +12,10 @@ extern "C" void func_00317AE8(char *self, float x) {
     *(float*)(self + 4) = *(float*)(self + 4) + x * x;
     *(int*)(self + 0x10) = *(int*)(self + 0x10) + 1;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_218AE8", func_00317B50);
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317C48);
-#ifdef SKIP_ASM
 struct sVec4_7C48 { float x, y, z, w; } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -70,24 +65,17 @@ extern "C" int func_00317C48(char *a, char *b) {
     if (vu0Dot_7C48(mk_7C48(a), mk_7C48(b)) < 0.999f) return 0;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317D10);
-#ifdef SKIP_ASM
 extern int D_004A3E80;
 
 extern "C" void func_00317D10(int arg0) {
     D_004A3E80 = arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317D18);
-#ifdef SKIP_ASM
 extern int D_004A3E80;
 
 extern "C" int func_00317D18(void) {
     return D_004A3E80;
 }
-#endif

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("input/inputparse", cInputMapParser_lookupModifierName);
-#ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern char D_004A3EF8[];
 extern char D_004A3F00[];
@@ -31,11 +29,8 @@ extern "C" int cInputMapParser_lookupModifierName(void* self, const char* name)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", cInputMapParser_lookupConfigName);
-#ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" int func_0041AB78(const char* a, const char* b, int n);
 extern char D_004A3F18[];
@@ -89,11 +84,8 @@ extern "C" int cInputMapParser_lookupConfigName(void* self, char* name)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00321A40);
-#ifdef SKIP_ASM
 struct sEntry_321A40 {
     char name[0x40];
     int value;
@@ -115,31 +107,22 @@ extern "C" sEntry_321A40* func_00321A40(sTable_321A40* self, const char* name)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00321AD0);
-#ifdef SKIP_ASM
 extern "C" void* func_00321AD0(void* self, void* a1)
 {
     return (char*)a1 + 0x40;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00321AD8);
-#ifdef SKIP_ASM
 extern "C" int func_00321AD8(void* self, int a1, int a2)
 {
     return a1 * 6 + a2 + 0x60;
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_readToken);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", func_00323098);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void cInputMapParser_parseStatement(void* self);
 
@@ -150,11 +133,8 @@ extern "C" void func_00323098(void* self)
         cInputMapParser_parseStatement(self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", cInputMapParser_parseStatement);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_00321500(void* self, const char* fmt, ...);
@@ -228,11 +208,8 @@ extern "C" void cInputMapParser_parseStatement(void* p)
     cInputMapParser_readToken(self);
     self->count++;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", cInputMapParser_parseExpression);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void func_00321500(void* self, const char* fmt, ...);
 extern "C" void func_00321638(void* self, void* node);
@@ -293,11 +270,8 @@ extern "C" void* cInputMapParser_parseExpression(void* self)
     n->b = b;
     return n;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", func_003233B8);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void func_00321638(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
@@ -354,11 +328,8 @@ extern "C" void* func_003233B8(void* self)
     }
     return left;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", func_00323540);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void func_00321638(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
@@ -415,13 +386,10 @@ extern "C" void* func_00323540(void* self)
     }
     return left;
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", func_003236D8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", func_00323900);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void func_00321638(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
@@ -495,11 +463,8 @@ extern "C" void* func_00323900(void* self)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", func_00323A68);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void func_00321638(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
@@ -573,13 +538,10 @@ extern "C" void* func_00323A68(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseTerm);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", cInputMapParser_parseBinaryFunc);
-#ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 extern "C" void* cInputMapParser_parseExpression(void* self);
 extern "C" void func_00321500(void* self, const char* fmt, ...);
@@ -681,7 +643,6 @@ extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op)
     n->b = b;
     return n;
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseUnaryFunc);
 
@@ -690,8 +651,6 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileStatement);
 INCLUDE_ASM("input/inputparse", func_00324678);
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00324EC8);
-#ifdef SKIP_ASM
 extern "C" void func_00321500(void* self, const char* fmt, ...);
 extern "C" int func_00324678(void* self, void* node, int* src, void* code, int cap, int a5);
 extern char D_0048E240[];
@@ -750,11 +709,8 @@ extern "C" int func_00324EC8(sCodeGen_00324EC8* self, void* node, int* dst, sIns
     code->arg = arg;
     return n1 + n2 + 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003250D8);
-#ifdef SKIP_ASM
 extern "C" void func_00321500(void* self, const char* fmt, ...);
 extern "C" int func_00324678(void* self, void* node, int* src, void* code, int cap, int a5);
 extern char D_0048E240[];
@@ -804,21 +760,15 @@ extern "C" int func_003250D8(sCodeGen_003250D8* self, void* node, int* dst, sIns
     code->arg = 0;
     return n + 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325250__FPv);
-#ifdef SKIP_ASM
 void* func_00325250(void* self)
 {
     *(int*)self = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325260);
-#ifdef SKIP_ASM
 struct sInputParse_325260 {
     int pad[2];
     float v[0x40];
@@ -840,11 +790,8 @@ extern "C" float func_00325260(sInputParse_325260* self, unsigned int id)
     }
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003252E8);
-#ifdef SKIP_ASM
 struct sInputParse_003252E8 {
     int pad[2];
     int a[1];
@@ -854,13 +801,10 @@ extern "C" void* func_003252E8(void* self, int i)
 {
     return &((sInputParse_003252E8*)self)->a[i];
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", func_003252F8);
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325430);
-#ifdef SKIP_ASM
 extern "C" float func_00325430(void* self, int a1)
 {
     if (a1 == 0) {
@@ -869,13 +813,10 @@ extern "C" float func_00325430(void* self, int a1)
     char* p = (char*)self + a1 * 4;
     return *(float*)(p + 0x108);
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", func_00325450);
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325F48);
-#ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -920,11 +861,8 @@ extern "C" void* func_00325F48(sParseBuf_5F48* self, char* path, int* outSize)
     *outSize = self->size;
     return out;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326078);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 void cMemMan_free(void* ptr);
 struct sParseStream;
@@ -958,11 +896,8 @@ extern "C" void func_00326078(void* self, int a1, int a2)
         cMemMan_free(st.base);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326150);
-#ifdef SKIP_ASM
 struct sParseStream;
 extern "C" void func_00326360(void* self, char c);
 extern "C" void func_00326478(void* self, sParseStream* s);
@@ -1017,11 +952,8 @@ extern "C" int func_00326150(void* self, sParseStream* s, int a2, int a3)
     }
     return *(int*)((char*)self + 0xC) >= 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326308);
-#ifdef SKIP_ASM
 extern "C" void func_00326360(void* self, char c);
 
 extern "C" void func_00326308(void* self, char* s)
@@ -1030,11 +962,8 @@ extern "C" void func_00326308(void* self, char* s)
         func_00326360(self, *s++);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326360);
-#ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1066,11 +995,8 @@ extern "C" void func_00326360(void* self, char c)
     }
     b->data[b->count++] = c;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("input/inputparse", func_00326430);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_00326308(void* self, char* msg);
 extern char D_0048E3C8[];
@@ -1081,11 +1007,8 @@ extern "C" void func_00326430(void* self, int a1, int a2)
     sprintf(buf, D_0048E3C8, a1, a2);
     func_00326308(self, buf);
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326478);
-#ifdef SKIP_ASM
 struct sParseStream {
     unsigned char* base;
     int size;
@@ -1100,13 +1023,10 @@ extern "C" void func_00326478(void* self, sParseStream* s)
         *(int*)((char*)self + 0xc) = *s->cur++;
     }
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", func_003264B0);
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003265C0);
-#ifdef SKIP_ASM
 struct sParseStream;
 extern "C" void func_00326478(void* self, sParseStream* s);
 // PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
@@ -1131,11 +1051,8 @@ extern "C" void func_003265C0(void* self, sParseStream* s, int a2, int a3)
 error:
     func_00326A20_5(self, s, a2, a3, D_0048E3D8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326678);
-#ifdef SKIP_ASM
 extern "C" void func_00326678(void* self, sParseStream* s)
 {
     while (*(int*)((char*)self + 0xC) >= 0) {
@@ -1147,21 +1064,15 @@ extern "C" void func_00326678(void* self, sParseStream* s)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_readCmdLine);
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326A20__FPv);
-#ifdef SKIP_ASM
 void func_00326A20(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326A28);
-#ifdef SKIP_ASM
 extern "C" int func_00326D60(void* p, int n);
 
 extern "C" void func_00326A28(void* self)
@@ -1170,11 +1081,8 @@ extern "C" void func_00326A28(void* self)
     *(int*)((char*)self + 0x2EE0) = 0x1D;
     *(int*)((char*)self + 0x2EE4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326A68);
-#ifdef SKIP_ASM
 struct sVEntry00326A68 {
     short delta;
     short index;
@@ -1201,11 +1109,8 @@ extern "C" void func_00326A68(sOwner00326A68* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326AE0);
-#ifdef SKIP_ASM
 extern "C" void func_00326CF0(void* p);
 
 extern "C" void func_00326AE0(void* self)
@@ -1215,11 +1120,8 @@ extern "C" void func_00326AE0(void* self)
         func_00326CF0(((void**)((char*)self + 0x2EEC))[i]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326B48);
-#ifdef SKIP_ASM
 struct sInputSlot_00326B48 {
     int value;
     char data[0x60];
@@ -1240,11 +1142,8 @@ extern "C" int func_00326B48(sInputParse_00326B48* s)
     s->head = next;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326B88);
-#ifdef SKIP_ASM
 class cInputDevice_326B88 {
 public:
     virtual void v01();
@@ -1272,11 +1171,8 @@ extern "C" void func_00326B88(sInputParse_00326B88* s)
     }
     s->tail = (s->tail + 1) % 30;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326C60);
-#ifdef SKIP_ASM
 struct sInputSlot_00326C60 {
     int value;
     char data[0x60];
@@ -1295,11 +1191,8 @@ extern "C" int func_00326C60(sInputParse_00326C60* s)
     s->head = (tail + 29) % 30;
     return (tail - head + 30) % 30;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326CA0);
-#ifdef SKIP_ASM
 struct sInputSlot_00326CA0 {
     int value;
     char pad[0x60];
@@ -1315,11 +1208,8 @@ extern "C" int func_00326CA0(void* self, int i)
     sInputParse_00326CA0* s = (sInputParse_00326CA0*)self;
     return s->slots[s->bank][i].value;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326CC8);
-#ifdef SKIP_ASM
 struct sInputSlot_00326CC8 {
     int value;
     char data[0x60];
@@ -1335,11 +1225,8 @@ extern "C" void* func_00326CC8(void* self, int i)
     sInputParse_00326CC8* s = (sInputParse_00326CC8*)self;
     return s->slots[s->bank][i].data;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326CF0);
-#ifdef SKIP_ASM
 struct sVEntry00326CF0 {
     short delta;
     short index;
@@ -1357,11 +1244,8 @@ extern "C" void func_00326CF0(void* p)
         ((SetFn00326CF0)(*self)[4].fn)((char*)self + (*self)[4].delta, i, 0.0f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326D60);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00326DF0(void* self, int a1, int a2);
 extern char D_004A3FB0[];
@@ -1378,11 +1262,8 @@ extern "C" int func_00326D60(void* p, int n)
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326DF0);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_0048E488[];
 
@@ -1400,11 +1281,8 @@ extern "C" void* func_00326DF0(void* self, int a1, int a2)
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326E50);
-#ifdef SKIP_ASM
 extern "C" int func_003FF8F0(int a, int b);
 void operator_delete(int* ptr);
 extern void* D_0048E488[];
@@ -1419,22 +1297,16 @@ extern "C" void func_00326E50(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("input/inputparse", func_00326EB0);
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327738__FPv);
-#ifdef SKIP_ASM
 int func_00327738(void* self)
 {
     return 0x2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327740);
-#ifdef SKIP_ASM
 static inline int clamp_327740(int v, int lo, int hi)
 {
     if (v >= lo) {
@@ -1463,11 +1335,8 @@ extern "C" void func_00327740(void* self, int mode, float v)
     }
     *p = r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003277D0);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0048E4B8[];
 
@@ -1478,28 +1347,19 @@ extern "C" void func_003277D0(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327800__FPv);
-#ifdef SKIP_ASM
 int func_00327800(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327808__FPv);
-#ifdef SKIP_ASM
 void func_00327808(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327810__FPv);
-#ifdef SKIP_ASM
 void* func_00327810(void* self)
 {
     int t0 = 0;
@@ -1509,11 +1369,8 @@ void* func_00327810(void* self)
     *(int*)((char*)self + 0xc) = t0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327828);
-#ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 void operator_delete(int* ptr);
 
@@ -1529,5 +1386,4 @@ extern "C" void func_00327828(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 

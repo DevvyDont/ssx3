@@ -10,8 +10,6 @@ struct sInstanceStruct {
 };
 
 //100%
-INCLUDE_ASM("object/instanceman", cInstanceMan_copyInstance__FPvP15sInstanceStructT0);
-#ifdef SKIP_ASM
 void cInstanceMan_copyInstance(void* self, sInstanceStruct* a, void* b)
 {
     void* saved = a->field_0x78;
@@ -19,11 +17,8 @@ void cInstanceMan_copyInstance(void* self, sInstanceStruct* a, void* b)
     a->field_0x78 = saved;
     a->field_0x8 |= 0x2000;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_003512C0);
-#ifdef SKIP_ASM
 struct sInstHandle {
     unsigned int gen : 8;
     unsigned int index : 24;
@@ -54,13 +49,10 @@ extern "C" sInstSlot* func_003512C0(sInstPool* self, unsigned int handle)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("object/instanceman", func_00351330);
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351398);
-#ifdef SKIP_ASM
 extern "C" void func_00351398(void* self, float* src)
 {
     *(float**)((char*)self + 0x40) = src;
@@ -71,11 +63,8 @@ extern "C" void func_00351398(void* self, float* src)
     *(float*)((char*)self + 0x54) = src[4];
     *(float*)((char*)self + 0x58) = src[5];
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_003513D0);
-#ifdef SKIP_ASM
 extern "C" void* func_003E6448(void* dst, int value, int size);
 
 extern "C" void func_003513D0(void* self)
@@ -84,7 +73,6 @@ extern "C" void func_003513D0(void* self)
     func_003E6448((char*)self + 0x44, 0, 0x40);
     *(int*)((char*)self + 0x40) = 0;
 }
-#endif
 
 INCLUDE_ASM("object/instanceman", func_00351410);
 
@@ -95,8 +83,6 @@ INCLUDE_ASM("object/instanceman", func_00351480);
 INCLUDE_ASM("object/instanceman", func_00351508);
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351538);
-#ifdef SKIP_ASM
 struct sImRange;
 struct sImRangeTable;
 extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x);
@@ -141,11 +127,8 @@ void func_00351538_impl(char* self, float t)
         out++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351660);
-#ifdef SKIP_ASM
 extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x);
 
 struct sImSeg_351660 {
@@ -194,11 +177,8 @@ extern "C" void func_00351660(char* self, sImV4_351660* vel, sImV4_351660* rotVe
     *vel = sImV4_351660(out[0], out[1], out[2], 0.0f);
     *rotVel = sImV4_351660(-out[3], -out[4], -out[5], 0.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351800);
-#ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void* func_00351538(void* self);
 
@@ -247,11 +227,8 @@ extern "C" void func_00351800(sImInst_351800* self)
     self->m[3][2] = self->t[2];
     self->m[3][3] = 1.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351948);
-#ifdef SKIP_ASM
 struct sImMat44 {
     float m[4][4];
 } __attribute__((aligned(16)));
@@ -319,24 +296,18 @@ extern "C" void func_00351948(void* self, sImMat44* m)
     vu0CopyMatIM(&t2, &t);
     vu0CopyMatIM(dst, &t2);
 }
-#endif
 
 extern "C" void* func_00351538(void* self);
 
 INCLUDE_ASM("object/instanceman", func_00351A10);
 
 //99.29%
-INCLUDE_ASM("object/instanceman", func_00351A60__FPv);
-#ifdef SKIP_ASM
 void* func_00351A60(void* self)
 {
     return func_00351538(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351A80);
-#ifdef SKIP_ASM
 struct sImRange {
     char pad_0x00[0x10];
     float lo;   // 0x10
@@ -376,11 +347,8 @@ extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x)
     }
     return e;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351B40);
-#ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* def);
 extern "C" float func_002D1C70();
 extern "C" void func_00352230(void* self);
@@ -664,11 +632,8 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
     func_00352230(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352168);
-#ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern void* D_0048F6D8[];
 
@@ -698,24 +663,18 @@ extern "C" void* func_00352168(void* self, void* a1, void* stream)
     *(float*)((char*)self + 0x1C) = -1.0f;
     return self;
 }
-#endif
 
 extern void* D_0048F6D8[];
 extern "C" void* func_0034FBF0(void*);
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352208__FPv);
-#ifdef SKIP_ASM
 void* func_00352208(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_0048F6D8;
     return func_0034FBF0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352230);
-#ifdef SKIP_ASM
 unsigned int BXrand();
 extern char* D_004A5B64;
 
@@ -834,11 +793,8 @@ extern "C" void func_00352230(void* p)
         AddEq_352230(self->vel[j], sV4_352230(vx, vy, vz, 0.0f));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352500);
-#ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern char* D_004A5B64;
 
@@ -950,11 +906,8 @@ extern "C" void func_00352500(sDebris_352500* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352708);
-#ifdef SKIP_ASM
 struct sInstanceManVEntry2708 {
     short delta;
     short index;
@@ -977,11 +930,8 @@ extern "C" void func_00352708(void* self, int check)
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352780);
-#ifdef SKIP_ASM
 extern "C" void func_0034FE28(void* self);
 
 struct sInstManVEntry2780 {
@@ -1004,13 +954,10 @@ extern "C" void func_00352780(void* self)
         func_0034FE28(self);
     }
 }
-#endif
 
 INCLUDE_ASM("object/instanceman", func_00352810);
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352A58);
-#ifdef SKIP_ASM
 struct sSerVEntry_00352A58 {
     short delta;
     short index;
@@ -1025,5 +972,4 @@ extern "C" void func_00352A58(void* self, void* stream)
     sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0xC);
 }
-#endif
 

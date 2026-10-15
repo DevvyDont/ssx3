@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_initialize);
-#ifdef SKIP_ASM
 extern "C" void* cRider_cRider(void* self);
 extern "C" void func_003E6448(void* p, int c, int n);
 struct func_002E8560_sTrail;
@@ -83,13 +81,10 @@ extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
     func_002E8560((func_002E8560_sTrail*)self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E83F0);
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002E8560);
-#ifdef SKIP_ASM
 struct func_002E8560_sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -158,7 +153,6 @@ extern "C" void func_002E8560(func_002E8560_sTrail* self)
         self->v18[i * 12 + 2] = self->v10[i * 12 + 2] = self->v1C[i * 12 + 2] = self->v20[i * 12 + 2] = self->v14[i * 12 + 2] = self->v24[i * 12 + 2] = 1.0f;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E86F0);
 
@@ -167,8 +161,6 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002E87E8);
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E8938);
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA480);
-#ifdef SKIP_ASM
 struct sMtxEntry_A480 {
     int v[5];
 };
@@ -221,11 +213,8 @@ extern "C" void func_002EA480(void* self)
     push_A480(D_004A289C);
     pop_A480(D_004A289C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
-#ifdef SKIP_ASM
 extern int D_004A45C8;
 
 struct sTrailStripA538 {
@@ -275,11 +264,8 @@ extern "C" void func_002EA538(char** trails, int n)
     }
     pop_A480(D_004A289C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA670);
-#ifdef SKIP_ASM
 extern void* D_00487F30[];
 extern "C" void* func_00354648(void* self);
 extern "C" void func_002EAA28(void* self);
@@ -293,11 +279,8 @@ extern "C" void* func_002EA670(void* self)
     func_002EAA28(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA6B8);
-#ifdef SKIP_ASM
 extern "C" void func_002EAA28(void* self);
 
 struct func_002EA6B8_sFade {
@@ -332,11 +315,8 @@ extern "C" void func_002EA6B8(func_002EA6B8_sFade* self, float dur)
     }
     self->state = 3;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA780);
-#ifdef SKIP_ASM
 struct sTrailFade {
     char pad[0x10];
     int state;
@@ -364,11 +344,8 @@ extern "C" void func_002EA780(sTrailFade* self, float t)
     }
     self->state = 2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA820);
-#ifdef SKIP_ASM
 struct sBTVEntry {
     short delta;
     short index;
@@ -386,11 +363,8 @@ extern "C" void func_002EA820(void* self)
         e->fn(obj + e->delta, (char*)self + 0x20);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA860);
-#ifdef SKIP_ASM
 extern char* D_004A5B80;
 
 extern "C" void func_002EA860(void* self)
@@ -403,11 +377,8 @@ extern "C" void func_002EA860(void* self)
     sBTVEntry* e = &(*(sBTVEntry**)(obj + 0x10D8))[41];
     e->fn(obj + e->delta, (char*)self + 0x34);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA8B8);
-#ifdef SKIP_ASM
 extern "C" void func_002EA8B8(void* self, int up)
 {
     int s = *(int*)((char*)self + 0x10);
@@ -423,13 +394,10 @@ extern "C" void func_002EA8B8(void* self, int up)
         *(int*)((char*)self + 0x1C) -= 1;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA900);
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EAA28);
-#ifdef SKIP_ASM
 struct sBTState {
     int mode;
     float a;
@@ -474,25 +442,19 @@ extern "C" void func_002EAA28(void* self)
         s->cur.d = d;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EAAE0);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EAC60);
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EADC0__FPv);
-#ifdef SKIP_ASM
 void func_002EADC0(void* self)
 {
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EADD0);
-#ifdef SKIP_ASM
 int func_0011FE98(void* self);
 void func_00392DE8(void* self, int val);
 extern "C" void func_00392D90(void* self, void* q, void* v);
@@ -623,13 +585,10 @@ extern "C" void func_002EADD0(sTrail_2EADD0* self)
         self->count = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EB198);
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EB8F0);
-#ifdef SKIP_ASM
 struct sBTVEntryR {
     short delta;
     short index;
@@ -653,13 +612,10 @@ extern "C" void func_002EB8F0(void)
     D_004A3B40 = b;
     D_004A3B44 = b - a;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EB938);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBB10);
-#ifdef SKIP_ASM
 struct sBTRect4 {
     float x, y, z, w;
 };
@@ -687,11 +643,8 @@ extern "C" void func_002EBB10(void* self, float s)
     rect.w = D_004A3B44;
     func_002EB938(&pos, &rect, &color, pos.x);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBBA8);
-#ifdef SKIP_ASM
 void func_002E4D70(void* self);
 extern void* D_004880A0[];
 
@@ -716,11 +669,8 @@ extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const fun
     self->b = b;
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBC40);
-#ifdef SKIP_ASM
 extern float D_004A3B30;
 extern float D_004A3B34;
 extern float D_004A3B38;
@@ -772,13 +722,10 @@ extern "C" void func_002EBC40(char* self, float t)
     rect.w = vh;
     func_002EB938(&pos, &rect, (sBTRect4*)(self + 4), 0.0f);
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBD88);
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBE20);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 unsigned int BXrand();
 // base ctor returns this; the unit declares it void
@@ -800,7 +747,6 @@ extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
     *q = (float)r2 * 0.48000001907348633f;
     return self;
 }
-#endif
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBF48);
 

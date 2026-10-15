@@ -6,8 +6,6 @@ struct cUIThing {
 };
 
 //100%
-INCLUDE_ASM("ui/uithing", cUIThing_getKeyframerEvent__FP8cUIThingi);
-#ifdef SKIP_ASM
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
 {
     signed char idx = (signed char)x;
@@ -16,13 +14,10 @@ unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
     }
     return 0xFFFF;
 }
-#endif
 
 INCLUDE_ASM("ui/uithing", func_0039FFA0);
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0000);
-#ifdef SKIP_ASM
 extern "C" void func_003975E0(void*, void*, unsigned char, unsigned short);
 extern "C" void func_003974B0(void*, unsigned char);
 
@@ -34,15 +29,12 @@ extern "C" void func_003A0000(void* self, unsigned short ev)
         func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uithing", func_003A0048);
 
 INCLUDE_ASM("ui/uithing", func_003A0158);
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0290);
-#ifdef SKIP_ASM
 struct sUIVec3 {
     float x, y, z;
 };
@@ -63,31 +55,22 @@ extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
         out->z += v.z;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0318);
-#ifdef SKIP_ASM
 extern "C" int func_003A0318(void* self, int a1)
 {
     self = (char*)self + ((signed char)a1 << 2);
     return *(int*)((char*)self + 0x6c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0330);
-#ifdef SKIP_ASM
 extern "C" void func_003A0330(void* self, int a1, int a2)
 {
     self = (char*)self + ((signed char)a1 << 2);
     *(int*)((char*)self + 0x6c) = a2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0348);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self);
 extern void* D_00494588[];
 
@@ -125,11 +108,8 @@ extern "C" func_003A0348_sObj* func_003A0348(func_003A0348_sObj* self)
     self->q98 = D_004C66C8;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A03F0);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText*, int);
 // PORT: func_0039FE00 really takes (self, data); other units declare it with one argument.
@@ -171,11 +151,8 @@ extern "C" void func_003A03F0(sUIThing03F0* self, sUIData03F0* data)
                                    data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A04F0);
-#ifdef SKIP_ASM
 extern "C" int func_003A04F0(void* self)
 {
     void* p = *(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
@@ -184,11 +161,8 @@ extern "C" int func_003A04F0(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0528);
-#ifdef SKIP_ASM
 extern "C" void func_003A0D00(void* self, unsigned short* str);
 extern "C" void cUIText_setUnicodeStringPrivate(void* self, unsigned short* str);
 
@@ -222,5 +196,4 @@ extern "C" void func_003A0528(void* self)
         }
     }
 }
-#endif
 

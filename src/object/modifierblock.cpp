@@ -32,8 +32,6 @@ extern void* D_00491340[16];
 extern void* D_00491200[16];
 
 //100%
-INCLUDE_ASM("object/modifierblock", tModifierBlock_tModifierBlock__FP14tModifierBlock);
-#ifdef SKIP_ASM
 tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self)
 {
     self->field_0x18 = D_00491340;
@@ -48,11 +46,8 @@ tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self)
     self->field_0xC = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352AE8);
-#ifdef SKIP_ASM
 extern "C" void func_003530D0(tModifierBlock* self);
 extern "C" void func_00353118(tModifierBlock* self);
 extern "C" void func_00353150(tModifierBlock* self);
@@ -79,11 +74,8 @@ extern "C" void func_00352AE8(tModifierBlock* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352B88);
-#ifdef SKIP_ASM
 struct sMbVEntryI {
     short delta;
     short index;
@@ -99,11 +91,8 @@ extern "C" int func_00352B88(tModifierBlock* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", tModifierBlock_setBoundBox__FP14tModifierBlock);
-#ifdef SKIP_ASM
 struct sMbVEntry {
     short delta;
     short index;
@@ -122,11 +111,8 @@ void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
         vt[13].fn((char*)node + vt[13].delta, box);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352BF8);
-#ifdef SKIP_ASM
 struct sMbVEntryF {
     short delta;
     short index;
@@ -142,11 +128,8 @@ extern "C" float func_00352BF8(tModifierBlock* self)
     }
     return 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", tModifierBlock_setRadius__FP14tModifierBlock);
-#ifdef SKIP_ASM
 void tModifierBlock_setRadius(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -155,11 +138,8 @@ void tModifierBlock_setRadius(tModifierBlock* self)
         target->fnRadius((char*)node + target->field_0x78);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352C70);
-#ifdef SKIP_ASM
 struct sMbVEntryV2C70 {
     short delta;
     short index;
@@ -204,11 +184,8 @@ extern "C" void func_00352C70(tModifierBlock* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352D20);
-#ifdef SKIP_ASM
 struct sMbVEntryV2D20 {
     short delta;
     short index;
@@ -247,11 +224,8 @@ extern "C" void func_00352D20(tModifierBlock* self)
         vt[4].fn((char*)node + vt[4].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352DD0);
-#ifdef SKIP_ASM
 struct sMbVEntryV2DD0 {
     short delta;
     short index;
@@ -277,11 +251,8 @@ extern "C" void func_00352DD0(tModifierBlock* self)
         vt[11].fn((char*)node + vt[11].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352E50);
-#ifdef SKIP_ASM
 extern "C" int func_00352E50(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -293,13 +264,10 @@ extern "C" int func_00352E50(tModifierBlock* self)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("object/modifierblock", func_00352E98);
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352ED0);
-#ifdef SKIP_ASM
 extern "C" int func_00352ED0(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -309,11 +277,8 @@ extern "C" int func_00352ED0(tModifierBlock* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352F08);
-#ifdef SKIP_ASM
 struct sMbVEntryV {
     short delta;
     short index;
@@ -328,11 +293,8 @@ extern "C" void func_00352F08(tModifierBlock* self)
         vt[7].fn((char*)node + vt[7].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352F40);
-#ifdef SKIP_ASM
 struct sMbVEntryP2F40 {
     short delta;
     short index;
@@ -380,11 +342,8 @@ extern "C" void func_00352F40(tModifierBlock* self, int id, float v)
         } while (p != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353020);
-#ifdef SKIP_ASM
 struct sMbVEntryP3020 {
     short delta;
     short index;
@@ -412,11 +371,8 @@ extern "C" void func_00353020(tModifierBlock* self, int a1, int a2)
         vt2[43].fn((char*)obj + vt2[43].delta, a1, a2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353098);
-#ifdef SKIP_ASM
 extern "C" void func_00353098(tModifierBlock* self, void* arg)
 {
     sBoundBoxNode* node = self->node;
@@ -425,11 +381,8 @@ extern "C" void func_00353098(tModifierBlock* self, void* arg)
         vt[22].fn((char*)node + vt[22].delta, arg);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_003530D0);
-#ifdef SKIP_ASM
 struct sMbVEntryDel {
     short delta;
     short index;
@@ -445,11 +398,8 @@ extern "C" void func_003530D0(tModifierBlock* self)
         self->node = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353118);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_00353118(tModifierBlock* self)
@@ -460,11 +410,8 @@ extern "C" void func_00353118(tModifierBlock* self)
         *p = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353150);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_00353150(tModifierBlock* self)
@@ -475,11 +422,8 @@ extern "C" void func_00353150(tModifierBlock* self)
         *p = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353188);
-#ifdef SKIP_ASM
 struct sMbVEntryDel2 {
     short delta;
     short index;
@@ -495,11 +439,8 @@ extern "C" void func_00353188(tModifierBlock* self)
         *(void**)((char*)self + 0xC) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_003531D0);
-#ifdef SKIP_ASM
 struct sModBlockDtorVEntry {
     short delta;
     short index;
@@ -526,11 +467,8 @@ extern "C" void func_003531D0(void* self)
         } while (p != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353228);
-#ifdef SKIP_ASM
 struct sModBlockVEntry3228 {
     short delta;
     short index;
@@ -555,11 +493,8 @@ extern "C" void func_00353228(void* self)
         } while (p != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353278);
-#ifdef SKIP_ASM
 struct sModBlockVEntry3278 {
     short delta;
     short index;
@@ -588,11 +523,8 @@ extern "C" void func_00353278(void* self)
         } while (p != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353300);
-#ifdef SKIP_ASM
 struct sModBlockDtorVEntry3300 {
     short delta;
     short index;
@@ -631,11 +563,8 @@ extern "C" void func_00353300(void* self, unsigned int id)
         } while (p != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353398);
-#ifdef SKIP_ASM
 struct sMbVEntryV3398 {
     short delta;
     short index;
@@ -657,11 +586,8 @@ extern "C" void func_00353398(void* self, void* list)
     *(void**)list = 0;
     *(void**)((char*)list + 0x4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353418);
-#ifdef SKIP_ASM
 struct sModifierLink {
     sModifierLink* next; // 0x0
     char pad_0x4[0x30 - 0x4];
@@ -679,11 +605,8 @@ extern "C" int func_00353418(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353448);
-#ifdef SKIP_ASM
 extern "C" void func_0035F688(void* self, void* stream);
 extern "C" void func_0035FD98(void* self, void* stream);
 
@@ -781,11 +704,8 @@ extern "C" void func_00353448(char* self, char* stream)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", tModifierBlock_readFromReplayFrame);
-#ifdef SKIP_ASM
 struct sMbStreamVEntry36D8 {
     short delta;
     short index;
@@ -891,13 +811,10 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         func_0035B690((char*)self + 0x1C, func_0035BA88(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), stream));
     }
 }
-#endif
 
 extern void* D_0048F008[];
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353AC0__FPv);
-#ifdef SKIP_ASM
 void* func_00353AC0(void* self)
 {
     *(void***)((char*)self + 0xc) = D_0048F008;
@@ -907,23 +824,17 @@ void* func_00353AC0(void* self)
     *(int*)((char*)self + 0x14) = 0;
     return self;
 }
-#endif
 
 extern "C" void* func_003546C8(void*);
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353AE8__FPv);
-#ifdef SKIP_ASM
 void* func_00353AE8(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_0048F008;
     return func_003546C8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353B10);
-#ifdef SKIP_ASM
 // PORT: func_002D1C58 is defined returning void*, but its value is the rider index passed to func_002D1C20(int).
 extern "C" int func_002D1C58_i() __asm__("func_002D1C58");
 extern "C" void* func_002D1C20(int i);
@@ -1021,11 +932,8 @@ extern "C" void func_00353B10(void* self)
     int* pf = (int*)((char*)t2 - 0xC);
     *pf = (*pf & ~0x3E0) | (old << 5);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353CF0);
-#ifdef SKIP_ASM
 struct sMbTrackEntry3CF0 {
     char pad_0x0[0x26];
     short count;            // 0x26
@@ -1093,11 +1001,8 @@ extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
         self->model = ref.get(w);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353D98__FPv);
-#ifdef SKIP_ASM
 int func_00353D98(void* self)
 {
     int t0 = -1;
@@ -1105,21 +1010,15 @@ int func_00353D98(void* self)
     *(int*)((char*)self + 0x10) = t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353DA8__FPv);
-#ifdef SKIP_ASM
 void* func_00353DA8(void* self)
 {
     *(int*)((char*)self + 0x24) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353DB8);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
@@ -1133,11 +1032,8 @@ extern "C" void func_00353DB8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353E08);
-#ifdef SKIP_ASM
 extern "C" void cSpring_setupNodes(void* self);
 
 struct sSpringDesc_3E08 {
@@ -1166,11 +1062,8 @@ extern "C" void func_00353E08(void* self, sSpringDesc_3E08* d, float len)
     s->seg = len / (float)(n - 1);
     cSpring_setupNodes(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353E80);
-#ifdef SKIP_ASM
 struct sMbVEntrySer3E80 {
     short delta;
     short index;
@@ -1188,5 +1081,4 @@ extern "C" void* func_00353E80(void* self, void* stream)
     e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 0x50);
     return self;
 }
-#endif
 

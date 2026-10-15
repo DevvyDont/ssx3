@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ui/uiengine", UIAsciiToUnicode__FPUsPCc);
-#ifdef SKIP_ASM
 void UIAsciiToUnicode(unsigned short* dst, const char* src)
 {
     for (; *src != 0; src++, dst++) {
@@ -10,11 +8,8 @@ void UIAsciiToUnicode(unsigned short* dst, const char* src)
     }
     *dst = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00397B08);
-#ifdef SKIP_ASM
 extern "C" void* func_003977E8(void* self);
 
 extern "C" void* func_00397B08(void* self)
@@ -36,11 +31,8 @@ extern "C" void* func_00397B08(void* self)
     *(void**)((char*)self + 0x6C) = self;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00397B70);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void func_00398078(void* self, int flags);
@@ -88,11 +80,8 @@ extern "C" void func_00397B70(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", cUIEngine_loadFile);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* FILE_load(const char* name, int flags);
 void func_00397138(void* self, int val);
@@ -111,11 +100,8 @@ extern "C" int cUIEngine_loadFile(void* self, int id)
     cUITextureBank_setData((char*)self + 0x58, id, file + *(int*)(file + 0x10));
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", cUIEngine_addScreenByHashName);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* func_003977E8(void* self);
@@ -185,11 +171,8 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
     cUIScreen_createAllObjects(screen);
     return screen;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00397DF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sUIRS_7DF8 {
     unsigned int f0_0 : 2;
@@ -282,22 +265,16 @@ extern "C" void func_00397DF8(void* self)
     D_004A289C_7df8->v32();
     D_004A289C_7df8->top--;
 }
-#endif
 
 void func_0039ECA8(void*);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398018);
-#ifdef SKIP_ASM
 extern "C" void func_00398018(void* self)
 {
     func_0039ECA8((char*)self + 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398038);
-#ifdef SKIP_ASM
 struct sVEntry398038 {
     short delta;
     short index;
@@ -313,11 +290,8 @@ extern "C" void func_00398038(void* self)
     vt[0x2E].fn((char*)obj + vt[0x2E].delta);
     func_0039F100((char*)self + 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398078);
-#ifdef SKIP_ASM
 struct sVEntry398078 {
     short delta;
     short index;
@@ -343,11 +317,8 @@ extern "C" void func_00398078(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", cUITextureBank_setData);
-#ifdef SKIP_ASM
 struct sUITexElem8138 {
     int tex;                // 0x00
     float f4;               // 0x04
@@ -459,11 +430,8 @@ extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
         self->elems[j].tex = self->texIds[src->tex];
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398380);
-#ifdef SKIP_ASM
 struct s398380Item {
     char pad[0x1C];
     int id;
@@ -480,13 +448,10 @@ extern "C" s398380Item* func_00398380(void* self, int id)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ui/uiengine", func_003983B8);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003983F0);
-#ifdef SKIP_ASM
 struct s3983F0Entry {
     int key;
     int unk4;
@@ -510,11 +475,8 @@ extern "C" int func_003983F0(s3983F0* self, int key)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398438);
-#ifdef SKIP_ASM
 extern "C" void func_003916C0(int h, int a);
 
 extern "C" void func_00398438(s3983F0* self)
@@ -529,15 +491,12 @@ extern "C" void func_00398438(s3983F0* self)
     }
     self->count = 0;
 }
-#endif
 
 INCLUDE_ASM("ui/uiengine", func_003984B0);
 
 INCLUDE_ASM("ui/uiengine", func_003984E8);
 
 //100%
-INCLUDE_ASM("ui/uiengine", cUIFontInterface_loadFonts);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int func_003915E8(void* mem, int name, int a2);
 extern char D_004A4780[];
@@ -554,22 +513,16 @@ extern "C" void cUIFontInterface_loadFonts(s3983F0* self)
         *(int*)((char*)self + j * 12 + 0xC) = func_003915E8(cMemMan_alloc(0x84, D_004A4780, 0, 0), uiFontNameOf(&self->entries[i]), 0);
     }
 }
-#endif
 
 extern "C" void* func_0039FE00(void* self);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398618__FPv);
-#ifdef SKIP_ASM
 void* func_00398618(void* self)
 {
     return func_0039FE00(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398638);
-#ifdef SKIP_ASM
 extern void* D_00494B98[];
 extern void* D_00494CE8[];
 
@@ -596,11 +549,8 @@ extern "C" void func_00398638(void* self, int on)
     f.vt = D_00494CE8;
     ((func_00398638_sFlags*)((char*)self + 0x14))->on = (on != 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003986B0);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -631,11 +581,8 @@ extern "C" void* func_003986B0(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398738);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -658,11 +605,8 @@ extern "C" void func_00398738(void* self)
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398798);
-#ifdef SKIP_ASM
 extern void* D_00494BB8[];
 extern void* D_00494CE8[];
 
@@ -686,11 +630,8 @@ extern "C" int func_00398798(void* self, int a1)
     f.vt = D_00494CE8;
     return r != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003987F8);
-#ifdef SKIP_ASM
 struct func_003987F8_sVEntry {
     short delta;
     short index;
@@ -708,11 +649,8 @@ extern "C" void func_003987F8(void* self, int a1)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398868);
-#ifdef SKIP_ASM
 struct func_00398868_sVEntry {
     short delta;
     short index;
@@ -732,11 +670,8 @@ extern "C" void func_00398868(void* self, float x, float y)
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398910);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -761,26 +696,20 @@ extern "C" void func_00398910(void* self, unsigned short ev)
     }
     func_003A0000(self, ev);
 }
-#endif
 
 INCLUDE_ASM("ui/uiengine", func_00398998);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398A60__FPvT0);
-#ifdef SKIP_ASM
 void func_00398A60(void* a, void* b)
 {
     float t = *(float*)a;
     *(float*)a = *(float*)b;
     *(float*)b = t;
 }
-#endif
 
 INCLUDE_ASM("ui/uiengine", func_00398A78);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiengine", func_00399730);
-#ifdef SKIP_ASM
 extern "C" void func_00399730(void* self, int id)
 {
     void* a = *(void**)((char*)self + 0x5C);
@@ -788,11 +717,8 @@ extern "C" void func_00399730(void* self, int id)
     void* c = *(void**)((char*)b + 0x10);
     *(s398380Item**)((char*)self + 0x7C) = func_00398380((char*)c + 0x58, id);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399768);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_00494798[];
@@ -839,11 +765,8 @@ extern "C" func_00399768_sObj* func_00399768(func_00399768_sObj* self)
     self->quad = D_004C66C8;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399820);
-#ifdef SKIP_ASM
 // PORT: func_0039FE00 really takes (self, data); the unit declares it with one argument.
 void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
 
@@ -884,11 +807,8 @@ extern "C" void func_00399820(sUIObj9820* self, sUIData9820* data)
     }
     self->flags14 |= 0x80;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399920);
-#ifdef SKIP_ASM
 void* func_0039FF50(void*);
 
 struct func_00399920_sEntry {
@@ -906,13 +826,10 @@ extern "C" int func_00399920(void* self)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ui/uiengine", func_00399970);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399D80);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -941,11 +858,8 @@ extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str
         e->str = s;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiengine", func_00399E28);
-#ifdef SKIP_ASM
 extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str);
 
 struct func_00399E28_sEntry {
@@ -987,7 +901,6 @@ extern "C" void func_00399E28(func_00399E28_sObj* self)
         ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uiengine", func_00399F00);
 

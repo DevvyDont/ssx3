@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_cPSPVisualEffectsMan);
-#ifdef SKIP_ASM
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void* func_002EFF98(void*);
 extern "C" void* func_00372AA0(void*);
@@ -69,11 +67,8 @@ extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
     self->objs[16] = func_00372AA0(cMemMan_alloc(4, D_00487C88, 0, 0));
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0820);
-#ifdef SKIP_ASM
 void operator_delete(int *);
 struct Obj0820 {
     virtual ~Obj0820();
@@ -111,11 +106,8 @@ extern "C" void func_002F0820(sMgr_0820* self, int arg1)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0A98);
-#ifdef SKIP_ASM
 class cObj_0A98 {
 public:
     virtual void v0();
@@ -275,11 +267,8 @@ extern "C" void func_002F0A98(sMgr_0A98* self)
         ((cWorld_0A98*)D_004A289C)->ResetSlot(i);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0CD0);
-#ifdef SKIP_ASM
 class cObj_0CD0 {
 public:
     virtual void v0();
@@ -311,23 +300,17 @@ extern "C" void func_002F0CD0(sMgr_0CD0* self)
     self->objs[15]->Update();
     self->objs[16]->Update();
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F0E88);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F0FE8);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1148);
-#ifdef SKIP_ASM
 extern "C" void func_002F1148(void *arg0) {
     (*(int *)((char*)(arg0) + (0xA0))) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1150);
-#ifdef SKIP_ASM
 int func_00312AA0(void* self, int i);
 extern "C" int func_00311AE8(void*, int);
 extern "C" char* func_00311B20(void*, int);
@@ -488,13 +471,10 @@ extern "C" void func_002F1150(sFx_1150* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F1510);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1768);
-#ifdef SKIP_ASM
 extern "C" void func_00370B60();
 extern char D_004881E8[];
 
@@ -506,11 +486,8 @@ extern "C" void *func_002F1768(void *arg0) {
     *(int *)((char*)arg0 + 0x208) = 0;
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F17A8);
-#ifdef SKIP_ASM
 extern "C" void func_00370C08(void *);
 extern char D_004881E8[];
 
@@ -518,11 +495,8 @@ extern "C" void func_002F17A8(void *arg0) {
     *(char **)((char*)arg0 + 0x1F8) = D_004881E8;
     func_00370C08(arg0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F17D0);
-#ifdef SKIP_ASM
 extern "C" void func_002F83B0();
 extern "C" void func_002F9838();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -535,11 +509,8 @@ extern "C" void func_002F17D0(void) {
     func_002F83B0();
     func_002F9838();
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1810);
-#ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv(int);
 extern "C" void func_002F8FF8__FPv();
 extern "C" void func_002FA5F8__FPv();
@@ -553,11 +524,8 @@ extern "C" void func_002F1810(void) {
     }
     D_004A3BB0 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1850);
-#ifdef SKIP_ASM
 extern "C" void func_002F18D8(void *);
 extern char D_004881D0[];
 
@@ -569,11 +537,8 @@ extern "C" void *func_002F1850(void *arg0, int arg1) {
     func_002F18D8(arg0);
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1890);
-#ifdef SKIP_ASM
 extern "C" void func_002F18D8(void *);
 extern "C" void func_002F1A00(void *);
 extern char D_004881D0[];
@@ -587,11 +552,8 @@ extern "C" void *func_002F1890(void *arg0, int arg1) {
     func_002F1A00(arg0);
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F18D8);
-#ifdef SKIP_ASM
 extern "C" void func_002F17D0();
 extern int D_004A3BB4;
 
@@ -603,11 +565,8 @@ extern "C" void func_002F18D8(void *arg0) {
     for (int i = 9; i >= 0; i--)
         *(int *)((char*)arg0 + 0x6C + i * 4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1940);
-#ifdef SKIP_ASM
 extern "C" void func_002F1810();
 void operator_delete(int *);
 extern char D_004881D0[];
@@ -641,32 +600,23 @@ extern "C" void func_002F1940(void *arg0, int arg1) {
         operator_delete((int *)arg0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
-#ifdef SKIP_ASM
 extern "C" void func_002F19F0(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x94))) = arg1;
     (*(int *)((char*)(arg0) + (0))) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
-#ifdef SKIP_ASM
 extern "C" void func_002F1A00(void *arg0) {
     (*(int *)((char*)(arg0) + (0xA0))) = 0;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2088);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2130);
-#ifdef SKIP_ASM
 struct Base2130 { char pad[0x1F8]; };
 struct Obj2130 : Base2130 {
     virtual void v0();
@@ -697,45 +647,30 @@ extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
     }
     return -1;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2218);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
-#ifdef SKIP_ASM
 extern "C" void func_002F2268(void *arg0, int arg1) {
     *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x204) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
-#ifdef SKIP_ASM
 extern "C" void func_002F2280(void *arg0, int arg1) {
     *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x204) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2298);
-#ifdef SKIP_ASM
 extern "C" void func_002F2298(void *arg0, int arg1) {
     *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x174) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F22B0);
-#ifdef SKIP_ASM
 extern "C" void func_002F22B0(void *arg0, int arg1) {
     *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x174) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F22C8);
-#ifdef SKIP_ASM
 extern "C" int func_00310C48(void*, int, const char*);
 extern char D_004879D8[];
 extern char D_004879E8[];
@@ -802,20 +737,14 @@ extern "C" void func_002F22C8(sObj_22C8* self)
     }
     self->ready = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
-#ifdef SKIP_ASM
 extern "C" int *func_002F2588(int *arg0) {
     *arg0 = 0;
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2598);
-#ifdef SKIP_ASM
 extern int D_004A3AFC;
 // NOTE: tunables are float members of global records; splat names each field separately.
 struct sTun_2598 {
@@ -896,24 +825,18 @@ extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598*
     float t = randf_2598();
     p->color = D_005046E0 * (1.0f - t) + D_005046F0 * t;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2810);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2C30);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
-#ifdef SKIP_ASM
 extern "C" void *func_002F2D60(void *arg0) {
     (*(int *)((char*)(arg0) + (4))) = 0;
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2D70);
-#ifdef SKIP_ASM
 extern int D_004A3AFC;
 // NOTE: tunables are float members of global records; splat names each field separately.
 struct sTun_2D70 {
@@ -1015,7 +938,6 @@ extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n)
     p->f48 = 0;
     p->dead = 0;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F3030);
 
@@ -1024,8 +946,6 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F3418);
 INCLUDE_ASM("seg/seg_1F1548", func_002F3550);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F3618);
-#ifdef SKIP_ASM
 extern "C" void func_003546C8(void *);
 extern char D_00488230[];
 
@@ -1033,11 +953,8 @@ extern "C" void func_002F3618(void *arg0) {
     *(char **)((char*)arg0 + 0xC) = D_00488230;
     func_003546C8(arg0);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F3640);
-#ifdef SKIP_ASM
 struct sVec2_3640 {
     float x, y;
 };
@@ -1086,11 +1003,8 @@ extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* p, int n)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F37A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S37A8 { int a, b; S37A8() {} S37A8(const S37A8 &o) { *this = o; } };
 extern "C" void func_002F2598(void *, S37A8, void *);
@@ -1104,11 +1018,8 @@ extern "C" void func_002F37A8_37A8(void *arg0, S37A8 *arg1, void *arg2) {
         *(int *)((char*)arg0 + 0x14) = *(int *)((char*)arg0 + 0x14) + 1;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F3810);
-#ifdef SKIP_ASM
 struct sVec2_3810 {
     float x, y;
 };
@@ -1158,11 +1069,8 @@ extern "C" void func_002F3810(char* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F39C8);
-#ifdef SKIP_ASM
 extern "C" void func_002F39C8(void *arg0) {
     *(int *)((char*)arg0 + 0x100C) = 0;
     *(int *)((char*)arg0 + 0x1024) = 0;
@@ -1170,15 +1078,12 @@ extern "C" void func_002F39C8(void *arg0) {
     *(int *)((char*)arg0 + 0x18) = 0;
     *(int *)((char*)arg0 + 0x1028) = 0;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F39E0);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F3E28);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4118);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void *func_002306A8(void *, int);
 extern "C" void func_002F4260_4118(void *, float, void *) __asm__("func_002F4260");
@@ -1194,11 +1099,8 @@ extern "C" void func_002F4118(void *arg0, float arg1) {
         } while (i < ((M4118 *)((N4118 *)((N4118 *)D_004A28A8)->c)->c)->cnt);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F41A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Base41A8 { int pad[3]; };
 struct Obj41A8 : Base41A8 {
@@ -1226,13 +1128,10 @@ extern "C" void func_002F41A8(int arg0) {
         } while (i < *(unsigned int *)(F84(F84(D_004A28A8)) + 0x10));
     }
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F4260);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4330);
-#ifdef SKIP_ASM
 extern float D_004A4280;
 extern float D_004A4284;
 
@@ -1242,11 +1141,8 @@ extern "C" void func_002F4330(void *arg0, float arg1) {
         *(float *)((char*)arg0 + 0x1024) += arg1 * (*(float *)((char*)arg0 + 0x1020) + 10.0f) * (D_004A4284 * 0.007692307699471712f);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4380);
-#ifdef SKIP_ASM
 extern void func_002E2860(void *);
 extern "C" void func_002F43E0(void *);
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -1261,11 +1157,8 @@ extern "C" void *func_002F4380(void *arg0) {
     func_002F43E0(arg0);
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F43E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sCol_43E0 {
     float r, g, b, a;
@@ -1345,11 +1238,8 @@ extern "C" void func_002F43E0_43E0(sLightSet_43E0* self)
     self->lights[8].col = D_004FAC80;
     self->count++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4690);
-#ifdef SKIP_ASM
 extern "C" float func_002EE268(int);
 
 struct sV2_4690 {
@@ -1483,11 +1373,8 @@ extern "C" void func_002F4690(sFlare_4690* self)
         ((cWorld_4690*)D_004A289C)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4A08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float func_002EE100(int);
 extern "C" float func_002EE148(int);
@@ -1620,24 +1507,18 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     gfx->End2D();
     gfx->EndScene();
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
-#ifdef SKIP_ASM
 extern "C" void func_002F5400(int, void *, int);
 extern void *D_004A28A8;
 
 extern "C" void func_002F5148(void *arg0) {
     func_002F5400((*(int *)((char*)((*(void **)((char*)(D_004A28A8) + (0x84)))) + (0x90))), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F5180);
-#ifdef SKIP_ASM
 extern "C" void cWorldLightMan_initLightCache(void *);
 struct cWorldPainterManArg;
 void *cWorldPainterMan_getQuery(void *, cWorldPainterManArg *);
@@ -1655,11 +1536,8 @@ extern "C" void *func_002F5180(void *arg0, int arg1) {
     *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&D_004A5598);
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F5230);
-#ifdef SKIP_ASM
 extern "C" void func_002F53B0(void *);
 void operator_delete(int *);
 struct Base5230 { int pad; };
@@ -1675,4 +1553,3 @@ extern "C" void func_002F5230(Outer5230 *arg0, int arg1) {
         operator_delete((int *)arg0);
     }
 }
-#endif

@@ -5,8 +5,6 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_getFrameData);
 INCLUDE_ASM("visualfx/avalanche", func_002D6290);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D6378);
-#ifdef SKIP_ASM
 extern void* D_00488648[];
 extern void* D_00488680[];
 struct func_002D6378_sElem {
@@ -30,11 +28,8 @@ extern "C" void func_002D6378(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D6410);
-#ifdef SKIP_ASM
 struct func_002D6410_sElem {
     float x;
     float y;
@@ -81,11 +76,8 @@ extern "C" void func_002D6410(void)
     D_004A3AC0 = 0;
     func_00416210(D_00538450, 0, 0x400);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D64D8);
-#ifdef SKIP_ASM
 struct sVec4_64D8 {
     float x, y, z, w;
     sVec4_64D8() {}
@@ -168,13 +160,10 @@ extern "C" void func_002D64D8(void* self, sVec4_64D8* v)
     if (bad)
         *v = sVec4_64D8(10.0f, 10.0f, 10.0f, 0.0f);
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", tAvalancheNode_calculate);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_calculateScale);
-#ifdef SKIP_ASM
 struct sAvalancheData {
     char pad[0xF0];
     unsigned short type;
@@ -209,13 +198,10 @@ extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D7CA8);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D7DD8);
-#ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_reset(void* self);
 
 struct sVEntry2D7DD8 {
@@ -241,11 +227,8 @@ extern "C" void func_002D7DD8(void* self, int force)
         cDynamicColourEmitter_reset((char*)self + 0xD0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_buildArray);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00487548[];
@@ -274,13 +257,10 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
         self->array[i++] = p;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D7EF8);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D81B0);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void* func_0028B180();
 extern "C" void func_0029DEF0(void* self, int a1);
@@ -306,11 +286,8 @@ extern "C" void func_002D81B0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D8258);
-#ifdef SKIP_ASM
 extern char D_004A3AD0[];
 extern char D_004A3AD8[];
 extern char D_004A3AE0[];
@@ -322,11 +299,8 @@ extern "C" void func_002D8258(void)
     func_002D83B8(1, D_004A3AD8);
     func_002D83B8(0, D_004A3AE0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D82A0);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void func_003DEC80(void* a, void* b, void* data, int size, int prio);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -355,11 +329,8 @@ extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride
     }
     return stride * rows;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D83B8);
-#ifdef SKIP_ASM
 extern void* D_004A3AB0;
 extern int D_004A3A48;
 extern char D_004A3AF0[];
@@ -461,13 +432,10 @@ extern "C" void func_002D83B8(int direct, char* name)
     }
     D_004A3A48 = 0;
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D87D0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D8948);
-#ifdef SKIP_ASM
 struct sAvalancheSlot {
     int active;
     char pad[0x18];
@@ -511,15 +479,12 @@ extern "C" void func_002D8948(void)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D8A00);
 
 INCLUDE_ASM("visualfx/avalanche", func_002D8EA8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D9130);
-#ifdef SKIP_ASM
 struct sRState_9130 {
     int f0;
     int f4;
@@ -607,13 +572,10 @@ extern "C" void func_002D9130(void)
         ctx->top--;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_addAvalancheNode);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9538);
-#ifdef SKIP_ASM
 struct sAvParams9538 { int data[0xD8 / 4]; };
 struct sAvNode9538 {
     sAvParams9538 params;       // 0x0
@@ -644,11 +606,8 @@ extern "C" void func_002D9538(int id, sAvParams9538* params)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D9660);
-#ifdef SKIP_ASM
 extern "C" void tAvalancheNode_calculate(void* node, void* self);
 
 extern "C" void func_002D9660(void* self)
@@ -659,13 +618,10 @@ extern "C" void func_002D9660(void* self)
         n = *(void**)((char*)n + 0xF4);
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D96B0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D96E0);
-#ifdef SKIP_ASM
 extern "C" void func_002D9A80(void);
 extern "C" void func_002D8258(void);
 extern "C" void func_002D87D0(void);
@@ -680,13 +636,10 @@ extern "C" void func_002D96E0(void)
     func_002D8258();
     func_002D87D0();
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9738);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", cAvalanche_triggerAvalanche);
-#ifdef SKIP_ASM
 extern "C" float cRenderStateMan_SnowFlakeColourR(int a);
 extern "C" float cRenderStateMan_SnowFlakeColourG(int a);
 extern "C" float cRenderStateMan_SnowFlakeColourB(int a);
@@ -845,11 +798,8 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
     }
     return (int)0x80000000;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9A80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct func_002D9A80_sSlot {
     int active;
@@ -886,11 +836,8 @@ extern "C" void func_002D9A80(void)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9B40);
-#ifdef SKIP_ASM
 extern "C" void func_002D9A80(void);
 extern "C" void func_00416210(void* dst, int c, int n);
 void cMemMan_free(void*);
@@ -926,11 +873,8 @@ extern "C" void func_002D9B40(void* self)
     }
     D_004A3ABC = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9C00);
-#ifdef SKIP_ASM
 struct sAvVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1005,15 +949,12 @@ extern "C" void func_002D9C00(int id, sAvMatrix* out)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/avalanche", func_002D9CB0);
 
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_readFromReplayFrame);
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9FB8);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void cAvalanche_resolveDataPointers(void);
 extern void* D_004A3AB4;
@@ -1036,11 +977,8 @@ extern "C" void func_002D9FB8(void* data)
         cAvalanche_resolveDataPointers();
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", cAvalanche_resolveDataPointers);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern void* D_004A3AB0;
 extern void* D_004A3AB4;
@@ -1114,11 +1052,8 @@ extern "C" void cAvalanche_resolveDataPointers(void)
     }
     D_004A3ABC = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002DA1C0);
-#ifdef SKIP_ASM
 struct sVec4_A1C0 {
     float x, y, z, w;
     sVec4_A1C0() {}
@@ -1237,5 +1172,4 @@ extern "C" sAvInfo_A1C0 func_002DA1C0(sVec3_A1C0 p)
     r.total = r.total / (float)r.count;
     return r;
 }
-#endif
 

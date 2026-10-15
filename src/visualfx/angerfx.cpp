@@ -5,19 +5,14 @@ INCLUDE_ASM("visualfx/angerfx", cAngerFX_cAngerFX);
 INCLUDE_ASM("visualfx/angerfx", func_002D4A70);
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D4BE0);
-#ifdef SKIP_ASM
 extern "C" void* func_003E6448(void* dst, int c, int n);
 
 extern "C" void func_002D4BE0(void* self)
 {
     func_003E6448(*(void**)((char*)self + 4), 0, 0x58);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D4C08);
-#ifdef SKIP_ASM
 void* cBEAggressionInterface_getThis();
 extern "C" int func_00155B50(void* self, int a, int b);
 extern char* D_004A28A8;
@@ -154,24 +149,18 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
         st->glowB = gb;
     }
 }
-#endif
 
 INCLUDE_ASM("visualfx/angerfx", func_002D5048);
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5598);
-#ifdef SKIP_ASM
 extern "C" void func_002D5598(unsigned char* rgb, float r, float g, float b)
 {
     rgb[0] = (int)r;
     rgb[1] = (int)g;
     rgb[2] = (int)b;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D55C0);
-#ifdef SKIP_ASM
 extern float D_004A3A38;
 
 // PORT: <? (g++ min operator)
@@ -190,11 +179,8 @@ extern "C" void func_002D55C0(unsigned char* p, float r, float g, float b)
     p[4] = (int)(cg * 255.0f);
     p[5] = (int)(cb * 255.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5658);
-#ifdef SKIP_ASM
 extern "C" void func_002D5658(unsigned char* p, float r, float g, float b, float a)
 {
     p[6] = (int)(r * 127.0f);
@@ -202,11 +188,8 @@ extern "C" void func_002D5658(unsigned char* p, float r, float g, float b, float
     p[8] = (int)(b * 127.0f);
     p[9] = (int)(a * 255.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D56B0);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_003715B0(void* p, int a1);
 extern "C" void func_003714F8(void* p, int a1);
@@ -219,11 +202,8 @@ extern "C" void func_002D56B0(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5718);
-#ifdef SKIP_ASM
 extern "C" int func_002D5718(const void* a, const void* b)
 {
     float x = *(const float*)a;
@@ -236,11 +216,8 @@ extern "C" int func_002D5718(const void* a, const void* b)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5750);
-#ifdef SKIP_ASM
 extern "C" int func_002D5750(const void* a, const void* b)
 {
     unsigned short x = *(const unsigned short*)a;
@@ -250,5 +227,4 @@ extern "C" int func_002D5750(const void* a, const void* b)
     }
     return y < x;
 }
-#endif
 

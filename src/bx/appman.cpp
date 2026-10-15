@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
-#ifdef SKIP_ASM
 extern void* D_0048DBE8[16];
 extern void* D_004A5B64;
 
@@ -23,15 +21,12 @@ extern "C" void* cAppMan_cAppMan(void* self)
     D_004A5B64 = self;
     return self;
 }
-#endif
 
 extern void* D_0048DBE8[16];
 extern void* D_004A5B64;
 void operator_delete(int* ptr);
 
 //99.92%
-INCLUDE_ASM("bx/appman", cAppMan__cAppMan__FPvi);
-#ifdef SKIP_ASM
 void cAppMan__cAppMan(void* self, int flags)
 {
     *(void**)((char*)self + 0x5C) = D_0048DBE8;
@@ -40,11 +35,8 @@ void cAppMan__cAppMan(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/appman", cAppMan_run);
-#ifdef SKIP_ASM
 extern "C" void SYNCTASK_run(int a);
 extern "C" void cAppMan_mainLoop(void* self);
 struct cAppMan;
@@ -103,7 +95,6 @@ extern "C" int cAppMan_run(char* self, char* exec, int a2, int a3)
         call1_6D60(e, 8, 1, 3);
     return 0;
 }
-#endif
 
 struct cAppMan {
     char pad_0x00[0x4];
@@ -112,17 +103,12 @@ struct cAppMan {
 };
 
 //100%
-INCLUDE_ASM("bx/appman", cAppMan_setNextModule__FP7cAppManUi);
-#ifdef SKIP_ASM
 void cAppMan_setNextModule(cAppMan* self, unsigned int module)
 {
     self->mNextModule = module;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/appman", cAppMan_mainLoop);
-#ifdef SKIP_ASM
 // PORT: cAppMan_checkHalt returns int; the main loop ignores it (void call here).
 void cAppMan_checkHalt_v(cAppMan* self) __asm__("cAppMan_checkHalt__FP7cAppMan");
 void func_00317530(void* self, float arg);
@@ -235,24 +221,18 @@ extern "C" void cAppMan_mainLoop(void* p)
         }
     }
 }
-#endif
 
 int cExecutionMan_checkHalt(void* self, int flag);
 
 INCLUDE_ASM("bx/appman", func_00317308);
 
 //100%
-INCLUDE_ASM("bx/appman", cAppMan_checkHalt__FP7cAppMan);
-#ifdef SKIP_ASM
 int cAppMan_checkHalt(cAppMan* self)
 {
     return cExecutionMan_checkHalt(self->mExecutionMan, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317348__FPv);
-#ifdef SKIP_ASM
 class cAppSubK2 {
 public:
     char pad_0x00[8];
@@ -297,11 +277,8 @@ int func_00317348(void* p)
     }
     self->sub->v05();
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/appman", cAppMan_loadexecpurge);
-#ifdef SKIP_ASM
 struct sVEntry00317400 {
     short delta;
     short index;
@@ -323,7 +300,6 @@ extern "C" void cAppMan_loadexecpurge(void* self)
         ((void (*)(void*, int))d->vt[1].fn)((char*)d + d->vt[1].delta, 3);
     }
 }
-#endif
 
 struct cExecutionMan {
     int field_0x0;
@@ -334,8 +310,6 @@ struct cExecutionMan {
 extern void* D_0048DC30[16];
 
 //100%
-INCLUDE_ASM("bx/appman", cExecutionMan_halt__FP13cExecutionMan);
-#ifdef SKIP_ASM
 cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
 {
     self->field_0x0 = 0;
@@ -343,13 +317,10 @@ cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
     self->field_0x4 = 0;
     return self;
 }
-#endif
 
 INCLUDE_ASM("bx/appman", func_00317478);
 
 //100%
-INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
-#ifdef SKIP_ASM
 int cExecutionMan_checkHalt(void* self, int flag)
 {
     void (*fn)(void*) = *(void (**)(void*))self;
@@ -363,29 +334,20 @@ int cExecutionMan_checkHalt(void* self, int flag)
         }
     }
 }
-#endif
 
 //99.25%
-INCLUDE_ASM("bx/appman", func_00317500__Fv);
-#ifdef SKIP_ASM
 int func_00317500(void)
 {
     return func_00317348(D_004A5B64);
 }
-#endif
 
 //99.67%
-INCLUDE_ASM("bx/appman", func_00317520__Fv);
-#ifdef SKIP_ASM
 int func_00317520(void)
 {
     return *(int*)((char*)D_004A5B64 + 0x8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317530__FPvf);
-#ifdef SKIP_ASM
 void func_00317530(void* self, float arg)
 {
     *(float*)((char*)self + 0xC) = arg;
@@ -395,12 +357,9 @@ void func_00317530(void* self, float arg)
     *(int*)((char*)self + 0x18) = 0;
     *(int*)((char*)self + 0x1C) = 0;
 }
-#endif
 
 
 //99.9%
-INCLUDE_ASM("bx/appman", func_00317550__FPvf);
-#ifdef SKIP_ASM
 void func_00317550(void* self, float arg)
 {
     float old8 = *(float*)((char*)self + 0x8);
@@ -419,29 +378,22 @@ void func_00317550(void* self, float arg)
     *(float*)((char*)self + 0x8) = arg;
     *(float*)((char*)self + 0x1C) = result;
 }
-#endif
 
 extern "C" float func_0040D758(float);
 
 //99.96%
-INCLUDE_ASM("bx/appman", func_003175A0__FPv);
-#ifdef SKIP_ASM
 void func_003175A0(void* self)
 {
     int delta = *(int*)((char*)D_004A5B64 + 0x1C) - *(int*)((char*)self + 0x10);
     float ret = func_0040D758((float)delta * *(float*)((char*)D_004A5B64 + 0x14) * *(float*)((char*)self + 0x1C));
     *(float*)((char*)self + 0x0) = *(float*)((char*)self + 0x14) + *(float*)((char*)self + 0x18) * ret;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317600__FPv);
-#ifdef SKIP_ASM
 void func_00317600(void* self)
 {
     *(float*)((char*)self + 0x14) = 100.0f;
     *(int*)((char*)self + 0x18) = 0;
     *(float*)((char*)self + 0x0) = 100.0f;
 }
-#endif
 

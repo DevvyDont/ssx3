@@ -3,8 +3,6 @@
 INCLUDE_ASM("bx/ps2main", systemInit);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/ps2main", main);
-#ifdef SKIP_ASM
 struct cExecutionMan;
 struct cExecutionManMainK {
     int field_0x0;
@@ -33,11 +31,8 @@ int main_impl(int argc, char** argv)
     exec->field_0x8 = D_0048DB68;
     return cAppMan_run(D_004A5B64, (cExecutionMan*)exec, argc, argv);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031B008);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cAppManB008 {
 public:
@@ -61,20 +56,14 @@ extern "C" void func_0031B008(int a0, int a1, int a2)
     func_00425FB8();
     func_0042C6A0(a0, a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031B088);
-#ifdef SKIP_ASM
 extern "C" float func_0031B088(float a, float b, float c, float d)
 {
     return a * d - b * c;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/ps2main", func_0031B098);
-#ifdef SKIP_ASM
 extern "C" float func_0031B088(float a, float b, float c, float d);
 
 // 3x3 determinant by cofactor expansion along the first column.
@@ -82,13 +71,10 @@ extern "C" float func_0031B098(float a, float b, float c, float d, float e, floa
 {
     return a * func_0031B088(e, f, h, i) - d * func_0031B088(b, c, h, i) + g * func_0031B088(b, c, e, f);
 }
-#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031B178);
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031B310);
-#ifdef SKIP_ASM
 extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i);
 
 // 4x4 adjoint (transposed cofactor matrix), in place.
@@ -130,11 +116,8 @@ extern "C" void func_0031B310(void* vm)
     m[2][3] = -func_0031B098(a1, a2, a3, b1, b2, b3, d1, d2, d3);
     m[3][3] =  func_0031B098(a1, a2, a3, b1, b2, b3, c1, c2, c3);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/ps2main", func_0031B6C8);
-#ifdef SKIP_ASM
 extern "C" float func_0031B178(void* m);
 extern "C" void func_0031B310(void* m);
 
@@ -165,7 +148,6 @@ extern "C" void func_0031B6C8(void* m)
         : "r"(m), "f"(s)
         : "memory");
 }
-#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031B748);
 
@@ -176,8 +158,6 @@ INCLUDE_ASM("bx/ps2main", func_0031B9B0);
 INCLUDE_ASM("bx/ps2main", func_0031BB30);
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031BCB0);
-#ifdef SKIP_ASM
 extern "C" float func_0031C128(float x);
 extern "C" float func_0031BF60(float x);
 
@@ -217,11 +197,8 @@ extern "C" sQuat_31BCB0 func_0031BCB0(const sQuat_31BCB0* a, const sQuat_31BCB0*
     sQuat_31BCB0 r(s0 * a->x + s1 * to.x, s0 * a->y + s1 * to.y, s0 * a->z + s1 * to.z, s0 * a->w + s1 * to.w);
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031BE50);
-#ifdef SKIP_ASM
 // sincos(x): quadrant reduction by pi/2, sin polynomial, cos = sqrt(1 - sin^2).
 extern "C" void func_0031BE50(float* sout, float* cout, float x)
 {
@@ -267,11 +244,8 @@ extern "C" void func_0031BE50(float* sout, float* cout, float x)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031BF60);
-#ifdef SKIP_ASM
 // sin(x): quadrant reduction by pi/2, then a cos or sin polynomial (Horner form).
 extern "C" float func_0031BF60(float x)
 {
@@ -308,11 +282,8 @@ extern "C" float func_0031BF60(float x)
         r = -r;
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031C040);
-#ifdef SKIP_ASM
 // cos(x): quadrant reduction by pi/2, then a sin or cos polynomial (Horner form).
 extern "C" float func_0031C040(float x)
 {
@@ -349,7 +320,6 @@ extern "C" float func_0031C040(float x)
         r = -r;
     return r;
 }
-#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031C128);
 

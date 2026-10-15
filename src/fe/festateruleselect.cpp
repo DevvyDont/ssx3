@@ -7,17 +7,12 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onCreateScreen);
 extern "C" void* func_0039E4C0(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00191C48__FPv);
-#ifdef SKIP_ASM
 void* func_00191C48(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00191C68);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
@@ -83,11 +78,8 @@ extern "C" void func_00191C68(char* self, sMsg_1C68* msg, unsigned int type)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00191E08);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A13A0[];
 
@@ -96,11 +88,8 @@ extern "C" int func_00191E08(void* self, void* msg)
     int id = *(int*)((char*)msg + 0x38);
     return (id == GetHashValue32(D_004A13A0)) ? 0x101 : 0x100;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateruleselect", func_00191E48);
-#ifdef SKIP_ASM
 struct cUIScreen;
 struct cUIText;
 int GetHashValue32(char* str);
@@ -174,15 +163,12 @@ extern "C" int func_00191E48(char* self, void* unused, unsigned int type, int id
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/festateruleselect", func_00192088);
 
 INCLUDE_ASM("fe/festateruleselect", func_00192240);
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192380);
-#ifdef SKIP_ASM
 extern "C" int func_0039A738(void* self);
 extern "C" void func_00192088(void* self, int idx, int a2);
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
@@ -218,11 +204,8 @@ extern "C" void func_00192380(sRuleSel_2380* self, void* item)
     }
     cFEStateRuleSelect_updateMenuColor(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
@@ -285,11 +268,8 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_001926F0);
-#ifdef SKIP_ASM
 extern void* D_0046B078[];
 
 extern "C" void* func_001926F0(void* self)
@@ -305,11 +285,8 @@ extern "C" void* func_001926F0(void* self)
     *(int*)((char*)self + 0x4) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192740);
-#ifdef SKIP_ASM
 struct sVEntry00192740 {
     short delta;
     short index;
@@ -332,11 +309,8 @@ extern "C" void func_00192740(void* self, int a1)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_001927B0);
-#ifdef SKIP_ASM
 extern "C" int func_0039A738(void* self);
 extern "C" int func_00192948(void* self, int idx);
 
@@ -377,11 +351,8 @@ extern "C" void func_001927B0(sRuleSel_001927B0* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192918);
-#ifdef SKIP_ASM
 extern "C" int func_00192918(void* self, int val)
 {
     int i;
@@ -392,30 +363,21 @@ extern "C" int func_00192918(void* self, int val)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192948);
-#ifdef SKIP_ASM
 extern "C" int func_00192948(void* self, int a1)
 {
     int mask = (int)(0x1000000 << a1) >> 24;
     return (*(int*)((char*)self + 0x2c) & mask) != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192968__FPvi);
-#ifdef SKIP_ASM
 void func_00192968(void* self, int val)
 {
     *(int*)((char*)self + 0x2C) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192970);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
@@ -500,11 +462,8 @@ extern "C" void func_00192970(sOwner_00192970* self, void* screen)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateruleselect", func_00192D00);
-#ifdef SKIP_ASM
 extern void* D_0046AF68[];
 extern "C" void* func_001A8500(void* self, int a1, int a2);
 
@@ -522,5 +481,4 @@ extern "C" void* func_00192D00(void* self, int a1)
     *(int*)((char*)self + 0x738) = 0;
     return self;
 }
-#endif
 
