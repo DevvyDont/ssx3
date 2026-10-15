@@ -1066,13 +1066,23 @@ extern "C" void* func_001747A0(void* self)
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174808);
+extern "C" void* func_00174808(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174848);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00175A20);
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176270);
+// deleting destructor: reset the vtable, free when bit 0 of flags is set
+extern "C" void func_00176270(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
 
 extern "C" void func_001762A0()
 {
@@ -1086,9 +1096,18 @@ extern "C" void func_001762B0()
 {
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762B8);
+extern "C" float func_001762B8()
+{
+    return 0.7853982f;
+}
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762C8);
+struct sCtfVec4 { float v[4]; } __attribute__((aligned(16)));
+extern sCtfVec4 D_004FF120;
+
+extern "C" sCtfVec4 func_001762C8()
+{
+    return D_004FF120;
+}
 
 extern "C" void func_001762E0()
 {
@@ -1098,7 +1117,12 @@ extern "C" void func_001762E8()
 {
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762F0);
+// Calls a virtual function through the vtable at +0x10 (entry at +0x28)
+extern "C" void func_001762F0(char* self)
+{
+    char* vt = *(char**)(self + 0x10);
+    (*(void (**)(char*))(vt + 0x2C))(self + *(short*)(vt + 0x28));
+}
 
 extern "C" void func_00176318()
 {
@@ -1775,7 +1799,10 @@ extern "C" void func_00177588(cCamCtrlK8940* self, int id)
     }
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177610);
+extern "C" void* func_00177610(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177650);
 
@@ -2479,7 +2506,10 @@ extern "C" void func_00178E90(void* self, int id)
     }
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178F18);
+extern "C" void* func_00178F18(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178F58);
 
@@ -2495,7 +2525,10 @@ void* func_00179738(void* self)
     return func_00178F58(1, 0xffff);
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179758);
+extern "C" void* func_00179758(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179798);
 
