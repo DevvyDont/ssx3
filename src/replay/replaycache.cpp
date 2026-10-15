@@ -1020,16 +1020,27 @@ extern "C" void func_002721D0(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272200);
+extern "C" void func_00272200(void* self)
+{
+    *(int*)((char*)self + 0x8) = 0;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+}
 
 extern "C" int func_00272210(void* self)
 {
     return *(int*)((char*)self + 0x4);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272218);
+extern "C" void func_00272218(void* self, int* out)
+{
+    *out = *(int*)((char*)self + 0xC);
+}
 
-INCLUDE_ASM("replay/replaycache", func_00272228);
+extern "C" void func_00272228(void* self, int* in)
+{
+    *(int*)((char*)self + 0xC) = *in;
+}
 
 extern "C" int func_00272238(void* self)
 {
@@ -1436,7 +1447,13 @@ extern "C" void func_002729A8(sRcList272938* self, int i)
 
 INCLUDE_ASM("replay/replaycache", func_00272A50);
 
-INCLUDE_ASM("replay/replaycache", func_00272AA0);
+extern "C" void* func_00272CC0(void* self, int a);
+extern "C" void func_00274868(void* p, int a);
+
+extern "C" void func_00272AA0(void* self, int a, int b)
+{
+    func_00274868(func_00272CC0(self, a), b);
+}
 
 //100%
 extern "C" void* func_00274830(void*, int);
@@ -1460,11 +1477,22 @@ extern "C" void func_00272B58(void* self, int a1)
 
 INCLUDE_ASM("replay/replaycache", func_00272B80);
 
-INCLUDE_ASM("replay/replaycache", func_00272BD0);
+extern "C" void* func_00272CC0(void* self, int a);
+extern "C" void func_002749E8(void* p);
+
+extern "C" void func_00272BD0(void* self, int a)
+{
+    func_002749E8(func_00272CC0(self, a));
+}
 
 INCLUDE_ASM("replay/replaycache", func_00272BF8);
 
-INCLUDE_ASM("replay/replaycache", func_00272C48);
+extern "C" void func_00274A08(void* p);
+
+extern "C" void func_00272C48(void* self, int a)
+{
+    func_00274A08(func_00272CC0(self, a));
+}
 
 INCLUDE_ASM("replay/replaycache", func_00272C70);
 
@@ -1497,7 +1525,13 @@ extern "C" unsigned char func_00272D20(void* self)
     return func_00274C68(self);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272D40);
+extern "C" void* func_00274D90();
+extern "C" int func_00274398(void* p);
+
+extern "C" void func_00272D40()
+{
+    func_00274398(func_00274D90());
+}
 
 //100%
 extern void* D_004819B0[];
@@ -2343,7 +2377,13 @@ extern "C" int func_00273F68(void* self)
 
 INCLUDE_ASM("replay/replaycache", func_00274100);
 
-INCLUDE_ASM("replay/replaycache", func_00274230);
+// Sets the field at +0xC, returning its old value
+extern "C" int func_00274230(void* self, int value)
+{
+    int old = *(int*)((char*)self + 0xC);
+    *(int*)((char*)self + 0xC) = value;
+    return old;
+}
 
 //100%
 class cRcListener4240 {
@@ -2391,7 +2431,12 @@ int func_00274348(void* self)
     return *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274358);
+extern "C" int func_00274358(void* self)
+{
+    char* base = *(char**)((char*)self + 0x4);
+    int* offsets = *(int**)((char*)self + 0x14);
+    return *(int*)(base + offsets[*(int*)((char*)self + 0x18)] + 0x4);
+}
 
 extern "C" int func_00274380(void* self)
 {
@@ -2409,9 +2454,15 @@ extern "C" int func_00274398(void* self)
     return *(int*)((char*)self + 0x4);
 }
 
-INCLUDE_ASM("replay/replaycache", func_002743A0);
+extern "C" int func_002743A0(void* self)
+{
+    return *(int*)(*(char**)(*(char**)((char*)self + 0x8) + 0x10) + 0x4);
+}
 
-INCLUDE_ASM("replay/replaycache", func_002743B0);
+extern "C" int func_002743B0(void* self)
+{
+    return **(int**)((char*)self + 0x10);
+}
 
 extern "C" int func_002743C0(void* self)
 {
@@ -2424,7 +2475,10 @@ unsigned char func_002743C8(void* self)
     return *(unsigned char*)((char*)*(void**)((char*)self + 0x1c) + 0x3);
 }
 
-INCLUDE_ASM("replay/replaycache", func_002743D8);
+extern "C" unsigned char func_002743D8(void* self)
+{
+    return ((unsigned char*)self + *(int*)((char*)self + 0x8))[3];
+}
 
 INCLUDE_ASM("replay/replaycache", func_002743E8);
 
@@ -2619,9 +2673,16 @@ extern "C" void func_00274860(void* self, int value)
 
 INCLUDE_ASM("replay/replaycache", func_00274868);
 
-INCLUDE_ASM("replay/replaycache", func_002748F8);
+extern "C" void func_002748F8(void* self, int value)
+{
+    *(int*)((char*)self + 0x34) = value;
+    *(int*)((char*)self + 0x38) = 0;
+}
 
-INCLUDE_ASM("replay/replaycache", func_00274908);
+extern "C" void func_00274908(void* self)
+{
+    (*(int*)((char*)self + 0x38))++;
+}
 
 //100%
 extern "C" void func_00273DC0(void* self);
