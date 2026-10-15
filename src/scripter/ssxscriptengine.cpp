@@ -425,7 +425,13 @@ void func_00278DE8(void* self, int val)
     *(int*)((char*)self + 0x554) = val;
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278DF0);
+// Sets word 2 of both riders
+extern "C" void func_00278DF0(void* self, int value)
+{
+    int i;
+    for (i = 0; i < 2; i++)
+        *(int*)(*(char**)((char*)self + 0x54C) + i * 0xCC + 0x8) = value;
+}
 
 //100%
 struct sSsxScriptRider {
@@ -496,7 +502,14 @@ extern "C" int func_00278F68(void* self, int i, int a, int b)
     return r;
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278FF8);
+extern "C" int func_00276198(void* a, void* b);
+
+extern "C" int func_00278FF8(void* self, int i, int j)
+{
+    if (i == j)
+        return 1;
+    return func_00276198(*(char**)((char*)self + 0x54C) + i * 0xCC, *(char**)((char*)self + 0x54C) + j * 0xCC);
+}
 
 //100%
 void func_002766B0(void* r, int a);
@@ -545,9 +558,19 @@ extern "C" void func_00279148(void* self, int i, int a)
     func_00276998(&(*(sSsxScriptRider**)((char*)self + 0x54C))[i], a);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279178);
+extern "C" void func_00276A08(void* rider, int a);
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_002791A8);
+extern "C" void func_00279178(void* self, int i, int a)
+{
+    func_00276A08(*(char**)((char*)self + 0x54C) + i * 0xCC, a);
+}
+
+extern "C" void func_00276A78(void* rider, int a);
+
+extern "C" void func_002791A8(void* self, int i, int a)
+{
+    func_00276A78(*(char**)((char*)self + 0x54C) + i * 0xCC, a);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_00278918(void*);
@@ -575,7 +598,12 @@ extern "C" void func_00279248(void* self, int i)
     func_00276CA8((char*)*(void**)((char*)self + 0x54C) + i * 0xCC);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279270);
+extern "C" void func_00277100(void* rider);
+
+extern "C" void func_00279270(void* self, int i)
+{
+    func_00277100(*(char**)((char*)self + 0x54C) + i * 0xCC);
+}
 
 //100%
 int func_002772B8(void*);
@@ -622,13 +650,25 @@ extern "C" int func_00279370(void* self, int a)
     return func_002771C8(*(char**)((char*)self + 0x54C) + i * 0xCC, a);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_002793B8);
+extern "C" void func_002793B8(void* self, int i, int a, int flag, int d, int f, int g)
+{
+    func_00275ED0(*(char**)((char*)self + 0x624) + i * 0xCC, a, flag ? 8 : 0, 0, d, f, g);
+}
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_002793F8);
+extern "C" void func_002793F8(void* self, int i, int on)
+{
+    func_00276270(&(*(sSsxScriptRider**)((char*)self + 0x624))[i], on ? 2 : 0);
+}
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279428);
+extern "C" void func_00279428(void* self, int i)
+{
+    func_00276388(&(*(sSsxScriptRider**)((char*)self + 0x624))[i], 0, 0);
+}
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279458);
+extern "C" void func_00279458(void* self, int i)
+{
+    func_00276868(*(char**)((char*)self + 0x624) + i * 0xCC, 1);
+}
 
 //100%
 extern "C" void func_00276868(void* self, int a1);
@@ -1957,7 +1997,13 @@ extern "C" void* func_0027C0A0(void* self)
     return func_002742E0(self);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0C0);
+extern "C" void* func_00274D90();
+extern "C" int func_00274318(void* p, int a);
+
+extern "C" int func_0027C0C0(void* self, int a, int b)
+{
+    return func_00274318(func_00274D90(), b);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2001,7 +2047,13 @@ extern "C" void* func_0027C2B0(void* self)
     return func_002742E0(self);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2D0);
+extern "C" void* func_00274D90();
+extern "C" int func_00274318(void* p, int a);
+
+extern "C" int func_0027C2D0(void* self, int a, int b)
+{
+    return func_00274318(func_00274D90(), b);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2045,7 +2097,13 @@ extern "C" void* func_0027C4C0(void* self)
     return func_002742E0(self);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4E0);
+extern "C" void* func_00274D90();
+extern "C" int func_00274318(void* p, int a);
+
+extern "C" int func_0027C4E0(void* self, int a, int b)
+{
+    return func_00274318(func_00274D90(), b);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2088,7 +2146,13 @@ extern "C" void* func_0027C6A8(void* self)
     return func_002742E0(self);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6C8);
+extern "C" void* func_00274D90();
+extern "C" int func_00274318(void* p, int a);
+
+extern "C" int func_0027C6C8(void* self, int a, int b)
+{
+    return func_00274318(func_00274D90(), b);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2131,7 +2195,13 @@ extern "C" void* func_0027C890(void* self)
     return func_002742E0(self);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C8B0);
+extern "C" void* func_00274D90();
+extern "C" int func_00274318(void* p, int a);
+
+extern "C" int func_0027C8B0(void* self, int a, int b)
+{
+    return func_00274318(func_00274D90(), b);
+}
 
 //100%
 class cScriptObj002742C8 {
@@ -2167,7 +2237,13 @@ void* func_0027C960(void* self)
     return func_002742E0(self);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C980);
+extern "C" void* func_00274D90();
+extern "C" int func_00274318(void* p, int a);
+
+extern "C" int func_0027C980(void* self, int a, int b)
+{
+    return func_00274318(func_00274D90(), b);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
