@@ -162,7 +162,16 @@ extern "C" void func_002AD300(void* self)
     *(int*)((char*)self + 0x8E8) = 0;
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002AD358);
+extern "C" void* func_002AD550(void* self, int idx, int a2);
+extern "C" void func_002ACB80(void* voice, int a, int b, float v);
+
+extern "C" void func_002AD358(void* self, int idx, int a2, float v)
+{
+    void* voice = func_002AD550(self, idx, a2);
+    if (voice != 0) {
+        func_002ACB80(voice, -1, 0, v);
+    }
+}
 
 //100%
 extern "C" void func_002ABB38(void*);
@@ -2761,7 +2770,12 @@ extern "C" int func_002B24C0(void* p)
     return func_002ADF60_p(D_004A377C) % *(unsigned int*)(*(char**)p + 0x40);
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B2500);
+extern "C" int func_002B2500(void* self)
+{
+    unsigned int r = func_002ADF60_p(D_004A377C);
+    void* p = *(void**)self;
+    return (r % (*(unsigned int*)((char*)p + 0x6C) - 1)) * *(int*)((char*)p + 0x74);
+}
 
 extern "C" void func_003D11B8(unsigned int id, void* out);
 
@@ -2824,7 +2838,17 @@ extern "C" float func_002B2600(void* self)
     return 0.0f;
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B2640);
+extern "C" float func_002B26B8(void* self);
+
+extern "C" float func_002B2640(void* self)
+{
+    func_002B2600_sInfo info;
+    func_002B25C8_out(self, &info);
+    if (info.type == 2) {
+        return (float)info.c;
+    }
+    return func_002B26B8(self);
+}
 
 //100%
 extern "C" float func_002B2690(void* self)
@@ -2833,13 +2857,16 @@ extern "C" float func_002B2690(void* self)
     return (60.0f / *(float*)((char*)p + 0x90)) * 1000.0f;
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B26B8);
-
-extern "C" void func_002B2640(void* self);
-
-extern "C" void func_002B26F8(void* self)
+extern "C" float func_002B26B8(void* self)
 {
-    func_002B2640(self);
+    float f = func_002B2690(self);
+    void* p = *(void**)self;
+    return f * (float)*(int*)((char*)p + 0x64) * (float)*(int*)((char*)p + 0x68);
+}
+
+extern "C" float func_002B26F8(void* self)
+{
+    return func_002B2640(self);
 }
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2853,7 +2880,11 @@ extern "C" float func_002B2718(void* self)
     return a - func_0040D8D0(b, func_002B2690(self));
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B2778);
+extern "C" int func_002B2778(void* self)
+{
+    float a = func_002B2600(self);
+    return (int)(a / func_002B2690(self));
+}
 
 INCLUDE_ASM("sound/bankmonitor", func_002B27C0);
 
@@ -3523,7 +3554,18 @@ extern "C" int func_002B48B8(void* self)
     return *(int*)(*(char**)self + 0x98);
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B48C8);
+extern "C" int func_002B48B8(void* self);
+
+extern "C" int func_002B48C8(void* self)
+{
+    if (*(int*)((char*)self + 0x418) != 0) {
+        void* p = *(void**)((char*)self + 0x408);
+        if (p != 0) {
+            return func_002B48B8(p);
+        }
+    }
+    return -1;
+}
 
 //100%
 int func_002B4908(void* self)
