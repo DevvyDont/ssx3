@@ -61,7 +61,32 @@ extern "C" void func_00282020(void* self)
     }
 }
 
-INCLUDE_ASM("scripter/bxscriptengine", func_002820B0);
+//100%
+extern "C" void func_002728F8(void*);
+extern "C" void func_00282908(void* self, void* script);
+
+extern "C" void func_002820B0(char* self)
+{
+    int i;
+    func_002728F8(*(void**)(self + 0x2B8));
+    for (i = 0; i < 16; i++) {
+        char* e = self + 0x2C0 + i * 0x24;
+        switch (*(int*)(e + 0x20)) {
+        case 0:
+            break;
+        case 1:
+            switch (*(int*)(e + 0x4)) {
+            case 0: continue;
+            case 1: func_00282908(self, e); break;
+            case 2: break;
+            case 3: continue;
+            case 4: break;
+            case 5: continue;
+            }
+            break;
+        }
+    }
+}
 
 //100%
 struct sSlot282150 { int value; int pad; };

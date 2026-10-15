@@ -390,7 +390,30 @@ extern "C" int func_0022D390(void* self)
     return r;
 }
 
-INCLUDE_ASM("main/game", func_0022D3D8);
+//100%
+extern "C" void func_0022E298(void*);
+
+extern "C" void func_0022D3D8(void* self, int i)
+{
+    int changed;
+    if (D_00442168[i].field_0x4 < 0)
+        return;
+    changed = 0;
+    switch (D_00442168[i].field_0x8) {
+    case 5:
+        D_00442168[i].field_0x8 = 1;
+        changed = 1;
+        break;
+    case 0: case 7:
+        D_00442168[i].field_0x8 = 3;
+        changed = 1;
+        break;
+    case 1: case 2: case 3: case 4: case 6: case 8:
+        break;
+    }
+    if (changed)
+        func_0022E298(self);
+}
 
 INCLUDE_ASM("main/game", func_0022D478);
 

@@ -420,7 +420,26 @@ extern "C" int func_00157430(void* self, int bit, char* bits)
 
 INCLUDE_ASM("be/beintreward", func_00157468);
 
-INCLUDE_ASM("be/beintreward", func_00157518);
+//100%
+extern "C" int func_001575C0(void* self, int a1, int a2);
+extern "C" int func_00157620(void* self, int a1, int a2);
+extern "C" int func_00157680(void* self, int a1, int a2);
+extern "C" int func_001576E0(void* self, int a1, int a2);
+extern "C" int func_00157740(void* self, int a1, int a2);
+extern "C" int func_001577A0(void* self, int a1, int a2);
+
+extern "C" int func_00157518(void* self, int a1, int a2, int kind)
+{
+    switch (kind) {
+    case 3: return func_001575C0(self, a1, a2);
+    case 4: return func_00157620(self, a1, a2);
+    case 5: return func_00157680(self, a1, a2);
+    case 6: return func_00157740(self, a1, a2);
+    case 7: return func_001576E0(self, a1, a2);
+    case 8: return func_001577A0(self, a1, a2);
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern int D_004A6CA8[];
