@@ -774,7 +774,26 @@ extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
     return func_00157430(self, bit-10, p + 0xF57);
 }
 
-INCLUDE_ASM("be/beintreward", func_00157F20);
+//100%
+int func_00157FD0_jt(void*, int, int, int, int) __asm__("func_00157FD0");
+int func_001580F8_jt(void*, int, int, int, int) __asm__("func_001580F8");
+int func_00158220_jt(void*, int, int, int, int) __asm__("func_00158220");
+int func_00158348_jt(void*, int, int, int, int) __asm__("func_00158348");
+int func_00158470_jt(void*, int, int, int, int) __asm__("func_00158470");
+int func_00158618_jt(void*, int, int, int, int) __asm__("func_00158618");
+
+extern "C" int func_00157F20(void* self, int a1, int a2, int kind, int bit, int give)
+{
+    switch (kind) {
+    case 3: return func_00157FD0_jt(self, a1, a2, bit, give);
+    case 4: return func_001580F8_jt(self, a1, a2, bit, give);
+    case 5: return func_00158220_jt(self, a1, a2, bit, give);
+    case 6: return func_00158470_jt(self, a1, a2, bit, give);
+    case 7: return func_00158348_jt(self, a1, a2, bit, give);
+    case 8: return func_00158618_jt(self, a1, a2, bit + 10, give);
+    }
+    return 0;
+}
 
 //100%
 extern "C" void* cBE_getBE();

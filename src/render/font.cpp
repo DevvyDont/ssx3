@@ -1705,7 +1705,33 @@ extern "C" float func_003948D0(int power, float d)
 
 INCLUDE_ASM("render/font", func_003949A0);
 
-INCLUDE_ASM("render/font", func_00394A20);
+//100%
+extern "C" float func_00394A20(int n, float x)
+{
+    float r;
+    switch (n) {
+    case 0: return 1.0f;
+    case 1: return x;
+    case 2: return x * x;
+    case 3: return x * x * x;
+    case 4: return x * x * x * x;
+    }
+    r = 0.0f;
+    if (x == r)
+        return r;
+    if (n < 0) {
+        n = -n;
+        x = 1.0f / x;
+    }
+    r = 1.0f;
+    while (n != 0) {
+        if (n & 1)
+            r *= x;
+        n >>= 1;
+        x *= x;
+    }
+    return r;
+}
 
 extern "C" float func_00394AD8(float a, float b)
 {
