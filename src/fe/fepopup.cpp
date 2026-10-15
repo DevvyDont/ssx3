@@ -1979,7 +1979,52 @@ extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3)
     self[8] = h;
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CAA18);
+//100%
+int GetHashValue32(char* str);
+extern char D_004661F8[];
+extern char D_00466210[];
+extern char D_00466228[];
+extern char D_00466240[];
+extern char D_00466258[];
+extern char D_00466270[];
+extern char D_00466288[];
+
+extern "C" void func_001CAA18(int* self, int kind, int a2, int a3, int a4)
+{
+    self[4] = a2;
+    self[3] = 2;
+    self[8] = GetHashValue32(D_004661F8);
+    self[7] = 3;
+    self[2] = -1;
+    self[0] = a3;
+    self[1] = a4;
+    switch (kind) {
+    case 3:
+        self[6] = GetHashValue32(D_00466210);
+        self[5] = 3;
+        break;
+    case 4:
+        self[6] = GetHashValue32(D_00466228);
+        self[5] = 3;
+        break;
+    case 5:
+        self[6] = GetHashValue32(D_00466240);
+        self[5] = 3;
+        break;
+    case 6:
+        self[6] = GetHashValue32(D_00466258);
+        self[5] = 3;
+        break;
+    case 7:
+        self[6] = GetHashValue32(D_00466270);
+        self[5] = 3;
+        break;
+    case 8:
+        self[6] = GetHashValue32(D_00466288);
+        self[5] = 3;
+        break;
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
