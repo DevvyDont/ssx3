@@ -466,7 +466,11 @@ extern "C" int func_00146E98(void* self, int second)
     return -1;
 }
 
-INCLUDE_ASM("be/beintplayer", func_00146F40);
+extern "C" void func_00146F40(void* self, int index, const char* name)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    strncpy((char*)&D_00534FE0[id], name, 0xC);
+}
 
 //100%
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -767,13 +771,36 @@ extern "C" void func_00147658(void* self, int index, int value)
     D_00534FE0[id].pad_0x13[0] = value;
 }
 
-INCLUDE_ASM("be/beintplayer", func_00147698);
+// Same 0x1C-byte layout as sPlayerCharEntry, viewing the words at 0x14 and 0x18.
+struct sPlayerSlotWords
+{
+    char pad_0x00[0x14];
+    int f14; // 0x14
+    int f18; // 0x18
+};
+extern sPlayerSlotWords D_00534FE0_slots[] __asm__("D_00534FE0");
 
-INCLUDE_ASM("be/beintplayer", func_001476D8);
+extern "C" int func_00147698(void* self, int index)
+{
+    return D_00534FE0_slots[cBENewPlayerInterface_getPlayerID(index)].f14;
+}
 
-INCLUDE_ASM("be/beintplayer", func_00147718);
+extern "C" void func_001476D8(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    D_00534FE0_slots[id].f14 = value;
+}
 
-INCLUDE_ASM("be/beintplayer", func_00147758);
+extern "C" int func_00147718(void* self, int index)
+{
+    return D_00534FE0_slots[cBENewPlayerInterface_getPlayerID(index)].f18;
+}
+
+extern "C" void func_00147758(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    D_00534FE0_slots[id].f18 = value;
+}
 
 //100%
 int cBENewPlayerInterface_getPlayerID(int index)
@@ -781,7 +808,20 @@ int cBENewPlayerInterface_getPlayerID(int index)
     return D_005305B0[index];
 }
 
-INCLUDE_ASM("be/beintplayer", func_001477B0);
+struct sPlayerFlagsView
+{
+    char pad_0x00[0x10];
+    unsigned int flag0 : 1; // 0x10 bit 0
+    unsigned int rest : 31;
+    char pad_0x14[0x1C - 0x14];
+};
+
+extern "C" int func_001477B0(void* self, int id)
+{
+    if (D_00534FE0[id].field_0xc == -1)
+        return -1;
+    return ((sPlayerFlagsView*)D_00534FE0)[id].flag0;
+}
 
 //100%
 struct sPlayerFlags_001477E8
@@ -868,11 +908,46 @@ extern "C" void func_00147A30(void* self, int index, int bit, int on)
         *(unsigned int*)(p + (w << 2)) &= ~(1 << b);
 }
 
-INCLUDE_ASM("be/beintplayer", func_00147B20);
+extern "C" int func_00147B20(void* self, int index, int k)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    int c = D_00534FE0[id].mCharID;
+    int off = profile * 0x9B50 + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    p += k * 8;
+    return *(int*)(p + 0xBA0);
+}
 
-INCLUDE_ASM("be/beintplayer", func_00147BB0);
+extern "C" int func_00147BB0(void* self, int index, int k)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    int c = D_00534FE0[id].mCharID;
+    int off = profile * 0x9B50 + c * 0xF88;
+    char* p = (char*)D_004A6CA8 + off;
+    p += k * 8;
+    return *(int*)(p + 0xBA4);
+}
 
-INCLUDE_ASM("be/beintplayer", func_00147C40);
+int cBELibrary_getCharacterID(int);
+
+extern "C" void func_00147C40(void* self, int value, int which)
+{
+    int c = cBELibrary_getCharacterID(0);
+    if (which != 0)
+    {
+        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        *(short*)(p + 0x280) = value;
+        *(short*)(p + 0x282) = 0;
+    }
+    else
+    {
+        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        *(short*)(p + 0x284) = value;
+        *(short*)(p + 0x286) = 0;
+    }
+}
 
 //100%
 int cBELibrary_getCharacterID(int);
@@ -984,7 +1059,20 @@ extern "C" void func_00147E18(void* self, int which)
     }
 }
 
-INCLUDE_ASM("be/beintplayer", func_00147F10);
+extern "C" short func_00147F10(void* self, int which)
+{
+    int c = cBELibrary_getCharacterID(0);
+    if (which != 0)
+    {
+        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        return *(short*)(p + 0x282);
+    }
+    else
+    {
+        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        return *(short*)(p + 0x286);
+    }
+}
 
 //100%
 struct sVTablePlayer_00147F78
@@ -1067,9 +1155,22 @@ extern "C" void func_00148098(void)
 
 INCLUDE_ASM("be/beintplayer", func_00148158);
 
-INCLUDE_ASM("be/beintplayer", func_001482D0);
+struct sCharStat15
+{
+    signed char v[15];
+};
+extern sCharStat15 D_005308D8_stat15[] __asm__("D_005308D8");
 
-INCLUDE_ASM("be/beintplayer", func_00148328);
+// Returns a copy of character c's 15-byte stat row.
+extern "C" sCharStat15 func_001482D0(void* self, int c)
+{
+    return D_005308D8_stat15[c];
+}
+
+extern "C" sCharStat15 func_00148328(void* self, int rider)
+{
+    return D_005308D8_stat15[cBELibrary_getCharacterID(rider)];
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1325,7 +1426,10 @@ extern "C" void func_00148AA8(void* self, int rider, int value)
     func_00148540(self, rider, v);
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148B50);
+extern "C" void func_00148B50(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[0] = value;
+}
 
 //100%
 struct sPlayerStat7 {
@@ -1341,7 +1445,10 @@ extern "C" signed char func_00148B78(void* self, int a1, int a2)
     return D_00535538[a1].e[a2].v[0];
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148BA0);
+extern "C" void func_00148BA0(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[1] = value;
+}
 
 //100%
 extern "C" signed char func_00148BC8(void* self, int a1, int a2)
@@ -1349,7 +1456,10 @@ extern "C" signed char func_00148BC8(void* self, int a1, int a2)
     return D_00535538[a1].e[a2].v[1];
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148BF0);
+extern "C" void func_00148BF0(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[2] = value;
+}
 
 //100%
 extern "C" signed char func_00148C18(void* self, int a1, int a2)
@@ -1357,7 +1467,10 @@ extern "C" signed char func_00148C18(void* self, int a1, int a2)
     return D_00535538[a1].e[a2].v[2];
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148C40);
+extern "C" void func_00148C40(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[3] = value;
+}
 
 //100%
 extern "C" signed char func_00148C68(void* self, int a1, int a2)
@@ -1365,7 +1478,10 @@ extern "C" signed char func_00148C68(void* self, int a1, int a2)
     return D_00535538[a1].e[a2].v[3];
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148C90);
+extern "C" void func_00148C90(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[4] = value;
+}
 
 //100%
 extern "C" signed char func_00148CB8(void* self, int a1, int a2)
@@ -1373,7 +1489,10 @@ extern "C" signed char func_00148CB8(void* self, int a1, int a2)
     return D_00535538[a1].e[a2].v[4];
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148CE0);
+extern "C" void func_00148CE0(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[5] = value;
+}
 
 //100%
 extern "C" signed char func_00148D08(void* self, int a1, int a2)
@@ -1381,7 +1500,10 @@ extern "C" signed char func_00148D08(void* self, int a1, int a2)
     return D_00535538[a1].e[a2].v[5];
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148D30);
+extern "C" void func_00148D30(void* self, int a1, int value, int a2)
+{
+    D_00535538_view[a1].e[a2].v[6] = value;
+}
 
 //100%
 extern "C" signed char func_00148D58(void* self, int a1, int a2)
