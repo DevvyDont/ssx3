@@ -81,21 +81,45 @@ extern "C" char* func_00156B28(void* self, int a1, int a2)
     return *(char**)((char*)func_0015A478(self) + 0x10) + (a2 * 3 + a1) * 8;
 }
 
-INCLUDE_ASM("be/beintreward", func_00156B70);
+extern "C" int func_00156B70(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x8);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156B90);
+extern "C" int func_00156B90(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0xC);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156BB0);
+extern "C" int func_00156BB0(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x10);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156BD0);
+extern "C" int func_00156BD0(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x14);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156BF0);
+extern "C" int func_00156BF0(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x18);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156C10);
+extern "C" int func_00156C10(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x1C);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156C30);
+extern "C" int func_00156C30(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x20);
+}
 
-INCLUDE_ASM("be/beintreward", func_00156C50);
+extern "C" int func_00156C50(void* self)
+{
+    return *(int*)((char*)func_0015A478(self) + 0x24);
+}
 
 //100%
 extern int D_004A6CA8[];
@@ -670,7 +694,11 @@ extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
     return func_00157430(self, bit, p + 0xF52);
 }
 
-INCLUDE_ASM("be/beintreward", func_00157EA0);
+extern "C" int func_00157EA0(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return (*(unsigned long*)(p + 0xf78) >> bit) & 1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern int D_004A6CA8[];
@@ -947,7 +975,11 @@ extern "C" long func_00158750(void* self, int a1, int a2)
     return *(long*)(p + 0xf78);
 }
 
-INCLUDE_ASM("be/beintreward", func_00158778);
+extern "C" int func_00158778(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, 0x40, (signed char*)(p + 0xF70));
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern int D_004A6CA8[];
@@ -1015,7 +1047,18 @@ int func_001588B0(void* self, int a1)
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern int D_004A6CA8[];
 
-INCLUDE_ASM("be/beintreward", func_001588C8);
+extern int D_0045AFE8[];
+
+extern "C" int func_001588C8(void* self, int kind, int value)
+{
+    int* t = D_0045AFE8 + kind * 4;
+    for (int i = 0; i < 4; i++)
+    {
+        if (value >= t[i])
+            return i;
+    }
+    return -1;
+}
 
 //100%
 struct sProfileSlot_00158910
@@ -1092,9 +1135,25 @@ extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int
     return -1;
 }
 
-INCLUDE_ASM("be/beintreward", func_00158B70);
+extern int D_0045B018[];
 
-INCLUDE_ASM("be/beintreward", func_00158BB8);
+extern "C" int func_00158B70(void* self, int kind, int value)
+{
+    int* t = D_0045B018 + kind * 4;
+    for (int i = 0; i < 4; i++)
+    {
+        if (value >= t[i])
+            return i;
+    }
+    return -1;
+}
+
+extern "C" int func_00158BB8(void* self, int medal, unsigned int value)
+{
+    if (value >= *(unsigned int*)((char*)(void*)D_0045B048 + medal * 4))
+        return 1;
+    return -1;
+}
 
 //100%
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
@@ -1187,7 +1246,12 @@ void* func_00158F30(void* self)
     return func_0015A6F0((void*)D_004C3EF0);
 }
 
-INCLUDE_ASM("be/beintreward", func_00158F50);
+extern void* D_004C3EF0[];
+
+extern "C" void* func_00158F50()
+{
+    return D_004C3EF0[0];
+}
 
 //100%
 struct sReward_0015A628;
@@ -1403,7 +1467,13 @@ extern "C" void func_00159B08(void* self, int rider, int k)
     }
 }
 
-INCLUDE_ASM("be/beintreward", func_00159C68);
+extern "C" void func_00159CD0(void* self, int a1, int a2, int bit);
+
+extern "C" void func_00159C68(void* self, int rider, int bit)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    func_00159CD0(self, profile, cBELibrary_getCharacterID(rider), bit);
+}
 
 INCLUDE_ASM("be/beintreward", func_00159CD0);
 
@@ -1514,7 +1584,23 @@ extern "C" void func_0015A510(void* self)
     *(short*)((char*)self + 0x4) = -1;
 }
 
-INCLUDE_ASM("be/beintreward", func_0015A548);
+// Counts the set bits among the first `count` bits of `bits` (LSB first).
+extern "C" int func_0015A548(void* self, int count, unsigned char* bits)
+{
+    int i = 0;
+    int j = 0;
+    int total = 0;
+    while (i < count)
+    {
+        unsigned char b = bits[j++];
+        for (int k = 0; k < 8 && i < count; k++)
+        {
+            i++;
+            total += (b >> k) & 1;
+        }
+    }
+    return total;
+}
 
 //100%
 extern "C" void func_0015A5B0(void* self, int bit, unsigned char* bits)
