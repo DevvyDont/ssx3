@@ -199,7 +199,8 @@ struct sBEBoltOn {
 
 // Bolt-ons of one character in one profile
 struct sBEBoltCharacter {
-    char pad_0x000[0x28C];
+    char pad_0x000[0x288];
+    short* slots;              // 0x288: item index per bolt-on slot, -1 for none
     int count;                 // 0x28C
     sBEBoltOn items[525];      // 0x290
     char pad_0xAC4[0xF88 - 0xAC4];
@@ -332,7 +333,15 @@ extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
     return 0;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014B0F0);
+extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on);
+extern "C" int func_0014B0F0(void* self, int profile, int character, int slot)
+{
+    sBEBoltCharacter* c = (sBEBoltCharacter*)((char*)D_004A6CA8 + profile * 0x9B50 + character * 0xF88);
+    int i = c->slots[slot];
+    sBEBoltOn* item = i >= 0 ? &c->items[i] : 0;
+    unsigned int on = item->flags & 0x10;
+    return func_0014AFB0(self, profile, character, slot, on == 0);
+}
 
 extern "C" void func_0014B170(void* self, int profile, int character, int a, int b)
 {
@@ -350,7 +359,30 @@ INCLUDE_ASM("be/belibrary", func_0014B218);
 
 INCLUDE_ASM("be/belibrary", func_0014B290);
 
-INCLUDE_ASM("be/belibrary", func_0014B2F8);
+struct sBELibTables;
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(sBELibTables* self, int i);
+extern void* D_004A6750[];
+
+// A group table entry: 0x38 bytes
+struct sBEGroupEntry {
+    signed char group;  // 0x0
+    signed char flag;   // 0x1
+    char pad_0x02[0x36];
+};
+
+// Number of entries in a group whose byte 1 is clear
+extern "C" int func_0014B2F8(void* self, int group)
+{
+    int count = func_0014D988(D_004A6750, group);
+    sBEGroupEntry* e = (sBEGroupEntry*)func_0014D998((sBELibTables*)D_004A6750, group);
+    int n = 0;
+    for (int i = 0; i < count; i++, e++) {
+        if (e->flag == 0)
+            n++;
+    }
+    return n;
+}
 
 INCLUDE_ASM("be/belibrary", func_0014B378);
 
