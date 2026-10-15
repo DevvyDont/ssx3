@@ -16,7 +16,13 @@ struct sUIVectorFlags {
 // The same flag word at + 0x14, read/written as plain unsigned fields.
 struct sUIVectorFields {
     unsigned int bit0 : 1;
-    unsigned int bits1 : 7;
+    unsigned int bit1 : 1;
+    unsigned int bit2 : 1;
+    unsigned int bit3 : 1;
+    unsigned int bit4 : 1;
+    unsigned int bit5 : 1;
+    unsigned int bit6 : 1;
+    unsigned int bit7 : 1;
     unsigned int layer : 5;
     unsigned int f13 : 6;
 };
@@ -49,6 +55,7 @@ struct sUIFlags1C {
     unsigned int bit7 : 1;
     unsigned int f8 : 6;
     unsigned int bit14 : 1;
+    unsigned int bit15 : 1;
 };
 
 // 12 bytes, 4-byte aligned (copied with ldl/ldr + lw). Float fields are a guess.
@@ -254,7 +261,10 @@ extern "C" void func_003A3E38(void* self, func_003A3E38_sVec3* off)
     *(func_003A3E38_sVec3*)((char*)self + 0x60) = *off;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A3F08);
+extern "C" void* func_003A3F08(void* self, ...)
+{
+    return self;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A3F48);
 
@@ -361,7 +371,17 @@ extern "C" void func_003A4888(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4900);
+extern void* D_00494BD8[];
+extern "C" void* func_003A6548(void* p);
+
+extern "C" void* func_003A4900(void* self)
+{
+    *(void**)((char*)self + 0x4) = self;
+    *(void**)((char*)self + 0x0) = self;
+    *(void***)((char*)self + 0x8) = D_00494BD8;
+    func_003A6548((char*)self + 0x14);
+    return self;
+}
 
 extern "C" int func_003A4940(void* self)
 {
@@ -493,7 +513,10 @@ extern "C" void* func_003A4B20(void* self)
     return (char*)self + 0x1C;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4B28);
+extern "C" void func_003A4B28(void* self, sVec4* out)
+{
+    *out = *(sVec4*)((char*)self + 0x1C);
+}
 
 extern "C" void func_003A4B50(void* self, float value)
 {
@@ -515,7 +538,10 @@ extern "C" void func_003A4B70(void* self, int value)
     ((sUIVectorFields*)((char*)self + 0x14))->layer = value;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4B90);
+extern "C" void func_003A4B90(void* self, int value)
+{
+    ((sUIVectorFields*)((char*)self + 0x14))->f13 = value;
+}
 
 extern "C" int func_003A4BB8(void* self)
 {
@@ -665,7 +691,15 @@ extern "C" int func_003A4D70(void* self, func_003A4D70_cVirt* obj)
 extern void* D_00494AA8[];
 extern "C" void* func_0039FC48(void*);
 
-INCLUDE_ASM("ui/uivector", func_003A4DA8);
+extern void* D_0046DD60[];
+
+extern "C" void func_003A4DA8(int* self, int flags)
+{
+    *(void***)self = D_0046DD60;
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
 extern "C" void func_003A4DD8()
 {
@@ -679,9 +713,27 @@ extern "C" void func_003A4DE8()
 {
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4DF0);
+// Base UI element constructor.
+extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* func_0021CCC8(void* p);
 
-INCLUDE_ASM("ui/uivector", func_003A4E38);
+extern "C" void* func_003A4DF0(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494AA8;
+    func_0021CCC8((char*)self + 0x74);
+    return self;
+}
+
+extern "C" void* func_003A4E38(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_00494AA8;
+    func_0021CCC8((char*)self + 0x74);
+    *(int*)((char*)self + 0x78) = -1;
+    *(int*)((char*)self + 0x7C) = 0;
+    return self;
+}
 
 //100%
 void* func_003A4E80(void* self)
@@ -770,11 +822,32 @@ extern "C" void func_003A4FA0(void* self, sVec2* in)
     *(sVec2*)((char*)self + 0x80) = *in;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A4FB8);
+extern "C" void func_003A4FB8(void* self, float x, float y)
+{
+    sVec2 v;
+    v.x = x;
+    v.y = y;
+    *(sVec2*)((char*)self + 0x80) = v;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A4FE0);
+extern void* D_004949E8[];
+extern "C" void* func_003977E8(void* p);
 
-INCLUDE_ASM("ui/uivector", func_003A5028);
+extern "C" void* func_003A4FE0(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_004949E8;
+    func_003977E8((char*)self + 0x74);
+    return self;
+}
+
+extern "C" void* func_003A5028(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_004949E8;
+    func_003977E8((char*)self + 0x74);
+    return self;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A5068);
 
@@ -938,9 +1011,27 @@ extern "C" unsigned char func_003A5418(void* self)
     return *(unsigned char*)((char*)self + 0x95);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5420);
+extern void* D_00494868[];
+extern "C" void* func_003A5508(void* self);
 
-INCLUDE_ASM("ui/uivector", func_003A5468);
+extern "C" void* func_003A5420(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494868;
+    func_003A5508((char*)self + 0x74);
+    return self;
+}
+
+extern "C" void* func_003A5468(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_00494868;
+    func_003A5508((char*)self + 0x74);
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0x7C) = 0;
+    ((sUIVectorFields*)((char*)self + 0x14))->bit1 = 1;
+    return self;
+}
 
 //100%
 extern void* D_00494868[];
@@ -975,14 +1066,31 @@ extern "C" int func_003A5528(void* self)
     return *(int*)((char*)self + 0x78);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5530);
+// Replaces the owned object at + 0x78, deleting the old one (virtual destructor, flags 3).
+extern "C" void func_003A5530(void* self, void* obj)
+{
+    void* old = *(void**)((char*)self + 0x78);
+    if (old != 0) {
+        sVE_3A39F8* vt = *(sVE_3A39F8**)((char*)old + 0x8);
+        ((void (*)(void*, int))vt[1].fn)((char*)old + vt[1].delta, 3);
+    }
+    *(void**)((char*)self + 0x78) = obj;
+}
 
 extern "C" int func_003A5580(void* self)
 {
     return *(int*)((char*)self + 0x7C);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5588);
+extern "C" void func_003A5588(void* self, void* obj)
+{
+    void* old = *(void**)((char*)self + 0x7C);
+    if (old != 0) {
+        sVE_3A39F8* vt = *(sVE_3A39F8**)((char*)old + 0x8);
+        ((void (*)(void*, int))vt[1].fn)((char*)old + vt[1].delta, 3);
+    }
+    *(void**)((char*)self + 0x7C) = obj;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A55D8);
 
@@ -1042,9 +1150,15 @@ extern "C" void func_003A5738(void* self, int enable)
     ((sUIVectorFlags*)((char*)self + 0x14))->bit7 = enable;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5758);
+extern "C" void func_003A5758(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0x78) = *in;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5780);
+extern "C" void func_003A5780(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0x88) = *in;
+}
 
 extern "C" unsigned char func_003A57A8(void* self)
 {
@@ -1056,7 +1170,18 @@ extern "C" unsigned char func_003A57B0(void* self)
     return *(unsigned char*)((char*)self + 0x318);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A57B8);
+extern void* D_004946C8[];
+extern "C" void* func_003A65D8(void* self);
+
+extern "C" void* func_003A57B8(void* self)
+{
+    *(void**)((char*)self + 0x4) = self;
+    *(void**)((char*)self + 0x0) = self;
+    *(void***)((char*)self + 0x8) = D_004946C8;
+    func_003A65D8((char*)self + 0x1C);
+    func_003977E8((char*)self + 0x24);
+    return self;
+}
 
 extern "C" void func_003A5800(void* self, int value)
 {
@@ -1148,7 +1273,10 @@ extern "C" int func_003A5908(void* self)
     return (*(int*)((char*)self + 0x1C) >> 15) & 0x1;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5918);
+extern "C" void func_003A5918(void* self, int value)
+{
+    ((sUIFlags1C*)((char*)self + 0x1C))->bit15 = value;
+}
 
 extern "C" int func_003A5940(void* self)
 {
@@ -1185,9 +1313,17 @@ extern "C" void func_003A59C0(void* self, int value)
     ((sUIFlags1C*)((char*)self + 0x1C))->f1 = value;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A59E0);
+extern "C" void func_003A59E0(void* self)
+{
+    ((sUIFlags1C*)((char*)self + 0x1C))->f1++;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5A10);
+extern "C" void func_003A5A10(void* self)
+{
+    if (((sUIFlags1C*)((char*)self + 0x1C))->f1 != 0) {
+        ((sUIFlags1C*)((char*)self + 0x1C))->f1--;
+    }
+}
 
 extern "C" int func_003A5A48(void* self)
 {
@@ -1388,7 +1524,16 @@ extern "C" int func_003A5D58(void* self)
     return *(int*)((char*)self + 0xD0);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5D60);
+extern void* D_00494588[];
+extern "C" void* func_003A65E8(void* self);
+
+extern "C" void* func_003A5D60(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494588;
+    func_003A65E8((char*)self + 0x74);
+    return self;
+}
 
 //100%
 extern void* D_00494588[];
@@ -1470,18 +1615,47 @@ extern "C" void func_003A5EE8(void* self, int enable)
     ((sUIVectorFlags*)((char*)self + 0x74))->bit6 = enable;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5F08);
+extern "C" void func_003A5F08(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0x78) = *in;
+}
 
-INCLUDE_ASM("ui/uivector", func_003A5F30);
+extern "C" void func_003A5F30(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0x88) = *in;
+}
 
 extern "C" int func_003A5F58(void* self)
 {
     return *(int*)((char*)self + 0xB0);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5F60);
+extern void* D_004944C8[];
 
-INCLUDE_ASM("ui/uivector", func_003A5FA0);
+extern "C" void* func_003A5F60(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_004944C8;
+    return self;
+}
+
+extern "C" void* func_003A5FA0(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_004944C8;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0x7C) = 0;
+    *(int*)((char*)self + 0x80) = 0;
+    *(int*)((char*)self + 0x84) = 0;
+    *(int*)((char*)self + 0x88) = 0;
+    *(int*)((char*)self + 0xC0) = 0;
+    *(int*)((char*)self + 0xC4) = 0;
+    *(int*)((char*)self + 0xC8) = 0;
+    *(char*)((char*)self + 0x8C) = 0;
+    *(char*)((char*)self + 0xA5) = 0;
+    return self;
+}
 
 //100%
 int func_003A6000(void* self)
@@ -1519,18 +1693,53 @@ extern "C" void func_003A6030(void* self, int value)
     *(int*)((char*)self + 0x88) = value;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6038);
+extern "C" unsigned int strlen(const char* s);
+extern "C" char* strcpy(char* dst, const char* src);
 
-INCLUDE_ASM("ui/uivector", func_003A6088);
+// Copies a name (max 24 chars) into the buffer at + 0x8C; too-long names clear it.
+extern "C" void func_003A6038(void* self, const char* name)
+{
+    if (strlen(name) > 24) {
+        *((char*)self + 0x8C) = 0;
+    } else {
+        strcpy((char*)self + 0x8C, name);
+    }
+}
+
+extern "C" void func_003A6088(void* self, const char* name)
+{
+    if (strlen(name) > 24) {
+        *((char*)self + 0xA5) = 0;
+    } else {
+        strcpy((char*)self + 0xA5, name);
+    }
+}
 
 extern "C" int func_003A60D8(void* self)
 {
     return *(int*)((char*)self + 0xC0);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A60E0);
+extern void* D_00494408[];
 
-INCLUDE_ASM("ui/uivector", func_003A6120);
+extern "C" void* func_003A60E0(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494408;
+    return self;
+}
+
+extern "C" void* func_003A6120(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_00494408;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0x7C) = 0;
+    *(int*)((char*)self + 0x80) = 0;
+    *(int*)((char*)self + 0x84) = 0;
+    return self;
+}
 
 //100%
 int func_003A6168(void* self)
@@ -1558,9 +1767,27 @@ extern "C" void func_003A6188(void* self, int value)
     *(int*)((char*)self + 0x80) = value;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6190);
+extern void* D_00494348[];
 
-INCLUDE_ASM("ui/uivector", func_003A61D0);
+extern "C" void* func_003A6190(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494348;
+    return self;
+}
+
+extern "C" void* func_003A61D0(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_00494348;
+    *(int*)((char*)self + 0x74) = 0;
+    *(int*)((char*)self + 0x78) = 0;
+    *(int*)((char*)self + 0x7C) = 0;
+    *(int*)((char*)self + 0x80) = 0;
+    *(int*)((char*)self + 0x88) = 0;
+    *(int*)((char*)self + 0x8C) = 0;
+    return self;
+}
 
 //100%
 int func_003A6220(void* self)
@@ -1593,7 +1820,17 @@ extern "C" void func_003A6248(void* self, int value)
     *(int*)((char*)self + 0x8C) = value;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6250);
+extern void* D_00494278[];
+extern "C" void* func_003A6600(void* self);
+
+extern "C" void* func_003A6250(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494278;
+    func_003A6600((char*)self + 0x74);
+    func_003977E8((char*)self + 0x8C);
+    return self;
+}
 
 //100%
 extern void* D_00494278[];
@@ -1653,7 +1890,10 @@ extern "C" void func_003A6398(void* self, int enable)
     ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A63B8);
+extern "C" void func_003A63B8(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0x78) = *in;
+}
 
 extern "C" cListNode* func_003A63E0(void* self)
 {
@@ -1690,7 +1930,10 @@ extern "C" int func_003A6490(void* self)
     return *(int*)((char*)self + 0x74) & 0x1;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A64A0);
+extern "C" void func_003A64A0(void* self, sVec4* in)
+{
+    *(sVec4*)((char*)self + 0xA8) = *in;
+}
 
 extern "C" void func_003A64C8(void* self, int value)
 {
@@ -1722,7 +1965,16 @@ extern "C" unsigned short func_003A64F0(void* self)
     return *(unsigned short*)((char*)self + 0xC4);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A64F8);
+extern void* D_004941B8[];
+extern "C" void* func_003A6618(void* self);
+
+extern "C" void* func_003A64F8(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_004941B8;
+    func_003A6618((char*)self + 0x74);
+    return self;
+}
 
 //100%
 int func_003A6540(void* self)
@@ -1732,7 +1984,22 @@ int func_003A6540(void* self)
 
 extern "C" void* func_003A3F48(int, int);
 
-INCLUDE_ASM("ui/uivector", func_003A6548);
+// Default flags of a cUIVector.
+extern "C" void* func_003A6548(void* self)
+{
+    sUIVectorFields* f = (sUIVectorFields*)self;
+    f->bit0 = 1;
+    f->bit7 = 0;
+    f->layer = 0;
+    f->bit5 = 0;
+    f->bit4 = 0;
+    f->bit2 = 0;
+    f->bit1 = 1;
+    f->bit3 = 1;
+    f->bit6 = 1;
+    f->f13 = 9;
+    return self;
+}
 
 extern "C" void* func_003A65A0(void* self)
 {
@@ -1768,7 +2035,13 @@ extern "C" void* func_003A6600(void* self)
     return self;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A6618);
+extern "C" void* func_003A6618(void* self)
+{
+    ((sCount_3A39F8*)self)->flag = 0;
+    ((sCount_3A39F8*)self)->pad1 = 0;
+    ((sCount_3A39F8*)self)->count = 0;
+    return self;
+}
 
 //99.38%
 void* func_003A6648(void* self)
