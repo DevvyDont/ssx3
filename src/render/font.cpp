@@ -1680,7 +1680,28 @@ extern "C" int func_003948C0(sfunc_003948C0* self, int i)
     return self->values[i];
 }
 
-INCLUDE_ASM("render/font", func_003948D0);
+// Distance attenuation: 1 inside 100 units, then (100/d)^power for power 1..3.
+extern "C" float func_003948D0(int power, float d)
+{
+    switch (power) {
+    case 1:
+        if (d < 100.0f) {
+            return 1.0f;
+        }
+        return 100.0f / d;
+    case 2:
+        if (d < 100.0f) {
+            return 1.0f;
+        }
+        return 10000.0f / (d * d);
+    case 3:
+        if (d < 100.0f) {
+            return 1.0f;
+        }
+        return 1000000.0f / (d * d * d);
+    }
+    return 1.0f;
+}
 
 INCLUDE_ASM("render/font", func_003949A0);
 
