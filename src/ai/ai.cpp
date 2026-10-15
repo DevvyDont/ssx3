@@ -2714,9 +2714,71 @@ extern "C" void func_0012D9D8(void* self)
 
 INCLUDE_ASM("ai/ai", func_0012DA88);
 
-INCLUDE_ASM("ai/ai", func_0012DCB0);
+//100%
+int func_00312AA0(void* self, int i);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" float func_0012E528(void* self);
 
-INCLUDE_ASM("ai/ai", func_0012DD98);
+extern "C" void func_0012DCB0(void* self_)
+{
+    char* self = (char*)self_;
+    int cur = func_00312AA0(*(void**)(*(char**)(self + 0x80) + 0x784), 2);
+    int next = cur;
+    bool one = *(int*)(*(char**)(self + 0x80) + 0x150) == 1;
+    if (!one) {
+        switch (cur) {
+        case 0x16A: next = 0x175; break;
+        case 0x16B: next = 0x176; break;
+        case 0x16C: next = 0x177; break;
+        case 0x16D: next = 0x178; break;
+        case 0x16E: next = 0x179; break;
+        case 0x16F: next = 0x17A; break;
+        case 0x170: case 0x180: next = 0x17B; break;
+        case 0x171: case 0x181: next = 0x17C; break;
+        case 0x172: case 0x182: next = 0x17D; break;
+        case 0x173: case 0x183: next = 0x17E; break;
+        }
+    } else {
+        next = 0x17F;
+    }
+    if (next != cur) {
+        cRiderAnimBase_play(*(void**)(*(char**)(self + 0x80) + 0x784), next, 0, -1.0f);
+        func_0012E528(self);
+    }
+}
+
+//100%
+int func_00312AA0(void* self, int i);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" float func_0012E528(void* self);
+
+extern "C" void func_0012DD98(void* self_)
+{
+    char* self = (char*)self_;
+    int cur = func_00312AA0(*(void**)(*(char**)(self + 0x80) + 0x784), 2);
+    int next = cur;
+    bool one = *(int*)(*(char**)(self + 0x80) + 0x150) == 1;
+    if (!one) {
+        switch (cur) {
+        case 0x175: next = 0x16A; break;
+        case 0x176: next = 0x16B; break;
+        case 0x177: next = 0x16C; break;
+        case 0x178: next = 0x16D; break;
+        case 0x179: next = 0x16E; break;
+        case 0x17A: next = 0x16F; break;
+        case 0x17B: case 0x180: next = 0x170; break;
+        case 0x17C: case 0x181: next = 0x171; break;
+        case 0x17D: case 0x182: next = 0x172; break;
+        case 0x17E: case 0x183: next = 0x173; break;
+        }
+    } else {
+        next = 0x174;
+    }
+    if (next != cur) {
+        cRiderAnimBase_play(*(void**)(*(char**)(self + 0x80) + 0x784), next, 0, -1.0f);
+        func_0012E528(self);
+    }
+}
 
 //100%
 int func_00312AA0(void* self, int i);
