@@ -28,7 +28,10 @@ void cExecutionMan_postpause()
 {
 }
 
-INCLUDE_ASM("bx/execman", func_00320960);
+extern "C" int func_00320960(char* self)
+{
+    return *(int*)(self + 0x4) != 0;
+}
 
 extern "C" void func_00320970(void* self, float value)
 {
@@ -80,15 +83,44 @@ extern "C" int func_003209B8(void* self)
     return *(int*)((char*)self + 0x0);
 }
 
-INCLUDE_ASM("bx/execman", func_003209C0);
+// Virtual calls on the object at +0x8 (vtable at its +0x8)
+extern "C" void func_003209C0(char* self)
+{
+    char* obj = *(char**)(self + 0x8);
+    char* vt = *(char**)(obj + 0x8);
+    (*(void (**)(char*))(vt + 0x2C))(obj + *(short*)(vt + 0x28));
+}
 
-INCLUDE_ASM("bx/execman", func_003209F0);
+extern "C" void func_003209F0(char* self)
+{
+    char* obj = *(char**)(self + 0x8);
+    char* vt = *(char**)(obj + 0x8);
+    (*(void (**)(char*))(vt + 0x24))(obj + *(short*)(vt + 0x20));
+}
 
-INCLUDE_ASM("bx/execman", func_00320A20);
+extern "C" unsigned int func_00320A20(char* self)
+{
+    char* obj = *(char**)(self + 0x8);
+    if (obj) {
+        char* vt = *(char**)(obj + 0x8);
+        return (*(unsigned int (**)(char*))(vt + 0x34))(obj + *(short*)(vt + 0x30));
+    }
+    return 0xFFFFFFFF;
+}
 
-INCLUDE_ASM("bx/execman", func_00320A60);
+extern "C" void func_00320A60(char* self)
+{
+    char* obj = *(char**)(self + 0x8);
+    char* vt = *(char**)(obj + 0x8);
+    (*(void (**)(char*))(vt + 0x5C))(obj + *(short*)(vt + 0x58));
+}
 
-INCLUDE_ASM("bx/execman", func_00320A90);
+extern "C" void func_00320A90(char* self)
+{
+    char* obj = *(char**)(self + 0x8);
+    char* vt = *(char**)(obj + 0x8);
+    (*(void (**)(char*))(vt + 0x64))(obj + *(short*)(vt + 0x60));
+}
 
 extern "C" void* func_00320AC0(void* self)
 {
@@ -153,7 +185,12 @@ extern "C" void* func_00320BF0(void* self, int a1)
 
 extern "C" void* func_00321108(int, int, int);
 
-INCLUDE_ASM("bx/execman", func_00320C18);
+extern "C" void func_00321010(void* a, void* b, int c, int d);
+
+extern "C" void func_00320C18(void** self, int c, int d)
+{
+    func_00321010(self[1], self[0], c, d);
+}
 
 //100%
 void* func_00320C48(void* self, int a1)
@@ -162,4 +199,9 @@ void* func_00320C48(void* self, int a1)
 }
 
 
-INCLUDE_ASM("bx/execman", func_00320C70);
+extern "C" void func_00321188(void* a, void* b, int c, int d);
+
+extern "C" void func_00320C70(void** self, int c, int d)
+{
+    func_00321188(self[1], self[0], c, d);
+}

@@ -554,9 +554,18 @@ extern "C" int func_0031F7F0(void* self)
     return func_0031ED60(self);
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031F810);
+extern "C" void func_0031F858(void* a, void* b, void* c, int d, int e);
 
-INCLUDE_ASM("bx/cubicspline", func_0031F838);
+extern "C" void func_0031F810(void* a, void* b, int c, int e)
+{
+    int v = c;
+    func_0031F858(a, b, &v, 3, e);
+}
+
+extern "C" void func_0031F838(void* a, void* b, void* c, int e)
+{
+    func_0031F858(a, b, c, 0, e);
+}
 
 INCLUDE_ASM("bx/cubicspline", func_0031F858);
 

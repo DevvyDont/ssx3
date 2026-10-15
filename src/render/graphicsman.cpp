@@ -280,7 +280,14 @@ extern "C" void func_0036A2C0(void* self, sGmMtx_A2C0* m)
 
 INCLUDE_ASM("render/graphicsman", func_0036A3B0);
 
-INCLUDE_ASM("render/graphicsman", func_0036A3E0);
+// Spreads the low 8 bits to the even bit positions (Morton code)
+extern "C" unsigned int func_0036A3B0(unsigned int x);
+
+// Interleaves the bits of x and y (Morton code)
+extern "C" unsigned int func_0036A3E0(unsigned short x, unsigned short y)
+{
+    return func_0036A3B0(x) | (func_0036A3B0(y) << 1);
+}
 
 INCLUDE_ASM("render/graphicsman", func_0036A428);
 
@@ -616,9 +623,18 @@ extern "C" void func_0036CE28(void* self, float a, float b)
     *(float*)((char*)self + 0x1c) = a - d;
 }
 
-INCLUDE_ASM("render/graphicsman", func_0036CE48);
+extern "C" void func_0036CE48(char* self)
+{
+    *(int*)(self + 0x14) = 0;
+    *(float*)(self + 0x1C) = 1e20f;
+}
 
-INCLUDE_ASM("render/graphicsman", func_0036CE58);
+extern "C" void func_0036CE58(char* self, cQuad128* v)
+{
+    *(cQuad128*)(self + 0xB0) = *v;
+    *(cQuad128*)(self + 0xC0) = D_004FF120;
+    *(cQuad128*)(self + 0xD0) = D_004FF120;
+}
 
 INCLUDE_ASM("render/graphicsman", func_0036CE80);
 
