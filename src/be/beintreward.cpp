@@ -418,7 +418,26 @@ extern "C" int func_00157430(void* self, int bit, char* bits)
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
 }
 
-INCLUDE_ASM("be/beintreward", func_00157468);
+//100%
+extern "C" int func_00157D60(void* self, int a1, int a2, int bit);
+int func_00157DA0_jt(void*, int, int, int) __asm__("func_00157DA0");
+int func_00157DE0_jt(void*, int, int, int) __asm__("func_00157DE0");
+int func_00157E20_jt(void*, int, int, int) __asm__("func_00157E20");
+int func_00157E60_jt(void*, int, int, int) __asm__("func_00157E60");
+extern "C" int func_00157EE0(void* self, int a1, int a2, int bit);
+
+extern "C" int func_00157468(void* self, int a1, int a2, int kind, int bit)
+{
+    switch (kind) {
+    case 3: return func_00157D60(self, a1, a2, bit);
+    case 4: return func_00157DA0_jt(self, a1, a2, bit);
+    case 5: return func_00157DE0_jt(self, a1, a2, bit);
+    case 6: return func_00157E60_jt(self, a1, a2, bit);
+    case 7: return func_00157E20_jt(self, a1, a2, bit);
+    case 8: return func_00157EE0(self, a1, a2, bit + 10);
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_001575C0(void* self, int a1, int a2);

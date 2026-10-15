@@ -527,7 +527,36 @@ extern "C" void func_00291438(void* self)
     *(int*)((char*)self + 0x5FCC) = snd1438AddVoice(self, 8, 0x10, 5);
 }
 
-INCLUDE_ASM("sound/soundsys", func_00291710);
+//100%
+extern "C" int func_00291710(void* self_, int rider_)
+{
+    char* self = (char*)self_;
+    char* rider = (char*)rider_;
+    int v;
+    if (func_0011FE98(rider) == 4)
+        v = *(int*)(self + 0x598C);
+    else
+        v = *(int*)(rider + 0x438);
+    switch (v) {
+    case 2: case 3: case 13:
+        return 1;
+    case 1:
+        return 2;
+    case 4:
+        return 3;
+    case 7: case 8: case 18:
+        return 7;
+    case 9:
+        return 5;
+    case 10:
+        return 4;
+    case 11:
+        return 8;
+    case -1: case 0: case 5: case 6: case 12: case 14: case 15: case 16: case 17: case 19:
+        break;
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_002917B8(void* self, int a1)
