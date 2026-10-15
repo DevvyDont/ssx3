@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Set, Union
 
@@ -66,18 +67,6 @@ for _u, _d in list(UNIT_CC.items()):
 # 0x18 bytes of .data the original doesn't have
 COMMON_CXXFLAGS = "-fno-exceptions"
 
-# The compiler driver runs the SN assembler build from May 2001 (ee/bin/as.exe), which pads short loops
-# with nops (an R5900 erratum workaround). The game was built with it, but it also pads some loops in
-# INCLUDE_ASM code, which already has the original padding, so those units come out too long. Their
-# source is compiled to assembly and assembled with the Aug 2000 build (bin/ee-as.exe), which never
-# pads. -mips4 stops it adding a hazard nop after mtc1. C in these units gets no short-loop padding,
-# so a decompiled function with a short loop won't match in them. Only affects the linked build.
-SN_AS_2000 = f"{CC_DIR}/bin/ee-as.exe -O2 -mabi=eabi -mips4 -Iasm/nonmatchings"
-SN_AS_2000_UNITS = {
-    "bx/cubicspline",
-    "ealib/seg_2B4578",
-    "replay/replaycache",
-}
 
 # splat's generated INCLUDE_ASM macro emits `.include "FOLDER/NAME.s"` relative
 # to the nonmatchings dir (no longer hardcodes "asm/nonmatchings/"), so the
@@ -96,7 +85,6 @@ WINE = "wine"
 if sys.platform == "linux" or sys.platform == "linux2":
     COMPILE_C_RULE = f"{WINE} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WINE} {COMPILE_CXX_RULE}"
-    SN_AS_2000 = f"{WINE} {SN_AS_2000}"
 elif sys.platform == "darwin":
     # macOS: run the Windows compiler with wibo (decompals/wibo, the
     # `wibo-macos` release asset; runs under Rosetta 2 on Apple Silicon)
@@ -105,7 +93,6 @@ elif sys.platform == "darwin":
     WIBO = os.environ.get("WIBO") or (str(_wibo_local) if _wibo_local.exists() else "wibo")
     COMPILE_C_RULE = f"{WIBO} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WIBO} {COMPILE_CXX_RULE}"
-    SN_AS_2000 = f"{WIBO} {SN_AS_2000}"
 
 def clean():
     files_to_clean = [
@@ -136,6 +123,39 @@ compiler_type = "gcc"
 [decompme.compilers]
 "tools/cc/eegcc-2.95.3-V1.36-vecmark/bin/gcc" = "eegcc-2.95.3-V1.36"
 """)
+
+
+BRANCH = re.compile(r"^(\s*/\* [0-9A-F]+ [0-9A-F]{8} ([0-9A-F]{8}) \*/\s+)"
+                    r"(b|beqz|bnez|beq|bne|beql|bnel|blez|bgtz|bltz|bgez|blezl|bgtzl|bltzl|bgezl|bc1f|bc1t|bc1fl|bc1tl)"
+                    r"(\s+.*)$", re.M)
+
+
+def freeze_asm_branches():
+    """Write every branch in the split asm as a .word of its original encoding.
+
+    The SN assembler the game was built with (ee/bin/as.exe, May 2001) pads short loops with nops, as a
+    workaround for an R5900 erratum. The asm already contains the padding the original build added, but the
+    assembler pads some of its loops again (depending on where they sit in the section), so those functions
+    come out too long. It only pads what it sees as a loop branch, so with the branches written as data it
+    leaves the asm alone, while compiled C still gets padded. Branch targets are local to each function, so
+    the encodings are position independent.
+    """
+    frozen = 0
+    for f in Path("asm").rglob("*.s"):
+        text = f.read_text()
+        if "/*" not in text:
+            continue
+
+        def sub(m):
+            nonlocal frozen
+            frozen += 1
+            word = int.from_bytes(bytes.fromhex(m.group(2)), "little")
+            return f"{m.group(1)}.word 0x{word:08X} /* {m.group(3)}{m.group(4).rstrip()} */"
+
+        new = BRANCH.sub(sub, text)
+        if new != text:
+            f.write_text(new)
+    print(f"Froze {frozen} asm branches")
 
 
 def rewrite_lit4_loads_for_objdiff():
@@ -295,7 +315,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
 
     cross = "mips-linux-gnu-"
 
-    ld_args = "-EL -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -Map $mapfile -T $in -o $out"
+    ld_args = "-EL -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -T obj/address_syms.ld -Map $mapfile -T $in -o $out"
 
     as_cpp = "cpp"
     as_filter = ""
@@ -330,15 +350,9 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
-        "cc_as2000",
-        description="cc $in (2000 assembler)",
-        command=f"{COMPILE_C_RULE.replace(' -c ', ' -S ')} $cflags -o $out.s && {SN_AS_2000} $out.s -o $out && {cross}strip $out -N dummy-symbol-name",
-    )
-
-    ninja.rule(
-        "cpp_as2000",
-        description="cpp $in (2000 assembler)",
-        command=f"{COMPILE_CXX_RULE.replace(' -c ', ' -S ')} $cflags -o $out.s && {SN_AS_2000} $out.s -o $out && {cross}strip $out -N dummy-symbol-name",
+        "address_syms",
+        description="address_syms $out",
+        command="python3 tools/address_syms.py $out $in",
     )
 
     ninja.rule(
@@ -402,7 +416,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 flags, inc = current_c_flags(entry)
                 build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags=flags, implicit=inc)
             else:
-                build(entry.object_path, entry.src_paths, "cpp_as2000" if seg.name in SN_AS_2000_UNITS else "cpp")
+                build(entry.object_path, entry.src_paths, "cpp")
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             unit_flags = UNIT_CFLAGS.get(seg.name, "")
             task, tvars = ("cc_unit", {"ccdir": UNIT_CC[seg.name]}) if seg.name in UNIT_CC else ("cc", None)
@@ -413,9 +427,6 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, task, out_dir="obj/current",
                       extra_flags=(flags + " " + unit_flags).strip(), implicit=inc, variables=tvars)
             else:
-                if seg.name in SN_AS_2000_UNITS:
-                    assert seg.name not in UNIT_CC
-                    task = "cc_as2000"
                 build(entry.object_path, entry.src_paths, task, extra_flags=unit_flags or None, variables=tvars)
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
             if dual_objects:
@@ -480,10 +491,16 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         return
 
     ninja.build(
+        "obj/address_syms.ld",
+        "address_syms",
+        sorted(str(obj) for obj in built_objects),
+    )
+
+    ninja.build(
         PRE_ELF_PATH,
         "ld",
         LD_PATH,
-        implicit=[str(obj) for obj in built_objects],
+        implicit=[str(obj) for obj in built_objects] + ["obj/address_syms.ld"],
         variables={"mapfile": MAP_PATH},
     )
 
@@ -550,6 +567,7 @@ def main():
     split.main([YAML_FILE], modes="all", verbose=False, use_cache=False)
 
     linker_entries = split.linker_writer.entries
+    freeze_asm_branches()
 
     if do_objects:
         rewrite_lit4_loads_for_objdiff()

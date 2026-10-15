@@ -51,7 +51,9 @@ options:
   section_order: [".text", ".vutext", ".data", ".rodata", ".lit4", ".sdata", ".sbss", ".bss"]
   auto_link_sections: [".data", ".rodata", ".bss"]
 
-  subalign: 4
+  # Functions are 8-aligned: a unit ending in C has no trailing nop, so the
+  # next object has to be aligned to 8 to reproduce the padding
+  subalign: 8
 
 segments:
   - name: elf_header
