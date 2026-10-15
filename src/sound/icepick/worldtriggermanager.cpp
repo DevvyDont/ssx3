@@ -1102,7 +1102,44 @@ extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, 
     }
 }
 
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
+//100%
+// Volume falloff curve: shape (float, truncated) applied to normalised distance x.
+extern "C" float func_002B82B8(float shape, float x)
+{
+    switch ((int)shape) {
+    case 0:
+        x = x * x;
+        x = 1.0f - x;
+        break;
+    case 1:
+        x = x / (1.5f - x * 0.5f);
+        x = 1.0f - x;
+        break;
+    case 2:
+        x = 1.0f - x;
+        break;
+    case 3:
+        x = 1.0f - x;
+        x = x / (1.5f - x * 0.5f);
+        break;
+    case 4:
+        x = 1.0f - x;
+        x = x * x;
+        break;
+    case 5:
+        if (x <= 0.7f) {
+            x = 1.0f;
+        } else {
+            x = 1.0f - x;
+            x = x * 3.3333333f;
+        }
+        break;
+    default:
+        x = 0.0f;
+        break;
+    }
+    return x;
+}
 
 extern "C" void* func_002B83B8(void* p, ...)
 {
