@@ -397,9 +397,17 @@ extern "C" void func_0028BDE0(void* self, int i)
     func_0028B650((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028BE08);
+extern "C" void func_0028B6C8(void* a, void* b);
 
-INCLUDE_ASM("sound/bankmanager", func_0028BE38);
+extern "C" void func_0028BE08(char* self, int i, int j)
+{
+    func_0028B6C8(*(char**)(self + 0xACC) + i * 0x60, *(char**)(self + 0xACC) + j * 0x60);
+}
+
+extern "C" void func_0028BE38(char* self, int i)
+{
+    func_0028B730((sBankNode*)(*(char**)(self + 0xACC) + i * 0x60));
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_0028B788(void* inst, int a, int b);
@@ -1124,7 +1132,12 @@ void func_0028DF08(void* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028DF18);
 
-INCLUDE_ASM("sound/bankmanager", func_0028E068);
+extern "C" int func_0028DF18(void* self, int a);
+
+extern "C" int func_0028E068(void* self)
+{
+    return func_0028DF18(self, 1) != 0;
+}
 
 INCLUDE_ASM("sound/bankmanager", func_0028E088);
 

@@ -15,7 +15,10 @@ void* cMCOverlayManager_getManager()
     return D_004A2C74;
 }
 
-INCLUDE_ASM("movie/movieplayer", func_0023C850);
+extern "C" int func_0023C850()
+{
+    return D_004A2C74 != 0;
+}
 
 //100%
 struct sMovieObj_23C860 {
@@ -36,14 +39,22 @@ extern "C" int func_0023C898(void* self)
     return *(int*)((char*)self + 0x130) == 1;
 }
 
-INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
+extern "C" int func_0023C8A8(char* self)
+{
+    return *(int*)(self + 0x130) == 0x23;
+}
 
 extern "C" int func_0023C8B8(void* self)
 {
     return *(int*)((char*)self + 0xDC);
 }
 
-INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
+extern int D_004A2C78;
+
+extern "C" int func_0023C8C0()
+{
+    return D_004A2C78 != 0;
+}
 
 //100%
 extern "C" int func_0023C8D0(void* self)
@@ -2869,9 +2880,27 @@ extern "C" void func_00241540(char* self)
     *(int*)(self + 0xE0) = 0;
 }
 
-INCLUDE_ASM("movie/movieplayer", func_00241678);
+extern "C" int func_002410D0(void* self);
 
-INCLUDE_ASM("movie/movieplayer", func_002416C0);
+// Previous page, wrapping to the last one when +0x100 allows it
+extern "C" void func_00241678(char* self)
+{
+    int n = *(int*)(self + 0xF8);
+    if (n > 0)
+        *(int*)(self + 0xF8) = n - 1;
+    else if (*(int*)(self + 0x100))
+        *(int*)(self + 0xF8) = func_002410D0(self) - 1;
+}
+
+// Next page, wrapping to the first one when +0x100 allows it
+extern "C" void func_002416C0(char* self)
+{
+    int last = func_002410D0(self) - 1;
+    if (*(int*)(self + 0xF8) < last)
+        *(int*)(self + 0xF8) = *(int*)(self + 0xF8) + 1;
+    else if (*(int*)(self + 0x100))
+        *(int*)(self + 0xF8) = 0;
+}
 
 //100%
 // PORT: callers pass more args than the unit's declarations of these take.

@@ -163,7 +163,10 @@ extern "C" void func_00313CF0(void* self, int a1, float val)
     *(int*)((char*)self + 0xc4) = 1;
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00313D10);
+extern "C" void func_00313D10(char* self, int i, float value)
+{
+    *(float*)(self + i * 0x1C + 0xC) = value;
+}
 
 //100%
 extern "C" void func_00313D28(void* self, int a1, float val)
@@ -179,7 +182,10 @@ extern "C" void func_00313D40(void* self, int a1, int val)
     *(int*)(p + 0x1c) = val;
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00313D58);
+extern "C" void func_00313D58(char* self, int i)
+{
+    *(int*)(self + i * 0x1C + 0x18) = 0;
+}
 
 //100%
 struct sSeqTrack_00313D70
@@ -584,9 +590,29 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
     return cur;
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00314788);
+// Whether a node with the given id is in the list
+extern "C" int func_00314788(char* self, int id)
+{
+    char* p;
+    for (p = *(char**)(self + 0x4); p; p = *(char**)(p + 0xC8)) {
+        if (*(int*)p == id)
+            return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM("animation/animsequencer", func_003147B8);
+// Index of the node with the given id, or -1
+extern "C" int func_003147B8(char* self, int id)
+{
+    char* p;
+    int i = 0;
+    for (p = *(char**)(self + 0x4); p; p = *(char**)(p + 0xC8)) {
+        if (*(int*)p == id)
+            return i;
+        i++;
+    }
+    return -1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 class cAsStream {
@@ -724,7 +750,13 @@ void func_00314AA0_impl(void* self, char* data)
     *(char**)((char*)self + 0xC) = data + *(int*)(data + 0x8);
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00314AC0);
+extern "C" int func_00314AC0(char* self)
+{
+    char* p = *(char**)(self + 0x4);
+    if (p)
+        return *(short*)(p + 0x4);
+    return 0;
+}
 
 INCLUDE_ASM("animation/animsequencer", func_00314AE0);
 
@@ -760,4 +792,7 @@ extern "C" void* func_00314C00(sMdfArchive* self, const char* name)
 }
 
 
-INCLUDE_ASM("animation/animsequencer", func_00314C98);
+extern "C" char* func_00314C98(char* self, int i)
+{
+    return *(char**)(self + 0x8) + i * 0x60;
+}
