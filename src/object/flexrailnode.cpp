@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("object/flexrailnode", cFlexRailNode_addSpaceHash);
-#ifdef SKIP_ASM
 struct sHashKey_8B90 {
     int level;      // 0x0
     int x;          // 0x4
@@ -42,11 +40,8 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self)
     sHashCell_8B90* c3 = key.z < 0 ? c2 + 1 : c2;
     func_00328C20(c3, 2, node, &key);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00348C48);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 struct sOctCell_8C48 {
     void* child[8];
@@ -93,11 +88,8 @@ extern "C" void func_00348C48(void* self)
     operator_delete(*(int**)((char*)self + 0x54));
     *(void**)((char*)self + 0x54) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00348D98);
-#ifdef SKIP_ASM
 extern "C" void func_00347D90(void* self, int type, void* a1, void* desc);
 extern "C" void func_003492A8(void* self);
 struct sFrBoxRail;
@@ -163,11 +155,8 @@ extern "C" void* func_00348D98(char* self, void* a1, char* desc)
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00348FA0);
-#ifdef SKIP_ASM
 extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
 extern "C" void func_003492A8(void* self);
 struct sFrBoxRail;
@@ -210,11 +199,8 @@ extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", func_003490B0);
-#ifdef SKIP_ASM
 extern char D_0048FF30[];
 void cMemMan_free(void*);
 extern "C" void func_00348C48(void* self);
@@ -230,11 +216,8 @@ extern "C" void func_003490B0(void* self, int flags)
     }
     func_00347F90(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349110);
-#ifdef SKIP_ASM
 struct sFrBoxVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -314,11 +297,8 @@ extern "C" void func_00349110(sFrBoxRail* self)
     vu0SubFRBox(self->min, pad);
     vu0AddFRBox(self->max, pad);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349220);
-#ifdef SKIP_ASM
 struct sFrNodeVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -378,13 +358,10 @@ extern "C" void func_00349220(void* self, sFrNode9220* node)
     node->posB = v;
     node->posA = v;
 }
-#endif
 
 INCLUDE_ASM("object/flexrailnode", func_003492A8);
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349798);
-#ifdef SKIP_ASM
 struct sFrVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -433,11 +410,8 @@ extern "C" void func_00349798(void* self, void* node, sFrVec4* v)
                  vu0ScaleFR(*v, *(float*)((char*)node + 0x68)));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349840);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 extern "C" void func_00349840(void* self, void* node)
@@ -451,11 +425,8 @@ extern "C" void func_00349840(void* self, void* node)
                             1.0f - *(float*)((char*)node + 0x68)));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_003498E8);
-#ifdef SKIP_ASM
 struct sFrV_98E8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -551,11 +522,8 @@ extern "C" void func_003498E8(char* self)
         n->force = D_004FF120_98E8;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349AD0);
-#ifdef SKIP_ASM
 struct sFlexRailVEntry9AD0 {
     short delta;
     short index;
@@ -572,13 +540,10 @@ extern "C" void func_00349AD0(void* self, void* stream)
     e = &(*(sFlexRailVEntry9AD0**)stream)[1];
     e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x50);
 }
-#endif
 
 INCLUDE_ASM("object/flexrailnode", func_00349B48);
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349DB0);
-#ifdef SKIP_ASM
 extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
 extern "C" void func_0034A0B0(void* self);
 extern "C" void cFlexRailNode_addSpaceHash(void* self);
@@ -614,11 +579,8 @@ extern "C" void* func_00349DB0(char* self, void* a1, void* stream)
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", func_00349EB8);
-#ifdef SKIP_ASM
 extern char D_0048FD90[];
 void cMemMan_free(void*);
 extern "C" void func_00348C48(void* self);
@@ -634,11 +596,8 @@ extern "C" void func_00349EB8(void* self, int flags)
     }
     func_00347F90(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349F18);
-#ifdef SKIP_ASM
 struct sFrBoxElem60 {
     sFrBoxVec4 pos; // 0x00
     char pad_0x10[0x50];
@@ -691,11 +650,8 @@ extern "C" void func_00349F18(sFrBoxRail60* self)
     vu0SubFRBox(self->min, pad);
     vu0AddFRBox(self->max, pad);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A028);
-#ifdef SKIP_ASM
 extern "C" sFrWorld9220** func_002D1BD8();
 extern "C" void func_0034FED8(void* model, int bone, sFrNodeMtx* out);
 
@@ -713,13 +669,10 @@ extern "C" void func_0034A028(void* self, sFrNodeA028* node)
     sFrNodeVec4 v = m.r[3];
     node->pos = v;
 }
-#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034A0B0);
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A568);
-#ifdef SKIP_ASM
 struct sV4_A568 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -869,13 +822,10 @@ extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* di
     float* k = self->k;
     vu0AddEq_A568(self->elems[node->idx].force, vu0Scale_A568(vu0Scale_A568(c, vu0Len_A568(vu0Sub_A568(node->pos, self->elems[node->idx].pos)) / alen), k[2]));
 }
-#endif
 
 INCLUDE_ASM("object/flexrailnode", func_0034A838);
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A8C8);
-#ifdef SKIP_ASM
 extern "C" float func_002D1C70();
 
 struct sV4_A8C8 {
@@ -1039,11 +989,8 @@ extern "C" void func_0034A8C8(sFrRailA8C8* self)
         self->elems[i].force = D_004FF120_A8C8;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AC10);
-#ifdef SKIP_ASM
 struct sFlexRailVEntryAC10 {
     short delta;
     short index;
@@ -1060,11 +1007,8 @@ extern "C" void func_0034AC10(void* self, void* stream)
     e = &(*(sFlexRailVEntryAC10**)stream)[1];
     e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x60);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AC88);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 
 struct sFrRailDesc;
@@ -1141,11 +1085,8 @@ extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)
     d->c[3] = s->t[3].c;
     return out;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", func_0034ADD8);
-#ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 extern "C" void* func_002D1CB0(void);
 extern char D_0048FC10[];
@@ -1167,11 +1108,8 @@ extern "C" void* func_0034ADD8(void* self, void* a1, void* node, void* src)
     func_0034C548(func_002D1CB0(), node, &desc);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AE68);
-#ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char D_0048FC10[];
 
@@ -1181,11 +1119,8 @@ extern "C" void* func_0034AE68(void* self)
     *(void**)((char*)self + 0xC) = D_0048FC10;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AEA0);
-#ifdef SKIP_ASM
 extern char D_0048FC10[];
 extern "C" void* func_002D1CB0(void);
 extern "C" void func_0034C600(void* set, void* arg);
@@ -1197,41 +1132,29 @@ extern "C" void func_0034AEA0(void* self, int flags)
     func_0034C600(func_002D1CB0(), *(void**)((char*)self + 0x18));
     func_0034FBF0(self, flags);
 }
-#endif
 
 extern "C" void* func_0034FE90(void* self);
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AEF8__FPv);
-#ifdef SKIP_ASM
 void* func_0034AEF8(void* self)
 {
     return func_0034FE90(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AF18__FPv);
-#ifdef SKIP_ASM
 void func_0034AF18(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AF20);
-#ifdef SKIP_ASM
 extern "C" void* func_0034AF20(void* self)
 {
     *(int*)((char*)self + 0x5c) = 0;
     *(unsigned int*)((char*)self + 0x58) = 0xFFFFFFFFU;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AF38);
-#ifdef SKIP_ASM
 extern int D_004A4010;
 extern void* D_0048FBF8[];
 
@@ -1265,11 +1188,8 @@ extern "C" void* func_0034AF38(void* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AFB8);
-#ifdef SKIP_ASM
 extern void* D_0048FBF8[];
 void operator_delete(int*);
 
@@ -1280,11 +1200,8 @@ extern "C" void func_0034AFB8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AFE8);
-#ifdef SKIP_ASM
 extern "C" int func_00415FC8(const void* a, const void* b, int n);
 
 extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
@@ -1297,11 +1214,8 @@ extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
     }
     return func_00415FC8(data, self, 0x58) == 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034B038);
-#ifdef SKIP_ASM
 extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
 
 struct sFlagDef_34B038 {
@@ -1326,11 +1240,8 @@ extern "C" void func_0034B038(sFlagSet_34B038* self, sFlagDef_34B038* def, char*
     self->meshes[self->count] = mesh;
     self->count++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034B168);
-#ifdef SKIP_ASM
 struct sFrRider_B168 {
     char pad_0x0[0x78];
     int id;                 // 0x78
@@ -1368,5 +1279,4 @@ extern "C" int func_0034B168(sFrRail_B168* self, sFrRider_B168* rider)
     }
     return 0;
 }
-#endif
 

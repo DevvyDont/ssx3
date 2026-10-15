@@ -12,8 +12,6 @@ struct cBEAggressionInterface {
 };
 
 //99.58%
-INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBEAggressionInterface_getThis()
 {
     if (D_004A124C == 0) {
@@ -24,27 +22,18 @@ void* cBEAggressionInterface_getThis()
     }
     return D_004A124C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155AA0__FPv);
-#ifdef SKIP_ASM
 void func_00155AA0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155AA8__FPv);
-#ifdef SKIP_ASM
 void func_00155AA8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155AB0);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
@@ -71,11 +60,8 @@ extern "C" int func_00155AB0(void* self, int a, int b)
         return 2;
     return D_004A6CA8[profile][cb].aggression[ca].v[0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155B50);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
@@ -92,11 +78,8 @@ extern "C" int func_00155B50(void* self, int a, int b)
         return 3;
     return D_004A6CA8[profile][cb].aggression[ca].v[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155BF0);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_001E2A08(int charID, int level);
@@ -170,13 +153,10 @@ extern "C" void func_00155BF0(void* self, int a, int b, int event)
     D_004A6CA8[profile][ca].aggression[cb].v[1] = lvl;
     D_004A6CA8[profile][ca].aggression[cb].v[0] = st;
 }
-#endif
 
 INCLUDE_ASM("be/beintaggression", func_00155E58);
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_001560A0);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305E0[];
@@ -199,11 +179,8 @@ extern "C" void func_001560A0(void* self, void* stream)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_001561B0);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
@@ -225,7 +202,6 @@ extern "C" void func_001561B0(void* self, void* stream)
         }
     }
 }
-#endif
 
 
 INCLUDE_ASM("be/beintaggression", func_001562B8);

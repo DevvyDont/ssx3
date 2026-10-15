@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupAppend__FPcN20);
-#ifdef SKIP_ASM
 char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
 {
     if (name == 0) {
@@ -15,7 +13,6 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
     }
     return dst;
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
 
@@ -34,8 +31,6 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDelete);
 INCLUDE_ASM("dirtysock/tags", func_003EB9E8);
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDupl);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 {
     int left = len;
@@ -48,7 +43,6 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
     }
     return len - left;
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
 
@@ -57,8 +51,6 @@ INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
 INCLUDE_ASM("dirtysock/tags", func_003EBD70);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetNumber);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
 extern "C" int cDirtysock_tag_TagFieldSetNumber(char* record, int len, char* name, int value)
@@ -85,11 +77,8 @@ extern "C" int cDirtysock_tag_TagFieldSetNumber(char* record, int len, char* nam
     *data = 0;
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFlags);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 extern char D_004965C0[];
 
@@ -106,11 +95,8 @@ extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name
     *data = 0;
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetAddress);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
 extern "C" int cDirtysock_tag_TagFieldSetAddress(char* record, int len, char* name, unsigned int addr)
@@ -144,11 +130,8 @@ extern "C" int cDirtysock_tag_TagFieldSetAddress(char* record, int len, char* na
     *data = 0;
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFourCC);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
 extern "C" int cDirtysock_tag_TagFieldSetFourCC(char* record, int len, char* name, int value)
@@ -163,13 +146,10 @@ extern "C" int cDirtysock_tag_TagFieldSetFourCC(char* record, int len, char* nam
     *data = 0;
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetString);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetBinary);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 extern unsigned char D_00495FC0[];
 extern unsigned char D_004960C0[];
@@ -187,15 +167,12 @@ extern "C" int cDirtysock_tag_TagFieldSetBinary(char* record, int len, char* nam
     *data = 0;
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetStructure);
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetCrypt);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetEpoch);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_00496A40[];
@@ -233,7 +210,6 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
     sprintf(data, D_00496A40, t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", func_003EC8B8);
 
@@ -242,8 +218,6 @@ INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
 INCLUDE_ASM("dirtysock/tags", func_003ECA88);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003ECB00);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
 // TagFieldMerge: apply every field of `data` to the record; returns how many were set.
@@ -271,15 +245,12 @@ extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
     }
     return count;
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", func_003ECBD8);
 
 INCLUDE_ASM("dirtysock/tags", func_003ECE38);
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetNumber);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
 {
     int sign;
@@ -299,11 +270,8 @@ extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
     }
     return sign * value;
 }
-#endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFlags);
-#ifdef SKIP_ASM
 extern int D_004965E0[];
 
 extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
@@ -319,11 +287,8 @@ extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
     }
     return defval;
 }
-#endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetAddr);
-#ifdef SKIP_ASM
 extern "C" unsigned int cDirtysock_tag_TagFieldGetAddr(const char* data, unsigned int defval)
 {
     unsigned int addr = 0;
@@ -341,11 +306,8 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetAddr(const char* data, unsigne
     }
     return defval;
 }
-#endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFourCC);
-#ifdef SKIP_ASM
 extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
 {
     int token;
@@ -357,15 +319,12 @@ extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
     }
     return token;
 }
-#endif
 
 INCLUDE_ASM("dirtysock/tags", func_003ED0F8);
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetString);
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetBinary);
-#ifdef SKIP_ASM
 extern unsigned char D_004961C0[];
 extern unsigned char D_004962C0[];
 
@@ -394,11 +353,8 @@ extern "C" int cDirtysock_tag_TagFieldGetBinary(const char* data, void* buffer, 
     }
     return count;
 }
-#endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetStructure);
-#ifdef SKIP_ASM
 extern char D_004A4A90[];
 
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffer, int len, const char* tmpl)
@@ -500,11 +456,8 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
     }
     return buf - (char*)buffer;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetCrypt);
-#ifdef SKIP_ASM
 extern unsigned char D_004961C0[];
 extern unsigned char D_004962C0[];
 extern char D_004A4A88[];
@@ -553,11 +506,8 @@ extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int 
     *buf = 0;
     return count - 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetTime);
-#ifdef SKIP_ASM
 // _TagFieldParseNumber / memset / ds_tmtosecs
 extern "C" char* func_003EAE68(const char* data, int* value);
 extern "C" void* func_00416210(void* dst, int value, int size);
@@ -625,11 +575,8 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
     }
     return result;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003EDD70);
-#ifdef SKIP_ASM
 extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int dflt);
 
 // TagFieldGetDate-style accessor: split a time tag into calendar fields.
@@ -657,7 +604,6 @@ extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* h
         *sec = t->tm_sec;
     return 0;
 }
-#endif
 
 
 INCLUDE_ASM("dirtysock/tags", func_003EDE80);

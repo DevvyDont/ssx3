@@ -39,8 +39,6 @@ extern "C" void func_00224DF0(cLunoTableRef* ref, int flags);
 INCLUDE_ASM("luno/lunovm", luno_cLunoVM_execute);
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224C00);
-#ifdef SKIP_ASM
 struct sVEntry00224C00 {
     short delta;
     short index;
@@ -56,11 +54,8 @@ extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base)
     v = *(int*)((char*)self + 0x4);
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, &v, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224C78);
-#ifdef SKIP_ASM
 struct sVEntry00224C78 {
     short delta;
     short index;
@@ -75,11 +70,8 @@ extern "C" void func_00224C78(void* self, sVEntry00224C78** stream, int base)
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[1], 4);
     *(int*)((char*)self + 0x4) = buf[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224D00);
-#ifdef SKIP_ASM
 extern "C" void func_00224D00(cLunoTable* self, int flags)
 {
     cLunoTableEntry* nodes = self->nodes;
@@ -97,11 +89,8 @@ extern "C" void func_00224D00(cLunoTable* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224DA0);
-#ifdef SKIP_ASM
 extern "C" void luno_cLunoTable_constructTable(cLunoTableRef* self);
 
 extern "C" cLunoTableRef* func_00224DA0(cLunoTableRef* self)
@@ -110,13 +99,10 @@ extern "C" cLunoTableRef* func_00224DA0(cLunoTableRef* self)
     luno_cLunoTable_constructTable(self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("luno/lunovm", func_00224DD0);
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224DF0);
-#ifdef SKIP_ASM
 extern "C" void func_00224DF0(cLunoTableRef* self, int flags)
 {
     if (--self->table->refCount == 0) {
@@ -126,13 +112,10 @@ extern "C" void func_00224DF0(cLunoTableRef* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_constructTable);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("luno/lunovm", func_00224F30);
-#ifdef SKIP_ASM
 extern "C" void func_00224D00(cLunoTable* table, int flags);
 
 extern "C" void func_00224F30(cLunoTableRef* ref)
@@ -143,11 +126,8 @@ extern "C" void func_00224F30(cLunoTableRef* ref)
     }
     ref->table = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224F68);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_00479870[];
@@ -183,11 +163,8 @@ extern "C" void func_00224F68(cLunoTableRef* ref)
     cLunoTableEntry** slot = &ref->table->nodes;
     *slot = (cLunoTableEntry*)new (D_00479870, 0xA0000000, 0) cLunoNode_224F68[ref->table->modulus + 1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00225068);
-#ifdef SKIP_ASM
 extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* other)
 {
     if (self->table != other->table) {
@@ -201,13 +178,10 @@ extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* othe
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("luno/lunovm", func_002250E0);
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00225248);
-#ifdef SKIP_ASM
 extern cLunoValue D_004C9098;
 
 // Hash node: key, value, chain link (0x20 bytes, vtable at +0x1C).
@@ -250,13 +224,10 @@ extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
     }
     return &D_004C9098;
 }
-#endif
 
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_set);
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_002257E0);
-#ifdef SKIP_ASM
 extern "C" void func_00225BE8(cLunoValue* self, sVEntry00224C00** stream, int base);
 
 extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
@@ -301,11 +272,8 @@ extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_002259A8);
-#ifdef SKIP_ASM
 extern "C" void func_00225B90(cLunoValue* self, int flags);
 extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int base);
 extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val);
@@ -358,11 +326,8 @@ extern "C" void func_002259A8(cLunoTableRef* self, sVEntry00224C00** stream, int
         func_00225B90(&key, 2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00225B90);
-#ifdef SKIP_ASM
 extern "C" void func_00225B90(cLunoValue* self, int flags)
 {
     if (self->type == 4) {
@@ -373,11 +338,8 @@ extern "C" void func_00225B90(cLunoValue* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("luno/lunovm", func_00225BE8);
-#ifdef SKIP_ASM
 extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base);
 extern "C" void func_002257E0(void* self, sVEntry00224C00** stream, int base);
 
@@ -392,11 +354,8 @@ extern "C" void func_00225BE8(cLunoValue* self, sVEntry00224C00** stream, int ba
         (*stream)[1].fn((char*)stream + (*stream)[1].delta, self, 4);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("luno/lunovm", func_00225CA0);
-#ifdef SKIP_ASM
 struct sLunoPair_225CA0 {
     int word0;
     int word1;
@@ -451,52 +410,37 @@ extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int ba
         (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 4);
     }
 }
-#endif
 
 INCLUDE_ASM("luno/lunovm", func_00225DE8);
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226600__FPvii);
-#ifdef SKIP_ASM
 void func_00226600(void* self, int a1, int a2)
 {
     *(int*)self = a1;
     *(int*)((char*)self + 0x4) = a2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226610__FPv);
-#ifdef SKIP_ASM
 void* func_00226610(void* self)
 {
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226618__FPv);
-#ifdef SKIP_ASM
 void* func_00226618(void* self)
 {
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226620__FPv);
-#ifdef SKIP_ASM
 void* func_00226620(void* self)
 {
     return self;
 }
-#endif
 
 extern cLunoValue D_004C9098;
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226628);
-#ifdef SKIP_ASM
 // Value add (for-loop step): same-type int/float/symbol add, float+int
 // gives float, int+float gives int; anything else gives nil.
 extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& a, const cLunoValue& b)
@@ -530,11 +474,8 @@ extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& a, cons
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226768);
-#ifdef SKIP_ASM
 struct sVEntry00226768 {
     short delta;
     short index;
@@ -556,27 +497,20 @@ extern "C" void func_00226768(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 extern "C" void* func_00225DE8(int, int);
 
 //99.38%
-INCLUDE_ASM("luno/lunovm", func_002267F0__FPv);
-#ifdef SKIP_ASM
 void* func_002267F0(void* self)
 {
     return func_00225DE8(1, 0xffff);
 }
-#endif
 
 extern "C" void* func_00225DE8(int, int);
 
 //99.38%
-INCLUDE_ASM("luno/lunovm", func_00226810__FPv);
-#ifdef SKIP_ASM
 void* func_00226810(void* self)
 {
     return func_00225DE8(0, 0xffff);
 }
-#endif
 

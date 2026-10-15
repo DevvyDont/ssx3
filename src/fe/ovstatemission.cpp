@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -26,19 +24,13 @@ extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
         func_001A34A0_2(self, obj);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3300__FPv);
-#ifdef SKIP_ASM
 void func_001A3300(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3308);
-#ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -61,11 +53,8 @@ extern "C" void func_001A3308(void* self, int a1)
     func_001A34A8(self);
     func_0039E4C0(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A33A0);
-#ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -114,31 +103,22 @@ extern "C" void func_001A33A0(void* self, void* item, unsigned int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A34A0__FPv);
-#ifdef SKIP_ASM
 void func_001A34A0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A34A8__FPv);
-#ifdef SKIP_ASM
 void func_001A34A8(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatemission", func_001A34B0);
 
 INCLUDE_ASM("fe/ovstatemission", func_001A34B8);
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3590);
-#ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
 extern char D_00461418[];
@@ -150,11 +130,8 @@ extern "C" void* func_001A3590(void* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A35E8);
-#ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DEDC0(void* handle, int arg);
 void operator_delete(int* p);
@@ -169,11 +146,8 @@ extern "C" void func_001A35E8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3648);
-#ifdef SKIP_ASM
 struct sMissionSlot {
     char name[0x100];
     int f100;
@@ -202,7 +176,6 @@ extern "C" void func_001A3648(sMissionSlot* self)
         self[i].f118 = -1;
     }
 }
-#endif
 
 
 INCLUDE_ASM("fe/ovstatemission", func_001A3698);

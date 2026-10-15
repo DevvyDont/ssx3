@@ -26,8 +26,6 @@ struct cSpline {
 };
 
 //100%
-INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
-#ifdef SKIP_ASM
 float cSpline_calcLength(cSpline* self)
 {
     sSplineHeader* header = self->node->header;
@@ -37,11 +35,8 @@ float cSpline_calcLength(cSpline* self)
     }
     return cur->field_0x84 + cur->field_0xC;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/spline3d", func_00345538);
-#ifdef SKIP_ASM
 class func_00345538_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -52,11 +47,8 @@ extern "C" void func_00345538(void* self, func_00345538_cObj* obj)
 {
     obj->v01(self, 8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/spline3d", cSpline_readFromReplayFrame);
-#ifdef SKIP_ASM
 class cStream_5570 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -118,11 +110,8 @@ extern "C" void cSpline_readFromReplayFrame(sSplineFollow5570* self, cStream_557
     }
     self->length = cSpline_calcLength((cSpline*)self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/spline3d", func_00345638);
-#ifdef SKIP_ASM
 struct sV4_5638 {
     float x, y, z, w;
     sV4_5638(const float& a, const float& b, const float& c, const float& d) : x(a), y(b), z(c), w(d) {}
@@ -246,5 +235,4 @@ extern "C" int func_00345638(void* self)
                   sV4_5638(*(float*)(s + 0x78), *(float*)(s + 0x7C), *(float*)(s + 0x80), 1.0f),
                   w->v43()) != 1;
 }
-#endif
 

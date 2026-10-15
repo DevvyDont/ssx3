@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
@@ -46,11 +44,8 @@ extern "C" void cFEStateRiderBio_onCreateScreen(void* self)
     func_00190A08(self);
     func_00190CD8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_00190A08);
-#ifdef SKIP_ASM
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cFEStateRiderBio_fillDNAInfo(void* self);
@@ -120,11 +115,8 @@ extern "C" void func_00190A08(void* self)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_00190CD8);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
@@ -150,11 +142,8 @@ extern "C" void func_00190CD8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillDNAInfo);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -179,11 +168,8 @@ extern "C" void cFEStateRiderBio_fillDNAInfo(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillFavesInfo);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -208,11 +194,8 @@ extern "C" void cFEStateRiderBio_fillFavesInfo(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillQnAInfo);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -237,11 +220,8 @@ extern "C" void cFEStateRiderBio_fillQnAInfo(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillBioInfo);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -265,11 +245,8 @@ extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
         func_003A1F18(obj, GetHashValue32(buf));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_001912D0);
-#ifdef SKIP_ASM
 struct sVEntry001912D0 {
     short delta;
     short index;
@@ -299,11 +276,8 @@ extern "C" void func_001912D0(void* self, void* item, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_00191360);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" char func_001A1CD0(void* p, int a);
 extern void* D_0046B090[];
@@ -318,5 +292,4 @@ extern "C" void* func_00191360(void* self)
     *(int*)((char*)self + 0xC) = 0x14;
     return self;
 }
-#endif
 

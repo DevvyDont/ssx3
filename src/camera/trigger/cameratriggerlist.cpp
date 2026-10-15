@@ -11,18 +11,13 @@ struct cCameraTriggerList {
 void cCameraTriggerList_initHeader(cCameraTriggerList* self);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_init__FP18cCameraTriggerList);
-#ifdef SKIP_ASM
 void cCameraTriggerList_init(cCameraTriggerList* self)
 {
     self->field_0x0 = 0;
     cCameraTriggerList_initHeader(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016BF40);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void tCameraTrigger__tCameraTrigger(void* self, int flags);
 
@@ -79,11 +74,8 @@ extern "C" void func_0016BF40(void* self_)
     }
     cCameraTriggerList_initHeader((cCameraTriggerList*)self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C098);
-#ifdef SKIP_ASM
 extern "C" void func_0016BF40(void*);
 void cMemMan_free(void*);
 
@@ -95,7 +87,6 @@ extern "C" void func_0016C098(void** self)
         *self = 0;
     }
 }
-#endif
 
 struct cCameraTriggerList2 {
     void** arr; // 0x0
@@ -105,8 +96,6 @@ struct cCameraTriggerList2 {
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C0D8);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_insert__FP19cCameraTriggerList2Pvi);
-#ifdef SKIP_ASM
 int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
 {
     if (idx < 0) {
@@ -120,11 +109,8 @@ int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
     }
     return 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_loadFromFile);
-#ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
 extern "C" int func_00317F98(const char* name);
 extern "C" void FILE_loadpackat(const char* name, void* buf, int size);
@@ -148,15 +134,12 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
     }
     return 2;
 }
-#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_loadFromBuffer);
 
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C388);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_initHeader__FP18cCameraTriggerList);
-#ifdef SKIP_ASM
 void cCameraTriggerList_initHeader(cCameraTriggerList* self)
 {
     self->field_0x4 = 0;
@@ -164,22 +147,16 @@ void cCameraTriggerList_initHeader(cCameraTriggerList* self)
     self->field_0x8 = 0;
     self->field_0x10 = 0;
 }
-#endif
 
 extern "C" int get_uint(void* buffer, void* dest);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readCookie__FP18cCameraTriggerListPv);
-#ifdef SKIP_ASM
 void cCameraTriggerList_readCookie(cCameraTriggerList* self, void* buffer)
 {
     get_uint(buffer, (char*)self + 0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readHeader);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit declares get_uint with C++ linkage; the target calls the unmangled symbol.
 int get_uint_c(void* buffer, void* dest) __asm__("get_uint");
@@ -191,5 +168,4 @@ extern "C" int cCameraTriggerList_readHeader(cCameraTriggerList* self, void* buf
     get_uint_c(buffer, &self->field_0x8);
     return 0;
 }
-#endif
 

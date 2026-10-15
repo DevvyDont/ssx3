@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045E240[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -17,11 +15,8 @@ extern "C" void cFEStateProfileSelect_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EB40);
-#ifdef SKIP_ASM
 extern "C" void func_0039F400(void* self, void* state);
 
 struct sColorK18EB40 {
@@ -82,11 +77,8 @@ extern "C" void func_0018EB40(void* self, char* menu, unsigned int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018ECA0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -132,11 +124,8 @@ extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
     *(signed char*)((char*)self + 0x44) = idx;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045E250[];
 extern int D_004A15E8;
@@ -168,22 +157,16 @@ extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
         break;
     }
 }
-#endif
 
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EE98__FPv);
-#ifdef SKIP_ASM
 void* func_0018EE98(void* self)
 {
     return func_0039E6B8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EEB8);
-#ifdef SKIP_ASM
 struct cList0018EEB8 {
     virtual void v01();
     virtual void v02();
@@ -263,11 +246,8 @@ extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EF70);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A15E0[];
@@ -305,11 +285,8 @@ extern "C" void func_0018EF70(void* self, int on)
     }
     *(int*)((char*)self + 0x234) = on;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F0B8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A1458[];
@@ -338,11 +315,8 @@ extern "C" void func_0018F0B8(void* self, bool on)
     }
     *(int*)((char*)self + 0x220) = !on;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F168);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A15D0[];
@@ -379,11 +353,8 @@ extern "C" void func_0018F168(void* self, bool a, bool b)
         o->setVisible(v);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F278);
-#ifdef SKIP_ASM
 extern "C" void func_0018F2B8(void* self);
 extern "C" void func_0018F9D8(void* self);
 
@@ -395,13 +366,10 @@ extern "C" void func_0018F278(void* self)
         func_0018F9D8(self);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festateprofile", func_0018F2B8);
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F9D8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_0018F2B8(void* self);
@@ -560,11 +528,8 @@ extern "C" void func_0018F9D8(void* p)
         o->setEnabled(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FAF0);
-#ifdef SKIP_ASM
 struct cAppMan;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -625,23 +590,17 @@ extern "C" void func_0018FAF0(void* self)
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }
-#endif
 
 extern "C" void* func_001D58B8(void*);
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FC70__FPv);
-#ifdef SKIP_ASM
 void func_0018FC70(void* self)
 {
     func_001D58B8(self);
     *(int*)((char*)self + 0x1a4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FC98);
-#ifdef SKIP_ASM
 extern "C" void* func_00227F80(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void func_00241E18(void*, unsigned short*, int);
@@ -712,15 +671,12 @@ extern "C" void func_0018FC98(void* p)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festateprofile", func_0018FD90);
 
 INCLUDE_ASM("fe/festateprofile", func_001902C0);
 
 //100%
-INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
@@ -759,11 +715,8 @@ extern "C" void cFEStateProfileLoad_initCreateScreen(void* self)
     *(int*)((char*)self + 0x220) = 1;
     *(int*)((char*)self + 0x224) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_00190670);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* func_00227F80(void* app);
@@ -803,11 +756,8 @@ extern "C" void func_00190670(void* self)
     ((sProfile_0670*)self)->f224 = 1;
     *(int*)((char*)func_00227F80(D_004A28A8) + 0x11C) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_00190768);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_0045E318[];
@@ -837,11 +787,8 @@ extern "C" void func_00190768(void* self)
     *(int*)((char*)self + 0x220) = 1;
     *(int*)((char*)self + 0x224) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_00190858);
-#ifdef SKIP_ASM
 extern void* D_0046B160[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -856,5 +803,4 @@ extern "C" void* func_00190858(void* self, int a1, int a2)
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     return self;
 }
-#endif
 

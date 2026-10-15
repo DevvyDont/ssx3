@@ -12,8 +12,6 @@ struct cBEEconInterface {
 };
 
 //99.58%
-INCLUDE_ASM("be/beintecon", cBEEconInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBEEconInterface_getThis()
 {
     if (D_004A1214 == 0) {
@@ -24,11 +22,8 @@ void* cBEEconInterface_getThis()
     }
     return D_004A1214;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150928);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
 extern "C" int func_00150928(void* self, int a, int b)
@@ -42,11 +37,8 @@ extern "C" int func_00150928(void* self, int a, int b)
     char* p = (char*)D_004A6CA8 + off;
     return *(int*)(p + 0xAC4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150960);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
@@ -60,13 +52,10 @@ extern "C" int func_00150960(void* self, int rider)
     char* p = (char*)D_004A6CA8 + off;
     return *(int*)(p + 0xAC4);
 }
-#endif
 
 extern int D_004A6CA8[];
 
 //100%
-INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
-#ifdef SKIP_ASM
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b)
 {
     if (a >= 2) {
@@ -78,11 +67,8 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b)
     char* p = (char*)D_004A6CA8 + off;
     return *(int*)(p + 0xAC8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001509F8);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
@@ -96,13 +82,10 @@ extern "C" int func_001509F8(void* self, int rider)
     char* p = (char*)D_004A6CA8 + off;
     return *(int*)(p + 0xAC8);
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00150A58);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150A90);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
 extern "C" int func_00150A90(void* self, int a, int b, int amount)
@@ -118,13 +101,10 @@ extern "C" int func_00150A90(void* self, int a, int b, int amount)
     *(int*)(p + 0xAC8) += amount;
     return *(int*)(p + 0xAC4);
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00150AE0);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150B48);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
 extern "C" int func_00150B48(void* self, int a, int b, int amount)
@@ -138,7 +118,6 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount)
     char* p = (char*)D_004A6CA8 + off;
     return *(int*)(p + 0xAC4) -= amount;
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00150B88);
 
@@ -147,8 +126,6 @@ INCLUDE_ASM("be/beintecon", func_00150C20);
 extern void* D_00440550[];
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150E50__FPvi);
-#ifdef SKIP_ASM
 struct sEconEntry {
     int key;
     int value;
@@ -162,13 +139,10 @@ int func_00150E50(void* self, int a1)
 {
     return ((sEconTable*)D_00440550)->entries[a1].value;
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00150E68);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151040);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -225,11 +199,8 @@ extern "C" int func_00151040(void* self, int medal, int key, int place)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151178);
-#ifdef SKIP_ASM
 extern "C" int func_00151178(void* self, int level)
 {
     switch (level)
@@ -243,11 +214,8 @@ extern "C" int func_00151178(void* self, int level)
         return 2000;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001511B0);
-#ifdef SKIP_ASM
 extern "C" int func_001511B0(void* self, int level)
 {
     switch (level)
@@ -261,13 +229,10 @@ extern "C" int func_001511B0(void* self, int level)
         return 6000;
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_001511E8);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151368);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
@@ -284,11 +249,8 @@ extern "C" void func_00151368(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001513B8);
-#ifdef SKIP_ASM
 int func_0014DC40(void* self, int kind);
 extern "C" void* func_0014DC50(void* self, int kind);
 int func_0014D988(void* self, int i);
@@ -391,11 +353,8 @@ extern "C" void func_001513B8(void* vself)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001515B8);
-#ifdef SKIP_ASM
 struct sEconItem_001515B8
 {
     short id;
@@ -421,13 +380,10 @@ extern "C" void func_001515B8(sEconItems_001515B8* self)
             p->flags &= ~0x10;
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00151600);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001519E0);
-#ifdef SKIP_ASM
 struct sEconColor_001519E0
 {
     signed char a;
@@ -469,11 +425,8 @@ extern "C" void func_001519E0(sEcon_001519E0* self, int k)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintecon", func_00151A88);
-#ifdef SKIP_ASM
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
 extern "C" void func_001513B8(void* self);
@@ -534,15 +487,12 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
     }
     func_001513B8(self);
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00151BD0);
 
 INCLUDE_ASM("be/beintecon", func_00151C20);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151C48);
-#ifdef SKIP_ASM
 struct sEconItem_00151C48
 {
     short id;
@@ -570,15 +520,12 @@ extern "C" void func_00151C48(sEconItems_00151C48* self, int id, int on)
     else
         p->flags &= ~2;
 }
-#endif
 
 INCLUDE_ASM("be/beintecon", func_00151C90);
 
 INCLUDE_ASM("be/beintecon", func_00151EF0);
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001520E8);
-#ifdef SKIP_ASM
 void* func_0014BDB8(void* self);
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
@@ -634,11 +581,8 @@ extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001521F0);
-#ifdef SKIP_ASM
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 int func_0014DC40(void* self, int kind);
@@ -715,7 +659,6 @@ extern "C" int func_001521F0(sEconItems_1521F0* self)
     }
     return ok;
 }
-#endif
 
 
 INCLUDE_ASM("be/beintecon", func_00152340);

@@ -13,8 +13,6 @@ struct cBEOptionInterface {
 };
 
 //100%
-INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBEOptionInterface_getThis()
 {
     if (D_004A120C == 0) {
@@ -26,11 +24,8 @@ void* cBEOptionInterface_getThis()
     }
     return D_004A120C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F2A8);
-#ifdef SKIP_ASM
 struct sOptions_0014F2A8
 {
     int data[0x288 / 4];
@@ -43,11 +38,8 @@ extern "C" void func_0014F2A8(void)
 {
     D_00535898 = D_00535610;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F360);
-#ifdef SKIP_ASM
 extern sOptions_0014F2A8 D_00535610;
 extern sOptions_0014F2A8 D_00535898;
 
@@ -55,11 +47,8 @@ extern "C" void func_0014F360(void)
 {
     D_00535610 = D_00535898;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F418);
-#ifdef SKIP_ASM
 extern "C" void func_0014F648(void* self);
 extern "C" void func_0014F600(void* self);
 extern "C" void func_0014F4F8(void* self);
@@ -72,11 +61,8 @@ extern "C" void func_0014F418(void* self)
     func_0014F4F8(self);
     func_0014F458(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F458);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sOptBits_0014F458
 {
@@ -115,11 +101,8 @@ extern "C" void func_0014F458(void* self)
     o->w1a = 1;
     ((cBEOptionInterfaceV_0014F458*)D_004A120C)->apply();
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F4F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A28A8;
 
@@ -169,11 +152,8 @@ extern "C" void func_0014F4F8(void* self)
     D_00535610_v0014F4F8[0].b6 = 0;
     ((cBEOptionInterfaceV_0014F4F8*)D_004A120C)->apply();
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F600);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sOptBits_0014F600
 {
@@ -194,11 +174,8 @@ extern "C" void func_0014F600(void* self)
     D_00535610_v0014F600[0].top = 0;
     ((cBEOptionInterfaceV_0014F600*)D_004A120C)->apply();
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F648);
-#ifdef SKIP_ASM
 class cBEOptionInterfaceV_0014F648
 {
 public:
@@ -210,26 +187,20 @@ extern "C" void func_0014F648(void* self)
 {
     ((cBEOptionInterfaceV_0014F648*)D_004A120C)->apply();
 }
-#endif
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
 extern const char D_0045A6C0[];
 
 //100%
-INCLUDE_ASM("be/beintoption", cBEOptionInterface_getDefaultQuickKeyMessageHashValue__FPvi);
-#ifdef SKIP_ASM
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value)
 {
     char buf[24];
     sprintf(buf, D_0045A6C0, value);
     return GetHashValue32(buf);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F6A8);
-#ifdef SKIP_ASM
 extern "C" unsigned int strlen(const char* s);
 extern char D_00535617[][0x40];
 
@@ -241,11 +212,8 @@ extern "C" char* func_0014F6A8(void* self, int i)
     }
     return s;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F6E8);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void func_003DCB20(char* dst, void* src);
 
@@ -265,11 +233,8 @@ extern "C" void func_0014F6E8(void* self, int i)
     void* text = vt[4].fn(o2, h);
     func_003DCB20(D_00535617[i], text);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintoption", func_0014F758);
-#ifdef SKIP_ASM
 extern "C" void func_0014F6E8(void* self, int i);
 
 extern "C" void func_0014F758(void* self)
@@ -279,11 +244,8 @@ extern "C" void func_0014F758(void* self)
         func_0014F6E8(self, i);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F7A8);
-#ifdef SKIP_ASM
 struct sOptionTripleView_0014F7A8 {
     int a;
     int b;
@@ -303,11 +265,8 @@ extern "C" int func_0014F7A8(int i)
     int c = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
     return func_0014F870() - c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F7E8);
-#ifdef SKIP_ASM
 extern "C" int func_0014F870();
 extern int D_005308D4[]; // D_005308B8 + 0x1C, addressed through its own symbol
 
@@ -315,11 +274,8 @@ extern "C" int func_0014F7E8(void* self)
 {
     return func_0014F870() - D_005308D4[0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F810);
-#ifdef SKIP_ASM
 // View of D_005308B8 (the unit defines sOptionGlobal_005308B8 further down).
 struct sOptionTriple_005308B8 {
     int a;
@@ -345,11 +301,8 @@ extern "C" int func_0014F810(int i)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F870);
-#ifdef SKIP_ASM
 struct sOptionGlobal_005308B8 {
     char pad_0x00[0x8];
     int field_0x8;
@@ -369,11 +322,8 @@ extern "C" int func_0014F870()
         m = D_005308B8.field_0x14;
     return m;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F898);
-#ifdef SKIP_ASM
 struct sOptionTriple_0014F898 {
     int a;
     int b;
@@ -388,5 +338,4 @@ extern "C" void func_0014F898()
     t[0] = t[1];
     t[1] = tmp;
 }
-#endif
 

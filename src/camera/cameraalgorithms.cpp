@@ -3,8 +3,6 @@
 INCLUDE_ASM("camera/cameraalgorithms", cChaseCameraController_createChaseAlgorithmBlend);
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D698);
-#ifdef SKIP_ASM
 struct func_0015D698_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* D_0045B8B0[];
@@ -24,11 +22,8 @@ extern "C" void* func_0015D698(void* self)
     *(func_0015D698_sVec4*)((char*)self + 0x80) = D_004FF140;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D700);
-#ifdef SKIP_ASM
 extern "C" void* func_0015D928(void* self);
 
 extern "C" void func_0015D700(void* self, float x, float y, float z)
@@ -50,15 +45,12 @@ extern "C" void func_0015D700(void* self, float x, float y, float z)
     *(func_0015D698_sVec4*)((char*)self + 0x80) = D_004FF140;
     func_0015D928(self);
 }
-#endif
 
 INCLUDE_ASM("camera/cameraalgorithms", func_0015D780);
 
 INCLUDE_ASM("camera/cameraalgorithms", func_0015D880);
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D928);
-#ifdef SKIP_ASM
 struct sV_D928 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -214,11 +206,8 @@ extern "C" void func_0015D928_impl(void* self)
     t.w = 1.0f;
     vu0TransMtx_D928(view, t);
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015DAC0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 
 extern "C" void func_0015DAC0(void)
@@ -228,13 +217,10 @@ extern "C" void func_0015DAC0(void)
     void* ctrl = *(void**)((char*)chase + 0x4);
     *(int*)((char*)ctrl + 0x4A4) = 1;
 }
-#endif
 
 INCLUDE_ASM("camera/cameraalgorithms", func_0015DAE0);
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015DB58);
-#ifdef SKIP_ASM
 extern "C" void func_0016C968(void* self);
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void func_00162170(void* cam);
@@ -267,5 +253,4 @@ extern "C" void func_0015DB58(void)
         *(int*)(*(char**)(riders + 8) + 0x460) = 0;
     }
 }
-#endif
 

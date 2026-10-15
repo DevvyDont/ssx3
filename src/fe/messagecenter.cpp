@@ -7,8 +7,6 @@ INCLUDE_ASM("fe/messagecenter", func_00197500);
 INCLUDE_ASM("fe/messagecenter", func_001977D0);
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001979D8);
-#ifdef SKIP_ASM
 extern "C" void func_001988D8(void* self, int idx);
 extern "C" void func_00197B88(void* self);
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int a1);
@@ -53,11 +51,8 @@ extern "C" void func_001979D8(sMsgCenter_979D8* self, void* item, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197AD8);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sMsgCenter_97AD8 {
     char pad_0x0[0x4C];
@@ -84,11 +79,8 @@ extern "C" void func_00197AD8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197B88);
-#ifdef SKIP_ASM
 extern "C" void func_00197BC8(void* self);
 extern "C" void func_00197CA0(void* self);
 extern "C" void func_00197DB8(void* self);
@@ -101,11 +93,8 @@ extern "C" void func_00197B88(void* self)
     func_00197DB8(self);
     func_00198118(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197BC8);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* func_00198A88(void* self, int i);
@@ -148,11 +137,8 @@ extern "C" void func_00197BC8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197CA0);
-#ifdef SKIP_ASM
 class cMsgWidget_97CA0 {
 public:
     int pad0, pad4;
@@ -224,11 +210,8 @@ extern "C" void func_00197CA0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197DB8);
-#ifdef SKIP_ASM
 class cMsgWidget_97DB8 {
 public:
     int pad0, pad4;
@@ -256,11 +239,8 @@ extern "C" void func_00197DB8(void* self)
         (*(cMsgWidget_97DB8**)((char*)self + 0x1F0))->show(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197E70);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" int strlen(const char* s);
@@ -349,11 +329,8 @@ extern "C" void func_00197E70(void* vself)
         self->artist->show(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198118);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void* p);
@@ -396,11 +373,8 @@ extern "C" void func_00198118(void* p)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHelpText);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -466,13 +440,10 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* p, int idx)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateButtonsText);
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001985B0);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" const char* func_00198AF0(void* a0);
@@ -483,11 +454,8 @@ extern "C" void func_001985B0(void* self)
         cUIText_setAsciiString(*(cUIText**)((char*)self + 0x1E0), func_00198AF0(*(void**)((char*)self + 0x168)));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001985F0);
-#ifdef SKIP_ASM
 class cMsgWidget_985F0 {
 public:
     int pad0, pad4;
@@ -531,11 +499,8 @@ extern "C" void func_001985F0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHilightedSongInfo);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" int strlen(const char* s);
@@ -631,11 +596,8 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001988D8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -667,11 +629,8 @@ extern "C" void func_001988D8(void* self, int idx)
     s->mask |= bit;
     s->seen |= bit;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198988);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
 extern "C" void* func_00198A88(void* self, int i);
@@ -709,11 +668,8 @@ extern "C" void func_00198988(sMsgCenter_98988* self, int idx)
     }
     func_0039F290(self->engine + 0x18, popup);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198A88);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void* func_002B40F0(void* self, int i);
 
@@ -721,11 +677,8 @@ extern "C" void* func_00198A88(void* self, int i)
 {
     return func_002B40F0((char*)func_0028B180() + 0x118, i);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198AB8);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void* func_002B4120(void* self, int i);
 
@@ -733,27 +686,20 @@ extern "C" void* func_00198AB8(void* self, int i)
 {
     return func_002B4120((char*)func_0028B180() + 0x118, i);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198AE8__FPv);
-#ifdef SKIP_ASM
 int func_00198AE8(void* self)
 {
     return 0x1388;
 }
-#endif
 
 INCLUDE_ASM("fe/messagecenter", func_00198AF0);
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198DA0);
-#ifdef SKIP_ASM
 extern "C" int func_00198DA0(void* self, void* a1)
 {
     void* p = *(void**)self;
     void* p2 = *(void**)a1;
     return *(short*)((char*)p + 0xa) - *(short*)((char*)p2 + 0xa);
 }
-#endif
 

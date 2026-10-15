@@ -3,8 +3,6 @@
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D28F8);
-#ifdef SKIP_ASM
 struct sVEntry001D28F8 {
     short delta;
     short index;
@@ -35,11 +33,8 @@ extern "C" void func_001D28F8(void* self, int flags)
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -78,11 +73,8 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
     }
     func_0028F140(func_0028B180(), 7);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D2A90);
-#ifdef SKIP_ASM
 extern "C" void func_001D3340(void* self);
 extern "C" void func_00186518(void* self, int a1);
 
@@ -91,11 +83,8 @@ extern "C" void func_001D2A90(void* self, int a1)
     func_001D3340(self);
     func_00186518(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -296,7 +285,6 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D2EA0);
 
@@ -305,8 +293,6 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D2F40);
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetEvent);
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3120);
-#ifdef SKIP_ASM
 extern "C" void func_001D31C0(void* self);
 extern "C" void* func_0039E510(void* self);
 
@@ -317,11 +303,8 @@ extern "C" void func_001D3120(void* self)
     }
     func_0039E510(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3160);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
@@ -334,13 +317,10 @@ extern "C" void func_001D3160(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D31C0);
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D32E0);
-#ifdef SKIP_ASM
 struct sVEntry_func_001D32E0 {
     short delta;
     short index;
@@ -360,13 +340,10 @@ extern "C" void func_001D32E0(void* self)
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D3340);
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3780);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern "C" void* cBE_getBE();
@@ -410,11 +387,8 @@ extern "C" void* func_001D3780(void* self, int a1, int a2, int a3)
     s->fD0 = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -429,11 +403,8 @@ extern "C" void cFEStatePeakRoom_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -579,22 +550,16 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
         }
     }
 }
-#endif
 
 extern "C" void* func_0039E4C0(void* self);
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3C60__FPv);
-#ifdef SKIP_ASM
 void* func_001D3C60(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3C80);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -644,11 +609,8 @@ extern "C" void func_001D3C80(void* self, void* item, unsigned int key)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3E08);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -675,11 +637,8 @@ extern "C" int func_001D3E08(void* self, void* item, unsigned int key, int id)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_updateHelpText);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -716,11 +675,8 @@ extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
         (*(cPeakWidget_3EC8**)((char*)self + 0xD0))->show(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3F80);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -805,11 +761,8 @@ extern "C" void func_001D3F80(void* vself, int peak)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D4268);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern "C" void* cBE_getBE();
@@ -864,5 +817,4 @@ extern "C" void* func_001D4268(void* self, int a1, int a2, int a3, int a4)
     func_001D4918(self);
     return self;
 }
-#endif
 

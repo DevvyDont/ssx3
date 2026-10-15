@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("animation/animmodel", cAnimModel_addModelPartLOD);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 // as operator new[] so the new-expressions below compute their destination before the call.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -69,11 +67,8 @@ extern "C" void cAnimModel_addModelPartLOD(sAnimModel_D8B8* self, int lod, char*
     self->parts[self->count].index = index;
     self->count++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030DB70__FPvi);
-#ifdef SKIP_ASM
 struct sAnimModelList {
     char pad_0x00[0x60];
     int count;     // 0x60
@@ -85,20 +80,14 @@ void func_0030DB70(void* self, int item)
     sAnimModelList* list = (sAnimModelList*)self;
     list->items[list->count++] = item;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030DB90);
-#ifdef SKIP_ASM
 extern "C" int func_0030DB90(void* self, void* a1)
 {
     return *(int*)self - *(int*)a1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030DBA0);
-#ifdef SKIP_ASM
 struct sVec4_0030DBA0
 {
     float x, y, z, w;
@@ -113,13 +102,10 @@ extern "C" void func_0030DBA0(void* self, float a, float b)
     v.w = 1.0f;
     *(sVec4_0030DBA0*)((char*)self + 0x140) = v;
 }
-#endif
 
 INCLUDE_ASM("animation/animmodel", cAnimModel_compile);
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030E9E0);
-#ifdef SKIP_ASM
 struct sAnimChannel_0030E9E0
 {
     int active;
@@ -179,11 +165,8 @@ extern "C" void func_0030E9E0(sAnimModel_0030E9E0* self, int i, int channel)
         e->channels[channel].active = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EA80);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
 extern "C" void func_0030EA80(sAnimModel_0030E9E0* self, int i, int channel)
 {
@@ -222,11 +205,8 @@ extern "C" void func_0030EA80(sAnimModel_0030E9E0* self, int i, int channel)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EB60);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
 extern "C" void func_0030EB60(sAnimModel_0030E9E0* self)
 {
@@ -239,11 +219,8 @@ extern "C" void func_0030EB60(sAnimModel_0030E9E0* self)
     }
     self->mask = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EBC0);
-#ifdef SKIP_ASM
 extern "C" int func_0030EBC0(sAnimModel_0030E9E0* self, int i, int channel)
 {
     int idx;
@@ -253,11 +230,8 @@ extern "C" int func_0030EBC0(sAnimModel_0030E9E0* self, int i, int channel)
     }
     return self->entries[idx].channels[channel].active;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EC18);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
 extern "C" void func_0030EC18(sAnimModel_0030E9E0* self, int i, int param)
 {
@@ -282,11 +256,8 @@ extern "C" void func_0030EC18(sAnimModel_0030E9E0* self, int i, int param)
         e->channels[k].active = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030ECA0);
-#ifdef SKIP_ASM
 struct sAnimEntry_0030ECA0
 {
     char pad[0x10];
@@ -310,7 +281,6 @@ extern "C" void func_0030ECA0(sAnimModel_0030ECA0* self, int i)
     sAnimEntry_0030ECA0* e = &self->entries[self->indices[i]];
     self->mask |= e->mask;
 }
-#endif
 
 INCLUDE_ASM("animation/animmodel", func_0030ECD8);
 
@@ -321,8 +291,6 @@ INCLUDE_ASM("animation/animmodel", func_00310120);
 INCLUDE_ASM("animation/animmodel", func_00310200);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animmodel", func_003103F0);
-#ifdef SKIP_ASM
 struct sAm3103F0Pair
 {
     char pad[0x20];
@@ -346,13 +314,10 @@ extern "C" void func_003103F0(sAm3103F0* self)
         func_00310120(self, i, &self->pairs[i]);
     }
 }
-#endif
 
 INCLUDE_ASM("animation/animmodel", func_00310458);
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310530);
-#ifdef SKIP_ASM
 struct sAmVec4
 {
     float x, y, z, w;
@@ -435,11 +400,8 @@ extern "C" void func_00310530(sAmModel* self, sAmVec4* v)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310640);
-#ifdef SKIP_ASM
 struct sAmMat_0640;
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
 static inline void vu0CopyMat_0640(void* d, const void* s)
@@ -615,11 +577,8 @@ extern "C" void func_00310640(sAmModel_0640* self, int lod, int x, int y)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310948);
-#ifdef SKIP_ASM
 struct sAmMat_0948;
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
 static inline void vu0CopyMat_0948(void* d, const void* s)
@@ -796,11 +755,8 @@ extern "C" void func_00310948(sAmModel_0948* self, int lod, int x, int y)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310C48);
-#ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
 struct sAmItem50 {
@@ -828,11 +784,8 @@ extern "C" int func_00310C48(void* self, int idx, const char* name)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310CE8);
-#ifdef SKIP_ASM
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 extern char D_004A3DF0[];
 
@@ -884,11 +837,8 @@ extern "C" ulong func_00310CE8(char* self, int idx, char* names)
     }
     return mask;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310EA8);
-#ifdef SKIP_ASM
 class cAmStream {
 public:
     virtual void read(void* data, int size);
@@ -899,20 +849,14 @@ extern "C" void func_00310EA8(void* self, cAmStream* s)
 {
     s->read(*(void**)((char*)self + 0x2C), *(int*)((char*)self + 0x10) << 5);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310EE0);
-#ifdef SKIP_ASM
 extern "C" void func_00310EE0(void* self, cAmStream* s)
 {
     s->write(*(void**)((char*)self + 0x2C), *(int*)((char*)self + 0x10) << 5);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310F18);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 // as operator new[] so the new-expressions below compute their destination before the call.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -950,11 +894,8 @@ extern "C" sAnimNode_310F18* func_00310F18(int bank, int n)
     D_004FE7A0_310F18[bank][19].next = D_004FE7A0_310F18[bank];
     return D_004FE860_310F18[bank] = D_004FE7A0_310F18[bank];
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311048);
-#ifdef SKIP_ASM
 extern void* D_004A3DF8;
 extern "C" void func_00416210(void* dst, int c, int n);
 // PORT: prototype mismatch. func_003110D0 is defined later in the unit as (void), but this
@@ -968,13 +909,10 @@ extern "C" void* func_00311048(void* self)
     func_003110D0_1(self);
     return self;
 }
-#endif
 
 INCLUDE_ASM("animation/animmodel", func_00311088);
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_003110D0);
-#ifdef SKIP_ASM
 extern int D_004FE7A0[];
 extern int D_004FE860[];
 
@@ -986,11 +924,8 @@ extern "C" void func_003110D0(void)
         D_004FE860[i] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311110);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void*);
 
@@ -1033,11 +968,8 @@ extern "C" void func_00311110(void)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311220);
-#ifdef SKIP_ASM
 extern "C" void func_00311290(void* self, char* data);
 
 extern "C" void* func_00311220(void* self, char* data)
@@ -1046,11 +978,8 @@ extern "C" void* func_00311220(void* self, char* data)
     func_00311290(self, data);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311250);
-#ifdef SKIP_ASM
 extern "C" char* func_003E22F0(void* src, int flags);
 
 extern "C" void* func_00311250(char** self, void* src)
@@ -1060,11 +989,8 @@ extern "C" void* func_00311250(char** self, void* src)
     func_00311290(self, data);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311290);
-#ifdef SKIP_ASM
 extern "C" void func_00311290(void* self, char* data)
 {
     *(char**)((char*)self + 0x4) = data;
@@ -1073,11 +999,8 @@ extern "C" void func_00311290(void* self, char* data)
     *(char**)((char*)self + 0x10) = data + *(int*)(data + 0x8);
     *(char**)((char*)self + 0x14) = data + *(int*)(data + 0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_003112C8);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
@@ -1093,7 +1016,6 @@ extern "C" void func_003112C8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("animation/animmodel", func_00311318);
 

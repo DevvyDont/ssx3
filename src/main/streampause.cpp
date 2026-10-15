@@ -9,15 +9,12 @@ struct cStreamPause {
 };
 
 //99.67%
-INCLUDE_ASM("main/streampause", cStreamPause_construct__Fv);
-#ifdef SKIP_ASM
 cStreamPause* cStreamPause_construct()
 {
     cStreamPause* self = (cStreamPause*)cMemMan_alloc(4, D_0047C520, 0x20000000, 0);
     self->vtable = D_0047D0E8;
     return self;
 }
-#endif
 
 INCLUDE_ASM("main/streampause", func_00242D50);
 
@@ -30,8 +27,6 @@ INCLUDE_ASM("main/streampause", func_00242E58);
 INCLUDE_ASM("main/streampause", func_00242EB8);
 
 //100%
-INCLUDE_ASM("main/streampause", func_00243838);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0047D6E8[];
 extern void* D_0046D970[];
@@ -60,7 +55,6 @@ extern "C" void func_00243838(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 
 INCLUDE_ASM("main/streampause", func_002438B0);

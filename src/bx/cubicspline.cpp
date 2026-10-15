@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initCommon);
-#ifdef SKIP_ASM
 void func_0031D790(void* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_0048DB38[];
@@ -33,23 +31,17 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
     self->flags.b1 = 1;
     self->flags.f3 = 0;
 }
-#endif
 
 extern "C" void cCubicSplineInterpolant_initCommon(void* self);
 
 //99.62%
-INCLUDE_ASM("bx/cubicspline", func_0031D700__FPv);
-#ifdef SKIP_ASM
 void func_0031D700(void* self)
 {
     cCubicSplineInterpolant_initCommon(self);
     *(int*)self &= -2;
 }
-#endif
 
 //99.76%
-INCLUDE_ASM("bx/cubicspline", func_0031D738__FPvff);
-#ifdef SKIP_ASM
 void func_0031D738(void* self, float a, float b)
 {
     cCubicSplineInterpolant_initCommon(self);
@@ -60,13 +52,10 @@ void func_0031D738(void* self, float a, float b)
     *(float*)((char*)ptr + 0x10) = a;
     *(float*)((char*)self + 0x4) = b;
 }
-#endif
 
 void* cMemMan_free(void* ptr);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031D790__FPv);
-#ifdef SKIP_ASM
 void func_0031D790(void* self)
 {
     if (*(void**)((char*)self + 0x8) != 0) {
@@ -78,11 +67,8 @@ void func_0031D790(void* self)
     flags &= -5;
     *(int*)self = flags;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031D7E0);
-#ifdef SKIP_ASM
 struct sCubicSplineKeyK2 {
     float x;  // 0x0
     float y;  // 0x4
@@ -106,7 +92,6 @@ extern "C" void func_0031D7E0(sCubicSpline* self, float x, float y)
         self->flags.f3++;
     }
 }
-#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
 
@@ -119,8 +104,6 @@ INCLUDE_ASM("bx/cubicspline", func_0031E190);
 INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
-#ifdef SKIP_ASM
 void func_0031E260(void* self)
 {
     char* p = (char*)self + 0x38;
@@ -138,11 +121,8 @@ void func_0031E260(void* self)
     *(int*)((char*)self + 0x354) = 0;
     *(int*)((char*)self + 0x35C) = 0x1000;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E2D8);
-#ifdef SKIP_ASM
 // dlmalloc 2.7 sYSMALLOc()
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit long param
@@ -302,11 +282,8 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
     *func_00415FB8() = 12;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E6D8);
-#ifdef SKIP_ASM
 extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit long param
 // PORT: libgcc 64-bit helpers called by name so the relocations match
 // (__divdi3 / __muldi3 in the retail ELF's unnamed libgcc copy).
@@ -358,13 +335,10 @@ extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031E818);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031ED60);
-#ifdef SKIP_ASM
 // dlmalloc 2.7 free()
 struct sMChunk_31ED60
 {
@@ -474,11 +448,8 @@ extern "C" void func_0031ED60_free(sMalloc_31ED60* ms, void* mem)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031EEE8);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 void func_0031E260(void* av);
 
@@ -567,7 +538,6 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
         func_0031E260(av);
     }
 }
-#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031F018);
 
@@ -592,8 +562,6 @@ INCLUDE_ASM("bx/cubicspline", func_0031FB00);
 INCLUDE_ASM("bx/cubicspline", func_0031FB68);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FBB8__FPvT0);
-#ifdef SKIP_ASM
 unsigned int func_0031FBB8(void* self, void* mem)
 {
     if (mem != 0) {
@@ -607,11 +575,8 @@ unsigned int func_0031FBB8(void* self, void* mem)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FC20);
-#ifdef SKIP_ASM
 // dlmalloc 2.7 mALLINFo()
 struct sMChunk_31FC20
 {
@@ -712,15 +677,12 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
     mi.usmblks = av->max_total_mem;
     return mi;
 }
-#endif
 
 INCLUDE_ASM("bx/cubicspline", func_0031FE28);
 
 INCLUDE_ASM("bx/cubicspline", func_0031FE30);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FF20__FPv);
-#ifdef SKIP_ASM
 void* func_0031FF20(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -729,24 +691,18 @@ void* func_0031FF20(void* self)
     *(int*)((char*)self + 0x0) = 0;
     return self;
 }
-#endif
 
 void operator_delete(int* ptr);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FF38__FPvi);
-#ifdef SKIP_ASM
 void func_0031FF38(void* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FF60);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int c, int n);
 
 extern "C" void func_0031FF60(void* self, unsigned int base, unsigned int size)
@@ -760,11 +716,8 @@ extern "C" void func_0031FF60(void* self, unsigned int base, unsigned int size)
     *(unsigned int*)((char*)self + 0xC) -= 0x380;
     *(unsigned int*)((char*)self + 0x8) = *(unsigned int*)((char*)self + 0x4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FFD8);
-#ifdef SKIP_ASM
 extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit long param
 {
     if (incr >= 0) {
@@ -779,50 +732,38 @@ extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit lon
     }
     return 0xFFFFFFFF;
 }
-#endif
 
 extern "C" int func_0031F2C8(void* self);
 
 INCLUDE_ASM("bx/cubicspline", func_00320038);
 
 //99.29%
-INCLUDE_ASM("bx/cubicspline", func_00320058__FPv);
-#ifdef SKIP_ASM
 int func_00320058(void* self)
 {
     return func_0031F2C8(self);
 }
-#endif
 
 extern "C" int func_0031F4E8(void* self);
 
 //99.29%
-INCLUDE_ASM("bx/cubicspline", func_00320078__FPv);
-#ifdef SKIP_ASM
 int func_00320078(void* self)
 {
     return func_0031F4E8(self);
 }
-#endif
 
 extern "C" int func_0031ED60(void* self);
 
 INCLUDE_ASM("bx/cubicspline", func_00320098);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003200C0__FPv);
-#ifdef SKIP_ASM
 int func_003200C0(void* self)
 {
     return func_0031ED60(self);
 }
-#endif
 
 INCLUDE_ASM("bx/cubicspline", func_003200E0);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003200E8__FPv);
-#ifdef SKIP_ASM
 void* func_003200E8(void* self)
 {
     *(void**)((char*)self + 0x800) = self;
@@ -836,11 +777,8 @@ void* func_003200E8(void* self)
     *(int*)((char*)self + 0x7F8) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320120__FPv);
-#ifdef SKIP_ASM
 void* func_00320120(void* self)
 {
     *(void**)((char*)self + 0x2000) = self;
@@ -854,11 +792,8 @@ void* func_00320120(void* self)
     *(int*)((char*)self + 0x1FF0) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320158__FPv);
-#ifdef SKIP_ASM
 void* func_00320158(void* self)
 {
     *(void**)((char*)self + 0x6000) = self;
@@ -872,11 +807,8 @@ void* func_00320158(void* self)
     *(int*)((char*)self + 0x5FE0) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320190__FPv);
-#ifdef SKIP_ASM
 void* func_00320190(void* self)
 {
     unsigned int i = 0;
@@ -891,11 +823,8 @@ void* func_00320190(void* self)
     *(int*)((char*)self + 0x31FC0) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003201D8__FPv);
-#ifdef SKIP_ASM
 void* func_003201D8(void* self)
 {
     unsigned int i = 0;
@@ -910,11 +839,8 @@ void* func_003201D8(void* self)
     *(int*)((char*)self + 0x25780) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320220__FPv);
-#ifdef SKIP_ASM
 void* func_00320220(void* self)
 {
     unsigned int i = 0;
@@ -929,11 +855,8 @@ void* func_00320220(void* self)
     *(int*)((char*)self + 0x1FF00) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320270__FPv);
-#ifdef SKIP_ASM
 void* func_00320270(void* self)
 {
     unsigned int i = 0;
@@ -948,13 +871,10 @@ void* func_00320270(void* self)
     *(int*)((char*)self + 0x1FE00) = 0;
     return self;
 }
-#endif
 
 extern "C" void* func_00319E48(int size);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003202C0__FPv);
-#ifdef SKIP_ASM
 void* func_003202C0(void* self)
 {
     void* node = *(void**)((char*)self + 0x800);
@@ -965,11 +885,8 @@ void* func_003202C0(void* self)
     }
     return func_00319E48(0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003202F8__FPv);
-#ifdef SKIP_ASM
 void* func_003202F8(void* self)
 {
     void* node = *(void**)((char*)self + 0x2000);
@@ -980,11 +897,8 @@ void* func_003202F8(void* self)
     }
     return func_00319E48(0x14);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320330__FPv);
-#ifdef SKIP_ASM
 void* func_00320330(void* self)
 {
     void* node = *(void**)((char*)self + 0x6000);
@@ -995,11 +909,8 @@ void* func_00320330(void* self)
     }
     return func_00319E48(0x24);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320368__FPv);
-#ifdef SKIP_ASM
 static inline void* popFreeNode(void** head)
 {
     void* node = *head;
@@ -1014,11 +925,8 @@ void* func_00320368(void* self)
     }
     return func_00319E48(0x44);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003203B8__FPv);
-#ifdef SKIP_ASM
 void* func_003203B8(void* self)
 {
     if (*(void**)((char*)self + 0x25800) != 0) {
@@ -1026,7 +934,6 @@ void* func_003203B8(void* self)
     }
     return func_00319E48(0x84);
 }
-#endif
 
 //92.5%
 INCLUDE_ASM("bx/cubicspline", func_00320408__FPv);
@@ -1059,134 +966,90 @@ void* func_00320448(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320488__FPvPPv);
-#ifdef SKIP_ASM
 void func_00320488(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x800);
     *(void**)((char*)self + 0x800) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320498__FPvPPv);
-#ifdef SKIP_ASM
 void func_00320498(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x2000);
     *(void**)((char*)self + 0x2000) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204A8__FPvPPv);
-#ifdef SKIP_ASM
 void func_003204A8(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x6000);
     *(void**)((char*)self + 0x6000) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204B8__FPvPPv);
-#ifdef SKIP_ASM
 void func_003204B8(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x32000);
     *(void**)((char*)self + 0x32000) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204D0__FPvPPv);
-#ifdef SKIP_ASM
 void func_003204D0(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x25800);
     *(void**)((char*)self + 0x25800) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204E8__FPvPPv);
-#ifdef SKIP_ASM
 void func_003204E8(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x20000);
     *(void**)((char*)self + 0x20000) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320500__FPvPPv);
-#ifdef SKIP_ASM
 void func_00320500(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x20000);
     *(void**)((char*)self + 0x20000) = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320518__Fv);
-#ifdef SKIP_ASM
 void func_00320518(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320520__Fv);
-#ifdef SKIP_ASM
 void func_00320520(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320528__Fv);
-#ifdef SKIP_ASM
 void func_00320528(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320530__Fv);
-#ifdef SKIP_ASM
 void func_00320530(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320538__Fv);
-#ifdef SKIP_ASM
 void func_00320538(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320540__Fv);
-#ifdef SKIP_ASM
 void func_00320540(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320548__Fv);
-#ifdef SKIP_ASM
 void func_00320548(void)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320550);
-#ifdef SKIP_ASM
 void* func_00316A00(void* self);
 void* func_00317930(void* self);
 void* func_0031FF20(void* self);
@@ -1292,4 +1155,3 @@ extern "C" void func_00320550(int init, int prio)
         }
     }
 }
-#endif

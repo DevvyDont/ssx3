@@ -3,8 +3,6 @@
 INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E228);
-#ifdef SKIP_ASM
 struct sSectionNode {
     int field_0x0;
     sSectionNode* next; // 0x4
@@ -32,11 +30,8 @@ extern "C" void func_0022E228(sSectionMan* self)
     self->field_0x19c = 0;
     self->field_0x1a0 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E278__FPv);
-#ifdef SKIP_ASM
 struct sSectionLink {
     int pad0;
     sSectionLink* next; // 0x4
@@ -48,11 +43,8 @@ void* func_0022E278(void* self)
     *(sSectionLink**)((char*)self + 0x198) = node->next;
     return node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E288__FPvT0);
-#ifdef SKIP_ASM
 int func_0022E288(void* self, void* a1)
 {
     int t0 = *(int*)((char*)self + 0x198);
@@ -60,11 +52,8 @@ int func_0022E288(void* self, void* a1)
     *(int*)((char*)self + 0x198) = (int)a1;
     return t0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/sectionman", func_0022E298);
-#ifdef SKIP_ASM
 struct sSectionNode_E298 {
     int id;
     sSectionNode_E298* next; // 0x4
@@ -97,11 +86,8 @@ extern "C" void func_0022E298(void* self, int id)
     }
     *(int*)((char*)self + 0x1A0) += 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E348);
-#ifdef SKIP_ASM
 extern "C" int func_0022E348(void* self, void* a1)
 {
     if (a1 != 0) {
@@ -109,11 +95,8 @@ extern "C" int func_0022E348(void* self, void* a1)
     }
     return *(int*)((char*)self + 0x19c);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/sectionman", func_0022E360);
-#ifdef SKIP_ASM
 // PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
 void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
 
@@ -127,5 +110,4 @@ extern "C" void func_0022E360(void* self, void* prev, void* node)
     func_0022E288_v(self, node);
     *(int*)((char*)self + 0x1A0) = *(int*)((char*)self + 0x1A0) - 1;
 }
-#endif
 

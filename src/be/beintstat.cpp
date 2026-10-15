@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("be/beintstat", cBEStatInterface_getCollisionAttrib);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -32,11 +30,8 @@ extern "C" float cBEStatInterface_getCollisionAttrib(void* self, int rider, int 
         v = D_00535538_getCollisionAttrib[profile].e[c][5] / 5;
     return (float)v / (float)D_005308D8_getCollisionAttrib[c].v[0xD];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149038);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -66,11 +61,8 @@ extern "C" float func_00149038(void* self, int rider, int value)
         v = D_00535538_func_00149038[profile].e[c][5] / 5;
     return (float)v / (float)D_005308D8_func_00149038[c].v[0xD];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149120);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -100,11 +92,8 @@ extern "C" float func_00149120(void* self, int rider, int value)
         v = D_00535538_func_00149120[profile].e[c][6] / 5;
     return (float)v / (float)D_005308D8_func_00149120[c].v[0xE];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149208);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -134,13 +123,10 @@ extern "C" float func_00149208(void* self, int rider, int value)
         v = D_00535538_func_00149208[profile].e[c][6] / 5;
     return (float)v / (float)D_005308D8_func_00149208[c].v[0xE];
 }
-#endif
 
 INCLUDE_ASM("be/beintstat", func_001492F0);
 
 //100%
-INCLUDE_ASM("be/beintstat", func_001493D8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -170,11 +156,8 @@ extern "C" float func_001493D8(void* self, int rider, int value)
         v = D_00535538_func_001493D8[profile].e[c][1] / 5;
     return (float)v / (float)D_005308D8_func_001493D8[c].v[0x9];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_001494C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -204,11 +187,8 @@ extern "C" float func_001494C0(void* self, int rider, int value)
         v = D_00535538_func_001494C0[profile].e[c][0] / 5;
     return (float)v / (float)D_005308D8_func_001494C0[c].v[0x8];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_001495A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -238,11 +218,8 @@ extern "C" float func_001495A8(void* self, int rider, int value)
         v = D_00535538_func_001495A8[profile].e[c][4] / 5;
     return (float)v / (float)D_005308D8_func_001495A8[c].v[0xC];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149690);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -272,11 +249,8 @@ extern "C" float func_00149690(void* self, int rider, int value)
         v = D_00535538_func_00149690[profile].e[c][2] / 5;
     return (float)v / (float)D_005308D8_func_00149690[c].v[0xA];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149778);
-#ifdef SKIP_ASM
 int cBENewPlayerInterface_isMissionMan(int index);
 extern "C" int func_00148950(void* iface, int id);
 
@@ -306,11 +280,8 @@ extern "C" int func_00149778(void* self, int rider, int value)
         lvl = 0;
     return value >= t.v[lvl];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149860);
-#ifdef SKIP_ASM
 extern "C" void func_00149BB8();
 extern "C" void* func_0014EDD8();
 extern "C" void* func_00147F78(void);
@@ -354,11 +325,8 @@ extern "C" void* func_00149860(void* self)
     cBERewardInterface_getThis();
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_001499A8);
-#ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_00153050(void);
 extern int* D_004A11B4;
@@ -407,11 +375,8 @@ extern "C" void func_001499A8(void* self, int flags)
     if (flags & 1)
         operator_delete((int*)self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149A88);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_002C2580(char* buf, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -463,7 +428,6 @@ extern "C" void func_00149A88(void* self, signed char idx)
     vreset_149A88((char*)func_00147F78());
     vreset_149A88((char*)cBEBAGTInterface_getThis());
 }
-#endif
 
 INCLUDE_ASM("be/beintstat", func_00149BB8);
 

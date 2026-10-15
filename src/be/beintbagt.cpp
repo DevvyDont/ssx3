@@ -19,8 +19,6 @@ struct cBEBAGTInterface {
 extern void* D_004A1210;
 
 //100%
-INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBEBAGTInterface_getThis()
 {
     if (D_004A1210 == 0) {
@@ -35,11 +33,8 @@ void* cBEBAGTInterface_getThis()
     }
     return D_004A1210;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014F960);
-#ifdef SKIP_ASM
 struct sBagtRec {
     short data[0xFF];
 };
@@ -60,11 +55,8 @@ extern "C" void func_0014F960(void)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FAD0);
-#ifdef SKIP_ASM
 extern sBagtSlot D_004A788E[3][10];
 extern sBagtRec D_00530EC0[3][10];
 
@@ -76,11 +68,8 @@ extern "C" void func_0014FAD0(void)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FC40);
-#ifdef SKIP_ASM
 extern sBagtSlot D_004A788E[3][10];
 extern sBagtRec D_00530EC0[3][10];
 
@@ -90,11 +79,8 @@ extern "C" void func_0014FC40(int i)
         D_00530EC0[i][j] = D_004A788E[i][j].rec;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FD80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -109,11 +95,8 @@ extern "C" int func_0014FD80(void* self, int rider, int idx, int value)
     p[1] = value;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FE08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -138,11 +121,8 @@ extern "C" int func_0014FE08(void* self, int rider, int idx, int bit)
     D_00530EC0_e[profile][c].e[idx].flags &= ~(1 << bit);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FEA8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -170,13 +150,10 @@ extern "C" int func_0014FEA8(void* self, int rider, int idx, int second)
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("be/beintbagt", func_0014FF90);
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FFB8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -189,11 +166,8 @@ extern "C" int func_0014FFB8(void* self, int rider, int idx, int bit)
     int c = cBELibrary_getCharacterID(rider);
     return (D_00530EC0_e[profile][c].e[idx].flags >> bit) & 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150048);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -206,73 +180,52 @@ extern "C" int func_00150048(void* self, int rider, int idx, int bit)
     int c = cBELibrary_getCharacterID(rider);
     return (D_00530EC0_e[profile][c].e[idx].flags2 >> bit) & 1;
 }
-#endif
 
 struct sPad20 { char x; int pad[4]; };
 extern sPad20 D_0045AEB8;
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001500D8);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_001500D8(void* self, int a1, int a2)
 {
     return *(unsigned short*)((char*)&D_0045AEB8 + a2 * 0x14);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001500F8);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_001500F8(void* self, int a1, int a2)
 {
     char* p = (char*)&D_0045AEB8 + a2 * 0x14;
     return *(unsigned short*)(p + 0x2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150118);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_00150118(void* self, int a1, int a2)
 {
     char* p = (char*)&D_0045AEB8 + a2 * 0x14;
     return *(unsigned short*)(p + 0x4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150138);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_00150138(void* self, int a1, int a2)
 {
     char* p = (char*)&D_0045AEB8 + a2 * 0x14;
     return *(unsigned short*)(p + 0x6);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150158);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_00150158(void* self, int a1, int a2)
 {
     char* p = (char*)&D_0045AEB8 + a2 * 0x14;
     return *(unsigned short*)(p + 0x8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150178);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_00150178(void* self, int a1, int a2)
 {
     char* p = (char*)&D_0045AEB8 + a2 * 0x14;
     return *(unsigned short*)(p + 0xa);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150198);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
 extern sPad20 D_0045AEB8;
@@ -318,11 +271,8 @@ extern "C" int func_00150198(void* self, int rider, int idx, int second)
     if (k < 0) return 0x1B6;
     return D_0045AEB8_150198[idx].anims[k].anim;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001502C8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
 extern sPad20 D_0045AEB8;
@@ -368,11 +318,8 @@ extern "C" int func_001502C8(void* self, int rider, int idx, int second)
     if (k < 0) return 0x1B6;
     return D_0045AEB8_1502C8[idx].anims[k].anim2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001503F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
 extern sPad20 D_0045AEB8;
@@ -418,22 +365,16 @@ extern "C" int func_001503F8(void* self, int rider, int idx, int second)
     if (k < 0) return 0;
     return D_0045AEB8_1503F8[idx].anims[k].anim3;
 }
-#endif
 
 extern void* D_00530600[];
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150528__FPvi);
-#ifdef SKIP_ASM
 int func_00150528(void* self, int a1)
 {
     return *(int*)((char*)(void*)D_00530600 + a1 * 8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150540__FPvi);
-#ifdef SKIP_ASM
 struct sBAGTEntry {
     int key;
     int value;
@@ -447,7 +388,6 @@ int func_00150540(void* self, int a1)
 {
     return ((sBAGTTable*)D_00530600)->entries[a1].value;
 }
-#endif
 
 INCLUDE_ASM("be/beintbagt", func_00150558);
 

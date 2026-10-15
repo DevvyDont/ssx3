@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatedebug", cScreenKeyboard_initScreenKeyboard);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
@@ -104,11 +102,8 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
     if (t != 0)
         cUIText_setAsciiString((cUIText*)t, self + 0xEC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatedebug", func_00180EF0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00180A90(void* self, int id, char* buf);
@@ -193,11 +188,8 @@ extern "C" int func_00180EF0(sDbgState_180EF0* self, sDbgInput_180EF0* in)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatedebug", func_00181090);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern void* D_0046D000[];
@@ -221,5 +213,4 @@ extern "C" void* func_00181090(void* self, void* owner, int count)
     *(unsigned char*)((char*)self + 0x15) = mask;
     return self;
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("main/loadscreens", cBackgroundMan_loadImages);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* ptr);
@@ -63,11 +61,8 @@ extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/loadscreens", func_0017AE00);
-#ifdef SKIP_ASM
 extern char D_004FF1A0[];
 
 struct sRS_AE00 {
@@ -218,7 +213,6 @@ extern "C" void func_0017AE00(sBgMan_AE00* self)
     call0_AE00(32);
     call0_AE00(22);
 }
-#endif
 
 INCLUDE_ASM("main/loadscreens", func_0017B1B0);
 

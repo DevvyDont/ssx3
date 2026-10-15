@@ -6,8 +6,6 @@ int tHashName32_getHashValue(uint*, char*);
 
 //100%
 //https://decomp.me/scratch/YWMcE
-INCLUDE_ASM("hashvalue", tHashName32_getHashValue__FPUiPc);
-#ifdef SKIP_ASM
 int tHashName32_getHashValue(uint* out, char* str) {
     uint hash = 0;
     uint top;
@@ -23,22 +21,16 @@ int tHashName32_getHashValue(uint* out, char* str) {
     *out = hash;
     return *out;
 }
-#endif
 
 //100%
 //https://decomp.me/scratch/VD967
-INCLUDE_ASM("hashvalue", GetHashValue32__FPc);
-#ifdef SKIP_ASM
 int GetHashValue32(char* param_1) {
     char hash[4];
     return tHashName32_getHashValue((uint*)hash, param_1);
 }
-#endif
 
 //https://decomp.me/scratch/ZrcdK
 //100%
-INCLUDE_ASM("hashvalue", tHashName64_getHashValue__FPUlPc);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct md5_ctx {
     unsigned int lo;    // 0x0
@@ -66,22 +58,16 @@ ulong tHashName64_getHashValue(ulong* out, char* str)
     *out = hash[0];
     return hash[0];
 }
-#endif
 
 
 //100%
 //https://decomp.me/scratch/I4NLb
-INCLUDE_ASM("hashvalue", GetHashValue64__FPc);
-#ifdef SKIP_ASM
 ulong GetHashValue64(char* str) {
     char hash[8];
     return tHashName64_getHashValue((ulong*)hash, str);
 }
-#endif
 
 //100%
-INCLUDE_ASM("hashvalue", func_00317710);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sHash128_17710 {
     ulong lo;
@@ -101,11 +87,8 @@ sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str)
     *out = h;
     return *out;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("hashvalue", func_00317798);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sHash128 {
     ulong lo;
@@ -119,4 +102,3 @@ extern "C" sHash128 func_00317798(char* str)
     sHash128 tmp;
     return func_00317710(&tmp, str);
 }
-#endif

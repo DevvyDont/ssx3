@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int func_003E06B0(int a, int b, int c);
@@ -31,11 +29,8 @@ extern "C" void* cStreamMan_cStreamMan(void* self)
     func_003A6ED8(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6E20);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_003A6ED8(void* self);
@@ -53,11 +48,8 @@ extern "C" void func_003A6E20(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6E98);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern const char D_004A47D8[];
 extern const char D_004A47E0[];
@@ -68,11 +60,8 @@ extern "C" int func_003A6E98(void* self, const char* name, int id)
     sprintf((char*)self + 4, D_004A47D8, name, D_004A47E0);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6ED8);
-#ifdef SKIP_ASM
 extern "C" void func_003A7058(void* self, int size);
 
 extern "C" void func_003A6ED8(void* self)
@@ -92,11 +81,8 @@ extern "C" void func_003A6ED8(void* self)
     *(int*)((char*)self + 0xB4) = 0;
     func_003A7058(self, 0x19000);
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6F38);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void func_003E0A28(int h);
 
@@ -110,11 +96,8 @@ extern "C" void func_003A6F38(void* self)
         cMemMan_free(*(void**)((char*)self + 0x8C));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6F88);
-#ifdef SKIP_ASM
 extern "C" int func_003E0C88(int h, void* p, int a, int tag);
 
 extern "C" int func_003A6F88(void* self, int a1, int a2, int a3)
@@ -135,11 +118,8 @@ extern "C" int func_003A6F88(void* self, int a1, int a2, int a3)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7010);
-#ifdef SKIP_ASM
 extern "C" void func_003E0E90(int, int);
 
 extern "C" void func_003A7010(void* self)
@@ -150,11 +130,8 @@ extern "C" void func_003A7010(void* self)
         *(int*)((char*)self + 0x94) = -1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7058);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 
 static inline int imax(int a, int b)
@@ -169,11 +146,8 @@ extern "C" void func_003A7058(void* self, int rate)
     *(int*)((char*)self + 0xD8) = rate;
     *(float*)((char*)self + 0xDC) = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7098);
-#ifdef SKIP_ASM
 struct sStreamMan7098 {
     void* f0;                   // 0x00
     char pad4[0x84];
@@ -247,22 +221,16 @@ extern "C" void func_003A7098(sStreamMan7098* self)
     self->active = 0;
     self->f94 = -1;
 }
-#endif
 
 extern "C" void* func_003B47F8(int);
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7218__FPviii);
-#ifdef SKIP_ASM
 void* func_003A7218(void* self, int a1, int a2, int a3)
 {
     return func_003B47F8(a3);
 }
-#endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7238);
-#ifdef SKIP_ASM
 extern "C" unsigned int cWorldCache_addBxStreamDataTest(void* cache, int group, int id, int key, int size);
 extern "C" void func_003A8CD0_s(void* self, int group, int id, unsigned int key, int a4) __asm__("func_003A8CD0");
 extern "C" void func_003E6574(void* dst, void* src, int size);
@@ -409,5 +377,4 @@ extern "C" int func_003A7238(void* self_, void* pcount_, void* pdata_)
     }
     return 1;
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("render/irradiance", cIrradianceDataBase_Load);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
@@ -37,11 +35,8 @@ extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase_ACD0* self)
         cMemMan_free(self->file);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/irradiance", func_0038ADB0);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 extern "C" void func_0038ADB0(void* self)
@@ -58,5 +53,4 @@ extern "C" void func_0038ADB0(void* self)
         *(int*)((char*)self + 0x4) = 0;
     }
 }
-#endif
 

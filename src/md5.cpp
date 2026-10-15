@@ -14,8 +14,6 @@ INCLUDE_ASM("md5", md5_process);
 #endif
 
 //100%
-INCLUDE_ASM("md5", md5_init__FP7md5_ctx);
-#ifdef SKIP_ASM
 void md5_init(md5_ctx* ctx)
 {
     unsigned int a = 0x67452301;
@@ -29,11 +27,8 @@ void md5_init(md5_ctx* ctx)
     ctx->lo = 0;
     ctx->hi = 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("md5", md5_append);
-#ifdef SKIP_ASM
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 extern "C" void md5_process(md5_ctx* ctx, const unsigned char* data);
 
@@ -83,11 +78,8 @@ extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes)
         func_0041605C(pms->buf, p, left);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("md5", md5_finish);
-#ifdef SKIP_ASM
 // Same layout as md5_ctx, viewed as the reference md5.c's md5_state_t (count[2], abcd[4]).
 struct md5_state_K4 {
     unsigned int count[2];  // 0x0
@@ -112,6 +104,5 @@ extern "C" void md5_finish(md5_ctx* ctx, unsigned char* digest)
         digest[i] = (unsigned char)(pms->abcd[i >> 2] >> ((i & 3) << 3));
     }
 }
-#endif
 #ifdef SKIP_ASM
 #endif

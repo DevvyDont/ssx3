@@ -6,8 +6,6 @@ struct cBucketMan {
 };
 
 //100%
-INCLUDE_ASM("object/bucketman", cBucketMan_init);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_004A4020[];
@@ -61,11 +59,8 @@ extern "C" void cBucketMan_init(cBucketMan* self, int n)
         ((sBucket_3549E0*)self->mBuckets)[i].flags = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354B38);
-#ifdef SKIP_ASM
 extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index);
 extern "C" void func_003546C8(void* self, int flags);
 void cMemMan_free(void*);
@@ -91,11 +86,8 @@ extern "C" void func_00354B38(cBucketMan* self)
     self->mBuckets = 0;
     *(int*)self = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", cBucketMan_add);
-#ifdef SKIP_ASM
 struct sBucketLink {
     int field_0x0;
     sBucketLink* prev; // 0x4
@@ -124,11 +116,8 @@ extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
         ((sBucketLists*)self->mBuckets)[index].head0.prev = node;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354C98);
-#ifdef SKIP_ASM
 void* cBucketMan_addfirst(cBucketMan* self, int index);
 extern "C" void* func_00354ED0(cBucketMan* self, int index);
 extern "C" void* func_00354F20(cBucketMan* self, void* node, int index);
@@ -207,11 +196,8 @@ extern "C" void func_00354C98(cBucketMan* self, int index)
         n = nextN;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354E48);
-#ifdef SKIP_ASM
 struct sBucketNode {
     int field_0x0;
     sBucketNode* prev; // 0x4
@@ -225,13 +211,10 @@ extern "C" void func_00354E48(cBucketMan* self, sBucketNode* node)
         node->prev->next = node->next;
     }
 }
-#endif
 
 INCLUDE_ASM("object/bucketman", func_00354E78);
 
 //100%
-INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
-#ifdef SKIP_ASM
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_first(cBucketMan* self, int index)
 {
@@ -240,11 +223,8 @@ void* cBucketMan_first(cBucketMan* self, int index)
     void* head = *(void**)(index + 0x8);
     return (head == (void*)(index + 0x14)) ? 0 : head;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354ED0);
-#ifdef SKIP_ASM
 // PORT: holds a pointer in an int (same shape as cBucketMan_first); not 64-bit safe.
 extern "C" void* func_00354ED0(cBucketMan* self, int index)
 {
@@ -253,32 +233,23 @@ extern "C" void* func_00354ED0(cBucketMan* self, int index)
     void* tail = *(void**)(index + 0x1C);
     return (tail == (void*)(index + 0x4)) ? 0 : tail;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
-#ifdef SKIP_ASM
 void* cBucketMan_next(cBucketMan* self, void* node, int index)
 {
     char* bucket = self->mBuckets + index * 0x44;
     void* next = *(void**)((char*)node + 0x4);
     return (next == (void*)(bucket + 0x14)) ? 0 : next;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354F20);
-#ifdef SKIP_ASM
 extern "C" void* func_00354F20(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x8);
     return (next == (void*)(self->mBuckets + index * 0x44 + 0x4)) ? 0 : next;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
-#ifdef SKIP_ASM
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_addfirst(cBucketMan* self, int index)
 {
@@ -287,21 +258,15 @@ void* cBucketMan_addfirst(cBucketMan* self, int index)
     void* head = *(void**)(index + 0x28);
     return (head == (void*)(index + 0x34)) ? 0 : head;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354F70);
-#ifdef SKIP_ASM
 extern "C" void* func_00354F70(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x4);
     return (next == (void*)(self->mBuckets + index * 0x44 + 0x34)) ? 0 : next;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_00354F98);
-#ifdef SKIP_ASM
 struct sBucketVEntry4F98 {
     short delta;
     short index;
@@ -319,11 +284,8 @@ extern "C" void func_00354F98(cBucketMan* self, int index)
     }
     cBucketMan_first(self, index);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_00355028);
-#ifdef SKIP_ASM
 struct sBucketVEntry5028 {
     short delta;
     short index;
@@ -339,11 +301,8 @@ extern "C" void func_00355028(cBucketMan* self, int index)
         node = cBucketMan_next(self, node, index);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_003550A0);
-#ifdef SKIP_ASM
 struct sBucketVEntry50A0 {
     short delta;
     short index;
@@ -359,11 +318,8 @@ extern "C" void func_003550A0(cBucketMan* self, int index)
         node = cBucketMan_next(self, node, index);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", cBucketMan_purgeBucket);
-#ifdef SKIP_ASM
 struct sBucketVEntryPurge {
     short delta;
     short index;
@@ -382,11 +338,8 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
         node = next;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_003551A8);
-#ifdef SKIP_ASM
 struct sBucketVEntry51A8 {
     short delta;
     short index;
@@ -417,7 +370,6 @@ extern "C" void func_003551A8(cBucketMan* self, int index, int key)
         node = next;
     }
 }
-#endif
 
 // 0x44-byte elements reached through a pointer at self+0x4
 struct sBucketEntry {
@@ -426,18 +378,13 @@ struct sBucketEntry {
 };
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00355260);
-#ifdef SKIP_ASM
 extern "C" void func_00355260(void* self, int a1)
 {
     sBucketEntry* p = *(sBucketEntry**)((char*)self + 0x4);
     p[a1].flags |= 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00355280);
-#ifdef SKIP_ASM
 extern void* D_00491028[];
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 
@@ -452,5 +399,4 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a3)
     *(int*)((char*)self + 0x28) = 0;
     return self;
 }
-#endif
 

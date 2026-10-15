@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("util/locale", cFELocale_addFile);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is probably the game's overloaded operator new(size, tag, flags, align). Calling it as
 // operator new gives gcc's malloc-like (REG_NOALIAS) aliasing that the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -39,11 +37,8 @@ extern "C" void cFELocale_addFile(void* self, int lang)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195A50);
-#ifdef SKIP_ASM
 extern "C" void func_002C6D70(void*, int);
 
 struct s195A50Arr {
@@ -58,13 +53,10 @@ extern "C" void func_00195A50(void* self, signed char i)
         arr->items[i] = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("util/locale", func_00195A98);
 
 //100%
-INCLUDE_ASM("util/locale", func_00195AA0);
-#ifdef SKIP_ASM
 extern "C" void func_00195948(void* self);
 extern "C" void func_00195BE0(void* self);
 extern "C" void func_00195DE0(void* self);
@@ -101,11 +93,8 @@ extern "C" void func_00195AA0(void* self, signed char lang)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195B70);
-#ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
 extern "C" void func_00195B70(void* self)
@@ -127,11 +116,8 @@ extern "C" void func_00195B70(void* self)
     }
     cFELocale_addFile(self, lang);
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195BE0);
-#ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
 extern "C" void func_00195BE0(void* p)
@@ -186,11 +172,8 @@ extern "C" void func_00195BE0(void* p)
     }
     cFELocale_addFile(self, id);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195D50);
-#ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, signed char i);
 
 extern "C" void func_00195D50(void* self)
@@ -207,11 +190,8 @@ extern "C" void func_00195D50(void* self)
         func_00195A50(self, 0x13);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195DE0);
-#ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
 extern "C" void func_00195DE0(void* self)
@@ -234,11 +214,8 @@ extern "C" void func_00195DE0(void* self)
     }
     cFELocale_addFile(self, file);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195E58);
-#ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, signed char i);
 
 extern "C" void func_00195E58(void* self)
@@ -251,11 +228,8 @@ extern "C" void func_00195E58(void* self)
         func_00195A50(self, 0xF);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195EB8);
-#ifdef SKIP_ASM
 extern "C" const char* func_002C6DE0(void* file, int key);
 extern "C" void func_002C27C0(char* dst, const char* src);
 extern char D_004A1390[];
@@ -284,11 +258,8 @@ extern "C" const char* func_00195EB8(func_00195EB8_sLocale* self, int key)
     func_002C27C0(buf, D_004A1390);
     return buf;
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195F70);
-#ifdef SKIP_ASM
 // PORT: func_002C6DC0__FPv really takes a second argument (it passes $5 through to
 // func_003DBB68); bind the 2-arg view to the 1-arg mangled symbol.
 void* func_002C6DC0_2(void* self, void* arg) __asm__("func_002C6DC0__FPv");
@@ -311,11 +282,8 @@ extern "C" void* func_00195F70(void* self, void* arg)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195FF0);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern "C" void* func_00398380(void* self, int id);
@@ -361,11 +329,8 @@ extern "C" void* func_00195FF0(void* self, void* engine, signed char idx, int a3
     *(int*)(s + 0x7C) = func_001587B8(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70)) > 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00196148);
-#ifdef SKIP_ASM
 int GetHashValue32(char*);
 extern char D_004A18A8[];
 extern char* D_004A28A8;
@@ -428,11 +393,8 @@ extern "C" void func_00196148(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00196228);
-#ifdef SKIP_ASM
 int GetHashValue32(char*);
 void* func_0039E4A0(void* self);
 extern char D_004A18A8[];
@@ -480,11 +442,8 @@ extern "C" void func_00196228(void* self)
     }
     func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_001962A8);
-#ifdef SKIP_ASM
 struct func_001962A8_sVEntry {
     short delta;
     short index;
@@ -510,11 +469,8 @@ extern "C" int func_001962A8(void* self, int a1)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00196378);
-#ifdef SKIP_ASM
 struct func_00196378_sVEntry {
     short delta;
     short index;
@@ -564,5 +520,4 @@ extern "C" void func_00196378(void* self, int a1)
     }
     func_00186518(self, a1);
 }
-#endif
 

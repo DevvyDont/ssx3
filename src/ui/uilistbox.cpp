@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByAsciiString);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -18,11 +16,8 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char
     *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA4) = data;
     return (*(unsigned char*)((char*)self + 0x318))++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A4B0);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int USTR_length(unsigned short* s);
@@ -38,11 +33,8 @@ extern "C" unsigned char func_0039A4B0(void* self, unsigned short* str, int data
     *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA4) = data;
     return (*(unsigned char*)((char*)self + 0x318))++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByStringID);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int USTR_length(unsigned short* s);
@@ -68,11 +60,8 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(void* self, int id, int d
     }
     return (*(unsigned char*)((char*)self + 0x318))++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A670);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 struct func_0039A670_sItem {
@@ -97,11 +86,8 @@ extern "C" void func_0039A670(void* self)
     *(unsigned char*)((char*)self + 0x319) = 0;
     *(unsigned char*)((char*)self + 0x318) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A708);
-#ifdef SKIP_ASM
 extern "C" int func_0039A708(void* self)
 {
     if (*(unsigned char*)((char*)self + 0x319) < *(unsigned char*)((char*)self + 0x318)) {
@@ -109,11 +95,8 @@ extern "C" int func_0039A708(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A738);
-#ifdef SKIP_ASM
 extern "C" int func_0039A738(void* self)
 {
     if (*(unsigned char*)((char*)self + 0x319) < *(unsigned char*)((char*)self + 0x318)) {
@@ -121,11 +104,8 @@ extern "C" int func_0039A738(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A768);
-#ifdef SKIP_ASM
 extern "C" int func_0039A768(void* self, int key, unsigned char* out)
 {
     int i;
@@ -137,11 +117,8 @@ extern "C" int func_0039A768(void* self, int key, unsigned char* out)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A7A8);
-#ifdef SKIP_ASM
 extern "C" void func_0039A7A8(void* self, int a1)
 {
     unsigned char v = (unsigned char)a1;
@@ -149,13 +126,10 @@ extern "C" void func_0039A7A8(void* self, int a1)
         *(char*)((char*)self + 0x319) = v;
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uilistbox", func_0039A7C8);
 
 //100%
-INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryByAsciiString);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -195,11 +169,8 @@ extern "C" void cUIListBox_setEntryByAsciiString(cUIListBox_sObj* self, unsigned
     self->entries[idx].text = text;
     self->entries[idx].data = data;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A8D8);
-#ifdef SKIP_ASM
 struct sVEntry39A8D8 {
     short delta;
     short index;
@@ -215,11 +186,8 @@ extern "C" void func_0039A8D8(void* self, int count)
     sVEntry39A8D8* vt = *(sVEntry39A8D8**)((char*)obj + 8);
     vt[0x13].fn((char*)obj + vt[0x13].delta, self, 9);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A928);
-#ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -290,11 +258,8 @@ extern "C" void func_0039A928(char* self, int on)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AAC0);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FE00(void* self);
 extern "C" char func_003979C0(void*);
 extern "C" void func_0039AB00(void* self, char a1);
@@ -307,11 +272,8 @@ extern "C" void func_0039AAC0(void* self)
     *(char*)((char*)self + 0x96) = v;
     func_0039AB00(self, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AB00);
-#ifdef SKIP_ASM
 extern "C" void func_0039AB00(void* self, char a1)
 {
     if (a1 == 0) {
@@ -326,11 +288,8 @@ extern "C" void func_0039AB00(void* self, char a1)
         *(char*)((char*)self + 0x94) = 7;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AB50);
-#ifdef SKIP_ASM
 extern "C" void* func_00397870(void* list, unsigned char i);
 
 struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
@@ -359,11 +318,8 @@ extern "C" unsigned char func_0039AB50(void* self)
     } while (n-- != 0);
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AC48);
-#ifdef SKIP_ASM
 extern "C" void* func_00397870(void* list, unsigned char i);
 
 struct func_0039AC48_sVEntry {
@@ -403,5 +359,4 @@ extern "C" unsigned char func_0039AC48(void* self)
     } while (n != 0xFF);
     return 0;
 }
-#endif
 

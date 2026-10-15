@@ -12,8 +12,6 @@ struct cBEMissionInterface {
 };
 
 //99.58%
-INCLUDE_ASM("be/beintmission", cBEMissionInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBEMissionInterface_getThis()
 {
     if (D_004A1238 == 0) {
@@ -24,15 +22,12 @@ void* cBEMissionInterface_getThis()
     }
     return D_004A1238;
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_001532F0);
 
 INCLUDE_ASM("be/beintmission", func_00153330);
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153350);
-#ifdef SKIP_ASM
 extern signed char D_0043FA70[];
 
 extern "C" int func_00153350(void* self, int start)
@@ -44,11 +39,8 @@ extern "C" int func_00153350(void* self, int start)
     }
     return sum;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153390);
-#ifdef SKIP_ASM
 struct sMissionEntry_0043D950
 {
     char pad_0x00[0x54];
@@ -74,13 +66,10 @@ extern "C" int func_00153390(void* self, int owner)
     }
     return sum;
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_001533F8);
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153498);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -96,11 +85,8 @@ extern "C" int func_00153498(void* self, int rider, int idx)
     char* p = D_004A6CA8_raw + off;
     return *(signed char*)(p + 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153520);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -120,11 +106,8 @@ extern "C" int func_00153520(void* self, int rider, int idx)
     }
     return sum;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -163,11 +146,8 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int ride
     }
     return sum;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153688);
-#ifdef SKIP_ASM
 struct sEconRecord_00153688
 {
     int id;
@@ -200,15 +180,12 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
     }
     return sum;
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_00153708);
 
 INCLUDE_ASM("be/beintmission", func_00153858);
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001538E8);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
@@ -224,15 +201,12 @@ extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
     int mask = 1 << bit;
     return (*(unsigned int*)(p + 4) & mask) != 0;
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_001539A8);
 
 INCLUDE_ASM("be/beintmission", func_00153B00);
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153C88);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153C88
 {
@@ -259,13 +233,10 @@ extern "C" void func_00153C88(void* self, int id)
     int i = func_00154240(self, id);
     ((cMissionObj_00153C88*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153C88[i].f4);
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_00153CD8);
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153D28);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153D28
 {
@@ -294,11 +265,8 @@ extern "C" void func_00153D28(void* self, int id)
     int i = func_00154240(self, id);
     ((cMissionObj_00153D28*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153D28[i].fC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153D78);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -310,11 +278,8 @@ extern "C" int func_00153D78(void* self, int id)
     char* p = (char*)D_004A6CA8 + off;
     return (*(unsigned int*)(p + 0x118) >> 3) & 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153DD0);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -326,11 +291,8 @@ extern "C" int func_00153DD0(void* self, int id)
     char* p = (char*)D_004A6CA8 + off;
     return (*(unsigned int*)(p + 0x118) >> 1) & 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153E28);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -342,11 +304,8 @@ extern "C" int func_00153E28(void* self, int id)
     char* p = (char*)D_004A6CA8 + off;
     return (*(unsigned int*)(p + 0x118)) & 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153E80);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -358,11 +317,8 @@ extern "C" int func_00153E80(void* self, int id)
     char* p = (char*)D_004A6CA8 + off;
     return (*(unsigned int*)(p + 0x118) >> 2) & 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153ED8);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -374,15 +330,12 @@ extern "C" int func_00153ED8(void* self, int id)
     char* p = (char*)D_004A6CA8 + off;
     return (*(unsigned int*)(p + 0x118) >> 4) & 1;
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_00153F30);
 
 INCLUDE_ASM("be/beintmission", func_00153F68);
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153FA0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
 // the fields at 0x18/0x1C; this local view of the same table binds to D_0043EE10.
@@ -407,11 +360,8 @@ extern "C" short func_00153FA0(void* self, int id)
     int i = func_00154240(self, id);
     return D_0043EE10_view[i].field_0x18;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153FD8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
 // the fields at 0x18/0x1C; this local view of the same table binds to D_0043EE10.
@@ -424,11 +374,8 @@ extern "C" int func_00153FD8(void* self, int id)
     int i = func_00154240(self, id);
     return D_0043EE10_view[i].field_0x1C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154010);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -440,11 +387,8 @@ extern "C" void func_00154010(void* self, int id, int value)
     char* p = (char*)D_004A6CA8 + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~1) | (value & 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154080);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -456,11 +400,8 @@ extern "C" void func_00154080(void* self, int id, int value)
     char* p = (char*)D_004A6CA8 + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 1)) | ((value & 1) << 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001540F0);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -472,11 +413,8 @@ extern "C" void func_001540F0(void* self, int id, int value)
     char* p = (char*)D_004A6CA8 + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 2)) | ((value & 1) << 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154160);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -488,11 +426,8 @@ extern "C" void func_00154160(void* self, int id, int value)
     char* p = (char*)D_004A6CA8 + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 3)) | ((value & 1) << 3);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001541D0);
-#ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
@@ -504,11 +439,8 @@ extern "C" void func_001541D0(void* self, int id, int value)
     char* p = (char*)D_004A6CA8 + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 4)) | ((value & 1) << 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154240);
-#ifdef SKIP_ASM
 struct sMissionDef_0043EE10
 {
     int id;             // 0x00
@@ -529,11 +461,8 @@ extern "C" int func_00154240(void* self, int id)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154278);
-#ifdef SKIP_ASM
 extern "C" int func_001542A0(void* self, int group);
 extern int D_005305F0[];
 
@@ -541,11 +470,8 @@ extern "C" int func_00154278(void* self)
 {
     return func_001542A0(self, D_005305F0[0]);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001542A0);
-#ifdef SKIP_ASM
 extern sMissionDef_0043EE10 D_0043EE10[];
 
 extern "C" int func_001542A0(void* self, int group)
@@ -558,11 +484,8 @@ extern "C" int func_001542A0(void* self, int group)
     }
     return n;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintmission", func_001542E0);
-#ifdef SKIP_ASM
 extern "C" int func_00153D78(void* self, int id);
 
 extern "C" int func_001542E0(void* self, int group)
@@ -578,11 +501,8 @@ extern "C" int func_001542E0(void* self, int group)
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154368);
-#ifdef SKIP_ASM
 // D_0043EE20 is D_0043EE10 + 0x10: the `group` field of each 0x24-byte
 // sMissionDef_0043EE10 entry, addressed through its own symbol.
 struct sMissionGroup_0043EE20
@@ -612,13 +532,10 @@ extern "C" int func_00154368(void* self, int owner)
     }
     return n;
 }
-#endif
 
 INCLUDE_ASM("be/beintmission", func_001543E0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintmission", func_001544D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_001543E0(void* self, int owner);
 
@@ -655,11 +572,8 @@ extern "C" int func_001544D0(void* self, int profile, int character, int owner)
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154588);
-#ifdef SKIP_ASM
 extern "C" int func_001545B0(void* self, int a, int group);
 extern int D_005305F0[];
 
@@ -667,11 +581,8 @@ extern "C" int func_00154588(void* self, int a)
 {
     return func_001545B0(self, a, D_005305F0[0]);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001545B0);
-#ifdef SKIP_ASM
 extern sMissionDef_0043EE10 D_0043EE10[];
 
 extern "C" int func_001545B0(void* self, int index, int group)
@@ -687,11 +598,8 @@ extern "C" int func_001545B0(void* self, int index, int group)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001545F8);
-#ifdef SKIP_ASM
 struct sMissionEntry {
     int id;              // 0x00
     char pad_0x04[0x14];
@@ -710,11 +618,8 @@ extern "C" int func_001545F8(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154630);
-#ifdef SKIP_ASM
 extern "C" int func_00154630(void* self, int value, int id)
 {
     for (int i = 0; i < 22; i++) {
@@ -724,11 +629,8 @@ extern "C" int func_00154630(void* self, int value, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154678);
-#ifdef SKIP_ASM
 extern "C" sMissionEntry func_00154678(void* self, int id)
 {
     for (int i = 0; i < 22; i++)
@@ -740,11 +642,8 @@ extern "C" sMissionEntry func_00154678(void* self, int id)
     }
     return D_00440770[0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154760);
-#ifdef SKIP_ASM
 extern "C" void* func_00154760(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {
@@ -754,11 +653,8 @@ extern "C" void* func_00154760(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547A0);
-#ifdef SKIP_ASM
 extern sMissionDef_0043EE10 D_0043EE10[];
 
 extern "C" int func_001547A0(void* self, int id)
@@ -770,27 +666,18 @@ extern "C" int func_001547A0(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547D8__FPv);
-#ifdef SKIP_ASM
 void func_001547D8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547E0__FPv);
-#ifdef SKIP_ASM
 void func_001547E0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547E8);
-#ifdef SKIP_ASM
 struct sSerVEntry_001547E8 {
     short delta;
     short index;
@@ -812,11 +699,8 @@ extern "C" void func_001547E8(void* self, void* stream)
     e = &(*(sSerVEntry_001547E8**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 8, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154898);
-#ifdef SKIP_ASM
 struct sSerVEntry_00154898 {
     short delta;
     short index;
@@ -838,5 +722,4 @@ extern "C" void func_00154898(void* self, void* stream)
     e = &(*(sSerVEntry_00154898**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 8, 4);
 }
-#endif
 

@@ -13,30 +13,22 @@ struct cObjectInterface_Impl {
 extern cObjectInterface* D_004A28A8;
 
 //100%
-INCLUDE_ASM("util/objectinterface", cObjectInterface_getInstanceMan__Fv);
-#ifdef SKIP_ASM
 void* cObjectInterface_getInstanceMan()
 {
     return D_004A28A8->mImpl->mInstanceMan;
 }
-#endif
 
 extern "C" void* func_002D9C00(void* self);
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D1CF0__FPv);
-#ifdef SKIP_ASM
 void* func_002D1CF0(void* self)
 {
     return func_002D9C00(self);
 }
-#endif
 
 INCLUDE_ASM("util/objectinterface", func_002D1D10);
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D2058);
-#ifdef SKIP_ASM
 // VU0 microprogram entry (micro-memory address 0x828)
 extern char D_828[];
 
@@ -76,7 +68,6 @@ extern "C" int func_002D2058(sQ128* v)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("util/objectinterface", func_002D20F8);
 
@@ -97,24 +88,16 @@ INCLUDE_ASM("util/objectinterface", func_002D2190);
 INCLUDE_ASM("util/objectinterface", func_002D21A0);
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D21B0__FPv);
-#ifdef SKIP_ASM
 void func_002D21B0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D21B8__FPv);
-#ifdef SKIP_ASM
 void func_002D21B8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D21C0);
-#ifdef SKIP_ASM
 extern void* D_004A3A00;
 
 extern "C" void* func_002D21C0(void* p)
@@ -122,7 +105,6 @@ extern "C" void* func_002D21C0(void* p)
     D_004A3A00 = p;
     return p;
 }
-#endif
 
 
 INCLUDE_ASM("util/objectinterface", func_002D21D0);

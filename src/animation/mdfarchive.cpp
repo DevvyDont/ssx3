@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", cMdfArchive_getModelPartByIndex);
-#ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_003E6574(void*, void*, int);
 extern "C" void func_003B47F8(void* src, void* dst);
@@ -38,26 +36,20 @@ extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int
     }
     return p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314D60);
-#ifdef SKIP_ASM
 extern unsigned int* D_004A3E78;
 
 extern "C" int func_00314D60(int* a, int* b)
 {
     return D_004A3E78[*a] < D_004A3E78[*b] ? -1 : 1;
 }
-#endif
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D98);
 
 INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314DD8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char* D_0048CFC0[];
 extern unsigned int* D_004A3E78;
@@ -85,11 +77,8 @@ extern "C" void func_00314DD8(sMdfHashTable_00314DD8* self)
     D_004A3E78 = 0;
     func_00416210(self->map, -1, 0x818);
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314E88);
-#ifdef SKIP_ASM
 struct sMdfIndex_00314E88
 {
     unsigned int hashes[0x206]; // 0x000: sorted by order[]
@@ -121,11 +110,8 @@ extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
     }
     return -1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/mdfarchive", func_00314EF0);
-#ifdef SKIP_ASM
 extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void* value)
 {
     int i = func_00314E88(self, hash);
@@ -134,11 +120,8 @@ extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void*
         ((void**)((char*)self + 0x1030))[i] = value;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/mdfarchive", func_00314F30);
-#ifdef SKIP_ASM
 struct sMdfHandle_00314F30
 {
     unsigned int kind : 8;
@@ -161,11 +144,8 @@ extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
         func_00314EF0_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), h);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314FE8);
-#ifdef SKIP_ASM
 extern void* D_004A5950;
 
 extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
@@ -175,7 +155,6 @@ extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
         func_00314EF0(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), D_004A5950);
     }
 }
-#endif
 
 
 INCLUDE_ASM("animation/mdfarchive", func_00315070);

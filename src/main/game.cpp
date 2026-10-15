@@ -11,8 +11,6 @@ struct sGameEntry {
 extern sGameEntry D_00442168[];
 
 //100%
-INCLUDE_ASM("main/game", cGame_renderModels);
-#ifdef SKIP_ASM
 struct sRState_C078 {
     int f0;
     int f4;
@@ -65,11 +63,8 @@ extern "C" void cGame_renderModels(void* self, void* world)
         D_004A289C->vt[0x60].fn((char*)D_004A289C + D_004A289C->vt[0x60].delta, items[i], 0, 0, flag | 0x20);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022C1B0);
-#ifdef SKIP_ASM
 extern void* D_004A4248;
 
 struct sVec_C1B0 {
@@ -165,11 +160,8 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
     ((sVEv_C1B0*)o->vt)[17].fn((char*)o + o->vt[17].delta);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022C3B8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 struct sVEntry_func_0022C3B8 {
     short delta;
@@ -186,13 +178,10 @@ extern "C" void func_0022C3B8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("main/game", func_0022C410);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/game", cGame_renderPatches);
-#ifdef SKIP_ASM
 extern "C" void func_0022C1B0(void* ctx);
 extern "C" void func_0022C410(void* ctx, int patch, int flag);
 extern "C" void func_0022C3B8(void* self, int flags);
@@ -225,11 +214,8 @@ extern "C" void cGame_renderPatches(void* self, void* world)
     }
     func_0022C3B8(ctx, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", cGame_renderFogVolumes);
-#ifdef SKIP_ASM
 struct sVEntry_renderFog {
     short delta;
     short index;
@@ -255,11 +241,8 @@ extern "C" void cGame_renderFogVolumes(void* self, void* world)
     }
     func_002DBF98(*(void**)((char*)self + 0x18));
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", cGame_renderLightHalos);
-#ifdef SKIP_ASM
 void func_002E2F98(void* self, int a1);
 extern "C" void func_002E2FF8(void* self, void* list, int n, int mode, int a4);
 extern "C" void func_002E30D0(void* self, int a1);
@@ -281,13 +264,10 @@ extern "C" void cGame_renderLightHalos(void* self, void* world, int a2)
     func_002E30D0(*(void**)((char*)self + 0x1C), a2);
     *(int*)((char*)*(void**)((char*)self + 0x1C) + 0x6494) = 0;
 }
-#endif
 
 INCLUDE_ASM("main/game", func_0022C830);
 
 //100%
-INCLUDE_ASM("main/game", func_0022CCE8);
-#ifdef SKIP_ASM
 extern "C" void func_0022CD40(void* self);
 
 extern "C" void* func_0022CCE8(void* self, int a1)
@@ -296,11 +276,8 @@ extern "C" void* func_0022CCE8(void* self, int a1)
     func_0022CD40(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022CD18);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_0022CD18(void* self, int flags)
@@ -309,11 +286,8 @@ extern "C" void func_0022CD18(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022CD40);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 struct cWorldView;
@@ -361,15 +335,12 @@ extern "C" void func_0022CD40(void* self)
     *(int*)((char*)self + 0x1A8) = 0;
     *(int*)((char*)self + 0x1C4) = 0;
 }
-#endif
 
 INCLUDE_ASM("main/game", func_0022CEA8);
 
 INCLUDE_ASM("main/game", func_0022D088);
 
 //100%
-INCLUDE_ASM("main/game", func_0022D278);
-#ifdef SKIP_ASM
 struct sGroup_D278 {
     int f0;
     int count;
@@ -406,11 +377,8 @@ int func_0022D278_impl(void* self, int idx)
     }
     return ok;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/game", func_0022D390);
-#ifdef SKIP_ASM
 extern "C" int func_0022D278(void* self);
 
 extern "C" int func_0022D390(void* self)
@@ -421,7 +389,6 @@ extern "C" int func_0022D390(void* self)
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("main/game", func_0022D3D8);
 
@@ -430,8 +397,6 @@ INCLUDE_ASM("main/game", func_0022D478);
 INCLUDE_ASM("main/game", func_0022D598);
 
 //100%
-INCLUDE_ASM("main/game", func_0022D640);
-#ifdef SKIP_ASM
 extern "C" void func_0022D640(void* self, int a1)
 {
     if (a1 != 0 && *(int*)((char*)self + 0x1B4) == 0) {
@@ -439,7 +404,6 @@ extern "C" void func_0022D640(void* self, int a1)
         *(int*)((char*)self + 0x1B8) = a1;
     }
 }
-#endif
 
 INCLUDE_ASM("main/game", func_0022D668);
 
@@ -448,8 +412,6 @@ INCLUDE_ASM("main/game", func_0022D6C8);
 INCLUDE_ASM("main/game", func_0022D8D8);
 
 //100%
-INCLUDE_ASM("main/game", func_0022DE58);
-#ifdef SKIP_ASM
 extern "C" void func_0022D478(void* self, int v);
 
 extern "C" void func_0022DE58(void* self, int v)
@@ -460,11 +422,8 @@ extern "C" void func_0022DE58(void* self, int v)
         *(int*)((char*)self + 0x1A8) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022DE98);
-#ifdef SKIP_ASM
 extern "C" void func_0022D598(void* self, int id);
 void func_00353D98(void* self);
 extern "C" void func_00353CF0(void* self, int id);
@@ -493,11 +452,8 @@ extern "C" void func_0022DE98(void* self)
     *(int*)((char*)self + 0x1A8) = 0;
     *(int*)((char*)self + 0x1AC) = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022DF50);
-#ifdef SKIP_ASM
 class cBEIface22DF50 {
 public:
     int pad[3];
@@ -520,22 +476,16 @@ extern "C" void func_0022DF50(void* self)
     iface->v01();
     func_00231278(*(void**)((char*)self + 0x1B0), 0xA);
 }
-#endif
 
 extern "C" void* func_002312D8(int);
 
 //100%
-INCLUDE_ASM("main/game", func_0022DFD0__FPv);
-#ifdef SKIP_ASM
 void* func_0022DFD0(void* self)
 {
     return func_002312D8(*(int*)((char*)self + 0x1b0));
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022DFF0);
-#ifdef SKIP_ASM
 class cRace22DFF0 {
 public:
     char pad[0xCC];
@@ -562,21 +512,15 @@ extern "C" void func_0022DFF0(void* self)
     }
     func_00231250(*(void**)((char*)self + 0x1B0), 0xA, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022E078);
-#ifdef SKIP_ASM
 extern "C" int func_0022E078(void* self, int a1)
 {
     int v = D_00442168[a1].field_0x8;
     return (unsigned int)(v - 1) < 2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022E098);
-#ifdef SKIP_ASM
 struct sGameEntry2 {
     int field_0x0;
     int field_0x4;
@@ -595,20 +539,14 @@ extern "C" int func_0022E098(void* self, int a1)
 {
     return D_00442168[D_00442488[a1].field_0x10].field_0x4;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022E0C8);
-#ifdef SKIP_ASM
 extern "C" int func_0022E0C8(void* self, int a1)
 {
     return D_00442168[a1].field_0x4;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022E0E0);
-#ifdef SKIP_ASM
 extern "C" int func_0022E0E0(void* self, int a1)
 {
     int i;
@@ -619,7 +557,6 @@ extern "C" int func_0022E0E0(void* self, int a1)
     }
     return 50;
 }
-#endif
 
 
 INCLUDE_ASM("main/game", func_0022E118);

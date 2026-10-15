@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatelegal", cFEStateLegal_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045DD10[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -18,11 +16,8 @@ extern "C" void cFEStateLegal_onCreateScreen(void* self)
     }
     *(int*)((char*)self + 0x48) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelegal", func_00187CB8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045DC60[];
 struct cUIScreen;
@@ -42,13 +37,10 @@ extern "C" void func_00187CB8(void* self)
         func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatelegal", func_00187D38);
 
 //100%
-INCLUDE_ASM("fe/festatelegal", func_001887A0);
-#ifdef SKIP_ASM
 struct sFlowState_887A0 {
     signed char count;
     char* states;
@@ -69,5 +61,4 @@ extern "C" void* func_001887A0(void* self, int a1, int reset)
     }
     return self;
 }
-#endif
 

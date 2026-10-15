@@ -3,8 +3,6 @@
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBD10);
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBEE0);
-#ifdef SKIP_ASM
 struct Pre_BEE0 { char pad[0x10D8]; };
 class Mgr_BEE0 : Pre_BEE0 {
 public:
@@ -73,22 +71,16 @@ extern "C" void func_002DBEE0(int *self, int flags) {
     }
     if (flags & 1) operator_delete(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBF80);
-#ifdef SKIP_ASM
 extern char D_00488308[];
 extern "C" void *func_002DBF80(int *self) {
     self[0] = 0;
     *(char**)((char*)self + 4) = D_00488308;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBF98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00418EF8_BF98(void* base, int n, int size, int (*cmp)(void*, void*)) __asm__("func_00418EF8");
 extern "C" int func_002DC168(void* arg0, void* arg1);
@@ -160,11 +152,8 @@ extern "C" void func_002DBF98(Obj_BF98* self) {
         self->n = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DC168);
-#ifdef SKIP_ASM
 extern "C" int func_002DC168(void *arg0, void *arg1) {
     int temp_3;
     int temp_4;
@@ -176,7 +165,6 @@ extern "C" int func_002DC168(void *arg0, void *arg1) {
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1DCD10", func_002DC190);
 

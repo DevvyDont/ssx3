@@ -10,8 +10,6 @@ struct cFloatingNode {
 };
 
 //100%
-INCLUDE_ASM("object/floatingnode", cFloatingNode_initInfo__FP13cFloatingNode);
-#ifdef SKIP_ASM
 // PORT: the unit declares cInstanceNode_getBoundBoxInfo with 2 args; its body uses 3 ($6 is written).
 void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("cInstanceNode_getBoundBoxInfo");
 
@@ -21,11 +19,8 @@ void cFloatingNode_initInfo(cFloatingNode* self)
     self->field_0x78 = mem;
     cInstanceNode_getBoundBoxInfo_3(self, mem, (char*)mem + 0x20);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034EF08);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern "C" void func_0034EF08(cFloatingNode* self)
@@ -35,11 +30,8 @@ extern "C" void func_0034EF08(cFloatingNode* self)
         self->field_0x78 = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034EF40);
-#ifdef SKIP_ASM
 struct sBox_F048;
 extern "C" void* func_002D1BE0();
 extern "C" void func_003291E0(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
@@ -122,11 +114,8 @@ extern "C" void func_0034EF40(char* self)
         func_003568B0(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034F048);
-#ifdef SKIP_ASM
 struct sVec4_F048 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -171,7 +160,6 @@ extern "C" void func_0034F048(cFloatingNode* self)
         func_003567E0(self);
     }
 }
-#endif
 
 INCLUDE_ASM("object/floatingnode", func_0034F120);
 
@@ -182,8 +170,6 @@ INCLUDE_ASM("object/floatingnode", func_0034F790);
 INCLUDE_ASM("object/floatingnode", func_0034F930);
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034FA88);
-#ifdef SKIP_ASM
 struct sFloatingVEntryFA88 {
     short delta;
     short index;
@@ -202,11 +188,8 @@ extern "C" void func_0034FA88(cFloatingNode* self, void* stream)
     e = &(*(sFloatingVEntryFA88**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x2C, 0x48);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034FB00);
-#ifdef SKIP_ASM
 extern "C" void* func_00354850(void* self, void* a1, int type);
 extern "C" void func_0034FC78(void* self, void* node);
 extern "C" void func_002D1BF0(void* node);
@@ -225,5 +208,4 @@ extern "C" void* func_0034FB00(void* self, void* a1, int type, void* node)
     }
     return self;
 }
-#endif
 

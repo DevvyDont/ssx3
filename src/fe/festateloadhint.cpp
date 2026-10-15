@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -56,11 +54,8 @@ extern "C" void cFELoadHintState_onCreateScreen(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245AE0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
 extern char D_004A2BD0[];
@@ -79,19 +74,13 @@ extern "C" int func_00245AE0(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245B50__FPv);
-#ifdef SKIP_ASM
 void func_00245B50(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245B58);
-#ifdef SKIP_ASM
 extern void* D_0047C608[];
 extern "C" void* func_0039E390(void* self);
 
@@ -100,11 +89,8 @@ extern "C" void* func_00245B58(void* self)
     *(void**)((char*)self + 0x8) = D_0047C608;
     return func_0039E390(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", cFELoadState_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -137,11 +123,8 @@ extern "C" void cFELoadState_onCreateScreen(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245C60);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
 extern char D_004A2BD0[];
@@ -160,11 +143,8 @@ extern "C" int func_00245C60(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245CD0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -178,11 +158,8 @@ extern "C" void func_00245CD0(void* self, void* widget)
         cFELoadState_widgetCreateQP(self, widget);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245D28);
-#ifdef SKIP_ASM
 extern void* D_0047C538[];
 extern "C" void* func_0039E390(void* self);
 
@@ -191,11 +168,8 @@ extern "C" void* func_00245D28(void* self)
     *(void**)((char*)self + 0x8) = D_0047C538;
     return func_0039E390(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0047BFA0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -210,19 +184,13 @@ extern "C" void cFELoadStateInLodge_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245DB8__FPv);
-#ifdef SKIP_ASM
 void func_00245DB8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245DC0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
 extern char D_004A2BD0[];
@@ -241,11 +209,8 @@ extern "C" int func_00245DC0(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245E30);
-#ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 
 extern "C" int func_00245E30(int* a, int* b)
@@ -257,11 +222,8 @@ extern "C" int func_00245E30(int* a, int* b)
     }
     return va != vb;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245E78);
-#ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 
 extern "C" int func_00245E78(int* a, int* b)
@@ -273,11 +235,8 @@ extern "C" int func_00245E78(int* a, int* b)
     }
     return va != vb;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245EC0);
-#ifdef SKIP_ASM
 extern int D_00536708[];
 
 extern "C" int func_00245EC0(int* a, int* b)
@@ -289,11 +248,8 @@ extern "C" int func_00245EC0(int* a, int* b)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245F00);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0047DB28[];
 
@@ -304,22 +260,16 @@ extern "C" void func_00245F00(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 extern "C" void* func_0039E390(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245F30__FPv);
-#ifdef SKIP_ASM
 void* func_00245F30(void* self)
 {
     return func_0039E390(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245F50);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -369,11 +319,8 @@ extern "C" void func_00245F50(void* self)
     }
     *(int*)((char*)self + 0x4C) = 300;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00246098);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
@@ -426,11 +373,8 @@ extern "C" void func_00246098(void* self)
     }
     func_0039E510(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_002461E0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00186A08(void* self, void* engine);
@@ -450,16 +394,12 @@ extern "C" void func_002461E0(void* self, void* item, int msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00246268);
-#ifdef SKIP_ASM
 extern "C" int func_00246268(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
-#endif
 
 INCLUDE_ASM("fe/festateloadhint", func_00246278);
 
@@ -470,8 +410,6 @@ INCLUDE_ASM("fe/festateloadhint", func_00246CF8);
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_InitwidgetMultiP);
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", cFELoadState_widgetCreateQP);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -562,27 +500,20 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         func_003A0E90(widget, (char*)text);
     }
 }
-#endif
 
 extern "C" void* func_00242EB8(int, int);
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00247E20__FPv);
-#ifdef SKIP_ASM
 void* func_00247E20(void* self)
 {
     return func_00242EB8(1, 0xffff);
 }
-#endif
 
 extern "C" void* func_00242EB8(int, int);
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00247E40__FPv);
-#ifdef SKIP_ASM
 void* func_00247E40(void* self)
 {
     return func_00242EB8(0, 0xffff);
 }
-#endif
 

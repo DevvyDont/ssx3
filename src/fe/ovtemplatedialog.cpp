@@ -3,8 +3,6 @@
 INCLUDE_ASM("fe/ovtemplatedialog", cPDATemplate_onCreateScreen);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8B0);
-#ifdef SKIP_ASM
 extern "C" int func_0020A8B0(int a0, int a1)
 {
     if ((unsigned int)(a0 - 6) < 6) {
@@ -15,11 +13,8 @@ extern "C" int func_0020A8B0(int a0, int a1)
     }
     return 0xa;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8F8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -108,15 +103,12 @@ extern "C" void func_0020A8F8(int mode)
         func_0020AB50(state);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020AB50);
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020BAB8);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CA10);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -172,13 +164,10 @@ extern "C" void func_0020CA10(void)
     }
     D_004A2468 = 0;
 }
-#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CB58);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CBA0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int func_0039F9D8(void* stack, int hash);
 extern void* D_004A28A8;
@@ -189,11 +178,8 @@ extern "C" int func_0020CBA0(void)
     char* stack = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18;
     return func_0039F9D8(stack, GetHashValue32(D_0046F818)) != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CBE8);
-#ifdef SKIP_ASM
 class cUIState20CBE8 {
 public:
     int pad[2];
@@ -242,11 +228,8 @@ extern "C" int func_0020CBE8(void)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CC60);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -270,15 +253,12 @@ extern "C" void func_0020CC60(void)
         func_0020AB50(0xC);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CCF8);
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CFD0);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_addPDATemplate);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
@@ -298,11 +278,8 @@ extern "C" void cOVStateManager_addPDATemplate(void)
         cUIStateStack_pushExplicit(mgr + 0x18, t);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D190);
-#ifdef SKIP_ASM
 class cOVTemplate20D190 {
 public:
     int pad[2];
@@ -319,11 +296,8 @@ extern "C" void func_0020D190(void)
     }
     D_004A270C = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D1D8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
@@ -370,20 +344,14 @@ extern "C" void func_0020D1D8(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D308);
-#ifdef SKIP_ASM
 extern "C" int func_0020D308(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D318);
-#ifdef SKIP_ASM
 extern int D_004A26FC;
 
 extern "C" void func_0020D318(void* self, int a1, int key)
@@ -392,13 +360,10 @@ extern "C" void func_0020D318(void* self, int a1, int key)
         D_004A26FC = 1;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onCreateScreen);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D4F0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
 extern char D_0046E818[];
@@ -414,15 +379,12 @@ extern "C" void func_0020D4F0(void* self, void* item)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
 
 INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetEvent);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020DBD0);
-#ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -447,11 +409,8 @@ extern "C" void func_0020DBD0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020DC68);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -516,5 +475,4 @@ extern "C" void func_0020DC68(char* self)
         }
     }
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/feflowstate", cFEFlowState_setNumStates);
-#ifdef SKIP_ASM
 extern "C" void func_001A06B0(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
@@ -18,11 +16,8 @@ extern "C" void cFEFlowState_setNumStates(void* self, int a1)
     *(void**)((char*)self + 0x4) = p;
     func_00416210(p, 0, n);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feflowstate", func_001A06B0);
-#ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 
 extern "C" void func_001A06B0(void* self)
@@ -34,23 +29,16 @@ extern "C" void func_001A06B0(void* self)
     }
     *(char*)self = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feflowstate", func_001A06F0);
-#ifdef SKIP_ASM
 extern "C" signed char func_001A06F0(void* self, int a1)
 {
     return *(signed char*)(*(int*)((char*)self + 0x4) + (signed char)a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feflowstate", func_001A0708);
-#ifdef SKIP_ASM
 extern "C" void func_001A0708(void* self, int a1, int a2)
 {
     *(char*)(*(int*)((char*)self + 0x4) + (signed char)a1) = a2;
 }
-#endif
 

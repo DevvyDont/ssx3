@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_00481730[];
@@ -20,11 +18,8 @@ extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size)
 {
     cReplayFramePtr_setBlockInl(self, (char*)operator_new_tag(size, D_00481730, 0, 0), 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E950);
-#ifdef SKIP_ASM
 extern "C" void func_0026E950(void* self, int a1, int a2)
 {
     *(int*)((char*)self + 0x4) = a1;
@@ -32,11 +27,8 @@ extern "C" void func_0026E950(void* self, int a1, int a2)
     *(int*)((char*)self + 0xc) = a1;
     *(int*)((char*)self + 0x10) = a2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E968);
-#ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
 extern "C" void func_0026E968(void* self)
@@ -47,7 +39,6 @@ extern "C" void func_0026E968(void* self)
     }
     cReplayFramePtr_setBlockInl(self, 0, 0);
 }
-#endif
 
 struct cReplayFramePtr {
     char pad_0x00[0x4];
@@ -57,17 +48,12 @@ struct cReplayFramePtr {
 };
 
 //100%
-INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
-#ifdef SKIP_ASM
 void cReplayFramePtr_readRewind(cReplayFramePtr* self)
 {
     self->field_0xC = self->field_0x4;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E9C0__FPv);
-#ifdef SKIP_ASM
 int func_0026E9C0(void* self)
 {
     int t0 = *(int*)((char*)self + 0x4);
@@ -75,11 +61,8 @@ int func_0026E9C0(void* self)
     *(int*)((char*)self + 0x8) = t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E9D0);
-#ifdef SKIP_ASM
 extern "C" void func_003E6574(void* dst, void* src, int size);
 
 extern "C" void func_0026E9D0(void* self, void* src, int n)
@@ -88,11 +71,8 @@ extern "C" void func_0026E9D0(void* self, void* src, int n)
     *(char**)((char*)self + 0x8) += n;
     *(int*)((char*)self + 0x10) += n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EA20);
-#ifdef SKIP_ASM
 extern "C" void func_003E6574(void* dst, void* src, int size);
 
 extern "C" void func_0026EA20(void* self, void* dst, int n)
@@ -100,11 +80,8 @@ extern "C" void func_0026EA20(void* self, void* dst, int n)
     func_003E6574(dst, *(char**)((char*)self + 0xC), n);
     *(char**)((char*)self + 0xC) += n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EA68);
-#ifdef SKIP_ASM
 class cStream26EA68 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -124,11 +101,8 @@ extern "C" short func_0026EA68(cStream26EA68* self)
     *(int*)((char*)self + 0xC) = pos;
     return hdr.id;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EAB8);
-#ifdef SKIP_ASM
 extern "C" int func_002C85A0(void* src, int a, int dst);
 
 extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
@@ -146,11 +120,8 @@ extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
     cReplayFramePtr_readRewind(self);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EB48);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 struct sRefSet_EB48 {
@@ -211,11 +182,8 @@ extern "C" void* func_0026EB48(cStream_EB48* stream)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EC08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRefSet_EC08 {
     char pad_0x0[0x1C];
@@ -280,11 +248,8 @@ extern "C" void* func_0026EC08(cStream_EC08* stream, void* owner)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ECD8);
-#ifdef SKIP_ASM
 struct sFpSerVEntry {
     short delta;
     short index;
@@ -303,11 +268,8 @@ extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
     }
     out->vt[1].fn((char*)out + out->vt[1].delta, &id, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ED28);
-#ifdef SKIP_ASM
 extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
 {
     struct {
@@ -324,27 +286,18 @@ extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
     }
     out->vt[1].fn((char*)out + out->vt[1].delta, &rec, 8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ED88__FPv);
-#ifdef SKIP_ASM
 void func_0026ED88(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", cReplayFramePtr_getFrameBlock__Fv);
-#ifdef SKIP_ASM
 void cReplayFramePtr_getFrameBlock()
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ED98);
-#ifdef SKIP_ASM
 extern "C" void func_0026EDD8(void* self);
 
 extern "C" void func_0026ED98(void* self)
@@ -352,11 +305,8 @@ extern "C" void func_0026ED98(void* self)
     *(int*)((char*)self + 0x630) = (*(int*)((char*)self + 0x630) + 1) % 9;
     func_0026EDD8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EDD8);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern int D_00445438[];
 extern "C" void func_00161FA0(void* self, int mode);
@@ -375,11 +325,8 @@ extern "C" void func_0026EDD8(void* self)
         func_00161FA0(*(void**)(list->riders[i] + 0xA8), D_00445438[*(int*)((char*)self + 0x630)]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EE68);
-#ifdef SKIP_ASM
 void* func_0016D1D8(void* p);
 extern void* D_004C5830[];
 extern "C" void func_0026EDD8(void* self);
@@ -389,11 +336,8 @@ extern "C" void func_0026EE68(void* self)
     func_0016D1D8(D_004C5830);
     func_0026EDD8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EEA0);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern void* D_004C5830[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
@@ -419,21 +363,15 @@ extern "C" void func_0026EEA0(void* self)
     }
     *(int*)((char*)self + 0x630) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EF30);
-#ifdef SKIP_ASM
 extern "C" void func_0026EF30(void* self)
 {
     func_0016D1D8(D_004C5830);
     *(int*)((char*)self + 0x634) = (*(int*)((char*)self + 0x634) + 1) % 9;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EF80);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern void* D_004C5830[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
@@ -444,11 +382,8 @@ extern "C" void func_0026EF80()
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
     func_0015DFD8(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84) + 0x4), 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EFB8);
-#ifdef SKIP_ASM
 extern "C" void* func_0026D5E8(void* self);
 void* func_0026E5A8(void* self);
 extern "C" void* func_00272288(void* self);
@@ -473,11 +408,8 @@ extern "C" void* func_0026EFB8(void* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F088);
-#ifdef SKIP_ASM
 struct sFpOwner26F428;
 struct cReplayFramePtr_F980;
 extern "C" void func_0026F428(sFpOwner26F428* self);
@@ -534,11 +466,8 @@ extern "C" void func_0026F088(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F180);
-#ifdef SKIP_ASM
 struct sReplayBlock_F180 {
     char data[0x38];
 };
@@ -570,13 +499,10 @@ extern "C" void func_0026F180(cReplayFramePtr_F180* self)
     func_0026F4A0(self, 10);
     func_0026F228(self);
 }
-#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026F228);
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F428);
-#ifdef SKIP_ASM
 void func_0026E5C0(void* self);
 
 struct sFpEntry26F428 {
@@ -599,30 +525,21 @@ extern "C" void func_0026F428(sFpOwner26F428* self)
     func_0026E5C0((char*)self + 0x3B0);
     func_0026E5C0((char*)self + 0x3BC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F498__FPv);
-#ifdef SKIP_ASM
 void func_0026F498(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F4A0__FPvi);
-#ifdef SKIP_ASM
 void func_0026F4A0(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }
-#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026F4A8);
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F7B8);
-#ifdef SKIP_ASM
 void func_0026F4A0(void* self, int state);
 
 extern "C" void func_0026F7B8(int* self)
@@ -635,11 +552,8 @@ extern "C" void func_0026F7B8(int* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F7F8);
-#ifdef SKIP_ASM
 struct sFrameDesc26F7F8 {
     short type;
     char a;
@@ -663,11 +577,8 @@ extern "C" void func_0026F7F8(void* self)
         func_0026D740_2(self, block);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F850);
-#ifdef SKIP_ASM
 extern "C" void func_0026DB88(void* self, void* p);
 extern "C" void func_00270238(void* self, void* p);
 
@@ -680,20 +591,14 @@ extern "C" void func_0026F850(void* self)
         *(void**)((char*)self + 0x3D0) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F898__FPvi);
-#ifdef SKIP_ASM
 void func_0026F898(void* self, int val)
 {
     *(int*)((char*)self + 0x28) = val;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/frameptr", func_0026F8A0);
-#ifdef SKIP_ASM
 extern "C" void func_0026EE68(void* self);
 extern "C" void func_0026EF30(void* self);
 extern "C" void func_0026F7F8(void* self);
@@ -736,11 +641,8 @@ extern "C" void func_0026F8A0(cReplayFramePtr_F8A0* self, void* a1, int a2, int 
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/frameptr", func_0026F980);
-#ifdef SKIP_ASM
 extern "C" void func_0026EEA0(void* self);
 extern "C" void func_0026EF80(void* self);
 void func_0026F4A0(void* self, int state);
@@ -786,11 +688,8 @@ extern "C" void func_0026F980(cReplayFramePtr_F980* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026FA50);
-#ifdef SKIP_ASM
 extern "C" void func_0026FA50(void* self)
 {
     int s = *(int*)((char*)self + 0x0);
@@ -799,11 +698,8 @@ extern "C" void func_0026FA50(void* self)
         *(int*)((char*)self + 0x60C) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026FA78);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern int D_00445438[];
 int func_00320C48(void* pad, int button);
@@ -833,7 +729,6 @@ extern "C" void func_0026FA78(int* self)
         cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
     }
 }
-#endif
 
 INCLUDE_ASM("replay/frameptr", func_0026FB88);
 

@@ -6,39 +6,28 @@ extern const uint D_004FF018[];
 
 //100%
 //https://decomp.me/scratch/ViFdz
-INCLUDE_ASM("bx/bxrandom", BXsrand__FUi);
-#ifdef SKIP_ASM
 void BXsrand(uint seed)
 {
 	cBxPseudoRng_Seed((uint*)D_004FF018, seed);
 	return;
 }
-#endif
 
-INCLUDE_ASM("bx/bxrandom", BXrand__Fv);
-#ifdef SKIP_ASM
 
 void BXrand()
 {
     cBxPseudoRng_NextInt((uint*)D_004FF018);
 }
-#endif
 
 
 //100%
-INCLUDE_ASM("bx/bxrandom", AIrand__Fv);
-#ifdef SKIP_ASM
 extern const uint D_004FF030[];
 
 unsigned int AIrand()
 {
     return cBxPseudoRng_NextInt((uint*)D_004FF030);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxrandom", AIrandf__Fff);
-#ifdef SKIP_ASM
 float AIrandf(float a, float b)
 {
     union {
@@ -48,10 +37,7 @@ float AIrandf(float a, float b)
     r.i = (AIrand() & 0x7FFFFF) | 0x3F800000; // float in [1.0, 2.0)
     return a + (b - a) * (r.f - 1.0f);
 }
-#endif
 
-INCLUDE_ASM("bx/bxrandom", func_00317890__Fff);
-#ifdef SKIP_ASM
 float func_00317890(float param_1, float param_2)
 {
 	float fVar1;
@@ -59,43 +45,31 @@ float func_00317890(float param_1, float param_2)
 	fVar1 = AIrandf(-1.0, 1.0);
 	return param_1 + param_2 * fVar1;
 }
-#endif
 
 extern "C" void* func_003E6574(void*, void*, int);
 
 //100%
-INCLUDE_ASM("bx/bxrandom", func_003178E0__FPv);
-#ifdef SKIP_ASM
 void* func_003178E0(void* self)
 {
     return func_003E6574(self, (void*)D_004FF030, 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxrandom", func_00317908__FPv);
-#ifdef SKIP_ASM
 void* func_00317908(void* self)
 {
     return func_003E6574((void*)D_004FF030, self, 0x18);
 }
-#endif
 
 extern void* D_0048DCB0[];
 extern "C" void* func_003E6574(void*, void*, int);
 
 //100%
-INCLUDE_ASM("bx/bxrandom", func_00317930__FPv);
-#ifdef SKIP_ASM
 void* func_00317930(void* self)
 {
     return func_003E6574(self, (void*)D_0048DCB0, 0x18);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxrandom", cBxPseudoRng_Seed);
-#ifdef SKIP_ASM
 extern "C" void cBxPseudoRng_Seed(uint* state, uint seed)
 {
     ulong x = seed;
@@ -107,11 +81,8 @@ extern "C" void cBxPseudoRng_Seed(uint* state, uint seed)
     x += 0x97327AE1; state[4] = x;
     x += 0xD1A9FBE7; state[5] = x;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxrandom", cBxPseudoRng_NextInt);
-#ifdef SKIP_ASM
 extern "C" uint cBxPseudoRng_NextInt(uint* state)
 {
     uint a = state[5];
@@ -135,4 +106,3 @@ extern "C" uint cBxPseudoRng_NextInt(uint* state)
     }
     return t;
 }
-#endif

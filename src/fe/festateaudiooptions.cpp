@@ -5,8 +5,6 @@ INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetCreate);
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetEvent);
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196B08);
-#ifdef SKIP_ASM
 extern "C" int func_00196B08(void* self, int a1, int a2, int a3)
 {
     if (a2 == 6 && (a3 == 2 || a3 == 3 || a3 == 4)) {
@@ -25,11 +23,8 @@ extern "C" int func_00196B08(void* self, int a1, int a2, int a3)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196B90);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern "C" void* cBE_getBE();
@@ -146,11 +141,8 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
     func_00197AD8(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196DB0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -186,11 +178,8 @@ extern "C" void func_00196DB0(void* self)
     }
     func_0039B760(*(void**)((char*)self + 0x170), *(unsigned char*)((char*)self + 0x14C));
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196E80);
-#ifdef SKIP_ASM
 struct sVEntry00196E80 {
     short delta;
     short index;
@@ -214,11 +203,8 @@ extern "C" void func_00196E80(void* self)
     }
     func_0039E4A0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196F00);
-#ifdef SKIP_ASM
 extern "C" void func_00186518(void* self);
 extern "C" void func_00197B88(void* self);
 extern "C" void func_00197E70(void* self);
@@ -234,11 +220,8 @@ extern "C" void func_00196F00(void* self)
     cFEStateRequestLine_updateButtonsText(self, 0);
     cFEStateRequestLine_updateHelpText(self, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196F50);
-#ifdef SKIP_ASM
 extern "C" void func_00197DB8(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
@@ -252,5 +235,4 @@ extern "C" int func_00196F50(void* self, int a1)
     }
     return 0;
 }
-#endif
 

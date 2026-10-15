@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045DC70[];
 extern char D_0045DC80[];
@@ -37,11 +35,8 @@ extern "C" void cFEStateMemCard_onCreateScreen(void* self)
     func_00227F80(D_004A28A8);
     ((cUIObjK186B50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DC80)))->v09(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186BF0);
-#ifdef SKIP_ASM
 extern char D_004A14C0[];
 extern "C" void func_001D8DE0(void* self);
 extern "C" int func_0023C898(void* mp);
@@ -72,11 +67,8 @@ extern "C" void func_00186BF0(void* self)
         ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DC80)))->v09(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186C98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0045DC90[];
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
@@ -157,11 +149,8 @@ extern "C" void func_00186C98(void)
     *(int*)((char*)st + 0x19C) = 4;
     st->v36(buf, 1, 1, 0, 0, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186D60);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -225,13 +214,10 @@ extern "C" void func_00186D60(void)
     sVtV_86D60* vvt = *(sVtV_86D60**)(w2 + 8);
     vvt[25].fn(w2 + vvt[25].delta, 1);
 }
-#endif
 
 INCLUDE_ASM("fe/fememcard", func_00186F40);
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186F90);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -293,11 +279,8 @@ extern "C" void func_00186F90(void)
     }
     func_00187270((sFEMemCardK187270*)D_004A14B8_86F90);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187148);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cFEMemCardStateK187148 {
 public:
@@ -352,11 +335,8 @@ extern "C" void func_00187148(void)
     D_004A14B8_K187148->v41();
     *(int*)((char*)D_004A14B8_K187148 + 0x1C0) = 6;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187180);
-#ifdef SKIP_ASM
 extern void* D_004A14B8;
 extern "C" void func_001D83A8(void);
 extern "C" void func_00187A38(void* self);
@@ -366,11 +346,8 @@ extern "C" void func_00187180(void)
     func_001D83A8();
     func_00187A38(D_004A14B8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_001871A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A28A8;
 struct sFEMemCardK1871A8 {
@@ -407,11 +384,8 @@ extern "C" void func_001871A8(void)
     func_0023C8F0(mp, 2);
     D_004A14B8_K1871A8->state = 2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187230);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A28A8;
 extern int D_004A14BC;
@@ -434,11 +408,8 @@ extern "C" void func_00187230(void)
     D_004A14B8_K187230->f234 = 0;
     func_0023C8F0(mp, 2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187270);
-#ifdef SKIP_ASM
 extern "C" void func_00187318(void* self);
 extern "C" void func_001877B0(void);
 extern "C" void func_00187920(void);
@@ -466,11 +437,8 @@ extern "C" void func_00187270(sFEMemCardK187270* self)
         func_00187318(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187318);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void func_00228238(void* p);
 
@@ -481,11 +449,8 @@ extern "C" void func_00187318(void* self)
         func_00228238(D_004A28A8);
     *(int*)((char*)self + 0x1AC) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187360);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern void* D_004A14B8;
 extern char D_0045DCE8[];
@@ -554,11 +519,8 @@ extern "C" void func_00187360(void)
     sVtV_00187360* bvt2 = *(sVtV_00187360**)(box2 + 8);
     bvt2[25].fn(box2 + bvt2[25].delta, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_001874E8);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern int D_004A14BC;
 extern "C" void* func_00227F80(void* p);
@@ -588,13 +550,10 @@ extern "C" void func_001874E8(void* self)
     }
     func_00187318(self);
 }
-#endif
 
 INCLUDE_ASM("fe/fememcard", func_00187580);
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_001876A8);
-#ifdef SKIP_ASM
 extern void* D_004A14B8;
 extern "C" void func_00241E18(void*, unsigned short*, int);
 extern "C" void func_003A0D00(void* self, unsigned short* str);
@@ -623,11 +582,8 @@ extern "C" void func_001876A8(void)
         vt[9].fn((char*)obj + vt[9].delta, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_001877B0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern void* D_004A14B8;
 extern int D_004A14BC;
@@ -694,11 +650,8 @@ extern "C" void func_001877B0(void)
             func_0039FCC8(obj, anim, 9, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187920);
-#ifdef SKIP_ASM
 extern char D_0045DD00[];
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -741,11 +694,8 @@ extern "C" void func_00187920(void)
     func_001D9308(D_004A14B8, 1);
     *(int*)((char*)D_004A14B8 + 0x1A8) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187A38);
-#ifdef SKIP_ASM
 extern "C" void* func_00227F80(void* p);
 extern "C" int func_0023C8D0(void* mp);
 extern "C" void func_0023C8F0(void* mp, int mode);
@@ -819,16 +769,12 @@ extern "C" void func_00187A38(void* p)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187C10__FPv);
-#ifdef SKIP_ASM
 int func_00187C10(void* self)
 {
     return 0;
 }
-#endif
 
 
 INCLUDE_ASM("fe/fememcard", func_00187C18);

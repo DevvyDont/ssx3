@@ -12,8 +12,6 @@ struct cBXString2 {
 };
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", cBXString_cBXString__FP10cBXString2);
-#ifdef SKIP_ASM
 struct cBXStrK2 {
     void* str;
 };
@@ -31,13 +29,10 @@ cBXString2* cBXString_cBXString(cBXString2* self)
     }
     return self;
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_002688E0);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268950);
-#ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 extern char D_004810E0[];
@@ -52,7 +47,6 @@ extern "C" void func_00268950(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_002689B8);
 
@@ -67,29 +61,21 @@ INCLUDE_ASM("bx/bxstringctor", func_00268A80);
 INCLUDE_ASM("bx/bxstringctor", func_00268A88);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268A90);
-#ifdef SKIP_ASM
 extern "C" void func_00268A90(void* self, void* a1, int a2)
 {
     func_0025D6C0(a2 + D_004A2FB0.v);
 }
-#endif
 
 extern sShortPad16 D_004A2FB8;
 extern "C" void func_002599B0(int);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
-#ifdef SKIP_ASM
 extern "C" void func_00268AB8(void* self, void* a1, int a2)
 {
     func_002599B0(a2 + D_004A2FB8.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268AE0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A2FC0;
 extern "C" void func_00259A60(int);
 
@@ -97,11 +83,8 @@ extern "C" void func_00268AE0(void* self, void* a1, int a2)
 {
     func_00259A60(a2 + D_004A2FC0.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B08);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A2FF0;
 void* func_002598A8(void* self);
 
@@ -109,11 +92,8 @@ extern "C" void func_00268B08(void* self, void* a1, char* a2)
 {
     func_002598A8(a2 + D_004A2FF0.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B30);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A2FF8;
 extern "C" void func_00259B10(int);
 
@@ -121,11 +101,8 @@ extern "C" void func_00268B30(void* self, void* a1, int a2)
 {
     func_00259B10(a2 + D_004A2FF8.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B58);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3000;
 extern "C" void func_002598C8(int);
 
@@ -133,11 +110,8 @@ extern "C" void func_00268B58(void* self, void* a1, int a2)
 {
     func_002598C8(a2 + D_004A3000.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B80);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3008;
 extern "C" void func_0025A1D0(int);
 
@@ -145,11 +119,8 @@ extern "C" void func_00268B80(void* self, void* a1, int a2)
 {
     func_0025A1D0(a2 + D_004A3008.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268BA8);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3020;
 extern "C" void func_0025B848(int);
 
@@ -157,11 +128,8 @@ extern "C" void func_00268BA8(void* self, void* a1, int a2)
 {
     func_0025B848(a2 + D_004A3020.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268BD0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3088;
 extern "C" void func_0025BD30(int);
 
@@ -169,11 +137,8 @@ extern "C" void func_00268BD0(void* self, void* a1, int a2)
 {
     func_0025BD30(a2 + D_004A3088.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268BF8);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A30A8;
 extern "C" void func_0025C0C0(int);
 
@@ -181,11 +146,8 @@ extern "C" void func_00268BF8(void* self, void* a1, int a2)
 {
     func_0025C0C0(a2 + D_004A30A8.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C20);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A30B0;
 extern "C" void func_0025C2D8(int);
 
@@ -193,11 +155,8 @@ extern "C" void func_00268C20(void* self, void* a1, int a2)
 {
     func_0025C2D8(a2 + D_004A30B0.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C48);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A30B8;
 extern "C" void func_0025C4F0(int);
 
@@ -205,11 +164,8 @@ extern "C" void func_00268C48(void* self, void* a1, int a2)
 {
     func_0025C4F0(a2 + D_004A30B8.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C70);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A30E8;
 extern "C" void func_0025C8A8(int);
 
@@ -217,11 +173,8 @@ extern "C" void func_00268C70(void* self, void* a1, int a2)
 {
     func_0025C8A8(a2 + D_004A30E8.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C98);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3118;
 extern "C" void func_0025CEB0(int);
 
@@ -229,11 +182,8 @@ extern "C" void func_00268C98(void* self, void* a1, int a2)
 {
     func_0025CEB0(a2 + D_004A3118.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268CC0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3120;
 extern "C" void func_0025D048(int);
 
@@ -241,11 +191,8 @@ extern "C" void func_00268CC0(void* self, void* a1, int a2)
 {
     func_0025D048(a2 + D_004A3120.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268CE8);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3138;
 extern "C" void func_0025D2D8(int);
 
@@ -253,11 +200,8 @@ extern "C" void func_00268CE8(void* self, void* a1, int a2)
 {
     func_0025D2D8(a2 + D_004A3138.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D10);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3140;
 extern "C" void func_0025D538(int);
 
@@ -265,11 +209,8 @@ extern "C" void func_00268D10(void* self, void* a1, int a2)
 {
     func_0025D538(a2 + D_004A3140.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D38);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3148;
 extern "C" void func_0025D8F8(int);
 
@@ -277,11 +218,8 @@ extern "C" void func_00268D38(void* self, void* a1, int a2)
 {
     func_0025D8F8(a2 + D_004A3148.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D60);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3158;
 extern "C" void func_0025DB80(int);
 
@@ -289,11 +227,8 @@ extern "C" void func_00268D60(void* self, void* a1, int a2)
 {
     func_0025DB80(a2 + D_004A3158.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D88);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3160;
 extern "C" void func_0025DDE0(int);
 
@@ -301,11 +236,8 @@ extern "C" void func_00268D88(void* self, void* a1, int a2)
 {
     func_0025DDE0(a2 + D_004A3160.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268DB0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3170;
 extern "C" void func_0025DF98(int);
 
@@ -313,11 +245,8 @@ extern "C" void func_00268DB0(void* self, void* a1, int a2)
 {
     func_0025DF98(a2 + D_004A3170.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268DD8);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3178;
 extern "C" void func_0025E138(int);
 
@@ -325,11 +254,8 @@ extern "C" void func_00268DD8(void* self, void* a1, int a2)
 {
     func_0025E138(a2 + D_004A3178.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268E00);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A31B0;
 extern "C" void func_0025E590(int);
 
@@ -337,11 +263,8 @@ extern "C" void func_00268E00(void* self, void* a1, int a2)
 {
     func_0025E590(a2 + D_004A31B0.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268E28);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A31B8;
 extern "C" void func_0025E7F0(int);
 
@@ -349,13 +272,10 @@ extern "C" void func_00268E28(void* self, void* a1, int a2)
 {
     func_0025E7F0(a2 + D_004A31B8.v);
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_00268E50);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268E78);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3210;
 extern "C" void func_0025F030(int);
 
@@ -363,11 +283,8 @@ extern "C" void func_00268E78(void* self, void* a1, int a2)
 {
     func_0025F030(a2 + D_004A3210.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268EA0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3248;
 extern "C" void func_0025F8A0(int);
 
@@ -375,11 +292,8 @@ extern "C" void func_00268EA0(void* self, void* a1, int a2)
 {
     func_0025F8A0(a2 + D_004A3248.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268EC8);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3268;
 void func_0025FC20(void* self);
 
@@ -387,11 +301,8 @@ extern "C" void func_00268EC8(void* self, void* a1, char* a2)
 {
     func_0025FC20(a2 + D_004A3268.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268EF0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3318;
 extern "C" void func_00260C68(int);
 
@@ -399,11 +310,8 @@ extern "C" void func_00268EF0(void* self, void* a1, int a2)
 {
     func_00260C68(a2 + D_004A3318.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F18);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3340;
 extern "C" void func_002615C8(int);
 
@@ -411,11 +319,8 @@ extern "C" void func_00268F18(void* self, void* a1, int a2)
 {
     func_002615C8(a2 + D_004A3340.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F40);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3348;
 extern "C" void func_00261A28(int);
 
@@ -423,11 +328,8 @@ extern "C" void func_00268F40(void* self, void* a1, int a2)
 {
     func_00261A28(a2 + D_004A3348.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F68);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3350;
 extern "C" void func_00261770(int);
 
@@ -435,11 +337,8 @@ extern "C" void func_00268F68(void* self, void* a1, int a2)
 {
     func_00261770(a2 + D_004A3350.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F90);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3380;
 extern "C" void func_00261970(int);
 
@@ -447,11 +346,8 @@ extern "C" void func_00268F90(void* self, void* a1, int a2)
 {
     func_00261970(a2 + D_004A3380.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268FB8);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A3388;
 extern "C" void func_002618C0(int);
 
@@ -459,11 +355,8 @@ extern "C" void func_00268FB8(void* self, void* a1, int a2)
 {
     func_002618C0(a2 + D_004A3388.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268FE0);
-#ifdef SKIP_ASM
 extern sShortPad16 D_004A33A0;
 void func_00261A20(void* self);
 
@@ -471,11 +364,8 @@ extern "C" void func_00268FE0(void* self, void* a1, char* a2)
 {
     func_00261A20(a2 + D_004A33A0.v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269008);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -523,11 +413,8 @@ extern "C" void func_00269008(void* self, int a1, int a2)
     void* mp = m;
     sMsgList_00269008_insert(*(sMsgListNode_00269008**)(g + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002690C8);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -575,11 +462,8 @@ extern "C" void func_002690C8(void* self, int a1, int a2)
     void* mp = m;
     sMsgList_002690C8_insert(*(sMsgListNode_002690C8**)(g + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269188);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -630,11 +514,8 @@ extern "C" void func_00269188(void* self, int a1)
     void* mp = m;
     sMsgList_00269188_insert(*(sMsgListNode_00269188**)(g + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269240);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -682,11 +563,8 @@ extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
     void* mp = m;
     sMsgList_00269240_insert(*(sMsgListNode_00269240**)(g + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269300);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -734,11 +612,8 @@ extern "C" void func_00269300(void* self, int a1, int a2)
     void* mp = m;
     sMsgList_00269300_insert(*(sMsgListNode_00269300**)(g + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002693C0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -789,11 +664,8 @@ extern "C" void func_002693C0(void* self, int a1)
     void* mp = m;
     sMsgList_002693C0_insert(*(sMsgListNode_002693C0**)(g + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269478);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -845,11 +717,8 @@ extern "C" void func_00269478(void* self, int a1)
     void* mp = m;
     sMsgList_00269478_insert(*(sMsgListNode_00269478**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269538);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -903,11 +772,8 @@ extern "C" void func_00269538(void* self, int a1, int a2)
     void* mp = m;
     sMsgList_00269538_insert(*(sMsgListNode_00269538**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269608);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -969,11 +835,8 @@ extern "C" void func_00269608(void* self)
     void* mp = m;
     sMsgList_00269608_insert(*(sMsgListNode_00269608**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002696F8);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1027,11 +890,8 @@ extern "C" void func_002696F8(void* self)
     void* mp = m;
     sMsgList_002696F8_insert(*(sMsgListNode_002696F8**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002697D0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1083,11 +943,8 @@ extern "C" void func_002697D0(void* self, int a1)
     void* mp = m;
     sMsgList_002697D0_insert(*(sMsgListNode_002697D0**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269890);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1139,11 +996,8 @@ extern "C" void func_00269890(void* self, int a1)
     void* mp = m;
     sMsgList_00269890_insert(*(sMsgListNode_00269890**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269948);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1197,11 +1051,8 @@ extern "C" void func_00269948(void* self, int a1, int a2)
     void* mp = m;
     sMsgList_00269948_insert(*(sMsgListNode_00269948**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269A18);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1255,11 +1106,8 @@ extern "C" void func_00269A18(void* self, int a1, int a2)
     void* mp = m;
     sMsgList_00269A18_insert(*(sMsgListNode_00269A18**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269AE0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1310,11 +1158,8 @@ extern "C" void func_00269AE0(void* self, int a1)
     void* mp = m;
     sMsgList_00269AE0_insert(*(sMsgListNode_00269AE0**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269B90);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1365,11 +1210,8 @@ extern "C" void func_00269B90(void* self, int a1)
     void* mp = m;
     sMsgList_00269B90_insert(*(sMsgListNode_00269B90**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269C40);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1420,11 +1262,8 @@ extern "C" void func_00269C40(void* self, int a1)
     void* mp = m;
     sMsgList_00269C40_insert(*(sMsgListNode_00269C40**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269CF0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1475,22 +1314,16 @@ extern "C" void func_00269CF0(void* self, int a1)
     void* mp = m;
     sMsgList_00269CF0_insert(*(sMsgListNode_00269CF0**)(D_004A3028 + 0xF0), mp);
 }
-#endif
 
 extern "C" void* func_00267E18(void* self);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269DA0__FPv);
-#ifdef SKIP_ASM
 void* func_00269DA0(void* self)
 {
     return func_00267E18(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269DC0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00480488[];
 extern char D_004813E0[];
@@ -1510,20 +1343,14 @@ extern "C" sNode00269DC0* func_00269DC0(void* self)
     n->value = v;
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269E20__FPv);
-#ifdef SKIP_ASM
 void* func_00269E20(void* self)
 {
     return func_00267E18(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269E40);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00480488[];
 extern char D_004813C0[];
@@ -1543,22 +1370,16 @@ extern "C" sNode00269E40* func_00269E40(void* self)
     n->value = v;
     return n;
 }
-#endif
 
 extern "C" void* func_00267468(int, int);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269EA0__FPv);
-#ifdef SKIP_ASM
 void* func_00269EA0(void* self)
 {
     return func_00267468(1, 0xffff);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269EC0__FPv);
-#ifdef SKIP_ASM
 int func_00269EC0(void* self)
 {
     int t0 = 0x2e;
@@ -1566,11 +1387,8 @@ int func_00269EC0(void* self)
     *(int*)((char*)self + 0x3c) = 1;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269ED8);
-#ifdef SKIP_ASM
 extern "C" void func_0026BA68(void* p);
 
 extern "C" void func_00269ED8(void* self, int a1, int id)
@@ -1581,11 +1399,8 @@ extern "C" void func_00269ED8(void* self, int a1, int id)
         func_0026BA68((char*)self + 0x3C);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269F18);
-#ifdef SKIP_ASM
 struct sBXVec4K2 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1631,35 +1446,26 @@ extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
         *t = hi;
     return func_0026AB20_K2(path, 0, *t);
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A000);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A068__FPv);
-#ifdef SKIP_ASM
 void func_0026A068(void* self)
 {
     *(int*)((char*)self + 0x38) = 0;
 }
-#endif
 
 extern "C" void func_0026BA88(void*);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A070);
-#ifdef SKIP_ASM
 extern "C" void func_0026A070(void* self, int a1, int a2)
 {
     if (a2 == 0) {
         func_0026BA88((char*)self + 0x38);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A090);
-#ifdef SKIP_ASM
 struct sBXRange {
     int field_0x0;
     int field_0x4;
@@ -1681,11 +1487,8 @@ extern "C" int func_0026A090(sBXRangeList* self, sBXRange* out, int maxOut, floa
     float base = self->field_0x38;
     return func_0026AA80(self, out, maxOut, base - a, base - b);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A0B8);
-#ifdef SKIP_ASM
 extern "C" float func_0026AC48(void* self);
 extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi);
 
@@ -1703,13 +1506,10 @@ extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
         hi = self->field_0x38 - b;
     return func_0026AC88(self, lo, hi);
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A138);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A180);
-#ifdef SKIP_ASM
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
 void func_0026BA68_A180(void* dst, void* src) __asm__("func_0026BA68");
 extern "C" void func_0026BA48(void* p, void* q);
@@ -1778,11 +1578,8 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
     }
     return src - start;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A338);
-#ifdef SKIP_ASM
 extern "C" void func_0026BA48(void* p, void* q);
 // PORT: func_0026BA88 takes (dst, src); the unit declares it with one arg
 void func_0026BA88_2(void* dst, void* src) __asm__("func_0026BA88");
@@ -1792,11 +1589,8 @@ extern "C" void func_0026A338(void* self, void* src, void* dst)
     func_0026BA48(dst, src);
     func_0026BA88_2((char*)dst + 0xC, (char*)src + 0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A378);
-#ifdef SKIP_ASM
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
 void func_0026BA68_K2(void* dst, void* src) __asm__("func_0026BA68");
 extern int D_004453D0[];
@@ -1819,15 +1613,12 @@ extern "C" void func_0026A378(void* self, char* src, int* dst)
     func_0026BA88_2(dst + 2, src);
     func_0026BA88_2(dst + 3, src + 4);
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A428);
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A638);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A8B8);
-#ifdef SKIP_ASM
 struct sBXSeg16 {
     float f0;
     float f4;
@@ -1853,15 +1644,12 @@ extern "C" sBXSeg16* func_0026A8B8(sBXSeg16* out, void* self, float t)
 done:
     return out;
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A920);
 
 INCLUDE_ASM("bx/bxstringctor", func_0026A970);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A9B0);
-#ifdef SKIP_ASM
 struct sBXBox {
     char pad_0x00[0x1C];
     float min[3]; // 0x1C
@@ -1900,11 +1688,8 @@ extern "C" float func_0026A9B0(sBXBox* self, float* p)
     }
     return dy;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AA80);
-#ifdef SKIP_ASM
 extern "C" int func_0026AA80(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi)
 {
     int n;
@@ -1925,11 +1710,8 @@ extern "C" int func_0026AA80(sBXRangeList* self, sBXRange* out, int maxOut, floa
 done:
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AB20);
-#ifdef SKIP_ASM
 struct sBXVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -2021,11 +1803,8 @@ extern "C" sBXVec4 func_0026AB20(sBXPath* self, int* inRange, float t)
         bxVu0AddEq(pos, bxVu0ScaleDir(*seg, len));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AC48);
-#ifdef SKIP_ASM
 struct sBXElem16 {
     float f0;
     float f4;
@@ -2043,11 +1822,8 @@ extern "C" float func_0026AC48(void* self)
     }
     return sum;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AC88);
-#ifdef SKIP_ASM
 extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
 {
     int i;
@@ -2060,13 +1836,10 @@ extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026AD00);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AD70);
-#ifdef SKIP_ASM
 extern "C" void func_0026ADF0(void* self);
 
 extern "C" int func_0026AD70(void* self, int v)
@@ -2076,23 +1849,17 @@ extern "C" int func_0026AD70(void* self, int v)
     func_0026ADF0(self);
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026ADA0__FPv);
-#ifdef SKIP_ASM
 void func_0026ADA0(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
 
 INCLUDE_ASM("bx/bxstringctor", func_0026ADE8);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
-#ifdef SKIP_ASM
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
 void func_0026BA68_2(void* dst, void* src) __asm__("func_0026BA68");
 extern "C" int func_0026B410(void* self, char* p);
@@ -2114,13 +1881,10 @@ extern "C" void func_0026ADF0(void* self)
     p += func_0026B7D8(self, p);
     func_0026B880(self, p);
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF00);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 extern "C" void func_0026AF00(void* self)
@@ -2136,31 +1900,22 @@ extern "C" void func_0026AF00(void* self)
     *(void**)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x4C) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF70);
-#ifdef SKIP_ASM
 extern "C" int func_0026AF70(void* self, int a1)
 {
     return *(int*)((char*)self + 0x14) + a1 * 0x3c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF88);
-#ifdef SKIP_ASM
 extern "C" int func_0026AF88(void* self, int a1)
 {
     return *(int*)((char*)self + 0xc) + (a1 << 6);
 }
-#endif
 
 extern "C" void* func_0026AFB8(void*);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF98__FPv);
-#ifdef SKIP_ASM
 // PORT: the unit declares func_0026AFB8(void*) and this symbol's mangling says (void*),
 // but both really take more arguments (callers pass $5-$7, and this passes a 5th arg in $8).
 // Bind the real signatures to the existing symbol names with asm labels.
@@ -2171,7 +1926,6 @@ int func_0026AF98_impl(void* self, void* a1, void** out, int maxOut)
 {
     return func_0026AFB8_impl(self, a1, out, maxOut, 1);
 }
-#endif
 
 INCLUDE_ASM("bx/bxstringctor", func_0026AFB8);
 

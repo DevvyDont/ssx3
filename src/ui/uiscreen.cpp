@@ -10,8 +10,6 @@ struct sDeleteTarget {
 };
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIThread_deleteThread__FPv);
-#ifdef SKIP_ASM
 void cUIThread_deleteThread(void* self)
 {
     cListNode_removeFromList(self);
@@ -20,13 +18,10 @@ void cUIThread_deleteThread(void* self)
         target->fn((char*)self + target->field_0x8, 3);
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039C558);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIScreen_setData);
-#ifdef SKIP_ASM
 extern "C" int func_003B4818(void* data);
 extern "C" void* func_003B47F8(void* src, void* dst);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
@@ -50,11 +45,8 @@ extern "C" void cUIScreen_setData(void* self, char* data)
     *(char**)((char*)self + 0x34) = data + *(int*)(data + 8);
     *(char**)((char*)self + 0x38) = data + *(int*)(data + 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039C728);
-#ifdef SKIP_ASM
 extern "C" void* func_0039C728(void* self, unsigned short frame)
 {
     int* list = *(int**)((char*)self + 0x34);
@@ -68,7 +60,6 @@ extern "C" void* func_0039C728(void* self, unsigned short frame)
     }
     return 0;
 }
-#endif
 
 struct sFrameEntry {
     int label; // 0x0
@@ -86,8 +77,6 @@ struct cUIScreen {
 };
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
-#ifdef SKIP_ASM
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
     sFrameList* list = self->list;
@@ -101,11 +90,8 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
     }
     return 0xFFFF;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIScreen_getPrimaryThread);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -123,15 +109,12 @@ extern "C" void* cUIScreen_getPrimaryThread(void* self)
     }
     return 0;
 }
-#endif
 
 extern "C" void* cUIScreen_getPrimaryThread(void* self);
 void cUIThread_deleteThread(void* self);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
 //99.75%
-INCLUDE_ASM("ui/uiscreen", cUIScreen_jumpToFrame__FPvUs);
-#ifdef SKIP_ASM
 void cUIScreen_jumpToFrame(void* self, unsigned short frame)
 {
     void* thread = cUIScreen_getPrimaryThread(self);
@@ -140,24 +123,18 @@ void cUIScreen_jumpToFrame(void* self, unsigned short frame)
     }
     cUIScreen_playFrame(self, frame, 0);
 }
-#endif
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_playFrame);
 
 INCLUDE_ASM("ui/uiscreen", func_0039C978);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CBC8);
-#ifdef SKIP_ASM
 extern "C" void func_0039CBC8(void* p0, void* p1, void* p2, void* p3)
 {
     *(unsigned int*)((char*)p3 + 0x10) &= 0xFEFFFFFFU;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CBE0);
-#ifdef SKIP_ASM
 extern "C" void func_0039CBE0(cUIScreen* self, void* p1, void* p2, void* p3)
 {
     sFrameEntry* e = (sFrameEntry*)((char*)self->list + 4);
@@ -170,11 +147,8 @@ extern "C" void func_0039CBE0(cUIScreen* self, void* p1, void* p2, void* p3)
         e = (sFrameEntry*)((char*)e + e->stride);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CC38);
-#ifdef SKIP_ASM
 extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
 {
     sFrameEntry* e = (sFrameEntry*)((char*)self->list + 4);
@@ -187,11 +161,8 @@ extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
         e = (sFrameEntry*)((char*)e + e->stride);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CCA8);
-#ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 // PORT: callers pass a 5th arg (0) that func_0039FCC8 never reads
@@ -209,11 +180,8 @@ extern "C" void func_0039CCA8(void* self, void* p1, void* msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CD30);
-#ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_0039FD38(void* self);
 
@@ -244,27 +212,18 @@ extern "C" void func_0039CD30(void* self, int a1, int* msg)
         obj->v13(msg[2], msg + 3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CD90__FPv);
-#ifdef SKIP_ASM
 void func_0039CD90(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CD98__FPv);
-#ifdef SKIP_ASM
 void func_0039CD98(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CDA0);
-#ifdef SKIP_ASM
 class func_0039CDA0_cVirtA {
 public:
     char pad[0x8];
@@ -306,11 +265,8 @@ extern "C" void func_0039CDA0(void* self, void* p1, int* msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CE20);
-#ifdef SKIP_ASM
 struct sUIFlags1C {
     unsigned int lo : 8;
     unsigned int mode : 6;
@@ -323,11 +279,8 @@ extern "C" void func_0039CE20(void* self)
         ((sUIFlags1C*)((char*)p + 0x1c))->mode = 3;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CE48);
-#ifdef SKIP_ASM
 extern "C" void func_00398638(void*, int);
 
 extern "C" void func_0039CE48(void* self)
@@ -338,19 +291,13 @@ extern "C" void func_0039CE48(void* self)
         ((sUIFlags1C*)((char*)p + 0x1c))->mode = 6;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CE90__FPv);
-#ifdef SKIP_ASM
 void func_0039CE90(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CE98);
-#ifdef SKIP_ASM
 extern "C" void func_0039CE98(void* self, void* p1, void* p2, void* p3)
 {
     *(unsigned int*)((char*)p3 + 0x10) &= 0xFEFFFFFFU;
@@ -359,11 +306,8 @@ extern "C" void func_0039CE98(void* self, void* p1, void* p2, void* p3)
         ((sUIFlags1C*)((char*)p + 0x1c))->mode = 7;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIScreen_createAllObjects);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
@@ -402,7 +346,6 @@ extern "C" void cUIScreen_createAllObjects(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039D008);
 
@@ -411,17 +354,12 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByStruct);
 extern "C" void* func_00398798(void*);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D758__FPv);
-#ifdef SKIP_ASM
 void* func_0039D758(void* self)
 {
     return func_00398798((char*)self + 0x40);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiscreen", func_0039D778);
-#ifdef SKIP_ASM
 extern "C" void func_0039C978(void* self, void* thread);
 extern "C" void func_00398910(void* list, unsigned short frame);
 
@@ -457,11 +395,8 @@ extern "C" void func_0039D778(void* self)
     }
     func_00398910((char*)self + 0x40, frame);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
-#ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash)
 {
     void** objs = *(void***)((char*)self + 0x3C);
@@ -475,11 +410,8 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D8C0);
-#ifdef SKIP_ASM
 extern "C" void func_0039FC48(void* self, int flags);
 extern void* D_004944C8[];
 
@@ -498,22 +430,16 @@ extern "C" void func_0039D8C0(void* self, int flags)
     }
     func_0039FC48(self, flags);
 }
-#endif
 
 extern "C" void* func_0039FE00(void* self);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D948__FPv);
-#ifdef SKIP_ASM
 void* func_0039D948(void* self)
 {
     return func_0039FE00(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D968);
-#ifdef SKIP_ASM
 struct func_0039D968_sVEntry {
     short delta;
     short index;
@@ -537,11 +463,8 @@ extern "C" void func_0039D968(void* self, float x, float y)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DA20);
-#ifdef SKIP_ASM
 extern "C" int strlen(const char*);
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -699,11 +622,8 @@ extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int tota
         ((tGet_DA20)w->vt[21].fn)((char*)w + w->vt[21].delta, &nsize);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DE68);
-#ifdef SKIP_ASM
 struct func_0039DE68_sVEntry {
     short delta;
     short index;
@@ -733,11 +653,8 @@ extern "C" void func_0039DE68(void* self, int a)
     func_0039DE68_call(*(char**)((char*)self + 0x78), a);
     func_0039DE68_call(*(char**)((char*)self + 0x74), a);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DF28);
-#ifdef SKIP_ASM
 extern "C" void func_0039FC48(void* self, int flags);
 extern void* D_00494348[];
 
@@ -756,22 +673,16 @@ extern "C" void func_0039DF28(void* self, int flags)
     }
     func_0039FC48(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DFB0);
-#ifdef SKIP_ASM
 extern "C" void func_0039DFB0(void* self)
 {
     func_0039FE00(self);
     *(int*)((char*)self + 0x78) = 10;
     *(int*)((char*)self + 0x80) = 100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DFE8);
-#ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -833,11 +744,8 @@ extern "C" int func_0039DFE8(char* self, char* input)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E130);
-#ifdef SKIP_ASM
 struct func_0039E130_sVec3 {
     float x, y, z;
 };
@@ -880,23 +788,17 @@ extern "C" void func_0039E130(char* self, float dx, float dy)
     func_0039E130_sVEntryF* vb3 = *(func_0039E130_sVEntryF**)(b3 + 8);
     vb3[17].fn(b3 + vb3[17].delta, x, y);
 }
-#endif
 
 extern void* D_0046DD60[];
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E288__FPv);
-#ifdef SKIP_ASM
 void* func_0039E288(void* self)
 {
     *(int*)self = (int)(void*)D_0046DD60;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E2A0);
-#ifdef SKIP_ASM
 extern "C" void* func_003977E8(void* self);
 extern void* D_004946C8[];
 
@@ -917,11 +819,8 @@ extern "C" void* func_0039E2A0(void* self, int a1)
     *(signed char*)(s + 0x44) = -1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E318);
-#ifdef SKIP_ASM
 extern "C" void* func_003977E8(void* self);
 extern void* D_004946C8[];
 
@@ -942,11 +841,8 @@ extern "C" void* func_0039E318(void* self, int a1, int a2)
     *(signed char*)(s + 0x44) = -1;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E390);
-#ifdef SKIP_ASM
 // PORT: unit declares func_00397948 as returning void*; called here as void (bound by asm label).
 extern "C" void func_00397948_v(void*) __asm__("func_00397948");
 extern "C" void func_003A4868(void*);
@@ -971,7 +867,6 @@ extern "C" void func_0039E390(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 extern "C" void* func_00397948(void*);
 
@@ -980,17 +875,12 @@ INCLUDE_ASM("ui/uiscreen", func_0039E438);
 INCLUDE_ASM("ui/uiscreen", func_0039E470);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E4A0__FPv);
-#ifdef SKIP_ASM
 void* func_0039E4A0(void* self)
 {
     return func_00397948(((char*)self + 0x24));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E4C0);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
@@ -1008,19 +898,13 @@ extern "C" void func_0039E4C0(void* self)
         vt[0xD].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E508__FPv);
-#ifdef SKIP_ASM
 void func_0039E508(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E510);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -1085,11 +969,8 @@ extern "C" void func_0039E510(char* self)
     } while (++*(signed char*)(self + 0x14) < 2);
     *(signed char*)(self + 0x14) = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E688);
-#ifdef SKIP_ASM
 class func_0039E688_cVirt {
 public:
     char pad[0x8];
@@ -1107,11 +988,8 @@ extern "C" void func_0039E688(void* self, func_0039E688_cVirt* obj)
 {
     obj->v07(1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E6B8);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -1144,28 +1022,22 @@ extern "C" void func_0039E6B8(void* self)
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
-#endif
 
 struct cList;
 struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E758);
-#ifdef SKIP_ASM
 extern "C" void func_0039E758(void* self, cListNode* node)
 {
     cList_addToEnd((cList*)((char*)self + 0x24), node);
 }
-#endif
 
 INCLUDE_ASM("ui/uiscreen", func_0039E778);
 
 INCLUDE_ASM("ui/uiscreen", func_0039E7F0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiscreen", func_0039E868);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -1182,5 +1054,4 @@ extern "C" void func_0039E868(void* self)
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
-#endif
 

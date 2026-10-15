@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushExplicit);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
@@ -23,13 +21,10 @@ extern "C" void cUIStateStack_pushExplicit(void* self, cUIStateStack_pushExplici
     state->v04();
     cList_addToEnd((cList*)((char*)self + 0x1C), (cListNode*)state);
 }
-#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F290);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushSpecial);
-#ifdef SKIP_ASM
 struct cListNode;
 void cList_addToFront(cList*, cListNode*);
 
@@ -65,11 +60,8 @@ extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st,
     cList_addToFront(self, (cListNode*)st);
     st->b5 = a2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F400);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 struct cListNode;
@@ -111,13 +103,10 @@ extern "C" void func_0039F400(cList* self, func_0039F400_sState* st)
     }
     cList_addToFront(self, (cListNode*)st);
 }
-#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F4C0);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F600);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
@@ -155,11 +144,8 @@ extern "C" func_0039F600_node* func_0039F600(cList* list)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F698);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
@@ -194,11 +180,8 @@ extern "C" func_0039F698_node* func_0039F698(cList* list)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F718);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
@@ -237,13 +220,10 @@ extern "C" func_0039F718_node* func_0039F718(cList* list)
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039F7B8);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F840);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -278,11 +258,8 @@ extern "C" void func_0039F840(cList* list)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F8C8);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -315,11 +292,8 @@ extern "C" void func_0039F8C8(cList* self)
     func_0039F8C8_purge(self);
     func_0039F8C8_purge((cList*)((char*)self + 0x1C));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F9D8);
-#ifdef SKIP_ASM
 struct cListNode;
 int cListNode_isSentinel(cListNode*);
 
@@ -345,11 +319,8 @@ extern "C" void* func_0039F9D8(void* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", cUIStateStack_getCurrentState);
-#ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 struct cListNode;
@@ -368,25 +339,19 @@ extern "C" void* cUIStateStack_getCurrentState(void* self)
     }
     return 0;
 }
-#endif
 
 struct cList;
 void* cList_first(cList*);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FAE8);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FAE8(void* self)
 {
     return cList_first((cList*)self);
 }
-#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039FB08);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FB30);
-#ifdef SKIP_ASM
 struct func_0039FB30_sVec3 {
     float x;
     float y;
@@ -466,11 +431,8 @@ extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a
     self->unk70 = 6;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FC48);
-#ifdef SKIP_ASM
 extern "C" void func_003A4868(void* self);
 void operator_delete(int* ptr);
 extern void* D_00494CC0[];
@@ -495,11 +457,8 @@ extern "C" void func_0039FC48(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FCC8);
-#ifdef SKIP_ASM
 extern "C" void func_0039FD38(void* self);
 extern "C" void func_00397468(void* self, int mode, unsigned short v);
 
@@ -512,11 +471,8 @@ extern "C" void func_0039FCC8(void* self, void* anim, unsigned char mode, unsign
     *(void**)((char*)self + 0xC) = anim;
     func_00397468(anim, *(unsigned char*)((char*)self + 0x10), v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FD38);
-#ifdef SKIP_ASM
 struct sVEntry39FD38 {
     short delta;
     short index;
@@ -532,7 +488,6 @@ extern "C" void func_0039FD38(void* self)
         *(void**)((char*)self + 0xC) = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039FD80);
 
@@ -541,8 +496,6 @@ INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
 INCLUDE_ASM("ui/uistatestack", func_0039FE00);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FEB8);
-#ifdef SKIP_ASM
 struct sUIAlignFlags14 {
     unsigned int lo : 13;
     unsigned int align : 6;
@@ -577,23 +530,16 @@ extern "C" void func_0039FEB8(void* self, sUIVec2* pos, sUIVec2* size)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FF50__FPv);
-#ifdef SKIP_ASM
 int func_0039FF50(void* self)
 {
     return *(int*)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FF60);
-#ifdef SKIP_ASM
 extern "C" void* func_0039FF60(void* self, int a1)
 {
     return *(int*)((char*)self + 0x38) == a1 ? self : 0;
 }
-#endif
 

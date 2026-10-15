@@ -12,8 +12,6 @@ struct cBERewardInterface {
 };
 
 //99.84%
-INCLUDE_ASM("be/beintreward", cBERewardInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBERewardInterface_getThis()
 {
     if (D_004A1264 == 0) {
@@ -24,11 +22,8 @@ void* cBERewardInterface_getThis()
     }
     return D_004A1264;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156A10);
-#ifdef SKIP_ASM
 extern "C" void cBERewardDB_init(void* db, int flag);
 extern void* D_004C3E98[];
 
@@ -36,11 +31,8 @@ extern "C" void func_00156A10()
 {
     cBERewardDB_init(D_004C3E98, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156A38);
-#ifdef SKIP_ASM
 // PORT: compares a pointer cast to int against -1; not 64-bit safe.
 extern void* D_004C3E98[];
 
@@ -52,11 +44,8 @@ extern "C" int func_00156A38(void)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", cBERewardInterface_isBetterMedal__FPvii);
-#ifdef SKIP_ASM
 int cBERewardInterface_isBetterMedal(void* self, int a, int b)
 {
     if (b == -1) {
@@ -67,40 +56,30 @@ int cBERewardInterface_isBetterMedal(void* self, int a, int b)
     }
     return b < a;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156A90);
-#ifdef SKIP_ASM
 extern "C" void* func_0015A478(void* self);
 
 extern "C" char* func_00156A90(void* self, int a1, int a2)
 {
     return *(char**)((char*)func_0015A478(self) + 0x8) + (a2 * 3 + a1) * 0xC;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156AE0);
-#ifdef SKIP_ASM
 extern "C" void* func_0015A478(void* self);
 
 extern "C" char* func_00156AE0(void* self, int a1, int a2)
 {
     return *(char**)((char*)func_0015A478(self) + 0xC) + (a1 * 4 + a2) * 0xC;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156B28);
-#ifdef SKIP_ASM
 extern "C" void* func_0015A478(void* self);
 
 extern "C" char* func_00156B28(void* self, int a1, int a2)
 {
     return *(char**)((char*)func_0015A478(self) + 0x10) + (a2 * 3 + a1) * 8;
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00156B70);
 
@@ -119,8 +98,6 @@ INCLUDE_ASM("be/beintreward", func_00156C30);
 INCLUDE_ASM("be/beintreward", func_00156C50);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156C70);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 struct sBELibTables;
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
@@ -236,11 +213,8 @@ extern "C" int func_00156C70(void* self, int a1, int a2, int type)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156EE0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 struct sBELibTables;
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
@@ -311,7 +285,6 @@ extern "C" int func_00156EE0(void* self, int a1, int a2)
     }
     return -1;
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00157080);
 
@@ -320,73 +293,50 @@ INCLUDE_ASM("be/beintreward", func_00157210);
 extern "C" void* func_0015A478(void* self);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001572B0__FPv);
-#ifdef SKIP_ASM
 int func_001572B0(void* self)
 {
     return *(int*)((char*)func_0015A478(self) + 0x3c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001572D0__FPv);
-#ifdef SKIP_ASM
 int func_001572D0(void* self)
 {
     return *(int*)((char*)func_0015A478(self) + 0x40);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001572F0__FPv);
-#ifdef SKIP_ASM
 int func_001572F0(void* self)
 {
     return *(int*)((char*)func_0015A478(self) + 0x44);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157310__FPv);
-#ifdef SKIP_ASM
 int func_00157310(void* self)
 {
     return *(int*)((char*)func_0015A478(self) + 0x48);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157330__FPv);
-#ifdef SKIP_ASM
 int func_00157330(void* self)
 {
     return *(int*)((char*)func_0015A478(self) + 0x4c);
 }
-#endif
 
 extern "C" void* func_0028B180(void* self);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157350__FPv);
-#ifdef SKIP_ASM
 int func_00157350(void* self)
 {
     return *(int*)((char*)func_0028B180(self) + 0x504);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157370__FPv);
-#ifdef SKIP_ASM
 int func_00157370(void* self)
 {
     return *(int*)((char*)func_0015A478(self) + 0x50);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157390);
-#ifdef SKIP_ASM
 // Counts the set bits among the first `count` bits of `bits` (LSB first).
 extern "C" int func_00157390(void* self, int count, signed char* bits)
 {
@@ -403,35 +353,26 @@ extern "C" int func_00157390(void* self, int count, signed char* bits)
     }
     return total;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001573F0);
-#ifdef SKIP_ASM
 extern "C" void func_001573F0(void* self, int bit, char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157430);
-#ifdef SKIP_ASM
 extern "C" int func_00157430(void* self, int bit, char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00157468);
 
 INCLUDE_ASM("be/beintreward", func_00157518);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_001575C0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
@@ -442,11 +383,8 @@ extern "C" int func_001575C0(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x3C), (signed char*)(p + 0xF30));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157620);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
@@ -457,11 +395,8 @@ extern "C" int func_00157620(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x40), (signed char*)(p + 0xF36));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157680);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
@@ -472,11 +407,8 @@ extern "C" int func_00157680(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x44), (signed char*)(p + 0xF45));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_001576E0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
@@ -487,11 +419,8 @@ extern "C" int func_001576E0(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x48), (signed char*)(p + 0xF53));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157740);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
@@ -502,11 +431,8 @@ extern "C" int func_00157740(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x4C), (signed char*)(p + 0xF52));
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_001577A0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -515,11 +441,8 @@ extern "C" int func_001577A0(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, 0x14, (signed char*)(p + 0xF57));
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001577E0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -541,11 +464,8 @@ extern "C" int func_001577E0(void* self, int a, int b)
     }
     return total >= 24;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001578A0);
-#ifdef SKIP_ASM
 extern "C" int func_00157A78(void* self, int a, int b, int i);
 
 extern "C" int func_001578A0(void* self, int a, int b)
@@ -557,11 +477,8 @@ extern "C" int func_001578A0(void* self, int a, int b)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157920);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char cBERewardInterface_getTrackMedal(void* self, int a, int b, int track, int kind);
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
@@ -609,11 +526,8 @@ extern "C" int func_00157920(void* self, int a, int b, int k)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157A78);
-#ifdef SKIP_ASM
 extern "C" int func_00157BF0(void* self, int a, int b, int c, int i);
 
 extern "C" int func_00157A78(void* self, int a, int b, int c)
@@ -625,11 +539,8 @@ extern "C" int func_00157A78(void* self, int a, int b, int c)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157B08);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00157B70(void* self, int a, int b, int peak);
@@ -639,11 +550,8 @@ extern "C" int func_00157B08(void* self, int rider, int peak)
     int profile = cBELibrary_getProfileIndex(rider);
     return func_00157B70(self, profile, cBELibrary_getCharacterID(rider), peak);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157B70);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
@@ -667,11 +575,8 @@ extern "C" int func_00157B70(void* self, int a, int b, int peak)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157BF0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e);
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
@@ -714,11 +619,8 @@ extern "C" int func_00157BF0(void* self, int a, int b, int k, int i)
     }
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157D60);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
@@ -727,11 +629,8 @@ extern "C" int func_00157D60(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF30);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157DA0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
@@ -740,11 +639,8 @@ extern "C" int func_00157DA0(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF36);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157DE0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
@@ -753,11 +649,8 @@ extern "C" int func_00157DE0(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF45);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157E20);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
@@ -766,11 +659,8 @@ extern "C" int func_00157E20(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF53);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157E60);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
@@ -779,13 +669,10 @@ extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF52);
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00157EA0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00157EE0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
@@ -794,13 +681,10 @@ extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit-10, p + 0xF57);
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00157F20);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157FD0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -839,11 +723,8 @@ extern "C" void func_00157FD0(void* self, int a1, int a2, int bit, int give)
     }
     func_00150928(econ, a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001580F8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -882,11 +763,8 @@ extern "C" void func_001580F8(void* self, int a1, int a2, int bit, int give)
     }
     func_00150928(econ, a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158220);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -925,11 +803,8 @@ extern "C" void func_00158220(void* self, int a1, int a2, int bit, int give)
     }
     func_00150928(econ, a1, a2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158348);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -968,11 +843,8 @@ extern "C" void func_00158348(void* self, int a1, int a2, int bit, int give)
     }
     func_00150928(econ, a1, a2);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00158470);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -997,11 +869,8 @@ extern "C" void func_00158470(void* self, int profile, int c, int idx, int award
     }
     func_00150928(econ, profile, c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158558);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1021,11 +890,8 @@ extern "C" void func_00158558(void* self, int profile, int c, int bit, int award
     }
     func_00150928(econ, profile, c);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00158618);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1051,11 +917,8 @@ extern "C" void func_00158618(void* self, int profile, int c, int idx, int award
     }
     func_00150928(econ, profile, c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158700);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
 extern "C" int func_00158700(void* self, int a1, int a2)
@@ -1063,11 +926,8 @@ extern "C" int func_00158700(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return *(int*)(p + 0xf80);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158728);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int D_004A6CA8[];
 
@@ -1076,11 +936,8 @@ extern "C" long func_00158728(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return *(long*)(p + 0xf70);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158750);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int D_004A6CA8[];
 
@@ -1089,13 +946,10 @@ extern "C" long func_00158750(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return *(long*)(p + 0xf78);
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00158778);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_001587B8);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -1104,11 +958,8 @@ extern "C" int func_001587B8(void* self, int a1, int a2)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, 0x40, (signed char*)(p + 0xF78));
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001587F8);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
 extern "C" void func_001587F8(void* self, int a1, int a2, int value)
@@ -1116,11 +967,8 @@ extern "C" void func_001587F8(void* self, int a1, int a2, int value)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     *(int*)(p + 0xf80) = value;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158820);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int D_004A6CA8[];
 
@@ -1129,11 +977,8 @@ extern "C" void func_00158820(void* self, int a1, int a2, long value)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     *(long*)(p + 0xf70) = value;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158848);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int D_004A6CA8[];
 
@@ -1142,40 +987,30 @@ extern "C" void func_00158848(void* self, int a1, int a2, long value)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     *(long*)(p + 0xf78) = value;
 }
-#endif
 
 extern int D_0045AFE8[];
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158870);
-#ifdef SKIP_ASM
 extern "C" int func_00158870(void* self, int a1, int a2)
 {
     return *(int*)((char*)D_0045AFE8 + ((a2 << 2) + (a1 << 4)));
 }
-#endif
 
 extern int D_0045B018[];
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158890);
-#ifdef SKIP_ASM
 extern "C" int func_00158890(void* self, int a1, int a2)
 {
     return *(int*)((char*)D_0045B018 + ((a2 << 2) + (a1 << 4)));
 }
-#endif
 
 extern void* D_0045B048[];
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001588B0__FPvi);
-#ifdef SKIP_ASM
 int func_001588B0(void* self, int a1)
 {
     return *(int*)((char*)(void*)D_0045B048 + a1 * 4);
 }
-#endif
 
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern int D_004A6CA8[];
@@ -1183,8 +1018,6 @@ extern int D_004A6CA8[];
 INCLUDE_ASM("be/beintreward", func_001588C8);
 
 //100%
-INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
-#ifdef SKIP_ASM
 struct sProfileSlot_00158910
 {
     char data[0xF88];
@@ -1198,11 +1031,8 @@ signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, in
     }
     return ((signed char*)result)[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158960);
-#ifdef SKIP_ASM
 extern "C" int func_00158960(void* self, int b, int c, int d, int e)
 {
     void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])D_004A6CA8)[b][c], e, d);
@@ -1211,11 +1041,8 @@ extern "C" int func_00158960(void* self, int b, int c, int d, int e)
     }
     return ((int*)result)[1];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001589B0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1232,11 +1059,8 @@ extern "C" int func_001589B0(void* self, int a, int b, int kind)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158A50);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1253,11 +1077,8 @@ extern "C" int func_00158A50(void* self, int a, int b, int kind)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsMedal);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1270,15 +1091,12 @@ extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int
         return 1;
     return -1;
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00158B70);
 
 INCLUDE_ASM("be/beintreward", func_00158BB8);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158BE0);
-#ifdef SKIP_ASM
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
 
 extern "C" void* func_00158BE0(void* self, int a, int b)
@@ -1290,11 +1108,8 @@ extern "C" void* func_00158BE0(void* self, int a, int b)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158C80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_001589B0(void* self, int a, int b, int kind);
 extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
@@ -1313,11 +1128,8 @@ extern "C" int func_00158C80(void* self, int a, int b, int kind)
     }
     return best;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158D58);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00158A50(void* self, int a, int b, int kind);
 extern int D_0045B018_2d[][4] __asm__("D_0045B018");
@@ -1336,11 +1148,8 @@ extern "C" int func_00158D58(void* self, int a, int b, int kind)
     }
     return best;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158E30);
-#ifdef SKIP_ASM
 int cBELibrary_getRiderIndex(int);
 extern void* D_004A1260;
 extern int D_00440F48[];
@@ -1361,35 +1170,26 @@ extern "C" void func_00158E30(void* self)
     *(int*)(p + 0x10) = 0;
     *(int*)(p + 0x14) = -1;
 }
-#endif
 
 extern void* D_004C3EF0[];
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158F20__FPv);
-#ifdef SKIP_ASM
 void* func_00158F20(void* self)
 {
     return (void*)D_004C3EF0;
 }
-#endif
 
 extern "C" void* func_0015A6F0(void*);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158F30__FPv);
-#ifdef SKIP_ASM
 void* func_00158F30(void* self)
 {
     return func_0015A6F0((void*)D_004C3EF0);
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00158F50);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00158F60);
-#ifdef SKIP_ASM
 struct sReward_0015A628;
 extern "C" void func_0015A628(sReward_0015A628* self, int row, int col, int value);
 extern void* D_004C3EF0[];
@@ -1424,11 +1224,8 @@ extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00159080);
-#ifdef SKIP_ASM
 extern "C" int func_00159080(void* self, int a1, int a2, int kind, int tier)
 {
     int r = -1;
@@ -1469,11 +1266,8 @@ extern "C" int func_00159080(void* self, int a1, int a2, int kind, int tier)
     }
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_00159170);
-#ifdef SKIP_ASM
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
 extern "C" void func_00159CD0(void* self, int a1, int a2, int bit);
 
@@ -1485,13 +1279,10 @@ extern "C" void func_00159170(void* self, int a1, int a2, int kind, int tier)
         func_00159CD0(self, a1, a2, bit);
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_001591E8);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001597B0);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_00159818(void* self, int a, int b, int c);
@@ -1501,11 +1292,8 @@ extern "C" void func_001597B0(void* self, int rider, int c)
     int profile = cBELibrary_getProfileIndex(rider);
     func_00159818(self, profile, cBELibrary_getCharacterID(rider), c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00159818);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1540,11 +1328,8 @@ extern "C" void func_00159818(void* self, int a, int b, int amount)
         func_00150A90(econ, a, b, amount);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_001599A0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1580,11 +1365,8 @@ extern "C" void func_001599A0(void* self, int rider, int k)
             func_00159CD0(self, prof, ch, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00159B08);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1620,15 +1402,12 @@ extern "C" void func_00159B08(void* self, int rider, int k)
             func_00159CD0(self, prof, ch, 0);
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_00159C68);
 
 INCLUDE_ASM("be/beintreward", func_00159CD0);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A2E0);
-#ifdef SKIP_ASM
 extern int D_004A6CA8[];
 extern "C" int func_0015A320(void* self, int bit, unsigned char* bits);
 
@@ -1637,27 +1416,20 @@ extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit)
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
     return func_0015A320(self, bit, (unsigned char*)(p + 0xF28));
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A320);
-#ifdef SKIP_ASM
 extern "C" int func_0015A320(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A358);
-#ifdef SKIP_ASM
 extern "C" void func_0015A358(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
 }
-#endif
 
 // 0x64-byte array elements; arr[i].field indexing reproduces the target's
 // base-first addu
@@ -1669,17 +1441,12 @@ struct sBERewardEntry {
 extern sBERewardEntry D_0043D950[];
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A398);
-#ifdef SKIP_ASM
 extern "C" int func_0015A398(void* self, int a1)
 {
     return D_0043D950[a1].field_0x54;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A3B8);
-#ifdef SKIP_ASM
 struct sRewardPair_0015A3B8
 {
     signed char a;
@@ -1706,21 +1473,15 @@ extern "C" int func_0015A3B8(void* self, int a, int b)
     }
     return -1;
 }
-#endif
 
 extern void* D_004C3E98[];
 
-INCLUDE_ASM("be/beintreward", func_0015A478);
-#ifdef SKIP_ASM
 void* func_0015A478(void* self)
 {
     return (void*)D_004C3E98;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A488);
-#ifdef SKIP_ASM
 extern "C" void func_0015A510(void* self);
 
 struct sRewardStrings_0015A488 {
@@ -1743,11 +1504,8 @@ extern "C" void* func_0015A488(sRewardStrings_0015A488* self)
     func_0015A510(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A510);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int c, int n);
 
 extern "C" void func_0015A510(void* self)
@@ -1755,33 +1513,24 @@ extern "C" void func_0015A510(void* self)
     func_003E6448(self, 0, 0x174);
     *(short*)((char*)self + 0x4) = -1;
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_0015A548);
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A5B0);
-#ifdef SKIP_ASM
 extern "C" void func_0015A5B0(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A5F0);
-#ifdef SKIP_ASM
 extern "C" int func_0015A5F0(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintreward", func_0015A628);
-#ifdef SKIP_ASM
 struct sRewardRow_0015A628
 {
     unsigned char counts[8]; // 0x0
@@ -1822,11 +1571,8 @@ extern "C" void func_0015A628(sReward_0015A628* self, int row, int col, int valu
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A6F0);
-#ifdef SKIP_ASM
 struct sRewardGrid_0015A6F0
 {
     char pad_0x00[0x6];
@@ -1850,29 +1596,20 @@ int func_0015A6F0_impl(sRewardGrid_0015A6F0* self)
     }
     return sum;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A750);
-#ifdef SKIP_ASM
 extern "C" signed char func_0015A750(void* self, int a1, int a2)
 {
     return *(signed char*)((char*)self + (a1 * 0xa + a2) + 0x6);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A768__FPvi);
-#ifdef SKIP_ASM
 int func_0015A768(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x174);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A778);
-#ifdef SKIP_ASM
 extern "C" void* func_0015A778(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -1896,11 +1633,8 @@ extern "C" void* func_0015A778(void* self)
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_0015A7D0);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_0015AE00(void* self);
 
@@ -1912,7 +1646,6 @@ extern "C" void func_0015A7D0(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintreward", func_0015A818);
 

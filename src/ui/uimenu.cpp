@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ui/uimenu", cUIMenu_setSelected);
-#ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -57,15 +55,12 @@ extern "C" void cUIMenu_setSelected(char* self, char* item, int play)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039AE98);
 
 INCLUDE_ASM("ui/uimenu", func_0039B000);
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B6A0);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
@@ -95,11 +90,8 @@ extern "C" void func_0039B6A0(void* self, float x, float y)
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B760);
-#ifdef SKIP_ASM
 extern "C" char func_003979C0(void*);
 
 extern "C" void func_0039B760(void* self, char a1)
@@ -110,13 +102,10 @@ extern "C" void func_0039B760(void* self, char a1)
     *(char*)((char*)self + 0x97) = func_003979C0((char*)self + 0x74);
     *(char*)((char*)self + 0x98) = 0;
 }
-#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039B7A8);
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B7B0);
-#ifdef SKIP_ASM
 extern "C" void* func_00397870(void* list, unsigned char i);
 
 struct func_0039B7B0_sVEntry {
@@ -145,13 +134,10 @@ extern "C" unsigned char func_0039B7B0(void* self, unsigned char start)
     }
     return 0xFF;
 }
-#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039B878);
 
 //100%
-INCLUDE_ASM("ui/uimenu", cUIMenu_setSelectedByIndex);
-#ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelected(char* self, char* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
 void* func_00397870_i(void* list, int i) __asm__("func_00397870");
@@ -183,22 +169,16 @@ extern "C" void cUIMenu_setSelectedByIndex(char* self, unsigned char idx)
     }
     cUIMenu_setSelected(self, (char*)func_00397870_i(self + 0x74, idx - *(unsigned char*)(self + 0x98)), 1);
 }
-#endif
 
 extern "C" void* func_0039FE00(void* self);
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BAB0__FPv);
-#ifdef SKIP_ASM
 void* func_0039BAB0(void* self)
 {
     return func_0039FE00(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BAD0);
-#ifdef SKIP_ASM
 class func_0039BAD0_cVirt {
 public:
     char pad[0x8];
@@ -227,11 +207,8 @@ extern "C" void func_0039BAD0(func_0039BAD0_s* self, int on)
         b->v04(on);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BB50);
-#ifdef SKIP_ASM
 struct func_0039BB50_sFlags {
     unsigned int pad0 : 6;
     unsigned int on : 1;
@@ -257,11 +234,8 @@ extern "C" void func_0039BB50(void* self, int on)
         vt[9].fn((char*)b + vt[9].delta, on);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BBD8);
-#ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -326,11 +300,8 @@ extern "C" void func_0039BBD8(char* self, int on)
         vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BD38);
-#ifdef SKIP_ASM
 class func_0039BD38_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -342,11 +313,8 @@ extern "C" int func_0039BD38(void* a, func_0039BD38_cVirt* obj)
 {
     return obj->v02(a);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BD68);
-#ifdef SKIP_ASM
 class func_0039BD68_cPred {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -378,11 +346,8 @@ extern "C" void* func_0039BD68(void* self, func_0039BD68_cPred* pred)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BE10);
-#ifdef SKIP_ASM
 class func_0039BE10_cVirt {
 public:
     char pad[0x8];
@@ -416,11 +381,8 @@ extern "C" void func_0039BE10(void* self)
         b->v16();
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BE70);
-#ifdef SKIP_ASM
 class func_0039BE70_cVirt {
 public:
     char pad[0x8];
@@ -441,13 +403,10 @@ extern "C" void func_0039BE70(void* self)
         *(func_0039BE70_cVirt**)((char*)self + 0x7C) = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uimenu", func_0039BED8);
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C130);
-#ifdef SKIP_ASM
 struct func_0039C130_sVEntry {
     short delta;
     short index;
@@ -467,11 +426,8 @@ extern "C" void func_0039C130(void* self, float x, float y)
         e->fn((char*)b + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C1C8);
-#ifdef SKIP_ASM
 extern "C" void func_003A0000(void* self, unsigned short ev);
 
 class func_0039C1C8_cVirt {
@@ -511,11 +467,8 @@ extern "C" void func_0039C1C8(void* self, unsigned short ev)
         b->v19(ev);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C240);
-#ifdef SKIP_ASM
 extern "C" void func_0039FC48(void* self, int flags);
 extern void* D_00494408[];
 
@@ -540,22 +493,16 @@ extern "C" void func_0039C240(void* self, int flags)
     }
     func_0039FC48(self, flags);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C2C8);
-#ifdef SKIP_ASM
 extern "C" void func_0039C2C8(void* self)
 {
     func_0039FE00(self);
     *(int*)((char*)self + 0x80) = 10;
     *(int*)((char*)self + 0x84) = 100;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C300);
-#ifdef SKIP_ASM
 struct func_0039C300_sVEntry {
     short delta;
     short index;
@@ -575,11 +522,8 @@ extern "C" void func_0039C300(void* self, float x, float y)
         vt2[17].fn((char*)b + vt2[17].delta, px, py);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C398);
-#ifdef SKIP_ASM
 extern "C" void func_003975E0(void* anim, void* thing, unsigned char flags, unsigned short ev);
 extern "C" void func_003974B0(void* anim, unsigned char flags);
 
@@ -606,11 +550,8 @@ extern "C" void func_0039C398(void* self, unsigned short ev)
         vt[19].fn((char*)b + vt[19].delta, ev);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C428);
-#ifdef SKIP_ASM
 struct func_0039C428_sVec3 {
     float x;
     float y;
@@ -665,5 +606,4 @@ extern "C" void func_0039C428(void* self, int pos)
         }
     }
 }
-#endif
 

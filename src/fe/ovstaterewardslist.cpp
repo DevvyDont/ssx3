@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", cOVStateRewardsList_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -19,11 +17,8 @@ extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
     }
     func_0020A380(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", func_00200288);
-#ifdef SKIP_ASM
 extern "C" void func_0039F400(void* list, void* item);
 
 struct sColor_200288 {
@@ -81,11 +76,8 @@ extern "C" void func_00200288(void* self, cUIObj_200288* item, int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
-#ifdef SKIP_ASM
 struct sRewardDesc_0388 {
     int w[0x6C / 4];
 };
@@ -104,11 +96,8 @@ extern "C" sRewardDesc_0388 func_00200388(int a, int b, int kind)
     }
     return D_004781D0[0][0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", func_002006B8);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -122,5 +111,4 @@ extern "C" void func_002006B8(void)
         D_004A25A4 = *(int*)((char*)func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
     }
 }
-#endif
 

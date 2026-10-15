@@ -3,8 +3,6 @@
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_cWorldPainterQuery);
 
 //100%
-INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C06C0);
-#ifdef SKIP_ASM
 void operator_delete(int* p);
 extern char D_00483E00[];
 extern char D_00485D30[];
@@ -38,13 +36,10 @@ extern "C" void func_002C06C0(sWPQuery_06C0* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0778);
 
 //100%
-INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0A10);
-#ifdef SKIP_ASM
 struct func_002C0A10_sItem {
     int a;
     int b;
@@ -63,5 +58,4 @@ extern "C" func_002C0A10_sItem* func_002C0A10(void* self, func_002C0A10_sList* l
     int i = func_002BAF90(list);
     return (i != -1) ? &list->items[i] : 0;
 }
-#endif
 

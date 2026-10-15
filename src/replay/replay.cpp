@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("replay/replay", cReplay_restoreFrame);
-#ifdef SKIP_ASM
 class cStreamRF {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -80,11 +78,8 @@ extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
     func_0012B788(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
     cGameViewMan_updateAll(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84));
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", cReplay_restoreBucket);
-#ifdef SKIP_ASM
 class cStreamRB {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -109,15 +104,12 @@ extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* strea
     }
     func_00354C98(&D_004A5988, bucket);
 }
-#endif
 
 INCLUDE_ASM("replay/replay", func_0026DE58);
 
 INCLUDE_ASM("replay/replay", cReplay_restoreObject);
 
 //100%
-INCLUDE_ASM("replay/replay", cReplay_restoreDeadBucket);
-#ifdef SKIP_ASM
 class cStreamRDB {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -177,22 +169,16 @@ extern "C" void cReplay_restoreDeadBucket(void* self, cStreamRDB* stream)
         func_003506D8(mem, ref.get());
     }
 }
-#endif
 
 extern "C" void* func_0026E6A0(void*);
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E448__FPv);
-#ifdef SKIP_ASM
 void* func_0026E448(void* self)
 {
     return func_0026E6A0((char*)self + 0x3b0);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E468);
-#ifdef SKIP_ASM
 extern "C" void* func_0026E468(void* self)
 {
     void* p = func_0026E448(self);
@@ -202,11 +188,8 @@ extern "C" void* func_0026E468(void* self)
     }
     return p;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E490);
-#ifdef SKIP_ASM
 extern "C" void* func_0026E490(void* self)
 {
     void* p = func_0026E448(self);
@@ -216,11 +199,8 @@ extern "C" void* func_0026E490(void* self)
     }
     return p;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E4B8);
-#ifdef SKIP_ASM
 // PORT: func_0026E448 is declared in this unit with one parameter, but this caller
 // passes (self, index); bind the 2-arg form to the symbol.
 void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
@@ -246,11 +226,8 @@ extern "C" void func_0026E4B8(void* self_)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E528);
-#ifdef SKIP_ASM
 // PORT: func_0026E468 really takes (self, index); the unit declares it with 1 arg
 void* func_0026E468_2(void* self, int idx) __asm__("func_0026E468");
 extern "C" void func_0026E4B8(void* self);
@@ -262,11 +239,8 @@ extern "C" void func_0026E528(void* self)
     *(int*)((char*)self + 0x484) = *(int*)((char*)p + 0x30);
     func_0026E4B8(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E568);
-#ifdef SKIP_ASM
 // PORT: func_0026E490 really takes (self, index); the unit declares it with 1 arg
 void* func_0026E490_2(void* self, int idx) __asm__("func_0026E490");
 extern "C" void func_0026E4B8(void* self);
@@ -278,11 +252,8 @@ extern "C" void func_0026E568(void* self)
     *(int*)((char*)self + 0x484) = *(int*)((char*)p + 0x30);
     func_0026E4B8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E5A8__FPv);
-#ifdef SKIP_ASM
 void* func_0026E5A8(void* self)
 {
     int t0 = 0;
@@ -291,22 +262,16 @@ void* func_0026E5A8(void* self)
     *(int*)((char*)self + 0x8) = t0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E5C0__FPv);
-#ifdef SKIP_ASM
 void func_0026E5C0(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E5D0);
-#ifdef SKIP_ASM
 struct sReplayNode {
     char pad[0x14];
     sReplayNode* next;
@@ -332,11 +297,8 @@ extern "C" void func_0026E5D0(sReplayList* list, sReplayNode* node)
     }
     list->count++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E608);
-#ifdef SKIP_ASM
 extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
 {
     if (node == list->head) {
@@ -355,22 +317,16 @@ extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
     node->prev = 0;
     list->count--;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E670);
-#ifdef SKIP_ASM
 extern "C" sReplayNode* func_0026E670(sReplayList* list)
 {
     sReplayNode* node = list->head;
     func_0026E608(list, node);
     return node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E6A0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sReplayFrame {
     char pad[0x14];
@@ -402,11 +358,8 @@ sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
     }
     return f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E6E0);
-#ifdef SKIP_ASM
 void func_0026D730(void*, int, int);
 
 struct sReplayDataE6E0 {
@@ -426,20 +379,14 @@ extern "C" void func_0026E6E0(sReplayObjE6E0* self, char* rider, sReplayDataE6E0
     self->rider = rider;
     self->data = *src;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E7F8__FPv);
-#ifdef SKIP_ASM
 void func_0026E7F8(void* self)
 {
     *(int*)((char*)self + 0xB0) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E800);
-#ifdef SKIP_ASM
 extern "C" void func_0026E800(void* self)
 {
     unsigned char* p = *(unsigned char**)((char*)self + 0xb0);
@@ -448,11 +395,8 @@ extern "C" void func_0026E800(void* self)
         *(int*)((char*)self + 0xb0) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E838);
-#ifdef SKIP_ASM
 void func_0026D730(void*, int, int);
 
 extern "C" int func_0026E838(void* self, void* o, int mode)
@@ -475,13 +419,10 @@ extern "C" int func_0026E838(void* self, void* o, int mode)
     func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, -e);
     return 1;
 }
-#endif
 
 extern void* D_00481898[];
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E8E0__FPv);
-#ifdef SKIP_ASM
 void* func_0026E8E0(void* self)
 {
     int t0 = 0;
@@ -492,5 +433,4 @@ void* func_0026E8E0(void* self)
     *(int*)((char*)self + 0x10) = t0;
     return self;
 }
-#endif
 

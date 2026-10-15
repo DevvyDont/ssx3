@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ui/uistate", cUIState_hideObjSafe);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 cListNode* cList_first(cList*);
@@ -31,11 +29,8 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name)
         } while (!cListNode_isSentinel(n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", cUIState_showObjSafe);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 cListNode* cList_first(cList*);
@@ -64,11 +59,8 @@ extern "C" void cUIState_showObjSafe(void* self, char* name)
         } while (!cListNode_isSentinel(n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039E9D8);
-#ifdef SKIP_ASM
 extern "C" void func_0039F8C8(void* self);
 extern "C" void func_00397948(void*);
 extern "C" void func_003A4868(void* self);
@@ -95,11 +87,8 @@ extern "C" void func_0039E9D8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039EA90);
-#ifdef SKIP_ASM
 struct func_0039EA90_sFlags {
     unsigned int b0 : 1;
     unsigned int b1 : 1;
@@ -144,11 +133,8 @@ extern "C" int func_0039EA90(cList* list, signed char id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039EB60);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 cListNode* cList_first(cList*);
@@ -174,11 +160,8 @@ extern "C" int func_0039EB60(cList* list, signed char id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039EBE0);
-#ifdef SKIP_ASM
 struct func_0039EBE0_sVEntry {
     short delta;
     short index;
@@ -208,21 +191,15 @@ extern "C" void func_0039EBE0(void* self)
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039ECA8__FPv);
-#ifdef SKIP_ASM
 void func_0039ECA8(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("ui/uistate", func_0039ECB0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uistate", func_0039F100);
-#ifdef SKIP_ASM
 extern "C" int func_0039ECB0(void* self);
 extern "C" void func_0039E868(void* self);
 
@@ -249,11 +226,8 @@ extern "C" void func_0039F100(void* self)
         } while (!cListNode_isSentinel(n));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039F190);
-#ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 cListNode* cList_first(cList*);
@@ -286,7 +260,6 @@ extern "C" func_0039F190_node* func_0039F190(cList* list, int count)
 done:
     return n;
 }
-#endif
 
 
 INCLUDE_ASM("ui/uistate", func_0039F200);

@@ -12,8 +12,6 @@ struct cActiveTriggerList {
 };
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cActiveTriggerList);
-#ifdef SKIP_ASM
 void cActiveTriggerList_purge(cActiveTriggerList* self)
 {
     sTriggerNode* node = self->head;
@@ -26,11 +24,8 @@ void cActiveTriggerList_purge(cActiveTriggerList* self)
     }
     self->head = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C678);
-#ifdef SKIP_ASM
 extern "C" void func_0016C678(cActiveTriggerList* self)
 {
     sTriggerNode* node = self->head;
@@ -42,11 +37,8 @@ extern "C" void func_0016C678(cActiveTriggerList* self)
         } while (node != 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6B0);
-#ifdef SKIP_ASM
 extern "C" sTriggerNode* func_0016C6B0(cActiveTriggerList* self, void* key)
 {
     sTriggerNode* node = self->head;
@@ -60,11 +52,8 @@ extern "C" sTriggerNode* func_0016C6B0(cActiveTriggerList* self, void* key)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6E0);
-#ifdef SKIP_ASM
 extern "C" void* func_0016C6E0(cActiveTriggerList* self, void* key)
 {
     sTriggerNode* node = self->head;
@@ -79,11 +68,8 @@ extern "C" void* func_0016C6E0(cActiveTriggerList* self, void* key)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_add);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char D_0045BF68[];
 
@@ -97,11 +83,8 @@ extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
     *(int*)((char*)n + 0xC) = 1;
     *(int*)((char*)n + 0x8) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C778);
-#ifdef SKIP_ASM
 extern "C" sTriggerNode* func_0016C778(cActiveTriggerList* self, sTriggerNode* target)
 {
     sTriggerNode* head = self->head;
@@ -122,11 +105,8 @@ extern "C" sTriggerNode* func_0016C778(cActiveTriggerList* self, sTriggerNode* t
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C800);
-#ifdef SKIP_ASM
 void* func_0016BEE8(void* self);
 void* func_0016C5D0(void* self);
 extern "C" void* func_0016D210(void* self);
@@ -146,11 +126,8 @@ extern "C" void* func_0016C800(void* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C888);
-#ifdef SKIP_ASM
 extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void func_0016C5E0(void* self, int flags);
 extern "C" void func_0016BEF8(void* self, int flags);
@@ -170,11 +147,8 @@ extern "C" void func_0016C888(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C918);
-#ifdef SKIP_ASM
 struct cCameraTriggerList;
 struct cCameraTriggerStack;
 void cCameraTriggerList_init(cCameraTriggerList* self);
@@ -190,11 +164,8 @@ extern "C" void func_0016C918(void* self)
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
     cCamera_resetChaseControllerSwitches();
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C968);
-#ifdef SKIP_ASM
 struct cCameraTriggerStack;
 void cCameraTriggerStack_init(cCameraTriggerStack* self);
 extern "C" void cCamera_resetChaseControllerSwitches(void);
@@ -207,5 +178,4 @@ extern "C" void func_0016C968(void* self)
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
     cCamera_resetChaseControllerSwitches();
 }
-#endif
 

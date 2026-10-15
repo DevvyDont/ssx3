@@ -12,8 +12,6 @@ extern void* D_0045ABE8[16];
 extern void* D_004A122C;
 
 //99.86%
-INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
-#ifdef SKIP_ASM
 void* cBERaceState_getState(void* self)
 {
     if (D_004A122C == 0) {
@@ -24,13 +22,10 @@ void* cBERaceState_getState(void* self)
     }
     return D_004A122C;
 }
-#endif
 
 INCLUDE_ASM("be/bestate", func_001530E0);
 
 //100%
-INCLUDE_ASM("be/bestate", func_00153200);
-#ifdef SKIP_ASM
 struct sStateObj153200 {
     int f0;
     int f4;
@@ -59,11 +54,8 @@ extern "C" void func_00153200(void) {
     D_004A1264->f8 = 0;
     D_004A121C->f8 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/bestate", func_00153258);
-#ifdef SKIP_ASM
 extern sStateObj153200* D_004A11C8;
 extern sStateObj153200* D_004A120C;
 extern sStateObj153200* D_004A1214;
@@ -83,5 +75,4 @@ extern "C" void func_00153258(void) {
     D_004A1264->f8 = 1;
     D_004A121C->f8 = 1;
 }
-#endif
 

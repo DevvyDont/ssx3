@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewNonBindTexID);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00492068[];
 
@@ -24,11 +22,8 @@ extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTexSlots367150* self)
     *slot = cMemMan_alloc(0x58, D_00492068, 0x21000000, 0);
     return id;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003671C8);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 struct cTexSlots3671C8 {
@@ -45,21 +40,15 @@ extern "C" void func_003671C8(cTexSlots3671C8* self, int id)
     self->freeHead = &self->slots[id];
     self->count--;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367230);
-#ifdef SKIP_ASM
 extern "C" void func_00367230(void)
 {
     for (int i = 0; i < 500; i++) {
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewBindTexID);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00492078[];
 
@@ -70,11 +59,8 @@ extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id)
     *slot = cMemMan_alloc(0x58, D_00492078, 0x21000000, 0);
     *(int*)self += 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003672C0);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 struct sGmPtrTable {
@@ -90,32 +76,23 @@ extern "C" void func_003672C0(sGmPtrTable* self, int idx)
     *e = 0;
     self->count--;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367310);
-#ifdef SKIP_ASM
 extern "C" void func_00367310(void)
 {
     for (int i = 0; i < 1500; i++) {
     }
 }
-#endif
 
 extern "C" void* func_00365E40(void*, int, int, void*);
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367340__FPvii);
-#ifdef SKIP_ASM
 void* func_00367340(void* self, int a1, int a2)
 {
     return func_00365E40((char*)self + 0x4350, a1, a2, (char*)self + 0x8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367360);
-#ifdef SKIP_ASM
 extern "C" void func_00366548(void* p);
 // PORT: the unit defines func_00367310(void), but this caller passes self.
 void func_00367310_1(void* self) __asm__("func_00367310");
@@ -132,23 +109,17 @@ extern "C" void func_00367360(void* self)
     }
     *(int*)((char*)self + 0x1F54) = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003673D0__FPv);
-#ifdef SKIP_ASM
 void func_003673D0(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_003673D8);
 
 INCLUDE_ASM("render/ps2graphicsman", func_00367440);
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
-#ifdef SKIP_ASM
 extern "C" void func_00367B60(void* self, int i)
 {
     char* obj = *(char**)((char*)self + (i << 2) + 8);
@@ -158,11 +129,8 @@ extern "C" void func_00367B60(void* self, int i)
         *(int*)e &= ~2;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367BC0);
-#ifdef SKIP_ASM
 void cMemMan_free(void* p);
 extern "C" void func_003663D8(void* self, int id);
 
@@ -219,11 +187,8 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
     fill7BC0((int*)(s + 0x1F4C), -1);
     *(int*)(s + 0x1F54) = -1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);
-#ifdef SKIP_ASM
 extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 extern char D_004A4068[];
@@ -232,11 +197,8 @@ extern "C" int func_00367CD0(void* self, int a, int b, int c)
 {
     return func_00367440(self, 0, D_004A4068, a, b, 0, c, 0, 0, 3, 0, -1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
-#ifdef SKIP_ASM
 extern "C" void* func_003E6574(void*, void*, int);
 extern "C" void func_00369098(void* self, int idx);
 
@@ -254,11 +216,8 @@ extern "C" void func_00367D20(void* self, int idx, void* data, int a3, int a4, i
     }
     func_00369098(self, idx);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367DB8);
-#ifdef SKIP_ASM
 // PORT: 64-bit GS register words (ulong is 64-bit here).
 struct sGsTex0Bits {
     ulong TBP0 : 14;
@@ -312,11 +271,8 @@ extern "C" void func_00367DB8(sPs2TexSet* self, int idx, ulong** pp)
     p += 12;
     *pp = p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367F18);
-#ifdef SKIP_ASM
 // PORT: 64-bit GS register words (ulong is 64-bit here).
 struct sGsTex0Bits7F18 {
     ulong TBP0 : 14;
@@ -379,11 +335,8 @@ extern "C" void func_00367F18(sPs2TexSet7F18* self, int idx, float* color, ulong
     p += 14;
     *pp = p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00368138);
-#ifdef SKIP_ASM
 extern char D_0044B200[];
 
 // PORT: 64-bit `ulong` DMA tag, pointer packed into the upper word
@@ -393,13 +346,10 @@ extern "C" void func_00368138(void* self, ulong** pkt)
     (*pkt)[1] = 0;
     *pkt += 2;
 }
-#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00368170);
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003684F0);
-#ifdef SKIP_ASM
 struct sPs2UpTex {
     char pad_0x00[0xC];
     unsigned int psm;       // 0xC
@@ -459,11 +409,8 @@ extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif
     *dma = d;
     *gif = p;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/ps2graphicsman", func_00368660);
-#ifdef SKIP_ASM
 extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
 extern "C" void func_00368170(void* self, int idx, ulong** dma, ulong** gif);
 extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma);
@@ -572,13 +519,10 @@ extern "C" void func_00368660(char* self, int a, int b, int a3, ulong** pp, void
         func_00368970(self, b, 1, &cur);
     *pp = cur;
 }
-#endif
 
 INCLUDE_ASM("render/ps2graphicsman", func_00368970);
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369098);
-#ifdef SKIP_ASM
 extern "C" void func_00366E30(void* list, int i);
 
 extern "C" void func_00369098(void* self, int idx)
@@ -598,11 +542,8 @@ extern "C" void func_00369098(void* self, int idx)
     }
     *(int*)((char*)self + 0x1F54) = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369130);
-#ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX1 register layout)
 struct sGsTex1 {
     ulong LCM : 1;
@@ -638,11 +579,8 @@ extern "C" void func_00369130(sGfxTexTable1* self, int idx, int mmin, int mmag, 
     t.MMAG = mmag;
     e->tex1 = t;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003691B0);
-#ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 struct sGsTex0 {
     ulong TBP0 : 14;
@@ -675,11 +613,8 @@ extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
         self->entries[idx]->tex0.TFX = tfx;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
-#ifdef SKIP_ASM
 extern "C" void func_00416210(void* dst, int c, int n);
 extern "C" void func_003E6448(void* dst, unsigned int value, int size);
 extern void* D_004A5B80;
@@ -792,11 +727,8 @@ extern "C" void* func_003691F8(char* self)
     *(int*)(self + 0xF4C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003695D8);
-#ifdef SKIP_ASM
 extern void* D_004A5B80;
 extern void* D_00493950[];
 void operator_delete(int* ptr);
@@ -809,11 +741,8 @@ extern "C" void func_003695D8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369610);
-#ifdef SKIP_ASM
 struct sVEntry00369610 {
     short delta;
     short index;
@@ -833,11 +762,8 @@ extern "C" void func_00369610(void* self, int* mask)
     sVEntry00369610* vt = *(sVEntry00369610**)((char*)self + 0x10D8);
     vt[62].fn((char*)self + vt[62].delta, mask);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369690);
-#ifdef SKIP_ASM
 extern "C" void* func_003E6574(void*, void*, int);
 
 extern "C" void func_00369690(void* self, int count, void* src)
@@ -845,11 +771,8 @@ extern "C" void func_00369690(void* self, int count, void* src)
     *(int*)((char*)self + 0xE80) = count;
     func_003E6574((char*)self + 0x280, src, count * 0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003696C8);
-#ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" void* func_003B3900(void* src, const char* name);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -903,22 +826,16 @@ extern "C" int func_003696C8(void* self_, const char* name)
     self->ents[self->count].handle = -1;
     return self->ents[self->count++].handle;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369890__FPvii);
-#ifdef SKIP_ASM
 void func_00369890(void* self, int a1, int a2)
 {
     *(int*)((char*)self + 0x27c) = a2;
     *(int*)((char*)self + 0x278) = a1;
     *(int*)((char*)self + 0xe80) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003698A0);
-#ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
 extern "C" void func_003698A0(void* self)
@@ -930,5 +847,4 @@ extern "C" void func_003698A0(void* self)
     *(void**)((char*)self + 0xF48) = 0;
     *(int*)((char*)self + 0xF4C) = 0;
 }
-#endif
 

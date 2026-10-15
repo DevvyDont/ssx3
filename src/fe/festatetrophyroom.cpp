@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -17,22 +15,16 @@ extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 extern "C" void* func_0039E4C0(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D43D0__FPv);
-#ifdef SKIP_ASM
 void* func_001D43D0(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetCreate);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -129,11 +121,8 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4660);
-#ifdef SKIP_ASM
 extern "C" int func_001D4660(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
@@ -144,11 +133,8 @@ extern "C" int func_001D4660(void* self, int a1, unsigned int a2)
     }
     return 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4698);
-#ifdef SKIP_ASM
 struct sVEntry001D4698 {
     short delta;
     short index;
@@ -198,11 +184,8 @@ extern "C" void func_001D4698(void* self, void* item, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4760);
-#ifdef SKIP_ASM
 extern "C" void func_001D4A20(void* self);
 extern "C" void* func_0039E510(void* self);
 
@@ -213,11 +196,8 @@ extern "C" void func_001D4760(void* self)
     }
     func_0039E510(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D47A0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -271,11 +251,8 @@ extern "C" void func_001D47A0(void* self, int index)
         *(int*)(w + 0x7C) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4890);
-#ifdef SKIP_ASM
 extern "C" void setChallengeStats(void* widget, signed char rider, int a2, int a3, int a4, int index);
 
 // Real virtual class so g++ emits the vcall itself (vptr at +8, after 8 bytes of data).
@@ -307,11 +284,8 @@ extern "C" void func_001D4890(void* self, int index)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4918);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -344,11 +318,8 @@ extern "C" void func_001D4918(sTrophyRoom_4918* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4A20);
-#ifdef SKIP_ASM
 extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
@@ -434,11 +405,8 @@ extern "C" void func_001D4A20(void* p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4B20);
-#ifdef SKIP_ASM
 struct cGame001D4B20 {
     char pad[0x10D8];
     virtual void v01();
@@ -519,11 +487,8 @@ extern "C" void func_001D4B20(sSelf001D4B20* self)
         self->tex[i] = -1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4BC8);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern "C" void* cBE_getBE();
@@ -543,11 +508,8 @@ extern "C" void* func_001D4BC8(void* self, int a1, signed char idx, int a3)
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -565,11 +527,8 @@ extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
     }
     func_0028F140(func_0028B180(), 6);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetCreate);
-#ifdef SKIP_ASM
 struct cUIText;
 extern "C" void func_001D4F90(void* self, int index, cUIText* text);
 extern char D_004A2000[];
@@ -614,11 +573,8 @@ extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
         func_001D4F90(self, 6, (cUIText*)w);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4EA8);
-#ifdef SKIP_ASM
 struct sVEntry001D4EA8 {
     short delta;
     short index;
@@ -652,13 +608,10 @@ extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
     }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D4F68);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4F90);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -678,11 +631,8 @@ extern "C" void func_001D4F90(void* self, int index, cUIText* text)
     sprintf(buf, D_004A2020, got, total);
     cUIText_setAsciiString(text, buf);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5038);
-#ifdef SKIP_ASM
 extern "C" void* func_001BEE30(void* self);
 extern void* D_00468050[];
 
@@ -693,11 +643,8 @@ extern "C" void* func_001D5038(void* self)
     *(int*)((char*)self + 0xC) = 0x34;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5078);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -712,11 +659,8 @@ extern "C" void func_001D5078(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D50E0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -730,11 +674,8 @@ extern "C" void func_001D50E0(void* self, cUIText* item)
         cUIText_setUnicodeStringByID(item, GetHashValue32(D_00461CC0));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5138);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -772,11 +713,8 @@ extern "C" int func_001D5138(void* self, int msg)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5240);
-#ifdef SKIP_ASM
 extern "C" int func_001A9668(void* self, void* a1, int a2);
 extern "C" int func_001BF6C0(void* self, void* a1, int a2);
 
@@ -790,11 +728,8 @@ extern "C" int func_001D5240(void* self, void* a1, int a2)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5280);
-#ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_0039F698(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
@@ -818,11 +753,8 @@ extern "C" void func_001D5280(void* self, void* item, int msg)
         func_001A97B8(self, item, msg);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5330);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_001D5488(void* self, int a1);
 extern void* D_00474E08[];
@@ -842,11 +774,8 @@ extern "C" void* func_001D5330(void* self, int a1, int a2, int a3)
     func_001D5488(self, a2);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D53B0);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_001D5488(void* self, int a1);
 extern void* D_00474E08[];
@@ -866,11 +795,8 @@ extern "C" void* func_001D53B0(void* self, int a1, int a2)
     func_001D5488(self, a2);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5428);
-#ifdef SKIP_ASM
 extern void* D_0046C980[];
 extern void* D_00474E08[];
 extern void* D_004A2028;
@@ -883,13 +809,10 @@ extern "C" void func_001D5428(void* self, int flags)
     *(void***)((char*)self + 8) = D_00474E08;
     func_0039E390(self, flags);
 }
-#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5488);
-#ifdef SKIP_ASM
 extern "C" void* func_00227F80(void* app);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1063,11 +986,8 @@ extern "C" void func_001D5488(void* self_, int mode)
     func_00241AA0(b1, 0x100);
     func_002C26D0(self + 0x11C, b2, b1, b0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D58B8);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1107,13 +1027,10 @@ extern "C" void func_001D58B8(void* self)
     }
     func_0020A430(self);
 }
-#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D59A0);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5C28);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern int D_004A19B8;
 extern "C" void* cBE_getBE();
@@ -1175,13 +1092,10 @@ extern "C" int func_001D5C28(int size)
     }
     return 1;
 }
-#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5DF0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1252,21 +1166,15 @@ extern "C" void func_001D5DF0()
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5F38__FPv);
-#ifdef SKIP_ASM
 void func_001D5F38(void* self)
 {
 }
-#endif
 
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5F40);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D64C0);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_00287670(void* opt);
 extern "C" int func_002876A0(void* opt);
@@ -1342,5 +1250,4 @@ extern "C" void func_001D64C0(unsigned int mode)
         o->v04(z);
     }
 }
-#endif
 

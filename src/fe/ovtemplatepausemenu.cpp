@@ -3,8 +3,6 @@
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onCreateScreen);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8448);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -47,11 +45,8 @@ extern "C" int func_001F8448(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F85C0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -101,19 +96,13 @@ extern "C" void func_001F85C0(void* self, int a1)
     }
     func_0039E4C0(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8720__FPv);
-#ifdef SKIP_ASM
 void func_001F8720(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8728);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -183,23 +172,17 @@ extern "C" void func_001F8728(void* self)
     func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
 }
-#endif
 
 extern "C" void* func_0020A430(void*);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F88E8__FPv);
-#ifdef SKIP_ASM
 void* func_001F88E8(void* self)
 {
     *(int*)((char*)self + 0xc4) = 0;
     return func_0020A430(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8908);
-#ifdef SKIP_ASM
 extern "C" int func_001F8908(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
@@ -211,22 +194,16 @@ extern "C" int func_001F8908(void* self, int a1, unsigned int a2)
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetEvent);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8DF0__FPv);
-#ifdef SKIP_ASM
 int func_001F8DF0(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8DF8);
-#ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -255,11 +232,8 @@ extern "C" void func_001F8DF8(void* self, int idx, int on)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8EE0);
-#ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478160[];
 
@@ -273,11 +247,8 @@ extern "C" void func_001F8EE0(void* self)
     *(int*)((char*)self + 0x110) = 1;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8F48);
-#ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478178[];
 
@@ -291,11 +262,8 @@ extern "C" void func_001F8F48(void* self)
     *(int*)((char*)self + 0x110) = 2;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8FB0);
-#ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478140[];
 
@@ -309,11 +277,8 @@ extern "C" void func_001F8FB0(void* self)
     *(int*)((char*)self + 0x110) = 3;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F9018);
-#ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478190[];
 
@@ -327,11 +292,8 @@ extern "C" void func_001F9018(void* self)
     *(int*)((char*)self + 0x110) = 4;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F9080);
-#ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_004781A8[];
 
@@ -345,11 +307,8 @@ extern "C" void func_001F9080(void* self)
     *(int*)((char*)self + 0x110) = 5;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F90E8);
-#ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern "C" int func_00231AB8(void* game);
 extern void* D_004A28A8;
@@ -371,5 +330,4 @@ extern "C" void func_001F90E8(void* self)
     *(int*)((char*)self + 0x110) = 6;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
-#endif
 

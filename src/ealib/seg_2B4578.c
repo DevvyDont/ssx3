@@ -5,8 +5,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B38B8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3900);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *f_3A10_3900(char *) __asm__("func_003B3A10");
 extern void f_3D00_3900(char *, int, void *) __asm__("func_003B3D00");
@@ -32,42 +30,30 @@ char *func_003B3900_3900(struct H_3900 *arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locate);
-#ifdef SKIP_ASM
 extern void func_003B3900();
 
 void SHAPE_locate(void) {
     func_003B3900();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B39D8);
-#ifdef SKIP_ASM
 extern unsigned char D_0044C3D0[];
 
 unsigned char func_003B39D8(unsigned char *arg0) {
     return D_0044C3D0[*arg0 & 0x7F];
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B39F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044C3D0_39F8[128] __asm__("D_0044C3D0");
 
 unsigned char func_003B39F8(int arg0) {
     return D_0044C3D0_39F8[arg0 & 0x7F];
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3A10);
-#ifdef SKIP_ASM
 unsigned char *func_003B3A10(unsigned char *p) {
     while (p) {
         int off;
@@ -81,7 +67,6 @@ unsigned char *func_003B3A10(unsigned char *p) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3A50);
 
@@ -143,8 +128,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B3D00);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3D40);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3DA8);
-#ifdef SKIP_ASM
 int func_003B3DA8(int arg0) {
     int r = 0;
     switch (arg0) {
@@ -155,7 +138,6 @@ int func_003B3DA8(int arg0) {
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3E40);
 
@@ -170,16 +152,11 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B4338);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B43C0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4448);
-#ifdef SKIP_ASM
 int func_003B4448(int arg0, int arg1, int arg2) {
     return ((arg1 * arg2) + arg0) << 5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4458);
-#ifdef SKIP_ASM
 extern int D_0044C450[];
 extern int D_0044C454[];
 extern int D_0044C458[];
@@ -189,7 +166,6 @@ void func_003B4458(int arg0, int arg1, int arg2) {
     D_0044C454[0] = arg1;
     D_0044C458[0] = arg2;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4478);
 
@@ -202,18 +178,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B4708);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4740);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B47F8);
-#ifdef SKIP_ASM
 extern void func_003B4740();
 
 void func_003B47F8(void) {
     func_003B4740();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4818);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int f_4818(unsigned char *p) __asm__("func_003B4818");
 static __inline__ int get24_4818(unsigned char *q) { return (q[0] << 16) | (q[1] << 8) | q[2]; }
@@ -236,25 +207,19 @@ int f_4818(unsigned char *p) {
     }
     return v;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B49B0);
-#ifdef SKIP_ASM
 extern void func_003B4818();
 
 void func_003B49B0(void) {
     func_003B4818();
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B49D0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4D00);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4DD8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Sub_4DD8 {
     char pad00[0x8];
@@ -296,15 +261,12 @@ int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) {
     *out = D_0050A8E8_4DD8.cfg;
     return D_0044C460;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4FC0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5158);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5320);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B5440_5320() __asm__("func_003B5440");
 extern int func_003B82B8_5320(int, int, int, int, int) __asm__("func_003B82B8");
@@ -345,36 +307,27 @@ int func_003B5320(void) {
     func_003C3358_5320();
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5440);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern signed char D_0050AA5C_5440[16] __asm__("D_0050AA5C");
 
 signed char func_003B5440(void) {
     return D_0050AA5C_5440[0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5450);
-#ifdef SKIP_ASM
 extern void func_003C60E0();
 
 int func_003B5450(void) {
     func_003C60E0();
     return 0;
 }
-#endif
 
 void func_003B5470(void) {
 }
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5478);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003BC910(void);
 extern void SYNCTASK_add_5478(void *, int, int) __asm__("SYNCTASK_add");
@@ -391,11 +344,8 @@ int func_003B5478(void) {
     func_003E4A30_5478(func_003BC910);
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B54E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct N_54E0 { struct N_54E0 *next; int pad; void (*fn)(int); int arg; } N_54E0;
 typedef struct { char pad[0x1B4]; N_54E0 *list; int pad2[2]; int cnt; } G_54E0;
@@ -417,35 +367,26 @@ void func_003B54E0(void) {
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5540);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B55F0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5860);
-#ifdef SKIP_ASM
 extern void func_003C3380();
 
 void func_003B5860(void) {
     func_003C3380();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5880);
-#ifdef SKIP_ASM
 extern void func_003C33E0();
 
 void func_003B5880(void) {
     func_003C33E0();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B58A0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*D_0044C46C[])(void);
 extern char D_0050A8E8_58A0[] __asm__("D_0050A8E8");
@@ -454,13 +395,10 @@ void func_003B58A0(void) {
     D_0044C46C[0]();
     D_0050A8E8_58A0[0x176]++;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B58D8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5910);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5910 {
     char pad0[0x174];
@@ -478,11 +416,8 @@ void func_003B5910(int arg0) {
         D_0050A8E8_5910.f177++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5948);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5948 { char pad[0x174]; char on; char p1; char p2; signed char n; char pad2[12]; int arr[8]; };
 extern struct S_5948 D_a8e8_5948 __asm__("D_0050A8E8");
@@ -503,11 +438,8 @@ void func_003B5948(int a) {
         func_003B58D8();
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5A28);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5A28 {
     char pad0[0x174];
@@ -525,11 +457,8 @@ void func_003B5A28(int arg0) {
         D_0050A8E8_5A28.f179++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5A60);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_5A60 { char pad[0x179]; signed char cnt; char pad2[0x4E]; int list[1]; };
 extern struct G_5A60 D_0050A8E8_5A60[] __asm__("D_0050A8E8");
@@ -551,11 +480,8 @@ void func_003B5A60(int arg) {
     }
     func_003B58D8();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5B20);
-#ifdef SKIP_ASM
 extern void func_003B58A0();
 extern void func_003B58D8();
 extern int func_003C4E50(int, int);
@@ -568,11 +494,8 @@ int func_003B5B20(int arg0, int arg1) {
     func_003B58D8();
     return temp_16;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5B68);
-#ifdef SKIP_ASM
 extern void func_003B58A0();
 extern void func_003B58D8();
 extern int func_003C4EC8(int);
@@ -585,11 +508,8 @@ int func_003B5B68(int arg0) {
     func_003B58D8();
     return temp_16;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5BA0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_5BA0 { char pad[0xC]; unsigned int lim; };
 extern struct G_5BA0 *D_0050AB1C_5BA0[] __asm__("D_0050AB1C");
@@ -599,11 +519,8 @@ void func_003B5BA0(int *a, int *b) {
     if (lim < (unsigned int)(x + *b))
         *b = lim - x;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5BD0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct H_5BD0 { int f0; int f4; int f8; int fC; int f10; };
 struct G_5BD0 { char pad[0x234]; struct H_5BD0 *cur; };
@@ -620,23 +537,17 @@ void func_003B5BD0(struct H_5BD0 *a0, int a1) {
     D_0050A8E8_5BD0.cur->fC = a1 - 0x20;
     D_0050A8E8_5BD0.cur->f10 = a1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5C40);
-#ifdef SKIP_ASM
 extern void func_003C6240();
 
 void func_003B5C40(void) {
     func_003C6240();
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5C60);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5E98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003B5E98_5E98(int) __asm__("func_003B5E98");
 struct E_5E98 { int key; int val; };
@@ -664,11 +575,8 @@ void func_003B5E98_5E98(int a) {
         if (!(s->cnt < i)) return;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5F60);
-#ifdef SKIP_ASM
 int func_003C51E0(void);
 extern char D_0050AA5C[];
 
@@ -681,13 +589,10 @@ int func_003B5F60(void) {
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5F98);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6098);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Hdr_6098 { int pad0; short pad4; unsigned short n; int off; int size2; int size1; int tbl[1]; };
 struct Ent_6098 { struct Hdr_6098 *hdr; char *buf1; char *buf2; char busy; };
@@ -757,11 +662,8 @@ fail:
     }
     return 8;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6300);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_6300 {
     void *p;
@@ -839,13 +741,10 @@ int func_003B6300(int arg0) {
     func_003B58D8_6300();
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B64D8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6528);
-#ifdef SKIP_ASM
 typedef struct { int a; int b; int c; } B6528_inner;
 typedef struct { B6528_inner *p; int pad[3]; } B6528_ent;
 extern B6528_ent *D_0050AADC[];
@@ -853,15 +752,12 @@ extern B6528_ent *D_0050AADC[];
 int func_003B6528(int arg0) {
     return D_0050AADC[0][arg0].p->c;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6548);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B65D0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6670);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B64D8_6670() __asm__("func_003B64D8");
 extern void func_003BB820_6670(int, int, char *, int, int, int) __asm__("func_003BB820");
@@ -894,11 +790,8 @@ int func_003B6670(int a0, int a1, char *a2, int a3, int a4) {
     func_003B58D8();
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6788);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B5F98_6788(void *, int) __asm__("func_003B5F98");
 extern int func_003BAAC0_6788(char **, void *) __asm__("func_003BAAC0");
@@ -919,13 +812,10 @@ int func_003B6788(int arg0, char *arg1, int arg2, int arg3) {
     } while (temp_16 != 0);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6820);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B68B8);
-#ifdef SKIP_ASM
 extern int func_003B8CC8(int, int);
 extern int func_003C6760(int, int, int, int);
 
@@ -944,11 +834,8 @@ void func_003B68B8(char *p) {
     } while (i == 0);
     *(char *)(p + 0x10) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6948);
-#ifdef SKIP_ASM
 int func_003B6948(unsigned char *p) {
     int v = 0;
     int w = *(unsigned short *)p;
@@ -964,11 +851,8 @@ int func_003B6948(unsigned char *p) {
     else if (t == 23) return h << 3;
     return (w * v) >> 8;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B69D8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x46]; unsigned char cnt; } G_69D8;
 extern void func_003B7838(int);
@@ -986,11 +870,8 @@ int func_003B69D8(void) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6A38);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0050A0A0[];
 extern unsigned char D_0050A92E_6A38[] __asm__("D_0050A92E");
@@ -1001,13 +882,10 @@ int func_003B6A38(int arg0) {
     }
     return D_0050A0A0[arg0];
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6A70);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6AD8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E13E8_6AD8(int, unsigned char *) __asm__("func_003E13E8");
 extern int *D_0050A0A0_6AD8[] __asm__("D_0050A0A0");
@@ -1016,7 +894,6 @@ void func_003B6AD8(void *arg0) {
     unsigned char *t = ((unsigned char **)arg0)[-1];
     func_003E13E8_6AD8(*D_0050A0A0_6AD8[*t], t);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6B10);
 
@@ -1031,8 +908,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B70F8);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B71D8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7410);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0050A0A0_7410[] __asm__("D_0050A0A0");
 extern unsigned char D_0050A92E_7410[] __asm__("D_0050A92E");
@@ -1048,37 +923,28 @@ int func_003B7410(void) {
     }
     return n;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7450);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B76E8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7818);
-#ifdef SKIP_ASM
 void func_003B7818(int a, int b, int c, int d, int e) {
     func_003B7450(a, b, c, d, e, 0, 0);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7838);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B78D8);
-#ifdef SKIP_ASM
 extern void func_003B76E8(int, int, int, int, int);
 
 void func_003B78D8(int a, int b, int c, int d) {
     func_003B76E8(a, b, c, d, 0);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B78F8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7A70);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 char *func_003B6A38_7A70(int) __asm__("func_003B6A38");
 
@@ -1093,11 +959,8 @@ char *func_003B7A70(int arg0) {
     }
     return v;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7AC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003C65F0(int);
 int func_003B7AC8_7AC8(int arg0, int arg1) __asm__("func_003B7AC8");
@@ -1106,11 +969,8 @@ int func_003B7AC8_7AC8(int arg0, int arg1) {
     int t = arg0 * 0x28 + 0x138;
     return t + func_003C65F0(arg1);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7B00);
-#ifdef SKIP_ASM
 extern int func_003B7AC8();
 extern int func_003E06B0(int, int, int);
 
@@ -1120,15 +980,12 @@ int func_003B7B00(int arg0) {
     temp_17 = func_003B7AC8();
     return temp_17 + func_003E06B0(arg0 + 2, 1, 1);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7B48);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7C40);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7D80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_003B7A70_7D80(int) __asm__("func_003B7A70");
 
@@ -1146,37 +1003,27 @@ int func_003B7D80(int arg0, int arg1) {
     func_003B58D8();
     return var_18;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7DE8);
-#ifdef SKIP_ASM
 extern void func_003B76E8(int, int, int, int, int);
 
 void func_003B7DE8(int a, int b, int c) {
     func_003B76E8(a, b, 0, c, 2);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7E10);
-#ifdef SKIP_ASM
 extern void func_003B76E8(int, int, int, int, int);
 
 void func_003B7E10(int a, int b, int c, int d) {
     func_003B76E8(a, b, c + d, 0, 1);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7E38);
-#ifdef SKIP_ASM
 extern void func_003B7450(int, int, int, int, int, int, int);
 
 void func_003B7E38(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
     func_003B7450(arg1, arg2, arg3, arg4, arg5, arg0, 1);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E70);
 
@@ -1197,8 +1044,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B80A0);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B80E0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8120);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int *func_003B6A38_8120(void) __asm__("func_003B6A38");
 void func_003E0B28_8120(int, int) __asm__("func_003E0B28");
@@ -1213,11 +1058,8 @@ int func_003B8120(int arg0, int arg1) {
     func_003E0B28_8120(*temp_2, arg1);
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8160);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_A7B0_8160(int) __asm__("func_003BA7B0");
 extern void f_2A50_8160(int) __asm__("func_003C2A50");
@@ -1240,11 +1082,8 @@ int func_003B8160(int arg0) {
     func_003B58D8();
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8218);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050AAE0_8218[] __asm__("D_0050AAE0");
 extern char D_0050AAF4_8218[] __asm__("D_0050AAF4");
@@ -1261,11 +1100,8 @@ void *func_003B8218(int arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8290);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 int func_003B8290(unsigned long a) {
     int t = (a & 0x40) >> 3;
@@ -1273,7 +1109,6 @@ int func_003B8290(unsigned long a) {
     if (a & 0x20) t |= 0x100;
     return t;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B82B8);
 
@@ -1282,8 +1117,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B83A0);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B84E0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8530);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BAA00_8530(int, int *) __asm__("func_003BAA00");
 extern int func_003BA6E8_8530(void) __asm__("func_003BA6E8");
@@ -1305,13 +1138,10 @@ int func_003B8530(int a, int n, int v) {
     }
     return h;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B85F0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B86C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_0050AAD8_86C0[] __asm__("D_0050AAD8");
 
@@ -1322,11 +1152,8 @@ short func_003B86C0(void) {
     }
     return *(short *)(D_0050AAD8_86C0[0] + i * 0x8C + 0x3A);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8700);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BAA00_8700(int, int *) __asm__("func_003BAA00");
 extern void func_003C2EC8_8700(int) __asm__("func_003C2EC8");
@@ -1348,11 +1175,8 @@ int func_003B8700(int arg0, int arg1) {
     }
     return h;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8790);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BA6E8_8790(void) __asm__("func_003BA6E8");
 extern void func_003BA938_8790(int, int) __asm__("func_003BA938");
@@ -1384,11 +1208,8 @@ int func_003B8790_8790(int a0, int arg1) {
     }
     return h;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8838);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BAA00_8838(int, int *) __asm__("func_003BAA00");
 extern void func_003C3010_8838(int, int) __asm__("func_003C3010");
@@ -1410,11 +1231,8 @@ int func_003B8838(int arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B88C8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BA6E8_88C8() __asm__("func_003BA6E8");
 extern void func_003BA740_88C8(int, int) __asm__("func_003BA740");
@@ -1438,11 +1256,8 @@ int func_003B88C8(int arg0, int arg1, int arg2) {
     }
     return t;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8978);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BAA00_8978(int, int *) __asm__("func_003BAA00");
 extern void func_003C3178_8978(int, int) __asm__("func_003C3178");
@@ -1460,11 +1275,8 @@ int func_003B8978(int arg0, int arg1) {
     }
     return h;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B89E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int func_003BA6E8_89E0(void) __asm__("func_003BA6E8");
 int func_003BAA00_89E0(int, int *) __asm__("func_003BAA00");
@@ -1483,25 +1295,19 @@ int func_003B89E0(void) {
     }
     return temp_2;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8AB8);
-#ifdef SKIP_ASM
 extern unsigned int func_003BA6E8();
 
 unsigned int func_003B8AB8(void) {
     return func_003BA6E8() >> 0x1F;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8AD8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8C00);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8C00 { char p0[0x1C]; unsigned short s1c; unsigned short s1e; char p1[0x2C]; unsigned short s4c; char p2[0x8C - 0x4E]; };
 struct G_8C00 { char pad[0x1F0]; struct E_8C00 *tab; };
@@ -1527,11 +1333,8 @@ int func_003B8C00(int a, int b, int c) {
     }
     return h;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8CC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BAA00_8CC8(int, int *) __asm__("func_003BAA00");
 extern void func_003C5068_8CC8(int, int) __asm__("func_003C5068");
@@ -1549,11 +1352,8 @@ int func_003B8CC8(int arg0, int arg1) {
     }
     return h;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8D30);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003BAA00_8D30(int, int *) __asm__("func_003BAA00");
 extern void func_003C5128_8D30(int, int) __asm__("func_003C5128");
@@ -1571,11 +1371,8 @@ int func_003B8D30(int arg0, int arg1) {
     }
     return h;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8D98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x10]; int key; char pad2[0x5C]; } E_8D98;
 extern E_8D98 D_0050A120_8D98[] __asm__("D_0050A120");
@@ -1590,13 +1387,10 @@ int func_003B8D98(int arg0) {
         return (D_0050A120_8D98[idx].key ^ v) == 0 ? idx : -8;
     return -8;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8DE8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8EE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8EE8 { int id; signed char owner; char pad[3]; };
 extern struct E_8EE8 D_0050A820_8EE8[] __asm__("D_0050A820");
@@ -1613,15 +1407,12 @@ int func_003B8EE8(int arg0) {
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8F78);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9140);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B91E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Ch_91E0 {
     char pad00[0x8];
@@ -1703,11 +1494,8 @@ void func_003B91E0(int h, struct Bits_91E0 *bits, int x, int cmd) {
     }
     e->p8++;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B93C8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct B_93C8 { unsigned int lo : 17; unsigned int f : 7; unsigned int hi : 8; };
 struct E_93C8 { int id; signed char owner; signed char sub; short pad; };
@@ -1731,13 +1519,10 @@ void func_003B93C8(int a0, struct B_93C8 *a1, int a2, int a3) {
         e += 1;
     } while (i >= 0);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B94B0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B96B8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B8DE8_96B8(int) __asm__("func_003B8DE8");
 extern void func_003B94B0_96B8(int) __asm__("func_003B94B0");
@@ -1766,13 +1551,10 @@ void func_003B96B8(void) {
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B97D8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9880);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B5948_9880(void (*)(void)) __asm__("func_003B5948");
 extern void func_003B96B8_9880(void) __asm__("func_003B96B8");
@@ -1787,11 +1569,8 @@ int func_003B9880(void) {
     func_003B58D8();
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B98C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a[4]; int v; int pad[0x17]; } E_98C0;
 extern void func_003B58A0();
@@ -1816,7 +1595,6 @@ int func_003B98C0(void) {
     func_003B58D8();
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9920);
 
@@ -1827,8 +1605,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B9B68);
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9C20);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9D00);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B89E0_9D00(int) __asm__("func_003B89E0");
 extern int D_0050A120_9D00[] __asm__("D_0050A120");
@@ -1863,13 +1639,10 @@ int func_003B9D00(int arg0) {
     func_003B58D8();
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9DC8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9E48);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A120_9E48[] __asm__("D_0050A120");
 extern int func_003B8D98_9E48() __asm__("func_003B8D98");
@@ -1910,11 +1683,8 @@ int func_003B9E48(int a0, int vol) {
     }
     return ret;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9F38);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A120_9F38[] __asm__("D_0050A120");
 
@@ -1933,11 +1703,8 @@ int func_003B9F38(int arg0, int arg1, int arg2) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9FC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char func_003B8D98_9FC8(void) __asm__("func_003B8D98");
 extern char D_0050A120_A120[] __asm__("D_0050A120");
@@ -1956,13 +1723,10 @@ signed char func_003B9FC8(void) {
     }
     return var_5;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA020);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA078);
-#ifdef SKIP_ASM
 extern short D_0050AC20[];
 
 int func_003BA078(int arg0, int arg1) {
@@ -1974,13 +1738,10 @@ int func_003BA078(int arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA0B0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA550);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_A550 { int f0; char pad[0x22]; unsigned char f26; unsigned char f27; char pad2[4]; int f2C; char pad3[0x69 - 0x30]; signed char f69; char pad4[0x8C - 0x6A]; };
 struct G_A550 { char pad[0x17E]; short cnt; int f180; char pad2[0x1F0 - 0x184]; struct E_A550 *tab; };
@@ -2033,11 +1794,8 @@ void func_003BA550(int i, unsigned char u) {
     e->f27 = 0;
     e->f2C = D_0050A8E8_A550.f180;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA6E8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A8E8_A8E8[] __asm__("D_0050A8E8");
 
@@ -2056,15 +1814,12 @@ int func_003BA6E8_A6E8(int arg0) {
     }
     return var_5;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA740);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA7B0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA888);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044C480_A888[] __asm__("D_0044C480");
 
@@ -2088,13 +1843,10 @@ int func_003BA888(int x) {
         scale = (scale * (D_0044C480_A888[t] + 0x100)) >> 8;
     return scale;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA938);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BAA00);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_AA00 { int w; char p0[0x22]; unsigned char type; char p1[0x42]; signed char b; char p2[0x22]; };
 struct G_AA00 { char pad[0x17E]; short cnt; char pad2[0x70]; struct E_AA00 *tab; };
@@ -2116,7 +1868,6 @@ int func_003BAA00(int h, int *pos) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BAAC0);
 
@@ -2125,8 +1876,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BB0C8);
 INCLUDE_ASM("ealib/seg_2B4578", func_003BB140);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003BB588);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Rec_B588 {
     short id;
@@ -2234,13 +1983,10 @@ fail:
     }
     return ret;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BB820);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BBDA0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct O_BDA0 { char pad[0x48]; int a[4]; int b[4]; };
 struct Rec_BDA0 { int p; int id; int v1; int v2; int v3; };
@@ -2303,7 +2049,6 @@ void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extr
         ((unsigned short *)(out + 0xC))[i] = D_0050ABC8_BDA0[hdr[2] - 1][i];
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC000);
 
@@ -2312,8 +2057,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BC0B0);
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC4C0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC530);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003B5E98_C530(int) __asm__("func_003B5E98");
 extern int D_0050AC30_C530[] __asm__("D_0050AC30");
@@ -2326,22 +2069,16 @@ void func_003BC530(void) {
     }
     func_003B58D8();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC570);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned short D_0044C590_C570[128] __asm__("D_0044C590");
 
 unsigned short func_003BC570(int arg0) {
     return D_0044C590_C570[arg0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC588);
-#ifdef SKIP_ASM
 extern int D_0044C690[];
 extern int D_0050AC50[];
 
@@ -2351,13 +2088,10 @@ void func_003BC588(int arg0) {
         D_0050AC50[i] = D_0044C690[i] + arg0;
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC5C8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC6B8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int f_A6E8_C6B8() __asm__("func_003BA6E8");
 extern void f_A938_C6B8(int) __asm__("func_003BA938");
@@ -2387,25 +2121,19 @@ int func_003BC6B8(int arg0, int arg1) {
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC770);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC840);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC910);
-#ifdef SKIP_ASM
 extern void func_003C5E08();
 
 void func_003BC910(void) {
     func_003C5E08();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC930);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003BECA0_C930(void) __asm__("func_003BECA0");
 extern void func_003BED30_C930(void) __asm__("func_003BED30");
@@ -2419,11 +2147,8 @@ void func_003BC930(void) {
     D_0050C844[0] = func_003BED30_C930;
     D_0050C848[0] = func_003BF0F0_C930;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC968);
-#ifdef SKIP_ASM
 void func_003BC968(int arg0, int arg1, int arg2, int arg3) {
     if (*(volatile int *)0x1000D400 & 0x100) {
         do {
@@ -2438,11 +2163,8 @@ void func_003BC968(int arg0, int arg1, int arg2, int arg3) {
         } while (*(volatile int *)0x1000D400 & 0x100);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BCA28);
-#ifdef SKIP_ASM
 void func_003BCA28(int arg0, int arg1, int arg2, int arg3) {
     if (*(volatile int *)0x1000D000 & 0x100) {
         do {
@@ -2457,11 +2179,8 @@ void func_003BCA28(int arg0, int arg1, int arg2, int arg3) {
         } while (*(volatile int *)0x1000D000 & 0x100);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BCAE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char p0[6]; unsigned short pos; unsigned char *buf; } BW_CAE8;
 extern BW_CAE8 *D_0050AC68_CAE8[] __asm__("D_0050AC68");
@@ -2489,13 +2208,10 @@ void func_003BCAE8(int arg0, int n) {
         D_0050AC68_CAE8[0]->pos += take;
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BCBA0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BD078);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C06B0_D078(int a0, float *buf, void *p, signed char *tbl) __asm__("func_003C06B0");
 extern signed char D_0044DD00_D078[] __asm__("D_0044DD00");
@@ -2541,15 +2257,12 @@ void func_003BD078(int a0, signed char *out, signed char *out8) {
         out8[i] = (int)(buf[i] * scale);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BD220);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BD5B8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BD9C0);
-#ifdef SKIP_ASM
 extern void *D_0050AC68;
 
 void func_003BD9C0(void) {
@@ -2620,15 +2333,12 @@ void func_003BD9C0(void) {
         } while (var_7 < (int) (*(unsigned char *)((char*)(D_0050AC68) + (1))));
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BDE08);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BE6E0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BECA0);
-#ifdef SKIP_ASM
 int func_003BECA0(int a, int b, int *o1, int *o2) {
     int w, m;
     if (b < 0) return -2;
@@ -2643,13 +2353,10 @@ int func_003BECA0(int a, int b, int *o1, int *o2) {
     *o2 = (w + (w + 0x200)) * 4 + 0xC00;
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BED30);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003BF0F0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct C_F0F0 {
     char pad0[0xA20];
@@ -2758,7 +2465,6 @@ int func_003BF0F0(int *data, int key, char *buf) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF3E0);
 
@@ -2787,8 +2493,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BFD60);
 INCLUDE_ASM("ealib/seg_2B4578", func_003BFE80);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BFFA0);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (butterfly add/sub of matrix rows, scaled per lane).
 void func_003BFFA0(void *in, void *scale, void *out) {
     __asm__ volatile(
@@ -2925,11 +2629,8 @@ void func_003BFFA0(void *in, void *scale, void *out) {
         : "r"(in), "r"(scale), "r"(out)
         : "memory");
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C01A0);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (8 vec4 pairs: sums and differences scaled per lane, strided stores).
 void func_003C01A0(void *in, void *scale, void *out, int stride) {
     __asm__ volatile(
@@ -3080,7 +2781,6 @@ void func_003C01A0(void *in, void *scale, void *out, int stride) {
         : "r"(in), "r"(scale), "r"(stride)
         : "memory");
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C03E0);
 
@@ -3163,8 +2863,6 @@ void func_003C0564(void *in, void *out, float s) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C05E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (scale 4x4 float matrix, convert to packed bytes).
 void func_003C05E0(void *in, void *out, float s) {
     __asm__ volatile(
@@ -3194,11 +2892,8 @@ void func_003C05E0(void *in, void *out, float s) {
         : "r"(in), "r"(out), "f"(s)
         : "$6", "$7", "$8", "$9", "memory");
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C0640);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (scale 4x4 float matrix, convert to packed bytes).
 void func_003C0640(void *in, void *out, float s) {
     __asm__ volatile(
@@ -3232,7 +2927,6 @@ void func_003C0640(void *in, void *out, float s) {
         : "r"(in), "r"(out), "f"(s)
         : "$6", "$7", "$8", "$9", "$10", "memory");
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C06B0);
 
@@ -3249,8 +2943,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C0A60);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0B10);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C0BE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003BA550(int, unsigned char);
 struct S_0BE8 { char pad[0x2F]; unsigned char a; unsigned char b; };
@@ -3259,11 +2951,8 @@ extern struct S_0BE8 D_0050A8E8_0BE8 __asm__("D_0050A8E8");
 void func_003C0BE8(int arg0) {
     func_003BA550(arg0 + D_0050A8E8_0BE8.b + D_0050A8E8_0BE8.a, D_0050A8E8_0BE8.a);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C0C18);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A8E8_0C18[] __asm__("D_0050A8E8");
 extern unsigned char D_0050A918_0C18[] __asm__("D_0050A918");
@@ -3286,15 +2975,12 @@ void func_003C0C18(int arg0, int *arg1, int *arg2) {
         *arg2 = *(short *)(b + 0x17E);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0C90);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0E28);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C1298);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct KV_1298 { int key; int val; };
 struct T_1298 {
@@ -3368,11 +3054,8 @@ void func_003C1298(void) {
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C1578);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0xC]; int v; int mode; } A_1578;
 typedef struct { char pad[0x1AA4]; int a; char pad2[0x5C]; int b; } G_1578;
@@ -3393,11 +3076,8 @@ void func_003C1578(A_1578 *arg0) {
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C15D8);
-#ifdef SKIP_ASM
 void func_003C15D8(char *dst, char *src) {
     while (*dst) dst++;
     while (*src) {
@@ -3405,13 +3085,10 @@ void func_003C15D8(char *dst, char *src) {
     }
     *dst = 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1638);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C1980);
-#ifdef SKIP_ASM
 struct S_1980 { char pad[0x1C0]; int cnt; };
 extern struct S_1980 D_0050A8E8_1980 __asm__("D_0050A8E8");
 int func_003C1980(void) {
@@ -3420,15 +3097,12 @@ int func_003C1980(void) {
     __asm__ volatile("sync\n\tei");
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C19A8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1B80);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C2268);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct {
     char pad0[0x176];
@@ -3524,7 +3198,6 @@ int func_003C2268(void) {
     func_003B58D8_2268();
     return 0;
 }
-#endif
 
 void func_003C2438(void) {
 }
@@ -3532,8 +3205,6 @@ void func_003C2438(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2440);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C25E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_25E0 {
     char pad00[0x4];
@@ -3609,11 +3280,8 @@ int func_003C25E0(int idx) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C27E0);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Ch_27E0 {
@@ -3668,15 +3336,12 @@ int func_003C27E0(int id, int k) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2A50);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2EC8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3010);
-#ifdef SKIP_ASM
 extern void func_003C8B40(int, int);
 struct G_3010 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 struct E_3010 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
@@ -3692,15 +3357,12 @@ int func_003C3010(int arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C30C8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3178);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3250);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C8C30(int, int);
 struct G_3250 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
@@ -3716,7 +3378,6 @@ void func_003C3250(int arg0, int arg1) {
             func_003C8C30(e->v[i] - (D_0050A8E8_3250[0].b + D_0050A8E8_3250[0].a), arg1);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3300);
 
@@ -3727,8 +3388,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C3380);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C33E0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3450);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_0B10_3450(int, void *, int) __asm__("func_003C0B10");
 extern int f_72F8_3450(void *, int) __asm__("func_003C72F8");
@@ -3758,11 +3417,8 @@ void func_003C3450(int arg0) {
         f_0B10_3450(2, q, f_72F8_3450(q + 4, 4));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3500);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044DD48_3500[] __asm__("D_0044DD48");
 struct A_3500 {
@@ -3808,20 +3464,16 @@ void func_003C3500(unsigned a) {
     D_0050AD00_3500.p[0x11] = D_0050A8E8_3500.a;
     D_0050AD00_3500.p[0x12] = D_0050A8E8_3500.b;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C35F8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C36A8);
-#ifdef SKIP_ASM
 extern void func_003C35F8(int);
 
 int func_003C36A8(int a, int b) {
     func_003C35F8(b);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C36C8);
 
@@ -3832,8 +3484,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C3780);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C38E0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3EA8);
-#ifdef SKIP_ASM
 int func_003C3EA8(void *arg0, int arg1, int *arg2) {
     if (*arg2 == 0) {
         *arg2 = (*(int *)((char*)(arg0) + (0x68)));
@@ -3841,35 +3491,26 @@ int func_003C3EA8(void *arg0, int arg1, int *arg2) {
     *(*(int **)((char*)(arg0) + (0x64))) = arg1 + ((*(int *)((char*)(arg0) + (0x68))) - *arg2);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3EE0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C42D8);
-#ifdef SKIP_ASM
 extern void func_003C4788(int, int, int, int, int);
 
 void func_003C42D8(int a, int b, int c, int d) {
     func_003C4788(a, b, c, d, 10);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C42F8);
-#ifdef SKIP_ASM
 extern void func_003C4898();
 
 void func_003C42F8(void) {
     func_003C4898();
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4318);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C43C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_43C0 { int a, b, c, d; };
 extern void func_00424020(int);
@@ -3896,7 +3537,6 @@ void func_003C43C0(int arg0, int arg1, int arg2, int arg3) {
         D_0044E178_43C0[0] = func_00424160(&s, 1);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4450);
 
@@ -3905,8 +3545,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C45E8);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4668);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C4788);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C45E8_4788(int) __asm__("func_003C45E8");
 extern int func_003C4668_4788(int, int, int, int, int) __asm__("func_003C4668");
@@ -3932,15 +3570,12 @@ int func_003C4788_4788(int a0, int a1, int a2, int a3, int a4) {
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4898);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4918);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C4978);
-#ifdef SKIP_ASM
 void func_003C4978(int arg0, int arg1, int arg2, int arg3) {
     if (*(volatile int *)0x1000D400 & 0x100) {
         do {
@@ -3955,11 +3590,8 @@ void func_003C4978(int arg0, int arg1, int arg2, int arg3) {
         } while (*(volatile int *)0x1000D400 & 0x100);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C4A38);
-#ifdef SKIP_ASM
 void func_003C4A38(int arg0, int arg1, int arg2, int arg3) {
     if (*(volatile int *)0x1000D000 & 0x100) {
         do {
@@ -3974,11 +3606,8 @@ void func_003C4A38(int arg0, int arg1, int arg2, int arg3) {
         } while (*(volatile int *)0x1000D000 & 0x100);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C4AF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050AD00_4AF8[] __asm__("D_0050AD00");
 
@@ -4001,7 +3630,6 @@ void func_003C4AF8(int *arg0, int *arg1) {
         *arg1 = *(unsigned short *)(b + 0x1A9E) - temp_4;
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4B70);
 
@@ -4010,8 +3638,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C4D78);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4E50);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C4EC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_4EC8 { unsigned short a; unsigned short b; };
 struct G_4EC8 { char pad[0x1A98]; unsigned short n; unsigned short lo; unsigned short hi; unsigned short max; struct S_4EC8 *segs; };
@@ -4065,13 +3691,10 @@ int f_4EC8(int *out) {
     *out <<= 6;
     return best << 6;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5068);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5128);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C8EC0(int, int);
 struct G_5128 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
@@ -4088,23 +3711,17 @@ int func_003C5128(int arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C51E0);
-#ifdef SKIP_ASM
 int func_003C51E0(void) {
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C51E8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C52C8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C52F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_52F8(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_52F8(void *) __asm__("func_003B4FC0");
@@ -4116,11 +3733,8 @@ int func_003C52F8(int arg0) {
     func_003B4FC0_52F8(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5330);
-#ifdef SKIP_ASM
 extern void func_003B4DD8(void *);
 
 int func_003C5330(int *arg0) {
@@ -4129,11 +3743,8 @@ int func_003C5330(int *arg0) {
     *arg0 = *(unsigned short *)(sp + 0x28);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5368);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5368(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5368(void *) __asm__("func_003B4FC0");
@@ -4145,11 +3756,8 @@ int func_003C5368(int arg0) {
     func_003B4FC0_5368(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C53A0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_53A0(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_53A0(void *) __asm__("func_003B4FC0");
@@ -4161,11 +3769,8 @@ int func_003C53A0(int arg0) {
     func_003B4FC0_53A0(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C53D8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_53D8(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_53D8(void *) __asm__("func_003B4FC0");
@@ -4177,11 +3782,8 @@ int func_003C53D8(int arg0) {
     func_003B4FC0_53D8(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5410);
-#ifdef SKIP_ASM
 extern void func_003B4FC0(void *);
 
 int func_003C5410(float f) {
@@ -4195,11 +3797,8 @@ int func_003C5410(float f) {
     func_003B4FC0(buf);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5468);
-#ifdef SKIP_ASM
 int func_003C5468(float *a0) {
     char buf[0xE0];
     float f;
@@ -4212,15 +3811,12 @@ int func_003C5468(float *a0) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C54C0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5538);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5600);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044E1C4_5600[] __asm__("D_0044E1C4");
 int func_003C54C0_5600(int, int *) __asm__("func_003C54C0");
@@ -4234,11 +3830,8 @@ int func_003C5600(int arg0) {
     D_0044E1C4_5600[0] = arg0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5648);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044E1C4_5648[4] __asm__("D_0044E1C4");
 
@@ -4246,15 +3839,12 @@ int func_003C5648(int *arg0) {
     *arg0 = D_0044E1C4_5648[0];
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5660);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5710);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5788);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct Buf_5788 { char pad[0x2A]; unsigned short a; unsigned short b; char rest[0xE0 - 0x2E]; } Buf_5788;
 extern void func_003B4DD8_5788(Buf_5788 *) __asm__("func_003B4DD8");
@@ -4276,7 +3866,6 @@ int func_003C5788(int arg0, int *arg1) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C57F0);
 
@@ -4285,8 +3874,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5880);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5908);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5998);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5998(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5998(void *) __asm__("func_003B4FC0");
@@ -4307,45 +3894,30 @@ int func_003C5998(int arg0, float f) {
     func_003B4FC0_5998(sp);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5A28);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5AA0);
-#ifdef SKIP_ASM
 int func_003C5AA0(void) {
     return -5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5AA8);
-#ifdef SKIP_ASM
 int func_003C5AA8(void) {
     return -5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5AB0);
-#ifdef SKIP_ASM
 int func_003C5AB0(void) {
     return -5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5AB8);
-#ifdef SKIP_ASM
 int func_003C5AB8(void) {
     return -5;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5AC0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5AC0(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5AC0(void *) __asm__("func_003B4FC0");
@@ -4357,11 +3929,8 @@ int func_003C5AC0(int arg0) {
     func_003B4FC0_5AC0(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5AF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5AF8(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5AF8(void *) __asm__("func_003B4FC0");
@@ -4373,11 +3942,8 @@ int func_003C5AF8(int arg0) {
     func_003B4FC0_5AF8(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5B30);
-#ifdef SKIP_ASM
 typedef struct { char pad[0x4A]; signed char v; char pad2[0xE0 - 0x4B]; } S_5B30;
 extern void func_003B4FC0(void *);
 
@@ -4388,11 +3954,8 @@ int func_003C5B30(float f) {
     func_003B4FC0(&s);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5B80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5B80(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5B80(void *) __asm__("func_003B4FC0");
@@ -4404,11 +3967,8 @@ int func_003C5B80(int arg0) {
     func_003B4FC0_5B80(sp);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5BB8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5BB8(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5BB8(void *) __asm__("func_003B4FC0");
@@ -4420,19 +3980,13 @@ int func_003C5BB8(int arg0) {
     func_003B4FC0_5BB8(sp);
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF0);
-#ifdef SKIP_ASM
 int func_003C5BF0(void) {
     return -5;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B4DD8_5BF8(void *) __asm__("func_003B4DD8");
 extern void func_003B4FC0_5BF8(void *) __asm__("func_003B4FC0");
@@ -4444,24 +3998,18 @@ int func_003C5BF8(int arg0) {
     func_003B4FC0_5BF8(sp);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5C30);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5DF0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern signed char D_0050AA5C_5DF0[16] __asm__("D_0050AA5C");
 
 int func_003C5DF0(void) {
     return D_0050AA5C_5DF0[0] == 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5E08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044E1C0_5E08[] __asm__("D_0044E1C0");
 void func_003B5320_5E08(void) __asm__("func_003B5320");
@@ -4471,11 +4019,8 @@ int func_003C5E08_5E08(void) {
     D_0044E1C0_5E08[0] = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5E30);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044E1C0_5E30[] __asm__("D_0044E1C0");
 extern int D_005157B0_5E30[] __asm__("D_005157B0");
@@ -4487,11 +4032,8 @@ int func_003C5E30(int a, int b, int c) {
     }
     return -5;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5E58);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003C5DF0();
 extern int D_0044E1C0_5E58[] __asm__("D_0044E1C0");
@@ -4511,11 +4053,8 @@ int func_003C5E58(int arg0, int *arg1, int *arg2) {
     }
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5ED0);
-#ifdef SKIP_ASM
 typedef struct { char pad0[0x64]; int a; int b; char pad1[0xE0 - 0x6C]; } S_5ED0;
 extern void func_003B4FC0(void *);
 
@@ -4527,11 +4066,8 @@ int func_003C5ED0(int arg0, int arg1) {
     func_003B4FC0(&s);
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5F18);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003B4FC0_5F18(char *) __asm__("func_003B4FC0");
 
@@ -4545,11 +4081,8 @@ int func_003C5F18(int arg0, float f) {
     }
     return -5;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5F70);
-#ifdef SKIP_ASM
 extern void func_003B4DD8(void *);
 
 int func_003C5F70(int arg0, float *arg1) {
@@ -4563,11 +4096,8 @@ int func_003C5F70(int arg0, float *arg1) {
     }
     return -5;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5FD0);
-#ifdef SKIP_ASM
 typedef struct { char pad0[0xCC]; int a; int b; char pad1[0xE0 - 0xD4]; } S_5FD0;
 extern void func_003B4FC0(void *);
 
@@ -4579,11 +4109,8 @@ int func_003C5FD0(int arg0, int arg1) {
     func_003B4FC0(&s);
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6018);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_6018 { char pad[0x178]; signed char n; char pad2[0x23]; int v[1]; };
 extern struct S_6018 D_0050A8E8_6018 __asm__("D_0050A8E8");
@@ -4591,11 +4118,8 @@ void func_003C6018(int a) {
     D_0050A8E8_6018.v[D_0050A8E8_6018.n] = a;
     D_0050A8E8_6018.n = D_0050A8E8_6018.n + 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6040);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x178]; signed char n; char pad2[0x23]; int arr[1]; } S_6040;
 extern S_6040 D_0050A8E8_6040 __asm__("D_0050A8E8");
@@ -4614,15 +4138,12 @@ void func_003C6040(int arg0) {
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C60E0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6158);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6240);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_0050AB1C_6240[] __asm__("D_0050AB1C");
 int func_003C6240_6240(void) __asm__("func_003C6240");
@@ -4633,21 +4154,15 @@ int func_003C6240_6240(void) {
     temp_3 = (*(int *)((char*)(D_0050AB1C_6240[0]) + (8)));
     return (int) ((temp_3 - (*(int *)((char*)(D_0050AB1C_6240[0]) + (0x10)))) * 0x64) / temp_3;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6278);
-#ifdef SKIP_ASM
 void func_003C6278(void *arg0) {
     *(int *)((char *)arg0 + 0) = 0;
     *(int *)((char *)arg0 + 4) = 0;
     *(int *)((char *)arg0 + 8) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6288);
-#ifdef SKIP_ASM
 void func_003C6288(void *arg0, void *arg1) {
     void *temp_2;
 
@@ -4662,11 +4177,8 @@ void func_003C6288(void *arg0, void *arg1) {
     (*(void **)((char*)(arg0) + (0))) = arg1;
     (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) + 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C62B8);
-#ifdef SKIP_ASM
 void func_003C62B8(void *arg0, int *arg1) {
     int *temp_2;
 
@@ -4681,11 +4193,8 @@ void func_003C62B8(void *arg0, int *arg1) {
     (*(int **)((char*)(arg0) + (4))) = arg1;
     (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) + 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C62E8);
-#ifdef SKIP_ASM
 int *func_003C62E8(void *arg0) {
     int *temp_2;
     int *temp_3;
@@ -4703,11 +4212,8 @@ int *func_003C62E8(void *arg0) {
     }
     return temp_3;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6320);
-#ifdef SKIP_ASM
 void func_003C6320(void *arg0, void *arg1) {
     void **temp_3;
     void *temp_3_2;
@@ -4728,7 +4234,6 @@ void func_003C6320(void *arg0, void *arg1) {
     }
     (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) - 1);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6380);
 
@@ -4737,8 +4242,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C64A8);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6500);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6540);
-#ifdef SKIP_ASM
 void *func_003C6540(char *arg0, int arg1) {
     int temp_3;
 
@@ -4751,27 +4254,20 @@ void *func_003C6540(char *arg0, int arg1) {
     }
     return arg0 + ((arg1 << 2) + 0x14) + temp_3;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6580);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C65E0);
-#ifdef SKIP_ASM
 int func_003C65E0(int arg0) {
     return (arg0 << 5) + 0x9C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C65F0);
-#ifdef SKIP_ASM
 int func_003CE198(void);
 int func_003C65F0(int arg0) {
     int t = func_003C65E0(arg0);
     return t + func_003CE198();
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6620);
 
@@ -4782,8 +4278,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6AB8);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6C28);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6C98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Inner_6C98 { char pad[0x48]; int a; int b; };
 struct S_6C98 { char pad[0x304]; struct Inner_6C98 *p[1]; };
@@ -4792,23 +4286,17 @@ int func_003C6C98(int i) {
     struct Inner_6C98 *q = (&D_005157B8_6C98)[0].p[i];
     int b = q->b; int a = q->a; return a + b;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CC0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE0);
-#ifdef SKIP_ASM
 int func_003C6CE0(void) {
     return -0xF;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6DA0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CE1A8_6DA0(void) __asm__("func_003CE1A8");
 typedef struct { char pad[0x304]; int arr[100]; } W_6DA0;
@@ -4819,11 +4307,8 @@ int func_003C6DA0(int arg0) {
     D_005157B8_6DA0.arr[arg0] = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6DE0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_6DE0 { int pad; int len:31; int flag:1; unsigned int val[6]; };
 struct Q_6DE0 {
@@ -4907,15 +4392,12 @@ unsigned int func_003C6DE0(int id, int r, int *len, int *flag) {
     v = e->val[r];
     return v ? v : 0xFFFFFFFF;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7010);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7080);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7138);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int fA6E8_7138(void) __asm__("func_003BA6E8");
 extern int fAA00_7138(int, int *) __asm__("func_003BAA00");
@@ -4947,11 +4429,8 @@ int func_003C7138(void) {
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7218);
-#ifdef SKIP_ASM
 struct S7218 { short s0; char b2, b3, b4, b5, b6, b7; short s8; short sA; short sC[6]; int i18[6]; char pad[0x48 - 0x30]; int a48[4]; int a58[4]; };
 
 int func_003C7218(struct S7218 *p) {
@@ -4974,11 +4453,8 @@ int func_003C7218(struct S7218 *p) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C72A0);
-#ifdef SKIP_ASM
 int func_003C72A0(int arg0) {
     if (arg0 > 0x10000) {
         arg0 = 0x10000;
@@ -4987,13 +4463,10 @@ int func_003C72A0(int arg0) {
     }
     return (int)(((func_003BC5C8() & 0x7FFF) - 0x4000) * arg0) >> 0xE;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C72F8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7388);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_7388 {
     unsigned char *p;
@@ -5042,11 +4515,8 @@ int func_003C7388(struct S_7388 *s) {
     s->p = s->p + s->len;
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7480);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S24_7480 { int w[6]; };
 struct S16_7480 { int w[4]; };
@@ -5069,11 +4539,8 @@ void func_003C7480(void) {
     D_0050AB20_7480.f = D_0044E240_7480;
     D_0050AB20_7480.g = D_0044E250_7480;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7600);
-#ifdef SKIP_ASM
 void func_003C7600(float *arg0, void *arg1) {
     (*(float *)((char*)(arg1) + (0))) = (float) ((*(float *)((char*)(arg1) + (0))) + (*arg0 * 0.9411765f));
     (*(float *)((char*)(arg1) + (4))) = (float) ((*(float *)((char*)(arg1) + (4))) + (*arg0 * 0.88235295f));
@@ -5093,11 +4560,8 @@ void func_003C7600(float *arg0, void *arg1) {
     (*(float *)((char*)(arg1) + (0x3C))) = (float) ((*(float *)((char*)(arg1) + (0x3C))) + (*arg0 * 0.05882353f));
     *arg0 = 0.0f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7828);
-#ifdef SKIP_ASM
 void func_003C7828(void *arg0, void *arg1, float fparg0, float fparg1) {
     float temp_f13;
 
@@ -5119,14 +4583,11 @@ void func_003C7828(void *arg0, void *arg1, float fparg0, float fparg1) {
     (*(float *)((char*)(arg1) + (0x38))) = (float) ((*(float *)((char*)(arg1) + (0x38))) + ((*(float *)((char*)(arg0) + (0x38))) * (fparg0 + (temp_f13 * 15.0f))));
     (*(float *)((char*)(arg1) + (0x3C))) = (float) ((*(float *)((char*)(arg1) + (0x3C))) + ((*(float *)((char*)(arg0) + (0x3C))) * (fparg0 + (temp_f13 * 16.0f))));
 }
-#endif
 
 void func_003C7AA8(void) {
 }
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7AB0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Obj_7AB0 {
     int (*fn)(struct Obj_7AB0 *self, int a, int b, void *c, int d);
@@ -5193,33 +4654,24 @@ int func_003C7AB0(struct S_7AB0 *s) {
     }
     return 0x10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7CC0);
-#ifdef SKIP_ASM
 extern void func_003B5C60();
 
 void func_003C7CC0(void) {
     func_003B5C60();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C7CE0);
-#ifdef SKIP_ASM
 extern void func_003B5E98();
 
 void func_003C7CE0(void) {
     func_003B5E98();
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7D00);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8018);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_8018 { char p0[5]; unsigned char f5; char p6[0xA8-6]; int fA8[4]; int fB8[8]; char pc[0x1DC-0xD8]; int f1DC; };
 extern struct G_8018 D_00515B40_8018 __asm__("D_00515B40");
@@ -5256,11 +4708,8 @@ void func_003C8018(void) {
     f_7AA8_8018(2.0f);
     f_58D8_8018();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8128);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad0[0xC]; short s; char pad1[0x1E0 - 0xE]; void (*f)(void); } C8128_S;
 extern C8128_S D_00515B40;
@@ -5270,24 +4719,18 @@ void func_003C8128(void) {
     D_00515B40.f = func_003CBB78_8128;
     D_00515B40.s = 0x400;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8148);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern signed char D_00515B4E_8148[16] __asm__("D_00515B4E");
 
 void func_003C8148(signed char arg0) {
     D_00515B4E_8148[0] = arg0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8158);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C83A0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_83A0 { char p0[5]; unsigned char cnt; char pad[0x1D6]; char *tbl; };
 extern struct G_83A0 D_00515B40_83A0 __asm__("D_00515B40");
@@ -5319,11 +4762,8 @@ void func_003C83A0(int arg0) {
     }
     e[0] = 2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8430);
-#ifdef SKIP_ASM
 extern void func_003C8468();
 extern int (*D_00515B48[])(int);
 
@@ -5331,11 +4771,8 @@ void func_003C8430(int arg0) {
     func_003C8468();
     D_00515B48[0](arg0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8468);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Node_8468 {
     int pad0;
@@ -5384,11 +4821,8 @@ void func_003C8468(int idx) {
     } while (next != 0);
     e->c0 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8560);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8560 {
     char pad0[1];
@@ -5407,11 +4841,8 @@ void func_003C8560(int idx, int k, float f) {
     D_00515B40_8560.tab[idx].v[k] = f;
     D_00515B40_8560.tab[idx].flag = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8598);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8598 {
     char pad0[1];
@@ -5430,13 +4861,10 @@ void func_003C8598(int idx, int k, float f) {
     D_00515B40_8598.tab[idx].v[k] = f;
     D_00515B40_8598.tab[idx].flag = 1;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C85D0);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8968);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[5]; unsigned char cnt; char pad2[6]; unsigned short add; } H_8968;
 extern H_8968 D_00515B40_8968[] __asm__("D_00515B40");
@@ -5458,11 +4886,8 @@ void func_003C8968(int *src, int len) {
         len -= 0x200;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8A40);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_00515D1C_8A40[] __asm__("D_00515D1C");
 
@@ -5474,13 +4899,10 @@ int func_003C8A40(int idx) {
     }
     return -1;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8A88);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8B40);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x4C]; int f; char pad2[0x10]; } E_8B40;
 typedef struct { E_8B40 arr[100]; } W_8B40;
@@ -5495,11 +4917,8 @@ void func_003C8B40(int arg0, int arg1) {
         func_003CB110_8B40(temp_4, arg1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8B80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *f_5C60_8B80(int) __asm__("func_003B5C60");
 extern void f_5E98_8B80(void *) __asm__("func_003B5E98");
@@ -5531,11 +4950,8 @@ void func_003C8B80(int arg0, int arg1) {
         p->q = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8C30);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_00515D1C_8C30[] __asm__("D_00515D1C");
 extern unsigned short D_0050A912_8C30[] __asm__("D_0050A912");
@@ -5574,13 +4990,10 @@ void func_003C8C30(int arg0, int arg1) {
         *(char**)(e + 0x5C) = 0;
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8D00);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8E28);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_003B5C60_8E28(int) __asm__("func_003B5C60");
 extern void func_003C8F48_8E28(int, void *) __asm__("func_003C8F48");
@@ -5601,11 +5014,8 @@ void func_003C8E28(int arg0, int arg1, void *arg2) {
     (*(signed char *)((char*)(temp_2) + (0x1A))) = 0;
     func_003C8F48_8E28(temp_18 + 0x40, temp_2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8EC0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_00515D1C_8EC0[] __asm__("D_00515D1C");
 extern void func_003C8FB0_8EC0(char *, char *) __asm__("func_003C8FB0");
@@ -5628,11 +5038,8 @@ void func_003C8EC0(int arg0, int arg1) {
         node = *(char **)(node + 8);
     } while (node != 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8F48);
-#ifdef SKIP_ASM
 void func_003C8F48(char **arg0, char *arg1) {
     char *cur;
     char *prev;
@@ -5654,11 +5061,8 @@ void func_003C8F48(char **arg0, char *arg1) {
         *(char **)(arg1 + 0x10) = prev;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C8FB0);
-#ifdef SKIP_ASM
 typedef struct N_8FB0 { char pad0[8]; struct N_8FB0 *next; int pad1; struct N_8FB0 *prev; } N_8FB0;
 
 void func_003C8FB0(N_8FB0 **arg0, N_8FB0 *arg1) {
@@ -5684,11 +5088,8 @@ void func_003C8FB0(N_8FB0 **arg0, N_8FB0 *arg1) {
         var_6->next = var_6->next->next;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9010);
-#ifdef SKIP_ASM
 int func_003C9010(void *arg0) {
     int (*temp_2)();
 
@@ -5698,11 +5099,8 @@ int func_003C9010(void *arg0) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9040);
-#ifdef SKIP_ASM
 void func_003C9040(void *arg0) {
     int (*temp_2)(void *);
     void *temp_4;
@@ -5722,11 +5120,8 @@ void func_003C9040(void *arg0) {
     }
     (*(signed char *)((char*)(arg0) + (0x1B))) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C90C0);
-#ifdef SKIP_ASM
 int func_003C90C0(char *a, char *b, int s, int t) {
     if (s == 1 && t == 1 && *(int*)(b + 8) == 0) {
         *(int*)(a + 0x10) = (int)b;
@@ -5754,11 +5149,8 @@ int func_003C90C0(char *a, char *b, int s, int t) {
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9188);
-#ifdef SKIP_ASM
 int func_003C9188(int *a, int *b, int x, int y) {
     if (x == 1 && y == 1 && a[4] == (int)b && b[2] == (int)a) {
         a[4] = 0;
@@ -5782,11 +5174,8 @@ int func_003C9188(int *a, int *b, int x, int y) {
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9268);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct {
     char pad0[0x18];
@@ -5807,11 +5196,8 @@ D_00515B40_9268.p18 = f_9268_a;
     D_00515B40_9268.p20 = f_9268_c;
     D_00515B40_9268.i68 = 0x34;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C92B0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct {
     char pad0[0x24];
@@ -5832,11 +5218,8 @@ D_00515B40_92B0.p24 = f_92B0_a;
     D_00515B40_92B0.p2c = f_92B0_c;
     D_00515B40_92B0.i74 = 0x3C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C92F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct {
     char pad[0x30];
@@ -5863,19 +5246,13 @@ D_00515B40_5B40.f3C = func_003C9420_9420;
     D_00515B40_5B40.f40 = func_003C9618_9618;
     D_00515B40_5B40.i88 = 0x30;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9358);
-#ifdef SKIP_ASM
 int func_003C9358(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9360);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003CDE68_9360(int, int **, int) __asm__("func_003CDE68");
 extern void func_00416210_9360(int *, int, int) __asm__("func_00416210");
@@ -5896,11 +5273,8 @@ int func_003C9360(void *arg0, int arg1, int arg2, int *arg3) {
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C93F8);
-#ifdef SKIP_ASM
 extern void func_003CD1D0(int);
 
 void func_003C93F8(void *arg0) {
@@ -5911,21 +5285,15 @@ void func_003C93F8(void *arg0) {
         func_003CD1D0(temp_4);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9420);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9518);
-#ifdef SKIP_ASM
 int func_003C9518(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9520);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a, b, c; } Q_9520;
 extern int func_003CDE68_9520(int, int *, int) __asm__("func_003CDE68");
@@ -5957,11 +5325,8 @@ int func_003C9520(char *arg0, int arg1, int arg2, int arg3) {
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C95F0);
-#ifdef SKIP_ASM
 extern void func_003CD1D0(int);
 
 void func_003C95F0(void *arg0) {
@@ -5972,13 +5337,10 @@ void func_003C95F0(void *arg0) {
         func_003CD1D0(temp_4);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9618);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C96F0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a, b, c; } Q_96F0;
 extern void f_7010_96F0(int, int, int) __asm__("func_003C7010");
@@ -6054,11 +5416,8 @@ int func_003C96F0(char *self, int n, int unused, int buf) {
     }
     return total;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9938);
-#ifdef SKIP_ASM
 extern void func_003CD1D0(int);
 
 void func_003C9938(void *arg0) {
@@ -6069,21 +5428,15 @@ void func_003C9938(void *arg0) {
         func_003CD1D0(temp_4);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9960);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C99F8);
-#ifdef SKIP_ASM
 int func_003C99F8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9A00);
-#ifdef SKIP_ASM
 struct R_9A00 { char pad[0x1C]; short *data; unsigned int pos; unsigned int cap; int flag; };
 
 int func_003C9A00(struct R_9A00 *r, unsigned int n, int arg2, int *buf) {
@@ -6104,11 +5457,8 @@ int func_003C9A00(struct R_9A00 *r, unsigned int n, int arg2, int *buf) {
     }
     return 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9AC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003C99F8_9AC8(void) __asm__("func_003C99F8");
 void func_003C9A00_9AC8(void) __asm__("func_003C9A00");
@@ -6124,19 +5474,13 @@ void func_003C9AC8(char *arg0, char *arg1) {
     *(void (**)(void))(arg1 + 0x28) = func_003C99F8_9AC8;
     *(int *)(arg0 + 4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9B08);
-#ifdef SKIP_ASM
 int func_003C9B08(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9B10);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_9E50_9B10(int, void *, void *) __asm__("func_003C9E50");
 struct R_9B10 { char pad[0x1C]; short *buf; unsigned cur; unsigned start; unsigned end; int en; };
@@ -6157,11 +5501,8 @@ int func_003C9B10(struct R_9B10 *self, int n, int unused, int *src) {
     }
     return 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9BC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003C9B10_9BC8(void) __asm__("func_003C9B10");
 void func_003C9B08_9BC8(void) __asm__("func_003C9B08");
@@ -6175,11 +5516,8 @@ void func_003C9BC8(int *a, int *b) {
     a[11] = b[6];
     b[10] = (int)func_003C9B08_9BC8;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9C08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003C6DE0_9C08(int, unsigned char, int *, int *) __asm__("func_003C6DE0");
 extern void func_003C7010_9C08(int, unsigned char, int) __asm__("func_003C7010");
@@ -6218,11 +5556,8 @@ int func_003C9C08_9C08(char *o, int n, int unused, int *buf) {
     }
     return *(int *)(o + 0x2C);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9D28);
-#ifdef SKIP_ASM
 extern int func_003CE0E0(int);
 extern signed char func_003CE118(int);
 extern int func_003CE378(int);
@@ -6238,15 +5573,12 @@ void func_003C9D28(void *arg0, void *arg1) {
     (*(unsigned char *)((char*)(arg0) + (0x30))) = (*(unsigned char *)((char*)(arg1) + (0x18)));
     (*(int *)((char*)(arg0) + (0x2C))) = 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9DA0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9E50);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9F58);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003CCF90_9F58(int, char **, int) __asm__("func_003CCF90");
 extern void func_00416210_9F58(char *, int, int) __asm__("func_00416210");
@@ -6270,19 +5602,13 @@ int func_003C9F58(void *arg0, int arg1, int arg2, int arg3) {
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9FF8);
-#ifdef SKIP_ASM
 int func_003C9FF8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x28)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA000);
-#ifdef SKIP_ASM
 extern void func_003CCF18(int);
 
 void func_003CA000(void *arg0) {
@@ -6293,11 +5619,8 @@ void func_003CA000(void *arg0) {
         func_003CCF18(temp_4);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA028);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char func_003C9F58_A028[] __asm__("func_003C9F58");
 extern char func_003C9FF8_A028[] __asm__("func_003C9FF8");
@@ -6318,21 +5641,15 @@ void func_003CA028(char *arg0, char *arg1) {
     n = *(int *)(arg0 + 0x24);
     func_003CCF60_A028(*(int *)(arg0 + 0x1C), *(int *)(arg0 + 0x20), n * 4, n);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA0B8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA358);
-#ifdef SKIP_ASM
 int func_003CA358(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA360);
-#ifdef SKIP_ASM
 extern void func_003CCF18(int);
 
 void func_003CA360(void *arg0) {
@@ -6343,11 +5660,8 @@ void func_003CA360(void *arg0) {
         func_003CCF18(temp_4);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA388);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char func_003CA0B8_A388[] __asm__("func_003CA0B8");
 extern char func_003CA358_A388[] __asm__("func_003CA358");
@@ -6380,13 +5694,10 @@ void func_003CA388(int *self, int *arg1) {
         func_003CCF60_A388(self[7], arg1[0], n * 4, n);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA460);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA5E8);
-#ifdef SKIP_ASM
 extern void func_003CCF18(int);
 
 void func_003CA5E8(void *arg0) {
@@ -6397,11 +5708,8 @@ void func_003CA5E8(void *arg0) {
         func_003CCF18(temp_4);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA610);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003CCEF0_A610(int) __asm__("func_003CCEF0");
 extern int func_003CCF40_A610(int) __asm__("func_003CCF40");
@@ -6423,13 +5731,10 @@ void func_003CA610(void *arg0, void *arg1) {
     (*(int *)((char*)(arg0) + (0x34))) = 0;
     (*(int *)((char*)(arg0) + (0x1C))) = func_003CCF40_A610(func_003CCEF0_A610(0xA8));
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA6A8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA7A0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CA6A8_A7A0(void) __asm__("func_003CA6A8");
 
@@ -6437,11 +5742,8 @@ void func_003CA7A0(void *arg0) {
     *(int *)((char *)arg0 + 4) = 0;
     *(void (**)(void))((char *)arg0 + 0) = func_003CA6A8_A7A0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA7B8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef int (*vfn_A7B8)(void *, int, float *, float *, unsigned char);
 int func_003CA7B8_A7B8(char *, int, float *, float *) __asm__("func_003CA7B8");
@@ -6460,11 +5762,8 @@ int func_003CA7B8_A7B8(char *self, int n, float *in, float *out) {
     }
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA870);
-#ifdef SKIP_ASM
 extern void func_003CA7B8();
 
 int func_003CA870(void *arg0) {
@@ -6478,11 +5777,8 @@ int func_003CA870(void *arg0) {
     (*(int *)((char*)(arg0) + (0x1C))) = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA8A0);
-#ifdef SKIP_ASM
 void func_003CA8A0(void *arg0, void *arg1) {
     float temp_f1;
     float temp_f2;
@@ -6494,11 +5790,8 @@ void func_003CA8A0(void *arg0, void *arg1) {
     (*(float *)((char*)(arg0) + (0x24))) = (float) (temp_f1 * ((float) (*(int *)((char*)(arg1) + (8))) * 0.00390625f));
     (*(float *)((char*)(arg0) + (0x20))) = (float) (temp_f2 * ((float) (*(int *)((char*)(arg1) + (8))) * 0.00390625f));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA900);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003CEBE8_A900(void *, int, int, int) __asm__("func_003CEBE8");
 
@@ -6517,11 +5810,8 @@ int func_003CA900(char *p, int arg1, int arg2, int arg3) {
     func_003CEBE8_A900(p + 0x20, n, arg2, arg3);
     return n;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA990);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int pad1c; char sub[1]; } S_A990;
 extern void func_003CEB90(void *);
@@ -6538,7 +5828,6 @@ int func_003CA990(S_A990 *self) {
     func_003CEB90(&self->sub);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA9D8);
 
@@ -6547,8 +5836,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CAA28);
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAB28);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CAC88);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C51E8_AC88(void *, void *, int) __asm__("func_003C51E8");
 extern void func_003CAA28_AC88(void *, void *, void *, int, int) __asm__("func_003CAA28");
@@ -6591,11 +5878,8 @@ void func_003CAC88(char *arg0, char **arg1, int arg2) {
     *(int *)(arg0 + 0x34) = 0;
     *(int *)(arg0 + 0x3C) = 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CADF0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C51E8_ADF0(int, void *, int) __asm__("func_003C51E8");
 
@@ -6617,7 +5901,6 @@ int func_003CADF0(void *arg0, int *arg1, int *arg2) {
     *arg2 += temp_20;
     return temp_16;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAEA0);
 
@@ -6628,8 +5911,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CB110);
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB1A8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CB280);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003C72F8(int, int);
 extern int func_003CE0E0(int);
@@ -6654,36 +5935,27 @@ int func_003CB280(void *arg0, void *arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x3C))) = 0;
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB328);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB4A8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CB528);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CB328_B528(void) __asm__("func_003CB328");
 
 void func_003CB528(void (**arg0)(void)) {
     *arg0 = func_003CB328_B528;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CB538);
-#ifdef SKIP_ASM
 void func_003CB538(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x1C))) = arg1;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB540);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CBB28);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_BB28_vt(void) __asm__("func_003CB540");
 
@@ -6697,42 +5969,32 @@ void func_003CBB28(int *self) {
     for (i = 3; i >= 0; i--)
         self[0xA + i] = 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBB78);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CBC00);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00515B54_BC00[4] __asm__("D_00515B54");
 
 void func_003CBC00(int arg0) {
     D_00515B54_BC00[0] = arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CBC10);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00515D80_BC10[4] __asm__("D_00515D80");
 
 int *func_003CBC10(void) {
     return D_00515D80_BC10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CBC20);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044E770_BC20[][6][6] __asm__("D_0044E770");
 
 unsigned char func_003CBC20(int arg0, int arg1, int arg2) {
     return D_0044E770_BC20[arg0 - 1][arg1 - 1][arg2 - 1];
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBC58);
 
@@ -6741,8 +6003,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CBEC8);
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC070);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CC630);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Hdr_C630 {
     int f0;
@@ -6809,11 +6069,8 @@ void func_003CC630(int a0, unsigned char *data) {
     D_00515B40_C630.f10 = func_003CBC58;
     D_00515B40_C630.fF = 1;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CC848);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003CBEC8();
 struct S_C848 { char pad[0xF]; char a; int b; };
@@ -6824,35 +6081,26 @@ void func_003CC848(void) {
     func_003CBEC8();
     D_00515B40_C848.a = 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC878);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CC918);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00517604_C918[4] __asm__("D_00517604");
 
 void func_003CC918(int arg0) {
     D_00517604_C918[0] = arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CC928);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00517608_C928[4] __asm__("D_00517608");
 
 void func_003CC928(int arg0) {
     D_00517608_C928[0] = arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CC938);
-#ifdef SKIP_ASM
 typedef struct { int pad0; float x; float y; unsigned char *src; float *dst; } S_C938;
 typedef union { short s; unsigned char c[2]; } U_C938;
 
@@ -6879,36 +6127,27 @@ void func_003CC938(S_C938 *s) {
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CCA08);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CCA38);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CCEF0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int (*D_00517604_CEF0[])(void) __asm__("D_00517604");
 int func_003CCEF0(void) {
     return D_00517604_CEF0[0]();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CCF18);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int (*D_00517608_CF18[])(void) __asm__("D_00517608");
 int func_003CCF18_CF18(int) __asm__("func_003CCF18");
 int func_003CCF18_CF18(int a) {
     return D_00517608_CF18[0]();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CCF40);
-#ifdef SKIP_ASM
 void *func_003CCF40(void *arg0) {
     (*(int *)((char*)(arg0) + (0xC))) = 0;
     (*(int *)((char*)(arg0) + (8))) = 0;
@@ -6917,11 +6156,8 @@ void *func_003CCF40(void *arg0) {
     (*(int *)((char*)(arg0) + (0x9C))) = 0;
     return arg0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CCF60);
-#ifdef SKIP_ASM
 int func_003CCF60(void *arg0, int arg1, int arg2, int arg3) {
     if (arg1 == 0) {
         return -1;
@@ -6934,11 +6170,8 @@ int func_003CCF60(void *arg0, int arg1, int arg2, int arg3) {
     (*(int *)((char*)(arg0) + (0xA0))) = arg1;
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CCF90);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_CF90 { int f0; int pending; int remaining; int fC; float *rd; char pad[0x10]; float buf[28]; int n; int pad2[3]; float *out; };
 extern void func_003CCA08_CF90(int *) __asm__("func_003CCA08");
@@ -7002,11 +6235,8 @@ int func_003CCF90(struct S_CF90 *s, float **pout, int n) {
     }
     return done;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD138);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { float x; float y; } V2_D138;
 V2_D138 func_003CD138_D138(char *p) __asm__("func_003CD138");
@@ -7019,42 +6249,30 @@ V2_D138 func_003CD138_D138(char *p) {
     w = v;
     return w;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD190);
-#ifdef SKIP_ASM
 void func_003CD190(void *arg0, void *arg1) {
     (*(float *)((char*)(arg0) + (0x98))) = (float) (*(float *)((char*)(arg1) + (0)));
     (*(float *)((char*)(arg0) + (0x9C))) = (float) (*(float *)((char*)(arg1) + (4)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD1A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int (*D_00517604_D1A8[])(void) __asm__("D_00517604");
 int func_003CD1A8_D1A8(int) __asm__("func_003CD1A8");
 int func_003CD1A8_D1A8(int a) {
     return D_00517604_D1A8[0]();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD1D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int (*D_00517608_D1D0[])(void) __asm__("D_00517608");
 int func_003CD1D0_D1D0(int) __asm__("func_003CD1D0");
 int func_003CD1D0_D1D0(int a) {
     return D_00517608_D1D0[0]();
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD1F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct BS_D1F8 { unsigned char *ptr; unsigned int bits; int cnt; } BS_D1F8;
 extern unsigned int D_0044E8C0_E8C0[] __asm__("D_0044E8C0");
@@ -7070,11 +6288,8 @@ int func_003CD1F8(BS_D1F8 *p, int n) {
     }
     return ret;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD260);
-#ifdef SKIP_ASM
 typedef struct { unsigned char *p; unsigned int bits; int n; } B_D260;
 
 void func_003CD260(B_D260 *b, int k) {
@@ -7090,13 +6305,10 @@ void func_003CD260(B_D260 *b, int k) {
         b->bits = t | (c << n);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD2B0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD518);
-#ifdef SKIP_ASM
 void func_003CD518(void *arg0) {
     int var_2;
     void *var_4;
@@ -7109,11 +6321,8 @@ void func_003CD518(void *arg0) {
         var_4 += 8;
     } while (var_2 >= 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD590);
-#ifdef SKIP_ASM
 void func_003CD590(char *a_, void *out_) {
     float *a = (float *)a_;
     float *out = (float *)out_;
@@ -7136,11 +6345,8 @@ void func_003CD590(char *a_, void *out_) {
         out[i] = s;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CD690);
-#ifdef SKIP_ASM
 extern void func_003CD590(char *, void *);
 extern void func_003CE410(int, void *, char *, char *);
 
@@ -7150,15 +6356,12 @@ void func_003CD690(char *arg0, int arg1, int arg2) {
     func_003CD590(arg0 + 0x114, buf);
     func_003CE410(arg2, buf, arg0 + 0x144, arg0 + (arg1 * 4 + 0x684));
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD6F0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD878);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CDDB8);
-#ifdef SKIP_ASM
 void *func_003CDDB8(void *arg0) {
     (*(int *)((char*)(arg0) + (0xD44))) = 0;
     (*(int *)((char*)(arg0) + (0xD64))) = 1;
@@ -7170,11 +6373,8 @@ void *func_003CDDB8(void *arg0) {
     (*(int *)((char*)(arg0) + (0xD60))) = 0;
     return arg0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CDDE8);
-#ifdef SKIP_ASM
 extern void func_003CD6F0(char *, unsigned char *, char *, int);
 
 int func_003CDDE8(char *arg0, unsigned char *arg1, int arg2, int arg3) {
@@ -7199,13 +6399,10 @@ int func_003CDDE8(char *arg0, unsigned char *arg1, int arg2, int arg3) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CDE68);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE078);
-#ifdef SKIP_ASM
 struct V3_E078 { int a; int b; int c; };
 
 struct V3_E078 func_003CE078(char *self) {
@@ -7215,29 +6412,20 @@ struct V3_E078 func_003CE078(char *self) {
     t.b = *(int *)(self + 0xD44);
     return t;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE0B8);
-#ifdef SKIP_ASM
 void func_003CE0B8(void *arg0, void *arg1) {
     (*(int *)((char*)(arg0) + (4))) = (int) (*(int *)((char*)(arg1) + (0)));
     (*(int *)((char*)(arg0) + (0xD5C))) = (int) (*(int *)((char*)(arg1) + (8)));
     (*(int *)((char*)(arg0) + (0xD44))) = (int) (*(int *)((char*)(arg1) + (4)));
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE0D8);
-#ifdef SKIP_ASM
 void func_003CE0D8(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0xD64))) = arg1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE0E0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A8E8_E0E0[] __asm__("D_0050A8E8");
 typedef struct { char pad[0x28]; short f; char pad2[0x62]; } R_E0E0;
@@ -7252,11 +6440,8 @@ int func_003CE0E0(int arg0) {
     temp_2 = (*(W_E0E0 **)(p + 0x1F0))->arr[temp_4].f;
     return (temp_2 == -1) ? temp_4 : temp_2;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE118);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A8E8_E118[] __asm__("D_0050A8E8");
 
@@ -7284,35 +6469,23 @@ int func_003CE118_impl(int arg0) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE198);
-#ifdef SKIP_ASM
 int func_003CE198(void) {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A0);
-#ifdef SKIP_ASM
 int func_003CE1A0(void) {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A8);
-#ifdef SKIP_ASM
 int func_003CE1A8(void) {
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE1B0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct {
     char pad0[4];
@@ -7368,7 +6541,6 @@ int func_003CE1B0(int arg0, int idx, int arg2, int arg3, int arg4, int arg5, A6_
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE378);
 
@@ -7377,8 +6549,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CE410);
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE7C0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEB90);
-#ifdef SKIP_ASM
 void func_003CEB90(void *arg0) {
     (*(int *)((char*)(arg0) + (0xC0))) = 0;
     (*(int *)((char*)(arg0) + (0xC4))) = 0;
@@ -7401,11 +6571,8 @@ void func_003CEB90(void *arg0) {
     (*(int *)((char*)(arg0) + (0xB4))) = 0;
     (*(int *)((char*)(arg0) + (0xB8))) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEBE8);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (FIR filter over 4-float blocks: 12x4 banded matrix times sliding window).
 void func_003CEBE8(char *p, int n, int src, int dst) {
     if (*(signed char *)(p + 0xFC) != 0) {
@@ -7546,11 +6713,8 @@ void func_003CEBE8(char *p, int n, int src, int dst) {
         : "r"(p), "r"(n), "r"(p + 0xC0), "r"(src), "r"(dst)
         : "$4", "$5", "$6", "$7", "$8", "memory");
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEE08);
-#ifdef SKIP_ASM
 extern void func_003CEBE8(char *, int, int, int);
 int func_003CEE08(char *arg0, int arg1, int arg2, int arg3) {
     int **obj = *(int ***)(arg0 + 8);
@@ -7561,11 +6725,8 @@ int func_003CEE08(char *arg0, int arg1, int arg2, int arg3) {
     }
     return r;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEE88);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int pad1c; char sub[1]; } S_EE88;
 extern void func_003CEB90(void *);
@@ -7582,15 +6743,12 @@ int func_003CEE88(S_EE88 *self) {
     func_003CEB90(&self->sub);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEED0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEF20);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEFB0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int pad1c; char sub[1]; } S_EFB0;
 extern void func_003CEB90(void *);
@@ -7607,15 +6765,12 @@ int func_003CEFB0(S_EFB0 *self) {
     func_003CEB90(&self->sub);
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEFF8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF060);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF128);
-#ifdef SKIP_ASM
 extern void func_003CF060();
 
 int func_003CF128(void *arg0) {
@@ -7629,21 +6784,15 @@ int func_003CF128(void *arg0) {
     (*(int *)((char*)(arg0) + (0x1C))) = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF158);
-#ifdef SKIP_ASM
 void func_003CF158(void *arg0, int *arg1) {
     (*(float *)((char*)(arg0) + (0x1C))) = (float) ((float) *arg1 * 0.00390625f);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF178);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF298);
-#ifdef SKIP_ASM
 extern void func_003B5E98(int);
 
 void func_003CF298(void *arg0) {
@@ -7654,11 +6803,8 @@ void func_003CF298(void *arg0) {
         func_003B5E98(temp_4);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF2C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CF178_F2C0(void) __asm__("func_003CF178");
 void func_003CF298_F2C0(void) __asm__("func_003CF298");
@@ -7675,11 +6821,8 @@ int func_003CF2C0(char *arg0) {
     *(int *)(arg0 + 0x20) = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF300);
-#ifdef SKIP_ASM
 struct S_F300 { char p0[0x1C]; int f1C; float f20; float f24; float f28; float f2C; float f30; char p34[4]; float f38; float f3C; };
 void func_003CF300(void *sv, int n, int in_, int out_) {
     struct S_F300 *s = (struct S_F300 *)sv;
@@ -7711,11 +6854,8 @@ void func_003CF300(void *sv, int n, int in_, int out_) {
         } while (n != 0);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF408);
-#ifdef SKIP_ASM
 extern void func_003CF300(void *, int, int, int);
 
 int func_003CF408(char *p, int arg1, int arg2, int arg3) {
@@ -7733,11 +6873,8 @@ int func_003CF408(char *p, int arg1, int arg2, int arg3) {
     func_003CF300(p, n, arg2, arg3);
     return n;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF498);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CF408_F498(void) __asm__("func_003CF408");
 
@@ -7754,11 +6891,8 @@ int func_003CF498(char *arg0) {
     *(int *)(arg0 + 0x3C) = 0;
     return 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF4D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern float f_C840_F4D0(float) __asm__("func_003BC840");
 extern float f_FA98_F4D0(float) __asm__("func_003CFA98");
@@ -7782,11 +6916,8 @@ void func_003CF4D0(void *arg0, void *arg1) {
     *(float *)((char*)arg0 + 0x2C) = r;
     *(float *)((char*)arg0 + 0x30) = (1.0f - f21) * fd * f_FA98_F4D0(-r * r);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF5D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B5C60_F5D0(int) __asm__("func_003B5C60");
 extern void func_003B5E98_F5D0(int) __asm__("func_003B5E98");
@@ -7823,11 +6954,8 @@ int func_003CF5D0(char *self, int n, char *a2, char *a3) {
     }
     return n;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF6D0);
-#ifdef SKIP_ASM
 extern void func_003B5E98(int);
 
 void func_003CF6D0(void *arg0) {
@@ -7838,11 +6966,8 @@ void func_003CF6D0(void *arg0) {
         func_003B5E98(temp_4);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF6F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; void *f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int f1c; int f20; short f24; short f26; } S_F6F8;
 extern void f_F6F8_a(void) __asm__("func_003CF5D0");
@@ -7862,13 +6987,10 @@ self->f26 = 1;
     self->f8 = 0;
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF740);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF798);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CF740_F798(void) __asm__("func_003CF740");
 
@@ -7877,11 +6999,8 @@ void func_003CF798(void *arg0, int arg1) {
     *(int *)((char *)arg0 + 4) = 0;
     *(void (**)(void))((char *)arg0 + 0) = func_003CF740_F798;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF7B0);
-#ifdef SKIP_ASM
 int func_003CF7B0(void *arg0) {
     (*(int *)((char*)(arg0) + (8))) = 0;
     (*(int *)((char*)(arg0) + (0xC))) = 0;
@@ -7891,13 +7010,10 @@ int func_003CF7B0(void *arg0) {
     (*(int *)((char*)(arg0) + (0x1C))) = 0;
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF7D0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF958);
-#ifdef SKIP_ASM
 void func_003B5E98(int);
 
 void func_003CF958(char *arg0) {
@@ -7910,11 +7026,8 @@ void func_003CF958(char *arg0) {
         *(int *)(arg0 + 0x1C) = 0;
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF998);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CF7D0_F998(void) __asm__("func_003CF7D0");
 void func_003CF958_F998(void) __asm__("func_003CF958");
@@ -7931,11 +7044,8 @@ int func_003CF998(char *arg0) {
     *(int *)(arg0 + 0x1C) = 0;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF9D8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_F958_F9D8(void) __asm__("func_003CF958");
 extern int f_FB38_F9D8(int, int) __asm__("func_003CFB38");
@@ -7968,11 +7078,8 @@ void func_003CF9D8(void *arg0, void *arg1) {
     f_6210_F9D8((char*)temp_3, 0, temp_16_2);
     (*(int *)((char*)(arg0) + (0x24))) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CFA98);
-#ifdef SKIP_ASM
 float func_003CFA98(float fparg0) {
     float temp_f0;
     float temp_f1;
@@ -7989,21 +7096,15 @@ float func_003CFA98(float fparg0) {
     temp_f6 = temp_f5 * -0.75f * fparg0;
     return temp_f0 + 1.0f + temp_f1 + temp_f2 + temp_f4 + temp_f5 + temp_f6 + (temp_f6 * -0.7857f * fparg0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CFB38);
-#ifdef SKIP_ASM
 extern int func_003CFB98(int, int);
 
 int func_003CFB38(int arg0, int arg1) {
     return func_003CFB98(arg0, arg1 / 16) * 16;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CFB68);
-#ifdef SKIP_ASM
 int func_003CFB68(int n) {
     int i = 0, sq;
     for (;;) {
@@ -8015,11 +7116,8 @@ int func_003CFB68(int n) {
             return i - 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003CFB98);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003CFB68_FB98(int) __asm__("func_003CFB68");
 
@@ -8044,13 +7142,10 @@ int func_003CFB98(int arg0, int arg1) {
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CFC30);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D0B18);
-#ifdef SKIP_ASM
 typedef struct { int a, b, c, d; } E_0B18;
 typedef struct { int p0, p1, p2; unsigned lo : 16; unsigned idx : 6; unsigned hi : 10; E_0B18 e[1]; } Q_0B18;
 
@@ -8060,13 +7155,10 @@ void func_003D0B18(Q_0B18 *q, E_0B18 *src) {
     q->idx = i + 1;
     arr[i] = *src;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0B78);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D0C20);
-#ifdef SKIP_ASM
 void func_003D0C20(unsigned char *a0, unsigned char *a1) {
     unsigned char *p = a0 + 0x10;
 
@@ -8075,11 +7167,8 @@ void func_003D0C20(unsigned char *a0, unsigned char *a1) {
         p += 0x10;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D0C78);
-#ifdef SKIP_ASM
 void func_003D0C78(int arg0, unsigned int arg1) {
     unsigned int temp_4;
 
@@ -8088,22 +7177,16 @@ void func_003D0C78(int arg0, unsigned int arg1) {
         (*(int *)((char*)(temp_4) + (8))) = (int) ((*(int *)((char*)(temp_4) + (8))) | 0x04000000);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D0CA0);
-#ifdef SKIP_ASM
 extern void func_003D0CC8(int);
 extern int func_003D5290();
 
 void func_003D0CA0(void) {
     func_003D0CC8(func_003D5290());
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D0CC8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003D32B8_0CC8(char *, int *) __asm__("func_003D32B8");
 extern int D_0044F438_0CC8[] __asm__("D_0044F438");
@@ -8140,7 +7223,6 @@ done:
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0D70);
 
@@ -8149,8 +7231,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0ED0);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1038);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D11B8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Info_11B8 {
     int a;
@@ -8278,13 +7358,10 @@ done:
     D_0044F420_11B8 = 0;
     return ret;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1470);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D15C8);
-#ifdef SKIP_ASM
 int func_003D15C8(int arg0, int arg1) {
     char *t = (char *)func_003D5290();
     if (t == 0) {
@@ -8293,11 +7370,8 @@ int func_003D15C8(int arg0, int arg1) {
     *(int *)(t + 0x24) = arg1 & 0xFFFF;
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D1608);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned int D_0044F430_1608[] __asm__("D_0044F430");
 extern void func_00411310_1608(int, ...) __asm__("func_00411310") __attribute__((noreturn));
@@ -8306,28 +7380,19 @@ void func_003D1608(int a, ...) {
     D_0044F430_1608[0] = 0xFFFFFFFF;
     func_00411310_1608(0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D1658);
-#ifdef SKIP_ASM
 void func_003D1658(int a, ...) {
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D1690);
-#ifdef SKIP_ASM
 void func_003D1690(int a, ...) {
 }
-#endif
 
 void func_003D16C8(void) {
 }
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D16D0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F43C_16D0[4] __asm__("D_0044F43C");
 
@@ -8335,15 +7400,11 @@ int func_003D16D0_16D0(void) __asm__("func_003D16D0");
 int func_003D16D0_16D0(void) {
     return D_0044F43C_16D0[0];
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D16E0);
-#ifdef SKIP_ASM
 int func_003D16E0(int arg0) {
     return arg0;
 }
-#endif
 
 void func_003D16E8(void) {
 }
@@ -8351,8 +7412,6 @@ void func_003D16E8(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16F0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D1940);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003D1BA8_1940(int, int) __asm__("func_003D1BA8");
 extern int func_003D5450_1940(int) __asm__("func_003D5450");
@@ -8390,7 +7449,6 @@ void func_003D1940(unsigned int mask) {
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1A88);
 
@@ -8401,8 +7459,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1D28);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1E80);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D1F80);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_1F80 { char pad[0x30]; unsigned int m_a; int m_b; char pad2[0xDC - 0x38]; char *ptrs[16]; char pad3[0x91C - 0x11C]; int count; char pad4[0x928 - 0x920]; };
 extern int f2AF370_1F80(void) __asm__("func_002AF370");
@@ -8428,11 +7484,8 @@ int func_003D1F80(unsigned int a0, char *a1) {
     }
     return ret;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2068);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F420_2068[] __asm__("D_0044F420");
 extern int D_0044F43C_2068[] __asm__("D_0044F43C");
@@ -8469,11 +7522,8 @@ unsigned int func_003D2068(void *arg0) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2138);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct I2138 { int w0; int w4; unsigned int w8; int wC; };
 struct E2138 { char pad[0xC]; unsigned char b; char padd; unsigned short h; struct I2138 items[1]; };
@@ -8497,11 +7547,8 @@ int func_003D2138(char *arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D21C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_0044F420_f420[] __asm__("D_0044F420");
 
@@ -8512,7 +7559,6 @@ void func_003D21C0(char *arg0, int arg1) {
         *(unsigned *)(p + 0xC) = (*(unsigned *)(p + 0xC) & 0xDFFFFFFF) | ((arg1 & 1) << 29);
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2218);
 
@@ -8525,8 +7571,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D25F0);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2A68);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2C20);
-#ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003D5450_2C20(int) __asm__("func_003D5450");
@@ -8580,11 +7624,8 @@ int func_003D2C20(int m, int arg1) {
     D_0044F420_2C20[0] = 0;
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2DF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_2DF8 { unsigned int f0; unsigned int f4; unsigned int f8; };
 struct R_2DF8 { unsigned short n; unsigned short type; unsigned int f4; unsigned int f8; };
@@ -8648,25 +7689,18 @@ ok:
     D_0044F420_2DF8[0] = 0;
     return ret;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2FA0);
-#ifdef SKIP_ASM
 void func_003D2FA0(void) {
     func_003D16C8();
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2FC0);
-#ifdef SKIP_ASM
 extern void func_003D16D0();
 
 void func_003D2FC0(void) {
     func_003D16D0();
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2FE0);
 
@@ -8674,8 +7708,6 @@ void func_003D3010(void) {
 }
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D3018);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F424_3018[4] __asm__("D_0044F424");
 extern int D_0044F428_3018[4] __asm__("D_0044F428");
@@ -8684,11 +7716,8 @@ void func_003D3018(int arg0, int arg1) {
     D_0044F424_3018[0] = arg0;
     D_0044F428_3018[0] = arg1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D3030);
-#ifdef SKIP_ASM
 int func_003D3030(void) {
     char *temp_2;
 
@@ -8698,11 +7727,8 @@ int func_003D3030(void) {
     }
     return *(int *)(temp_2 + 0x54);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D3058);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_002AE478_3058() __asm__("func_002AE478");
 
@@ -8711,11 +7737,8 @@ int func_003D3058(int n) {
     t += n * 0x10;
     return (t / 16) * 16 + 0x10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D30A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_002AE768_30A8(int, int, int) __asm__("func_002AE768");
 extern void *func_003D5290_30A8(int) __asm__("func_003D5290");
@@ -8739,11 +7762,8 @@ void func_003D30A8(int arg0, int arg1, int arg2) {
         D_0044F420_30A8[0] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D3140);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_002AE328_3140(int, int) __asm__("func_002AE328");
 extern char *func_003D5290_3140(int) __asm__("func_003D5290");
@@ -8775,11 +7795,8 @@ ok:
     D_0044F420_3140[0] = 0;
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D31E8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_31E8 { char p0[0xC]; int f0c; int f10; char p1[0x1C]; unsigned int f30; int f34; char p2[0x928 - 0x38]; };
 extern struct S_31E8 D_00517610_31E8[] __asm__("D_00517610");
@@ -8803,18 +7820,14 @@ void func_003D31E8(unsigned int a, int b, int c) {
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D32A8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044ED48_32A8[4] __asm__("D_0044ED48");
 
 int *func_003D32A8(void) {
     return D_0044ED48_32A8;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D32B8);
 
@@ -8827,8 +7840,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3900);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3C90);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003D3D20);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V_3D20 {
     char pad0;
@@ -8908,11 +7919,8 @@ void func_003D3D20(int idx) {
     D_0044F420_3D20->x91C = old;
     *v = save;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4050);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003D0B18_4050(void *, void *) __asm__("func_003D0B18");
 extern void func_003D1F80_4050(int, int) __asm__("func_003D1F80");
@@ -8966,13 +7974,10 @@ int func_003D4050(int idx) {
     }
     return r;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D41A8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4898);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct E_4898 { short v; short w; } E_4898;
 typedef struct B_4898 { E_4898 ent[0x40]; } B_4898;
@@ -9000,11 +8005,8 @@ int func_003D4898(int arg0) {
     }
     return var_7;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4900);
-#ifdef SKIP_ASM
 struct S_4900 {
     int a0;
     int a4;
@@ -9029,11 +8031,8 @@ int func_003D4900(int a0, int *a1) {
     }
     return s.a10;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4950);
-#ifdef SKIP_ASM
 extern int func_002AEAA8(int, unsigned int);
 
 int func_003D4950(char *arg0) {
@@ -9049,13 +8048,10 @@ int func_003D4950(char *arg0) {
     }
     return var_16;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D49D0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4A50);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_4A50 { char pad[0x30]; unsigned mask; int w34; char pad2[0x8EC]; int *tab; };
 extern struct E_4A50 D_00517610_4A50[] __asm__("D_00517610");
@@ -9077,15 +8073,12 @@ int func_003D4A50(unsigned arg0) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4B00);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4BB0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4C40);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_4C40 {
     char pad0[0x30];
@@ -9113,11 +8106,8 @@ void func_003D4C40(void) {
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4F10);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Str_4F10 {
     char pad00[0x3];
@@ -9228,7 +8218,6 @@ void func_003D4F10(void) {
     while (!isB && func_003D1E80_4F10() != 0) {
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5128);
 
@@ -9237,8 +8226,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5290);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5330);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003D53B8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003D11B8_53B8(int, int *) __asm__("func_003D11B8");
 extern int func_003D3030_53B8(int) __asm__("func_003D3030");
@@ -9257,29 +8244,22 @@ int func_003D53B8(int arg0, int arg1) {
     }
     return 0;
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5450);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003D54C8);
-#ifdef SKIP_ASM
 extern void func_003D5128(int);
 
 void func_003D54C8(void) {
     func_003D5128(0x20);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003D54E8);
-#ifdef SKIP_ASM
 extern void func_003D5128(int);
 
 void func_003D54E8(void) {
     func_003D5128(0x42);
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5508);
 
@@ -9288,8 +8268,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5698);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5800);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D5968);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_002AF428_5968(int) __asm__("func_002AF428");
 extern void func_002AF6C0_5968(int, int) __asm__("func_002AF6C0");
@@ -9325,7 +8303,6 @@ b10:
         }
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5A98);
 
@@ -9334,8 +8311,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5CC0);
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5EE8);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D6108);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_6108 { char pad[0x30]; int m_a; int m_b; char pad2[0x928 - 0x38]; };
 extern int f5450_6108(int) __asm__("func_003D5450");
@@ -9357,11 +8332,8 @@ void func_003D6108(int a0, int a1) {
         D_f420_6108[0] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D61E8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_61E8 { char pad[0x30]; int m_a; int m_b; char pad2[0x928 - 0x38]; };
 extern int f5450_61E8(int) __asm__("func_003D5450");
@@ -9383,11 +8355,8 @@ void func_003D61E8(int a0, int a1) {
         D_f420_61E8[0] = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D62C8);
-#ifdef SKIP_ASM
 extern void func_002AF6C0(int, int);
 
 void func_003D62C8(void *arg0, signed char arg1) {
@@ -9396,11 +8365,8 @@ void func_003D62C8(void *arg0, signed char arg1) {
         func_002AF6C0((*(int *)((char*)(arg0) + (0x54))), (int) ((*(signed char *)((char*)(arg0) + (0x34))) * arg1) / 100);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D6318);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003D6318_cb(int, int, int, char) __asm__("func_002AF608");
 
@@ -9411,24 +8377,18 @@ void func_003D6318(char *self, int v, int w) {
     self[0xD] = 0;
     func_003D6318_cb(*(int *)(self + 0x54), x, w, 1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D6360);
-#ifdef SKIP_ASM
 void func_003D6360(void *arg0, int arg1, int arg2, int arg3) {
     *(signed char *)((char *)arg0 + 0x16) = arg1;
     if (arg3 >= 0) {
         *(signed char *)((char *)arg0 + 0x15) = arg3;
     }
 }
-#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6378);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D63F8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F438_63F8[] __asm__("D_0044F438");
 extern signed char f_63F8_cb(int) __asm__("func_002AF4B0");
@@ -9441,11 +8401,8 @@ void func_003D63F8(char *self, int a, int b) {
     self[0x16] = a;
     self[0x14] = t;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003D6448);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F438_6448[] __asm__("D_0044F438");
 extern signed char f_6448_cb(int) __asm__("func_002AF480");
@@ -9458,4 +8415,3 @@ void func_003D6448(char *self, int a, int b) {
     self[0x1E] = a;
     self[0x1C] = t;
 }
-#endif

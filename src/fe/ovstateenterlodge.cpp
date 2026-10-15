@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -21,11 +19,8 @@ extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
     cOVStateManager_addPDATemplate();
     func_0020A380(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7210);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A23E0[];
 extern char D_004A23E8[];
@@ -44,25 +39,19 @@ extern "C" void func_001F7210(void* self, void* a1)
     }
     func_0039E4C0(self, a1);
 }
-#endif
 
 extern "C" void* func_0020A430(void*);
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7298__FPv);
-#ifdef SKIP_ASM
 void* func_001F7298(void* self)
 {
     *(int*)((char*)self + 0x50) = 0;
     return func_0020A430(self);
 }
-#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F72B8);
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F72E0);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern int D_004A19C4;
 extern "C" void cGame_exit(void* game, int a);
@@ -111,11 +100,8 @@ extern "C" void func_001F72E0(sSelf001F72E0* self, void* widget, int msg)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -132,11 +118,8 @@ extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
     }
     func_0020A380(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onGainTransition);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -164,11 +147,8 @@ extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gain
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F74E0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A23E0[];
 extern char D_004A23E8[];
@@ -185,11 +165,8 @@ extern "C" void func_001F74E0(void* self, void* item)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
-#ifdef SKIP_ASM
 extern void* D_004A3DD8;
 extern "C" int* func_0030C820(void* list);
 
@@ -202,20 +179,14 @@ extern "C" void func_001F7548(void* self)
         *(int*)((char*)self + 0x9C) = *(int*)((char*)D_004A3DD8 + 0x2A0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7590);
-#ifdef SKIP_ASM
 extern "C" int func_001F7590(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F75A0);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 void func_0029D6D0(void* self);
 extern "C" void func_0030B540(void* self);
@@ -261,11 +232,8 @@ extern "C" void func_001F75A0(void* self, void* item, int msg)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F76B8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -285,11 +253,8 @@ extern "C" void func_001F76B8(void* self)
     }
     func_0020A380(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
-#ifdef SKIP_ASM
 extern void* D_004A3DD8;
 extern "C" int* func_0030C820(void* list);
 
@@ -297,11 +262,8 @@ extern "C" void func_001F7738(void* self)
 {
     *(int*)((char*)self + 0x9C) = *func_0030C820((char*)D_004A3DD8 + 0x1C4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7770);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A23E0[];
 extern char D_004A23E8[];
@@ -324,20 +286,14 @@ extern "C" void func_001F7770(void* self, void* item)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);
-#ifdef SKIP_ASM
 extern "C" int func_001F77F0(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7800);
-#ifdef SKIP_ASM
 extern "C" void func_0020AB50(int id);
 // PORT: func_0039F190 returns the last node; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
@@ -381,13 +337,10 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
     func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
 }
-#endif
 
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7958);
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetCreate);
-#ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -416,11 +369,8 @@ extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
         *(int*)((char*)w + 0x18) = 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7F08);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -463,20 +413,14 @@ extern "C" void func_001F7F08(void* self, void* a1)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F80C8);
-#ifdef SKIP_ASM
 extern "C" int func_001F80C8(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F80D8);
-#ifdef SKIP_ASM
 struct sVEntry_001F80D8 {
     short delta;
     short index;
@@ -492,11 +436,8 @@ extern "C" void func_001F80D8(void* self, void* a1, int a2)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F8118);
-#ifdef SKIP_ASM
 extern int D_004A26FC;
 extern "C" void func_0020AB50(int id);
 
@@ -516,5 +457,4 @@ extern "C" void func_001F8118(void* self, void* a1)
         }
     }
 }
-#endif
 

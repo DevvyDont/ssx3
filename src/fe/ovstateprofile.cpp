@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -23,11 +21,8 @@ extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
     func_00212080(self);
     func_0020A380(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211220);
-#ifdef SKIP_ASM
 extern "C" void func_00211380(void* self);
 extern "C" void func_00211270(void* self);
 
@@ -42,11 +37,8 @@ extern "C" void func_00211220(void* self)
         func_00211270(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211270);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00211380(void* self);
@@ -204,13 +196,10 @@ extern "C" void func_00211270(void* p)
         o->setEnabled(1);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00211380);
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211850);
-#ifdef SKIP_ASM
 class cUIObj_211850 {
 public:
     int pad[2];
@@ -252,11 +241,8 @@ extern "C" void func_00211850(void* self, bool show)
         *(int*)((char*)self + 0x230) = on;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211970);
-#ifdef SKIP_ASM
 class cUIObj_211970 {
 public:
     int pad[2];
@@ -281,11 +267,8 @@ extern "C" void func_00211970(void* self, bool on)
     ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
     *(int*)((char*)self + 0x220) = !on;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211A08);
-#ifdef SKIP_ASM
 class cUIObj_211A08 {
 public:
     int pad[2];
@@ -311,11 +294,8 @@ extern "C" void func_00211A08(void* self, int a1, bool on)
     *(int*)((char*)self + 0x224) = !on;
     a->setVisible(!on);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211AA8);
-#ifdef SKIP_ASM
 extern "C" void cGame_exit(void* game, int a);
 extern void* D_004A28A8;
 extern "C" void func_0039F718(void* self);
@@ -331,23 +311,17 @@ extern "C" void func_00211AA8(void* self)
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }
-#endif
 
 extern "C" void* func_001D58B8(void*);
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211B10__FPv);
-#ifdef SKIP_ASM
 void func_00211B10(void* self)
 {
     func_001D58B8(self);
     *(int*)((char*)self + 0x1a4) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211B38);
-#ifdef SKIP_ASM
 class cOvl211B38 {
 public:
     virtual void v01();
@@ -422,13 +396,10 @@ extern "C" int func_00211B38(void* self, int a1, unsigned int key)
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00211BC8);
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212080);
-#ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -446,11 +417,8 @@ extern "C" void func_00212080(void* self)
         *(int*)((char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)) + 0x18) = i - 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212138);
-#ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, void* a1, int a2);
 extern void* D_00471F80[];
 
@@ -465,11 +433,8 @@ extern "C" void* func_00212138(void* self, void* a1, int a2)
     *(int*)((char*)self + 0x230) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -486,22 +451,16 @@ extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
     }
     func_0020A380(self);
 }
-#endif
 
 INCLUDE_ASM("fe/ovstateprofile", func_00212208);
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_002122E0__FPv);
-#ifdef SKIP_ASM
 int func_002122E0(void* self)
 {
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_002122E8);
-#ifdef SKIP_ASM
 struct sVEntry002122E8 {
     short delta;
     short index;
@@ -528,11 +487,8 @@ extern "C" void func_002122E8(void* self)
         o->vt[9].fn((char*)o + o->vt[9].delta, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void* func_00227F80(void* app);
 extern "C" int func_0023C898(void* mp);
@@ -585,11 +541,8 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
         ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38)))->setVisible(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_002124C8);
-#ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
 extern "C" void func_002124C8(void* self)
@@ -599,11 +552,8 @@ extern "C" void func_002124C8(void* self)
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212508);
-#ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern int D_004A11B8;
 extern int D_00535C08[];
@@ -651,7 +601,6 @@ extern "C" void func_00212508(void* self)
         cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_00471E90, 0x100, 0)));
     }
 }
-#endif
 
 
 INCLUDE_ASM("fe/ovstateprofile", func_00212680);

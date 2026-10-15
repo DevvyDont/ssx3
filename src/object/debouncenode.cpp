@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
-#ifdef SKIP_ASM
 struct sDebounceVEntry2D10 {
     short delta;
     short index;
@@ -22,11 +20,8 @@ extern "C" void* cDebounceNode_cDebounceNode(void* self, void* unused, void* str
     e->fn((char*)stream + e->delta, (char*)self + 0x30, 4);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342D88);
-#ifdef SKIP_ASM
 struct sDebounceVEntry2D88 {
     short delta;
     short index;
@@ -47,11 +42,8 @@ extern "C" int func_00342D88(void* self)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342DD8);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_003506D8(void* self, void* parent);
 extern const char D_0048E738[];
@@ -80,22 +72,16 @@ extern "C" void func_00342DD8(void* self)
         }
     }
 }
-#endif
 
 extern "C" void* func_00356B08(void* self);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342E78__FPv);
-#ifdef SKIP_ASM
 void* func_00342E78(void* self)
 {
     return func_00356B08(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342E98);
-#ifdef SKIP_ASM
 int func_0034FCC0(void* self);
 extern "C" void* func_00350F60(void* self, void* parent);
 extern const char D_0048E748[];
@@ -129,11 +115,8 @@ extern "C" void func_00342E98(void* self, int check)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342FA8);
-#ifdef SKIP_ASM
 struct sDebounceVEntry2FA8 {
     short delta;
     short index;
@@ -150,11 +133,8 @@ extern "C" void func_00342FA8(void* self, void* stream)
     e = &(*(sDebounceVEntry2FA8**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x30, 4);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343010);
-#ifdef SKIP_ASM
 struct sVec2_3010 {
     float x;
     float y;
@@ -206,11 +186,8 @@ extern "C" void* func_00343010(sDebounce_3010* self, void* a1, void* a2, sDesc_3
     self->flags->w = (self->flags->w & ~2) | 4;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003430D0);
-#ifdef SKIP_ASM
 struct sDebounceVEntry30D0 {
     short delta;
     short index;
@@ -228,13 +205,10 @@ extern "C" void* func_003430D0(void* self, void* unused, void* stream)
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x2C);
     return self;
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343130);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003434E8);
-#ifdef SKIP_ASM
 struct sDebounceScroll {
     char pad_0x0[0x38];
     float du; // 0x38
@@ -258,13 +232,10 @@ extern "C" void func_003434E8(sDebounceScroll* self)
         self->v += 1.0f;
     }
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343588);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343718);
-#ifdef SKIP_ASM
 struct sDebounceVEntry {
     short delta;
     short index;
@@ -279,11 +250,8 @@ extern "C" void func_00343718(void* self, void* stream)
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x2C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343768);
-#ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 extern char D_004903F0[];
 
@@ -295,11 +263,8 @@ extern "C" void* func_00343768(void* self, void* a1, void* a2, void* a3)
     *(int*)((char*)self + 0x20) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003437C0);
-#ifdef SKIP_ASM
 struct sDebounceVEntry37C0 {
     short delta;
     short index;
@@ -317,11 +282,8 @@ extern "C" void* func_003437C0(void* self, void* unused, void* stream)
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x8);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343820);
-#ifdef SKIP_ASM
 struct sDebounceVEntry1 {
     short delta;
     short index;
@@ -336,11 +298,8 @@ extern "C" void func_00343820(void* self)
         vt[34].fn((char*)self + vt[34].delta, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343868);
-#ifdef SKIP_ASM
 extern "C" void func_00343868(void* self, int msg, float level)
 {
     int bit = 0;
@@ -402,11 +361,8 @@ extern "C" void func_00343868(void* self, int msg, float level)
             *(int*)((char*)self + 0x1C) = c - 1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343A18);
-#ifdef SKIP_ASM
 struct sDebounceVEntryA18 {
     short delta;
     short index;
@@ -421,11 +377,8 @@ extern "C" void func_00343A18(void* self, void* stream)
     sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343A68);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
@@ -465,11 +418,8 @@ extern "C" sState00343A68* func_00343A68(sState00343A68* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343B28);
-#ifdef SKIP_ASM
 extern int D_004A3FF0;
 void operator_delete(int*);
 void* func_00344348(void* self);
@@ -501,11 +451,8 @@ extern "C" void func_00343B28(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343BC0);
-#ifdef SKIP_ASM
 struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
 void* func_00344348(void* self);
@@ -522,11 +469,8 @@ extern "C" void func_00343BC0(sDebounceBlock* self)
         func_003442E0((sDebounceState*)&self[i]);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343C08);
-#ifdef SKIP_ASM
 struct sDebounceElem3C08 {
     char data[0x1F4];
 };
@@ -540,15 +484,12 @@ extern "C" void func_00343C08(sDebounceElem3C08* self, void* arg)
         func_00344898(&self[i], arg);
     }
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_00343C60);
 
 INCLUDE_ASM("object/debouncenode", func_00343F38);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003440C8);
-#ifdef SKIP_ASM
 struct sDebounceElem40C8 {
     int field_0x0;
     unsigned int field_0x4;
@@ -569,11 +510,8 @@ extern "C" void func_003440C8(sDebounceElem40C8* self)
         p++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344138);
-#ifdef SKIP_ASM
 struct sDebounceElem4138 {
     int field_0x0;
     unsigned int field_0x4;
@@ -594,11 +532,8 @@ extern "C" void func_00344138(sDebounceElem4138* self)
         p++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003441A8);
-#ifdef SKIP_ASM
 class cDebounceStream;
 extern "C" void func_00344FC0(void* self, cDebounceStream* s);
 
@@ -626,11 +561,8 @@ extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* s)
         }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/debouncenode", func_00344240);
-#ifdef SKIP_ASM
 class cDebounceStream;
 extern "C" void func_00344FF8(void* self, cDebounceStream* s);
 
@@ -659,11 +591,8 @@ extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* s)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003442E0);
-#ifdef SKIP_ASM
 struct sDebounceSlot {
     unsigned int id; // 0x0
     int value;       // 0x4
@@ -703,22 +632,16 @@ extern "C" void func_003442E0(sDebounceState* self)
         self->slots[i].value = 0;
     }
 }
-#endif
 
 extern "C" void* func_00344800(void* self);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344348__FPv);
-#ifdef SKIP_ASM
 void* func_00344348(void* self)
 {
     return func_00344800(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344368);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 extern "C" void func_003443A8(void* self);
 
@@ -731,13 +654,10 @@ extern "C" void func_00344368(void* self, int a1)
     *(float*)(s + 0x1E4) = 1.0f / (float)*(int*)(g + 0x10);
     func_003443A8(self);
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_003443A8);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344730);
-#ifdef SKIP_ASM
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** func_002D1BD8();
 
@@ -818,11 +738,8 @@ extern "C" void func_00344730(sDebounce4730* self, int index)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344800);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void*);
 
@@ -865,13 +782,10 @@ void func_00344800_v(sDebounceOwner4800* self)
     self->items = 0;
     self->buf = 0;
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_00344898);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003449F0);
-#ifdef SKIP_ASM
 struct sDebounceVEntry49F0 {
     short delta;
     short index;
@@ -912,13 +826,10 @@ extern "C" void func_003449F0(void* elem)
     }
     func_00344AA0(self);
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_00344AA0);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344E18);
-#ifdef SKIP_ASM
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** func_002D1BD8();
 extern "C" void func_00344730(sDebounce4730* self, int index);
@@ -983,11 +894,8 @@ extern "C" void func_00344E18(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344FC0);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 class cDebounceStream {
 public:
@@ -999,11 +907,8 @@ extern "C" void func_00344FC0(void* self, cDebounceStream* s)
 {
     s->v01(self, 0x10C);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344FF8);
-#ifdef SKIP_ASM
 extern "C" void func_003443A8(void* self);
 
 extern "C" void func_00344FF8(void* self, cDebounceStream* s)
@@ -1012,11 +917,8 @@ extern "C" void func_00344FF8(void* self, cDebounceStream* s)
     func_00344800(self);
     func_003443A8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345048);
-#ifdef SKIP_ASM
 struct sDebVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -1102,11 +1004,8 @@ extern "C" void func_00345048(sDebCurve* self, float t, sDebVec4* pos, sDebVec4*
     v.w = 0.0f;
     *vel = debMtxApply(&self->basis, v);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003451C0);
-#ifdef SKIP_ASM
 struct cSpline;
 float cSpline_calcLength(cSpline* self);
 
@@ -1163,11 +1062,8 @@ extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
     self->field_0x4 = 0;
     self->length = cSpline_calcLength((cSpline*)self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345248);
-#ifdef SKIP_ASM
 struct sDebKey5248 {
     char pad_0x00[0x60];
     sDebKey5248* prev;  // 0x60
@@ -1223,13 +1119,10 @@ extern "C" void func_00345248(sDebTrack5248* self, float t, sDebVec4* pos, sDebV
     }
     func_00345048((sDebCurve*)self->key, t, pos, vel, acc);
 }
-#endif
 
 INCLUDE_ASM("object/debouncenode", func_00345320);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345430);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00345638(void* node);
 
@@ -1340,5 +1233,4 @@ extern "C" void func_00345430(void* self, int arg)
         node = *(char**)(node + 0x64);
     }
 }
-#endif
 

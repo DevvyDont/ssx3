@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -46,11 +44,8 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
         *(int*)((char*)self + 0x50) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001833D0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00186518(void* self, int a1);
@@ -81,11 +76,8 @@ extern "C" void func_001833D0(void* self, int a1)
     showObj_001833D0(self, D_0045D8C8, 9);
     func_00186518(self, a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183550);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
@@ -100,22 +92,16 @@ extern "C" void func_00183550(void* self)
         }
     }
 }
-#endif
 
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001835A8__FPv);
-#ifdef SKIP_ASM
 void* func_001835A8(void* self)
 {
     return func_0039E6B8(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001835C8);
-#ifdef SKIP_ASM
 extern "C" void func_0039E510(void*);
 extern "C" void func_00182EC0(void*);
 
@@ -124,11 +110,8 @@ extern "C" void func_001835C8(void* self)
     func_0039E510(self);
     func_00182EC0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001835F8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -170,11 +153,8 @@ extern "C" void func_001835F8(void* self, void* item, int msg)
         func_001831D0(self, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183710);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -272,11 +252,8 @@ extern "C" void func_00183710(char* self, char* item, unsigned int msg)
     }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183A98);
-#ifdef SKIP_ASM
 extern void* D_0046CCC0[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -294,11 +271,8 @@ extern "C" void* func_00183A98(void* self, int a1, int a2)
     *(int*)((char*)self + 0x48) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183B08);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_0045D900[];
@@ -339,11 +313,8 @@ extern "C" void func_00183B08(void* self)
         d->setVisible(0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183C08);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_0045D900[];
@@ -384,11 +355,8 @@ extern "C" void func_00183C08(void* self)
         d->setVisible(1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183D08);
-#ifdef SKIP_ASM
 struct sVec2_00183D08 { float x, y; };
 
 class cWidget_00183D08 {
@@ -432,5 +400,4 @@ extern "C" void func_00183D08(cWidget_00183D08* self, void* rect, float scale)
         self->v09(0);
     }
 }
-#endif
 

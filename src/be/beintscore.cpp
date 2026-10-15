@@ -16,8 +16,6 @@ struct cBEScoreInterface {
 };
 
 //100%
-INCLUDE_ASM("be/beintscore", cBEScoreInterface_getThis__Fv);
-#ifdef SKIP_ASM
 // PORT: the unit declares func_001549A8 as returning void; the body returns self.
 void* func_001549A8_impl(void* self) __asm__("func_001549A8");
 
@@ -35,11 +33,8 @@ void* cBEScoreInterface_getThis()
     }
     return D_004A1248;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001549A8);
-#ifdef SKIP_ASM
 extern "C" void func_001549E8(void* self);
 extern void* D_0045ACA8[];
 
@@ -53,19 +48,13 @@ void* func_001549A8_impl(void* self)
     func_001549E8(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001549E0__FPv);
-#ifdef SKIP_ASM
 void func_001549E0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001549E8);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int value, int size);
 
 struct sScoreSlot_001549E8 {
@@ -95,11 +84,8 @@ extern "C" void func_001549E8(void* p)
         self->slots[i].last = -1;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00154A58);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 extern "C" void func_00155420(int rider, int a, int b, int c);
 extern signed char D_005305F9[];
@@ -112,15 +98,12 @@ extern "C" void func_00154A58(int rider, int a)
         func_00155420(rider, a, -1, -1);
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintscore", func_00154AB8);
 
 INCLUDE_ASM("be/beintscore", func_00154EE8);
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001550E8);
-#ifdef SKIP_ASM
 struct sScoreEntry_001550E8 {
     int value;
     char pad[0x10];
@@ -135,11 +118,8 @@ extern "C" int func_001550E8(void* self, int i, int a, int b)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155130);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -156,11 +136,8 @@ extern "C" int func_00155130(void* self, int i)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155190);
-#ifdef SKIP_ASM
 struct sScoreEntryB_00155190
 {
     int value;
@@ -182,11 +159,8 @@ extern "C" void* func_00155190(void* self, int i)
         return D_004A1244;
     return &D_00530990[t[i].idx];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155208);
-#ifdef SKIP_ASM
 struct sScoreEntryB_00155208
 {
     int value;
@@ -203,20 +177,14 @@ extern "C" void* func_00155208(void* self, int i)
         return t[i].f8;
     return D_004A1244;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155270);
-#ifdef SKIP_ASM
 extern "C" void* func_00155270(void* self, int a1)
 {
     return (char*)self + (a1 * 0xb0 + 0x20);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155288);
-#ifdef SKIP_ASM
 extern char D_004A6CA8[];
 
 extern "C" void* func_00155288(void* self, int a1, int a2)
@@ -224,7 +192,6 @@ extern "C" void* func_00155288(void* self, int a1, int a2)
     char* p = D_004A6CA8 + (a1 * 0x9b50 + a2 * 0xf88);
     return p + 0xde4;
 }
-#endif
 
 signed char cBELibrary_getCharacterID(int index);
 extern char D_004A6CA8[];
@@ -243,8 +210,6 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderInde
 INCLUDE_ASM("be/beintscore", func_001552F8);
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155328);
-#ifdef SKIP_ASM
 extern "C" int func_00155328(void* self, int a)
 {
     switch (a) {
@@ -257,27 +222,18 @@ extern "C" int func_00155328(void* self, int a)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155380__FPv);
-#ifdef SKIP_ASM
 void func_00155380(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155388__FPv);
-#ifdef SKIP_ASM
 void func_00155388(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155390);
-#ifdef SKIP_ASM
 extern short D_00440ED0[][3];
 
 extern "C" void func_00155390(char* self, int idx, int score)
@@ -295,13 +251,10 @@ extern "C" void func_00155390(char* self, int idx, int score)
         *(signed char*)(self + idx + 0xBB8) = level;
     }
 }
-#endif
 
 INCLUDE_ASM("be/beintscore", func_00155420);
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001557E0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -317,13 +270,10 @@ extern "C" bool func_001557E0(void* self, int rider)
         return !func_0014F810(0);
     return true;
 }
-#endif
 
 INCLUDE_ASM("be/beintscore", func_00155848);
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001558F8);
-#ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
@@ -343,7 +293,6 @@ extern "C" int func_001558F8(void* self, int rider, int a, int b)
         return -1;
     return stats[1];
 }
-#endif
 
 
 INCLUDE_ASM("be/beintscore", func_001559A8);

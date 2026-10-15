@@ -5,8 +5,6 @@
 typedef int cQuad128 __attribute__((mode(TI)));
 
 //100%
-INCLUDE_ASM("render/graphicsman", cGraphicsMan_AddBlendedMatrix);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00492638[];
@@ -56,13 +54,10 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* 
     }
     self->nBlend++;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_00369A78);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369C28);
-#ifdef SKIP_ASM
 extern char* D_004A5B64;
 extern "C" void SYNCTASK_run(int a);
 extern "C" void func_003E5398(int a);
@@ -102,11 +97,8 @@ extern "C" void func_00369C28(void* self)
         (*(cGmApp_9C28**)(D_004A5B64 + 0x8))->v12();
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369CB0);
-#ifdef SKIP_ASM
 struct sGfxVEntry95 {
     short delta;
     short index;
@@ -118,54 +110,39 @@ extern "C" void func_00369CB0(void* self, void* obj, int a2, int a3, int a4)
     sGfxVEntry95* vt = *(sGfxVEntry95**)((char*)self + 0x10D8);
     vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, a2, a3, a4, 1.0f);
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_00369CF8);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369FF0__FPv);
-#ifdef SKIP_ASM
 void func_00369FF0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369FF8);
-#ifdef SKIP_ASM
 extern "C" void func_00369FF8(void* self)
 {
     char* vt = *(char**)((char*)self + 0x10D8);
     ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A020);
-#ifdef SKIP_ASM
 extern "C" void func_0036A020(void* self)
 {
     char* vt = *(char**)((char*)self + 0x10D8);
     ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036A048);
 
 extern "C" void* func_0036A1C0(int);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A190__FPvi);
-#ifdef SKIP_ASM
 void* func_0036A190(void* self, int a1)
 {
     return func_0036A1C0(a1);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A1B0__FPvT0);
-#ifdef SKIP_ASM
 int func_0036A1B0(void* self, void* a1)
 {
     int t0 = -1;
@@ -173,11 +150,8 @@ int func_0036A1B0(void* self, void* a1)
     *(int*)((char*)a1 + 0x4) = t0;
     return t0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A1C0);
-#ifdef SKIP_ASM
 extern int D_004A5B88;
 extern void* D_0053AB40[];
 
@@ -189,11 +163,8 @@ extern "C" void* func_0036A1C0(int n)
     *node = *head;
     *head = node;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A1E8);
-#ifdef SKIP_ASM
 extern int D_004A5B88;
 extern void* D_0053AB40[];
 
@@ -214,11 +185,8 @@ extern "C" void func_0036A1E8()
     }
     D_0053AB40[D_004A5B88] = 0;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_0036A290);
-#ifdef SKIP_ASM
 extern "C" void func_0036A1E8();
 
 extern "C" void func_0036A290()
@@ -227,11 +195,8 @@ extern "C" void func_0036A290()
     for (i = 0; i < 4; i++)
         func_0036A1E8();
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A2C0);
-#ifdef SKIP_ASM
 struct sGmVec4_A2C0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -312,7 +277,6 @@ extern "C" void func_0036A2C0(void* self, sGmMtx_A2C0* m)
         gmMtxCopy_A2C0(m, &t2);
     }
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036A3B0);
 
@@ -321,8 +285,6 @@ INCLUDE_ASM("render/graphicsman", func_0036A3E0);
 INCLUDE_ASM("render/graphicsman", func_0036A428);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036AA60);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here (GIF/DMA packet words); cQuad128 is a 128-bit GPR quadword.
 extern "C" void func_0036AA60(void* self, int x, int y, char** pp)
 {
@@ -347,11 +309,8 @@ extern "C" void func_0036AA60(void* self, int x, int y, char** pp)
     *(ulong*)(*pp + 0xA8) = 0x3F;
     *pp += 0xB0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036ABA0);
-#ifdef SKIP_ASM
 extern float D_004A432C;
 extern float D_004A4330;
 extern int D_004A4334;
@@ -384,11 +343,8 @@ extern "C" void func_0036ABA0(void* self, int idx)
     *(float*)(e + 0xC) = D_004A4338;
     *(sGmQuad_ABA0*)(e + 0x10) = D_00504720;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_0036AC00);
-#ifdef SKIP_ASM
 extern int D_004A4324;
 extern int D_004A4328;
 extern void* D_004A4474;
@@ -457,11 +413,8 @@ extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
     func_003663D8(*(char**)(self + 0x18F4) + 0x1F60, slot);
     func_00368138(*(char**)(self + 0x18F4), pkt2);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036AE20);
-#ifdef SKIP_ASM
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 struct sGmVE_AE20 {
     short delta;
@@ -534,7 +487,6 @@ extern "C" void func_0036AE20(void* vself, int idx, int a, int b, int n, char** 
     ((ulong*)*pp)[1] = 0;
     *pp = (char*)p;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036B158);
 
@@ -547,8 +499,6 @@ INCLUDE_ASM("render/graphicsman", func_0036C188);
 INCLUDE_ASM("render/graphicsman", func_0036C398);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036C740);
-#ifdef SKIP_ASM
 extern float D_004A43D4;
 extern float D_004A43D8;
 extern float D_004A43DC;
@@ -577,13 +527,10 @@ extern "C" void func_0036C740(void* self, int idx)
     *(float*)(e + 0x14) = D_004A43F0;
     *(float*)(e + 0x18) = D_004A43F4;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036C790);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CBF8);
-#ifdef SKIP_ASM
 struct sGfxVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -626,11 +573,8 @@ extern "C" void func_0036CBF8(char* self, int w, int h, float x, float y, float 
     *(cQuad128*)(self + 0x130) = D_004FF120;
     *(sGfxVec4*)(self + 0x140) = one;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CCB8);
-#ifdef SKIP_ASM
 int BXrand();
 
 static inline float randf_0036CCB8(float a, float b)
@@ -652,22 +596,16 @@ extern "C" void func_0036CCB8(char* self)
     *(float*)(self + 0x58) = randf_0036CCB8(1.0f, 2.0f);
     *(float*)(self + 0x5C) = randf_0036CCB8(1.0f, 2.0f);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE00);
-#ifdef SKIP_ASM
 extern "C" void func_0036CE00(void* self, float a, float b, float c)
 {
     *(float*)((char*)self + 0x10) = c;
     *(float*)((char*)self + 0x20) = b - a;
     *(float*)((char*)self + 0x18) = a - c * 1.5f;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE28);
-#ifdef SKIP_ASM
 extern "C" void func_0036CE28(void* self, float a, float b)
 {
     float d = b - a;
@@ -677,7 +615,6 @@ extern "C" void func_0036CE28(void* self, float a, float b)
     *(float*)((char*)self + 0x14) = d;
     *(float*)((char*)self + 0x1c) = a - d;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036CE48);
 
@@ -686,8 +623,6 @@ INCLUDE_ASM("render/graphicsman", func_0036CE58);
 INCLUDE_ASM("render/graphicsman", func_0036CE80);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CEF8);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector add).
 static inline sGfxVec4 vu0AddGM(const sGfxVec4& a, const sGfxVec4& b)
 {
@@ -741,26 +676,20 @@ extern "C" void func_0036CEF8(char* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c)
     *(sGfxVec4*)(self + 0xC0) = vu0ScaleGM(*b, 2.0f);
     *(sGfxVec4*)(self + 0xD0) = vu0ScaleGM(*c, 2.0f);
 }
-#endif
 
 extern cQuad128 D_004FF120;
 
 INCLUDE_ASM("render/graphicsman", func_0036CFA8);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D008);
-#ifdef SKIP_ASM
 extern "C" void func_0036D008(void* self)
 {
     *(cQuad128*)((char*)self + 0xe0) = D_004FF120;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036D020);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D1F0);
-#ifdef SKIP_ASM
 struct sGmVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
@@ -846,11 +775,8 @@ extern "C" void func_0036D1F0(sGmFrustum* self, const sGmVec4* a, const sGmVec4*
     self->vA0 = gmDivD1F0(*d, self->scale);
     self->v70 = gmSubD1F0(gmDivD1F0(*a, self->scale), gmScaleD1F0(gmAddD1F0(gmAddD1F0(self->v80, self->v90), self->vA0), 1.5f));
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D318);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector add).
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -862,29 +788,20 @@ extern "C" void func_0036D318(char* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c,
     *(sGfxVec4*)(self + 0x100) = *c;
     *(sGfxVec4*)(self + 0x110) = *d;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D3D8);
-#ifdef SKIP_ASM
 extern "C" void func_0036D3D8(void* self, float val)
 {
     *(float*)((char*)self + 0x8) = val * *(float*)((char*)self + 0x4c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D3E8);
-#ifdef SKIP_ASM
 extern "C" void func_0036D3E8(void* self, float val)
 {
     *(float*)((char*)self + 0x8) += val * *(float*)((char*)self + 0x4c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D400);
-#ifdef SKIP_ASM
 // PORT: PS2-only VU0 random-number unit (R register); the PC port needs a C PRNG.
 extern "C" void func_0036D400(float* seed)
 {
@@ -898,15 +815,12 @@ extern "C" void func_0036D400(float* seed)
         : "0"(v));
     *seed = v;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036D428);
 
 INCLUDE_ASM("render/graphicsman", func_0036D500);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370018);
-#ifdef SKIP_ASM
 extern char D_00493160[];
 void func_002F7A68(void*);
 
@@ -918,13 +832,10 @@ extern "C" void* func_00370018(void* self)
     *(int*)((char*)self + 0x184) = 0;
     return self;
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_00370058);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_003705E0);
-#ifdef SKIP_ASM
 extern "C" void func_00370058(void* gfx, void* a1, void* desc, void* out, float f);
 
 extern "C" void func_003705E0(char* self, void* a1, char* d)
@@ -950,13 +861,10 @@ extern "C" void func_003705E0(char* self, void* a1, char* d)
     func_0036CBF8(self + 0x10, *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
     func_00370058(self + 0x10, a1, d, self + 0x160, -1.0f);
 }
-#endif
 
 INCLUDE_ASM("render/graphicsman", func_00370708);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370758);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00493160[];
@@ -968,11 +876,8 @@ extern "C" void func_00370758(int* self, int flags)
         operator_delete(self);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_00370788);
-#ifdef SKIP_ASM
 extern "C" void func_0036D428(void* self, float val);
 
 extern "C" void func_00370788(char* self, float dt)
@@ -997,11 +902,8 @@ extern "C" void func_00370788(char* self, float dt)
     }
     *(int*)(self + 0xC) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370888);
-#ifdef SKIP_ASM
 struct sGmQuad {
     float v[4];
 } __attribute__((aligned(16)));
@@ -1019,11 +921,8 @@ extern "C" void func_00370888(void* self, const sGmQuad2* m, const sGmQuad* v)
     *(sGmQuad*)((char*)self + 0xC0) = *v;
     func_003708C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_003708C0);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sGfxRS_708C0 {
     int field_0x0;          // 0x0
@@ -1098,11 +997,8 @@ extern "C" void func_003708C0(void* selfp)
     ((tDraw_708C0)vt2[82].fn)((char*)g + vt2[82].delta, self + 0x10);
     g->top--;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370AA8);
-#ifdef SKIP_ASM
 struct sGmSerVEntry {
     short delta;
     short index;
@@ -1127,11 +1023,8 @@ extern "C" void func_00370AA8(void* self, sGmSerObj* out)
     buf.c = *(int*)((char*)self + 0xC);
     out->vt[1].fn((char*)out + out->vt[1].delta, &buf, 12);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_00370AF8);
-#ifdef SKIP_ASM
 class cStream00370AF8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
@@ -1154,11 +1047,8 @@ extern "C" void func_00370AF8(void* self, cStream00370AF8* stream)
     func_0036D500((char*)self + 0x10, (char*)self + 0x160);
     *(int*)((char*)self + 0xC) = buf.c;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370B60);
-#ifdef SKIP_ASM
 void func_002F7A68(void*);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_00493118[];
@@ -1204,11 +1094,8 @@ extern "C" sGmView_0B60* func_00370B60(sGmView_0B60* self)
     func_00416210(blk, 0, 0x10);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370C08);
-#ifdef SKIP_ASM
 extern "C" void func_00370CF8(void* self, int flag);
 void operator_delete(int* ptr);
 extern void* D_00493118[];
@@ -1221,5 +1108,4 @@ extern "C" void func_00370C08(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 

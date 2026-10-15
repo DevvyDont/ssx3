@@ -9,8 +9,6 @@ struct cAsyncSys {
 };
 
 //100%
-INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi);
-#ifdef SKIP_ASM
 extern const char D_00482988[];
 // PORT: operator_new really takes (size, tag, flags, d); unit declares 1 arg
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -23,11 +21,8 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
         self->field_0x1CC = operator_new_tag(x, D_00482988, flags, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028A230);
-#ifdef SKIP_ASM
 extern "C" void func_00289DF0(void* self, int a);
 extern "C" void func_003E4FB0(int a);
 void cMemMan_free(void* p);
@@ -45,11 +40,8 @@ extern "C" void func_0028A230(cAsyncSys* self)
         self->field_0x1D0 = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028A298);
-#ifdef SKIP_ASM
 extern "C" int func_003DF748(char* name, int a1, int a2);
 extern "C" int func_003DF690(char* name, int a1);
 
@@ -186,11 +178,8 @@ extern "C" void func_0028A298(void* self)
     }
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/asyncsys", func_0028A558);
-#ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_0028A298(void* self);
 
@@ -258,7 +247,6 @@ extern "C" void func_0028A558(void* self, int a1, const char* name, int a3, int 
     }
     func_0028A298(self);
 }
-#endif
 
 INCLUDE_ASM("sound/asyncsys", func_0028A728);
 
@@ -267,87 +255,64 @@ INCLUDE_ASM("sound/asyncsys", func_0028AAF8);
 INCLUDE_ASM("sound/asyncsys", func_0028B0F0);
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B180);
-#ifdef SKIP_ASM
 extern void* D_004A3500;
 
 extern "C" void* func_0028B180()
 {
     return D_004A3500;
 }
-#endif
 
 INCLUDE_ASM("sound/asyncsys", func_0028B188);
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1B0);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" int func_0028B1B0()
 {
     return *(void**)(D_004A28A8 + 0x84) != 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1C0);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" void* func_0028B1C0()
 {
     return D_004A28A8;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1C8);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" void* func_0028B1C8()
 {
     return *(void**)(D_004A28A8 + 0x84);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1D8);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" void* func_0028B1D8()
 {
     return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1E8);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" void* func_0028B1E8()
 {
     return *(void**)(D_004A28A8 + 0x78);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1F8);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" void* func_0028B1F8()
 {
     return *(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84) + 0x10);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B210);
-#ifdef SKIP_ASM
 extern char* D_004A28A8;
 
 extern "C" void* func_0028B210(int i)
@@ -355,22 +320,16 @@ extern "C" void* func_0028B210(int i)
     char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
     return *(void**)(riders + (i << 2) + 4);
 }
-#endif
 
 INCLUDE_ASM("sound/asyncsys", func_0028B230);
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B240__FPv);
-#ifdef SKIP_ASM
 int func_0028B240(void* self)
 {
     return 0x3C;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B248);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B248(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -384,11 +343,8 @@ extern "C" void* func_0028B248(void* self)
     *(char*)((char*)self + 0x20) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B278);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_0028B528(void* self);
 extern "C" void func_0028B730(void* self);
@@ -403,11 +359,8 @@ extern "C" void func_0028B278(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B2D0);
-#ifdef SKIP_ASM
 extern "C" void func_0028B528(void* self);
 
 extern "C" void func_0028B2D0(void* self)
@@ -418,11 +371,8 @@ extern "C" void func_0028B2D0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B320);
-#ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void* func_002523A8(void* self);
@@ -509,11 +459,8 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
     (**(cSndStream_B320***)(D_004A3614 + 0x1D8))->v7();
     strcpy((char*)self + 0x20, file);
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B528);
-#ifdef SKIP_ASM
 extern "C" int func_003B6300(int id);
 extern "C" void* func_002523A8(void* self);
 
@@ -530,5 +477,4 @@ extern "C" void func_0028B528(void* self)
         }
     }
 }
-#endif
 

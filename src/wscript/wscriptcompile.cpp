@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", cWScriptCompile_parseKeywords);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_0048E8C0[];
@@ -47,11 +45,8 @@ extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* s
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_00351120);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
 
@@ -65,11 +60,8 @@ extern "C" void func_00351120(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_00351170);
-#ifdef SKIP_ASM
 struct sWSNode {
     sWSNode* next;
     int pad4;
@@ -98,11 +90,8 @@ extern "C" sWSNode* func_00351170(sWSPool* self)
     p->flags |= 0x2000;
     return p;
 }
-#endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_003511D0);
-#ifdef SKIP_ASM
 extern "C" sWSNode* func_003511D0(sWSPool* self, unsigned int id)
 {
     sWSNode** link = &self->free;
@@ -121,11 +110,8 @@ extern "C" sWSNode* func_003511D0(sWSPool* self, unsigned int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_00351260__FPvT0);
-#ifdef SKIP_ASM
 int func_00351260(void* self, void* a1)
 {
     int t0 = *(int*)((char*)self + 0x8);
@@ -133,5 +119,4 @@ int func_00351260(void* self, void* a1)
     *(int*)((char*)self + 0x8) = (int)a1;
     return t0;
 }
-#endif
 

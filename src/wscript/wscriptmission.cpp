@@ -3,8 +3,6 @@
 INCLUDE_ASM("wscript/wscriptmission", cWScriptMan_checkGate);
 
 //100%
-INCLUDE_ASM("wscript/wscriptmission", func_00184520);
-#ifdef SKIP_ASM
 struct cList;
 struct cUIText;
 
@@ -64,5 +62,4 @@ extern "C" void func_00184520(sWSMission4520* self)
         cUIText_setAsciiString(t2, func_00198AF0(func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), self->player, cid)));
     }
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2318[];
 extern int D_00441B14[];
@@ -30,11 +28,8 @@ extern "C" void cFEStateLodge_onCreateScreen(void* self)
     *(int*)((char*)self + 0x50) = 0x12;
     *(int*)((char*)self + 0x54) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -98,11 +93,8 @@ extern "C" void cFEStateLodge_onWidgetCreate(void* self, void* w)
         cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0046EE90));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3A38);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -181,13 +173,10 @@ extern "C" void func_001F3A38(char* self, char* w, int event)
         func_0039F400(*(char**)(self + 0x10) + 0x18, r);
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F3CC8);
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3CF0);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
 extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
@@ -295,11 +284,8 @@ extern "C" void func_001F3CF0(char* self, char* msg, unsigned int id)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3FF8);
-#ifdef SKIP_ASM
 extern void* D_004739D8[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -313,11 +299,8 @@ extern "C" void* func_001F3FF8(void* self)
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0046EF20[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -342,11 +325,8 @@ extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
         *(int*)((char*)self + 0x48) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4108);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -395,11 +375,8 @@ extern "C" void func_001F4108(void* self, char* popup, int event)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -441,11 +418,8 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(void* self, void* w)
         cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4380);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
@@ -460,13 +434,10 @@ extern "C" void func_001F4380(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F43D8);
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4400);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -559,7 +530,6 @@ extern "C" void func_001F4400(char* self, char* w, int event)
     }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatelodge", func_001F4728);
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00460168[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -17,11 +15,8 @@ extern "C" void cFEStateBonusMaterial_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_00195540);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A14F8[];
 extern char D_004A1500[];
@@ -42,24 +37,18 @@ extern "C" void func_00195540(void* self, void* menu)
         *(int*)((char*)menu + 0x18) = 2;
     }
 }
-#endif
 
 INCLUDE_ASM("fe/festatebonusmaterial", func_001955B8);
 
 extern "C" void* func_0039E4C0(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_001955E0__FPv);
-#ifdef SKIP_ASM
 void* func_001955E0(void* self)
 {
     return func_0039E4C0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_00195600);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001D2598(void* self, const char* a, const char* b);
@@ -98,5 +87,4 @@ extern "C" void func_00195600(void* self, void* item, unsigned int event)
     }
     }
 }
-#endif
 

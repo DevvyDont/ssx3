@@ -5,8 +5,6 @@ INCLUDE_ASM("seg/seg_CF758", setChallengeName);
 INCLUDE_ASM("seg/seg_CF758", setChallengeStats);
 
 //100%
-INCLUDE_ASM("seg/seg_CF758", func_001CED90);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_ED90(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -43,6 +41,5 @@ extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
     }
     cBERewardInterface_getEarningsMedal(r, arg0, arg1, arg2);
 }
-#endif
 
 INCLUDE_ASM("seg/seg_CF758", func_001CEEA0);

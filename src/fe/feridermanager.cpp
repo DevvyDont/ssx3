@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/feridermanager", cFERider_initBoneMap);
-#ifdef SKIP_ASM
 extern "C" int func_00310C48(void* self, int idx, const char* name);
 extern char D_004A1970[];
 extern char D_004A1978[];
@@ -36,11 +34,8 @@ extern "C" void cFERider_initBoneMap(void* self)
     *(int*)((char*)self + 0xCAC) = func_00310C48(*(void**)((char*)self + 0x8), 1, D_00460AA0);
     *(int*)((char*)self + 0xCB0) = func_00310C48(*(void**)((char*)self + 0x8), 1, D_00460AB0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019E7F0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -105,13 +100,10 @@ extern "C" void func_0019E7F0(int* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", cFERider_init);
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019EBA0);
-#ifdef SKIP_ASM
 struct sVE_EBA0 {
     short delta;
     short index;
@@ -152,11 +144,8 @@ extern "C" void func_0019EBA0(void* self)
     *(int*)((char*)self + 0xC78) = 0;
     *(int*)((char*)self + 0xCD4) = -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019EC68);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -204,11 +193,8 @@ extern "C" void func_0019EC68(void* p)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019ED80);
-#ifdef SKIP_ASM
 extern void* D_004A289C;
 void func_00369890(void* self, int a1, int a2);
 extern "C" void func_00369690(void* self, int count, void* src);
@@ -263,13 +249,10 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     func_00310200(self->model, p);
     cFERider_initBoneMap(self);
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feridermanager", func_0019F138);
-#ifdef SKIP_ASM
 extern void* D_004A289C;
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int func_001A0100(int* self);
@@ -350,11 +333,8 @@ extern "C" void func_0019F138(void* selfp)
         func_002ECF78(self->fC74);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F2D0);
-#ifdef SKIP_ASM
 struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
 struct sHalfF2D0 { sQuadF2D0 a, b; };
 extern sQuadF2D0 D_004FF130;
@@ -382,11 +362,8 @@ extern "C" void func_0019F2D0(void* self)
     }
     *(int*)((char*)self + 0x14) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F3E8);
-#ifdef SKIP_ASM
 struct sQuadRM { int x[4]; } __attribute__((aligned(16)));
 extern "C" void func_0019F2D0(void* self);
 
@@ -396,15 +373,12 @@ extern "C" void func_0019F3E8(void* self, sQuadRM* src)
     *(sQuadRM*)((char*)self + 0xC40) = src[1];
     func_0019F2D0(self);
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019F418);
 
 INCLUDE_ASM("fe/feridermanager", func_0019F488);
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F548);
-#ifdef SKIP_ASM
 extern "C" void func_0019F2D0(void* self);
 
 extern "C" void func_0019F548(void* self, sQuadRM* src)
@@ -413,7 +387,6 @@ extern "C" void func_0019F548(void* self, sQuadRM* src)
     *(sQuadRM*)((char*)self + 0xC60) = src[1];
     func_0019F2D0(self);
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", func_0019F578);
 
@@ -432,8 +405,6 @@ INCLUDE_ASM("fe/feridermanager", func_0019F740);
 INCLUDE_ASM("fe/feridermanager", func_0019F760);
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F780);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -490,11 +461,8 @@ extern "C" void func_0019F780(int* self)
     }
     **(int**)((char*)self + 0xC74) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F878);
-#ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
 struct sRiderName_F878 {
@@ -518,11 +486,8 @@ extern "C" int func_0019F878(sRiderTable_F878* self, const char* name)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F908);
-#ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void func_003B3D00(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -581,11 +546,8 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FA78);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -655,11 +617,8 @@ extern "C" void func_0019FA78(int* self, sItemListFA78* list)
     }
     *(int*)((char*)self + 0xCB8) = flag;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FBE0);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -728,11 +687,8 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int a3)
     }
     func_0019E070(mgr, self[0]);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FD58);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -796,11 +752,8 @@ extern "C" int func_0019FD58(int* self)
     }
     return ok;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FF00);
-#ifdef SKIP_ASM
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" int func_0014D448(void* self, int g, int key);
@@ -873,13 +826,10 @@ extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, i
     }
     func_0019DF20(mgr, self[0]);
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", func_001A0100);
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0358);
-#ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_002A16B0(void* mgr, int id);
 extern "C" void func_002A1778(void* mgr, int id);
@@ -894,11 +844,8 @@ extern "C" void func_001A0358(void* self)
         *(int*)((char*)self + 0xC20) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A03C0);
-#ifdef SKIP_ASM
 extern "C" void* func_0019E3D0(void* self);
 
 extern "C" void* func_001A03C0(void* self)
@@ -910,11 +857,8 @@ extern "C" void* func_001A03C0(void* self)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0420);
-#ifdef SKIP_ASM
 extern "C" void func_001A04C8(void* self);
 extern "C" void func_0019E498(void* self, int flags);
 void operator_delete(int* p);
@@ -934,11 +878,8 @@ extern "C" void func_001A0420(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0498);
-#ifdef SKIP_ASM
 struct sRiderSlot_001A0498 {
     int field_0x0;
     int index;
@@ -954,11 +895,8 @@ extern "C" void func_001A0498(sRiderSlot_001A0498* self)
         p++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A04C8);
-#ifdef SKIP_ASM
 extern "C" void func_0019EBA0(void* slot);
 
 extern "C" void func_001A04C8(void* self)
@@ -968,55 +906,40 @@ extern "C" void func_001A04C8(void* self)
         func_0019EBA0((char*)self + i * 0xce0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0508);
-#ifdef SKIP_ASM
 extern "C" void func_0019E588(void* slot, int a1, int a2);
 
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3)
 {
     func_0019E588((char*)self + idx * 0xce0, a2, a3);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0538);
-#ifdef SKIP_ASM
 extern "C" void* func_001A0538(void* self, int a1)
 {
     return (char*)self + a1 * 0xce0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0548);
-#ifdef SKIP_ASM
 extern "C" void* func_001A0548(void* self, int a1)
 {
     return (char*)self + a1 * 0xce0;
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", func_001A0558);
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0570);
-#ifdef SKIP_ASM
 extern "C" void func_0019E538(void* slot, int v);
 
 extern "C" void func_001A0570(void* self, int i, int v)
 {
     func_0019E538((char*)self + i * 0xce0, v);
 }
-#endif
 
 INCLUDE_ASM("fe/feridermanager", func_001A0598);
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0608);
-#ifdef SKIP_ASM
 extern "C" void func_0019F138(void* slot);
 
 extern "C" void func_001A0608(void* self)
@@ -1026,5 +949,4 @@ extern "C" void func_001A0608(void* self)
         func_0019F138((char*)self + i * 0xce0);
     }
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("camera/cameraalgolist", cCameraAlgoList_insert);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char D_0045B1F0[];
 
@@ -52,11 +50,8 @@ extern "C" void cCameraAlgoList_insert(sAlgoListK2* list, cCamAlgoK2* algo, int 
     list->count++;
     n->next = old;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgolist", func_0015CA50);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 struct sAlgoVEntryK2 {
@@ -105,11 +100,8 @@ extern "C" sAlgoNodeK2b* func_0015CA50(sAlgoListK2b* list, sAlgoNodeK2b* n)
     list->count--;
     return next;
 }
-#endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgolist", func_0015CB08);
-#ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 struct sAlgoVEntry {
@@ -155,5 +147,4 @@ extern "C" void func_0015CB08(sAlgoList* list)
     list->count = 0;
     list->head = 0;
 }
-#endif
 

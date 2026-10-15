@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
-#ifdef SKIP_ASM
 extern "C" void* cAppMan_cAppMan(void* self);
 extern "C" void func_003E6448(void* dst, int c, int n);
 extern int D_004A3E90;
@@ -65,11 +63,8 @@ extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp00226830* self)
     func_003E6448(self->fB0, 0, 8);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_init);
-#ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -178,13 +173,10 @@ extern "C" void cSSXApp_init(char* self, int argc, char** argv)
     *(void**)(self + 0x11C) = m;
     func_001A3648(m);
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadInputMap);
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_parseCommandLine);
-#ifdef SKIP_ASM
 struct cBXString {
     char* str;
     cBXString() {}
@@ -267,14 +259,11 @@ extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv)
     }
     D_004A4540 = *(int*)(self + 0x64) == 0;
 }
-#endif
 
 extern "C" int func_00326C60(void* mgr);
 extern void* D_004A28A0;
 
 //99.9%
-INCLUDE_ASM("main/ssxapp", cSSXApp_flush__Fv);
-#ifdef SKIP_ASM
 int cSSXApp_flush()
 {
     if (D_004A28A0 != 0) {
@@ -282,11 +271,8 @@ int cSSXApp_flush()
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_preUpdate);
-#ifdef SKIP_ASM
 extern "C" int func_00326B48(void* pad);
 extern "C" void func_00255A20(void* p);
 extern "C" void func_002668E8(void* p);
@@ -316,37 +302,28 @@ extern "C" int cSSXApp_preUpdate(void* self)
     }
     return 0;
 }
-#endif
 
 extern "C" void func_00326B88(void* mgr);
 
 //99.89%
-INCLUDE_ASM("main/ssxapp", cSSXApp_timerCallback__Fv);
-#ifdef SKIP_ASM
 void cSSXApp_timerCallback()
 {
     if (D_004A28A0 != 0) {
         func_00326B88(D_004A28A0);
     }
 }
-#endif
 
 void* cMCOverlayManager_getManager();
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00227F80);
-#ifdef SKIP_ASM
 extern "C" void* func_00227F80()
 {
     return cMCOverlayManager_getManager();
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_00227FA0);
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_purge);
-#ifdef SKIP_ASM
 void operator_delete(int* p);
 extern "C" void func_00398438(void* p);
 extern "C" void func_00326A68(void* p);
@@ -463,11 +440,8 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     }
     D_004A28A8 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_startGameLoad);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0022E968(void* self);
 struct cAppMan;
@@ -482,11 +456,8 @@ extern "C" void cSSXApp_startGameLoad(void* self)
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
     *(void**)((char*)self + 0xC0) = cGameModeMan_getGM();
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00228238);
-#ifdef SKIP_ASM
 extern int D_004A203C;
 extern char D_0047A818[];
 extern "C" void* func_001A1CE8(void* p);
@@ -505,13 +476,10 @@ extern "C" void func_00228238(void* self)
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
     }
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", cSSXApp_initload);
 
 //100%
-INCLUDE_ASM("main/ssxapp", cSSXApp_initLocale);
-#ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -551,7 +519,6 @@ extern "C" void cSSXApp_initLocale(void* self)
     (*pfn)(thisp, optLanguage_228A78(D_00535610_228A78));
     func_00195B70(*(void**)((char*)self + 0x8C));
 }
-#endif
 
 extern "C" void func_002B4B48(void* self);
 extern "C" void func_00284C28();
@@ -572,8 +539,6 @@ struct sExecPurgeMgr {
 extern sExecPurgeMgr* D_004A5B80;
 
 //99.95%
-INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
-#ifdef SKIP_ASM
 void cSSXApp_loadexecpurge(void* self)
 {
     func_002B4B48(self);
@@ -582,11 +547,8 @@ void cSSXApp_loadexecpurge(void* self)
     sExecPurgeVTable* vt = D_004A5B80->vtable;
     vt->fn((char*)D_004A5B80 + vt->field_0x3B8);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00228C08);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sOptions_228C08 {
     unsigned int pad0 : 20;
@@ -681,11 +643,8 @@ extern "C" void func_00228C08()
     void (**pfn)(void*, int, int) = &vt[12].fn;
     (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", initOnline);
-#ifdef SKIP_ASM
 extern int D_004A3E94;
 extern int D_004A29EC;
 extern char D_00479918[];
@@ -761,11 +720,8 @@ extern "C" void initOnline()
     }
     func_00266788();
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229180);
-#ifdef SKIP_ASM
 extern "C" void func_002292E0(void* self);
 // PORT: the ctor's mangled name says int; it receives the allocated block (pointer in int)
 void* cCrowdRender2D_cCrowdRender2D(int mem);
@@ -831,11 +787,8 @@ extern "C" void* func_00229180(sCrowd_229180* self)
     func_002292E0(self);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229278);
-#ifdef SKIP_ASM
 extern "C" void func_00229398(void* self);
 extern int D_004A2A00;
 void operator_delete(int* p);
@@ -855,11 +808,8 @@ extern "C" void func_00229278(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_002292E0);
-#ifdef SKIP_ASM
 extern "C" void func_003E6448(void* dst, int c, int n);
 unsigned int BXrand();
 
@@ -894,13 +844,10 @@ extern "C" void func_002292E0(void* self)
     c->count2 = 0;
     func_003E6448(c->rest, 0, 0x500);
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229398);
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229408);
-#ifdef SKIP_ASM
 extern "C" void func_00229B90(void* self, int a1);
 
 extern "C" void func_00229408(void* self, int id)
@@ -913,11 +860,8 @@ extern "C" void func_00229408(void* self, int id)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229498);
-#ifdef SKIP_ASM
 extern "C" void func_00229398(void* self);
 extern "C" void func_002292E0(void* self);
 
@@ -926,11 +870,8 @@ extern "C" void func_00229498(void* self)
     func_00229398(self);
     func_002292E0(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_002294C8);
-#ifdef SKIP_ASM
 extern "C" void cCrowdAnim2D_update(void* p);
 extern "C" void func_00229530(void* self);
 extern short D_00536690[];
@@ -952,11 +893,8 @@ extern "C" void func_002294C8(void* self)
     }
     func_00229530(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229530);
-#ifdef SKIP_ASM
 unsigned int BXrand();
 extern "C" int func_002A77C8(void* self, int a1);
 extern void* D_004A3500;
@@ -1054,11 +992,8 @@ extern "C" void func_00229530(void* selfp)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229738);
-#ifdef SKIP_ASM
 struct sQuad229 {
     int v[4];
 } __attribute__((aligned(16)));
@@ -1083,11 +1018,8 @@ extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value)
     self->index++;
     self->index %= 40;
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229788);
-#ifdef SKIP_ASM
 extern "C" void func_00229910(void* self, int slot, int a1);
 
 extern "C" void func_00229788(void* self, int a1)
@@ -1100,11 +1032,8 @@ extern "C" void func_00229788(void* self, int a1)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_002297D8);
-#ifdef SKIP_ASM
 extern "C" void func_00229B90(void* self, int a1);
 
 extern "C" void func_002297D8(void* self, int val)
@@ -1117,26 +1046,20 @@ extern "C" void func_002297D8(void* self, int val)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229820);
 
 INCLUDE_ASM("main/ssxapp", func_00229910);
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229B90);
-#ifdef SKIP_ASM
 extern "C" void func_00229B90(void* self, int a1)
 {
     ((unsigned int*)self)[a1 + 2] = 0xFFFFFFFFU;
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229BA8);
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229E20);
-#ifdef SKIP_ASM
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 class cSSXAppStream {
 public:
@@ -1148,11 +1071,8 @@ extern "C" void func_00229E20(void* self, cSSXAppStream* s)
 {
     s->v01((char*)self + 0x8, 0x200);
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229E58);
-#ifdef SKIP_ASM
 extern "C" void func_00229398(void* self);
 extern "C" void func_002292E0(void* self);
 extern "C" void func_00229910(void* self, int slot, int a1);
@@ -1182,11 +1102,8 @@ extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* s)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229F30);
-#ifdef SKIP_ASM
 // Upload two 4x4 matrices (a, b) to VU0 data memory starting at qword 4 (address 0x40).
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own matrix store.
 extern "C" void func_00229F30(void* a, void* b)
@@ -1215,19 +1132,13 @@ extern "C" void func_00229F30(void* a, void* b)
         : "r"(0x40), "r"(a), "r"(b)
         : "memory");
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229F80__FPv);
-#ifdef SKIP_ASM
 void func_00229F80(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229F88);
-#ifdef SKIP_ASM
 // Upload a vector plus a 4x4 matrix (5 qwords) to VU0 data memory slot `index`,
 // starting at qword 0x50 + index * 5.
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own store.
@@ -1251,7 +1162,6 @@ extern "C" void func_00229F88(int index, void* v, void* m)
         : "r"(index * 5 + 0x50), "r"(v), "r"(m)
         : "memory");
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229FC8);
 
@@ -1260,8 +1170,6 @@ INCLUDE_ASM("main/ssxapp", func_0022A128);
 INCLUDE_ASM("main/ssxapp", func_0022A270);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022A368);
-#ifdef SKIP_ASM
 extern "C" void func_00229FC8(void* self, void* node, int frustum);
 
 struct sNode_A368 {
@@ -1291,11 +1199,8 @@ extern "C" void func_0022A368(void* self, sList_A368* list, int count)
         func_00229FC8(self, 0, 0);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022A408);
-#ifdef SKIP_ASM
 extern "C" void func_0022A128(void* self, void* node, int frustum);
 
 struct sNode_A408 {
@@ -1325,11 +1230,8 @@ extern "C" void func_0022A408(void* self, sList_A408* list, int count)
         func_0022A128(self, 0, 0);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022A4A8);
-#ifdef SKIP_ASM
 struct sNode_22A4A8 {
     sNode_22A4A8* next;
     int f4;
@@ -1366,15 +1268,12 @@ extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
         func_0022A270(self, 0, 0);
     }
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022A5A0);
 
 INCLUDE_ASM("main/ssxapp", func_0022A698);
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A770);
-#ifdef SKIP_ASM
 struct sVisNode_A770 {
     sVisNode_A770* next;    // 0x00
     int pad_0x4;
@@ -1434,13 +1333,10 @@ extern "C" void func_0022A770(sVisOwner_A770* self, sVisList_A770* list, int cou
         }
     }
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022A830);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022ADD8);
-#ifdef SKIP_ASM
 extern void* D_004A289C;
 extern "C" void func_002425C0(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
@@ -1576,7 +1472,6 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
     func_0022A4A8((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
     return self;
 }
-#endif
 
 INCLUDE_ASM("main/ssxapp", func_0022B008);
 

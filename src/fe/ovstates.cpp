@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/ovstates", cFEStateTitle_onCreateScreen);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -23,11 +21,8 @@ extern "C" void cFEStateTitle_onCreateScreen(void* self)
     }
     func_0028F140(func_0028B180(), 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001947F8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_0045DB90[];
@@ -63,11 +58,8 @@ extern "C" int func_001947F8(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001948A8);
-#ifdef SKIP_ASM
 extern "C" void func_0039E510(void* self);
 extern void* D_004A28A8;
 extern int D_004A19CC;
@@ -127,19 +119,13 @@ extern "C" void func_001948A8(sSelf_1948A8* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194980__FPv);
-#ifdef SKIP_ASM
 void func_00194980(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194988);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_003A0330(void* self, int a1, int a2);
 extern char D_004A17D0[];
@@ -152,11 +138,8 @@ extern "C" void func_00194988(void* self, void* item)
         func_003A0330(item, 0, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001949E0);
-#ifdef SKIP_ASM
 struct sVEntry_func_001949E0 {
     short delta;
     short index;
@@ -175,20 +158,14 @@ extern "C" void func_001949E0(void* self, void* msg, int type)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194A48);
-#ifdef SKIP_ASM
 extern "C" int func_00194A48(void* self, int a1, int a2)
 {
     return a2 != 6 ? 0x100 : 0x101;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194A60);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*);
 extern void* D_0046B9E8[];
 
@@ -201,11 +178,8 @@ extern "C" void* func_00194A60(void* self)
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_003E6448(void* p, int v, int n);
@@ -254,11 +228,8 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194BF0);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
@@ -321,11 +292,8 @@ extern "C" void func_00194BF0(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetCreate);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00460050[];
 extern char D_00460060[];
@@ -361,11 +329,8 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
         *(int*)((char*)item + 0x18) = 0x31;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194DD0);
-#ifdef SKIP_ASM
 extern "C" void func_0039E510(void* self);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
@@ -443,13 +408,10 @@ extern "C" void func_00194DD0(void* self)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetEvent);
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001952E8);
-#ifdef SKIP_ASM
 extern "C" int func_001952E8(void* self, int a1, int a2)
 {
     switch (a2) {
@@ -460,13 +422,10 @@ extern "C" int func_001952E8(void* self, int a1, int a2)
     }
     return 0x101;
 }
-#endif
 
 INCLUDE_ASM("fe/ovstates", func_00195328);
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00195498);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*);
 extern char D_0046B918[];
 
@@ -477,5 +436,4 @@ extern "C" void* func_00195498(void* self)
     *(int*)((char*)self + 0xC) = 5;
     return self;
 }
-#endif
 

@@ -3,8 +3,6 @@
 INCLUDE_ASM("seg/seg_1C9348", HUFF_about);
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8468);
-#ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n) {
     unsigned r = 0;
     while (n--) {
@@ -12,11 +10,8 @@ extern "C" unsigned func_002C8468(unsigned char *p, int n) {
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C84A0);
-#ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
 extern "C" int func_002C84A0(unsigned char *p) {
@@ -31,11 +26,8 @@ extern "C" int func_002C84A0(unsigned char *p) {
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8550);
-#ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
 extern "C" void func_002C8550(unsigned char *p) {
@@ -45,21 +37,15 @@ extern "C" void func_002C8550(unsigned char *p) {
         func_002C8468(p + 2, 3);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C85A0);
-#ifdef SKIP_ASM
 extern "C" int func_002C76C0(int, int);
 
 extern "C" int func_002C85A0(int a, int b, int c) {
     return func_002C76C0(a, c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C85C0);
-#ifdef SKIP_ASM
 extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n) {
     unsigned char *end = src + n;
     int prev = 0;
@@ -71,11 +57,8 @@ extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n) {
         } while (src < end);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8600);
-#ifdef SKIP_ASM
 struct HuffOut_8600 {
     unsigned char* buf;
     int pos;
@@ -109,11 +92,8 @@ extern "C" void func_002C8600_impl(HuffState_8600* s, HuffOut_8600* out, unsigne
         s->nbytes++;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C86F8);
-#ifdef SKIP_ASM
 struct HS_86F8 { char pad[0x1524]; int l[0x208]; int r[0x208]; int a[256]; };
 extern "C" void func_002C86F8(HS_86F8 *self, unsigned i, int d) {
     if (i < 0x100) {
@@ -123,15 +103,12 @@ extern "C" void func_002C86F8(HS_86F8 *self, unsigned i, int d) {
     func_002C86F8(self, self->l[i], d + 1);
     func_002C86F8(self, self->r[i], d + 1);
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C8770);
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C8970);
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8A78);
-#ifdef SKIP_ASM
 struct HuffState_8A78 {
     char pad0[0xD44];
     unsigned int len[252];      // 0xD44
@@ -194,11 +171,8 @@ extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigne
     func_002C8600_8A78(s, out, 1, bits + 1);
     func_002C8600_8A78(s, out, v - base, bits + 2);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1C9348", func_002C8C30);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct HS_8C30 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
 extern void func_002C8600_8C30(HS_8C30 *, int, int, int) __asm__("func_002C8600");
@@ -210,11 +184,8 @@ extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) {
     func_002C8A78(self, x, 0);
     func_002C8600_8C30(self, x, y, 9);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1C9348", func_002C8CA8);
-#ifdef SKIP_ASM
 struct HS_8CA8 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
 extern "C" void func_002C8600(HS_8CA8 *, int, int, int);
 extern "C" void func_002C8C30(HS_8CA8 *, int, int);
@@ -226,11 +197,8 @@ extern "C" void func_002C8CA8(HS_8CA8 *self, int x, int idx) {
     }
     func_002C8600(self, x, self->b[idx], self->a[idx]);
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8CF8);
-#ifdef SKIP_ASM
 struct HuffState_8CF8 {
     char pad0[0xD44];
     unsigned int len[252];      // 0xD44
@@ -265,15 +233,12 @@ extern "C" void func_002C8CF8(HuffState_8CF8* s)
         s->base[i] = 124;
     }
 }
-#endif
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C8E48);
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C9A48);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1C9348", func_002C9F60);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct HuffBuf_9F60 {
     char* buf;
@@ -340,11 +305,8 @@ extern "C" int func_002C9F60(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* 
     func_002C9A48(s, out, 0x39);
     return out->len;
 }
-#endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", HUFF_encode);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* name, int flags, int align);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -397,4 +359,3 @@ extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
     }
     return result;
 }
-#endif

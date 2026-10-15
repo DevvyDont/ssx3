@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_cScriptAnimBankManager);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004825D8[];
@@ -42,11 +40,8 @@ extern "C" cScriptAnimBankManager53B8* cScriptAnimBankManager_cScriptAnimBankMan
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275498);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_00275698(void* self);
@@ -64,11 +59,8 @@ extern "C" void func_00275498(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_LinkBank);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -141,11 +133,8 @@ extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* 
     }
     return e->slot;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275650);
-#ifdef SKIP_ASM
 struct sScAnimVEntry {
     short delta;
     short index;
@@ -163,11 +152,8 @@ extern "C" void func_00275650(sAnimList* self, int id)
         vt[2].fn((char*)self + vt[2].delta, p);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275698);
-#ifdef SKIP_ASM
 struct sDmEntry275698 {
     char pad_0x00[0x8];
     int used;
@@ -197,11 +183,8 @@ extern "C" void func_00275698(void* self_)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275718);
-#ifdef SKIP_ASM
 struct sAnimEntry {
     int id;
     int unk4;
@@ -225,11 +208,8 @@ extern "C" void* func_00275718(sAnimList* self, int id)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275760);
-#ifdef SKIP_ASM
 extern "C" void func_00311110(void** tbl);
 extern "C" void func_003112C8(void* self, int flags);
 void cMemMan_free(void*);
@@ -255,11 +235,8 @@ extern "C" void func_00275760(void* self, sAnimEntry* e)
     e->unk10 = 0;
     //PEND
 }
-#endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_002757F0);
-#ifdef SKIP_ASM
 extern "C" sAnimEntry* func_002757F0(sAnimList* self)
 {
     for (int i = 0; i < self->count; i++) {
@@ -269,5 +246,4 @@ extern "C" sAnimEntry* func_002757F0(sAnimList* self)
     }
     return 0;
 }
-#endif
 

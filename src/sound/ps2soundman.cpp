@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_cSndPlayOpts);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_9350(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_002ADE88(void* self, int heap);
@@ -122,11 +120,8 @@ extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, i
     self->depth--;
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/ps2soundman", func_002A97C0);
-#ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
 extern "C" void func_002ADEE8(void* self, int flags);
@@ -181,11 +176,8 @@ extern "C" void func_002A97C0(char* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("sound/ps2soundman", func_002A9988);
-#ifdef SKIP_ASM
 extern "C" void func_002A9988(void* self, float a, float b)
 {
     (*(float**)((char*)self + 0x6C))[*(int*)((char*)self + 0x1C)] = a;
@@ -195,5 +187,4 @@ extern "C" void func_002A9988(void* self, float a, float b)
     }
     (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = b;
 }
-#endif
 

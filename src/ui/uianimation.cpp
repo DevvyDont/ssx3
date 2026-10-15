@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("ui/uianimation", cUIAnimationBank_getAnimationByHashName);
-#ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data);
 extern const char D_004A4768[];
@@ -25,11 +23,8 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, in
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003971C8);
-#ifdef SKIP_ASM
 struct func_003971C8_sKey {
     unsigned short dt;
     short value;
@@ -65,11 +60,8 @@ extern "C" float func_003971C8(func_003971C8_sAnim** self, int t)
     }
     return v;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397278);
-#ifdef SKIP_ASM
 extern "C" unsigned short func_00397278(void* self)
 {
     void* p = *(void**)self;
@@ -78,20 +70,14 @@ extern "C" unsigned short func_00397278(void* self)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397298__FPvi);
-#ifdef SKIP_ASM
 void func_00397298(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
-#ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void func_00397298(void* self, int val);
@@ -126,11 +112,8 @@ extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
     }
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003973A8);
-#ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern void* D_00494D08[];
@@ -150,15 +133,12 @@ extern "C" void func_003973A8(void* self, int flags)
         operator_delete((int*)self);
     }
 }
-#endif
 
 INCLUDE_ASM("ui/uianimation", func_00397440);
 
 INCLUDE_ASM("ui/uianimation", func_00397458);
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397468);
-#ifdef SKIP_ASM
 extern "C" void func_00397468(void* self, int mode, unsigned short v)
 {
     mode &= 7;
@@ -173,11 +153,8 @@ extern "C" void func_00397468(void* self, int mode, unsigned short v)
         *(unsigned short*)((char*)self + 0xa) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003974B0);
-#ifdef SKIP_ASM
 struct func_003974B0_sData {
     short pad0;
     unsigned short count;
@@ -243,11 +220,8 @@ extern "C" void func_003974B0(func_003974B0_sAnim* self, unsigned char flags)
         break;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003975E0);
-#ifdef SKIP_ASM
 struct sUIAnimVt75E0 { short delta; short index; void (*fn)(void*, int, float); };
 struct sUIAnimHdr75E0 { short f0; unsigned short nframes; unsigned int ntracks; };
 struct sUIAnim75E0 {
@@ -277,5 +251,4 @@ extern "C" void func_003975E0(sUIAnim75E0* self, char* obj, int mode, unsigned s
     }
     self->cur = frame;
 }
-#endif
 

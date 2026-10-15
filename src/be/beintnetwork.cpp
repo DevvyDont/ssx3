@@ -12,8 +12,6 @@ struct cBENetworkInterface {
 };
 
 //99.58%
-INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getThis__Fv);
-#ifdef SKIP_ASM
 void* cBENetworkInterface_getThis()
 {
     if (D_004A1204 == 0) {
@@ -24,11 +22,8 @@ void* cBENetworkInterface_getThis()
     }
     return D_004A1204;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E130);
-#ifdef SKIP_ASM
 struct sNetState_0014E130
 {
     int data[0x4B0 / 4];
@@ -41,11 +36,8 @@ extern "C" void func_0014E130(void)
 {
     D_00535088 = D_00534B30;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E1F8);
-#ifdef SKIP_ASM
 extern sNetState_0014E130 D_00534B30;
 extern sNetState_0014E130 D_00535088;
 
@@ -53,20 +45,14 @@ extern "C" void func_0014E1F8(void)
 {
     D_00534B30 = D_00535088;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E2C0__FPv);
-#ifdef SKIP_ASM
 int func_0014E2C0(void* self)
 {
     return 0xC44;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E2C8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sNetHdr_E2C8 {
     int w[0x4C / 4];
@@ -154,11 +140,8 @@ extern "C" void func_0014E2C8(void* self, int p, sNetState_E2C8* out)
         out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + p * 0x9B50)))[k];
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E5C8);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -207,11 +190,8 @@ extern "C" void func_0014E5C8(void* self, int p, sNetState_E2C8* in)
         ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + p * 0x9B50)))[k] = in->keys[k];
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->v02();
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E9C0);
-#ifdef SKIP_ASM
 struct sBEPlayerData {
     char data[0x9B50];
 };
@@ -224,11 +204,8 @@ extern "C" void func_0014E9C0(void* self, int a1, int a2)
     sBEPlayerData* src = &D_004A6CA8[a1];
     func_00156858(&D_004A6CA8[a2], src);
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintnetwork", func_0014E9F8);
-#ifdef SKIP_ASM
 extern "C" void func_001567B8(void* self, int arg);
 // PORT: func_0014EB08 is defined (void) in this unit but called with self here.
 void func_0014EB08_self(void* self) __asm__("func_0014EB08");
@@ -252,11 +229,8 @@ extern "C" void func_0014E9F8(void* self)
     }
     func_0014EB08_self(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EA90);
-#ifdef SKIP_ASM
 struct sVEntry0014EA90 {
     short delta;
     short index;
@@ -282,11 +256,8 @@ extern "C" void func_0014EA90(void* self)
     b->vtable[2].fn((char*)b + b->vtable[2].delta);
     func_0014EB08_self(self);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EB08);
-#ifdef SKIP_ASM
 struct sNetSlot_0014EB08
 {
     unsigned int a : 1;
@@ -311,34 +282,25 @@ extern "C" void func_0014EB08(void)
     D_005308B8[1].a = tmp.a;
     D_005308B8[1].x = tmp.x;
 }
-#endif
 
 extern "C" char* strcpy(char*, const char*);
 extern char D_00534FC8[16];
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
-#ifdef SKIP_ASM
 extern "C" void func_0014EBB8(void* self, const char* src)
 {
     strcpy(D_00534FC8, src);
 }
-#endif
 
 extern char D_00534FB8[16];
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
-#ifdef SKIP_ASM
 extern "C" void func_0014EBD8(void* self, const char* src)
 {
     strcpy(D_00534FB8, src);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EBF8);
-#ifdef SKIP_ASM
 struct sCharEntry_0014EBF8
 {
     char pad_0x00[0x11];
@@ -359,11 +321,8 @@ extern "C" void func_0014EBF8(void* self, int idx)
         D_00534A88[i] = D_00535B20[i];
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014ECA0);
-#ifdef SKIP_ASM
 extern "C" void func_00156988(sBEPlayerData* data);
 
 extern "C" void func_0014ECA0(void* self, int idx)
@@ -382,11 +341,8 @@ extern "C" void func_0014ECA0(void* self, int idx)
     sBEIface0014EA90* b = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 6);
     b->vtable[2].fn((char*)b + b->vtable[2].delta);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EDD8);
-#ifdef SKIP_ASM
 extern const char D_0045A280[];
 extern void* D_0045AD38[16];
 extern void* D_004A1208;
@@ -401,11 +357,8 @@ extern "C" void* func_0014EDD8(void)
     }
     return D_004A1208;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EE28);
-#ifdef SKIP_ASM
 signed char cBELibrary_getCharacterID(int index);
 
 struct sNetChar_0014EE28
@@ -419,11 +372,8 @@ extern "C" void* func_0014EE28(void* self, int rider)
 {
     return &D_00530970[cBELibrary_getCharacterID(rider)];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EE58);
-#ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char cBELibrary_getCharacterID(int index);
 extern "C" signed char func_0014A0B0(int index);
@@ -450,11 +400,8 @@ extern "C" void* func_0014EE58(void* self, int rider)
     }
     return &D_00530990_0014EE58[c];
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EEC8);
-#ifdef SKIP_ASM
 struct sNetEntry8_0043FA38
 {
     char data[8];
@@ -475,7 +422,6 @@ extern "C" void* func_0014EEC8(void* self, int player, int index)
     }
     return &D_00530990[player];
 }
-#endif
 
 
 INCLUDE_ASM("be/beintnetwork", func_0014EF00);

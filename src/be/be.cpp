@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("be/be", cBE_getBE);
-#ifdef SKIP_ASM
 struct sBEInterface;
 extern sBEInterface* D_005308A8[];
 extern int D_004A11F4;
@@ -44,7 +42,6 @@ extern "C" void* cBE_getBE()
     }
     return D_004A11EC;
 }
-#endif
 
 struct sBEInterfaceVTable {
     char pad_0x00[0x8];
@@ -64,8 +61,6 @@ extern int D_004A11F4;
 INCLUDE_ASM("be/be", func_0014DD48);
 
 //100%
-INCLUDE_ASM("be/be", cBE_getInterface__Fv);
-#ifdef SKIP_ASM
 class cBEInterfaceV_getInterface
 {
 public:
@@ -81,11 +76,8 @@ void* cBE_getInterface_impl(void* be, int kind)
 {
     return ((cBEInterfaceV_getInterface*)D_005308A8[D_004A11F4])->getInterface(kind);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014DD98);
-#ifdef SKIP_ASM
 class cBEStateV_0014DD98
 {
 public:
@@ -110,11 +102,8 @@ extern "C" void func_0014DD98(void)
     D_004A11EC = 0;
     D_004A11F0 = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014DE28);
-#ifdef SKIP_ASM
 extern void* D_004A11F8;
 extern "C" void func_00149A88(void* p, char c);
 extern "C" void func_0014FC40(char c);
@@ -125,11 +114,8 @@ extern "C" void func_0014DE28(void* self, char c)
         func_00149A88(D_004A11F8, c);
     func_0014FC40(c);
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/be", cBE_setState);
-#ifdef SKIP_ASM
 class cBEStateV_setState
 {
 public:
@@ -149,13 +135,10 @@ extern "C" void cBE_setState(int state)
         ((cBEStateV_setState*)D_005308A8[state])->enter();
     }
 }
-#endif
 
 INCLUDE_ASM("be/be", func_0014DEE8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/be", func_0014DF08);
-#ifdef SKIP_ASM
 class cBEReplayStream {
 public:
     virtual void write(void* data, int size);
@@ -183,11 +166,8 @@ extern "C" void func_0014DF08(void* self, cBEReplayStream* s)
             cBE_getInterface_Fv(self, i)->writeToReplayFrame(s);
     }
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/be", cBE_readFromReplayFrame);
-#ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
@@ -200,20 +180,14 @@ extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* s)
             cBE_getInterface_Fv(self, i)->readFromReplayFrame(s);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014E048);
-#ifdef SKIP_ASM
 extern "C" int func_0014E048()
 {
     return 0xBB78;
 }
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/be", func_0014E050);
-#ifdef SKIP_ASM
 extern "C" void func_0014A188(void* buf);
 // PORT: func_0014E048 is declared () in this unit but called with the BE object here.
 int func_0014E048_self(void* be) __asm__("func_0014E048");
@@ -227,16 +201,12 @@ extern "C" void func_0014E050(void* self, char* buf)
     char* p = buf + (func_0014E048_self(self) - 4);
     memcpy(p, &crc, 4);
 }
-#endif
 
 extern "C" void* func_0014A5E0(int);
 
 //100%
-INCLUDE_ASM("be/be", func_0014E0C0__FPvi);
-#ifdef SKIP_ASM
 void* func_0014E0C0(void* self, int a1)
 {
     return func_0014A5E0(a1);
 }
-#endif
 

@@ -1,8 +1,6 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A2028;
 extern void* D_004A28A8;
@@ -46,11 +44,8 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
         vt[40].fn(fe + vt[40].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackReadSuccess);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A2028;
 extern void* D_004A28A8;
@@ -95,11 +90,8 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
         vt[40].fn(fe + vt[40].delta);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D68E8);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -142,11 +134,8 @@ extern "C" void func_001D68E8(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D69E0);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -186,11 +175,8 @@ extern "C" void func_001D69E0(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D6AD0);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -229,11 +215,8 @@ extern "C" void func_001D6AD0(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D6C28);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -272,11 +255,8 @@ extern "C" void func_001D6C28(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D6D88);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -338,11 +318,8 @@ extern "C" void func_001D6D88(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7010);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -390,11 +367,8 @@ extern "C" void func_001D7010(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7190);
-#ifdef SKIP_ASM
 extern "C" void* func_00227F80(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
@@ -421,11 +395,8 @@ extern "C" void func_001D7190(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D72A8);
-#ifdef SKIP_ASM
 struct sVEntry001D72A8 {
     short delta;
     short index;
@@ -449,11 +420,8 @@ extern "C" void func_001D72A8(void)
     vt2[1].fn(obj + vt2[1].delta, 0x24);
     func_0023D570(obj, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7318);
-#ifdef SKIP_ASM
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
 extern char D_00464330[];
@@ -478,11 +446,8 @@ extern "C" void func_001D7318(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmFormatDone);
-#ifdef SKIP_ASM
 extern char D_00467818[];
 extern char D_0045F7E0[];
 
@@ -507,11 +472,8 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7548);
-#ifdef SKIP_ASM
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
 extern char D_004644F0[];
@@ -540,11 +502,8 @@ extern "C" void func_001D7548(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmDelete);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -594,11 +553,8 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D77E8);
-#ifdef SKIP_ASM
 extern char D_004644D8[];
 extern char D_0045DCD8[];
 extern char D_00462C88[];
@@ -636,11 +592,8 @@ extern "C" void func_001D77E8(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7998);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -689,11 +642,8 @@ extern "C" void func_001D7998(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7B18);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_00227F80(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
@@ -739,11 +689,8 @@ extern "C" void func_001D7B18(void)
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
     mvt[26].fn(mthis, str2, 0);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileExists);
-#ifdef SKIP_ASM
 extern char D_00467860[];
 extern char D_0045F7E0[];
 
@@ -763,11 +710,8 @@ extern "C" void cFEMemCard_callbackFileExists(void)
     mvt[26].fn(m + mvt[26].delta, o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0)), 0);
     *(int*)((char*)D_004A2028 + 0x1C0) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7D70);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -807,11 +751,8 @@ extern "C" void func_001D7D70(void)
         cMemMan_free(buf);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDeleteDone);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -850,11 +791,8 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
     }
     return 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8020);
-#ifdef SKIP_ASM
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
 extern char D_00464640[];
@@ -884,11 +822,8 @@ extern "C" int func_001D8020(void)
     }
     return 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8160);
-#ifdef SKIP_ASM
 void func_0023FB18(void* mp, int a);
 extern "C" void func_0023FAE0(void* mp);
 extern "C" void func_00241400(void* mp);
@@ -939,11 +874,8 @@ extern "C" void func_001D8160(void)
     func_0023FAE0(mp);
     mp->v01(0x36);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8240);
-#ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_003A0D00(void* self, unsigned short* str);
 extern char D_004678B0[];
@@ -979,11 +911,8 @@ extern "C" void func_001D8240(void)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8358);
-#ifdef SKIP_ASM
 struct sVEntry001D8358 {
     short delta;
     short index;
@@ -1001,11 +930,8 @@ extern "C" void func_001D8358(void)
         vt[35].fn(fe + vt[35].delta, 2);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D83A8);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -1064,13 +990,10 @@ extern "C" void func_001D83A8(void)
         }
     }
 }
-#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8530);
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8670);
-#ifdef SKIP_ASM
 extern void* D_004A2028;
 
 extern "C" void func_001D8670(void)
@@ -1082,20 +1005,14 @@ extern "C" void func_001D8670(void)
     *(int*)(fe + 0x1A8) = 0;
     *(int*)(fe + 0x1E0) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D86A0__FPv);
-#ifdef SKIP_ASM
 void func_001D86A0(void* self)
 {
     *(int*)((char*)self + 0x1C0) = 6;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D86B0);
-#ifdef SKIP_ASM
 struct sVEntry001D86B0 {
     short delta;
     short index;
@@ -1112,13 +1029,10 @@ extern "C" void func_001D86B0(void* self)
     *(int*)((char*)self + 0x1C0) = 5;
     vt[47].fn((char*)self + vt[47].delta);
 }
-#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8700);
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8BE0);
-#ifdef SKIP_ASM
 extern "C" void func_001D9308(void*, int);
 
 extern "C" void func_001D8BE0(void* self)
@@ -1134,22 +1048,16 @@ extern "C" void func_001D8BE0(void* self)
     *(int*)((char*)self + 0x1E8) = 0;
     *(int*)((char*)self + 0x1DC) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8C38__FPv);
-#ifdef SKIP_ASM
 void func_001D8C38(void* self)
 {
     *(int*)((char*)self + 0x1A8) = 0;
     *(int*)((char*)self + 0x1C0) = 1;
     *(int*)((char*)self + 0x1DC) = 0;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onInputBegin);
-#ifdef SKIP_ASM
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -1191,11 +1099,8 @@ extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
     }
     return handled;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8D68);
-#ifdef SKIP_ASM
 struct sVEntry001D8D68 {
     short delta;
     short index;
@@ -1216,13 +1121,10 @@ extern "C" void func_001D8D68(void* self)
     vt[36].fn((char*)self + vt[36].delta, buf, 1, 1, 0, 0, 1);
     *(int*)((char*)self + 0x210) = 1;
 }
-#endif
 
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8DE0);
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9258);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A1600[];
@@ -1247,11 +1149,8 @@ extern "C" void func_001D9258(void* self)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9308);
-#ifdef SKIP_ASM
 struct sVEntry001D9308 {
     short delta;
     short index;
@@ -1273,11 +1172,8 @@ extern "C" void func_001D9308(void* self, int on)
         *(short*)((char*)self + 0x9C) = 0;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9368);
-#ifdef SKIP_ASM
 struct sVEntry001D9368 {
     short delta;
     short index;
@@ -1292,61 +1188,40 @@ extern "C" void func_001D9368(void* self)
         vt[35].fn((char*)self + vt[35].delta, 1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93A8__FPv);
-#ifdef SKIP_ASM
 void func_001D93A8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93B0__FPv);
-#ifdef SKIP_ASM
 void func_001D93B0(void* self)
 {
     *(int*)((char*)self + 0x1C0) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93C0__FPv);
-#ifdef SKIP_ASM
 void func_001D93C0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93C8__FPv);
-#ifdef SKIP_ASM
 void func_001D93C8(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D0__FPv);
-#ifdef SKIP_ASM
 void func_001D93D0(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D8);
-#ifdef SKIP_ASM
 extern "C" int func_001D93D8(void* self)
 {
     return *(int*)((char*)self + 0x1c0) == 6;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93E8);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
@@ -1363,11 +1238,8 @@ extern "C" void func_001D93E8(void* self, char* objName, char* animName)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerDisplayState);
-#ifdef SKIP_ASM
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 void cUIScreen_jumpToFrame(void* self, unsigned short frame);
@@ -1482,11 +1354,8 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
     if (frame != 0xFFFF)
         cUIScreen_jumpToFrame(*(void**)(self + 0x40), frame);
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D97E0);
-#ifdef SKIP_ASM
 extern "C" int func_001D97E0(void* self, void* list, int idx, int back)
 {
     int step = 1;
@@ -1499,11 +1368,8 @@ extern "C" int func_001D97E0(void* self, void* list, int idx, int back)
     }
     return -1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9818);
-#ifdef SKIP_ASM
 struct sVEntry001D9818 {
     short delta;
     short index;
@@ -1524,19 +1390,13 @@ extern "C" void func_001D9818(void* self)
         vt[9].fn((char*)obj + vt[9].delta, 0);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9878__FPv);
-#ifdef SKIP_ASM
 void func_001D9878(void* self)
 {
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9880);
-#ifdef SKIP_ASM
 class cMovieStreamK1D9880 {
 public:
     virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
@@ -1580,11 +1440,8 @@ extern "C" int func_001D9880(void* self)
     }
     return r;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_createReadBuffer);
-#ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -1605,11 +1462,8 @@ extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
     *(void**)((char*)self + 0x1D4) = p;
     *(int*)((char*)self + 0x228) = 1;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D99C8);
-#ifdef SKIP_ASM
 extern "C" void* cScreenPopup_cScreenPopup(void* mem, void* engine, void* owner);
 extern "C" void func_001D9A80(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern char D_0046C890[];
@@ -1637,11 +1491,8 @@ extern "C" sMemCardPopupK1D99C8* func_001D99C8(sMemCardPopupK1D99C8* self, void*
     func_001D9A80(self, a3, a4, a5, a6, a7, a8);
     return self;
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9A80);
-#ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void func_001C57C0(void* self, int a1, int a2);
 // PORT: func_001C5DD8 takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
@@ -1692,11 +1543,8 @@ extern "C" void func_001D9A80(void* self, int a1, int a2, int a3, int a4, int a5
         func_001C5DD8_self(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9BD0);
-#ifdef SKIP_ASM
 extern "C" void* func_002C2508(void* dst, void* src);
 void func_001C57A0(void* slots, int idx, int data);
 // PORT: func_001C5DD8 takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
@@ -1726,11 +1574,8 @@ extern "C" void func_001D9BD0(void* self, void* src, int mode)
         func_001C5DD8_self(self);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9CA8);
-#ifdef SKIP_ASM
 extern "C" int func_002C24D0(void* p);
 extern "C" void* func_002C2508(void* dst, void* src);
 // PORT: func_001C5DD8 takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
@@ -1748,11 +1593,8 @@ extern "C" void func_001D9CA8(void* self, void* src)
         }
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D18);
-#ifdef SKIP_ASM
 extern "C" void func_001C5DD8(void*, int);
 
 extern "C" void func_001D9D18(void* self, int a1)
@@ -1762,11 +1604,8 @@ extern "C" void func_001D9D18(void* self, int a1)
         func_001C5DD8(self, a1);
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D48);
-#ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void func_001DA4A8(void* self);
 extern char D_0046A618[];
@@ -1789,5 +1628,4 @@ extern "C" void* func_001D9D48(void* self, void* engine, void* owner)
     func_001DA4A8(self);
     return self;
 }
-#endif
 

@@ -3,8 +3,6 @@
 INCLUDE_ASM("object/spring", cSpring_setupNodes);
 
 //100%
-INCLUDE_ASM("object/spring", func_00353FC0);
-#ifdef SKIP_ASM
 struct sSpVec_53FC0 {
     float x, y, z, w;
     sSpVec_53FC0() {}
@@ -209,11 +207,8 @@ extern "C" void func_00353FC0(sSpring_53FC0* self)
         self->nodes[i].t = 0.0f;
     }
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/spring", func_003545D8);
-#ifdef SKIP_ASM
 struct sSpringVEntry45D8 {
     short delta;
     short index;
@@ -227,11 +222,8 @@ extern "C" void func_003545D8(void* self, void* stream)
     e = &(*(sSpringVEntry45D8**)stream)[1];
     e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 0x50);
 }
-#endif
 
 //100%
-INCLUDE_ASM("object/spring", func_00354648);
-#ifdef SKIP_ASM
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* D_00491F00[16];
 extern char D_004A5988;
@@ -247,5 +239,4 @@ extern "C" cObjNode* func_00354648(cObjNode* self, void* param2)
     cBucketMan_add(&D_004A5988, self, param2);
     return self;
 }
-#endif
 
