@@ -1,0 +1,4 @@
+# Extra function starts that spimdisasm folds into the function before them.
+# Each is reached only through a function pointer, so without its own entry
+# the runtime has nothing to dispatch to. Format: address name
+0x004178A8 sprintf_nullsink
