@@ -638,7 +638,29 @@ extern "C" void func_0013C7A8(sHpCtl_13C7A8* self)
     vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), f <? 1.0f);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C878);
+extern "C" float func_0013C878(sHpCtl_13C7A8* self, float* p, float a, float b)
+{
+    float r;
+    if (a > 0.0f)
+    {
+        r = p[0] * (a * -0.033333f);
+        if (b > 0.0f)
+            r -= p[7] * b;
+    }
+    else if (-self->m4 < a)
+    {
+        r = -p[0] * a / self->m4;
+        r -= p[7] * b;
+    }
+    else
+    {
+        a = -self->m8 >? a;
+        r = p[0] * (1.0f - (a + self->m4 + (a + self->m4)) / (self->m8 - self->m4));
+        r -= p[7] * b;
+    }
+    *(float*)(self->mRider + 0x758) = -a / self->m8 >? 0.0f;
+    return r;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C948);
 
@@ -1889,7 +1911,40 @@ extern "C" sVec4HP func_00140958(char* self)
     return *(sVec4HP*)(self + 0x370);
 }
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140968);
+extern "C" float func_0031C228(float); // atan
+
+// atan2(y, x) built on a single-argument atan.
+static inline float Atan2_HP(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        return y >= 0.0f ? 1.5707964f : -1.5707964f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            r += 3.1415927f;
+        else
+            r -= 3.1415927f;
+    }
+    return r;
+}
+
+static inline sVec4HP GetVec1B0_HP(char* self)
+{
+    return *(sVec4HP*)(self + 0x1B0);
+}
+
+// Heading angle of the vector at +0x1B0 in its x/y plane.
+extern "C" float func_00140968(char* self)
+{
+    sVec4HP v = GetVec1B0_HP(self);
+    sVec4HP w = v;
+    return Atan2_HP(v.y, w.x);
+}
 
 extern "C" int func_00140A28(void* self)
 {
