@@ -1815,7 +1815,10 @@ extern "C" void func_00161A60(void* self, int* p)
     *(int**)((char*)self + 0x20) = p;
 }
 
-INCLUDE_ASM("camera/camera", func_00161AA0);
+extern "C" int func_00161AA0(void* self)
+{
+    return *(int*)(*(char**)((char*)self + 0x20) + 0x4);
+}
 
 //100%
 struct sCam162138;
@@ -3797,7 +3800,12 @@ extern "C" void func_00167EA0(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("camera/camera", func_00167ED0);
+struct sCamVec4 { float v[4]; } __attribute__((aligned(16)));
+
+extern "C" void func_00167ED0(char* self, sCamVec4* v)
+{
+    *(sCamVec4*)(self + 0x20) = *v;
+}
 
 extern "C" void func_00167EE0(void* self, float value)
 {
@@ -3809,7 +3817,10 @@ extern "C" void func_00167EE8(void* self, float value)
     *(float*)((char*)self + 0x34) = value;
 }
 
-INCLUDE_ASM("camera/camera", func_00167EF0);
+extern "C" sCamVec4 func_00167EF0(char* self)
+{
+    return *(sCamVec4*)(self + 0x20);
+}
 
 extern "C" float func_00167F00(void* self)
 {
@@ -4000,11 +4011,21 @@ extern "C" void* func_001680B0(void* self)
     return (char*)self + 0x80;
 }
 
-INCLUDE_ASM("camera/camera", func_001680B8);
+extern "C" void func_001680B8(char* self, sCamVec4* v)
+{
+    *(sCamVec4*)(self + 0x20) = *v;
+}
 
-INCLUDE_ASM("camera/camera", func_001680C8);
+extern "C" void func_001680C8(char* self, sCamVec4* v)
+{
+    *(sCamVec4*)(self + 0x30) = *v;
+}
 
-INCLUDE_ASM("camera/camera", func_001680D8);
+extern "C" void func_001680D8(char* self, sCamVec4* v)
+{
+    *(sCamVec4*)(self + 0x20) = v[0];
+    *(sCamVec4*)(self + 0x30) = v[1];
+}
 
 extern "C" void func_001680F0(void* self, float value)
 {
