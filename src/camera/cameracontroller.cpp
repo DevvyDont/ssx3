@@ -211,7 +211,11 @@ extern "C" void func_0015CF80(void* self, int msg)
     }
 }
 
-INCLUDE_ASM("camera/cameracontroller", func_0015CFD0);
+//100%
+extern "C" int func_0015CFD0(void* self)
+{
+    return *(int*)(**(char***)*(char**)((char*)self + 0x8) + 0xC);
+}
 
 //100%
 extern "C" void func_0015CFE8(void* self)

@@ -431,7 +431,12 @@ void* func_002C1688(void* self)
     return func_002C0B70(1, 0xffff);
 }
 
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16A8);
+//100%
+extern "C" void func_002C16A8(int* p, int a, int b)
+{
+    p[1] = a;
+    p[0] = b;
+}
 
 //100%
 extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d)
@@ -442,7 +447,12 @@ extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned shor
     p[3] = (d << 1) | (p[3] & 1);
 }
 
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1718);
+//100%
+extern "C" void func_002C1718(int* p)
+{
+    p[0] = 0;
+    p[1] = 0;
+}
 
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1728);
 

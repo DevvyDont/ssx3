@@ -58,7 +58,11 @@ struct sBEInterface {
 extern sBEInterface* D_005308A8[];
 extern int D_004A11F4;
 
-INCLUDE_ASM("be/be", func_0014DD48);
+//100%
+extern "C" int func_0014DD48()
+{
+    return D_004A11F0 != 0;
+}
 
 //100%
 class cBEInterfaceV_getInterface

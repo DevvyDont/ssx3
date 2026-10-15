@@ -995,7 +995,13 @@ extern "C" void func_002EF950(sTrail_EF950* self)
     rsPop_EF950(D_004A289C);
 }
 
-INCLUDE_ASM("visualfx/renderstateman", func_002EFF90);
+//100%
+extern void* D_004A3B78;
+
+extern "C" void* func_002EFF90()
+{
+    return D_004A3B78;
+}
 
 //100%
 struct sRSEntry_002EFF98 {
@@ -1190,7 +1196,13 @@ extern "C" void func_002F00A0(void* self, int i)
     ctx->a24C[i] = func_002EED50(i);
 }
 
-INCLUDE_ASM("visualfx/renderstateman", func_002F0360);
+//100%
+extern void* D_004A3B80;
+
+extern "C" void* func_002F0360()
+{
+    return D_004A3B80;
+}
 
 //100%
 extern void* D_00487D78[];

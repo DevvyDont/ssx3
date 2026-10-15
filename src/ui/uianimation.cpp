@@ -134,9 +134,17 @@ extern "C" void func_003973A8(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("ui/uianimation", func_00397440);
+//100%
+extern "C" int func_00397440(void* self)
+{
+    return *(short*)((char*)self + 0xA) >= *(unsigned short*)(*(char**)self + 0x2);
+}
 
-INCLUDE_ASM("ui/uianimation", func_00397458);
+//100%
+extern "C" short func_00397458(void* self)
+{
+    return *(short*)(*(char**)self + 0x2);
+}
 
 //100%
 extern "C" void func_00397468(void* self, int mode, unsigned short v)

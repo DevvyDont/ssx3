@@ -321,7 +321,11 @@ extern "C" void* func_0028B210(int i)
     return *(void**)(riders + (i << 2) + 4);
 }
 
-INCLUDE_ASM("sound/asyncsys", func_0028B230);
+//100%
+extern "C" void* func_0028B230()
+{
+    return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x10);
+}
 
 //100%
 int func_0028B240(void* self)

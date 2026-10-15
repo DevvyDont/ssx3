@@ -161,9 +161,18 @@ extern "C" void func_00275B08(sDmTable275B08* self)
     }
 }
 
-INCLUDE_ASM("scripter/datamanager", func_00275B78);
+//100%
+extern "C" int func_00275B78(void* self, void* p)
+{
+    return *(int*)((char*)p + 0x8);
+}
 
-INCLUDE_ASM("scripter/datamanager", func_00275B80);
+//100%
+extern "C" void func_00275B80(void* self, int* src, int* a, int* b)
+{
+    *a = src[0];
+    *b = src[1];
+}
 
 //100%
 void* func_00275CF8(void* self);

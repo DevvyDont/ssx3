@@ -275,7 +275,12 @@ extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
     }
 }
 
-INCLUDE_ASM("world/worldview", func_003AA2D8);
+//100%
+extern "C" void* func_003AA2D8(void* self)
+{
+    *(unsigned int*)((char*)self + 0x8) = 0xFFFFFFFF;
+    return self;
+}
 
 //100%
 extern "C" void func_003E6448(void* dst, int c, int n);
