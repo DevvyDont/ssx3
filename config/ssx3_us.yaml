@@ -21,6 +21,10 @@ options:
   hasm_in_src_path: True
 
   rodata_string_guesser_level: 2
+  # Only ASCII strings: a string decoded from another encoding (EUC-JP by
+  # default) is written back as UTF-8, which changes its bytes
+  string_encoding: ASCII
+  data_string_encoding: ASCII
 
   find_file_boundaries: False
   disasm_unknown: True
@@ -36,6 +40,9 @@ options:
   undefined_funcs_auto_path: config/undefined_funcs_auto.txt
   create_undefined_syms_auto: True
   undefined_syms_auto_path: config/undefined_syms_auto.txt
+
+  # Symbols outside every segment (.bss) get padded names, like the asm uses
+  symbol_name_format_no_rom: $VRAM
 
   symbol_addrs_path: [ config/symbol_addrs.txt, config/lib_symbol_addrs.txt, config/gap_symbol_addrs.txt ]
 
@@ -55,7 +62,7 @@ segments:
     type: code
     start: 0x1000
     vram: 0x100000
-    bss_size: 0x099EDB # I think?
+    # bss_size removed for local link test
     align: 4
     subsegments:
       - [0x1000, asm, sce/crt0]

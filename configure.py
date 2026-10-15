@@ -27,12 +27,10 @@ ELF_PATH = f"{OUTDIR}/{BASENAME}"
 MAP_PATH = f"{OUTDIR}/{BASENAME}.map"
 PRE_ELF_PATH = f"{OUTDIR}/{BASENAME}.elf"
 
-COMMON_INCLUDES = "-Iinclude -isystem include/sdk/ee -isystem include/gcc"
-if sys.platform == "darwin":
-    # macOS has no /usr/include for the compiler to fall back on (under Linux
-    # + Wine it picks up the host's glibc headers there, e.g. <stdint.h>), so
-    # supply the few headers the sources need from tools/macos/include.
-    COMMON_INCLUDES += " -isystem tools/macos/include"
+# tools/macos/include supplies the few standard headers the sources need
+# (<stdint.h>). Without it the compiler falls back to the host's /usr/include:
+# missing on macOS, and glibc's headers on Linux, which it can't parse.
+COMMON_INCLUDES = "-Iinclude -isystem include/sdk/ee -isystem include/gcc -isystem tools/macos/include"
 
 
 # The compiler is SN V1.36 with its dormant `vec_mark` insn switched on (see tools/patch_vecmark.py):
@@ -64,7 +62,22 @@ for _u, _d in list(UNIT_CC.items()):
     if not os.path.isfile(f"{_d}/bin/ee-gcc2953.exe"):
         print(f"warning: {_d} missing; {_u} builds with the default compiler")
         del UNIT_CC[_u]
-COMMON_CXXFLAGS = ""
+# The game's objects have no exception frame info: without -fno-exceptions every C++ object gets
+# 0x18 bytes of .data the original doesn't have
+COMMON_CXXFLAGS = "-fno-exceptions"
+
+# The compiler driver runs the SN assembler build from May 2001 (ee/bin/as.exe), which pads short loops
+# with nops (an R5900 erratum workaround). The game was built with it, but it also pads some loops in
+# INCLUDE_ASM code, which already has the original padding, so those units come out too long. Their
+# source is compiled to assembly and assembled with the Aug 2000 build (bin/ee-as.exe), which never
+# pads. -mips4 stops it adding a hazard nop after mtc1. C in these units gets no short-loop padding,
+# so a decompiled function with a short loop won't match in them. Only affects the linked build.
+SN_AS_2000 = f"{CC_DIR}/bin/ee-as.exe -O2 -mabi=eabi -mips4 -Iasm/nonmatchings"
+SN_AS_2000_UNITS = {
+    "bx/cubicspline",
+    "ealib/seg_2B4578",
+    "replay/replaycache",
+}
 
 # splat's generated INCLUDE_ASM macro emits `.include "FOLDER/NAME.s"` relative
 # to the nonmatchings dir (no longer hardcodes "asm/nonmatchings/"), so the
@@ -83,6 +96,7 @@ WINE = "wine"
 if sys.platform == "linux" or sys.platform == "linux2":
     COMPILE_C_RULE = f"{WINE} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WINE} {COMPILE_CXX_RULE}"
+    SN_AS_2000 = f"{WINE} {SN_AS_2000}"
 elif sys.platform == "darwin":
     # macOS: run the Windows compiler with wibo (decompals/wibo, the
     # `wibo-macos` release asset; runs under Rosetta 2 on Apple Silicon)
@@ -91,6 +105,7 @@ elif sys.platform == "darwin":
     WIBO = os.environ.get("WIBO") or (str(_wibo_local) if _wibo_local.exists() else "wibo")
     COMPILE_C_RULE = f"{WIBO} {COMPILE_C_RULE}"
     COMPILE_CXX_RULE = f"{WIBO} {COMPILE_CXX_RULE}"
+    SN_AS_2000 = f"{WIBO} {SN_AS_2000}"
 
 def clean():
     files_to_clean = [
@@ -315,6 +330,18 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
     )
 
     ninja.rule(
+        "cc_as2000",
+        description="cc $in (2000 assembler)",
+        command=f"{COMPILE_C_RULE.replace(' -c ', ' -S ')} $cflags -o $out.s && {SN_AS_2000} $out.s -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
+    ninja.rule(
+        "cpp_as2000",
+        description="cpp $in (2000 assembler)",
+        command=f"{COMPILE_CXX_RULE.replace(' -c ', ' -S ')} $cflags -o $out.s && {SN_AS_2000} $out.s -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
+    ninja.rule(
         "ld",
         description="link $out",
         command=f"{cross}ld {ld_args}",
@@ -368,6 +395,14 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, "as", out_dir="obj/current", extra_flags="-DSKIP_ASM")
             else:
                 build(entry.object_path, entry.src_paths, "as")
+        # Before CommonSegC: CommonSegCpp is a subclass of it
+        elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
+            if dual_objects:
+                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
+                flags, inc = current_c_flags(entry)
+                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags=flags, implicit=inc)
+            else:
+                build(entry.object_path, entry.src_paths, "cpp_as2000" if seg.name in SN_AS_2000_UNITS else "cpp")
         elif isinstance(seg, splat.segtypes.common.c.CommonSegC):
             unit_flags = UNIT_CFLAGS.get(seg.name, "")
             task, tvars = ("cc_unit", {"ccdir": UNIT_CC[seg.name]}) if seg.name in UNIT_CC else ("cc", None)
@@ -378,14 +413,10 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, task, out_dir="obj/current",
                       extra_flags=(flags + " " + unit_flags).strip(), implicit=inc, variables=tvars)
             else:
+                if seg.name in SN_AS_2000_UNITS:
+                    assert seg.name not in UNIT_CC
+                    task = "cc_as2000"
                 build(entry.object_path, entry.src_paths, task, extra_flags=unit_flags or None, variables=tvars)
-        elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
-            if dual_objects:
-                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
-                flags, inc = current_c_flags(entry)
-                build(entry.object_path, entry.src_paths, "cpp", out_dir="obj/current", extra_flags=flags, implicit=inc)
-            else:
-                build(entry.object_path, entry.src_paths, "cpp")
         elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
             if dual_objects:
                 build(entry.object_path, entry.src_paths, "as", out_dir="obj/target", collect_objdiff=True, orig_entry=entry)
@@ -506,9 +537,7 @@ def main():
 
     do_clean = (args.clean or args.only_clean) or False
 
-    # FIXME: Set skip_checksum to False once builds are able
-    # to match; it has been temporairly enabled here.
-    do_skip_checksum = args.skip_checksum or True
+    do_skip_checksum = args.skip_checksum
     do_objects = args.objects or False
 
     if do_clean:
@@ -516,7 +545,9 @@ def main():
         if args.only_clean:
             return
 
-    split.main([YAML_FILE], modes="all", verbose=False)
+    # No cache: segments loaded from the cache aren't scanned, so the symbols
+    # they reference would be left out of undefined_syms_auto.txt
+    split.main([YAML_FILE], modes="all", verbose=False, use_cache=False)
 
     linker_entries = split.linker_writer.entries
 

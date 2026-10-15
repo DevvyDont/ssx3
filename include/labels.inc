@@ -30,8 +30,9 @@
 .endm
 
 
-# A label referenced by a jumptable.
-.macro jlabel label, visibility=local
+# A label referenced by a jumptable. Global, since the jump table can sit in
+# another object (the .rodata data segment).
+.macro jlabel label, visibility=global
     .\visibility \label
     \label:
 .endm
