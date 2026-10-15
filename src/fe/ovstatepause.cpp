@@ -757,7 +757,60 @@ extern "C" void func_001FD150(void* self)
     }
 }
 
-INCLUDE_ASM("fe/ovstatepause", func_001FD190);
+//100%
+extern void* D_004A28A8;
+extern char D_0046FED0[];
+extern char D_0046FEE0[];
+extern char D_0046FEF0[];
+extern char D_0046FF08[];
+extern char D_0046FF18[];
+extern char D_0046FF28[];
+int GetHashValue32(char* str);
+
+typedef int (*tHashFn_1FD190)(void*, int);
+
+extern "C" int func_001FD190(int which)
+{
+    switch (which) {
+    case 6: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        return ((tHashFn_1FD190)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046FED0));
+    }
+    case 7: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        return ((tHashFn_1FD190)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046FEE0));
+    }
+    case 8: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        return ((tHashFn_1FD190)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046FEF0));
+    }
+    case 9: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        return ((tHashFn_1FD190)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046FF08));
+    }
+    case 10: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        return ((tHashFn_1FD190)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046FF18));
+    }
+    case 11: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* vt = *(char**)(o + 4);
+        o += *(short*)(vt + 0x20);
+        return ((tHashFn_1FD190)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046FF28));
+    }
+    }
+    return 0;
+}
 
 //100%
 int GetHashValue32(char* str);
