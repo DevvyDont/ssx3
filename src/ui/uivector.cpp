@@ -924,7 +924,25 @@ extern "C" void* func_003A51D0(void* self, func_003A51D0_cFunctor* fn)
     return func_00397A68((char*)self + 0x74, fn);
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5230);
+extern void* D_00494928[];
+extern "C" void* func_003A5338(void* self);
+
+extern "C" void* func_003A5230(void* self, int a, int b)
+{
+    func_0039FB30(self, a, b);
+    *(void***)((char*)self + 0x8) = D_004949E8;
+    func_003977E8((char*)self + 0x74);
+    *(void***)((char*)self + 0x8) = D_00494928;
+    func_003A5338((char*)self + 0x90);
+    *(unsigned char*)((char*)self + 0xA4) = 0xFF;
+    *(char*)((char*)self + 0x95) = 0;
+    *(char*)((char*)self + 0x96) = 0;
+    *(char*)((char*)self + 0x97) = 0;
+    *(char*)((char*)self + 0x98) = 0;
+    *(int*)((char*)self + 0x9C) = 0;
+    *(int*)((char*)self + 0xA0) = 0;
+    return self;
+}
 
 INCLUDE_ASM("ui/uivector", func_003A52A0);
 
@@ -1092,7 +1110,24 @@ extern "C" void func_003A5588(void* self, void* obj)
     *(void**)((char*)self + 0x7C) = obj;
 }
 
-INCLUDE_ASM("ui/uivector", func_003A55D8);
+extern void* D_00494798[];
+extern "C" void* func_003A65A0(void* self);
+extern "C" void* func_003A65B8(void* self);
+
+extern "C" void* func_003A55D8(void* self)
+{
+    func_0039FB30(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00494798;
+    func_003A65A0((char*)self + 0x74);
+    char* p = (char*)self + 0x98;
+    int i = 31;
+    do {
+        func_003A65B8(p);
+        i--;
+        p += 0x14;
+    } while (i != -1);
+    return self;
+}
 
 //100%
 extern void* D_00494798[];
@@ -1469,9 +1504,40 @@ extern "C" void func_003A5B48(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("ui/uivector", func_003A5B98);
+extern void* D_00494670[];
+extern "C" void* func_001DD580(void* p);
 
-INCLUDE_ASM("ui/uivector", func_003A5C08);
+extern "C" void* func_003A5B98(void* self)
+{
+    *(void**)((char*)self + 0x4) = self;
+    *(void**)((char*)self + 0x0) = self;
+    *(void***)((char*)self + 0x8) = D_00494670;
+    func_001DD580((char*)self + 0x14);
+    func_003977E8((char*)self + 0x18);
+    func_0039FB30((char*)self + 0x40, 0, 0);
+    *(void***)((char*)self + 0x48) = D_004949E8;
+    func_003977E8((char*)self + 0xB4);
+    return self;
+}
+
+extern "C" void* func_003A5C08(void* self, int arg)
+{
+    *(void**)((char*)self + 0x4) = self;
+    *(void**)((char*)self + 0x0) = self;
+    *(int*)((char*)self + 0xC) = 0;
+    *(int*)((char*)self + 0x10) = 0;
+    *(void***)((char*)self + 0x8) = D_00494670;
+    func_001DD580((char*)self + 0x14);
+    func_003977E8((char*)self + 0x18);
+    *(int*)((char*)self + 0x34) = 0;
+    *(int*)((char*)self + 0x38) = 0;
+    *(int*)((char*)self + 0x3C) = 0;
+    func_0039FB30((char*)self + 0x40, 0, 0);
+    *(void***)((char*)self + 0x48) = D_004949E8;
+    func_003977E8((char*)self + 0xB4);
+    *(int*)((char*)self + 0xD0) = arg;
+    return self;
+}
 
 extern "C" int func_003A5C98(void* self)
 {
