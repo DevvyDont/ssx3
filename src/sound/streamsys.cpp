@@ -315,7 +315,18 @@ extern "C" int func_002AA320(void* self, int a, int buf, int off)
 
 extern "C" void* func_003B78F8(int);
 
-INCLUDE_ASM("sound/streamsys", func_002AA398);
+extern "C" int func_002AA398(void* self, int a, int buf, int off)
+{
+    int r;
+    if (*(void**)((char*)self + 0x74) == 0) {
+        r = 0;
+    } else {
+        int n;
+        func_003E2CE0(*(void**)((char*)self + 0x74), 0, buf, &n, 0);
+        r = func_003B78D8(*(int*)((char*)self + 0x8), a, (int)((char*)self + 0x14), off + n);
+    }
+    return r;
+}
 
 //100%
 void* func_002AA408(void* self)
@@ -466,9 +477,28 @@ extern "C" void func_002AA648(void* p, int flags)
     }
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AA7F0);
+extern const char D_00483228[];
+// PORT: cMemMan_alloc is the game's operator new(size, tag, flags, d); the stream
+// instance constructors are bound by asm label (func_002A9C00 is a second overload).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
-INCLUDE_ASM("sound/streamsys", func_002AA870);
+struct cStreamInstanceNew_AA7F0 {
+    char data[0x84];
+    cStreamInstanceNew_AA7F0(void* player, int heap, int extra) __asm__("cStreamInstance_cStreamInstance");
+    cStreamInstanceNew_AA7F0(void* player, int a, int b, int c, int d) __asm__("func_002A9C00");
+};
+
+// Create the stream instance for slot i.
+extern "C" void func_002AA7F0(void* sys, int i, int heap, int extra)
+{
+    sStreamSysA490* self = (sStreamSysA490*)sys;
+    self->items[i] = new (D_00483228, heap, 0) cStreamInstanceNew_AA7F0(self->vbase + 0x1D8, heap, extra);
+}
+
+extern "C" void func_002AA870(sStreamSysA490* self, int i, int heap, int a3, int a4, int a5, int a6)
+{
+    self->items[i] = new (D_00483228, heap, 0) cStreamInstanceNew_AA7F0(self->vbase + 0x1D8, a3, a4, a5, a6);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -575,9 +605,27 @@ extern "C" void func_002AAC28(void* self)
     }
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AAC98);
+extern "C" void func_002AA2B0(void* self);
 
-INCLUDE_ASM("sound/streamsys", func_002AAD08);
+extern "C" void func_002AAC98(sStreamSysA490* self)
+{
+    for (int i = 0; i < self->count; i++) {
+        if (self->items[i] != 0) {
+            func_002AA2B0(self->items[i]);
+        }
+    }
+}
+
+extern "C" void func_002AA2E8(void* self);
+
+extern "C" void func_002AAD08(sStreamSysA490* self)
+{
+    for (int i = 0; i < self->count; i++) {
+        if (self->items[i] != 0) {
+            func_002AA2E8(self->items[i]);
+        }
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_002AA320(void* e, int a, int b, int c);
