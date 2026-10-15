@@ -957,12 +957,29 @@ extern "C" void func_00294678(void* self, char* rider)
     }
 }
 
-INCLUDE_ASM("sound/soundsys", func_002947B0);
-
+// Six rider slots at 0x59E8.
 struct sSnd4860 {
     char pad[0x59E8];
     int vals[6];
 };
+
+extern "C" void func_00294678(void* self, char* rider);
+
+// Refresh the six rider slots at 0x59E8, clearing those whose rider is gone.
+extern "C" void func_002947B0(void* self)
+{
+    sSnd4860* s = (sSnd4860*)self;
+    for (int i = 0; i < 6; i++) {
+        if (s->vals[i] != 0 && i < *(int*)((char*)func_0028B1D8() + 0x78)) {
+            char* rider = *(char**)((char*)func_0028B1D8() + (i << 2) + 0x28);
+            if (rider != 0) {
+                func_00294678(self, rider);
+                continue;
+            }
+        }
+        s->vals[i] = 0;
+    }
+}
 
 extern "C" int func_00294860(void* self, int i)
 {
@@ -7582,7 +7599,16 @@ extern "C" int func_002A7678(void* self, int a1)
     return r;
 }
 
-INCLUDE_ASM("sound/soundsys", func_002A7718);
+extern "C" void func_002A7718(void* self)
+{
+    for (int i = 0; i < *(int*)((char*)self + 0x14); i++) {
+        func_002A6430(*(char**)((char*)self + 0x18) + i * 0x190, 0.0f);
+    }
+    char* m = *(char**)self;
+    sSsVt13D8* vt = *(sSsVt13D8**)(m + 0xAB0);
+    char* obj = m + 0x1D8;
+    vt[3].fn(obj + vt[3].delta, ((sSndKey8_10E0*)D_004A3700_5D08)[0].v);
+}
 
 extern "C" void func_002A68B0(void* p);
 
