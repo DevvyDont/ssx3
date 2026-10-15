@@ -410,7 +410,21 @@ extern "C" void func_002910E0(void* vself)
     *(int*)((char*)self + 0x5834) = 1;
 }
 
-INCLUDE_ASM("sound/soundsys", func_002913D8);
+struct sSsVt13D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, long);
+};
+
+extern "C" void func_002913D8(void* self)
+{
+    char* m = **(char***)((char*)self + 0x118);
+    sSsVt13D8* vt = *(sSsVt13D8**)(m + 0xAB0);
+    char* obj = m + 0x1D8;
+    vt[3].fn(obj + vt[3].delta, D_004A3680[0].v);
+    *(int*)((char*)self + 0x5830) = 0;
+    *(int*)((char*)self + 0x5834) = 0;
+}
 
 extern "C" void func_00291430()
 {
@@ -856,11 +870,26 @@ INCLUDE_ASM("sound/soundsys", func_00293740);
 
 INCLUDE_ASM("sound/soundsys", func_00293948);
 
-INCLUDE_ASM("sound/soundsys", func_00293B50);
+extern "C" void func_00293538(void* self);
 
-INCLUDE_ASM("sound/soundsys", func_00293B70);
+extern "C" void func_00293B50(void* self)
+{
+    func_00293538(self);
+}
 
-INCLUDE_ASM("sound/soundsys", func_00293B90);
+extern "C" void func_00293740(void* self);
+
+extern "C" void func_00293B70(void* self)
+{
+    func_00293740(self);
+}
+
+extern "C" void func_00293948(void* self);
+
+extern "C" void func_00293B90(void* self)
+{
+    func_00293948(self);
+}
 
 INCLUDE_ASM("sound/soundsys", func_00293BB0);
 
@@ -914,7 +943,18 @@ extern "C" void func_00294678(void* self, char* rider)
 
 INCLUDE_ASM("sound/soundsys", func_002947B0);
 
-INCLUDE_ASM("sound/soundsys", func_00294860);
+struct sSnd4860 {
+    char pad[0x59E8];
+    int vals[6];
+};
+
+extern "C" int func_00294860(void* self, int i)
+{
+    if (i < 6) {
+        return ((sSnd4860*)self)->vals[i];
+    }
+    return 0;
+}
 
 //100%
 extern "C" void func_00294880(void* self, int i, int v)
@@ -6374,7 +6414,13 @@ extern "C" int func_002A4770(void* self)
     return 0;
 }
 
-INCLUDE_ASM("sound/soundsys", func_002A49E8);
+extern sSndKey8 D_004A36F0[];
+
+extern "C" void func_002A49E8(void* self)
+{
+    *(int*)((char*)self + 0x5818) = 1;
+    func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 30000, D_004A36F0[0].v, 0, 0, 0, 0, 0);
+}
 
 //100%
 extern "C" int func_002A10C0(void* self, int id);
@@ -6387,7 +6433,11 @@ extern "C" int func_002A4A38(void* self)
     return 0;
 }
 
-INCLUDE_ASM("sound/soundsys", func_002A4A68);
+extern "C" int func_002A4A68(void* self)
+{
+    *(int*)((char*)self + 0x5818) = 0;
+    return 1;
+}
 
 INCLUDE_ASM("sound/soundsys", func_002A4A78);
 
@@ -7500,7 +7550,12 @@ extern "C" int func_002A7678(void* self, int a1)
 
 INCLUDE_ASM("sound/soundsys", func_002A7718);
 
-INCLUDE_ASM("sound/soundsys", func_002A77A8);
+extern "C" void func_002A68B0(void* p);
+
+extern "C" void func_002A77A8(void* self, void* obj)
+{
+    func_002A68B0(*(void**)((char*)obj + 0x80));
+}
 
 //100%
 struct s2A77C8Item {
