@@ -632,7 +632,12 @@ extern "C" void func_0030A610(void* self, int id)
     *(int*)((char*)self + 0x290) = 0;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030A660);
+extern "C" int func_003A6B78(void* world, int id, int flag);
+
+extern "C" int func_0030A660(void* self, int id)
+{
+    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 5) != -1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_003A6B78(void* world, int id, int flag);
@@ -987,7 +992,11 @@ extern "C" void* func_0030B320(void* self, int id)
     return 0;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030B350);
+int GetHashValue32(char*);
+extern "C" void* func_0030B350(void* self, char* name)
+{
+    return func_0030B320(self, GetHashValue32(name));
+}
 
 //100%
 class func_0030B388_cObj {
@@ -1015,7 +1024,10 @@ extern "C" func_0030B388_cObj* func_0030B388(void* self, unsigned int id)
     return result;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030B3F0);
+extern "C" func_0030B388_cObj* func_0030B3F0(void* self, char* name)
+{
+    return func_0030B388(self, GetHashValue32(name));
+}
 
 //100%
 extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node)
@@ -1782,11 +1794,18 @@ extern "C" cWScriptQueueEntry* func_0030C870(cWScriptQueue* self)
     return &self->entries[self->head];
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030C898);
+extern "C" void* func_0030C898(void* p, ...)
+{
+    return p;
+}
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C8D8);
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D238);
+extern "C" void func_0030D238(void* self, int a, int b)
+{
+    *(int*)((char*)self + 0x0) = a;
+    *(int*)((char*)self + 0x4) = b;
+}
 
 extern "C" int func_0030D248(int a0)
 {
@@ -1935,18 +1954,30 @@ extern "C" int func_0030D328(void* self)
     return *(int*)((char*)self + 0x2A4);
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D330);
+extern "C" int func_0030D330(void* self)
+{
+    return *(int*)((char*)self + 0x1C4) != *(int*)((char*)self + 0x1C8);
+}
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D348);
+extern "C" cWScriptQueueEntry* func_0030D348(void* self)
+{
+    return func_0030C820((cWScriptQueue*)((char*)self + 0x1C4));
+}
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D368);
+extern "C" cWScriptQueueEntry* func_0030D368(void* self)
+{
+    return func_0030C870((cWScriptQueue*)((char*)self + 0x1C4));
+}
 
 extern "C" void func_0030D388(void* self, int value)
 {
     *(int*)((char*)self + 0x0) = value;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D390);
+extern "C" int func_0030D390(void* self, unsigned int i)
+{
+    return i < 10;
+}
 
 extern "C" void func_0030D398(void* self)
 {
@@ -1968,7 +1999,10 @@ extern "C" int func_0030D3B0(void* self)
     return *(int*)((char*)self + 0x24);
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D3B8);
+extern "C" void func_0030D3B8(void* self, int value)
+{
+    *(int*)(*(char**)((char*)self + 0x10) + 0x29C) = value;
+}
 
 extern "C" int func_0030D3C8(void* self)
 {
@@ -1986,9 +2020,15 @@ int func_0030D3D8(void* self)
     return 0;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D3E0);
+extern "C" void func_0030D3E0(void* self, void* a, int b)
+{
+    func_0030AC98(*(void**)((char*)self + 0x10), a, b);
+}
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D400);
+extern "C" void func_0030D400(void* self, void* a, int b)
+{
+    func_0030ADA8(*(void**)((char*)self + 0x10), a, b);
+}
 
 //100%
 extern void* D_00489AE0[];
@@ -2003,7 +2043,10 @@ extern "C" void func_0030D420(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D450);
+extern "C" int func_0030D450(void* self)
+{
+    return *(int*)(*(char**)((char*)self + 0x3C) + 0x1C);
+}
 
 extern "C" int func_0030D460(void* self)
 {
@@ -2028,7 +2071,10 @@ int func_0030D480(void* self)
 
 extern "C" void* func_0030C8D8(int, int);
 
-INCLUDE_ASM("wscript/wscriptman", func_0030D488);
+extern "C" int func_0030D488(void* self)
+{
+    return *(int*)((char*)self + 0x60) == 2;
+}
 
 //99.38%
 void* func_0030D498(void* self)
