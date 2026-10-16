@@ -977,7 +977,100 @@ void* func_00279EF8(void* self)
     return func_002836D8((char*)self + 0xa38);
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279F18);
+//100%
+extern "C" int* func_0027A668_9F18(void* self, int idx) __asm__("func_0027A668__FPv");
+
+struct sRider_9F18 {
+    char pad[0x18];
+    void* rider; // 0x18
+};
+
+struct sRiderMgr_9F18 {
+    char pad0[0x28];
+    void* riders[6];           // 0x28
+    sRider_9F18* groupA[2];    // 0x40
+    sRider_9F18* groupB[5];    // 0x48
+    sRider_9F18* groupC[5];    // 0x5C
+    char pad70[0x8];
+    int nRiders;               // 0x78
+    int nA;                    // 0x7C
+    int nB;                    // 0x80
+    int nC;                    // 0x84
+};
+
+static inline sRiderMgr_9F18* RiderMgr_9F18()
+{
+    return *(sRiderMgr_9F18**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+}
+
+static inline void* RiderOf_9F18(sRider_9F18* r)
+{
+    return r ? r->rider : 0;
+}
+
+extern "C" void* func_00279F18(void* self, int i, int a2)
+{
+    switch (i) {
+    case 0: {
+        int idx = *func_0027A668_9F18(self, a2);
+        if (idx >= 0) {
+            return RiderMgr_9F18()->riders[idx];
+        }
+        break;
+    }
+    case 1:
+        i = func_0027A668_9F18(self, a2)[1];
+        if (i >= 0) {
+            return RiderMgr_9F18()->riders[i];
+        }
+        break;
+    case 2:
+        i = func_0027A668_9F18(self, a2)[2];
+        if (i >= 0) {
+            return RiderMgr_9F18()->riders[i];
+        }
+        break;
+    case 3: case 4: {
+        sRiderMgr_9F18* mgr = RiderMgr_9F18();
+        i -= 3;
+        if (i < mgr->nA) {
+            return RiderOf_9F18(mgr->groupA[i]);
+        }
+        break;
+    }
+    case 5: case 6: case 7: case 8: case 9: {
+        sRiderMgr_9F18* mgr = RiderMgr_9F18();
+        i -= 5;
+        if (i < mgr->nB + mgr->nC) {
+            if (i < mgr->nB) {
+                return RiderOf_9F18(mgr->groupB[i]);
+            }
+            return RiderOf_9F18(mgr->groupC[i - mgr->nB]);
+        }
+        break;
+    }
+    case 10: case 11: case 12: case 13: case 14: {
+        sRiderMgr_9F18* mgr = RiderMgr_9F18();
+        i -= 10;
+        if (i < mgr->nC + mgr->nB) {
+            if (i < mgr->nC) {
+                return RiderOf_9F18(mgr->groupC[i]);
+            }
+            return RiderOf_9F18(mgr->groupB[i - mgr->nC]);
+        }
+        break;
+    }
+    case 15: case 16: case 17: case 18: case 19: case 20: {
+        sRiderMgr_9F18* mgr = RiderMgr_9F18();
+        i -= 15;
+        if (i < mgr->nRiders) {
+            return mgr->riders[i];
+        }
+        break;
+    }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
 
