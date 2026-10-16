@@ -131,7 +131,51 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount)
 
 INCLUDE_ASM("be/beintecon", func_00150B88);
 
-INCLUDE_ASM("be/beintecon", func_00150C20);
+//100%
+struct sProf0C20 { char s[0xF88]; };
+extern "C" void* func_00147F78(void);
+typedef void (*fn0C20)(void*);
+int func_00150E50(void* self, int a1);
+
+extern "C" int func_00150C20(void* self, int profile, int c, unsigned int kind)
+{
+    char* p;
+    int money;
+    int cost;
+    if (profile >= 2) return 0;
+    p = 0;
+    {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* q = (char*)D_004A6CA8 + off;
+        money = *(int*)(q + 0xAC4);
+    }
+    switch (kind) {
+    case 0: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBDF]; break;
+    case 1: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBE0]; break;
+    case 2: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBE1]; break;
+    case 3: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBE2]; break;
+    case 4: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBE3]; break;
+    case 5: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBE4]; break;
+    case 6: p = &((sProf0C20 (*)[10])D_004A6CA8)[profile][c].s[0xBE5]; break;
+    }
+    cost = func_00150E50(self, *p / 5 - 1);
+    if (money < cost) return 0;
+    if (*p != 0x37) {
+        {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* q = (char*)D_004A6CA8 + off;
+            *(int*)(q + 0xAC4) -= cost;
+        }
+        (*p)++;
+        {
+            char* o = (char*)func_00147F78();
+            char* vt = *(char**)(o + 0xC);
+            ((fn0C20)*(void**)(vt + 0x14))(o + *(short*)(vt + 0x10));
+        }
+        return 1;
+    }
+    return 0;
+}
 
 extern void* D_00440550[];
 
