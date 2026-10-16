@@ -1132,7 +1132,83 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
     return 1;
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00257F98);
+//100%
+extern "C" int func_00257BD8_7F98(void* self, int ch, void* dst, int n) __asm__("func_00257BD8");
+extern "C" void func_002588A8_7F98(void* self) __asm__("func_002588A8");
+extern "C" void func_00258870(void*, int, int);
+extern void* D_004A28A8;
+
+struct sMsg_7F98 {
+    unsigned char type;
+    char pad[3];
+    int a;
+    int b;
+};
+
+struct sConn_7F98 {
+    char pad[0x500];
+    int hist[60]; // 0x500
+};
+
+extern "C" void func_00257F98(char* self)
+{
+    sMsg_7F98 msg;
+    while (func_00257BD8_7F98(self, 3, &msg, 0xC)) {
+        switch (msg.type) {
+        case 0:
+            if (*(int*)(self + 0x7C) == 0) {
+                func_00258870(self, 0xE4C, 1);
+            } else {
+                *(int*)(self + 0x3F8) = 1;
+            }
+            *(int*)(self + 0x78) = 1;
+            *(int*)(self + 0x5C) = 0;
+            (*(int*)(self + 0x50))++;
+            *(int*)(self + 0x3FC) = 0;
+            break;
+        case 1:
+            *(int*)(self + 0x5C) = 0;
+            *(int*)(self + 0x78) = 0;
+            if (*(int*)(self + 0x74) != 0 && *(int*)(self + 0x64) > 0) {
+                *(int*)(self + 0x64) = 0x4B0;
+            }
+            *(int*)(self + 0x3F8) = 0;
+            *(int*)(self + 0x60) = 0;
+            *(int*)(self + 0x84) = 0;
+            if (*(int*)(self + 0x7C) == 0) {
+                func_00258870(self, 0x708, 0);
+            } else {
+                func_002588A8_7F98(self);
+            }
+            break;
+        case 3:
+            *(int*)(self + 0x3F4) = 1;
+            break;
+        case 5:
+            *(int*)(self + 0x88) = 1;
+            if (*(int*)(self + 0x3C) == 0) {
+                *(int*)(self + 0x3C) = *(int*)((char*)D_004A28A8 + 0x18) / *(int*)((char*)D_004A28A8 + 0x10);
+            }
+            *(int*)(self + 0x78) = 0;
+            *(int*)self = 0;
+            *(int*)(self + 0x14) = 1;
+            if (*(int*)(self + 0x4) == 0 && *(int*)(self + 0x70) < 15) {
+                *(int*)(self + 0x8C) = 1;
+            }
+            break;
+        case 2:
+            (*(int*)(self + 0x58))++;
+            break;
+        case 4: {
+            int t = msg.a;
+            *(int*)(self + 0x404) = 1;
+            *(int*)(self + 0x40C) = t;
+            ((sConn_7F98*)self)->hist[(t / 60) % 60] = msg.b;
+            break;
+        }
+        }
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
