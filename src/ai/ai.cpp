@@ -2195,7 +2195,70 @@ extern "C" void func_0012CA30(sAiObj12CA30* self)
     func_00309990(D_004A3DD8);
 }
 
-INCLUDE_ASM("ai/ai", func_0012CB68);
+//100%
+extern "C" int func_00116120_CB68(void* rider, int a, int b) __asm__("func_00116120");
+extern "C" void func_0029E970(void* snd, void* rider);
+extern "C" void func_0029E590(void* snd, void* rider, float t);
+extern "C" void func_0012CD20_CB68(void* self) __asm__("func_0012CD20");
+extern "C" void func_0012D4E8_CB68(void* self) __asm__("func_0012D4E8");
+extern "C" void func_0012D160_CB68(void* self) __asm__("func_0012D160");
+extern "C" void func_0012D848_CB68(void* self) __asm__("func_0012D848");
+extern "C" void func_0012D9D8_CB68(void* self) __asm__("func_0012D9D8");
+
+struct sAiObj_CB68 {
+    int state;          // 0x0
+    char pad4[0x6C];
+    float charge;       // 0x70
+    char pad74[0xC];
+    char* rider;        // 0x80
+};
+
+extern "C" void func_0012CB68(sAiObj_CB68* self, int* input)
+{
+    func_00114130(self->rider, 0, 0);
+    if (func_00116120_CB68(self->rider, (*input >> 12) & 1, 0)) {
+        return;
+    }
+    int active = self->state != 3;
+    if (active) {
+        float t = self->charge;
+        float r;
+        if (t > 0.00416986271739006f) {
+            r = t - 0.00416986271739006f;
+        } else {
+            r = 0.0f;
+            if (t < -0.00416986271739006f) {
+                r = t + 0.00416986271739006f;
+            }
+        }
+        self->charge = r;
+        if (*input & 0x2000) {
+            float rate = 17.00261688232422f;
+            int mode = *(int*)(self->rider + 0xB20);
+            switch (mode) {
+            case 0:
+                rate = 8.001495361328125f;
+                break;
+            case 2:
+                rate = 34.00276565551758f;
+                break;
+            }
+            self->charge += rate * 0.01666666753590107f;
+            if (self->charge >= 1.0f) {
+                func_0029E970(func_0028B180(), self->rider);
+            } else {
+                func_0029E590(func_0028B180(), self->rider, self->charge);
+            }
+        }
+    }
+    switch (self->state) {
+    case 0: func_0012CD20_CB68(self); break;
+    case 1: func_0012D4E8_CB68(self); break;
+    case 2: func_0012D160_CB68(self); break;
+    case 3: func_0012D848_CB68(self); break;
+    case 4: func_0012D9D8_CB68(self); break;
+    }
+}
 
 //100%
 extern "C" int func_00312AE8(void* self, int i);

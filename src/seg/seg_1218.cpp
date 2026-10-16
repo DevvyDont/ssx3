@@ -1047,7 +1047,64 @@ extern "C" void func_00103578(sObj_3578* self, cStream_3578* s)
 
 INCLUDE_ASM("seg/seg_1218", func_001036A0);
 
-INCLUDE_ASM("seg/seg_1218", func_00103918);
+//100%
+extern "C" int func_00104CA0_3918(void*, void*, void*) __asm__("func_00104CA0");
+extern "C" int func_00104A40_3918(void*, void*, void*) __asm__("func_00104A40");
+extern "C" int func_00104A60_3918(void*, void*, void*) __asm__("func_00104A60");
+extern "C" int func_00104B78_3918(void*, void*, void*) __asm__("func_00104B78");
+extern "C" int func_00104C18_3918(void*, void*, void*) __asm__("func_00104C18");
+extern "C" int func_00104B48_3918(void*, void*, void*) __asm__("func_00104B48");
+extern "C" int func_00104C38_3918(void*, void*, void*) __asm__("func_00104C38");
+extern "C" int func_00104B98_3918(void*, void*, void*) __asm__("func_00104B98");
+extern "C" int func_00104BB8_3918(void*, void*, void*) __asm__("func_00104BB8");
+extern "C" int func_00104BD8_3918(void*, void*, void*) __asm__("func_00104BD8");
+extern "C" int func_00104C80_3918(void*, void*, void*) __asm__("func_00104C80");
+extern "C" char* cAIAnimEventMap_getBlendInTime_3918(int) __asm__("cAIAnimEventMap_getBlendInTime");
+
+struct sObj_3918 {
+    int vals[0x14];
+    char* base; // 0x50
+};
+
+extern "C" void func_00103918(sObj_3918* self, char* ent, int* arg)
+{
+    int idx = (ent - self->base) >> 3;
+    switch (*(int*)(cAIAnimEventMap_getBlendInTime_3918(*arg) + 8)) {
+    case 0:
+        self->vals[idx] = func_00104CA0_3918(self, ent, arg);
+        break;
+    case 1:
+        self->vals[idx] = func_00104A40_3918(self, ent, arg);
+        break;
+    case 2:
+        self->vals[idx] = func_00104A60_3918(self, ent, arg);
+        break;
+    case 3:
+        self->vals[idx] = func_00104B78_3918(self, ent, arg);
+        break;
+    case 4:
+        self->vals[idx] = func_00104C18_3918(self, ent, arg);
+        break;
+    case 5:
+        self->vals[idx] = func_00104B48_3918(self, ent, arg);
+        break;
+    case 6:
+        self->vals[idx] = func_00104C38_3918(self, ent, arg);
+        break;
+    case 7:
+        self->vals[idx] = func_00104B98_3918(self, ent, arg);
+        break;
+    case 8:
+        self->vals[idx] = func_00104BB8_3918(self, ent, arg);
+        break;
+    case 9:
+        self->vals[idx] = func_00104BD8_3918(self, ent, arg);
+        break;
+    case 10:
+        self->vals[idx] = func_00104C80_3918(self, ent, arg);
+        break;
+    }
+}
 
 //100%
 struct sEnt_3AA0 {
