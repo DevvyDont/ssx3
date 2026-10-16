@@ -94,15 +94,29 @@ pick a function to match, the matching workflow, and PR expectations.
 
 ## AI use
 
-Use of AI tools (Claude, ChatGPT, Copilot, decomp.me's assistants, etc.) to
-help write or reverse-engineer matches is welcome, including for whole PRs.
-This project's correctness standard doesn't depend on who or what wrote a
-match: [objdiff](tools/objdiff) either reports a byte-perfect match against
-the real game binary or it doesn't. AI-assisted PRs are held to the same bar
-as any other — a green objdiff diff, not a claim of one — and normal review
-still applies (does the struct layout make sense, is naming reasonable,
-etc.). There's no need to disclose AI involvement, but please don't submit
-unverified output you haven't actually built and diffed yourself.
+Most of this fork's work is done with AI. Matching, linking and the PC port are
+largely written by Claude (Anthropic) under the direction of the repository
+owner, and AI-written commits carry a `Co-Authored-By: Claude` trailer. The
+decompilation this fork builds on ([DevvyDont/ssx3](https://github.com/DevvyDont/ssx3))
+was also matched mostly by AI agents, going by its commit history.
+
+AI-written code is held to checks it can't talk its way past:
+
+- A function counts as matched only when [objdiff](tools/objdiff) reports a
+  byte-perfect match and the linked build still passes the sha1 check against
+  the retail executable. A claim of a match is not a match.
+- Matched C is linked into the build in place of its asm. It is never left
+  wrapped behind an `INCLUDE_ASM`.
+- No inline asm in matched functions, and no changes to objdiff, the checksum,
+  the compiler or its flags to make a function pass.
+- Matched is not the same as understood. Much of the matched C still uses raw
+  struct offsets (`*(int*)(self + 0x5830)`), and naming those structs and
+  fields is ongoing work.
+
+Contributions made with AI are welcome here on the same terms. Please say so
+in the PR, and make sure you can explain what the change does. Other SSX
+projects set their own rules; [ssxdecomp/ssx3](https://github.com/ssxdecomp/ssx3)
+does not accept LLM-generated code, so don't send work from this fork there.
 
 ## License
 
