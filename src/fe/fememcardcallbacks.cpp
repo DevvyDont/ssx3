@@ -1030,7 +1030,191 @@ extern "C" void func_001D86B0(void* self)
     vt[47].fn((char*)self + vt[47].delta);
 }
 
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8700);
+//100%
+extern "C" void func_001D9308(void*, int);
+extern "C" void func_001D7190(void);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" void* func_00227F80(void* app);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+
+struct sVE_8700 { short delta; short index; void (*fn)(void*); };
+
+#define V_8700(n) ((*(sVE_8700**)(self + 8))[n].fn(self + (*(sVE_8700**)(self + 8))[n].delta))
+#define DONE_8700()                        \
+    if (*(int*)(self + 0x204) == 1) {      \
+        *(int*)(mp + 0x440) = 1;           \
+        V_8700(40);                        \
+    }
+
+extern "C" void func_001D8700(char* self, void* a1, int button)
+{
+    if ((unsigned int)(button - 0xF) < 3) {
+        int c;
+        c = 0;
+        if (button == 0x10) {
+            c = 1;
+        } else if (button == 0x11) {
+            c = 2;
+        }
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        switch (*(int*)(self + 0x19C)) {
+        case 2:
+            if (c == 0) {
+                V_8700(45);
+            } else {
+                *(int*)(self + 0x1C0) = 1;
+            }
+            break;
+        case 19:
+            if (c != 0) {
+                *(int*)(self + 0x1EC) = 1;
+                break;
+            }
+            *(int*)(self + 0x1F0) = 0;
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 1:
+            if (c == 0) {
+                *(int*)(self + 0x1C0) = 3;
+                *(int*)(self + 0x1F0) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 9:
+            if (c != 0) {
+                *(int*)(self + 0x1EC) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 18:
+            if (c == 0) {
+                *(int*)(self + 0x1EC) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 10:
+            if (c != 0) {
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 11:
+            *(int*)(self + 0x1F0) = 0;
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 4:
+        case 5:
+        case 6:
+            V_8700(40);
+            break;
+        case 3:
+            *(int*)(self + 0x1B0) = 0;
+            if (c == 0) {
+                *(int*)(self + 0x1A8) = 1;
+                *(int*)(self + 0x1E0) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 12:
+            if (c == 0) {
+                V_8700(41);
+                *(int*)(self + 0x1C0) = 1;
+                DONE_8700();
+            } else if (c == 1) {
+                *(int*)(self + 0x1EC) = c;
+            } else {
+                func_001D7190();
+                return;
+            }
+            break;
+        case 13:
+            if (c == 0) {
+                *(int*)(self + 0x1C0) = 3;
+                *(int*)(self + 0x1F0) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 7:
+            *(int*)(self + 0x1A8) = 0;
+            *(int*)(self + 0x1E0) = 0;
+            if (*(int*)(self + 0x1F4)) {
+                V_8700(41);
+            }
+            if (*(int*)(self + 0x1DC)) {
+                *(int*)(self + 0x1A8) = 1;
+            }
+            DONE_8700();
+            break;
+        case 16:
+            *(int*)(self + 0x1E8) = 0;
+            func_001D9308(self, 0);
+            if (*(int*)(self + 0x1DC)) {
+                *(int*)(self + 0x1A8) = 1;
+            } else {
+                *(int*)(self + 0x1A8) = 0;
+            }
+            DONE_8700();
+            break;
+        case 17:
+            *(int*)(self + 0x1E8) = 0;
+            V_8700(41);
+            break;
+        case 14:
+        case 15:
+            *(int*)(self + 0x1B0) = 0;
+            if (c == 0) {
+                *(int*)(self + 0x1A8) = 1;
+                *(int*)(self + 0x1E8) = 1;
+            } else if (c == 1) {
+                *(int*)(self + 0x1E8) = 0;
+                V_8700(41);
+                DONE_8700();
+            }
+            break;
+        case 8:
+        case 23:
+            V_8700(41);
+            break;
+        case 24:
+            V_8700(41);
+            break;
+        case 20:
+        case 21:
+        case 22:
+            break;
+        }
+        if (*(int*)(self + 0x19C) != 0x16) {
+            func_0039F190(*(char**)((char*)D_004A2028 + 0x10) + 0x18, 1);
+        }
+        *(int*)(self + 0x210) = 0;
+    } else if (button == 0x16) {
+        char* fe = (char*)D_004A2028;
+        if (*(int*)(fe + 0x1A0)) {
+            *(int*)(fe + 0x1A4) = 0;
+            *(int*)(fe + 0x1A0) = 0;
+        } else {
+            if (*(int*)(self + 0x19C) == 0x16) {
+                *(int*)(self + 0x210) = 0;
+            }
+            *(int*)((char*)D_004A2028 + 0x218) = 0;
+        }
+    }
+}
+
 
 //100%
 extern "C" void func_001D9308(void*, int);
