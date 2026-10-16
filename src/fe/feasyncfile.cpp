@@ -16853,7 +16853,91 @@ extern "C" void func_001C2578(void* self, void* vtext, char* str)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C2740);
+//100%
+int GetHashValue32(char* str);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+extern "C" void func_001A9B58(void* self);
+extern "C" void func_001C2A18(void* self);
+extern "C" void* func_001C1C50(void* self, int a1);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_004611A8[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_00465BC0[];
+extern char D_00465BE0[];
+extern char D_00465C00[];
+
+extern "C" void func_001C2740(char* self, char* item, int id)
+{
+    switch (id) {
+    case 5: {
+        unsigned int idx = *(unsigned int*)(item + 0x18);
+        if (idx >= 10)
+            break;
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
+        char* msg = func_0014F6A8(iface, idx);
+        if (msg == 0) {
+            char tmp[0x40];
+            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVE_001C2468* vt = *(sVE_001C2468**)(o + 4);
+            char* obj = o + vt[4].delta;
+            void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
+            func_003DCB20(tmp, str);
+            func_001A9150(self, 0, GetHashValue32(D_00465BC0), (int)tmp, 0, idx, 0x3F);
+        } else {
+            func_001A9150(self, 0, GetHashValue32(D_00465BC0), (int)msg, 0, idx, 0x3F);
+        }
+        func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+        break;
+    }
+    case 6:
+        if (*(int*)(self + 0x6D0)) {
+            char* p = (char*)func_001A9C50(self);
+            *(int*)(p + 0xBC) = 2;
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00465BE0);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)(p + 0x168) = 0;
+            *(int*)(p + 0x150) = 0x83A;
+            func_001A9BC0(self, p);
+        } else {
+            func_001A8A40(self, func_001C1C50(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *(int*)(self + 0x10)));
+        }
+        break;
+    case 8:
+        if ((*(int*)(self + 0x1C) & 6) == 0)
+            func_001A9B58(self);
+        break;
+    case 13:
+        func_001C2A18(self);
+        break;
+    case 4: {
+        char* p = (char*)func_001A9C50(self);
+        *(int*)(p + 0xBC) = 2;
+        char* sub = p + 0xBC;
+        *(int*)(p + 0xC4) = GetHashValue32(D_00465C00);
+        *(int*)(p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+        func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+        *(int*)(p + 0x150) = 0x83B;
+        *(int*)(p + 0x168) = 1;
+        func_001A9BC0(self, p);
+        break;
+    }
+    default:
+        func_001A8918(self, (int)item, id);
+        break;
+    }
+}
+
 
 //100%
 int GetHashValue32(char* str);
