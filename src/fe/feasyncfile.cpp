@@ -6788,7 +6788,70 @@ extern "C" bool func_001B1590(void* self, cFEVObj_001B1590* obj)
     return 0;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B15D8);
+//100%
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern void* D_004A28A8;
+extern int D_00534B30_15D8[] __asm__("D_00534B30");
+extern "C" void func_001B1760(void* self, int index);
+extern "C" void func_001B1A08(void* self, int on, int a2);
+extern "C" void func_001B1B10(void* self, int sel, int flag);
+extern "C" void func_001AB288(void* self, int code);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00192D00_15D8(void* mem, int a1) __asm__("func_00192D00");
+extern "C" void* func_001B1F88_15D8(void* mem, int a1) __asm__("func_001B1F88");
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" int func_0025DA90(void* self);
+extern void* D_004A3028;
+extern int D_004A4E88;
+extern const char D_00460CC8[];
+extern const char D_0045FF10[];
+extern const char D_0045FF28[];
+extern "C" int func_001A8A40_15D8(void* self, void* obj) __asm__("func_001A8A40");
+extern "C" int func_001A8E40_15D8(void* self, int id) __asm__("func_001A8E40");
+
+extern "C" int func_001B15D8(char* self, unsigned int id)
+{
+    switch (id) {
+    case 0xE0:
+        break;
+    case 0xF3: {
+        int* d;
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        d = D_00534B30_15D8;
+        if (d[0x32C / 4] < 0) return 0;
+        func_001B1760(self, d[0x32C / 4]);
+        func_001B1B10(self, d[0x32C / 4], 1);
+        break;
+    }
+    case 0xF5:
+        func_001B1A08(self, 1, 1);
+        break;
+    case 0xF7:
+        func_001B1A08(self, 0, 1);
+        break;
+    case 0xEE:
+    case 0xF1:
+    case 0xF8:
+    case 0xFA:
+    case 0x112:
+    case 0x113:
+        func_001AB288(self, id);
+        break;
+    case 0xF6:
+        func_001A8A40_15D8(self, func_00192D00_15D8(cMemMan_alloc(0x73C, D_00460CC8, 0, 0), *(int*)(self + 0x10)));
+        break;
+    case 0x10C:
+        if (func_0025DA90(D_004A3028) != 0 && D_004A4E88 == 0) {
+            func_001A8A40_15D8(self, func_001B1F88_15D8(cMemMan_alloc(0x73C, D_0045FF10, 0, 0), *(int*)(self + 0x10)));
+        } else {
+            func_001A8A40_15D8(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
+        }
+        break;
+    default:
+        return func_001A8E40_15D8(self, id);
+    }
+    return 0;
+}
 
 //100%
 class cFEVText_001B1760 {
