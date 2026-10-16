@@ -3748,7 +3748,113 @@ extern "C" void func_002814F8(void* self, void* obj, int a2, int flags, float t)
     }
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_002816A0);
+//100%
+extern "C" void* func_0028B180();
+extern "C" float func_002B4920(void* self);
+extern "C" void func_00282D30(void* self, float dt);
+void func_0027D788(void* self, float val);
+extern "C" void* func_00281C40_p(void* self, int i) __asm__("func_00281C40");
+
+struct sNode_2816A0
+{
+    char pad0[0x4];
+    int bit;
+    int len;
+    char padC[0x4];
+    unsigned int start;
+    signed char* kind;
+};
+
+extern "C" void func_002816A0(char* self, void* obj, float t, float dt)
+{
+    int info[2];
+    func_0027C8E0(obj, info);
+    if (*func_0027C888_p(obj) != 0)
+    {
+        *(int*)(self + 0xF0) = 0;
+        char* snd = (char*)func_0028B180();
+        char* clk = snd + 0x118;
+        if (*(int*)(snd + 0x530))
+        {
+            float now = func_002B4920(clk);
+            if (*(float*)(self + 0xF4) < now)
+            {
+                *(int*)(self + 0xF0) = 1;
+                if (*(int*)(self + 0xEC))
+                {
+                    func_00281C68(self, info, t);
+                    *(int*)(self + 0xEC) = 0;
+                }
+            }
+            *(float*)(self + 0xF4) = now;
+        }
+        else
+        {
+            *(int*)(self + 0xF0) = 1;
+        }
+    }
+    if (info[0] == 0)
+        return;
+    if (*(int*)(self + 0xE8) == 0)
+        return;
+    sNode_2816A0* head = (sNode_2816A0*)info[1];
+    switch (*head->kind)
+    {
+    case 0:
+    {
+        if ((float)(head->start + head->len) < t)
+            *(int*)(self + 0xE8) = 0;
+        void* a = func_00281C40_p(self, head->bit);
+        void* b = func_00281C40_p(self, 1 - head->bit);
+        if (b == 0)
+        {
+            *(int*)(self + 0xE8) = 0;
+            break;
+        }
+        float f = 1.0f;
+        if ((float)(head->start + head->len) < t)
+            *(int*)(self + 0xE8) = 0;
+        else
+            f = (t - (float)head->len) / (float)head->start;
+        func_0027D788(a, f);
+        func_0027D788(b, 1.0f - f);
+        break;
+    }
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    {
+        void* a = func_00281C40_p(self, head->bit);
+        void* b = func_00281C40_p(self, 1 - head->bit);
+        func_00282D30(*(void**)(self + 0xD8), dt);
+        if (*(int*)(*(char**)(self + 0xD8) + 0x8) <= 0)
+            *(int*)(self + 0xE8) = 0;
+        if (*(int*)(self + 0xE8) != 0 && b != 0 && t < (float)(head->start + head->len))
+        {
+            func_0027D788(b, 1.0f);
+            func_0027D788(a, 0.0f);
+        }
+        else
+        {
+            if (b != 0)
+                func_0027D788(b, 0.0f);
+            func_0027D788(a, 1.0f);
+        }
+        break;
+    }
+    case 7:
+        func_00282D30(*(void**)(self + 0xD8), dt);
+        if (*(int*)(*(char**)(self + 0xD8) + 0x8) <= 0)
+            *(int*)(self + 0xE8) = 0;
+        break;
+    case 8:
+        break;
+    }
+}
+
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
