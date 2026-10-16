@@ -1131,7 +1131,76 @@ void func_002CC0B8(void* self, int val)
     *(int*)((char*)self + 0x54) = val;
 }
 
-INCLUDE_ASM("util/menu", func_002CC0C0);
+//100%
+float func_00320BF0_C0C0(int, int) __asm__("func_00320BF0");
+extern "C" int func_00266BA8(void* self, int a1, int* a2, int* a3);
+extern void* D_004A33F0;
+extern "C" void func_002CC460(void* p);
+
+class func_002CC0C0_cMenu {
+public:
+    char pad[0x12C];
+    // vptr at 0x12C; slot N at vtable offset N*8
+    virtual void v01();
+    virtual int v02();
+};
+
+struct func_002CC0C0_sStack {
+    int count;                          // 0x0
+    func_002CC0C0_cMenu* entries[0x11]; // 0x4
+    int action;                         // 0x48
+    int key;                            // 0x4C
+    int mod;                            // 0x50
+    int pad54[2];
+    int** pad;                          // 0x5C
+};
+
+extern "C" void func_002CC0C0(void* p)
+{
+    func_002CC0C0_sStack* self = (func_002CC0C0_sStack*)p;
+    if (self->count == 0) {
+        return;
+    }
+    int ok = 0;
+    if (*self->pad != 0) {
+        ok = **self->pad != 0;
+    }
+    if (!ok) {
+        return;
+    }
+    int btn = (int)func_00320BF0_C0C0((int)self->pad, 0x3D);
+    int* key = &self->key;
+    int* mod = &self->mod;
+    *key = -1;
+    *mod = -1;
+    self->action = btn;
+    if (btn == -1 && D_004A33F0 != 0 && func_00266BA8(D_004A33F0, 0, key, mod)) {
+        if (self->mod < 0x20) {
+            self->mod = -1;
+        }
+        switch (self->key) {
+        case 0x26: self->action = 0; break;
+        case 0x28: self->action = 1; break;
+        case 0x25: self->action = 2; break;
+        case 0x27: self->action = 3; break;
+        case 0x2D: self->action = 9; break;
+        case 0x2E: self->action = 10; break;
+        case 0xD: self->action = 6; break;
+        case 0x1B: self->action = 7; break;
+        }
+    }
+    int r = self->entries[self->count - 1]->v02();
+    switch (r) {
+    case 1:
+        func_002CC460(self);
+        break;
+    case 2:
+        while (self->count != 0) {
+            func_002CC460(self);
+        }
+        break;
+    }
+}
 
 //100%
 int func_002CC248(void* self)
