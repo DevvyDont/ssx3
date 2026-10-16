@@ -1800,7 +1800,102 @@ extern "C" int func_001CA180(char* self, unsigned char* item, int code)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CA298);
+//100%
+extern "C" void cScreenPopup_createConfirmationPopup(void* self, int idx);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void func_001CD088(void* self, int v);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cScreenPopup_setTextString(void* self, void* dst, cUIText* text);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void cScreenPopup_checkAndFixTextEntry(void* self, cUIText* text, const char* str);
+extern char D_0045D8D8[];
+
+struct sVE_CA298 { short delta; short index; void (*fn)(void*, void*, int); };
+
+struct sEntry_CA298 { int flag; int b; int c; };
+
+struct sPopup_CA298 {
+    char pad0[0x90];
+    int ids[5];              // 0x90
+    char pad1[0x2D0 - 0xA4];
+    sEntry_CA298 entries[5]; // 0x2D0
+};
+
+extern "C" void func_001CA298(char* self, int id, int type)
+{
+    char* o;
+    sVE_CA298* e;
+    switch (type) {
+    case 5:
+        if (*(int*)(self + 0x30C) != 0) {
+            *(int*)(self + 0xB8) = 0;
+            int handled = 0;
+            sPopup_CA298* p = (sPopup_CA298*)self;
+            for (int i = 0; i < 5; i++) {
+                if (id == p->ids[i]) {
+                    if (p->entries[i].flag != 0) {
+                        cScreenPopup_createConfirmationPopup(self, i);
+                    } else {
+                        o = *(char**)(self + 0x20);
+                        e = &(*(sVE_CA298**)(o + 8))[17];
+                        e->fn(o + e->delta, self, i + 0xF);
+                    }
+                    handled = 1;
+                    break;
+                }
+            }
+            if (handled) {
+                return;
+            }
+            if (id != *(int*)(self + 0x88)) {
+                return;
+            }
+            void* popup = func_001CB030(cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
+            *(void**)(self + 0x2A8) = popup;
+            func_001CD088(popup, *(int*)(self + 0x328));
+            func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, *(void**)(self + 0x2A8));
+            cUIText* t = *(cUIText**)(self + 0x84);
+            if (t == 0) {
+                return;
+            }
+            cScreenPopup_setTextString(self, self + 0x2B4, t);
+            return;
+        } else {
+            *(int*)(self + 0xB8) = 1;
+        }
+        break;
+    case 6:
+        if (*(int*)(self + 0x310) != 0) {
+            o = *(char**)(self + 0x20);
+            e = &(*(sVE_CA298**)(o + 8))[17];
+            e->fn(o + e->delta, self, 0x14);
+            return;
+        }
+        break;
+    case 7:
+    case 8:
+        break;
+    case 13: {
+        cBXString_cBXString4(self + 0x2B0, *(char**)(self + 0x2A8) + 0x74);
+        cUIText* t = *(cUIText**)(self + 0x80);
+        if (t == 0) {
+            return;
+        }
+        char* str = *(char**)(self + 0x2B0);
+        if (*(int*)(str - 8) == 0) {
+            return;
+        }
+        cScreenPopup_checkAndFixTextEntry(self, t, str);
+        return;
+    }
+    default:
+        o = *(char**)(self + 0x20);
+        e = &(*(sVE_CA298**)(o + 8))[19];
+        ((void (*)(void*, int))e->fn)(o + e->delta, id);
+        break;
+    }
+}
 
 //100%
 struct sVEntry_func_001CA488 {
