@@ -3361,7 +3361,53 @@ extern "C" int func_001E2E80(int id, int i)
     return D_00441630_2BB8[id].f4 + i;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E2EA0);
+//100%
+extern char D_0046DE60[];
+extern char D_0046DE70[];
+extern char D_0046DE80[];
+extern char D_0046DE90[];
+extern char D_0046DEA0[];
+extern char D_0046DEB0[];
+extern char D_0046DEC0[];
+extern char D_0046DED0[];
+extern char D_0046DEE0[];
+extern char D_0046DEF0[];
+extern char D_0046DF00[];
+extern char D_0046DF10[];
+extern char D_0046DF20[];
+
+extern "C" int func_001E2EA0(int id)
+{
+    switch (id) {
+    case 0:
+        return GetHashValue32(D_0046DE60);
+    case 1:
+        return GetHashValue32(D_0046DE70);
+    case 2:
+        return GetHashValue32(D_0046DE80);
+    case 3:
+        return GetHashValue32(D_0046DE90);
+    case 4:
+        return GetHashValue32(D_0046DEA0);
+    case 5:
+        return GetHashValue32(D_0046DEB0);
+    case 6:
+        return GetHashValue32(D_0046DEC0);
+    case 7:
+        return GetHashValue32(D_0046DED0);
+    case 8:
+        return GetHashValue32(D_0046DEE0);
+    case 9:
+        return GetHashValue32(D_0046DEF0);
+    case 10:
+        return GetHashValue32(D_0046DF00);
+    case 11:
+        return GetHashValue32(D_0046DF10);
+    case 12:
+        return GetHashValue32(D_0046DF20);
+    }
+    return 0;
+}
 
 //100%
 int GetHashValue32(char* str);

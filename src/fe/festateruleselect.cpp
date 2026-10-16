@@ -166,7 +166,45 @@ extern "C" int func_00191E48(char* self, void* unused, unsigned int type, int id
 
 INCLUDE_ASM("fe/festateruleselect", func_00192088);
 
-INCLUDE_ASM("fe/festateruleselect", func_00192240);
+//100%
+extern int D_005308D0_2240[] __asm__("D_005308D0");
+extern unsigned int D_005308B8_2240[] __asm__("D_005308B8");
+extern int D_005308D4_2240[] __asm__("D_005308D4");
+
+extern "C" int func_00192240(void* self, int opt)
+{
+    switch (opt) {
+    case 4:
+        return D_005308D0_2240[0] & 1;
+    case 3:
+        return (D_005308B8_2240[0] >> 3) & 1;
+    case 5:
+        return (D_005308D0_2240[0] & 0x8) != 0;
+    case 14:
+        return (D_005308B8_2240[0] >> 5) & 1;
+    case 7:
+        return (D_005308B8_2240[0] >> 4) & 1;
+    case 8:
+        return (D_005308D0_2240[0] & 0x2) != 0;
+    case 1:
+        return (D_005308D0_2240[0] & 0x4) != 0;
+    case 2:
+        return D_005308D4_2240[0];
+    case 6:
+        return (D_005308D0_2240[0] & 0x10) != 0;
+    case 9:
+        return (D_005308D0_2240[0] & 0x20) != 0;
+    case 10:
+        return (D_005308D0_2240[0] & 0x40) != 0;
+    case 11:
+        return (D_005308D0_2240[0] & 0x80) != 0;
+    case 12:
+        return (D_005308D0_2240[0] & 0x100) != 0;
+    case 13:
+        return (D_005308D0_2240[0] & 0x200) != 0;
+    }
+    return -1;
+}
 
 //100%
 extern "C" int func_0039A738(void* self);
