@@ -240,7 +240,27 @@ extern "C" int func_001511B0(void* self, int level)
     }
 }
 
-INCLUDE_ASM("be/beintecon", func_001511E8);
+//100%
+struct sProf11E8 { char s[0xF88]; };
+struct sEcon11E8 { int a; int b; };
+extern sEcon11E8 D_00440550_11E8[] __asm__("D_00440550");
+
+extern "C" int func_001511E8(void* self, int profile, int c, unsigned int kind)
+{
+    char* p;
+    if (profile >= 2) return 0;
+    p = 0;
+    switch (kind) {
+    case 0: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBDF]; break;
+    case 1: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBE0]; break;
+    case 2: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBE1]; break;
+    case 3: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBE2]; break;
+    case 4: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBE3]; break;
+    case 5: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBE4]; break;
+    case 6: p = &((sProf11E8 (*)[10])D_004A6CA8)[profile][c].s[0xBE5]; break;
+    }
+    return D_00440550_11E8[(*p + 1) / 5].b;
+}
 
 //100%
 void cMemMan_free(void*);
