@@ -1122,7 +1122,117 @@ extern "C" void func_001D8D68(void* self)
     *(int*)((char*)self + 0x210) = 1;
 }
 
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8DE0);
+extern "C" void func_0020E900();
+extern "C" void func_0039E510(void*);
+extern "C" void func_00241380(void* mp);
+extern "C" int func_0023C898(void* mp);
+extern "C" void func_0023D618(void* mp);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A1600[];
+
+struct sVEv_8DE0 { short delta; short index; void (*fn)(void*, ...); };
+struct sVEi_8DE0 { short delta; short index; int (*fn)(void*, ...); };
+struct sVEb_8DE0 { short delta; short index; bool (*fn)(void*, ...); };
+
+#define VV_8DE0(o, n, args...) ((*(sVEv_8DE0**)((o) + 8))[n].fn((o) + (*(sVEv_8DE0**)((o) + 8))[n].delta , ## args))
+#define VI_8DE0(o, n, args...) ((*(sVEi_8DE0**)((o) + 8))[n].fn((o) + (*(sVEi_8DE0**)((o) + 8))[n].delta , ## args))
+#define VB_8DE0(o, n, args...) ((*(sVEb_8DE0**)(o))[n].fn((o) + (*(sVEb_8DE0**)(o))[n].delta , ## args))
+
+extern "C" void func_001D8DE0(char* self)
+{
+    if (*(int*)(self + 0x218) == 0 && *(int*)(self + 0x1A4) == 0) {
+        if (*(void**)((char*)D_004A28A8 + 0x84)) {
+            func_0020E900();
+        } else {
+            func_0039E510(self);
+        }
+    }
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    if (*(int*)(self + 0x1D8) == 0) {
+        func_00241380(mp);
+        *(int*)(self + 0x1D8) = 1;
+        *(int*)(self + 0x214) = 1;
+        VI_8DE0(self, 35, 1);
+        sVEi_8DE0* mvt = *(sVEi_8DE0**)(mp + 0x748);
+        mvt[1].fn(mp + mvt[1].delta, 0x31);
+    }
+    if (*(int*)(self + 0x1C0) != 6
+        || (*(int*)(self + 0x1B0) == 1 && func_0023C898(mp) == 0)
+        || (*(int*)(self + 0x1B0) == 0 && VB_8DE0(*(char**)(mp + 0x434), 11) != 0)) {
+        func_0023D618(mp);
+    }
+    switch (*(int*)(self + 0x1C0)) {
+    case 0:
+        VV_8DE0(self, 31);
+        break;
+    case 1:
+        VV_8DE0(self, 27);
+        break;
+    case 2:
+        VV_8DE0(self, 32);
+        break;
+    case 3:
+        VV_8DE0(self, 28);
+        break;
+    case 4:
+        VV_8DE0(self, 30);
+        break;
+    case 5:
+        VV_8DE0(self, 29);
+        break;
+    case 6: {
+        char* mp2 = (char*)func_00227F80(D_004A28A8);
+        if ((*(int*)(self + 0x1B0) != 1 || func_0023C898(mp2) != 0)
+            && (*(int*)(self + 0x1B0) != 0 || VB_8DE0(*(char**)(mp2 + 0x434), 11) == 0)) {
+            VV_8DE0(self, 33);
+        }
+        break;
+    }
+    }
+    char* fe = (char*)D_004A2028;
+    if (*(int*)(fe + 0x210) == 0) {
+        if (*(int*)(fe + 0x208) == 0 && *(int*)(fe + 0x204) == 0) {
+            int s = *(int*)(mp + 0x130);
+            if (s == 0x28 || s == 0xB || s == 0xF || s == 0x10 || s == 0x11 || s == 0x12 || s == 0x1F
+                || s == 0x21 || s == 0x20 || s == 0x22 || s == 0x2C || s == 0x19 || s == 0x1A) {
+                VV_8DE0(self, 47);
+            }
+        }
+        if (*(int*)((char*)D_004A2028 + 0x210) == 0) {
+            goto skip;
+        }
+    }
+    {
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        func_00241E18(mp, buf, 0x320);
+        char* m = *(char**)(self + 0x218);
+        VV_8DE0(m, 27, buf);
+        if (buf) {
+            cMemMan_free(buf);
+        }
+    }
+skip:
+    VV_8DE0(self, 26);
+    if (*(int*)(self + 0x218) == 0 && VB_8DE0(*(char**)(mp + 0x434), 75)) {
+        void* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        int x = *(int*)(self + 0x1C4);
+        if (o) {
+            x = *((unsigned char*)o + 0x95);
+        }
+        int flag = 0;
+        sVEi_8DE0* vt = *(sVEi_8DE0**)(self + 8);
+        char* t = self + vt[38].delta;
+        int (**pf)(void*, ...) = &vt[38].fn;
+        if (!VB_8DE0(*(char**)(mp + 0x434), 67, x) || !VB_8DE0(*(char**)(mp + 0x434), 53)) {
+            flag = 1;
+        }
+        (*pf)(t, flag);
+        int a = !VB_8DE0(*(char**)(mp + 0x434), 67, x);
+        int b = !VB_8DE0(*(char**)(mp + 0x434), 53);
+        VI_8DE0(self, 39, a, b);
+    }
+}
+
 
 //100%
 int GetHashValue32(char* str);
