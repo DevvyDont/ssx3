@@ -11,7 +11,57 @@ struct cOVStateHUDElem {
     float w; // 0x1c
 };
 
-INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onCreateScreen);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void func_0020A380(void* self);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void* self, int id);
+extern signed char D_00535C10[];
+extern char D_0046E9D8[];
+extern char D_0046E9E8[];
+extern char D_0046E9F8[];
+extern char D_0046EA08[];
+extern char D_0046EA18[];
+
+extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
+{
+    char* s = (char*)self;
+    void* eng = *(void**)(s + 0x10);
+    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046E9D8), 0);
+    *(void**)(s + 0x40) = scr;
+    if (scr != 0) {
+        cUIScreen_playFrame(scr, 0, 0);
+    }
+    func_0020A380(self);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    switch (D_00535C10[0]) {
+    case 0:
+    case 5:
+        cUIState_showObjSafe(self, D_0046E9E8);
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 6:
+    default:
+        cUIState_hideObjSafe(self, D_0046E9F8);
+        break;
+    }
+    char* r = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
+    bool any = *(int*)(r + 0x18) >= 0 || *(int*)(r + 0x1C) >= 0;
+    if (!any) {
+        cUIState_hideObjSafe(self, D_0046EA08);
+        cUIState_hideObjSafe(self, D_0046EA18);
+    }
+    func_00294F78(func_0028B180(), 0xE);
+}
 
 //100%
 struct sVEntry001E9130 {

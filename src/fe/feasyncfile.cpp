@@ -6205,7 +6205,61 @@ extern "C" int func_001B0670(cFEVObj_001B0670* self, int a1)
 
 INCLUDE_ASM("fe/feasyncfile", func_001B06E0);
 
-INCLUDE_ASM("fe/feasyncfile", func_001B0708);
+//100%
+extern "C" void func_00263018_0708(void* self, int a1) __asm__("func_00263018");
+extern "C" void func_001AFA60_0708(void* self, void* msg) __asm__("func_001AFA60");
+extern "C" void func_001AFD88_0708(void* self, void* msg) __asm__("func_001AFD88");
+extern "C" void func_001B0C08_0708(void* self) __asm__("func_001B0C08");
+extern "C" void func_001AB178_0708(void* self, int code) __asm__("func_001AB178");
+extern "C" void func_001AB108_0708(void* self) __asm__("func_001AB108");
+extern "C" void* cMemMan_alloc_0708(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* func_001B0F60_0708(void* self, void* a1) __asm__("func_001B0F60");
+extern "C" void func_001A8A40_0708(void* self, void* screen) __asm__("func_001A8A40");
+int func_001A8E40_0708(void* self, int code, void* msg) __asm__("func_001A8E40");
+extern const char D_00461C60[];
+
+extern "C" int func_001B0708(char* self, int code, void* msg)
+{
+    switch (code) {
+    case 0xEF:
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        func_00263018_0708(D_004A3328, *(int*)(self + 0x6D0));
+        break;
+    case 0x110:
+        func_001AB108_0708(self);
+        break;
+    case 0xED:
+    case 0xEE:
+    case 0xF0:
+    case 0xF1:
+    case 0x10C:
+    case 0x112:
+    case 0x113:
+        func_001B0C08_0708(self);
+        func_001AB178_0708(self, code);
+        break;
+    case 0xF3:
+        func_001A8A40_0708(self, func_001B0F60_0708(cMemMan_alloc_0708(0x6E4, D_00461C60, 0x100, 0), *(void**)(self + 0x10)));
+        break;
+    case 0xE3:
+        func_001AFA60_0708(*(void**)(self + 0x40), msg);
+        break;
+    case 0xE5:
+        func_001AFD88_0708(*(void**)(self + 0x40), msg);
+        break;
+    default:
+        return func_001A8E40_0708(self, code, msg);
+    }
+    return 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
