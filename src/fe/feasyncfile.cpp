@@ -10504,7 +10504,57 @@ extern "C" void func_001B91C8(void* self, void* a1, int kind)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B92C8);
+//100%
+extern "C" void func_001A97B8_92C8(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" char* func_001A9C50_92C8(void* self) __asm__("func_001A9C50");
+extern "C" void func_001A9BC0_92C8(void* self, void* p) __asm__("func_001A9BC0");
+void func_001C57C0_92C8(void* p, int i, int hash) __asm__("func_001C57C0__FPvii");
+extern "C" void* cMemMan_alloc_92C8(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* func_001AD130_92C8(void* self, void* a1) __asm__("func_001AD130");
+extern "C" void func_001A8A40_92C8(void* self, void* screen) __asm__("func_001A8A40");
+int GetHashValue32_92C8(char* str) __asm__("GetHashValue32__FPc");
+extern const char D_00462D68_92C8[] __asm__("D_00462D68");
+extern char D_00462D80_92C8[] __asm__("D_00462D80");
+extern char D_0045DCC8_92C8[] __asm__("D_0045DCC8");
+extern char D_0045FCD8_92C8[] __asm__("D_0045FCD8");
+
+extern "C" void func_001B92C8(void* self_, void* unused, int ev)
+{
+    char* self = (char*)self_;
+    switch (ev) {
+    case 0xF:
+    case 0x10:
+    case 0x14:
+        *(int*)(self + 0x6E8) = 0;
+        func_001A97B8_92C8(self, unused, ev);
+        break;
+    case 0x11:
+        *(int*)(self + 0x6E8) = 1;
+        func_001A97B8_92C8(self, unused, ev);
+        break;
+    case 0x16:
+        if (*(int*)(self + 0x6E8) != 0) {
+            func_001A97B8_92C8(self, unused, ev);
+            char* p = func_001A9C50_92C8(self);
+            *(int*)(p + 0xBC) = 2;
+            *(int*)(p + 0xC4) = GetHashValue32_92C8(D_00462D80_92C8);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0_92C8(p + 0xBC, 0, GetHashValue32_92C8(D_0045DCC8_92C8));
+            func_001C57C0_92C8(p + 0xBC, 1, GetHashValue32_92C8(D_0045FCD8_92C8));
+            *(int*)(p + 0x168) = 0;
+            *(int*)(p + 0x150) = 0x81E;
+            *(int*)(p + 0x164) = 0;
+            func_001A9BC0_92C8(self, p);
+        } else {
+            func_001A8A40_92C8(self, func_001AD130_92C8(cMemMan_alloc_92C8(0x6D8, D_00462D68_92C8, 0, 0), *(void**)(self + 0x10)));
+        }
+        *(int*)(self + 0x6E8) = 0;
+        break;
+    default:
+        func_001A97B8_92C8(self, unused, ev);
+        break;
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
@@ -14883,7 +14933,51 @@ extern "C" void func_001C0CE0(void* self, void* item)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C0D28);
+//100%
+extern "C" void* cMemMan_alloc_0D28(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* func_001BEE30_0D28(void* p, void* a1) __asm__("func_001BEE30");
+extern "C" void* func_001B88F0_0D28(void* p, void* a1, int a2) __asm__("func_001B88F0");
+extern "C" void* func_001BA3E0_0D28(void* p, void* a1) __asm__("func_001BA3E0");
+extern "C" void* func_001C1C50_0D28(void* p, void* a1) __asm__("func_001C1C50");
+extern "C" void func_001A8A40_0D28(void* self, void* screen) __asm__("func_001A8A40");
+extern "C" void func_001A8918_0D28(void* self) __asm__("func_001A8918");
+extern const char D_00465740_0D28[] __asm__("D_00465740");
+extern const char D_00462ED0_0D28[] __asm__("D_00462ED0");
+extern const char D_00464848_0D28[] __asm__("D_00464848");
+extern const char D_004611A8_0D28[] __asm__("D_004611A8");
+
+extern "C" void func_001C0D28(void* self_, int ok, unsigned int ev)
+{
+    char* self = (char*)self_;
+    if (ok == 0)
+        return;
+    switch (ev) {
+    case 5:
+    case 6:
+        switch (*(int*)(self + 0x18)) {
+        case 0x12:
+            func_001A8A40_0D28(self, func_001BEE30_0D28(cMemMan_alloc_0D28(0x6D4, D_00465740_0D28, 0, 0), *(void**)(self + 0x10)));
+            break;
+        case 0x14:
+            func_001A8A40_0D28(self, func_001B88F0_0D28(cMemMan_alloc_0D28(0x6F4, D_00462ED0_0D28, 0, 0), *(void**)(self + 0x10), 1));
+            break;
+        case 0x15:
+            func_001A8A40_0D28(self, func_001B88F0_0D28(cMemMan_alloc_0D28(0x6F4, D_00462ED0_0D28, 0, 0), *(void**)(self + 0x10), 0));
+            break;
+        case 0x16:
+            func_001A8A40_0D28(self, func_001BA3E0_0D28(cMemMan_alloc_0D28(0x6E0, D_00464848_0D28, 0, 0), *(void**)(self + 0x10)));
+            break;
+        case 0x13:
+        default:
+            func_001A8A40_0D28(self, func_001C1C50_0D28(cMemMan_alloc_0D28(0x6D0, D_004611A8_0D28, 0, 0), *(void**)(self + 0x10)));
+            break;
+        }
+        break;
+    default:
+        func_001A8918_0D28(self);
+        break;
+    }
+}
 
 extern "C" void* func_001A8E40(void* self);
 
