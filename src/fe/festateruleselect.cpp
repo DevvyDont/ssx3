@@ -2,7 +2,118 @@
 
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_setupMenu);
 
-INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onCreateScreen);
+//100%
+struct cUIText;
+int GetHashValue32(char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv_1940(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char idx);
+extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern char D_00535BC8[];
+extern char D_005308B8[];
+extern char D_0045FB10[];
+extern char D_0045FB20[];
+extern char D_004A1398[];
+extern char* D_00441058[];
+extern signed char D_00441098[];
+extern signed char D_004410A8[];
+extern signed char D_004410B8[];
+extern signed char D_004A1690[8];
+extern signed char D_004A1698[8];
+extern signed char D_004A16A0[8];
+extern char D_004A16A8[];
+extern char D_004A13A0[];
+
+struct sVE_1940 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObj_1940 {
+    char pad0[0x8];
+    sVE_1940* vt;
+};
+
+extern "C" void cFEStateRuleSelect_onCreateScreen(char* self)
+{
+    void* engine = *(void**)(self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FB10), 0);
+    *(void**)(self + 0x40) = screen;
+    if (screen != 0)
+        cUIScreen_playFrame(screen, 0, 0);
+    *(signed char**)(self + 0x48) = 0;
+    int count = 0;
+    cBE_getInterface_Fv_1940(cBE_getBE(), 0);
+    switch ((signed char)D_00535BC8[0x4A]) {
+    case 0:
+        *(signed char**)(self + 0x48) = D_00441098;
+        count = 11;
+        break;
+    case 1:
+        *(signed char**)(self + 0x48) = D_004410A8;
+        count = 10;
+        break;
+    case 3:
+        *(signed char**)(self + 0x48) = D_004A1690;
+        count = 8;
+        break;
+    case 2:
+        *(signed char**)(self + 0x48) = D_004A1698;
+        count = 8;
+        break;
+    case 4:
+        *(signed char**)(self + 0x48) = D_004410B8;
+        count = 11;
+        break;
+    case 5:
+        *(signed char**)(self + 0x48) = D_004A16A0;
+        count = 8;
+        break;
+    }
+    for (int i = 0; i < 15; i++)
+        self[0x51 + i] = 0;
+    self[0x50] = count;
+    func_003E6448(D_005308B8, 0, 0x20);
+    cFEStateRuleSelect_setupMenu(self, 0);
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1398));
+    if (menu != 0) {
+        *(int*)(menu + 0x14) |= 0x80;
+        func_0039B760(menu, count);
+        cUIMenu_setSelectedByIndex(menu, 0);
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045FB20));
+        signed char sel = **(signed char**)(self + 0x48);
+        if (t != 0)
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00441058[sel]));
+    }
+    char name0[16];
+    char name1[16];
+    __builtin_memcpy(name0, D_004A16A8, 3);
+    __builtin_memcpy(name1, D_004A13A0, 2);
+    for (signed char i = 0; i < 11; i++) {
+        char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name0));
+        *(int*)(a + 0x14) &= ~1;
+        char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name1));
+        if (i >= count) {
+            ((sObj_1940*)b)->vt[9].fn(b + ((sObj_1940*)b)->vt[9].delta, 0);
+            ((sObj_1940*)b)->vt[8].fn(b + ((sObj_1940*)b)->vt[8].delta, 1);
+        }
+        if (i < 9) {
+            name1[0]++;
+            name0[0]++;
+        } else {
+            name0[0] = name1[0] = i + 0x58;
+        }
+    }
+}
+
 
 extern "C" void* func_0039E4C0(void* self);
 
