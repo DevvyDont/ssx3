@@ -1194,7 +1194,59 @@ extern "C" float func_00119E38(void* self, int a, int b)
     return r;
 }
 
-INCLUDE_ASM("ai/ridermetrix", func_00119EF8);
+//100%
+extern "C" void func_001E3760(int rider, int amt);
+extern "C" void func_001597B0(void* self, int rider, int c);
+
+class cRiderPart_9EF8 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+
+extern "C" float func_00119EF8_def(char* self, int kind, int amount) __asm__("func_00119EF8");
+extern "C" int func_00117B88_9EF8(void* self, int type, int value, int arg, float duration) __asm__("func_00117B88");
+extern "C" float func_00119EF8_def(char* self, int kind, int amount)
+{
+    if (amount == 0) {
+        return 0.0f;
+    }
+    int* lvl = *(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int l = *lvl;
+    int locked = 0;
+    if (l != 0 && l < 10) {
+        locked = 1;
+    }
+    if (locked) {
+        return 0.0f;
+    }
+    void* iface = cBE_getInterface(cBE_getBE(), 0xD);
+    func_001E3760(((cRiderPart_9EF8*)(*(char**)(self + 0x1AC) + 0x6C0))->v07(), amount);
+    func_001597B0(iface, ((cRiderPart_9EF8*)(*(char**)(self + 0x1AC) + 0x6C0))->v07(), amount);
+    func_00117B88_9EF8(self, 0x18, amount, 0, 0.699999988079071f);
+    switch (kind) {
+    case 3:
+        func_00117B88(self, 0x31, amount, amount, 1.5f);
+        break;
+    case 1:
+        func_00117B88(self, 0x2E, amount, 0, 2.5f);
+        break;
+    case 0:
+        func_00117B88(self, 0x2F, amount, 0, 2.5f);
+        break;
+    case 2:
+        func_00117B88(self, 0x30, amount, *(int*)(self + 0x9C), 2.5f);
+        break;
+    case 4:
+        break;
+    }
+    return 0.0f;
+}
 
 extern "C" void func_00117AE8(void* self, int a, const char* b, float c, int d);
 extern const char D_00457888[];
