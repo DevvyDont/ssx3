@@ -9035,7 +9035,61 @@ extern "C" void func_001B5830(void* self, void* a1, unsigned int kind)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B5A58);
+//100%
+extern "C" void func_00261408(void* self);
+extern "C" int* func_002591B8_5A58(void) __asm__("func_002591B8");
+extern "C" void func_002636F0(void* out, int val);
+extern "C" void* func_001BEE30_5A58(void* self, int a1) __asm__("func_001BEE30");
+extern "C" void func_001A97B8_5A58(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" int func_001A8A40_5A58(void* self, void* obj) __asm__("func_001A8A40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00461CD8[];
+typedef void (*fn5A58)(void*, int);
+
+extern "C" void func_001B5A58(char* self, void* a1, unsigned int kind)
+{
+    switch (kind) {
+    case 21:
+        *(int*)(self + 0x6DC) = 0;
+        func_001A97B8_5A58(self, a1, kind);
+        return;
+    case 15:
+        func_001A97B8_5A58(self, a1, kind);
+        *(int*)(self + 0x6DC) = 1;
+        return;
+    case 16:
+    case 20: {
+        char* o;
+        char* vt;
+        func_001A97B8_5A58(self, a1, kind);
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        func_00261408(D_004A3328);
+        func_0025B800(D_004A3028);
+        func_002636F0(func_002591B8_5A58(), 0);
+        o = *(char**)(self + 0x6EC);
+        vt = *(char**)(o + 0x8);
+        ((fn5A58)*(void**)(vt + 0x44))(o + *(short*)(vt + 0x40), 0);
+        return;
+    }
+    case 22:
+        if (*(int*)(self + 0x6DC) != 0) {
+            func_001A8A40_5A58(self, func_001BEE30_5A58(cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), *(int*)(self + 0x10)));
+        }
+        func_001A97B8_5A58(self, a1, kind);
+        return;
+    default:
+        func_001A97B8_5A58(self, a1, kind);
+        return;
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
