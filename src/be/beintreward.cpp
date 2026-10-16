@@ -310,7 +310,46 @@ extern "C" int func_00156EE0(void* self, int a1, int a2)
     return -1;
 }
 
-INCLUDE_ASM("be/beintreward", func_00157080);
+//100%
+extern "C" int func_00157210(void* self, int kind);
+extern "C" int func_00157518(void* self, int a1, int a2, int kind);
+
+struct sRw7080 { char s[0xF88]; };
+
+extern "C" int func_00157080(void* self, int a1, int a2, int kind)
+{
+    int total = func_00157210(self, kind);
+    int result = -1;
+    int have = func_00157518(self, a1, a2, kind);
+    unsigned int r;
+    char* base;
+    char* p;
+    int i;
+    if (have >= total) return -1;
+    r = BXrand() % (unsigned int)(total - have);
+    p = 0;
+    base = &((sRw7080 (*)[10])D_004A6CA8)[a1][a2].s[0];
+    switch (kind) {
+    case 3: p = base + 0xF30; break;
+    case 4: p = base + 0xF36; break;
+    case 5: p = base + 0xF45; break;
+    case 6: p = base + 0xF52; break;
+    case 7: p = base + 0xF53; break;
+    }
+    for (i = 0; result < 0; i++) {
+        int b;
+        for (b = 0; b < 8; b++) {
+            if (((p[i] >> b) ^ 1) & 1) {
+                if (r == 0) {
+                    result = i * 8 + b;
+                    break;
+                }
+                r--;
+            }
+        }
+    }
+    return result;
+}
 
 //100%
 int func_001572B0(void* self);
