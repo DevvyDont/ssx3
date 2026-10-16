@@ -274,7 +274,84 @@ extern "C" sLmCell_F2A8* func_0038F2A8(float* pos)
     return &D_00504D80[i % 8];
 }
 
-INCLUDE_ASM("render/lightman", func_0038F300);
+//100%
+extern "C" void func_0038F768(void);
+extern "C" void func_0038F7B0(void);
+extern int D_004A5B84;
+
+struct sLightBufs_F300 {
+    int mode;
+    int count;
+    int f8;
+    int fC;
+    int size;
+    int addr[3];
+    int b20[3];
+    int b2C[3];
+};
+
+extern "C" void func_0038F300(sLightBufs_F300* self, int mode)
+{
+    int i;
+    if (self->mode == mode)
+        return;
+    self->mode = mode;
+    switch (mode) {
+    case 1:
+        self->count = 1;
+        break;
+    case 2:
+        self->count = 2;
+        break;
+    case 3:
+        self->count = 2;
+        break;
+    case 4:
+        self->count = 2;
+        break;
+    case 5:
+        self->count = 2;
+        break;
+    case 6:
+    case 7:
+        self->count = 3;
+        break;
+    }
+    self->f8 = 0;
+    self->fC = 0;
+    switch (mode) {
+    case 1:
+        self->size = 0x400;
+        break;
+    case 2:
+        self->size = 0x200;
+        break;
+    case 3:
+        self->size = 0x1C0;
+        break;
+    case 4:
+        self->size = 0x180;
+        break;
+    case 6:
+        self->size = 0x140;
+        break;
+    case 5:
+    case 7:
+        self->size = 0x100;
+        break;
+    }
+    for (i = 0; i < self->count; i++) {
+        self->addr[i] = self->size * i * 16 + 0x70000000;
+        self->b20[i] = 0;
+        self->b2C[i] = 0;
+    }
+    if (self->size * self->count < 0x400)
+        D_004A5B84 = self->size * self->count * 16 + 0x70000000;
+    else
+        D_004A5B84 = 0;
+    func_0038F768();
+    func_0038F7B0();
+}
 
 //100%
 struct sLightRing {
