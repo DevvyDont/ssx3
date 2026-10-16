@@ -27,6 +27,9 @@ set(SSX3PC_RUNTIME_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type of the r
 set(SSX3PC_RUNTIME_JOBS "" CACHE STRING
     "Parallel jobs for the runtime build (the generated code needs about 3 GB per job)")
 option(SSX3PC_FFMPEG "Build the runtime with FFmpeg, which plays the game's movies" ON)
+# The function tracker logs and flushes every guest function entry and exit to ps2_log.txt,
+# which makes races run at 1-2 frames a second. Off unless debugging the runtime.
+option(SSX3PC_TRACE_LOGS "Build the runtime with its per-function trace and IOP RPC trace logs" OFF)
 set(SSX3PC_PKG_CONFIG_PATH "/usr/lib/i386-linux-gnu/pkgconfig" CACHE STRING
     "pkg-config path for the 32-bit FFmpeg libraries")
 
@@ -136,6 +139,8 @@ ExternalProject_Add(ssx3pc_runtime
         -DPS2X_BUILD_STUDIO=OFF
         -DPS2X_ENABLE_FFMPEG=${RUNTIME_FFMPEG}
         -DPS2X_ENABLE_SCCACHE=OFF
+        -DPS2X_ENABLE_AGRESSIVE_LOGS=${SSX3PC_TRACE_LOGS}
+        -DPS2X_ENABLE_IOP_RPC_TRACE=${SSX3PC_TRACE_LOGS}
         -DPS2X_RUNNER_SOURCE_DIR=${GEN_DIR}
         -DPS2X_RUNNER_EXTRA_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}/ssx3_overrides.cpp
     BUILD_COMMAND ${RUNTIME_ENV} ${CMAKE_COMMAND} --build . ${RUNTIME_BUILD_ARGS}

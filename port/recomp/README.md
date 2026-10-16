@@ -53,6 +53,10 @@ Each compile job needs up to about 3 GB of memory, and that's what `SSX3PC_RUNTI
 FFmpeg plays the game's movies. Pass `-DSSX3PC_FFMPEG=OFF` to build without it (the game then waits forever on
 the first movie), or `-DSSX3PC_PKG_CONFIG_PATH=...` if your 32-bit FFmpeg lives elsewhere.
 
+The runtime's per-function trace log (`ps2_log.txt`, written next to the ELF) and its IOP RPC trace are off by default:
+the trace flushes every guest function call to disk and slows races from about 2.3 to 1.6 frames a second.
+Pass `-DSSX3PC_TRACE_LOGS=ON` to turn them back on.
+
 ## Running
 
 Run it from a folder holding the extracted disc, and point `PS2X_CD_IMAGE` at an ISO of the disc:
@@ -75,6 +79,7 @@ These debug switches print to stderr:
 | `PS2X_DUMP_RDRAM=file` with `PS2X_DUMP_RDRAM_TICK=n` | EE RAM, written to `file` at frame `n` |
 | `PS2X_DUMP_RDRAM_ON_FAULT=file` | EE RAM, written to `file` the first time guest code jumps to an unknown address |
 | `PS2X_VU1_LOG=1` | how often each VU1 microprogram runs, and VIF1 codes the interpreter skips |
+| `PS2X_FRAME_LOG=1` | how many passes of the game's main loop run per second, every 2 s |
 | `PS2X_GS_SAMPLE=flagfile` | once `flagfile` exists, 3000 non-sprite primitives drawn to the main framebuffer |
 
 Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
