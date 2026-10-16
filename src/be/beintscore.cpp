@@ -244,7 +244,124 @@ extern "C" void func_00155390(char* self, int idx, int score)
     }
 }
 
-INCLUDE_ASM("be/beintscore", func_00155420);
+//100%
+struct sGame5420 {
+    char pad_0x0[0x40];
+    int course;         // 0x40
+    char pad_0x44[4];
+    signed char f48;    // 0x48
+    signed char f49;    // 0x49
+    signed char f4A;    // 0x4A
+};
+extern sGame5420 D_005305B0_5420[] __asm__("D_005305B0");
+extern int D_0043D950[];
+
+struct sStats5420 {
+    char pad_0x0[0x18];
+    int f18;
+    int f1C;
+    int f20;
+    char pad_0x24[8];
+    int f2C;
+    char pad_0x30[0x20];
+    float f50;
+    char pad_0x54[4];
+    float f58;
+    float f5C;
+    char pad_0x60[0x28];
+    int f88;
+};
+
+struct sProf5420 { char s[0xF88]; };
+
+struct sCourse5420 { int id; char pad[0x60]; };
+
+struct sRec5420 {
+    int score;
+    int course;
+};
+
+extern "C" void func_00155420(int index, int stats_, int a2, int a3)
+{
+    sStats5420* stats = (sStats5420*)stats_;
+    sGame5420* g = D_005305B0_5420;
+    int profile;
+    int c;
+    int course;
+    signed char mode;
+    signed char f48;
+    char* p;
+    sRec5420* rec;
+    int i;
+    if (g->f49 != 0) return;
+    profile = cBELibrary_getProfileIndex(index);
+    if ((unsigned int)profile >= 3) return;
+    c = cBELibrary_getCharacterID(index);
+    mode = g->f4A;
+    f48 = g->f48;
+    p = ((sProf5420 (*)[10])D_004A6CA8)[profile][c].s;
+    course = ((sCourse5420*)D_0043D950)[g->course].id;
+    rec = (sRec5420*)(p + 0xDE4);
+    if (course == 0x16) course = 0;
+    {
+        int start = 0;
+        if (stats == 0 || mode == 12) start = 8;
+        i = start;
+    }
+    for (; i < 10; i++) {
+        sRec5420* e = &rec[i];
+        int v;
+        switch (i) {
+        case 0:
+            v = stats->f2C;
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 3, v); }
+            break;
+        case 1:
+            v = stats->f18;
+            if (v >= e->score) { e->score = v; e->course = course; }
+            break;
+        case 2:
+            v = stats->f1C;
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 5, v); }
+            break;
+        case 3:
+            v = stats->f20;
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 4, v); }
+            break;
+        case 4:
+            v = stats->f88;
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 7, v); }
+            break;
+        case 5:
+            v = (int)(stats->f5C + 0.5f);
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 1, v); }
+            break;
+        case 6:
+            v = (int)(stats->f58 + 0.5f);
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 0, v); }
+            break;
+        case 7:
+            v = (int)(stats->f50 + 0.5f);
+            if (v >= e->score) { e->score = v; e->course = course; func_00155390(p, 2, v); }
+            break;
+        case 8:
+            if (a3 > 0 && mode == 0) {
+                if (e->score == 0 || e->score >= a3) { e->score = a3; e->course = course; }
+            }
+            break;
+        case 9:
+            if (a2 > 0) {
+                if ((unsigned int)(mode - 1) < 3 || f48 == 6) {
+                    if (a2 >= e->score) { e->score = a2; e->course = course; func_00155390(p, 6, a2 / 100); }
+                }
+            }
+            break;
+        }
+    }
+    if (stats != 0) {
+        if (stats->f88 >= rec[10].score) rec[10].score = stats->f88;
+    }
+}
 
 //100%
 extern "C" void* cBE_getBE();
