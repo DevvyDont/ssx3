@@ -886,6 +886,70 @@ index 9614016..bbd4d3a 100644
  
          setReturnU32(ctx, ret);
      }
+diff --git a/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp b/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
+index f0ad507..eeee1f1 100644
+--- a/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
++++ b/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
+@@ -1,3 +1,4 @@
++#include <cstdlib>
+ #include "runtime/gs/gs_cpu_backend.h"
+ #include "runtime/gs/ps2_gs_common.h"
+ #include "runtime/gs/ps2_gs_psmct16.h"
+@@ -818,6 +819,54 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
+         }
+     });
+ 
++    // PS2X_GS_SAMPLE=flagfile: while flagfile exists, log the next 4000 primitives, then remove it.
++    static const char *gsSample = std::getenv("PS2X_GS_SAMPLE");
++    if (gsSample)
++    {
++        static uint32_t sampled = 0;
++        static uint32_t pollTick = 0;
++        static bool active = false;
++        if (!active && (++pollTick % 512u) == 0u)
++        {
++            if (FILE *probe = std::fopen(gsSample, "rb"))
++            {
++                std::fclose(probe);
++                active = true;
++                sampled = 0;
++            }
++        }
++        static uint64_t typeCounts[8] = {};
++        if (active)
++            ++typeCounts[static_cast<unsigned>(state.prim.type) & 7u];
++        if (active && state.prim.type == GS_PRIM_SPRITE && (typeCounts[6] % 64u) == 0u)
++            std::fprintf(stderr, "[gsprim] counts pt=%llu ln=%llu ls=%llu tri=%llu ts=%llu tf=%llu spr=%llu\n",
++                         (unsigned long long)typeCounts[0], (unsigned long long)typeCounts[1], (unsigned long long)typeCounts[2],
++                         (unsigned long long)typeCounts[3], (unsigned long long)typeCounts[4], (unsigned long long)typeCounts[5],
++                         (unsigned long long)typeCounts[6]);
++        if (active && state.prim.type != GS_PRIM_SPRITE && ctx.frame.fbp < 300u && ++sampled <= 3000u)
++        {
++            const GSVertex *v = batch.vertices.data();
++            std::fprintf(stderr,
++                         "[gsprim] t=%u tme=%d abe=%d fge=%d fst=%d fbp=%u psm=%x zbp=%u zpsm=%x zm=%d test=%llx alpha=%llx fbmsk=%x tex=%u/%x "
++                         "v0=(%.1f,%.1f,%.0f q%.3g) v1=(%.1f,%.1f,%.0f) v2=(%.1f,%.1f,%.0f) c0=%u,%u,%u,%u st0=%.3g,%.3g ofs=%u,%u sc=%u-%u,%u-%u\n",
++                         static_cast<unsigned>(state.prim.type), state.prim.tme, state.prim.abe, state.prim.fge, state.prim.fst,
++                         ctx.frame.fbp, ctx.frame.psm, ctx.zbuf.zbp, ctx.zbuf.psm, ctx.zbuf.zmask,
++                         static_cast<unsigned long long>(ctx.test), static_cast<unsigned long long>(ctx.alpha), ctx.frame.fbmsk,
++                         ctx.tex0.tbp0, ctx.tex0.psm,
++                         v[0].x, v[0].y, v[0].z, v[0].q, v[1].x, v[1].y, v[1].z, v[2].x, v[2].y, v[2].z,
++                         v[0].r, v[0].g, v[0].b, v[0].a, v[0].s, v[0].t,
++                         ctx.xyoffset.ofx >> 4, ctx.xyoffset.ofy >> 4,
++                         ctx.scissor.x0, ctx.scissor.x1, ctx.scissor.y0, ctx.scissor.y1);
++        }
++        if (active && sampled >= 3000u)
++        {
++            {
++                active = false;
++                std::remove(gsSample);
++            }
++        }
++    }
++
+     switch (state.prim.type)
+     {
+     case GS_PRIM_SPRITE:
 diff --git a/ps2xRuntime/src/lib/ps2_debug_panel.cpp b/ps2xRuntime/src/lib/ps2_debug_panel.cpp
 index c9aa2c6..5cfa0e7 100644
 --- a/ps2xRuntime/src/lib/ps2_debug_panel.cpp
@@ -1151,18 +1215,19 @@ index 37b6a4d..07d5731 100644
          uint64_t *reg = gsRegPtr(gs_regs, address);
          return reg ? *reg : 0;
 diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
-index 45cb9d2..5c676cd 100644
+index 45cb9d2..bb0729c 100644
 --- a/ps2xRuntime/src/lib/ps2_runtime.cpp
 +++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
-@@ -1,4 +1,7 @@
+@@ -1,4 +1,8 @@
 +#include <cstdio>
 +#include <cstdlib>
++#include <map>
  #include "ps2_runtime.h"
 +#include "ps2_guest_scratch.h"
  #include "ps2_log.h"
  #include "ps2_stubs.h"
  #include "ps2_syscalls.h"
-@@ -27,6 +30,11 @@
+@@ -27,6 +31,11 @@
  #include <unordered_map>
  #include <sstream>
  
@@ -1174,7 +1239,7 @@ index 45cb9d2..5c676cd 100644
  namespace ps2_stubs
  {
      void resetSifState();
-@@ -477,10 +485,17 @@ static void UploadFrame(Texture2D &tex, PS2Runtime *rt, uint32_t &outWidth, uint
+@@ -477,10 +486,17 @@ static void UploadFrame(Texture2D &tex, PS2Runtime *rt, uint32_t &outWidth, uint
      s_hasUploadedFrame = true;
  }
  
@@ -1192,7 +1257,44 @@ index 45cb9d2..5c676cd 100644
  
      m_eeScheduler = std::make_unique<EeScheduler>(*this);
  
-@@ -1342,6 +1357,19 @@ void PS2Runtime::reportMissingFunction(uint8_t *rdram,
+@@ -679,6 +695,20 @@ bool PS2Runtime::syncCoreSubsystems()
+                                          (cpuContext->vu0_fbrst & (1u << 10)) != 0u;
+                                      m_vu1.state().tBitEnabled =
+                                          (cpuContext->vu0_fbrst & (1u << 11)) != 0u;
++                                     static const bool vu1Log = std::getenv("PS2X_VU1_LOG") != nullptr;
++                                     if (vu1Log)
++                                     {
++                                         static std::map<uint32_t, uint64_t> calls;
++                                         static uint64_t total = 0;
++                                         ++calls[startPC];
++                                         if ((++total % 5000u) == 0u)
++                                         {
++                                             std::fprintf(stderr, "[vu1] %llu mscal:", static_cast<unsigned long long>(total));
++                                             for (const auto &kv : calls)
++                                                 std::fprintf(stderr, " %04x=%llu", kv.first, static_cast<unsigned long long>(kv.second));
++                                             std::fprintf(stderr, "\n");
++                                         }
++                                     }
+                                      m_vu1.execute(m_memory.getVU1Code(), PS2_VU1_CODE_SIZE,
+                                                    m_memory.getVU1Data(), PS2_VU1_DATA_SIZE,
+                                                    m_gs, &m_memory, startPC, top, itop, 65536);
+@@ -1275,6 +1305,15 @@ void PS2Runtime::reportMissingFunction(uint8_t *rdram,
+ 
+     if (firstReport)
+     {
++        if (const char *dumpPath = std::getenv("PS2X_DUMP_RDRAM_ON_FAULT"))
++        {
++            if (FILE *f = std::fopen(dumpPath, "wb"))
++            {
++                std::fwrite(rdram, 1, PS2_RAM_SIZE, f);
++                std::fclose(f);
++                std::cerr << "[dump] rdram written to " << dumpPath << std::endl;
++            }
++        }
+         std::ostringstream oss;
+         oss << "[guest-branch:missing-target] kind=" << describeGuestBranchKind(kind)
+             << " op=" << (debugName ? debugName : "<unknown>")
+@@ -1342,6 +1381,19 @@ void PS2Runtime::reportMissingFunction(uint8_t *rdram,
      }
  }
  
@@ -1212,7 +1314,7 @@ index 45cb9d2..5c676cd 100644
  bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
                                       R5900Context *ctx,
                                       uint32_t targetPc,
-@@ -1350,6 +1378,13 @@ bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
+@@ -1350,6 +1402,13 @@ bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
                                       GuestBranchKind kind,
                                       const char *debugName)
  {
@@ -1226,7 +1328,7 @@ index 45cb9d2..5c676cd 100644
      ctx->pc = targetPc;
      const bool isCall = (kind == GuestBranchKind::DirectCall || kind == GuestBranchKind::IndirectCall);
  
-@@ -1677,6 +1712,11 @@ void PS2Runtime::ensureGuestHeapInitializedLocked()
+@@ -1677,6 +1736,11 @@ void PS2Runtime::ensureGuestHeapInitializedLocked()
          return;
      }
  
@@ -1238,7 +1340,7 @@ index 45cb9d2..5c676cd 100644
      const uint32_t suggested = (m_guestHeapSuggestedBase == 0u) ? kGuestHeapDefaultBase : m_guestHeapSuggestedBase;
      resetGuestHeapLocked(suggested, clampGuestHeapLimit(0u));
  }
-@@ -1807,6 +1847,17 @@ void PS2Runtime::freeGuestBlockLocked(uint32_t guestAddr)
+@@ -1807,6 +1871,17 @@ void PS2Runtime::freeGuestBlockLocked(uint32_t guestAddr)
  void PS2Runtime::configureGuestHeap(uint32_t guestBase, uint32_t guestLimit)
  {
      std::lock_guard<std::mutex> lock(m_guestHeapMutex);
@@ -1256,7 +1358,7 @@ index 45cb9d2..5c676cd 100644
      uint32_t normalizedBase = alignGuestHeapValue(clampGuestHeapBase(guestBase), kGuestHeapDefaultAlignment);
      if (normalizedBase == 0u)
      {
-@@ -1820,7 +1871,10 @@ uint32_t PS2Runtime::guestMalloc(uint32_t size, uint32_t alignment)
+@@ -1820,7 +1895,10 @@ uint32_t PS2Runtime::guestMalloc(uint32_t size, uint32_t alignment)
  {
      std::lock_guard<std::mutex> lock(m_guestHeapMutex);
      ensureGuestHeapInitializedLocked();
@@ -1268,7 +1370,7 @@ index 45cb9d2..5c676cd 100644
  }
  
  uint32_t PS2Runtime::guestCalloc(uint32_t count, uint32_t size, uint32_t alignment)
-@@ -1975,6 +2029,16 @@ uint32_t PS2Runtime::guestHeapLimit() const
+@@ -1975,6 +2053,16 @@ uint32_t PS2Runtime::guestHeapLimit() const
      return m_guestHeapConfigured ? m_guestHeapLimit : m_guestHeapSuggestedBase;
  }
  
@@ -1285,7 +1387,7 @@ index 45cb9d2..5c676cd 100644
  uint32_t PS2Runtime::reserveAsyncCallbackStack(uint32_t size, uint32_t alignment)
  {
      if (size == 0u)
-@@ -2420,6 +2484,22 @@ void PS2Runtime::run()
+@@ -2420,6 +2508,22 @@ void PS2Runtime::run()
  
              }
          });
@@ -1308,6 +1410,46 @@ index 45cb9d2..5c676cd 100644
          uint32_t presentWidth = FB_WIDTH;
          uint32_t presentHeight = DEFAULT_DISPLAY_HEIGHT;
          UploadFrame(frameTex, this, presentWidth, presentHeight);
+diff --git a/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp b/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
+index b02c7ca..40b31d6 100644
+--- a/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
++++ b/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
+@@ -1,3 +1,5 @@
++#include <cstdio>
++#include <cstdlib>
+ // Based on Blackline Interactive implementation
+ #include "runtime/ps2_memory.h"
+ #include <cstring>
+@@ -697,13 +699,14 @@ void PS2Memory::processVIF1Data(const uint8_t *data, uint32_t sizeBytes)
+                     }
+                     else if (vl == 3u && vn == 3u)
+                     {
+-                        // V4-5: packed color-like format in a single 16-bit value.
++                        // V4-5: RGBA 5:5:5:1 in one 16-bit value, expanded to 8-bit
++                        // channels (R/G/B shifted left by 3, A by 7) as the VIF does.
+                         uint16_t packed = 0;
+                         std::memcpy(&packed, srcVec, sizeof(packed));
+-                        decompressed[0] = packed & 0x1Fu;
+-                        decompressed[1] = (packed >> 5) & 0x1Fu;
+-                        decompressed[2] = (packed >> 10) & 0x1Fu;
+-                        decompressed[3] = (packed >> 15) & 0x01u;
++                        decompressed[0] = (packed & 0x1Fu) << 3;
++                        decompressed[1] = ((packed >> 5) & 0x1Fu) << 3;
++                        decompressed[2] = ((packed >> 10) & 0x1Fu) << 3;
++                        decompressed[3] = ((packed >> 15) & 0x01u) << 7;
+                     }
+                     else
+                     {
+@@ -777,6 +780,9 @@ void PS2Memory::processVIF1Data(const uint8_t *data, uint32_t sizeBytes)
+         }
+         else
+         {
++            static const bool vifLog = std::getenv("PS2X_VU1_LOG") != nullptr;
++            if (vifLog)
++                std::fprintf(stderr, "[vif1] unhandled opcode %02x imm=%04x\n", opcode, imm);
+             continue;
+         }
+     }
 diff --git a/ps2xRuntime/src/main.cpp b/ps2xRuntime/src/main.cpp
 index 563bcbd..e00fe45 100644
 --- a/ps2xRuntime/src/main.cpp

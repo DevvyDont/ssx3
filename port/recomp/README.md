@@ -20,6 +20,7 @@ or any disc file.
   - MPEG movies that pull their data through the game's Nodata callback, and end when the stream does;
   - a way for a game to move the runtime's scratch allocations out of its own heap;
   - the debug panel hidden until F1 is pressed (or `PS2X_DEBUG_UI=1`);
+  - VIF `UNPACK V4-5` expanding 5:5:5:1 colours to 8 bits per channel, as the hardware does;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -67,11 +68,15 @@ These debug switches print to stderr:
 | `PS2X_MPEG_LOG=1` | MPEG callbacks, data fed to the decoder, and the end of each movie |
 | `PS2X_HEAP_LOG=1` | the runtime's scratch allocations |
 | `PS2X_DUMP_RDRAM=file` with `PS2X_DUMP_RDRAM_TICK=n` | EE RAM, written to `file` at frame `n` |
+| `PS2X_DUMP_RDRAM_ON_FAULT=file` | EE RAM, written to `file` the first time guest code jumps to an unknown address |
+| `PS2X_VU1_LOG=1` | how often each VU1 microprogram runs, and VIF1 codes the interpreter skips |
+| `PS2X_GS_SAMPLE=flagfile` | once `flagfile` exists, 3000 non-sprite primitives drawn to the main framebuffer |
 
 Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 
 ## Status
 
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
-input through the front end: the main menu, character select and the 3D character setup screen all draw.
-Sound has not been tested yet.
+input through the front end to a race. In the race, the HUD, sky and distant mountains draw; the nearby track,
+riders and scenery do not yet. Pressing X while the race is loading can crash the loader thread. Sound has not
+been tested yet.
