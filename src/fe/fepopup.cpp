@@ -3065,7 +3065,194 @@ extern "C" void func_001CC190(void* self)
     *(int*)((char*)self + 0x140) = i;
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CC1E0);
+//100%
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int strlen(const char* s);
+extern "C" int func_001CE560(void*, int, int);
+extern "C" void func_001CE5E0(void* self, int key);
+extern "C" void func_001CC7C8(void* self);
+extern "C" void func_001CC848(void* self, int a1);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_redrawScreen(void* self);
+extern "C" int cKeyboardPopup_getObjName(void* self, int i, char* out, int mode);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+int GetHashValue32(char* str);
+
+struct sVEntry_1CC1E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sColor_1CC1E0 {
+    float r;
+    float g;
+    float b;
+    float a;
+    sColor_1CC1E0(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+struct sVEntryC_1CC1E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, const sColor_1CC1E0&);
+};
+
+static inline void Show_1CC1E0(char* obj, int frame)
+{
+    sVEntry_1CC1E0* vt = *(sVEntry_1CC1E0**)(obj + 8);
+    vt[19].fn(obj + vt[19].delta, 0, frame);
+}
+
+extern "C" void func_001CC1E0(char* self, int msg)
+{
+    int flash = 0;
+    if (*(int*)(self + 0x54) != 0) {
+        int cur = *(int*)(self + 0x140);
+        if (cur != 0x37 && cur != 0x46) {
+            *(int*)(self + 0x54) = 0;
+            *(int*)(self + 0x140) = 0x46;
+            func_001CC1E0(self, 0);
+            flash = 1;
+            *(int*)(self + 0x140) = cur;
+        }
+    }
+    int sel = 0;
+    if (msg == 0 && func_001CE560(self, *(int*)(self + 0x140), 0)) {
+        switch (*(unsigned int*)(self + 0x140)) {
+        case 0x1B: {
+            char* buf = self + 0x74;
+            int len = strlen(buf);
+            int pos = *(int*)(self + 0x134);
+            if (pos != len) {
+                if (pos != 0) {
+                    if (pos > 0) {
+                        *(int*)(self + 0x134) = pos - 1;
+                    }
+                    strcpy(self + 0x74 + *(int*)(self + 0x134), self + 0x75 + *(int*)(self + 0x134));
+                    if (*(int*)(self + 0x138) == *(int*)(self + 0x134) + 1) {
+                        *(int*)(self + 0x138) = *(int*)(self + 0x134);
+                        sel = 1;
+                    }
+                    if (strlen(self + 0x74) < *(unsigned int*)(self + 0x13C)) {
+                        *(int*)(self + 0x13C) = strlen(self + 0x74);
+                    }
+                }
+            } else {
+                if (*(int*)(self + 0x138) == pos) {
+                    *(int*)(self + 0x138) = 0;
+                } else {
+                    if (pos > 0) {
+                        *(int*)(self + 0x134) = pos - 1;
+                    }
+                    buf[*(int*)(self + 0x134)] = 0;
+                    *(int*)(self + 0x13C) = *(int*)(self + 0x134);
+                }
+            }
+            break;
+        }
+        case 0x2A:
+            *(int*)(self + 0x68) ^= 1;
+            cKeyboardPopup_redrawScreen(self);
+            break;
+        case 0x38:
+            *(int*)(self + 0x6C) ^= 1;
+            cKeyboardPopup_redrawScreen(self);
+            break;
+        case 0x46:
+            func_00416210(self + 0x74, 0, 0x40);
+            self[0x74] = 0;
+            *(int*)(self + 0x134) = 0;
+            *(int*)(self + 0x13C) = 0;
+            *(int*)(self + 0x138) = 0;
+            break;
+        case 0x4C:
+            if (*(int*)(self + 0x134) == *(int*)(self + 0x138)) {
+                if (*(int*)(self + 0x134) != 0) {
+                    *(int*)(self + 0x138) = *(int*)(self + 0x134) - 1;
+                }
+                sel = 1;
+            }
+            if (*(int*)(self + 0x134) > 0) {
+                *(int*)(self + 0x134) = *(int*)(self + 0x134) - 1;
+            }
+            break;
+        case 0x53: {
+            int len = strlen(self + 0x74);
+            int pos = *(int*)(self + 0x134);
+            if (pos != len) {
+                if (pos < *(int*)(self + 0x60) - 1) {
+                    *(int*)(self + 0x134) = pos + 1;
+                }
+                if (*(int*)(self + 0x13C) == *(int*)(self + 0x134)) {
+                    *(int*)(self + 0x13C) = *(int*)(self + 0x13C) + 1;
+                }
+            }
+            break;
+        }
+
+        case 0x37:
+            if (*(int*)(self + 0x420) != 0) {
+                func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+            }
+            *(int*)(self + 0x5C) = 1;
+            Show_1CC1E0(*(char**)(self + 0x20), 0xD);
+            break;
+        case 0x4B:
+            if (func_001CE560(self, 0x4B, 0)) {
+                func_001CC7C8(self);
+            }
+            break;
+        case 0:
+            func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+            Show_1CC1E0(*(char**)(self + 0x20), 0xE);
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+            func_001CE5E0(self, *(int*)(self + 0x140) - 4);
+            break;
+        case 0x1C:
+        case 0x45:
+        case 0x4F:
+            break;
+        default:
+            func_001CC7C8(self);
+            break;
+        }
+    }
+    if (*(int*)(self + 0x140) != 0x38 && *(int*)(self + 0x6C) != 0) {
+        *(int*)(self + 0x6C) ^= 1;
+        cKeyboardPopup_redrawScreen(self);
+    }
+    func_001CC848(self, sel);
+    if (*(int*)(self + 0x58) != 0) {
+        func_001CE3C8(self, 0x4B, strlen(self + 0x74) != 0, 2);
+    }
+    if (strlen(self + 0x74) < *(int*)(self + 0x64)) {
+        func_001CE3C8(self, 0x37, 0, 2);
+    } else {
+        func_001CE3C8(self, 0x37, 1, 2);
+    }
+    cKeyboardPopup_redrawScreen(self);
+    if (flash) {
+        char name[32];
+        cKeyboardPopup_getObjName(self, 0x46, name, 1);
+        char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+        if (obj != 0) {
+            sVEntryC_1CC1E0* vt = *(sVEntryC_1CC1E0**)(obj + 8);
+            vt[11].fn(obj + vt[11].delta, sColor_1CC1E0(0.3f, 0.0f, 0.0f, 0.0f));
+        }
+    }
+}
 
 //100%
 extern "C" int strlen(const char* s);
