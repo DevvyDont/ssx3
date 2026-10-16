@@ -802,7 +802,75 @@ extern "C" void* func_003252E8(void* self, int i)
     return &((sInputParse_003252E8*)self)->a[i];
 }
 
-INCLUDE_ASM("input/inputparse", func_003252F8);
+//100%
+struct sIPEntry_52F8 {
+    float f;
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+    unsigned int d;
+    int pad[2];
+};
+struct sIPTable_52F8 {
+    int count;
+    sIPEntry_52F8 e[1];
+};
+struct sIP_52F8 {
+    int type;
+    sIPTable_52F8* t;
+};
+
+extern "C" float func_003252F8(void* self_, int idx, int type)
+{
+    sIP_52F8* self = (sIP_52F8*)self_;
+again:
+    switch (type) {
+    case 0:
+        if (idx < self->t->count)
+            return self->t->e[idx].f;
+        break;
+    case 1:
+        {
+            unsigned int v;
+            if (idx < self->t->count)
+                v = self->t->e[idx].c;
+            else
+                v = 0;
+            return (float)v;
+        }
+    case 2:
+        {
+            unsigned int v;
+            if (idx < self->t->count)
+                v = self->t->e[idx].a;
+            else
+                v = 0;
+            return (float)v;
+        }
+    case 3:
+        {
+            unsigned int v;
+            if (idx < self->t->count)
+                v = self->t->e[idx].b;
+            else
+                v = 0;
+            return (float)v;
+        }
+    case 4:
+        {
+            unsigned int v;
+            if (idx < self->t->count)
+                v = self->t->e[idx].d;
+            else
+                v = 0;
+            return (float)v;
+        }
+    case 5:
+        type = self->type;
+        goto again;
+    }
+    return 0.0f;
+}
 
 //100%
 extern "C" float func_00325430(void* self, int a1)

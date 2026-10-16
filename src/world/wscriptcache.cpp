@@ -2111,7 +2111,62 @@ extern "C" void func_003B17A8(void)
 
 INCLUDE_ASM("world/wscriptcache", func_003B1878);
 
-INCLUDE_ASM("world/wscriptcache", func_003B1988);
+//100%
+extern "C" void func_003B1AB0(void);
+extern "C" void func_003B1CC0(void);
+extern "C" void func_003B1D58(void);
+extern "C" void func_003B1EE0(void);
+extern "C" void func_003B1FC8(void);
+extern "C" void func_003B20B8(void);
+extern "C" void func_003B2230(void);
+extern "C" void func_003B22F8(void);
+extern "C" void func_003B23A0(void);
+// PORT: called with no argument set up; bound to the mangled void* form by asm label
+void func_003B2380_noarg(void) __asm__("func_003B2380__FPv");
+
+extern "C" void func_003B1988(void)
+{
+    unsigned int t;
+    func_003B1498_noarg();
+    while ((t = func_003B1258(0x20)) == 0x1B5 || t == 0x1B2) {
+        if (t == 0x1B5) {
+            func_003B1340();
+            switch ((int)func_003B1300(4) - 1) {
+            case 0:
+                func_003B1AB0();
+                break;
+            case 1:
+                func_003B1CC0();
+                break;
+            case 2:
+                func_003B1D58();
+                break;
+            case 4:
+                func_003B1EE0();
+                break;
+            case 6:
+                func_003B1FC8();
+                break;
+            case 7:
+                func_003B20B8();
+                break;
+            case 8:
+                func_003B2230();
+                break;
+            case 9:
+                func_003B22F8();
+                break;
+            case 3:
+                func_003B23A0();
+                break;
+            }
+            func_003B1498_noarg();
+        } else {
+            func_003B1340();
+            func_003B2380_noarg();
+        }
+    }
+}
 
 //100%
 extern int D_005095DC[];

@@ -4057,7 +4057,62 @@ extern "C" void func_00364050(char* self)
     func_0038F6A8(ring);
 }
 
-INCLUDE_ASM("object/railmodifier", func_00364240);
+//100%
+extern "C" unsigned int func_00364240(unsigned int* p, int a1)
+{
+    int w = 31 - ((p[2] & 0x3E0) >> 5);
+    unsigned int m;
+    switch ((int)(p[1] & 3)) {
+    case 0:
+        m = 0x3FF;
+        break;
+    case 1:
+        m = 0x3FE;
+        break;
+    case 2:
+        m = (p[2] & 0x1FFFFC00) >> 10;
+        break;
+    default:
+        m = 0;
+        break;
+    }
+    int k;
+    switch ((p[0] & 0x3C0) >> 6) {
+    case 5:
+        k = 6;
+        break;
+    case 2:
+        k = 5;
+        break;
+    case 1:
+        k = 4;
+        break;
+    case 3:
+        k = 3;
+        break;
+    case 6:
+    case 7:
+        k = 2;
+        break;
+    case 4:
+    case 8:
+        k = 1;
+        break;
+    case 0:
+    default:
+        k = 0;
+        break;
+    }
+    short lo = (short)a1;
+    int hi = a1 >> 16;
+    int v = 0;
+    if (lo >= 0)
+        v = lo;
+    if (hi >= 0)
+        v |= (hi & 0xF) << 6;
+    v &= 0x3FF;
+    return ~((w << 26) | (m << 16) | (k << 13) | (v << 3));
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void* func_00416210(void* dst, int c, int n);
