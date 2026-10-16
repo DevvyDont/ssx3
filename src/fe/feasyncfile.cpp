@@ -10253,7 +10253,56 @@ extern "C" void func_001B7CB8(char* self)
 
 INCLUDE_ASM("fe/feasyncfile", func_001B7E40);
 
-INCLUDE_ASM("fe/feasyncfile", func_001B8238);
+//100%
+extern "C" void func_002C2718_8238(char* buf, const char* fmt, ...) __asm__("func_002C2718");
+extern "C" void func_002C26D0_8238(void* str, int fmt, ...) __asm__("func_002C26D0");
+extern char D_004A12C0[];
+extern char D_004642E0[];
+extern char D_00463F20[];
+extern char D_00464588[];
+extern char D_004644D8[];
+
+struct sVEntry_8238 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Loc8238(char* name)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_8238* vt = *(sVEntry_8238**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+}
+
+extern "C" void func_001B8238(char* self)
+{
+    char buf[32];
+    func_002C2718_8238(buf, D_004A12C0, 1);
+    switch (*(int*)(self + 0x6DC)) {
+    case 3:
+    case 23: {
+        int a = Loc8238(D_004642E0);
+        int f = Loc8238(D_00463F20);
+        func_002C26D0_8238(self + 0x702, f, 1, a);
+        break;
+    }
+    case 9:
+    case 15:
+    case 17:
+        {
+            int f = Loc8238(D_00464588);
+            func_002C26D0_8238(self + 0x702, f, 1, 0x11);
+        }
+        break;
+    case 28:
+        {
+            int f = Loc8238(D_004644D8);
+            func_002C26D0_8238(self + 0x702, f, buf);
+        }
+        break;
+    }
+}
 
 //100%
 extern void* D_004A28A8;
