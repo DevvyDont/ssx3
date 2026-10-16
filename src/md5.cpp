@@ -10,8 +10,6 @@ struct md5_ctx {
 };
 
 INCLUDE_ASM("md5", md5_process);
-#ifdef SKIP_ASM
-#endif
 
 //100%
 void md5_init(md5_ctx* ctx)

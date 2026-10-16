@@ -78,12 +78,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEA8);
 
 //80.0%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);
-#ifdef SKIP_ASM
-void* func_0016CEC8(void* self, int a1)
-{
-    return func_0016CEF0((void*)D_004C5830, self, a1);
-}
-#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);

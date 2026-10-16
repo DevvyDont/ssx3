@@ -2058,11 +2058,8 @@ struct sFontCache {
 
 inline void* operator new(unsigned int, void* p) { return p; }
 
-extern "C" void* func_00394D50(void* self)
-{
-    new (self) sFontCache;
-    return self;
-}
+INCLUDE_ASM("render/font", func_00394D50);
+extern "C" void* func_00394D50(void* self);
 
 //100%
 struct sGlyphKey {
@@ -2190,17 +2187,8 @@ struct sRenderSlot5288 {
     sRenderSlot5288() {}
 };
 
-extern "C" void* func_00395288(void* self)
-{
-    func_003691F8(self);
-    *(void***)((char*)self + 0x10D8) = D_00493260;
-    new ((char*)self + 0x10E0) sRenderSlot5288[12];
-    new ((char*)self + 0x11A0) sRenderSlot5288[8];
-    new ((char*)self + 0x1220) sRenderSlot5288[2];
-    new ((char*)self + 0x1240) sRenderSlot5288[2];
-    new ((char*)self + 0x1260) sRenderSlot5288[4];
-    return self;
-}
+INCLUDE_ASM("render/font", func_00395288);
+extern "C" void* func_00395288(void* self);
 
 //100%
 int func_00395318(void* self)
@@ -2269,25 +2257,8 @@ extern "C" void func_003956B0(void* self);
 
 // Fetch the current (combined) matrix into out and return out.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void* func_003953B8(void* out, void* self)
-{
-    func_003956B0(self);
-    __asm__ __volatile__(
-        ".set noreorder\n"
-        "lqc2      $vf1, 0x0(%1)\n"
-        "lqc2      $vf2, 0x10(%1)\n"
-        "lqc2      $vf3, 0x20(%1)\n"
-        "lqc2      $vf4, 0x30(%1)\n"
-        "sqc2      $vf1, 0x0(%0)\n"
-        "sqc2      $vf2, 0x10(%0)\n"
-        "sqc2      $vf3, 0x20(%0)\n"
-        "sqc2      $vf4, 0x30(%0)\n"
-        ".set reorder\n"
-        :
-        : "r"(out), "r"((char*)self + 0x58A0)
-        : "memory");
-    return out;
-}
+INCLUDE_ASM("render/font", func_003953B8);
+extern "C" void* func_003953B8(void* out, void* self);
 
 extern "C" void* func_00395418(void* self)
 {

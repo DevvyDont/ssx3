@@ -228,27 +228,8 @@ struct sFERiderED80 {
     int fCB4;           // 0xCB4
 };
 
-extern "C" void func_0019ED80(sFERiderED80* self)
-{
-    self->fCB4 = 1;
-    func_00369890(D_004A289C, 0, 0);
-    func_00369690(D_004A289C, self->count, self->bones);
-    cAnimModel_compile(self->model, 1);
-    char* anim = (char*)new (D_00460B28, 0, 0) sAnimMemED80;
-    cRiderAnimBase_cRiderAnimBase(anim);
-    *(void***)(anim + 0x58) = D_00458458;
-    *(int*)(anim + 0x60) = 0;
-    self->anim = anim;
-    *(int*)(anim + 0x64) = 0;
-    func_00104D50(anim, self);
-    cRiderAnimBase_play(self->anim, 0x1B2, 0, -1.0f);
-    func_00312598(self->anim, 0);
-    sHalfED80 p[2];
-    p[1] = D_004FF230;
-    p[0] = D_004FF230;
-    func_00310200(self->model, p);
-    cFERider_initBoneMap(self);
-}
+INCLUDE_ASM("fe/feridermanager", func_0019ED80);
+extern "C" void func_0019ED80(sFERiderED80* self);
 
 INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 

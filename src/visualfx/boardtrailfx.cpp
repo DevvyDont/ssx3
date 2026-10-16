@@ -43,44 +43,8 @@ struct cBoardTrailFX {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xF0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
-{
-    if (inChrg) {
-        self->vbase = (char*)self + 0xF0;
-        cRider_cRider((char*)self + 0xF0);
-    }
-    *(const void**)(self->vbase + 0x6E8) = &D_00488BB8;
-    *(void**)(self->vbase + 0x6D0) = D_00459B90;
-    *(const void**)(self->vbase + 0x6C0) = &D_00488C00;
-    if (inChrg == 0) {
-        int vc;
-        sBTVt9 t1 = D_00488BB8;
-        *(void**)(self->vbase + 0x6E8) = &t1;
-        {
-            char* vbo = self->vbase - 0xF0;
-            vc = (char*)self - vbo;
-        }
-        t1.e[1].delta = D_00488BB8.e[1].delta + vc;
-        sBTVt22 t2 = D_00488C00;
-        *(void**)(self->vbase + 0x6C0) = &t2;
-        t2.e[1].delta = D_00488C00.e[1].delta + vc;
-    }
-    self->f28 = 0;
-    short neg = -1;
-    int i;
-    for (i = 47; i >= 0; i--) {
-        self->ids[i] = neg;
-    }
-    sBTTrailVtx** s = self->strip;
-    s[0] = new (D_00487B20, 0, 0) sBTTrailVtx[324];
-    for (i = 1; i < 6; i++) {
-        s[i] = self->strip[0] + i * 54;
-    }
-    self->fC = 0;
-    func_003E6448(self->strip[0], 0, 0x3CC0);
-    func_002E8560((func_002E8560_sTrail*)self);
-    return self;
-}
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_initialize);
+extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg);
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E83F0);
 

@@ -18,13 +18,8 @@ struct sRiderSphere_329910 {
     sRiderSphere_329910() {}
 };
 
-cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
-{
-    new ((char*)self + 0x2C) sRiderSphere_329910[20];
-    self->field_0x24 = -1;
-    *(unsigned int*)&self->field_0x28 = 0xFFFFFFFF;
-    return self;
-}
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_cRiderSphereTree__FP16cRiderSphereTree);
+cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329938);
 
@@ -334,26 +329,8 @@ extern char D_6E0[];
 // returns whether it left a nonzero result in vi2.
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version
 // of the microprogram.
-extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
-{
-    int r;
-    __asm__ __volatile__(
-        ".set push\n"
-        ".set noreorder\n"
-        "lqc2      $vf10, 0x0(%1)\n"
-        "lqc2      $vf11, 0x0(%2)\n"
-        "lqc2      $vf12, 0x0(%3)\n"
-        "lqc2      $vf13, 0x0(%4)\n"
-        "ctc2.ni   %5, $vi27\n"
-        "vnop\n"
-        "vnop\n"
-        "vcallmsr  $vi27\n"
-        "cfc2.i    %0, $vi2\n"
-        ".set pop\n"
-        : "=r"(r)
-        : "r"(a), "r"(b), "r"(c), "r"(d), "0"((int)D_6E0 >> 3));
-    return r != 0;
-}
+INCLUDE_ASM("intersect/riderspheretree", func_0032B6A8);
+extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032B6E0);
 
@@ -581,19 +558,8 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C5E0);
 //100%
 // self->(0x80) += *v  (4-wide VU0 add, macro mode)
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-extern "C" void func_0032C630(void* self, void* v)
-{
-    __asm__ __volatile__(
-        ".set noreorder\n"
-        "lqc2      $vf3, 0x80(%0)\n"
-        "lqc2      $vf4, 0x0(%1)\n"
-        "vadd.xyzw $vf5, $vf3, $vf4\n"
-        "sqc2      $vf5, 0x80(%0)\n"
-        ".set reorder\n"
-        :
-        : "r"(self), "r"(v)
-        : "memory");
-}
+INCLUDE_ASM("intersect/riderspheretree", func_0032C630);
+extern "C" void func_0032C630(void* self, void* v);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032C648);
 
@@ -2192,25 +2158,8 @@ extern "C" int func_0032FFA0(void* self, sSphereVec4* a, sSphereVec4* b, sSphere
 //100%
 // Returns -dot(*a, *b) (4-component dot product on VU0, macro mode).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (-(ax*bx + ay*by + az*bz + aw*bw)).
-extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b)
-{
-    float d;
-    __asm__ __volatile__(
-        ".set push\n"
-        ".set noreorder\n"
-        "lqc2      $vf3, 0x0(%1)\n"
-        "lqc2      $vf5, 0x0(%2)\n"
-        "vaddw.x   $vf6, $vf0, $vf0w\n"
-        "vmul.xyzw $vf4, $vf3, $vf5\n"
-        "vadday.x  ACC, $vf4, $vf4y\n"
-        "vmaddaz.x ACC, $vf6, $vf4z\n"
-        "vmaddw.x  $vf4, $vf6, $vf4w\n"
-        "qmfc2.ni  %0, $vf4\n"
-        ".set pop\n"
-        : "=r"(d)
-        : "r"(a), "r"(b));
-    return -d;
-}
+INCLUDE_ASM("intersect/riderspheretree", func_003300F8);
+extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b);
 
 INCLUDE_ASM("intersect/riderspheretree", func_00330128);
 

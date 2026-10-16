@@ -347,17 +347,8 @@ struct sAnimState_00312598
 extern "C" int func_00314418(void* seq, sAnimState_00312598* out, int max);
 extern "C" void func_0030F2B0(void* model, int count, sAnimState_00312598* states, int a3);
 
-extern "C" void func_00312598(void* p, int a1)
-{
-    char* self = (char*)p;
-    int n = 0;
-    sAnimState_00312598 states[0x40];
-    for (int i = 0; i < 6; i++)
-    {
-        n += func_00314418(*(char**)(self + 0x50) + (i << 3), &states[n], 0x40 - n);
-    }
-    func_0030F2B0(*(void**)(self + 0x54), n, states, a1);
-}
+INCLUDE_ASM("animation/rideranimbase", func_00312598);
+extern "C" void func_00312598(void* p, int a1);
 
 INCLUDE_ASM("animation/rideranimbase", func_00312660);
 
@@ -581,10 +572,8 @@ inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
     uC4 = 0;
 }
 
-extern "C" sRiderAnim_00313508* func_00313508(sRiderAnim_00313508* self, int owner)
-{
-    return new (self) sRiderAnim_00313508(owner);
-}
+INCLUDE_ASM("animation/rideranimbase", func_00313508);
+extern "C" sRiderAnim_00313508* func_00313508(sRiderAnim_00313508* self, int owner);
 
 //100%
 struct sAnimEvents_00313868;

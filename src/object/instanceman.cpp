@@ -563,75 +563,8 @@ struct sImSrc {
     float s;              // 0x30
 };
 
-extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def, sImSrc* src, sImObj* owner)
-{
-    func_0034FB00(self, a1, 0xB, a2);
-    self->vt = D_0048F6D8;
-    new (&self->rot) sImV4[24];
-    new (&self->arr1) sImV4[24];
-    new (&self->pos) sImV4[24];
-    new (&self->arr3) sImV4[24];
-    self->f6B0 = def->f4;
-    self->f1C = def->f10;
-    self->f24 = def->f30;
-    self->f6B4 = def->f8;
-    float rot = def->angle * 0.01745329424738884f;
-    self->f20 = rot * func_002D1C70();
-    sImSkel* skel = self->model->skel;
-    sImMtx local[24];
-    sImMtx* mats = local;
-    sImObj* obj = owner;
-    sImMtx* root = (sImMtx*)((char*)self->model + 0x10);
-    if (~def->model.id != 0) {
-        sImModelInst* m = (sImModelInst*)def->model.get();
-        if (m != 0 && m->getOwner() != 0) {
-            obj = m->getOwner();
-        }
-    }
-    if (obj != 0) {
-        sImVEntry* e = &obj->vt[24];
-        root = (sImMtx*)e->fn((char*)obj + e->delta);
-        e = &obj->vt[26];
-        if (e->fn((char*)obj + e->delta) != 0) {
-            e = &obj->vt[27];
-            mats = (sImMtx*)e->fn((char*)obj + e->delta);
-            if (def->bone != -1) {
-                root = &mats[def->bone];
-                mats = local;
-            }
-        }
-    }
-    if (mats == local) {
-        sImBone* b = skel->bones;
-        float s = self->model->scale;
-        sImV4 scale(s, s, s, 1.0f);
-        for (int i = 0; i < skel->count; i++, b++) {
-            if (b->parent != -1) {
-                local[i] = mulScaledIM(local[b->parent], *b->mtx, scale);
-            } else {
-                local[i] = mulScaledIM(*root, *b->mtx, scale);
-            }
-        }
-    }
-    for (int i = 0; i < skel->count; i++) {
-        sImPair p = func_0031B748(&mats[i]);
-        self->rot[i] = p.rot;
-        self->pos[i] = p.pos;
-    }
-    if (owner != 0) {
-        sImVEntryI* vt = (sImVEntryI*)owner->vt;
-        vt[1].fn((char*)owner + vt[1].delta, 3);
-    }
-    self->f390 = sImV4(def->a[0], def->a[1], def->a[2]);
-    self->f3A0 = sImV4(def->b[0], def->b[1], def->b[2]);
-    if (src != 0) {
-        vu0AddIM(self->f3A0, vu0ScaleIM(vu0ScaleIM(src->v, absIM(src->s)), def->fC));
-    }
-    self->model->flags = (self->model->flags & ~2u) | 4u;
-    self->model->flags &= ~0x60u;
-    func_00352230(self);
-    return self;
-}
+INCLUDE_ASM("object/instanceman", func_00351B40);
+extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def, sImSrc* src, sImObj* owner);
 
 //100%
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
@@ -650,19 +583,8 @@ struct sInstElem2168 {
     sInstElem2168() {}
 };
 
-extern "C" void* func_00352168(void* self, void* a1, void* stream)
-{
-    cInstanceNode_cInstanceNode(self, a1, stream);
-    *(void***)((char*)self + 0xC) = D_0048F6D8;
-    new ((char*)self + 0x30) sInstElem2168[24];
-    new ((char*)self + 0x1B0) sInstElem2168[24];
-    new ((char*)self + 0x330) sInstElem2168[24];
-    new ((char*)self + 0x4B0) sInstElem2168[24];
-    sInstManVEntry2168* e = &(*(sInstManVEntry2168**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 0xC);
-    *(float*)((char*)self + 0x1C) = -1.0f;
-    return self;
-}
+INCLUDE_ASM("object/instanceman", func_00352168);
+extern "C" void* func_00352168(void* self, void* a1, void* stream);
 
 extern void* D_0048F6D8[];
 extern "C" void* func_0034FBF0(void*);

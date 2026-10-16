@@ -686,47 +686,8 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
     r->tex = t;
 }
 
-extern "C" void* func_003691F8(char* self)
-{
-    *(void***)(self + 0x10D8) = D_00493950;
-    new (self + 0xE84) sGfxState_691F8;
-    *(int*)(self + 0xF44) = 0;
-    D_004A5B80 = self;
-    for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
-    func_00416210(&D_00501420, 0, 0x10);
-    gfxSetA_691F8(&D_00501420, 1, 3, 23);
-    gfxSetA_691F8(&D_00501420, 0, 1, 22);
-    gfxSetA_691F8(&D_00501420, 3, 3, 20);
-    gfxSetA_691F8(&D_00501420, 0, 0xFF, 12);
-    gfxSetA_691F8(&D_00501420, 0, 3, 0);
-    gfxSetB_691F8(&D_00501420, 4, 0x1F, 5);
-    gfxSetB_691F8(&D_00501420, 0, 0x1F, 0);
-    gfxSet0_691F8(&D_00501420, 0, 3, 0);
-    gfxSet0_691F8(&D_00501420, 0, 3, 10);
-    gfxSet0_691F8(&D_00501420, 0, 0xF, 6);
-    gfxSetC_691F8(&D_00501420, 0, 0x3FFFFFFF, 0);
-    for (unsigned int k = 0; k < 2; k++) {
-        gfxSetA_691F8(&D_00501420, 5, 0x1F, 2 + k * 5);
-        gfxSet0_691F8(&D_00501420, 0, 0xFF, 12 + k * 8);
-    }
-    for (unsigned int k = 0; k < 2; k++) {
-        gfxSet0_691F8(&D_00501420, 0, 3, 2 + k * 2);
-    }
-    gfxSetTex_691F8(&D_00501420, D_004A5A10[0]);
-    for (int k = 0; k < 4; k++) {
-        ((sRS_691F8*)(self + 0xE88))[k] = D_00501420;
-    }
-    *(sRS_691F8**)(self + 0xE84) = (sRS_691F8*)(self + 0xE88);
-    *(sKey8_691F8*)self = D_004A5960[0];
-    *(int*)(self + 0x8) = 0;
-    func_003E6448(self + 0xF50, 0xFFFFFFFF, 0x158);
-    *(int*)(self + 0x270) = 1;
-    *(int*)(self + 0x26C) = 0;
-    *(int*)(self + 0x274) = 0;
-    *(int*)(self + 0xF48) = 0;
-    *(int*)(self + 0xF4C) = 0;
-    return self;
-}
+INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
+extern "C" void* func_003691F8(char* self);
 
 //100%
 extern void* D_004A5B80;

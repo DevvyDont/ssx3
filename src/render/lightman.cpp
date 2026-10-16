@@ -249,36 +249,8 @@ struct sLmQuadCtx {
 
 extern sLmQuadCtx* D_004A5B80_EC40 __asm__("D_004A5B80");
 
-extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z)
-{
-    sLmQuadVtx v[4];
-    float zero = 0.0f;
-    float one = 1.0f;
-    v[0].q = one;
-    v[0].c[0] = (int)(col[1] * 255.0f);
-    v[0].c[1] = (int)(col[2] * 255.0f);
-    v[0].c[2] = (int)(col[3] * 255.0f);
-    v[0].c[3] = (int)(col[0] * 128.0f);
-    v[0].pos = sLmQuadVec4(p0[0], p0[1], z, one);
-    v[3] = v[0];
-    v[2] = v[0];
-    v[1] = v[0];
-    v[3].pos.x = p1[0];
-    v[1].pos.x = p1[0];
-    v[3].pos.y = p1[1];
-    v[2].pos.y = p1[1];
-    v[0].t = zero;
-    v[0].s = zero;
-    v[1].s = one;
-    v[1].t = zero;
-    v[2].s = zero;
-    v[2].t = one;
-    v[3].s = one;
-    v[3].t = one;
-    sLmQuadCtx* g = D_004A5B80_EC40;
-    sLmQuadVEntry* vt = g->vtable;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
-}
+INCLUDE_ASM("render/lightman", func_0038EC40);
+extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 
 INCLUDE_ASM("render/lightman", func_0038ED90);
 
@@ -810,39 +782,8 @@ extern "C" void func_00391360(void)
 //100%
 // PORT: PS2-only VU0 inline asm (lqc2 x16 into vf1-vf16, then vcallmsr of the
 // microprogram at VU0 micro-memory address 0); the PC port needs a C version.
-extern "C" void func_00391418(void* self, void* m)
-{
-    __asm__ __volatile__(
-        ".set push\n"
-        ".set noreorder\n"
-        "lqc2      $vf1, 0x0(%0)\n"
-        "lqc2      $vf2, 0x10(%0)\n"
-        "lqc2      $vf3, 0x20(%0)\n"
-        "lqc2      $vf4, 0x30(%0)\n"
-        "lqc2      $vf5, 0x40(%0)\n"
-        "lqc2      $vf6, 0x50(%0)\n"
-        "lqc2      $vf7, 0x60(%0)\n"
-        "lqc2      $vf8, 0x70(%0)\n"
-        "lqc2      $vf9, 0x80(%0)\n"
-        "lqc2      $vf10, 0x90(%0)\n"
-        "lqc2      $vf11, 0xA0(%0)\n"
-        "lqc2      $vf12, 0xB0(%0)\n"
-        "lqc2      $vf13, 0xC0(%0)\n"
-        "lqc2      $vf14, 0xD0(%0)\n"
-        "lqc2      $vf15, 0xE0(%0)\n"
-        "lqc2      $vf16, 0xF0(%0)\n"
-        "lui       $2, 0\n"
-        "addiu     $2, $2, 0\n"
-        "srl       $2, $2, 3\n"
-        "ctc2.ni   $2, $vi27\n"
-        "vnop\n"
-        "vnop\n"
-        "vcallmsr  $vi27\n"
-        ".set pop\n"
-        :
-        : "r"(m)
-        : "$2", "memory");
-}
+INCLUDE_ASM("render/lightman", func_00391418);
+extern "C" void func_00391418(void* self, void* m);
 
 //100%
 struct sQuad16 {
@@ -871,12 +812,8 @@ extern "C" void func_00391480(void* self, sQuad16* dst)
 
 //100%
 // PORT: PS2-only VU0 integer register read (vi1); the PC port needs a C fallback.
-extern "C" int func_003914F8(void)
-{
-    int r;
-    __asm__ __volatile__("cfc2.i %0, $vi1" : "=r"(r));
-    return r;
-}
+INCLUDE_ASM("render/lightman", func_003914F8);
+extern "C" int func_003914F8(void);
 
 INCLUDE_ASM("render/lightman", func_00391508);
 

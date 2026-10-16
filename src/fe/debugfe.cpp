@@ -778,20 +778,8 @@ struct sDbgList17F7B8 {
     int n;                      // 0x210
 };
 
-extern "C" void* func_0017F7B8(void* self)
-{
-    func_00231CD0(self);
-    *(void**)self = D_0046D900;
-    *(int*)((char*)self + 0x24) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    sDbgList17F7B8* l = (sDbgList17F7B8*)((char*)self + 0x24);
-    new (l->e) sDbgEntry17F7B8[64];
-    l->n = 0;
-    func_003E6448(l->e, 0, 0x200);
-    return self;
-}
+INCLUDE_ASM("fe/debugfe", func_0017F7B8);
+extern "C" void* func_0017F7B8(void* self);
 
 //100%
 void operator_delete(int* ptr);

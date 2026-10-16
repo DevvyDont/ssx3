@@ -1108,81 +1108,8 @@ struct sVEnt_13D1B8 { short delta; short index; void (*fn)(void*, void*); };
 #define RIDER (*(char**)((char*)self + 0x18))
 #define RV(off) (*(sVec4HP*)(RIDER + (off)))
 
-extern "C" int func_0013D1B8(void* self, sHit_13D1B8* out, float* dist)
-{
-    RV(0x380) = RV(0x370);
-    sVec4HP pos = vu0Add_13D1B8(RV(0x110), vu0Scale_13D1B8(RV(0x3B0), *(float*)(*(char**)(RIDER + 0x780) + 0x140) * (*(float*)(RIDER + 0x1F0) * 45.0f)));
-    sVec4HP a = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(0x370), -100.0f));
-    sVec4HP b = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(0x370), 200.0f));
-    char seg[0xB0];
-    func_0032E100(seg, a, b, 2, 0.5f);
-    sHit_13D1B8 hits[64];
-    int n = func_00333EF8(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
-    if (n == 0) {
-        RV(0x370) = D_004FF160;
-        RV(0x3D0) = D_004FF120_v;
-        RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
-        RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
-        *(int*)(RIDER + 0x438) = 0;
-        *dist = 0.0f;
-        return 0;
-    }
-    int best = 0;
-    float up0 = vu0Dot_13D1B8(hits[0].normal, RV(0x370));
-    float bestDiff = absf_13D1B8(hits[0].dist - 0.5f);
-    int ok = up0 >= 0.3f;
-    for (int i = 1; i < n; i++) {
-        float d = absf_13D1B8(hits[i].dist - 0.5f);
-        float up = vu0Dot_13D1B8(hits[i].normal, RV(0x370));
-        if (!ok) {
-            if (up >= 0.3f) {
-                bestDiff = d;
-                best = i;
-                ok = 1;
-                continue;
-            }
-        } else if (up < 0.3f) {
-            continue;
-        }
-        if (d < bestDiff) {
-            bestDiff = d;
-            best = i;
-        } else if (d == bestDiff) {
-            if (isBetter_13D1B8(&hits[i], &hits[best])) {
-                best = i;
-            }
-        }
-    }
-    *out = hits[best];
-    if (out->tri != 0) {
-        *(int*)(RIDER + 0x430) = *(int*)(out->tri + 0x150);
-        *(float*)(RIDER + 0xAAC) = out->m6C;
-        *(float*)(RIDER + 0xAB0) = out->m70;
-        *(short*)(RIDER + 0x2D4) = *(short*)(out->tri + 0xA);
-    } else {
-        *(unsigned int*)(RIDER + 0x430) = 0xFFFFFFFF;
-    }
-    if (out->obj != 0) {
-        char* h = *(char**)(out->obj + 0xC);
-        if (h) {
-            sVEnt_13D1B8* vt = *(sVEnt_13D1B8**)(h + 0xC);
-            vt[42].fn(h + vt[42].delta, out);
-        }
-    }
-    *(int*)(RIDER + 0x438) = out->m4C;
-    if (*(int*)(RIDER + 0x438) == -1) {
-        *(int*)(RIDER + 0x438) = 0;
-    }
-    RV(0x370) = out->normal;
-    RV(0x460) = out->pos;
-    RV(0x3D0) = out->v20;
-    RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
-    RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
-    sVec4HP delta = vu0Sub_13D1B8(pos, out->pos);
-    *(float*)(RIDER + 0x454) = vu0Dot_13D1B8(delta, RV(0x370));
-    *dist = vu0Length_13D1B8(vu0Sub_13D1B8(delta, vu0Scale_13D1B8(RV(0x370), *(float*)(RIDER + 0x454))));
-    return 1;
-}
+INCLUDE_ASM("ai/control/handplantcontrol", func_0013D1B8);
+extern "C" int func_0013D1B8(void* self, sHit_13D1B8* out, float* dist);
 #undef RV
 #undef RIDER
 

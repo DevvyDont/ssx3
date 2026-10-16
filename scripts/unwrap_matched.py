@@ -88,7 +88,7 @@ def main():
         wrapped = {m.group(2) for m in INCLUDE.finditer(text)} & matched[unit]
         names = {n for n in wrapped if aligned(unit, n)}
         for n in sorted(wrapped - names):
-            print(f"{unit}: {n} not 8-aligned in the original, left wrapped")
+            print(f"{unit}: {n} not 8-aligned in the original: keep it as asm and delete its C")
         text, count = unwrap(text, names)
         if count:
             src.write_text(text)

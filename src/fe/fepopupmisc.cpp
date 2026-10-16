@@ -5500,16 +5500,6 @@ extern "C" void func_001E8160(void* self, void* a1, int a2)
 // constant and v1 to the result, the target does the reverse. No source
 // shape tried (temp local, early return, nested ternary) flips it.
 INCLUDE_ASM("fe/fepopupmisc", func_001E81B0);
-#ifdef SKIP_ASM
-extern "C" int func_001E81B0(void* self, int a1, int a2)
-{
-    int r = 0;
-    if (a2 == 6) {
-        r = *(int*)((char*)self + 0xa0) != 0 ? 0x101 : 0;
-    }
-    return r;
-}
-#endif
 
 //100%
 extern "C" int func_001E81D0(void* self, int a1)

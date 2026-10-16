@@ -143,76 +143,8 @@ static inline void setState_AE00()
     setMode_AE00(ctx_AE00()->top, 5);
 }
 
-extern "C" void func_0017AE00(sBgMan_AE00* self)
-{
-    if (self->cur < 0 || self->cur >= self->count) {
-        return;
-    }
-    call0_AE00(21);
-    call0_AE00(31);
-    sCtx_AE00* g = ctx_AE00();
-    g->top[1] = g->top[0];
-    g->top++;
-    setState_AE00();
-    {
-        sCtx_AE00* c = ctx_AE00();
-        sVEnt_AE00* e = &c->vt[26];
-        ((fnRect_AE00)e->fn)((char*)c + e->delta, 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    }
-    {
-        sCtx_AE00* c = ctx_AE00();
-        sVEnt_AE00* e = &c->vt[34];
-        ((fnP_AE00)e->fn)((char*)c + e->delta, D_004FF1A0);
-    }
-    setState_AE00();
-    sVert_AE00 v[4];
-    for (int i = 0; i < 4; i++) {
-        v[i].a = 0x80;
-        v[i].r = 0x80;
-        v[i].g = 0x80;
-        v[i].b = 0x80;
-        v[i].q = 1.0f;
-    }
-    sPos_AE00 p;
-    p.x = 0.0f;
-    p.y = 0.0f;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[0].pos = p;
-    p.x = 640.0f;
-    p.y = 0.0f;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[1].pos = p;
-    p.x = 0.0f;
-    p.y = 480.0f;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[2].pos = p;
-    p.x = 640.0f;
-    p.y = 480.0f;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[3].pos = p;
-    v[0].u = 0.0f;
-    v[0].v = 0.0f;
-    v[1].u = 1.0f;
-    v[1].v = 0.0f;
-    v[2].u = 0.0f;
-    v[2].v = 1.0f;
-    v[3].u = 1.0f;
-    v[3].v = 1.0f;
-    setAlpha_AE00(ctx_AE00()->top, 0x18);
-    *(short*)((char*)ctx_AE00()->top + 0x10) = imageOf_AE00(self);
-    {
-        sCtx_AE00* c = ctx_AE00();
-        sVEnt_AE00* e = &c->vt[71];
-        e->fn((char*)c + e->delta, 4, v, 0);
-    }
-    ctx_AE00()->top--;
-    call0_AE00(32);
-    call0_AE00(22);
-}
+INCLUDE_ASM("main/loadscreens", func_0017AE00);
+extern "C" void func_0017AE00(sBgMan_AE00* self);
 
 INCLUDE_ASM("main/loadscreens", func_0017B1B0);
 

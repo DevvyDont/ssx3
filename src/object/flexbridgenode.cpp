@@ -118,73 +118,8 @@ struct sFlexGrid {
 
 extern char* D_004A5B80;
 
-extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
-{
-    char* world = D_004A5B80;
-    int n = self->count;
-    int nverts = n * 2;
-    int ntris = (n - 1) * 2;
-    sGridVEntry* e = &(*(sGridVEntry**)(world + 0x10D8))[76];
-    self->mesh = (sGridMesh*)e->fn(world + e->delta, n, 2, 0x20000000);
-    sGridV4*& p0 = self->pts[0];
-    p0 = new (D_0048E778, 0x20000000, 0) sGridV4[nverts];
-    sGridV4*& p1 = self->pts[1];
-    p1 = new (D_0048E788, 0x20000000, 0) sGridV4[nverts];
-    self->idx = new (D_0048E798, 0x20000000, 0) unsigned char[ntris * 3];
-    sGridV3 pos[4];
-    sGridV2 uvs[4];
-    sGridCol cols[4];
-    sGridV2* uv = new (D_0048E7A8, 0x100, 0) sGridV2[nverts];
-    sGridCol* col = new (D_0048E7B8, 0x100, 0) sGridCol[nverts];
-    sGridVEntryV* e2 = &(*(sGridVEntryV**)(world + 0x10D8))[97];
-    e2->fn(world + e2->delta, self->def, 0, pos, uvs, cols);
-    for (int i = 0; i < n; i++) {
-        float t = (float)i;
-        float inv = 1.0f / (float)(n - 1);
-        self->pts[0][i] = sGridV4(pos[0] + (pos[1] - pos[0]) * t * inv, 1.0f);
-        self->pts[0][n + i] = sGridV4(pos[2] + (pos[3] - pos[2]) * t * inv, 1.0f);
-        uv[i] = uvs[0] + (uvs[1] - uvs[0]) * t * inv;
-        uv[n + i] = uvs[2] + (uvs[3] - uvs[2]) * t * inv;
-        col[i].a = 1.0f;
-        col[i].r = cols[0].r + (cols[1].r - cols[0].r) * t * inv;
-        col[i].g = cols[0].g + (cols[1].g - cols[0].g) * t * inv;
-        col[i].b = cols[0].b + (cols[1].b - cols[0].b) * t * inv;
-        col[n + i].a = 1.0f;
-        col[n + i].r = cols[2].r + (cols[3].r - cols[2].r) * t * inv;
-        col[n + i].g = cols[2].g + (cols[3].g - cols[2].g) * t * inv;
-        col[n + i].b = cols[2].b + (cols[3].b - cols[2].b) * t * inv;
-    }
-    sGridVEntryV* e3 = &self->mesh->vt[6];
-    e3->fn((char*)self->mesh + e3->delta, pos, col, uv);
-    if (uv != 0) {
-        cMemMan_free(uv);
-    }
-    if (col != 0) {
-        cMemMan_free(col);
-    }
-    sGridDef* def = self->def;
-    self->box.min = sGridV4(def->min.x, def->min.y, def->min.z, 1.0f);
-    self->box.max = sGridV4(def->max.x, def->max.y, def->max.z, 1.0f);
-    sGridBox old = self->box;
-    sGridV4 ext(100.0f, 100.0f, 100.0f, 0.0f);
-    gridVecSub(self->box.min, self->box.min, ext);
-    gridVecAdd(self->box.max, self->box.max, ext);
-    // PORT: the unit declares func_003291E0's third parameter as int; the def pointer is passed through it
-    int id = (int)self->def;
-    func_003291E0(func_002D1BE0(), 0, id, (sBox00348058*)&self->box, (sBox00348058*)&old);
-    int v = 0;
-    int j = 0;
-    for (int k = 0; k < ntris - 1; k += 2) {
-        self->idx[j + 0] = v;
-        self->idx[j + 1] = v + n;
-        self->idx[j + 2] = v + 1;
-        self->idx[j + 3] = v + n;
-        self->idx[j + 4] = v + n + 1;
-        self->idx[j + 5] = v + 1;
-        v++;
-        j += 6;
-    }
-}
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_setupGrid);
+extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self);
 
 //100%
 struct sFlexVec4 {
@@ -336,23 +271,8 @@ struct sFlexDef_347D90 {
     int f44;
 };
 
-extern "C" void* func_00347D90(char* self, void* a2, void* a3, sFlexDef_347D90* def)
-{
-    func_0034FB00(self, 1, a2, a3);
-    *(char**)(self + 0xC) = D_004900D0;
-    int len = def->f44;
-    *(int*)(self + 0x20) = 0;
-    *(int*)(self + 0x24) = len;
-    for (int i = 0; i < 8; i++) {
-        if (def->links[i] != 0xFFFFFFFF) {
-            *(int*)(self + 0x20) += 1;
-        }
-    }
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
-    *segs = new (D_0048E7C8, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, D_004A4008, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
-    return self;
-}
+INCLUDE_ASM("object/flexbridgenode", func_00347D90);
+extern "C" void* func_00347D90(char* self, void* a2, void* a3, sFlexDef_347D90* def);
 
 //100%
 struct sSerVEntry_00347EA8 {
@@ -363,17 +283,8 @@ struct sSerVEntry_00347EA8 {
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
 
-extern "C" void* func_00347EA8(char* self, void* a, void* stream)
-{
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
-    cInstanceNode_cInstanceNode(self, a, stream);
-    *(char**)(self + 0xC) = D_004900D0;
-    sSerVEntry_00347EA8* e = &(*(sSerVEntry_00347EA8**)stream)[2];
-    e->fn((char*)stream + e->delta, self + 0x20, 0x30);
-    *segs = new (D_0048E7C8, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, D_004A4008, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
-    return self;
-}
+INCLUDE_ASM("object/flexbridgenode", func_00347EA8);
+extern "C" void* func_00347EA8(char* self, void* a, void* stream);
 
 //100%
 struct sFlexBridgeVEntry7F90 {

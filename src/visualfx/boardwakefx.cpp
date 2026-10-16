@@ -45,41 +45,8 @@ struct sWakeElemBW {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xC0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg)
-{
-    sVt9_BW t1;
-    sVt22_BW t2;
-    if (inChrg) {
-        *(void**)self = (char*)self + 0xC0;
-        cRider_cRider((char*)self + 0xC0);
-    }
-    *(void**)(*(char**)self + 0x6E8) = (void*)&D_00488DA8;
-    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488DF0;
-    if (inChrg == 0) {
-        int vc;
-        t1 = D_00488DA8;
-        *(void**)(*(char**)self + 0x6E8) = &t1;
-        {
-            char* vbo = *(char**)self - 0xC0;
-            vc = (char*)self - vbo;
-        }
-        t1.e[1].delta = D_00488DA8.e[1].delta + vc;
-        t2 = D_00488DF0;
-        *(void**)(*(char**)self + 0x6C0) = &t2;
-        t2.e[1].delta = D_00488DF0.e[1].delta + vc;
-    }
-    sWakeStripBW*& strips = *(sWakeStripBW**)((char*)self + 0xC);
-    strips = new (D_00487968, 0, 0) sWakeStripBW[32];
-    sWakeElemBW** rows = (sWakeElemBW**)((char*)self + 0x10);
-    rows[0] = new (D_00487980, 0, 0) sWakeElemBW[160];
-    for (int i = 1; i < 5; i++) {
-        rows[i] = *(sWakeElemBW**)((char*)self + 0x10) + i * 32;
-    }
-    *(int*)((char*)self + 0xB4) = -1;
-    func_002DCF28((sWakeDCF28*)self);
-    return self;
-}
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_cBoardWakeFX);
+extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DCDA0);
 
@@ -2946,35 +2913,8 @@ struct sWake5920 {
     sVec5920 v[2];              // 0x40
 };
 
-extern "C" void* func_002E5920(sWake5920* self, void* a1)
-{
-    func_00354648(self, a1);
-    self->vtbl = D_00487FD8;
-    new (self->v) sVec5920[2];
-    func_00319CC8();
-    for (int i = 11; i >= 0; i--) {
-        self->fx[i] = 0;
-    }
-    for (int j = 0; j < 2; j++) {
-        self->v[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-    self->fx[0] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[1] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[2] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[3] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[4] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    self->fx[5] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x7C) >= 2) {
-        self->fx[6] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[7] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[8] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[9] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[10] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-        self->fx[11] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    }
-    func_00319CC8();
-    return self;
-}
+INCLUDE_ASM("visualfx/boardwakefx", func_002E5920);
+extern "C" void* func_002E5920(sWake5920* self, void* a1);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern void* D_00487FD8[];
@@ -3268,36 +3208,8 @@ struct sWakePt_6320 {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x3B0): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002E6320(void* self, int inChrg)
-{
-    sVt9_3680 t1;
-    sVt22_3680 t2;
-    if (inChrg) {
-        *(void**)self = (char*)self + 0x3B0;
-        cRider_cRider((char*)self + 0x3B0);
-    }
-    *(void**)(*(char**)self + 0x6E8) = (void*)&D_00488550;
-    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488598;
-    if (inChrg == 0) {
-        int vc;
-        t1 = D_00488550;
-        *(void**)(*(char**)self + 0x6E8) = &t1;
-        {
-            char* vbo = *(char**)self - 0x3B0;
-            vc = (char*)self - vbo;
-        }
-        t1.e[1].delta = D_00488550.e[1].delta + vc;
-        t2 = D_00488598;
-        *(void**)(*(char**)self + 0x6C0) = &t2;
-        t2.e[1].delta = D_00488598.e[1].delta + vc;
-    }
-    new ((char*)self + 0x50) sWakeSeg_6320[30];
-    sWakePt_6320*& pts = *(sWakePt_6320**)((char*)self + 0x3AC);
-    pts = new (D_00487B08, 0, 0) sWakePt_6320[20];
-    func_002E6640(self);
-    return self;
-}
+INCLUDE_ASM("visualfx/boardwakefx", func_002E6320);
+extern "C" void* func_002E6320(void* self, int inChrg);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
 

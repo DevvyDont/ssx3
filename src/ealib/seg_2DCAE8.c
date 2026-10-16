@@ -2432,11 +2432,8 @@ int func_003E3538(int a0) {
 
 //100%
 void func_00423DD0_3588(int) __asm__("func_00423DD0");
-void func_003E3588(int a, int b, int c) {
-    func_00423DD0_3588(c);
-    // PORT: MIPS sync + EE ei (no C equivalent)
-    __asm__ volatile("sync\n\tei");
-}
+INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3588);
+void func_003E3588(int a, int b, int c);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2605,10 +2602,8 @@ void func_003E49B8(void) {
 //100% - objdiff report; single-function view differs only in a relocation name
 extern void func_003E49B8(void);
 
-void func_003E4A10(void) {
-    func_003E49B8();
-    __asm__ volatile("break 0xFFFF");  // PORT: trap
-}
+INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4A10);
+void func_003E4A10(void);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -3312,11 +3307,8 @@ int func_003E6240(unsigned int a) {
 //100%
 extern int D_00450DA4[];
 
-void func_003E62B0(void) {
-    if (D_00450DA4[0] != 0) {
-        __asm__ volatile("break 6");  // PORT: trap
-    }
-}
+INCLUDE_ASM("ealib/seg_2DCAE8", func_003E62B0);
+void func_003E62B0(void);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

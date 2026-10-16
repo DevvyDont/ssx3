@@ -107,8 +107,13 @@ AI-written code is held to checks it can't talk its way past:
   the retail executable. A claim of a match is not a match.
 - Matched C is linked into the build in place of its asm. It is never left
   wrapped behind an `INCLUDE_ASM`.
-- No inline asm in matched functions, and no changes to objdiff, the checksum,
-  the compiler or its flags to make a function pass.
+- Everything is built with unmodified tools: the stock SN ee-gcc 2.95.3
+  compilers and the official objdiff release. Nothing edits objdiff, the
+  checksum or the compiler to make a function pass.
+- Inline asm is only used for EE instructions the compiler can't emit (VU0
+  macro mode, COP2 moves, `sync`/`ei` and the like). A function that is
+  mostly inline asm, or that needs inline asm for something C can express,
+  stays as asm and does not count as decompiled.
 - Matched is not the same as understood. Much of the matched C still uses raw
   struct offsets (`*(int*)(self + 0x5830)`), and naming those structs and
   fields is ongoing work.
