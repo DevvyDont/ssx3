@@ -2745,7 +2745,69 @@ extern "C" void func_003B2B68(char* buf)
     D_0044C458[0](buf);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003B2B90);
+//100%
+// Decode a block's alpha (explicit 4-bit when fmt == 3, else interpolated 3-bit) into the alpha bytes of a 4x4 tile.
+extern "C" void func_003B2B90(char* img, int pitch, char* data, int fmt)
+{
+    if (fmt == 3) {
+        for (unsigned int y = 0; y < 4; y++) {
+            for (unsigned int x = 0; x < 2; x++) {
+                unsigned char b = *data++;
+                int lo = b & 0xF;
+                *(unsigned long*)img = (*(unsigned long*)img & 0xFFFFFF) | ((lo | (lo << 4)) << 24);
+                img += 8;
+                int hi = b & 0xF0;
+                *(unsigned long*)img = (*(unsigned long*)img & 0xFFFFFF) | ((int)(hi | ((unsigned int)hi >> 4)) << 24);
+                img += 8;
+            }
+            img = img + pitch - 0x20;
+        }
+        return;
+    }
+    unsigned char* src = (unsigned char*)data;
+    unsigned char* out = (unsigned char*)img + 3;
+    unsigned char a0 = *src++;
+    unsigned char a1 = *src++;
+    unsigned char a2, a3, a4, a5, a6, a7;
+    if (a0 > a1) {
+        a2 = (6 * a0 + 1 * a1 + 3) / 7;
+        a3 = (5 * a0 + 2 * a1 + 3) / 7;
+        a4 = (4 * a0 + 3 * a1 + 3) / 7;
+        a5 = (3 * a0 + 4 * a1 + 3) / 7;
+        a6 = (2 * a0 + 5 * a1 + 3) / 7;
+        a7 = (1 * a0 + 6 * a1 + 3) / 7;
+    } else {
+        a2 = (4 * a0 + 1 * a1 + 2) / 5;
+        a3 = (3 * a0 + 2 * a1 + 2) / 5;
+        a4 = (2 * a0 + 3 * a1 + 2) / 5;
+        a5 = (1 * a0 + 4 * a1 + 2) / 5;
+        a6 = 0;
+        a7 = 0xFF;
+    }
+    for (int k = 0; k < 2; k++) {
+        unsigned long bits = *(unsigned long*)src;
+        src += 3;
+        for (int y = 0; y < 2; y++) {
+            for (int x = 0; x < 4; x++) {
+                unsigned char idx = bits & 7;
+                bits >>= 3;
+                switch (idx) {
+                case 0: *out = a0; break;
+                case 1: *out = a1; break;
+                case 2: *out = a2; break;
+                case 3: *out = a3; break;
+                case 4: *out = a4; break;
+                case 5: *out = a5; break;
+                case 6: *out = a6; break;
+                case 7: *out = a7; break;
+                }
+                out += 4;
+            }
+            out += pitch - 0x10;
+        }
+    }
+}
+
 
 //100%
 // PORT: 64-bit `ulong` palette entries (`long` is 8 bytes on this compiler).

@@ -537,7 +537,148 @@ void func_0026F4A0(void* self, int val)
     *(int*)((char*)self + 0x0) = val;
 }
 
-INCLUDE_ASM("replay/frameptr", func_0026F4A8);
+//100%
+void func_0026F4A0(void* self, int state);
+int func_00320C48(void* pad, int button);
+extern char* D_004A28A8;
+extern "C" void func_0026FB88(void* self, int a1);
+extern "C" void func_0026FE50(char* self);
+extern "C" void func_00270538(void* self);
+extern "C" void func_00270628(void* self);
+extern "C" void func_00270670(void* self);
+extern "C" void func_00270E18(void* self);
+extern "C" void func_0026F8A0(struct cReplayFramePtr_F8A0* self, void* a1, int a2, int a3);
+
+struct sFrameDesc_F4A8 {
+    short type;
+    char a;
+    char b;
+};
+
+extern "C" void* func_0026D760_F4A8(void* self, sFrameDesc_F4A8* desc) __asm__("func_0026D760");
+// PORT: func_0026D740 is mangled with one parameter (__FPv) but is called with (self, block).
+void func_0026D740_F4A8(void* self, void* block) __asm__("func_0026D740__FPv");
+
+struct cReplayFramePtr_F4A8 {
+    int state;          // 0x0
+    char pad4[0x18 - 0x4];
+    int keyEvery;       // 0x18
+    char pad1C[0x20 - 0x1C];
+    int f20;            // 0x20
+    char pad24[0x28 - 0x24];
+    int pad;            // 0x28
+    char pad2C[0x3C8 - 0x2C];
+    int frame;          // 0x3C8
+    int count;          // 0x3CC
+    void* block;        // 0x3D0
+    void* f3D4;         // 0x3D4
+    char pad3D8[0x484 - 0x3D8];
+    int last;           // 0x484
+    char pad488[0x604 - 0x488];
+    int f604;           // 0x604
+    int f608;           // 0x608
+    int f60C;           // 0x60C
+    int f610;           // 0x610
+    int f614;           // 0x614
+    int f618;           // 0x618
+    int f61C;           // 0x61C
+    int f620;           // 0x620
+    int f624;           // 0x624
+};
+
+static inline void AddBlock_F4A8(cReplayFramePtr_F4A8* self, int type)
+{
+    sFrameDesc_F4A8 desc;
+    desc.type = type;
+    desc.a = 0;
+    desc.b = 0;
+    func_0026D740_F4A8(self, func_0026D760_F4A8(self, &desc));
+}
+
+extern "C" void func_0026F4A8(cReplayFramePtr_F4A8* self)
+{
+    int ok = !(self->state == 14 || self->state == 15);
+    if (!ok)
+        return;
+    if (self->f614 > 0)
+        self->f614--;
+    self->f604 = 0;
+    if (self->f618 == 7)
+        func_0026F4A0(self, 3);
+    if (!(self->state == 3 || self->state == 4))
+        self->f20 = 0;
+    switch (self->state) {
+    case 11:
+        func_0026F4A0(self, 12);
+        break;
+    case 2:
+        if (self->last < self->frame - 1) {
+            func_0026FB88(self, 0);
+            func_0026FE50((char*)self);
+            break;
+        }
+        func_00270670(self);
+    case 0:
+    case 12:
+        func_0026F4A0(self, 0);
+        self->block = 0;
+        if (self->f60C != 0) {
+            if (self->f608 == 0) {
+                func_00270628(self);
+                func_00270E18(self);
+                func_00270538(self);
+                AddBlock_F4A8(self, 1);
+                func_0026F4A0(self, 13);
+            }
+        } else if (self->f624 != 0) {
+            func_0026F8A0((cReplayFramePtr_F8A0*)self, self->f3D4, 1, 0);
+            func_0026F4A0(self, 2);
+            self->f624 = 0;
+            self->f620 = 1;
+        } else {
+            if (self->f610 == 0) {
+                if (self->frame % 60 == 0) {
+                    func_00270538(self);
+                    if (self->frame == 0 || (self->keyEvery != 0 && self->frame % self->keyEvery == 0))
+                        AddBlock_F4A8(self, 1);
+                    else
+                        AddBlock_F4A8(self, 0);
+                }
+                if (self->f610 == 0)
+                    self->count++;
+            }
+            self->frame++;
+        }
+        break;
+    case 3: {
+        void* p = *(void**)((self->pad << 2) + D_004A28A8 + 0xB0);
+        if (p != 0 && func_00320C48(p, 0x6B))
+            func_0026FB88(self, 0);
+        func_0026FE50((char*)self);
+        break;
+    }
+    case 9:
+        func_0026F8A0((cReplayFramePtr_F8A0*)self, 0, 0, 1);
+        func_0026F4A0(self, 1);
+        self->f61C = 1;
+        break;
+    case 8:
+        func_0026F8A0((cReplayFramePtr_F8A0*)self, 0, 0, 0);
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        func_0026F4A0(self, 3);
+        break;
+    case 10:
+    case 13:
+        break;
+    default:
+        func_0026FE50((char*)self);
+        break;
+    }
+}
+
 
 //100%
 void func_0026F4A0(void* self, int state);

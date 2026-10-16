@@ -1109,7 +1109,121 @@ extern "C" void func_003A9188(func_003A9188_sCache* self)
     self->f2E4 = 0;
 }
 
-INCLUDE_ASM("world/worldcache", func_003A9258);
+//100%
+extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern "C" void cWorldCache_activateSectionMem(void* self, int i, int section);
+extern "C" void func_003A8448(sWCSlots* self, int i, float f);
+extern "C" void func_003A84F8(void* self, int a1, int a2);
+extern "C" void func_003A84C8_9258(void* cache, int id) __asm__("func_003A84C8");
+extern "C" int func_003A8618(void* self, int a1);
+extern "C" int func_003A8638(void* self, int a1);
+extern "C" void func_003A8230(void* self, int i);
+extern "C" void func_003A9558_9258(void** self, void* node) __asm__("func_003A9558");
+extern "C" void func_003A95C0(void** self, void* node, int* ok);
+extern "C" void func_003A9D60(void* self, int i);
+extern "C" void func_003AD1A8(void);
+extern char* D_004A5B80;
+extern const char D_004A47E8[];
+extern const char D_004A47F0[];
+extern const char D_004A47F8[];
+extern const char D_004A4800[];
+extern const char D_004A4808[];
+
+struct sWCSection_9258 {
+    char name[0x18];
+    int id;      // 0x18
+    void* node;  // 0x1C
+    char pad[0x58 - 0x20];
+};
+
+struct sWCPair_9258 {
+    int state;
+    float pri;
+};
+
+struct sWCCache_9258 {
+    void* slots;                  // 0x0
+    char* info;                   // 0x4
+    sWCSection_9258* sections;    // 0x8
+    int fC;
+    int f10;
+    sWCPair_9258 pairs[64];       // 0x14
+    char pad214[0x2E0 - 0x214];
+    int f2E0;
+    int f2E4;
+};
+
+struct sVE_9258 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline int IsName_9258(sWCCache_9258* c, unsigned int i, const char* n)
+{
+    return func_00416B18(c->sections[i].name, n, 4) == 0;
+}
+
+extern "C" void func_003A9258(void* self_)
+{
+    sWCCache_9258* self = (sWCCache_9258*)self_;
+    if (self->info == 0)
+        return;
+    self->f2E0 = 0;
+    self->f2E4 = 0;
+    for (unsigned int i = 0; i < *(unsigned int*)(self->info + 8); i++) {
+        switch (self->pairs[i].state) {
+        case 0:
+            break;
+        case 1:
+            if (IsName_9258(self, i, D_004A47E8) || IsName_9258(self, i, D_004A47F0) ||
+                IsName_9258(self, i, D_004A47F8) || IsName_9258(self, i, D_004A4800) ||
+                IsName_9258(self, i, D_004A4808)) {
+                cWorldCache_activateSectionMem(self->slots, i, 0);
+            } else {
+                cWorldCache_activateSectionMem(self->slots, i, 2);
+            }
+            func_003A8448((sWCSlots*)self->slots, self->sections[i].id, self->pairs[i].pri);
+            func_003A84F8(self->slots, self->sections[i].id, 1);
+            self->pairs[i].state = 2;
+            break;
+        case 2:
+            if (func_003A8618(self->slots, self->sections[i].id)) {
+                self->pairs[i].state = 5;
+                char* o = D_004A5B80;
+                sVE_9258* vt = *(sVE_9258**)(o + 0x10D8);
+                vt[102].fn(o + vt[102].delta, i);
+            }
+            break;
+        case 4:
+            if (func_003A8638(self->slots, self->sections[i].id)) {
+                int ok = 1;
+                func_003A95C0((void**)self, self->sections[i].node, &ok);
+                if (ok) {
+                    self->pairs[i].state = 0;
+                    func_003A8230(self->slots, i);
+                    func_003AD1A8();
+                }
+            }
+            break;
+        case 5:
+            self->f2E0++;
+            break;
+        case 6:
+            self->f2E0++;
+            self->f2E4++;
+            break;
+        case 3:
+            func_003A84C8_9258(self->slots, self->sections[i].id);
+            func_003A9558_9258((void**)self, self->sections[i].node);
+            self->pairs[i].state = 4;
+            break;
+        }
+    }
+    for (int k = 0; k < 2; k++)
+        func_003A9D60(self, k);
+}
+
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_003A84C8(void* cache, unsigned short id);
