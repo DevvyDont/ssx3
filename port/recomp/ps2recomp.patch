@@ -214,6 +214,217 @@ index 435db3a..9070dd7 100644
              case COP1_S_ABS:
                  return fmt::format("ctx->f[{}] = FPU_ABS_S(ctx->f[{}]);", fd, fs);
              case COP1_S_MOV:
+diff --git a/ps2xRecomp/src/lib/vu_translation_helpers.cpp b/ps2xRecomp/src/lib/vu_translation_helpers.cpp
+index 509fd07..b5210f9 100644
+--- a/ps2xRecomp/src/lib/vu_translation_helpers.cpp
++++ b/ps2xRecomp/src/lib/vu_translation_helpers.cpp
+@@ -75,21 +75,26 @@ namespace ps2recomp
+         uint8_t fs_reg = inst.rd;
+         uint8_t ft_reg = inst.rt;
+ 
+-        return fmt::format("{{ float fs = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); float ft = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); ctx->vu0_q = (ft != 0.0f) ? (fs / ft) : 0.0f; }}", fs_reg, fs_reg, fsf, ft_reg, ft_reg, ftf);
++        // A zero divisor gives +-max (sign of fs xor ft), as on the EE FPU.
++        return fmt::format("{{ float fs = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); float ft = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); ctx->vu0_q = ps2_fdiv(fs, ft); }}", fs_reg, fs_reg, fsf, ft_reg, ft_reg, ftf);
+     }
+ 
+     std::string CodeGenerator::translateVU_VSQRT(const Instruction &inst)
+     {
+         uint8_t ftf = inst.vectorInfo.ftf;
+         uint8_t ft_reg = inst.rt;
+-        return fmt::format("{{ float ft = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); ctx->vu0_q = sqrtf(std::max(0.0f, ft)); }}", ft_reg, ft_reg, ftf);
++        // sqrt(|ft|): the sign of ft is ignored.
++        return fmt::format("{{ float ft = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); ctx->vu0_q = ps2_fsqrt(ft); }}", ft_reg, ft_reg, ftf);
+     }
+ 
+     std::string CodeGenerator::translateVU_VRSQRT(const Instruction &inst)
+     {
++        // RSQRT Q, fs.fsf, ft.ftf computes fs / sqrt(|ft|), not 1 / sqrt(ft).
++        uint8_t fsf = inst.vectorInfo.fsf;
+         uint8_t ftf = inst.vectorInfo.ftf;
++        uint8_t fs_reg = inst.rd;
+         uint8_t ft_reg = inst.rt;
+-        return fmt::format("{{ float ft = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); ctx->vu0_q = (ft > 0.0f) ? (1.0f / sqrtf(ft)) : 0.0f; }}", ft_reg, ft_reg, ftf);
++        return fmt::format("{{ float fs = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); float ft = _mm_cvtss_f32(_mm_shuffle_ps(ctx->vu0_vf[{}], ctx->vu0_vf[{}], _MM_SHUFFLE(0,0,0,{}))); ctx->vu0_q = ps2_frsqrt(fs, ft); }}", fs_reg, fs_reg, fsf, ft_reg, ft_reg, ftf);
+     }
+ 
+     std::string CodeGenerator::translateVU_VMTIR(const Instruction &inst)
+@@ -111,14 +116,32 @@ namespace ps2recomp
+                            inst.rt, inst.rt);
+     }
+ 
++    // Byte offset of the single x/y/z/w field selected by a dest mask (x = 8 ... w = 1).
++    static uint32_t vu0FieldWordOffset(uint8_t dest_mask)
++    {
++        if (dest_mask & 0x8)
++            return 0u;
++        if (dest_mask & 0x4)
++            return 4u;
++        if (dest_mask & 0x2)
++            return 8u;
++        return 12u;
++    }
++
+     std::string CodeGenerator::translateVU_VILWR(const Instruction &inst)
+     {
+-        return fmt::format("{{ uint32_t addr = (uint32_t)(ctx->vi[{}] << 2) & 0x3FFC; ctx->vi[{}] = static_cast<uint16_t>(READ32(addr)); }}", inst.rd, inst.rt); // VILWR.<f> vit, (vis)
++        // VILWR.<f> vit, (vis): one word of the VU0 data quadword at vis; the field picks which.
++        if (inst.rt == 0)
++            return "// VILWR to VI0 ignored";
++        return fmt::format("{{ uint32_t addr = 0x11004000u + (((uint32_t)ctx->vi[{}] & 0xFFu) << 4) + {}u; ctx->vi[{}] = static_cast<uint16_t>(READ32(addr)); }}",
++                           inst.rd, vu0FieldWordOffset(inst.vectorInfo.vectorField), inst.rt);
+     }
+ 
+     std::string CodeGenerator::translateVU_VISWR(const Instruction &inst)
+     {
+-        return fmt::format("{{ uint32_t addr = (uint32_t)(ctx->vi[{}] << 2) & 0x3FFC; WRITE32(addr, (uint32_t)ctx->vi[{}]); }}", inst.rd, inst.rt); // VISWR.<f> vit, (vis)
++        // VISWR.<f> vit, (vis): stores vit, zero-extended, to one word of the VU0 data quadword at vis.
++        return fmt::format("{{ uint32_t addr = 0x11004000u + (((uint32_t)ctx->vi[{}] & 0xFFu) << 4) + {}u; WRITE32(addr, (uint32_t)ctx->vi[{}]); }}",
++                           inst.rd, vu0FieldWordOffset(inst.vectorInfo.vectorField), inst.rt);
+     }
+ 
+     std::string CodeGenerator::translateVU_VIADD(const Instruction &inst)
+@@ -164,17 +187,14 @@ namespace ps2recomp
+ 
+     std::string CodeGenerator::translateVU_VCALLMSR(const Instruction &inst)
+     {
+-        // VCALLMSR calls a VU0 microprogram at address stored in integer register
+-        uint8_t vis_reg_idx = inst.rd; // Source integer register (vis)
+-
+-        return fmt::format(
+-            "{{ "
+-            "    uint16_t instr_index = ctx->vi[{}] & 0x1FF; "             // Get instruction index from VI[IS], mask to 9 bits
+-            "    uint32_t target_byte_addr = (uint32_t)instr_index << 3; " // Convert to byte address
+-            "    ctx->vu0_pc = target_byte_addr; "
+-            "    runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); "
+-            "}}",
+-            vis_reg_idx);
++        // VCALLMSR starts the VU0 microprogram at CMSAR0 (an instruction index, like VCALLMS's immediate).
++        // Its is field always names CMSAR0 (27), which is a control register, not one of the 16 VI registers.
++        (void)inst;
++        return "{ "
++               "    uint32_t target_byte_addr = (ctx->vu0_cmsar0 & 0x1FFu) << 3; "
++               "    ctx->vu0_pc = target_byte_addr; "
++               "    runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); "
++               "}";
+     }
+ 
+     std::string CodeGenerator::translateVU_VRNEXT(const Instruction &inst)
+@@ -756,6 +776,8 @@ namespace ps2recomp
+         return fmt::format("{{ __m128 src = ctx->vu0_vf[{}]; "
+                            "src = _mm_mul_ps(src, _mm_set1_ps({})); "
+                            "__m128i res_i = _mm_cvttps_epi32(src); "
++                           // Positive overflow saturates to 0x7FFFFFFF on the VU; SSE gives 0x80000000 there.
++                           "res_i = _mm_xor_si128(res_i, _mm_cmpgt_epi32(_mm_castps_si128(src), _mm_set1_epi32(0x4EFFFFFF))); "
+                            "__m128 res = _mm_castsi128_ps(res_i); "
+                            "__m128i mask = _mm_set_epi32({}, {}, {}, {}); "
+                            "ctx->vu0_vf[{}] = _mm_blendv_ps(ctx->vu0_vf[{}], res, _mm_castsi128_ps(mask)); }}",
+@@ -765,68 +787,68 @@ namespace ps2recomp
+                            inst.rt, inst.rt);
+     }
+ 
++    // In macro mode the VU0 load/store ops address VU0 data memory (4 KB, mapped at 0x11004000 on the EE)
++    // in quadwords, wrapping at its end. VI0 is never incremented or decremented.
++    static std::string vu0MacroQAddr(uint8_t vi)
++    {
++        return fmt::format("0x11004000u + (((uint32_t)ctx->vi[{}] & 0xFFu) << 4)", vi);
++    }
++
++    static std::string vu0MacroStepVI(uint8_t vi, int step)
++    {
++        if (vi == 0)
++            return "";
++        return fmt::format("ctx->vi[{}] = static_cast<uint16_t>(ctx->vi[{}] {} 1); ", vi, vi, step > 0 ? '+' : '-');
++    }
++
+     std::string CodeGenerator::translateVU_VLQI(const Instruction &inst)
+     {
++        // VLQI.dest ft, (is++)
++        uint8_t vft = inst.rt;
+         uint8_t vis = inst.rd;
+         uint8_t dest_mask = inst.vectorInfo.vectorField;
+-        return fmt::format("{{ uint32_t addr = ((uint32_t)(ctx->vi[{}] & 0x3FF)) << 4; "
++        return fmt::format("{{ uint32_t addr = {}; "
+                            "__m128 res = _mm_castsi128_ps(READ128(addr)); "
+-                           "__m128i mask = _mm_set_epi32({}, {}, {}, {}); "
+-                           "ctx->vu0_vf[{}] = _mm_blendv_ps(ctx->vu0_vf[{}], res, _mm_castsi128_ps(mask)); "
+-                           "ctx->vi[{}] = (ctx->vi[{}] + 1) & 0x3FF; }}",
+-                           vis,
+-                           (dest_mask & 0x1) ? -1 : 0, (dest_mask & 0x2) ? -1 : 0,
+-                           (dest_mask & 0x4) ? -1 : 0, (dest_mask & 0x8) ? -1 : 0,
+-                           inst.rt, inst.rt,
+-                           vis, vis);
++                           "ctx->vu0_vf[{}] = _mm_blendv_ps(ctx->vu0_vf[{}], res, {}); "
++                           "{}}}",
++                           vu0MacroQAddr(vis), vft, vft, codegen::vuMaskExpr(dest_mask), vu0MacroStepVI(vis, 1));
+     }
+ 
+     std::string CodeGenerator::translateVU_VSQI(const Instruction &inst)
+     {
+-        uint8_t vis = inst.rd;
++        // VSQI.dest fs, (it++): the VF source is in the fs field and the VI base in the ft field.
++        uint8_t vfs = inst.rd;
++        uint8_t vit = inst.rt;
+         uint8_t dest_mask = inst.vectorInfo.vectorField;
+-        return fmt::format("{{ uint32_t addr = ((uint32_t)(ctx->vi[{}] & 0x3FF)) << 4; "
+-                           "__m128i old_val = READ128(addr); "
+-                           "__m128 res = _mm_blendv_ps(_mm_castsi128_ps(old_val), ctx->vu0_vf[{}], _mm_castsi128_ps(_mm_set_epi32({}, {}, {}, {}))); "
++        return fmt::format("{{ uint32_t addr = {}; "
++                           "__m128 res = _mm_blendv_ps(_mm_castsi128_ps(READ128(addr)), ctx->vu0_vf[{}], {}); "
+                            "WRITE128(addr, _mm_castps_si128(res)); "
+-                           "ctx->vi[{}] = (ctx->vi[{}] + 1) & 0x3FF; }}",
+-                           vis,
+-                           inst.rt,
+-                           (dest_mask & 0x1) ? -1 : 0, (dest_mask & 0x2) ? -1 : 0,
+-                           (dest_mask & 0x4) ? -1 : 0, (dest_mask & 0x8) ? -1 : 0,
+-                           vis, vis);
++                           "{}}}",
++                           vu0MacroQAddr(vit), vfs, codegen::vuMaskExpr(dest_mask), vu0MacroStepVI(vit, 1));
+     }
+ 
+     std::string CodeGenerator::translateVU_VLQD(const Instruction &inst)
+     {
++        // VLQD.dest ft, (--is)
++        uint8_t vft = inst.rt;
+         uint8_t vis = inst.rd;
+         uint8_t dest_mask = inst.vectorInfo.vectorField;
+-        return fmt::format("{{ ctx->vi[{}] = (ctx->vi[{}] - 1) & 0x3FF; "
+-                           "uint32_t addr = ((uint32_t)(ctx->vi[{}] & 0x3FF)) << 4; "
++        return fmt::format("{{ {}uint32_t addr = {}; "
+                            "__m128 res = _mm_castsi128_ps(READ128(addr)); "
+-                           "__m128i mask = _mm_set_epi32({}, {}, {}, {}); "
+-                           "ctx->vu0_vf[{}] = _mm_blendv_ps(ctx->vu0_vf[{}], res, _mm_castsi128_ps(mask)); }}",
+-                           vis, vis,
+-                           vis,
+-                           (dest_mask & 0x1) ? -1 : 0, (dest_mask & 0x2) ? -1 : 0,
+-                           (dest_mask & 0x4) ? -1 : 0, (dest_mask & 0x8) ? -1 : 0,
+-                           inst.rt, inst.rt);
++                           "ctx->vu0_vf[{}] = _mm_blendv_ps(ctx->vu0_vf[{}], res, {}); }}",
++                           vu0MacroStepVI(vis, -1), vu0MacroQAddr(vis), vft, vft, codegen::vuMaskExpr(dest_mask));
+     }
+ 
+     std::string CodeGenerator::translateVU_VSQD(const Instruction &inst)
+     {
+-        uint8_t vis = inst.rd;
++        // VSQD.dest fs, (--it)
++        uint8_t vfs = inst.rd;
++        uint8_t vit = inst.rt;
+         uint8_t dest_mask = inst.vectorInfo.vectorField;
+-        return fmt::format("{{ ctx->vi[{}] = (ctx->vi[{}] - 1) & 0x3FF; "
+-                           "uint32_t addr = ((uint32_t)(ctx->vi[{}] & 0x3FF)) << 4; "
+-                           "__m128i old_val = READ128(addr); "
+-                           "__m128 res = _mm_blendv_ps(_mm_castsi128_ps(old_val), ctx->vu0_vf[{}], _mm_castsi128_ps(_mm_set_epi32({}, {}, {}, {}))); "
++        return fmt::format("{{ {}uint32_t addr = {}; "
++                           "__m128 res = _mm_blendv_ps(_mm_castsi128_ps(READ128(addr)), ctx->vu0_vf[{}], {}); "
+                            "WRITE128(addr, _mm_castps_si128(res)); }}",
+-                           vis, vis,
+-                           vis,
+-                           inst.rt,
+-                           (dest_mask & 0x1) ? -1 : 0, (dest_mask & 0x2) ? -1 : 0,
+-                           (dest_mask & 0x4) ? -1 : 0, (dest_mask & 0x8) ? -1 : 0);
++                           vu0MacroStepVI(vit, -1), vu0MacroQAddr(vit), vfs, codegen::vuMaskExpr(dest_mask));
+     }
+ 
+     std::string CodeGenerator::translateVU_VRGET(const Instruction &inst)
 diff --git a/ps2xRuntime/CMakeLists.txt b/ps2xRuntime/CMakeLists.txt
 index 589d768..3444800 100644
 --- a/ps2xRuntime/CMakeLists.txt
@@ -329,7 +540,7 @@ index 4b9242c..aa6417a 100644
      {
          std::string name;
 diff --git a/ps2xRuntime/include/ps2_runtime_macros.h b/ps2xRuntime/include/ps2_runtime_macros.h
-index 0485d50..39c6af8 100644
+index 0485d50..ab1e7ad 100644
 --- a/ps2xRuntime/include/ps2_runtime_macros.h
 +++ b/ps2xRuntime/include/ps2_runtime_macros.h
 @@ -10,6 +10,8 @@
@@ -341,6 +552,32 @@ index 0485d50..39c6af8 100644
  #endif
  
  #include "ps2_runtime.h"
+@@ -311,6 +313,16 @@ inline float ps2_frsqrt(float a, float b)
+     return ps2_fall_normal(a, b, r) ? r : ps2_frsqrt_slow(a, b);
+ }
+ 
++// CVT.W.S always truncates toward zero on the R5900, whatever FCR31's rounding mode says, and saturates:
++// anything of magnitude 2^31 or more (exponent 255 included) gives 0x7FFFFFFF, or 0x80000000 when negative.
++inline int32_t ps2_cvtws(float a)
++{
++    const uint32_t bits = std::bit_cast<uint32_t>(a);
++    if ((bits & PS2_FLOAT_EXP_MASK) <= 0x4E800000u)
++        return static_cast<int32_t>(a);
++    return (bits & PS2_FLOAT_SIGN_MASK) ? INT32_MIN : INT32_MAX;
++}
++
+ enum class Ps2VecOp
+ {
+     Add,
+@@ -853,7 +865,7 @@ inline __m128i ps2_u64_to_epi64_pair(uint64_t value)
+ #define FPU_FLOOR_W_S(a) ((int32_t)floorf((float)(a)))
+ #define FPU_CVT_S_W(a) ((float)(int32_t)(a))
+ #define FPU_CVT_S_L(a) ((float)(int64_t)(a))
+-#define FPU_CVT_W_S(a) ((int32_t)nearbyintf((float)(a)))
++#define FPU_CVT_W_S(a) ps2_cvtws((float)(a))
+ #define FPU_CVT_L_S(a) ((int64_t)(float)(a))
+ #define FPU_C_F_S(a, b) (0)
+ #define FPU_C_UN_S(a, b) (isnan((float)(a)) || isnan((float)(b)))
 diff --git a/ps2xRuntime/include/runtime/ps2_memory.h b/ps2xRuntime/include/runtime/ps2_memory.h
 index ea86a9c..c55c66b 100644
 --- a/ps2xRuntime/include/runtime/ps2_memory.h
@@ -1602,7 +1839,7 @@ index 563bcbd..e00fe45 100644
  
  #ifdef _DEBUG
 diff --git a/ps2xTest/src/code_generator_tests.cpp b/ps2xTest/src/code_generator_tests.cpp
-index 463b6cf..f834952 100644
+index 463b6cf..f87bb4b 100644
 --- a/ps2xTest/src/code_generator_tests.cpp
 +++ b/ps2xTest/src/code_generator_tests.cpp
 @@ -992,6 +992,24 @@ void register_code_generator_tests()
@@ -1630,6 +1867,91 @@ index 463b6cf..f834952 100644
          tc.Run("FCR access uses CFC1/CTC1", [](TestCase &t) {
              CodeGenerator gen({}, {});
  
+@@ -1464,6 +1482,61 @@ void register_code_generator_tests()
+             t.IsTrue(out.find("ctx->vi[20]") == std::string::npos, "S2 VLQI must not use rs(format) as VI index");
+         });
+ 
++        tc.Run("VU0 S2 VSQI stores fs to VU0 data memory at it", [](TestCase &t) {
++            // vsqi.xyzw vf2, (vi1++): fs (rd) = 2 is the source, it (rt) = 1 is the address and is incremented.
++            Instruction inst{};
++            inst.opcode = OPCODE_COP2;
++            inst.rs = COP2_CO | 0xF;
++            inst.rt = 1;
++            inst.rd = 2;
++            inst.function = 0x3C;
++            inst.vectorInfo.vectorField = 0xF;
++            inst.raw = (((VU0_S2_VSQI >> 2) & 0x1F) << 6) | (VU0_S2_VSQI & 0x3);
++
++            CodeGenerator gen({}, {});
++            std::string out = gen.translateInstruction(inst);
++
++            t.IsTrue(out.find("0x11004000u + (((uint32_t)ctx->vi[1] & 0xFFu) << 4)") != std::string::npos,
++                     "VSQI should address VU0 data memory through it but got: " + out);
++            t.IsTrue(out.find("ctx->vu0_vf[2]") != std::string::npos, "VSQI should store fs but got: " + out);
++            t.IsTrue(out.find("ctx->vi[1] = static_cast<uint16_t>(ctx->vi[1] + 1)") != std::string::npos,
++                     "VSQI should increment it but got: " + out);
++            t.IsTrue(out.find("ctx->vi[2]") == std::string::npos, "VSQI must not use fs as a VI index but got: " + out);
++        });
++
++        tc.Run("VU0 S2 VLQI with VI0 as base leaves VI0 alone", [](TestCase &t) {
++            Instruction inst{};
++            inst.opcode = OPCODE_COP2;
++            inst.rs = COP2_CO | 0xF;
++            inst.rt = 3;
++            inst.rd = 0;
++            inst.function = 0x3C;
++            inst.vectorInfo.vectorField = 0xF;
++            inst.raw = (((VU0_S2_VLQI >> 2) & 0x1F) << 6) | (VU0_S2_VLQI & 0x3);
++
++            CodeGenerator gen({}, {});
++            std::string out = gen.translateInstruction(inst);
++
++            t.IsTrue(out.find("0x11004000u") != std::string::npos, "VLQI should read VU0 data memory but got: " + out);
++            t.IsTrue(out.find("ctx->vi[0] =") == std::string::npos, "VLQI must not write VI0 but got: " + out);
++        });
++
++        tc.Run("VU0 VCALLMSR starts the microprogram at CMSAR0", [](TestCase &t) {
++            // vcallmsr: COP2 CO, is = 27 (CMSAR0), function 0x39
++            Instruction inst{};
++            inst.opcode = OPCODE_COP2;
++            inst.rs = COP2_CO;
++            inst.rd = 27;
++            inst.function = 0x39;
++            inst.raw = 0x4A00D839u;
++
++            CodeGenerator gen({}, {});
++            std::string out = gen.translateInstruction(inst);
++
++            t.IsTrue(out.find("ctx->vu0_cmsar0") != std::string::npos, "VCALLMSR should read CMSAR0 but got: " + out);
++            t.IsTrue(out.find("ctx->vi[27]") == std::string::npos, "VCALLMSR must not index past the 16 VI registers but got: " + out);
++        });
++
+         tc.Run("JAL to known function emits call and check", [](TestCase &t) {
+             Function func;
+             func.name = "jal_test";
+diff --git a/ps2xTest/src/ps2_float_semantics_tests.cpp b/ps2xTest/src/ps2_float_semantics_tests.cpp
+index 2866d2b..ab51b27 100644
+--- a/ps2xTest/src/ps2_float_semantics_tests.cpp
++++ b/ps2xTest/src/ps2_float_semantics_tests.cpp
+@@ -178,6 +178,18 @@ void register_ps2_float_semantics_tests()
+             t.Equals(bitsOf(FPU_SQRT_S(-0.0f)), bitsOf(0.0f), "sqrt(-0) should be +0");
+         });
+ 
++        tc.Run("FPU CVT.W.S truncates toward zero and saturates", [](TestCase &t)
++        {
++            t.Equals(FPU_CVT_W_S(2.7f), int32_t{2}, "2.7 should truncate to 2");
++            t.Equals(FPU_CVT_W_S(-2.7f), int32_t{-2}, "-2.7 should truncate to -2");
++            t.Equals(FPU_CVT_W_S(0.5f), int32_t{0}, "0.5 should truncate to 0");
++            t.Equals(FPU_CVT_W_S(floatOf(0x00000001u)), int32_t{0}, "an exponent-0 value should give 0");
++            t.Equals(FPU_CVT_W_S(3.0e9f), INT32_MAX, "3e9 should saturate to 0x7FFFFFFF");
++            t.Equals(FPU_CVT_W_S(-3.0e9f), INT32_MIN, "-3e9 should saturate to 0x80000000");
++            t.Equals(FPU_CVT_W_S(floatOf(kPlusMax)), INT32_MAX, "+max should saturate to 0x7FFFFFFF");
++            t.Equals(FPU_CVT_W_S(floatOf(kMinusMax)), INT32_MIN, "-max should saturate to 0x80000000");
++        });
++
+         tc.Run("VU vector ADD/SUB/MUL follow the same rules in every lane", [](TestCase &t)
+         {
+             // _mm_set_ps lists lanes 3..0
 diff --git a/ps2xTest/src/ps2_gs_tests.cpp b/ps2xTest/src/ps2_gs_tests.cpp
 index 0458a8c..0bfadee 100644
 --- a/ps2xTest/src/ps2_gs_tests.cpp
