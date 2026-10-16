@@ -7898,7 +7898,61 @@ extern "C" void func_001B3978(void* self, void* name)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B3A30);
+//100%
+extern "C" void func_001B2378(void* self, int a1);
+extern "C" void func_001B3978(void* self, void* a1);
+extern "C" void* func_001BCB58_3A30(void* self, int a1) __asm__("func_001BCB58");
+extern "C" void func_001B2CD0(void* self, int a1);
+extern "C" void func_001AB3D0(void* self, int a1, int a2);
+extern "C" int func_001A8E40_3A30(void* self, int id, int a2) __asm__("func_001A8E40");
+extern char D_00461B30[];
+extern char D_00463DC8[];
+
+extern "C" int func_001B3A30(char* self, unsigned int id, int a2)
+{
+    switch (id) {
+    case 0xE0: {
+        char buf[32];
+        strcpy(buf, self + 0x70C);
+        func_001B2378(self, 1);
+        func_001B3978(self, buf);
+        break;
+    }
+    case 0xDC:
+        if (func_0025DA90(D_004A3028) == 0) {
+            func_001A8A40_15D8(self, func_001BCB58_3A30(cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(self + 0x10)));
+            break;
+        }
+        func_001B2378(self, 1);
+        break;
+    case 0xE8: {
+        char* p = (char*)func_001A9C50(self);
+        char* sub;
+        *(int*)(p + 0xBC) = 1;
+        sub = p + 0xBC;
+        *(int*)(p + 0xC4) = GetHashValue32(D_00463DC8);
+        *(int*)(p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+        *(int*)(p + 0x150) = 0x804;
+        func_001A9BC0(self, p);
+        break;
+    }
+    case 0xDE:
+        if (*(int*)(self + 0x6F8) == 0) func_001B2CD0(self, a2);
+        break;
+    case 0xE1:
+        func_001B2378(self, 1);
+        break;
+    case 0xEA: case 0xEB: case 0xEC: case 0xED: case 0xEE: case 0xEF: case 0xF0:
+    case 0x106: case 0x10A: case 0x10B:
+        func_001AB3D0(self, func_001A98B0(self), 1);
+        break;
+    default:
+        func_001AB3D0(self, func_001A98B0(self), 1);
+        return func_001A8E40_3A30(self, id, a2);
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int sprintf(char* buf, const char* fmt, ...);
