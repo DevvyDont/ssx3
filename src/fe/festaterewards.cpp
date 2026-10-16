@@ -1557,7 +1557,144 @@ extern "C" void cFEStatePreviewReward_onCreateScreen(void* self)
     }
 }
 
-INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetCreate);
+//100%
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" void* func_00398380(void* self, int id);
+extern char D_00466DF8[];
+extern char D_00466E08[];
+extern char D_00466E18[];
+extern char D_00466E30[];
+extern char D_00466E50[];
+extern char D_00466E60[];
+extern char D_00466E70[];
+extern char D_00466E88[];
+extern char D_00466EA0[];
+extern char D_00466EC0[];
+extern char D_00466F10[];
+extern char D_00467150[];
+extern char D_00467160[];
+extern char D_00467170[];
+extern char D_00467188[];
+extern char D_00467198[];
+extern char D_004671A8[];
+extern char D_004671C0[];
+
+struct sVE_1D1C90 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void Show_1D1C90(char* o, int on)
+{
+    sVE_1D1C90* vt = *(sVE_1D1C90**)(o + 0x8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+static inline void SetImage_1D1C90(char* self, char* w, char* name)
+{
+    char* ui = *(char**)(self + 0x10);
+    int hh = GetHashValue32(name);
+    *(void**)(w + 0x7C) = func_00398380(ui + 0x58, hh);
+    *(int*)(w + 0x78) = -1;
+}
+
+static inline void SetText_1D1C90(char* w, char* name)
+{
+    cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(name));
+}
+
+struct sPR_1D1C90 {
+    char pad[0x48];
+    char* a48[3];
+    char* a54[3];
+    char pad60[0x70 - 0x60];
+    int f70;
+    int sel;
+};
+
+extern "C" void cFEStatePreviewReward_onWidgetCreate(char* self, char* w)
+{
+    if (w == 0)
+        return;
+    int h = *(int*)(w + 0x38);
+    if (h == GetHashValue32(D_00466DF8)) {
+        switch (*(int*)(self + 0x68)) {
+        case 3:
+            SetImage_1D1C90(self, w, D_00466E08);
+            break;
+        case 4:
+            SetImage_1D1C90(self, w, D_00466E18);
+            break;
+        case 5:
+            SetImage_1D1C90(self, w, D_00466E30);
+            break;
+        case 7:
+            SetImage_1D1C90(self, w, D_00466E50);
+            break;
+        }
+    } else if (h == GetHashValue32(D_00466E60)) {
+        switch (*(int*)(self + 0x68)) {
+        case 3:
+            SetText_1D1C90(w, D_00466E70);
+            break;
+        case 4:
+            SetText_1D1C90(w, D_00466E88);
+            break;
+        case 5:
+            SetText_1D1C90(w, D_00466EA0);
+            break;
+        case 6:
+            SetText_1D1C90(w, D_00467150);
+            break;
+        case 7:
+            SetText_1D1C90(w, D_00466EC0);
+            break;
+        }
+    } else if (h == GetHashValue32(D_00466F10)) {
+        switch (*(int*)(self + 0x68)) {
+        case 4:
+            Show_1D1C90(w, 0);
+            break;
+        case 3:
+        case 5:
+        case 7:
+            cUIText_setAsciiString((cUIText*)w, **(char***)(self + 0x60));
+            break;
+        case 6:
+            break;
+        }
+    } else if (h == GetHashValue32(D_00467160)) {
+        *(char**)(self + 0x54) = w;
+        Show_1D1C90(w, 0);
+    } else if (h == GetHashValue32(D_00467170)) {
+        *(char**)(self + 0x58) = w;
+        Show_1D1C90(w, 0);
+    } else if (h == GetHashValue32(D_00467188)) {
+        *(char**)(self + 0x5C) = w;
+        Show_1D1C90(w, 0);
+    } else if (h == GetHashValue32(D_00467198)) {
+        *(char**)(self + 0x48) = w;
+    } else if (h == GetHashValue32(D_004671A8)) {
+        *(char**)(self + 0x4C) = w;
+    } else if (h == GetHashValue32(D_004671C0)) {
+        *(char**)(self + 0x50) = w;
+    }
+    int i = ((sPR_1D1C90*)self)->sel;
+    if (i >= 0) {
+        char* o = ((sPR_1D1C90*)self)->a48[i];
+        if (o != 0 && ((sPR_1D1C90*)self)->a54[i] != 0) {
+            int f = ((sPR_1D1C90*)self)->f70;
+            *(int*)(o + 0x7C) = 0;
+            *(int*)(o + 0x78) = f;
+            Show_1D1C90(((sPR_1D1C90*)self)->a54[((sPR_1D1C90*)self)->sel], 1);
+        }
+    }
+}
+
 
 //100%
 extern "C" int func_001D1F78(void* self, int a1, unsigned int a2)
