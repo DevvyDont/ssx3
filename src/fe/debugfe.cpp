@@ -333,7 +333,144 @@ extern "C" void func_0017DA30(char* self, int a1)
     }
 }
 
-INCLUDE_ASM("fe/debugfe", func_0017DB18);
+//100%
+extern void* D_004A2EB8;
+extern void* D_004A3028;
+extern void* D_004A28A8;
+extern void* D_004A33F4;
+extern char D_0045CE60[];
+struct cAppMan;
+extern "C" void func_00255F50(void* comm, int a1);
+extern "C" void func_0025B6D8(void* self, int a1);
+extern "C" int func_002CC098(void* stack);
+extern "C" void func_002CC3B8(void* a, void* b);
+extern "C" void func_001DB418(void* self, void* a1);
+extern "C" void func_001DB528(void* self, void* a1);
+extern "C" void func_001DB620(void* self, void* a1);
+extern "C" void func_0025D800(void* a, int b, int c);
+extern "C" int func_00255D50(void* comm, int chan);
+extern "C" void cGameComm_construct(int a, int b);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* func_00232720(void* self);
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern "C" void func_00256038(void* self, int* out);
+extern "C" void func_00266D58(void* self, void* ip);
+extern "C" void func_00266E30(void* self);
+
+static inline int StackEmpty_17DB18(char* s) { return *(int*)s == 0; }
+
+static inline bool IsState1_17DB18(void* c) { return *(int*)((char*)c + 0x20) == 1; }
+
+extern "C" void func_0017DB18(void* self_)
+{
+    char* self = (char*)self_;
+    int state;
+    do {
+        state = *(int*)(self + 0x4);
+        switch (state) {
+        case 0:
+            if (IsState1_17DB18(D_004A2EB8))
+                func_00255F50(D_004A2EB8, 0);
+            *(int*)(self + 0x4) = 1;
+            break;
+        case 1:
+            if ((unsigned int)(*(int*)((char*)D_004A2EB8 + 0x20) - 3) < 2)
+                break;
+            func_0025B6D8(D_004A3028, 0);
+            *(int*)(self + 0x4) = 2;
+            break;
+        case 13:
+            if (func_002CC098(self + 0x8) == 0)
+                func_002CC3B8(self + 0x8, self + 0x1AAC);
+            break;
+        case 17:
+            if (func_002CC098(self + 0x8) == 0) {
+                *(int*)(self + 0x4) = 12;
+                func_002CC3B8(self + 0x8, self + 0x1044);
+            }
+            break;
+        case 24:
+            if (func_002CC098(self + 0x8) == 0) {
+                func_002CC3B8(self + 0x8, self + 0x1044);
+                *(int*)(self + 0x4) = 12;
+            }
+            break;
+        case 21:
+            if (func_002CC098(self + 0x8) == 0) {
+                *(int*)(self + 0x4) = 3;
+                func_002CC3B8(self + 0x8, self + 0x70);
+            }
+            break;
+        case 20:
+            if (func_002CC098(self + 0x8) == 0) {
+                *(int*)(self + 0x4) = 3;
+                func_002CC3B8(self + 0x8, self + 0x70);
+            }
+            break;
+        case 18:
+        case 19:
+            if (func_002CC098(self + 0x8) == 0)
+                *(int*)(self + 0x4) = 0;
+            break;
+        case 22:
+            if (func_002CC098(self + 0x8) == 0) {
+                func_001DB418(self + 0x74C, D_004A3028);
+                func_002CC3B8(self + 0x8, self + 0x74C);
+                *(int*)(self + 0x4) = 6;
+            }
+            break;
+        case 23:
+            if (func_002CC098(self + 0x8) == 0) {
+                func_002CC3B8(self + 0x8, self + 0xD2C);
+                *(int*)(self + 0x4) = 10;
+            }
+            break;
+        case 15:
+            if (StackEmpty_17DB18(self + 0x8))
+                func_002CC3B8(self + 0x8, self + 0x18C0);
+            break;
+        case 6:
+            if (StackEmpty_17DB18(self + 0x8))
+                func_002CC3B8(self + 0x8, self + 0x74C);
+            break;
+        case 10:
+            if (StackEmpty_17DB18(self + 0x8))
+                func_002CC3B8(self + 0x8, self + 0xD2C);
+            func_001DB528(self + 0xD2C, D_004A3028);
+            break;
+        case 12:
+            if (StackEmpty_17DB18(self + 0x8)) {
+                func_0025D800(D_004A3028, -1, 0);
+                *(int*)(self + 0x4) = 11;
+            } else {
+                func_001DB620(self + 0x1044, D_004A3028);
+            }
+            break;
+        case 3:
+            if (StackEmpty_17DB18(self + 0x8))
+                func_002CC3B8(self + 0x8, self + 0x70);
+            break;
+        case 14:
+            if (StackEmpty_17DB18(self + 0x8)) {
+                *(int*)(self + 0x4) = 12;
+                func_002CC3B8(self + 0x8, self + 0x1044);
+            }
+            break;
+        case 16:
+            if (func_00255D50(D_004A2EB8, *(int*)(self + 0x1C10))) {
+                int ip;
+                cGameComm_construct(*(int*)(self + 0x1C10), *(int*)((char*)D_004A3028 + 0xB4));
+                cAppMan_setNextModule((cAppMan*)D_004A28A8,
+                                      (unsigned int)func_00232720(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+                func_00256038(D_004A2EB8, &ip);
+                func_00266D58(D_004A33F4, (void*)ip);
+                func_00266E30(D_004A33F4);
+            }
+            break;
+        }
+    } while (*(int*)(self + 0x4) != state);
+}
+
 
 //100%
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
