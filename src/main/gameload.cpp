@@ -671,7 +671,113 @@ extern "C" void func_00231348(void* self, cStream_00231348* stream)
     func_002361C8_s((char*)self + 0x1DC, stream);
 }
 
-INCLUDE_ASM("main/gameload", func_002314D0);
+//100%
+extern "C" void func_00234A30(void* self, void* stream);
+void func_00236D80_s(void* self, void* stream) __asm__("func_00236D80__FPv");
+void func_00234E00_s(void* self, void* stream) __asm__("func_00234E00__FPv");
+void func_00234ED8_s(void* self, void* stream) __asm__("func_00234ED8__FPv");
+extern "C" void func_00234120(void* self, void* stream);
+void func_00233BB0_s(void* self, void* stream) __asm__("func_00233BB0__FPv");
+void func_00236EE8_s(void* self, void* stream) __asm__("func_00236EE8__FPv");
+void func_00233BF0_s(void* self, void* stream) __asm__("func_00233BF0__FPv");
+void func_00236B90_s(void* self, void* stream) __asm__("func_00236B90__FPv");
+extern "C" void func_00235A18(void* self, void* stream);
+void func_00236B18_s(void* self, void* stream) __asm__("func_00236B18__FPv");
+void func_00236FC8_s(void* self, void* stream) __asm__("func_00236FC8__FPv");
+extern "C" void func_00235FD0(void* self, void* stream);
+extern "C" void func_002367C8(void* self, void* stream);
+void func_002361E8_s(void* self, void* stream) __asm__("func_002361E8__FPv");
+
+struct sVE_14D0 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+static inline void Ser_14D0(char* o, void* stream)
+{
+    sVE_14D0* vt = *(sVE_14D0**)(o + 0xC);
+    vt[13].fn(o + vt[13].delta, stream);
+}
+
+static inline void SerInt_14D0(char* stream, int* p)
+{
+    sVE_14D0* vt = *(sVE_14D0**)stream;
+    vt[2].fn(stream + vt[2].delta, p, 4);
+}
+
+extern "C" void func_002314D0(void* self_, char* stream)
+{
+    cGLMan_0F40* self = (cGLMan_0F40*)self_;
+    Ser_14D0(*(char**)((char*)self + 0x70), stream);
+    Ser_14D0(*(char**)((char*)self + 0x74), stream);
+    SerInt_14D0(stream, &self->id);
+    SerInt_14D0(stream, &self->prevId);
+    SerInt_14D0(stream, &self->req);
+    SerInt_14D0(stream, &self->reqArg);
+    func_00234A30(State_0F40(self, 0xB0), stream);
+    func_00236D80_s(State_0F40(self, 0xD0), stream);
+    func_00234E00_s(State_0F40(self, 0xE0), stream);
+    func_00234ED8_s(State_0F40(self, 0xF0), stream);
+    func_00234120(State_0F40(self, 0x100), stream);
+    func_00233BB0_s(State_0F40(self, 0x118), stream);
+    func_00236EE8_s(State_0F40(self, 0x128), stream);
+    func_00233BF0_s(State_0F40(self, 0x138), stream);
+    func_00236B90_s(State_0F40(self, 0x148), stream);
+    func_00235A18(State_0F40(self, 0x158), stream);
+    func_00236B18_s(State_0F40(self, 0x178), stream);
+    func_00236FC8_s(State_0F40(self, 0x18C), stream);
+    func_00235FD0(State_0F40(self, 0x19C), stream);
+    func_002367C8(State_0F40(self, 0x1B8), stream);
+    func_002361E8_s(State_0F40(self, 0x1DC), stream);
+    switch (self->id) {
+    case 0: self->cur = 0; break;
+    case 1: self->cur = State_0F40(self, 0xB0); break;
+    case 2: self->cur = State_0F40(self, 0xD0); break;
+    case 3: self->cur = State_0F40(self, 0xE0); break;
+    case 4: self->cur = State_0F40(self, 0xF0); break;
+    case 5: self->cur = State_0F40(self, 0x100); break;
+    case 6: self->cur = State_0F40(self, 0x118); break;
+    case 7: self->cur = State_0F40(self, 0x128); break;
+    case 8: self->cur = State_0F40(self, 0x138); break;
+    case 9: self->cur = State_0F40(self, 0x148); break;
+    case 10: self->cur = State_0F40(self, 0x158); break;
+    case 11: self->cur = State_0F40(self, 0x178); break;
+    case 12: self->cur = State_0F40(self, 0x18C); break;
+    case 13: self->cur = State_0F40(self, 0x19C); break;
+    case 14: self->cur = State_0F40(self, 0x1B8); break;
+    case 15: self->cur = State_0F40(self, 0x1DC); break;
+    case 16: self->cur = State_0F40(self, 0x1EC); break;
+    default:
+        self->cur = 0;
+        self->id = 0;
+        break;
+    }
+    switch (self->prevId) {
+    case 1: self->prev = State_0F40(self, 0xB0); break;
+    case 2: self->prev = State_0F40(self, 0xD0); break;
+    case 3: self->prev = State_0F40(self, 0xE0); break;
+    case 4: self->prev = State_0F40(self, 0xF0); break;
+    case 5: self->prev = State_0F40(self, 0x100); break;
+    case 6: self->prev = State_0F40(self, 0x118); break;
+    case 7: self->prev = State_0F40(self, 0x128); break;
+    case 8: self->prev = State_0F40(self, 0x138); break;
+    case 9: self->prev = State_0F40(self, 0x148); break;
+    case 10: self->prev = State_0F40(self, 0x158); break;
+    case 11: self->prev = State_0F40(self, 0x178); break;
+    case 12: self->prev = State_0F40(self, 0x18C); break;
+    case 13: self->prev = State_0F40(self, 0x19C); break;
+    case 14: self->prev = State_0F40(self, 0x1B8); break;
+    case 15: self->prev = State_0F40(self, 0x1DC); break;
+    case 16: self->prev = State_0F40(self, 0x1EC); break;
+    default:
+        self->prevId = 0;
+    case 0:
+        self->prev = 0;
+        break;
+    }
+}
+
 
 //100%
 extern void* D_004A28A8;
