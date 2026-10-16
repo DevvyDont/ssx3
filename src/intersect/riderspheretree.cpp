@@ -18,13 +18,8 @@ struct sRiderSphere_329910 {
     sRiderSphere_329910() {}
 };
 
-cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
-{
-    new ((char*)self + 0x2C) sRiderSphere_329910[20];
-    self->field_0x24 = -1;
-    *(unsigned int*)&self->field_0x28 = 0xFFFFFFFF;
-    return self;
-}
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_cRiderSphereTree__FP16cRiderSphereTree);
+cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329938);
 

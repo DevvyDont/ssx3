@@ -775,19 +775,8 @@ struct sPtElem2B30 {
     sPtElem2B30() {}
 };
 
-extern "C" void* func_00372B30(void* self)
-{
-    new ((char*)self + 0x20) sPtElem2B30[4];
-    new ((char*)self + 0x60) sPtElem2B30[6];
-    new ((char*)self + 0xC0) sPtElem2B30[8];
-    new ((char*)self + 0x140) sPtElem2B30[4];
-    new ((char*)self + 0x180) sPtElem2B30[6];
-    new ((char*)self + 0x1E0) sPtElem2B30[8];
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    return self;
-}
+INCLUDE_ASM("render/particle", func_00372B30);
+extern "C" void* func_00372B30(void* self);
 
 INCLUDE_ASM("render/particle", func_00372B78);
 
@@ -3730,122 +3719,8 @@ static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
     return r;
 }
 
-extern "C" void func_00382170(cRMgr2170* mgr, sPt2170* pos, float* col, float radius, int segs)
-{
-    char* self = (char*)mgr;
-    sMat2170 m;
-    int step;
-    int i;
-    int k;
-
-    CopyMat2170(&m, mgr->v35());
-    sPt2170 c = MulMat2170(&m, *pos);
-    if (3000.0f < c.z) {
-        return;
-    }
-    if (segs > 0) {
-        step = segs;
-    } else if (2000.0f < c.z) {
-        step = 4;
-    } else if (750.0f < c.z) {
-        step = 2;
-    } else {
-        step = 1;
-    }
-    if (D_004A59A0 == 0) {
-        D_004FFBC0[0].x = 0.0f;
-        D_004FFBC0[0].y = 1.0f;
-        D_004FFBC0[0].z = 0.0f;
-        D_004FFBC0[0].w = 0.0f;
-        D_004FFBC0[1].x = 0.3799999952316284f;
-        D_004FFBC0[1].y = 0.9200000166893005f;
-        D_004FFBC0[1].z = 0.0f;
-        D_004FFBC0[1].w = 0.0f;
-        D_004FFBC0[2].x = 0.7099999785423279f;
-        D_004FFBC0[2].y = 0.7099999785423279f;
-        D_004FFBC0[2].z = 0.0f;
-        D_004FFBC0[2].w = 0.0f;
-        D_004FFBC0[3].x = 0.9200000166893005f;
-        D_004FFBC0[3].y = 0.3799999952316284f;
-        D_004FFBC0[3].z = 0.0f;
-        D_004FFBC0[3].w = 0.0f;
-        D_004FFBC0[4].x = 1.0f;
-        D_004FFBC0[4].y = 0.0f;
-        D_004FFBC0[4].z = 0.0f;
-        D_004FFBC0[4].w = 0.0f;
-        D_004FFBC0[5].x = 0.9200000166893005f;
-        D_004FFBC0[5].y = -0.3799999952316284f;
-        D_004FFBC0[5].z = 0.0f;
-        D_004FFBC0[5].w = 0.0f;
-        D_004FFBC0[6].x = 0.7099999785423279f;
-        D_004FFBC0[6].y = -0.7099999785423279f;
-        D_004FFBC0[6].z = 0.0f;
-        D_004FFBC0[6].w = 0.0f;
-        D_004FFBC0[7].x = 0.3799999952316284f;
-        D_004FFBC0[7].y = -0.9200000166893005f;
-        D_004FFBC0[7].z = 0.0f;
-        D_004FFBC0[7].w = 0.0f;
-        D_004FFBC0[8].x = 0.0f;
-        D_004FFBC0[8].y = -1.0f;
-        D_004FFBC0[8].z = 0.0f;
-        D_004FFBC0[8].w = 0.0f;
-        D_004FFBC0[9].x = -0.3799999952316284f;
-        D_004FFBC0[9].y = -0.9200000166893005f;
-        D_004FFBC0[9].z = 0.0f;
-        D_004FFBC0[9].w = 0.0f;
-        D_004FFBC0[10].x = -0.7099999785423279f;
-        D_004FFBC0[10].y = -0.7099999785423279f;
-        D_004FFBC0[10].z = 0.0f;
-        D_004FFBC0[10].w = 0.0f;
-        D_004FFBC0[11].x = -0.9200000166893005f;
-        D_004FFBC0[11].y = -0.3799999952316284f;
-        D_004FFBC0[11].z = 0.0f;
-        D_004FFBC0[11].w = 0.0f;
-        D_004FFBC0[12].x = -1.0f;
-        D_004FFBC0[12].y = 0.0f;
-        D_004FFBC0[12].z = 0.0f;
-        D_004FFBC0[12].w = 0.0f;
-        D_004FFBC0[13].x = -0.9200000166893005f;
-        D_004FFBC0[13].y = 0.3799999952316284f;
-        D_004FFBC0[13].z = 0.0f;
-        D_004FFBC0[13].w = 0.0f;
-        D_004FFBC0[14].x = -0.7099999785423279f;
-        D_004FFBC0[14].y = 0.7099999785423279f;
-        D_004FFBC0[14].z = 0.0f;
-        D_004FFBC0[14].w = 0.0f;
-        D_004FFBC0[15].x = -0.3799999952316284f;
-        D_004FFBC0[15].y = 0.9200000166893005f;
-        D_004FFBC0[15].z = 0.0f;
-        D_004FFBC0[15].w = 0.0f;
-        D_004A59A0 = 1;
-    }
-    (*(sRS2170**)(self + 0xE84))->tex = -1;
-    (*(sRS2170**)(self + 0xE84))->flagsA = ((*(sRS2170**)(self + 0xE84))->flagsA & ~0x7C) | 4;
-    mgr->v31();
-    mgr->v37();
-
-    sVtx2170 verts[17];
-    i = 0;
-    for (k = 0; k < 16; k += step) {
-        verts[i].r = (int)(col[1] * 128.0f);
-        verts[i].g = (int)(col[2] * 128.0f);
-        verts[i].b = (int)(col[3] * 128.0f);
-        verts[i].a = (int)(col[0] * 128.0f);
-        sPt2170 p = Add2170(c, Scale2170(D_004FFBC0[k], radius));
-        verts[i].pos = p;
-        i++;
-    }
-    verts[i].r = (int)(col[1] * 128.0f);
-    verts[i].g = (int)(col[2] * 128.0f);
-    verts[i].b = (int)(col[3] * 128.0f);
-    verts[i].a = (int)(col[0] * 128.0f);
-    sPt2170 p = Add2170(c, Scale2170(D_004FFBC0[0], radius));
-    verts[i].pos = p;
-    i++;
-    mgr->v73(i, verts, 0);
-    (*(sRS2170**)(self + 0xE84))->flagsA = ((*(sRS2170**)(self + 0xE84))->flagsA & ~0x7C) | 4;
-    mgr->v32();
-}
+INCLUDE_ASM("render/particle", func_00382170);
+extern "C" void func_00382170(cRMgr2170* mgr, sPt2170* pos, float* col, float radius, int segs);
 
 //100%
 extern "C" void func_003825F8(void* arg);

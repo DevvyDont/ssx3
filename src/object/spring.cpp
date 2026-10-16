@@ -167,46 +167,8 @@ static inline float spLength_53FC0(const sSpVec_53FC0& v)
     return r;
 }
 
-extern "C" void func_00353FC0(sSpring_53FC0* self)
-{
-    sSpVec_53FC0 g(0.0f, 0.0f, -980.0f, 0.0f);
-    float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
-    sSpVec_53FC0 F[16];
-    float T[16];
-    F[0] = F[self->n - 1] = D_004FF120_sp;
-    T[0] = T[self->n - 1] = 0.0f;
-    for (int i = 1; i < self->n - 1; i++) {
-        sSpVec_53FC0 d1 = spSub_53FC0(self->nodes[i - 1].p, self->nodes[i].p);
-        sSpVec_53FC0 d2 = spSub_53FC0(self->nodes[i + 1].p, self->nodes[i].p);
-        spScaleEq_53FC0(d1, 1.0f - self->rest * self->scale / spLength_53FC0(d1));
-        spScaleEq_53FC0(d2, 1.0f - self->rest * self->scale / spLength_53FC0(d2));
-        F[i] = spScaleF_53FC0(self->k, spAdd_53FC0(d1, d2));
-        spAddEq_53FC0(F[i], spScaleF_53FC0(dt * self->k, spSub_53FC0(spAdd_53FC0(self->nodes[i - 1].v, self->nodes[i + 1].v), spScale_53FC0(self->nodes[i].v, 2.0f))));
-        // PORT: pointer arithmetic in int (only form that gives the target's index-first addu and
-        // signed -0x30 offsets; g++ 2.95 turns nd[-1] into an unsigned 0xFFFFFFB0 offset).
-        sSpNode_53FC0* nd = (sSpNode_53FC0*)(i * 0x50 + (int)self->nodes);
-        T[i] = self->c * (((sSpNode_53FC0*)((int)nd - 0x50))->a - nd->a + nd[1].a - nd->a);
-        T[i] += dt * self->c * (((sSpNode_53FC0*)((int)nd - 0x50))->av + nd[1].av - nd->av * 2.0f);
-        spAddEq_53FC0(F[i], spAdd_53FC0(spScale_53FC0(nd->v, -self->damp), g));
-        T[i] += -self->e * self->nodes[i].av;
-    }
-    for (int i = 1; i < self->n - 1; i++) {
-        spAddEq_53FC0(F[i], self->nodes[i].f);
-        T[i] += self->nodes[i].t;
-    }
-    for (int i = 1; i < self->n - 1; i++) {
-        sSpVec_53FC0 v = spAdd_53FC0(spScale_53FC0(F[i], dt), spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * self->k, spAdd_53FC0(F[i - 1], F[i + 1])), dt * dt * 2.0f * self->k + 1.0f));
-        v = spDiv_53FC0(v, dt * dt * 2.0f * self->k + 1.0f);
-        spAddEq_53FC0(self->nodes[i].v, v);
-        spAddEq_53FC0(self->nodes[i].p, spScale_53FC0(self->nodes[i].v, dt));
-        self->nodes[i].av += (dt * T[i] + dt * dt * dt * self->c * (T[i - 1] + T[i + 1]) / (dt * dt * 2.0f * self->c + 1.0f)) / (dt * dt * 2.0f * self->c + 1.0f);
-        self->nodes[i].a += dt * self->nodes[i].av;
-    }
-    for (int i = 0; i < self->n; i++) {
-        self->nodes[i].f = D_004FF120_sp;
-        self->nodes[i].t = 0.0f;
-    }
-}
+INCLUDE_ASM("object/spring", func_00353FC0);
+extern "C" void func_00353FC0(sSpring_53FC0* self);
 
 //100%
 struct sSpringVEntry45D8 {

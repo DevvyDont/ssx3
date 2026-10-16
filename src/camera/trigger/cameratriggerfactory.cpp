@@ -265,43 +265,8 @@ extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj);
 extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj);
 void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
 
-extern "C" int get_camboundobj(void* reader, void** out)
-{
-    int type;
-    int n = get_uint(reader, &type);
-    switch (type) {
-    case 0: {
-        sCTBoundEllG* o = new (D_0045C110, 0, 0) sCTBoundEllG;
-        int r = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)o);
-        *out = o;
-        n += r;
-        break;
-    }
-    case 1: {
-        sCTBoundBoxG* o = new (D_0045C128, 0, 0) sCTBoundBoxG;
-        int r = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)o);
-        *out = o;
-        n += r;
-        break;
-    }
-    case 2: {
-        sCTBoundLineG* o = new (D_0045C140, 0, 0) sCTBoundLineG;
-        int r = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)o);
-        *out = o;
-        n += r;
-        break;
-    }
-    case 3: {
-        sCTBoundPointG* o = new (D_0045C158, 0, 0) sCTBoundPointG;
-        // PORT: get_cCTBoundObjPoint returns the byte count as void*.
-        int r = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)o);
-        *out = o;
-        n += r;
-        break;
-    }
-    }
-    return n;
-}
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camboundobj);
+extern "C" int get_camboundobj(void* reader, void** out);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -440,21 +405,8 @@ public:
     virtual void* axis();
 };
 
-extern "C" int get_camspline(void* reader, cCTSplineK2** out)
-{
-    int n;
-    *out = (cCTSplineK2*)new (D_0045C170, 0, 0) sCTSplineG;
-    n = get_t3Vector_n(reader, (*out)->center());
-    n += get_t3Vector_n(reader, (*out)->axis());
-    n += get_float(reader, (*out)->sizeX());
-    n += get_float(reader, (*out)->sizeY());
-    n += get_float(reader, (*out)->sizeZ());
-    n += get_t3Vector_n(reader, (char*)*out + 0x28);
-    n += get_t3Vector_n(reader, (char*)*out + 0x34);
-    n += get_t3Vector_n(reader, (char*)*out + 0x40);
-    n += get_t3Vector_n(reader, (char*)*out + 0x4C);
-    return n;
-}
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camspline);
+extern "C" int get_camspline(void* reader, cCTSplineK2** out);
 
 //100%
 struct sVec4_171FA8 {

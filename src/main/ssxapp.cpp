@@ -772,26 +772,8 @@ struct sCrowd_229180 {
     char* anim;
 };
 
-extern "C" void* func_00229180(sCrowd_229180* self)
-{
-    new ((char*)self + 0x8) sCrowdId_229180[128];
-    new ((char*)self + 0x210) sCrowdSlot_229180[128];
-    new ((char*)self + 0x2220) sCrowdRest_229180[40];
-    // PORT: the singleton pointer is held in an int global
-    D_004A2A00 = (int)self;
-    self->render = cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, D_0047B320, 0x20000000, 0));
-    char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(self->render);
-    self->anim = anim;
-    D_00536690_229180[0].f0 = AnimCount_229180(anim);
-    D_00536690_229180[0].fC = 0x20000;
-    D_00536690_229180[0].f10 = 0;
-    D_00536690_229180[0].f2 = -1;
-    D_00536690_229180[0].f4 = -1;
-    D_00536690_229180[0].f8 = 0;
-    D_00536690_229180[0].f6 = -1;
-    func_002292E0(self);
-    return self;
-}
+INCLUDE_ASM("main/ssxapp", func_00229180);
+extern "C" void* func_00229180(sCrowd_229180* self);
 
 //100%
 extern "C" void func_00229398(void* self);

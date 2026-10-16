@@ -483,22 +483,8 @@ static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
                       0.0f);
 }
 
-extern "C" void func_00137550(char* self)
-{
-    sVec4_7550 pts[4];
-    sRadii_7550 radii = D_00458220;
-    char* r = *(char**)(self + 0x40);
-    char* model = *(char**)(r + 0x780);
-    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(r + 0x8A4)];
-    float s = *(float*)(model + 0x140);
-    sVec4_7550 d = vu0Scale_7550(xAxis_7550(bone), s);
-    pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 70.0f));
-    pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 30.0f));
-    pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 30.0f));
-    pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 70.0f));
-    func_00329A90(*(void**)(self + 0x44), 4, pts, radii.r, &bone->pos,
-                  *(float*)(*(char**)(*(char**)(self + 0x40) + 0x780) + 0x140) * 90.0f);
-}
+INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137550);
+extern "C" void func_00137550(char* self);
 
 //100%
 extern "C" void cRider_updateOrientationImplicit(void*);

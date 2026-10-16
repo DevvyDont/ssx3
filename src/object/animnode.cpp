@@ -52,32 +52,8 @@ struct sAnimNode_E448 {
     sMeshRef_E448* refs;        // 0x4C
 };
 
-extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
-{
-    sAnimDef_E448* def = *(sAnimDef_E448**)(self->res + 0x80);
-    sAnimEntry_E448* e = def->entries;
-    int i;
-    self->numMeshes = 0;
-    for (i = 0; i < def->count; i++, e++) {
-        if (e->src != 0)
-            self->numMeshes++;
-    }
-    if (self->numMeshes != 0) {
-        sMeshInst_E448*& meshes = self->meshes;
-        meshes = new (D_0048E860, 0x20000000, 0) sMeshInst_E448[self->numMeshes];
-    } else {
-        self->meshes = 0;
-    }
-    sMeshRef_E448*& refs = self->refs;
-    refs = new (D_0048E870, 0x20000000, 0) sMeshRef_E448[def->count];
-    e = def->entries;
-    int k = 0;
-    for (i = 0; i < def->count; i++, e++) {
-        if (e->src != 0) {
-            func_00351398(&self->meshes[k++], e->src);
-        }
-    }
-}
+INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
+extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self);
 
 //100%
 struct sVec4_E600 {
@@ -101,21 +77,8 @@ struct sVEntry_E600b {
     void (*fn)(void*, int, sMat_E600*);
 };
 
-extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out)
-{
-    void* obj = (char*)self + 0x14;
-    if (id == *(int*)((char*)self + 0x2C)) {
-        sVEntry_E600a* vt = *(sVEntry_E600a**)((char*)self + 0x20);
-        sVec4_E600 t = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
-        *out = t;
-        return;
-    }
-    sMat_E600 buf[24];
-    sVEntry_E600b* vt = *(sVEntry_E600b**)((char*)self + 0x20);
-    vt[33].fn((char*)obj + vt[33].delta, id + 0x10, buf);
-    sVec4_E600 t = buf[idx].r[3];
-    *out = t;
-}
+INCLUDE_ASM("object/animnode", func_0034E600);
+extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out);
 
 INCLUDE_ASM("object/animnode", func_0034E698);
 

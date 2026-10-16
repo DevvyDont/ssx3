@@ -688,59 +688,8 @@ static inline void func_002CB498_setF8_5(sRS_2CB498* rs, int v)
     rs->f8 = (rs->f8 & ~0x3E0) | ((v << 5) & 0x3E0);
 }
 
-extern "C" void func_002CB498(void* self, float* rect, func_002CA988_sColor* col)
-{
-    sVtx_2CB498 v[4];
-    int i;
-    for (i = 0; i < 4; i++) {
-        v[i].a = (int)(col->a * 128.0f);
-        v[i].r = (int)(col->r * 128.0f);
-        v[i].g = (int)(col->g * 128.0f);
-        v[i].b = (int)(col->b * 128.0f);
-        v[i].q = 1.0f;
-    }
-    int old = func_002CB498_getF8_5(D_004A289C_cb498->top);
-    func_002CB498_setF8_5(D_004A289C_cb498->top, old - 2);
-    D_004A289C_cb498->top->f4_2 = 5;
-    int id = *(int*)(*(char**)((char*)self + 0x124) + 0x60);
-    D_004A289C_cb498->top->f10 = id;
-    float r[4];
-    float t[4];
-    float left = rect[0] + 5.0f;
-    float top = rect[1] + 5.0f;
-    float right = rect[0] + rect[2] - 5.0f;
-    float bot = rect[1] + rect[3] - 5.0f;
-    float w = rect[2] - 10.0f;
-    float h = rect[3] - 10.0f;
-    r[0] = rect[0]; r[1] = rect[1]; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.0f; t[1] = 0.0f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = right; r[1] = rect[1]; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.75f; t[1] = 0.0f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = right; r[1] = bot; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.75f; t[1] = 0.75f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = rect[0]; r[1] = bot; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.0f; t[1] = 0.75f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = left; r[1] = rect[1]; r[2] = w; r[3] = 5.0f;
-    t[0] = 0.25f; t[1] = 0.0f; t[2] = 0.5f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = left; r[1] = bot; r[2] = w; r[3] = 5.0f;
-    t[0] = 0.25f; t[1] = 0.75f; t[2] = 0.5f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = rect[0]; r[1] = top; r[2] = 5.0f; r[3] = h;
-    t[0] = 0.0f; t[1] = 0.25f; t[2] = 0.25f; t[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = right; r[1] = top; r[2] = 5.0f; r[3] = h;
-    t[0] = 0.75f; t[1] = 0.25f; t[2] = 0.25f; t[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = left; r[1] = top; r[2] = w; r[3] = h;
-    t[0] = 0.25f; t[1] = 0.25f; t[2] = 0.5f; t[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    func_002CB498_setF8_5(D_004A289C_cb498->top, old);
-}
+INCLUDE_ASM("util/menu", func_002CB498);
+extern "C" void func_002CB498(void* self, float* rect, func_002CA988_sColor* col);
 
 //100%
 extern char D_004D5380[];
@@ -867,43 +816,8 @@ public:
 
 extern cCtx_2CB8C8* D_004A289C_cb8c8 __asm__("D_004A289C");
 
-extern "C" void func_002CB8C8(void* self, float* rect)
-{
-    sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
-    vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
-    *(short*)((char*)D_004A289C_cb8c8->top + 0x10) = -1;
-    D_004A289C_cb8c8->top->f4_2 = 1;
-    sVtx_2CB8C8 v[6];
-    int i;
-    for (i = 0; i < 6; i++) {
-        v[i].a = 0x80;
-        v[i].r = (int)(D_004D53A0.x * 128.0f);
-        v[i].g = (int)(D_004D53A0.y * 128.0f);
-        v[i].b = (int)(D_004D53A0.z * 128.0f);
-        v[i].u = 0;
-        v[i].v = 0;
-        v[i].q = 1.0f;
-    }
-    float bot = rect[1] + rect[3] - 4.0f;
-    float left = rect[0] + 6.0f;
-    float right = rect[0] + rect[2] - 6.0f;
-    float mid = rect[0] + rect[2] * 0.5f;
-    float top = rect[1] + 3.0f;
-    sVec4_2CB8C8 p;
-    p.x = left; p.y = bot; p.z = 0.0f; p.w = 1.0f;
-    v[0].pos = p;
-    p.x = left; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[1].pos = p;
-    p.x = mid; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[2].pos = p;
-    p.x = mid; p.y = top; p.z = 0.0f; p.w = 1.0f;
-    v[3].pos = p;
-    p.x = right; p.y = bot; p.z = 0.0f; p.w = 1.0f;
-    v[4].pos = p;
-    p.x = right; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[5].pos = p;
-    D_004A289C_cb8c8->v71(6, v, 0);
-}
+INCLUDE_ASM("util/menu", func_002CB8C8);
+extern "C" void func_002CB8C8(void* self, float* rect);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1011,43 +925,8 @@ public:
 
 extern cCtx_2CBAC8* D_004A289C_cbac8 __asm__("D_004A289C");
 
-extern "C" void func_002CBAC8(void* self, float* rect)
-{
-    sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
-    vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
-    *(short*)((char*)D_004A289C_cbac8->top + 0x10) = -1;
-    D_004A289C_cbac8->top->f4_2 = 1;
-    sVtx_2CBAC8 v[6];
-    int i;
-    for (i = 0; i < 6; i++) {
-        v[i].a = 0x80;
-        v[i].r = (int)(D_004D53A0.x * 128.0f);
-        v[i].g = (int)(D_004D53A0.y * 128.0f);
-        v[i].b = (int)(D_004D53A0.z * 128.0f);
-        v[i].u = 0;
-        v[i].v = 0;
-        v[i].q = 1.0f;
-    }
-    float top = rect[1] + 3.0f;
-    float left = rect[0] + 6.0f;
-    float right = rect[0] + rect[2] - 6.0f;
-    float mid = rect[0] + rect[2] * 0.5f;
-    float bot = rect[1] + rect[3] - 4.0f;
-    sVec4_2CBAC8 p;
-    p.x = left; p.y = top; p.z = 0.0f; p.w = 1.0f;
-    v[0].pos = p;
-    p.x = left; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[1].pos = p;
-    p.x = mid; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[2].pos = p;
-    p.x = mid; p.y = bot; p.z = 0.0f; p.w = 1.0f;
-    v[3].pos = p;
-    p.x = right; p.y = top; p.z = 0.0f; p.w = 1.0f;
-    v[4].pos = p;
-    p.x = right; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[5].pos = p;
-    D_004A289C_cbac8->v71(6, v, 0);
-}
+INCLUDE_ASM("util/menu", func_002CBAC8);
+extern "C" void func_002CBAC8(void* self, float* rect);
 
 //100%
 struct cMenuList {
@@ -2960,76 +2839,8 @@ public:
 
 extern cCtx_2CE910* D_004A289C_ce910 __asm__("D_004A289C");
 
-extern "C" void func_002CE910(void* self, float* rect)
-{
-    char buf[0x20];
-    char* name = (char*)self + 0x18;
-    int focused = self == func_002CBF30(*(void**)self);
-    strcpy(buf, name);
-    int len = strlen(name);
-    if (focused && *(int*)((char*)self + 0x28) == len && *(int*)((char*)self + 0x28) < 15) {
-        func_004162D0(buf, D_004A39D0);
-    }
-    {
-        char* menu = *(char**)self;
-        sVEntry2CB880* vt = *(sVEntry2CB880**)(menu + 0x12C);
-        fn2CB880* f = &vt[8].fn;
-        (*f)(menu + vt[8].delta, rect, focused ? D_004D5380 : D_004D5390);
-    }
-    func_002CA988_sVec3* col = self == func_002CBF30(*(void**)self) ? &D_004D53A0 : &D_004D53B0;
-    func_002CA988_sColor c;
-    c.a = 1.0f;
-    c.r = col->x;
-    c.g = col->y;
-    c.b = col->z;
-    *(func_002CA988_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = c;
-    *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(2.0f, 2.0f);
-    char* label = *(char**)((char*)self + 0x14);
-    if (label) {
-        func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
-    }
-    char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float w = func_00391FB0(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-    func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
-    if (focused) {
-        font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-        float w1 = func_00391FB0(font, buf + *(int*)((char*)self + 0x28), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-        font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-        char* next = buf + 1;
-        float w2 = func_00391FB0(font, next + *(int*)((char*)self + 0x28), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-        float x1 = rect[0] + (rect[2] - w1) - 16.0f;
-        float bot = rect[1] + rect[3] - 6.0f;
-        float x2 = rect[0] + (rect[2] - w2) - 16.0f;
-        float y1 = bot - 4.0f;
-        float y2 = bot - 1.0f;
-        sVtx_2CE910 v[4];
-        float zero = 0.0f;
-        float one = 1.0f;
-        sVec4_2CE910 p;
-        p.Set(x1, y1, zero, one);
-        v[0].v = zero;
-        v[0].u = zero;
-        v[0].q = one;
-        v[0].r = (int)(c.r * 127.0f);
-        v[0].g = (int)(c.g * 127.0f);
-        v[0].b = (int)(c.b * 127.0f);
-        v[0].a = 0x7F;
-        v[0].pos = p;
-        p.Set(x1, y2, zero, one);
-        v[1] = v[0];
-        v[1].pos = p;
-        p.Set(x2, y1, zero, one);
-        v[2] = v[0];
-        v[2].pos = p;
-        p.Set(x2, y2, zero, one);
-        v[3] = v[0];
-        v[3].pos = p;
-        D_004A289C_ce910->top->f4_2 = 1;
-        *(short*)((char*)D_004A289C_ce910->top + 0x10) = -1;
-        D_004A289C_ce910->v71(4, v, 0);
-    }
-    *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(0.0f, 0.0f);
-}
+INCLUDE_ASM("util/menu", func_002CE910);
+extern "C" void func_002CE910(void* self, float* rect);
 
 //100%
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
@@ -3233,109 +3044,8 @@ public:
 
 extern cCtx_2CF1C8* D_004A289C_cf1c8 __asm__("D_004A289C");
 
-extern "C" void func_002CF1C8(void* self, float* rect)
-{
-    {
-        char* menu = *(char**)self;
-        sVEntry_2CF1C8* vt = *(sVEntry_2CF1C8**)(menu + 0x12C);
-        char* thisp = menu + vt[9].delta;
-        vt[9].fn(thisp, rect, self == func_002CBF30(menu));
-    }
-    float barX = rect[0] + rect[2] - 16.0f - 80.0f;
-    float textX = barX - 16.0f;
-    func_002CA988_sVec3* col = self == func_002CBF30(*(void**)self) ? &D_004D53A0 : &D_004D53B0;
-    func_002CA988_sColor c;
-    c.a = 1.0f;
-    c.r = col->x;
-    c.g = col->y;
-    c.b = col->z;
-    *(func_002CA988_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = c;
-    *(sVec2_2CF1C8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CF1C8(2.0f, 2.0f);
-    func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
-                  D_00487470[*(int*)((char*)self + 0x18)]);
-    char buf[0x10];
-    sprintf(buf, D_00486710,
-            func_00413AF8(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2))),
-            (int)(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2)) * 255.99000549316406f));
-    char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float w = func_00391FB0(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-    func_00391CB0(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
-
-    func_002CA988_sColor c1 = **(func_002CA988_sColor**)((char*)self + 0x14);
-    func_002CA988_sColor c2 = **(func_002CA988_sColor**)((char*)self + 0x14);
-    *(float*)((char*)&c1 + (*(int*)((char*)self + 0x18) << 2)) = 0.0f;
-    *(float*)((char*)&c2 + (*(int*)((char*)self + 0x18) << 2)) = 1.0f;
-    sRect_2CF1C8 r;
-    r.x = barX;
-    r.y = rect[1] + rect[3] - 6.0f - 10.0f;
-    r.w = 80.0f;
-    r.h = 10.0f;
-    sVtx_2CF1C8 v[4];
-    float zero = 0.0f;
-    float one = 1.0f;
-    sVec4_2CF1C8 p;
-    v[0].r = (int)(c1.r * 128.0f);
-    v[0].g = (int)(c1.g * 128.0f);
-    v[0].b = (int)(c1.b * 128.0f);
-    v[0].a = 0x80;
-    v[0].v = zero;
-    v[0].u = zero;
-    v[0].q = one;
-    p.Set(r.x, r.y, zero, one);
-    v[0].pos = p;
-    v[1].r = (int)(c1.r * 128.0f);
-    v[1].g = (int)(c1.g * 128.0f);
-    v[1].b = (int)(c1.b * 128.0f);
-    v[1].a = 0x80;
-    v[1].v = zero;
-    v[1].u = zero;
-    v[1].q = one;
-    p.Set(r.x, r.y + r.h, zero, one);
-    v[1].pos = p;
-    v[2].r = (int)(c2.r * 128.0f);
-    v[2].g = (int)(c2.g * 128.0f);
-    v[2].b = (int)(c2.b * 128.0f);
-    v[2].a = 0x80;
-    v[2].v = zero;
-    v[2].u = zero;
-    v[2].q = one;
-    p.Set(r.x + r.w, r.y, zero, one);
-    v[2].pos = p;
-    v[3].r = (int)(c2.r * 128.0f);
-    v[3].g = (int)(c2.g * 128.0f);
-    v[3].b = (int)(c2.b * 128.0f);
-    v[3].a = 0x80;
-    v[3].v = zero;
-    v[3].u = zero;
-    v[3].q = one;
-    p.Set(r.x + r.w, r.y + r.h, zero, one);
-    v[3].pos = p;
-    if ((*(float**)((char*)self + 0x14))[0] != 1.0f) {
-        D_004A289C_cf1c8->top->f4_2 = 5;
-    } else {
-        D_004A289C_cf1c8->top->f4_2 = 1;
-    }
-    *(short*)((char*)D_004A289C_cf1c8->top + 0x10) = -1;
-    D_004A289C_cf1c8->v71(4, v, 0);
-
-    float mx = r.x + r.w * *(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2));
-    v[0].r = (int)(c.r * 128.0f);
-    v[0].g = (int)(c.g * 128.0f);
-    v[0].b = (int)(c.b * 128.0f);
-    p.x = mx - 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
-    v[0].pos = p;
-    v[1].r = (int)(c.r * 128.0f);
-    v[1].g = (int)(c.g * 128.0f);
-    v[1].b = (int)(c.b * 128.0f);
-    p.x = mx; p.y = r.y - 2.0f; p.z = 0.0f; p.w = 1.0f;
-    v[1].pos = p;
-    v[2].r = (int)(c.r * 128.0f);
-    v[2].g = (int)(c.g * 128.0f);
-    v[2].b = (int)(c.b * 128.0f);
-    p.x = mx + 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
-    v[2].pos = p;
-    D_004A289C_cf1c8->v71(3, v, 0);
-}
+INCLUDE_ASM("util/menu", func_002CF1C8);
+extern "C" void func_002CF1C8(void* self, float* rect);
 
 //100%
 class func_002CF788_cItem {
@@ -3815,60 +3525,8 @@ public:
 extern cCtx_2D0008* D_004A289C_2d0008 __asm__("D_004A289C");
 
 // PORT: rect pointer passed through func_002CA988's int parameter
-extern "C" void func_002D0008(char* self, float* rect)
-{
-    func_002CA988_5(self, (int)rect, *(int*)(self + 0x18), 0, 0);
-    sVtx_2D0008 v[4];
-    sRect_2D0008 rc;
-    rc.w = 20.0f;
-    rc.h = 17.0f;
-    rc.x = rect[0] + rect[2] - 16.0f - rc.w;
-    rc.y = rect[1] + 6.0f + 2.0f;
-    float x2 = rc.x + rc.w;
-    float y2 = rc.y + rc.h;
-    sCol_2D0008* c = *(sCol_2D0008**)(self + 0x14);
-    float zero = 0.0f;
-    float one = 1.0f;
-    v[0].r = (int)(c->r * 128.0f);
-    v[0].g = (int)(c->g * 128.0f);
-    v[0].b = (int)(c->b * 128.0f);
-    v[0].a = (int)(c->a * 128.0f);
-    v[0].v = zero;
-    v[0].u = zero;
-    v[0].q = one;
-    *(sVec4_2D0008*)v[0].pos = sVec4_2D0008(rc.x, rc.y, zero, one);
-    v[1].r = (int)(c->r * 128.0f);
-    v[1].g = (int)(c->g * 128.0f);
-    v[1].b = (int)(c->b * 128.0f);
-    v[1].a = (int)(c->a * 128.0f);
-    v[1].v = zero;
-    v[1].u = zero;
-    v[1].q = one;
-    *(sVec4_2D0008*)v[1].pos = sVec4_2D0008(rc.x, y2, zero, one);
-    v[2].r = (int)(c->r * 128.0f);
-    v[2].g = (int)(c->g * 128.0f);
-    v[2].b = (int)(c->b * 128.0f);
-    v[2].a = (int)(c->a * 128.0f);
-    v[2].v = zero;
-    v[2].u = zero;
-    v[2].q = one;
-    *(sVec4_2D0008*)v[2].pos = sVec4_2D0008(x2, rc.y, zero, one);
-    v[3].r = (int)(c->r * 128.0f);
-    v[3].g = (int)(c->g * 128.0f);
-    v[3].b = (int)(c->b * 128.0f);
-    v[3].a = (int)(c->a * 128.0f);
-    v[3].v = zero;
-    v[3].u = zero;
-    v[3].q = one;
-    *(sVec4_2D0008*)v[3].pos = sVec4_2D0008(x2, y2, zero, one);
-    if (c->a != 1.0f) {
-        D_004A289C_2d0008->top->f4_2 = 5;
-    } else {
-        D_004A289C_2d0008->top->f4_2 = 1;
-    }
-    *(short*)((char*)D_004A289C_2d0008->top + 0x10) = -1;
-    D_004A289C_2d0008->v71(4, v, 0);
-}
+INCLUDE_ASM("util/menu", func_002D0008);
+extern "C" void func_002D0008(char* self, float* rect);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void* func_002CF860(void* self, void* name, void* title);

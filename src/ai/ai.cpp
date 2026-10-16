@@ -35,22 +35,8 @@ struct sAIObj_1286A0 {
     sAIObj_1286A0(void* owner) __asm__("func_00101310");
 };
 
-extern "C" void* cAI_cAI(void* self)
-{
-    *(void**)((char*)self + 0xCC) = D_00458488;
-    *(void**)((char*)self + 0xAC) = D_004585C8;
-    *(void**)((char*)self + 0xB0) = D_004585A0;
-    *(void**)((char*)self + 0xB4) = D_00458550;
-    *(void**)((char*)self + 0xBC) = D_00458578;
-    *(void**)((char*)self + 0xC0) = D_00458528;
-    *(void**)((char*)self + 0xC4) = D_00458500;
-    *(void**)((char*)self + 0xC8) = D_004584D8;
-    sAIState_1286A0** slot = (sAIState_1286A0**)((char*)self + 0xA4);
-    *slot = new (D_00457F00, 0, 0) sAIState_1286A0;
-    *(sAIObj_1286A0**)((char*)self + 0xA8) = new (D_00457F10, 0, 0) sAIObj_1286A0(self);
-    *(int*)((char*)self + 0x74) = 0;
-    return self;
-}
+INCLUDE_ASM("ai/ai", cAI_cAI);
+extern "C" void* cAI_cAI(void* self);
 
 //100%
 extern "C" void func_0012B090(void*);

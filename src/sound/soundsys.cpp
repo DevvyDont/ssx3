@@ -6727,23 +6727,7 @@ struct func_002A4D68_sObj {
     func_002A4D68_sObj() __asm__("func_002A4D68");
 };
 
-func_002A4D68_sObj::func_002A4D68_sObj()
-    : f0(-1), f10(0), f14(0), f18(0), f1C(0), fD4(0), fD8(-1),
-      f170(0), f174(-1), f178(0), f17C(0), f180(0), f184(3), f188(0), f18C(0)
-{
-    int i;
-    for (i = 0; i < 15; i++) {
-        triples[i].a = 0;
-        triples[i].b = 0;
-        triples[i].c = 0;
-    }
-    for (i = 0; i < 3; i++) {
-        *(int*)((char*)this + i * 0x30 + 0x100) = i;
-        *(int*)((char*)this + i * 0x30 + 0xE0) = -1;
-        *(int*)((char*)this + i * 0x30 + 0xE4) = -1;
-        *(int*)((char*)this + i * 0x30 + 0xE8) = 0;
-    }
-}
+INCLUDE_ASM("sound/soundsys", func_002A4D68);
 
 //100%
 extern "C" void func_002A6848(void* self);

@@ -394,42 +394,8 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
-extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
-{
-    sUITexBank8138* self = (sUITexBank8138*)vbank;
-    sUITexData8138* data = (sUITexData8138*)vdata;
-    char name[0x70];
-    int i = 0;
-    sprintf(name, D_00493D90, id);
-    sUIFsh8138* fsh = func_003E22F0(name, 0x3000100);
-    self->texCount = fsh->count;
-    self->texIds = (int*)operator_new_tag(self->texCount * 4, D_00493DA0, 0, 0);
-    func_00416210(self->texIds, 0xFF, self->texCount * 4);
-    for (; i < self->texCount; i++) {
-        char* shape = (char*)fsh + fsh->dir[i].offset;
-        if (shape != 0) {
-            sUIVE_8138* vt = *(sUIVE_8138**)(D_004A289C_8138 + 0x10D8);
-            self->texIds[i] = vt[46].fn(D_004A289C_8138 + vt[46].delta, shape, D_004A4778, 0, 1, -1);
-        }
-    }
-    func_002523A8(fsh);
-    sUITexSrc8138* src = data->e;
-    self->data = data;
-    int n = data->count;
-    self->elemCount = n;
-    sUITexElem8138*& slot = self->elems;
-    slot = new (D_00493DB0, 0, 0) sUITexElem8138[n];
-    func_00416210(self->elems, 0xFF, self->elemCount * 4);
-    int j;
-    for (j = 0; j < self->elemCount; j++, src++) {
-        self->elems[j].fC = src->fC;
-        self->elems[j].f10 = src->f8;
-        self->elems[j].f18 = src->f14;
-        self->elems[j].f14 = src->f10;
-        self->elems[j].id = src->id;
-        self->elems[j].tex = self->texIds[src->tex];
-    }
-}
+INCLUDE_ASM("ui/uiengine", cUITextureBank_setData);
+extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata);
 
 //100%
 struct s398380Item {

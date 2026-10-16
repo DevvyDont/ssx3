@@ -53,36 +53,8 @@ struct cGameViewMan22E3B8 {
     float height;
 };
 
-extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* self, unsigned int count)
-{
-    new ((char*)self + 4) sCamRef22E3B8[2];
-    self->count = count;
-    float farClip = 30000.0f;
-    if (count >= 2) {
-        farClip = 20000.0f;
-    }
-    unsigned int i;
-    for (i = 0; i < 2; i++) {
-        if (i < self->count) {
-            self->cams[i].p = (sCam22E3B8*)cCamera_cCamera(cMemMan_alloc(0x4B0, D_0047B538, 0x20000000, 0), i);
-            sCam22E3B8* c = self->cams[i].p;
-            c->vt[2].fn((char*)c + c->vt[2].delta, i, 0.7853981852531433f, 30.0f, farClip);
-            func_0015DFD8(self->cams[i].p, 2);
-        } else {
-            self->cams[i].p = 0;
-        }
-    }
-    self->fC = 0;
-    self->f10 = 1;
-    self->f14 = 0;
-    float w = (float)((cDisp22E3B8*)D_004A289C)->v10();
-    float h = (float)((cDisp22E3B8*)D_004A289C)->v11();
-    self->width = w;
-    self->height = h;
-    self->f18 = 0;
-    self->f1C = 0;
-    return self;
-}
+INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
+extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* self, unsigned int count);
 
 //100%
 extern void* D_004A28A8;

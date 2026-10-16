@@ -717,32 +717,8 @@ struct sEffFlags_346350 {
     unsigned int b6 : 1;
 };
 
-extern "C" void* func_00346350(void* self, int a1, int a2, int a3)
-{
-    func_0034FB00(self, a1, 5, a2);
-    *(void***)((char*)self + 0xC) = D_00490270;
-    func_00353DA8((char*)self + 0x50);
-    *(int*)((char*)self + 0x44) = 12;
-    *(float*)((char*)self + 0x40) = 100.0f;
-    sEffV3_346350 pts[4];
-    sEffV2_346350 uv[4];
-    sEffV4_346350 col[4];
-    sEffVE_346350* vt = *(sEffVE_346350**)(D_004A5B80 + 0x10D8);
-    vt[97].fn(D_004A5B80 + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
-    sEffV3_346350 d;
-    d.x = pts[1].x - pts[0].x;
-    d.y = pts[1].y - pts[0].y;
-    d.z = pts[1].z - pts[0].z;
-    func_00353E08((char*)self + 0x50, a3, sqrtf_346350(d.x * d.x + d.y * d.y + d.z * d.z));
-    cFlexBridgeNode_setupGrid(self);
-    func_00346D38(self);
-    func_003475D8(self);
-    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
-    *f = (*f & 0xFFFFFFFD) | 4;
-    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
-    *f = (*f & 0xFFFFFFDF) | 0x40;
-    return self;
-}
+INCLUDE_ASM("object/effectlink", func_00346350);
+extern "C" void* func_00346350(void* self, int a1, int a2, int a3);
 
 //100%
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);

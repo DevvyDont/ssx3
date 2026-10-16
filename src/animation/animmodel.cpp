@@ -539,44 +539,8 @@ extern int D_004A5948;
 extern sAmCtx_0640* D_004A5B80_0640 __asm__("D_004A5B80");
 extern sAmMat_0640 D_004FC420[];
 
-extern "C" void func_00310640(sAmModel_0640* self, int lod, int x, int y)
-{
-    sAmCtx_0640* ctx = D_004A5B80_0640;
-    if (D_004A5948 == 0) {
-        new ((void*)D_004FC420) sAmMat_0640[64];
-        D_004A5948 = 1;
-    }
-    for (int i = 0; i < self->nmats; i++) {
-        D_004FC420[i] = mulMat_0640(self->matsA[i], self->matsB[i]);
-    }
-    if (self->lodded != 0) {
-        for (int j = 0; j < self->count; j++) {
-            // PORT: pointer arithmetic through int (offset-first addu).
-            sAmPart_0640* p = (sAmPart_0640*)(j * (int)sizeof(sAmPart_0640) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAmRef_0640* r = &p->lods[lod].refs[p->index];
-                if (r->part != 0) {
-                    ((tSetMats_0640)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FC420, 0, r->fC, r->f8, 0);
-                    int m = self->parts[j].id == 2 ? x : y;
-                    ((tDraw_0640)ctx->vt[99].fn)((char*)ctx + ctx->vt[99].delta, r->part, r->data, m, 0, self->alpha);
-                }
-            }
-        }
-    } else {
-        ((tSetMats_0640)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FC420, 0, self->info[lod].b, self->info[lod].a, 0);
-        for (int j = 0; j < self->count; j++) {
-            // PORT: pointer arithmetic through int (offset-first addu).
-            sAmPart_0640* p = (sAmPart_0640*)(j * (int)sizeof(sAmPart_0640) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAmRef_0640* r = p->lods[lod].refs;
-                if (r->part != 0) {
-                    int m = p->id == 2 ? x : y;
-                    ((tDraw_0640)ctx->vt[99].fn)((char*)ctx + ctx->vt[99].delta, r->part, r->data, m, 0, self->alpha);
-                }
-            }
-        }
-    }
-}
+INCLUDE_ASM("animation/animmodel", func_00310640);
+extern "C" void func_00310640(sAmModel_0640* self, int lod, int x, int y);
 
 //100%
 struct sAmMat_0948;
@@ -715,46 +679,8 @@ extern int D_004A594C;
 extern sAmCtx_0948* D_004A5B80_0948 __asm__("D_004A5B80");
 extern sAmMat_0948 D_004FD420[];
 
-extern "C" void func_00310948(sAmModel_0948* self, int lod, int x, int y)
-{
-    if (D_004A594C == 0) {
-        new ((void*)D_004FD420) sAmMat_0948[64];
-        D_004A594C = 1;
-    }
-    sAmCtx_0948* ctx = D_004A5B80_0948;
-    for (int i = 0; i < self->nmats; i++) {
-        D_004FD420[i] = mulMat_0948(self->matsA[i], self->matsB[i]);
-    }
-    if (self->lodded != 0) {
-        for (int j = 0; j < self->count; j++) {
-            // PORT: pointer arithmetic through int (offset-first addu).
-            sAmPart_0948* p = (sAmPart_0948*)(j * (int)sizeof(sAmPart_0948) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAmRef_0948* r = &p->lods[lod].refs[p->index];
-                if (r->part != 0) {
-                    ((tSetMats_0948)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FD420, 0, r->fC, r->f8, 0);
-                    int ok = (unsigned)(self->parts[j].id - 1) < 2;
-                    int m = ok ? x : y;
-                    ((tDraw_0948)ctx->vt[100].fn)((char*)ctx + ctx->vt[100].delta, r->part, r->data, m);
-                }
-            }
-        }
-    } else {
-        ((tSetMats_0948)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FD420, 0, self->info[lod].b, self->info[lod].a, 0);
-        for (int j = 0; j < self->count; j++) {
-            // PORT: pointer arithmetic through int (offset-first addu).
-            sAmPart_0948* p = (sAmPart_0948*)(j * (int)sizeof(sAmPart_0948) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAmRef_0948* r = p->lods[lod].refs;
-                if (r->part != 0) {
-                    int ok = (unsigned)(p->id - 1) < 2;
-                    int m = ok ? x : y;
-                    ((tDraw_0948)ctx->vt[100].fn)((char*)ctx + ctx->vt[100].delta, r->part, r->data, m);
-                }
-            }
-        }
-    }
-}
+INCLUDE_ASM("animation/animmodel", func_00310948);
+extern "C" void func_00310948(sAmModel_0948* self, int lod, int x, int y);
 
 //100%
 extern "C" int func_004165A8(const void* a, const void* b);

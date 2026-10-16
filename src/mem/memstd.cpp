@@ -1146,64 +1146,8 @@ struct sMesh_2548D0 {
 
 // PORT: the unit declares func_002548D0 as returning void*, but it returns nothing (v0 is left as is); bind the real signature.
 extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
-extern "C" void func_002548D0_impl(void* p)
-{
-    sMesh_2548D0* self = (sMesh_2548D0*)p;
-    while (self->world->v17() == 0) {
-    }
-    float w = (float)self->world->v10();
-    float h = (float)self->world->v11();
-    self->world->v26(0, 0, 0.0f, 0.0f, w, h, 0.0f, 1.0f);
-    self->world->v34(D_004FF1A0);
-    sRS_2548D0* rs = self->world->top;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((self->f3C << 5) & 0x3E0);
-    sVtx_2548D0 v[4];
-    int i;
-    for (i = 0; i < 4; i++) {
-        v[i].a = 0x80;
-        v[i].r = 0x80;
-        v[i].g = 0x80;
-        v[i].b = 0x80;
-        v[i].q = 1.0f;
-    }
-    float cw = self->cw * 16.0f;
-    float x0 = self->x + 0.5f;
-    v[0].u = 0.0f;
-    v[0].v = 0.0f;
-    float x1 = x0 + cw;
-    v[1].u = 1.0f;
-    v[1].v = 0.0f;
-    v[2].u = 0.0f;
-    v[2].v = 1.0f;
-    v[3].u = 1.0f;
-    v[3].v = 1.0f;
-    int cell = 0;
-    int row;
-    for (row = 0; row < self->rows; row++) {
-        float yoff = 0.0f;
-        int col = 0;
-        if (col < self->cols) {
-            int* wp = self->widths;
-            do {
-                float y = self->y + 0.5f + yoff;
-                float ch = (float)*wp * self->ch;
-                int id = *self->items[cell];
-                D_004A5B80_2548D0->top->f10 = id;
-                { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[0].pos = q; }
-                { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[1].pos = q; }
-                { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[2].pos = q; }
-                { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[3].pos = q; }
-                yoff += ch;
-                cell++;
-                wp++;
-                col++;
-                self->world->v71(4, v, 0);
-            } while (col < self->cols);
-        }
-        x0 += cw;
-        x1 += cw;
-    }
-}
+INCLUDE_ASM("mem/memstd", func_002548D0);
+extern "C" void func_002548D0_impl(void* p);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

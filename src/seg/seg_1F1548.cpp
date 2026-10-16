@@ -1148,15 +1148,8 @@ extern "C" void func_002F43E0(void *);
 inline void* operator new[](unsigned int, void* p) { return p; }
 struct Elem4380 { Elem4380() {} };
 
-extern "C" void *func_002F4380(void *arg0) {
-    func_002E2860(arg0);
-    new ((char*)arg0 + 0x40) Elem4380[16];
-    *(int *)((char*)arg0 + 0x204) = 0;
-    *(short *)((char*)arg0 + 0x2E) = 0;
-    *(short *)((char*)arg0 + 0x2C) = 0;
-    func_002F43E0(arg0);
-    return arg0;
-}
+INCLUDE_ASM("seg/seg_1F1548", func_002F4380);
+extern "C" void *func_002F4380(void *arg0);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1527,15 +1520,8 @@ extern void *D_004A28A8;
 struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
 struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 
-extern "C" void *func_002F5180(void *arg0, int arg1) {
-    new ((char*)arg0 + 0x10) A5180[8];
-    new ((char*)arg0 + 0x210) B5180[32];
-    *(int *)arg0 = arg1;
-    cWorldLightMan_initLightCache(arg0);
-    char *t = *(char **)(*(char **)((char*)D_004A28A8 + 0x84) + 0x10);
-    *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&D_004A5598);
-    return arg0;
-}
+INCLUDE_ASM("seg/seg_1F1548", func_002F5180);
+extern "C" void *func_002F5180(void *arg0, int arg1);
 
 //100%
 extern "C" void func_002F53B0(void *);

@@ -714,31 +714,8 @@ static inline int isBetter_003342D0(sHit_003342D0* a, sHit_003342D0* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-extern "C" float func_003342D0(void* self, char* q, sHit_003342D0* out, int a3)
-{
-    sHit_003342D0 hits[64];
-    int n = func_00333EF8(self, q, hits, 0x40, a3);
-    if (n == 0) {
-        return -1.0f;
-    }
-    int best = 0;
-    sVEnt_003342D0* vt = *(sVEnt_003342D0**)(q + 0x50);
-    float ref = vt[3].fn(q + vt[3].delta);
-    float bestDiff = absf_003342D0(hits[0].dist - ref);
-    for (int i = 1; i < n; i++) {
-        float d = absf_003342D0(hits[i].dist - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
-            best = i;
-        } else if (d == bestDiff) {
-            if (isBetter_003342D0(&hits[i], &hits[best])) {
-                best = i;
-            }
-        }
-    }
-    *out = hits[best];
-    return out->dist;
-}
+INCLUDE_ASM("intersect/worldsphtree", func_003342D0);
+extern "C" float func_003342D0(void* self, char* q, sHit_003342D0* out, int a3);
 
 //100%
 struct sVEnt_334458 { short delta; short index; void* fn; };
@@ -1164,31 +1141,8 @@ static inline int isBetter_00336850(sHit_00336850* a, sHit_00336850* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-extern "C" float func_00336850(void* self, char* q, sHit_00336850* out, int a3)
-{
-    sHit_00336850 hits[64];
-    int n = func_00335D78(self, q, hits, 0x40, a3);
-    if (n == 0) {
-        return -1.0f;
-    }
-    int best = 0;
-    sVEnt_00336850* vt = *(sVEnt_00336850**)(q + 0x50);
-    float ref = vt[3].fn(q + vt[3].delta);
-    float bestDiff = absf_00336850(hits[0].dist - ref);
-    for (int i = 1; i < n; i++) {
-        float d = absf_00336850(hits[i].dist - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
-            best = i;
-        } else if (d == bestDiff) {
-            if (isBetter_00336850(&hits[i], &hits[best])) {
-                best = i;
-            }
-        }
-    }
-    *out = hits[best];
-    return out->dist;
-}
+INCLUDE_ASM("intersect/worldsphtree", func_00336850);
+extern "C" float func_00336850(void* self, char* q, sHit_00336850* out, int a3);
 
 //100%
 struct sQuad_369D8 {
@@ -1268,74 +1222,8 @@ static inline void visit_003369D8(sCell_369D8* c, char* flag, sQuery_369D8* q, s
     func_0033DBE8(flag, q, q, p, c->node, c);
 }
 
-extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
-{
-    char seg[0xB0];
-    float lo = pos[2] - 100000.0f;
-    float hi = pos[2] + 100000.0f;
-    float t = clamp_003369D8((pos[2] + 20.0f - lo) / (hi - lo), 0.0f, 1.0f);
-    {
-        sQuad_369D8 a;
-        a.x = pos[0];
-        a.y = pos[1];
-        a.z = lo;
-        a.w = 1.0f;
-        sQuad_369D8 b;
-        b.x = pos[0];
-        b.y = pos[1];
-        b.z = hi;
-        b.w = 1.0f;
-        func_0032E100(seg, a, b, 2, t);
-    }
-    sHit_003369D8 hits[64];
-    sQuery_369D8 q;
-    q.seg = seg;
-    q.hits = hits;
-    q.max = 0x40;
-    sTrav_369D8 tr;
-    q.count = &tr.count;
-    q.f10 = 0;
-    q.f14 = *(void**)((char*)self + 0xA4);
-    tr.count = 0;
-    tr.ctx.pos = pos;
-    sCtx_369D8* ctx = &tr.ctx;
-    sCell_369D8* c0 = &self[0];
-    sCell_369D8* c1 = &self[1];
-    sCell_369D8* c2 = &self[2];
-    sCell_369D8* c3 = &self[3];
-    sCell_369D8* c4 = &self[4];
-    sCell_369D8* c5 = &self[5];
-    sCell_369D8* c6 = &self[6];
-    sCell_369D8* c7 = &self[7];
-    if (self[0].node) visit_003369D8(c0, &tr.ctx.flags[0], &q, ctx);
-    if (self[1].node) visit_003369D8(c1, &tr.ctx.flags[1], &q, ctx);
-    if (self[2].node) visit_003369D8(c2, &tr.ctx.flags[2], &q, ctx);
-    if (self[3].node) visit_003369D8(c3, &tr.ctx.flags[3], &q, ctx);
-    if (self[4].node) visit_003369D8(c4, &tr.ctx.flags[4], &q, ctx);
-    if (self[5].node) visit_003369D8(c5, &tr.ctx.flags[5], &q, ctx);
-    if (self[6].node) visit_003369D8(c6, &tr.ctx.flags[6], &q, ctx);
-    if (self[7].node) visit_003369D8(c7, &tr.ctx.flags[7], &q, ctx);
-    if (tr.count == 0) {
-        return 0;
-    }
-    float ref = pos[2];
-    int best = 0;
-    float bestDiff = absf_003369D8(hits[0].p.z - ref);
-    for (int i = 1; i < tr.count; i++) {
-        float d = absf_003369D8((hits + i)->p.z - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
-            best = i;
-        } else if (d == bestDiff) {
-            if (isBetter_003369D8(hits + i, hits + best)) {
-                best = i;
-            }
-        }
-    }
-    *outP = (hits + best)->p;
-    *outN = (hits + best)->n;
-    return 1;
-}
+INCLUDE_ASM("intersect/worldsphtree", func_003369D8);
+extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN);
 
 //100%
 struct sVEnt_336D40 { short delta; short index; void* fn; };
@@ -1469,31 +1357,8 @@ static inline int isBetter_003378C0(sHit_003378C0* a, sHit_003378C0* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-extern "C" float func_003378C0(void* self, char* q, sHit_003378C0* out, int a3)
-{
-    sHit_003378C0 hits[128];
-    int n = func_00336F30(self, q, hits, 0x80, a3);
-    if (n == 0) {
-        return -1.0f;
-    }
-    int best = 0;
-    sVEnt_003378C0* vt = *(sVEnt_003378C0**)(q + 0x50);
-    float ref = vt[3].fn(q + vt[3].delta);
-    float bestDiff = absf_003378C0(hits[0].dist - ref);
-    for (int i = 1; i < n; i++) {
-        float d = absf_003378C0(hits[i].dist - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
-            best = i;
-        } else if (d == bestDiff) {
-            if (isBetter_003378C0(&hits[i], &hits[best])) {
-                best = i;
-            }
-        }
-    }
-    *out = hits[best];
-    return out->dist;
-}
+INCLUDE_ASM("intersect/worldsphtree", func_003378C0);
+extern "C" float func_003378C0(void* self, char* q, sHit_003378C0* out, int a3);
 
 INCLUDE_ASM("intersect/worldsphtree", func_00337A48);
 

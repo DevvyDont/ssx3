@@ -1270,19 +1270,8 @@ extern unsigned short D_004A2088[];
 inline void* operator new[](unsigned int, void* p) { return p; }
 struct Elem { Elem() {} };
 
-extern "C" void *func_002212C8(void *arg0) {
-    func_0039E2A0_12C8(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473320;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    new ((char*)arg0 + 0x9C) Elem[8];
-    return arg0;
-}
+INCLUDE_ASM("fe/all_in_one_fe", func_002212C8);
+extern "C" void *func_002212C8(void *arg0);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1291,19 +1280,8 @@ extern char D_00473320[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
-extern "C" void *func_00221350(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1350(arg0, arg1);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473320;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    new ((char*)arg0 + 0x9C) Elem[8];
-    return arg0;
-}
+INCLUDE_ASM("fe/all_in_one_fe", func_00221350);
+extern "C" void *func_00221350(void *arg0, int arg1, int arg2);
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

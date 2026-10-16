@@ -26,16 +26,8 @@ struct sMultiParticle {
     void* sys;     // 0x10
 };
 
-extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
-{
-    sMPRef** slot = &self->refs;
-    *slot = new (D_004A4030, 0x20000000, 0) sMPRef[self->count];
-    self->sys = func_00370018(cMemMan_alloc(0x190, D_004A4038, 0x20000000, 0));
-    for (int i = 0; i < self->count; i++) {
-        self->refs[i].id = 0xFFFFFFFF;
-    }
-    func_003705E0(self->sys, D_004FF1A0, self->field_0x8);
-}
+INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
+extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self);
 
 //100%
 extern "C" void func_00370788(void* self, float dt);

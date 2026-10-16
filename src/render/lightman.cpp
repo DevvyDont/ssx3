@@ -249,36 +249,8 @@ struct sLmQuadCtx {
 
 extern sLmQuadCtx* D_004A5B80_EC40 __asm__("D_004A5B80");
 
-extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z)
-{
-    sLmQuadVtx v[4];
-    float zero = 0.0f;
-    float one = 1.0f;
-    v[0].q = one;
-    v[0].c[0] = (int)(col[1] * 255.0f);
-    v[0].c[1] = (int)(col[2] * 255.0f);
-    v[0].c[2] = (int)(col[3] * 255.0f);
-    v[0].c[3] = (int)(col[0] * 128.0f);
-    v[0].pos = sLmQuadVec4(p0[0], p0[1], z, one);
-    v[3] = v[0];
-    v[2] = v[0];
-    v[1] = v[0];
-    v[3].pos.x = p1[0];
-    v[1].pos.x = p1[0];
-    v[3].pos.y = p1[1];
-    v[2].pos.y = p1[1];
-    v[0].t = zero;
-    v[0].s = zero;
-    v[1].s = one;
-    v[1].t = zero;
-    v[2].s = zero;
-    v[2].t = one;
-    v[3].s = one;
-    v[3].t = one;
-    sLmQuadCtx* g = D_004A5B80_EC40;
-    sLmQuadVEntry* vt = g->vtable;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
-}
+INCLUDE_ASM("render/lightman", func_0038EC40);
+extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 
 INCLUDE_ASM("render/lightman", func_0038ED90);
 

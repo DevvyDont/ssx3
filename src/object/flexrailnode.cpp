@@ -120,41 +120,8 @@ struct sFlexRailElem_348D98 {
     char pad48[8];
 };
 
-extern "C" void* func_00348D98(char* self, void* a1, char* desc)
-{
-    func_00347D90(self, 0x14, a1, desc);
-    *(void**)(self + 0xC) = D_0048FF30;
-    *(float*)(self + 0x60) = *(float*)(desc + 0x48);
-    *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
-    *(float*)(self + 0x68) = *(float*)(desc + 0x50);
-    sFlexRailRef_348D98 refs[8];
-    int bones[8];
-    int n = 0;
-    unsigned int* ids = (unsigned int*)(desc + 4);
-    int* bn = (int*)(desc + 0x24);
-    for (int i = 0; i < 8; i++, ids++, bn++) {
-        unsigned int id = *ids;
-        if (id != 0xFFFFFFFF) {
-            refs[n].id = id;
-            bones[n] = *bn;
-            n++;
-        }
-    }
-    sFlexRailElem_348D98*& elems = *(sFlexRailElem_348D98**)(self + 0x70);
-    elems = new (D_0048E820, 0x20000000, 0) sFlexRailElem_348D98[*(int*)(self + 0x20)];
-    for (int j = 0; j < *(int*)(self + 0x20); j++) {
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].link.id = refs[j].id;
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].bone = bones[j];
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].vel = D_004FF120;
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].force = D_004FF120;
-        func_00349220(self, (sFrNode9220*)&(*(sFlexRailElem_348D98**)(self + 0x70))[j]);
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].posB = (*(sFlexRailElem_348D98**)(self + 0x70))[j].posA;
-    }
-    func_003492A8(self);
-    func_00349110((sFrBoxRail*)self);
-    cFlexRailNode_addSpaceHash(self);
-    return self;
-}
+INCLUDE_ASM("object/flexrailnode", func_00348D98);
+extern "C" void* func_00348D98(char* self, void* a1, char* desc);
 
 //100%
 extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
@@ -184,21 +151,8 @@ struct sFrStreamVEntry_348FA0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
-{
-    func_00347EA8(self, a1, stream);
-    *(void**)(self + 0xC) = D_0048FF30;
-    sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
-    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(self + 0x70);
-    *elems = new (D_0048E820, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
-    sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x50);
-    func_003492A8(self);
-    func_00349110((sFrBoxRail*)self);
-    cFlexRailNode_addSpaceHash(self);
-    return self;
-}
+INCLUDE_ASM("object/flexrailnode", func_00348FA0);
+extern "C" void* func_00348FA0(char* self, void* a1, void* stream);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern char D_0048FF30[];
@@ -565,20 +519,8 @@ struct sFrStreamVEntry_349DB0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_00349DB0(char* self, void* a1, void* stream)
-{
-    func_00347EA8(self, a1, stream);
-    *(void**)(self + 0xC) = D_0048FD90;
-    sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
-    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(self + 0x70);
-    *elems = new (D_0048E830, 0x20000000, 0) sFlexRailElem_349DB0[*(int*)(self + 0x20)];
-    sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x60);
-    func_0034A0B0(self);
-    cFlexRailNode_addSpaceHash(self);
-    return self;
-}
+INCLUDE_ASM("object/flexrailnode", func_00349DB0);
+extern "C" void* func_00349DB0(char* self, void* a1, void* stream);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern char D_0048FD90[];
@@ -961,34 +903,8 @@ static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
         : "memory");
 }
 
-extern "C" void func_0034A8C8(sFrRailA8C8* self)
-{
-    float dt = func_002D1C70();
-    sV4Slot_A8C8 f[8];
-    for (int i = 0; i < self->count - 1; i++) {
-        f[i].v = vu0Scale_A8C8(self->elems[i].posA, -self->k[0]);
-        vu0AddEq_A8C8(f[i].v, vu0Scale_A8C8(self->elems[i].posB, -self->k[1]));
-    }
-    for (int i = 0; i < self->count - 1; i++) {
-        vu0AddEq_A8C8(f[i].v, self->elems[i].force);
-    }
-    for (int i = 0; i < self->count - 1; i++) {
-        sV4_A8C8 a;
-        a = vu0Scale_A8C8(f[i].v, dt);
-        vu0AddEq_A8C8(self->elems[i].posA, vu0Scale_A8C8(self->elems[i].posB, dt));
-        vu0AddEq_A8C8(self->elems[i].posB, a);
-    }
-    sV4_A8C8 acc = D_004FF120_A8C8;
-    for (int i = 0; i < self->count - 1; i++) {
-        vu0AddEq_A8C8(acc, self->elems[i].posA);
-        float len = vu0Len_A8C8(self->elems[i].vel);
-        sV4_A8C8 s = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
-        self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, s);
-    }
-    for (int i = 0; i < self->count; i++) {
-        self->elems[i].force = D_004FF120_A8C8;
-    }
-}
+INCLUDE_ASM("object/flexrailnode", func_0034A8C8);
+extern "C" void func_0034A8C8(sFrRailA8C8* self);
 
 //100%
 struct sFlexRailVEntryAC10 {

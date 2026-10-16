@@ -16,20 +16,8 @@ struct sMetrixEntry_001172E0
 };
 
 // PORT: element address built through int (pointer in int).
-extern "C" void cRiderMetrix_linkToRider(char* self, char* rider)
-{
-    *(char**)(self + 0x1AC) = rider;
-    if (*(int*)(rider + 0x870) >= 0)
-    {
-        sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(self + 0x1B0);
-        *(int*)(self + 0x1B4) = 0x2C;
-        *slot = new (operator_new_tag(0x2C * sizeof(sMetrixEntry_001172E0), D_004A1078, 0, 0)) sMetrixEntry_001172E0[0x2C];
-        for (int i = 0; i < *(int*)(self + 0x1B4); i++)
-        {
-            ((sMetrixEntry_001172E0*)(i * 0x9C + *(int*)(self + 0x1B0)))->index = i;
-        }
-    }
-}
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
+extern "C" void cRiderMetrix_linkToRider(char* self, char* rider);
 
 //100%
 struct sRiderMetrixEntry_001173B8
