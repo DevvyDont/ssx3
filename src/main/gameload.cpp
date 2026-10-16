@@ -443,7 +443,120 @@ extern "C" int func_00230E98(void* self)
     return 1;
 }
 
-INCLUDE_ASM("main/gameload", func_00230F40);
+//100%
+extern void* D_004A28A8;
+extern int D_004A2A50;
+extern int D_00534B30[];
+extern "C" void func_0022E550(void* p);
+
+struct cGLState_0F40 {
+    int f0, f4, f8;
+    virtual void v01();
+    virtual void enter();
+    virtual void update();
+    virtual void v04();
+    virtual void start(int arg);
+    virtual void tick();
+    virtual void leave();
+};
+
+struct cGLMan_0F40 {
+    char pad0[0x84];
+    void* f84;
+    char pad88[0x1FC - 0x88];
+    cGLState_0F40* prev;     // 0x1FC
+    cGLState_0F40* cur;      // 0x200
+    cGLState_0F40* sub;      // 0x204
+    int subReq;              // 0x208
+    int subId;               // 0x20C
+    int req;                 // 0x210
+    int id;                  // 0x214
+    int prevId;              // 0x218
+    int reqArg;              // 0x21C
+    int f220;
+    int busy;                // 0x224
+};
+
+static inline cGLState_0F40* State_0F40(cGLMan_0F40* m, int i)
+{
+    return (cGLState_0F40*)((char*)m + i);
+}
+
+extern "C" void func_00230F40(void* self_)
+{
+    cGLMan_0F40* self = (cGLMan_0F40*)self_;
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] == 0 && self->busy != 0)
+        return;
+    if (D_004A2A50 & 0x20)
+        return;
+    if (self->cur != 0) {
+        if (self->id != 3 || self->req == 0)
+            self->cur->tick();
+    }
+    if (self->subReq != 0) {
+        switch (self->subReq) {
+        case 1: self->sub = State_0F40(self, 0xB0); break;
+        case 2: self->sub = State_0F40(self, 0xD0); break;
+        case 3: self->sub = State_0F40(self, 0xE0); break;
+        case 4: self->sub = State_0F40(self, 0xF0); break;
+        case 5: self->sub = State_0F40(self, 0x100); break;
+        case 6: self->sub = State_0F40(self, 0x118); break;
+        case 7: self->sub = State_0F40(self, 0x128); break;
+        case 8: self->sub = State_0F40(self, 0x138); break;
+        case 9: self->sub = State_0F40(self, 0x148); break;
+        case 10: self->sub = State_0F40(self, 0x158); break;
+        case 11: self->sub = State_0F40(self, 0x178); break;
+        case 12: self->sub = State_0F40(self, 0x18C); break;
+        case 13: self->sub = State_0F40(self, 0x19C); break;
+        case 14: self->sub = State_0F40(self, 0x1B8); break;
+        case 15: self->sub = State_0F40(self, 0x1DC); break;
+        case 16: self->sub = State_0F40(self, 0x1EC); break;
+        }
+        self->subId = self->subReq;
+        self->subReq = 0;
+        self->sub->enter();
+    }
+    if (self->sub != 0)
+        self->sub->update();
+    int req = self->req;
+    if (req == 0)
+        return;
+    int arg = self->reqArg;
+    if (self->cur != 0)
+        self->cur->leave();
+    self->prevId = self->id;
+    self->prev = self->cur;
+    switch (req) {
+    case 1: self->cur = State_0F40(self, 0xB0); self->id = 1; break;
+    case 2: self->cur = State_0F40(self, 0xD0); self->id = 2; break;
+    case 3: self->cur = State_0F40(self, 0xE0); self->id = 3; break;
+    case 4: self->cur = State_0F40(self, 0xF0); self->id = 4; break;
+    case 5: self->cur = State_0F40(self, 0x100); self->id = 5; break;
+    case 6: self->cur = State_0F40(self, 0x118); self->id = 6; break;
+    case 7: self->cur = State_0F40(self, 0x128); self->id = 7; break;
+    case 8: self->cur = State_0F40(self, 0x138); self->id = 8; break;
+    case 9: self->cur = State_0F40(self, 0x148); self->id = 9; break;
+    case 10: self->cur = State_0F40(self, 0x158); self->id = 10; break;
+    case 11: self->cur = State_0F40(self, 0x178); self->id = 11; break;
+    case 12: self->cur = State_0F40(self, 0x18C); self->id = 12; break;
+    case 13: self->cur = State_0F40(self, 0x19C); self->id = 13; break;
+    case 14: self->cur = State_0F40(self, 0x1B8); self->id = 14; break;
+    case 15: self->cur = State_0F40(self, 0x1DC); self->id = 15; break;
+    case 16: self->cur = State_0F40(self, 0x1EC); self->id = 16; break;
+    }
+    self->req = 0;
+    self->reqArg = 0;
+    if (self->subId == self->id) {
+        self->subId = 0;
+        self->sub = 0;
+    }
+    if (self->cur != 0) {
+        func_0022E550(self->f84);
+        self->cur->start(arg);
+    }
+}
+
 
 //100%
 extern "C" void func_00230F40(void* self);
