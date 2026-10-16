@@ -148,7 +148,86 @@ extern "C" void func_002380E8(void)
     D_004A2C6C = 0;
 }
 
-INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
+//100%
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern signed char D_00535C11[];
+extern "C" void cGameModeMan_restartHeat(void* self);
+typedef void (*tInit_8180)(void*);
+
+extern "C" void cGameModeMan_initGameMode(char* self, int mode)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    {
+        char* m = (char*)D_00536668[*(int*)(self + 0x4)];
+        char* vt = *(char**)m;
+        ((tInit_8180)*(void**)(vt + 0x1C))(m + *(short*)(vt + 0x18));
+    }
+    *(int*)(self + 0x8) = mode;
+    int net = D_00535C11[0];
+    *(int*)(self + 0xC) = net;
+    if (net == 2) {
+        switch (mode) {
+        case 0:
+            *(int*)(self + 0x4) = 8;
+            break;
+        case 1:
+            *(int*)(self + 0x4) = 9;
+            break;
+        case 3:
+            *(int*)(self + 0x4) = 9;
+            break;
+        case 2:
+            *(int*)(self + 0x4) = 9;
+            break;
+        case 4:
+            *(int*)(self + 0x4) = 5;
+            break;
+        case 5:
+            *(int*)(self + 0x4) = 6;
+            break;
+        default:
+            *(int*)(self + 0x4) = 8;
+            break;
+        }
+    } else {
+        switch (mode) {
+        case 1:
+        case 2:
+        case 3:
+            *(int*)(self + 0x4) = 0;
+            break;
+        case 0:
+            *(int*)(self + 0x4) = 1;
+            break;
+        case 12:
+            *(int*)(self + 0x4) = 2;
+            break;
+        case 4:
+            *(int*)(self + 0x4) = 5;
+            break;
+        case 6:
+            *(int*)(self + 0x4) = 4;
+            break;
+        case 7:
+            *(int*)(self + 0x4) = 4;
+            break;
+        case 8:
+            *(int*)(self + 0x4) = 4;
+            break;
+        case 5:
+            *(int*)(self + 0x4) = 6;
+            break;
+        case 9:
+        case 10:
+        case 11:
+            *(int*)(self + 0x4) = 7;
+            break;
+        }
+    }
+    *(int*)(self + 0x84) = 1;
+    cGameModeMan_restartHeat(self);
+}
 
 INCLUDE_ASM("main/gamemode", func_002382B8);
 

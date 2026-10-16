@@ -1363,7 +1363,52 @@ extern "C" void func_00309030(void* self)
     }
 }
 
-INCLUDE_ASM("wscript/wscriptprocess", func_00309118);
+//100%
+extern "C" void func_00308DB8_9118(void* self) __asm__("func_00308DB8");
+extern "C" void func_0030A868_9118(void* self, int id, int a2, int a3) __asm__("func_0030A868");
+extern "C" void* func_0028B180_9118() __asm__("func_0028B180");
+extern "C" void func_0029D6E0_9118(void* snd, int id) __asm__("func_0029D6E0");
+extern "C" void func_0029DBB0_9118(void* snd, int a1) __asm__("func_0029DBB0");
+extern "C" void func_0026F7B8_9118(void* p) __asm__("func_0026F7B8");
+extern "C" void func_0026CC48_9118(void* p) __asm__("func_0026CC48");
+extern char* D_004A28A8_9118 __asm__("D_004A28A8");
+
+extern "C" void func_00309118(void* self_)
+{
+    char* self = (char*)self_;
+    switch (*(int*)(self + 0x2AC)) {
+    case 1:
+        func_00308DB8_9118(self);
+        func_0030A868_9118(self, *(int*)(self + 0x2B0), 1, 0);
+        func_0029D6E0_9118(func_0028B180_9118(), *(int*)(self + 0x2A0));
+        func_0026F7B8_9118(*(void**)(*(char**)(D_004A28A8_9118 + 0x84) + 0x28));
+        break;
+    case 2:
+        func_0030A868_9118(self, *(int*)(self + 0x2B0), 3, 0);
+        break;
+    case 3:
+        func_0030A868_9118(self, *(int*)(self + 0x2B0), 0x12, 0);
+        func_00308DB8_9118(self);
+        func_0029DBB0_9118(func_0028B180_9118(), 1);
+        break;
+    case 4:
+        func_0030A868_9118(self, *(int*)(self + 0x2B0), 5, 0);
+        func_00308DB8_9118(self);
+        func_0029DBB0_9118(func_0028B180_9118(), 1);
+        break;
+    case 5:
+        func_0026CC48_9118(*(void**)(*(char**)(D_004A28A8_9118 + 0x84) + 0x34));
+        func_0030A868_9118(self, *(int*)(self + 0x2B0), 1, 1);
+        func_00308DB8_9118(self);
+        break;
+    case 6:
+        func_0030A868_9118(self, *(int*)(self + 0x2B0), 0x12, 0);
+        func_00308DB8_9118(self);
+        break;
+    }
+    *(int*)(self + 0x2AC) = 0;
+    *(unsigned int*)(self + 0x2B0) = 0xFFFFFFFF;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 class func_003077F8_cProc;

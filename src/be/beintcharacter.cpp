@@ -33,7 +33,58 @@ extern "C" bool func_0014EF70(void* self, int riderIndex)
     return D_00530970_view[charID].field_0x44 != 0;
 }
 
-INCLUDE_ASM("be/beintcharacter", func_0014EFA8);
+//100%
+extern "C" int func_0014A0B0(int rider);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_isMissionMan(int rider);
+extern signed char D_00535C11[];
+struct sCharStatEntry_EFA8 {
+    char pad_0x00[0x48];
+    int stat;           // 0x48
+    char pad_0x4C[0x88 - 0x4C];
+};
+extern sCharStatEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
+
+extern "C" float func_0014EFA8(void* self, int rider)
+{
+    int charID = cBELibrary_getCharacterID(rider);
+    int board = func_0014A0B0(rider);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (board != 0 && (D_00535C11[0] != 0 || rider != 0)) {
+        switch (board) {
+        case 10:
+            return 0.98f;
+        case 11:
+        case 14:
+            return 0.85f;
+        case 29:
+            return 2.0f;
+        case 28:
+            return 0.7f;
+        case 26:
+            return 1.5f;
+        case 20:
+            return 1.2f;
+        case 22:
+        case 23:
+            return 1.3f;
+        case 15:
+        case 17:
+            return 0.75f;
+        case 13:
+        case 18:
+        case 19:
+        case 21:
+            return 1.0f;
+        default:
+            return 0.9f;
+        }
+    }
+    if (cBENewPlayerInterface_isMissionMan(rider))
+        return 0.8f;
+    return D_00530970_EFA8[charID].stat * 0.01f;
+}
 
 
 extern "C" void func_0014F100()

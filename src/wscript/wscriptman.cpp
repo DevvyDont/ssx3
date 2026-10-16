@@ -838,7 +838,65 @@ extern "C" void* func_0030AEB8(void* self)
     return 0;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030AF08);
+//100%
+struct sWSBits_AF08 {
+    unsigned int a : 3;
+    unsigned int b : 4;
+    unsigned int c : 3;
+    unsigned int d : 2;
+    unsigned int e : 4;
+    unsigned int f : 3;
+    unsigned int g : 3;
+    unsigned int h : 6;
+    unsigned int i : 4;
+    unsigned int j : 3;
+    unsigned int k : 7;
+    unsigned int l : 1;
+    unsigned int pad : 7;
+    unsigned int n : 2;
+    unsigned int o : 4;
+    unsigned int p : 3;
+};
+
+extern "C" unsigned int func_0030AF08(void* self_, int unused, int field)
+{
+    char* self = (char*)self_;
+    if (*(sWSBits_AF08**)(self + 0x29C) != 0) {
+    switch (field) {
+    case 0:
+        return (*(sWSBits_AF08**)(self + 0x29C))->a;
+    case 1:
+        return (*(sWSBits_AF08**)(self + 0x29C))->b;
+    case 2:
+        return (*(sWSBits_AF08**)(self + 0x29C))->c;
+    case 3:
+        return (*(sWSBits_AF08**)(self + 0x29C))->d;
+    case 4:
+        return (*(sWSBits_AF08**)(self + 0x29C))->e;
+    case 5:
+        return (*(sWSBits_AF08**)(self + 0x29C))->f;
+    case 6:
+        return (*(sWSBits_AF08**)(self + 0x29C))->g;
+    case 7:
+        return (*(sWSBits_AF08**)(self + 0x29C))->h;
+    case 8:
+        return (*(sWSBits_AF08**)(self + 0x29C))->i;
+    case 9:
+        return (*(sWSBits_AF08**)(self + 0x29C))->j;
+    case 10:
+        return (*(sWSBits_AF08**)(self + 0x29C))->k;
+    case 11:
+        return (*(sWSBits_AF08**)(self + 0x29C))->l;
+    case 13:
+        return (*(sWSBits_AF08**)(self + 0x29C))->n;
+    case 14:
+        return (*(sWSBits_AF08**)(self + 0x29C))->p;
+    case 15:
+        return (*(sWSBits_AF08**)(self + 0x29C))->o;
+    }
+    }
+    return 0;
+}
 
 struct cWScriptListNode {
     char pad_0x00[0x18];
