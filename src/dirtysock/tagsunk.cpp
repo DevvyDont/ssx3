@@ -6500,7 +6500,110 @@ extern "C" int func_00265A38(void* self)
     return ((cDsObj265A38*)D_004A33D8)->v20();
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00265A68);
+//100%
+struct cDsObj265A68 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int a);
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int v11();
+};
+
+extern void* D_004A33D8;
+extern int D_004A3940;
+extern "C" int func_003F80E0(int* status);
+extern "C" void func_00265D98(void* self);
+extern "C" void func_00265E40(void* self);
+extern "C" void func_00265E80(void* self);
+extern "C" void func_00265EC8(void* self);
+extern "C" void func_00265F00(void* self);
+
+extern "C" void func_00265A68(int* self)
+{
+    int status;
+    ((cDsObj265A68*)D_004A33D8)->v03();
+    status = 0;
+    switch (self[0]) {
+    case 0:
+    case 1:
+    case 5:
+    case 9:
+    case 13:
+    case 17:
+    case 22:
+        break;
+    case 2:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            func_00265D98(self);
+        }
+        break;
+    case 6:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            func_00265E40(self);
+        }
+        break;
+    case 10:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            func_00265E80(self);
+        }
+        break;
+    case 14:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            func_00265EC8(self);
+        }
+        break;
+    case 18:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            func_00265F00(self);
+        }
+        break;
+    case 3:
+    case 7:
+    case 11:
+    case 15: {
+        int r = func_003F80E0(&status);
+        self[1] = r;
+        if (r == 0) {
+            if (status == 2) {
+                self[0] += 1;
+            }
+        } else {
+            self[0] += 2;
+        }
+        break;
+    }
+    case 4:
+    case 8:
+    case 12:
+    case 16:
+    case 21:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            ((cDsObj265A68*)D_004A33D8)->v05(0);
+        }
+        break;
+    case 19:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            ((cDsObj265A68*)D_004A33D8)->v08();
+            self[0] = 20;
+        }
+        break;
+    case 20:
+        if (((cDsObj265A68*)D_004A33D8)->v11() == 0) {
+            if (D_004A3940) {
+                self[0] = 22;
+            } else {
+                self[0] = 21;
+            }
+        }
+        break;
+    }
+}
 
 //100%
 struct cDsObj265CB0 {

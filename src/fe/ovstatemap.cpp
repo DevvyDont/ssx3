@@ -300,7 +300,121 @@ extern "C" void func_00208BB8(void* self)
     }
 }
 
-INCLUDE_ASM("fe/ovstatemap", func_00208C28);
+//100%
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void func_002095E8(void* self, void* obj, int on);
+extern "C" void func_00209648(void* self, void* obj, int on);
+extern "C" void* func_0039F190(void* list, int a1);
+extern "C" void* func_0028B180();
+extern "C" void func_0028FAE0(void* snd);
+extern "C" void func_00231250(void* a0, int a1, int a2, int a3);
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_004A26FC;
+extern int D_005366E8[];
+extern int D_004428F0[];
+extern char D_004706E8[];
+extern char D_00470700[];
+extern char D_00470718[];
+extern char D_00470730[];
+extern char D_00470748[];
+extern char D_00470760[];
+
+struct sVE_8C28 {
+    short delta;
+    short index;
+    void (*fn)(void*, float*);
+};
+
+struct sState_8C28 {
+    char pad_0x0[0x1C];
+    unsigned lo : 7;
+    unsigned flag : 1;
+    unsigned mode : 6;
+    unsigned hi : 18;
+};
+
+extern "C" void func_00208C28(char* self, char* item, int id)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (id) {
+    case 5:
+        if (*(int*)(self + 0xBC) != 0) {
+            if (*(int*)(item + 0x18) != 0) {
+                *(int*)(self + 0xBC) = 0;
+                cOVState_MAP_setupPopup(self);
+            } else {
+                *(int*)((char*)cBE_getInterface_Fv(cBE_getBE(), 10) + 0x10) = *(int*)(self + 0xD8);
+                func_0028FAE0(func_0028B180());
+                int n = D_004A2A54 - 1;
+                void* w = *(void**)((char*)D_004A28A8 + 0x84);
+                D_004A26FC = 3;
+                D_004A2A54 = n;
+                D_004A2A50 = D_004428F0[D_005366E8[n]];
+                func_00231250(w, 0xF, 0, 0);
+                func_0020A088(self);
+                func_00208BB8(self);
+            }
+        } else {
+            *(int*)(self + 0xBC) = 1;
+            *(int*)(self + 0xD8) = *(int*)(item + 0x18);
+            cOVState_MAP_setupPopup(self);
+            char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706C8));
+            float c[4];
+            sVE_8C28* vt = *(sVE_8C28**)(o + 0x8);
+            void* obj = o + vt[11].delta;
+            c[0] = 1.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            c[3] = 0.0f;
+            vt[11].fn(obj, c);
+        }
+        break;
+    case 6: {
+        if (*(int*)(self + 0xBC) != 0) {
+            *(int*)(self + 0xBC) = 0;
+            cOVState_MAP_setupPopup(self);
+        } else {
+            func_0020A088(self);
+            func_00208BB8(self);
+            func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+            int f = *(int*)(self + 0x1C);
+            *(int*)(self + 0x1C) = (f & ~0x3F00) | 0x780;
+        }
+        break;
+    }
+    case 1:
+        if (*(int*)(self + 0xBC) != 0) {
+            func_002095E8(self, item, 1);
+            if (*(int*)(item + 0x18) == 0) {
+                cUIState_showObjSafe(self, D_004706E8);
+                cUIState_hideObjSafe(self, D_00470700);
+                cUIState_showObjSafe(self, D_00470718);
+                cUIState_hideObjSafe(self, D_00470730);
+                cUIState_showObjSafe(self, D_00470748);
+                cUIState_hideObjSafe(self, D_00470760);
+            } else {
+                cUIState_showObjSafe(self, D_00470700);
+                cUIState_hideObjSafe(self, D_004706E8);
+                cUIState_showObjSafe(self, D_00470730);
+                cUIState_hideObjSafe(self, D_00470718);
+                cUIState_showObjSafe(self, D_00470760);
+                cUIState_hideObjSafe(self, D_00470748);
+            }
+        }
+        break;
+    case 2:
+        if (*(int*)(self + 0xBC) != 0) {
+            func_00209648(self, item, 1);
+        }
+        break;
+    case 7:
+        break;
+    }
+}
 
 //100%
 extern "C" int func_00208EF8(void* self, int a1, int a2)

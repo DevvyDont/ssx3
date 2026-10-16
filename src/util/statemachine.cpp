@@ -51,7 +51,110 @@ extern "C" void* func_002C7440(void)
     return func_002C7478(cMemMan_alloc(0x38, D_00486560, 0, 0));
 }
 
-INCLUDE_ASM("util/statemachine", func_002C7478);
+//100%
+extern "C" int func_0040BAA8(void);
+extern "C" int func_0040B9E8(void);
+extern "C" int func_0040BB38(void);
+extern "C" int func_0040BC08(void);
+extern "C" int func_00402520(unsigned char* clock);
+extern "C" void func_0040BFE0(unsigned char* clock);
+extern char D_00486798[];
+extern void* D_004A28A8;
+
+extern "C" void* func_002C7478(void* self_)
+{
+    int* self = (int*)self_;
+    unsigned char clock[8];
+    self[9] = 0;
+    *(char**)&self[13] = D_00486798;
+    int r = func_0040BAA8();
+    switch (r) {
+    case 0:
+        self[10] = 1;
+        break;
+    case 1:
+        self[10] = 0;
+        break;
+    default:
+        self[10] = 0;
+        break;
+    }
+    self[11] = 1;
+    switch (func_0040B9E8()) {
+    case 0:
+        self[12] = 0;
+        break;
+    case 1:
+        self[12] = 1;
+        break;
+    case 2:
+        self[12] = 2;
+        break;
+    case 3:
+        self[12] = 3;
+        break;
+    case 4:
+        self[12] = 4;
+        break;
+    case 5:
+        self[12] = 5;
+        break;
+    case 6:
+        self[12] = 6;
+        break;
+    case 7:
+        self[12] = 7;
+        break;
+    default:
+        self[12] = 1;
+        break;
+    }
+    r = func_0040BB38();
+    switch (r) {
+    case 0:
+        self[0] = 0;
+        break;
+    case 1:
+        self[0] = r;
+        break;
+    case 2:
+        self[0] = r;
+        break;
+    default:
+        self[0] = 0;
+        break;
+    }
+    r = func_0040BC08();
+    switch (r) {
+    case 0:
+        self[1] = 0;
+        break;
+    case 1:
+        self[1] = 1;
+        break;
+    default:
+        self[1] = 0;
+        break;
+    }
+    if (func_00402520(clock) != 0) {
+        func_0040BFE0(clock);
+        self[2] = (clock[3] & 0xF) + (clock[3] >> 4) * 10;
+        self[3] = (clock[2] & 0xF) + (clock[2] >> 4) * 10;
+        self[4] = (clock[1] & 0xF) + (clock[1] >> 4) * 10;
+        self[5] = (clock[7] & 0xF) + (clock[7] >> 4) * 10 + 2000;
+        self[6] = (clock[6] & 0xF) + (clock[6] >> 4) * 10;
+        self[7] = (clock[5] & 0xF) + (clock[5] >> 4) * 10;
+    } else {
+        self[5] = 2003;
+        self[6] = 10;
+        self[7] = 14;
+        self[2] = 0;
+        self[3] = 0;
+        self[4] = 0;
+    }
+    self[8] = *(int*)((char*)D_004A28A8 + 0x18);
+    return self;
+}
 
 INCLUDE_ASM("util/statemachine", func_002C76C0);
 
