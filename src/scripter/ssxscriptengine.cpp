@@ -1072,7 +1072,174 @@ extern "C" void* func_00279F18(void* self, int i, int a2)
     return 0;
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
+//100%
+extern char* D_004A28A8;
+struct sVec_27A0D8 {
+    float x, y, z, w;
+    sVec_27A0D8() {}
+    sVec_27A0D8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
+} __attribute__((aligned(16)));
+struct sV3_27A0D8 {
+    float x, y, z;
+};
+extern int D_004A51D8;
+extern sV3_27A0D8 D_004D3770[3];
+// D_004D3680[20..22] is D_004D3770[0..2]; the lookup indexes by the raw id.
+extern sV3_27A0D8 D_004D3680[];
+extern "C" void func_0027B750_v(void* self, void* obj, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw)
+    __asm__("func_0027B750");
+extern "C" void func_0027B948_v(void* self, void* obj, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw)
+    __asm__("func_0027B948");
+extern "C" void func_0027BB08_v(char* self, int slot, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw, int cat,
+                                const sVec_27A0D8* off) __asm__("func_0027BB08");
+// PORT: func_0027C070 is defined returning int, but it returns a pointer here; bound by asm label.
+signed char* func_0027C070_p(void* self) __asm__("func_0027C070__FPv");
+extern "C" int func_003369D8_v(void* cell, sVec_27A0D8* pos, sVec_27A0D8* outP, sVec_27A0D8* outN)
+    __asm__("func_003369D8");
+
+extern "C" void func_0027A0D8(char* self, int id, void* obj, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw)
+{
+    *flag = 0;
+    *pitch = 0;
+    *yaw = 0;
+    *pos = sVec_27A0D8(0.0f, 0.0f, 0.0f, 1.0f);
+    switch (id) {
+    case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
+    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: {
+        void* o = func_00279F18(self, id - 40, (int)obj);
+        if (o != 0)
+            func_0027B948_v(self, o, pos, flag, pitch, yaw);
+        break;
+    }
+    case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
+    case 13: case 14: case 15: case 16: case 17: case 18: {
+        void* o = func_00279F18(self, id + 2, (int)obj);
+        if (o != 0)
+            func_0027B750_v(self, o, pos, flag, pitch, yaw);
+        break;
+    }
+    case 25:
+        func_0027BB08_v(self, 1, pos, flag, pitch, yaw, 0x32, 0);
+        ((float*)pos)[2] -= 1000.0f;
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 26:
+        func_0027BB08_v(self, 2, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 27:
+        func_0027BB08_v(self, 3, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 28:
+        func_0027BB08_v(self, 4, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 29:
+    {
+        int cat = 0x32;
+        if (*func_0027C070_p(obj) != 0)
+            cat = 0x2B;
+        func_0027BB08_v(self, 5, pos, flag, pitch, yaw, cat, 0);
+    }
+        break;
+    case 30:
+    {
+        int cat = 0x32;
+        if (*func_0027C070_p(obj) != 0)
+            cat = 0x2B;
+        func_0027BB08_v(self, 6, pos, flag, pitch, yaw, cat, 0);
+    }
+        break;
+    case 31:
+        func_0027BB08_v(self, 9, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 32:
+        func_0027BB08_v(self, 10, pos, flag, pitch, yaw, 0x32, 0);
+        break;
+    case 33:
+        func_0027BB08_v(self, 11, pos, flag, pitch, yaw, 0x32, 0);
+        break;
+    case 34: case 35: case 36:
+        func_0027BB08_v(self, id - 22, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 37: case 38: case 39:
+        func_0027BB08_v(self, id - 22, pos, flag, pitch, yaw, 0x32, 0);
+        break;
+    case 19:
+        func_0027BB08_v(self, 7, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 20: case 21: case 22: {
+        if (D_004A51D8 == 0) {
+            D_004D3770[0].x = -20.0f;
+            D_004D3770[0].y = 0.0f;
+            D_004D3770[0].z = 340.0f;
+            D_004D3770[1].x = -20.0f;
+            D_004D3770[1].y = -275.0f;
+            D_004D3770[1].z = 280.0f;
+            D_004D3770[2].x = -20.0f;
+            D_004D3770[2].y = 275.0f;
+            D_004D3770[2].z = 280.0f;
+            D_004A51D8 = 1;
+        }
+        sV3_27A0D8* t = &D_004D3680[id];
+        sVec_27A0D8 off(t->x, t->y, t->z, 0.0f);
+        func_0027BB08_v(self, 0, pos, flag, pitch, yaw, 0x32, &off);
+        break;
+    }
+    case 23:
+        func_0027BB08_v(self, 0, pos, flag, pitch, yaw, 0x32, 0);
+        {
+            sVec_27A0D8 n;
+            sVec_27A0D8 p;
+            if (func_003369D8_v(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), pos, &p, &n))
+                pos->z = p.z;
+        }
+        break;
+    case 24:
+        func_0027BB08_v(self, 8, pos, flag, pitch, yaw, 0x32, 0);
+        break;
+    }
+}
+
 
 //100%
 void* func_002E4D70(void* self);
