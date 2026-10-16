@@ -819,18 +819,8 @@ extern "C" void func_0036D3E8(void* self, float val)
 
 //100%
 // PORT: PS2-only VU0 random-number unit (R register); the PC port needs a C PRNG.
-extern "C" void func_0036D400(float* seed)
-{
-    float v = *seed;
-    __asm__ __volatile__(
-        "qmtc2.ni  %0, $vf3\n"
-        "vrinit    R, $vf3x\n"
-        "vrnext.x  $vf3, R\n"
-        "qmfc2.ni  %0, $vf3\n"
-        : "=r"(v)
-        : "0"(v));
-    *seed = v;
-}
+INCLUDE_ASM("render/graphicsman", func_0036D400);
+extern "C" void func_0036D400(float* seed);
 
 INCLUDE_ASM("render/graphicsman", func_0036D428);
 

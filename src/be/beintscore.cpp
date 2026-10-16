@@ -198,14 +198,6 @@ extern char D_004A6CA8[];
 
 //97.94%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
-#ifdef SKIP_ASM
-signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderIndex)
-{
-    int charID = cBELibrary_getCharacterID(0);
-    char* p = D_004A6CA8 + riderIndex + charID * 0xF88;
-    return p[0xBB8];
-}
-#endif
 
 INCLUDE_ASM("be/beintscore", func_001552F8);
 

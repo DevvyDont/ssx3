@@ -23,20 +23,8 @@ void cCrowdRender2D__cCrowdRender2D(int* param_1, int param_2)
 }
 
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_init__Fv);
-#ifdef SKIP_ASM
-void cCrowdRender2D_init()
-{
-
-}
-#endif
 
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_purge__FPi);
-#ifdef SKIP_ASM
-int cCrowdRender2D_purge(int *param_1)
-{
-	return *param_1;
-}
-#endif
 
 //100%
 //https://decomp.me/scratch/Rbiv4

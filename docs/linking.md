@@ -12,8 +12,12 @@ bytes.
 - Functions are 8-aligned. A unit ending in C has no trailing nop, so the
   linker aligns each object to 8 (`subalign: 8`) to recreate it. A few
   hand-written asm routines (VU0 code in `ealib/seg_2B4578`) sit at
-  addresses that aren't 8-aligned: those can't be linked from C, and
-  `scripts/unwrap_matched.py` leaves them wrapped.
+  addresses that aren't 8-aligned: those can't be linked from C, so they
+  stay as asm. `scripts/unwrap_matched.py` skips them; delete their C rather
+  than leave it wrapped behind the asm.
+- The compiler is the stock SN ee-gcc 2.95.3 V1.36 download (plus the stock
+  2.95.3-114 build for `ealib/seg_2D7498`), unmodified. A function that only
+  matches with a patched compiler, or that is mostly inline asm, stays asm.
 - C++ units are compiled with `-fno-exceptions`; otherwise every object gets
   0x18 bytes of exception info in `.data` that the game doesn't have.
 

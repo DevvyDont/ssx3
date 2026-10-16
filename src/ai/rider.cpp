@@ -503,59 +503,8 @@ INCLUDE_ASM("ai/rider", func_0011DFE0);
 // PORT: PS2-only VU0 macro-mode asm. Normalises the orientation quaternion at
 // self+0x120, then builds the rider matrix at self+0x1A0 from it (rows 0-2)
 // and the position at self+0x110 (row 3).
-extern "C" void cRider_updateOrientationImplicit(char* self)
-{
-    __asm__ __volatile__(
-        ".set push\n"
-        ".set noreorder\n"
-        "lqc2       $vf3, 0x120(%0)\n"
-        "vaddw.x    $vf6, $vf0, $vf0w\n"
-        "vmul.xyzw  $vf4, $vf3, $vf3\n"
-        "vadday.x   ACC, $vf4, $vf4y\n"
-        "vmaddaz.x  ACC, $vf6, $vf4z\n"
-        "vmaddw.x   $vf4, $vf6, $vf4w\n"
-        "vrsqrt     Q, $vf0w, $vf4x\n"
-        "vwaitq\n"
-        "vmulq.xyzw $vf5, $vf3, Q\n"
-        "sqc2       $vf5, 0x120(%0)\n"
-        "lqc2       $vf4, 0x120(%0)\n"
-        "lqc2       $vf3, 0x110(%0)\n"
-        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
-        "vadd.xyz   $vf5, $vf4, $vf4\n"
-        "vsub.w     $vf10, $vf10, $vf10\n"
-        "vsub.w     $vf11, $vf11, $vf11\n"
-        "vsub.w     $vf12, $vf12, $vf12\n"
-        "vmul.xyz   $vf6, $vf5, $vf4\n"
-        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
-        "vopmula.xyz ACC, $vf5, $vf4\n"
-        "vmadd.xyz  $vf8, $vf0, $vf0\n"
-        "vsubay.x   ACC, $vf1, $vf6y\n"
-        "vmsubz.x   $vf10, $vf1, $vf6z\n"
-        "vsubaz.y   ACC, $vf1, $vf6z\n"
-        "vmsubx.y   $vf11, $vf1, $vf6x\n"
-        "vsubax.z   ACC, $vf1, $vf6x\n"
-        "vmsuby.z   $vf12, $vf1, $vf6y\n"
-        "vaddaz.y   ACC, $vf0, $vf8z\n"
-        "vmaddz.y   $vf10, $vf1, $vf7z\n"
-        "vaddax.z   ACC, $vf0, $vf8x\n"
-        "vmaddx.z   $vf11, $vf1, $vf7x\n"
-        "vaddax.y   ACC, $vf0, $vf8x\n"
-        "vmsubx.y   $vf12, $vf1, $vf7x\n"
-        "vadday.z   ACC, $vf0, $vf8y\n"
-        "vmsuby.z   $vf10, $vf1, $vf7y\n"
-        "vaddaz.x   ACC, $vf0, $vf8z\n"
-        "vmsubz.x   $vf11, $vf1, $vf7z\n"
-        "vadday.x   ACC, $vf0, $vf8y\n"
-        "vmaddy.x   $vf12, $vf1, $vf7y\n"
-        "sqc2       $vf3, 0x30(%1)\n"
-        "sqc2       $vf10, 0x0(%1)\n"
-        "sqc2       $vf11, 0x10(%1)\n"
-        "sqc2       $vf12, 0x20(%1)\n"
-        ".set pop\n"
-        :
-        : "r"(self), "r"(self + 0x1A0)
-        : "memory");
-}
+INCLUDE_ASM("ai/rider", cRider_updateOrientationImplicit);
+extern "C" void cRider_updateOrientationImplicit(char* self);
 
 INCLUDE_ASM("ai/rider", func_0011E150);
 

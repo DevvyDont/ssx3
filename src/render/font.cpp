@@ -2257,25 +2257,8 @@ extern "C" void func_003956B0(void* self);
 
 // Fetch the current (combined) matrix into out and return out.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void* func_003953B8(void* out, void* self)
-{
-    func_003956B0(self);
-    __asm__ __volatile__(
-        ".set noreorder\n"
-        "lqc2      $vf1, 0x0(%1)\n"
-        "lqc2      $vf2, 0x10(%1)\n"
-        "lqc2      $vf3, 0x20(%1)\n"
-        "lqc2      $vf4, 0x30(%1)\n"
-        "sqc2      $vf1, 0x0(%0)\n"
-        "sqc2      $vf2, 0x10(%0)\n"
-        "sqc2      $vf3, 0x20(%0)\n"
-        "sqc2      $vf4, 0x30(%0)\n"
-        ".set reorder\n"
-        :
-        : "r"(out), "r"((char*)self + 0x58A0)
-        : "memory");
-    return out;
-}
+INCLUDE_ASM("render/font", func_003953B8);
+extern "C" void* func_003953B8(void* out, void* self);
 
 extern "C" void* func_00395418(void* self)
 {

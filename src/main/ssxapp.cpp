@@ -1093,32 +1093,8 @@ extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* s)
 //100%
 // Upload two 4x4 matrices (a, b) to VU0 data memory starting at qword 4 (address 0x40).
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own matrix store.
-extern "C" void func_00229F30(void* a, void* b)
-{
-    __asm__ __volatile__(
-        ".set noreorder\n"
-        "ctc2.ni   %0, $vi1\n"
-        "lqc2      $vf1, 0x0(%1)\n"
-        "lqc2      $vf2, 0x10(%1)\n"
-        "lqc2      $vf3, 0x20(%1)\n"
-        "lqc2      $vf4, 0x30(%1)\n"
-        "vsqi.xyzw $vf1, ($vi1++)\n"
-        "vsqi.xyzw $vf2, ($vi1++)\n"
-        "vsqi.xyzw $vf3, ($vi1++)\n"
-        "vsqi.xyzw $vf4, ($vi1++)\n"
-        "lqc2      $vf1, 0x0(%2)\n"
-        "lqc2      $vf2, 0x10(%2)\n"
-        "lqc2      $vf3, 0x20(%2)\n"
-        "lqc2      $vf4, 0x30(%2)\n"
-        "vsqi.xyzw $vf1, ($vi1++)\n"
-        "vsqi.xyzw $vf2, ($vi1++)\n"
-        "vsqi.xyzw $vf3, ($vi1++)\n"
-        "vsqi.xyzw $vf4, ($vi1++)\n"
-        ".set reorder\n"
-        :
-        : "r"(0x40), "r"(a), "r"(b)
-        : "memory");
-}
+INCLUDE_ASM("main/ssxapp", func_00229F30);
+extern "C" void func_00229F30(void* a, void* b);
 
 //100%
 void func_00229F80(void* self)
@@ -1129,26 +1105,8 @@ void func_00229F80(void* self)
 // Upload a vector plus a 4x4 matrix (5 qwords) to VU0 data memory slot `index`,
 // starting at qword 0x50 + index * 5.
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own store.
-extern "C" void func_00229F88(int index, void* v, void* m)
-{
-    __asm__ __volatile__(
-        ".set noreorder\n"
-        "ctc2.ni   %0, $vi1\n"
-        "lqc2      $vf1, 0x0(%1)\n"
-        "lqc2      $vf2, 0x0(%2)\n"
-        "lqc2      $vf3, 0x10(%2)\n"
-        "lqc2      $vf4, 0x20(%2)\n"
-        "lqc2      $vf5, 0x30(%2)\n"
-        "vsqi.xyzw $vf1, ($vi1++)\n"
-        "vsqi.xyzw $vf2, ($vi1++)\n"
-        "vsqi.xyzw $vf3, ($vi1++)\n"
-        "vsqi.xyzw $vf4, ($vi1++)\n"
-        "vsqi.xyzw $vf5, ($vi1++)\n"
-        ".set reorder\n"
-        :
-        : "r"(index * 5 + 0x50), "r"(v), "r"(m)
-        : "memory");
-}
+INCLUDE_ASM("main/ssxapp", func_00229F88);
+extern "C" void func_00229F88(int index, void* v, void* m);
 
 INCLUDE_ASM("main/ssxapp", func_00229FC8);
 

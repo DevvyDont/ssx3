@@ -2462,23 +2462,8 @@ extern char D_004FF1A0[];
 
 // Copy the 4x4 matrix D_004FF1A0 into self+0x90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_003612C0(void* self)
-{
-    __asm__ __volatile__(
-        ".set noreorder\n"
-        "lqc2      $vf1, 0x0(%1)\n"
-        "lqc2      $vf2, 0x10(%1)\n"
-        "lqc2      $vf3, 0x20(%1)\n"
-        "lqc2      $vf4, 0x30(%1)\n"
-        "sqc2      $vf1, 0x0(%0)\n"
-        "sqc2      $vf2, 0x10(%0)\n"
-        "sqc2      $vf3, 0x20(%0)\n"
-        "sqc2      $vf4, 0x30(%0)\n"
-        ".set reorder\n"
-        :
-        : "r"((char*)self + 0x90), "r"(D_004FF1A0)
-        : "memory");
-}
+INCLUDE_ASM("object/railmodifier", func_003612C0);
+extern "C" void func_003612C0(void* self);
 
 extern "C" void* func_003612F8(void* self)
 {
@@ -3466,160 +3451,14 @@ extern "C" void* func_003620C8(sHandlerIds362058* self, int ch)
 
 //100%
 // PORT: PS2-only inline asm (dump all 32 FPU registers as 64-bit words into buf).
-extern "C" void func_00362120(void* buf)
-{
-    __asm__ __volatile__(
-        ".set push\n"
-        ".set noreorder\n"
-        "por       $2, $0, $0\n"
-        "mfc1      $2, $f0\n"
-        "sd        $2, 0x0(%0)\n"
-        "mfc1      $2, $f1\n"
-        "sd        $2, 0x8(%0)\n"
-        "mfc1      $2, $f2\n"
-        "sd        $2, 0x10(%0)\n"
-        "mfc1      $2, $f3\n"
-        "sd        $2, 0x18(%0)\n"
-        "mfc1      $2, $f4\n"
-        "sd        $2, 0x20(%0)\n"
-        "mfc1      $2, $f5\n"
-        "sd        $2, 0x28(%0)\n"
-        "mfc1      $2, $f6\n"
-        "sd        $2, 0x30(%0)\n"
-        "mfc1      $2, $f7\n"
-        "sd        $2, 0x38(%0)\n"
-        "mfc1      $2, $f8\n"
-        "sd        $2, 0x40(%0)\n"
-        "mfc1      $2, $f9\n"
-        "sd        $2, 0x48(%0)\n"
-        "mfc1      $2, $f10\n"
-        "sd        $2, 0x50(%0)\n"
-        "mfc1      $2, $f11\n"
-        "sd        $2, 0x58(%0)\n"
-        "mfc1      $2, $f12\n"
-        "sd        $2, 0x60(%0)\n"
-        "mfc1      $2, $f13\n"
-        "sd        $2, 0x68(%0)\n"
-        "mfc1      $2, $f14\n"
-        "sd        $2, 0x70(%0)\n"
-        "mfc1      $2, $f15\n"
-        "sd        $2, 0x78(%0)\n"
-        "mfc1      $2, $f16\n"
-        "sd        $2, 0x80(%0)\n"
-        "mfc1      $2, $f17\n"
-        "sd        $2, 0x88(%0)\n"
-        "mfc1      $2, $f18\n"
-        "sd        $2, 0x90(%0)\n"
-        "mfc1      $2, $f19\n"
-        "sd        $2, 0x98(%0)\n"
-        "mfc1      $2, $f20\n"
-        "sd        $2, 0xA0(%0)\n"
-        "mfc1      $2, $f21\n"
-        "sd        $2, 0xA8(%0)\n"
-        "mfc1      $2, $f22\n"
-        "sd        $2, 0xB0(%0)\n"
-        "mfc1      $2, $f23\n"
-        "sd        $2, 0xB8(%0)\n"
-        "mfc1      $2, $f24\n"
-        "sd        $2, 0xC0(%0)\n"
-        "mfc1      $2, $f25\n"
-        "sd        $2, 0xC8(%0)\n"
-        "mfc1      $2, $f26\n"
-        "sd        $2, 0xD0(%0)\n"
-        "mfc1      $2, $f27\n"
-        "sd        $2, 0xD8(%0)\n"
-        "mfc1      $2, $f28\n"
-        "sd        $2, 0xE0(%0)\n"
-        "mfc1      $2, $f29\n"
-        "sd        $2, 0xE8(%0)\n"
-        "mfc1      $2, $f30\n"
-        "sd        $2, 0xF0(%0)\n"
-        "mfc1      $2, $f31\n"
-        "sd        $2, 0xF8(%0)\n"
-        ".set pop\n"
-        :
-        : "r"(buf)
-        : "$2", "memory");
-}
+INCLUDE_ASM("object/railmodifier", func_00362120);
+extern "C" void func_00362120(void* buf);
 
 //100%
 // PORT: PS2-only inline asm (reload all 32 FPU registers from buf; deliberately
 // no FPU clobbers so the compiler doesn't save/restore $f20-$f31 around it).
-extern "C" void func_00362230(void* buf)
-{
-    __asm__ __volatile__(
-        ".set push\n"
-        ".set noreorder\n"
-        "por       $2, $0, $0\n"
-        "ld        $2, 0x0(%0)\n"
-        "mtc1      $2, $f0\n"
-        "ld        $2, 0x8(%0)\n"
-        "mtc1      $2, $f1\n"
-        "ld        $2, 0x10(%0)\n"
-        "mtc1      $2, $f2\n"
-        "ld        $2, 0x18(%0)\n"
-        "mtc1      $2, $f3\n"
-        "ld        $2, 0x20(%0)\n"
-        "mtc1      $2, $f4\n"
-        "ld        $2, 0x28(%0)\n"
-        "mtc1      $2, $f5\n"
-        "ld        $2, 0x30(%0)\n"
-        "mtc1      $2, $f6\n"
-        "ld        $2, 0x38(%0)\n"
-        "mtc1      $2, $f7\n"
-        "ld        $2, 0x40(%0)\n"
-        "mtc1      $2, $f8\n"
-        "ld        $2, 0x48(%0)\n"
-        "mtc1      $2, $f9\n"
-        "ld        $2, 0x50(%0)\n"
-        "mtc1      $2, $f10\n"
-        "ld        $2, 0x58(%0)\n"
-        "mtc1      $2, $f11\n"
-        "ld        $2, 0x60(%0)\n"
-        "mtc1      $2, $f12\n"
-        "ld        $2, 0x68(%0)\n"
-        "mtc1      $2, $f13\n"
-        "ld        $2, 0x70(%0)\n"
-        "mtc1      $2, $f14\n"
-        "ld        $2, 0x78(%0)\n"
-        "mtc1      $2, $f15\n"
-        "ld        $2, 0x80(%0)\n"
-        "mtc1      $2, $f16\n"
-        "ld        $2, 0x88(%0)\n"
-        "mtc1      $2, $f17\n"
-        "ld        $2, 0x90(%0)\n"
-        "mtc1      $2, $f18\n"
-        "ld        $2, 0x98(%0)\n"
-        "mtc1      $2, $f19\n"
-        "ld        $2, 0xA0(%0)\n"
-        "mtc1      $2, $f20\n"
-        "ld        $2, 0xA8(%0)\n"
-        "mtc1      $2, $f21\n"
-        "ld        $2, 0xB0(%0)\n"
-        "mtc1      $2, $f22\n"
-        "ld        $2, 0xB8(%0)\n"
-        "mtc1      $2, $f23\n"
-        "ld        $2, 0xC0(%0)\n"
-        "mtc1      $2, $f24\n"
-        "ld        $2, 0xC8(%0)\n"
-        "mtc1      $2, $f25\n"
-        "ld        $2, 0xD0(%0)\n"
-        "mtc1      $2, $f26\n"
-        "ld        $2, 0xD8(%0)\n"
-        "mtc1      $2, $f27\n"
-        "ld        $2, 0xE0(%0)\n"
-        "mtc1      $2, $f28\n"
-        "ld        $2, 0xE8(%0)\n"
-        "mtc1      $2, $f29\n"
-        "ld        $2, 0xF0(%0)\n"
-        "mtc1      $2, $f30\n"
-        "ld        $2, 0xF8(%0)\n"
-        "mtc1      $2, $f31\n"
-        ".set pop\n"
-        :
-        : "r"(buf)
-        : "$2", "memory");
-}
+INCLUDE_ASM("object/railmodifier", func_00362230);
+extern "C" void func_00362230(void* buf);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_00362120(void*);
@@ -4631,20 +4470,8 @@ static inline int railFloorLog2(int x)
     return r;
 }
 
-extern "C" int func_003667F8(sRailNodeMan* self, int size)
-{
-    int b;
-    for (b = railFloorLog2(size) - 6; b < 17; b++) {
-        int i = self->headsB[b].next2;
-        while (i >= 0) {
-            if (self->nodes[i].size >= size) {
-                return i;
-            }
-            i = self->nodes[i].next2;
-        }
-    }
-    return -1;
-}
+INCLUDE_ASM("object/railmodifier", func_003667F8);
+extern "C" int func_003667F8(sRailNodeMan* self, int size);
 
 // Walk the list headed at f23C0 and return the free link (flags bit 0 clear)
 // with the largest f4, or -1.

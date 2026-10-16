@@ -996,33 +996,9 @@ void* func_003203B8(void* self)
 
 //92.5%
 INCLUDE_ASM("bx/cubicspline", func_00320408__FPv);
-#ifdef SKIP_ASM
-void* func_00320408(void* self)
-{
-    void* node = *(void**)((char*)self + 0x20000);
-    if (node != 0) {
-        void* next = *(void**)node;
-        *(void**)((char*)self + 0x20000) = next;
-        return node;
-    }
-    return func_00319E48(0x104);
-}
-#endif
 
 //92.5%
 INCLUDE_ASM("bx/cubicspline", func_00320448__FPv);
-#ifdef SKIP_ASM
-void* func_00320448(void* self)
-{
-    void* node = *(void**)((char*)self + 0x20000);
-    if (node != 0) {
-        void* next = *(void**)node;
-        *(void**)((char*)self + 0x20000) = next;
-        return node;
-    }
-    return func_00319E48(0x204);
-}
-#endif
 
 //100%
 void func_00320488(void* self, void** node)

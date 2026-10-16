@@ -3725,17 +3725,8 @@ extern "C" void func_00382170(cRMgr2170* mgr, sPt2170* pos, float* col, float ra
 //100%
 extern "C" void func_003825F8(void* arg);
 
-extern "C" int func_003825C0(int cause, void* arg)
-{
-    if (cause != 2) {
-        // PORT: PS2-only debug trap (assert).
-        __asm__ __volatile__("break 0");
-    }
-    func_003825F8(arg);
-    // PORT: PS2-only: re-enable interrupts (EI).
-    __asm__ __volatile__("sync.l\n\tei");
-    return 1;
-}
+INCLUDE_ASM("render/particle", func_003825C0);
+extern "C" int func_003825C0(int cause, void* arg);
 
 //100%
 extern "C" void func_00423DD0(int sema);
@@ -3755,17 +3746,8 @@ extern "C" void func_003825F8(void* self)
 //100%
 extern "C" void func_00382688(void* arg);
 
-extern "C" int func_00382650(int cause, void* arg)
-{
-    if (cause != 1) {
-        // PORT: PS2-only debug trap (assert).
-        __asm__ __volatile__("break 0");
-    }
-    func_00382688(arg);
-    // PORT: PS2-only: re-enable interrupts (EI).
-    __asm__ __volatile__("sync.l\n\tei");
-    return 1;
-}
+INCLUDE_ASM("render/particle", func_00382650);
+extern "C" int func_00382650(int cause, void* arg);
 
 //100%
 extern "C" void func_00423DD0(int sema);
