@@ -10216,7 +10216,40 @@ extern "C" void func_001B7C70(void* self)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B7CB8);
+//100%
+extern "C" void func_00265A68(void* p);
+extern "C" int func_00265D38(void* p);
+extern "C" void func_002659E8(void* p);
+
+extern "C" void func_001B7CB8(char* self)
+{
+    func_00265A68(D_004A33D0);
+    int* d = D_004A33D0;
+    *(int*)(self + 0x6D4) = d[1];
+    if (func_00265D38(d) != 0) {
+        *(int*)(self + 0x6D8) = 1;
+        if (*(int*)(self + 0x6D4) == 0) *(int*)(self + 0x6D4) = 2;
+    }
+    switch (*(unsigned int*)(self + 0x6DC)) {
+    case 0: func_001B70D0(self, 1); break;
+    case 1: func_001B77A8(self); break;
+    case 2: func_001B77C8(self); break;
+    case 5: func_001B70D0(self, 6); break;
+    case 6: func_001B7820(self); break;
+    case 8: func_001B78F0(self); break;
+    case 11: func_001B70D0(self, 12); break;
+    case 12: func_001B7938(self); break;
+    case 14: func_001B7A08(self); break;
+    case 16: func_001B7A50(self); break;
+    case 19: func_001B70D0(self, 20); break;
+    case 20: func_001B7A98(self); break;
+    case 22: func_001B7BC0(self); break;
+    case 7: case 13: case 21: case 25: func_002659E8(D_004A33D0); break;
+    case 26: func_001B7C28(self); break;
+    case 27: func_001B7C70(self); break;
+    case 3: case 4: case 9: case 10: case 15: case 17: case 18: case 23: case 24: case 28: case 29: break;
+    }
+}
 
 INCLUDE_ASM("fe/feasyncfile", func_001B7E40);
 
