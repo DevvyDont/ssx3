@@ -10933,7 +10933,162 @@ extern "C" void func_001B83C0(sAsync_1B83C0* self)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
+//100%
+// PORT: func_001A97B8 returns int; the result is unused here
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" void* func_001B70D0(void*, int);
+extern "C" int func_00265D68(void* self);
+extern "C" int func_001B8890(void* self, int mode);
+extern int* D_004A33D0;
+
+struct sVE_84D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+static inline void Notify_84D8(char* self, int arg)
+{
+    char* o = *(char**)(self + 0x20);
+    sVE_84D8* vt = *(sVE_84D8**)(o + 0x8);
+    vt[17].fn(o + vt[17].delta, self, arg);
+}
+
+extern "C" void func_001B84D8(char* self, char* item, unsigned int id)
+{
+    switch (*(int*)(self + 0x6DC)) {
+    case 7:
+    case 13:
+    case 21:
+    case 25:
+        switch (id) {
+        case 15: {
+            func_001A97B8_v(self, item, 15);
+            if (func_00265D68(D_004A33D0) != 0) {
+                *(int*)(self + 0x6D4) = 2;
+                func_001B70D0(self, func_001B8890(self, *(int*)(self + 0x6DC)));
+            } else if (*(int*)(self + 0x6D8) != 0) {
+                *(int*)(self + 0x6D4) = 6;
+                func_001B70D0(self, func_001B8890(self, *(int*)(self + 0x6DC)));
+            } else if (*(int*)(item + 0x18) != 0) {
+                func_001B70D0(self, *(int*)(item + 0x18));
+            }
+            break;
+        }
+        case 16:
+        case 20: {
+            func_001A97B8_v(self, item, id);
+            int mode = *(int*)(self + 0x6DC);
+            if (mode == 25 || mode == 13 || mode == 7)
+                goto set11;
+            *(int*)(self + 0x6D0) = 0x10;
+            break;
+        }
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 3:
+        switch (id) {
+        case 15:
+            func_001A97B8_v(self, item, 15);
+            if (*(int*)(self + 0x18) != 0) {
+                *(int*)(self + 0x6D0) = 0;
+                *(int*)(self + 0x6D4) = 0;
+                *(int*)(self + 0x6D8) = 0;
+                func_001B70D0(self, *(int*)(self + 0xB0C));
+            } else {
+                *(int*)(self + 0x6D0) = 0x10;
+            }
+            break;
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            if (*(int*)(self + 0x6D0) != 0)
+                Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        case 16:
+        case 20:
+            func_001A97B8_v(self, item, id);
+            *(int*)(self + 0x6D0) = 0xF;
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 9:
+    case 15:
+    case 17:
+    case 28:
+        switch (id) {
+        case 15:
+            func_001A97B8_v(self, item, 15);
+        set11:
+            *(int*)(self + 0x6D0) = 0x11;
+            break;
+        case 16:
+        case 20:
+            func_001A97B8_v(self, item, id);
+            *(int*)(self + 0x6D0) = 0xF;
+            break;
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            if (*(int*)(self + 0x6D0) != 0)
+                Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 23:
+        switch (id) {
+        case 15:
+            func_001A97B8_v(self, item, 15);
+            if (*(int*)(self + 0xB08) == 0) {
+                *(int*)(self + 0x6D0) = 0x10;
+            } else {
+                *(int*)(self + 0x6D0) = 0;
+                *(int*)(self + 0x6D4) = 0;
+                *(int*)(self + 0x6D8) = 0;
+                *(int*)(self + 0xB08) = 0;
+                *(int*)(self + 0xB0C) = 0;
+                func_001B70D0(self, 0);
+            }
+            break;
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            if (*(int*)(self + 0x6D0) != 0)
+                Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 4:
+    case 10:
+    case 18:
+    case 24:
+    case 29:
+        if (id == 22) {
+            func_001A97B8_v(self, item, 0x16);
+            Notify_84D8(self, 0xF);
+        } else {
+            func_001A97B8_v(self, item, id);
+        }
+        break;
+    default:
+        func_001A97B8_v(self, item, id);
+        break;
+    }
+}
+
 
 //100%
 class func_001B8860_cObj {
