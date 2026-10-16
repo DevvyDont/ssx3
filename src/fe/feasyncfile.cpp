@@ -7611,7 +7611,86 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B31A0);
+//100%
+int GetHashValue32(char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_0025F248(void* self, int idx);
+extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
+extern "C" void func_001A9890(void* self, const char* str);
+int func_001A98B0(void* self);
+extern "C" void func_001AB370(void* self, int a1, int a2);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001B3D20(void* self, int idx, int on);
+extern "C" void func_001A9B58(void* self);
+extern "C" void func_001B33D8(void* self);
+extern "C" void func_0025D800(void* self, int a1, const char* a2);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+extern void* D_004A3028;
+extern char D_00463A60[];
+extern char D_00463D20[];
+
+extern "C" void func_001B31A0(char* self, char* msg, int id)
+{
+    char buf[0x20];
+    int i;
+    switch (id) {
+    case 5: {
+        int idx = *(int*)(msg + 0x18);
+        if (func_0025F248(D_004A3028, idx) != 0) {
+            return;
+        }
+        func_001A9890(self, func_0025F1E0(D_004A3028, idx, 0));
+        func_001AB370(self, func_001A98B0(self), 1);
+        return;
+    }
+    case 1:
+        for (i = 0; i < 6; i++) {
+            sprintf(buf, D_00463A60, i);
+            int want = *(int*)(msg + 0x38);
+            if (want == GetHashValue32(buf)) {
+                func_001B3D20(self, i, 1);
+                return;
+            }
+        }
+        func_001A8918(self, (int)msg, id);
+        return;
+    case 2:
+        for (i = 0; i < 6; i++) {
+            sprintf(buf, D_00463A60, i);
+            int want = *(int*)(msg + 0x38);
+            if (want == GetHashValue32(buf)) {
+                func_001B3D20(self, i, 0);
+                return;
+            }
+        }
+        func_001A8918(self, (int)msg, id);
+        return;
+    case 6: {
+        *(int*)(self + 0x6F8) = 1;
+        char* p = (char*)func_001A9C50(self);
+        *(int*)(p + 0xBC) = 0;
+        *(int*)(p + 0xC4) = GetHashValue32(D_00463D20);
+        *(int*)(p + 0xC0) = 3;
+        *(int*)(p + 0x150) = 0x802;
+        *(int*)(p + 0x164) = 0;
+        func_001A9BC0(self, p);
+        func_0025D800(D_004A3028, -1, 0);
+        return;
+    }
+    case 8:
+        if ((*(unsigned int*)(self + 0x1C) & 6) == 0) {
+            func_001A9B58(self);
+        }
+        return;
+    case 13:
+        func_001B33D8(self);
+        return;
+    default:
+        func_001A8918(self, (int)msg, id);
+        return;
+    }
+}
 
 //100%
 extern "C" void func_00260F80();

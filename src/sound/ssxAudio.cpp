@@ -962,7 +962,119 @@ extern "C" int func_002876D0(void* self)
     return (int)(func_00287920(self, 4) * 11.0f);
 }
 
-INCLUDE_ASM("sound/ssxAudio", func_00287700);
+//100%
+extern float D_004A3504;
+extern float D_004A3508;
+extern float D_004A350C;
+extern float D_004A3510;
+extern float D_004A3514;
+extern float D_004A3518;
+extern float D_004A351C;
+extern float D_004A3520;
+extern float D_004A3524;
+extern float D_004A3528;
+extern const float D_004A352C_7700 __asm__("D_004A352C");
+extern const float D_004A3530_7700 __asm__("D_004A3530");
+extern const float D_004A3534_7700 __asm__("D_004A3534");
+extern const float D_004A3538_7700 __asm__("D_004A3538");
+extern const float D_004A353C_7700 __asm__("D_004A353C");
+extern const float D_004A3540_7700 __asm__("D_004A3540");
+extern const float D_004A3544_7700 __asm__("D_004A3544");
+extern const float D_004A3548_7700 __asm__("D_004A3548");
+extern const float D_004A354C_7700 __asm__("D_004A354C");
+extern const float D_004A3550_7700 __asm__("D_004A3550");
+extern "C" void func_002B4388(void* self);
+extern "C" void func_003B8160(int vol);
+
+struct sAudio_7700 {
+    char pad_0x0000[0x6394];
+    float mixGain[20]; // 0x6394
+    float outGain[20]; // 0x63E4
+};
+
+struct sVol_7700 {
+    float raw;   // 0x0
+    float level; // 0x4
+    float mixed; // 0x8
+    float out;   // 0xC
+};
+
+// PORT: g++ `<?` / `>?` (min / max) operators.
+extern "C" void func_00287700(void* self_, float v, int ch)
+{
+    char* self = (char*)self_;
+    v = (v <? 1.0f) >? 0.0f;
+    sVol_7700* e = (sVol_7700*)(self + 0x62BC + ch * 16);
+    switch (ch) {
+    case 0:
+        e->raw = v;
+        e->level = v;
+        break;
+    case 1:
+        e->raw = v;
+        e->level = v * D_004A3508;
+        func_002B4388(self + 0x118);
+        break;
+    case 2:
+        e->raw = v;
+        e->level = v * D_004A3510;
+        break;
+    case 3:
+        e->raw = v;
+        e->level = v * D_004A3514;
+        break;
+    case 4:
+        e->raw = v;
+        e->level = v * D_004A350C;
+        break;
+    case 5:
+        e->raw = v;
+        e->level = v * D_004A3504;
+        break;
+    case 6:
+        e->raw = v;
+        e->level = v * D_004A3518;
+        break;
+    case 7:
+        e->raw = v;
+        e->level = v * D_004A351C;
+        break;
+    case 8:
+        e->raw = v;
+        e->level = v * D_004A3520;
+        break;
+    case 9:
+        e->raw = v;
+        e->level = v * D_004A3524;
+        break;
+    case 10:
+        e->raw = v;
+        e->level = v * D_004A3528;
+        break;
+    }
+    e->mixed = e->level * ((sAudio_7700*)self)->mixGain[ch];
+    e->out = e->mixed * ((sAudio_7700*)self)->outGain[ch];
+    switch (ch) {
+    case 0:
+        func_003B8160((signed char)(int)(e->out * 127.0f));
+        break;
+    case 1:
+        func_002B4388(self + 0x118);
+        break;
+    case 4:
+        *(float*)(self + 0x636C) = e->out * D_004A352C_7700;
+        *(float*)(self + 0x6370) = e->out * D_004A3530_7700;
+        *(float*)(self + 0x6374) = e->out * D_004A3534_7700;
+        *(float*)(self + 0x6378) = e->out * D_004A3538_7700;
+        *(float*)(self + 0x637C) = e->out * D_004A353C_7700;
+        *(float*)(self + 0x6380) = e->out * D_004A3540_7700;
+        *(float*)(self + 0x6384) = e->out * D_004A3544_7700;
+        *(float*)(self + 0x6388) = e->out * D_004A3548_7700;
+        *(float*)(self + 0x638C) = e->out * D_004A354C_7700;
+        *(float*)(self + 0x6390) = e->out * D_004A3550_7700;
+        break;
+    }
+}
 
 //100%
 extern "C" float func_00287920(void* self, int a1)

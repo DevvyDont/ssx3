@@ -7133,7 +7133,99 @@ extern "C" void func_00266348(void)
     D_004A33D4 = 0xF;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00266358);
+//100%
+extern void* D_004A33D8;
+extern int D_004A33D4;
+extern int D_004A33DC;
+extern int D_004A33E0;
+extern int D_004A33E4;
+extern int D_004A3940;
+extern char D_00537190[];
+extern "C" int func_002C51D0(void* obj, int a1);
+extern "C" int func_00266578(int a0);
+void func_002C67E8(void* self, int a1);
+extern "C" void func_002C68C8(void* obj, int idx, char* out);
+extern "C" int func_003FA360(char* str);
+
+struct sVE_266358 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_00266358(int* status, int* out)
+{
+    *out = 0;
+    switch (D_004A33D4) {
+    case 3:
+    case 15:
+    case 16:
+        *status = 2;
+        return 0;
+    case 10:
+        *status = 2;
+        *out = 0x800;
+        return 0;
+    }
+    {
+        char* obj = (char*)D_004A33D8;
+        sVE_266358* vt = *(sVE_266358**)obj;
+        if (vt[11].fn(obj + vt[11].delta) != 0) {
+            *status = 1;
+            return 0;
+        }
+    }
+    *status = 2;
+    if (func_002C51D0(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC)) != 0) {
+        return func_00266578(func_002C51D0(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC)));
+    }
+    switch (D_004A33D4) {
+    case 1:
+        if (D_004A33E4 > 0) {
+            *status = 1;
+            D_004A33E4--;
+            func_002C67E8(D_004A33D8, D_004A33DC);
+            return 0;
+        }
+        D_004A33E0 = 1;
+        break;
+    case 2: {
+        int i;
+        if (*(int*)((char*)D_004A33D8 + 0x54) <= 0) {
+            *out = 0;
+            break;
+        }
+        for (i = 0; i < *(int*)((char*)D_004A33D8 + 0x54); i++) {
+            func_002C68C8(D_004A33D8, i, D_00537190);
+            if (func_003FA360(D_00537190) != 0) {
+                *out = 1;
+                return 0;
+            }
+        }
+        *out = 0;
+        break;
+    }
+    case 5:
+        *out = D_004A3940;
+        break;
+    case 6:
+        *out = D_004A3940;
+        break;
+    case 14:
+        *out = D_004A3940;
+        break;
+    case 9: {
+        char* obj = (char*)D_004A33D8;
+        sVE_266358* vt = *(sVE_266358**)obj;
+        *out = vt[20].fn(obj + vt[20].delta) << 10;
+        break;
+    }
+    case 0:
+    case 4:
+        break;
+    }
+    return 0;
+}
 
 //100%
 extern int D_004A33D4;

@@ -1721,7 +1721,83 @@ extern "C" int func_00122E50(void* self)
     return n + (int)(d * r);
 }
 
-INCLUDE_ASM("ai/rider", func_00122EE8);
+//100%
+int func_0011FE98(void* self);
+int func_0011FEE8(void* self);
+extern "C" int func_00135EB0(void* self);
+extern "C" int func_00135EF0(void* self);
+extern "C" int func_00135F30(void* self);
+extern "C" int func_00311AE8(void*, int);
+extern "C" char* func_00311B20(void*, int);
+extern "C" int func_001446A0(void* self, int a1);
+
+// Tests one rider condition by id (used by the scripted-event checks).
+extern "C" int func_00122EE8(char* self, int cond)
+{
+    switch (cond) {
+    case 0:
+        return func_0011FE98(self) == 2;
+    case 1:
+        return func_0011FEE8(self) == 9;
+    case 2: {
+        int r = 0;
+        if (func_0011FE98(self) == 1
+            || (func_0011FE98(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
+            r = 1;
+        }
+        return r;
+    }
+    case 3:
+        return func_0011FE98(self) == 0;
+    case 4:
+        return func_0011FE98(self) == 4;
+    case 5: {
+        int r = 0;
+        if (func_0011FEE8(self) == 5) {
+            r = func_00135EB0(*(char**)(self + 0x77C) + 0x230) != 0;
+        }
+        return r;
+    }
+    case 6: {
+        int r = 0;
+        if (func_0011FEE8(self) == 5) {
+            r = func_00135EF0(*(char**)(self + 0x77C) + 0x230) != 0;
+        }
+        return r;
+    }
+    case 7: {
+        int r = 0;
+        if (func_0011FEE8(self) == 5) {
+            r = func_00135F30(*(char**)(self + 0x77C) + 0x230) != 0;
+        }
+        return r;
+    }
+    case 9:
+        return *(int*)(self + 0x330) == 1;
+    case 10:
+        return *(int*)(self + 0x330) == 2;
+    case 11:
+        return *(float*)(self + 0x2FC) != 0.0f;
+    case 8:
+        return *(int*)(*(char**)(self + 0x790) + 0x198);
+    case 15:
+        return *(int*)(*(char**)(self + 0x790) + 0x138);
+    case 16:
+        return *(int*)(*(char**)(self + 0x790) + 0x13C);
+    case 17:
+        return *(int*)(*(char**)(self + 0x790) + 0x19C);
+    case 18: {
+        int r = 0;
+        if (func_00311AE8(*(void**)(self + 0x784), 1) == 0xD) {
+            if (func_001446A0(func_00311B20(*(void**)(self + 0x784), 1) + 0xB0, 0) != 0) {
+                r = func_001446A0(func_00311B20(*(void**)(self + 0x784), 1) + 0xB0, 1) == 0;
+            }
+        }
+        return r;
+    }
+    }
+    return 0;
+}
 
 //100%
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);

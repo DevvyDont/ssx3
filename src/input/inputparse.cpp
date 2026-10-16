@@ -387,7 +387,89 @@ extern "C" void* func_00323540(void* self)
     return left;
 }
 
-INCLUDE_ASM("input/inputparse", func_003236D8);
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void func_00321638(void* self, void* node);
+extern "C" void* func_003215F8(void* self);
+extern "C" void* func_00323900(void* self);
+
+struct sCmpNode_003236D8 {
+    int type;
+    union {
+        float value;
+        sCmpNode_003236D8* a;
+    };
+    sCmpNode_003236D8* b;
+};
+
+// Parses a chain of comparisons (<, <=, >=, >, ==, !=); constant operands fold to 1.0/0.0.
+extern "C" void* func_003236D8(void* self)
+{
+    sCmpNode_003236D8* left = (sCmpNode_003236D8*)func_00323900(self);
+    if (left == 0) {
+        return 0;
+    }
+    for (;;) {
+        int op;
+        switch (*(int*)((char*)self + 0x98)) {
+        case 0x10:
+            op = 10;
+            break;
+        case 0x11:
+            op = 11;
+            break;
+        case 0xF:
+            op = 9;
+            break;
+        case 0xE:
+            op = 8;
+            break;
+        case 0x12:
+            op = 12;
+            break;
+        case 0x13:
+            op = 13;
+            break;
+        default:
+            return left;
+        }
+        cInputMapParser_readToken(self);
+        sCmpNode_003236D8* right = (sCmpNode_003236D8*)func_00323900(self);
+        if (right == 0) {
+            func_00321638(self, left);
+            return 0;
+        }
+        if (left->type == 4 && right->type == 4) {
+            switch (op) {
+            case 10:
+                left->value = (left->value < right->value) ? 1.0f : 0.0f;
+                break;
+            case 11:
+                left->value = (left->value <= right->value) ? 1.0f : 0.0f;
+                break;
+            case 9:
+                left->value = (left->value >= right->value) ? 1.0f : 0.0f;
+                break;
+            case 8:
+                left->value = (left->value > right->value) ? 1.0f : 0.0f;
+                break;
+            case 12:
+                left->value = (left->value == right->value) ? 1.0f : 0.0f;
+                break;
+            case 13:
+                left->value = (left->value != right->value) ? 1.0f : 0.0f;
+                break;
+            }
+            func_00321638(self, right);
+        } else {
+            sCmpNode_003236D8* n = (sCmpNode_003236D8*)func_003215F8(self);
+            n->a = left;
+            n->type = op;
+            n->b = right;
+            left = n;
+        }
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void cInputMapParser_readToken(void* self);

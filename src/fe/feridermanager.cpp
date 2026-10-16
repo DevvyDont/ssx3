@@ -101,7 +101,91 @@ extern "C" void func_0019E7F0(int* self)
     }
 }
 
-INCLUDE_ASM("fe/feridermanager", cFERider_init);
+//100%
+extern "C" void func_0019EBA0(void* self);
+extern "C" void* func_002F1890(void* mem, void* owner);
+extern "C" void* func_002ECA68(void* mem, void* owner, void* a2);
+extern "C" void* func_0030D4B8(void* mem);
+extern "C" void func_0030D840(void* self, int a1, int a2);
+extern "C" void func_002F19F0(void* self, void* a1);
+void func_0019FF00_i(void* self, void* list, void* prev, int force, int a4) __asm__("func_0019FF00");
+void func_0019FBE0_i(void* self, void* list, int a2, int a3) __asm__("func_0019FBE0");
+void func_0019F138_i(void* self) __asm__("func_0019F138");
+void func_0019E7F0_i(void* self) __asm__("func_0019E7F0");
+extern "C" void* cMemMan_alloc_init(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern char D_00460AC0[];
+extern char D_00460AD8[];
+extern char D_00460AF0[];
+
+extern "C" int cFERider_init(void* self_, int a1, int a2, int a3)
+{
+    int* self = (int*)self_;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+    if (self[0] == a2 && self[0x10 / 4] == a3) {
+        return 1;
+    }
+    if (self[0] >= 0) {
+        func_0019EBA0(self);
+    }
+    int busy = (self[0xCC4 / 4] != 0) | (self[0xCC8 / 4] != 0);
+    self[0x10 / 4] = a3;
+    self[0x4 / 4] = a1;
+    self[0] = a2;
+    self[0xC28 / 4] = 0;
+    self[0x14 / 4] = 0;
+    self[0xCC8 / 4] = 0;
+    self[0xCB4 / 4] = 0;
+    self[0xCB8 / 4] = 0;
+    self[0xCBC / 4] = 0;
+    self[0xCC0 / 4] = 0;
+    self[0xC24 / 4] = -1;
+    self[0xCC4 / 4] = busy;
+    *(void**)(self + 0xC70 / 4) = func_002F1890(cMemMan_alloc_init(0xA8, D_00460AC0, 0, 0), self);
+    *(void**)(self + 0xC74 / 4) = func_002ECA68(cMemMan_alloc_init(0xC8, D_00460AD8, 0, 0), self, *(void**)(self + 0xC70 / 4));
+    *(void**)(self + 0x8 / 4) = func_0030D4B8(cMemMan_alloc_init(0x160, D_00460AF0, 0, 0));
+    func_0030D840(*(void**)(self + 0x8 / 4), 100, 0xF);
+    func_002F19F0(*(void**)(self + 0xC70 / 4), *(void**)(self + 0x8 / 4));
+    void* list = func_0014AD28(iface, a1, a2);
+    func_0019FF00_i(self, list, 0, self[0x10 / 4], 1);
+    if (self[0x10 / 4] != 0) {
+        func_0019E7F0_i(self);
+    }
+    func_0019FBE0_i(self, list, 0, 1);
+    func_0019F138_i(self);
+    switch (self[0]) {
+    case 0:
+        self[0xCD8 / 4] = 1;
+        break;
+    case 1:
+        self[0xCD8 / 4] = 4;
+        break;
+    case 2:
+        self[0xCD8 / 4] = 0x20;
+        break;
+    case 3:
+        self[0xCD8 / 4] = 2;
+        break;
+    case 4:
+        self[0xCD8 / 4] = 8;
+        break;
+    case 5:
+        self[0xCD8 / 4] = 0x100;
+        break;
+    case 6:
+        self[0xCD8 / 4] = 0x200;
+        break;
+    case 7:
+        self[0xCD8 / 4] = 0x80;
+        break;
+    case 8:
+        self[0xCD8 / 4] = 0x10;
+        break;
+    case 9:
+        self[0xCD8 / 4] = 0x40;
+        break;
+    }
+    return 1;
+}
 
 //100%
 struct sVE_EBA0 {
@@ -235,7 +319,7 @@ INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern void* D_004A289C;
-extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
+extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int func_001A0100(int* self);
 extern "C" int func_0019FD58(int* self);
 extern "C" void func_0019F780(int* self);
