@@ -6,6 +6,7 @@
 #include "ps2_runtime_macros.h"
 
 #include <cctype>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -165,6 +166,26 @@ namespace
         std::fprintf(stderr, "[file] exists \"%s\" -> %d\n", name.c_str(), static_cast<int32_t>(getRegU32(ctx, 2)));
     }
 
+    PS2Runtime::RecompiledFunction g_syncTaskOriginal = nullptr;
+
+    // PS2X_FRAME_LOG=1: SYNCTASK_run runs once per pass of the main loop; log the
+    // loop rate every 2 s of wall time.
+    void ssx3CountFrames(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+    {
+        static uint32_t frames = 0;
+        static auto last = std::chrono::steady_clock::now();
+        ++frames;
+        const auto now = std::chrono::steady_clock::now();
+        const double secs = std::chrono::duration<double>(now - last).count();
+        if (secs >= 2.0)
+        {
+            std::fprintf(stderr, "[frames] %.1f main-loop passes/s\n", frames / secs);
+            frames = 0;
+            last = now;
+        }
+        g_syncTaskOriginal(rdram, ctx, runtime);
+    }
+
     void applySsx3(PS2Runtime &runtime)
     {
         // SSX 3's dlmalloc grows from the end of the ELF image over the whole
@@ -186,6 +207,12 @@ namespace
             g_fileCompleteOriginal = runtime.lookupFunction(0x003DE420u);
             if (g_fileCompleteOriginal)
                 runtime.replaceFunction(0x003DE420u, ssx3LogFileComplete);
+        }
+        if (std::getenv("PS2X_FRAME_LOG"))
+        {
+            g_syncTaskOriginal = runtime.lookupFunction(0x003E5928u);
+            if (g_syncTaskOriginal)
+                runtime.replaceFunction(0x003E5928u, ssx3CountFrames);
         }
         runtime.replaceFunction(0x004261F0u, ssx3iSifSendCmd);
         runtime.replaceFunction(0x003F61D0u, ssx3UsbKbStart);
