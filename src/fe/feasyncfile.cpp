@@ -11534,7 +11534,124 @@ extern "C" void func_001B8AA0(void* self, cUIText* text)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B8C38);
+//100%
+extern "C" int func_001BA110(void* self);
+extern "C" void* func_001BA3E0(void* self, int a1);
+extern "C" void func_001BA280(void* self);
+extern "C" void func_001BA218(void* self);
+extern "C" void* func_001C0418(void* self, int a1);
+extern "C" void func_001B9820(void* self);
+extern char D_00464768[];
+extern char D_004647B8[];
+extern char D_004647D0[];
+extern char D_004647E0[];
+extern char D_00464810[];
+extern char D_00464828[];
+extern char D_00464848[];
+extern char D_004647F8[];
+extern char D_00464838[];
+extern char D_00464860[];
+
+static inline bool IsId_1B8C38(char* item, char* name)
+{
+    int id = *(int*)(item + 0x38);
+    return id == GetHashValue32(name);
+}
+
+struct sVEntry_1B8C38 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001B8C38(char* self, char* item, int msg)
+{
+    switch (msg) {
+    case 9:
+        if (IsId_1B8C38(item, D_00464780) && item != 0) {
+            *(int*)(*(char**)(self + 0x6D0) + 0x38) = func_0039A738(item) == 1;
+        }
+        if (IsId_1B8C38(item, D_00464790) && item != 0) {
+            *(int*)(*(char**)(self + 0x6D0) + 0x3C) = func_0039A738(item) == 1;
+        }
+        break;
+    case 5:
+        if (IsId_1B8C38(item, D_00464768)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462B88));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_004647B8), **(int**)(self + 0x6D0), 0, 10, 0x10);
+            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_004647D0)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_00462D00), *(int*)(*(char**)(self + 0x6D0) + 4), 1, 11, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_004647E0)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004647F8));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_00464810), *(int*)(*(char**)(self + 0x6D0) + 8), 1, 12, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_00464828)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00464838));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_00462CD0), *(int*)(*(char**)(self + 0x6D0) + 0xC), 0, 13, 0x32);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_004647A8)) {
+            if (func_001BA110(self)) {
+                if (*(int*)(self + 0x6EC) != 0) {
+                    func_001A8A40(self, func_001BA3E0(cMemMan_alloc(0x6E0, D_00464848, 0, 0), *(int*)(self + 0x10)));
+                } else {
+                    func_001BA280(self);
+                }
+            }
+        }
+        break;
+    case 6:
+        if (*(int*)(self + 0x6EC) != 0) {
+            char* st = (char*)func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+            *(int*)(st + 0x18) = 0x832;
+            func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, st);
+        } else {
+            func_001BA218(self);
+            func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)(self + 0x10)));
+        }
+        break;
+    case 13: {
+        func_001B9820(self);
+        char* obj = *(char**)(self + 0x6F0);
+        if (obj != 0) {
+            sVEntry_1B8C38* vt = *(sVEntry_1B8C38**)(obj + 8);
+            vt[8].fn(obj + vt[8].delta, !func_001B9558(self));
+        }
+        break;
+    }
+    case 8: {
+        char* st = (char*)func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), *(int*)(self + 0x10));
+        if (*(int*)(self + 0x6EC) != 0) {
+            *(int*)(st + 0x18) = 0x14;
+        } else {
+            *(int*)(st + 0x18) = 0x15;
+        }
+        func_001A8A40(self, st);
+        break;
+    }
+    case 14:
+        break;
+    default:
+        func_001A8918(self, (int)item, msg);
+        break;
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
