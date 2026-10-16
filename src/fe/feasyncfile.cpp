@@ -12837,7 +12837,58 @@ extern "C" void func_001BC818(void* self, void* a1, int kind)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001BC990);
+//100%
+extern "C" void func_001BC990(void* self_, void* a1, int kind_)
+{
+    char* self = (char*)self_;
+    unsigned int kind = kind_;
+    switch (kind) {
+    case 15:
+    case 16:
+    case 20:
+        *(int*)(self + 0x6D4) = 0;
+        func_001A97B8_AED8(self, a1, kind);
+        break;
+    case 17:
+        *(int*)(self + 0x6D4) = 1;
+        func_001A97B8_AED8(self, a1, kind);
+        break;
+    case 22:
+        func_001A97B8_AED8(self, a1, kind);
+        if (*(int*)(self + 0x6D4) != 0) {
+            char* p = (char*)func_001A9C50(self);
+            char* sub;
+            *(int*)(p + 0xBC) = 2;
+            sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462D80);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)(p + 0x150) = 0x81F;
+            *(int*)(p + 0x168) = 0;
+            *(int*)(p + 0x164) = 0;
+            func_001A9BC0(self, p);
+        } else {
+            char* p = (char*)func_001A9C50(self);
+            char* sub;
+            *(int*)(p + 0xBC) = 1;
+            sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)(p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, (*(const char***)(self + 0x6D8))[0]);
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (*(const char***)(self + 0x6D8))[1]);
+            func_0025C610(D_004A3028);
+        }
+        *(int*)(self + 0x6D4) = 0;
+        break;
+    default:
+        func_001A97B8_AED8(self, a1, kind);
+        break;
+    }
+}
 
 //100%
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
