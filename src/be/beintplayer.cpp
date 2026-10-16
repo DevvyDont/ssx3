@@ -552,7 +552,67 @@ extern "C" void func_001468B0(void* self, int index, int c, int kind, int flag, 
 
 INCLUDE_ASM("be/beintplayer", func_00146A70);
 
-INCLUDE_ASM("be/beintplayer", func_00146C10);
+//100%
+struct sProfBits6C10
+{
+    unsigned long low : 14;
+    unsigned long b14 : 1;
+    unsigned long b15 : 1;
+    unsigned long b16 : 1;
+    unsigned long b17 : 1;
+    unsigned long b18 : 1;
+    unsigned long b19 : 1;
+    unsigned long rest : 44;
+};
+
+extern "C" void func_00146C10(void* self, int index, int c, int kind, int value)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    switch (kind) {
+    case 6:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b14 = value;
+        break;
+    }
+    case 7:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b15 = value;
+        break;
+    }
+    case 8:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b16 = value;
+        break;
+    }
+    case 9:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b17 = value;
+        break;
+    }
+    case 10:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b18 = value;
+        break;
+    }
+    case 11:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b19 = value;
+        break;
+    }
+    }
+}
 
 //100%
 int cBELibrary_getProfileIndex(int);
