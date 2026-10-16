@@ -1430,7 +1430,44 @@ extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
     return 0;
 }
 
-INCLUDE_ASM("seg/seg_1218", func_001043F8);
+//100%
+extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
+{
+    int clip = 0xA5;
+    switch (*(int*)anim) {
+    case 0x129: clip = 0xA5; break;
+    case 0x12A: clip = 0xAB; break;
+    case 0x12B: clip = 0xA8; break;
+    case 0x12C: clip = 0xAC; break;
+    case 0x12D: clip = 0xA6; break;
+    case 0x12E: clip = 0xAA; break;
+    case 0x12F: clip = 0xA7; break;
+    case 0x130: clip = 0xA9; break;
+    }
+    func_00313C50(anim, 1, *(int*)(D_004A3E7C + clip * 4 + 0x1030));
+    func_00313D40(anim, 1, 1);
+    char* p = *(char**)(self + 0x60);
+    float b = __builtin_fabsf(*(float*)(p + 0x298));
+    float a = __builtin_fabsf(*(float*)(p + 0x28C));
+    float m = (a < b) ? b : a;
+    float one = 1.0f;
+    float r = 0.0f;
+    if (0.0f <= m) {
+        r = m <? one;
+    }
+    m = r;
+    float w = m * 0.75f + 0.25f;
+    func_00313D28(anim, 0, one - w);
+    func_00313D28(anim, 1, w);
+    func_00313CF0(anim, 0, m * *(float*)(anim + 0x10));
+    float t = dt * 0.01666666753590107f;
+    func_003135B0(anim, 1, t);
+    if (func_00313800(anim, t)) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

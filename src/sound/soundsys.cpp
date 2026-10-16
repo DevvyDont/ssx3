@@ -4393,7 +4393,68 @@ extern "C" int func_0029F378(void* self, void* obj)
     }
 }
 
-INCLUDE_ASM("sound/soundsys", func_0029F3F8);
+//100%
+extern "C" void* func_0028B1D8();
+extern "C" int func_0029F378(void* self, void* obj);
+extern "C" void func_0028BC58(void* p, int a1, char* msg, int a3);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_004A36E0[];
+extern char D_00482E88[];
+extern char D_00482E98[];
+extern char D_00482EA8[];
+extern char D_00482EB8[];
+extern char D_00482EC8[];
+extern char D_00482ED8[];
+extern char D_00482EE8[];
+extern char D_00482EF8[];
+extern char D_00482F08[];
+extern char D_00482F18[];
+extern char D_00482F28[];
+extern char D_00482F38[];
+extern char D_00482F48[];
+
+extern "C" void func_0029F3F8(char* self)
+{
+    char buf[0x40];
+    switch (func_0029F378(self, *(void**)((char*)func_0028B1D8() + 0x28))) {
+    case 6:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482E98);
+        break;
+    case 3:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482EA8);
+        break;
+    case 0:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482EB8);
+        break;
+    case 8:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482EC8);
+        break;
+    case 1:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482ED8);
+        break;
+    case 4:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482EE8);
+        break;
+    case 9:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482EF8);
+        break;
+    case 7:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482F08);
+        break;
+    case 5:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482F18);
+        break;
+    case 2:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482F28);
+        break;
+    default:
+        sprintf(buf, D_004A36E0, D_00482E88, D_00482F38);
+        break;
+    }
+    func_0028BC58(**(void***)(self + 0x118), 0xE, buf, 0);
+    sprintf(buf, D_004A36E0, D_00482E88, D_00482F48);
+    func_0028BC58(**(void***)(self + 0x118), 0xF, buf, 0);
+}
 
 //100%
 extern "C" void func_0028BCE8(void* self, int i);

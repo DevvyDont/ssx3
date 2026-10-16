@@ -512,7 +512,90 @@ extern "C" void func_0022D668(char* self, int arg)
     }
 }
 
-INCLUDE_ASM("main/game", func_0022D6C8);
+//100%
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void cBE_setState(int state);
+extern "C" void func_0012B180(void* riders);
+extern "C" void cBENewRaceInterface_setGameMode(void* self, int mode);
+extern "C" void cBENewRaceInterface_setGameEvent(void* self, int evt);
+extern "C" void cGameModeMan_initGameMode(void* self, int mode);
+extern "C" void func_00231250(void* gm, int state, int a, int b);
+extern void* D_004A28A8;
+
+// View of sGameSettings; bound to the same symbol by asm label.
+struct sGameSettings_D6C8 {
+    char pad_0x00[0x48];
+    signed char eventKind; // 0x48: 4 = free ride
+    signed char gameType;  // 0x49: 0 = Conquer the Mountain
+    signed char mode;      // 0x4A
+};
+extern sGameSettings_D6C8 D_00535BC8_D6C8 __asm__("D_00535BC8");
+
+struct sVE_D6C8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0022D6C8(char* self, int mode)
+{
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    int skip = 0;
+    if (D_00535BC8_D6C8.gameType != 0) {
+        skip = 1;
+    } else {
+        int notFree = D_00535BC8_D6C8.eventKind != 4;
+        if (notFree || (unsigned int)(*(int*)(self + 0x1BC) - 0xE) < 3 || mode == 1) {
+            skip = 1;
+        }
+    }
+    if (skip) {
+        return;
+    }
+    cBE_setState(0);
+    char* game = *(char**)((char*)D_004A28A8 + 0x84);
+    if (*(int*)(game + 0x214) != 4) {
+        return;
+    }
+    func_0012B180(*(void**)(game + 0xC));
+    char* g = (char*)D_004A28A8;
+    *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0xC) = 0;
+    if ((unsigned int)(*(int*)(*(char**)(*(char**)(g + 0x84) + 0x78) + 0x1BC) - 0xE) < 3) {
+        cBENewRaceInterface_setGameMode(iface, 4);
+        cBENewRaceInterface_setGameEvent(iface, 0xC);
+    } else {
+        switch (mode) {
+        case 2:
+            cBENewRaceInterface_setGameMode(iface, 0);
+            cBENewRaceInterface_setGameEvent(iface, 0);
+            break;
+        case 3:
+            cBENewRaceInterface_setGameMode(iface, 1);
+            cBENewRaceInterface_setGameEvent(iface, 1);
+            break;
+        case 4:
+            cBENewRaceInterface_setGameMode(iface, 2);
+            cBENewRaceInterface_setGameEvent(iface, 3);
+            break;
+        case 5:
+            cBENewRaceInterface_setGameMode(iface, 3);
+            cBENewRaceInterface_setGameEvent(iface, 2);
+            break;
+        case 6:
+            cBENewRaceInterface_setGameMode(iface, 5);
+            cBENewRaceInterface_setGameEvent(iface, 4);
+            break;
+        case 0:
+        case 1:
+            break;
+        }
+    }
+    sVE_D6C8* vt = *(sVE_D6C8**)(iface + 0xC);
+    vt[1].fn(iface + vt[1].delta);
+    cGameModeMan_initGameMode(*(void**)((char*)D_004A28A8 + 0xC0), D_00535BC8_D6C8.mode);
+    func_00231250(*(void**)(self + 0x1B0), 1, 1, 0);
+}
 
 INCLUDE_ASM("main/game", func_0022D8D8);
 

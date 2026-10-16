@@ -473,7 +473,69 @@ extern "C" float func_00115B08(void *arg0) {
     return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(arg0) + (0x86C)))) * 90.0f) - 90.0f;
 }
 
-INCLUDE_ASM("seg/seg_14B10", func_00115B58);
+//100%
+extern "C" int func_00311AE8(void*, int);
+extern "C" int func_001298C8();
+extern "C" int cRiderAnimBase_play_5B58(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+extern "C" void* func_0028B180_5B58() __asm__("func_0028B180");
+extern "C" void func_0029FF80(void* snd, void* self, int a);
+extern "C" int func_0011FEE8_5B58(void*) __asm__("func_0011FEE8__FPv");
+
+extern "C" void func_00115B58(char* self)
+{
+    if (*(int*)(self + 0x358) == 0) {
+        return;
+    }
+    if (func_00311AE8(*(void**)(self + 0x784), 2) == 5) {
+        return;
+    }
+    if (func_00311AE8(*(void**)(self + 0x784), 1) != 0) {
+        return;
+    }
+    if (func_00311AE8(*(void**)(self + 0x784), 2) == 10) {
+        return;
+    }
+    int dt = func_001298C8() - *(int*)(self + 0x354);
+    if (dt < 0xB4) {
+        if (dt < 0) {
+            return;
+        }
+        switch (*(int*)(self + 0x358)) {
+        case 1:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play_5B58(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            func_0029FF80(func_0028B180_5B58(), self, 0);
+            break;
+        case 2:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play_5B58(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            func_0029FF80(func_0028B180_5B58(), self, 1);
+            break;
+        case 3:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play_5B58(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            break;
+        case 4:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play_5B58(*(void**)(self + 0x784), 0x13A, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            break;
+        case 5:
+        case 6:
+            if (__builtin_fabsf(*(float*)(self + 0x1FC)) < 0.75f) {
+                if (func_0011FEE8_5B58(self) == 0) {
+                    cRiderAnimBase_play_5B58(*(void**)(self + 0x784), 0x13E, 0, -1.0f);
+                }
+            }
+            break;
+        }
+    }
+    *(int*)(self + 0x358) = 0;
+    *(int*)(self + 0x354) = -1;
+}
 
 INCLUDE_ASM("seg/seg_14B10", func_00115D48);
 

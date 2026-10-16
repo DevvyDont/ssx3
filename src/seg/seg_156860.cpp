@@ -51,7 +51,80 @@ extern "C" char *cCommSystem_getSignature(void) {
     return D_00481370;
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00255A20);
+//100%
+extern "C" void func_003F42A0(void);
+extern "C" int func_003F3CC0_5A20(int tag, int a, int b) __asm__("func_003F3CC0");
+extern "C" int func_003F3C50(void* buf, int a);
+extern "C" void func_00255FE8(void* self, int tag);
+extern "C" void func_00256038(void* self, int* out);
+extern char D_00536810[];
+
+struct sVE_5A20 { short delta; short index; void (*fn)(void*); };
+
+extern "C" void func_00255A20(char* self)
+{
+    func_003F42A0();
+    switch (*(int*)(self + 0x20)) {
+    case 0:
+    case 1:
+    case 6:
+        break;
+    case 2:
+        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) == 0) {
+            func_003F3C50(D_00536810 + (*(int*)(self + 0x1C) << 8), 0);
+            *(int*)(self + 0x20) = 3;
+        }
+        break;
+    case 3:
+        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) && func_003F3CC0_5A20(0x686F7374, 0, 0)) {
+            *(int*)(self + 0x20) = 4;
+            *(int*)(self + 0x24) = 0x708;
+            *(int*)(self + 0x30) = func_003F3CC0_5A20(0x74797065, 0, 0);
+            int r = func_003F3CC0_5A20(0x62626E64, 0, 0);
+            if (r == 1) {
+                *(int*)(self + 0x2C) = r;
+            }
+        }
+        {
+            int c = func_003F3CC0_5A20(0x636F6E6E, 0, 0);
+            if ((c >> 24) == 0x2D) {
+                func_00255FE8(self, c);
+                *(int*)(self + 0x24) = 0;
+            }
+        }
+        break;
+    case 4: {
+        int out;
+        func_00256038(self, &out);
+        if (out != 0) {
+            *(int*)(self + 0x24) = 0;
+            *(int*)(self + 0x20) = 5;
+        }
+        break;
+    }
+    case 5: {
+        char** objs = (char**)self;
+        for (int i = 0; i >= 0; i--) {
+            char* o = *objs;
+            if (o != 0) {
+                sVE_5A20* e = &(*(sVE_5A20**)(o + 8))[3];
+                e->fn(o + e->delta);
+            }
+            objs++;
+        }
+        break;
+    }
+    }
+    int t = *(int*)(self + 0x24);
+    if (t > 0) {
+        t--;
+        *(int*)(self + 0x24) = t;
+        if (t <= 0) {
+            func_00255FE8(self, 0x74696D65);
+            *(int*)(self + 0x24) = 0;
+        }
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1132,7 +1205,83 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
     return 1;
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00257F98);
+//100%
+extern "C" int func_00257BD8_7F98(void* self, int ch, void* dst, int n) __asm__("func_00257BD8");
+extern "C" void func_002588A8_7F98(void* self) __asm__("func_002588A8");
+extern "C" void func_00258870(void*, int, int);
+extern void* D_004A28A8;
+
+struct sMsg_7F98 {
+    unsigned char type;
+    char pad[3];
+    int a;
+    int b;
+};
+
+struct sConn_7F98 {
+    char pad[0x500];
+    int hist[60]; // 0x500
+};
+
+extern "C" void func_00257F98(char* self)
+{
+    sMsg_7F98 msg;
+    while (func_00257BD8_7F98(self, 3, &msg, 0xC)) {
+        switch (msg.type) {
+        case 0:
+            if (*(int*)(self + 0x7C) == 0) {
+                func_00258870(self, 0xE4C, 1);
+            } else {
+                *(int*)(self + 0x3F8) = 1;
+            }
+            *(int*)(self + 0x78) = 1;
+            *(int*)(self + 0x5C) = 0;
+            (*(int*)(self + 0x50))++;
+            *(int*)(self + 0x3FC) = 0;
+            break;
+        case 1:
+            *(int*)(self + 0x5C) = 0;
+            *(int*)(self + 0x78) = 0;
+            if (*(int*)(self + 0x74) != 0 && *(int*)(self + 0x64) > 0) {
+                *(int*)(self + 0x64) = 0x4B0;
+            }
+            *(int*)(self + 0x3F8) = 0;
+            *(int*)(self + 0x60) = 0;
+            *(int*)(self + 0x84) = 0;
+            if (*(int*)(self + 0x7C) == 0) {
+                func_00258870(self, 0x708, 0);
+            } else {
+                func_002588A8_7F98(self);
+            }
+            break;
+        case 3:
+            *(int*)(self + 0x3F4) = 1;
+            break;
+        case 5:
+            *(int*)(self + 0x88) = 1;
+            if (*(int*)(self + 0x3C) == 0) {
+                *(int*)(self + 0x3C) = *(int*)((char*)D_004A28A8 + 0x18) / *(int*)((char*)D_004A28A8 + 0x10);
+            }
+            *(int*)(self + 0x78) = 0;
+            *(int*)self = 0;
+            *(int*)(self + 0x14) = 1;
+            if (*(int*)(self + 0x4) == 0 && *(int*)(self + 0x70) < 15) {
+                *(int*)(self + 0x8C) = 1;
+            }
+            break;
+        case 2:
+            (*(int*)(self + 0x58))++;
+            break;
+        case 4: {
+            int t = msg.a;
+            *(int*)(self + 0x404) = 1;
+            *(int*)(self + 0x40C) = t;
+            ((sConn_7F98*)self)->hist[(t / 60) % 60] = msg.b;
+            break;
+        }
+        }
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
