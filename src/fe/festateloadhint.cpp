@@ -401,7 +401,98 @@ extern "C" int func_00246268(void* self, int a1, int a2)
     return a2 == 6 ? 0x101 : 0;
 }
 
-INCLUDE_ASM("fe/festateloadhint", func_00246278);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" int func_00144C98(void* iface);
+extern "C" int func_00144BF0(void* iface);
+extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
+extern "C" void func_003A0E90(void* obj, char* text);
+extern char* D_004A28A8;
+extern char D_004A2BD8[];
+extern char D_0047BA48[];
+extern char D_0047BA58[];
+extern char D_0047BA68[];
+extern char D_0047BA78[];
+extern char D_0047BA88[];
+extern char D_0047BAA0[];
+extern char D_0047BAB0[];
+extern char D_0047BAC0[];
+extern char D_0047BAD0[];
+extern signed char D_00535BC8_6278[] __asm__("D_00535BC8");
+
+static inline int wHash_6278(char* w) { return *(int*)(w + 0x38); }
+
+struct sVEnt_6278 { short delta; short index; void* (*fn)(void*, int); };
+struct sVEntW_6278 { short delta; short index; void (*fn)(void*, int); };
+
+static inline void Show_6278(char* w)
+{
+    sVEntW_6278* vt = *(sVEntW_6278**)(w + 8);
+    vt[9].fn(w + vt[9].delta, 1);
+}
+
+extern "C" void func_00246278(void* self, void* widget)
+{
+    char* w = (char*)widget;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (wHash_6278(w) == GetHashValue32(D_0047BA48)) {
+        char buf[0xC8];
+        func_00416210(buf, 0, 0xC8);
+        char* fmt = D_004A2BD8;
+        switch (func_00144C98(iface)) {
+        case 0: {
+            char* o = *(char**)(D_004A28A8 + 0x8C);
+            sVEnt_6278* vt = *(sVEnt_6278**)(o + 4);
+            void* text = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BA58));
+            func_002C27C0(buf, fmt, text, func_00144BF0(iface));
+            break;
+        }
+        case 1: {
+            char* o = *(char**)(D_004A28A8 + 0x8C);
+            sVEnt_6278* vt = *(sVEnt_6278**)(o + 4);
+            void* text = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BA68));
+            func_002C27C0(buf, fmt, text, func_00144BF0(iface));
+            break;
+        }
+        case 2: {
+            char* o = *(char**)(D_004A28A8 + 0x8C);
+            sVEnt_6278* vt = *(sVEnt_6278**)(o + 4);
+            void* text = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BA78));
+            func_002C27C0(buf, fmt, text, func_00144BF0(iface));
+            break;
+        }
+        }
+        func_003A0E90(widget, buf);
+        return;
+    }
+    switch (D_00535BC8_6278[0x48]) {
+    case 0:
+        if (wHash_6278(w) == GetHashValue32(D_0047BA88)) Show_6278(w);
+        break;
+    case 1:
+        if (wHash_6278(w) == GetHashValue32(D_0047BAA0)) Show_6278(w);
+        break;
+    case 2:
+        if (wHash_6278(w) == GetHashValue32(D_0047BAB0)) Show_6278(w);
+        break;
+    case 3:
+        if (wHash_6278(w) == GetHashValue32(D_0047BAC0)) Show_6278(w);
+        break;
+    case 4:
+        if (wHash_6278(w) == GetHashValue32(D_0047BA88)) Show_6278(w);
+        break;
+    case 5:
+        if (wHash_6278(w) == GetHashValue32(D_0047BAD0)) Show_6278(w);
+        break;
+    case 6:
+        if (wHash_6278(w) == GetHashValue32(D_0047BAD0)) Show_6278(w);
+        break;
+    }
+}
 
 INCLUDE_ASM("fe/festateloadhint", func_002464E8);
 
