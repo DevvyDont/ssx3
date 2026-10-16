@@ -42,4 +42,94 @@ extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
     cBERewardInterface_getEarningsMedal(r, arg0, arg1, arg2);
 }
 
-INCLUDE_ASM("seg/seg_CF758", func_001CEEA0);
+//100%
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" int func_00146D98(void* self, int index);
+extern "C" int func_00150928(void* self, int a, int b);
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+int cBELibrary_getRiderIndex(int);
+extern void* D_0046A3C8[];
+struct sVE_CEEA0
+{
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a4, int a5)
+{
+    char* s = (char*)self;
+    func_0039E2A0(self, engine);
+    *(int*)(s + 0xC) = 0x2F;
+    *(void***)(s + 0x8) = D_0046A3C8;
+    *(signed char*)(s + 0x44) = idx;
+    *(unsigned char*)(s + 0x15) = func_001A1CD0(**(void***)(s + 0x10), idx);
+    *(int*)(s + 0x4C) = a5;
+    *(int*)(s + 0x58) = 4;
+    *(int*)(s + 0x5C) = 8;
+    *(int*)(s + 0x8EC) = -2;
+    *(int*)(s + 0x48) = 0;
+    *(int*)(s + 0x64) = 0;
+    *(int*)(s + 0x8F4) = 0;
+    *(int*)(s + 0x8F8) = 0;
+    *(int*)(s + 0x70) = 0;
+    *(int*)(s + 0x74) = 0;
+    *(int*)(s + 0x8FC) = 0;
+    *(int*)(s + 0x900) = 0;
+    *(int*)(s + 0x904) = 0;
+    *(int*)(s + 0x908) = 0;
+    *(int*)(s + 0x90C) = 0;
+    *(int*)(s + 0x910) = 0;
+    *(int*)(s + 0x914) = 0;
+    *(int*)(s + 0x918) = 0;
+    *(int*)(s + 0x91C) = 0;
+    *(int*)(s + 0x920) = 0;
+    *(int*)(s + 0x68) = 0;
+    *(int*)(s + 0x6C) = 0;
+    *(int*)(s + 0x78) = 0;
+    int(*ta)[8] = (int(*)[8])(s + 0x924);
+    int(*tb)[8] = (int(*)[8])(s + 0x9A4);
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            ta[i][j] = 0;
+            tb[i][j] = 0;
+        }
+    }
+    char* pi = (char*)cBE_getInterface_ED90(cBE_getBE(), 1);
+    *(int*)(s + 0x50) = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)(s + 0x44));
+    if (a4 != 0)
+    {
+        switch (func_00146D98(pi, cBELibrary_getRiderIndex(*(signed char*)(s + 0x44))))
+        {
+        case 0x11:
+            *(int*)(s + 0x8F0) = 1;
+            break;
+        case 0x12:
+            *(int*)(s + 0x8F0) = 1;
+            break;
+        case 0x13:
+            *(int*)(s + 0x8F0) = 2;
+            break;
+        case 0x14:
+            *(int*)(s + 0x8F0) = 2;
+            break;
+        case 0x15:
+            *(int*)(s + 0x8F0) = 3;
+            break;
+        default:
+            *(int*)(s + 0x8F0) = 1;
+            break;
+        }
+    }
+    else
+    {
+        *(int*)(s + 0x8F0) = -1;
+    }
+    sVE_CEEA0* e = (sVE_CEEA0*)(*(char**)(pi + 0xC) + 0x10);
+    e->fn(pi + e->delta);
+    *(int*)(s + 0x54) = func_00150928(cBE_getInterface_ED90(cBE_getBE(), 0xB), *(signed char*)(s + 0x44), *(int*)(s + 0x50));
+    return self;
+}
