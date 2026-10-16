@@ -3261,7 +3261,45 @@ extern "C" void func_00241DC8(void* self, void* dst, int n)
     func_002C26D0(dst, buf, n + 1);
 }
 
-INCLUDE_ASM("movie/movieplayer", func_00241E18);
+//100%
+extern char D_004A29E8[];
+extern char D_0047C3B8[];
+extern char D_0047C3D0[];
+extern char D_0047C3E8[];
+extern char D_0047C408[];
+extern char D_0047C420[];
+
+extern "C" void func_00241E18(void* self, void* dst)
+{
+    char buf[0x200];
+    char buf2[0x200];
+    func_002C2540(dst, D_004A29E8);
+    func_00241DC8(self, buf, *(int*)((char*)self + 0x428));
+    switch (*(int*)((char*)self + 0x130)) {
+    case 0: case 2: case 3: case 6: case 7: case 13: case 29:
+    case 49: case 50: case 51: case 52: case 53: case 54:
+        func_002C26D0_v(dst, Loc_241710(D_0047C3B8), buf);
+        break;
+    case 4:
+        func_00241DC8(self, buf2, *(int*)((char*)self + 0x428));
+        func_002C26D0_v(dst, Loc_241710(D_0047C360), buf2);
+        break;
+    case 10: case 11: case 39: case 40:
+        func_002C26D0_v(dst, Loc_241710(D_0047C3D0), buf);
+        break;
+    case 15: case 16: case 17: case 18:
+        func_002C26D0_v(dst, Loc_241710(D_0047C3E8), buf);
+        break;
+    case 31: case 32: case 33: case 34:
+        func_002C26D0_v(dst, Loc_241710(D_0047C408), buf);
+        break;
+    case 25: case 26: case 44:
+        func_002C2508(dst, Loc_241710(D_0047C420));
+        break;
+    case 55:
+        break;
+    }
+}
 
 extern "C" void* func_002420C8(void*, int);
 
