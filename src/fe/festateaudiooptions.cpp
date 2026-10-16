@@ -2,7 +2,192 @@
 
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetCreate);
 
-INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetEvent);
+//100%
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3);
+extern "C" void cUIStateStack_pushSpecial(void* self, void* st, int a2, int a3);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* func_0039F190(void* list, int count);
+extern "C" void func_001587F8(void* self, int a1, int a2, int value);
+extern "C" void func_0028BF78(void* self, int state);
+extern "C" void* func_0028B180();
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern void* D_004A28A8;
+extern char D_00460470[];
+extern char D_00460488[];
+extern char D_00460498[];
+extern char D_004604B0[];
+extern char D_004604C0[];
+extern char D_004604E0[];
+extern char D_004604F8[];
+extern char D_00460510[];
+extern char D_00460528[];
+extern char D_00460540[];
+
+struct sVEntry_196700 {
+    short delta;
+    short index;
+    void* (*fn)(void*, ...);
+};
+struct sVEntryF_196700 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void Apply_196700(char* self, char* menu)
+{
+    struct sArr { char* it[1]; };
+    sArr* arr = (sArr*)(self + 0x4C);
+    int n = -1;
+    int v = *(int*)(self + 0x60);
+    char* it = arr->it[*(int*)(self + 0x78)];
+    *(int*)(it + 0x78) = n;
+    *(int*)(it + 0x7C) = v;
+    int sel = *(int*)(menu + 0x18);
+    int w = *(int*)(self + 0x5C);
+    *(int*)(self + 0x78) = sel;
+    char* it2 = arr->it[sel];
+    *(int*)(it2 + 0x78) = n;
+    *(int*)(it2 + 0x7C) = w;
+}
+
+static inline void Notify_196700(char* self)
+{
+    func_001587F8(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), *(int*)(self + 0x70), *(int*)(self + 0x78));
+    func_0028BF78(func_0028B180(), *(int*)(self + 0x78));
+}
+
+static inline void SetText_196700(cUIText* text, char* id)
+{
+    cUIText_setUnicodeStringByID(text, GetHashValue32(id));
+}
+
+static inline void SetFlag_196700(char* obj, int v)
+{
+    sVEntryF_196700* vt = *(sVEntryF_196700**)(obj + 8);
+    vt[6].fn(obj + vt[6].delta, v);
+}
+
+extern "C" void cFEStateAudioOptions_onWidgetEvent(char* self, char* menu, unsigned int msg)
+{
+    char* st;
+    if (menu == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5: {
+        int sel = *(int*)(menu + 0x18);
+        if (sel == 0 || sel == 2) {
+            Apply_196700(self, menu);
+            Notify_196700(self);
+            return;
+        } else if (sel == 1 || sel == 3) {
+            if (*(int*)(self + 0x7C) != 0) {
+                Apply_196700(self, menu);
+                Notify_196700(self);
+            }
+            return;
+        }
+        if (sel != 4) {
+            return;
+        }
+        if (*(int*)(self + 0x74) == 0 && *(int*)(self + 0x7C) == 0) {
+            return;
+        }
+        st = (char*)func_00196B90(cMemMan_alloc(0x210, D_00460470, 0, 0), *(int*)(self + 0x10), *(signed char*)(self + 0x44), *(int*)(self + 0x74));
+        if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+            *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
+            return;
+        }
+        func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+        return;
+    }
+    case 6: {
+        Notify_196700(self);
+        if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+            func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+            return;
+        }
+        char* obj = **(char***)(self + 0x10);
+        sVEntry_196700* vt = *(sVEntry_196700**)(obj + 4);
+        char* st2 = (char*)vt[5].fn(obj + vt[5].delta, self, *(int*)(menu + 0x18));
+        if (st2 != 0) {
+            func_0039F400(*(char**)(self + 0x10) + 0x18, st2);
+        }
+        return;
+    }
+    case 1: {
+        cUIText* text = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00460488));
+        if (text == 0) {
+            return;
+        }
+        int a = 0;
+        int b = 0;
+        int c = 0;
+        switch (*(unsigned int*)(menu + 0x18)) {
+        case 0:
+            SetText_196700(text, D_00460498);
+            break;
+        case 2:
+            SetText_196700(text, D_004604B0);
+            break;
+        case 1:
+            if (*(int*)(self + 0x7C) == 0) {
+                c = *(int*)((char*)D_004A28A8 + 0x84) != 0;
+                if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+                    SetText_196700(text, D_004604C0);
+                } else if (*(int*)(self + 0x74) != 0) {
+                    SetText_196700(text, D_004604E0);
+                } else {
+                    SetText_196700(text, D_004604F8);
+                }
+            } else {
+                SetText_196700(text, D_00460510);
+            }
+            break;
+        case 3:
+            if (*(int*)(self + 0x7C) == 0) {
+                a = *(int*)((char*)D_004A28A8 + 0x84) != 0;
+                if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+                    SetText_196700(text, D_004604C0);
+                } else if (*(int*)(self + 0x74) != 0) {
+                    SetText_196700(text, D_004604E0);
+                } else {
+                    SetText_196700(text, D_004604F8);
+                }
+            } else {
+                SetText_196700(text, D_00460528);
+            }
+            break;
+        case 4:
+            if (*(int*)(self + 0x74) == 0 && *(int*)(self + 0x7C) == 0) {
+                b = *(int*)((char*)D_004A28A8 + 0x84) != 0;
+                if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+                    SetText_196700(text, D_004604C0);
+                } else {
+                    SetText_196700(text, D_004604F8);
+                }
+            } else {
+                SetText_196700(text, D_00460540);
+            }
+            break;
+        }
+        if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+            SetFlag_196700(*(char**)(self + 0x64), b);
+            SetFlag_196700(*(char**)(self + 0x68), c);
+            SetFlag_196700(*(char**)(self + 0x6C), a);
+        }
+        return;
+    }
+    }
+}
 
 //100%
 extern "C" int func_00196B08(void* self, int a1, int a2, int a3)
