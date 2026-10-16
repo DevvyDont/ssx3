@@ -16173,7 +16173,93 @@ extern "C" void func_001C1E08(void* self, void* obj)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C1EA8);
+//100%
+struct sVE_1C1EA8 {
+    short delta;
+    short index;
+    void (*fn)(void*, float*);
+};
+struct sState_1C1EA8 {
+    char pad_0x0[0x1C];
+    unsigned lo : 8;
+    unsigned mode : 6;
+    unsigned hi : 18;
+};
+extern "C" void* func_001C5018(void* mem, int a1);
+extern "C" void* func_001C20F8(void* mem, int a1);
+extern "C" void* func_001C0418(void* mem, int a1);
+extern "C" void* func_001887A0(void* self, void* engine, int reset);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
+extern char D_00465AD0[];
+extern char D_00465AE0[];
+extern char D_00464860[];
+extern char D_0045D698[];
+
+extern "C" void func_001C1EA8(void* self, void* item, int id)
+{
+    if (item == 0) {
+        return;
+    }
+    switch (id) {
+    case 5:
+        switch (*(int*)((char*)item + 0x18)) {
+        case 0:
+            func_001A8A40(self, func_001C5018(cMemMan_alloc(0x6D0, D_00465AD0, 0, 0), *(int*)((char*)self + 0x10)));
+            break;
+        case 1:
+            func_001A8A40(self, func_001C20F8(cMemMan_alloc(0x6FC, D_00465AE0, 0, 0), *(int*)((char*)self + 0x10)));
+            break;
+        case 2: {
+            char* obj = (char*)func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), *(int*)((char*)self + 0x10));
+            *(int*)(obj + 0x18) = 0x13;
+            func_001A8A40(self, obj);
+            break;
+        }
+        case 3:
+            if ((*(int*)((char*)self + 0x1C) & 6) == 0) {
+                sState_1C1EA8* st = (sState_1C1EA8*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0),
+                                                                  *(void**)((char*)self + 0x10), 0);
+                st->mode = 1;
+                cUIStateStack_pushSpecial(*(char**)((char*)self + 0x10) + 0x18, st, 0, 0);
+            }
+            break;
+        }
+        break;
+    case 6:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
+        break;
+    case 1: {
+        float c[4];
+        sVE_1C1EA8* vt = *(sVE_1C1EA8**)((char*)item + 0x8);
+        void* obj = (char*)item + vt[11].delta;
+        c[0] = 1.0f;
+        c[1] = 1.0f;
+        c[2] = 1.0f;
+        c[3] = 1.0f;
+        vt[11].fn(obj, c);
+        break;
+    }
+    case 2: {
+        float c[4];
+        sVE_1C1EA8* vt = *(sVE_1C1EA8**)((char*)item + 0x8);
+        void* obj = (char*)item + vt[11].delta;
+        c[0] = 1.0f;
+        c[1] = 0.0f;
+        c[2] = 0.0f;
+        c[3] = 0.0f;
+        vt[11].fn(obj, c);
+        break;
+    }
+    case 8:
+        if ((*(int*)((char*)self + 0x1C) & 6) == 0) {
+            func_001A9B58(self);
+        }
+        break;
+    default:
+        func_001A8918(self, (int)item, id);
+        break;
+    }
+}
 
 //100%
 extern void* D_0046A908[];
