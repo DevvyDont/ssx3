@@ -2761,7 +2761,125 @@ extern "C" void func_0012D9D8(void* self)
     }
 }
 
-INCLUDE_ASM("ai/ai", func_0012DA88);
+//100%
+// Picks the mirrored (goofy) or regular variant of the current trick anim.
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+int func_00312AA0(void* self, int i);
+extern "C" float func_0012E528(void* self);
+
+extern "C" void func_0012DA88(void* self_)
+{
+    char* self = (char*)self_;
+    int mirror = *(int*)self == 1;
+    int cur = func_00312AA0(*(void**)(*(char**)(self + 0x80) + 0x784), 2);
+    int next = cur;
+    switch (cur) {
+    case 0x148:
+        next = mirror ? 0x175 : 0x16A;
+        break;
+    case 0x149:
+        next = mirror ? 0x176 : 0x16B;
+        break;
+    case 0x14A:
+        next = mirror ? 0x177 : 0x16C;
+        break;
+    case 0x14B:
+        next = mirror ? 0x17B : 0x170;
+        break;
+    case 0x14C:
+        next = mirror ? 0x179 : 0x16E;
+        break;
+    case 0x14D:
+        next = mirror ? 0x17A : 0x16F;
+        break;
+    case 0x14E:
+        next = mirror ? 0x17D : 0x172;
+        break;
+    case 0x14F:
+        next = mirror ? 0x17E : 0x173;
+        break;
+    case 0x150:
+        next = mirror ? 0x178 : 0x16D;
+        break;
+    case 0x151:
+        next = mirror ? 0x17C : 0x171;
+        break;
+    case 0x152:
+        next = mirror ? 0x175 : 0x16A;
+        break;
+    case 0x153:
+        next = mirror ? 0x176 : 0x16B;
+        break;
+    case 0x154:
+        next = mirror ? 0x177 : 0x16C;
+        break;
+    case 0x155:
+        next = mirror ? 0x17B : 0x170;
+        break;
+    case 0x156:
+        next = mirror ? 0x179 : 0x16E;
+        break;
+    case 0x157:
+        next = mirror ? 0x17E : 0x173;
+        break;
+    case 0x158:
+        next = mirror ? 0x17C : 0x171;
+        break;
+    case 0x159:
+        next = mirror ? 0x178 : 0x16D;
+        break;
+    case 0x15A:
+        next = mirror ? 0x17A : 0x16F;
+        break;
+    case 0x15B:
+        next = mirror ? 0x17D : 0x172;
+        break;
+    case 0x15C:
+        next = mirror ? 0x17B : 0x170;
+        break;
+    case 0x15D:
+        next = mirror ? 0x17C : 0x171;
+        break;
+    case 0x15E:
+        next = mirror ? 0x177 : 0x16C;
+        break;
+    case 0x15F:
+        next = mirror ? 0x179 : 0x16E;
+        break;
+    case 0x160:
+        next = mirror ? 0x17E : 0x173;
+        break;
+    case 0x161:
+        next = mirror ? 0x17B : 0x170;
+        break;
+    case 0x162:
+        next = mirror ? 0x17B : 0x170;
+        break;
+    case 0x163:
+        next = mirror ? 0x17D : 0x172;
+        break;
+    case 0x164:
+        next = mirror ? 0x176 : 0x16B;
+        break;
+    case 0x165:
+        next = mirror ? 0x175 : 0x16A;
+        break;
+    case 0x166:
+        next = mirror ? 0x17B : 0x170;
+        break;
+    case 0x167:
+        next = mirror ? 0x17D : 0x172;
+        break;
+    case 0x168:
+    case 0x169:
+        next = mirror ? 0x17F : 0x174;
+        break;
+    }
+    if (next != cur) {
+        cRiderAnimBase_play(*(void**)(*(char**)(self + 0x80) + 0x784), next, 0, -1.0f);
+        func_0012E528(self);
+    }
+}
 
 //100%
 int func_00312AA0(void* self, int i);
