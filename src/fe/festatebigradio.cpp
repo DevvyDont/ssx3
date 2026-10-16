@@ -156,7 +156,114 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
     }
 }
 
-INCLUDE_ASM("fe/festatebigradio", func_001938F8);
+//100%
+int GetHashValue32(char* str);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" int func_00192918(void* self, int val);
+extern "C" void func_00192740(void* self, int a1);
+extern "C" void func_001927B0(void* p);
+extern "C" void func_00194080(void* self);
+extern "C" void func_00193DE0(void* self, int player, int opt, int value);
+extern "C" void func_00265688(void* snd);
+extern "C" void func_00265568(void* self, int a, int b);
+extern "C" int func_0039A738(void* self);
+extern "C" void func_0039F400_38F8(void* list, void* item) __asm__("func_0039F400");
+extern "C" void func_003E6448(void* p, int v, int n);
+extern int D_004A1A70;
+extern void* D_004A33CC;
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_0045FD98[];
+extern char D_005308B8[];
+
+class cBRObj_38F8 {
+public:
+    int f0;
+    virtual void* v01(void* owner, int idx);
+    virtual void* v02(void* owner, int idx);
+    virtual void* v03(void* owner, int idx);
+    virtual void* v04(void* owner, int idx);
+    virtual void* v05(void* owner, int idx);
+};
+
+static inline int isOn001938F8()
+{
+    return D_004A1A70 == 1;
+}
+
+extern "C" void func_001938F8(char* self, char* item, int id)
+{
+    int k;
+    switch (id) {
+    case 5:
+        {
+            int i = 0;
+            do {
+                if (func_00192918(self + 0x6D0 + i * 0x34, (int)item) != -1) {
+                    if (isOn001938F8() && i == 0)
+                        func_00265688(D_004A33CC);
+                    func_00192740(self + 0x6D0 + i * 0x34, 1);
+                    func_00194080(self);
+                    break;
+                }
+                i++;
+            } while (i < 2);
+        }
+        if (!isOn001938F8() && *(int*)(self + 0x6F8) != 0 && *(int*)(self + 0x72C) != 0) {
+            cBRObj_38F8* o = **(cBRObj_38F8***)(self + 0x10);
+            void* r = o->v04(self, *(int*)(item + 0x18));
+            if (r != 0)
+                func_0039F400_38F8(*(char**)(self + 0x10) + 0x18, r);
+        }
+        break;
+    case 6:
+        if (isOn001938F8()) {
+            char* p = (char*)func_001A9C50(self);
+            *(int*)(p + 0xBC) = 2;
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_0045FD98);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)(p + 0x150) = 0x838;
+            *(int*)(p + 0x168) = 1;
+            func_001A9BC0(self, p);
+        } else {
+            cBRObj_38F8* o = **(cBRObj_38F8***)(self + 0x10);
+            void* r = o->v05(self, *(int*)(item + 0x18));
+            if (r != 0)
+                func_0039F400_38F8(*(char**)(self + 0x10) + 0x18, r);
+            func_003E6448(D_005308B8, 0, 0x20);
+        }
+        break;
+    case 1:
+    case 2:
+        k = *(int*)(item + 0x18);
+        func_001927B0(self + 0x6D0 + k * 0x34);
+        break;
+    case 7:
+        if (isOn001938F8())
+            func_001A8918(self, (int)item, id);
+        break;
+    case 9:
+        if (isOn001938F8()) {
+            void* snd = D_004A33CC;
+            int h = func_00192918(self + 0x6D0, (int)item);
+            func_00265568(snd, h, func_0039A738(item));
+        } else {
+            k = *(int*)(item + 0x18);
+            int r = func_00192918(self + 0x6D0 + k * 0x34, (int)item);
+            int v = (*(signed char**)(self + 0x738))[r];
+            if (v != -1)
+                func_00193DE0(self, k, v, func_0039A738(item));
+        }
+        break;
+    }
+}
+
 
 //100%
 int GetHashValue32(char* str);
