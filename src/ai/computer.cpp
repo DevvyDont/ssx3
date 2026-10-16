@@ -1,6 +1,105 @@
 #include "common.h"
 
-INCLUDE_ASM("ai/computer", cComputer_setIndividualRiderDifficulty);
+//100%
+// Sets one AI rider's speed/skill tuning for a difficulty level (1..5) and race mode.
+extern "C" void cComputer_setIndividualRiderDifficulty(char* self, int level, int mode)
+{
+    switch (level) {
+    case 1:
+        *(float*)(self + 0xDF8) = 100.0f;
+        *(float*)(self + 0xDFC) = 86.9153976f;
+        *(float*)(*(char**)(self + 0x18) + 0xDC) = -49670.1406f;
+        *(float*)(*(char**)(self + 0x18) + 0xE0) = 47500.0f;
+        *(int*)(*(char**)(self + 0x18) + 0xE4) = 0;
+        break;
+    case 2:
+        *(float*)(self + 0xDF8) = 80.3891449f;
+        *(float*)(self + 0xDFC) = 79.5998383f;
+        *(float*)(*(char**)(self + 0x18) + 0xDC) = -70000.0f;
+        *(float*)(*(char**)(self + 0x18) + 0xE0) = 45000.0f;
+        *(int*)(*(char**)(self + 0x18) + 0xE4) = 1;
+        break;
+    case 3:
+        *(float*)(self + 0xDF8) = 51.007576f;
+        *(float*)(self + 0xDFC) = 68.9012375f;
+        *(float*)(*(char**)(self + 0x18) + 0xDC) = -81571.1797f;
+        *(float*)(*(char**)(self + 0x18) + 0xE0) = 40000.0f;
+        *(int*)(*(char**)(self + 0x18) + 0xE4) = 1;
+        break;
+    case 4:
+        *(float*)(self + 0xDF8) = 46.6018982f;
+        *(float*)(self + 0xDFC) = 56.8430748f;
+        *(float*)(*(char**)(self + 0x18) + 0xDC) = -80321.1797f;
+        *(float*)(*(char**)(self + 0x18) + 0xE0) = 37500.0f;
+        *(int*)(*(char**)(self + 0x18) + 0xE4) = 1;
+        break;
+    case 5:
+        *(float*)(self + 0xDF8) = 14.000701f;
+        *(float*)(self + 0xDFC) = 42.4410439f;
+        *(float*)(*(char**)(self + 0x18) + 0xDC) = -92500.0f;
+        *(float*)(*(char**)(self + 0x18) + 0xE0) = 32500.0f;
+        *(int*)(*(char**)(self + 0x18) + 0xE4) = 1;
+        break;
+    }
+    if (mode == 0) {
+        switch (level) {
+        case 1:
+            *(float*)(self + 0xDF8) = 100.0f;
+            *(float*)(self + 0xDFC) = 83.8930817f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 45000.0f;
+            break;
+        case 2:
+            *(float*)(self + 0xDF8) = 55.8049736f;
+            *(float*)(self + 0xDFC) = 64.6436768f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 42500.0f;
+            break;
+        case 3:
+            *(float*)(self + 0xDF8) = 40.2501869f;
+            *(float*)(self + 0xDFC) = 60.0044975f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 37500.0f;
+            break;
+        case 4:
+            *(float*)(self + 0xDF8) = 15.5423021f;
+            *(float*)(self + 0xDFC) = 52.0049553f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 32500.0f;
+            break;
+        case 5:
+            *(float*)(self + 0xDF8) = 7.95483208f;
+            *(float*)(self + 0xDFC) = 35.0202637f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 30000.0f;
+            break;
+        }
+    } else if (mode == 2) {
+        switch (level) {
+        case 1:
+            *(float*)(self + 0xDF8) = 100.0f;
+            *(float*)(self + 0xDFC) = 100.0f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 50000.0f;
+            break;
+        case 2:
+            *(float*)(self + 0xDF8) = 84.9981003f;
+            *(float*)(self + 0xDFC) = 82.6824875f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 47500.0f;
+            break;
+        case 3:
+            *(float*)(self + 0xDF8) = 74.9987259f;
+            *(float*)(self + 0xDFC) = 70.8223801f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 40000.0f;
+            break;
+        case 4:
+            *(float*)(self + 0xDF8) = 54.9958344f;
+            *(float*)(self + 0xDFC) = 59.9440651f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 37500.0f;
+            break;
+        case 5:
+            *(float*)(self + 0xDF8) = 29.9814339f;
+            *(float*)(self + 0xDFC) = 46.9987717f;
+            *(float*)(*(char**)(self + 0x18) + 0xE0) = 32500.0f;
+            break;
+        }
+    }
+    *(float*)(self + 0xDFC) = *(float*)(self + 0xDFC) * 0.01f;
+}
 
 INCLUDE_ASM("ai/computer", cComputer_updateRiderDifficulty);
 
