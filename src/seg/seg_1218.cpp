@@ -2468,7 +2468,56 @@ extern "C" void func_00108F88(void) {
 
 INCLUDE_ASM("seg/seg_1218", func_00108FA8);
 
-INCLUDE_ASM("seg/seg_1218", func_0010A768);
+//100%
+extern "C" void func_003E6448_A768(void* dst, int value, int size) __asm__("func_003E6448");
+extern "C" float func_0010DEF0_A768(void* self) __asm__("func_0010DEF0");
+extern "C" void func_00120090_A768(void* p, float f) __asm__("func_00120090");
+int func_0011FEE8_A768(void*) __asm__("func_0011FEE8__FPv");
+extern "C" void func_0010A960_A768(void*, void*) __asm__("func_0010A960");
+extern "C" void func_0010AA70_A768(void*, void*) __asm__("func_0010AA70");
+extern "C" void func_0010B790_A768(void*, void*) __asm__("func_0010B790");
+extern "C" void func_0010B590_A768(void*, void*) __asm__("func_0010B590");
+extern "C" void func_0010AED8_A768(void*, void*) __asm__("func_0010AED8");
+extern "C" void func_0010B250_A768(void*, void*) __asm__("func_0010B250");
+extern "C" void func_0010B750_A768(void*, void*) __asm__("func_0010B750");
+extern "C" void func_0010AD78_A768(void*, void*) __asm__("func_0010AD78");
+
+extern "C" void func_0010A768(char* self, void* pad)
+{
+    func_003E6448_A768(pad, 0, 8);
+    func_00120090_A768(*(void**)(self + 0x18), func_0010DEF0_A768(self));
+    int s = func_0011FEE8_A768(*(void**)(self + 0x18));
+    switch (s) {
+    case 0:
+        func_0010A960_A768(self, pad);
+        break;
+    case 2:
+        func_0010AA70_A768(self, pad);
+        break;
+    case 6:
+        func_0010B790_A768(self, pad);
+        break;
+    case 4:
+        func_0010B590_A768(self, pad);
+        break;
+    case 7:
+        func_0010AED8_A768(self, pad);
+        break;
+    case 5:
+        func_0010B250_A768(self, pad);
+        break;
+    case 8:
+        func_0010B750_A768(self, pad);
+        break;
+    case 1:
+        func_0010AD78_A768(self, pad);
+        break;
+    case 13:
+        break;
+    }
+    if (s != 5)
+        *(int*)(self + 0xE34) = 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

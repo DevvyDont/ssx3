@@ -732,7 +732,78 @@ extern "C" void func_00308328(func_00308328_cProcess* self)
     }
 }
 
-INCLUDE_ASM("wscript/wscriptprocess", func_003083A0);
+//100%
+extern "C" void func_003083A0(void* proc, void* cmd_)
+{
+    char* self = (char*)proc;
+    unsigned short* cmd = (unsigned short*)cmd_;
+    if (*(int*)self != 2)
+        return;
+    switch (*cmd) {
+    case 0:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x3C))(self + *(short*)(vt + 0x38));
+        }
+        break;
+    case 1:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x44))(self + *(short*)(vt + 0x40));
+        }
+        break;
+    case 2:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x4C))(self + *(short*)(vt + 0x48));
+        }
+        break;
+    case 3:
+        *(unsigned short**)(*(char**)(*(char**)(self + 0x3C) + 0x10) + 0x29C) = cmd + 2;
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x54))(self + *(short*)(vt + 0x50));
+        }
+        *(unsigned short**)(*(char**)(*(char**)(self + 0x3C) + 0x10) + 0x29C) = 0;
+        break;
+    case 4:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x5C))(self + *(short*)(vt + 0x58));
+        }
+        break;
+    case 5:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x64))(self + *(short*)(vt + 0x60));
+        }
+        break;
+    case 6:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x6C))(self + *(short*)(vt + 0x68));
+        }
+        break;
+    case 7:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x74))(self + *(short*)(vt + 0x70));
+        }
+        break;
+    case 8:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x7C))(self + *(short*)(vt + 0x78));
+        }
+        break;
+    case 9:
+        {
+            char* vt = *(char**)(self + 0x40);
+            ((tOp_3078C0)*(void**)(vt + 0x84))(self + *(short*)(vt + 0x80));
+        }
+        break;
+    }
+}
 
 //100%
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);

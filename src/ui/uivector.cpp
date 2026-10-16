@@ -67,7 +67,62 @@ struct sVec3 {
 
 INCLUDE_ASM("ui/uivector", cUIVector_setUIData);
 
-INCLUDE_ASM("ui/uivector", func_003A36D0);
+//100%
+extern "C" void func_003A0048(void* self, unsigned short prop, float v);
+struct sUIVec2_36D0 {
+    float a;
+    float b;
+};
+struct sUIVec4_36D0 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+// Sets one animatable property; ids past the cUIThing ones address per-point fields.
+extern "C" void func_003A36D0(char* self, unsigned short prop, float v)
+{
+    if (*(void**)(self + 0x80) == 0)
+        return;
+    if (prop >= 0x15) {
+        prop = prop - 0x15;
+        unsigned short n = prop / 9;
+        if (n >= *(unsigned int*)(self + 0x74) >> 17)
+            return;
+        switch ((unsigned short)(prop % 9)) {
+        case 0:
+            (*(sVec3**)(self + 0x80))[n].x = v;
+            break;
+        case 1:
+            (*(sVec3**)(self + 0x80))[n].y = v;
+            break;
+        case 2:
+            (*(sVec3**)(self + 0x80))[n].z = v;
+            break;
+        case 3:
+            (*(sUIVec2_36D0**)(self + 0x88))[n].a = v;
+            break;
+        case 4:
+            (*(sUIVec2_36D0**)(self + 0x88))[n].b = v;
+            break;
+        case 5:
+            (*(sUIVec4_36D0**)(self + 0x7C))[n].x = v;
+            break;
+        case 6:
+            (*(sUIVec4_36D0**)(self + 0x7C))[n].y = v;
+            break;
+        case 7:
+            (*(sUIVec4_36D0**)(self + 0x7C))[n].z = v;
+            break;
+        case 8:
+            (*(sUIVec4_36D0**)(self + 0x7C))[n].w = v;
+            break;
+        }
+    } else {
+        func_003A0048(self, prop, v);
+    }
+}
 
 INCLUDE_ASM("ui/uivector", func_003A3808);
 
