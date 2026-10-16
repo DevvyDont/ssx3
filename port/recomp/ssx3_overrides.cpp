@@ -8,6 +8,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 
 namespace ps2_syscalls
@@ -106,6 +107,49 @@ namespace
 
     PS2Runtime::RecompiledFunction g_fileInfoOriginal = nullptr;
     PS2Runtime::RecompiledFunction g_bxExistsOriginal = nullptr;
+    PS2Runtime::RecompiledFunction g_fileCommandOriginal = nullptr;
+    PS2Runtime::RecompiledFunction g_fileCompleteOriginal = nullptr;
+
+    // iFILESYS_CommandCompleteCallback (0x003DE420): a0 is nonzero on success; the
+    // command being completed is at *(0x00519AB0 + 0x24), its file name at +0x10.
+    void ssx3LogFileComplete(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+    {
+        uint32_t command = 0;
+        if (const uint8_t *p = getConstMemPtr(rdram, 0x00519AB0u + 0x24u))
+            std::memcpy(&command, p, sizeof(command));
+        const int32_t ok = static_cast<int32_t>(getRegU32(ctx, 4));
+        if (command != 0u && ok == 0)
+        {
+            uint32_t nameBuf = 0, field4 = 0;
+            if (const uint8_t *p = getConstMemPtr(rdram, command + 0x24u))
+                std::memcpy(&nameBuf, p, sizeof(nameBuf));
+            if (const uint8_t *p = getConstMemPtr(rdram, command + 0x4u))
+                std::memcpy(&field4, p, sizeof(field4));
+            std::fprintf(stderr, "[file] complete FAILED cmd=%08x f4=%08x \"%s\"\n", command, field4,
+                         readGuestString(rdram, nameBuf ? nameBuf + 0x10u : 0u).c_str());
+        }
+        g_fileCompleteOriginal(rdram, ctx, runtime);
+    }
+
+    // func_003DD4E8 queues a FILESYS command for the file named in a0.
+    void ssx3LogFileCommand(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+    {
+        static std::string last;
+        static uint32_t repeats = 0;
+        const std::string name = readGuestString(rdram, getRegU32(ctx, 4));
+        if (name == last)
+        {
+            if ((++repeats & (repeats - 1u)) == 0u)
+                std::fprintf(stderr, "[file] command \"%s\" x%u\n", name.c_str(), repeats + 1u);
+        }
+        else
+        {
+            last = name;
+            repeats = 0;
+            std::fprintf(stderr, "[file] command \"%s\"\n", name.c_str());
+        }
+        g_fileCommandOriginal(rdram, ctx, runtime);
+    }
 
     void ssx3LogFileInfo(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
     {
@@ -136,6 +180,12 @@ namespace
             g_bxExistsOriginal = runtime.lookupFunction(0x00317F38u);
             if (g_bxExistsOriginal)
                 runtime.replaceFunction(0x00317F38u, ssx3LogBxExists);
+            g_fileCommandOriginal = runtime.lookupFunction(0x003DD4E8u);
+            if (g_fileCommandOriginal)
+                runtime.replaceFunction(0x003DD4E8u, ssx3LogFileCommand);
+            g_fileCompleteOriginal = runtime.lookupFunction(0x003DE420u);
+            if (g_fileCompleteOriginal)
+                runtime.replaceFunction(0x003DE420u, ssx3LogFileComplete);
         }
         runtime.replaceFunction(0x004261F0u, ssx3iSifSendCmd);
         runtime.replaceFunction(0x003F61D0u, ssx3UsbKbStart);

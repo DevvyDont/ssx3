@@ -21,6 +21,11 @@ or any disc file.
   - a way for a game to move the runtime's scratch allocations out of its own heap;
   - the debug panel hidden until F1 is pressed (or `PS2X_DEBUG_UI=1`);
   - VIF `UNPACK V4-5` expanding 5:5:5:1 colours to 8 bits per channel, as the hardware does;
+  - a guest call that yields before its callee starts no longer counts as finished when the callee is the
+    function the call came from (EA's file system recurses this way while a race loads);
+  - `BLTZ`/`BGEZ`/`BLEZ`/`BGTZ` (and their likely/link forms) testing the whole 64-bit register, like `SLT` and
+    `BEQ` already do; EA's file table compares hashes with `LWU`+`DSUBU`+`BLTZ`, and a 32-bit test sorted it
+    wrongly, so some riders' texture archives were never found;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -63,8 +68,8 @@ These debug switches print to stderr:
 | --- | --- |
 | `PS2X_DUMP_THREADS=1` | the EE thread table every 5 s, with return addresses from each stack |
 | `PS2X_SIF_LOG=1` | SIF commands in both directions |
-| `PS2X_CD_LOG=1` | CD reads |
-| `PS2X_FILE_LOG=1` | the game's file lookups and their results |
+| `PS2X_CD_LOG=1` | CD reads and `sceCdCallback` calls |
+| `PS2X_FILE_LOG=1` | the game's file lookups and their results, each file command it queues, and each one that fails |
 | `PS2X_MPEG_LOG=1` | MPEG callbacks, data fed to the decoder, and the end of each movie |
 | `PS2X_HEAP_LOG=1` | the runtime's scratch allocations |
 | `PS2X_DUMP_RDRAM=file` with `PS2X_DUMP_RDRAM_TICK=n` | EE RAM, written to `file` at frame `n` |
@@ -77,6 +82,7 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 ## Status
 
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
-input through the front end to a race. In the race, the HUD, sky and distant mountains draw; the nearby track,
-riders and scenery do not yet. Pressing X while the race is loading can crash the loader thread. Sound has not
-been tested yet.
+input through the front end to a race. In the race, the HUD, sky, distant mountains and the slope draw; the
+riders and close scenery do not yet. Sound has not been tested yet.
+
+When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
