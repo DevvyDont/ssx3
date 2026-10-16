@@ -539,7 +539,134 @@ extern "C" int func_001A4300(void* self, int a1, int a2, int a3)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A4330);
+//100%
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" const char* func_002625C8(void* self, int idx);
+extern "C" void func_001A9890(void* self, const char* str);
+int func_001A98B0(void* self);
+extern "C" void func_001AB370(void* self, int a1, int a2);
+extern "C" void func_001A4750(void* self);
+extern "C" int func_001A6070(void* self, int idx);
+extern "C" void func_001A5FB8(void* self, int sel);
+extern "C" void func_001A5128(void* self, int pos, int count);
+extern "C" void func_001A66A8(void* self, unsigned int index, int flag);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern char D_004A1408[];
+extern char D_00461540[];
+extern char D_004615A0[];
+extern char D_004615B0[];
+
+struct sVE_4330 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sColor_4330 {
+    float r, g, b, a;
+    sColor_4330(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+struct sVEC_4330 {
+    short delta;
+    short index;
+    void (*fn)(void*, const sColor_4330&);
+};
+
+static inline void* GetSession_001A4330()
+{
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    return D_004A3328;
+}
+
+extern "C" void func_001A4330(char* self, char* item, int id)
+{
+    char buf[0x20];
+    switch (id) {
+    case 6: {
+        char* o = *(char**)(self + 0x20);
+        sVE_4330* vt = *(sVE_4330**)(o + 0x8);
+        vt[17].fn(o + vt[17].delta, self, 0x14);
+        break;
+    }
+    case 8:
+        func_001A9150(self, 0, GetHashValue32(D_00461540), (int)D_004A1408, 0, 1, 0x10);
+        *(int*)(*(char**)(self + 0x69C) + 0x438) = 1;
+        *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+        func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+        func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        break;
+    case 5: {
+        int idx = *(int*)(item + 0x18);
+        if (idx < 0)
+            break;
+        const char* name = func_002625C8(GetSession_001A4330(), idx);
+        if (name != 0) {
+            func_001A9890(self, name);
+            func_001AB370(self, func_001A98B0(self), 0);
+        }
+        break;
+    }
+    case 13:
+        func_001A4750(self);
+        break;
+    case 1:
+        for (int i = 0; i < 15; i++) {
+            sprintf(buf, D_004615A0, i);
+            int h = *(int*)(item + 0x38);
+            if (h == GetHashValue32(buf)) {
+                func_001A6070(self, i + *(int*)(self + 0x6F4));
+                func_001A5FB8(self, i);
+                func_001A5128(self, i + *(int*)(self + 0x6F4),
+                              (*(int**)(self + 0x6EC) - *(int**)(self + 0x6E8)));
+                func_001A66A8(self, i, 1);
+                break;
+            }
+        }
+        func_001A8918(self, (int)item, id);
+        break;
+    case 2:
+        for (int i = 0; i < 15; i++) {
+            sprintf(buf, D_004615A0, i);
+            int h = *(int*)(item + 0x38);
+            if (h == GetHashValue32(buf)) {
+                sprintf(buf, D_004615B0, i);
+                char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+                if (o != 0) {
+                    sVE_4330* vt = *(sVE_4330**)(o + 0x8);
+                    vt[9].fn(o + vt[9].delta, 0);
+                }
+                sVEC_4330* vt = *(sVEC_4330**)(item + 0x8);
+                vt[11].fn(item + vt[11].delta, sColor_4330(1.0f, 0, 0, 0));
+                func_001A66A8(self, i, 0);
+                break;
+            }
+        }
+        func_001A8918(self, (int)item, id);
+        break;
+    default:
+        func_001A8918(self, (int)item, id);
+        break;
+    }
+}
+
 
 //100%
 extern "C" void func_00260F80();
