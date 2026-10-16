@@ -124,7 +124,96 @@ extern "C" void func_003A36D0(char* self, unsigned short prop, float v)
     }
 }
 
-INCLUDE_ASM("ui/uivector", func_003A3808);
+//100%
+struct sUIKey_3808 {
+    short prop;
+    short val;
+};
+struct sUIVec4_3808 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+// Applies a list of (property, value) pairs; ids past the cUIThing ones address per-point fields.
+extern "C" void func_003A3808(char* self, unsigned int count, sUIKey_3808* keys)
+{
+    if (*(void**)(self + 0x80) == 0)
+        return;
+    for (unsigned int i = 0; i < count; i++, keys++) {
+        float v = (float)keys->val;
+        int prop = keys->prop;
+        if (prop >= 0x15) {
+            prop = prop - 0x15;
+            unsigned short n = prop / 9;
+            if (n >= *(unsigned int*)(self + 0x74) >> 17)
+                continue;
+            switch (prop % 9) {
+            case 0:
+                (*(sVec3**)(self + 0x80))[n].x = v;
+                break;
+            case 1:
+                (*(sVec3**)(self + 0x80))[n].y = v;
+                break;
+            case 2:
+                (*(sVec3**)(self + 0x80))[n].z = v;
+                break;
+            case 3:
+            case 4:
+                break;
+            case 5:
+                (*(sUIVec4_3808**)(self + 0x7C))[n].x = v;
+                break;
+            case 6:
+                (*(sUIVec4_3808**)(self + 0x7C))[n].y = v;
+                break;
+            case 7:
+                (*(sUIVec4_3808**)(self + 0x7C))[n].z = v;
+                break;
+            case 8:
+                (*(sUIVec4_3808**)(self + 0x7C))[n].w = v;
+                break;
+            }
+        } else {
+            switch (prop) {
+            case 0:
+                *(float*)(self + 0x44) = v;
+                break;
+            case 1:
+                *(float*)(self + 0x48) = v;
+                break;
+            case 9:
+                *(float*)(self + 0x50) = v * 0.01f;
+                break;
+            case 10:
+                *(float*)(self + 0x54) = v * 0.01f;
+                break;
+            case 12:
+                *(unsigned int*)(self + 0x14) = (*(unsigned int*)(self + 0x14) & 0xFFF81FFF) | (((int)v & 0x3F) << 13);
+                break;
+            case 13:
+                *(float*)(self + 0x1C) = v * 0.003921569f;
+                break;
+            case 14:
+                *(float*)(self + 0x20) = v * 0.003921569f;
+                break;
+            case 15:
+                *(float*)(self + 0x24) = v * 0.003921569f;
+                break;
+            case 16:
+                *(float*)(self + 0x28) = v * 0.003921569f;
+                break;
+            case 6:
+                *(float*)(self + 0x60) = v;
+                break;
+            case 7:
+                *(float*)(self + 0x64) = v;
+                break;
+            }
+        }
+    }
+}
 
 //100%
 // PORT: func_004139F8 is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
