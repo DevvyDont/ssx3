@@ -539,7 +539,134 @@ extern "C" int func_001A4300(void* self, int a1, int a2, int a3)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A4330);
+//100%
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" const char* func_002625C8(void* self, int idx);
+extern "C" void func_001A9890(void* self, const char* str);
+int func_001A98B0(void* self);
+extern "C" void func_001AB370(void* self, int a1, int a2);
+extern "C" void func_001A4750(void* self);
+extern "C" int func_001A6070(void* self, int idx);
+extern "C" void func_001A5FB8(void* self, int sel);
+extern "C" void func_001A5128(void* self, int pos, int count);
+extern "C" void func_001A66A8(void* self, unsigned int index, int flag);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern char D_004A1408[];
+extern char D_00461540[];
+extern char D_004615A0[];
+extern char D_004615B0[];
+
+struct sVE_4330 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sColor_4330 {
+    float r, g, b, a;
+    sColor_4330(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+struct sVEC_4330 {
+    short delta;
+    short index;
+    void (*fn)(void*, const sColor_4330&);
+};
+
+static inline void* GetSession_001A4330()
+{
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    return D_004A3328;
+}
+
+extern "C" void func_001A4330(char* self, char* item, int id)
+{
+    char buf[0x20];
+    switch (id) {
+    case 6: {
+        char* o = *(char**)(self + 0x20);
+        sVE_4330* vt = *(sVE_4330**)(o + 0x8);
+        vt[17].fn(o + vt[17].delta, self, 0x14);
+        break;
+    }
+    case 8:
+        func_001A9150(self, 0, GetHashValue32(D_00461540), (int)D_004A1408, 0, 1, 0x10);
+        *(int*)(*(char**)(self + 0x69C) + 0x438) = 1;
+        *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+        func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+        func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        break;
+    case 5: {
+        int idx = *(int*)(item + 0x18);
+        if (idx < 0)
+            break;
+        const char* name = func_002625C8(GetSession_001A4330(), idx);
+        if (name != 0) {
+            func_001A9890(self, name);
+            func_001AB370(self, func_001A98B0(self), 0);
+        }
+        break;
+    }
+    case 13:
+        func_001A4750(self);
+        break;
+    case 1:
+        for (int i = 0; i < 15; i++) {
+            sprintf(buf, D_004615A0, i);
+            int h = *(int*)(item + 0x38);
+            if (h == GetHashValue32(buf)) {
+                func_001A6070(self, i + *(int*)(self + 0x6F4));
+                func_001A5FB8(self, i);
+                func_001A5128(self, i + *(int*)(self + 0x6F4),
+                              (*(int**)(self + 0x6EC) - *(int**)(self + 0x6E8)));
+                func_001A66A8(self, i, 1);
+                break;
+            }
+        }
+        func_001A8918(self, (int)item, id);
+        break;
+    case 2:
+        for (int i = 0; i < 15; i++) {
+            sprintf(buf, D_004615A0, i);
+            int h = *(int*)(item + 0x38);
+            if (h == GetHashValue32(buf)) {
+                sprintf(buf, D_004615B0, i);
+                char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+                if (o != 0) {
+                    sVE_4330* vt = *(sVE_4330**)(o + 0x8);
+                    vt[9].fn(o + vt[9].delta, 0);
+                }
+                sVEC_4330* vt = *(sVEC_4330**)(item + 0x8);
+                vt[11].fn(item + vt[11].delta, sColor_4330(1.0f, 0, 0, 0));
+                func_001A66A8(self, i, 0);
+                break;
+            }
+        }
+        func_001A8918(self, (int)item, id);
+        break;
+    default:
+        func_001A8918(self, (int)item, id);
+        break;
+    }
+}
+
 
 //100%
 extern "C" void func_00260F80();
@@ -4411,7 +4538,127 @@ extern "C" int func_001AC5A8(void* self, int a1, int a2)
     return a2 != 9 ? 0x101 : 0x100;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001AC5C0);
+//100%
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" int func_001AC408(void* self);
+extern "C" int func_001AC360(void* self);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_0025B6D8(void* self, int a1);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B6ED0(void* self, int a1, void* a2, int a3, int a4, int a5);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_001ACDD0(void* self);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern void* D_004A3028;
+extern char D_00462B88[];
+extern char D_00462BA0[];
+extern char D_00462C70[];
+extern char D_00462C88[];
+extern char D_00462C98[];
+extern char D_00462CB8[];
+extern char D_00462CD0[];
+extern char D_00462CE8[];
+extern char D_00462D00[];
+extern char D_00462D10[];
+extern char D_00461618[];
+
+struct sAsync_1AC5C0 {
+    char pad0[0x6D8];
+    int popupMode; // 0x6D8
+};
+
+extern "C" void func_001AC5C0(char* self, char* item, unsigned int id)
+{
+    switch (id) {
+    case 5:
+        switch (*(int*)(item + 0x18)) {
+        case 4: {
+            if (func_001AC408(self) == 0)
+                break;
+            char* p = (char*)func_001A9C50(self);
+            *(int*)(p + 0xBC) = 1;
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)(p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            ((sAsync_1AC5C0*)self)->popupMode = 4;
+            func_0025B6D8(D_004A3028, 0);
+            break;
+        }
+        case 2: {
+            if (func_001AC360(self) == 0)
+                break;
+            char* p = (char*)func_001A9C50(self);
+            *(int*)(p + 0xBC) = 0;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462C98);
+            *(int*)(p + 0xC0) = 3;
+            *(int*)(p + 0x164) = 0;
+            *(int*)(p + 0x150) = 0x812;
+            func_001A9BC0(self, p);
+            ((sAsync_1AC5C0*)self)->popupMode = 2;
+            func_0025B6D8(D_004A3028, 0);
+            break;
+        }
+        case 3: {
+            char* p = (char*)func_001A9C50(self);
+            int three = 3;
+            *(int*)(p + 0xBC) = -1;
+            *(int*)(p + 0x180) = 0x32;
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462CB8);
+            *(int*)(p + 0xC0) = three;
+            *(int*)(p + 0xD4) = GetHashValue32(D_00462CD0);
+            *(int*)(p + 0xD0) = three;
+            func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+            *(int*)(p + 0x150) = 0x80F;
+            func_001A9BC0(self, p);
+            break;
+        }
+        case 0: {
+            cUIText* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462B88));
+            if (o == 0)
+                break;
+            int str = *(int*)((char*)D_004A3028 + 0x48);
+            func_001A9150(self, (int)o, GetHashValue32(D_00462CE8), str, 0, 6, 0x10);
+            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            break;
+        }
+        case 1: {
+            cUIText* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
+            if (o == 0)
+                break;
+            int str = *(int*)((char*)D_004A3028 + 0x4C);
+            func_001A9150(self, (int)o, GetHashValue32(D_00462D00), str, 1, 7, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            break;
+        }
+        }
+        break;
+    case 6: {
+        char* q = (char*)func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+        *(int*)(q + 0x18) = 0x832;
+        func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, q);
+        break;
+    }
+    case 13:
+        func_001ACDD0(self);
+        break;
+    default:
+        func_001A8918(self, (int)item, id);
+        break;
+    }
+}
+
 
 //100%
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
@@ -10806,7 +11053,162 @@ extern "C" void func_001B83C0(sAsync_1B83C0* self)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
+//100%
+// PORT: func_001A97B8 returns int; the result is unused here
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" void* func_001B70D0(void*, int);
+extern "C" int func_00265D68(void* self);
+extern "C" int func_001B8890(void* self, int mode);
+extern int* D_004A33D0;
+
+struct sVE_84D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+static inline void Notify_84D8(char* self, int arg)
+{
+    char* o = *(char**)(self + 0x20);
+    sVE_84D8* vt = *(sVE_84D8**)(o + 0x8);
+    vt[17].fn(o + vt[17].delta, self, arg);
+}
+
+extern "C" void func_001B84D8(char* self, char* item, unsigned int id)
+{
+    switch (*(int*)(self + 0x6DC)) {
+    case 7:
+    case 13:
+    case 21:
+    case 25:
+        switch (id) {
+        case 15: {
+            func_001A97B8_v(self, item, 15);
+            if (func_00265D68(D_004A33D0) != 0) {
+                *(int*)(self + 0x6D4) = 2;
+                func_001B70D0(self, func_001B8890(self, *(int*)(self + 0x6DC)));
+            } else if (*(int*)(self + 0x6D8) != 0) {
+                *(int*)(self + 0x6D4) = 6;
+                func_001B70D0(self, func_001B8890(self, *(int*)(self + 0x6DC)));
+            } else if (*(int*)(item + 0x18) != 0) {
+                func_001B70D0(self, *(int*)(item + 0x18));
+            }
+            break;
+        }
+        case 16:
+        case 20: {
+            func_001A97B8_v(self, item, id);
+            int mode = *(int*)(self + 0x6DC);
+            if (mode == 25 || mode == 13 || mode == 7)
+                goto set11;
+            *(int*)(self + 0x6D0) = 0x10;
+            break;
+        }
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 3:
+        switch (id) {
+        case 15:
+            func_001A97B8_v(self, item, 15);
+            if (*(int*)(self + 0x18) != 0) {
+                *(int*)(self + 0x6D0) = 0;
+                *(int*)(self + 0x6D4) = 0;
+                *(int*)(self + 0x6D8) = 0;
+                func_001B70D0(self, *(int*)(self + 0xB0C));
+            } else {
+                *(int*)(self + 0x6D0) = 0x10;
+            }
+            break;
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            if (*(int*)(self + 0x6D0) != 0)
+                Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        case 16:
+        case 20:
+            func_001A97B8_v(self, item, id);
+            *(int*)(self + 0x6D0) = 0xF;
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 9:
+    case 15:
+    case 17:
+    case 28:
+        switch (id) {
+        case 15:
+            func_001A97B8_v(self, item, 15);
+        set11:
+            *(int*)(self + 0x6D0) = 0x11;
+            break;
+        case 16:
+        case 20:
+            func_001A97B8_v(self, item, id);
+            *(int*)(self + 0x6D0) = 0xF;
+            break;
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            if (*(int*)(self + 0x6D0) != 0)
+                Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 23:
+        switch (id) {
+        case 15:
+            func_001A97B8_v(self, item, 15);
+            if (*(int*)(self + 0xB08) == 0) {
+                *(int*)(self + 0x6D0) = 0x10;
+            } else {
+                *(int*)(self + 0x6D0) = 0;
+                *(int*)(self + 0x6D4) = 0;
+                *(int*)(self + 0x6D8) = 0;
+                *(int*)(self + 0xB08) = 0;
+                *(int*)(self + 0xB0C) = 0;
+                func_001B70D0(self, 0);
+            }
+            break;
+        case 22:
+            func_001A97B8_v(self, item, 0x16);
+            if (*(int*)(self + 0x6D0) != 0)
+                Notify_84D8(self, *(int*)(self + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, item, id);
+            break;
+        }
+        break;
+    case 4:
+    case 10:
+    case 18:
+    case 24:
+    case 29:
+        if (id == 22) {
+            func_001A97B8_v(self, item, 0x16);
+            Notify_84D8(self, 0xF);
+        } else {
+            func_001A97B8_v(self, item, id);
+        }
+        break;
+    default:
+        func_001A97B8_v(self, item, id);
+        break;
+    }
+}
+
 
 //100%
 class func_001B8860_cObj {

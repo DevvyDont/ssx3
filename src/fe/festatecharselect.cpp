@@ -281,7 +281,130 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
     }
 }
 
-INCLUDE_ASM("fe/festatecharselect", func_001817E8);
+//100%
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_001472C8(void* self, int a1, int a2);
+extern "C" void func_00147448(void* self, int a1, int charID);
+extern "C" void func_001474A8(void* iface, int rider, int id);
+extern "C" void func_001A1CB8(void* self, int a1, int val);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001887A0(void* mem, void* owner, int a2);
+extern "C" void* func_0018ECA0(void* mem, void* owner, int a2, int mask);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
+extern char D_0045D698[];
+extern char D_0045D6A8[];
+
+struct sVE_17E8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+struct sVEP_17E8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, ...);
+};
+
+static inline void Refresh_17E8(void* iface)
+{
+    sVE_17E8* vt = *(sVE_17E8**)((char*)iface + 0xC);
+    vt[1].fn((char*)iface + vt[1].delta);
+}
+
+static inline void ApplyRider_17E8(int rider, int slot, int charID, int board)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    func_001472C8(iface, rider, slot);
+    func_00147448(iface, rider, charID);
+    func_001474A8(iface, rider, board);
+    Refresh_17E8(iface);
+}
+
+static inline void* StateCall_17E8(char* self, int slot, int sel)
+{
+    char* o = **(char***)(self + 0x10);
+    sVEP_17E8* vt = *(sVEP_17E8**)(o + 0x4);
+    return vt[slot].fn(o + vt[slot].delta, self, sel);
+}
+
+static inline void Finish_17E8(char* self)
+{
+    func_0019E538(func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44)), 0);
+    *(int*)(self + 0x80) = 0;
+}
+
+extern "C" void func_001817E8(char* self, char* menu, int msg)
+{
+    if (menu == 0)
+        return;
+    switch (msg) {
+    case 5: {
+        char* p = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+        *(int*)(p + 0xC20) = 1;
+        *(int*)(p + 0xC1C) = 0;
+        ApplyRider_17E8(*(signed char*)(self + 0x44), *(signed char*)(self + 0x14),
+                        D_00440F68[*(int*)(menu + 0x18)], *(int*)(self + 0x4C));
+        {
+            int mask = 1 << *(signed char*)(self + 0x14);
+            func_001A1CB8(**(void***)(self + 0x10), *(signed char*)(self + 0x44), mask & 0xFF);
+        }
+        void* st = StateCall_17E8(self, 4, *(int*)(menu + 0x18));
+        if (st != 0)
+            func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+        Finish_17E8(self);
+        return;
+    }
+    case 6: {
+        void* st = StateCall_17E8(self, 5, *(int*)(menu + 0x18));
+        if (st == 0)
+            return;
+        func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+        Finish_17E8(self);
+        return;
+    }
+    case 1: {
+        sVE_17E8* vt = *(sVE_17E8**)(menu + 0x8);
+        vt[9].fn(menu + vt[9].delta, 1);
+        func_00181BD0(self, *(signed char*)(self + 0x44), D_00440F68[*(int*)(menu + 0x18)]);
+        ApplyRider_17E8(*(signed char*)(self + 0x44), *(signed char*)(self + 0x14),
+                        D_00440F68[*(int*)(menu + 0x18)], *(int*)(self + 0x4C));
+        return;
+    }
+    case 2: {
+        sVE_17E8* vt = *(sVE_17E8**)(menu + 0x8);
+        vt[9].fn(menu + vt[9].delta, 0);
+        return;
+    }
+    case 7: {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_001472C8(iface, *(signed char*)(self + 0x44), *(signed char*)(self + 0x14));
+        Refresh_17E8(iface);
+        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(void**)(self + 0x10), 1);
+        *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
+        Finish_17E8(self);
+        return;
+    }
+    case 8: {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+        func_001472C8(iface, *(signed char*)(self + 0x44), *(signed char*)(self + 0x14));
+        Refresh_17E8(iface);
+        void* st = func_0018ECA0(cMemMan_alloc(0x280, D_0045D6A8, 0x100, 0), *(void**)(self + 0x10), 2,
+                                 (1 << *(signed char*)(self + 0x14)) & 0xFF);
+        func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+        char* o = **(char***)(self + 0x10);
+        if (o != 0)
+            *(int*)(o + 0xC) = 9;
+        break;
+    }
+    default:
+        return;
+    }
+    Finish_17E8(self);
+}
+
 
 //100%
 int GetHashValue32(char* str);

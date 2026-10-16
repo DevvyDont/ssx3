@@ -801,7 +801,140 @@ extern "C" void func_002341D0(void* self, int mode)
     *(int*)((char*)self + 0x1C) = 0;
 }
 
-INCLUDE_ASM("fe/festateloadscreen", func_002343B0);
+//100%
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+extern void* D_004A2C68;
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_43B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001F36C0(void* self, int bit);
+extern "C" void func_001F36D8(void* hud, int a);
+extern "C" int func_00279220(void* a, int b);
+extern "C" void func_00279040(void* self, int i, int a);
+extern "C" int func_00279298(void* p);
+extern "C" void func_00234910(void* self);
+extern "C" void func_0012AB20(void* self);
+extern "C" void func_0012AC48(void* self);
+extern "C" void func_00128958(void* p);
+extern "C" void func_00128998(void* self, int n);
+extern "C" void func_00128A48(void* p, int a);
+extern "C" int func_0012A180(void* p);
+extern "C" void func_001296F8(void* p);
+extern "C" int func_002791D8(void* self, int i);
+extern "C" int func_00278F68(void* self, int i, int a, int b);
+extern "C" int func_00279148(void* self, int i, int a);
+void func_001289F0(void* p);
+extern "C" int func_0012ABD0(void* p);
+extern "C" int func_0012ACF8(void* p);
+extern "C" void func_0012B030(void* p);
+extern "C" void func_0012B000(void* p);
+extern "C" void func_00233AA0(void* self);
+
+struct sRace_2343B0 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+    signed char sub4A;
+};
+extern sRace_2343B0 D_00535BC8_r2343B0 __asm__("D_00535BC8");
+
+static inline char* Ai_2343B0()
+{
+    return *(char**)((char*)D_004A2C68 + 0xC);
+}
+
+extern "C" void func_002343B0(char* self)
+{
+    if (*(int*)(self + 0x1C) < 3) {
+        func_001F36C0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 2);
+        if (func_00279220(D_004A28A4, 0) == 4)
+            func_00279040(D_004A28A4, 0, 1);
+    } else {
+        if (func_00279220(D_004A28A4, 0) == 3)
+            func_00279040(D_004A28A4, 0, 0);
+        func_001F36D8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 2);
+    }
+    switch (*(unsigned int*)(self + 0x1C)) {
+    case 0:
+        if (func_00279298(D_004A28A4) == 0)
+            *(int*)(self + 0x1C) = 1;
+        break;
+    case 1: {
+        cBE_getInterface_43B0(cBE_getBE(), 0);
+        func_00234910(self);
+        sRace_2343B0* rc = &D_00535BC8_r2343B0;
+        int mode = rc->mode48;
+        int flag = rc->flag49;
+        int sub = rc->sub4A;
+        if (mode == 4 || (mode == 5 && sub != 4) || (mode == 6 && sub != 5)) {
+            func_0012AB20(Ai_2343B0());
+            func_0012AC48(Ai_2343B0());
+            *(int*)(self + 0x10) = 1;
+        } else if (flag == 0) {
+            func_00128958(Ai_2343B0());
+            if (*(int*)(Ai_2343B0() + 0x80) == 0) {
+                if (mode == 0)
+                    func_00128998(Ai_2343B0(), 0);
+                else
+                    func_00128998(Ai_2343B0(), 2);
+            }
+            *(int*)(Ai_2343B0() + 0x8C) = 0;
+        }
+        func_00128A48(Ai_2343B0(), 0);
+        if (mode == 5 || mode == 0)
+            func_00128A48(Ai_2343B0(), 1);
+        else if (mode != 4)
+            func_00128A48(Ai_2343B0(), 2);
+        *(int*)(self + 0x1C) = 2;
+        break;
+    }
+    case 2:
+        if (func_0012A180(Ai_2343B0()) == 0) {
+            func_001296F8(Ai_2343B0());
+            return;
+        }
+        *(int*)(self + 0x1C) = 3;
+        break;
+    case 3: {
+        if (func_00279220(D_004A28A4, 1) != 0)
+            return;
+        if (*(int*)(Ai_2343B0() + 0x84) > 0)
+            *(int*)(Ai_2343B0() + 0x8C) = 1;
+        if (*(int*)(Ai_2343B0() + 0x80) > 0)
+            *(int*)(Ai_2343B0() + 0x14) = 1;
+        if (func_002791D8(D_004A28A4, 0) == 2) {
+            func_00278F68(D_004A28A4, 0, *(int*)(self + 0x14) == 0, 1);
+            return;
+        }
+        int r = func_00279220(D_004A28A4, 0);
+        int r2 = func_00279148(D_004A28A4, 0, 0);
+        int busy = r != 0 && r2 != 5;
+        if (busy)
+            return;
+        cBE_getInterface_43B0(cBE_getBE(), 0);
+        if (D_00535BC8_r2343B0.mode48 != 4) {
+            func_001289F0(Ai_2343B0());
+            if (*(int*)(Ai_2343B0() + 0x80) > 0)
+                *(int*)(Ai_2343B0() + 0x14) = 1;
+        }
+        if (*(int*)(self + 0x10) != 0) {
+            if (func_0012ABD0(Ai_2343B0()) == 0)
+                break;
+            if (func_0012ACF8(Ai_2343B0()) == 0)
+                break;
+            func_0012B030(Ai_2343B0());
+            func_0012B000(Ai_2343B0());
+            *(int*)(self + 0x10) = 0;
+        }
+        *(int*)(self + 0x1C) = 4;
+        func_00233AA0(self);
+        break;
+    }
+    case 4:
+        break;
+    }
+}
+
 
 //100%
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
