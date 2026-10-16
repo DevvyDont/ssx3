@@ -228,7 +228,59 @@ extern "C" int func_00193CF8(char* self, unsigned char* item, int kind)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/festatebigradio", func_00193DE0);
+//100%
+struct sBigRadioBits_3DE0 {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+};
+struct sBigRadioOpt_3DE0 {
+    sBigRadioBits_3DE0 flags;
+    int f4;
+    int f8;
+};
+extern sBigRadioOpt_3DE0 D_005308B8_3DE0[] __asm__("D_005308B8");
+
+extern "C" void func_00193DE0(void* self, int player, int opt, int value)
+{
+    switch (opt) {
+    case 0: {
+        unsigned int o = player == 0;
+        D_005308B8_3DE0[o].f8 = value;
+        break;
+    }
+    case 1: {
+        unsigned int o = player == 0;
+        D_005308B8_3DE0[o].flags.b3 = value;
+        break;
+    }
+    case 2: {
+        unsigned int o = player == 0;
+        D_005308B8_3DE0[o].flags.b0 = value;
+        break;
+    }
+    case 3:
+        D_005308B8_3DE0[player].flags.b4 = value;
+        break;
+    case 4:
+        D_005308B8_3DE0[player].flags.b5 = value;
+        break;
+    case 5:
+        D_005308B8_3DE0[player].flags.b1 = value;
+        break;
+    case 6:
+        D_005308B8_3DE0[player].flags.b2 = value;
+        break;
+    case 7: {
+        unsigned int o = player == 0;
+        D_005308B8_3DE0[o].f4 = value;
+        break;
+    }
+    }
+}
 
 //100%
 struct sBigRadioOpt_3F38 {
