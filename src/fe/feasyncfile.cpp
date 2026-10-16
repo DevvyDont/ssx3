@@ -4538,7 +4538,127 @@ extern "C" int func_001AC5A8(void* self, int a1, int a2)
     return a2 != 9 ? 0x101 : 0x100;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001AC5C0);
+//100%
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" int func_001AC408(void* self);
+extern "C" int func_001AC360(void* self);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_0025B6D8(void* self, int a1);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B6ED0(void* self, int a1, void* a2, int a3, int a4, int a5);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_001ACDD0(void* self);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern void* D_004A3028;
+extern char D_00462B88[];
+extern char D_00462BA0[];
+extern char D_00462C70[];
+extern char D_00462C88[];
+extern char D_00462C98[];
+extern char D_00462CB8[];
+extern char D_00462CD0[];
+extern char D_00462CE8[];
+extern char D_00462D00[];
+extern char D_00462D10[];
+extern char D_00461618[];
+
+struct sAsync_1AC5C0 {
+    char pad0[0x6D8];
+    int popupMode; // 0x6D8
+};
+
+extern "C" void func_001AC5C0(char* self, char* item, unsigned int id)
+{
+    switch (id) {
+    case 5:
+        switch (*(int*)(item + 0x18)) {
+        case 4: {
+            if (func_001AC408(self) == 0)
+                break;
+            char* p = (char*)func_001A9C50(self);
+            *(int*)(p + 0xBC) = 1;
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)(p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            ((sAsync_1AC5C0*)self)->popupMode = 4;
+            func_0025B6D8(D_004A3028, 0);
+            break;
+        }
+        case 2: {
+            if (func_001AC360(self) == 0)
+                break;
+            char* p = (char*)func_001A9C50(self);
+            *(int*)(p + 0xBC) = 0;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462C98);
+            *(int*)(p + 0xC0) = 3;
+            *(int*)(p + 0x164) = 0;
+            *(int*)(p + 0x150) = 0x812;
+            func_001A9BC0(self, p);
+            ((sAsync_1AC5C0*)self)->popupMode = 2;
+            func_0025B6D8(D_004A3028, 0);
+            break;
+        }
+        case 3: {
+            char* p = (char*)func_001A9C50(self);
+            int three = 3;
+            *(int*)(p + 0xBC) = -1;
+            *(int*)(p + 0x180) = 0x32;
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462CB8);
+            *(int*)(p + 0xC0) = three;
+            *(int*)(p + 0xD4) = GetHashValue32(D_00462CD0);
+            *(int*)(p + 0xD0) = three;
+            func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+            *(int*)(p + 0x150) = 0x80F;
+            func_001A9BC0(self, p);
+            break;
+        }
+        case 0: {
+            cUIText* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462B88));
+            if (o == 0)
+                break;
+            int str = *(int*)((char*)D_004A3028 + 0x48);
+            func_001A9150(self, (int)o, GetHashValue32(D_00462CE8), str, 0, 6, 0x10);
+            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            break;
+        }
+        case 1: {
+            cUIText* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
+            if (o == 0)
+                break;
+            int str = *(int*)((char*)D_004A3028 + 0x4C);
+            func_001A9150(self, (int)o, GetHashValue32(D_00462D00), str, 1, 7, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            break;
+        }
+        }
+        break;
+    case 6: {
+        char* q = (char*)func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+        *(int*)(q + 0x18) = 0x832;
+        func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, q);
+        break;
+    }
+    case 13:
+        func_001ACDD0(self);
+        break;
+    default:
+        func_001A8918(self, (int)item, id);
+        break;
+    }
+}
+
 
 //100%
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
