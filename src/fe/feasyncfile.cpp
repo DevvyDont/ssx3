@@ -15391,7 +15391,64 @@ extern "C" void func_001C17F8(void* self, int on)
     (*(cFEVObj_001C17F8**)((char*)self + 0x730))->v08(on);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C19C8);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" int func_001A8A40_19C8(void* self, void* obj) __asm__("func_001A8A40");
+extern "C" int func_001A8E40_19C8(void* self, int id) __asm__("func_001A8E40");
+extern "C" int func_0039F698(void* p);
+extern "C" void func_001AB178(void* self, int code);
+extern char D_00461618[];
+extern char D_00465958[];
+extern const char D_00461C60[];
+typedef void (*fn19C8)(void*, void*, int);
+
+extern "C" int func_001C19C8(char* self, unsigned int id)
+{
+    switch (id) {
+    case 0xE6:
+        *(int*)(self + 0x6F0) = 1;
+        break;
+    case 0x10C:
+    case 0x112:
+        func_0039F698(*(char**)(self + 0x10) + 0x18);
+        func_001AB178(self, id);
+        break;
+    case 0xE7:
+        if (*(int*)(self + 0x6F0) != 0) {
+            char* p = (char*)func_001A9C50(self);
+            char* sub;
+            *(int*)(p + 0xBC) = 1;
+            sub = p + 0xBC;
+            func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+            *(int*)(p + 0xC4) = GetHashValue32(D_00465958);
+            *(int*)(p + 0xC0) = 3;
+            *(int*)(p + 0x150) = 0x82F;
+            *(int*)(p + 0x14C) = 6;
+            func_001A9BC0(self, p);
+        } else {
+            char* o;
+            char* vt;
+            *(int*)(self + 0x6EC) = 0;
+            o = *(char**)(self + 0x20);
+            vt = *(char**)(o + 0x8);
+            ((fn19C8)*(void**)(vt + 0x8C))(o + *(short*)(vt + 0x88), self, 0x14);
+        }
+        break;
+    case 0xEF:
+        break;
+    case 0xF3:
+        func_001A8A40_19C8(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)(self + 0x10)));
+        break;
+    default:
+        return func_001A8E40_19C8(self, id);
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_001C1B88(void* self, void* a1, int a2);
