@@ -200,6 +200,20 @@ index 4bf8dc5..95f69d7 100644
              default:
                  return "false";
              }
+diff --git a/ps2xRecomp/src/lib/fpu_translator.cpp b/ps2xRecomp/src/lib/fpu_translator.cpp
+index 435db3a..9070dd7 100644
+--- a/ps2xRecomp/src/lib/fpu_translator.cpp
++++ b/ps2xRecomp/src/lib/fpu_translator.cpp
+@@ -58,7 +58,8 @@ namespace ps2recomp
+                                    "ctx->f[{}] = FPU_DIV_S(ctx->f[{}], ctx->f[{}]); }}",
+                                    ft, fd, fs, ft);
+             case COP1_S_SQRT:
+-                return fmt::format("ctx->f[{}] = FPU_SQRT_S(ctx->f[{}]);", fd, fs);
++                // The R5900 encodes SQRT.S fd, ft: the operand is in the ft field, and fs is zero.
++                return fmt::format("ctx->f[{}] = FPU_SQRT_S(ctx->f[{}]);", fd, ft);
+             case COP1_S_ABS:
+                 return fmt::format("ctx->f[{}] = FPU_ABS_S(ctx->f[{}]);", fd, fs);
+             case COP1_S_MOV:
 diff --git a/ps2xRuntime/CMakeLists.txt b/ps2xRuntime/CMakeLists.txt
 index 589d768..3444800 100644
 --- a/ps2xRuntime/CMakeLists.txt
@@ -1587,3 +1601,32 @@ index 563bcbd..e00fe45 100644
          runtime.run();
  
  #ifdef _DEBUG
+diff --git a/ps2xTest/src/code_generator_tests.cpp b/ps2xTest/src/code_generator_tests.cpp
+index 463b6cf..f834952 100644
+--- a/ps2xTest/src/code_generator_tests.cpp
++++ b/ps2xTest/src/code_generator_tests.cpp
+@@ -992,6 +992,24 @@ void register_code_generator_tests()
+             t.IsTrue(mtc0Code.find("Unhandled COP0") == std::string::npos, "MTC0 should not hit unhandled COP0 path");
+         });
+ 
++        tc.Run("SQRT.S reads its operand from the ft field", [](TestCase &t) {
++            CodeGenerator gen({}, {});
++
++            // 0x46010144 is sqrt.s $f5, $f1 on the R5900: ft=1, fs=0, fd=5.
++            Instruction sqrt{};
++            sqrt.opcode = OPCODE_COP1;
++            sqrt.rs = COP1_S;
++            sqrt.rt = 1;
++            sqrt.rd = 0;
++            sqrt.sa = 5;
++            sqrt.function = COP1_S_SQRT;
++
++            const std::string code = gen.translateInstruction(sqrt);
++            printGeneratedCode("SQRT.S reads its operand from the ft field", code);
++            t.IsTrue(code.find("ctx->f[5] = FPU_SQRT_S(ctx->f[1])") != std::string::npos,
++                     "SQRT.S should compute sqrt(ft) into fd");
++        });
++
+         tc.Run("FCR access uses CFC1/CTC1", [](TestCase &t) {
+             CodeGenerator gen({}, {});
+ 

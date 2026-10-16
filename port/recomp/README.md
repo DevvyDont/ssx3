@@ -26,6 +26,9 @@ or any disc file.
   - `BLTZ`/`BGEZ`/`BLEZ`/`BGTZ` (and their likely/link forms) testing the whole 64-bit register, like `SLT` and
     `BEQ` already do; EA's file table compares hashes with `LWU`+`DSUBU`+`BLTZ`, and a 32-bit test sorted it
     wrongly, so some riders' texture archives were never found;
+  - `SQRT.S` taking its operand from the `ft` field, where the R5900 encodes it (the translator read `fs`,
+    which is always `$f0`); SSX 3's lighting normalises light directions with it, and without the fix the
+    riders' vertex colours saturated into rainbow noise;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -87,7 +90,7 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 ## Status
 
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
-input through the front end to a race. In the race, the HUD, sky, distant mountains and the slope draw; the
-riders and close scenery do not yet. Sound has not been tested yet.
+input through the front end to a race. In the race, the HUD, sky, distant mountains, the slope and the
+riders draw; most close scenery does not yet. Sound has not been tested yet.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
