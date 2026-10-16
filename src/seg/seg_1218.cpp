@@ -1045,7 +1045,91 @@ extern "C" void func_00103578(sObj_3578* self, cStream_3578* s)
     }
 }
 
-INCLUDE_ASM("seg/seg_1218", func_001036A0);
+//100%
+extern "C" int func_001048C0_36A0(void*, void*, int*, float) __asm__("func_001048C0");
+extern "C" int func_00104940_36A0(void*, void*, int*, float) __asm__("func_00104940");
+extern "C" int func_001049C0_36A0(void*, void*, int*, float) __asm__("func_001049C0");
+extern "C" int func_00104110_36A0(void*, void*, int*, float) __asm__("func_00104110");
+extern "C" int func_00104178_36A0(void*, void*, int*, float) __asm__("func_00104178");
+extern "C" int func_00104238_36A0(void*, void*, int*, float) __asm__("func_00104238");
+extern "C" int func_001042A8_36A0(void*, void*, int*, float) __asm__("func_001042A8");
+extern "C" int func_00104358_36A0(void*, void*, int*, float) __asm__("func_00104358");
+extern "C" int func_001045D8_36A0(void*, void*, int*, float) __asm__("func_001045D8");
+extern "C" int func_00104660_36A0(void*, void*, int*, float) __asm__("func_00104660");
+extern "C" int func_001042E0_36A0(void*, void*, int*, float) __asm__("func_001042E0");
+extern "C" int func_001043F8_36A0(void*, void*, int*, float) __asm__("func_001043F8");
+extern "C" int func_001045B8_36A0(void*, void*, int*, float) __asm__("func_001045B8");
+extern "C" int func_001047F0_36A0(void*, void*, int*, float) __asm__("func_001047F0");
+extern "C" int func_00104728_36A0(void*, void*, int*, float) __asm__("func_00104728");
+extern "C" int func_001046B0_36A0(void*, void*, int*, float) __asm__("func_001046B0");
+extern "C" char* cAIAnimEventMap_getBlendInTime_36A0(int) __asm__("cAIAnimEventMap_getBlendInTime");
+extern "C" void func_00103AA0_36A0(void*, int*) __asm__("func_00103AA0");
+
+static inline int isActive_36A0(char* p)
+{
+    return *(int*)(p + 0x874) && *(int*)(p + 0x87C);
+}
+
+extern "C" void func_001036A0(char* self, void* x, int* anim, float dt)
+{
+    int r = 0;
+    switch (*(int*)(cAIAnimEventMap_getBlendInTime_36A0(*anim) + 4)) {
+    case 0:
+        r = func_001048C0_36A0(self, x, anim, dt);
+        break;
+    case 1:
+        r = func_00104940_36A0(self, x, anim, dt);
+        break;
+    case 2:
+        r = func_001049C0_36A0(self, x, anim, dt);
+        break;
+    case 3:
+        r = func_00104110_36A0(self, x, anim, dt);
+        break;
+    case 4:
+        r = func_00104178_36A0(self, x, anim, dt);
+        break;
+    case 5:
+        r = func_00104238_36A0(self, x, anim, dt);
+        break;
+    case 6:
+        r = func_001042A8_36A0(self, x, anim, dt);
+        break;
+    case 7:
+        r = func_00104358_36A0(self, x, anim, dt);
+        break;
+    case 8:
+        r = func_001045D8_36A0(self, x, anim, dt);
+        break;
+    case 9:
+        r = func_00104660_36A0(self, x, anim, dt);
+        break;
+    case 10:
+        r = func_001042E0_36A0(self, x, anim, dt);
+        break;
+    case 11:
+        r = func_001043F8_36A0(self, x, anim, dt);
+        break;
+    case 12:
+        r = func_001045B8_36A0(self, x, anim, dt);
+        break;
+    case 13:
+        r = func_001047F0_36A0(self, x, anim, dt);
+        break;
+    case 14:
+        r = func_00104728_36A0(self, x, anim, dt);
+        break;
+    case 15:
+        r = func_001046B0_36A0(self, x, anim, dt);
+        break;
+    }
+    if (r == 0) {
+        char* p = *(char**)(self + 0x60);
+        if (p != 0 && isActive_36A0(p)) {
+            func_00103AA0_36A0(self, anim);
+        }
+    }
+}
 
 //100%
 extern "C" int func_00104CA0_3918(void*, void*, void*) __asm__("func_00104CA0");
