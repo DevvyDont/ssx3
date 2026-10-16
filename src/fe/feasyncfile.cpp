@@ -8229,7 +8229,89 @@ void func_001B4198(void* self)
     *(int*)((char*)self + 0x708) = 6;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B41A8);
+//100%
+extern int D_004A1B80;
+void func_002C67E8(void* self, int a1);
+extern "C" void* func_001A8770(void* self);
+extern "C" void func_001B4470(void* self);
+extern "C" void func_001B43A8(void* self);
+extern "C" void func_001B5068(void* self, int a1);
+extern "C" void func_001B4888(void* self, int a1, int a2, int a3);
+extern "C" void func_001B45E8(void* self);
+extern "C" int func_0039F698(void* p);
+typedef int (*fn41A8)(void*);
+typedef int (*fn41A8i)(void*, int);
+
+static inline int VCall41A8(int off)
+{
+    char* o = (char*)D_004A1B78;
+    char* vt = *(char**)o;
+    return ((fn41A8)*(void**)(vt + off + 4))(o + *(short*)(vt + off));
+}
+
+static inline void VCall41A8i(int off, int a)
+{
+    char* o = (char*)D_004A1B78;
+    char* vt = *(char**)o;
+    ((void (*)(void*, int))*(void**)(vt + off + 4))(o + *(short*)(vt + off), a);
+}
+
+static inline void VCall41A8v(int off)
+{
+    char* o = (char*)D_004A1B78;
+    char* vt = *(char**)o;
+    ((void (*)(void*))*(void**)(vt + off + 4))(o + *(short*)(vt + off));
+}
+
+extern "C" void func_001B41A8(char* self)
+{
+    if (D_004A1B78 != 0) VCall41A8v(0x18);
+    switch (*(unsigned int*)(self + 0x708)) {
+    case 1:
+        *(int*)(self + 0x708) = 2;
+        break;
+    case 2:
+        if (VCall41A8(0x58) == 0) {
+            func_002C67E8(D_004A1B78, D_004A1B80);
+            *(int*)(self + 0x708) = 3;
+        }
+        break;
+    case 3:
+        if (VCall41A8(0x58) == 0) func_001B4470(self);
+        break;
+    case 4:
+        func_001B43A8(self);
+        break;
+    case 5: {
+        if ((*(int*)(self + 0x6E0))-- < 0) {
+            if (VCall41A8(0x1A8) == 0) {
+                func_001B5068(self, -1);
+                func_001B4888(self, 0x842, 0x18, D_004A1B80);
+            } else {
+                func_0039F698(*(char**)(self + 0x10) + 0x18);
+            }
+            *(int*)(self + 0x708) = 0;
+            break;
+        }
+    }
+    case 0:
+        if (VCall41A8(0x58) == 0) VCall41A8i(0x28, D_004A1B80);
+        break;
+    case 6:
+        *(int*)(self + 0x708) = 7;
+        break;
+    case 7:
+        if (VCall41A8(0x58) == 0) {
+            func_002C67E8(D_004A1B78, D_004A1B80);
+            *(int*)(self + 0x708) = 8;
+        }
+        break;
+    case 8:
+        if (VCall41A8(0x58) == 0) func_001B45E8(self);
+        break;
+    }
+    func_001A8770(self);
+}
 
 //100%
 // D_004A1B78 is declared earlier in the unit (cFEVObj_001B3F78*, see func_001B3F78)
