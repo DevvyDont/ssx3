@@ -1300,7 +1300,21 @@ extern "C" void func_00148098(void)
     }
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148158);
+//100%
+extern "C" int func_00148158(void* self, int profile, unsigned int kind)
+{
+    int c = cBELibrary_getCharacterID(profile);
+    switch (kind) {
+    case 0: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBDF]; }
+    case 1: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE0]; }
+    case 2: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE1]; }
+    case 3: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE2]; }
+    case 4: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE3]; }
+    case 5: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE4]; }
+    case 6: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE5]; }
+    }
+    return -1;
+}
 
 struct sCharStat15
 {
