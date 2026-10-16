@@ -7722,7 +7722,69 @@ extern "C" int func_001B3568(void* self, void* sender, int event, int value)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B35B0);
+//100%
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+int func_001A98B0(void* self);
+extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4);
+extern "C" void func_001ABB30(void* self, int a1, void* a2, int a3);
+extern "C" void func_001A4B20_ABC50(void* self, int a1, int* out) __asm__("func_001ABC50");
+extern "C" void func_001A4B20_ABE58(void* self, int a1, int* out) __asm__("func_001ABE58");
+extern "C" void func_001ABED8(void* self);
+extern "C" void func_0025DF00(void* self, int a1);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+int GetHashValue32(char* str);
+extern void* D_004A3028;
+extern char D_00463D78[];
+
+extern "C" void func_001B35B0(void* self_, void* a1, int kind_)
+{
+    char* self = (char*)self_;
+    unsigned int kind = kind_;
+    int r17;
+    int r18;
+    switch (kind) {
+    case 15:
+        func_001ABCD0(self, func_001A98B0(self), a1, kind, 0);
+        return;
+    case 16:
+        func_001A97B8(self, a1, kind);
+        func_001ABB30(self, func_001A98B0(self), a1, kind);
+        return;
+    case 17:
+        func_001A4B20_ABE58(self, func_001A98B0(self), &r17);
+        if (r17 == 1) {
+            func_001ABED8(self);
+        } else {
+            func_001A97B8(self, a1, kind);
+        }
+        return;
+    case 18:
+        func_001A4B20_ABC50(self, func_001A98B0(self), &r18);
+        if (r18 == 1) {
+            func_001ABED8(self);
+        } else {
+            func_001A97B8(self, a1, kind);
+        }
+        return;
+    case 19: {
+        void* d;
+        char* p;
+        *(int*)(self + 0x6C4) = 0;
+        d = D_004A3028;
+        func_0025DF00(d, func_001A98B0(self));
+        p = (char*)func_001A9C50(self);
+        *(int*)(p + 0xBC) = 0;
+        *(int*)(p + 0xC4) = GetHashValue32(D_00463D78);
+        *(int*)(p + 0xC0) = 3;
+        *(int*)(p + 0x164) = 0;
+        *(int*)(p + 0x150) = 0x805;
+        func_001A9BC0(self, p);
+        break;
+    }
+    }
+    func_001A97B8(self, a1, kind);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
