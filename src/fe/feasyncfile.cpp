@@ -11820,7 +11820,64 @@ extern "C" void func_001BADE8(void* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001BAED8);
+//100%
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025C610(void* self);
+extern "C" void func_001A97B8_AED8(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern char D_00462D80[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_00462C70[];
+extern char D_00462C88[];
+
+extern "C" void func_001BAED8(char* self, void* a1, unsigned int kind)
+{
+    switch (kind) {
+    case 15:
+    case 16:
+    case 20:
+        *(int*)(self + 0x6D8) = 0;
+        func_001A97B8_AED8(self, a1, kind);
+        break;
+    case 17:
+        *(int*)(self + 0x6D8) = 1;
+        func_001A97B8_AED8(self, a1, kind);
+        break;
+    case 22:
+        func_001A97B8_AED8(self, a1, kind);
+        if (*(int*)(self + 0x6D8) != 0) {
+            char* p = (char*)func_001A9C50(self);
+            char* sub;
+            *(int*)(p + 0xBC) = 2;
+            sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462D80);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)(p + 0x150) = 0x81F;
+            *(int*)(p + 0x164) = 0;
+            func_001A9BC0(self, p);
+        } else {
+            char* p = (char*)func_001A9C50(self);
+            char* sub;
+            *(int*)(p + 0xBC) = 1;
+            sub = p + 0xBC;
+            *(int*)(p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)(p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, (*(const char***)(self + 0x6D0))[0]);
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (*(const char***)(self + 0x6D0))[1]);
+            func_0025C610(D_004A3028);
+        }
+        *(int*)(self + 0x6D8) = 0;
+        break;
+    default:
+        func_001A97B8_AED8(self, a1, kind);
+        break;
+    }
+}
 
 //100%
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
