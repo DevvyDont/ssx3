@@ -923,7 +923,60 @@ extern "C" void func_0028CD48(void* self)
     func_002B3C28(mon, 0x7F);
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028CDF8);
+//100%
+extern "C" void func_002B4A08(void* self, int a1);
+extern int D_00536708_CDF8[] __asm__("D_00536708");
+extern int D_00536730_CDF8[] __asm__("D_00536730");
+extern char* D_004A28A8_CDF8 __asm__("D_004A28A8");
+extern char D_00482A00[];
+
+struct sRace_CDF8 {
+    int mode;           // 0x0
+    char pad[0x14];
+    int course[4];      // 0x18
+};
+
+extern "C" void func_0028CDF8(char* self)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    if (*(int*)(self + 0x608C) == 2) {
+        return;
+    }
+    sRace_CDF8* race = *(sRace_CDF8**)(D_004A28A8_CDF8 + 0xC0);
+    if (race->mode != 3) {
+        return;
+    }
+    if (D_00536730_CDF8[0] >= 3) {
+        return;
+    }
+    int track = -1;
+    switch (race->course[D_00536708_CDF8[0]]) {
+    case 0: track = 10; break;
+    case 1: track = 2; break;
+    case 2: track = 8; break;
+    case 3: track = 1; break;
+    case 4: track = 5; break;
+    case 5: track = 9; break;
+    case 6: track = 3; break;
+    case 7: track = 7; break;
+    case 8: track = 4; break;
+    case 9: track = 6; break;
+    }
+    if (track < 0) {
+        return;
+    }
+    char* mon = self + 0x118;
+    *(int*)(self + 0x62AC) = *(int*)(self + 0x508);
+    sBmVtCD48* vt = *(sBmVtCD48**)(self + 0x5558);
+    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, D_00482A00, 0xC, func_00287968(self, 1, 0), 0);
+    func_002B49C0(mon, 0xC9);
+    sBmVtCD48* vt2 = *(sBmVtCD48**)(self + 0x5558);
+    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, track);
+    func_002B4A08(mon, 1);
+    func_002B3C28(mon, 0x7F);
+}
 
 INCLUDE_ASM("sound/bankmanager", func_0028CF98);
 
