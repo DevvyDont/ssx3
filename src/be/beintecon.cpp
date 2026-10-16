@@ -150,7 +150,35 @@ int func_00150E50(void* self, int a1)
     return ((sEconTable*)D_00440550)->entries[a1].value;
 }
 
-INCLUDE_ASM("be/beintecon", func_00150E68);
+//100%
+struct sProf0E68 { char s[0xF88]; };
+struct sEcon0E68 { int a; int b; };
+extern sEcon0E68 D_00440550_0E68[] __asm__("D_00440550");
+
+extern "C" int func_00150E68(void* self, int profile, int c, unsigned int kind)
+{
+    char* p;
+    if (profile >= 2) return 0;
+    p = 0;
+    switch (kind) {
+    case 0: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBDF]; break;
+    case 1: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE0]; break;
+    case 2: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE1]; break;
+    case 3: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE2]; break;
+    case 4: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE3]; break;
+    case 5: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE4]; break;
+    case 6: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE5]; break;
+    }
+    if (*p == 5) return 0;
+    {
+        int v = D_00440550_0E68[(*p - 1) / 5].b;
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* q = (char*)D_004A6CA8 + off;
+        *(int*)(q + 0xAC4) += v;
+    }
+    (*p)++;
+    return 1;
+}
 
 //100%
 extern "C" void* cBE_getBE();
