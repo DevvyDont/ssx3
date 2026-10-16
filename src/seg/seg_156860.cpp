@@ -51,7 +51,80 @@ extern "C" char *cCommSystem_getSignature(void) {
     return D_00481370;
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00255A20);
+//100%
+extern "C" void func_003F42A0(void);
+extern "C" int func_003F3CC0_5A20(int tag, int a, int b) __asm__("func_003F3CC0");
+extern "C" int func_003F3C50(void* buf, int a);
+extern "C" void func_00255FE8(void* self, int tag);
+extern "C" void func_00256038(void* self, int* out);
+extern char D_00536810[];
+
+struct sVE_5A20 { short delta; short index; void (*fn)(void*); };
+
+extern "C" void func_00255A20(char* self)
+{
+    func_003F42A0();
+    switch (*(int*)(self + 0x20)) {
+    case 0:
+    case 1:
+    case 6:
+        break;
+    case 2:
+        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) == 0) {
+            func_003F3C50(D_00536810 + (*(int*)(self + 0x1C) << 8), 0);
+            *(int*)(self + 0x20) = 3;
+        }
+        break;
+    case 3:
+        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) && func_003F3CC0_5A20(0x686F7374, 0, 0)) {
+            *(int*)(self + 0x20) = 4;
+            *(int*)(self + 0x24) = 0x708;
+            *(int*)(self + 0x30) = func_003F3CC0_5A20(0x74797065, 0, 0);
+            int r = func_003F3CC0_5A20(0x62626E64, 0, 0);
+            if (r == 1) {
+                *(int*)(self + 0x2C) = r;
+            }
+        }
+        {
+            int c = func_003F3CC0_5A20(0x636F6E6E, 0, 0);
+            if ((c >> 24) == 0x2D) {
+                func_00255FE8(self, c);
+                *(int*)(self + 0x24) = 0;
+            }
+        }
+        break;
+    case 4: {
+        int out;
+        func_00256038(self, &out);
+        if (out != 0) {
+            *(int*)(self + 0x24) = 0;
+            *(int*)(self + 0x20) = 5;
+        }
+        break;
+    }
+    case 5: {
+        char** objs = (char**)self;
+        for (int i = 0; i >= 0; i--) {
+            char* o = *objs;
+            if (o != 0) {
+                sVE_5A20* e = &(*(sVE_5A20**)(o + 8))[3];
+                e->fn(o + e->delta);
+            }
+            objs++;
+        }
+        break;
+    }
+    }
+    int t = *(int*)(self + 0x24);
+    if (t > 0) {
+        t--;
+        *(int*)(self + 0x24) = t;
+        if (t <= 0) {
+            func_00255FE8(self, 0x74696D65);
+            *(int*)(self + 0x24) = 0;
+        }
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
