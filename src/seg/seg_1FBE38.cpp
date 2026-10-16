@@ -3935,7 +3935,93 @@ extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
     return D_004C9098_2048;
 }
 
-INCLUDE_ASM("seg/seg_1FBE38", func_00302210);
+//100%
+extern int *D_004A3DD8_2210 __asm__("D_004A3DD8");
+extern char *D_004A28A8_2210 __asm__("D_004A28A8");
+extern int D_00445E40_2210[] __asm__("D_00445E40");
+extern const int D_004465C8_2210[] __asm__("D_004465C8");
+extern "C" int cBE_getBE_2210(void) __asm__("cBE_getBE");
+extern "C" void* cBE_getInterface_2210(int, int) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144CE0_2210(void*, int) __asm__("func_00144CE0");
+extern "C" void func_0022CEA8_2210(char*, int, int) __asm__("func_0022CEA8");
+extern "C" void func_0022D088_2210(char*, int, int) __asm__("func_0022D088");
+extern "C" void func_00231250_2210(void*, int, int, int) __asm__("func_00231250");
+extern "C" void* func_0028B180_2210(void) __asm__("func_0028B180");
+extern "C" void func_002A49E8_2210(void*) __asm__("func_002A49E8");
+struct Sh_2210 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual int v09(); };
+struct V3_2210 { float x, y, z; };
+extern V3_2210 D_004C9098_2210 __asm__("D_004C9098");
+struct Tag_2210 { char c; Tag_2210() {} Tag_2210(const Tag_2210 &o) : c(o.c) {} };
+extern unsigned D_2210[] __asm__("D_004FBC20");
+extern int D_004A5730;
+extern "C" void* func_003E6574_2210(void*, void*, int) __asm__("func_003E6574");
+struct Ent_2210 { int idx; int val; int pad; int type; };
+extern "C" V3_2210 func_00302210(int n, Ent_2210 *e) {
+    if (D_004A5730 == 0) {
+        ((int*)D_2210)[0] = -1;
+        ((int*)D_2210)[1] = -1;
+        ((int*)D_2210)[2] = -1;
+        D_004A5730 = 1;
+        (*(Tag_2210*)((char*)D_2210 + 12)) = Tag_2210((*(Tag_2210*)((char*)D_2210 + 12)));
+    }
+    unsigned buf64[4];
+    unsigned *buf = buf64;
+    func_003E6574_2210(buf, D_2210, 16);
+    Ent_2210 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004465C8_2210[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    int r;
+    int k = *D_004A3DD8_2210;
+    if (k != -1) {
+        int k4 = k * 4;
+        char *lvl = *(char**)(*(char**)(D_004A28A8_2210 + 0x84) + 0xC);
+        char *q = *(char**)(lvl + k4 + 0x28);
+        char *a = q ? q + 0x6C0 : 0;
+        char *b = a ? a - 0x6C0 : 0;
+        Sh_2210 *sh = (Sh_2210*)(b + 0x6C0);
+        r = sh->v09() ^ 1;
+    } else {
+        r = 0;
+    }
+    if (r) {
+        unsigned id = buf[2];
+        int a1 = buf[1];
+        int v16 = 0;
+        int a0 = buf[0];
+        void *iface = cBE_getInterface_2210(cBE_getBE_2210(), 0);
+        char *w = *(char**)(*(char**)(D_004A28A8_2210 + 0x84) + 0x78);
+        if (id < 8)
+            v16 = D_00445E40_2210[id];
+        int h = func_00144CE0_2210(iface, a0);
+        switch (a1) {
+        case 0:
+            func_0022CEA8_2210(w, h, v16);
+            break;
+        case 2:
+            func_0022D088_2210(w, h, v16);
+            break;
+        case 3:
+            func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 2, 0);
+            func_002A49E8_2210(func_0028B180_2210());
+            break;
+        case 4:
+            func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 0, 0);
+            break;
+        case 5:
+            *(int*)(w + 0x1A4) = 1;
+            break;
+        }
+    }
+    return D_004C9098_2210;
+}
+
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
