@@ -2088,5 +2088,105 @@ INCLUDE_ASM("fe/ovstatepause", func_001FF7B8);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FFD08);
 
-INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onGainTransition);
+//100%
+extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" const char* func_00144BF0(void* track);
+extern "C" void func_002C2540(unsigned short* dst, const char* src);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
+extern char D_0046F520[];
+extern char D_004A2400[];
+extern char D_0046E548[];
+extern char D_0046E398[];
+extern char D_0046E3A8[];
+extern char D_0046E3C0[];
+extern char D_00470468[];
+extern char D_004A2588[];
+extern char D_004A2590[];
+extern char D_00470480[];
+
+typedef int (*tLocFn_REW)(void*, int);
+
+extern "C" int cOVState_REWARDS_onGainTransition(char* self)
+{
+    if (*(int*)(self + 0x48) == 0) {
+        unsigned short text[0x68];
+        unsigned short fmt[0x10];
+        unsigned short line[0x68];
+        char name[0x40];
+        void* reward = cBE_getInterface_Fv(cBE_getBE(), 2);
+        void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* track = cBE_getInterface_Fv(cBE_getBE(), 0);
+        int mode = (signed char)D_00535BC8[0x4A];
+        int sub = (signed char)D_00535BC8[0x48];
+        switch (mode) {
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+            func_002C2508(text, (void*)func_001FD190(mode));
+            break;
+        case 5:
+            func_002C2540(fmt, D_0046F520);
+            func_002C26D0(text, fmt, func_00144BF0(track));
+            break;
+        default: {
+            int s = 0;
+            switch (sub) {
+            case 0:
+            case 5: {
+                char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+                char* vt = *(char**)(o + 4);
+                o += *(short*)(vt + 0x20);
+                s = ((tLocFn_REW)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046E548));
+                break;
+            }
+            case 1: {
+                char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+                char* vt = *(char**)(o + 4);
+                o += *(short*)(vt + 0x20);
+                s = ((tLocFn_REW)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046E398));
+                break;
+            }
+            case 2: {
+                char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+                char* vt = *(char**)(o + 4);
+                o += *(short*)(vt + 0x20);
+                s = ((tLocFn_REW)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046E3A8));
+                break;
+            }
+            case 3: {
+                char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+                char* vt = *(char**)(o + 4);
+                o += *(short*)(vt + 0x20);
+                s = ((tLocFn_REW)*(void**)(vt + 0x24))(o, GetHashValue32(D_0046E3C0));
+                break;
+            }
+            case 4:
+                break;
+            }
+            func_002C2540(fmt, D_004A2400);
+            func_002C26D0(text, fmt, func_00144BF0(track), s);
+            break;
+        }
+        }
+        func_003A0E90(cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470468)), text);
+        int idx = func_00146E98(player, 0);
+        void* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2588));
+        func_002C27C0(name, D_004A2590, func_0014EE58(reward, idx));
+        {
+            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            char* vt = *(char**)(o + 4);
+            o += *(short*)(vt + 0x20);
+            unsigned short* lf = (unsigned short*)((tLocFn_REW)*(void**)(vt + 0x24))(o, GetHashValue32(D_00470480));
+            func_002C26D0(line, lf, name);
+        }
+        func_003A0E90(obj, line);
+    }
+    *(int*)(self + 0x48) = 1;
+    return 0;
+}
 
