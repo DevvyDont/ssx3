@@ -29,6 +29,14 @@ or any disc file.
   - `SQRT.S` taking its operand from the `ft` field, where the R5900 encodes it (the translator read `fs`,
     which is always `$f0`); SSX 3's lighting normalises light directions with it, and without the fix the
     riders' vertex colours saturated into rainbow noise;
+  - VU0 macro-mode `VSQI`/`VLQI`/`VSQD`/`VLQD` and `VILWR`/`VISWR` addressing VU0 data memory rather than the
+    bottom of EE RAM, with `VSQI`/`VSQD` storing `fs` at `it` (the translator had the two fields swapped). SSX 3
+    stores matrices this way for a VU0 microprogram that decides which world objects are in view, so most close
+    scenery was dropped;
+  - `VCALLMSR` starting the microprogram at `CMSAR0` (it read past the 16 VI registers, so it jumped anywhere);
+  - `CVT.W.S` truncating toward zero and saturating, as the R5900 always does (it rounded to nearest);
+  - VU0 macro `DIV`/`SQRT`/`RSQRT` and `FTOI` giving the hardware results for zero divisors, negative inputs,
+    `RSQRT`'s numerator and positive overflow;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -108,7 +116,8 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 ## Status
 
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
-input through the front end to a race. In the race, the HUD, sky, distant mountains, the slope and the
-riders draw; most close scenery does not yet. Sound has not been tested yet.
+input through the front end to a race. In the race, the HUD, sky, distant mountains, riders and close scenery
+(start gate, trees, course walls) draw and riders stay on the course. The snow under the riders draws black and
+some course surfaces show multicoloured noise. Sound has not been tested yet.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
