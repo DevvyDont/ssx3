@@ -3692,7 +3692,75 @@ extern "C" void func_00362448(sDwordList362448* list)
     list->count++;
 }
 
-INCLUDE_ASM("object/railmodifier", func_00362478);
+//100%
+extern "C" void func_00362478(sGifPacket* pkt, int reg, int hi, int ctx)
+{
+    switch (ctx) {
+    case 0:
+        pkt->cur[1] = 0x42;
+        break;
+    case 1:
+        pkt->cur[1] = 0x43;
+        break;
+    default:
+        pkt->cur[1] = 0x42;
+        break;
+    }
+    switch (reg) {
+    case 0:
+        pkt->cur[0] = 0xAA;
+        break;
+    case 1:
+        pkt->cur[0] = 0x2A;
+        break;
+    case 5:
+        pkt->cur[0] = 0x44;
+        break;
+    case 6:
+        pkt->cur[0] = 0x46;
+        break;
+    case 7:
+        pkt->cur[0] = 0x48;
+        break;
+    case 8:
+        pkt->cur[0] = 0x81;
+        break;
+    case 9:
+        pkt->cur[0] = 0x42;
+        break;
+    case 4:
+        pkt->cur[0] = 0x89;
+        break;
+    case 3:
+        pkt->cur[0] = 0x6A;
+        break;
+    case 11:
+        pkt->cur[0] = ((ulong)hi << 32) | 0x64;
+        break;
+    case 12:
+        pkt->cur[0] = ((ulong)hi << 32) | 0x68;
+        break;
+    case 13:
+    case 14:
+        pkt->cur[0] = ((ulong)hi << 32) | 0x88;
+        break;
+    case 2:
+        pkt->cur[0] = ((ulong)0x80 << 32) | 0x68;
+        break;
+    case 16:
+        pkt->cur[0] = 0x98;
+        break;
+    case 17:
+        pkt->cur[0] = 0x58;
+        break;
+    case 10:
+    case 21:
+        pkt->cur[0] = 0x49;
+        break;
+    }
+    pkt->cur += 2;
+    pkt->qwc++;
+}
 
 //100%
 // PORT: 64-bit GS register writes (ulong).

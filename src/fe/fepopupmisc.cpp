@@ -4830,7 +4830,64 @@ extern "C" void func_001E55D0(void* self, int idx)
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E5638);
+//100%
+int GetHashValue32(char* str);
+extern char D_0046E140[];
+extern "C" unsigned char func_001E5AA0(void* self, int idx);
+extern char D_0046E160[];
+extern char D_0046E180[];
+extern char D_0046E1A0[];
+extern char D_0046E1C0[];
+
+extern "C" void func_001E5638(void* self, int idx)
+{
+    char buf[32];
+    int n;
+    if (D_004A20C4 != 0)
+        n = func_001E5AA0(self, idx);
+    else
+        n = func_001E3650(func_001E3388(idx));
+    if (func_001E2D58(3, idx)) {
+        switch (idx) {
+        case 0x73:
+        case 0x75:
+        case 0x77:
+        case 0x79:
+        case 0x7B:
+        case 0x7D:
+        case 0x7F:
+        case 0x81:
+        case 0x83:
+        case 0x85:
+        case 0x87:
+        case 0x89:
+            sprintf(buf, D_0046E140, n);
+            break;
+        case 0x74:
+        case 0x76:
+        case 0x78:
+        case 0x7A:
+        case 0x7C:
+        case 0x7E:
+        case 0x80:
+        case 0x82:
+        case 0x84:
+        case 0x86:
+        case 0x88:
+        case 0x8A:
+            sprintf(buf, D_0046E160, n);
+            break;
+        }
+    } else if (func_001E2D58(5, idx)) {
+        sprintf(buf, D_0046E180, n);
+    } else if (func_001E2D58(4, idx)) {
+        sprintf(buf, D_0046E1A0, n);
+    } else if (func_001E2D58(8, idx)) {
+        sprintf(buf, D_0046E1C0, n);
+    }
+    if (*(cUIText**)((char*)self + 0x54) != 0)
+        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x54), GetHashValue32(buf));
+}
 
 //100%
 struct sVEntry001E5780 {
