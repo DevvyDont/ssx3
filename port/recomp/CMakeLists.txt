@@ -129,8 +129,8 @@ ExternalProject_Add(ssx3pc_runtime
     CMAKE_COMMAND ${RUNTIME_ENV} ${CMAKE_COMMAND}
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${SSX3PC_RUNTIME_BUILD_TYPE}
-        "-DCMAKE_C_FLAGS=-m32 -msse4.2"
-        "-DCMAKE_CXX_FLAGS=-m32 -msse4.2"
+        "-DCMAKE_C_FLAGS=-m32 -msse4.2 -mfpmath=sse"
+        "-DCMAKE_CXX_FLAGS=-m32 -msse4.2 -mfpmath=sse"
         -DCMAKE_EXE_LINKER_FLAGS=-m32
         -DPS2X_BUILD_RECOMP=OFF
         -DPS2X_BUILD_ANALYZER=OFF

@@ -60,6 +60,24 @@ The runtime's per-function trace log (`ps2_log.txt`, written next to the ELF) an
 the trace flushes every guest function call to disk and slows races from about 2.3 to 1.6 frames a second.
 Pass `-DSSX3PC_TRACE_LOGS=ON` to turn them back on.
 
+The runtime is built with `-mfpmath=sse`. Without it a 32-bit build does float maths on the x87 unit, which
+turns PS2 floats with the top exponent (ordinary large numbers on the PS2) into NaNs.
+
+### PS2Recomp's tests
+
+PS2Recomp's test runner links the runtime, so it needs the same 32-bit flags. Once the build above has fetched
+and patched PS2Recomp into `port/recomp/build/ps2recomp`:
+
+```bash
+PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig cmake -S port/recomp/build/ps2recomp -B /tmp/ps2x-tests -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release "-DCMAKE_C_FLAGS=-m32 -msse4.2 -mfpmath=sse" \
+    "-DCMAKE_CXX_FLAGS=-m32 -msse4.2 -mfpmath=sse" -DCMAKE_EXE_LINKER_FLAGS=-m32 -DPS2X_BUILD_STUDIO=OFF
+ninja -C /tmp/ps2x-tests ps2x_tests
+cd port/recomp/build/ps2recomp && /tmp/ps2x-tests/ps2xTest/ps2x_tests
+```
+
+Run it from the PS2Recomp source folder: one test reads `instructions.h` by relative path.
+
 ## Running
 
 Run it from a folder holding the extracted disc, and point `PS2X_CD_IMAGE` at an ISO of the disc:

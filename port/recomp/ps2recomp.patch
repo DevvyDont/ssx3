@@ -1630,3 +1630,33 @@ index 463b6cf..f834952 100644
          tc.Run("FCR access uses CFC1/CTC1", [](TestCase &t) {
              CodeGenerator gen({}, {});
  
+diff --git a/ps2xTest/src/ps2_gs_tests.cpp b/ps2xTest/src/ps2_gs_tests.cpp
+index 0458a8c..0bfadee 100644
+--- a/ps2xTest/src/ps2_gs_tests.cpp
++++ b/ps2xTest/src/ps2_gs_tests.cpp
+@@ -422,17 +422,21 @@ void register_ps2_gs_tests()
+             constexpr uint32_t kGsCsr = 0x12001000u;
+             constexpr uint32_t kGsImr = 0x12001010u;
+ 
++            // GIF data is consumed synchronously, so CSR.FIFO (bits 14-15) always reads 01 (empty).
++            const auto withFifoEmpty = [](uint64_t value)
++            { return (value & ~0xC000ull) | 0x4000ull; };
++
+             const uint64_t csrPattern = 0xA1B2C3D4E5F60718ull;
+             mem.write64(kGsCsr, csrPattern);
+-            t.Equals(mem.read64(kGsCsr), csrPattern, "64-bit CSR read should match prior 64-bit write");
+-            t.Equals(mem.read32(kGsCsr), static_cast<uint32_t>(csrPattern & 0xFFFFFFFFull), "CSR low dword read should match");
++            t.Equals(mem.read64(kGsCsr), withFifoEmpty(csrPattern), "64-bit CSR read should match prior 64-bit write");
++            t.Equals(mem.read32(kGsCsr), static_cast<uint32_t>(withFifoEmpty(csrPattern) & 0xFFFFFFFFull), "CSR low dword read should match");
+             t.Equals(mem.read32(kGsCsr + 4u), static_cast<uint32_t>(csrPattern >> 32), "CSR high dword read should match");
+ 
+             mem.write32(kGsCsr, 0x11223344u);
+-            t.Equals(mem.read64(kGsCsr), 0xA1B2C3D411223344ull, "32-bit low write should preserve CSR high dword");
++            t.Equals(mem.read64(kGsCsr), withFifoEmpty(0xA1B2C3D411223344ull), "32-bit low write should preserve CSR high dword");
+ 
+             mem.write32(kGsCsr + 4u, 0x55667788u);
+-            t.Equals(mem.read64(kGsCsr), 0x5566778811223344ull, "32-bit high write should preserve CSR low dword");
++            t.Equals(mem.read64(kGsCsr), withFifoEmpty(0x5566778811223344ull), "32-bit high write should preserve CSR low dword");
+ 
+             const uint64_t imrPattern = 0x0123456789ABCDEFull;
+             mem.write64(kGsImr, imrPattern);
