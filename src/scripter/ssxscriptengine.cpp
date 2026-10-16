@@ -1074,7 +1074,82 @@ extern "C" void* func_00279F18(void* self, int i, int a2)
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027A4A0);
+//100%
+void* func_002E4D70(void* self);
+extern void* D_004880C0[];
+
+struct sColor_7A4A0
+{
+    float r, g, b, a;
+};
+
+struct sFx_7A4A0
+{
+    void** vt;
+    sColor_7A4A0 c;
+};
+
+// PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
+extern "C" void* func_002E4CE8_7A4A0(unsigned size) __asm__("func_002E4CE8");
+extern "C" void* func_002EBBA8_7A4A0(void* self, const sColor_7A4A0& v, int a, int b) __asm__("func_002EBBA8");
+extern "C" void* func_002EBE20_7A4A0(void* self, sColor_7A4A0 v) __asm__("func_002EBE20");
+
+static inline sFx_7A4A0* initFx_7A4A0(sFx_7A4A0* p, const sColor_7A4A0& col)
+{
+    func_002E4D70(p);
+    p->vt = D_004880C0;
+    p->c = col;
+    return p;
+}
+
+extern "C" void* func_0027A4A0(void* self, int kind, int mode)
+{
+    sColor_7A4A0 v;
+    switch (mode) {
+    case 0:
+        v.r = 1.0f;
+        v.g = 0.0f;
+        v.b = 0.0f;
+        v.a = 0.0f;
+        break;
+    case 1:
+        v.r = 1.0f;
+        v.g = 1.0f;
+        v.b = 1.0f;
+        v.a = 1.0f;
+        break;
+    }
+    switch (kind) {
+    case 0:
+    case 8:
+        return 0;
+    case 1: {
+        sFx_7A4A0* p = (sFx_7A4A0*)func_002E4CE8_7A4A0(0x14);
+        sColor_7A4A0 t = v;
+        return initFx_7A4A0(p, t);
+    }
+    case 2:
+        return func_002EBBA8_7A4A0(func_002E4CE8_7A4A0(0x1C), v, -1, 0);
+    case 3:
+        return func_002EBBA8_7A4A0(func_002E4CE8_7A4A0(0x1C), v, 1, 0);
+    case 4:
+        return func_002EBBA8_7A4A0(func_002E4CE8_7A4A0(0x1C), v, 0, -1);
+    case 5:
+        return func_002EBBA8_7A4A0(func_002E4CE8_7A4A0(0x1C), v, 0, 1);
+    case 6:
+        return func_002EBE20_7A4A0(func_002E4CE8_7A4A0(0x1C), v);
+    case 7: {
+        sFx_7A4A0* p = (sFx_7A4A0*)func_002E4CE8_7A4A0(0x14);
+        sColor_7A4A0 t;
+        t.r = 1.0f;
+        t.g = 1.0f;
+        t.b = 1.0f;
+        t.a = 1.0f;
+        return initFx_7A4A0(p, t);
+    }
+    }
+    return 0;
+}
 
 // PORT: the real function is func_00282BB0__FPvT0 (void*, void*); this caller passes only $a0.
 void* func_00282BB0(void* self) __asm__("func_00282BB0__FPvT0");
