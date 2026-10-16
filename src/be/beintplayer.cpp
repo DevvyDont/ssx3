@@ -550,9 +550,112 @@ extern "C" void func_001468B0(void* self, int index, int c, int kind, int flag, 
     }
 }
 
-INCLUDE_ASM("be/beintplayer", func_00146A70);
+//100%
+extern "C" int func_00146A70(void* self, int index, int c, int kind)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    switch (kind) {
+    case 6:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(unsigned long*)(p + 0x278) >> 14) & 1;
+    }
+    case 7:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(unsigned long*)(p + 0x278) >> 15) & 1;
+    }
+    case 8:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(unsigned long*)(p + 0x278) >> 16) & 1;
+    }
+    case 9:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(unsigned long*)(p + 0x278) >> 17) & 1;
+    }
+    case 10:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(unsigned long*)(p + 0x278) >> 18) & 1;
+    }
+    case 11:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        return (int)(*(unsigned long*)(p + 0x278) >> 19) & 1;
+    }
+    }
+    return 0;
+}
 
-INCLUDE_ASM("be/beintplayer", func_00146C10);
+//100%
+struct sProfBits6C10
+{
+    unsigned long low : 14;
+    unsigned long b14 : 1;
+    unsigned long b15 : 1;
+    unsigned long b16 : 1;
+    unsigned long b17 : 1;
+    unsigned long b18 : 1;
+    unsigned long b19 : 1;
+    unsigned long rest : 44;
+};
+
+extern "C" void func_00146C10(void* self, int index, int c, int kind, int value)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    switch (kind) {
+    case 6:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b14 = value;
+        break;
+    }
+    case 7:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b15 = value;
+        break;
+    }
+    case 8:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b16 = value;
+        break;
+    }
+    case 9:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b17 = value;
+        break;
+    }
+    case 10:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b18 = value;
+        break;
+    }
+    case 11:
+        {
+        int off = c * 0xF88 + profile * 0x9B50;
+        char* p = (char*)D_004A6CA8 + off;
+        ((sProfBits6C10*)(p + 0x278))->b19 = value;
+        break;
+    }
+    }
+}
 
 //100%
 int cBELibrary_getProfileIndex(int);
@@ -1300,7 +1403,21 @@ extern "C" void func_00148098(void)
     }
 }
 
-INCLUDE_ASM("be/beintplayer", func_00148158);
+//100%
+extern "C" int func_00148158(void* self, int profile, unsigned int kind)
+{
+    int c = cBELibrary_getCharacterID(profile);
+    switch (kind) {
+    case 0: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBDF]; }
+    case 1: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE0]; }
+    case 2: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE1]; }
+    case 3: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE2]; }
+    case 4: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE3]; }
+    case 5: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE4]; }
+    case 6: { int off = c * 0xF88 + profile * 0x9B50; char* p = (char*)D_004A6CA8 + off; return p[0xBE5]; }
+    }
+    return -1;
+}
 
 struct sCharStat15
 {
