@@ -149,7 +149,31 @@ extern "C" void func_0031B6C8(void* m)
         : "memory");
 }
 
-INCLUDE_ASM("bx/ps2main", func_0031B748);
+//100%
+struct sV_0031B748 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPair_0031B748 {
+    sV_0031B748 a;
+    sV_0031B748 b;
+};
+
+extern "C" void func_0031B7A8(sV_0031B748* out, float (*m)[4]);
+
+// Splits a matrix into its translation row and a rotation from func_0031B7A8.
+// PORT: g++ named return value extension (`return r`); a modern compiler does NRVO itself.
+extern "C" sPair_0031B748 func_0031B748(float (*m)[4]) return r
+{
+    sV_0031B748 v;
+    v.x = m[3][0];
+    v.y = m[3][1];
+    v.z = m[3][2];
+    v.w = m[3][3];
+    r.a = v;
+    func_0031B7A8(&v, m);
+    r.b = v;
+}
 
 INCLUDE_ASM("bx/ps2main", func_0031B7A8);
 
