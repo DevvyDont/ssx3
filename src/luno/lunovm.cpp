@@ -100,7 +100,13 @@ extern "C" cLunoTableRef* func_00224DA0(cLunoTableRef* self)
     return self;
 }
 
-INCLUDE_ASM("luno/lunovm", func_00224DD0);
+// Copy constructor: share the other reference's table and bump its refcount.
+extern "C" cLunoTableRef* func_00224DD0(cLunoTableRef* self, cLunoTableRef* other)
+{
+    self->table = other->table;
+    self->table->refCount++;
+    return self;
+}
 
 //100%
 extern "C" void func_00224DF0(cLunoTableRef* self, int flags)

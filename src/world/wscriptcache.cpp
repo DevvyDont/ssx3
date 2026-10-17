@@ -478,9 +478,19 @@ extern "C" void* func_003ADE08(void* self, int a1, int a2, int a3, int a4, int a
     return self;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003ADE58);
+extern "C" void* func_003ADE58(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8)
+{
+    *(int*)((char*)self + 0x60) = 0;
+    func_003ADEC8(self, a1, a2, a3, a4, a5, a6, a7, a8);
+    return self;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003ADE90);
+extern "C" void* func_003ADE90(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    *(int*)((char*)self + 0x60) = 0;
+    func_003ADEC8(self, a1, a2, a3, a4, a5, a6, 2, a7);
+    return self;
+}
 
 //100%
 struct sAlloc_ADEC8 {
@@ -1185,7 +1195,17 @@ extern "C" int func_003AF2F8(void* self)
     return *(int*)((char*)self + 0x4);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF300);
+extern unsigned char D_00499C81[];
+
+extern "C" void func_003AF300(char** pp, unsigned int* plen)
+{
+    unsigned int i;
+    char* p = *pp;
+    for (i = 0; i < *plen && ((D_00499C81 + p[i])[0] & 8) != 0; i++) {
+    }
+    *pp = p + i;
+    *plen -= i;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF378);
 
@@ -1197,7 +1217,26 @@ INCLUDE_ASM("world/wscriptcache", func_003AF670);
 
 INCLUDE_ASM("world/wscriptcache", func_003AF7F0);
 
-INCLUDE_ASM("world/wscriptcache", func_003B0340);
+extern "C" void* func_003B0340(int* self)
+{
+    self[0] = 0x20;
+    self[1] = 350;
+    self[2] = 600;
+    self[3] = 50;
+    ((unsigned int*)self)[4] = 0xFFFFFFFF;
+    ((unsigned int*)self)[5] = 0xFFFFFFFF;
+    ((unsigned char*)self)[0x24] = 0xFF;
+    ((unsigned char*)self)[0x25] = 0xFF;
+    ((unsigned char*)self)[0x26] = 0xFF;
+    ((unsigned char*)self)[0x27] = 0xFF;
+    self[6] = 2;
+    self[7] = 2;
+    self[8] = 0;
+    self[10] = 0;
+    self[11] = 0;
+    self[12] = 0;
+    return self;
+}
 
 extern "C" void func_003B03A8(void* self, int value)
 {
@@ -1919,7 +1958,12 @@ extern "C" void func_003B1140(sWSPool* self, sWSItem* item)
     self->free.addTail(item);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003B11A0);
+extern char D_004953E8[];
+
+extern "C" void* func_003B11A0()
+{
+    return func_003B0948(D_00509430_B0C58.alloc(D_004953E8, 0x80, 0, 0, D_00509430_B0C58.flags));
+}
 
 //100%
 void func_003B11E8(void* self)
