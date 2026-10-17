@@ -973,7 +973,14 @@ void func_003DF028(void *arg0) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF0B8);
+// Releases the handle at 0x1C of c, then frees c with func_003DF028.
+extern void func_003DD310_F0B8(int) __asm__("func_003DD310");
+extern void func_003DF028_F0B8(void *) __asm__("func_003DF028");
+void func_003DF0B8_F0B8(int a, int b, char *c) __asm__("func_003DF0B8");
+void func_003DF0B8_F0B8(int a, int b, char *c) {
+    func_003DD310_F0B8(*(volatile int *)(c + 0x1C));
+    func_003DF028_F0B8(c);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2648,7 +2655,9 @@ void func_003E4D68(void) {
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4DB8);
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4E98);
+// Returns the global at D_00450DCC.
+extern volatile int D_00450DCC_4E98 __asm__("D_00450DCC");
+int func_003E4E98(void) { return D_00450DCC_4E98; }
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2716,7 +2725,20 @@ int func_003E5008(void) {
     return D_00450DC8_5008[0];
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5018);
+// Tags the descriptor at D_00450DF8 with 'PS2T' and the current thread, sets its priority, then starts the worker.
+struct D_5018 { int tag; int thread; };
+extern struct D_5018 D_00450DF8_5018 __asm__("D_00450DF8");
+extern int func_00423C90_5018(void) __asm__("func_00423C90");
+extern void func_00423C30_5018(int, int) __asm__("func_00423C30");
+extern void func_003E5698_5018(void *) __asm__("func_003E5698");
+extern char D_0051ED88_5018[] __asm__("D_0051ED88");
+void func_003E5018(void) {
+    int t = func_00423C90_5018();
+    D_00450DF8_5018.tag = 0x50533254;
+    D_00450DF8_5018.thread = t;
+    func_00423C30_5018(t, 100);
+    func_003E5698_5018(D_0051ED88_5018);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -3195,7 +3217,15 @@ void func_003E5EF8(int a0, int a1) {
     func_003E5AA8(a0, a1);
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5F48);
+// Returns bit 0 of entry n's flags, initialising the table first if needed.
+extern int D_00451008_5F48 __asm__("D_00451008");
+extern void func_003E5B60_5F48(void) __asm__("func_003E5B60");
+struct E_5F48 { int a; int flags; };
+extern struct E_5F48 D_00450E08_5F48[] __asm__("D_00450E08");
+int func_003E5F48(int n) {
+    if (D_00451008_5F48 == 0) func_003E5B60_5F48();
+    return (&D_00450E08_5F48[n])->flags & 1;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
