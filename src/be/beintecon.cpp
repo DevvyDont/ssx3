@@ -112,7 +112,17 @@ extern "C" int func_00150A90(void* self, int a, int b, int amount)
     return *(int*)(p + 0xAC4);
 }
 
-INCLUDE_ASM("be/beintecon", func_00150AE0);
+//100%
+// Applies amount to the rider's profile and character through func_00150A90.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern "C" int func_00150AE0(void* self, int rider, int amount)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    return func_00150A90(self, profile, c, amount);
+}
 
 //100%
 extern int D_004A6CA8[];
@@ -603,7 +613,38 @@ struct sEconBoltCharacter {
     sEconBoltOn items[525];     // 0x290
 };
 
-INCLUDE_ASM("be/beintecon", func_00151BD0);
+//100%
+// Resets the per-item state bits: items with flag 0x20 get 0x16 set, the rest lose 0x10 and 0x4.
+struct sEconItem_151BD0
+{
+    short id;
+    short flags;
+};
+
+struct sEconItems_151BD0
+{
+    char pad[0x288];
+    short* lookup;                  // 0x288
+    int count;                      // 0x28C
+    sEconItem_151BD0 items[0x20D];  // 0x290
+};
+
+extern "C" void func_00151BD0(sEconItems_151BD0* self)
+{
+    for (int i = 0; i < self->count; i++)
+    {
+        sEconItem_151BD0* it = &self->items[i];
+        if (it->flags & 0x20)
+        {
+            it->flags |= 0x16;
+        }
+        else
+        {
+            it->flags &= ~0x10;
+            it->flags &= ~0x4;
+        }
+    }
+}
 
 // The id of item i, or -1
 extern "C" int func_00151C20(sEconBoltCharacter* c, int i)
@@ -782,6 +823,19 @@ extern "C" int func_001521F0(sEconItems_1521F0* self)
 }
 
 
-INCLUDE_ASM("be/beintecon", func_00152340);
+//100%
+// Returns whether item id has flag 0x10.
+extern "C" int func_00152340(sEconItems_151BD0* self, int id)
+{
+    sEconItem_151BD0* it = &self->items[self->lookup[id]];
+    int f = it->flags & 0x10;
+    return f != 0;
+}
 
-INCLUDE_ASM("be/beintecon", func_00152368);
+//100%
+// Returns whether item id has every flag in mask.
+extern "C" int func_00152368(sEconItems_151BD0* self, int id, int mask)
+{
+    sEconItem_151BD0* it = &self->items[self->lookup[id]];
+    return (~(unsigned short)it->flags & mask) == 0;
+}

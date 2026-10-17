@@ -4196,7 +4196,22 @@ int func_003C72A0(int arg0) {
     return (int)(((func_003BC5C8() & 0x7FFF) - 0x4000) * arg0) >> 0xE;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C72F8);
+//100%
+// Reads an n-byte big-endian value from p and sign-extends it for 1, 2 or 3 bytes.
+int func_003C72F8_72F8(unsigned char *p, int n) __asm__("func_003C72F8");
+int func_003C72F8_72F8(unsigned char *p, int n) {
+    int v = 0;
+    int i = n;
+    while (i--)
+        v = (v << 8) + *p++;
+    if (n == 1 && v >= 0x80)
+        v -= 0x100;
+    else if (n == 2 && v > 0x7FFF)
+        v -= 0x10000;
+    else if (n == 3 && v > 0x7FFFFF)
+        v -= 0x1000000;
+    return v;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -6350,7 +6365,24 @@ void func_003CEED0(char *self, int *p) {
     func_003CE7C0_A9D8(self + 0x20, 2);
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEF20);
+//100%
+// Lets the handler at 0x8 filter n first (stopping when it returns <= 0), then passes it to func_003CEBE8.
+typedef int (*F_EF20)(void *, int, int, int, int);
+struct H_EF20 { F_EF20 fn; };
+extern void func_003CEBE8_EF20(void *, int, int, int) __asm__("func_003CEBE8");
+int func_003CEF20(char *self, int n, int a, int b) {
+    struct H_EF20 *h = *(struct H_EF20 **)(self + 8);
+    int r;
+    if (h) {
+        r = h->fn(h, n, b, a, *(unsigned char *)(self + 0x1A));
+        if (r <= 0)
+            return r;
+    } else {
+        r = n;
+    }
+    func_003CEBE8_EF20(self + 0x20, r, a, b);
+    return r;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -7453,7 +7485,33 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D37A0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3900);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D3C90);
+//100%
+// Looks up id's remap list in the table at D_0044F420 and returns what value maps to, or value.
+struct T_3C90 { char pad[0x34]; int *words; short *index; char pad2[0xC]; int *ranges; };
+extern struct T_3C90 *D_0044F420_3C90 __asm__("D_0044F420");
+int func_003D3C90(int id, int value) {
+    struct T_3C90 *t;
+    int *words;
+    int k, start, n, w, i;
+    int *p;
+    int r = value;
+    if (id < 0)
+        return r;
+    t = D_0044F420_3C90;
+    words = t->words;
+    k = *((unsigned char *)&words[t->index[id]] + 4);
+    if (k == 0)
+        return r;
+    start = t->ranges[k - 1];
+    n = t->ranges[k] - start;
+    p = &words[start];
+    for (i = 0; i < n; i++) {
+        w = p[i];
+        if (r == (w >> 16))
+            r = w & 0xFFFF;
+    }
+    return r;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
