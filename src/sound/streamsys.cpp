@@ -267,7 +267,15 @@ extern "C" void func_002AA1E8(void* self)
     func_003B7D80(buf[1], 0);
 }
 
-INCLUDE_ASM("sound/streamsys", func_002AA210);
+extern "C" int func_002AA210(void* self)
+{
+    int buf[2];
+    func_002AA020_impl(self, buf);
+    if (buf[0] == 0) {
+        return -1;
+    }
+    return buf[1];
+}
 
 extern "C" void func_002AA240(void* self, int h)
 {

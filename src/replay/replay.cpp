@@ -105,7 +105,18 @@ extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* strea
     func_00354C98(&D_004A5988, bucket);
 }
 
-INCLUDE_ASM("replay/replay", func_0026DE58);
+struct cBucketMan;
+void* cBucketMan_first(cBucketMan* self, int index);
+void* cBucketMan_next(cBucketMan* self, void* node, int index);
+extern "C" void func_0026DE58(void* self, int bucket)
+{
+    char* p = (char*)cBucketMan_first((cBucketMan*)&D_004A5988, bucket);
+    cBucketMan* bm = (cBucketMan*)&D_004A5988;
+    for (; p != 0; p = (char*)cBucketMan_next(bm, p, bucket)) {
+        sVtS_DBF0* vt = *(sVtS_DBF0**)(p + 0xC);
+        ((void (*)(void*))vt[3].fn)(p + vt[3].delta);
+    }
+}
 
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" short func_0026EA68(cStreamRB* stream);

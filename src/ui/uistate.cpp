@@ -413,4 +413,12 @@ done:
 }
 
 
-INCLUDE_ASM("ui/uistate", func_0039F200);
+extern "C" void func_0039F200(void* self, void* p)
+{
+    int v = *(int*)((char*)p + 0x1C);
+    if ((v >> 5) & 1) {
+        if ((((unsigned int)v >> 8) & 0x3F) == 5) {
+            *(int*)((char*)p + 0x1C) = (v & ~0x3F00) | 0x680;
+        }
+    }
+}

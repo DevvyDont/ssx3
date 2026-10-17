@@ -262,7 +262,15 @@ extern "C" void* func_0028B180()
     return D_004A3500;
 }
 
-INCLUDE_ASM("sound/asyncsys", func_0028B188);
+extern char* D_004A28A8;
+extern "C" int func_0028B188(void)
+{
+    int r = 0;
+    if (*(int*)(D_004A28A8 + 0x7C) != 0 || *(int*)(D_004A28A8 + 0x80) != 0) {
+        r = 1;
+    }
+    return r;
+}
 
 //100%
 extern char* D_004A28A8;

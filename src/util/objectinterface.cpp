@@ -207,6 +207,25 @@ extern "C" int func_002D23C8(char** cursor, char value)
     return 1;
 }
 
-INCLUDE_ASM("util/objectinterface", func_002D23E8);
+extern "C" unsigned int strlen(const char*);
+extern "C" int func_002D23E8(char** cursor, const char* s)
+{
+    unsigned int i;
+    const char* p = s;
+    int total = 0;
+    for (i = 0; i < strlen(s); i++) {
+        total += func_002D23C8(cursor, *p++);
+    }
+    func_002D23C8(cursor, 0);
+    return total + 1;
+}
 
-INCLUDE_ASM("util/objectinterface", func_002D2478);
+struct sOIStr_2478 { unsigned int n; char* s; };
+extern "C" int func_002D2478(char** cursor, sOIStr_2478** str)
+{
+    int total = func_002D2210(cursor, (*str)->n);
+    for (unsigned int i = 0; i < (*str)->n; i++) {
+        total += func_002D23C8(cursor, (*str)->s[i]);
+    }
+    return total;
+}

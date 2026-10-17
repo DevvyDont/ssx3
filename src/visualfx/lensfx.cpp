@@ -613,7 +613,11 @@ extern "C" void func_002EE368(void)
     func_002EE010(func_002EF198());
 }
 
-INCLUDE_ASM("visualfx/lensfx", func_002EE390);
+extern "C" void* func_002EF1F0(void);
+extern "C" void func_002EE390(void)
+{
+    func_002EE010(func_002EF1F0());
+}
 
 //100%
 extern sLensFxSlot D_004FA370[];

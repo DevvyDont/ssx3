@@ -347,7 +347,19 @@ extern "C" void cUIScreen_createAllObjects(void* self)
     }
 }
 
-INCLUDE_ASM("ui/uiscreen", func_0039D008);
+extern "C" char* func_0039D008(void* self, int id)
+{
+    char* rec = *(char**)((char*)self + 0x38) + 4;
+    for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
+        if (*(int*)(rec + 4) == id) {
+            char* obj = cUIScreen_createObjectByStruct(self, rec);
+            *(int*)(obj + 0x38) = id;
+            return obj;
+        }
+        rec += *(unsigned short*)(rec + 2);
+    }
+    return 0;
+}
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByStruct);
 

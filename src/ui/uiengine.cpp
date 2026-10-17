@@ -415,7 +415,17 @@ extern "C" s398380Item* func_00398380(void* self, int id)
     return 0;
 }
 
-INCLUDE_ASM("ui/uiengine", func_003983B8);
+struct sUIEnt_83B8 { void* p; char pad[0x18]; int key; };
+extern "C" void* func_003983B8(void* self, int key)
+{
+    int i;
+    sUIEnt_83B8* e;
+    for (i = 0; i < *(int*)((char*)self + 0x10); i++) {
+        e = &(*(sUIEnt_83B8**)((char*)self + 0xC))[i];
+        if (e->key == key) return e->p;
+    }
+    return 0;
+}
 
 //100%
 struct s3983F0Entry {
@@ -460,7 +470,17 @@ extern "C" void func_00398438(s3983F0* self)
 
 INCLUDE_ASM("ui/uiengine", func_003984B0);
 
-INCLUDE_ASM("ui/uiengine", func_003984E8);
+// PORT: func_003984B0 is still asm; its record argument is a pointer, bound by asm label.
+extern "C" void func_003984B0_v(void* self, int idx, void* a, int b) __asm__("func_003984B0");
+extern "C" void func_003984E8(void* self, unsigned int* data)
+{
+    char* rec = (char*)data + 4;
+    *(unsigned int**)self = data;
+    for (unsigned int i = 0; i < **(unsigned int**)self; i++) {
+        func_003984B0_v(self, i, rec + 8, *(int*)rec);
+        rec += *(int*)(rec + 4) + 8;
+    }
+}
 
 //100%
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
