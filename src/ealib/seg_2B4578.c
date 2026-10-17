@@ -853,7 +853,18 @@ int func_003B6A38(int arg0) {
     return D_0050A0A0[arg0];
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6A70);
+// Removes the current item from both lists of channel c and clears it if it is the active one.
+extern char *D_0050A0A0_6A70[] __asm__("D_0050A0A0");
+extern int func_003B7A70_6A70(int) __asm__("func_003B7A70");
+extern void func_003C6320_6A70(void *, int) __asm__("func_003C6320");
+extern void func_003C6288_6A70(void *, int) __asm__("func_003C6288");
+void func_003B6A70(int c) {
+    char *p = D_0050A0A0_6A70[c & 0xFF];
+    int r = func_003B7A70_6A70(c);
+    func_003C6320_6A70(p + 0x11C, r);
+    func_003C6288_6A70(p + 0x128, r);
+    if (*(int *)(p + 0x134) == r) *(int *)(p + 0x134) = 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1006,7 +1017,15 @@ int func_003B7E70(int h, int v) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7EB0);
+// Looks up a handle, stores the byte option at 0xEC and forwards a/10 with it.
+extern void func_003B8530_7EB0(int, int, int) __asm__("func_003B8530");
+int func_003B7EB0(int h, int a, int b) {
+    char *p = func_003B6A38_7E70(h);
+    if (p == 0) return -8;
+    p[0xEC] = b;
+    func_003B8530_7EB0(*(int *)(p + 4), a / 10, b);
+    return 0;
+}
 
 // Looks up a handle; returns the byte at 0xEC if the query succeeds.
 extern int func_003B86C0_7F18(int) __asm__("func_003B86C0");
@@ -2992,7 +3011,20 @@ void func_003C3250(int arg0, int arg1) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3300);
+// Resets the stream state block and opens the default stream.
+struct G_3300 { char p[0x1B10]; volatile int h; volatile int cur; volatile int count; };
+struct D_3300 { int f0; int size; int mode; };
+extern struct G_3300 D_0050AD00_3300 __asm__("D_0050AD00");
+extern struct D_3300 D_0050ACE0_3300 __asm__("D_0050ACE0");
+extern int func_00423DA0_3300(struct D_3300 *) __asm__("func_00423DA0");
+void func_003C3300(void) {
+    struct D_3300 *d = &D_0050ACE0_3300;
+    D_0050AD00_3300.cur = -1;
+    d->size = 0x14;
+    d->mode = 1;
+    D_0050AD00_3300.count = 0;
+    D_0050AD00_3300.h = func_00423DA0_3300(d);
+}
 
 // Passes the handle at offset 0x1B10 of the global block to func_00423DB0.
 struct G_3358 { char p[0x1B10]; volatile int h; };
@@ -3190,7 +3222,25 @@ int func_003C4788_4788(int a0, int a1, int a2, int a3, int a4) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4898);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C4918);
+// Frees the 16-byte slot holding handle h (28 slots) and wakes the worker.
+struct S_4918 { int h; int p[3]; };
+struct G_4918 { char p[0xCC0]; volatile unsigned char used; char p1; volatile char busy; char p2[5]; struct S_4918 slots[28]; };
+extern struct G_4918 D_0050AD00_4918 __asm__("D_0050AD00");
+extern void func_003C45E8_4918(int) __asm__("func_003C45E8");
+void func_003C4918(int h) {
+    struct G_4918 *g = &D_0050AD00_4918;
+    struct S_4918 *e = g->slots;
+    int i;
+    for (i = 0; i < 28; i++, e++) {
+        if (e->h == h) {
+            g->busy = 0;
+            g->used--;
+            e->h = 0;
+            func_003C45E8_4918(1);
+            return;
+        }
+    }
+}
 
 //100%
 void func_003C4978(int arg0, int arg1, int arg2, int arg3) {
@@ -6258,7 +6308,13 @@ int func_003CEFB0(S_EFB0 *self) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEFF8);
+// Sets both ratios at 0x114/0x118 from fixed-point values over a common divisor, then marks dirty bit 4.
+void func_003CEFF8(char *self, int *p) {
+    float x = (float)(p[0] >> 7), y = (float)(p[1] >> 7), d = (float)(p[2] >> 8);
+    *(float *)(self + 0x114) = x / d;
+    *(float *)(self + 0x118) = y / d;
+    func_003CE7C0_A9D8(self + 0x20, 4);
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF060);
 
@@ -6480,7 +6536,13 @@ self->f26 = 1;
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CF740);
+// Copies n words from src into the write cursor at 0x1C and advances it; returns n.
+extern void func_003C51E8_F740(void *, void *, int) __asm__("func_003C51E8");
+int func_003CF740(char *self, int n, int unused, void *src) {
+    func_003C51E8_F740(src, *(void **)(self + 0x1C), n * 4);
+    *(int *)(self + 0x1C) += n * 4;
+    return n;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
