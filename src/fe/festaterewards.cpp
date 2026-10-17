@@ -91,7 +91,184 @@ extern "C" void func_001CF238(void* self)
 
 INCLUDE_ASM("fe/festaterewards", func_001CF270);
 
-INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onWidgetCreate);
+//100%
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_00398380(void* self, int id);
+extern char D_00460488[];
+extern char D_00466DA0[];
+extern char D_00466DB0[];
+extern char D_00466DC0[];
+extern char D_00466DD8[];
+extern char D_00466DE8[];
+extern char D_004A1EE8[];
+extern char D_004A1EF0[];
+extern char D_0045DB90[];
+extern char D_00466DF8[];
+extern char D_00466E08[];
+extern char D_00466E18[];
+extern char D_00466E30[];
+extern char D_00466E40[];
+extern char D_00466E50[];
+extern char D_00466E60[];
+extern char D_00466E70[];
+extern char D_00466E88[];
+extern char D_00466EA0[];
+extern char D_00466EB0[];
+extern char D_00466EC0[];
+extern char D_00466ED0[];
+extern char D_00466EE8[];
+extern char D_00466EF8[];
+extern char D_00466F10[];
+extern char D_00466F20[];
+extern char D_00466F30[];
+extern char D_00466210[];
+extern char D_00466228[];
+extern char D_00466240[];
+extern char D_00466258[];
+extern char D_00466270[];
+extern char D_00466288[];
+extern char D_004A12C0[];
+extern char D_004A1408[];
+extern char* D_00441440[][8];
+extern char* D_004414C0[][8];
+
+struct sVE_F818 { short delta; short index; void (*fn)(void*, int); };
+struct sVEv_F818 { short delta; short index; void (*fn)(void*); };
+
+struct sGallery_F818 {
+    char pad0[0x924];
+    void* items[4][8];
+    void* locks[4][8];
+};
+
+static inline void* Find_F818(char* ui, char* name)
+{
+    int id = GetHashValue32(name);
+    return func_00398380(ui + 0x58, id);
+}
+
+#define WCALL_F818(o, n, a) ((*(sVE_F818**)((o) + 8))[n].fn((o) + (*(sVE_F818**)((o) + 8))[n].delta, a))
+
+extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(char* self, char* w)
+{
+    int h = *(int*)(w + 0x38);
+    char buf[0x10];
+    if (h == GetHashValue32(D_00460488)) {
+        *(char**)(self + 0x900) = w;
+        WCALL_F818(w, 9, 0);
+    } else if (h == GetHashValue32(D_00466DA0)) {
+        *(char**)(self + 0x91C) = w;
+    } else if (h == GetHashValue32(D_00466DB0)) {
+        *(char**)(self + 0x920) = w;
+    } else if (h == GetHashValue32(D_00466DC0)) {
+        *(char**)(self + 0x8F8) = w;
+        WCALL_F818(w, 9, 0);
+    } else if (h == GetHashValue32(D_00466DD8)) {
+        *(char**)(self + 0x918) = w;
+        sprintf(buf, D_004A12C0, *(int*)(self + 0x68));
+        cUIText_setAsciiString(*(cUIText**)(self + 0x918), buf);
+    } else if (h == GetHashValue32(D_00466DE8)) {
+        *(char**)(self + 0x914) = w;
+        sprintf(buf, D_004A12C0, *(int*)(self + 0x6C));
+        cUIText_setAsciiString(*(cUIText**)(self + 0x914), buf);
+    } else if (h == GetHashValue32(D_004A1EE8)) {
+        cUIText_setAsciiString((cUIText*)w, D_004A1EF0);
+    } else if (h == GetHashValue32(D_0045DB90)) {
+        *(char**)(self + 0x8F4) = w;
+    } else if (h == GetHashValue32(D_00466DF8)) {
+        switch (*(int*)(self + 0x4C)) {
+        case 3:
+            *(void**)(w + 0x7C) = Find_F818(*(char**)(self + 0x10), D_00466E08);
+            *(int*)(w + 0x78) = -1;
+            break;
+        case 4:
+            *(void**)(w + 0x7C) = Find_F818(*(char**)(self + 0x10), D_00466E18);
+            *(int*)(w + 0x78) = -1;
+            break;
+        case 5:
+            *(void**)(w + 0x7C) = Find_F818(*(char**)(self + 0x10), D_00466E30);
+            *(int*)(w + 0x78) = -1;
+            break;
+        case 6:
+            *(void**)(w + 0x7C) = Find_F818(*(char**)(self + 0x10), D_00466E40);
+            *(int*)(w + 0x78) = -1;
+            break;
+        case 7:
+            *(void**)(w + 0x7C) = Find_F818(*(char**)(self + 0x10), D_00466E50);
+            *(int*)(w + 0x78) = -1;
+            break;
+        }
+    } else if (h == GetHashValue32(D_00466E60)) {
+        switch (*(int*)(self + 0x4C)) {
+        case 3:
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466E70));
+            break;
+        case 4:
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466E88));
+            break;
+        case 5:
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EA0));
+            break;
+        case 6:
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EB0));
+            break;
+        case 7:
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EC0));
+            break;
+        case 8:
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466ED0));
+            break;
+        }
+    } else if (h == GetHashValue32(D_00466EE8)) {
+        *(char**)(self + 0x904) = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+    } else if (h == GetHashValue32(D_00466EF8)) {
+        int m = *(int*)(self + 0x4C);
+        if (m == 3) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466210));
+        } else if (m == 4) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466228));
+        } else if (m == 5) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466240));
+        } else if (m == 6) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466258));
+        } else if (m == 7) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466270));
+        } else if (m == 8) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466288));
+        }
+    } else if (h == GetHashValue32(D_00466F10)) {
+        *(char**)(self + 0x908) = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+    } else if (h == GetHashValue32(D_00466F20)) {
+        *(char**)(self + 0x90C) = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+    } else if (h == GetHashValue32(D_00466F30)) {
+        *(char**)(self + 0x910) = w;
+        sVEv_F818* vt = *(sVEv_F818**)(self + 8);
+        vt[43].fn(self + vt[43].delta);
+    } else {
+        sGallery_F818* g = (sGallery_F818*)self;
+        int i;
+        for (i = 0; i < *(int*)(self + 0x58); i++) {
+            int j;
+            for (j = 0; j < *(int*)(self + 0x5C); j++) {
+                if (h == GetHashValue32(D_00441440[i][j])) {
+                    *(int*)(w + 0x18) = i * *(int*)(self + 0x5C) + j;
+                    WCALL_F818(w, 9, 0);
+                    g->items[i][j] = w;
+                } else if (h == GetHashValue32(D_004414C0[i][j])) {
+                    g->locks[i][j] = w;
+                    WCALL_F818(w, 9, 0);
+                }
+            }
+        }
+    }
+}
+
 
 //100%
 struct sVE_FD18 {
