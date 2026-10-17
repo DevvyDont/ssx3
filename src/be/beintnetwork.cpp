@@ -424,4 +424,13 @@ extern "C" void* func_0014EEC8(void* self, int player, int index)
 }
 
 
-INCLUDE_ASM("be/beintnetwork", func_0014EF00);
+//100%
+// Returns the rider's character entry in the 0x88-byte table at D_005309A0.
+int cBELibrary_getCharacterID_EF00(int index) __asm__("cBELibrary_getCharacterID__Fi");
+
+extern sNetChar_0014EE28 D_005309A0[];
+
+extern "C" void* func_0014EF00(void* self, int rider)
+{
+    return &D_005309A0[cBELibrary_getCharacterID_EF00(rider)];
+}

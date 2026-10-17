@@ -836,7 +836,18 @@ extern "C" void* func_00311048(void* self)
     return self;
 }
 
-INCLUDE_ASM("animation/animmodel", func_00311088);
+//100%
+// Destructor: clears D_004A3DF8, runs func_00311110 on self, then frees self when flags bit 0 is set.
+extern "C" void func_00311110_1088(void* self) __asm__("func_00311110");
+void operator_delete(int*);
+
+extern "C" void func_00311088(void* self, int flags)
+{
+    D_004A3DF8 = 0;
+    func_00311110_1088(self);
+    if (flags & 1)
+        operator_delete((int*)self);
+}
 
 //100%
 extern int D_004FE7A0[];

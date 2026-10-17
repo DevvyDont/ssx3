@@ -47,7 +47,17 @@ extern "C" int func_00314D60(int* a, int* b)
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D98);
 
-INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
+//100%
+// Destructor: clears the current-archive global at D_004A3E7C, then frees self when flags bit 0 is set.
+extern int D_004A3E7C;
+void operator_delete(int* p);
+
+extern "C" void func_00314DB0(int* self, int flags)
+{
+    D_004A3E7C = 0;
+    if (flags & 1)
+        operator_delete(self);
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -157,4 +167,17 @@ extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
 }
 
 
-INCLUDE_ASM("animation/mdfarchive", func_00315070);
+//100%
+// Finds key among the 0x206 hashes at 0x1030 and returns the matching name from D_0048CFC0, or D_0048A4C0.
+extern char D_0048A4C0[];
+
+extern "C" char* func_00315070(char* self, int key)
+{
+    int* hashes = (int*)(self + 0x1030);
+    for (int i = 0; i < 0x206; i++)
+    {
+        if (key == hashes[i])
+            return D_0048CFC0[i];
+    }
+    return D_0048A4C0;
+}

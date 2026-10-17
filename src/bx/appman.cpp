@@ -224,7 +224,14 @@ extern "C" void cAppMan_mainLoop(void* p)
 
 int cExecutionMan_checkHalt(void* self, int flag);
 
-INCLUDE_ASM("bx/appman", func_00317308);
+//100%
+// Forwards the object at 0x8 to func_00317478.
+extern "C" int func_00317478(void* p);
+
+extern "C" int func_00317308(char* self)
+{
+    return func_00317478(*(void**)(self + 0x8));
+}
 
 //100%
 int cAppMan_checkHalt(cAppMan* self)
@@ -318,7 +325,34 @@ cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
     return self;
 }
 
-INCLUDE_ASM("bx/appman", func_00317478);
+//100%
+// Stores a and b in the first two fields, then calls virtual slot 13.
+class cAppTask_317478 {
+public:
+    int a; // 0x0
+    int b; // 0x4
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+};
+
+void func_00317478_7478(cAppTask_317478* self, int a, int b) __asm__("func_00317478");
+void func_00317478_7478(cAppTask_317478* self, int a, int b)
+{
+    self->b = b;
+    self->a = a;
+    self->v13();
+}
 
 //100%
 int cExecutionMan_checkHalt(void* self, int flag)

@@ -48,7 +48,13 @@ void cMemMan_free(void* ptr)
     MUTEX_unlock(D_00538B00);
 }
 
-INCLUDE_ASM("bx/memman", func_00317EE0);
+//100%
+// Locks and immediately unlocks the memory manager mutex.
+extern "C" void func_00317EE0()
+{
+    MUTEX_lock(D_00538B00);
+    MUTEX_unlock(D_00538B00);
+}
 
 extern "C" void func_00319CC8();
 

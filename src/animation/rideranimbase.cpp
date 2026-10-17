@@ -47,7 +47,16 @@ extern "C" void* func_003119E8(void* self, int i)
     return *(char**)((char*)self + 0x50) + (i << 3);
 }
 
-INCLUDE_ASM("animation/rideranimbase", func_003119F8);
+//100%
+// Returns the D_0044AF80 entry for the slot in anim's blend-in event (field 0xC).
+extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern int D_0044AF80[];
+
+extern "C" int func_003119F8(void* self, int anim)
+{
+    int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
+    return D_0044AF80[slot];
+}
 
 //100%
 extern "C" void func_00311860(void* p);
@@ -258,7 +267,13 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_003
 
 INCLUDE_ASM("animation/rideranimbase", func_00311D88);
 
-INCLUDE_ASM("animation/rideranimbase", func_00311E38);
+//100%
+// Resets entry i of the 8-byte table at 0x50 with func_00314668 and sets slot i to 0x1B6.
+extern "C" void func_00311E38(int* self, int i)
+{
+    func_00314668(*(char**)((char*)self + 0x50) + i * 8);
+    *(int*)((char*)self + (i << 2)) = 0x1B6;
+}
 
 //100%
 extern "C" void func_00314718(void* self, int v);

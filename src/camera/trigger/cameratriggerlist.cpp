@@ -93,7 +93,21 @@ struct cCameraTriggerList2 {
     int count; // 0x4
 };
 
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C0D8);
+//100%
+// Returns the trigger whose id (first field) is id, or null.
+struct sCamTrig_16C0D8 { int id; };
+struct sCamTrigList_16C0D8 { sCamTrig_16C0D8** items; int count; };
+
+extern "C" sCamTrig_16C0D8* func_0016C0D8(sCamTrigList_16C0D8* self, int id)
+{
+    for (int i = 0; i < self->count; i++)
+    {
+        sCamTrig_16C0D8* t = self->items[i];
+        if (t->id == id)
+            return t;
+    }
+    return 0;
+}
 
 //100%
 int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)

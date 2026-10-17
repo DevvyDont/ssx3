@@ -308,7 +308,22 @@ extern "C" void func_00153C88(void* self, int id)
     ((cMissionObj_00153C88*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153C88[i].f4);
 }
 
-INCLUDE_ASM("be/beintmission", func_00153CD8);
+//100%
+// Passes field 0x8 of mission id's definition to virtual slot 4 of the mission object at 0x8C of D_004A28A8.
+struct sMissionDefView_00153CD8
+{
+    int id;
+    int f4;
+    int f8;
+    char pad_0x0C[0x18];
+};
+extern sMissionDefView_00153CD8 D_0043EE10_v00153CD8[] __asm__("D_0043EE10");
+
+extern "C" void func_00153CD8(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    ((cMissionObj_00153C88*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153CD8[i].f8);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

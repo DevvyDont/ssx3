@@ -204,4 +204,23 @@ extern "C" void func_001561B0(void* self, void* stream)
 }
 
 
-INCLUDE_ASM("be/beintaggression", func_001562B8);
+//100%
+// Leaves the current BE state, switches to the state id in *next and enters it.
+class cBEState_1562B8
+{
+public:
+    char pad_0x00[0x4];
+    virtual void v1();
+    virtual void v2();
+    virtual void leave();
+    virtual void enter();
+};
+extern int D_004A11F4;
+extern cBEState_1562B8* D_005308A8[];
+
+extern "C" void func_001562B8(int* next)
+{
+    D_005308A8[D_004A11F4]->leave();
+    D_004A11F4 = *next;
+    D_005308A8[D_004A11F4]->enter();
+}

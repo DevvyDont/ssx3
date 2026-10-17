@@ -566,7 +566,18 @@ extern "C" void func_0011FEF8(void* self)
     func_00111860(*(void**)((char*)self + 0x77C));
 }
 
-INCLUDE_ASM("ai/rider", func_0011FF18);
+//100%
+// Calls the first virtual of the object at 0x77C with a (its vtable pointer sits at 0xDE8).
+class cRiderSub_11FF18 {
+public:
+    char pad_0x000[0xDE8];
+    virtual void v01(int a);
+};
+
+extern "C" void func_0011FF18(char* self, int a)
+{
+    (*(cRiderSub_11FF18**)(self + 0x77C))->v01(a);
+}
 
 //100%
 // 0x20-byte elements with the quadword at offset 0
@@ -590,7 +601,19 @@ void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBECharacterInterface_getWeight(void* iface, int character);
 extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character, int stat);
 
-INCLUDE_ASM("ai/rider", func_0011FF70);
+//100%
+// Returns the first vector of the current entry (index at 0x8A8) in the 0x20-byte table of the object at 0x780.
+struct sVec4_11FF70
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sEntry_11FF70 { sVec4_11FF70 v; char pad[0x10]; };
+
+extern "C" sVec4_11FF70 func_0011FF70(char* self)
+{
+    char* o = *(char**)(self + 0x780);
+    return (*(sEntry_11FF70**)(o + 0x2C))[*(int*)(self + 0x8A8)].v;
+}
 
 //100%
 extern "C" float cRider_getMass(void* self)
