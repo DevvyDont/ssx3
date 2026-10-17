@@ -1947,7 +1947,16 @@ extern "C" void func_00288F60(void* self, int mode)
 
 extern "C" void func_00288F60(void* self, int i);
 
-INCLUDE_ASM("sound/ssxAudio", func_00289398);
+// Previous of six entries, wrapping
+extern "C" void func_00289398(char* self)
+{
+    if (*(int*)(self + 0x6470) == 0) {
+        *(int*)(self + 0x6470) = 5;
+    } else {
+        *(int*)(self + 0x6470) = *(int*)(self + 0x6470) - 1;
+    }
+    func_00288F60(self, *(int*)(self + 0x6470));
+}
 
 // Next of six entries, wrapping
 extern "C" void func_002893C8(char* self)
@@ -1957,7 +1966,16 @@ extern "C" void func_002893C8(char* self)
     func_00288F60(self, *(int*)(self + 0x6470));
 }
 
-INCLUDE_ASM("sound/ssxAudio", func_00289400);
+struct sSndKey8_9400 {
+    long v;
+} __attribute__((packed));
+extern sSndKey8_9400 D_004A3600[];
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+
+extern "C" void func_00289400(char* self)
+{
+    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xFA, D_004A3600[0].v, 0, 0, 0, 0, 0);
+}
 
 extern void* D_004A52D4;
 extern "C" void func_002B6950(void* p, int a, int b);

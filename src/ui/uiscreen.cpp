@@ -870,9 +870,22 @@ extern "C" void func_0039E390(void* self, int flags)
 
 extern "C" void* func_00397948(void*);
 
-INCLUDE_ASM("ui/uiscreen", func_0039E438);
+// Sets layer bit `bit` in the screen's layer mask; a negative bit sets all.
+extern "C" void func_0039E438(void* self, signed char bit)
+{
+    if (bit < 0) {
+        *(unsigned char*)((char*)self + 0x15) = 0xFF;
+    } else {
+        signed char m = 1 << bit;
+        *(unsigned char*)((char*)self + 0x15) |= m;
+    }
+}
 
-INCLUDE_ASM("ui/uiscreen", func_0039E470);
+extern "C" void func_0039E470(void* self, signed char bit)
+{
+    signed char m = ~(1 << bit);
+    *(unsigned char*)((char*)self + 0x15) &= m;
+}
 
 //100%
 void* func_0039E4A0(void* self)
@@ -1033,9 +1046,37 @@ extern "C" void func_0039E758(void* self, cListNode* node)
     cList_addToEnd((cList*)((char*)self + 0x24), node);
 }
 
-INCLUDE_ASM("ui/uiscreen", func_0039E778);
+typedef void (*fnUIShow_E778)(char*, int);
 
-INCLUDE_ASM("ui/uiscreen", func_0039E7F0);
+extern "C" void func_0039E778(void* self)
+{
+    char* n = (char*)cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            char* o = n + 0x40;
+            if ((*(int*)(n + 0x54) >> 6) & 1) {
+                char* vt = *(char**)(n + 0x48);
+                ((fnUIShow_E778)*(void**)(vt + 0x4C))(o + *(short*)(vt + 0x48), 0);
+            }
+            n = *(char**)(n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+
+extern "C" void func_0039E7F0(void* self)
+{
+    char* n = (char*)cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            char* o = n + 0x40;
+            if ((*(int*)(n + 0x54) >> 6) & 1) {
+                char* vt = *(char**)(n + 0x48);
+                ((fnUIShow_E778)*(void**)(vt + 0x4C))(o + *(short*)(vt + 0x48), 1);
+            }
+            n = *(char**)(n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct cList;

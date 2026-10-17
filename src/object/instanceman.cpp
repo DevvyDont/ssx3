@@ -74,9 +74,19 @@ extern "C" void func_003513D0(void* self)
     *(int*)((char*)self + 0x40) = 0;
 }
 
-INCLUDE_ASM("object/instanceman", func_00351410);
+typedef void (*fnInst_1410)(char*, void*, int);
 
-INCLUDE_ASM("object/instanceman", func_00351448);
+extern "C" void func_00351410(void* self, char* obj)
+{
+    char* vt = *(char**)obj;
+    ((fnInst_1410)*(void**)(vt + 0xC))(obj + *(short*)(vt + 0x8), self, 0x40);
+}
+
+extern "C" void func_00351448(void* self, char* obj)
+{
+    char* vt = *(char**)obj;
+    ((fnInst_1410)*(void**)(vt + 0x14))(obj + *(short*)(vt + 0x10), self, 0x40);
+}
 
 INCLUDE_ASM("object/instanceman", func_00351480);
 

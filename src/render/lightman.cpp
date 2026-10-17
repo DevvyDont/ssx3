@@ -20,7 +20,13 @@ extern "C" void func_0038DC20()
 {
 }
 
-INCLUDE_ASM("render/lightman", func_0038DC28);
+extern "C" void func_0038DC28(unsigned int* self)
+{
+    self[0] = 0xFFFFFFFF;
+    self[1] = 0xFFFFFFFF;
+    self[2] = 0xFFFFFFFF;
+    self[3] = 0xFFFFFFFF;
+}
 
 extern "C" void func_0038DC48()
 {
@@ -396,9 +402,6 @@ extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
     return r;
 }
 
-INCLUDE_ASM("render/lightman", func_0038F560);
-
-//100%
 struct sLightDma_F598 {
     int field_0x0;
     int count;              // 0x4
@@ -407,8 +410,16 @@ struct sLightDma_F598 {
     int defSize;            // 0x10
     int result[3];          // 0x14
     unsigned int addr[3];   // 0x20
+    int sizes[3];           // 0x2C
 };
+unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags) __asm__("func_0038F598");
 
+extern "C" void func_0038F560(sLightDma_F598* self, int flags)
+{
+    func_0038F598_impl(self, self->sizes[self->cur] << 4, flags);
+}
+
+//100%
 extern "C" void func_0038F768(void);
 extern "C" void func_0038F6A8(void* self);
 extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
@@ -461,7 +472,12 @@ extern "C" void func_0038F6A8(void* self)
     *(int*)((char*)self + 0xC) = (*(int*)((char*)self + 0xC) + 1) % *(int*)((char*)self + 0x4);
 }
 
-INCLUDE_ASM("render/lightman", func_0038F6D0);
+extern "C" char* func_0038F6D0(sLightDma_F598* self, int off)
+{
+    int d = off - self->result[self->cur];
+    d += -d & 0xF;
+    return (char*)self->addr[self->cur] + ((d >> 4) << 4);
+}
 
 //100%
 extern int D_004A5B84;
