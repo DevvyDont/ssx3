@@ -885,7 +885,41 @@ INCLUDE_ASM("ai/ai", func_0012A560);
 
 INCLUDE_ASM("ai/ai", func_0012A768);
 
-INCLUDE_ASM("ai/ai", func_0012A998);
+struct sAiObj12A998
+{
+    char pad0[0x48];
+    char* mRiders[14];
+    int mCount;
+};
+
+struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
+
+extern void* D_004A289C;
+
+// For each flagged rider (+0x884) whose id is in the D_00536708 list, clear the
+// flag and re-arm its timer (+0x888) from the game object's virtual 114.
+extern "C" void func_0012A998(sAiObj12A998* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        char* r = *(char**)(self->mRiders[i] + 0x18);
+        if (*(int*)(r + 0x884) != 0)
+        {
+            char* obj = r + 0x6C0;
+            sVEntry0012A998* ov = *(sVEntry0012A998**)obj;
+            if (func_0012A1F0(self, ov[7].fn(obj + ov[7].delta)))
+            {
+                char* g = (char*)D_004A289C;
+                char* r2 = *(char**)(self->mRiders[i] + 0x18);
+                *(int*)(r2 + 0x884) = 0;
+                *(int*)(r2 + 0x888) = -1;
+                char* rider = self->mRiders[i];
+                sVEntry0012A998* vt = *(sVEntry0012A998**)(g + 0x10D8);
+                *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn(g + vt[114].delta) + 4;
+            }
+        }
+    }
+}
 
 struct sAiObj12AA78
 {
