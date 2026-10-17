@@ -1969,9 +1969,81 @@ extern "C" void func_00111890(void* self)
 
 extern "C" void* func_002E23E0(void*);
 
-INCLUDE_ASM("ai/computer", func_00111948);
+//100%
+extern int D_004A4534;
 
-INCLUDE_ASM("ai/computer", func_001119F8);
+// Runs the per-frame update of each AI controller block, unless D_004A4534 is set and the rider says to skip (virtual slot 9).
+extern "C" void func_00392D18(void* p);
+extern "C" void func_002DD0B8(void* p);
+extern "C" void func_002DABC8(void* p);
+extern "C" void func_002E8938(void* p);
+extern "C" void func_002E66B8(void* p);
+extern "C" void func_002EADD0(void* p);
+extern "C" void func_002EF6D0(void* p);
+extern "C" void func_002D4C08(void* p);
+extern "C" void func_002E39D8(void* p);
+extern "C" void func_002DF920(void* p);
+extern "C" void func_002F1150(void* p);
+extern "C" void func_002F6518(void* p);
+
+extern "C" void func_00111948(char* self)
+{
+    if (D_004A4534 != 0)
+    {
+        char* o = *(char**)(self + 0x18) + 0x6C0;
+        sVE_0010DA10* ve = &(*(sVE_0010DA10**)o)[9];
+        if (ve->fn(o + ve->delta))
+            return;
+    }
+    func_00392D18(self + 0xD30);
+    func_002DD0B8(self + 0x3B0);
+    func_002DABC8(self + 0x470);
+    func_002E8938(self + 0x520);
+    func_002E66B8(self + 0x610);
+    func_002EADD0(self + 0x9C0);
+    func_002EF6D0(self + 0xAD0);
+    func_002D4C08(self + 0xAF0);
+    func_002E39D8(self + 0xB00);
+    func_002DF920(self + 0xB40);
+    func_002F1150(self + 0xC70);
+    func_002F6518(self + 0xD20);
+}
+
+//100%
+// Runs the second update pass of each AI controller block, with the same skip check.
+extern "C" void func_002DDAB8(void* p);
+extern "C" void func_002DB478(void* p);
+extern "C" void func_002EA480(void* p);
+extern "C" void func_002E7A10(void* p);
+extern "C" void func_002EB198(void* p);
+extern "C" void func_002EF950(void* p);
+extern "C" void func_002D5048(void* p);
+extern "C" void func_002E3AF8(void* p);
+extern "C" void func_002E24D0(void* p);
+extern "C" void func_002F1510(void* p);
+void func_002F6908(void* p);
+
+extern "C" void func_001119F8(char* self)
+{
+    if (D_004A4534 != 0)
+    {
+        char* o = *(char**)(self + 0x18) + 0x6C0;
+        sVE_0010DA10* ve = &(*(sVE_0010DA10**)o)[9];
+        if (ve->fn(o + ve->delta))
+            return;
+    }
+    func_002DDAB8(self + 0x3B0);
+    func_002DB478(self + 0x470);
+    func_002EA480(self + 0x520);
+    func_002E7A10(self + 0x610);
+    func_002EB198(self + 0x9C0);
+    func_002EF950(self + 0xAD0);
+    func_002D5048(self + 0xAF0);
+    func_002E3AF8(self + 0xB00);
+    func_002E24D0(self + 0xB40);
+    func_002F1510(self + 0xC70);
+    func_002F6908(self + 0xD20);
+}
 
 //100%
 // PORT: prototype mismatch. The project names this func_00111AA0__FPv (one
