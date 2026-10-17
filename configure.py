@@ -163,6 +163,41 @@ def rewrite_lit4_loads_for_objdiff():
             f.write_text(new)
     print(f"lit4: rewrote {rewritten} literal loads to li.s for objdiff")
 
+def fix_short_loop_branches():
+    """Write the loop-back branch of each address in config/short_loop_branches.txt as a raw `.word`.
+
+    Re-assembling splat's output of a very short loop (e.g. `c.lt.s; nop; nop; bc1tl`) makes SN `as` insert
+    its R5900 short-loop nops a second time, so the function (and obj/target) comes out longer than retail.
+    As a raw word the branch keeps its exact encoding and the assembler no longer sees a loop.
+    """
+    import re
+
+    path = Path("config/short_loop_branches.txt")
+    if not path.exists():
+        return
+    addrs = {int(m, 16) for m in re.findall(r"^\s*0x([0-9A-Fa-f]+)", path.read_text(), re.M)}
+    line = re.compile(r"^(\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/)\s+(\S+)\s.*$", re.M)
+    done = set()
+    for f in Path("asm/nonmatchings").rglob("*.s"):
+        text = f.read_text()
+        if not any(f"{a:08X}" in text for a in addrs):
+            continue
+
+        def sub(m):
+            vram = int(m.group(2), 16)
+            if vram not in addrs:
+                return m.group(0)
+            done.add(vram)
+            word = int.from_bytes(bytes.fromhex(m.group(3)), "little")
+            return f"{m.group(1)}  .word 0x{word:08X} /* {m.group(4)}: raw word, see config/short_loop_branches.txt */"
+
+        f.write_text(line.sub(sub, text))
+    missing = addrs - done
+    if missing:
+        print("short-loop fix: not found: " + ", ".join(f"0x{a:08X}" for a in sorted(missing)))
+    print(f"short-loop fix: {len(done)} loop branches written as raw words")
+
+
 def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_only=False, dual_objects=False):
     """
     Build the objects and the final ELF file.
@@ -506,9 +541,8 @@ def main():
 
     do_clean = (args.clean or args.only_clean) or False
 
-    # FIXME: Set skip_checksum to False once builds are able
-    # to match; it has been temporairly enabled here.
-    do_skip_checksum = args.skip_checksum or True
+    # The normal build is byte-identical to retail since 2026-10-17 (fork), so the checksum runs unless -s.
+    do_skip_checksum = args.skip_checksum
     do_objects = args.objects or False
 
     if do_clean:
@@ -517,6 +551,7 @@ def main():
             return
 
     split.main([YAML_FILE], modes="all", verbose=False)
+    fix_short_loop_branches()
 
     linker_entries = split.linker_writer.entries
 
