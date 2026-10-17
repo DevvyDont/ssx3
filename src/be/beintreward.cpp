@@ -1855,5 +1855,154 @@ extern "C" void func_0015A7D0(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("be/beintreward", func_0015A818);
+//100%
+struct sRwE12_A818 { int s[3]; };
+struct sRwE8_A818 { int s[2]; };
+struct sRwE16_A818 { int s[3]; int pad; };
+
+struct sRwDB_A818 {
+    int pad0;
+    int* data;
+    sRwE12_A818* t0;
+    sRwE12_A818* t1;
+    sRwE8_A818* t2;
+    sRwE16_A818* t3;
+    sRwE16_A818* t4;
+    sRwE16_A818* t5;
+    sRwE16_A818* t7;
+    sRwE16_A818* t6;
+    sRwE16_A818* t8;
+    char* strings;
+    int n0;
+    int n1;
+    int n2;
+    int n3;
+    int n4;
+    int n5;
+    int n7;
+    int n6;
+    int n8;
+};
+
+#define FIX_A818(e, k)                                  \
+    if ((e)->s[k] != 0) {                               \
+        (e)->s[k] = (int)(db->strings + ((e)->s[k] - 1)); \
+    }
+
+extern "C" void func_0015A818(sRwDB_A818* db, int* p)
+{
+    int i;
+    db->data = p;
+    for (i = 0; i < 9; i++) {
+        int type = *p++;
+        int n = *p++;
+        if (n == 0) {
+            continue;
+        }
+        switch (type) {
+        case 0:
+            db->t0 = (sRwE12_A818*)p;
+            db->n0 = n;
+            p = (int*)((sRwE12_A818*)p + n);
+            break;
+        case 1:
+            db->t1 = (sRwE12_A818*)p;
+            db->n1 = n;
+            p = (int*)((sRwE12_A818*)p + n);
+            break;
+        case 2:
+            db->t2 = (sRwE8_A818*)p;
+            db->n2 = n;
+            p = (int*)((sRwE8_A818*)p + n);
+            break;
+        case 3:
+            db->t3 = (sRwE16_A818*)p;
+            db->n3 = n;
+            p = (int*)((sRwE16_A818*)p + n);
+            break;
+        case 4:
+            db->t4 = (sRwE16_A818*)p;
+            db->n4 = n;
+            p = (int*)((sRwE16_A818*)p + n);
+            break;
+        case 5:
+            db->t5 = (sRwE16_A818*)p;
+            db->n5 = n;
+            p = (int*)((sRwE16_A818*)p + n);
+            break;
+        case 6:
+            db->t6 = (sRwE16_A818*)p;
+            db->n6 = n;
+            p = (int*)((sRwE16_A818*)p + n);
+            break;
+        case 7:
+            db->t7 = (sRwE16_A818*)p;
+            db->n7 = n;
+            p = (int*)((sRwE16_A818*)p + n);
+            break;
+        case 8:
+            db->t8 = (sRwE16_A818*)p;
+            db->n8 = n;
+            p = (int*)((sRwE16_A818*)p + n);
+            break;
+        }
+    }
+    int j;
+    p++;
+    db->strings = (char*)p;
+    for (j = 0; j < db->n0; j++) {
+        sRwE12_A818* e = &db->t0[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n1; j++) {
+        sRwE12_A818* e = &db->t1[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n2; j++) {
+        sRwE8_A818* e = &db->t2[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+    }
+    for (j = 0; j < db->n3; j++) {
+        sRwE16_A818* e = &db->t3[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n4; j++) {
+        sRwE16_A818* e = &db->t4[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n5; j++) {
+        sRwE16_A818* e = &db->t5[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n6; j++) {
+        sRwE16_A818* e = &db->t6[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n7; j++) {
+        sRwE16_A818* e = &db->t7[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+    for (j = 0; j < db->n8; j++) {
+        sRwE16_A818* e = &db->t8[j];
+        FIX_A818(e, 0);
+        FIX_A818(e, 1);
+        FIX_A818(e, 2);
+    }
+}
+
 
