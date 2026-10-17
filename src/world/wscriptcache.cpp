@@ -786,7 +786,19 @@ extern "C" int func_003AE6C8(void* self, float f)
     return *(int*)((char*)self + 0x74);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AE718);
+extern "C" void* func_003AF258(void* p, unsigned int key);
+extern "C" void* func_003AE718(void* self)
+{
+    char* s = (char*)self;
+    if (*(void**)(s + 0x70) != 0) {
+        if (*(int*)(s + 0x74) != 0) {
+            return func_003AF258(*(void**)(s + 0x70), *(int*)(s + 0x44));
+        } else {
+            return func_003AF258(*(void**)(s + 0x70), func_004139F8(*(float*)(s + 0x48)));
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AE780);
 
@@ -1188,7 +1200,29 @@ extern "C" void* func_003AF230(void* self, unsigned int i)
     return *(char**)self + i * 0x34;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF258);
+extern "C" void* func_003AF258(void* self, unsigned int key)
+{
+    struct S { char* arr; int n; };
+    S* s = (S*)self;
+    if (s->n == 0) {
+        return 0;
+    }
+    int hi = s->n;
+    char* arr = s->arr;
+    int lo = -1;
+    while (hi - lo >= 2) {
+        int mid = (hi + lo) / 2;
+        if (key <= *(unsigned int*)(arr + mid * 0x34 + 0x14)) {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    int i = hi - 1;
+    if (i < 0) i = 0;
+    i = (i < s->n - 1) ? i : s->n - 1;
+    return arr + i * 0x34;
+}
 
 extern "C" int func_003AF2F8(void* self)
 {
@@ -1207,7 +1241,22 @@ extern "C" void func_003AF300(char** pp, unsigned int* plen)
     *plen -= i;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF378);
+static inline int to_lower_3AF378(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
+extern "C" int func_003AF378(const char* a, const char* b)
+{
+    int i;
+    int r;
+    r = 0;
+    i = 0;
+    while (a[i] != 0 && b[i] != 0) {
+        r += to_lower_3AF378(a[i]) - to_lower_3AF378(b[i]);
+        if (r != 0) {
+            return r;
+        }
+        i++;
+    }
+    return a[i] - b[i];
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF428);
 

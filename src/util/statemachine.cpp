@@ -25,7 +25,25 @@ extern "C" void cConsoleConfig_setTimeString(void* self, char* dst, int size, in
     func_002C25B8(dst, buf, size);
 }
 
-INCLUDE_ASM("util/statemachine", func_002C7038);
+extern char D_00486540[];
+extern char D_00486550[];
+
+extern "C" void func_002C7038(void* self, char* dst, int size, int day, int month, int year, int mode)
+{
+    char buf[0x40];
+    switch (mode) {
+    case 0:
+        func_002C27C0(buf, D_00486540, year, month, day);
+        break;
+    case 1:
+        func_002C27C0(buf, D_00486550, month, day, year);
+        break;
+    case 2:
+        func_002C27C0(buf, D_00486550, day, month, year);
+        break;
+    }
+    func_002C25B8(dst, buf, size);
+}
 
 extern "C" void func_002C73C0(void* self);
 
@@ -57,11 +75,48 @@ extern "C" int func_002C71C0(void* self, int year)
     return r;
 }
 
-INCLUDE_ASM("util/statemachine", func_002C7208);
+extern "C" int func_002C7208(void* self, int month, int year)
+{
+    if (month == 2) {
+        if (func_002C71C0(self, year)) return 29;
+        return 28;
+    }
+    if (month >= 8) month++;
+    int r = 30;
+    if (month & 1) r = 31;
+    return r;
+}
 
-INCLUDE_ASM("util/statemachine", func_002C7260);
+extern "C" void func_002C7260(void* self, int* day, int* month, int* year, int n)
+{
+    while (n > 0) {
+        int dim = func_002C7208(self, *month, *year);
+        int d = *day;
+        if (dim < d + n) {
+            *day = 1;
+            n -= dim - d + 1;
+            (*month)++;
+            if (*month >= 13) {
+                *month = 1;
+                (*year)++;
+            }
+        } else {
+            *day = d + n;
+            n = 0;
+        }
+    }
+}
 
-INCLUDE_ASM("util/statemachine", func_002C7328);
+extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int n)
+{
+    int t = *hour * 3600 + *min * 60 + *sec + n;
+    int d = t / 86400;
+    t = t % 86400;
+    *hour = (t / 3600) % 24;
+    *min = (t / 60) % 60;
+    *sec = t % 60;
+    return d;
+}
 
 extern "C" int func_002C7328(void* self, int* a, int* b, int* c, int n);
 extern "C" void func_002C7260(void* self, int* a, int* b, int* c, int n);

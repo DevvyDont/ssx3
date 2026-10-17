@@ -158,7 +158,20 @@ extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
     return 0;
 }
 
-INCLUDE_ASM("world/worldview", func_003A9A48);
+extern "C" int func_003A9A48(func_003A99D8_sView* self, unsigned int i)
+{
+    cWorldViewSectionList* list = self->mSections;
+    if (list != 0 && i < (unsigned int)list->mNumSections) {
+        int off = i << 3;
+        char* base = (char*)self + 0x14;
+        func_003A99D8_sEntry* e = (func_003A99D8_sEntry*)(base + off);
+        if (e->state == 6) {
+            e->state = 5;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 extern "C" void* func_003A9A90(void* self)
 {
