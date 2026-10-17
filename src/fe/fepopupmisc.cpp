@@ -2708,7 +2708,48 @@ extern "C" void func_001E1C10(int which)
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E1DD0);
+//100%
+extern void* D_004A28A8;
+extern "C" int func_001E3A30(void* self);
+extern "C" void func_001E3A78(int a, int b);
+
+extern "C" void func_001E1DD0(void* self, int id, int alt)
+{
+    int state = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int snd;
+    int busy = state != 0 && state < 10;
+
+    if (busy)
+        return;
+    snd = 0;
+    switch (id) {
+    case 6:
+        snd = func_001E3A30((void*)0x22) ? 0 : 0x28;
+        break;
+    case 7:
+        snd = func_001E3A30((void*)0x24) ? 0 : 0x2C;
+        break;
+    case 8:
+        snd = func_001E3A30((void*)0x26) ? 0 : 0x30;
+        break;
+    case 9:
+        snd = func_001E3A30((void*)0x23) ? 0 : 0x2A;
+        break;
+    case 10:
+        snd = func_001E3A30((void*)0x25) ? 0 : 0x2E;
+        break;
+    case 11:
+        snd = func_001E3A30((void*)0x27) ? 0 : 0x32;
+        break;
+    }
+    if (snd != 0)
+    {
+        int n = snd + 1;
+        if (alt == 0)
+            n = snd;
+        func_001E3A78(n, 1);
+    }
+}
 
 //100%
 extern void* D_004A28A8;
