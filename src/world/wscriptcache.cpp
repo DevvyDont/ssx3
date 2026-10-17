@@ -126,9 +126,60 @@ extern "C" void func_003ACA70(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003ACAD0);
+extern "C" void ASYNCFILE_release_CAD0(int, int *, int *) __asm__("ASYNCFILE_release");
+extern "C" void func_002523A8_CAD0(int) __asm__("func_002523A8");
+extern "C" void func_003B47F8_CAD0(int, int) __asm__("func_003B47F8");
+extern "C" int func_003B4818_CAD0(int) __asm__("func_003B4818");
+extern "C" int func_003DF980_CAD0(int) __asm__("func_003DF980");
+extern "C" void func_003E6574_CAD0(int, int, int) __asm__("func_003E6574");
+int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
+extern char D_00495080[];
+extern "C" void func_003ACAD0(void *self_) {
+    char *self = (char*)self_;
+    short st = *(short*)self;
+    if (st == 1 && func_003DF980_CAD0(*(int*)(self + 4)) == st) {
+        int sp0 = 0;
+        int sp4 = 0;
+        ASYNCFILE_release_CAD0(*(int*)(self + 4), &sp0, &sp4);
+        if (sp0 != 0) {
+            if (sp4 > 0) {
+                int t = func_003B4818_CAD0(sp0);
+                if (t > 0) {
+                    int r = operator_new_CAD0(t, D_00495080, 0x20000000, 0);
+                    *(int*)(self + 8) = r;
+                    func_003B47F8_CAD0(sp0, r);
+                } else {
+                    int r = operator_new_CAD0(sp4, D_00495080, 0x20000000, 0);
+                    *(int*)(self + 8) = r;
+                    func_003E6574_CAD0(r, sp0, sp4);
+                }
+                func_002523A8_CAD0(sp0);
+            }
+        }
+        *(short*)self = 2;
+    }
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003ACBB8);
+struct sBXStr_CBB8 { char *p; int pad[3]; sBXStr_CBB8() {} };
+extern "C" void func_003186D0_CBB8(sBXStr_CBB8*, const char*, int) __asm__("func_003186D0");
+extern "C" void func_00318630_CBB8(sBXStr_CBB8*, sBXStr_CBB8*, const char*) __asm__("func_00318630");
+extern "C" int func_003DF690_CBB8(const char*, int) __asm__("func_003DF690");
+extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
+extern char D_004A47C0[];
+extern char D_004A4818[];
+extern "C" void func_003ACBB8(void* self, int arg)
+{
+    sBXStr_CBB8 a;
+    sBXStr_CBB8 b;
+    *(short*)((char*)self + 2) = 0;
+    func_003186D0_CBB8(&b, D_004A47C0, arg);
+    func_00318630_CBB8(&a, &b, D_004A4818);
+    *(int*)((char*)self + 4) = func_003DF690_CBB8(a.p, 0x100);
+    cBXString_dt_CBB8(&a, 2);
+    cBXString_dt_CBB8(&b, 2);
+    int n = *(int*)((char*)self + 4);
+    *(short*)((char*)self + 0) = n <= 0 ? 2 : 1;
+}
 
 //100%
 struct sWSCItemFields {

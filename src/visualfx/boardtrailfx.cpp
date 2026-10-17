@@ -739,7 +739,19 @@ extern "C" void func_002EBC40(char* self, float t)
     func_002EB938(&pos, &rect, (sBTRect4*)(self + 4), 0.0f);
 }
 
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBD88);
+// base ctor returns this; the unit declares it void
+void* func_002E4D70_r8(void* self) __asm__("func_002E4D70__FPv");
+extern void* D_00488080[];
+struct sBtRectBD88 { float x, y, w, h; };
+extern "C" void* func_002EBD88(void* self, sBtRectBD88 rect, float a, float b)
+{
+    func_002E4D70_r8(self);
+    *(void***)self = D_00488080;
+    *(sBtRectBD88*)((char*)self + 0x4) = rect;
+    *(float*)((char*)self + 0x14) = a;
+    *(float*)((char*)self + 0x18) = b;
+    return self;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
