@@ -732,7 +732,23 @@ int func_003B6528(int arg0) {
     return D_0050AADC[0][arg0].p->c;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6548);
+// Loads data a into slot n, freeing what the slot held before.
+extern int func_003B6528_6548(int) __asm__("func_003B6528");
+extern int func_0041610C_6548(int, int, int) __asm__("func_0041610C");
+struct E_6548 { int data; int p[3]; };
+struct G_6548 { char p[0x1F4]; struct E_6548 *slots; };
+extern struct G_6548 D_0050A8E8_6548 __asm__("D_0050A8E8");
+int func_003B6548(int a, int n) {
+    int r = 0;
+    int x = func_003B6528_6548(n);
+    if (x < 0) {
+        r = x;
+    } else {
+        func_0041610C_6548(a, D_0050A8E8_6548.slots[n].data, x);
+        D_0050A8E8_6548.slots[n].data = a;
+    }
+    return r;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B65D0);
 
@@ -1362,7 +1378,19 @@ int func_003B89E0(void) {
     return temp_2;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
+// Under the lock, refreshes every active voice.
+struct E_8A38 { int h; char p[0x88]; };
+struct G_8A38 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_8A38 *ents; };
+extern struct G_8A38 D_0050A8E8_8A38 __asm__("D_0050A8E8");
+extern int func_003B89E0_8A38(int) __asm__("func_003B89E0");
+extern void func_003B58A0_8A38(void) __asm__("func_003B58A0");
+extern void func_003B58D8_8A38(void) __asm__("func_003B58D8");
+void func_003B8A38(void) {
+    int i = 0;
+    func_003B58A0_8A38();
+    for (; i < D_0050A8E8_8A38.n; i++) func_003B89E0_8A38(D_0050A8E8_8A38.ents[i].h);
+    func_003B58D8_8A38();
+}
 
 //100%
 extern unsigned int func_003BA6E8();
