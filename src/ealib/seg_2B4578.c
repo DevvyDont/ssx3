@@ -125,7 +125,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B4478);
 
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cloneat);
 
-// Clones a shape: looks up its size, allocates through the registered allocator and copies it in.
+// Clones a shape: gets memory from the callback at D_0044C454 (sized by func_003B4478), then fills it with SHAPE_cloneat.
 extern int func_003B4478_4690(char *) __asm__("func_003B4478");
 extern char *(*D_0044C454_4690)(char *, int, int, int, int) __asm__("D_0044C454");
 extern void SHAPE_cloneat_4690(char *, char *) __asm__("SHAPE_cloneat");
@@ -359,7 +359,7 @@ void func_003B58A0(void) {
     D_0050A8E8_58A0[0x176]++;
 }
 
-// Drops the nesting counter at 0x176 and calls the registered callback.
+// Decrements the counter at 0x176 and calls the callback at D_0044C470.
 extern volatile char D_0050A8E8_58D8[] __asm__("D_0050A8E8");
 extern void (*D_0044C470_58D8)(void) __asm__("D_0044C470");
 void func_003B58D8(void) {
@@ -732,7 +732,7 @@ int func_003B6528(int arg0) {
     return D_0050AADC[0][arg0].p->c;
 }
 
-// Loads data a into slot n, freeing what the slot held before.
+// Passes a and slot n's old data to func_0041610C, then stores a in the slot.
 extern int func_003B6528_6548(int) __asm__("func_003B6528");
 extern int func_0041610C_6548(int, int, int) __asm__("func_0041610C");
 struct E_6548 { int data; int p[3]; };
@@ -878,7 +878,7 @@ int func_003B6A38(int arg0) {
     return D_0050A0A0[arg0];
 }
 
-// Removes the current item from both lists of channel c and clears it if it is the active one.
+// Removes channel c's current item from the lists at 0x11C and 0x128, and clears 0x134 if it held that item.
 extern char *D_0050A0A0_6A70[] __asm__("D_0050A0A0");
 extern int func_003B7A70_6A70(int) __asm__("func_003B7A70");
 extern void func_003C6320_6A70(void *, int) __asm__("func_003C6320");
@@ -907,7 +907,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
 
-// Dispatches a channel message: 'SCDl' and 'SCHl' are handled locally, anything else goes to the channel handler.
+// Dispatches a channel message by its tag: 'SCDl' and 'SCHl' have their own handlers, anything else goes to func_003E13E8.
 extern int *D_0050A0A0_7080[] __asm__("D_0050A0A0");
 extern void func_003B6EA8_7080(int *, int *) __asm__("func_003B6EA8");
 extern void func_003B6BD0_7080(int, int *) __asm__("func_003B6BD0");
@@ -1069,7 +1069,7 @@ int func_003B7EB0(int h, int a, int b) {
     return 0;
 }
 
-// Looks up a handle; returns the byte at 0xEC if the query succeeds.
+// Looks up a handle and returns its query result, or the byte at 0xEC when the query fails.
 extern int func_003B86C0_7F18(int) __asm__("func_003B86C0");
 int func_003B7F18(int h) {
     char *p = func_003B6A38_7E70(h);
@@ -1378,7 +1378,7 @@ int func_003B89E0(void) {
     return temp_2;
 }
 
-// Under the lock, refreshes every active voice.
+// Between func_003B58A0 and func_003B58D8, calls func_003B89E0 on each entry's handle.
 struct E_8A38 { int h; char p[0x88]; };
 struct G_8A38 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_8A38 *ents; };
 extern struct G_8A38 D_0050A8E8_8A38 __asm__("D_0050A8E8");
@@ -3065,7 +3065,7 @@ void func_003C3250(int arg0, int arg1) {
     }
 }
 
-// Resets the stream state block and opens the default stream.
+// Resets 0x1B14/0x1B18, fills the descriptor at D_0050ACE0 and keeps the handle func_00423DA0 returns.
 struct G_3300 { char p[0x1B10]; volatile int h; volatile int cur; volatile int count; };
 struct D_3300 { int f0; int size; int mode; };
 extern struct G_3300 D_0050AD00_3300 __asm__("D_0050AD00");
@@ -3276,7 +3276,7 @@ int func_003C4788_4788(int a0, int a1, int a2, int a3, int a4) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4898);
 
-// Frees the 16-byte slot holding handle h (28 slots) and wakes the worker.
+// Clears the 16-byte slot holding handle h (of 28), drops the use count, then calls func_003C45E8(1).
 struct S_4918 { int h; int p[3]; };
 struct G_4918 { char p[0xCC0]; volatile unsigned char used; char p1; volatile char busy; char p2[5]; struct S_4918 slots[28]; };
 extern struct G_4918 D_0050AD00_4918 __asm__("D_0050AD00");
@@ -3860,7 +3860,7 @@ void func_003C6040(int arg0) {
     }
 }
 
-// When enabled, calls each registered update callback in turn.
+// When the flag at 0x174 is set, calls each callback in the list at 0x19C.
 struct G_60E0 { char p[0x174]; signed char on; char p1[3]; signed char n; char p2[0x19C - 0x179]; void (*fn[1])(void); };
 extern struct G_60E0 D_0050A8E8_60E0 __asm__("D_0050A8E8");
 void func_003C60E0(void) {
@@ -5561,7 +5561,7 @@ int func_003CA990(S_A990 *self) {
     return 0;
 }
 
-// Sets the ratio at 0x114 from two fixed-point values, then marks dirty bit 3.
+// Sets the ratio at 0x114 from two fixed-point values, then calls func_003CE7C0 with 3.
 extern void func_003CE7C0_A9D8(void *, int) __asm__("func_003CE7C0");
 void func_003CA9D8(char *self, int *p) {
     *(float *)(self + 0x114) = (float)(p[0] >> 7) / (float)(p[1] >> 8);
@@ -6344,7 +6344,7 @@ int func_003CEE88(S_EE88 *self) {
     return 0;
 }
 
-// Sets the ratio at 0x118 from two fixed-point values, then marks dirty bit 2.
+// Sets the ratio at 0x118 from two fixed-point values, then calls func_003CE7C0 with 2.
 void func_003CEED0(char *self, int *p) {
     *(float *)(self + 0x118) = ((float)(p[0] >> 8) * 2.0f) / (float)(p[1] >> 8);
     func_003CE7C0_A9D8(self + 0x20, 2);
@@ -6370,7 +6370,7 @@ int func_003CEFB0(S_EFB0 *self) {
     return 0;
 }
 
-// Sets both ratios at 0x114/0x118 from fixed-point values over a common divisor, then marks dirty bit 4.
+// Sets both ratios at 0x114/0x118 from fixed-point values over a common divisor, then calls func_003CE7C0 with 4.
 void func_003CEFF8(char *self, int *p) {
     float x = (float)(p[0] >> 7), y = (float)(p[1] >> 7), d = (float)(p[2] >> 8);
     *(float *)(self + 0x114) = x / d;

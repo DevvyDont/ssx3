@@ -24,7 +24,7 @@ void* cBEMissionInterface_getThis()
 }
 
 //100%
-// Sums the 17 signed bytes of the score table starting at start.
+// Sums the 17 signed bytes of D_0043FA70 starting at start.
 extern signed char D_0043FA70[];
 
 extern "C" int func_001532F0(void* self, int start)
@@ -38,7 +38,7 @@ extern "C" int func_001532F0(void* self, int start)
 }
 
 //100%
-// Returns the score-table byte for idx in the current set.
+// Returns the D_0043FA70 byte for idx in the current set.
 extern int D_005305F0[];
 
 extern "C" int func_00153330(void* self, int idx)
