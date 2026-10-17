@@ -45,7 +45,73 @@ extern "C" void cFEPopupVideoCalibration_onCreateScreen(void* self)
     *(char*)((char*)self + 0x48) = 0;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001DEC68);
+//100%
+// volatile: the target keeps this load out of the jal delay slot (nop), like a volatile read
+extern char* volatile D_004A1544;
+extern char D_0045DDB8[];
+extern char D_0045DDC8[];
+
+struct sVEi_EC68 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sVEm_EC68 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sDefObj_EC68 {
+    sVEm_EC68* vt;
+};
+extern sDefObj_EC68 D_004A5A58_EC68 __asm__("D_004A5A58");
+
+struct sPopup_EC68 {
+    char pad0[0x10];
+    char* owner;                // 0x10
+    char pad14[0x8];            // 0x14
+    int flags;                  // 0x1C
+    char pad20[0x20];           // 0x20
+    void* screen;               // 0x40
+    char pad44[0x4];            // 0x44
+    signed char shown;          // 0x48
+};
+
+extern "C" int func_001DEC68(sPopup_EC68* self, char* in)
+{
+    sVEi_EC68* vt = *(sVEi_EC68**)(in + 8);
+    if (vt[5].fn(in + vt[5].delta) != 0) {
+        if (self->shown == 0) {
+            cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1540));
+            if (obj != 0) {
+                obj->v09(0);
+            }
+            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1544));
+            if (obj != 0) {
+                obj->v09(1);
+            }
+            cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045DD90));
+            if (text != 0) {
+                cUIText_setUnicodeStringByID(text, GetHashValue32(D_0045DDB8));
+            }
+            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045DDC8));
+            if (obj != 0) {
+                obj->v09(0);
+            }
+            self->shown = 1;
+        } else {
+            self->flags = ((self->flags | 0x80) & ~0x3F00) | 0x700;
+        }
+        sDefObj_EC68* p = *(sDefObj_EC68**)(self->owner + 0x14);
+        if (p == 0)
+            p = &D_004A5A58_EC68;
+        if (p != 0)
+            p->vt[2].fn((char*)p + p->vt[2].delta, 6);
+    }
+    return 1;
+}
 
 extern void* D_0046B230[];
 extern "C" void* func_0039E390(void*);
@@ -3677,7 +3743,16 @@ extern "C" int func_001E3460(int* out)
     return -1;
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
+//100%
+extern "C" int func_001E34D8(int i)
+{
+    sPopupEntry18* a = &D_004C6C08[i];
+    int n = i + 1;
+    sPopupEntry18* b = &D_004C6C08[n];
+    if (b->field_0x4 == a->field_0x4)
+        return n;
+    return -1;
+}
 
 //100%
 extern "C" void* cBE_getBE();
@@ -3872,7 +3947,40 @@ extern "C" void func_001E3A78(int a, int b)
     func_00147A30(cBE_getInterface_Fv(cBE_getBE(), 1), 0, a, b);
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E3AC8);
+//100%
+class cPad_1E3AC8 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual int GetType();
+    virtual void SetMotor(int motor, float strength);
+};
+struct sApp_1E3AC8 {
+    char pad[0x2EEC];
+    cPad_1E3AC8* pads[2];
+};
+extern sApp_1E3AC8* D_004A28A0_1E3AC8 __asm__("D_004A28A0");
+// GNU C++ minimum/maximum operator: compiles to the EE max.s instruction.
+static inline float Max_1E3AC8(float a, float b) { return a >? b; }
+
+// Pad rumble from a stick-style (x, y) pair: motor 0 and motor 1 strengths.
+extern "C" void func_001E3AC8(signed char port, float x, float y)
+{
+    x = x * 0.91333336f - 18.518518f;
+    float cx = 0.0f;
+    if (x >= 0.0f)
+        cx = x;
+    y *= 0.99166667f;
+    cPad_1E3AC8* pad = 0;
+    if (D_004A28A0_1E3AC8 != 0)
+        pad = D_004A28A0_1E3AC8->pads[port];
+    if (pad->GetType() == 2) {
+        pad->SetMotor(0, Max_1E3AC8(Max_1E3AC8((y - 0.5f) * 0.01f, (cx - 2.0f) / 972.22223f), 0.0f));
+        float b = (cx - 100.0f) / 5000.0f;
+        pad->SetMotor(1, Max_1E3AC8(Max_1E3AC8((y - 70.0f) * 0.00625f, b), 0.0f));
+    }
+}
 
 //100%
 extern "C" void* func_0039E2A0(void* self, void* engine);
@@ -5047,7 +5155,43 @@ extern "C" void func_001E5800(void* self, void* a1, unsigned int msg)
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E58E0);
+//100%
+extern "C" int func_001E34D8(int i);
+extern "C" int func_001E3408();
+extern "C" int func_001E3460(int* out);
+extern "C" void func_001E5428(void* self);
+// PORT: func_001E33E8 is declared (void*) but called with no argument here
+unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+
+extern "C" void func_001E58E0(void* self)
+{
+    int id = *(int*)((char*)self + 0x68);
+    sPopupEntry18_5800* a = &D_004C6C08_5800[id];
+    sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
+    if (b->type == 4) {
+        int n = func_001E34D8(id);
+        if (n == -1) {
+            char* o = *(char**)((char*)self + 0x20);
+            sVE5800* vt = *(sVE5800**)(o + 8);
+            vt[17].fn(o + vt[17].delta, self, 0x14);
+            return;
+        }
+        *(int*)((char*)self + 0x68) = n;
+        *(int*)((char*)self + 0x6C) = *(int*)((char*)self + 0x6C) + 1;
+        func_001E5428(self);
+    } else if (func_001E3408() > 0) {
+        sPopupList* t = func_001E39F8_list();
+        int idx;
+        *(int*)((char*)self + 0x68) = func_001E3460(&idx);
+        t->mask |= 1 << idx;
+        *(int*)((char*)self + 0x6C) = func_001E33E8_noarg() - idx;
+        func_001E5428(self);
+    } else {
+        char* o = *(char**)((char*)self + 0x20);
+        sVE5800* vt = *(sVE5800**)(o + 8);
+        vt[17].fn(o + vt[17].delta, self, 0x14);
+    }
+}
 
 //100%
 extern "C" int func_001E5A18(void* self, int a1, unsigned int a2)

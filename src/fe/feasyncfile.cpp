@@ -384,7 +384,60 @@ extern "C" void func_001A3E30()
     func_00262768(D_004A3328, 1, 10, 0, 0, 0);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A3EA0);
+//100%
+extern "C" void cBXString__cBXString(void* self, int flags);
+// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
+extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+struct sOwner1A5450;
+extern "C" void func_001A5450(sOwner1A5450* self);
+void cMemMan_free(void* p);
+void operator_delete(int* ptr);
+extern void* D_00467F28[];
+
+struct sVE1A3EA0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVec1A3EA0 {
+    int f0;
+    int* mBegin;
+    int* mEnd;
+    int* mCap;
+};
+
+struct sOwner1A3EA0 {
+    char pad0[0x6E4];
+    sVec1A3EA0 mVec;
+};
+
+static inline void Dealloc1A3EA0(int* p, int n)
+{
+    if (p != 0) {
+        if (n == 1) {
+            operator_delete(p);
+        } else {
+            cMemMan_free(p);
+        }
+    }
+}
+
+extern "C" void func_001A3EA0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x8) = D_00467F28;
+    char* obj = *(char**)((char*)self + 0x20);
+    sVE1A3EA0* vt = *(sVE1A3EA0**)(obj + 0x8);
+    vt[32].fn(obj + vt[32].delta);
+    func_001A5450((sOwner1A5450*)self);
+    sOwner1A3EA0* o = (sOwner1A3EA0*)self;
+    sVec1A3EA0* v = &o->mVec;
+    Dealloc1A3EA0(v->mBegin, o->mVec.mCap - o->mVec.mBegin);
+    cBXString__cBXString((char*)self + 0x6E0, 2);
+    cBXString__cBXString((char*)self + 0x6D4, 2);
+    cBXString__cBXString((char*)self + 0x6D0, 2);
+    func_001A85D0_dtor(self, flags);
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -2702,7 +2755,61 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A8500);
+//100%
+extern "C" void* func_0039E318(void* self, int a1, int a2);
+extern "C" void* cBXString_cBXString2(void* self, const char* str);
+// operator new gives gcc's malloc-like (REG_NOALIAS) aliasing that the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern void* D_0046B808[];
+extern char D_004A1390[];
+extern char D_0045CDE8[];
+
+struct sListNode1A8500 {
+    sListNode1A8500* mNext;
+    sListNode1A8500* mPrev;
+    void* mData;
+};
+
+struct sList1A8500 {
+    int f0;
+    sListNode1A8500* mNode;
+};
+
+// Stateless node allocator; as a local object it still reserves the 16-byte stack slot the target has.
+struct sAlloc1A8500 {
+    char mState[4];
+    sAlloc1A8500() {}
+    void* allocate(unsigned int n) { return operator new(n, D_0045CDE8, 0x20000000, 0); }
+};
+
+extern "C" void* func_001A8500(void* self, int a1, int a2)
+{
+    func_0039E318(self, a1, a2);
+    *(void***)((char*)self + 0x8) = D_0046B808;
+    *(int*)((char*)self + 0x48) = 0;
+    *(int*)((char*)self + 0x4C) = 0;
+    *(int*)((char*)self + 0x50) = 0;
+    *(int*)((char*)self + 0x54) = 0;
+    *(int*)((char*)self + 0x58) = 0;
+    *(int*)((char*)self + 0x69C) = 0;
+    *(int*)((char*)self + 0x6A0) = 0;
+    *(int*)((char*)self + 0x6A4) = 0;
+    *(int*)((char*)self + 0x6A8) = 1;
+    *(int*)((char*)self + 0x6AC) = 0;
+    *(int*)((char*)self + 0x6B0) = 0;
+    *(int*)((char*)self + 0x6B4) = 0;
+    *(int*)((char*)self + 0x6B8) = 0;
+    *(int*)((char*)self + 0x6BC) = 2;
+    cBXString_cBXString2((char*)self + 0x6C0, D_004A1390);
+    *(int*)((char*)self + 0x6C4) = 0;
+    sList1A8500* l = (sList1A8500*)((char*)self + 0x6C8);
+    sAlloc1A8500 alloc;
+    *(sListNode1A8500**)((char*)self + 0x6CC) = (sListNode1A8500*)alloc.allocate(0xC);
+    l->mNode->mNext = *(sListNode1A8500**)((char*)self + 0x6CC);
+    l->mNode->mPrev = *(sListNode1A8500**)((char*)self + 0x6CC);
+    *(char*)((char*)self + 0x44) = 0;
+    return self;
+}
 
 INCLUDE_ASM("fe/feasyncfile", func_001A85D0);
 
@@ -4340,12 +4447,13 @@ extern "C" void func_001ABED8(void* self)
 }
 
 //100%
-extern "C" void* func_001A8500(void* self);
+// PORT: func_001A8500 takes (self, a1, a2); this caller passes its own a1/a2 through untouched
+extern "C" void* func_001A8500_1ABF70(void* self) __asm__("func_001A8500");
 extern void* D_0046B6F8[];
 
 extern "C" void* func_001ABF70(void* self)
 {
-    func_001A8500(self);
+    func_001A8500_1ABF70(self);
     *(void***)((char*)self + 0x8) = D_0046B6F8;
     return self;
 }
@@ -4545,7 +4653,14 @@ extern "C" int func_001AC360(void* self)
     return 1;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001AC408);
+//100%
+extern "C" int func_001AC408(void* self)
+{
+    bool ok = true;
+    ok = ok && func_001AC360(self);
+    ok = ok && func_001AC2B8(self);
+    return ok;
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -5991,7 +6106,48 @@ extern "C" void func_001AEC60(void* self, int on)
     (*(cFEVObj_001AEC60**)(s + 0x6DC))->v08(on);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001AF098);
+//100%
+extern int D_005308D0[];
+extern signed char D_00535C12[];
+// volatile: the target keeps this load out of the jal delay slot, like a volatile read
+extern volatile unsigned char D_004A4E8C_AF098 __asm__("D_004A4E8C");
+extern "C" void func_0039A7A8(void* self, int a1);
+
+extern "C" void func_001AF098(void* self, int all)
+{
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (all) {
+        func_0039A7A8(*(void**)((char*)self + 0x6E4), 1);
+        func_0039A7A8(*(void**)((char*)self + 0x6E8), 1);
+        func_0039A7A8(*(void**)((char*)self + 0x6EC), 1);
+        func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
+        return;
+    }
+    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0x4) != 0) {
+        func_0039A7A8(*(void**)((char*)self + 0x6E4), (D_005308D0[0] >> 8) & 1);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6E4), 1);
+    }
+    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0xC) != 0) {
+        func_0039A7A8(*(void**)((char*)self + 0x6E8), (D_005308D0[0] >> 6) & 1);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6E8), 1);
+    }
+    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0x8) != 0) {
+        int f = D_005308D0[0] >> 7;
+        func_0039A7A8(*(void**)((char*)self + 0x6EC), f & 1);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6EC), 1);
+    }
+    if (D_00535C12[0] != 0) {
+        cBENewRaceInterface_setNumberAI(iface, 0);
+        sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
+        ivt[1].fn(iface + ivt[1].delta);
+        func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6E0), D_004A4E8C_AF098);
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -7055,7 +7211,27 @@ extern "C" void func_001B0C08(void* self)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B0D30);
+//100%
+extern char D_004637B0[];
+
+extern "C" void func_001B0D30(void* self)
+{
+    *(int*)((char*)self + 0x6D4) = 0;
+    if (*(void**)((char*)self + 0x40) != 0) {
+        cFEVObj_001B0C08* o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004635F8));
+        if (o != 0) {
+            o->v08(0);
+        }
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
+        if (o != 0) {
+            o->v09(0);
+        }
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463618));
+        if (o != 0) {
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_004637B0));
+        }
+    }
+}
 
 //100%
 extern "C" void func_001B0C08(void* self);
@@ -8103,7 +8279,41 @@ extern "C" void func_001B25E0(const char* src, void* out)
 
 INCLUDE_ASM("fe/feasyncfile", func_001B27B0);
 
-INCLUDE_ASM("fe/feasyncfile", func_001B2CD0);
+//100%
+extern "C" void* cBXString_cBXString1(void* self, void* other);
+extern "C" void* cBXString_Concat(void* self, const char* str);
+extern "C" void func_003189A0(void* self, void* other);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" void func_003A19F8(cUIText* text, char* str);
+extern char D_004A1A50[];
+
+struct sBXString1B2CD0 {
+    char* str;
+    sBXString1B2CD0() {}
+    sBXString1B2CD0(const sBXString1B2CD0& o);
+};
+
+// PORT: the item pointer arrives as int
+extern "C" void func_001B2CD0(void* self, int a1)
+{
+    char* item = (char*)a1;
+    if (*(void**)((char*)self + 0x40) != 0) {
+        char* list = *(char**)((char*)self + 0x6F0);
+        if (list != 0) {
+            unsigned short count = *(unsigned short*)(list + 0xC8);
+            unsigned short top = *(unsigned short*)(list + 0xC4);
+            unsigned short sel = *(unsigned short*)(list + 0xC6);
+            int empty = count == 0;
+            sBXString1B2CD0 s;
+            cBXString_cBXString1(&s, item + 8);
+            cBXString_Concat(&s, D_004A1A50);
+            func_003189A0(&s, item + 0xC);
+            func_003A19F8(*(cUIText**)((char*)self + 0x6F0), s.str);
+            func_001A83D8(*(sList1A83D8**)((char*)self + 0x6F0), 0x40, 6, count, top, sel, empty, 1);
+            cBXString__cBXString(&s, 2);
+        }
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -12180,7 +12390,27 @@ extern "C" int func_001B9488(void* self, int a1, int a2)
     return func_001A8E40_3i(self, a1, a2);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B9558);
+//100%
+// bxString-style handle: length lives 8 bytes before the character data.
+struct sStr_1B9558 {
+    char* p;
+    int Len() const { return *(int*)(p - 8); }
+    bool HasData() const { return Len() != 0; }
+};
+struct sStrSet_1B9558 {
+    sStr_1B9558 s[4];
+};
+
+extern "C" bool func_001B9558(void* self)
+{
+    sStrSet_1B9558* t = *(sStrSet_1B9558**)((char*)self + 0x6D0);
+    bool ok = true;
+    ok = ok && t->s[0].HasData();
+    ok = ok && t->s[1].HasData();
+    ok = ok && t->s[2].HasData();
+    ok = ok && t->s[3].HasData();
+    return ok;
+}
 
 //100%
 int GetHashValue32(char* str);
@@ -12643,7 +12873,15 @@ extern "C" int func_001B9FA0(void* self)
     return ok;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001BA110);
+//100%
+extern "C" int func_001BA110(void* self)
+{
+    bool ok = true;
+    ok = ok && func_001B9D68(self);
+    ok = ok && func_001B9FA0(self);
+    ok = ok && func_001B9B18(self);
+    return ok;
+}
 
 //100%
 extern "C" void* cBXString_operatorE(void* self, void* other);
@@ -13545,7 +13783,21 @@ extern "C" int func_001BB968(void* self, int year)
     return leap;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001BB9B0);
+//100%
+// Days in a month (1-based); February uses the leap-year test.
+extern "C" int func_001BB9B0(void* self, int month, int year)
+{
+    if (month == 2) {
+        if (func_001BB968(self, year))
+            return 29;
+        return 28;
+    }
+    if (month >= 8)
+        month++;
+    if (month % 2 == 1)
+        return 31;
+    return 30;
+}
 
 extern "C" void* func_001BBC40(void* self);
 
@@ -18087,7 +18339,20 @@ extern "C" void* func_001C2D18(void* self, int a1)
     return self;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C2D90);
+//100%
+extern "C" void* func_001C2D90(void* self)
+{
+    func_001A8500_3(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00468278;
+    sFEState1C2D18* s = (sFEState1C2D18*)self;
+    s->a = 0;
+    s->b = 0;
+    s->c = 0;
+    for (int i = 3; i >= 0; i--) {
+        s->slots[i] = 0;
+    }
+    return self;
+}
 
 //100%
 int GetHashValue32(char* str);
