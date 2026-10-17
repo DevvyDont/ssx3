@@ -265,7 +265,20 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_003
     }
 }
 
-INCLUDE_ASM("animation/rideranimbase", func_00311D88);
+//100%
+// Stores v at 0x80 of every sequence in all six sequencers.
+extern "C" void func_00311D88(void* self, int v)
+{
+    for (int i = 0; i < 6; i++) {
+        int j = 0;
+        if (j < (*(cAnimSequencer**)((char*)self + 0x50))[i].mCount) {
+            do {
+                *(int*)((char*)cAnimSequencer_getSequence(&(*(cAnimSequencer**)((char*)self + 0x50))[i], j) + 0x80) = v;
+                j++;
+            } while (j < (*(cAnimSequencer**)((char*)self + 0x50))[i].mCount);
+        }
+    }
+}
 
 //100%
 // Resets entry i of the 8-byte table at 0x50 with func_00314668 and sets slot i to 0x1B6.
