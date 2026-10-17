@@ -722,7 +722,16 @@ void* func_00314A40(void* self)
     return func_00314AA0(self);
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00314A60);
+//100%
+// Loads the archive named name with func_003E22F0, stores it and points self at its tables.
+extern "C" char* func_003E22F0(const char* name, int flags);
+
+extern "C" void func_00314A60(void* self, const char* name, int flags)
+{
+    char* data = func_003E22F0(name, flags);
+    *(char**)self = data;
+    func_00314AA0_impl(self, data);
+}
 
 //100%
 // The original had the same mismatch: callers (func_00314A18/func_00314A40, the
@@ -746,13 +755,9 @@ extern "C" int func_00314AC0(char* self)
     return 0;
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00314AE0);
-
-INCLUDE_ASM("animation/animsequencer", func_00314B70);
-
 //100%
+// Returns 1 when the archive has a part called name.
 extern "C" int func_0041AA88(const char* a, const char* b);
-extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
 
 struct sMdfPart60 {
     char name[0x60];
@@ -768,6 +773,31 @@ struct sMdfArchive {
     sMdfHeader* header; // 0x4
     sMdfPart60* parts;  // 0x8
 };
+
+extern "C" int func_00314AE0(sMdfArchive* self, const char* name)
+{
+    for (int i = 0; i < self->header->count; i++)
+    {
+        if (func_0041AA88(name, self->parts[i].name) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+//100%
+// Returns the part called name, or null.
+extern "C" sMdfPart60* func_00314B70(sMdfArchive* self, const char* name)
+{
+    for (int i = 0; i < self->header->count; i++)
+    {
+        if (func_0041AA88(name, self->parts[i].name) == 0)
+            return &self->parts[i];
+    }
+    return 0;
+}
+
+//100%
+extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
 
 extern "C" void* func_00314C00(sMdfArchive* self, const char* name)
 {
