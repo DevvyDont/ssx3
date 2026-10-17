@@ -349,7 +349,14 @@ extern "C" void* func_0039FAE8(void* self)
     return cList_first((cList*)self);
 }
 
-INCLUDE_ASM("ui/uistatestack", func_0039FB08);
+struct sUSBlock {
+    int d[16];
+} __attribute__((aligned(16)));
+
+extern "C" void func_0039FB08(sUSBlock* dst, sUSBlock* src)
+{
+    *dst = *src;
+}
 
 //100%
 struct func_0039FB30_sVec3 {
@@ -489,9 +496,26 @@ extern "C" void func_0039FD38(void* self)
     }
 }
 
-INCLUDE_ASM("ui/uistatestack", func_0039FD80);
+extern "C" int func_00397458(void* p);
 
-INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
+extern "C" void func_0039FD80(char* self, float scale)
+{
+    if (*(void**)(self + 0xC) != 0) {
+        int v = func_00397458(*(void**)(self + 0xC));
+        *(short*)(*(char**)(self + 0xC) + 0xA) = (int)((float)v * scale);
+    }
+}
+
+extern "C" int func_00397440(void* p);
+
+extern "C" int func_0039FDD8(char* self)
+{
+    void* p = *(void**)(self + 0xC);
+    if (p != 0) {
+        return func_00397440(p);
+    }
+    return 0;
+}
 
 INCLUDE_ASM("ui/uistatestack", func_0039FE00);
 

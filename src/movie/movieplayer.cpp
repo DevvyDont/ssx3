@@ -478,7 +478,13 @@ extern "C" void func_0023D660(void* self)
     }
 }
 
-INCLUDE_ASM("movie/movieplayer", func_0023D7A8);
+extern "C" int func_0023D7A8(char* self)
+{
+    int flags = *(int*)(self + 0x43C);
+    flags &= ~4;
+    flags &= ~0x10;
+    return *(int*)(self + 0x440) == 0 && flags != 0;
+}
 
 INCLUDE_ASM("movie/movieplayer", func_0023D7D8);
 
@@ -2498,7 +2504,20 @@ extern "C" void func_00240F30(void* self)
     }
 }
 
-INCLUDE_ASM("movie/movieplayer", func_00240FB0);
+struct sMovieVEntry0FB0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int, int);
+};
+
+extern "C" void func_00240FB0(void* self, int a, int b, int c)
+{
+    void* o = *(void**)((char*)self + 0x434);
+    D_004A2C78 = 1;
+    sMovieVEntry0FB0* vt = *(sMovieVEntry0FB0**)o;
+    vt[36].fn((char*)o + vt[36].delta, a, b, c);
+    *(int*)((char*)self + 0xE4) = c;
+}
 
 //100%
 extern int D_004A2C78;
@@ -2518,7 +2537,14 @@ extern "C" void func_00241000(void* self, int a, int b, int c)
     *(int*)((char*)self + 0xE4) = c;
 }
 
-INCLUDE_ASM("movie/movieplayer", func_00241050);
+extern "C" void func_00241050(void* self, int a, int b, int c)
+{
+    void* o = *(void**)((char*)self + 0x434);
+    D_004A2C78 = 1;
+    sMovieVEntry1000* vt = *(sMovieVEntry1000**)o;
+    vt[38].fn((char*)o + vt[38].delta, a, b, c);
+    *(int*)((char*)self + 0xE4) = c;
+}
 
 //100%
 extern "C" void func_002410A0(void* self)
@@ -2528,7 +2554,22 @@ extern "C" void func_002410A0(void* self)
     vt[12].fn((char*)obj + vt[12].delta);
 }
 
-INCLUDE_ASM("movie/movieplayer", func_002410D0);
+typedef int (*fnMP10D0)(char*);
+
+static inline int func_002410D0_count(void* self)
+{
+    void* o = *(void**)((char*)self + 0x434);
+    sMovieVEntry0F30* vt = *(sMovieVEntry0F30**)o;
+    return vt[68].fn((char*)o + vt[68].delta);
+}
+
+extern "C" int func_002410D0(void* self)
+{
+    if (*(int*)((char*)self + 0xEC) < func_002410D0_count(self)) {
+        return *(int*)((char*)self + 0xEC);
+    }
+    return func_002410D0_count(self);
+}
 
 //100%
 extern int D_004A2C78;
@@ -3039,7 +3080,35 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* self, int idx, ch
     }
 }
 
-INCLUDE_ASM("movie/movieplayer", func_00241928);
+extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern char D_004A2C90[];
+extern char D_004A2C98[];
+
+struct sMPSlot1928 {
+    int a;      // 0x344
+    int b;      // 0x348
+    int c;      // 0x34C
+    int d;      // 0x350
+    int id;     // 0x354
+    char pad[0xE0 - 0x14];
+};
+
+struct sMP1928 {
+    char pad[0x344];
+    sMPSlot1928 slots[1];
+};
+
+extern "C" void func_00241928(sMP1928* self, int i, void* out)
+{
+    if (self->slots[i].d != 0 && self->slots[i].a != 0 && self->slots[i].b != 0 && self->slots[i].c != 0) {
+        char name[0x200];
+        char path[0x200];
+        func_002C2540_r(name, D_004A2C90);
+        func_002C2540_r(path, D_004A2C98);
+        func_002C26D0_v(out, path, self->slots[i].id, name);
+    }
+}
 
 //100%
 extern "C" int func_002419D8(void* self, int a1)

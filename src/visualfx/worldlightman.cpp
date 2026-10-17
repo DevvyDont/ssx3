@@ -705,7 +705,10 @@ extern "C" int func_002F7A70(void* self)
     return *(int*)((char*)self + 0x4) > 0;
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
+extern "C" sWLCVec4 func_002F7A80(char* p)
+{
+    return ((sWLCVec4*)(*(char**)(p + 0xC) + *(int*)(p + 0x8) * 0x70))[*(int*)(p + 0xB4) - 1];
+}
 
 extern "C" void func_002F7AB0()
 {
@@ -832,7 +835,15 @@ void func_002F7C30(void* self)
 {
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
+extern char D_00488648[];
+extern "C" void func_002D6410(void* self);
+
+extern "C" void* func_002F7C38(void* self)
+{
+    *(void**)self = D_00488648;
+    func_002D6410(self);
+    return self;
+}
 
 extern int D_004A3A30;
 
@@ -1094,7 +1105,12 @@ extern "C" void func_002F7EC8()
 {
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
+void func_002EADC0(void* self);
+
+extern "C" void func_002F7ED0(void* self)
+{
+    func_002EADC0(self);
+}
 
 extern "C" void func_002F7EF0()
 {
@@ -1215,7 +1231,22 @@ extern "C" void func_002F8030(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("visualfx/worldlightman", func_002F8060);
+struct sWLPacked8060 {
+    long a;
+    long b;
+} __attribute__((packed));
+
+void func_002E4D70(void* self);
+extern char D_004880C0[];
+
+extern "C" void* func_002F8060(char* self, sWLPacked8060* src)
+{
+    sWLPacked8060 t = *src;
+    func_002E4D70(self);
+    *(void**)self = D_004880C0;
+    *(sWLPacked8060*)(self + 4) = t;
+    return self;
+}
 
 //100%
 extern void* D_004880E0[];
