@@ -4633,7 +4633,54 @@ extern "C" void func_001E4C78(void* self_, int idx, int slot, int id, unsigned c
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E4F70);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_0046E140[];
+extern char D_0046E160[];
+extern char D_0046E180[];
+extern char D_0046E1A0[];
+extern char D_0046E1C0[];
+
+struct sPopTexts_001E4F70 {
+    char pad0[0xFC];
+    cUIText* texts[8];
+};
+
+struct sVEntry001E4F70 {
+    short delta;
+    short pad;
+    void (*fn)(void*, int);
+};
+
+// Formats the label for a popup option id and shows it in the given text slot.
+extern "C" void func_001E4F70(void* self, int slot, int id, unsigned char n)
+{
+    char buf[48];
+    if (func_001E2D58(3, id)) {
+        switch (id) {
+        case 0x73: case 0x75: case 0x77: case 0x79: case 0x7B: case 0x7D:
+        case 0x7F: case 0x81: case 0x83: case 0x85: case 0x87: case 0x89:
+            sprintf(buf, D_0046E140, n);
+            break;
+        case 0x74: case 0x76: case 0x78: case 0x7A: case 0x7C: case 0x7E:
+        case 0x80: case 0x82: case 0x84: case 0x86: case 0x88: case 0x8A:
+            sprintf(buf, D_0046E160, n);
+            break;
+        }
+    } else if (func_001E2D58(5, id)) {
+        sprintf(buf, D_0046E180, n);
+    } else if (func_001E2D58(4, id)) {
+        sprintf(buf, D_0046E1A0, n);
+    } else if (func_001E2D58(8, id)) {
+        sprintf(buf, D_0046E1C0, n);
+    }
+    sPopTexts_001E4F70* o = (sPopTexts_001E4F70*)self;
+    if (o->texts[slot] != 0) {
+        cUIText_setUnicodeStringByID(o->texts[slot], GetHashValue32(buf));
+        char* t = (char*)o->texts[slot];
+        sVEntry001E4F70* vt = *(sVEntry001E4F70**)(t + 8);
+        vt[9].fn(t + vt[9].delta, 1);
+    }
+}
 
 //100%
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);

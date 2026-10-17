@@ -107,7 +107,32 @@ extern "C" void func_0015AEC0(sBEDB_0015AE00* self)
     }
 }
 
-INCLUDE_ASM("be/bedbreward", func_0015AF40);
+// Reward database view: tables of fixed-size records whose first word is the id.
+struct sBEDBTables_0015AF40
+{
+    int handle;
+    void* data;
+    char* tables[9];
+};
+
+// Returns the id of record idx in the table for the given reward type.
+extern "C" int func_0015AF40(sBEDBTables_0015AF40* self, unsigned int type, int idx)
+{
+    switch (type) {
+    case 0: { int o = idx * 12; return *(int*)(self->tables[0] + o); }
+    case 1: { int o = idx * 12; return *(int*)(self->tables[1] + o); }
+    case 2: { int o = idx * 8; return *(int*)(self->tables[2] + o); }
+    case 3: { int o = idx * 16; return *(int*)(self->tables[3] + o); }
+    case 4: { int o = idx * 16; return *(int*)(self->tables[4] + o); }
+    case 5: { int o = idx * 16; return *(int*)(self->tables[5] + o); }
+    case 6: { int o = idx * 16; return *(int*)(self->tables[7] + o); }
+    case 7: { int o = idx * 16; return *(int*)(self->tables[6] + o); }
+    case 8: { int o = idx * 16; return *(int*)(self->tables[8] + o); }
+    case 9:
+    default:
+        return 0;
+    }
+}
 
 // Variadic no-op (probably a stripped debug print); returns its first argument.
 extern "C" void* func_0015AFE8(void* a, ...)

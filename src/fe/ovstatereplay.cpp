@@ -117,7 +117,45 @@ extern "C" void cOVState_REPLAY_onUpdate(void* p)
     cOVState_REPLAY_setupTicker(self);
 }
 
-INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupCameraName);
+extern char D_004A2730[];
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern long D_00471C40[];
+extern long D_00471C50[];
+extern long D_00471C60[];
+extern long D_00471C70[];
+extern long D_00471C80[];
+extern long D_004A2738[];
+extern long D_00471C90[];
+extern long D_004A2740[];
+extern long D_004A2748[];
+extern char D_004A2138[];
+
+// Shows the name of the current replay camera.
+extern "C" void cOVState_REPLAY_setupCameraName(void* self)
+{
+    long buf[2];
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2730));
+    if (text == 0)
+        return;
+    unsigned int cam = *(unsigned int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28) + 0x630);
+    switch (cam) {
+    case 0: __builtin_memcpy(buf, D_00471C40, 11); break;
+    case 1: __builtin_memcpy(buf, D_00471C50, 14); break;
+    case 2: __builtin_memcpy(buf, D_00471C60, 12); break;
+    case 3: __builtin_memcpy(buf, D_00471C70, 11); break;
+    case 4: __builtin_memcpy(buf, D_00471C80, 11); break;
+    case 5: __builtin_memcpy(buf, D_004A2738, 8); break;
+    case 6: __builtin_memcpy(buf, D_00471C90, 9); break;
+    case 7: __builtin_memcpy(buf, D_004A2740, 8); break;
+    case 8: __builtin_memcpy(buf, D_004A2748, 8); break;
+    default:
+        sprintf((char*)buf, D_004A2138, cam + 1);
+        break;
+    }
+    cUIText_setAsciiString(text, (char*)buf);
+}
 
 //100%
 int GetHashValue32(char* str);

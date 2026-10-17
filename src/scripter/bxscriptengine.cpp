@@ -289,7 +289,84 @@ extern "C" int func_00282500(void* self, void* p, int v)
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282510);
 
-INCLUDE_ASM("scripter/bxscriptengine", func_00282540);
+extern "C" void func_002729A8(void* self, void* obj);
+// PORT: the unit declares func_00282540 as void; it returns the stopped state (6).
+extern "C" int func_00282540_r(void* self, int id) __asm__("func_00282540");
+
+struct sBxsVEntry2540 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sBxsVEntry2540b {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+struct sBXSlot2540 {
+    void* data;
+    unsigned short uses;
+};
+
+struct sBXThread2540 {
+    void** owner;   // 0x0
+    int state;      // 0x4
+    int slot;       // 0x8
+    int arg;        // 0xC
+    short f10;      // 0x10
+    short f12;      // 0x12
+    int pending;    // 0x14
+    float time;     // 0x18
+    int result;     // 0x1C
+    int active;     // 0x20
+};
+
+// Stops script thread id: releases its pending load or slot reference and frees the thread.
+extern "C" int func_00282540_r(void* self, int id)
+{
+    sBXThread2540* t = (sBXThread2540*)func_00282CB0(self, id);
+    if (t == 0 || t->active == 0)
+        return 6;
+    t->f10 = 0;
+    switch (t->state) {
+    case 1: {
+        int idx = t->pending;
+        sBXSlot2540* sl = &(*(sBXSlot2540**)((char*)self + 0x2B0))[idx];
+        if (sl->data == 0) {
+            sBxsVEntry2540* e = &(*(sBxsVEntry2540**)((char*)self + 0x2A8))[8];
+            e->fn((char*)self + e->delta, idx);
+        }
+        break;
+    }
+    case 3:
+    case 4:
+    case 5:
+        func_00282338(self, id);
+        break;
+    case 0:
+    case 2:
+    case 6:
+        break;
+    }
+    sBxsVEntry2540b* e = &(*(sBxsVEntry2540b**)((char*)self + 0x2A8))[12];
+    e->fn((char*)self + e->delta, id, t->arg);
+    if (t->owner != 0) {
+        func_00274C10(t->owner, 0);
+        func_002729A8(*(void**)((char*)self + 0x2B8), *t->owner);
+    }
+    if (t->slot >= 0) {
+        sBXSlot2540* s = &(*(sBXSlot2540**)((char*)self + 0x2B0))[t->slot];
+        if (--s->uses == 0) {
+            sBxsVEntry2540* e2 = &(*(sBxsVEntry2540**)((char*)self + 0x2A8))[9];
+            e2->fn((char*)self + e2->delta, t->slot);
+        }
+    }
+    t->state = 7;
+    func_00282C88(self, t);
+    return 6;
+}
 
 extern "C" void func_00272BF8(void* p);
 

@@ -3053,7 +3053,68 @@ extern "C" void func_001A8AE8(void* self, cFEVObj_001A8AE8* obj)
 
 INCLUDE_ASM("fe/feasyncfile", func_001A8B88);
 
-INCLUDE_ASM("fe/feasyncfile", func_001A8E40);
+extern "C" void func_001A9930(void* self);
+extern "C" int func_0025DA90(void* self);
+extern void* D_004A3028;
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern char D_00461B30[];
+extern const char D_0045FF28[];
+extern "C" void* func_001BCB58_v(void* p, int a1) __asm__("func_001BCB58");
+extern "C" void* func_001BFBB8(void* p, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001A8F98(void* self);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* msg);
+extern "C" void func_001A9BC0(void* self, void* popup);
+
+struct sVEntry001A8E40 {
+    short delta;
+    short pad;
+    int (*fn)(void*, int, void*);
+};
+
+// PORT: the unit declares func_001A8E40 as void*(void*); the handler takes (self, id, msg)
+extern "C" int func_001A8E40_impl(char* self, int id, char* msg) __asm__("func_001A8E40");
+
+// Async-file state message handler: opens child screens and forwards UI messages to the active popup.
+extern "C" int func_001A8E40_impl(char* self, int id, char* msg)
+{
+    switch (id) {
+    case 0x115:
+    case 0x116:
+        func_001A9930(self);
+        break;
+    case 0xDC:
+        if (func_0025DA90(D_004A3028) != 0)
+            break;
+        func_001A8A40(self, func_001BCB58_v(cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(self + 0x10)));
+        break;
+    case 0xEF:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
+        break;
+    case 0x102:
+        if (*(int*)(msg + 8) == 0x74696D65) {
+            func_001A8F98(self);
+        } else {
+            void* p = func_001A9C50(self);
+            func_001A9CC0(self, &p, self, msg);
+            func_001A9BC0(self, p);
+        }
+        break;
+    case 0xDD:
+    case 0xDE:
+    case 0xE0:
+    case 0xE1: {
+        char* c = *(char**)(self + 0x20);
+        if (c != 0) {
+            sVEntry001A8E40* vt = *(sVEntry001A8E40**)(c + 8);
+            vt[24].fn(c + vt[24].delta, id, msg);
+        }
+        break;
+    }
+    }
+    return 0;
+}
 
 //100%
 int GetHashValue32(char* str);
