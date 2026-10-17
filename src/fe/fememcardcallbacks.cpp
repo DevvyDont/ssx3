@@ -1030,7 +1030,191 @@ extern "C" void func_001D86B0(void* self)
     vt[47].fn((char*)self + vt[47].delta);
 }
 
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8700);
+//100%
+extern "C" void func_001D9308(void*, int);
+extern "C" void func_001D7190(void);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" void* func_00227F80(void* app);
+extern void* D_004A2028;
+extern void* D_004A28A8;
+
+struct sVE_8700 { short delta; short index; void (*fn)(void*); };
+
+#define V_8700(n) ((*(sVE_8700**)(self + 8))[n].fn(self + (*(sVE_8700**)(self + 8))[n].delta))
+#define DONE_8700()                        \
+    if (*(int*)(self + 0x204) == 1) {      \
+        *(int*)(mp + 0x440) = 1;           \
+        V_8700(40);                        \
+    }
+
+extern "C" void func_001D8700(char* self, void* a1, int button)
+{
+    if ((unsigned int)(button - 0xF) < 3) {
+        int c;
+        c = 0;
+        if (button == 0x10) {
+            c = 1;
+        } else if (button == 0x11) {
+            c = 2;
+        }
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        switch (*(int*)(self + 0x19C)) {
+        case 2:
+            if (c == 0) {
+                V_8700(45);
+            } else {
+                *(int*)(self + 0x1C0) = 1;
+            }
+            break;
+        case 19:
+            if (c != 0) {
+                *(int*)(self + 0x1EC) = 1;
+                break;
+            }
+            *(int*)(self + 0x1F0) = 0;
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 1:
+            if (c == 0) {
+                *(int*)(self + 0x1C0) = 3;
+                *(int*)(self + 0x1F0) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 9:
+            if (c != 0) {
+                *(int*)(self + 0x1EC) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 18:
+            if (c == 0) {
+                *(int*)(self + 0x1EC) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 10:
+            if (c != 0) {
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 11:
+            *(int*)(self + 0x1F0) = 0;
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 4:
+        case 5:
+        case 6:
+            V_8700(40);
+            break;
+        case 3:
+            *(int*)(self + 0x1B0) = 0;
+            if (c == 0) {
+                *(int*)(self + 0x1A8) = 1;
+                *(int*)(self + 0x1E0) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 12:
+            if (c == 0) {
+                V_8700(41);
+                *(int*)(self + 0x1C0) = 1;
+                DONE_8700();
+            } else if (c == 1) {
+                *(int*)(self + 0x1EC) = c;
+            } else {
+                func_001D7190();
+                return;
+            }
+            break;
+        case 13:
+            if (c == 0) {
+                *(int*)(self + 0x1C0) = 3;
+                *(int*)(self + 0x1F0) = 1;
+                break;
+            }
+            V_8700(41);
+            DONE_8700();
+            break;
+        case 7:
+            *(int*)(self + 0x1A8) = 0;
+            *(int*)(self + 0x1E0) = 0;
+            if (*(int*)(self + 0x1F4)) {
+                V_8700(41);
+            }
+            if (*(int*)(self + 0x1DC)) {
+                *(int*)(self + 0x1A8) = 1;
+            }
+            DONE_8700();
+            break;
+        case 16:
+            *(int*)(self + 0x1E8) = 0;
+            func_001D9308(self, 0);
+            if (*(int*)(self + 0x1DC)) {
+                *(int*)(self + 0x1A8) = 1;
+            } else {
+                *(int*)(self + 0x1A8) = 0;
+            }
+            DONE_8700();
+            break;
+        case 17:
+            *(int*)(self + 0x1E8) = 0;
+            V_8700(41);
+            break;
+        case 14:
+        case 15:
+            *(int*)(self + 0x1B0) = 0;
+            if (c == 0) {
+                *(int*)(self + 0x1A8) = 1;
+                *(int*)(self + 0x1E8) = 1;
+            } else if (c == 1) {
+                *(int*)(self + 0x1E8) = 0;
+                V_8700(41);
+                DONE_8700();
+            }
+            break;
+        case 8:
+        case 23:
+            V_8700(41);
+            break;
+        case 24:
+            V_8700(41);
+            break;
+        case 20:
+        case 21:
+        case 22:
+            break;
+        }
+        if (*(int*)(self + 0x19C) != 0x16) {
+            func_0039F190(*(char**)((char*)D_004A2028 + 0x10) + 0x18, 1);
+        }
+        *(int*)(self + 0x210) = 0;
+    } else if (button == 0x16) {
+        char* fe = (char*)D_004A2028;
+        if (*(int*)(fe + 0x1A0)) {
+            *(int*)(fe + 0x1A4) = 0;
+            *(int*)(fe + 0x1A0) = 0;
+        } else {
+            if (*(int*)(self + 0x19C) == 0x16) {
+                *(int*)(self + 0x210) = 0;
+            }
+            *(int*)((char*)D_004A2028 + 0x218) = 0;
+        }
+    }
+}
+
 
 //100%
 extern "C" void func_001D9308(void*, int);
@@ -1122,7 +1306,117 @@ extern "C" void func_001D8D68(void* self)
     *(int*)((char*)self + 0x210) = 1;
 }
 
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8DE0);
+extern "C" void func_0020E900();
+extern "C" void func_0039E510(void*);
+extern "C" void func_00241380(void* mp);
+extern "C" int func_0023C898(void* mp);
+extern "C" void func_0023D618(void* mp);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern char D_004A1600[];
+
+struct sVEv_8DE0 { short delta; short index; void (*fn)(void*, ...); };
+struct sVEi_8DE0 { short delta; short index; int (*fn)(void*, ...); };
+struct sVEb_8DE0 { short delta; short index; bool (*fn)(void*, ...); };
+
+#define VV_8DE0(o, n, args...) ((*(sVEv_8DE0**)((o) + 8))[n].fn((o) + (*(sVEv_8DE0**)((o) + 8))[n].delta , ## args))
+#define VI_8DE0(o, n, args...) ((*(sVEi_8DE0**)((o) + 8))[n].fn((o) + (*(sVEi_8DE0**)((o) + 8))[n].delta , ## args))
+#define VB_8DE0(o, n, args...) ((*(sVEb_8DE0**)(o))[n].fn((o) + (*(sVEb_8DE0**)(o))[n].delta , ## args))
+
+extern "C" void func_001D8DE0(char* self)
+{
+    if (*(int*)(self + 0x218) == 0 && *(int*)(self + 0x1A4) == 0) {
+        if (*(void**)((char*)D_004A28A8 + 0x84)) {
+            func_0020E900();
+        } else {
+            func_0039E510(self);
+        }
+    }
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    if (*(int*)(self + 0x1D8) == 0) {
+        func_00241380(mp);
+        *(int*)(self + 0x1D8) = 1;
+        *(int*)(self + 0x214) = 1;
+        VI_8DE0(self, 35, 1);
+        sVEi_8DE0* mvt = *(sVEi_8DE0**)(mp + 0x748);
+        mvt[1].fn(mp + mvt[1].delta, 0x31);
+    }
+    if (*(int*)(self + 0x1C0) != 6
+        || (*(int*)(self + 0x1B0) == 1 && func_0023C898(mp) == 0)
+        || (*(int*)(self + 0x1B0) == 0 && VB_8DE0(*(char**)(mp + 0x434), 11) != 0)) {
+        func_0023D618(mp);
+    }
+    switch (*(int*)(self + 0x1C0)) {
+    case 0:
+        VV_8DE0(self, 31);
+        break;
+    case 1:
+        VV_8DE0(self, 27);
+        break;
+    case 2:
+        VV_8DE0(self, 32);
+        break;
+    case 3:
+        VV_8DE0(self, 28);
+        break;
+    case 4:
+        VV_8DE0(self, 30);
+        break;
+    case 5:
+        VV_8DE0(self, 29);
+        break;
+    case 6: {
+        char* mp2 = (char*)func_00227F80(D_004A28A8);
+        if ((*(int*)(self + 0x1B0) != 1 || func_0023C898(mp2) != 0)
+            && (*(int*)(self + 0x1B0) != 0 || VB_8DE0(*(char**)(mp2 + 0x434), 11) == 0)) {
+            VV_8DE0(self, 33);
+        }
+        break;
+    }
+    }
+    char* fe = (char*)D_004A2028;
+    if (*(int*)(fe + 0x210) == 0) {
+        if (*(int*)(fe + 0x208) == 0 && *(int*)(fe + 0x204) == 0) {
+            int s = *(int*)(mp + 0x130);
+            if (s == 0x28 || s == 0xB || s == 0xF || s == 0x10 || s == 0x11 || s == 0x12 || s == 0x1F
+                || s == 0x21 || s == 0x20 || s == 0x22 || s == 0x2C || s == 0x19 || s == 0x1A) {
+                VV_8DE0(self, 47);
+            }
+        }
+        if (*(int*)((char*)D_004A2028 + 0x210) == 0) {
+            goto skip;
+        }
+    }
+    {
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        func_00241E18(mp, buf, 0x320);
+        char* m = *(char**)(self + 0x218);
+        VV_8DE0(m, 27, buf);
+        if (buf) {
+            cMemMan_free(buf);
+        }
+    }
+skip:
+    VV_8DE0(self, 26);
+    if (*(int*)(self + 0x218) == 0 && VB_8DE0(*(char**)(mp + 0x434), 75)) {
+        void* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        int x = *(int*)(self + 0x1C4);
+        if (o) {
+            x = *((unsigned char*)o + 0x95);
+        }
+        int flag = 0;
+        sVEi_8DE0* vt = *(sVEi_8DE0**)(self + 8);
+        char* t = self + vt[38].delta;
+        int (**pf)(void*, ...) = &vt[38].fn;
+        if (!VB_8DE0(*(char**)(mp + 0x434), 67, x) || !VB_8DE0(*(char**)(mp + 0x434), 53)) {
+            flag = 1;
+        }
+        (*pf)(t, flag);
+        int a = !VB_8DE0(*(char**)(mp + 0x434), 67, x);
+        int b = !VB_8DE0(*(char**)(mp + 0x434), 53);
+        VI_8DE0(self, 39, a, b);
+    }
+}
+
 
 //100%
 int GetHashValue32(char* str);

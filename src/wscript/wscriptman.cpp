@@ -721,7 +721,199 @@ extern "C" void func_0030A728(void* self, unsigned int id, int kind)
     }
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030A868);
+//100%
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_A868(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern signed char D_00535C10[];
+struct cWSQueue;
+extern "C" void func_0030C7C0(cWSQueue* self, int id, int op, int a3);
+extern "C" void* func_0030AEB8(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0029D6E0(void* self, unsigned int id);
+extern "C" void func_0029DBB0(void* self, int keep);
+extern "C" int func_00153D78(void* self, int id);
+extern "C" int func_00153DD0(void* self, int id);
+extern "C" int func_00153E28(void* self, int id);
+extern "C" int func_00153E80(void* self, int id);
+extern "C" int func_00153ED8(void* self, int id);
+extern "C" int func_00153FD8(void* self, int id);
+extern "C" int func_0030B8C0(void* self);
+extern "C" char* func_0030B388_A868(void* self, unsigned int id) __asm__("func_0030B388");
+
+struct sVEntry_0030A868 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline void VCall_0030A868(char* obj, int slot)
+{
+    sVEntry_0030A868* vt = *(sVEntry_0030A868**)(obj + 0x5C);
+    vt[slot].fn(obj + vt[slot].delta);
+}
+
+extern "C" int func_0030A868(char* self, unsigned int id, int op, int a3)
+{
+    int f = 0;
+    if (op == 15 || op == 19) {
+        f = 1;
+    }
+    cBE_getInterface_A868(cBE_getBE(), 0);
+    if (f == 0) {
+        if (D_00535C10[0] != 4) {
+            return 0;
+        }
+        if (*(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) != 1) {
+            return 0;
+        }
+    }
+    int saved = *(int*)self;
+    if (a3 != -1) {
+        *(int*)self = a3;
+    }
+    switch (op) {
+    case 0:
+    case 1:
+    case 2:
+    case 18:
+        func_0030A728(self, id, op);
+        break;
+    case 8:
+    case 9:
+    case 11: {
+        int x = **(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28);
+        int c = x != 0 && x < 10;
+        if (!c) {
+            func_0030C7C0((cWSQueue*)(self + 0x1C4), id, op, *(int*)self);
+        }
+        break;
+    }
+    }
+    char* obj = (char*)func_0030AEB8(self);
+    int r = 0;
+    void* iface = cBE_getInterface_A868(cBE_getBE(), 0xA);
+    switch (op) {
+    case 0:
+        break;
+    case 3:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_A868(self + 0x2B8, id);
+            if (obj == 0) {
+                obj = func_0030B388_A868(self + 0x2B4, id);
+            }
+        }
+        if (obj != 0) {
+            VCall_0030A868(obj, 17);
+            func_0029D6E0(func_0028B180(), id);
+        }
+        break;
+    case 4:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_A868(self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            VCall_0030A868(obj, 2);
+        }
+        break;
+    case 5:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_A868(self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            VCall_0030A868(obj, 19);
+            func_0029DBB0(func_0028B180(), 0);
+        }
+        break;
+    case 17:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_A868(self + 0x2B8, id);
+            if (obj == 0) {
+                obj = func_0030B388_A868(self + 0x2B4, id);
+            }
+        }
+        if (obj != 0) {
+            VCall_0030A868(obj, 20);
+        }
+        break;
+    case 13:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = *(int*)(obj + 0x20);
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        r = func_00153E28(iface, id) != 0;
+        break;
+    case 12:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = *(int*)(obj + 0x20);
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        r = func_00153DD0(iface, id) != 0;
+        break;
+    case 16:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = *(int*)(obj + 0x20);
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        if (*(int*)(self + 0x2AC) == 1) {
+            break;
+        }
+        if (func_0030B8C0(self) != 0) {
+            break;
+        }
+        r = 0;
+        if (func_00153ED8(iface, id) != 0) {
+            r = 1;
+        }
+        break;
+    case 19:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = *(int*)(obj + 0x20);
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        r = func_00153FD8(iface, id) == -1;
+        break;
+    case 14:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = *(int*)(obj + 0x20);
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        r = func_00153E80(iface, id) != 0;
+        break;
+    case 15:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = *(int*)(obj + 0x20);
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        r = func_00153D78(iface, id) != 0;
+        break;
+    }
+    *(int*)self = saved;
+    return r;
+}
 
 //100%
 struct func_00309DD0_sValue;

@@ -5572,7 +5572,117 @@ extern "C" void func_001AE680(void* self)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001AE7A0);
+//100%
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00186610_E7A0(void* p, void* engine, int a2) __asm__("func_00186610");
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
+extern "C" void func_001AF568(void* self);
+extern "C" void func_001AF098(void* self, int on);
+extern "C" void func_001AF208(void* self, cUIText* item, int on);
+extern "C" void func_0025F4C0(void* a, int b, int c);
+extern "C" void func_0039F600(void* p);
+extern "C" void func_0025F628(void* a, int b, int c);
+extern "C" void func_001AEC60(void* self, int on);
+extern int D_004A25A4;
+extern unsigned int D_004A2594;
+extern int D_004A2598;
+extern char D_00460C38[];
+
+extern "C" void func_001AE7A0(char* self, char* menu, int msg)
+{
+    if (menu == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5:
+        switch (*(int*)(menu + 0x18)) {
+        case 7: {
+            func_001AE680(self);
+            D_004A25A4 = 1;
+            D_004A2594 = 0;
+            D_004A2598 = 0;
+            char* st = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(void**)(self + 0x10), 1);
+            *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
+            break;
+        }
+        case 9:
+            if (*(int*)(self + 0x6D0) == 0) {
+                func_001AE680(self);
+                func_001AF568(self);
+                char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+                D_00534B34[0] = func_0039A738(*(void**)(self + 0x6DC)) != 0;
+                sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
+                vt[1].fn(iface + vt[1].delta);
+                if (func_0039A738(*(void**)(self + 0x6DC))) {
+                    ((sOpts1AE680*)D_005308B8)->b6 = 1;
+                    ((sOpts1AE680*)D_005308B8)->b7 = 1;
+                    ((sOpts1AE680*)D_005308B8)->b8 = 1;
+                    char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+                    cBENewRaceInterface_setNumberAI(nr, 0);
+                    sVE1AE680i* nvt = *(sVE1AE680i**)(nr + 0xC);
+                    nvt[1].fn(nr + nvt[1].delta);
+                } else {
+                    int v = func_0039A738(*(void**)(self + 0x6E8));
+                    sOpts1AE680* o = (sOpts1AE680*)D_005308B8;
+                    o->b6 = v;
+                    o->b8 = func_0039A738(*(void**)(self + 0x6E4));
+                    o->b7 = func_0039A738(*(void**)(self + 0x6EC));
+                    char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+                    cBENewRaceInterface_setNumberAI(nr, func_0039A738(*(void**)(self + 0x6E0)));
+                    sVE1AE680i* nvt = *(sVE1AE680i**)(nr + 0xC);
+                    nvt[1].fn(nr + nvt[1].delta);
+                }
+                func_0025F4C0(D_004A3028, *(int*)((char*)D_004A3028 + 0x98), *(signed char*)(self + 0x14));
+            }
+            break;
+        case 10:
+            if (*(int*)(self + 0x6D0) != 0) {
+                func_0025F628(D_004A3028, 0, 1);
+            }
+            func_0039F600(*(char**)(self + 0x10) + 0x18);
+            break;
+        }
+        break;
+    case 6:
+        func_0025F628(D_004A3028, 0, *(int*)(self + 0x6D0));
+        func_0039F600(*(char**)(self + 0x10) + 0x18);
+        break;
+    case 9:
+        if (menu == *(char**)(self + 0x6DC)) {
+            char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+            D_00534B34[0] = func_0039A738(*(void**)(self + 0x6DC)) != 0;
+            sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
+            vt[1].fn(iface + vt[1].delta);
+            func_001AF098(self, func_0039A738(*(void**)(self + 0x6DC)) != 0);
+            func_001AEC60(self, *(int*)(self + 0x6D0));
+        } else if (menu == *(char**)(self + 0x6E8)) {
+            ((sOpts1AE680*)D_005308B8)->b6 = func_0039A738(menu);
+        } else if (menu == *(char**)(self + 0x6E4)) {
+            ((sOpts1AE680*)D_005308B8)->b8 = func_0039A738(menu);
+        } else if (menu == *(char**)(self + 0x6EC)) {
+            ((sOpts1AE680*)D_005308B8)->b7 = func_0039A738(menu);
+        } else if (menu == *(char**)(self + 0x6E0)) {
+            char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+            cBENewRaceInterface_setNumberAI(nr, func_0039A738(*(void**)(self + 0x6E0)));
+            D_004A4E8C = func_0039A738(*(void**)(self + 0x6E0));
+            sVE1AE680* nvt = *(sVE1AE680**)(nr + 0xC);
+            nvt[1].fn(nr + nvt[1].delta);
+        }
+        break;
+    case 1:
+        func_001AF208(self, (cUIText*)menu, 1);
+        break;
+    case 2:
+        func_001AF208(self, (cUIText*)menu, 0);
+        break;
+    case 7:
+        break;
+    default:
+        func_001A8918(self, (int)menu, msg);
+        break;
+    }
+}
 
 //100%
 extern "C" void func_00260F80();
@@ -11424,7 +11534,124 @@ extern "C" void func_001B8AA0(void* self, cUIText* text)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B8C38);
+//100%
+extern "C" int func_001BA110(void* self);
+extern "C" void* func_001BA3E0(void* self, int a1);
+extern "C" void func_001BA280(void* self);
+extern "C" void func_001BA218(void* self);
+extern "C" void* func_001C0418(void* self, int a1);
+extern "C" void func_001B9820(void* self);
+extern char D_00464768[];
+extern char D_004647B8[];
+extern char D_004647D0[];
+extern char D_004647E0[];
+extern char D_00464810[];
+extern char D_00464828[];
+extern char D_00464848[];
+extern char D_004647F8[];
+extern char D_00464838[];
+extern char D_00464860[];
+
+static inline bool IsId_1B8C38(char* item, char* name)
+{
+    int id = *(int*)(item + 0x38);
+    return id == GetHashValue32(name);
+}
+
+struct sVEntry_1B8C38 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001B8C38(char* self, char* item, int msg)
+{
+    switch (msg) {
+    case 9:
+        if (IsId_1B8C38(item, D_00464780) && item != 0) {
+            *(int*)(*(char**)(self + 0x6D0) + 0x38) = func_0039A738(item) == 1;
+        }
+        if (IsId_1B8C38(item, D_00464790) && item != 0) {
+            *(int*)(*(char**)(self + 0x6D0) + 0x3C) = func_0039A738(item) == 1;
+        }
+        break;
+    case 5:
+        if (IsId_1B8C38(item, D_00464768)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462B88));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_004647B8), **(int**)(self + 0x6D0), 0, 10, 0x10);
+            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_004647D0)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_00462D00), *(int*)(*(char**)(self + 0x6D0) + 4), 1, 11, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_004647E0)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004647F8));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_00464810), *(int*)(*(char**)(self + 0x6D0) + 8), 1, 12, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_00464828)) {
+            cUIText* obj = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00464838));
+            if (obj == 0) {
+                return;
+            }
+            func_001A9150(self, (int)obj, GetHashValue32(D_00462CD0), *(int*)(*(char**)(self + 0x6D0) + 0xC), 0, 13, 0x32);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        } else if (IsId_1B8C38(item, D_004647A8)) {
+            if (func_001BA110(self)) {
+                if (*(int*)(self + 0x6EC) != 0) {
+                    func_001A8A40(self, func_001BA3E0(cMemMan_alloc(0x6E0, D_00464848, 0, 0), *(int*)(self + 0x10)));
+                } else {
+                    func_001BA280(self);
+                }
+            }
+        }
+        break;
+    case 6:
+        if (*(int*)(self + 0x6EC) != 0) {
+            char* st = (char*)func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+            *(int*)(st + 0x18) = 0x832;
+            func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, st);
+        } else {
+            func_001BA218(self);
+            func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)(self + 0x10)));
+        }
+        break;
+    case 13: {
+        func_001B9820(self);
+        char* obj = *(char**)(self + 0x6F0);
+        if (obj != 0) {
+            sVEntry_1B8C38* vt = *(sVEntry_1B8C38**)(obj + 8);
+            vt[8].fn(obj + vt[8].delta, !func_001B9558(self));
+        }
+        break;
+    }
+    case 8: {
+        char* st = (char*)func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), *(int*)(self + 0x10));
+        if (*(int*)(self + 0x6EC) != 0) {
+            *(int*)(st + 0x18) = 0x14;
+        } else {
+            *(int*)(st + 0x18) = 0x15;
+        }
+        func_001A8A40(self, st);
+        break;
+    }
+    case 14:
+        break;
+    default:
+        func_001A8918(self, (int)item, msg);
+        break;
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
