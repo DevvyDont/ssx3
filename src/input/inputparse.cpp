@@ -931,7 +931,222 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseUnaryFunc);
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_compileStatement);
 
-INCLUDE_ASM("input/inputparse", func_00324678);
+//100%
+extern "C" void func_00321500(void* self, const char* fmt, ...);
+// PORT: func_00321AD0 returns a pointer the code generator stores as a 10-bit operand.
+int func_00321AD0_i(void* self, void* a1) __asm__("func_00321AD0");
+extern "C" int func_00321AD8(void* self, int a1, int a2);
+extern char D_0048E240[];
+extern char D_0048E228[];
+extern char D_0048E268[];
+
+union sInsn_00324678 {
+    struct {
+        unsigned int op : 6;
+        unsigned int dst : 6;
+        unsigned int src : 10;
+        unsigned int arg : 10;
+    } r;
+    struct {
+        unsigned int op : 6;
+        unsigned int reg : 10;
+        unsigned int off : 16;
+    } j;
+    float f;
+};
+struct sCodeGen_00324678 {
+    char pad0[0x108EC];
+    int freeRegs[63];  // 0x108EC
+    int numFree;                // 0x109E8
+};
+struct sNode_00324678 {
+    int type;
+    union {
+        float value;
+        int index;
+        void* ref;
+        sNode_00324678* a;
+    };
+    union {
+        int mod;
+        sNode_00324678* b;
+    };
+    sNode_00324678* c;
+};
+struct sVar_00324678 {
+    char name[0x40];
+    sNode_00324678* node;
+};
+
+// the binary/unary emitters are defined below with their own struct types
+int func_00324EC8_v(sCodeGen_00324678* self, sNode_00324678* node, int* dst, sInsn_00324678* code, int cap, int op, int a6) __asm__("func_00324EC8");
+int func_003250D8_v(sCodeGen_00324678* self, sNode_00324678* node, int* dst, sInsn_00324678* code, int cap, int op, int a6) __asm__("func_003250D8");
+
+extern "C" int func_00324678(void* selfp, void* nodep, int* dst, void* codep, int cap, int mod)
+{
+    sCodeGen_00324678* self = (sCodeGen_00324678*)selfp;
+    sNode_00324678* node = (sNode_00324678*)nodep;
+    sInsn_00324678* code = (sInsn_00324678*)codep;
+again:
+    switch (node->type) {
+    case 4:
+        if (*dst < 0) {
+            if (self->numFree > 0) {
+                *dst = self->freeRegs[--self->numFree];
+            }
+            if (*dst < 0) {
+                func_00321500(self, D_0048E240);
+                return -1;
+            }
+        }
+        if (cap < 2) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->r.op = 0;
+        code->r.dst = *dst;
+        code->r.src = 0;
+        code->r.arg = 0;
+        code[1].f = node->value;
+        return 2;
+    case 1:
+        if (node->mod != 5)
+            mod = node->mod;
+        node = ((sVar_00324678*)node->ref)->node;
+        goto again;
+    case 2: {
+        int v = func_00321AD8(self, node->index, node->mod != 5 ? node->mod : mod);
+        if (*dst == -1) {
+            *dst = v;
+            return 0;
+        }
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->r.op = 1;
+        code->r.dst = *dst;
+        code->r.src = v;
+        code->r.arg = 0;
+        return 1;
+    }
+    case 3:
+        if (*dst == -1) {
+            *dst = func_00321AD0_i(self, node->ref);
+            return 0;
+        }
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->r.op = 1;
+        code->r.dst = *dst;
+        code->r.src = func_00321AD0_i(self, node->ref);
+        code->r.arg = 0;
+        return 1;
+    case 5: {
+        int cond = -1;
+        int n1 = func_00324678(self, node->a, &cond, code, cap, mod);
+        if (n1 < 0)
+            return -1;
+        code += n1;
+        cap -= n1;
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        int c = cond;
+        code->j.op = 2;
+        code->j.reg = c;
+        if ((unsigned int)c < 0x40) {
+            self->freeRegs[self->numFree++] = c;
+        }
+        cap--;
+        int n2 = func_00324678(self, node->b, dst, code + 1, cap, mod);
+        if (n2 < 0)
+            return -1;
+        if (n2 + 1 > 0xFFFF) {
+            func_00321500(self, D_0048E268);
+            return -1;
+        }
+        code->j.off = n2 + 1;
+        code += n2 + 1;
+        cap -= n2;
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->j.op = 3;
+        code->j.reg = 0;
+        int n3 = func_00324678(self, node->c, dst, code + 1, cap - 1, mod);
+        if (n3 < 0)
+            return -1;
+        if (n3 > 0xFFFF) {
+            func_00321500(self, D_0048E268);
+            return -1;
+        }
+        code->j.off = n3;
+        return n1 + n2 + n3 + 2;
+    }
+    case 6:
+        return func_00324EC8_v(self, node, dst, code, cap, 4, mod);
+    case 7:
+        return func_00324EC8_v(self, node, dst, code, cap, 5, mod);
+    case 8:
+        return func_00324EC8_v(self, node, dst, code, cap, 6, mod);
+    case 9:
+        return func_00324EC8_v(self, node, dst, code, cap, 7, mod);
+    case 10:
+        return func_00324EC8_v(self, node, dst, code, cap, 8, mod);
+    case 11:
+        return func_00324EC8_v(self, node, dst, code, cap, 9, mod);
+    case 12:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xA, mod);
+    case 13:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xB, mod);
+    case 14:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xC, mod);
+    case 15:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xD, mod);
+    case 16:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xE, mod);
+    case 17:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xF, mod);
+    case 20:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x10, mod);
+    case 21:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x11, mod);
+    case 22:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x12, mod);
+    case 23:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x13, mod);
+    case 24:
+        return func_003250D8_v(self, node, dst, code, cap, 0x14, mod);
+    case 25:
+        return func_003250D8_v(self, node, dst, code, cap, 0x15, mod);
+    case 26:
+        return func_003250D8_v(self, node, dst, code, cap, 0x16, mod);
+    case 27:
+        return func_003250D8_v(self, node, dst, code, cap, 0x17, mod);
+    case 28:
+        return func_003250D8_v(self, node, dst, code, cap, 0x18, mod);
+    case 29:
+        return func_003250D8_v(self, node, dst, code, cap, 0x19, mod);
+    case 30:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1A, mod);
+    case 31:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1B, mod);
+    case 32:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1C, mod);
+    case 33:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1D, mod);
+    case 18:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1E, mod);
+    case 19:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1F, mod);
+    }
+    return -1;
+}
 
 //100%
 extern "C" void func_00321500(void* self, const char* fmt, ...);
@@ -1649,7 +1864,269 @@ extern "C" void func_00326E50(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("input/inputparse", func_00326EB0);
+//100%
+struct sPad_326EB0 {
+    char pad00[0x4];
+    int port;
+    int slot;
+    char pad0C[0x24];
+    int smallMotor;
+    int smallMotorSent;
+    int bigMotor;
+    int bigMotorSent;
+    unsigned char act[8];
+    int state;
+    int retries;
+    int modeSet;
+    int pressure;
+    int analog;
+    int actuators;
+};
+struct sPadData_326EB0 {
+    unsigned char status;
+    unsigned char mode;
+    unsigned char select : 1;
+    unsigned char l3 : 1;
+    unsigned char r3 : 1;
+    unsigned char start : 1;
+    unsigned char up : 1;
+    unsigned char right : 1;
+    unsigned char down : 1;
+    unsigned char left : 1;
+    unsigned char l2 : 1;
+    unsigned char r2 : 1;
+    unsigned char l1 : 1;
+    unsigned char r1 : 1;
+    unsigned char triangle : 1;
+    unsigned char circle : 1;
+    unsigned char cross : 1;
+    unsigned char square : 1;
+    unsigned char stick[4];
+    unsigned char pressure[12];
+    unsigned char pad14[0xC];
+};
+extern "C" int func_003FF708(int port, int slot, void* buf);
+extern "C" int func_003FFBC0(int port, int slot);
+extern "C" int func_003FFFA0(int port, int slot, int a, int b);
+extern "C" int func_004000D8(int port, int slot, int a, int b);
+extern "C" int func_00400490(int port, int slot);
+extern "C" int func_004004F0(int port, int slot);
+extern "C" int func_003FFCD8(int port, int slot);
+extern "C" int func_003FFD60(int port, int slot, int a, int b);
+extern "C" int func_00400250(int port, int slot, void* align);
+extern "C" int func_003FFA58(int port, int slot, void* buf);
+extern "C" int func_00400190(int port, int slot, void* act);
+extern unsigned char D_004A3FB8[8];
+
+static inline float Btn_326EB0(int on)
+{
+    return on ? 1.0f : 0.0f;
+}
+
+static inline int Axis_326EB0(int v, int range)
+{
+    v = v * 255 / range;
+    if (v < 0) v = 0;
+    return v;
+}
+
+extern "C" int func_00326EB0(void* selfp, float* out)
+{
+    sPad_326EB0* s = (sPad_326EB0*)selfp;
+    sPadData_326EB0 buf;
+    int got = 0;
+    int st;
+    int ret;
+
+    if (s->state == 0) {
+        if (func_003FF708(s->port, s->slot, (char*)s + 0x80) == 1) {
+            s->state = 1;
+            s->modeSet = 0;
+            s->smallMotor = 0;
+            s->smallMotorSent = -1;
+            s->bigMotorSent = -1;
+            s->bigMotor = 0;
+        }
+    }
+    st = func_003FFBC0(s->port, s->slot);
+    if (st == 0 || st == 7) {
+        s->modeSet = 0;
+        s->state = 1;
+    }
+    switch (s->state) {
+    case 1:
+        if (st == 6 || st == 2) {
+            int id;
+            s->pressure = 0;
+            s->analog = 0;
+            s->actuators = 0;
+            id = func_003FFFA0(s->port, s->slot, 1, 0);
+            if (id == 0) {
+                break;
+            }
+            switch (func_003FFFA0(s->port, s->slot, 2, 0)) {
+            case 0:
+                if (id == 4) {
+                    s->state = 10;
+                }
+                break;
+            case 4:
+                s->state = 2;
+                break;
+            case 7:
+                s->analog = 1;
+                s->state = 2;
+                break;
+            }
+        }
+        break;
+    case 2:
+        if (s->analog == 0 || s->modeSet == 0) {
+            int r = func_004000D8(s->port, s->slot, 1, 3);
+            if (r == 1) {
+                s->modeSet = r;
+                s->state = 3;
+            }
+        } else {
+            s->state = 4;
+        }
+        break;
+    case 3:
+        if (func_003FFBC0(s->port, s->slot) != 5) {
+            s->state = 1;
+        }
+        break;
+    case 4:
+        if (func_00400490(s->port, s->slot) == 1) {
+            s->state = 5;
+        } else {
+            s->state = 7;
+        }
+        break;
+    case 5:
+        if (func_004004F0(s->port, s->slot) == 1) {
+            s->retries = 0;
+            s->state = 6;
+        }
+        break;
+    case 6: {
+        int r = func_003FFCD8(s->port, s->slot);
+        if (r == 1) {
+            s->state = 1;
+            s->modeSet = 0;
+        } else if (r == 0) {
+            if (++s->retries >= 5) {
+                s->pressure = 1;
+                s->state = 7;
+            }
+        } else {
+            s->retries = 0;
+        }
+        break;
+    }
+    case 7:
+        if (func_003FFD60(s->port, s->slot, -1, 0) != 0) {
+            s->state = 8;
+        } else {
+            s->state = 10;
+        }
+        break;
+    case 8:
+        if (func_00400250(s->port, s->slot, D_004A3FB8) == 1) {
+            s->retries = 0;
+            s->state = 9;
+        }
+        break;
+    case 9: {
+        int r = func_003FFCD8(s->port, s->slot);
+        if (r == 1) {
+            s->state = 1;
+            s->modeSet = 0;
+        } else if (r == 0) {
+            if (++s->retries >= 5) {
+                s->actuators = 1;
+                s->state = 10;
+            }
+        } else {
+            s->retries = 0;
+        }
+        break;
+    }
+    case 10:
+        if (func_003FFA58(s->port, s->slot, &buf) == 0 || buf.status != 0) {
+            s->modeSet = 0;
+            s->state = 1;
+        } else {
+            got = 1;
+        }
+        break;
+    }
+    ret = 0;
+    if (got) {
+        ret = 0x18;
+        out[0] = Btn_326EB0(!buf.select);
+        out[1] = !buf.start ? 1.0f : 0.0f;
+        out[2] = !buf.l3 ? 1.0f : 0.0f;
+        out[3] = !buf.r3 ? 1.0f : 0.0f;
+        if (s->pressure) {
+            out[4] = buf.pressure[0] * 0.003921569f;
+            out[5] = buf.pressure[1] * 0.003921569f;
+            out[6] = buf.pressure[2] * 0.003921569f;
+            out[7] = buf.pressure[3] * 0.003921569f;
+            out[8] = buf.pressure[4] * 0.003921569f;
+            out[9] = buf.pressure[5] * 0.003921569f;
+            out[10] = buf.pressure[6] * 0.003921569f;
+            out[11] = buf.pressure[7] * 0.003921569f;
+            out[12] = buf.pressure[8] * 0.003921569f;
+            out[13] = buf.pressure[9] * 0.003921569f;
+            out[14] = buf.pressure[10] * 0.003921569f;
+            out[15] = buf.pressure[11] * 0.003921569f;
+        } else {
+            out[4] = !buf.right ? 1.0f : 0.0f;
+            out[5] = !buf.left ? 1.0f : 0.0f;
+            out[6] = !buf.up ? 1.0f : 0.0f;
+            out[7] = !buf.down ? 1.0f : 0.0f;
+            out[8] = !buf.triangle ? 1.0f : 0.0f;
+            out[9] = !buf.circle ? 1.0f : 0.0f;
+            out[10] = !buf.cross ? 1.0f : 0.0f;
+            out[11] = !buf.square ? 1.0f : 0.0f;
+            out[12] = !buf.l1 ? 1.0f : 0.0f;
+            out[13] = !buf.r1 ? 1.0f : 0.0f;
+            out[14] = Btn_326EB0(!buf.l2);
+            out[15] = !buf.r2 ? 1.0f : 0.0f;
+        }
+        if (s->analog) {
+            out[16] = Axis_326EB0(0x4F - buf.stick[0], 0x4F) * 0.003921569f;
+            out[17] = Axis_326EB0(buf.stick[0] - 0xB0, 0x4F) * 0.003921569f;
+            out[18] = Axis_326EB0(0x4F - buf.stick[1], 0x4F) * 0.003921569f;
+            out[19] = Axis_326EB0(buf.stick[1] - 0xB0, 0x4F) * 0.003921569f;
+            out[20] = Axis_326EB0(0x4F - buf.stick[2], 0x4F) * 0.003921569f;
+            out[21] = Axis_326EB0(buf.stick[2] - 0xB0, 0x4F) * 0.003921569f;
+            out[22] = Axis_326EB0(0x4F - buf.stick[3], 0x4F) * 0.003921569f;
+            out[23] = Axis_326EB0(buf.stick[3] - 0xB0, 0x4F) * 0.003921569f;
+        } else {
+            out[16] = 0.0f;
+            out[17] = 0.0f;
+            out[18] = 0.0f;
+            out[19] = 0.0f;
+            out[20] = 0.0f;
+            out[21] = 0.0f;
+            out[22] = 0.0f;
+            out[23] = 0.0f;
+        }
+    }
+    if (s->state == 10) {
+        if (s->smallMotor != s->smallMotorSent || s->bigMotor != s->bigMotorSent) {
+            s->act[0] = s->smallMotor;
+            s->act[1] = s->bigMotor;
+            s->smallMotorSent = s->smallMotor;
+            s->bigMotorSent = s->bigMotor;
+            func_00400190(s->port, s->slot, s->act);
+        }
+    }
+    return ret;
+}
+
 
 //100%
 int func_00327738(void* self)

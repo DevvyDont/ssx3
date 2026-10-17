@@ -881,7 +881,398 @@ void* func_002C48A0(void* self)
     return func_002C48C0(self, 0x1e);
 }
 
-INCLUDE_ASM("worldpainter/quadtree", func_002C48C0);
+//100%
+struct sVEnt_48C0 { short delta; short index; int (*fn)(void*, int); };
+struct sPort_48C0 { int status; char pad[0x10]; };
+struct sEntry_48C0 { char name[0x78]; };
+struct sMC_48C0 {
+    sVEnt_48C0* vt;
+    int state;
+    int len;
+    int port;
+    int pad10;
+    int count;
+    int fd;
+    int x1C;
+    int size;
+    int pad24;
+    int index;
+    int data;
+    void* buf;
+    int bufSize;
+    int handle;
+    int x3C;
+    int busy;
+    int x44;
+    int x48;
+    char pad4C[0xC];
+    char name[0x21];
+    char path[0x40];
+    char dir[0x40];
+    char file[0x40];
+    char pad139[0x4B];
+    sPort_48C0 ports[2];
+    char pad1AC[0x4];
+    sEntry_48C0 entries[6];
+    char dirbuf[0x40];
+    char pad4C0[0x1000];
+    char root[0x40];
+};
+extern "C" int func_00409D10(int h, int a1, char* name, int a3);
+extern "C" int func_00409E70(int h);
+extern "C" int func_00409E38(int h, int a1, char* name);
+extern "C" int func_0040A090(int h, int a1, int a2);
+extern "C" int func_0040A1A8(int h, int a1, int a2);
+extern "C" int func_0040AA68(int h, int a1, char* name);
+extern "C" int func_003DF690(char* name, int a1);
+extern "C" int func_002C50E0(void* self);
+extern "C" void func_002C5570(void* self, int a1);
+extern char D_004A3958[];
+extern int D_004A3960[];
+extern char D_00487460[];
+extern char* D_004459F0[];
+extern char D_00445A00[];
+extern char D_00445A40[];
+extern char D_00445A70[];
+extern char D_00445AA0[];
+struct sIconSys_48C0 {
+    char magic[4];
+    short reserved;
+    short titleOffset;
+    int pad08;
+    int transparency;
+    int bgColor[0x10];
+    int lightDir[0xC];
+    int lightColor[0xC];
+    int ambient[4];
+    short title[0x22];
+    char iconList[0x40];
+    char iconCopy[0x40];
+    char iconDelete[0x40];
+    char pad1C4[0x200];
+};
+extern sIconSys_48C0 D_005376F8;
+
+extern "C" void* func_002C48C0(void* selfp, int st)
+{
+    sMC_48C0* self = (sMC_48C0*)selfp;
+    self->state = st;
+    switch (st) {
+    case 1:
+        self->ports[self->port].status = D_004A3940;
+        if (self->buf != 0) {
+            func_002523A8(self->buf);
+            self->buf = 0;
+        }
+        if (self->fd >= 0) {
+            D_004A3940 = func_00409E70(self->fd);
+            if (D_004A3940 >= 0) {
+                func_002C48C0(self, 2);
+            }
+            self->fd = -1;
+        }
+        self->data = 0;
+        self->x1C = -1;
+        self->size = 0;
+        break;
+    case 3:
+        func_002C50E0(self);
+        break;
+    case 36:
+        self->x48 = 0;
+        D_004A3940 = func_00409E38(self->port, 0, self->file);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 37:
+        sprintf(self->path, D_004A3958, self->file, D_00487460);
+        D_004A3940 = func_00409D10(self->port, 0, self->path, 0x203);
+        self->fd = -1;
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 38: {
+        char* name = self->name;
+        func_003E6448(&D_005376F8, 0, 0x3C4);
+        __builtin_memcpy(&D_005376F8, D_004A3960, 5);
+        func_002C2210(self, D_005376F8.title, name);
+        if (self->len > 0) D_005376F8.titleOffset = self->len; else D_005376F8.titleOffset = strlen(name) * 2;
+        D_005376F8.transparency = 0x60;
+        func_003E6574(D_005376F8.bgColor, D_00445A00, 0x40);
+        func_003E6574(D_005376F8.lightDir, D_00445A40, 0x30);
+        func_003E6574(D_005376F8.lightColor, D_00445A70, 0x30);
+        func_003E6574(D_005376F8.ambient, D_00445AA0, 0x10);
+        strcpy(D_005376F8.iconList, D_004459F0[0]);
+        strcpy(D_005376F8.iconCopy, D_004459F0[1]);
+        strcpy(D_005376F8.iconDelete, D_004459F0[2]);
+        D_004A3940 = func_0040A1A8(self->fd, (int)&D_005376F8, 0x3C4);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    }
+    case 39:
+        D_004A3940 = func_00409E70(self->fd);
+        if (D_004A3940 < 0) {
+            self->fd = -1;
+            func_002C48C0(self, 1);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    case 40:
+    case 44:
+    case 48: {
+        char buf[0x40];
+        if (self->buf != 0) {
+            func_002523A8(self->buf);
+            self->buf = 0;
+        }
+        int i = self->state == 0x2C ? 1 : self->state == 0x30 ? 2 : 0;
+        sprintf(buf, D_004A3958, self->root, D_004459F0[i]);
+        self->handle = func_003DF690(buf, 0x100);
+        break;
+    }
+    case 41:
+    case 45:
+    case 49: {
+        int i = self->state == 0x2D ? 1 : self->state == 0x31 ? 2 : 0;
+        sprintf(self->path, D_004A3948, self->dir, D_004459F0[i]);
+        D_004A3940 = func_00409D10(self->port, 0, self->path, 0x203);
+        if (D_004A3940 < 0) {
+            self->fd = -1;
+            func_002C48C0(self, 1);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    }
+    case 42:
+    case 46:
+    case 50:
+        D_004A3940 = func_0040A1A8(self->fd, (int)self->buf, self->bufSize);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 43:
+    case 47:
+    case 51:
+        if (self->buf != 0) {
+            func_002523A8(self->buf);
+            self->buf = 0;
+        }
+        D_004A3940 = func_00409E70(self->fd);
+        if (D_004A3940 < 0) {
+            self->fd = -1;
+            func_002C48C0(self, 1);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    case 22:
+        D_004A3940 = func_00409D10(self->port, 0, self->file, 0x203);
+        if (D_004A3940 < 0) {
+            self->fd = -1;
+            func_002C48C0(self, 1);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    case 23:
+        D_004A3940 = func_0040A1A8(self->fd, self->data, self->size);
+        self->data = 0;
+        self->size = 0;
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 24:
+        if (self->fd >= 0) {
+            D_004A3940 = func_00409E70(self->fd);
+            if (D_004A3940 < 0) {
+                self->fd = -1;
+                func_002C48C0(self, 1);
+            } else {
+                self->fd = -1;
+            }
+        } else {
+            func_002C48C0(self, 0x19);
+        }
+        break;
+    case 28:
+        self->x44 = 0;
+        D_004A3940 = func_00409D10(self->port, 0, self->file, 1);
+        self->fd = -1;
+        if (D_004A3940 != 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 29:
+        D_004A3940 = func_0040A090(self->fd, self->data, self->size);
+        if (D_004A3940 != 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 30:
+        if (self->fd >= 0) {
+            D_004A3940 = func_00409E70(self->fd);
+            if (D_004A3940 < 0) {
+                self->fd = -1;
+                func_002C48C0(self, 1);
+            } else {
+                self->fd = -1;
+            }
+        } else {
+            func_002C48C0(self, 0x1F);
+        }
+        break;
+    case 54:
+        self->ports[self->port].status = 0;
+        D_004A3940 = func_0040AA68(self->port, 0, self->file);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 55:
+    case 56:
+    case 57: {
+        int i = self->state == 0x38 ? 1 : self->state == 0x39 ? 2 : 0;
+        sprintf(self->path, D_004A3948, self->dir, D_004459F0[i]);
+        D_004A3940 = func_0040AA68(self->port, 0, self->path);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    }
+    case 58:
+        sprintf(self->path, D_004A3948, self->dir, D_00487460);
+        D_004A3940 = func_0040AA68(self->port, 0, self->path);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 59:
+        D_004A3940 = func_0040AA68(self->port, 0, self->dir);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 1);
+        }
+        break;
+    case 7:
+        for (self->index = 0; self->index < self->count; self->index++) {
+            if (self->vt[0x43].fn((char*)self + self->vt[0x43].delta, self->index)) {
+                sprintf(self->path, D_004A3948, (char*)self + self->index * 0x78 + 0x1B0, D_00487460);
+                return func_002C48C0(self, 8);
+            }
+        }
+        break;
+    case 8:
+        D_004A3940 = func_00409D10(self->port, 0, self->path, 1);
+        if (D_004A3940 < 0) {
+            self->fd = -1;
+            func_002C5570(self, self->index);
+            func_002C48C0(self, 0x10);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    case 10:
+        D_004A3940 = func_0040A090(self->fd, (int)&D_005376F8, 0x3C4);
+        if (D_004A3940 < 0) {
+            func_002C5570(self, self->index);
+            func_002C48C0(self, 0xF);
+        }
+        break;
+    case 9:
+        D_004A3940 = func_00409E70(self->fd);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 0x10);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    case 11:
+        self->x3C = 0;
+        sprintf(self->file, D_004A3948, (char*)self + self->index * 0x78 + 0x1B0, (char*)self + self->index * 0x78 + 0x1B0);
+        func_003E6448(self->dirbuf, 0, 0x40);
+        D_004A3940 = func_0040A688(self->port, 0, self->file, 0, 1, self->dirbuf);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 0x10);
+        }
+        break;
+    case 12:
+    case 13:
+    case 14: {
+        int i = self->state == 0xD ? 1 : self->state == 0xE ? 2 : 0;
+        sprintf(self->path, D_004A3948, (char*)self + self->index * 0x78 + 0x1B0, D_004459F0[i]);
+        func_003E6448(self->dirbuf, 0, 0x40);
+        D_004A3940 = func_0040A688(self->port, 0, self->path, 0, 1, self->dirbuf);
+        if (D_004A3940 < 0) {
+            func_002C48C0(self, 0x10);
+        }
+        break;
+    }
+    case 15:
+        D_004A3940 = func_00409E70(self->fd);
+        if (D_004A3940 < 0) {
+            self->fd = -1;
+            func_002C48C0(self, 0x10);
+        } else {
+            self->fd = -1;
+        }
+        break;
+    case 2:
+        break;
+    case 4:
+        break;
+    case 6:
+        break;
+    case 16:
+        break;
+    case 18:
+        break;
+    case 21:
+        break;
+    case 25:
+        break;
+    case 27:
+        break;
+    case 31:
+        break;
+    case 35:
+        break;
+    case 52:
+        break;
+    case 53:
+        break;
+    case 61:
+        break;
+    case 64:
+        break;
+    case 66:
+        break;
+    case 68:
+        break;
+    case 70:
+        break;
+    case 72:
+        break;
+    case 74:
+        break;
+    case 76:
+        break;
+    case 78:
+        break;
+    default:
+        if (self->busy == 0) {
+            func_002C50E0(self);
+        }
+        break;
+    }
+}
+
 
 //100%
 extern "C" int func_0040A498(int h, int a1, int* a2, int* a3, int* a4);

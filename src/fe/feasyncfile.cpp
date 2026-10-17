@@ -18167,7 +18167,198 @@ extern "C" void func_001C3570(void* self, void* menu)
     func_001DA510(menu, 4, GetHashValue32(D_004614E8), 1);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001C3668);
+//100%
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A9B58(void* self);
+extern "C" void func_001C49C8(void* self);
+extern "C" void func_001C4B78(void* self, int idx);
+extern "C" int func_0039A738(void* a);
+extern "C" void func_001C3EE8(void* self, int a1);
+extern "C" void func_001C3D68(void* self, int pos, int count);
+extern "C" void func_003A0290(void* w, void* pos);
+extern "C" int func_0025F338(void* a);
+extern void* D_004A3028;
+extern const char D_0045FF28[];
+extern char D_00465C78[];
+extern char D_00465C88[];
+extern char D_00465C98[];
+extern char D_00465CA8[];
+extern char D_00465CB8[];
+extern char D_00465CC8[];
+extern char D_00465CF0[];
+extern char D_00465D00[];
+extern char D_00465D10[];
+extern char D_00465D60[];
+extern char D_00465E10[];
+extern char D_00465E20[];
+extern char D_004A1C10[];
+
+struct sColor_3668 {
+    float r, g, b, a;
+    sColor_3668& Set(float r_, float g_, float b_, float a_)
+    {
+        r = r_;
+        g = g_;
+        b = b_;
+        a = a_;
+        return *this;
+    }
+};
+struct sVec3_3668 {
+    float x, y, z;
+};
+struct cUIObj_3668 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int a1);
+    virtual void v10();
+    virtual void v11(const sColor_3668& c);
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20(void* out);
+};
+
+static inline cUIObj_3668* Get_3668(char* self, char* name)
+{
+    return (cUIObj_3668*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+}
+
+extern "C" void func_001C3310(void* self);
+
+static inline int IsHash_3668(char* w, char* name)
+{
+    int h = *(int*)(w + 0x38);
+    return h == GetHashValue32(name);
+}
+
+extern "C" void func_001C3668(char* self, char* w, int ev)
+{
+    // one 16-byte local holds the tint colour and, later, the widget position
+    sColor_3668 c;
+    char buf[0x20];
+    sVec3_3668 size;
+    int i;
+    cUIObj_3668* o;
+    if (w == 0)
+        return;
+    switch (ev) {
+    case 6:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
+        break;
+    case 9:
+        if (IsHash_3668(w, D_00465C78)) {
+            func_001C49C8(self);
+        } else if (IsHash_3668(w, D_00465C88)) {
+            func_001C4B78(self, func_0039A738(w));
+            func_001C3310(self);
+        }
+    case 1:
+        if (*(void**)(self + 0x40) == 0)
+            break;
+        if (IsHash_3668(w, D_00465CF0)) {
+            func_001C3EE8(self, 0);
+        } else if (IsHash_3668(w, D_00465D10)) {
+            func_001C3EE8(self, 2);
+        } else if (IsHash_3668(w, D_00465D00)) {
+            func_001C3EE8(self, 1);
+        } else if (IsHash_3668(w, D_00465C78)) {
+            ((cUIObj_3668*)w)->v11(c.Set(1.0f, 1.0f, 1.0f, 1.0f));
+            o = Get_3668(self, D_00465CA8);
+            o->v09(1);
+            o = Get_3668(self, D_00465C98);
+            o->v09(1);
+            o = Get_3668(self, D_00465E10);
+            o->v09(1);
+        } else if (IsHash_3668(w, D_00465C88)) {
+            ((cUIObj_3668*)w)->v11(c.Set(1.0f, 1.0f, 1.0f, 1.0f));
+            o = Get_3668(self, D_00465CC8);
+            o->v09(1);
+            o = Get_3668(self, D_00465CB8);
+            o->v09(1);
+            o = Get_3668(self, D_00465E20);
+            o->v09(1);
+        } else {
+            for (i = 0; i < 10; i++) {
+                sprintf(buf, D_00465D60, i);
+                if (IsHash_3668(w, buf))
+                    goto found;
+            }
+        }
+        func_001A8918(self, (int)w, ev);
+        break;
+    case 2:
+        if (IsHash_3668(w, D_00465CF0)) {
+            if (*(int*)(self + 0x6E0) == 0)
+                ((cUIObj_3668*)w)->v11(c.Set(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (IsHash_3668(w, D_00465D10)) {
+            if (*(int*)(self + 0x6E0) == 2)
+                ((cUIObj_3668*)w)->v11(c.Set(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (IsHash_3668(w, D_00465D00)) {
+            if (*(int*)(self + 0x6E0) == 1)
+                ((cUIObj_3668*)w)->v11(c.Set(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (IsHash_3668(w, D_00465C78)) {
+            ((cUIObj_3668*)w)->v11(c.Set(1.0f, 0, 0, 0));
+            o = Get_3668(self, D_00465CA8);
+            o->v09(0);
+            o = Get_3668(self, D_00465C98);
+            o->v09(0);
+            o = Get_3668(self, D_00465E10);
+            o->v09(0);
+        } else if (IsHash_3668(w, D_00465C88)) {
+            ((cUIObj_3668*)w)->v11(c.Set(1.0f, 0, 0, 0));
+            o = Get_3668(self, D_00465CC8);
+            o->v09(0);
+            o = Get_3668(self, D_00465CB8);
+            o->v09(0);
+            o = Get_3668(self, D_00465E20);
+            o->v09(0);
+        }
+        func_001A8918(self, (int)w, ev);
+        break;
+    case 8:
+        if ((*(int*)(self + 0x1C) & 6) == 0)
+            func_001A9B58(self);
+        break;
+    found: {
+        cUIObj_3668* t = Get_3668(self, D_004A1C10);
+        func_003A0290(w, &c);
+        ((cUIObj_3668*)w)->v20(&size);
+        c.g = c.g - size.y + 14.0f;
+        c.r = c.r + -40.0f;
+        *(sVec3_3668*)((char*)t + 0x44) = *(sVec3_3668*)&c;
+        t->v09(1);
+        func_001C3D68(self, i + *(int*)(self + 0x6E8), func_0025F338(D_004A3028));
+        func_001A8918(self, (int)w, ev);
+        break;
+    }
+    default:
+        func_001A8918(self, (int)w, ev);
+        break;
+    case 5:
+        break;
+    }
+}
 
 //100%
 int GetHashValue32(char* str);

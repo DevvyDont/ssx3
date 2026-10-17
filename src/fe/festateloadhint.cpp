@@ -494,7 +494,171 @@ extern "C" void func_00246278(void* self, void* widget)
     }
 }
 
-INCLUDE_ASM("fe/festateloadhint", func_002464E8);
+//100%
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" int func_00144BE0(void* iface);
+extern "C" int func_00144D18(void* iface, int a1);
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" int func_00148950(void* iface, int id);
+extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+struct sIds_64E8 { int v[17]; };
+extern sIds_64E8 D_0047BAE0_64E8 __asm__("D_0047BAE0");
+extern sIds_64E8 D_0047BB28_64E8 __asm__("D_0047BB28");
+struct sOptEntry_64E8 { unsigned int f0; int x; int y; };
+extern sOptEntry_64E8 D_005308B8_64E8[] __asm__("D_005308B8");
+extern char D_0047BB70[];
+extern char D_0047BB80[];
+extern char D_0047BB98[];
+extern char D_0047BBA8[];
+extern char D_0047BBB8[];
+extern char D_0047BBC8[];
+extern char D_004A2BE0[];
+extern char D_004A2BE8[];
+extern char D_004A2BF0[];
+extern char D_004A2BF8[];
+extern char D_0047BBD8[];
+extern char D_0047BBE8[];
+extern char D_004A2C00[];
+extern char D_0047BBF8[];
+extern char D_0047BC08[];
+extern char D_0047BC18[];
+extern char D_0047BC30[];
+extern char D_0047BC48[];
+extern char D_0047BC60[];
+extern char D_0047BC70[];
+extern char D_0047BC80[];
+extern char D_004A2C08[];
+
+static inline void* Text_64E8(char* name)
+{
+    char* o = *(char**)(D_004A28A8 + 0x8C);
+    sVEnt_6278* vt = *(sVEnt_6278**)(o + 4);
+    return vt[4].fn(o + vt[4].delta, GetHashValue32(name));
+}
+
+extern "C" void func_002464E8(void* self, void* widget)
+{
+    char* w = (char*)widget;
+    sIds_64E8 tblA = D_0047BAE0_64E8;
+    sIds_64E8 tblB = D_0047BB28_64E8;
+    unsigned short buf[100];
+    unsigned short str1[100];
+    unsigned short str2[100];
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (wHash_6278(w) == GetHashValue32(D_0047BB70)) {
+        func_00416210(buf, 0, 0xC8);
+        char* fmt = D_004A2BD8;
+        switch (func_00144C98(iface)) {
+        case 0: {
+            void* text = Text_64E8(D_0047BA58);
+            func_002C27C0((char*)buf, fmt, text, func_00144BF0(iface));
+            break;
+        }
+        case 1: {
+            void* text = Text_64E8(D_0047BA68);
+            func_002C27C0((char*)buf, fmt, text, func_00144BF0(iface));
+            break;
+        }
+        case 2: {
+            void* text = Text_64E8(D_0047BA78);
+            func_002C27C0((char*)buf, fmt, text, func_00144BF0(iface));
+            break;
+        }
+        }
+        func_003A0E90(widget, (char*)buf);
+        return;
+    }
+    switch (D_00535BC8_6278[0x48]) {
+    case 0:
+        if (wHash_6278(w) == GetHashValue32(D_0047BB80)) { Show_6278(w); return; }
+        break;
+    case 1:
+        if (wHash_6278(w) == GetHashValue32(D_0047BB98)) { Show_6278(w); return; }
+        break;
+    case 2:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBA8)) { Show_6278(w); return; }
+        break;
+    case 3:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBB8)) { Show_6278(w); return; }
+        break;
+    case 4:
+        if (wHash_6278(w) == GetHashValue32(D_0047BB80)) { Show_6278(w); return; }
+        break;
+    case 5:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBC8)) { Show_6278(w); return; }
+        break;
+    case 6:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBC8)) { Show_6278(w); return; }
+        break;
+    }
+    switch (D_00535BC8_6278[0x48]) {
+    case 0:
+        if (wHash_6278(w) == GetHashValue32(D_004A2BE0)) { Show_6278(w); return; }
+        break;
+    case 1:
+        if (wHash_6278(w) == GetHashValue32(D_004A2BE8)) { Show_6278(w); return; }
+        break;
+    case 2:
+        if (wHash_6278(w) == GetHashValue32(D_004A2BF0)) { Show_6278(w); return; }
+        break;
+    case 3:
+        if (wHash_6278(w) == GetHashValue32(D_004A2BF8)) { Show_6278(w); return; }
+        break;
+    case 5:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBD8)) { Show_6278(w); return; }
+        break;
+    case 6:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBE8)) { Show_6278(w); return; }
+        break;
+    case 7:
+        break;
+    }
+    switch (func_00144D18(iface, func_00144BE0(iface))) {
+    case 0:
+        if (wHash_6278(w) == GetHashValue32(D_004A2C00)) { Show_6278(w); return; }
+        break;
+    case 1:
+        if (wHash_6278(w) == GetHashValue32(D_0047BBF8)) { Show_6278(w); return; }
+        break;
+    case 2:
+        if (wHash_6278(w) == GetHashValue32(D_0047BC08)) { Show_6278(w); return; }
+        break;
+    }
+    if (wHash_6278(w) == GetHashValue32(D_0047BC18)) {
+        func_002C2508(str1, Text_64E8(D_0047BC30));
+        func_002C26D0(buf, str1, tblB.v[func_00144BE0(iface)]);
+        func_003A0E90(widget, (char*)buf);
+    } else if (wHash_6278(w) == GetHashValue32(D_0047BC48)) {
+        func_002C2508(str2, Text_64E8(D_0047BC30));
+        func_002C26D0(buf, str2, tblA.v[func_00144BE0(iface)]);
+        func_003A0E90(widget, (char*)buf);
+    } else if (wHash_6278(w) == GetHashValue32(D_0047BC60)) {
+        void* career = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* names = cBE_getInterface_Fv(cBE_getBE(), 2);
+        cUIText_setAsciiString((cUIText*)widget, func_0014EE58(names, func_00146E98(career, 0)));
+    } else if (wHash_6278(w) == GetHashValue32(D_0047BC70)) {
+        void* career = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* stats = cBE_getInterface_Fv(cBE_getBE(), 3);
+        func_002C2508(str1, Text_64E8(D_0047BC80));
+        int value = func_00148950(stats, func_00146E98(career, 0));
+        int done = (D_005308B8_64E8[func_00146E98(career, 0)].f0 >> 1) & 1;
+        func_002C26D0(buf, str1, done ? 1 : value);
+        func_003A0E90(widget, (char*)buf);
+    } else if (wHash_6278(w) == GetHashValue32(D_004A2C08)) {
+        void* p = *(void**)((char*)self + 0x48);
+        if (p != 0) {
+            void* q = *(void**)((char*)p + 0x10);
+            if (q != 0) {
+                *(void**)(w + 0x78) = q;
+                *(int*)(w + 0x7C) = 0;
+            }
+        }
+    }
+}
+
 
 INCLUDE_ASM("fe/festateloadhint", func_00246CF8);
 
