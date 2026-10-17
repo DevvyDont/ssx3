@@ -2736,7 +2736,17 @@ extern "C" void func_0025E7F0(char* self, char* msg)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_0025EAA0);
+extern char D_004A3108[];
+extern "C" void func_00268E50(void* self, void* a1, int a2);
+
+// Sends an 'onln' message with value under key D_004A3108; func_00268E50 handles the reply.
+extern "C" void func_0025EAA0(void* self, const char* value)
+{
+    char buf[0x100];
+    buf[0] = 0;
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A3108, value);
+    func_003E8B10(*(void**)((char*)self + 0x54), 0x6F6E6C6E, buf, (int)func_00268E50, self);
+}
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025EB00);
 
@@ -3057,7 +3067,12 @@ extern "C" bool func_0025F430(void* self)
     return s != 0 && *s != 0;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_0025F478);
+extern "C" int func_0025F4C0(void* self, char* entry, int a);
+
+extern "C" int func_0025F478(void* self, int idx, int a)
+{
+    return func_0025F4C0(self, func_0025F1E0(self, idx, 0), a);
+}
 
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F4C0);
 
@@ -7405,7 +7420,19 @@ extern "C" void* func_002667E8(void* self)
     return self;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00266850);
+extern "C" void func_003F62F8(void* self);
+void operator_delete(int*);
+
+// Destructor: releases the table at +0x460 if one is held.
+extern "C" void func_00266850(void* self, int flags)
+{
+    if (*(int*)((char*)self + 0x460) != 0) {
+        func_003F62F8(self);
+        *(int*)((char*)self + 0x460) = 0;
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
 
 //100%
 extern "C" void func_003F6358(void* self);
