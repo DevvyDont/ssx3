@@ -44,6 +44,16 @@ or any disc file.
     end-of-frame depth effect's `TEXA` setting before the 3D, which turned the snow under the riders' shadows black;
   - DMA chains longer than 4,096 tags being sent whole. The cut-off dropped the end of SSX 3's race list, which
     draws the player's rider and the stadium at the start gate;
+  - a faster VU1 interpreter with the same results: it checks its pipelines only when a queued result is due,
+    works out FMAC flags in `double` (exact for VU products and sums) and only falls back to `long double` at the
+    edge of the float range, and copies `XGKICK` packets 16 bytes at a time. Replaying 4,000 VU1 microprogram runs
+    recorded in an SSX 3 race gives bit-identical output, about 2.5 times faster;
+  - the IOP catching up 256 cycles (2,048 EE cycles) at a time instead of after every block of EE code. Each catch-up
+    walks the IOP's threads, timers and interrupts, and doing that every few EE instructions cost SSX 3 about a fifth
+    of its main thread;
+  - the GS rasterizer running a triangle pixel's depth test before its colour and texture work, since a pixel that
+    fails it is dropped anyway, and rounding filtered texels without a libm call. 8,000 GS packets recorded in a race
+    replay to the same VRAM about 10% faster;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -126,5 +136,8 @@ With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title
 input through the front end to a race. In the race, the HUD, sky, mountains, start-gate stadium, riders, their
 shadows and the course draw with the right textures, and the race plays from the gate down the first slope.
 The camera sits much further behind the player's rider than it should. Sound has not been tested yet.
+
+It is far from full speed. On a 4-core 2.1 GHz Xeon, the first stretch of a race draws about 1 to 1.3 frames a
+second and later stretches up to about 3.5.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
