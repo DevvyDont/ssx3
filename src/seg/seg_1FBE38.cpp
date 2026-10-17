@@ -4309,7 +4309,71 @@ extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* e) {
     return D_004C9098_2DF0;
 }
 
-INCLUDE_ASM("seg/seg_1FBE38", func_00302EF8);
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+struct Flag_2EF8 { char c; Flag_2EF8() {} Flag_2EF8(const Flag_2EF8& o) : c(o.c) {} };
+struct Ent_2EF8 { int idx; int val; int pad; int kind; };
+extern int D_004A3D10_2EF8[2] __asm__("D_004A3D10");
+extern char *D_004A3DD8_2EF8 __asm__("D_004A3DD8");
+extern char *D_004A28A8_2EF8 __asm__("D_004A28A8");
+extern int D_004A57B0_2EF8 __asm__("D_004A57B0");
+extern int D_004A57A8_2EF8 __asm__("D_004A57A8");
+extern Flag_2EF8 D_004A57AC_2EF8 __asm__("D_004A57AC");
+struct A_2EF8 { char pad[0x6C0]; };
+struct B_2EF8 { virtual void v01(); };
+struct D_2EF8 : A_2EF8, B_2EF8 { };
+struct Tab_2EF8 { char pad[0x28]; D_2EF8 *arr[1]; };
+extern "C" int func_00122EE8_2EF8(D_2EF8*, int) __asm__("func_00122EE8");
+// Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
+extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
+    if (D_004A57B0_2EF8 == 0) {
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        D_004A57B0_2EF8 = 1;
+        D_004A57A8_2EF8 = 0;
+        D_004A57AC_2EF8 = Flag_2EF8(D_004A57AC_2EF8);
+    }
+    int v[4] __attribute__((aligned(16)));
+    int* vp = v;
+    func_003E6574(vp, &D_004A57A8_2EF8, 8);
+    Ent_2EF8* p = e;
+    for (int i = 0; i < n; i++, p++) {
+        int k = p->idx;
+        int* d = (int*)((k << 2) + (int)vp);
+        if (p->kind != D_004A3D10_2EF8[k] && D_004A3D10_2EF8[k] == 2)
+            *(float*)d = (float)p->val;
+        else
+            *d = p->val;
+    }
+    D_2EF8* r = (*(Tab_2EF8**)(*(char**)(D_004A28A8_2EF8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_2EF8];
+    B_2EF8* b = r;
+    D_2EF8* d = (D_2EF8*)b;
+    int res;
+    switch (vp[0]) {
+    case 3: res = func_00122EE8_2EF8(d, 0); break;
+    case 4: res = func_00122EE8_2EF8(d, 1); break;
+    case 1: res = func_00122EE8_2EF8(d, 2); break;
+    case 0: res = func_00122EE8_2EF8(d, 3); break;
+    case 2: res = func_00122EE8_2EF8(d, 4); break;
+    case 5: res = func_00122EE8_2EF8(d, 5); break;
+    case 6: res = func_00122EE8_2EF8(d, 6); break;
+    case 7: res = func_00122EE8_2EF8(d, 7); break;
+    case 9: res = func_00122EE8_2EF8(d, 8); break;
+    case 10: res = func_00122EE8_2EF8(d, 9); break;
+    case 11: res = func_00122EE8_2EF8(d, 10); break;
+    case 12: res = func_00122EE8_2EF8(d, 11); break;
+    case 13: res = func_00122EE8_2EF8(d, 12); break;
+    case 14: res = func_00122EE8_2EF8(d, 13); break;
+    case 15: res = func_00122EE8_2EF8(d, 14); break;
+    case 16: res = func_00122EE8_2EF8(d, 15); break;
+    case 17: res = func_00122EE8_2EF8(d, 16); break;
+    case 8: res = func_00122EE8_2EF8(d, 17); break;
+    case 18: res = func_00122EE8_2EF8(d, 18); break;
+    default: res = 0; break;
+    }
+    *(int*)((char*)self + 8) = 1;
+    *func_00226610(self) = res;
+    return self;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
