@@ -674,7 +674,102 @@ extern "C" void func_00194168(void* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/festatebigradio", func_001941B0);
+struct sGroup_41B0 {
+    void* menu;
+    char pad4[0x8 - 0x4];
+    void* items[(0x34 - 0x8) / 4];
+};
+struct sMsg_41B0 {
+    char pad0[0x8];
+    int group;
+    int item;
+    int key;
+};
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+extern "C" void func_001AB288(void* self);
+extern "C" int func_001A8E40(void* self, int msg, void* data);
+extern "C" int func_0025DA90(void* self);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B1F88(void* mem, int a1);
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern void* D_004A3028;
+extern const char D_0045FF10[];
+extern const char D_0045FF28[];
+extern char D_004A1788[];
+extern char D_004A17B0[];
+
+struct sBigRadio_41B0 {
+    char pad0[0x10];
+    int f10;
+    char pad14[0x40 - 0x14];
+    void* screen;
+    char pad44[0x6D0 - 0x44];
+    sGroup_41B0 groups[2];
+    char* opts;
+};
+
+extern "C" int func_001941B0(sBigRadio_41B0* self, int msg, sMsg_41B0* data)
+{
+    switch (msg) {
+    case 0xFB:
+        cUIMenu_setSelectedByIndex(self->groups[data->group].menu, data->item);
+        break;
+    case 0xFC: {
+        unsigned char sel;
+        void* item = (&self->groups[data->group])->items[data->item];
+        if (func_0039A768(item, data->key, &sel) == 0) {
+            return 0;
+        }
+        func_0039A7A8(item, sel);
+        int opt = *(signed char*)(self->opts + func_00192918(&self->groups[data->group], (int)item));
+        if (opt == -1) {
+            return 0;
+        }
+        int player = data->group;
+        func_00193DE0(self, player, opt, func_0039A738(item));
+        break;
+    }
+    case 0xFD:
+        func_00192740(&self->groups[data->group], 1);
+        func_00194080(self);
+        break;
+    case 0xEE:
+    case 0xF1:
+    case 0xF8:
+    case 0xFA:
+    case 0x112:
+    case 0x113:
+        func_001AB288(self);
+        break;
+    case 0x10C: {
+        if (func_0025DA90(D_004A3028) != 0) {
+            func_001A8A40(self, func_001B1F88(cMemMan_alloc(0x73C, D_0045FF10, 0, 0), self->f10));
+        } else {
+            func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), self->f10));
+        }
+        break;
+    }
+    case 0xFE: {
+        func_00192740(&self->groups[data->group], 0);
+        func_00192970(&self->groups[data->group], self->screen);
+        cUIMenu_setSelectedByIndex(self->groups[data->group].menu, 0);
+        int frame;
+        if (data->group == 0)
+            frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(D_004A1788));
+        else
+            frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(D_004A17B0));
+        if (frame == 0xFFFF) {
+            return 0;
+        }
+        cUIScreen_playFrame(self->screen, frame, 1);
+        break;
+    }
+    default:
+        return func_001A8E40(self, msg, data);
+    }
+    return 0;
+}
 
 //100%
 extern void* D_004A33CC;
