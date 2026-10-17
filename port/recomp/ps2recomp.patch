@@ -936,10 +936,20 @@ index 0000000..06fdb29
 +extern uint32_t g_ps2xGameHeapBase;
 +extern uint32_t g_ps2xGameHeapLimit;
 diff --git a/ps2xRuntime/include/ps2_runtime.h b/ps2xRuntime/include/ps2_runtime.h
-index 4b9242c..aa6417a 100644
+index 4b9242c..f1c8648 100644
 --- a/ps2xRuntime/include/ps2_runtime.h
 +++ b/ps2xRuntime/include/ps2_runtime.h
-@@ -384,6 +384,8 @@ public:
+@@ -150,6 +150,9 @@ struct alignas(16) R5900Context
+ 
+         // Initialize VU0 registers
+         vu0_q = 1.0f; // Q register usually initialized to 1.0
++        // vf0 always reads (0, 0, 0, 1) on the hardware. New threads, interrupt
++        // handlers and callbacks start from a fresh context, so set it here.
++        vu0_vf[0] = _mm_set_ps(1.0f, 0.0f, 0.0f, 0.0f);
+ 
+         // Reset COP0 registers
+         cop0_random = 47; // Start at maximum value
+@@ -384,6 +387,8 @@ public:
      uint32_t guestHeapEnd() const;
      uint32_t guestHeapLimit() const;
      uint32_t reserveAsyncCallbackStack(uint32_t size, uint32_t alignment = 16u);
@@ -948,7 +958,7 @@ index 4b9242c..aa6417a 100644
  
      void drainCompletedDmacHandlers(uint8_t *rdram);
  
-@@ -532,6 +534,11 @@ public:
+@@ -532,6 +537,11 @@ public:
      std::atomic<uint32_t> m_debugGp{0};
  
  private:
@@ -5236,6 +5246,33 @@ index 0b22fe0..9c9d3e1 100644
          tc.Run("VIF1 DMA DIRECT forwards payload to GIF callback and clears channel", [](TestCase &t)
          {
              PS2Memory mem;
+diff --git a/ps2xTest/src/ps2_runtime_kernel_tests.cpp b/ps2xTest/src/ps2_runtime_kernel_tests.cpp
+index 63b12d9..813c038 100644
+--- a/ps2xTest/src/ps2_runtime_kernel_tests.cpp
++++ b/ps2xTest/src/ps2_runtime_kernel_tests.cpp
+@@ -668,6 +668,22 @@ void register_ps2_runtime_kernel_tests()
+                       "the scheduler must publish guest execution only around the active guest call");
+         });
+ 
++        tc.Run("a started thread reads VU0's vf0 as (0, 0, 0, 1)", [](TestCase &t)
++        {
++            TestEnv env;
++            EeScheduler &ee = env.runtime.eeScheduler();
++            ee.reset(env.rdram.data(), env.ctx);
++            ee.bindMainContextForSyscall(env.ctx, env.rdram.data());
++
++            const int id = ee.createThread(EeThreadCreateParams{0u, K_SCHED_HIGH, 0x24000u, 0x800u,
++                                                                 0u, 20, 0u});
++            t.Equals(ee.startThread(id, 0u, env.ctx, false), KE_OK, "StartThread should make a dormant thread ready");
++            float vf0[4] = {};
++            std::memcpy(vf0, &ee.thread(id)->context.vu0_vf[0], sizeof(vf0));
++            t.IsTrue(vf0[0] == 0.0f && vf0[1] == 0.0f && vf0[2] == 0.0f && vf0[3] == 1.0f,
++                     "vf0 is hardwired, so a new thread must not start with it cleared");
++        });
++
+         tc.Run("thread lifecycle, nested suspend, WAIT-SUSPEND, and wakeup count are centralized", [](TestCase &t)
+         {
+             TestEnv env;
 diff --git a/ps2xTest/src/ps2_sif_rpc_tests.cpp b/ps2xTest/src/ps2_sif_rpc_tests.cpp
 index 7242e65..2d194d0 100644
 --- a/ps2xTest/src/ps2_sif_rpc_tests.cpp

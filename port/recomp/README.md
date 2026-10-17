@@ -73,6 +73,11 @@ or any disc file.
   - the VU1 interpreter working out an FMAC instruction's result and its flags in one pass, over only the fields it
     writes. The 4,000 recorded VU1 runs still give bit-identical output, with about 5% fewer instructions. With the
     GS and IOP changes, a race draws about 8% more frames;
+  - every new thread, interrupt handler and callback starting with VU0's `vf0` as (0, 0, 0, 1), as the hardware always
+    reads it. The runtime started them with it cleared, and it was only set again once a VU0 microprogram ran. SSX 3
+    builds the player's rider on a newly started loader thread, turning each bone's rest pose from a quaternion with
+    code that reads `vf0`, so the bones' rest-pose matrices came out as zeros and the player's rider drew tiny, with
+    stretched legs, in front of the camera;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -157,7 +162,7 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
 input through the front end to a race. In the race, the HUD, sky, mountains, start-gate stadium, riders, their
 shadows and the course draw with the right textures, and the race plays from the gate down the first slope.
-The camera sits much further behind the player's rider than it should. Sound has not been tested yet.
+Sound has not been tested yet.
 
 It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 5 to 7 frames a second.
 
