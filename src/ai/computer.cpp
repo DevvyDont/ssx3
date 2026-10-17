@@ -1221,7 +1221,53 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
 
 INCLUDE_ASM("ai/computer", func_0010EB30);
 
-INCLUDE_ASM("ai/computer", func_0010F1C0);
+//100%
+struct sCpuVt_F1C0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" void func_0010E098(void*, int, float);
+// Called with an extra int argument here; bind a two-argument view by asm label.
+void func_0010E8B8_i(void* self, int v) __asm__("func_0010E8B8");
+extern "C" void func_00116120(void* rider, int a, int b);
+
+extern "C" void func_0010F1C0(char* self, int cmd, float f)
+{
+    switch (cmd) {
+    case 0:
+    case 7:
+        break;
+    case 1: {
+        char* o = self + 0x6C0;
+        sCpuVt_F1C0* vt = *(sCpuVt_F1C0**)o;
+        vt[13].fn(o + vt[13].delta);
+        break;
+    }
+    case 2: {
+        char* o = self + 0x6C0;
+        sCpuVt_F1C0* vt = *(sCpuVt_F1C0**)o;
+        vt[14].fn(o + vt[14].delta);
+        break;
+    }
+    case 3: {
+        char* o = self + 0x6C0;
+        sCpuVt_F1C0* vt = *(sCpuVt_F1C0**)o;
+        vt[15].fn(o + vt[15].delta);
+        break;
+    }
+    case 4:
+        func_0010E098(self, 8, f);
+        break;
+    case 6:
+        func_0010E8B8_i(self, (int)f);
+        break;
+    case 5:
+        func_00116120(self, 0, 4);
+        break;
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" float func_00119BB0(int);

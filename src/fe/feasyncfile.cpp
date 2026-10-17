@@ -5510,7 +5510,51 @@ extern "C" int func_001ADFB8(func_001ADFB8_cObj* self)
     return 1;
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001ADFE8);
+//100%
+extern void* D_004A28A8;
+extern int D_00534B30_DFE8[] __asm__("D_00534B30");
+extern signed char D_00535C12[];
+extern char D_00441268[];
+extern char D_00441278[];
+extern char D_00441288[];
+extern char D_00441298[];
+extern char D_004412A8[];
+extern char D_004412B8[];
+extern "C" void func_001A87D0(void* self, int a1);
+extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void func_001AF098(void* self, int on);
+extern "C" void func_001AEC60(void* self, int on);
+
+extern "C" void func_001ADFE8(char* self, int a1)
+{
+    func_001A87D0(self, a1);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    func_0039A7A8(*(void**)(self + 0x6DC), D_00534B30_DFE8[1] ^ 1);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    switch (D_00535C12[0]) {
+    case 3:
+        *(char**)(self + 0x6D8) = D_00441288;
+        break;
+    case 1:
+        *(char**)(self + 0x6D8) = D_00441278;
+        break;
+    case 2:
+        *(char**)(self + 0x6D8) = D_00441298;
+        break;
+    case 5:
+        *(char**)(self + 0x6D8) = D_004412A8;
+        break;
+    case 4:
+        *(char**)(self + 0x6D8) = D_004412B8;
+        break;
+    case 0:
+    default:
+        *(char**)(self + 0x6D8) = D_00441268;
+        break;
+    }
+    func_001AF098(self, D_00534B30_DFE8[1]);
+    func_001AEC60(self, *(int*)(self + 0x6D0));
+}
 
 //100%
 void* func_001AE0E0(void* self)

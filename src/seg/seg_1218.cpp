@@ -3416,4 +3416,40 @@ extern "C" int func_0010C3B8(void* self) {
     return (float)(r % 100U) < thr;
 }
 
-INCLUDE_ASM("seg/seg_1218", func_0010C450);
+//100%
+extern "C" int func_0010C450(void* self, int mode, int x)
+{
+    switch (mode) {
+    case 1:
+        if (x == 1)
+            return 1;
+        if (x == 2)
+            return 1;
+        return 2;
+    case 2:
+        if (x == 1)
+            return 1;
+        if (x == 2)
+            return 1;
+        return 2;
+    case 3:
+        if (x == 1)
+            return 0;
+        if (x == 2)
+            return 1;
+        return 1;
+    case 4:
+        if (x == 1)
+            return 0;
+        if (x == 2)
+            return 0;
+        return 1;
+    case 5:
+        if (x == 1)
+            return 0;
+        if (x == 2)
+            return 0;
+        return 0;
+    }
+    return 0;
+}
