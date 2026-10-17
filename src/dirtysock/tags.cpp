@@ -16,7 +16,16 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
 
-INCLUDE_ASM("dirtysock/tags", func_003EB578);
+//100%
+// Sets the byte flag at D_004A4A70 and returns its old value.
+extern char D_004A4A70;
+
+extern "C" int func_003EB578(int v)
+{
+    char old = D_004A4A70;
+    D_004A4A70 = v;
+    return old;
+}
 
 INCLUDE_ASM("dirtysock/tags", func_003EB588);
 

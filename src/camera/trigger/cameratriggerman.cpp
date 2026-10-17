@@ -74,7 +74,14 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 extern void* D_004C5830[];
 extern "C" void* func_0016CEF0(void*, void*, int);
 
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEA8);
+//100%
+// Forwards to func_0016CA18.
+extern "C" void func_0016CA18(void* self);
+
+extern "C" void func_0016CEA8(void* self)
+{
+    func_0016CA18(self);
+}
 
 //80.0%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);

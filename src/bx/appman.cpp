@@ -224,7 +224,14 @@ extern "C" void cAppMan_mainLoop(void* p)
 
 int cExecutionMan_checkHalt(void* self, int flag);
 
-INCLUDE_ASM("bx/appman", func_00317308);
+//100%
+// Forwards the object at 0x8 to func_00317478.
+extern "C" int func_00317478(void* p);
+
+extern "C" int func_00317308(char* self)
+{
+    return func_00317478(*(void**)(self + 0x8));
+}
 
 //100%
 int cAppMan_checkHalt(cAppMan* self)

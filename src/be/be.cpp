@@ -140,7 +140,14 @@ extern "C" void cBE_setState(int state)
     }
 }
 
-INCLUDE_ASM("be/be", func_0014DEE8);
+//100%
+// Passes the global at D_004A11F8 to func_0014A078.
+extern "C" void func_0014A078(void*);
+
+extern "C" void func_0014DEE8()
+{
+    func_0014A078(D_004A11F8);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 class cBEReplayStream {

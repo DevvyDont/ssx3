@@ -47,7 +47,17 @@ extern "C" int func_00314D60(int* a, int* b)
 
 INCLUDE_ASM("animation/mdfarchive", func_00314D98);
 
-INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
+//100%
+// Destructor: clears the current-archive global at D_004A3E7C, then frees self when flags bit 0 is set.
+extern int D_004A3E7C;
+void operator_delete(int* p);
+
+extern "C" void func_00314DB0(int* self, int flags)
+{
+    D_004A3E7C = 0;
+    if (flags & 1)
+        operator_delete(self);
+}
 
 //100%
 int GetHashValue32(char* str);

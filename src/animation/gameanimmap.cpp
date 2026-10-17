@@ -47,7 +47,18 @@ extern "C" void func_003158E0(void* self, float value)
 
 INCLUDE_ASM("animation/gameanimmap", func_003158E8);
 
-INCLUDE_ASM("animation/gameanimmap", func_00315988);
+//100%
+// Copies the 0x20-byte pair of vectors from src into self at 0x30.
+struct sVec4_315988
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sPair_315988 { sVec4_315988 a, b; };
+
+extern "C" void func_00315988(char* self, sPair_315988* src)
+{
+    *(sPair_315988*)(self + 0x30) = *src;
+}
 
 //100%
 extern "C" void func_003159A0(void* self, long v)

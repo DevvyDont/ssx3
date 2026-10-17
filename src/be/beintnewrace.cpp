@@ -141,7 +141,14 @@ extern "C" void* func_00144BF0()
     return (char*)&D_0043D954 + D_00535C08.value * 0x64;
 }
 
-INCLUDE_ASM("be/beintnewrace", func_00144C10);
+//100%
+// Returns the current race's entry in the 0x64-byte table at D_0043D974.
+extern sPad16 D_0043D974;
+
+extern "C" void* func_00144C10()
+{
+    return (char*)&D_0043D974 + D_00535C08.value * 0x64;
+}
 
 //100%
 extern sPad16 D_0043D994;
