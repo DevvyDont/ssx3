@@ -710,7 +710,32 @@ extern "C" int func_0012A180(sAiObj128A48* self)
     return result;
 }
 
-INCLUDE_ASM("ai/ai", func_0012A1F0);
+extern int D_00536708[];
+
+struct sAiIds12A1F0
+{
+    char pad0[0x18];
+    int ids[1];
+};
+
+struct sAiGlobal12A1F0
+{
+    char pad0[0xC0];
+    sAiIds12A1F0* table;
+};
+
+// Whether id slot idx of the table at +0xC0 holds one of the six ids in D_00536708.
+extern "C" int func_0012A1F0(void* self, int idx)
+{
+    int found = 0;
+    int id = ((sAiGlobal12A1F0*)D_004A28A8)->table->ids[idx];
+    for (int i = 0; i < 6; i++)
+    {
+        if (id == D_00536708[i])
+            found = 1;
+    }
+    return found;
+}
 
 extern "C" int func_0012A240(int* self)
 {
@@ -862,7 +887,34 @@ INCLUDE_ASM("ai/ai", func_0012A768);
 
 INCLUDE_ASM("ai/ai", func_0012A998);
 
-INCLUDE_ASM("ai/ai", func_0012AA78);
+struct sAiObj12AA78
+{
+    char pad0[0x48];
+    char* mRiders[14];
+    int mCount;
+};
+
+struct sVEntry0012AA78 { short delta; short index; int (*fn)(void*); };
+
+extern "C" int func_0011C0E0(void*);
+
+// 0 if any rider that is not done (func_0011C0E0) reports an id from the
+// D_00536708 list (func_0012A1F0), else 1.
+extern "C" int func_0012AA78(sAiObj12AA78* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        {
+            char* obj = *(char**)(self->mRiders[i] + 0x18) + 0x6C0;
+            sVEntry0012AA78* vt = *(sVEntry0012AA78**)obj;
+            if (func_0012A1F0(self, vt[7].fn(obj + vt[7].delta)))
+                result = 0;
+        }
+    }
+    return result;
+}
 
 //100%
 struct sAiObj12AB20
