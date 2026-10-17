@@ -1070,7 +1070,60 @@ extern "C" int func_00294F48(void* self)
     return vt[1].fn((char*)self + vt[1].delta, 0, 0);
 }
 
-INCLUDE_ASM("sound/soundsys", func_00294F78);
+//100%
+struct sSndVt_4F78 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int);
+};
+
+extern "C" void func_00294F78(void* self, int id)
+{
+    int snd = -1;
+
+    switch (id) {
+    case 5:
+    case 6:
+        snd = -1;
+        break;
+    case 7:
+        snd = 0x10;
+        break;
+    case 8:
+        snd = 0x11;
+        break;
+    case 0:
+    case 9:
+        snd = 3;
+        break;
+    case 1:
+    case 10:
+        snd = 4;
+        break;
+    case 2:
+    case 11:
+        snd = 2;
+        break;
+    case 3:
+    case 12:
+        snd = 1;
+        break;
+    case 4:
+    case 13:
+        snd = 0xD;
+        break;
+    case 14:
+        snd = 0x12;
+        break;
+    case 15:
+        snd = 7;
+        break;
+    }
+    if (snd != -1) {
+        sSndVt_4F78* vt = *(sSndVt_4F78**)((char*)self + 0xC);
+        vt[1].fn((char*)self + vt[1].delta, 0, snd);
+    }
+}
 
 //100%
 extern "C" void* func_002AD550(void* self, int idx, int a2);
