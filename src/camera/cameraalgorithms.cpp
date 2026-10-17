@@ -1,6 +1,242 @@
 #include "common.h"
 
-INCLUDE_ASM("camera/cameraalgorithms", cChaseCameraController_createChaseAlgorithmBlend);
+//100%
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+struct sVec4_15D088 { float x, y, z, w; } __attribute__((aligned(16)));
+extern "C" void* func_001616A8(void* self);
+extern "C" void* func_001689C8(void* self);
+extern "C" void* func_00168CD8(void* self);
+extern "C" void* func_00160438(void* self);
+extern "C" void* func_001682B8(void* self);
+extern "C" void* func_00168650(void* self);
+extern "C" void* func_00160760(void* self);
+extern "C" void* func_00176A68(void* self);
+extern "C" void* func_00177068(void* self);
+extern "C" void* func_00176D68(void* self);
+extern "C" void* func_00177E50(void* self);
+extern "C" void* func_001774C0(void* self, int n);
+extern "C" void* func_00160B70(void* self, float f);
+extern "C" void* func_00161060(char* self, float* p0, float* p1, float* p2, float* p3, float dur, float a, float b, float c);
+extern "C" void func_00161E58(void* self, void* algo, float w);
+extern "C" void* func_00174190(void* self);
+extern "C" void* func_00178520(void* self, sVec4_15D088* a, sVec4_15D088* b);
+extern "C" void* func_001789E8(char* self, char* src);
+extern "C" void func_00170240(sVec4_15D088* out, char* r);
+extern "C" void func_001707B0(sVec4_15D088* out, char* r);
+extern "C" void func_00170D20(sVec4_15D088* out, char* r, int i);
+extern void* D_004A28A8;
+extern char D_0045B250[];
+extern char D_0045B278[];
+extern char D_0045B298[];
+extern char D_0045B2B0[];
+extern char D_0045B2D8[];
+extern char D_0045B300[];
+extern char D_0045B328[];
+extern char D_0045B348[];
+extern char D_0045B370[];
+extern char D_0045B390[];
+extern char D_0045B3B0[];
+extern char D_0045B3D0[];
+extern char D_0045B3F8[];
+extern char D_0045B420[];
+extern char D_0045B448[];
+extern char D_0045B470[];
+extern char D_0045B498[];
+extern char D_0045B4C0[];
+extern char D_0045B4E8[];
+extern char D_0045B510[];
+extern char D_0045B538[];
+extern char D_0045B558[];
+extern char D_0045B578[];
+extern char D_0045B598[];
+
+struct sVE_15D088 { short delta; short index; void (*fn)(void*, ...); };
+
+extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, unsigned int type, char* info, float blend)
+{
+    char* cam = 0;
+    if (*(int*)(self + 0x30) & 2) {
+        blend = 1.0f;
+    }
+    switch (type) {
+    case 91: {
+        int v = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+        int busy = v != 0 && v < 10;
+        if (!busy) {
+            char* r = *(char**)(info + 8);
+            if (*(int*)(r + 0x28) == 2) {
+                void* mem = cMemMan_alloc(0x3B0, D_0045B250, 0x20000000, 0);
+                sVec4_15D088 a;
+                sVec4_15D088 b;
+                func_00170240(&a, r);
+                func_001707B0(&b, r);
+                cam = (char*)func_00178520(mem, &a, &b);
+                break;
+            }
+        }
+        cam = (char*)func_00174190(cMemMan_alloc(0x90, D_0045B278, 0x20000000, 0));
+        *(char**)(cam + 0x80) = info;
+        break;
+    }
+    case 92: {
+        char* r = *(char**)(info + 8);
+        void* mem = cMemMan_alloc(0x3D0, D_0045B298, 0x20000000, 0);
+        sVec4_15D088 p0;
+        sVec4_15D088 p1;
+        sVec4_15D088 p2;
+        sVec4_15D088 p3;
+        func_00170D20(&p0, r, 0);
+        func_00170D20(&p1, r, 1);
+        func_00170D20(&p2, r, 2);
+        func_00170D20(&p3, r, 3);
+        cam = (char*)func_00161060((char*)mem, (float*)&p0, (float*)&p1, (float*)&p2, (float*)&p3, *(float*)(info + 0x18), *(float*)(info + 0x14), *(float*)(info + 0x1C), *(float*)(info + 0x10));
+        break;
+    }
+    case 7:
+        cam = (char*)func_001616A8(cMemMan_alloc(0x390, D_0045B328, 0x20000000, 0));
+        break;
+    case 9:
+        cam = (char*)func_001689C8(cMemMan_alloc(0x390, D_0045B348, 0x20000000, 0));
+        break;
+    case 10:
+        cam = (char*)func_00168CD8(cMemMan_alloc(0x390, D_0045B370, 0x20000000, 0));
+        break;
+    case 11:
+        cam = (char*)func_00160438(cMemMan_alloc(0x390, D_0045B390, 0x20000000, 0));
+        break;
+    case 13:
+        cam = (char*)func_001682B8(cMemMan_alloc(0x390, D_0045B3B0, 0x20000000, 0));
+        break;
+    case 18:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B3D0, 0x20000000, 0), 0);
+        break;
+    case 19:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B3F8, 0x20000000, 0), 1);
+        break;
+    case 20:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B420, 0x20000000, 0), 2);
+        break;
+    case 21:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B448, 0x20000000, 0), 3);
+        break;
+    case 22:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B470, 0x20000000, 0), 4);
+        break;
+    case 23:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B498, 0x20000000, 0), 5);
+        break;
+    case 24:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B4C0, 0x20000000, 0), 6);
+        break;
+    case 25:
+        cam = (char*)func_001774C0(cMemMan_alloc(0x3A0, D_0045B4E8, 0x20000000, 0), 7);
+        break;
+    case 32:
+        cam = (char*)func_00168650(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
+        break;
+    case 41:
+        cam = (char*)func_00160760(cMemMan_alloc(0x3A0, D_0045B538, 0x20000000, 0));
+        break;
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+        {
+            float ang = (float)(int)(type - 0x21) * 0.7853982f;
+            cam = (char*)func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), ang);
+        }
+        *(int*)(cam + 0xC) = type;
+        break;
+    case 2:
+    case 60:
+        cam = (char*)func_00176A68(cMemMan_alloc(0x390, D_0045B2D8, 0x20000000, 0));
+        break;
+    case 1:
+    case 62:
+        cam = (char*)func_00177068(cMemMan_alloc(0x390, D_0045B300, 0x20000000, 0));
+        break;
+    case 0:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 8:
+    case 12:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
+    case 30:
+    case 31:
+    case 42:
+    case 43:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+    case 48:
+    case 49:
+    case 50:
+    case 51:
+    case 52:
+    case 53:
+    case 54:
+    case 55:
+    case 56:
+    case 57:
+    case 58:
+    case 59:
+    case 61:
+    case 63:
+    case 64:
+    case 65:
+    case 74:
+        cam = (char*)func_00176D68(cMemMan_alloc(0x390, D_0045B2B0, 0x20000000, 0));
+        break;
+    case 66:
+        cam = (char*)func_00177E50(cMemMan_alloc(0x3A0, D_0045B578, 0x20000000, 0));
+        break;
+    case 67:
+        cam = 0;
+        break;
+    case 68:
+        cam = (char*)func_001789E8((char*)cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(char**)(self + 0x20));
+        break;
+    case 94:
+        cam = (char*)func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
+        *(int*)(cam + 0xC) = type;
+        break;
+    case 95:
+        cam = (char*)func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 0.3926991f);
+        *(int*)(cam + 0xC) = type;
+        break;
+    case 96:
+        cam = (char*)func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -2.3561945f);
+        *(int*)(cam + 0xC) = type;
+        break;
+    case 97:
+        cam = (char*)func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 2.3561945f);
+        *(int*)(cam + 0xC) = type;
+        break;
+    }
+    {
+        sVE_15D088* vt = *(sVE_15D088**)(cam + 0x10);
+        vt[12].fn(cam + vt[12].delta, *(void**)(self + 0x20));
+    }
+    func_00161E58(self, cam, blend);
+    {
+        sVE_15D088* vt = *(sVE_15D088**)(cam + 0x10);
+        vt[4].fn(cam + vt[4].delta);
+    }
+}
 
 //100%
 struct func_0015D698_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
