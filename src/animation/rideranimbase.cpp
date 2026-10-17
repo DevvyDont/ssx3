@@ -267,7 +267,13 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_003
 
 INCLUDE_ASM("animation/rideranimbase", func_00311D88);
 
-INCLUDE_ASM("animation/rideranimbase", func_00311E38);
+//100%
+// Resets entry i of the 8-byte table at 0x50 with func_00314668 and sets slot i to 0x1B6.
+extern "C" void func_00311E38(int* self, int i)
+{
+    func_00314668(*(char**)((char*)self + 0x50) + i * 8);
+    *(int*)((char*)self + (i << 2)) = 0x1B6;
+}
 
 //100%
 extern "C" void func_00314718(void* self, int v);
