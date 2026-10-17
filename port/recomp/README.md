@@ -61,6 +61,18 @@ or any disc file.
     first, so what the game sees is unchanged, and the window shows a frame once everything drawn before it is done,
     without waiting on the GS. One worker gave 1.6 to 2.2 times the frames of drawing on the game thread, and on a
     4-core machine two workers gave 1.57 times the frames of one;
+  - the GS workers also sharing two kinds of draw that read the buffer they draw to: a sprite that copies a buffer onto
+    itself pixel for pixel, since each pixel then reads only itself, and a UV sprite whose texels are worked out
+    exactly, with the sprite rasterizer's own maths, so a resample from one buffer into the next no longer looks like
+    it reads what it draws. These were SSX 3's three full-screen effect passes, the last draws that ran on one worker.
+    The recorded race packets replay to the same VRAM about 15% faster with three workers;
+  - a faster IOP interpreter: IOP RAM reads and writes are inline, an instruction is checked for an import stub only
+    when it is a `jr $ra`, and the next DMA completion is kept at hand instead of being looked for after every
+    instruction. SSX 3 mixes its sound on the IOP, and in a race each IOP instruction took about 24 ns instead of 38 to
+    47;
+  - the VU1 interpreter working out an FMAC instruction's result and its flags in one pass, over only the fields it
+    writes. The 4,000 recorded VU1 runs still give bit-identical output, with about 5% fewer instructions. With the
+    GS and IOP changes, a race draws about 8% more frames;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -147,6 +159,6 @@ input through the front end to a race. In the race, the HUD, sky, mountains, sta
 shadows and the course draw with the right textures, and the race plays from the gate down the first slope.
 The camera sits much further behind the player's rider than it should. Sound has not been tested yet.
 
-It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 4 to 6.5 frames a second.
+It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 5 to 7 frames a second.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
