@@ -103,7 +103,55 @@ extern "C" void func_001A1D50(void* self, int flags)
     func_001957D0(self, flags);
 }
 
-INCLUDE_ASM("fe/fereal", func_001A1DC0);
+extern "C" void* cBE_getBE();
+extern "C" void func_0014DE28(void* be, int b);
+extern "C" void* func_003E6448(void* p, int c, int n);
+extern "C" void cBE_setState(int state);
+extern "C" void func_00369FF8(void* p);
+extern "C" void func_00195E58(void* p);
+extern "C" void cFEFlowState_setNumStates(void* flow, int n);
+extern char D_004A4E80;
+extern char D_005308B8[];
+extern int D_004A19B8;
+extern int D_004A4324;
+extern int D_004A45D8;
+extern int D_004A43C8;
+extern void* D_004A289C;
+extern void* D_004A28A8;
+
+struct sVec3K1A1DC0 {
+    int x, y, z;
+    sVec3K1A1DC0() { x = 0; y = 0; z = 0; }
+};
+typedef void (*tFn_1A1DC0)(void*, const sVec3K1A1DC0&);
+typedef void (*tVoid_1A1DC0)(void*);
+
+//100%
+extern "C" void func_001A1DC0(char* self)
+{
+    char* m;
+    char* vt;
+    if (D_004A19B8 != 0) {
+        func_0014DE28(cBE_getBE(), 0);
+        func_0014DE28(cBE_getBE(), 1);
+        func_0014DE28(cBE_getBE(), 2);
+        func_003E6448(D_005308B8, 0, 0x20);
+        D_004A19B8 = 0;
+    }
+    *(int*)(self + 0xB5AD8) = 0;
+    *(int*)(self + 0xB5ADC) = 0;
+    cBE_setState(0);
+    func_00369FF8(D_004A289C);
+    func_00195E58(*(void**)((char*)D_004A28A8 + 0x8C));
+    D_004A4324 = 0;
+    D_004A45D8 = 0;
+    D_004A43C8 = 0;
+    m = (char*)D_004A289C;
+    vt = *(char**)(m + 0x10D8);
+    ((tFn_1A1DC0)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K1A1DC0());
+    cFEFlowState_setNumStates(&D_004A4E80, 0x56);
+    ((tVoid_1A1DC0)*(void**)(*(char**)self + 0x44))(self + *(short*)(*(char**)self + 0x40));
+}
 
 INCLUDE_ASM("fe/fereal", cRealFE_load);
 
@@ -608,4 +656,13 @@ extern "C" void func_001A2F70(void* self, int which)
 }
 
 
-INCLUDE_ASM("fe/fereal", func_001A3050);
+extern char D_00469248[];
+
+//100%
+extern "C" void* func_001A3050(void* self, void* owner)
+{
+    func_0039E2A0(self, owner);
+    *(void**)((char*)self + 0x8) = D_00469248;
+    *(int*)((char*)self + 0xC) = 0x16;
+    return self;
+}

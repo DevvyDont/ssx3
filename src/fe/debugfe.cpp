@@ -33,7 +33,56 @@ extern "C" void func_0017D008(void* self, int idx)
     iface->v01();
 }
 
-INCLUDE_ASM("fe/debugfe", func_0017D0A8);
+struct sNetCfgK17D0A8 {
+    int active;             // 0x0
+    int pad_0x4;
+    int server;             // 0x8
+    unsigned short port;    // 0xC
+};
+extern sNetCfgK17D0A8 D_00534B30;
+extern void* D_004A2EB8;
+extern void* D_004A33F4;
+extern long D_0045D018[];
+extern long D_0045D028[];
+extern "C" void func_00256038(void* comm, int* out);
+extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int a3);
+extern "C" int func_00255D50(void* comm, int chan);
+extern "C" void func_00255A20(void* comm);
+extern "C" void SYNCTASK_run(int a);
+extern "C" void THREAD_yieldticks(int ticks);
+extern "C" void cGameComm_construct(int a, int b);
+extern "C" void func_00266D58(void* p, void* id);
+extern "C" void func_00266E30(void* p);
+
+//100%
+extern "C" void func_0017D0A8(void* self)
+{
+    long addr[4];
+    int id[4];
+    int chan;
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30.active != 0) {
+        func_00256038(D_004A2EB8, id);
+        if (id[0] == 0xA0A3519) {
+            __builtin_memcpy(addr, D_0045D018, 12);
+        } else {
+            __builtin_memcpy(addr, D_0045D028, 12);
+        }
+        if (D_00534B30.server != 0) {
+            chan = cCommSystem_openDSockChannel(D_004A2EB8, (const char*)addr, D_00534B30.port, 1);
+        } else {
+            chan = cCommSystem_openDSockChannel(D_004A2EB8, (const char*)addr, D_00534B30.port, 0);
+        }
+        while (func_00255D50(D_004A2EB8, chan) == 0) {
+            func_00255A20(D_004A2EB8);
+            SYNCTASK_run(0);
+            THREAD_yieldticks(1);
+        }
+        cGameComm_construct(chan, D_00534B30.server);
+        func_00266D58(D_004A33F4, (void*)id[0]);
+        func_00266E30(D_004A33F4);
+    }
+}
 
 //100%
 extern "C" int func_0017D1B8(void* self, int a1, unsigned int a2)
@@ -1007,7 +1056,25 @@ extern "C" void func_0017F868(sDebugFE_17F868* self)
     }
 }
 
-INCLUDE_ASM("fe/debugfe", func_0017FA60);
+extern "C" void func_00369FF8(void* p);
+extern int D_004A4324;
+struct sVec3K17FA60 {
+    int x, y, z;
+    sVec3K17FA60() { x = 0; y = 0; z = 0; }
+};
+typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
+
+//100%
+extern "C" void func_0017FA60(void* self)
+{
+    char* m;
+    char* vt;
+    func_00369FF8(D_004A289C);
+    D_004A4324 = 0;
+    m = D_004A289C;
+    vt = *(char**)(m + 0x10D8);
+    ((tFn_17FA60)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K17FA60());
+}
 
 extern "C" void* func_00231CF0(void* self);
 
@@ -1552,7 +1619,24 @@ extern "C" int func_001807C8(void* self)
     return v;
 }
 
-INCLUDE_ASM("fe/debugfe", func_001807D8);
+// Masked copy of a string: '*' per character of name (+0xEC) into stars (+0x12C)
+struct sStarsK1807D8 {
+    char pad_0x000[0xEC];
+    char name[0x40];    // 0xEC
+    char stars[0x40];   // 0x12C
+};
+
+//100%
+extern "C" char* func_001807D8(sStarsK1807D8* self)
+{
+    int n = strlen(self->name);
+    int i;
+    for (i = 0; i < n; i++) {
+        self->stars[i] = '*';
+    }
+    self->stars[n] = 0;
+    return self->stars;
+}
 
 //100%
 struct cDbgKbdTarget {

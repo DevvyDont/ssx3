@@ -217,7 +217,25 @@ extern "C" void func_001C5DD8(void* self)
     }
 }
 
-INCLUDE_ASM("fe/fepopup", func_001C5E58);
+typedef void (*tFn_1C5E58)(void*, int);
+
+// Forward one call (vtable slot 0x48) to each of the popup's five child widgets
+static inline void callChild_1C5E58(char* o, int arg)
+{
+    if (o != 0) {
+        ((tFn_1C5E58)*(void**)(*(char**)(o + 0x8) + 0x4C))(o + *(short*)(*(char**)(o + 0x8) + 0x48), arg);
+    }
+}
+
+//100%
+extern "C" void func_001C5E58(char* self, int arg)
+{
+    callChild_1C5E58(*(char**)(self + 0x70), arg);
+    callChild_1C5E58(*(char**)(self + 0x74), arg);
+    callChild_1C5E58(*(char**)(self + 0x78), arg);
+    callChild_1C5E58(*(char**)(self + 0x7C), arg);
+    callChild_1C5E58(*(char**)(self + 0x88), arg);
+}
 
 //100%
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1749,7 +1767,17 @@ extern "C" void cScreenPopup_createConfirmationPopup(void* self, int idx)
 
 INCLUDE_ASM("fe/fepopup", func_001C9CD0);
 
-INCLUDE_ASM("fe/fepopup", func_001CA0F0);
+typedef void (*tFn_1CA0F0)(void*, int);
+
+//100%
+extern "C" void func_001CA0F0(char* self, int i, int arg)
+{
+    char* o = *(char**)(self + (i << 2) + 0x90);
+    if (o != 0) {
+        ((tFn_1CA0F0)*(void**)(*(char**)(o + 0x8) + 0x44))(o + *(short*)(*(char**)(o + 0x8) + 0x40), arg);
+        ((tFn_1CA0F0)*(void**)(*(char**)(o + 0x8) + 0xCC))(o + *(short*)(*(char**)(o + 0x8) + 0xC8), 1);
+    }
+}
 
 //100%
 extern "C" int func_001CA150(void* self)
