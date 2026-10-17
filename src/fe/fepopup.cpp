@@ -3816,7 +3816,291 @@ extern "C" void cKeyboardPopup_redrawScreen(void* self)
 
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_SetNameForKey);
 
-INCLUDE_ASM("fe/fepopup", func_001CDB98);
+//100%
+int GetHashValue32(char* str);
+void func_001DA510(void* self, int i, int a, int b);
+void func_001DA528(void* self, int val);
+void func_001DA530(void* self, int i, int value);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int cKeyboardPopup_getObjName(void* self, int i, char* out, int mode);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001D9D48(void* mem, void* a1, void* owner);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cKeyboardPopup_redrawScreen(void* self);
+extern "C" void func_001CB500(void* self, int a1);
+extern "C" void func_001CB650(void* self, int a1);
+extern "C" void func_001CB7F0(void* self, int a1);
+extern "C" void func_001CB9B0(void* self, int a1);
+extern "C" void func_001CC1E0(char* self, int msg);
+extern "C" int func_001CC6E8(void* self, int c);
+extern "C" void func_001CC620(void* self, int value);
+int func_001CE560_out(void* self, int idx, int* out) __asm__("func_001CE560");
+extern int D_004A1A70;
+extern void* D_004A28A8;
+extern char D_004A5A58;
+extern char D_00461A70[];
+extern char D_00466940[];
+extern char D_00466950[];
+extern char D_00466968[];
+extern char D_00466988[];
+extern char D_004669A0[];
+extern char D_004669B8[];
+extern char D_004669D8[];
+
+struct sColor_1CDB98 {
+    float r, g, b, a;
+    sColor_1CDB98(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+struct cWidget_1CDB98 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11(const sColor_1CDB98& c);
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19(int a1, int a2);
+};
+
+struct cPad_1CDB98 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual int v17();
+    virtual int v18();
+    virtual int v19();
+    virtual int v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual int v25();
+    virtual void v26();
+    virtual int v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual int v41();
+    virtual int v42();
+    virtual int v43();
+};
+
+struct cSnd_1CDB98 {
+    virtual void v01();
+    virtual void v02(int id);
+};
+
+static inline int IsOn_1CDB98()
+{
+    return D_004A1A70 == 1;
+}
+
+static inline void Tint_1CDB98(char* self, char* name, float r)
+{
+    cKeyboardPopup_getObjName(self, *(int*)(self + 0x140), name, 1);
+    cWidget_1CDB98* o = (cWidget_1CDB98*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+    if (o != 0)
+        o->v11(sColor_1CDB98(r, 0, 0, 0));
+}
+
+extern "C" int func_001CDB98(char* self, cPad_1CDB98* pad)
+{
+    char name[0x20];
+    if (pad->v08())
+        return 1;
+    int handled = 0;
+    int sound = 1;
+    Tint_1CDB98(self, name, 0.3f);
+    if (pad->v19()) {
+        handled = 1;
+        func_001CB500(self, 1);
+    } else if (pad->v20()) {
+        handled = 1;
+        func_001CB650(self, 1);
+    } else if (pad->v17()) {
+        handled = 1;
+        func_001CB7F0(self, 1);
+    } else if (pad->v18()) {
+        handled = 1;
+        func_001CB9B0(self, 1);
+    } else if (pad->v05()) {
+        handled = 1;
+        func_001CC1E0(self, 0);
+    } else if (pad->v07()) {
+        if (IsOn_1CDB98()) {
+            if (*(int*)((char*)D_004A28A8 + 0x84) == 0) {
+                handled = 1;
+                void* menu = func_001D9D48(cMemMan_alloc(0x140, D_00461A70, 0x100, 0), *(void**)(self + 0x10), self);
+                func_001DA528(menu, 6);
+                *(int*)((char*)menu + 0x54) = GetHashValue32(D_00466940);
+                func_001DA530(menu, 0, GetHashValue32(D_00466950));
+                func_001DA510(menu, 0, GetHashValue32(D_00466968), 4);
+                func_001DA510(menu, 1, GetHashValue32(D_00466968), 3);
+                func_001DA510(menu, 2, GetHashValue32(D_00466988), 5);
+                func_001DA510(menu, 3, GetHashValue32(D_004669A0), 6);
+                func_001DA510(menu, 4, GetHashValue32(D_004669B8), 0);
+                func_001DA510(menu, 5, GetHashValue32(D_004669D8), 1);
+                func_0039F290(*(char**)(self + 0x10) + 0x18, menu);
+            }
+            sound = 5;
+        }
+    } else if (pad->v06()) {
+        handled = 1;
+        sound = 6;
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        cWidget_1CDB98* o = *(cWidget_1CDB98**)(self + 0x20);
+        o->v19(0, 0xE);
+    } else if (pad->v25()) {
+        handled = 1;
+        *(int*)(self + 0x68) ^= 1;
+        cKeyboardPopup_redrawScreen(self);
+    } else if (pad->v27()) {
+        handled = 1;
+        *(int*)(self + 0x6C) ^= 1;
+        cKeyboardPopup_redrawScreen(self);
+    } else {
+        int fail = 0;
+        if (pad->v41()) {
+            int upper = 0;
+            switch (pad->v42()) {
+            case 8:
+                if (func_001CE560_out(self, 0x1B, 0))
+                    *(int*)(self + 0x140) = 0x1B;
+                else
+                    fail = 1;
+                break;
+            case 13:
+                *(int*)(self + 0x140) = 0x37;
+                break;
+            case 16:
+                if (func_001CE560_out(self, 0x38, 0))
+                    *(int*)(self + 0x140) = 0x38;
+                else
+                    fail = 1;
+                break;
+            case 20:
+                if (func_001CE560_out(self, 0x2A, 0))
+                    *(int*)(self + 0x140) = 0x2A;
+                else
+                    fail = 1;
+                break;
+            case 27:
+                if (func_001CE560_out(self, 0, 0))
+                    *(int*)(self + 0x140) = 0;
+                else
+                    fail = 1;
+                break;
+            case 37:
+                if (func_001CE560_out(self, 0x4C, 0))
+                    *(int*)(self + 0x140) = 0x4C;
+                else
+                    fail = 1;
+                break;
+            case 39:
+                if (func_001CE560_out(self, 0x53, 0))
+                    *(int*)(self + 0x140) = 0x53;
+                else
+                    fail = 1;
+                break;
+            case 38:
+                if (func_001CE560_out(self, 0x45, 0))
+                    *(int*)(self + 0x140) = 0x45;
+                else
+                    fail = 1;
+                break;
+            case 40:
+                if (func_001CE560_out(self, 0x4F, 0))
+                    *(int*)(self + 0x140) = 0x4F;
+                else
+                    fail = 1;
+                break;
+            case 9:
+                if (func_001CE560_out(self, 0x1C, 0))
+                    *(int*)(self + 0x140) = 0x1C;
+                else
+                    fail = 1;
+                break;
+            case 112: case 113: case 114: case 115: case 116:
+            case 117: case 118: case 119: case 120: case 121: {
+                int k = pad->v42() - 0x6C;
+                if (func_001CE560_out(self, k, 0))
+                    *(int*)(self + 0x140) = k;
+                else
+                    fail = 1;
+                break;
+            }
+            default:
+                if (pad->v43() >= 0x20) {
+                    char ch = pad->v43();
+                    fail = func_001CC6E8(self, ch) ^ 1;
+                    if (!fail) {
+                        if (func_001CE560_out(self, *(int*)(self + 0x140), 0)) {
+                            if (ch == '`')
+                                func_001CC620(self, '~');
+                            else
+                                func_001CC620(self, ch);
+                        } else {
+                            fail = 1;
+                        }
+                    }
+                }
+                upper = 1;
+                break;
+            }
+            if (!fail) {
+                handled = 1;
+                func_001CC1E0(self, upper);
+            }
+        }
+    }
+    Tint_1CDB98(self, name, 1.0f);
+    cSnd_1CDB98* snd = *(cSnd_1CDB98**)(*(char**)(self + 0x10) + 0x14);
+    if (snd == 0)
+        snd = (cSnd_1CDB98*)&D_004A5A58;
+    if (handled && snd != 0)
+        snd->v02(sound);
+    return 1;
+}
 
 //100%
 extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
