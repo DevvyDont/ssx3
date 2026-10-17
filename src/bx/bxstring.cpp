@@ -328,9 +328,38 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
     return self;
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318760);
+// A cBXString temporary; the destructor call frees it at scope end.
+struct cBXStringTmp {
+    char* str;
+    ~cBXStringTmp() { cBXString__cBXString((cBXString*)this, 2); }
+};
 
-INCLUDE_ASM("bx/bxstring", func_003187C8);
+// cBXString(a + ch). PORT: pointer held in int for the negative header offset;
+// c is a 2-byte buffer so it gets its own stack slot, as in the target.
+extern "C" cBXString* func_00318760(cBXString* self, cBXString* a, char ch)
+{
+    cBXStringTmp tmp;
+    char c[2];
+    c[0] = ch;
+    tmp.str = D_004A3E90;
+    int sa = *(int*)a;
+    func_00318540((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, 1, c);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    return self;
+}
+
+// cBXString(ch + b). PORT: as func_00318760.
+extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* b)
+{
+    cBXStringTmp tmp;
+    char c[2];
+    c[0] = ch;
+    tmp.str = D_004A3E90;
+    int sb = *(int*)b;
+    func_00318540((cBXString*)&tmp, 1, c, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    return self;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
@@ -454,7 +483,22 @@ extern "C" char* func_00318AF8(cBXString* self, int len)
     return self->str;
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318B40);
+// Shrinks the buffer to the string's length (reallocates when capacity != length).
+// PORT: pointer held in int for the negative header offsets.
+extern "C" void func_00318B40(cBXString* self)
+{
+    int s = *(int*)self;
+    if (*(int*)(s - 8) != *(int*)(s - 4))
+    {
+        char* tmp;
+        cBXString_cBXString1((cBXString*)&tmp, self);
+        int len = *(int*)((int)tmp - 8);
+        cBXString_Reset(self);
+        cBXString_Realloc(self, len);
+        func_0041605C(*(char**)self, tmp, len);
+        cBXString__cBXString((cBXString*)&tmp, 2);
+    }
+}
 
 // Makes the buffer unique, then marks it as not shareable (refcount -1).
 extern "C" char* func_00318BC0(cBXString* self)
@@ -535,7 +579,20 @@ extern "C" void func_00318D28(cBXString* self)
     }
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318D90);
+static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
+// In-place lower-case; bit 1 of the ctype table = upper-case.
+// PORT: pointer held in int to get the target's negative load offset.
+extern "C" void func_00318D90(cBXString* self)
+{
+    func_00318120(self);
+    char* p = self->str;
+    int i = *(int*)((int)p - 8);
+    while (--i >= 0)
+    {
+        *p = to_lower(*p);
+        p++;
+    }
+}
 
 INCLUDE_ASM("bx/bxstring", func_00318DF8);
 
