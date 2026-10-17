@@ -206,7 +206,16 @@ extern "C" int func_002849F0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x550)));
 }
 
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849F8);
+struct sE_49F8 { int a; int b; int c; int d; };
+struct sS_49F8 { char pad[0x628]; sE_49F8 e[8]; };
+extern "C" int func_002849F8(sS_49F8* self, int i)
+{
+    int r = 0;
+    if (self->e[i].c == 0) {
+        r = self->e[i].a == 0;
+    }
+    return r;
+}
 
 //100%
 extern "C" void func_00283228();

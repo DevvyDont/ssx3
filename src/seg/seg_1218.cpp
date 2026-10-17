@@ -965,7 +965,22 @@ extern "C" void func_001033B0(void *arg0, V_33B0 *arg1) {
     (*(int *)((char*)(arg0) + (0))) = (int) ((*(int *)((char*)(arg0) + (0))) + 1);
 }
 
-INCLUDE_ASM("seg/seg_1218", func_001033F8);
+struct sEnt_33F8 { int key; int pad[7]; } __attribute__((aligned(16)));
+struct sList_33F8 { int count; int pad[3]; sEnt_33F8 e[6]; int sel; };
+extern "C" void func_001033F8(sList_33F8* self, int key)
+{
+    int i;
+    self->sel = -1;
+    for (i = 0; i < self->count; i++) {
+        if (self->e[i].key == key) {
+            for (i++; i < self->count; i++) {
+                self->e[i - 1] = self->e[i];
+            }
+            self->count--;
+            return;
+        }
+    }
+}
 
 //100%
 class cStream_3480 {
@@ -2710,7 +2725,23 @@ extern "C" void func_0010A898(char *arg0, C_A898 *arg1) {
     arg1->m0(arg0 + 0xDF0, 0x150);
 }
 
-INCLUDE_ASM("seg/seg_1218", func_0010A8E8);
+class cObj_A8E8;
+typedef void (cObj_A8E8::*Fn_A8E8)();
+extern "C" Fn_A8E8 D_0043CF20_A8E8[4] __asm__("D_0043CF20");
+struct sVt_A8E8 { short delta; short index; void (*fn)(void*, void*, int); };
+extern "C" void func_00111D98(char* self, void* obj);
+static inline void setState_A8E8(char* self, short s)
+{
+    *(Fn_A8E8*)(self + 0xF44) = D_0043CF20_A8E8[s];
+    *(short*)(self + 0xF38) = s;
+}
+extern "C" void func_0010A8E8(char* self, char* obj)
+{
+    func_00111D98(self, obj);
+    sVt_A8E8* vt = *(sVt_A8E8**)obj;
+    vt[2].fn(obj + vt[2].delta, self + 0xDF0, 0x150);
+    setState_A8E8(self, *(short*)(self + 0xF38));
+}
 
 //100%
 struct sFlags_A960 {

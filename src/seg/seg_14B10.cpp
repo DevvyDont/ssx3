@@ -708,7 +708,18 @@ extern "C" void func_00117048(char *arg0, int arg1, signed char *arg2, int arg3,
     *(int *)(arg0 + 0x14) = 0;
 }
 
-INCLUDE_ASM("seg/seg_14B10", func_001170A8);
+extern "C" int sprintf(char*, const char*, ...);
+extern char D_004A5E20[];
+extern char D_004A1070[];
+extern "C" void func_001170A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
+    sprintf(D_004A5E20, D_004A1070, arg2);
+    func_00117008(arg0, (signed char *)D_004A5E20);
+    *(int *)(arg0 + 0x14) = arg2;
+    *(int *)(arg0 + 0) = arg1;
+    *(float *)(arg0 + 4) = fparg0;
+    *(int *)(arg0 + 0xC) = arg3;
+    *(int *)(arg0 + 8) = 0;
+}
 
 //100%
 extern "C" void func_00117008(char *, signed char *);
@@ -722,7 +733,15 @@ extern "C" void func_00117138(char *arg0, int arg1, signed char *arg2, int arg3,
     *(int *)(arg0 + 0x14) = 0;
 }
 
-INCLUDE_ASM("seg/seg_14B10", func_001171A8);
+extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
+    sprintf(D_004A5E20, D_004A1070, arg2);
+    func_00117008(arg0, (signed char *)D_004A5E20);
+    *(int *)(arg0 + 0x14) = arg2;
+    *(int *)(arg0 + 0) = arg1;
+    *(float *)(arg0 + 8) = -fparg0;
+    *(int *)(arg0 + 0xC) = arg3;
+    *(float *)(arg0 + 4) = -1.0f;
+}
 
 //100%
 extern "C" void func_00117540(void *);
