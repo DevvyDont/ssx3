@@ -931,7 +931,222 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseUnaryFunc);
 
 INCLUDE_ASM("input/inputparse", cInputMapParser_compileStatement);
 
-INCLUDE_ASM("input/inputparse", func_00324678);
+//100%
+extern "C" void func_00321500(void* self, const char* fmt, ...);
+// PORT: func_00321AD0 returns a pointer the code generator stores as a 10-bit operand.
+int func_00321AD0_i(void* self, void* a1) __asm__("func_00321AD0");
+extern "C" int func_00321AD8(void* self, int a1, int a2);
+extern char D_0048E240[];
+extern char D_0048E228[];
+extern char D_0048E268[];
+
+union sInsn_00324678 {
+    struct {
+        unsigned int op : 6;
+        unsigned int dst : 6;
+        unsigned int src : 10;
+        unsigned int arg : 10;
+    } r;
+    struct {
+        unsigned int op : 6;
+        unsigned int reg : 10;
+        unsigned int off : 16;
+    } j;
+    float f;
+};
+struct sCodeGen_00324678 {
+    char pad0[0x108EC];
+    int freeRegs[63];  // 0x108EC
+    int numFree;                // 0x109E8
+};
+struct sNode_00324678 {
+    int type;
+    union {
+        float value;
+        int index;
+        void* ref;
+        sNode_00324678* a;
+    };
+    union {
+        int mod;
+        sNode_00324678* b;
+    };
+    sNode_00324678* c;
+};
+struct sVar_00324678 {
+    char name[0x40];
+    sNode_00324678* node;
+};
+
+// the binary/unary emitters are defined below with their own struct types
+int func_00324EC8_v(sCodeGen_00324678* self, sNode_00324678* node, int* dst, sInsn_00324678* code, int cap, int op, int a6) __asm__("func_00324EC8");
+int func_003250D8_v(sCodeGen_00324678* self, sNode_00324678* node, int* dst, sInsn_00324678* code, int cap, int op, int a6) __asm__("func_003250D8");
+
+extern "C" int func_00324678(void* selfp, void* nodep, int* dst, void* codep, int cap, int mod)
+{
+    sCodeGen_00324678* self = (sCodeGen_00324678*)selfp;
+    sNode_00324678* node = (sNode_00324678*)nodep;
+    sInsn_00324678* code = (sInsn_00324678*)codep;
+again:
+    switch (node->type) {
+    case 4:
+        if (*dst < 0) {
+            if (self->numFree > 0) {
+                *dst = self->freeRegs[--self->numFree];
+            }
+            if (*dst < 0) {
+                func_00321500(self, D_0048E240);
+                return -1;
+            }
+        }
+        if (cap < 2) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->r.op = 0;
+        code->r.dst = *dst;
+        code->r.src = 0;
+        code->r.arg = 0;
+        code[1].f = node->value;
+        return 2;
+    case 1:
+        if (node->mod != 5)
+            mod = node->mod;
+        node = ((sVar_00324678*)node->ref)->node;
+        goto again;
+    case 2: {
+        int v = func_00321AD8(self, node->index, node->mod != 5 ? node->mod : mod);
+        if (*dst == -1) {
+            *dst = v;
+            return 0;
+        }
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->r.op = 1;
+        code->r.dst = *dst;
+        code->r.src = v;
+        code->r.arg = 0;
+        return 1;
+    }
+    case 3:
+        if (*dst == -1) {
+            *dst = func_00321AD0_i(self, node->ref);
+            return 0;
+        }
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->r.op = 1;
+        code->r.dst = *dst;
+        code->r.src = func_00321AD0_i(self, node->ref);
+        code->r.arg = 0;
+        return 1;
+    case 5: {
+        int cond = -1;
+        int n1 = func_00324678(self, node->a, &cond, code, cap, mod);
+        if (n1 < 0)
+            return -1;
+        code += n1;
+        cap -= n1;
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        int c = cond;
+        code->j.op = 2;
+        code->j.reg = c;
+        if ((unsigned int)c < 0x40) {
+            self->freeRegs[self->numFree++] = c;
+        }
+        cap--;
+        int n2 = func_00324678(self, node->b, dst, code + 1, cap, mod);
+        if (n2 < 0)
+            return -1;
+        if (n2 + 1 > 0xFFFF) {
+            func_00321500(self, D_0048E268);
+            return -1;
+        }
+        code->j.off = n2 + 1;
+        code += n2 + 1;
+        cap -= n2;
+        if (cap <= 0) {
+            func_00321500(self, D_0048E228);
+            return -1;
+        }
+        code->j.op = 3;
+        code->j.reg = 0;
+        int n3 = func_00324678(self, node->c, dst, code + 1, cap - 1, mod);
+        if (n3 < 0)
+            return -1;
+        if (n3 > 0xFFFF) {
+            func_00321500(self, D_0048E268);
+            return -1;
+        }
+        code->j.off = n3;
+        return n1 + n2 + n3 + 2;
+    }
+    case 6:
+        return func_00324EC8_v(self, node, dst, code, cap, 4, mod);
+    case 7:
+        return func_00324EC8_v(self, node, dst, code, cap, 5, mod);
+    case 8:
+        return func_00324EC8_v(self, node, dst, code, cap, 6, mod);
+    case 9:
+        return func_00324EC8_v(self, node, dst, code, cap, 7, mod);
+    case 10:
+        return func_00324EC8_v(self, node, dst, code, cap, 8, mod);
+    case 11:
+        return func_00324EC8_v(self, node, dst, code, cap, 9, mod);
+    case 12:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xA, mod);
+    case 13:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xB, mod);
+    case 14:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xC, mod);
+    case 15:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xD, mod);
+    case 16:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xE, mod);
+    case 17:
+        return func_00324EC8_v(self, node, dst, code, cap, 0xF, mod);
+    case 20:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x10, mod);
+    case 21:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x11, mod);
+    case 22:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x12, mod);
+    case 23:
+        return func_00324EC8_v(self, node, dst, code, cap, 0x13, mod);
+    case 24:
+        return func_003250D8_v(self, node, dst, code, cap, 0x14, mod);
+    case 25:
+        return func_003250D8_v(self, node, dst, code, cap, 0x15, mod);
+    case 26:
+        return func_003250D8_v(self, node, dst, code, cap, 0x16, mod);
+    case 27:
+        return func_003250D8_v(self, node, dst, code, cap, 0x17, mod);
+    case 28:
+        return func_003250D8_v(self, node, dst, code, cap, 0x18, mod);
+    case 29:
+        return func_003250D8_v(self, node, dst, code, cap, 0x19, mod);
+    case 30:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1A, mod);
+    case 31:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1B, mod);
+    case 32:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1C, mod);
+    case 33:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1D, mod);
+    case 18:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1E, mod);
+    case 19:
+        return func_003250D8_v(self, node, dst, code, cap, 0x1F, mod);
+    }
+    return -1;
+}
 
 //100%
 extern "C" void func_00321500(void* self, const char* fmt, ...);
