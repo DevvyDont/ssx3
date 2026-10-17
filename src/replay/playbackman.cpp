@@ -450,7 +450,43 @@ void func_0026D168(void* self)
     *(int*)((char*)self + 0x8) = 0;
 }
 
-INCLUDE_ASM("replay/playbackman", func_0026D178);
+//100%
+int func_0026D2B0_D178(void* self, void* chunk) __asm__("func_0026D2B0");
+int func_0026D420_D178(void* self, void* chunk) __asm__("func_0026D420");
+
+extern "C" int func_0026D178(void* self, void* chunk)
+{
+    int r;
+
+    if (*(int*)((char*)self + 0xC) == 0)
+        return 0;
+    r = 1;
+    switch (**(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28)) {
+    case 0: {
+        char* p = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x28);
+        if (*(int*)(p + 0x60C) != 0)
+            break;
+        if (*(int*)(p + 0x608) != 0)
+            break;
+        if (*(int*)(p + 0x610) != 0)
+            break;
+        func_0026D2B0_D178(self, chunk);
+        // fall through
+    }
+    case 10:
+    case 11:
+    case 12:
+    case 14:
+        r = 0;
+        break;
+    case 1:
+    case 2:
+    case 4:
+        r = func_0026D420_D178(self, chunk);
+        break;
+    }
+    return r;
+}
 
 //100%
 struct sPbChunk_D2B0;
