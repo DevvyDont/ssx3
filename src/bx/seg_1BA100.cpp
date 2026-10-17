@@ -2132,7 +2132,41 @@ extern "C" void func_002BE1E0(void *arg0) {
     (*(float *)((char*)(arg0) + (8))) = 1.0f;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BE1F8);
+//100%
+// Copies the default pair into four slots, sets 0x48 to 1.0 and 0x50 to 0.75, and clears 0x00.
+struct sPair_002BE1F8
+{
+    float a;
+    float b;
+};
+extern sPair_002BE1F8 D_004A53D0;
+struct sPairSet_002BE1F8
+{
+    int flags;              // 0x00
+    char pad_0x04[4];
+    sPair_002BE1F8 k0;      // 0x08
+    char pad_0x10[8];
+    sPair_002BE1F8 k1;      // 0x18
+    char pad_0x20[8];
+    sPair_002BE1F8 k2;      // 0x28
+    char pad_0x30[8];
+    sPair_002BE1F8 k3;      // 0x38
+    char pad_0x40[8];
+    float field_0x48;       // 0x48
+    char pad_0x4C[4];
+    float field_0x50;       // 0x50
+};
+
+extern "C" void func_002BE1F8(sPairSet_002BE1F8* o)
+{
+    o->k0 = D_004A53D0;
+    o->k1 = D_004A53D0;
+    o->k2 = D_004A53D0;
+    o->k3 = D_004A53D0;
+    o->field_0x48 = 1.0f;
+    o->field_0x50 = 0.75f;
+    o->flags = 0;
+}
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BE258);
 
