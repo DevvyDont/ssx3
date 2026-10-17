@@ -80,7 +80,30 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 
 INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
 
-INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
+//100%
+// Cuts the record at its first "=" or ":" that ends a line, then appends "=\n" and val if they fit (-1 when fewer than 5 bytes remain).
+extern "C" int func_003EBCB0(unsigned char* buf, int size, const char* val)
+{
+    unsigned char* p = buf;
+    unsigned char* end;
+    while (*p != 0) {
+        if ((*p == '=' || *p == ':') && p[1] < 0x20)
+            break;
+        p++;
+    }
+    *p = 0;
+    if (val == 0)
+        return 0;
+    end = buf + size - 1;
+    if (end - p < 5)
+        return -1;
+    *p++ = '=';
+    *p++ = '\n';
+    while (*val != 0 && p != end)
+        *p++ = *val++;
+    *p = 0;
+    return 0;
+}
 
 INCLUDE_ASM("dirtysock/tags", func_003EBD70);
 
