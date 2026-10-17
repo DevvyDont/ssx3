@@ -7795,9 +7795,37 @@ extern "C" void* func_00266FC0(void* p, ...)
     return p;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00267000);
+//100%
+// Lexicographic less-than of the char ranges [a, aend) and [b, bend).
+extern "C" int func_00267000(const signed char* a, const signed char* aend, const signed char* b, const signed char* bend)
+{
+    for (; a != aend && b != bend; ++a, ++b)
+    {
+        if (*a < *b)
+            return 1;
+        if (*b < *a)
+            return 0;
+    }
+    return a == aend && b != bend;
+}
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00267068);
+//100%
+// Three-way lexicographic compare of the char ranges [a, aend) and [b, bend): -1, 0 or 1.
+extern "C" int func_00267068(const signed char* a, const signed char* aend, const signed char* b, const signed char* bend)
+{
+    while (a != aend && b != bend)
+    {
+        if (*a < *b)
+            return -1;
+        if (*b < *a)
+            return 1;
+        ++a;
+        ++b;
+    }
+    if (b == bend)
+        return a != aend;
+    return -1;
+}
 
 struct sDsListNode670C8 {
     sDsListNode670C8* next;
