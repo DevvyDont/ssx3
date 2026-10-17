@@ -23,9 +23,28 @@ void* cBEMissionInterface_getThis()
     return D_004A1238;
 }
 
-INCLUDE_ASM("be/beintmission", func_001532F0);
+//100%
+// Sums the 17 signed bytes of the score table starting at start.
+extern signed char D_0043FA70[];
 
-INCLUDE_ASM("be/beintmission", func_00153330);
+extern "C" int func_001532F0(void* self, int start)
+{
+    int sum = 0;
+    for (int i = 0; i < 17; i++)
+    {
+        sum += D_0043FA70[start + i];
+    }
+    return sum;
+}
+
+//100%
+// Returns the score-table byte for idx in the current set.
+extern int D_005305F0[];
+
+extern "C" int func_00153330(void* self, int idx)
+{
+    return D_0043FA70[idx + D_005305F0[0]];
+}
 
 //100%
 extern signed char D_0043FA70[];
@@ -67,7 +86,38 @@ extern "C" int func_00153390(void* self, int owner)
     return sum;
 }
 
-INCLUDE_ASM("be/beintmission", func_001533F8);
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+
+//100%
+// Sums the 17 signed counts of the rider's record table starting at idx.
+struct sEconRecord_001533F8
+{
+    int id;
+    signed char count; // 0x4
+    char pad_0x05[0x7];
+};
+
+struct sEconChar_001533F8
+{
+    sEconRecord_001533F8 records[22];
+    char pad[0xF88 - 22 * 12];
+};
+
+extern sEconChar_001533F8 D_004A6CA8_001533F8[][10] __asm__("D_004A6CA8");
+
+extern "C" int func_001533F8(void* self, int rider, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int sum = 0;
+    for (int i = 0; i < 17; i++)
+    {
+        sum += D_004A6CA8_001533F8[profile][c].records[idx + i].count;
+    }
+    return sum;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -183,7 +233,31 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
 
 INCLUDE_ASM("be/beintmission", func_00153708);
 
-INCLUDE_ASM("be/beintmission", func_00153858);
+//100%
+// Returns the address of the word after the id of record idx in the current set.
+// This view starts the records 4 bytes in, which is how the retail code indexes them here.
+struct sEconRecordView_00153858
+{
+    int id;
+    int rest[2];
+};
+
+struct sEconCharView_00153858
+{
+    int hdr;
+    sEconRecordView_00153858 records[22];
+    char pad[0xF88 - 22 * 12 - 4];
+};
+
+extern sEconCharView_00153858 D_004A6CA8_00153858[][10] __asm__("D_004A6CA8");
+
+extern "C" int* func_00153858(void* self, int rider, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    sEconRecordView_00153858* r = &D_004A6CA8_00153858[profile][c].records[D_005305F0[0]];
+    return &r[idx].id + 1;
+}
 
 //100%
 int cBELibrary_getProfileIndex(int);
@@ -331,9 +405,31 @@ extern "C" int func_00153ED8(void* self, int id)
     return (*(unsigned int*)(p + 0x118) >> 4) & 1;
 }
 
-INCLUDE_ASM("be/beintmission", func_00153F30);
+//100%
+// Returns the group (0x10) of mission id.
+struct sMissionDefView_00153F30
+{
+    char pad_0x00[0x10];
+    int group;          // 0x10
+    int field_0x14;     // 0x14
+    char pad_0x18[0xC];
+};
+extern sMissionDefView_00153F30 D_0043EE10_153F30[] __asm__("D_0043EE10");
+extern "C" int func_00154240(void* self, int id);
 
-INCLUDE_ASM("be/beintmission", func_00153F68);
+extern "C" int func_00153F30(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    return D_0043EE10_153F30[i].group;
+}
+
+//100%
+// Returns the field at 0x14 of mission id.
+extern "C" int func_00153F68(void* self, int id)
+{
+    int i = func_00154240(self, id);
+    return D_0043EE10_153F30[i].field_0x14;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
