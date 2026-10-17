@@ -1281,7 +1281,7 @@ extern "C" void func_001218D0(cRider* self)
         self->unk_434 = func_0022E0E0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78), (unsigned char)self->unk_430);
     char* obj = (char*)&self->mVtbl;
     sRiderVE_001218D0* vt = *(sRiderVE_001218D0**)obj;
-    func_002ED490(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), self->unk_460, self->unk_464, -99999.0f);
+    func_002ED490(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), self->unk_460.x, self->unk_460.y, -99999.0f);
     char* p = (char*)self->mRiderHandler;
     func_00392D18(p ? p + 0xD30 : 0);
 }

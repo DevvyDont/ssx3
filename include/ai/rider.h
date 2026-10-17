@@ -52,8 +52,23 @@ enum {
     kRiderVt_vibrationUpdate = 19
 };
 
+// One of cRider's 19 smoothed channels at 0x1F0 (func_00123640 initialises {cur, rate, target}).
+struct sRiderChannel {
+    float cur;
+    float rate;
+    float target;
+};
+
 struct cRider {
-    /* 0x000 */ char unk_000[0x100];
+    /* 0x000 */ char unk_000[0xD8];
+    /* 0x0D8 */ int unk_0D8; // set to -1, then passed to func_00117540(mMetrix, v) (func_0011D390)
+    /* 0x0DC */ int unk_0DC; // cleared on reset (func_0011D390)
+    /* 0x0E0 */ int unk_0E0; // cleared on reset (func_0011D390)
+    /* 0x0E4 */ char unk_0E4[0xC];
+    /* 0x0F0 */ int unk_0F0; // cleared on reset (func_0011D390)
+    /* 0x0F4 */ int unk_0F4; // cleared on reset (func_0011D390)
+    /* 0x0F8 */ int unk_0F8; // set to -1 on reset (func_0011D390)
+    /* 0x0FC */ char unk_0FC[0x4];
     /* 0x100 */ int unk_100; // cleared when the rider quits (func_00125108)
     /* 0x104 */ char unk_104[0xC];
     /* 0x110 */ t4Vector mPosition; // [R] getPosition (func_001408F0)
@@ -63,7 +78,11 @@ struct cRider {
     /* 0x154 */ char unk_154[0x4C];
     /* 0x1A0 */ t4Matrix mMatrix; // [P] rows getSide/getFront/getUp (unshifted) + position; built from mRotation/mPosition
     /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (func_00140910); [P] setVelocity
-    /* 0x1F0 */ char unk_1F0[0xF8];
+    /* 0x1F0 */ sRiderChannel unk_1F0[19]; // [U] 19 channels, init by func_00123640; .cur of [0],[2],[3],[8] read as lean input
+    /* 0x2D4 */ unsigned short unk_2D4; // = hit object +0xA (func_001242B0)
+    /* 0x2D6 */ char unk_2D6[0x2];
+    /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (func_00123640)
+    /* 0x2DC */ char unk_2DC[0xC];
     /* 0x2E8 */ float unk_2E8; // decays each frame (func_001200D0)
     /* 0x2EC */ float unk_2EC;
     /* 0x2F0 */ float unk_2F0;
@@ -72,11 +91,22 @@ struct cRider {
     /* 0x2FC */ float unk_2FC; // scales the mass (cRider_getMass)
     /* 0x300 */ float unk_300; // decay rate for 0x2E8-0x2F8
     /* 0x304 */ int unk_304; // 0..3
-    /* 0x308 */ char unk_308[0x10];
+    /* 0x308 */ int unk_308; // = 1 (ctor)
+    /* 0x30C */ float unk_30C; // = 4000.0 (ctor)
+    /* 0x310 */ float unk_310; // = 0.18 (ctor)
+    /* 0x314 */ float unk_314; // = 0.015 (ctor)
     /* 0x318 */ float unk_318;
-    /* 0x31C */ char unk_31C[0x54];
+    /* 0x31C */ char unk_31C[0x4];
+    /* 0x320 */ int unk_320; // copied into unk_2D8 (func_00123640)
+    /* 0x324 */ int unk_324; // = func_0014EF70(interface 2, mAIIndex) (func_0011D390)
+    /* 0x328 */ char unk_328[0x48];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in func_00121950
-    /* 0x380 */ char unk_380[0x60];
+    /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (func_001242B0)
+    /* 0x390 */ char unk_390[0x10];
+    /* 0x3A0 */ t4Vector unk_3A0; // Normalize(front minus its mGroundNormal component) (func_001242B0)
+    /* 0x3B0 */ t4Vector unk_3B0; // Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, func_001242B0)
+    /* 0x3C0 */ char unk_3C0[0x10];
+    /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or D_004FF120 on a miss (func_001242B0)
     /* 0x3E0 */ t4Vector unk_3E0; // damped by 0.98 per frame (func_001210B0)
     /* 0x3F0 */ float unk_3F0;
     /* 0x3F4 */ float unk_3F4;
@@ -85,12 +115,14 @@ struct cRider {
     /* 0x400 */ t4Vector unk_400; // with 0x410: box tested against the view (func_00122278)
     /* 0x410 */ t4Vector unk_410;
     /* 0x420 */ t4Vector unk_420; // tested by the VU0 frustum program
-    /* 0x430 */ int unk_430;
+    /* 0x430 */ unsigned int unk_430; // built as 0xFFFFFFFF with lui/ori (unsigned) in the ctor and func_001242B0
     /* 0x434 */ int unk_434;
-    /* 0x438 */ char unk_438[0x28];
-    /* 0x460 */ float unk_460;
-    /* 0x464 */ float unk_464;
-    /* 0x468 */ char unk_468[0x8];
+    /* 0x438 */ int unk_438; // ground material from the hit, -1 mapped to 0 (func_001242B0)
+    /* 0x43C */ char unk_43C[0x14];
+    /* 0x450 */ int unk_450; // = -1 (ctor)
+    /* 0x454 */ float unk_454; // Dot(probe - hit.pos, normal): height above ground (func_001242B0)
+    /* 0x458 */ char unk_458[0x8];
+    /* 0x460 */ t4Vector unk_460; // [U] ground hit position (func_001242B0)
     /* 0x470 */ float mFinishTime; // [P] preview 0x440 (+0x30): <0 racing, >=0 seconds past the line (isPastFinishLine)
     /* 0x474 */ int mStartTick; // [P] getStartTick, preview 0x444 (+0x30)
     /* 0x478 */ int mFinishTick; // [P] getFinishTick, preview 0x448 (+0x30); = now + mPenaltyTicks (func_00125108)
@@ -98,7 +130,12 @@ struct cRider {
     /* 0x480 */ int mDidNotFinish; // [P] getDidNotFinish, preview 0x450 (+0x30); set by cRider_quitEvent
     /* 0x484 */ char unk_484[0x4C];
     /* 0x4D0 */ float unk_4D0;
-    /* 0x4D4 */ char unk_4D4[0xDC];
+    /* 0x4D4 */ char unk_4D4[0xC8];
+    /* 0x59C */ int unk_59C; // cleared on reset (func_0011D390)
+    /* 0x5A0 */ int unk_5A0; // cleared on reset (func_0011D390)
+    /* 0x5A4 */ int unk_5A4; // cleared on reset (func_0011D390)
+    /* 0x5A8 */ int unk_5A8; // cleared on reset (func_0011D390)
+    /* 0x5AC */ int unk_5AC; // cleared on reset (func_0011D390)
     /* 0x5B0 */ int unk_5B0;
     /* 0x5B4 */ float unk_5B4; // smoothed slope angle (func_00121950)
     /* 0x5B8 */ unsigned int unk_5B8;
@@ -110,8 +147,13 @@ struct cRider {
     /* 0x6D8 */ void* unk_6D8;
     /* 0x6DC */ char unk_6DC[0xC]; // cScriptObject data; its vptr follows
     /* 0x6E8 */ void* mScriptObjectVtbl; // _vt$6cRider$13cScriptObject
-    /* 0x6EC */ char unk_6EC[0x64];
-    /* 0x750 */ float mAudioBraking; // [P] getAudioBraking_0_to_1 (bracketed +0x40)
+    /* 0x6EC */ char unk_6EC[0x14];
+    /* 0x700 */ t4Matrix unk_700; // start transform used by a VU0 matrix*vector (func_00123640)
+    /* 0x740 */ float unk_740; // start-angle offset added to unk_AF0 (func_00123640)
+    /* 0x744 */ float unk_744; // start-angle offset added to unk_AF4 (func_00123640)
+    /* 0x748 */ float unk_748; // start-angle offset added to unk_AF8 (func_00123640)
+    /* 0x74C */ char unk_74C[0x4];
+    /* 0x750 */ float mAudioBraking; // [P] getAudioBraking_0_to_1 (bracketed +0x40); func_001242B0 also writes it as int 0
     /* 0x754 */ float mAudioEdging; // [P] getAudioEdging_0_to_1
     /* 0x758 */ float mAudioPressure; // [P] getAudioPressure_0_to_1
     /* 0x75C */ float mAudioSpeed; // [P] getAudioSpeed_0_to_1
@@ -157,34 +199,49 @@ struct cRider {
     /* 0xAA0 */ void* mSphereTree; // [P] getSphereTree (seen)
     /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (func_00122898)
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by func_00122898
-    /* 0xAAC */ char unk_AAC[0x10];
+    /* 0xAAC */ float unk_AAC; // hit f6C (func_001242B0); the ctor copies 8 bytes here from D_004A5960
+    /* 0xAB0 */ float unk_AB0; // hit f70 (func_001242B0)
+    /* 0xAB4 */ char unk_AB4[0x8];
     /* 0xABC */ int* unk_ABC;
     /* 0xAC0 */ int* unk_AC0;
     /* 0xAC4 */ int mIsInNIS; // [P] IsInNIS (seen); most updates are skipped while set
     /* 0xAC8 */ int unk_AC8; // set when an anim event fires
     /* 0xACC */ char unk_ACC[0x4];
     /* 0xAD0 */ int unk_AD0;
-    /* 0xAD4 */ char unk_AD4[0x28];
+    /* 0xAD4 */ char unk_AD4[0xC];
+    /* 0xAE0 */ t4Vector unk_AE0; // start position (w = 1), zeroed in the ctor (func_00123640)
+    /* 0xAF0 */ float unk_AF0; // start angle, degrees * pi/180 (func_00123640)
+    /* 0xAF4 */ float unk_AF4; // start angle, degrees * pi/180 (func_00123640)
+    /* 0xAF8 */ float unk_AF8; // start angle, degrees * pi/180 (func_00123640)
     /* 0xAFC */ int unk_AFC;
     /* 0xB00 */ int unk_B00;
-    /* 0xB04 */ int unk_B04;
+    /* 0xB04 */ float unk_B04; // speed (func_001242B0), 0.0f (func_00123640)
     /* 0xB08 */ int unk_B08[4]; // sound ids, -1 = none (func_00123B48)
     /* 0xB18 */ int mIsOnScreen; // [P] IsRiderOnScreen, preview 0x9F8 (+0x120 assumed); [U] frustum test result (func_00122278)
     /* 0xB1C */ int unk_B1C;
-    /* 0xB20 */ char unk_B20[0x4];
+    /* 0xB20 */ int unk_B20; // = 1 (ctor)
     /* 0xB24 */ float unk_B24;
-    /* 0xB28 */ char unk_B28[0x4];
+    /* 0xB28 */ int unk_B28; // = 31 (ctor)
     /* 0xB2C */ int unk_B2C;
-    /* 0xB30 */ char unk_B30[0x4];
+    /* 0xB30 */ int unk_B30; // = 0 (ctor)
     /* 0xB34 */ int unk_B34; // stat column for cBEStatInterface_getCollisionAttrib
 };
 
+CHECK_OFFSET(cRider, unk_0D8, 0xD8);
+CHECK_OFFSET(cRider, unk_0DC, 0xDC);
+CHECK_OFFSET(cRider, unk_0E0, 0xE0);
+CHECK_OFFSET(cRider, unk_0F0, 0xF0);
+CHECK_OFFSET(cRider, unk_0F4, 0xF4);
+CHECK_OFFSET(cRider, unk_0F8, 0xF8);
 CHECK_OFFSET(cRider, unk_100, 0x100);
 CHECK_OFFSET(cRider, mPosition, 0x110);
 CHECK_OFFSET(cRider, mRotation, 0x120);
 CHECK_OFFSET(cRider, unk_150, 0x150);
 CHECK_OFFSET(cRider, mMatrix, 0x1A0);
 CHECK_OFFSET(cRider, mVelocity, 0x1E0);
+CHECK_OFFSET(cRider, unk_1F0, 0x1F0);
+CHECK_OFFSET(cRider, unk_2D4, 0x2D4);
+CHECK_OFFSET(cRider, unk_2D8, 0x2D8);
 CHECK_OFFSET(cRider, unk_2E8, 0x2E8);
 CHECK_OFFSET(cRider, unk_2EC, 0x2EC);
 CHECK_OFFSET(cRider, unk_2F0, 0x2F0);
@@ -193,8 +250,18 @@ CHECK_OFFSET(cRider, unk_2F8, 0x2F8);
 CHECK_OFFSET(cRider, unk_2FC, 0x2FC);
 CHECK_OFFSET(cRider, unk_300, 0x300);
 CHECK_OFFSET(cRider, unk_304, 0x304);
+CHECK_OFFSET(cRider, unk_308, 0x308);
+CHECK_OFFSET(cRider, unk_30C, 0x30C);
+CHECK_OFFSET(cRider, unk_310, 0x310);
+CHECK_OFFSET(cRider, unk_314, 0x314);
 CHECK_OFFSET(cRider, unk_318, 0x318);
+CHECK_OFFSET(cRider, unk_320, 0x320);
+CHECK_OFFSET(cRider, unk_324, 0x324);
 CHECK_OFFSET(cRider, mGroundNormal, 0x370);
+CHECK_OFFSET(cRider, unk_380, 0x380);
+CHECK_OFFSET(cRider, unk_3A0, 0x3A0);
+CHECK_OFFSET(cRider, unk_3B0, 0x3B0);
+CHECK_OFFSET(cRider, unk_3D0, 0x3D0);
 CHECK_OFFSET(cRider, unk_3E0, 0x3E0);
 CHECK_OFFSET(cRider, unk_3F0, 0x3F0);
 CHECK_OFFSET(cRider, unk_3F4, 0x3F4);
@@ -204,14 +271,21 @@ CHECK_OFFSET(cRider, unk_410, 0x410);
 CHECK_OFFSET(cRider, unk_420, 0x420);
 CHECK_OFFSET(cRider, unk_430, 0x430);
 CHECK_OFFSET(cRider, unk_434, 0x434);
+CHECK_OFFSET(cRider, unk_438, 0x438);
+CHECK_OFFSET(cRider, unk_450, 0x450);
+CHECK_OFFSET(cRider, unk_454, 0x454);
 CHECK_OFFSET(cRider, unk_460, 0x460);
-CHECK_OFFSET(cRider, unk_464, 0x464);
 CHECK_OFFSET(cRider, mFinishTime, 0x470);
 CHECK_OFFSET(cRider, mStartTick, 0x474);
 CHECK_OFFSET(cRider, mFinishTick, 0x478);
 CHECK_OFFSET(cRider, mPenaltyTicks, 0x47C);
 CHECK_OFFSET(cRider, mDidNotFinish, 0x480);
 CHECK_OFFSET(cRider, unk_4D0, 0x4D0);
+CHECK_OFFSET(cRider, unk_59C, 0x59C);
+CHECK_OFFSET(cRider, unk_5A0, 0x5A0);
+CHECK_OFFSET(cRider, unk_5A4, 0x5A4);
+CHECK_OFFSET(cRider, unk_5A8, 0x5A8);
+CHECK_OFFSET(cRider, unk_5AC, 0x5AC);
 CHECK_OFFSET(cRider, unk_5B0, 0x5B0);
 CHECK_OFFSET(cRider, unk_5B4, 0x5B4);
 CHECK_OFFSET(cRider, unk_5B8, 0x5B8);
@@ -220,6 +294,10 @@ CHECK_OFFSET(cRider, mScriptObjRiderVtbl, 0x6D0);
 CHECK_OFFSET(cRider, unk_6D8, 0x6D8);
 CHECK_OFFSET(cRider, unk_6DC, 0x6DC);
 CHECK_OFFSET(cRider, mScriptObjectVtbl, 0x6E8);
+CHECK_OFFSET(cRider, unk_700, 0x700);
+CHECK_OFFSET(cRider, unk_740, 0x740);
+CHECK_OFFSET(cRider, unk_744, 0x744);
+CHECK_OFFSET(cRider, unk_748, 0x748);
 CHECK_OFFSET(cRider, mAudioBraking, 0x750);
 CHECK_OFFSET(cRider, mAudioEdging, 0x754);
 CHECK_OFFSET(cRider, mAudioPressure, 0x758);
@@ -260,19 +338,28 @@ CHECK_OFFSET(cRider, unk_A60, 0xA60);
 CHECK_OFFSET(cRider, mSphereTree, 0xAA0);
 CHECK_OFFSET(cRider, unk_AA4, 0xAA4);
 CHECK_OFFSET(cRider, mShadow, 0xAA8);
+CHECK_OFFSET(cRider, unk_AAC, 0xAAC);
+CHECK_OFFSET(cRider, unk_AB0, 0xAB0);
 CHECK_OFFSET(cRider, unk_ABC, 0xABC);
 CHECK_OFFSET(cRider, unk_AC0, 0xAC0);
 CHECK_OFFSET(cRider, mIsInNIS, 0xAC4);
 CHECK_OFFSET(cRider, unk_AC8, 0xAC8);
 CHECK_OFFSET(cRider, unk_AD0, 0xAD0);
+CHECK_OFFSET(cRider, unk_AE0, 0xAE0);
+CHECK_OFFSET(cRider, unk_AF0, 0xAF0);
+CHECK_OFFSET(cRider, unk_AF4, 0xAF4);
+CHECK_OFFSET(cRider, unk_AF8, 0xAF8);
 CHECK_OFFSET(cRider, unk_AFC, 0xAFC);
 CHECK_OFFSET(cRider, unk_B00, 0xB00);
 CHECK_OFFSET(cRider, unk_B04, 0xB04);
 CHECK_OFFSET(cRider, unk_B08, 0xB08);
 CHECK_OFFSET(cRider, mIsOnScreen, 0xB18);
 CHECK_OFFSET(cRider, unk_B1C, 0xB1C);
+CHECK_OFFSET(cRider, unk_B20, 0xB20);
 CHECK_OFFSET(cRider, unk_B24, 0xB24);
+CHECK_OFFSET(cRider, unk_B28, 0xB28);
 CHECK_OFFSET(cRider, unk_B2C, 0xB2C);
+CHECK_OFFSET(cRider, unk_B30, 0xB30);
 CHECK_OFFSET(cRider, unk_B34, 0xB34);
 
 #endif /* AI_RIDER_H */
