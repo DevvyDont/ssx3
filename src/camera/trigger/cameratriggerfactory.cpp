@@ -1204,20 +1204,52 @@ void* func_00176460(void* self)
     return (char*)self + 0x18;
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176468);
+//100%
+// Constructor of the plain bound object (vtable D_0045C3A0) in place at self.
+// PORT: plain placement operator new; the port can use <new>.
+inline void* operator new(unsigned int, void* p) { return p; }
+extern void* D_0045C3A0[];      // bound object vtable
+struct sCTBoundPlainG : sCTBoundObjG {
+    sCTBoundPlainG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3A0) {}
+};
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001764E8);
+extern "C" void* func_00176468(void* self)
+{
+    return new (self) sCTBoundPlainG;
+}
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176570);
+//100%
+// Constructor of the volume ellipse (vtable D_0045C350, type 0) in place at self.
+extern "C" void* func_001764E8(void* self)
+{
+    return new (self) sCTVolEllG;
+}
+
+//100%
+// Constructor of the volume box (vtable D_0045C300, type 1) in place at self.
+extern "C" void* func_00176570(void* self)
+{
+    return new (self) sCTVolBoxG;
+}
 
 //100%
 void func_001765F8(void* self)
 {
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176600);
+//100%
+// Constructor of the bound ellipse (vtable D_0045C2A8, type 0) in place at self.
+extern "C" void* func_00176600(void* self)
+{
+    return new (self) sCTBoundEllG;
+}
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176688);
+//100%
+// Constructor of the bound box (vtable D_0045C268, type 1) in place at self.
+extern "C" void* func_00176688(void* self)
+{
+    return new (self) sCTBoundBoxG;
+}
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176710);
 
