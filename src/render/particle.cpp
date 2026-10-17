@@ -611,7 +611,43 @@ INCLUDE_ASM("render/particle", func_00371F98);
 
 INCLUDE_ASM("render/particle", func_00372098);
 
-INCLUDE_ASM("render/particle", func_003720F0);
+//100%
+// Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
+extern "C" unsigned long* func_003720F0(unsigned long* chain)
+{
+    unsigned long* p = chain;
+    int done = 0;
+
+    do {
+        unsigned long tag = *p;
+        int id = (int)(tag >> 28) & 7;
+        int addr = (long)tag >> 32;
+        int qwc = (int)tag & 0xFFFF;
+
+        switch (id) {
+        case 0:
+        case 2:
+        case 4:
+        case 5:
+        case 7:
+            break;
+        case 1:
+            p += 2;
+            p += qwc * 2;
+            break;
+        case 3:
+            *p = ((unsigned long)(unsigned int)((char*)chain + addr) << 32) | (*p & 0xFFFFFFFF);
+            p += 2;
+            break;
+        case 6:
+            p += 2;
+            p += qwc * 2;
+            done = 1;
+            break;
+        }
+    } while (done == 0);
+    return p;
+}
 
 INCLUDE_ASM("render/particle", func_00372198);
 
