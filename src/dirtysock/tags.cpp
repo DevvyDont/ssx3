@@ -289,7 +289,23 @@ extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int mo
     return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs ? secs - offset : 0);
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
+//100%
+// Like func_003EC8B8, but takes the date (year << 16 | month << 8 | day) and time (hour << 16 | min << 8 | sec) packed.
+extern "C" int func_003EC9A0(char* record, int len, char* name, int date, int time, int offset)
+{
+    sDsTmK2 tm;
+    int secs;
+    func_00416210_C8B8(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    tm.tm_year = ((date >> 16) & 0xFFFF) - 1900;
+    tm.tm_mon = ((date >> 8) & 0xFF) - 1;
+    tm.tm_mday = date & 0xFF;
+    tm.tm_hour = (time >> 16) & 0xFF;
+    tm.tm_min = (time >> 8) & 0xFF;
+    tm.tm_sec = time & 0xFF;
+    secs = func_003EB090_C8B8(&tm);
+    return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs ? secs - offset : 0);
+}
 
 //100%
 // Finds field name in src, steps back to the start of its token, and sets up record from there.
