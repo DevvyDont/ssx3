@@ -293,7 +293,32 @@ extern "C" void func_0026CA90(void* self)
     }
 }
 
-INCLUDE_ASM("replay/playbackman", func_0026CAF8);
+extern "C" int func_0026C9F0(void* self, int key);
+extern "C" void SYNCTASK_run(int a);
+extern "C" void THREAD_yieldticks(int ticks);
+extern "C" int func_0026D020(void* self, int idx);
+
+extern "C" int func_0026CAF8(void* self, int key)
+{
+    int idx;
+    if (*(int*)((char*)self + 0x70) == 0) {
+        idx = func_0026CFE8(self, key);
+        if (idx >= 0 && func_0026C9F0(self, key) != 0) {
+            while (func_0026C998(self, key) == 0) {
+                cPlaybackMan_update((cPlaybackMan_C5F8*)self);
+                SYNCTASK_run(0);
+                THREAD_yieldticks(1);
+            }
+            if (func_0026D020(self, idx) == 0) {
+                return 0;
+            }
+            if (*(int*)(*(char**)((char*)self + 0x4) + 0xC) > 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 //100%
 void func_0026CBB0(void* self)
@@ -433,7 +458,21 @@ extern "C" int func_0026CFE8(void* self, int key)
     return -1;
 }
 
-INCLUDE_ASM("replay/playbackman", func_0026D020);
+extern "C" int func_002C85A0(void* src, int a, int dst);
+extern "C" int func_0026D020(void* self, int idx)
+{
+    char* s = (char*)self;
+    void* src = *(void**)(*(char**)(s + 0x58) + idx * 0xC + 0x4);
+    if (src != 0) {
+        func_002C85A0(src, 0, *(int*)(s + 0x4));
+        return 1;
+    }
+    unsigned int* buf = *(unsigned int**)(s + 0x4);
+    func_003E6448(buf, 0, 0x1C22C);
+    buf[0] = 0xDBAC0101;
+    buf[1] = 0x1C200;
+    return 0;
+}
 
 //100%
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
