@@ -442,7 +442,66 @@ extern "C" void func_00199C28(void* selfv, char* w, unsigned int ev)
     }
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199F20);
+extern "C" void func_0019A3D0(void* self);
+
+// Answers a widget query for the equip screen (enabled/selectable state for each query kind).
+extern "C" int func_00199F20(void* selfv, void* w, unsigned int kind, int idx)
+{
+    sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
+    switch (kind) {
+    case 2:
+    case 3:
+        func_0019B618(self, 0, 0);
+        return 1;
+    case 0:
+        if (idx < self->count) {
+            int f = self->items[idx]->flags & 4;
+            return f != 0;
+        }
+        return 0;
+    case 1:
+        if (idx == 0 || self->count == 0 || idx < self->count)
+            return 1;
+        return 0;
+    case 6: {
+        sList_9C28* list = self->list;
+        int k = *((unsigned char*)list + 0x95);
+        if (k < 0)
+            return 0x110;
+        if (k < self->count) {
+            sItem_9C28* item = self->items[k];
+            if (item->flags & 0x20)
+                return 0x101;
+            if (isMode1_9C28(self)) {
+                int cost = item->cost;
+                if (cost > 0)
+                    cost *= 10;
+                if (cost < self->money)
+                    return 0x101;
+                break;
+            }
+            if (D_004A18D8 >= self->vals[k - list->top] + self->spent)
+                break;
+        }
+        return 0x110;
+    }
+    case 7:
+        if (self->depth > 0) {
+            self->depth--;
+            return 1;
+        }
+        break;
+    case 8:
+        if (*(int*)((char*)self + 0xAE4) != 0) {
+            func_0019A3D0(self);
+            return 0x101;
+        }
+        return 0x100;
+    case 9:
+        return 0x100;
+    }
+    return 0x101;
+}
 
 //100%
 struct sEquipTable;
