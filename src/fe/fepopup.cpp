@@ -3862,7 +3862,87 @@ extern "C" void cKeyboardPopup_redrawScreen(void* self)
     }
 }
 
-INCLUDE_ASM("fe/fepopup", cKeyboardPopup_SetNameForKey);
+extern char D_00466720[];
+extern char D_00466740[];
+extern char D_00466760[];
+extern char D_00466778[];
+extern char D_00466790[];
+extern char D_004667A8[];
+extern char D_004667C0[];
+extern char D_004667D8[];
+extern char D_004A1CC8[];
+
+// Sets the label and highlight of a special (non-letter) keyboard key.
+extern "C" void cKeyboardPopup_SetNameForKey(void* self, cUIText* text, int i)
+{
+    char* s = (char*)self;
+    char buf[0x10];
+    if (text == 0)
+        return;
+    if (func_001CE560(self, i, 0) == 0) {
+        sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+        vt[11].fn((char*)text + vt[11].delta, D_004C67B8);
+    } else {
+        sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+        vt[11].fn((char*)text + vt[11].delta, D_004C67C8);
+    }
+    switch (i) {
+    case 27:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466720));
+        return;
+    case 42:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466740));
+        {
+            sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+            vt[11].fn((char*)text + vt[11].delta, D_004C67C8);
+        }
+        return;
+    case 56:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466760));
+        {
+            sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+            vt[11].fn((char*)text + vt[11].delta, D_004C67C8);
+        }
+        return;
+    case 70:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466778));
+        return;
+    case 28:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466790));
+        return;
+    case 55:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667A8));
+        return;
+    case 75:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667C0));
+        return;
+    case 0:
+        if (*(int*)(s + 0x43C) == 1) {
+            sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+            vt[9].fn((char*)text + vt[9].delta, (void*)0);
+        } else {
+            sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+            vt[9].fn((char*)text + vt[9].delta, (void*)1);
+        }
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667D8));
+        return;
+    case 4: case 5: case 6: case 7: case 8:
+    case 9: case 10: case 11: case 12: case 13:
+        if (*(int*)(s + 0x43C) == 1) {
+            sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+            vt[9].fn((char*)text + vt[9].delta, (void*)0);
+        } else {
+            sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+            vt[9].fn((char*)text + vt[9].delta, (void*)1);
+        }
+        sprintf(buf, D_004A1CC8, i - 3);
+        cUIText_setAsciiString(text, buf);
+        return;
+    case 83:
+    default:
+        return;
+    }
+}
 
 //100%
 int GetHashValue32(char* str);
