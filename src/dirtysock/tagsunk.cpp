@@ -76,7 +76,15 @@ extern "C" int func_00259400(void* a, void* b, char* x, char* y)
     return sy[0] - sx[0];
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00259468);
+// Sort comparison: ascending by the first word of each entry's tag structure.
+extern "C" int func_00259468(void* a, void* b, char* x, char* y)
+{
+    int sx[2];
+    int sy[2];
+    cDirtysock_tag_TagFieldGetStructure(x + 0x28, sx, 8, D_004A2F30);
+    cDirtysock_tag_TagFieldGetStructure(y + 0x28, sy, 8, D_004A2F30);
+    return sx[0] - sy[0];
+}
 
 INCLUDE_ASM("dirtysock/tagsunk", func_002594D0);
 
