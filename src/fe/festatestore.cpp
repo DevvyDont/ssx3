@@ -471,7 +471,261 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
     }
 }
 
-INCLUDE_ASM("fe/festatestore", func_00185268);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* t, int id);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
+extern "C" void func_00183C08(void* self);
+extern "C" void func_00183B08(void* self);
+extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
+extern "C" void cFEStateUberTrick_trickVisible(void* self, int on);
+extern "C" void func_00184780(void* self, int on);
+extern "C" void func_00184520(void* self);
+extern "C" void cWScriptMan_checkGate(void* self);
+extern "C" int func_00150048(void* self, int rider, int a, int b);
+extern "C" int func_0014FFB8(void* self, int rider, int a, int b);
+extern "C" int func_0014FD80(void* self, int rider, int a, int b);
+extern "C" int func_00150928(void* self, int rider, int charID);
+struct sTrick_185268 {
+    unsigned short anim;
+    unsigned short pad;
+    unsigned short id;
+    unsigned short cost;
+};
+extern "C" sTrick_185268* func_0014FF90(void* self, int rider, int a, int* count);
+extern "C" int func_00116938(int id);
+extern "C" void* func_001CABA8(void* mem, void* engine, void* owner, int rider);
+extern "C" void cUIStateBuyPopup_initBuyTrick(void* popup, int trick, int cost, int points);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* func_001A0548(void* self, int idx);
+extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
+extern void* D_004A28A8;
+extern char D_004A5A58;
+extern signed char D_00535C11[];
+extern char D_004A14A8[];
+extern char D_0045D920[];
+extern char D_0045D930[];
+extern char D_0045DA70[];
+extern char D_0045DAD8[];
+extern char D_0045DAE8[];
+extern char D_0045DB00[];
+extern char D_0045DB18[];
+extern char D_0045DB30[];
+extern char D_0045DB48[];
+
+struct sColor_185268 {
+    float r, g, b, a;
+    sColor_185268(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+struct cWidget_185268 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07(int on);
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11(const sColor_185268& c);
+};
+
+struct cIface_185268 {
+    int f0;
+    int f4;
+    int f8;
+    virtual void v01();
+    virtual void v02();
+};
+
+struct cState_185268 {
+    int f0;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void* v05(void* owner, int a);
+};
+
+struct sVE_185268 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct cSnd_185268 {
+    virtual void v01();
+    virtual void v02(int id);
+};
+
+static inline int IsHash_185268(char* w, char* name)
+{
+    int h = *(int*)(w + 0x38);
+    return h == GetHashValue32(name);
+}
+
+static inline void Back_185268(char* self)
+{
+    void* r = (*(cState_185268**)*(char**)(self + 0x10))->v05(self, 0);
+    if (r != 0)
+        func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+}
+
+extern "C" void func_00185268(char* self, char* w, int ev)
+{
+    switch (ev) {
+    case 5:
+        if (*(char**)(w + 0x40) == *(char**)(self + 0x4C)) {
+            if (IsHash_185268(w, D_004A14A8)) {
+                Back_185268(self);
+                break;
+            }
+            (*(cWidget_185268**)(self + 0x4C))->v07(0);
+            cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0);
+            (*(cWidget_185268**)(self + 0x50))->v07(1);
+            func_00183C08(self);
+            cFEStateUberTrick_costVisible(self, 1);
+            func_00184780(self, 1);
+        } else if (*(char**)(w + 0x40) == *(char**)(self + 0x50)) {
+            char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+            char* b = *(char**)(*(char**)(w + 0x40) + 0xA0);
+            if (a == 0 || b == 0)
+                break;
+            int ia = *(signed char*)(a + 0x18);
+            int ib = *(signed char*)(b + 0x18);
+            cIface_185268* pi = (cIface_185268*)cBE_getInterface_Fv(cBE_getBE(), 6);
+            cBE_getInterface_Fv(cBE_getBE(), 0);
+            if (func_00150048(pi, *(signed char*)(self + 0x44), ia, ib) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ia, ib)) {
+                func_0014FD80(pi, *(signed char*)(self + 0x44), ia, ib);
+                sVE_185268* vt = *(sVE_185268**)((char*)pi + 0xC);
+                vt[1].fn((char*)pi + vt[1].delta);
+                cWScriptMan_checkGate(self);
+                break;
+            }
+            if (D_00535C11[0] == 0) {
+                if (!func_0014FFB8(pi, *(signed char*)(self + 0x44), ia, ib))
+                    break;
+                cIface_185268* player = (cIface_185268*)cBE_getInterface_Fv(cBE_getBE(), 1);
+                signed char charID = cBENewPlayerInterface_getPlayerCharID(player, *(signed char*)(self + 0x44));
+                player->v02();
+                int points = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
+                int count;
+                sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ia, &count);
+                int trick = func_00116938(tbl[ib].id);
+                sTrick_185268* e = &tbl[ib];
+                if (points >= e->cost) {
+                    void* popup = func_001CABA8(cMemMan_alloc(0x70, D_0045DAD8, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
+                    cUIStateBuyPopup_initBuyTrick(popup, trick, e->cost, points);
+                    func_0039F290(*(char**)(self + 0x10) + 0x18, popup);
+                    break;
+                }
+            }
+            cSnd_185268* snd = *(cSnd_185268**)(*(char**)(self + 0x10) + 0x14);
+            if (snd == 0)
+                snd = (cSnd_185268*)&D_004A5A58;
+            if (snd != 0)
+                snd->v02(4);
+        }
+        break;
+    case 6:
+        if (*(char**)(w + 0x40) == *(char**)(self + 0x50)) {
+            (*(cWidget_185268**)(self + 0x4C))->v07(1);
+            (*(cWidget_185268**)(self + 0x50))->v07(0);
+            cWidget_185268* o = *(cWidget_185268**)(*(char**)(self + 0x50) + 0xA0);
+            if (o != 0)
+                o->v11(sColor_185268(1.0f, 0, 0, 0));
+            cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0xFF);
+            func_00183B08(self);
+            cFEStateUberTrick_costVisible(self, 0);
+            func_00184780(self, 0);
+            break;
+        }
+        Back_185268(self);
+        break;
+    case 7:
+        if (*(char**)(w + 0x40) == *(char**)(self + 0x50)) {
+            char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+            char* b = *(char**)(*(char**)(w + 0x40) + 0xA0);
+            if (a == 0 || b == 0)
+                break;
+            void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
+            int ib = *(signed char*)(b + 0x18);
+            int ia = *(signed char*)(a + 0x18);
+            int n = 0;
+            sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ia, &n);
+            if (*(int*)(self + 0x48) == 0)
+                break;
+            char* rider = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+            cRiderAnimBase_play(*(void**)(rider + 0xC), tbl[ib].anim, 0, -1.0f);
+        }
+        break;
+    case 1: {
+        char* rider = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+        *(int*)(rider + 0xCD0) = 1;
+        if (*(char**)(w + 0x40) == *(char**)(self + 0x4C)) {
+            if (*(void**)(self + 0x50) != 0 && *(int*)(w + 0x18) != -1) {
+                cFEStateUberTrick_trickVisible(self, 1);
+                cWScriptMan_checkGate(self);
+                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045D920));
+                if (t != 0)
+                    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DAE8));
+            } else {
+                cFEStateUberTrick_trickVisible(self, 0);
+                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045D920));
+                if (t != 0)
+                    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB00));
+            }
+        } else if (*(void**)(self + 0x50) != 0 && *(char**)(w + 0x40) == *(char**)(self + 0x50)) {
+            cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045D930));
+            char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+            char* b = *(char**)(*(char**)(self + 0x50) + 0xA0);
+            if (a == 0 || b == 0 || t == 0)
+                break;
+            int ia = *(signed char*)(a + 0x18);
+            int ib = *(signed char*)(b + 0x18);
+            void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
+            cBE_getInterface_Fv(cBE_getBE(), 0);
+            if (func_00150048(pi, *(signed char*)(self + 0x44), ia, ib) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ia, ib)) {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DA70));
+            } else if (D_00535C11[0] == 0) {
+                if (func_0014FFB8(pi, *(signed char*)(self + 0x44), ia, ib)) {
+                    cIface_185268* player = (cIface_185268*)cBE_getInterface_Fv(cBE_getBE(), 1);
+                    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, *(signed char*)(self + 0x44));
+                    player->v02();
+                    int points = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
+                    int count;
+                    sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ia, &count);
+                    if (points >= tbl[ib].cost)
+                        cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB18));
+                    else
+                        cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB30));
+                }
+            } else {
+                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB48));
+            }
+            func_00184520(self);
+        }
+        break;
+    }
+    case 2: {
+        char* rider = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+        *(int*)(rider + 0xCD0) = 0;
+        break;
+    }
+    }
+}
 
 //100%
 extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
