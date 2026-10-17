@@ -680,7 +680,14 @@ extern "C" void func_00279488(void* self)
     }
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_002794E0);
+extern "C" void func_00278918(void*);
+extern "C" void func_00276B98(void*);
+
+extern "C" void func_002794E0(char* self, int i)
+{
+    func_00278918(self);
+    func_00276B98(*(char**)(self + 0x624) + i * 0xCC);
+}
 
 //100%
 extern "C" int* cSSXScriptEngine_GetScriptFromCategory(void*, int);
@@ -1894,7 +1901,32 @@ extern "C" int func_0027B528(sScriptEng0628* self)
     return -1;
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027B578);
+struct sSSXSlotB578 {
+    int a;      // 0x628
+    int key;    // 0x62C
+    int b;      // 0x630
+    int pad;
+};
+
+struct sSSXEngineB578 {
+    char pad[0x628];
+    sSSXSlotB578 slots[10];
+};
+
+extern "C" int func_0027B578(void* selfp, int key, int i)
+{
+    sSSXEngineB578* self = (sSSXEngineB578*)selfp;
+    for (; i < 10; i++) {
+        bool empty = self->slots[i].b == 0 && self->slots[i].a == 0;
+        if (empty) {
+            continue;
+        }
+        if (self->slots[i].key == key) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 //100%
 // PORT: the unit declares ASYNCFILE_release(void*, int, int); this caller passes

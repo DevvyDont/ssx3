@@ -166,7 +166,13 @@ extern "C" sPathEntry* func_0026B5E0(sPathEntryList* list, int type, int id)
     return 0;
 }
 
-INCLUDE_ASM("path/pathsys", func_0026B648);
+extern "C" void* func_0026B648(int* self, int i)
+{
+    if (self[0] <= 0 || i >= self[0] || i < 0) {
+        return 0;
+    }
+    return (char*)self[1] + i * 0x28;
+}
 
 //100%
 struct sPathVec3 {
@@ -354,7 +360,18 @@ extern "C" void* func_0026BAA8(void* p, ...)
 
 INCLUDE_ASM("path/pathsys", func_0026BAE8);
 
-INCLUDE_ASM("path/pathsys", func_0026C3D0);
+struct sPathVec4 {
+    float x, y, z, w;
+};
+
+extern "C" sPathVec4* func_0026C3D0(sPathVec4* out, char* p)
+{
+    out->x = *(float*)(p + 0xC);
+    out->y = *(float*)(p + 0x10);
+    out->z = *(float*)(p + 0x14);
+    out->w = 1.0f;
+    return out;
+}
 
 extern "C" int func_0026C400(void* self)
 {

@@ -62,7 +62,38 @@ extern "C" void func_0028B650(void* self)
     }
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028B6C8);
+struct sBankNodeB6C8 {
+    char pad0[0x8];
+    int f8;                 // 0x8
+    int fC;                 // 0xC
+    int f10;                // 0x10
+    int f14;                // 0x14
+    sBankNodeB6C8* next;    // 0x18
+    sBankNodeB6C8* prev;    // 0x1C
+};
+
+extern "C" void func_0028B6C8(void* np, void* listp)
+{
+    sBankNodeB6C8* n = (sBankNodeB6C8*)np;
+    sBankNodeB6C8* list = (sBankNodeB6C8*)listp;
+    if (list->next != 0) {
+        n->next = list;
+        n->prev = list->prev;
+        list->prev = n;
+        n->prev->next = n;
+    } else {
+        list->next = n;
+        list->prev = n;
+        n->next = list;
+        n->prev = list;
+    }
+    if (list->f8 != 0) {
+        n->f8 = list->f8;
+        n->f10 = list->f10;
+        n->f14 = list->f14;
+        n->fC = list->fC;
+    }
+}
 
 //100%
 struct sBankNode {
@@ -1192,7 +1223,22 @@ extern "C" int func_0028E068(void* self)
     return func_0028DF18(self, 1) != 0;
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028E088);
+extern "C" int func_002B2550(void* p);
+
+extern "C" int func_0028E088(char* self, char* ev)
+{
+    if (*(void**)(self + 0x520) == 0 || func_002B2550(*(void**)(self + 0x520)) == -1) {
+        *(int*)(self + 0x6274) = 1;
+        *(int*)(self + 0x6278) = *(int*)(ev + 0x1C);
+        return 1;
+    }
+    if (*(int*)(ev + 0x20) == 1) {
+        *(int*)(self + 0x6274) = *(int*)(ev + 0x20);
+        *(int*)(self + 0x6278) = *(int*)(ev + 0x1C);
+        return 1;
+    }
+    return 0;
+}
 
 //100%
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1305,7 +1351,23 @@ extern "C" void func_0028E888(void* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028E8C0);
 
-INCLUDE_ASM("sound/bankmanager", func_0028EF90);
+struct sBankArgEF90 {
+    long v;
+} __attribute__((packed));
+
+extern sBankArgEF90 D_004A3648[];
+extern "C" void func_002ADCA0(void* p, int a, long b, int c, int d, int e, int f, int g);
+
+extern "C" void func_0028EF90(void* selfp)
+{
+    char* self = (char*)selfp;
+    *(int*)(self + 0x6258) = 0;
+    *(int*)(self + 0x577C) = 0;
+    func_0028DF08(self);
+    *(int*)(self + 0x578C) = 0;
+    func_0028D488(self);
+    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 10, D_004A3648[0].v, 0, 2, 1, 0, 0);
+}
 
 //100%
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
