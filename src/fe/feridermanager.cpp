@@ -486,7 +486,13 @@ extern "C" void func_0019F718(char* self, int i, sFrmQuad* v)
     *(sFrmQuad*)(((sFrmSlots*)self)->slot[i] * 32 + *(char**)(*(char**)(self + 0x8) + 0x2C) + 0x10) = *v;
 }
 
-INCLUDE_ASM("fe/feridermanager", func_0019F740);
+void func_00312AA0(void* p, int a);
+
+//100%
+extern "C" void func_0019F740(void* self)
+{
+    func_00312AA0(*(void**)((char*)self + 0xC), 2);
+}
 
 extern "C" void func_00312AB0(void* p, int a);
 
