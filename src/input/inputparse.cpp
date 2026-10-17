@@ -1864,7 +1864,269 @@ extern "C" void func_00326E50(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("input/inputparse", func_00326EB0);
+//100%
+struct sPad_326EB0 {
+    char pad00[0x4];
+    int port;
+    int slot;
+    char pad0C[0x24];
+    int smallMotor;
+    int smallMotorSent;
+    int bigMotor;
+    int bigMotorSent;
+    unsigned char act[8];
+    int state;
+    int retries;
+    int modeSet;
+    int pressure;
+    int analog;
+    int actuators;
+};
+struct sPadData_326EB0 {
+    unsigned char status;
+    unsigned char mode;
+    unsigned char select : 1;
+    unsigned char l3 : 1;
+    unsigned char r3 : 1;
+    unsigned char start : 1;
+    unsigned char up : 1;
+    unsigned char right : 1;
+    unsigned char down : 1;
+    unsigned char left : 1;
+    unsigned char l2 : 1;
+    unsigned char r2 : 1;
+    unsigned char l1 : 1;
+    unsigned char r1 : 1;
+    unsigned char triangle : 1;
+    unsigned char circle : 1;
+    unsigned char cross : 1;
+    unsigned char square : 1;
+    unsigned char stick[4];
+    unsigned char pressure[12];
+    unsigned char pad14[0xC];
+};
+extern "C" int func_003FF708(int port, int slot, void* buf);
+extern "C" int func_003FFBC0(int port, int slot);
+extern "C" int func_003FFFA0(int port, int slot, int a, int b);
+extern "C" int func_004000D8(int port, int slot, int a, int b);
+extern "C" int func_00400490(int port, int slot);
+extern "C" int func_004004F0(int port, int slot);
+extern "C" int func_003FFCD8(int port, int slot);
+extern "C" int func_003FFD60(int port, int slot, int a, int b);
+extern "C" int func_00400250(int port, int slot, void* align);
+extern "C" int func_003FFA58(int port, int slot, void* buf);
+extern "C" int func_00400190(int port, int slot, void* act);
+extern unsigned char D_004A3FB8[8];
+
+static inline float Btn_326EB0(int on)
+{
+    return on ? 1.0f : 0.0f;
+}
+
+static inline int Axis_326EB0(int v, int range)
+{
+    v = v * 255 / range;
+    if (v < 0) v = 0;
+    return v;
+}
+
+extern "C" int func_00326EB0(void* selfp, float* out)
+{
+    sPad_326EB0* s = (sPad_326EB0*)selfp;
+    sPadData_326EB0 buf;
+    int got = 0;
+    int st;
+    int ret;
+
+    if (s->state == 0) {
+        if (func_003FF708(s->port, s->slot, (char*)s + 0x80) == 1) {
+            s->state = 1;
+            s->modeSet = 0;
+            s->smallMotor = 0;
+            s->smallMotorSent = -1;
+            s->bigMotorSent = -1;
+            s->bigMotor = 0;
+        }
+    }
+    st = func_003FFBC0(s->port, s->slot);
+    if (st == 0 || st == 7) {
+        s->modeSet = 0;
+        s->state = 1;
+    }
+    switch (s->state) {
+    case 1:
+        if (st == 6 || st == 2) {
+            int id;
+            s->pressure = 0;
+            s->analog = 0;
+            s->actuators = 0;
+            id = func_003FFFA0(s->port, s->slot, 1, 0);
+            if (id == 0) {
+                break;
+            }
+            switch (func_003FFFA0(s->port, s->slot, 2, 0)) {
+            case 0:
+                if (id == 4) {
+                    s->state = 10;
+                }
+                break;
+            case 4:
+                s->state = 2;
+                break;
+            case 7:
+                s->analog = 1;
+                s->state = 2;
+                break;
+            }
+        }
+        break;
+    case 2:
+        if (s->analog == 0 || s->modeSet == 0) {
+            int r = func_004000D8(s->port, s->slot, 1, 3);
+            if (r == 1) {
+                s->modeSet = r;
+                s->state = 3;
+            }
+        } else {
+            s->state = 4;
+        }
+        break;
+    case 3:
+        if (func_003FFBC0(s->port, s->slot) != 5) {
+            s->state = 1;
+        }
+        break;
+    case 4:
+        if (func_00400490(s->port, s->slot) == 1) {
+            s->state = 5;
+        } else {
+            s->state = 7;
+        }
+        break;
+    case 5:
+        if (func_004004F0(s->port, s->slot) == 1) {
+            s->retries = 0;
+            s->state = 6;
+        }
+        break;
+    case 6: {
+        int r = func_003FFCD8(s->port, s->slot);
+        if (r == 1) {
+            s->state = 1;
+            s->modeSet = 0;
+        } else if (r == 0) {
+            if (++s->retries >= 5) {
+                s->pressure = 1;
+                s->state = 7;
+            }
+        } else {
+            s->retries = 0;
+        }
+        break;
+    }
+    case 7:
+        if (func_003FFD60(s->port, s->slot, -1, 0) != 0) {
+            s->state = 8;
+        } else {
+            s->state = 10;
+        }
+        break;
+    case 8:
+        if (func_00400250(s->port, s->slot, D_004A3FB8) == 1) {
+            s->retries = 0;
+            s->state = 9;
+        }
+        break;
+    case 9: {
+        int r = func_003FFCD8(s->port, s->slot);
+        if (r == 1) {
+            s->state = 1;
+            s->modeSet = 0;
+        } else if (r == 0) {
+            if (++s->retries >= 5) {
+                s->actuators = 1;
+                s->state = 10;
+            }
+        } else {
+            s->retries = 0;
+        }
+        break;
+    }
+    case 10:
+        if (func_003FFA58(s->port, s->slot, &buf) == 0 || buf.status != 0) {
+            s->modeSet = 0;
+            s->state = 1;
+        } else {
+            got = 1;
+        }
+        break;
+    }
+    ret = 0;
+    if (got) {
+        ret = 0x18;
+        out[0] = Btn_326EB0(!buf.select);
+        out[1] = !buf.start ? 1.0f : 0.0f;
+        out[2] = !buf.l3 ? 1.0f : 0.0f;
+        out[3] = !buf.r3 ? 1.0f : 0.0f;
+        if (s->pressure) {
+            out[4] = buf.pressure[0] * 0.003921569f;
+            out[5] = buf.pressure[1] * 0.003921569f;
+            out[6] = buf.pressure[2] * 0.003921569f;
+            out[7] = buf.pressure[3] * 0.003921569f;
+            out[8] = buf.pressure[4] * 0.003921569f;
+            out[9] = buf.pressure[5] * 0.003921569f;
+            out[10] = buf.pressure[6] * 0.003921569f;
+            out[11] = buf.pressure[7] * 0.003921569f;
+            out[12] = buf.pressure[8] * 0.003921569f;
+            out[13] = buf.pressure[9] * 0.003921569f;
+            out[14] = buf.pressure[10] * 0.003921569f;
+            out[15] = buf.pressure[11] * 0.003921569f;
+        } else {
+            out[4] = !buf.right ? 1.0f : 0.0f;
+            out[5] = !buf.left ? 1.0f : 0.0f;
+            out[6] = !buf.up ? 1.0f : 0.0f;
+            out[7] = !buf.down ? 1.0f : 0.0f;
+            out[8] = !buf.triangle ? 1.0f : 0.0f;
+            out[9] = !buf.circle ? 1.0f : 0.0f;
+            out[10] = !buf.cross ? 1.0f : 0.0f;
+            out[11] = !buf.square ? 1.0f : 0.0f;
+            out[12] = !buf.l1 ? 1.0f : 0.0f;
+            out[13] = !buf.r1 ? 1.0f : 0.0f;
+            out[14] = Btn_326EB0(!buf.l2);
+            out[15] = !buf.r2 ? 1.0f : 0.0f;
+        }
+        if (s->analog) {
+            out[16] = Axis_326EB0(0x4F - buf.stick[0], 0x4F) * 0.003921569f;
+            out[17] = Axis_326EB0(buf.stick[0] - 0xB0, 0x4F) * 0.003921569f;
+            out[18] = Axis_326EB0(0x4F - buf.stick[1], 0x4F) * 0.003921569f;
+            out[19] = Axis_326EB0(buf.stick[1] - 0xB0, 0x4F) * 0.003921569f;
+            out[20] = Axis_326EB0(0x4F - buf.stick[2], 0x4F) * 0.003921569f;
+            out[21] = Axis_326EB0(buf.stick[2] - 0xB0, 0x4F) * 0.003921569f;
+            out[22] = Axis_326EB0(0x4F - buf.stick[3], 0x4F) * 0.003921569f;
+            out[23] = Axis_326EB0(buf.stick[3] - 0xB0, 0x4F) * 0.003921569f;
+        } else {
+            out[16] = 0.0f;
+            out[17] = 0.0f;
+            out[18] = 0.0f;
+            out[19] = 0.0f;
+            out[20] = 0.0f;
+            out[21] = 0.0f;
+            out[22] = 0.0f;
+            out[23] = 0.0f;
+        }
+    }
+    if (s->state == 10) {
+        if (s->smallMotor != s->smallMotorSent || s->bigMotor != s->bigMotorSent) {
+            s->act[0] = s->smallMotor;
+            s->act[1] = s->bigMotor;
+            s->smallMotorSent = s->smallMotor;
+            s->bigMotorSent = s->bigMotor;
+            func_00400190(s->port, s->slot, s->act);
+        }
+    }
+    return ret;
+}
+
 
 //100%
 int func_00327738(void* self)
