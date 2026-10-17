@@ -126,7 +126,84 @@ void cRider_addRiderMetrix(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011BBE8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBELibrary_getCharacterID(int);
+extern "C" int func_0014A0B0(int);
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+int func_0014D988(void* self, int i);
+extern "C" void* func_0014D998(void* self, int i);
+extern "C" void* func_0014AD50(void* iface, int rider);
+
+struct sBEEntry_11BBE8
+{
+    int f0;
+    short f4;
+    char pad[0x32];
+};
+
+struct sSlot_11BBE8
+{
+    short a;
+    unsigned short flags;
+};
+
+struct sRiderData_11BBE8
+{
+    char pad[0x288];
+    short* map;         // 0x288
+    int f28C;
+    sSlot_11BBE8 slots[1]; // 0x290
+};
+
+extern "C" int func_0011BBE8(void* vself, char** list)
+{
+    cRider* self = (cRider*)vself;
+    int n = 0;
+    void* iface = cBE_getInterface(cBE_getBE(), 9);
+    int ch = cBELibrary_getCharacterID(self->mAIIndex);
+    int other = func_0014A0B0(self->mAIIndex);
+    void* db = func_0014BDB8_noarg();
+    if (other != 0)
+    {
+        ch = other;
+        sBEEntry_11BBE8* e = (sBEEntry_11BBE8*)func_0014D998(db, ch);
+        int cnt = func_0014D988(db, ch);
+        for (int i = 0; i < cnt; i++)
+        {
+            list[n] = (char*)e;
+            n++;
+            e++;
+        }
+    }
+    else
+    {
+        sRiderData_11BBE8* r = (sRiderData_11BBE8*)func_0014AD50(iface, self->mAIIndex);
+        int cnt = func_0014D988(db, ch);
+        sBEEntry_11BBE8* e = (sBEEntry_11BBE8*)func_0014D998(db, ch);
+        for (int i = 0; i < cnt; i++, e++)
+        {
+            short idx = r->map[e->f4];
+            sSlot_11BBE8* s;
+            if (idx >= 0)
+                s = &r->slots[idx];
+            else
+                s = 0;
+            if (s->flags & 0x10)
+            {
+                list[n] = (char*)e;
+                n++;
+            }
+        }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011BD60);
@@ -522,7 +599,54 @@ extern "C" void func_0011DF18(cRider* self, int notify)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011DFE0);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+
+struct sQuat_0011DFE0
+{
+    float x, y, z, w;
+    sQuat_0011DFE0() {}
+    sQuat_0011DFE0(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline t4Vector QuatMul_0011DFE0(const sQuat_0011DFE0& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sQuat_0011DFE0 AxisAngle_0011DFE0(const t4Vector& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQuat_0011DFE0(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+extern "C" void func_0011DFE0(cRider* self, t4Vector* axis, float angle)
+{
+    self->mRotation = QuatMul_0011DFE0(AxisAngle_0011DFE0(*axis, angle), self->mRotation);
+    cRider_updateOrientationImplicit(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateOrientationImplicit);
@@ -1942,7 +2066,229 @@ extern "C" void func_001235F8(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00123640);
+#ifdef SKIP_ASM
+extern "C" void func_0027F9F8(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+extern "C" void func_00311A50(void* anim);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+int func_0027C958(void* self);
+extern "C" void func_0027C9B0(int, void*);
+struct sQuat_001241C0;
+extern "C" void func_001241C0(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+extern "C" void func_00111890(void* self);
+extern "C" void func_0030EA80(void* model, int i, int channel);
+extern "C" void func_0030E9E0(void* model, int i, int channel);
+void* func_0014BDB8_3640() __asm__("func_0014BDB8__FPv");
+extern "C" void* func_0014AD50(void* iface, int id);
+int func_0014D988(void* tbl, int g);
+extern "C" void* func_0014D998(void* tbl, int g);
+extern "C" int func_00123128(cRider* self);
+extern "C" void func_00114130(void* rider, int a, int b);
+
+struct sV_3640
+{
+    float x, y, z, w;
+    sV_3640() {}
+    sV_3640(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+extern sV_3640 D_004FF120_3640 __asm__("D_004FF120");
+extern sV_3640 D_004FF160_3640 __asm__("D_004FF160");
+
+static inline sV_3640 AxisAngle_3640(const sV_3640& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sV_3640(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+// PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
+// PORT: g++ named-return-value extension.
+static inline sV_3640 MatMulV_3640(const char* m, const sV_3640& v) return r
+{
+    __asm__(
+        "lqc2       $vf8, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "lqc2       $vf5, 0x10(%1)\n"
+        "lqc2       $vf6, 0x20(%1)\n"
+        "lqc2       $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2       $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sV_3640 QuatMul_3640(const sV_3640& a, const sV_3640& b)
+{
+    sV_3640 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sTrack_3640
+{
+    float cur;
+    float rate;
+    float target;
+};
+
+static inline void initTrack_3640(cRider* self, int off, float v, float z)
+{
+    *(float*)((char*)self + off + 8) = v;
+    *(float*)((char*)self + off) = v;
+    *(float*)((char*)self + off + 4) = z;
+}
+
+struct sItem_3640 {
+    short a;
+    unsigned short flags;
+};
+
+struct sDb_3640 {
+    char pad0[0x288];
+    short* map;                 // 0x288
+    char pad28C[0x4];
+    sItem_3640 items[1];        // 0x290
+};
+
+struct sEnt_3640 {
+    char pad0[0x4];
+    short item;                 // 0x04
+    char pad6[0xA];
+    signed char id;             // 0x10
+    char pad11[0x23];
+    int flags;                  // 0x34
+};
+
+static inline sItem_3640* lookup_3640(sDb_3640* d, int i)
+{
+    short k = d->map[i];
+    if (k >= 0) {
+        return &d->items[k];
+    }
+    return 0;
+}
+
+extern "C" void func_00123640(cRider* self)
+{
+    int buf[12];
+    func_0027F9F8(&self->mScriptObjRiderVtbl);
+    func_0011FEC8_impl(self, 0xD);
+    func_0011FE78_impl(self, 3);
+    func_00311A50(self->mRiderAnim);
+    cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
+    self->mIsInNIS = 1;
+    *(int*)((char*)self + 0x2D8) = *(int*)((char*)self + 0x320);
+    self->unk_AC8 = 0;
+    int j;
+    for (j = 3; j >= 0; j--)
+        self->unk_B08[j] = -1;
+    float zero;
+    float one = 1.0f;
+    // PORT: func_0027C958 returns a record pointer as int
+    char* rec = (char*)func_0027C958(self->unk_6D8);
+    zero = 0.0f;
+    self->unk_AFC = rec[7] != 0;
+    self->unk_B00 = 1;
+    self->unk_AD0 = rec[4] != 0;
+    func_0027C9B0((int)self->unk_6D8, buf);
+    float* fb = (float*)buf;
+    sV_3640 q;
+    q.x = fb[6];
+    q.y = fb[7];
+    q.z = fb[8];
+    q.w = one;
+    *(float*)((char*)self + 0xAF0) = fb[9] * 0.01745329424738884f;
+    *(float*)((char*)self + 0xAF4) = fb[10] * 0.01745329424738884f;
+    *(float*)((char*)self + 0xAF8) = fb[11] * 0.01745329424738884f;
+    *(sV_3640*)((char*)self + 0xAE0) = q;
+    q = MatMulV_3640((char*)self + 0x700, *(sV_3640*)((char*)self + 0xAE0));
+    *(sV_3640*)&self->mPosition = q;
+    float ry = *(float*)((char*)self + 0x744);
+    float rz = *(float*)((char*)self + 0x740);
+    func_001241C0(self, (sQuat_001241C0*)&q, zero,
+                  *(float*)((char*)self + 0xAF4) + ry,
+                  *(float*)((char*)self + 0xAF0) + rz);
+    float rx = *(float*)((char*)self + 0x748);
+    *(sV_3640*)&self->mRotation = AxisAngle_3640(D_004FF160_3640, *(float*)((char*)self + 0xAF8) + rx - 1.5707963705062866f);
+    *(sV_3640*)&self->mRotation = QuatMul_3640(q, *(sV_3640*)&self->mRotation);
+    cRider_updateOrientationImplicit(self);
+    *(sV_3640*)&self->mVelocity = D_004FF120_3640;
+    *(float*)((char*)self + 0xB04) = zero;
+    func_00111890(self->mRiderHandler);
+    initTrack_3640(self, 0x1F0, zero, zero);
+    initTrack_3640(self, 0x1FC, zero, zero);
+    initTrack_3640(self, 0x208, zero, zero);
+    initTrack_3640(self, 0x214, zero, zero);
+    initTrack_3640(self, 0x220, zero, zero);
+    initTrack_3640(self, 0x22C, zero, zero);
+    initTrack_3640(self, 0x238, zero, zero);
+    initTrack_3640(self, 0x244, zero, zero);
+    initTrack_3640(self, 0x250, zero, zero);
+    initTrack_3640(self, 0x25C, one, zero);
+    initTrack_3640(self, 0x268, zero, zero);
+    initTrack_3640(self, 0x274, zero, zero);
+    initTrack_3640(self, 0x280, zero, zero);
+    initTrack_3640(self, 0x28C, zero, zero);
+    initTrack_3640(self, 0x298, zero, zero);
+    initTrack_3640(self, 0x2A4, zero, zero);
+    initTrack_3640(self, 0x2B0, zero, zero);
+    initTrack_3640(self, 0x2BC, zero, zero);
+    initTrack_3640(self, 0x2C8, zero, zero);
+    func_0030E9E0(self->mAnimModel, 5, 0);
+    func_0030E9E0(self->mAnimModel, 6, 0);
+    func_0030E9E0(self->mAnimModel, 8, 0);
+    func_0030E9E0(self->mAnimModel, 9, 0);
+    func_0030EA80(self->mAnimModel, 4, 0);
+    func_0030EA80(self->mAnimModel, 7, 0);
+    if (rec[6] != 0) {
+        void* iface = cBE_getInterface(cBE_getBE(), 9);
+        void* tbl = func_0014BDB8_3640();
+        sDb_3640* db = (sDb_3640*)func_0014AD50(iface, self->mAIIndex);
+        int g = func_00123128(self);
+        int n = func_0014D988(tbl, g);
+        sEnt_3640* e = (sEnt_3640*)func_0014D998(tbl, g);
+        int i;
+        for (i = 0; i < n; i++, e++) {
+            int id = e->id;
+            if (id >= 0 && (e->flags & 0x40)) {
+                if (lookup_3640(db, e->item)->flags & 0x10) {
+                    func_0030EA80(self->mAnimModel, id, 0);
+                    func_0030EA80(self->mAnimModel, id, 1);
+                    func_0030EA80(self->mAnimModel, id, 2);
+                    func_0030EA80(self->mAnimModel, id, 3);
+                }
+            }
+        }
+    }
+    func_00114130(self, 0, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00123B48);
@@ -2174,7 +2520,252 @@ extern "C" void func_001241C0(cRider* self, sQuat_001241C0* out, float rx, float
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_001242B0);
+#ifdef SKIP_ASM
+struct sV_42B0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sV_42B0 D_004FF120_42B0 __asm__("D_004FF120");
+extern sV_42B0 D_004FF160_42B0 __asm__("D_004FF160");
+
+struct sRay_42B0 {
+    char data[0xB0];
+} __attribute__((aligned(16)));
+
+struct sHit_42B0 {
+    sV_42B0 pos;        // 0x00
+    sV_42B0 nrm;        // 0x10
+    sV_42B0 v20;        // 0x20
+    char pad30[0x1C];
+    int mat;            // 0x4C
+    int pad50;
+    char* obj;          // 0x54
+    char pad58[0x14];
+    float f6C;          // 0x6C
+    float f70;          // 0x70
+    char pad74[0xC];
+} __attribute__((aligned(16)));
+
+struct sVE_42B0 { short delta; short index; sV_42B0* (*fn)(void*); };
+
+extern "C" void func_0032E100(sRay_42B0* ray, const sV_42B0& a, const sV_42B0& b, int n, float t);
+extern "C" float func_003342D0(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
+void func_00111AA0_42B0(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float Length_42B0(const sV_42B0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_42B0(const sV_42B0& a, const sV_42B0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sV_42B0 Scale_42B0(const sV_42B0& v, float s)
+{
+    sV_42B0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV_42B0 Add_42B0(const sV_42B0& a, const sV_42B0& b)
+{
+    sV_42B0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV_42B0 Sub_42B0(const sV_42B0& a, const sV_42B0& b)
+{
+    sV_42B0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sV_42B0 Cross_42B0(const sV_42B0& a, const sV_42B0& b)
+{
+    sV_42B0 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV_42B0 Normalize_42B0(const sV_42B0& v)
+{
+    sV_42B0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline float DotV_42B0(sV_42B0 a, const sV_42B0& b)
+{
+    return Dot_42B0(a, b);
+}
+
+
+// Non-POD by-value vector (user copy ctor => passed by invisible reference, no callee copy).
+struct sVecP_42B0 {
+    float x, y, z, w;
+    sVecP_42B0(const sV_42B0& v) { *(sV_42B0*)this = v; }
+    sVecP_42B0(const sVecP_42B0& v) { *(sV_42B0*)this = *(const sV_42B0*)&v; }
+} __attribute__((aligned(16)));
+
+static inline sV_42B0 SubV_42B0(sVecP_42B0 a, const sV_42B0& b)
+{
+    return Sub_42B0(*(sV_42B0*)&a, b);
+}
+
+// PORT: the unit declares func_001242B0(void*, void*); this definition binds the cRider* view by asm label.
+extern "C" void func_001242B0_impl(cRider* self, void* p) __asm__("func_001242B0");
+extern "C" void func_001242B0_impl(cRider* self, void* p)
+{
+    char* o = (char*)&self->mVtbl;
+    sVE_42B0* ve = &(*(sVE_42B0**)o)[kRiderVt_getVelocity];
+    float speed = Length_42B0(*ve->fn(o + ve->delta));
+    float s = *(float*)((char*)self->mAnimModel + 0x140) * (*(float*)((char*)self + 0x1F0) * 45.0f);
+    sV_42B0 b = Add_42B0(*(sV_42B0*)p, Scale_42B0(*(sV_42B0*)((char*)self + 0x3B0), s));
+    sV_42B0 lo = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, -100.0f));
+    sV_42B0 hi = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, 200.0f));
+    sHit_42B0 hit;
+    sRay_42B0 ray;
+    func_0032E100(&ray, lo, hi, 2, 0.5f);
+    float t = func_003342D0(self->unk_860, &ray, &hit, 0);
+    *(sV_42B0*)((char*)self + 0x380) = *(sV_42B0*)&self->mGroundNormal;
+    if (t > 0.0f && hit.obj != 0) {
+        self->unk_430 = *(int*)(hit.obj + 0x150);
+        *(float*)((char*)self + 0xAAC) = hit.f6C;
+        *(float*)((char*)self + 0xAB0) = hit.f70;
+        *(unsigned short*)((char*)self + 0x2D4) = *(unsigned short*)(hit.obj + 0xA);
+    } else {
+        *(unsigned int*)&self->unk_430 = 0xFFFFFFFF;
+    }
+    if (t < 0.0f) {
+        self->unk_B00 = 0;
+        *(sV_42B0*)&self->mGroundNormal = D_004FF160_42B0;
+        *(sV_42B0*)((char*)self + 0x3D0) = D_004FF120_42B0;
+        *(sV_42B0*)((char*)self + 0x3A0) = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
+        *(sV_42B0*)((char*)self + 0x3B0) = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)((char*)self + 0x3A0));
+        *(int*)((char*)self + 0x438) = 0;
+        self->mAudioBraking = 0.0f;
+        self->mAudioEdging = 0.0f;
+        self->mAudioPressure = 0.0f;
+        self->mAudioSpeed = 0.0f;
+        *(float*)((char*)self + 0xB04) = speed;
+        return;
+    }
+    if (self->unk_AFC != 0 && self->unk_B00 == 0) {
+        func_00111AA0_42B0(self->mRiderHandler, &hit, &hit.nrm, hit.mat, Length_42B0(hit.v20));
+    }
+    self->unk_B00 = 1;
+    *(int*)((char*)self + 0x438) = hit.mat;
+    if (hit.mat == -1)
+        *(int*)((char*)self + 0x438) = 0;
+    *(sV_42B0*)&self->mGroundNormal = hit.nrm;
+    *(sV_42B0*)((char*)self + 0x460) = hit.pos;
+    *(sV_42B0*)((char*)self + 0x3D0) = hit.v20;
+    *(sV_42B0*)((char*)self + 0x3A0) = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
+    *(sV_42B0*)((char*)self + 0x3B0) = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)((char*)self + 0x3A0));
+    *(float*)((char*)self + 0x454) = Dot_42B0(Sub_42B0(b, hit.pos), *(sV_42B0*)&self->mGroundNormal);
+    float d = *(float*)((char*)self + 0xB04) - speed;
+    *(int*)&self->mAudioBraking = 0;
+    if (d < self->mAudioBraking) {
+        float v = -d * 0.0036000001709908247f;
+        self->mAudioBraking = v;
+        if (1.0f < v)
+            self->mAudioBraking = 1.0f;
+    }
+    float v2 = speed * 0.0007200000109151006f;
+    self->mAudioSpeed = v2;
+    if (1.0f < v2)
+        self->mAudioSpeed = 1.0f;
+    *(float*)((char*)self + 0xB04) = speed;
+    self->mAudioPressure = 0.30000001192092896f;
+    self->mAudioEdging = 0.0f;
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_00124788);
 
@@ -2353,7 +2944,174 @@ extern "C" void cRider_quitEvent(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125448);
+#ifdef SKIP_ASM
+extern "C" void* func_0028B180();
+extern "C" int func_002AD550(void* bank, int id, int a);
+extern "C" void func_002AD5F0(void* bank, int id, int a, float f);
+void func_00280548(void* self, int a1, void* a2, void* a3);
+extern "C" int func_00287968(void* self, int a1, int a2);
+extern "C" int func_00288A20(void* self, void* rider);
+extern "C" int func_002906B8(void* self);
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+struct sWtEnt_5448 {
+    signed char b0;
+    char pad1[3];
+    int f4[5];
+};
+
+struct sWtPair_5448 {
+    int a;
+    int b;
+};
+
+struct sWtV16_5448 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+struct sWtSub_5448 {
+    int f0;
+    sWtEnt_5448 cfg;         // 0x04
+    volatile int cur;        // 0x1C
+    sWtEnt_5448* ents;       // 0x20
+    int arr24[4];            // 0x24
+    int* p34;                // 0x34
+    int* p38;                // 0x38
+    int* p3C;                // 0x3C
+    sWtPair_5448 arr40[4];   // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sWtV16_5448* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+
+struct sWtTrack_5448 {
+    char pad0[0x1D8];
+    sWtSub_5448 sub;         // 0x1D8
+};
+
+struct sWtSnd_5448 {
+    sWtTrack_5448* track;    // 0x0
+    int* types;              // 0x4
+    int* args;               // 0x8
+    char pad[0x10C];
+    sWtTrack_5448** cur;     // 0x118
+};
+
+struct sSfxEnt_5448 {
+    int id;                  // 0x0
+    int when;                // 0x4
+    char pad8[0xC - 0x8];
+    int slot;                // 0xC
+    char pad10[0x1C - 0x10];
+    signed char* vol;        // 0x1C
+    sSfxEnt_5448* next;      // 0x20
+};
+
+
+#define MIN_5448(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_5448(a, b) ((a) < (b) ? (b) : (a))
+
+extern "C" void func_00125448(void* vself, void* vobj, float when, float b, int flags)
+{
+    cRider* self = (cRider*)vself;
+    char* obj = (char*)vobj;
+    int* ids = self->unk_B08;
+    sWtSnd_5448* snd = (sWtSnd_5448*)func_0028B180();
+    int i;
+    for (i = 0; i < 4; i++) {
+        if (ids[i] >= 0) {
+            if (func_002AD550((char*)*snd->cur + 0x1D8, ids[i], 1) == 0)
+                ids[i] = -1;
+        }
+    }
+    if (flags & 1) {
+        sSfxEnt_5448* e = *(sSfxEnt_5448**)(obj + 0xC);
+        if (e != 0) {
+        char* rp = (char*)&self->mPosition;
+        do {
+            if ((float)e->when != when)
+                return;
+            int a, type;
+            func_00280548(&self->mScriptObjRiderVtbl, e->id, &a, &type);
+            int tp = type;
+            int ar = a;
+            sWtTrack_5448* t = snd->track;
+            sWtSub_5448* s = &t->sub;
+            t->sub.cur++;
+            s->ents[t->sub.cur] = s->cfg;
+            t->sub.arr24[t->sub.cur] = 0;
+            s->p34[t->sub.cur] = 0;
+            s->p38[t->sub.cur] = s->ents[t->sub.cur].b0;
+            s->p3C[t->sub.cur] = 0;
+            func_00416210((char*)s + t->sub.cur * 8 + 0x40, 0, 8);
+            s->p60[t->sub.cur] = 0;
+            s->p64[t->sub.cur] = 0;
+            s->p68[t->sub.cur] = 0;
+            s->p6C[t->sub.cur] = 0;
+            s->p70[t->sub.cur].f4 = 0;
+            s->p70[t->sub.cur].f0 = 100;
+            s->p70[t->sub.cur].f8 = 90;
+            s->p70[t->sub.cur].fC = 50;
+            s->p74[t->sub.cur] = 0;
+            s->p80[t->sub.cur] = 0;
+            s->p84[t->sub.cur] = 0;
+            s->p78[t->sub.cur] = 0x7F;
+            s->p7C[t->sub.cur] = 1;
+            snd->types[snd->track->sub.cur] = tp;
+            snd->args[snd->track->sub.cur] = ar;
+            {
+                sWtTrack_5448* t2 = *snd->cur;
+                sWtSub_5448* s2 = &t2->sub;
+                s2->p38[t2->sub.cur] = *e->vol;
+                s2->ents[t2->sub.cur].b0 = MAX_5448(MIN_5448(s2->p38[s2->cur], 0x7F), 0);
+            }
+            {
+                sWtTrack_5448** pt = snd->cur;
+                int h = func_00287968(snd, 4, 0);
+                (*pt)->sub.p3C[(*pt)->sub.cur] = h;
+            }
+            {
+                sWtTrack_5448* t3 = *snd->cur;
+                t3->sub.arr24[t3->sub.cur] = (int)rp;
+                sWtTrack_5448** pt = snd->cur;
+                int h = func_00288A20(snd, self);
+                (*pt)->sub.p64[(*pt)->sub.cur] = h;
+            }
+            *(int*)((char*)ids + (e->slot << 2)) = func_002906B8(snd);
+            e = e->next;
+        } while (e != 0);
+        }
+    } else if (flags & 2) {
+        int keep[4];
+        int on = 1;
+        for (i = 3; i >= 0; i--)
+            keep[i] = on;
+        sSfxEnt_5448* e;
+        for (e = *(sSfxEnt_5448**)(obj + 0xC); e != 0; e = e->next)
+            keep[e->slot] = 0;
+        for (i = 0; i < 4; i++) {
+            if (keep[i] != 0) {
+                if (ids[i] >= 0) {
+                    func_002AD5F0((char*)*snd->cur + 0x1D8, ids[i], 1, 0.0f);
+                    ids[i] = -1;
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00125958);
