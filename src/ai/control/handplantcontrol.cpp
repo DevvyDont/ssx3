@@ -45,7 +45,18 @@ extern "C" void cHandplantMotion_gainFocus(char* self)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_00138BA0);
 
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139178);
+typedef int cQuad128_139178 __attribute__((mode(TI)));
+extern "C" void func_00139548(void* self);
+
+// Runs func_00139548, then copies the 16-byte vector at +0x10 into the rider (+0xA0) at +0x1E0;
+// returns the rider.
+extern "C" char* func_00139178(void* self)
+{
+    func_00139548(self);
+    char* rider = *(char**)((char*)self + 0xA0);
+    *(cQuad128_139178*)(rider + 0x1E0) = *(cQuad128_139178*)((char*)self + 0x10);
+    return rider;
+}
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_001391A8);
 

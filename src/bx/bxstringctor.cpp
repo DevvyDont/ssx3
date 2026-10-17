@@ -30,7 +30,22 @@ cBXString2* cBXString_cBXString(cBXString2* self)
     return self;
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_002688E0);
+extern "C" void cBXString__cBXString(void* self, int flags);
+void operator_delete(int*);
+extern char D_0046D8C0[];
+
+// Destructor: three cBXString members, vtable at +0xC.
+extern "C" void func_002688E0(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_0046D8C0;
+    cBXString__cBXString((char*)self + 8, 2);
+    cBXString__cBXString((char*)self + 4, 2);
+    cBXString__cBXString(self, 2);
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
 
 //100%
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -279,7 +294,13 @@ extern "C" void func_00268E28(void* self, void* a1, int a2)
     func_0025E7F0(a2 + D_004A31B8.v);
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_00268E50);
+extern sShortPad16 D_004A31D0;
+extern "C" void func_0025EB00(int);
+
+extern "C" void func_00268E50(void* self, void* a1, int a2)
+{
+    func_0025EB00(a2 + D_004A31D0.v);
+}
 
 //100%
 extern sShortPad16 D_004A3210;
@@ -1453,7 +1474,22 @@ extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
     return func_0026AB20_K2(path, 0, *t);
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026A000);
+struct sBXRange16 { int type; int f4; float lo; float hi; };
+struct sBXRangeList16 { int count; sBXRange16* items; };
+
+// 0 if a type-13 range contains x, else 1.
+extern "C" int func_0026A000(sBXRangeList16* self, float x)
+{
+    for (int i = 0; i < self->count; i++)
+    {
+        if (!(x < self->items[i].lo) && !(self->items[i].hi < x))
+        {
+            if (self->items[i].type == 13)
+                return 0;
+        }
+    }
+    return 1;
+}
 
 //100%
 void func_0026A068(void* self)
@@ -1513,7 +1549,16 @@ extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
     return func_0026AC88(self, lo, hi);
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026A138);
+// lo of the first type-1 range, or -1.
+extern "C" float func_0026A138(sBXRangeList* self)
+{
+    for (int i = 0; i < self->count; i++)
+    {
+        if (self->items[i].field_0x0 == 1)
+            return self->items[i].min;
+    }
+    return -1.0f;
+}
 
 //100%
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
@@ -1651,9 +1696,32 @@ done:
     return out;
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026A920);
+struct sBXKey16 { int a; int b; int pad[2]; };
+struct sBXKeyList { int count; sBXKey16* items; };
 
-INCLUDE_ASM("bx/bxstringctor", func_0026A970);
+// The entry whose keys are (a, b), or 0.
+extern "C" sBXKey16* func_0026A920(sBXKeyList* self, int a, int b)
+{
+    sBXKey16* e = self->items;
+    for (int i = 0; i < self->count; i++, e++)
+    {
+        if (e->a == a && e->b == b)
+            return e;
+    }
+    return 0;
+}
+
+// The entry whose first key is a, or 0.
+extern "C" sBXKey16* func_0026A970(sBXKeyList* self, int a)
+{
+    sBXKey16* e = self->items;
+    for (int i = 0; i < self->count; i++, e++)
+    {
+        if (e->a == a)
+            return e;
+    }
+    return 0;
+}
 
 //100%
 struct sBXBox {
@@ -1843,7 +1911,25 @@ extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
     return 0;
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026AD00);
+struct sBXBox2 {
+    char pad_0x00[0x1C];
+    float min[3]; // 0x1C
+    float max[3]; // 0x28
+};
+
+// Whether the XY rectangle [lo, hi] overlaps the box's XY extent.
+extern "C" int func_0026AD00(sBXBox2* self, float* lo, float* hi)
+{
+    if (hi[0] < self->min[0])
+        return 0;
+    if (hi[1] < self->min[1])
+        return 0;
+    if (lo[0] > self->max[0])
+        return 0;
+    if (lo[1] > self->max[1])
+        return 0;
+    return 1;
+}
 
 //100%
 extern "C" void func_0026ADF0(void* self);
@@ -1861,7 +1947,14 @@ void func_0026ADA0(void* self)
 {
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
+extern "C" int func_003E22F0(void* p, int v);
+
+extern "C" void func_0026ADA8(void* self, void* name)
+{
+    *(int*)((char*)self + 0x48) = func_003E22F0(name, 0);
+    *(int*)((char*)self + 0x4C) = 1;
+    func_0026ADF0(self);
+}
 
 extern "C" int func_0026ADE8(void* self)
 {
