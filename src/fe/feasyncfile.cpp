@@ -5402,7 +5402,64 @@ extern "C" void func_001AD9C8(void* self, void* a1, int a2)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001ADA30);
+extern "C" void func_001ADC30(void* self, int msg);
+extern char D_00462F58[];
+extern char D_00462F78[];
+extern "C" int func_001A8E40_DA30(void* self, int id, void* msg) __asm__("func_001A8E40");
+
+struct sVEntry001ADA30 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+
+// Async-file screen message handler: online setup popups, refresh, and the trophy screen.
+extern "C" int func_001ADA30(char* self, int id, void* msg)
+{
+    switch (id) {
+    case 0xD9: {
+        char* p = (char*)func_001A9C50(self);
+        *(int*)(p + 0xBC) = 0;
+        *(int*)(p + 0xC4) = GetHashValue32(D_00462F58);
+        *(int*)(p + 0xC0) = 3;
+        *(int*)(p + 0x164) = 0;
+        *(int*)(p + 0x150) = 0x817;
+        func_001A9BC0(self, p);
+        break;
+    }
+    case 0x104: {
+        func_00261408(GetSession_001AD5E8());
+        func_0025B800(D_004A3028);
+        char* p = (char*)func_001A9C50(self);
+        *(int*)(p + 0xBC) = 1;
+        char* sub = p + 0xBC;
+        *(int*)(p + 0xC4) = GetHashValue32(D_00462F78);
+        *(int*)(p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+        *(int*)(p + 0x164) = 0;
+        *(int*)(p + 0x150) = 0x819;
+        func_001A9BC0(self, p);
+    }
+    case 0xD6:
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+    case 0xD8: {
+        sVEntry001ADA30* vt = *(sVEntry001ADA30**)(self + 8);
+        vt[18].fn(self + vt[18].delta, cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462E00)));
+        break;
+    }
+    case 0x102:
+        func_001ADC30(self, (int)msg);
+        break;
+    case 0x111:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
+        break;
+    default:
+        return func_001A8E40_DA30(self, id, msg);
+    case 0xE1:
+        break;
+    }
+    return -1;
+}
 
 //100%
 int GetHashValue32(char* str);
