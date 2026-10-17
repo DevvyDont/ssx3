@@ -1291,7 +1291,36 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
     }
 }
 
-INCLUDE_ASM("fe/festateoptions", func_0018CCE0);
+//100%
+extern "C" int func_00147618(void* iface, int a1);
+extern "C" void func_0018CF50(void* self, int a1);
+
+extern "C" int func_0018CCE0(void* self, void* w, unsigned int msg)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    switch (msg) {
+    case 9:
+        return 0x100;
+    case 5: {
+        int k;
+        switch (*(unsigned char*)((char*)w + 0x95)) {
+        case 2:
+            k = 0;
+            break;
+        case 3:
+            k = 1;
+            break;
+        default:
+            return 0x101;
+        }
+        func_0018CF50(self, func_00147618(iface, k) == 0);
+        break;
+    }
+    case 6:
+        return 0;
+    }
+    return 0x101;
+}
 
 //100%
 extern "C" int func_0018CDB0(void* self, int a1, int a2)
@@ -2104,4 +2133,13 @@ extern "C" void func_0018E478(void* self)
 INCLUDE_ASM("fe/festateoptions", func_0018E510);
 
 
-INCLUDE_ASM("fe/festateoptions", func_0018EA98);
+//100%
+extern void* D_0046C158[];
+
+extern "C" void* func_0018EA98(void* self)
+{
+    func_0039E2A0(self);
+    *(int*)((char*)self + 0xC) = 8;
+    *(void***)((char*)self + 0x8) = D_0046C158;
+    return self;
+}

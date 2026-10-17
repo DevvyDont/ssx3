@@ -769,8 +769,42 @@ extern "C" void* func_00212680(void* p, ...)
     return p;
 }
 
-INCLUDE_ASM("fe/ovstateprofile", func_002126C0);
+//100%
+extern "C" int func_002126C0(const signed char* a, const signed char* ae, const signed char* b, const signed char* be)
+{
+    for (; a != ae && b != be; ++a, ++b) {
+        if (*a < *b) return 1;
+        if (*b < *a) return 0;
+    }
+    return a == ae && b != be;
+}
 
-INCLUDE_ASM("fe/ovstateprofile", func_00212728);
+//100%
+extern "C" int func_00212728(const signed char* a, const signed char* ae, const signed char* b, const signed char* be)
+{
+    while (a != ae && b != be) {
+        if (*a < *b) return -1;
+        if (*b < *a) return 1;
+        ++a;
+        ++b;
+    }
+    if (b == be) return !(a == ae);
+    return -1;
+}
 
-INCLUDE_ASM("fe/ovstateprofile", func_00212788);
+//100%
+extern "C" void operator_delete__FPi(void*);
+struct sListNode_212788 { sListNode_212788* next; sListNode_212788* prev; };
+
+extern "C" void func_00212788(void* self)
+{
+    sListNode_212788* head = *(sListNode_212788**)((char*)self + 4);
+    sListNode_212788* cur = head->next;
+    while (cur != *(sListNode_212788**)((char*)self + 4)) {
+        sListNode_212788* tmp = cur;
+        cur = cur->next;
+        operator_delete__FPi(tmp);
+    }
+    (*(sListNode_212788**)((char*)self + 4))->next = *(sListNode_212788**)((char*)self + 4);
+    (*(sListNode_212788**)((char*)self + 4))->prev = *(sListNode_212788**)((char*)self + 4);
+}

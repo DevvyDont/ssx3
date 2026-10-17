@@ -711,7 +711,21 @@ extern "C" void func_00208588(void* self)
     func_0020A430(self);
 }
 
-INCLUDE_ASM("fe/uitemplatemap", func_002085B8);
+//100%
+extern "C" int func_002018A8(void* self);
+extern "C" int func_0039F190(void* list, int a1);
+
+struct sFlags_2085B8 { unsigned int b0 : 7; unsigned int b7 : 1; unsigned int b8 : 6; };
+
+extern "C" void func_002085B8(void* self)
+{
+    if (func_002018A8((char*)self + 0x9C) == 1) {
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        sFlags_2085B8* f = (sFlags_2085B8*)((char*)self + 0x1C);
+        f->b8 = 7;
+        f->b7 = 1;
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int func_00208610(void* self, int a1, int a2)

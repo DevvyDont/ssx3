@@ -286,7 +286,51 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
     }
 }
 
-INCLUDE_ASM("fe/ovstatelodge", func_001D2EA0);
+//100%
+struct sVE1_1D2EA0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sW_1D2EA0 {
+    int pad0[2];
+    sVE1_1D2EA0* vt;
+};
+struct sVEv_1D2EA0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sObj_1D2EA0 {
+    int pad0[2];
+    sVEv_1D2EA0* vt;
+    int padC[2];
+    int f14;
+};
+struct sIfc_1D2EA0 {
+    sVEv_1D2EA0* vt;
+};
+extern sIfc_1D2EA0 D_004A5A58;
+
+extern "C" int func_001D2EA0(void* self, sW_1D2EA0* w)
+{
+    sObj_1D2EA0* o = *(sObj_1D2EA0**)((char*)self + 0x48);
+    int on = 0;
+    if (o != 0) {
+        on = (o->f14 >> 6) & 1;
+    }
+    if (on) {
+        if (w->vt[6].fn((char*)w + w->vt[6].delta) != 0) {
+            sIfc_1D2EA0* ifc = *(sIfc_1D2EA0**)(*(char**)((char*)self + 0x10) + 0x14);
+            if (ifc == 0) ifc = &D_004A5A58;
+            ifc->vt[2].fn((char*)ifc + ifc->vt[2].delta, 3);
+            sObj_1D2EA0* o2 = *(sObj_1D2EA0**)((char*)self + 0x48);
+            o2->vt[9].fn((char*)o2 + o2->vt[9].delta, 0);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("fe/ovstatelodge", func_001D2F40);
 
@@ -318,7 +362,60 @@ extern "C" void func_001D3160(void* self)
     }
 }
 
-INCLUDE_ASM("fe/ovstatelodge", func_001D31C0);
+//100%
+extern "C" int func_0019E238(void* self, int bank, int handle);
+extern "C" char* func_0019E2B0(void* self, int bank, int handle);
+extern "C" void func_001D32E0(void* self);
+extern char D_004A1F40[];
+struct sVE_1D31C0 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, const char*, int, int, int);
+};
+struct sObj_1D31C0 {
+    int pad0[5];
+    int f14;
+};
+
+static inline int vis_1D31C0(sObj_1D31C0* o)
+{
+    int on = 0;
+    if (o != 0) {
+        on = (o->f14 >> 6) & 1;
+    }
+    return on;
+}
+static inline int both_1D31C0(char* s)
+{
+    int r = 0;
+    if (vis_1D31C0(*(sObj_1D31C0**)(s + 0x48))) {
+        sObj_1D31C0* b = (*(sObj_1D31C0**)(s + 0x4C));
+        if (b != 0) r = (b->f14 >> 6) & 1;
+    }
+    return r;
+}
+extern "C" void func_001D31C0(void* self)
+{
+    char* s = (char*)self;
+    char* bank = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    if (*(void**)(s + 0x50) == 0) return;
+    if (func_0019E238(bank, *(int*)(s + 0xB0), *(int*)(s + 0xBC)) == 0) return;
+    char* item = func_0019E2B0(bank, *(int*)(s + 0xB0), *(int*)(s + 0xBC));
+    char* g = (char*)D_004A289C;
+    sVE_1D31C0* vt = *(sVE_1D31C0**)(g + 0x10D8);
+    int id = vt[46].fn(g + vt[46].delta, item + *(int*)(item + 0x14), D_004A1F40, 0, 1, -1);
+    *(int*)(s + 0xC4) = id;
+    char* o = *(char**)(s + 0x50);
+    *(int*)(o + 0x78) = id;
+    *(int*)(o + 0x7C) = 0;
+    if (vis_1D31C0(*(sObj_1D31C0**)(s + 0x48))) {
+        if (!both_1D31C0(s)) {
+            func_001D32E0(self);
+        }
+    }
+    func_0019DC20(bank, *(int*)(s + 0xB0), *(int*)(s + 0xBC));
+    *(int*)(s + 0xBC) = -1;
+}
 
 //100%
 struct sVEntry_func_001D32E0 {

@@ -940,7 +940,32 @@ extern "C" void func_00209E78(void* p)
     }
 }
 
-INCLUDE_ASM("fe/ovstatemap", func_00209FD0);
+//100%
+static inline void hide_9FD0(sObj00208BB8* o)
+{
+    if (o != 0) {
+        o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+    }
+}
+
+struct sMap_9FD0 {
+    char pad0[0xC0];
+    int count;
+    char padC4[0x20];
+    sObj00208BB8* a[8];
+    sObj00208BB8* b[8];
+};
+
+extern "C" void func_00209FD0(void* self)
+{
+    char* s = (char*)self;
+    hide_9FD0(*(sObj00208BB8**)(s + 0xE0));
+    sMap_9FD0* m = (sMap_9FD0*)self;
+    for (int i = 0; i < m->count; i++) {
+        hide_9FD0(m->a[i]);
+        hide_9FD0(m->b[i]);
+    }
+}
 
 //100%
 class cUIObj_A088 {

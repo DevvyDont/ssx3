@@ -195,7 +195,31 @@ extern "C" void func_00233640(void* self, int type)
     cBigFile__cBigFile(&bf, 2);
 }
 
-INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
+//100%
+extern "C" void func_00369FF8(void* self);
+extern "C" void func_00228238(void* self);
+extern "C" void func_0028F768(void* self);
+extern "C" void* func_0028B180();
+extern int D_004A4324;
+struct sVE_2338C8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+struct sZero_2338C8 { int a; int b; int c; };
+
+struct sZeroC_2338C8 { int a; int b; int c; sZeroC_2338C8() : a(0), b(0), c(0) {} };
+
+extern "C" void func_002338C8(void)
+{
+    func_00369FF8(D_004A289C);
+    func_00228238(D_004A28A8);
+    *(int*)&D_004A4324 = 0;
+    char* g = (char*)D_004A289C;
+    sVE_2338C8* vt = *(sVE_2338C8**)(g + 0x10D8);
+    vt[15].fn(g + vt[15].delta, &sZeroC_2338C8());
+    func_0028F768(func_0028B180());
+}
 
 //100%
 struct cGame00233930 {
@@ -334,7 +358,13 @@ extern "C" void func_00233AA0(void* self)
     }
 }
 
-INCLUDE_ASM("fe/festateloadscreen", func_00233AD0);
+//100%
+void func_00231278(void* self, int val);
+
+extern "C" void func_00233AD0(void* self, int val)
+{
+    func_00231278(D_004A2C68, val);
+}
 
 //100%
 struct sVEntry_func_00233AF0 {

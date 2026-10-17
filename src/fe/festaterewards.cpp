@@ -2032,7 +2032,31 @@ extern "C" void func_001D2198(void* self)
     }
 }
 
-INCLUDE_ASM("fe/festaterewards", func_001D22F0);
+//100%
+extern "C" void func_00253390(void* self);
+extern void* D_00469928[];
+
+extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx)
+{
+    char* s = (char*)self;
+    char* b0 = s + 0x48;
+    func_0039E318(self, engine, owner);
+    *(signed char*)(s + 0x44) = idx;
+    *(char*)(s + 0x48) = 0;
+    *(char*)(s + 0x148) = 0;
+    *(int*)(s + 0x274) = 0;
+    *(int*)(s + 0x278) = 0;
+    *(int*)(s + 0x27C) = 0;
+    *(int*)(s + 0x248) = 0;
+    *(void***)(s + 0x8) = D_00469928;
+    *(int*)(s + 0xC) = 6;
+    *(int*)(s + 0x270) = 1;
+    char* b1 = s + 0x148;
+    func_00253390(s + 0x24C);
+    *(char**)(s + 0x24C) = b0;
+    *(char**)(s + 0x250) = b1;
+    return self;
+}
 
 //100%
 extern "C" void func_00253418(void* p, int a1);
