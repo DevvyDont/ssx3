@@ -125,7 +125,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B4478);
 
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cloneat);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4690);
+// Clones a shape: looks up its size, allocates through the registered allocator and copies it in.
+extern int func_003B4478_4690(char *) __asm__("func_003B4478");
+extern char *(*D_0044C454_4690)(char *, int, int, int, int) __asm__("D_0044C454");
+extern void SHAPE_cloneat_4690(char *, char *) __asm__("SHAPE_cloneat");
+char *func_003B4690(char *shape) {
+    int size = func_003B4478_4690(shape);
+    char *p = D_0044C454_4690(f_3A10_3900(shape), size, 0, 0x10, 0x400);
+    SHAPE_cloneat_4690(p, shape);
+    return p;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4708);
 
@@ -882,7 +891,24 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7080);
+// Dispatches a channel message: 'SCDl' and 'SCHl' are handled locally, anything else goes to the channel handler.
+extern int *D_0050A0A0_7080[] __asm__("D_0050A0A0");
+extern void func_003B6EA8_7080(int *, int *) __asm__("func_003B6EA8");
+extern void func_003B6BD0_7080(int, int *) __asm__("func_003B6BD0");
+extern void func_003E13E8_7080(int, int *) __asm__("func_003E13E8");
+int func_003B7080(int ch, int *msg) {
+    int *p = D_0050A0A0_7080[ch];
+    int id = *msg;
+    if (id == 0x6C444353) {
+        func_003B6EA8_7080(p, msg);
+    } else if (id == 0x6C484353) {
+        func_003B6BD0_7080(ch, msg);
+        return 0;
+    } else {
+        func_003E13E8_7080(*p, msg);
+    }
+    return 1;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B70F8);
 
@@ -3806,7 +3832,15 @@ void func_003C6040(int arg0) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C60E0);
+// When enabled, calls each registered update callback in turn.
+struct G_60E0 { char p[0x174]; signed char on; char p1[3]; signed char n; char p2[0x19C - 0x179]; void (*fn[1])(void); };
+extern struct G_60E0 D_0050A8E8_60E0 __asm__("D_0050A8E8");
+void func_003C60E0(void) {
+    int i;
+    if (D_0050A8E8_60E0.on) {
+        for (i = 0; i < D_0050A8E8_60E0.n; i++) D_0050A8E8_60E0.fn[i]();
+    }
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6158);
 
