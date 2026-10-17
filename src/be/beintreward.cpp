@@ -1597,7 +1597,168 @@ extern "C" void func_00159C68(void* self, int rider, int bit)
     func_00159CD0(self, profile, cBELibrary_getCharacterID(rider), bit);
 }
 
-INCLUDE_ASM("be/beintreward", func_00159CD0);
+//100%
+extern "C" void func_001E2578();
+extern "C" void func_001E2518();
+extern "C" void func_001E2428(int);
+extern "C" void func_001E38B8(int);
+extern "C" int func_0014B560(void*, int, int, int, int);
+extern "C" void func_0015A358(void* self, int bit, unsigned char* bits);
+struct sI4_9CD0 { int v[4]; };
+extern sI4_9CD0 D_0045AA28_9CD0 __asm__("D_0045AA28");
+struct sI2_9CD0 { int v[2]; };
+extern int D_004A1268_9CD0[] __asm__("D_004A1268");
+
+extern "C" void func_00159CD0(void* self, int a, int b, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88;
+    sReward_0015A628* q = (sReward_0015A628*)D_004C3EF0;
+    sI4_9CD0 t1 = D_0045AA28_9CD0;
+    sI2_9CD0 t2 = *(sI2_9CD0*)D_004A1268_9CD0;
+    int x = -1;
+    int code = 0;
+    int i, j;
+
+    if (!((unsigned)(bit - 0x11) < 3)) {
+        if (func_0015A2E0(self, a, b, bit)) {
+            return;
+        }
+    }
+
+    switch (bit) {
+    case 0:
+        func_001E2578();
+        code = 0x1D;
+        break;
+    case 1:
+        func_001E2518();
+        code = 0x18;
+        break;
+    case 2:
+        func_001E2428(0);
+        code = 0x12;
+        break;
+    case 3:
+        func_001E2428(1);
+        code = 0x19;
+        break;
+    case 4:
+        func_001E2428(2);
+        code = 0x1A;
+        break;
+    case 5:
+    case 8:
+    case 11:
+    case 14:
+        for (i = 0; i < 4; i++) {
+            t1.v[i] = func_00157080(self, a, b, 4);
+            if (t1.v[i] < 0) {
+                break;
+            }
+            func_001580F8_jt(self, a, b, t1.v[i], 0);
+            func_0015A628(q, bit, 4, t1.v[i]);
+        }
+        {
+            int r = func_00157080(self, a, b, 3);
+            if (r >= 0) {
+                func_00157FD0_jt(self, a, b, r, 0);
+                func_0015A628(q, bit, 3, r);
+            }
+        }
+        if (bit == 0xB) {
+            func_001E38B8(a);
+        }
+        func_00158F60(self, a, b, bit, 1);
+        break;
+    case 6:
+    case 9:
+    case 12:
+    case 15:
+        {
+            int r = func_00157080(self, a, b, 7);
+            if (r >= 0) {
+                func_00158348_jt(self, a, b, r, 0);
+                func_0015A628(q, bit, 7, r);
+            }
+        }
+        for (i = 0; i < 2; i++) {
+            t2.v[i] = func_00157080(self, a, b, 5);
+            if (t2.v[i] < 0) {
+                break;
+            }
+            func_00158220_jt(self, a, b, t2.v[i], 0);
+            func_0015A628(q, bit, 5, t2.v[i]);
+        }
+        if (bit == 0xC) {
+            func_001E38B8(a);
+        }
+        func_00158F60(self, a, b, bit, 2);
+        break;
+    case 7:
+        code = 0x1B;
+        break;
+    case 10:
+        code = 0x17;
+        break;
+    case 13:
+        code = 0x1C;
+        break;
+    case 16:
+        code = 0x15;
+        break;
+    case 17:
+        x = func_00156C70(self, a, b, 0);
+        break;
+    case 18:
+        x = func_00156C70(self, a, b, 1);
+        break;
+    case 19:
+        x = func_00156C70(self, a, b, 2);
+        break;
+    case 20: case 21: case 22: case 23: case 24: case 25:
+    case 26: case 27: case 28: case 29: case 30: case 31:
+        x = func_00156EE0(self, a, b);
+        break;
+    }
+
+    func_0015A358(self, bit, (unsigned char*)(p + 0xF28));
+    if (code) {
+        func_0015A628(q, bit, 8, code);
+        func_00158618_jt(self, a, b, code, 0);
+    }
+    if (x != -1) {
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+        func_0015A628(q, bit, 9, x);
+        func_0014B560(iface, a, b, x, 0);
+    }
+    if (func_001577E0(self, a, b)) {
+        if (func_0015A2E0(self, a, b, 0) == 0) {
+            func_00159CD0(self, a, b, 0);
+        }
+    }
+    if (func_001578A0(self, a, b)) {
+        if (func_0015A2E0(self, a, b, 1) == 0) {
+            func_00159CD0(self, a, b, 1);
+        }
+    }
+    for (j = 0; j < 3; j++) {
+        if (func_00157A78(self, a, b, j)) {
+            if (func_0015A2E0(self, a, b, j + 2) == 0) {
+                func_00159CD0(self, a, b, j + 2);
+            }
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 4; j++) {
+            int bb = func_00159080(self, a, b, i, j);
+            if (func_00157BF0(self, a, b, i, j)) {
+                if (func_0015A2E0(self, a, b, bb) == 0) {
+                    func_00159170(self, a, b, i, j);
+                }
+            }
+        }
+    }
+}
 
 //100%
 extern int D_004A6CA8[];
