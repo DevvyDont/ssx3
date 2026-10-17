@@ -195,7 +195,170 @@ extern "C" int func_001F8908(void* self, int a1, unsigned int a2)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetEvent);
+//100%
+class cUIText;
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" void func_0020AB50(int id);
+extern "C" void* func_00195FF0(void* self, void* engine, signed char idx, int a3);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
+extern "C" void* func_0028B180_8960() __asm__("func_0028B180");
+extern "C" void func_00289BB8(void* self);
+extern "C" void func_001F8DF8(void* self, int idx, int on);
+extern void* D_004A28A8;
+extern char D_004A5A58;
+extern char D_004A2470[];
+extern char D_004A2480[];
+extern char D_0046F860[];
+extern char* D_00441BF8[];
+extern int D_004A2708;
+extern unsigned int D_004A2594;
+extern char D_004C8AE8[];
+extern char D_004C8AF8[];
+extern char D_004C8B08[];
+extern char D_004C8B18[];
+
+struct sVEi_8960 { short delta; short index; int (*fn)(void*, ...); };
+struct sVEv_8960 { short delta; short index; void (*fn)(void*, int); };
+struct sStFlags_8960 { char pad[0x1C]; unsigned int lo : 8; unsigned int mode : 6; };
+
+extern "C" void func_0039F190_v(void* self, int a1) __asm__("func_0039F190");
+struct sOn_8960 { char pad[0xD8]; int on[1]; };
+extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(char* self, char* w, int ev)
+{
+    if (w == 0) {
+        return;
+    }
+    switch (ev) {
+    case 5: {
+        char* l = &D_004A5A58;
+        char* p = *(char**)(*(char**)(self + 0x10) + 0x14);
+        if (p) {
+            l = p;
+        }
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0xC0), GetHashValue32(D_004A2470));
+        if (((sOn_8960*)self)->on[*(int*)(w + 0x18)] == 0) {
+            sVEv_8960* vt = *(sVEv_8960**)l;
+            vt[2].fn(l + vt[2].delta, 4);
+            return;
+        }
+        sVEv_8960* vt = *(sVEv_8960**)l;
+        vt[2].fn(l + vt[2].delta, 6);
+        D_004A2468 = *(unsigned char*)(o + 0x95);
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0xC0), GetHashValue32(D_0046F850));
+        cUIScreen_playFrame(*(void**)(self + 0xC0), frame, 1);
+        *(int*)(self + 0xD0) = 1;
+        switch (*(int*)(w + 0x18)) {
+        case 1:
+            if (D_004A2EEC) {
+                func_00258790(D_004A2EEC, 0);
+                char* g = D_004A2EEC;
+                *(int*)(g + 0x68) = -1;
+                *(int*)(g + 0x64) = -1;
+            }
+            func_0020D190();
+            func_0039F190_r(*(char**)(self + 0x10) + 0x18, 1);
+            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            func_00289BB8(func_0028B180_8960());
+            break;
+        case 2:
+            D_004A2708 = 1;
+            func_0020AB50(0x17);
+            break;
+        case 3:
+            func_0020AB50(7);
+            break;
+        case 4: {
+            char* ui = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+            sStFlags_8960* st = (sStFlags_8960*)func_00195FF0(cMemMan_alloc(0x80, D_0046F860, 0, 0), ui, 0, 0);
+            st->mode = 1;
+            cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
+            break;
+        }
+        case 5:
+        case 13:
+            func_0020AB50(0x18);
+            break;
+        case 6:
+            func_0020AB50(0x1C);
+            break;
+        case 7:
+            func_0020AB50(0x19);
+            break;
+        case 8:
+            func_0020AB50(0x1A);
+            break;
+        case 9:
+            func_0020AB50(0x1B);
+            break;
+        case 10:
+            func_0020AB50(0x20);
+            break;
+        case 11:
+            D_004A2594 = 2;
+            func_0020AB50(0x21);
+            break;
+        case 12:
+            func_0020AB50(0x22);
+            break;
+        }
+        break;
+    }
+    case 6: {
+        if (D_004A2EEC) {
+            func_00258790(D_004A2EEC, 0);
+            char* g = D_004A2EEC;
+            *(int*)(g + 0x68) = -1;
+            *(int*)(g + 0x64) = -1;
+        }
+        func_0020D190();
+        char* q = *(char**)(self + 0x10);
+        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        func_0039F190_r(q + 0x18, 1);
+        func_00289BB8(func_0028B180_8960());
+        break;
+    }
+    case 1: {
+        if (*(int*)(self + 0xD0) == 0) {
+            if (((sOn_8960*)self)->on[*(int*)(w + 0x18)]) {
+                sVEi_8960* vt = *(sVEi_8960**)(w + 8);
+                vt[11].fn(w + vt[11].delta, D_004C8AF8);
+            } else {
+                sVEi_8960* vt = *(sVEi_8960**)(w + 8);
+                vt[11].fn(w + vt[11].delta, D_004C8AE8);
+            }
+            if (*(int*)(self + 0xD0) == 0) {
+                func_001F8DF8(self, *(int*)(w + 0x18), 1);
+            }
+        }
+        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xC0), GetHashValue32(D_004A2480));
+        if (t) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00441BF8[*(int*)(w + 0x18)]));
+        }
+        break;
+    }
+    case 2:
+        if (*(int*)(self + 0xD0) == 0) {
+            if (((sOn_8960*)self)->on[*(int*)(w + 0x18)]) {
+                sVEi_8960* vt = *(sVEi_8960**)(w + 8);
+                vt[11].fn(w + vt[11].delta, D_004C8B18);
+            } else {
+                sVEi_8960* vt = *(sVEi_8960**)(w + 8);
+                vt[11].fn(w + vt[11].delta, D_004C8B08);
+            }
+            if (*(int*)(self + 0xD0) == 0) {
+                func_001F8DF8(self, *(int*)(w + 0x18), 0);
+            }
+        }
+        break;
+    case 3:
+    case 4:
+    case 7:
+    case 8:
+        break;
+    }
+}
+
 
 //100%
 int func_001F8DF0(void* self)
