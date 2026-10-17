@@ -35,7 +35,22 @@ extern "C" void* cWScriptMan_addProcess1(void* self, int a1, int a2, int a3, int
 
 INCLUDE_ASM("wscript/wscriptman", func_00309618);
 
-INCLUDE_ASM("wscript/wscriptman", func_003096F0);
+struct cWScriptListHead;
+struct cWScriptListNode;
+extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
+
+extern "C" void* func_003096F0(char* self, void* key)
+{
+    void* r = (void*)func_0030B2D0((cWScriptListHead*)(self + 0x2B8), (cWScriptListNode*)key);
+    if (r != 0) {
+        return r;
+    }
+    r = (void*)func_0030B2D0((cWScriptListHead*)(self + 0x2B4), (cWScriptListNode*)key);
+    if (r != 0) {
+        return r;
+    }
+    return (void*)func_0030B2D0((cWScriptListHead*)(self + 0x2BC), (cWScriptListNode*)key);
+}
 
 //100%
 struct sVEntry00309750 {
@@ -259,7 +274,35 @@ extern "C" float func_00309BA8(void* self)
     return 0.0f;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_00309C88);
+extern "C" int func_003A6D18(void*, int*);
+struct func_00309DD0_sValue;
+struct func_00309C88_sValue {
+    int word0;
+    int word1;
+    int type;
+};
+struct func_00309C88_sCall {
+    int pad[4];
+};
+
+void func_00226600(void* self, int a1, int a2);
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+
+extern "C" void func_00309C88(void* self, int* handle)
+{
+    func_00309C88_sValue arg;
+    func_00309C88_sValue ret;
+    func_00309C88_sCall call;
+    func_00226600(&arg, func_003A6D18(*(void**)((char*)self + 0x28C), handle), 0);
+    ret.type = 0;
+    ret.word0 = 0;
+    void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
+    func_002224A8(&call);
+    func_002224B8(&call, &arg, table, &ret);
+    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+}
 
 //100%
 struct func_00309DD0_sValue;
@@ -1291,7 +1334,18 @@ extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node)
     return 0;
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030B458);
+extern "C" char* func_0030B458(char* self, unsigned int id)
+{
+    char* r = func_0030B388_A868(self + 0x2B8, id);
+    if (r != 0) {
+        return r;
+    }
+    r = func_0030B388_A868(self + 0x2B4, id);
+    if (r != 0) {
+        return r;
+    }
+    return func_0030B388_A868(self + 0x2BC, id);
+}
 
 //100%
 void func_0030B4B8(void* self)
@@ -1365,9 +1419,31 @@ extern "C" void func_0030B540(void* self)
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
 }
 
-INCLUDE_ASM("wscript/wscriptman", func_0030B590);
+extern "C" void func_0026CDF8(void* p);
+extern "C" void func_0026F228(void* p);
+extern "C" int func_0026CAF8(void* p, int a);
 
-INCLUDE_ASM("wscript/wscriptman", func_0030B608);
+extern "C" int func_0030B590(char* self)
+{
+    func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    if (func_0026CAF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34), *(int*)(self + 0x2A0)) != 0) {
+        *(int*)(self + 0x2AC) = 5;
+        *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
+        return 1;
+    }
+    return 0;
+}
+
+void func_0026CBB0(void* p);
+
+extern "C" void func_0030B608(char* self)
+{
+    func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    func_0026CBB0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
+    *(int*)(self + 0x2AC) = 6;
+    *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
+}
 
 //100%
 extern char* D_004A28A8;

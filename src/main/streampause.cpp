@@ -21,11 +21,55 @@ extern "C" void* func_00242D50(void* p, ...)
     return p;
 }
 
-INCLUDE_ASM("main/streampause", func_00242D90);
+extern "C" int func_00242D90(const signed char* a, const signed char* b, const signed char* c, const signed char* d)
+{
+    for (; a != b && c != d; ++a, ++c) {
+        if (*a < *c) {
+            return 1;
+        }
+        if (*c < *a) {
+            return 0;
+        }
+    }
+    return a == b && c != d;
+}
 
-INCLUDE_ASM("main/streampause", func_00242DF8);
+extern "C" int func_00242DF8(const signed char* a, const signed char* b, const signed char* c, const signed char* d)
+{
+    while (a != b && c != d) {
+        if (*a < *c) {
+            return -1;
+        }
+        if (*c < *a) {
+            return 1;
+        }
+        ++a;
+        ++c;
+    }
+    if (c == d) {
+        return !(a == b);
+    }
+    return -1;
+}
 
-INCLUDE_ASM("main/streampause", func_00242E58);
+void operator_delete(int* ptr);
+
+struct sSPNode2E58 {
+    sSPNode2E58* next;
+    sSPNode2E58* prev;
+};
+
+extern "C" void func_00242E58(char* self)
+{
+    sSPNode2E58* n = (*(sSPNode2E58**)(self + 4))->next;
+    while (n != *(sSPNode2E58**)(self + 4)) {
+        sSPNode2E58* t = n;
+        n = n->next;
+        operator_delete((int*)t);
+    }
+    (*(sSPNode2E58**)(self + 4))->next = *(sSPNode2E58**)(self + 4);
+    (*(sSPNode2E58**)(self + 4))->prev = *(sSPNode2E58**)(self + 4);
+}
 
 INCLUDE_ASM("main/streampause", func_00242EB8);
 
@@ -60,7 +104,13 @@ extern "C" void func_00243838(void* self, int flags)
 }
 
 
-INCLUDE_ASM("main/streampause", func_002438B0);
+extern "C" void func_002438B0(void* self, int flags)
+{
+    *(void***)self = D_0046D970;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
 
 extern "C" void func_002438E0()
 {

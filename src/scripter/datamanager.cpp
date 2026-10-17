@@ -769,11 +769,31 @@ extern "C" int func_00276998(void* self, int i)
     return 0x1C;
 }
 
-INCLUDE_ASM("scripter/datamanager", func_00276A08);
+extern "C" int func_00276A08(char* self, int i)
+{
+    if (i < func_00283D28_count(self + 0xC)) {
+        if (*(int*)func_00283D70(self + 0xC, i) < 0x1D) {
+            return 0x20;
+        }
+        return *(int*)func_00283D70(self + 0xC, i);
+    }
+    return 0x20;
+}
 
 INCLUDE_ASM("scripter/datamanager", func_00276A78);
 
-INCLUDE_ASM("scripter/datamanager", func_00276B08);
+extern "C" void* func_00282BF0(void* p, int a);
+
+extern "C" void* func_00276B08(char* self, int i)
+{
+    if (i < func_00283D28_count(self + 0xC)) {
+        char* e = (char*)func_00283D70(self + 0xC, i);
+        if (func_00277DD8(self, e) == 0 && *(int*)(e + 0xC) >= 0) {
+            return func_00282BF0(*(void**)self, *(int*)(e + 0xC));
+        }
+    }
+    return 0;
+}
 
 //100%
 extern "C" void func_00277778(void* self);
@@ -983,9 +1003,27 @@ extern "C" int func_002770C0(void* self)
     return (*(int*)((char*)e + 0x8) >> 2) & 1;
 }
 
-INCLUDE_ASM("scripter/datamanager", func_00277100);
+extern "C" int func_00282798(void* p, int a);
 
-INCLUDE_ASM("scripter/datamanager", func_002771A8);
+extern "C" int func_00277100(char* self)
+{
+    if (*(int*)(self + 0xA4) == 1) {
+        return 0;
+    }
+    if (*(int*)(self + 0xBC) < 0) {
+        return 1;
+    }
+    char* e = (char*)func_00283D70(self + 0xC, *(int*)(self + 0xBC));
+    if (func_00277DD8(self, e) != 0) {
+        return *(int*)(e + 0xC) >= 0;
+    }
+    return func_00282798(*(void**)self, *(int*)((char*)func_00283D70(self + 0xC, *(int*)(self + 0xBC)) + 0xC)) == 2;
+}
+
+extern "C" void func_002771A8(char* self)
+{
+    func_00283C58(self + 0xC);
+}
 
 //100%
 extern "C" void* func_00283D70(void* list, int i);
@@ -1005,7 +1043,13 @@ extern "C" int func_002771C8(void* self, void* obj)
     return obj == func_00282BF0(D_004A28A4, *(int*)((char*)e + 0xC));
 }
 
-INCLUDE_ASM("scripter/datamanager", func_00277248);
+extern "C" int func_00277248(char* self)
+{
+    if (*(int*)(self + 0xA4) != 3) {
+        return 0;
+    }
+    return func_00277DD8(self, func_00283D70(self + 0xC, 0));
+}
 
 //100%
 extern "C" int func_00277298(void* self)

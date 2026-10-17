@@ -33,7 +33,16 @@ extern "C" void func_00329970(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("intersect/riderspheretree", func_00329998);
+extern "C" void func_00329998(char* self, float f)
+{
+    *(float*)(self + 0x20) = f;
+    *(int*)(self + 0x24) = -1;
+    *(unsigned int*)(self + 0x28) = 0xFFFFFFFF;
+    *(int*)(self + 0x2C) = 1;
+    *(float*)(self + 0x40) = f;
+    *(int*)(self + 0x44) = -1;
+    *(int*)(self + 0x0) = 0;
+}
 
 //100%
 struct sSphereLeaf_99C8 {

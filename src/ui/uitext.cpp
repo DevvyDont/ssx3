@@ -217,7 +217,16 @@ extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
     }
 }
 
-INCLUDE_ASM("ui/uitext", func_003A10F0);
+typedef void (*fnUT10F0)(char*);
+
+extern "C" int func_003A10F0(char* self)
+{
+    if (*(void**)(self + 0xB4) == 0 || ((*(int*)(self + 0x14) >> 2) & 1) == 0) {
+        char* vt = *(char**)(self + 0x8);
+        ((fnUT10F0)*(void**)(vt + 0x84))(self + *(short*)(vt + 0x80));
+    }
+    return *(int*)(self + 0xA8);
+}
 
 //100%
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
@@ -685,7 +694,22 @@ extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str)
     (*(unsigned short***)((char*)self + 0xBC))[idx] = copy;
 }
 
-INCLUDE_ASM("ui/uitext", func_003A1C80);
+typedef void (*fnUT1C80)(char*, int);
+
+struct sUTVEntry1C80 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_003A1C80(void* self, char* str)
+{
+    func_003A18C0_1(self);
+    *(int*)((char*)self + 0xC0) = 0;
+    (*(sUTVEntry1C80**)((char*)self + 8))[5].fn((char*)self + (*(sUTVEntry1C80**)((char*)self + 8))[5].delta, 1);
+    (*(sUTVEntry1C80**)((char*)self + 8))[24].fn((char*)self + (*(sUTVEntry1C80**)((char*)self + 8))[24].delta, 0);
+    func_003A19F8(self, str);
+}
 
 //100%
 extern "C" void func_003A18C0(void*, void*);
