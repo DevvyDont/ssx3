@@ -298,9 +298,28 @@ extern "C" void* func_001DA540(void* p, ...)
     return p;
 }
 
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA580);
+//100%
+extern "C" int func_001DA580(const signed char* a, const signed char* ae, const signed char* b, const signed char* be)
+{
+    for (; a != ae && b != be; ++a, ++b) {
+        if (*a < *b) return 1;
+        if (*b < *a) return 0;
+    }
+    return a == ae && b != be;
+}
 
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA5E8);
+//100%
+extern "C" int func_001DA5E8(const signed char* a, const signed char* ae, const signed char* b, const signed char* be)
+{
+    while (a != ae && b != be) {
+        if (*a < *b) return -1;
+        if (*b < *a) return 1;
+        ++a;
+        ++b;
+    }
+    if (b == be) return !(a == ae);
+    return -1;
+}
 
 //100%
 struct cNullMenuItem;

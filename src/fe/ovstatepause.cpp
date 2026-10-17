@@ -90,7 +90,24 @@ extern "C" void func_001FA9E0(void* self)
     }
 }
 
-INCLUDE_ASM("fe/ovstatepause", func_001FAA78);
+//100%
+extern "C" void* func_00397870(void* self, int a1);
+
+extern "C" int func_001FAA78(void* self, void* w, unsigned int msg, int a3)
+{
+    switch (msg) {
+    case 6: {
+        int h = *(int*)((char*)func_00397870((char*)w + 0x74, a3) + 0x38);
+        if (h == GetHashValue32(D_004A24E8)) {
+            break;
+        }
+    }
+    case 8:
+    case 9:
+        return 0x100;
+    }
+    return 0x101;
+}
 
 //100%
 extern "C" int func_001FAAF0(void* self, int a1, int a2)
