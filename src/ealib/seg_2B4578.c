@@ -350,7 +350,13 @@ void func_003B58A0(void) {
     D_0050A8E8_58A0[0x176]++;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B58D8);
+// Drops the nesting counter at 0x176 and calls the registered callback.
+extern volatile char D_0050A8E8_58D8[] __asm__("D_0050A8E8");
+extern void (*D_0044C470_58D8)(void) __asm__("D_0044C470");
+void func_003B58D8(void) {
+    D_0050A8E8_58D8[0x176]--;
+    D_0044C470_58D8();
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -696,7 +702,17 @@ int func_003B6300(int arg0) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B64D8);
+// Checks slot n: -8 if out of range or empty, -18 if flagged busy, else 0.
+struct E_64D8 { int used; char p[8]; char busy; char p2[3]; };
+struct G_64D8 { char p[0x28]; volatile unsigned short n; char p2[0x1F4 - 0x2A]; struct E_64D8 *slots; };
+extern struct G_64D8 D_0050A8E8_64D8 __asm__("D_0050A8E8");
+int func_003B64D8(int n) {
+    struct E_64D8 *e;
+    if (n < 0 || n >= D_0050A8E8_64D8.n) return -8;
+    e = D_0050A8E8_64D8.slots;
+    if (e[n].used) return e[n].busy ? -18 : 0;
+    return -8;
+}
 
 //100%
 typedef struct { int a; int b; int c; } B6528_inner;
@@ -780,7 +796,7 @@ void func_003B68B8(char *p) {
     *(int *)(p + 4) = func_003C6760(*(int *)(p + 8), (int)(p + 0x14), (int)(p + 0x1C), (int)(p + 0xEC));
     do {
         if (*f != 0) {
-            func_003B8CC8(*(int *)(p + 4), (int)q);
+            func_003B8CC8(*(volatile int *)(p + 4), (int)q);
         }
         q += 0x18;
         i++;
@@ -979,23 +995,65 @@ void func_003B7E38(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
     func_003B7450(arg1, arg2, arg3, arg4, arg5, arg0, 1);
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7E70);
+// Looks up a handle and sets its byte option at 0xEC.
+extern char *func_003B6A38_7E70(int) __asm__("func_003B6A38");
+extern void func_003B85F0_7E70(int, int) __asm__("func_003B85F0");
+int func_003B7E70(int h, int v) {
+    char *p = func_003B6A38_7E70(h);
+    if (p == 0) return -8;
+    p[0xEC] = v;
+    func_003B85F0_7E70(*(volatile int *)(p + 4), v);
+    return 0;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7EB0);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7F18);
+// Looks up a handle; returns the byte at 0xEC if the query succeeds.
+extern int func_003B86C0_7F18(int) __asm__("func_003B86C0");
+int func_003B7F18(int h) {
+    char *p = func_003B6A38_7E70(h);
+    int r;
+    if (p == 0) return -8;
+    r = func_003B86C0_7F18(*(volatile int *)(p + 4));
+    if (r < 0) r = (signed char)p[0xEC];
+    return r;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7F60);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7FB8);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8010);
+// Looks up a handle and sets its byte option at 0xF0.
+extern void func_003B8700_8010(int, int) __asm__("func_003B8700");
+int func_003B8010(int h, int v) {
+    char *p = func_003B6A38_7E70(h);
+    if (p == 0) return -8;
+    p[0xF0] = v;
+    func_003B8700_8010(*(volatile int *)(p + 4), v);
+    return 0;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8050);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B80A0);
+// Looks up a handle and sets its short option at 0x100.
+extern void func_003B8978_80A0(int, int) __asm__("func_003B8978");
+int func_003B80A0(int h, int v) {
+    char *p = func_003B6A38_7E70(h);
+    if (p == 0) return -8;
+    *(short *)(p + 0x100) = v;
+    func_003B8978_80A0(*(volatile int *)(p + 4), v);
+    return 0;
+}
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B80E0);
+// Looks up a handle and sets its short option at 0xFA.
+extern void func_003B8838_80E0(int, int) __asm__("func_003B8838");
+int func_003B80E0(int h, int v) {
+    char *p = func_003B6A38_7E70(h);
+    if (p == 0) return -8;
+    *(short *)(p + 0xFA) = v;
+    func_003B8838_80E0(*(volatile int *)(p + 4), v);
+    return 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2927,7 +2985,11 @@ void func_003C3250(int arg0, int arg1) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3300);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3358);
+// Passes the handle at offset 0x1B10 of the global block to func_00423DB0.
+struct G_3358 { char p[0x1B10]; volatile int h; };
+extern struct G_3358 D_0050AD00_3358 __asm__("D_0050AD00");
+extern void func_00423DB0_3358(int) __asm__("func_00423DB0");
+void func_003C3358(void) { func_00423DB0_3358(D_0050AD00_3358.h); }
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3380);
 
@@ -3833,7 +3895,10 @@ int func_003C6C98(int i) {
     int b = q->b; int a = q->a; return a + b;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6CC0);
+// Returns field 0x4C of the object in slot n of the 0x304 table.
+struct G_6CC0 { char p[0x304]; char *t[1]; };
+extern struct G_6CC0 D_005157B8_6CC0 __asm__("D_005157B8");
+int func_003C6CC0(int n) { return *(volatile int *)(D_005157B8_6CC0.t[n] + 0x4C); }
 
 //100%
 int func_003C6CE0(void) {
