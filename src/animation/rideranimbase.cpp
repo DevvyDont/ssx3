@@ -507,7 +507,155 @@ extern "C" void func_00312BD0(void* self, void* unused, void* rider, int anim)
     cRiderAnimBase_play(self, anim, 0, -1.0f);
 }
 
-INCLUDE_ASM("animation/rideranimbase", func_00312C20);
+//100%
+struct sCurveKey_312C20 {
+    int type;
+    float a;
+    float b;
+    union { float c; int idx; };
+    float d;
+};
+
+struct sCurveSet_312C20 {
+    sCurveKey_312C20* keys;
+    unsigned char* row8a;
+    unsigned char* row8b;
+    unsigned short* row16;
+    float* rowf;
+    unsigned char stride8a;
+    unsigned char stride8b;
+    unsigned char stride16;
+    unsigned char stridef;
+};
+
+extern "C" void func_00312C20(sCurveSet_312C20* self, int start, int count, float* out, float t)
+{
+    int ti = (int)t;
+    float h = t * 0.5f;
+    int hi = (int)h;
+    float fa = t - ti;
+    float fb = h - hi;
+    sCurveKey_312C20* e = self->keys + start;
+    sCurveKey_312C20* end = e + count;
+    unsigned char* a8 = self->row8a + ti * self->stride8a;
+    unsigned char* b8 = self->row8b + hi * self->stride8b;
+    unsigned short* c16 = self->row16 + ti * self->stride16;
+    float* df = self->rowf + ti * self->stridef;
+
+    if (fa < 0.001f) {
+        fa = 0.0f;
+    }
+    if (fb < 0.001f) {
+        fb = 0.0f;
+    }
+
+    if (fa != 0.0f || fb != 0.0f) {
+        unsigned char* a8n = a8 + self->stride8a;
+        unsigned char* b8n = b8 + self->stride8b;
+        unsigned short* c16n = c16 + self->stride16;
+        float* dfn = df + self->stridef;
+        for (;;) {
+            switch (e->type) {
+            case 0:
+                *out++ = 0.0f;
+                break;
+            case 1:
+                *out++ = e->a;
+                break;
+            case 2:
+                *out++ = t * e->a + e->b;
+                break;
+            case 3:
+                *out++ = t * (t * e->a + e->b) + e->c;
+                break;
+            case 4:
+                *out++ = t * (t * (t * e->a + e->b) + e->c) + e->d;
+                break;
+            case 5: {
+                float d = e->d;
+                float a = e->a;
+                float b = e->b;
+                float c = e->c;
+                if (t <= d) {
+                    *out++ = t * a + b;
+                } else {
+                    *out++ = a * d + b + c * (t - d);
+                }
+                break;
+            }
+            case 6: {
+                float v = a8[e->idx];
+                *out++ = (v + fa * (a8n[e->idx] - v)) * e->b + e->a;
+                break;
+            }
+            case 7: {
+                float v = b8[e->idx];
+                *out++ = (v + fb * (b8n[e->idx] - v)) * e->b + e->a;
+                break;
+            }
+            case 8: {
+                float v = c16[e->idx];
+                *out++ = (v + fa * (c16n[e->idx] - v)) * e->b + e->a;
+                break;
+            }
+            case 9: {
+                float v = df[e->idx];
+                *out++ = v + fa * (dfn[e->idx] - v);
+                break;
+            }
+            }
+            e++;
+            if (e == end) {
+                return;
+            }
+        }
+    } else {
+        do {
+            switch (e->type) {
+            case 0:
+                *out++ = 0.0f;
+                break;
+            case 1:
+                *out++ = e->a;
+                break;
+            case 2:
+                *out++ = t * e->a + e->b;
+                break;
+            case 3:
+                *out++ = t * (t * e->a + e->b) + e->c;
+                break;
+            case 4:
+                *out++ = t * (t * (t * e->a + e->b) + e->c) + e->d;
+                break;
+            case 5: {
+                float d = e->d;
+                float a = e->a;
+                float b = e->b;
+                float c = e->c;
+                if (t <= d) {
+                    *out++ = t * a + b;
+                } else {
+                    *out++ = a * d + b + c * (t - d);
+                }
+                break;
+            }
+            case 6:
+                *out++ = a8[e->idx] * e->b + e->a;
+                break;
+            case 7:
+                *out++ = b8[e->idx] * e->b + e->a;
+                break;
+            case 8:
+                *out++ = c16[e->idx] * e->b + e->a;
+                break;
+            case 9:
+                *out++ = df[e->idx];
+                break;
+            }
+            e++;
+        } while (e != end);
+    }
+}
 
 INCLUDE_ASM("animation/rideranimbase", func_003130A8);
 
