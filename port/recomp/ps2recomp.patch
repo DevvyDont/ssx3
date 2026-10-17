@@ -579,7 +579,7 @@ index 0485d50..ab1e7ad 100644
  #define FPU_C_F_S(a, b) (0)
  #define FPU_C_UN_S(a, b) (isnan((float)(a)) || isnan((float)(b)))
 diff --git a/ps2xRuntime/include/runtime/ps2_memory.h b/ps2xRuntime/include/runtime/ps2_memory.h
-index ea86a9c..c55c66b 100644
+index ea86a9c..9cf92aa 100644
 --- a/ps2xRuntime/include/runtime/ps2_memory.h
 +++ b/ps2xRuntime/include/runtime/ps2_memory.h
 @@ -19,6 +19,7 @@
@@ -599,6 +599,22 @@ index ea86a9c..c55c66b 100644
  static_assert(std::atomic<uint64_t>::is_always_lock_free, "GS CSR atomic must be lock-free on all supported targets");
  
  // PS2 VIF (VPU Interface) registers
+@@ -333,6 +334,7 @@ public:
+ 
+     bool isPath3Masked() const { return m_path3Masked; }
+     void flushMaskedPath3Packets(bool drainImmediately = true);
++    void releaseMaskedPath3Packet();
+ 
+     void submitGifPacket(GifPathId pathId, const uint8_t *data, uint32_t sizeBytes, bool drainImmediately = true, bool path2DirectHl = false);
+     void processGIFPacket(uint32_t srcPhysAddr, uint32_t qwCount);
+@@ -410,6 +412,7 @@ public:
+     uint32_t m_vif1PendingPath2ImageQwc = 0u;
+     bool m_vif1PendingPath2DirectHl = false;
+     std::vector<std::vector<uint8_t>> m_path3MaskedFifo;
++    size_t m_path3MaskedHead = 0u; // bytes of the first queued transfer already sent to the GS
+ 
+     struct PendingTransfer
+     {
 diff --git a/ps2xRuntime/include/runtime/ps2_x86_compat.h b/ps2xRuntime/include/runtime/ps2_x86_compat.h
 new file mode 100644
 index 0000000..e50bf59
@@ -1414,7 +1430,7 @@ index 6bd1835..25608c0 100644
  {
  public:
 diff --git a/ps2xRuntime/src/lib/ps2_memory.cpp b/ps2xRuntime/src/lib/ps2_memory.cpp
-index 37b6a4d..07d5731 100644
+index 37b6a4d..85db820 100644
 --- a/ps2xRuntime/src/lib/ps2_memory.cpp
 +++ b/ps2xRuntime/src/lib/ps2_memory.cpp
 @@ -238,6 +238,55 @@ static inline uint32_t gs_vram_offset(uint32_t basePage, uint32_t x, uint32_t y,
@@ -1501,7 +1517,15 @@ index 37b6a4d..07d5731 100644
          delete[] iop_ram;
          delete[] m_gsVRAM;
          delete[] m_vu0Code;
-@@ -336,11 +385,11 @@ bool PS2Memory::initialize(size_t ramSize)
+@@ -329,6 +378,7 @@ bool PS2Memory::initialize(size_t ramSize)
+     m_codeRegions.clear();
+     m_path3Masked = false;
+     m_path3MaskedFifo.clear();
++    m_path3MaskedHead = 0u;
+     m_vif1PendingPath2ImageQwc = 0u;
+     m_vif1PendingPath2DirectHl = false;
+     resetEeTimers();
+@@ -336,11 +386,11 @@ bool PS2Memory::initialize(size_t ramSize)
      try
      {
          // Allocate main RAM
@@ -1515,7 +1539,7 @@ index 37b6a4d..07d5731 100644
          std::memset(m_scratchpad, 0, PS2_SCRATCHPAD_SIZE);
          ps2SetScratchpadHostPtr(m_scratchpad);
  
-@@ -748,7 +797,8 @@ uint32_t PS2Memory::read32(uint32_t address)
+@@ -748,7 +798,8 @@ uint32_t PS2Memory::read32(uint32_t address)
          const uint32_t regOff = (address - PS2_GS_PRIV_REG_BASE) & ~0x7u;
          if (regOff == kGsCsrRegOffset)
          {
@@ -1525,7 +1549,7 @@ index 37b6a4d..07d5731 100644
              return (uint32_t)(val >> (off * 8));
          }
          uint64_t *reg = gsRegPtr(gs_regs, address);
-@@ -795,7 +845,7 @@ uint64_t PS2Memory::read64(uint32_t address)
+@@ -795,7 +846,7 @@ uint64_t PS2Memory::read64(uint32_t address)
          const uint32_t regOff = (address - PS2_GS_PRIV_REG_BASE) & ~0x7u;
          if (regOff == kGsCsrRegOffset)
          {
@@ -1534,6 +1558,140 @@ index 37b6a4d..07d5731 100644
          }
          uint64_t *reg = gsRegPtr(gs_regs, address);
          return reg ? *reg : 0;
+@@ -1344,7 +1395,9 @@ bool PS2Memory::writeIORegister(uint32_t address, uint32_t value)
+                     uint32_t asr1 = m_ioRegisters[channelBase + 0x50];
+                     uint32_t asp = (chcr >> 4) & 0x3u;
+                     const bool tieEnabled = (chcr & (1u << 7)) != 0u;
+-                    const int kMaxChainTags = 4096;
++                    // Only a guard against chains that loop forever: SSX 3's race list alone runs past 4,096 tags.
++                    const int kMaxChainTags = 1 << 20;
++                    const size_t kMaxChainBytes = 64u * 1024u * 1024u;
+                     std::vector<uint8_t> chainBuf;
+ 
+                     auto appendData = [&](uint32_t srcAddr, uint32_t qwCount)
+@@ -1405,7 +1458,7 @@ bool PS2Memory::writeIORegister(uint32_t address, uint32_t value)
+                     int tagsProcessed = 0;
+                     uint32_t lastTagUpper = (chcr >> 16) & 0xFFFFu;
+ 
+-                    while (tagsProcessed < kMaxChainTags)
++                    while (tagsProcessed < kMaxChainTags && chainBuf.size() < kMaxChainBytes)
+                     {
+                         const uint32_t currentTagAddr = tagAddr;
+                         const bool tagInSPR = isScratchpad(tagAddr);
+@@ -1859,6 +1912,10 @@ void PS2Memory::processPendingTransfers()
+     }
+     m_pendingVif1Transfers.clear();
+ 
++    // A VIF1 list that leaves PATH3 unmasked lets the GIF send the rest of what PATH3 has queued.
++    if (hadVif1 && !m_path3Masked)
++        flushMaskedPath3Packets(false);
++
+     if (m_gifArbiter)
+         m_gifArbiter->drain();
+ 
+@@ -1919,6 +1976,39 @@ std::vector<uint32_t> PS2Memory::consumeCompletedDmacCauses()
+     return causes;
+ }
+ 
++namespace
++{
++    // Returns the offset just past the GIF packet (the tag with EOP set and its data) that starts at pos,
++    // or size if no tag in [pos, size) ends a packet.
++    size_t gifPacketEnd(const uint8_t *data, size_t size, size_t pos, bool &endsPacket)
++    {
++        endsPacket = false;
++        while (pos + 16u <= size)
++        {
++            uint64_t tagLo = 0;
++            std::memcpy(&tagLo, data + pos, sizeof(tagLo));
++            const uint64_t nloop = tagLo & 0x7FFFull;
++            const bool eop = ((tagLo >> 15) & 0x1ull) != 0ull;
++            const uint32_t flg = static_cast<uint32_t>((tagLo >> 58) & 0x3ull);
++            uint64_t nreg = (tagLo >> 60) & 0xFull;
++            if (nreg == 0ull)
++                nreg = 16ull;
++            uint64_t dataQw = nloop;
++            if (flg == GIF_FMT_PACKED)
++                dataQw = nloop * nreg;
++            else if (flg == GIF_FMT_REGLIST)
++                dataQw = (nloop * nreg + 1ull) / 2ull;
++            pos += 16u + static_cast<size_t>(std::min<uint64_t>(dataQw * 16ull, size - pos - 16u));
++            if (eop)
++            {
++                endsPacket = true;
++                return pos;
++            }
++        }
++        return size;
++    }
++}
++
+ void PS2Memory::flushMaskedPath3Packets(bool drainImmediately)
+ {
+     if (m_path3Masked || m_path3MaskedFifo.empty())
+@@ -1932,17 +2022,59 @@ void PS2Memory::flushMaskedPath3Packets(bool drainImmediately)
+             m_gifPacketCallback(packetData, packetSize);
+     };
+ 
+-    for (const auto &packet : m_path3MaskedFifo)
++    for (size_t i = 0; i < m_path3MaskedFifo.size(); ++i)
+     {
+-        if (packet.size() >= 16u)
+-            emit(packet.data(), static_cast<uint32_t>(packet.size()));
++        const auto &packet = m_path3MaskedFifo[i];
++        const size_t start = (i == 0u) ? m_path3MaskedHead : 0u;
++        if (packet.size() >= start + 16u)
++            emit(packet.data() + start, static_cast<uint32_t>(packet.size() - start));
+     }
+     m_path3MaskedFifo.clear();
++    m_path3MaskedHead = 0u;
+ 
+     if (m_gifArbiter && drainImmediately)
+         m_gifArbiter->drain();
+ }
+ 
++// MSKPATH3 masks PATH3 only between GIF packets, so clearing it lets the GIF start the next queued packet,
++// which then runs to its end even if the mask is set again straight away. Games stream textures this way:
++// a VIF1 list unmasks and remasks PATH3 once per texture, so that exactly one upload lands between the
++// draws that use the previous texture and the draws that use the next.
++void PS2Memory::releaseMaskedPath3Packet()
++{
++    bool released = false;
++    while (!m_path3MaskedFifo.empty())
++    {
++        const auto &transfer = m_path3MaskedFifo.front();
++        bool endsPacket = false;
++        const size_t end = gifPacketEnd(transfer.data(), transfer.size(), m_path3MaskedHead, endsPacket);
++        if (end >= m_path3MaskedHead + 16u)
++        {
++            const uint8_t *packet = transfer.data() + m_path3MaskedHead;
++            const uint32_t packetSize = static_cast<uint32_t>(end - m_path3MaskedHead);
++            if (m_gifArbiter)
++                m_gifArbiter->submit(GifPathId::Path3, packet, packetSize, false);
++            else if (m_gifPacketCallback)
++                m_gifPacketCallback(packet, packetSize);
++            released = true;
++        }
++        if (end + 16u <= transfer.size())
++        {
++            m_path3MaskedHead = end;
++        }
++        else
++        {
++            m_path3MaskedFifo.erase(m_path3MaskedFifo.begin());
++            m_path3MaskedHead = 0u;
++        }
++        if (endsPacket)
++            break;
++    }
++
++    if (m_gifArbiter && released)
++        m_gifArbiter->drain();
++}
++
+ void PS2Memory::submitGifPacket(GifPathId pathId, const uint8_t *data, uint32_t sizeBytes, bool drainImmediately, bool path2DirectHl)
+ {
+     if (!data || sizeBytes < 16)
 diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
 index 45cb9d2..9cae214 100644
 --- a/ps2xRuntime/src/lib/ps2_runtime.cpp
@@ -1781,7 +1939,7 @@ index 45cb9d2..9cae214 100644
          uint32_t presentHeight = DEFAULT_DISPLAY_HEIGHT;
          UploadFrame(frameTex, this, presentWidth, presentHeight);
 diff --git a/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp b/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
-index b02c7ca..40b31d6 100644
+index b02c7ca..024694b 100644
 --- a/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
 +++ b/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
 @@ -1,3 +1,5 @@
@@ -1790,6 +1948,15 @@ index b02c7ca..40b31d6 100644
  // Based on Blackline Interactive implementation
  #include "runtime/ps2_memory.h"
  #include <cstring>
+@@ -387,7 +389,7 @@ void PS2Memory::processVIF1Data(const uint8_t *data, uint32_t sizeBytes)
+             const bool wasMasked = m_path3Masked;
+             m_path3Masked = (imm & 0x8000u) != 0u;
+             if (wasMasked && !m_path3Masked)
+-                flushMaskedPath3Packets();
++                releaseMaskedPath3Packet();
+             continue;
+         }
+         else if (opcode == VIF_MARK)
 @@ -697,13 +699,14 @@ void PS2Memory::processVIF1Data(const uint8_t *data, uint32_t sizeBytes)
                      }
                      else if (vl == 3u && vn == 3u)
@@ -1982,3 +2149,144 @@ index 0458a8c..0bfadee 100644
  
              const uint64_t imrPattern = 0x0123456789ABCDEFull;
              mem.write64(kGsImr, imrPattern);
+diff --git a/ps2xTest/src/ps2_memory_tests.cpp b/ps2xTest/src/ps2_memory_tests.cpp
+index 0b22fe0..9c9d3e1 100644
+--- a/ps2xTest/src/ps2_memory_tests.cpp
++++ b/ps2xTest/src/ps2_memory_tests.cpp
+@@ -956,6 +956,88 @@ void register_ps2_memory_tests()
+             t.IsTrue(secondOk, "second queued PATH3 packet should flush in-order");
+         });
+ 
++        tc.Run("MSKPATH3 unmask releases one queued GIF packet", [](TestCase &t)
++        {
++            PS2Memory mem;
++            t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
++
++            std::vector<std::vector<uint8_t>> captured;
++            mem.setGifPacketCallback([&](const uint8_t *data, uint32_t sizeBytes)
++            {
++                captured.emplace_back(data, data + sizeBytes);
++            });
++
++            // One PATH3 transfer holding two GIF packets, each a single A+D write.
++            std::vector<uint8_t> path3;
++            for (uint64_t value : {0x11ull, 0x22ull})
++            {
++                appendU64(path3, makeGifTag(1u, GIF_FMT_PACKED, 1u, true));
++                appendU64(path3, 0x0Eull);
++                appendU64(path3, value);
++                appendU64(path3, GS_REG_TEXA);
++            }
++
++            const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
++            const uint32_t clearMask = makeVifCmd(0x06u, 0u, 0x0000u);
++            mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&setMask), sizeof(setMask));
++            mem.submitGifPacket(GifPathId::Path3, path3.data(), static_cast<uint32_t>(path3.size()));
++            t.Equals(captured.size(), static_cast<size_t>(0u), "masked PATH3 data should be held");
++
++            const uint32_t window[2] = {clearMask, setMask};
++            mem.processVIF1Data(reinterpret_cast<const uint8_t *>(window), sizeof(window));
++            t.Equals(captured.size(), static_cast<size_t>(1u), "unmasking PATH3 should let one GIF packet through");
++            t.Equals(captured[0].size(), static_cast<size_t>(32u), "the released packet should end at its EOP tag");
++            t.Equals(captured[0][16], static_cast<uint8_t>(0x11u), "the first queued packet should go first");
++
++            mem.processVIF1Data(reinterpret_cast<const uint8_t *>(window), sizeof(window));
++            t.Equals(captured.size(), static_cast<size_t>(2u), "the next unmask should let the next packet through");
++            t.Equals(captured[1].size(), static_cast<size_t>(32u), "the second packet should be sent whole");
++            t.Equals(captured[1][16], static_cast<uint8_t>(0x22u), "the second queued packet should go second");
++        });
++
++        tc.Run("VIF1 DMA leaving PATH3 unmasked sends the rest of PATH3's queue", [](TestCase &t)
++        {
++            PS2Memory mem;
++            t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
++
++            std::vector<std::vector<uint8_t>> captured;
++            mem.setGifPacketCallback([&](const uint8_t *data, uint32_t sizeBytes)
++            {
++                captured.emplace_back(data, data + sizeBytes);
++            });
++
++            std::vector<uint8_t> path3;
++            for (uint64_t value : {0x11ull, 0x22ull, 0x33ull})
++            {
++                appendU64(path3, makeGifTag(1u, GIF_FMT_PACKED, 1u, true));
++                appendU64(path3, 0x0Eull);
++                appendU64(path3, value);
++                appendU64(path3, GS_REG_TEXA);
++            }
++
++            const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
++            mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&setMask), sizeof(setMask));
++            mem.submitGifPacket(GifPathId::Path3, path3.data(), static_cast<uint32_t>(path3.size()));
++
++            constexpr uint32_t kVif1Ch = 0x10009000u;
++            constexpr uint32_t kSrc = 0x00024000u;
++            uint8_t *rdram = mem.getRDRAM();
++            std::memset(rdram + kSrc, 0, 16u);
++            const uint32_t clearMask = makeVifCmd(0x06u, 0u, 0x0000u);
++            std::memcpy(rdram + kSrc, &clearMask, sizeof(clearMask));
++            t.IsTrue(mem.writeIORegister(kVif1Ch + 0x10u, kSrc), "write VIF1 MADR should succeed");
++            t.IsTrue(mem.writeIORegister(kVif1Ch + 0x20u, 1u), "write VIF1 QWC should succeed");
++            t.IsTrue(mem.writeIORegister(kVif1Ch + 0x00u, 0x100u), "write VIF1 CHCR STR should succeed");
++            mem.processPendingTransfers();
++
++            t.IsFalse(mem.isPath3Masked(), "the VIF1 list should leave PATH3 unmasked");
++            size_t sentBytes = 0u;
++            for (const auto &packet : captured)
++                sentBytes += packet.size();
++            t.Equals(sentBytes, path3.size(), "all queued PATH3 data should be sent once the VIF1 list ends unmasked");
++            t.Equals(captured.back()[captured.back().size() - 16u], static_cast<uint8_t>(0x33u), "PATH3 data should stay in order");
++        });
++
+         tc.Run("GIF arbiter prioritizes PATH1 then PATH2 then PATH3", [](TestCase &t)
+         {
+             std::vector<uint8_t> order;
+@@ -1370,6 +1452,47 @@ void register_ps2_memory_tests()
+             t.IsTrue(ct32Ok, "all CT32 pixels should survive a preceding paletted upload in the same GIF DMA chain");
+         });
+ 
++        tc.Run("VIF1 DMA chain longer than 4096 tags is transferred whole", [](TestCase &t)
++        {
++            PS2Memory mem;
++            t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
++
++            constexpr uint32_t kVif1Ch = 0x10009000u;
++            constexpr uint32_t kChain = 0x00040000u;
++            constexpr uint32_t kCntTags = 5000u;
++            uint8_t *rdram = mem.getRDRAM();
++
++            // 5000 CNT tags, each carrying one qword of VIF NOPs, then an END tag carrying DIRECT 1.
++            uint32_t addr = kChain;
++            for (uint32_t i = 0; i < kCntTags; ++i)
++            {
++                writeDmaTag(rdram, addr, makeDmaTag(1u, 1u, 0u));
++                std::memset(rdram + addr + 16u, 0, 16u);
++                addr += 32u;
++            }
++            writeDmaTag(rdram, addr, makeDmaTag(2u, 7u, 0u));
++            std::memset(rdram + addr + 16u, 0, 32u);
++            const uint32_t direct = makeVifCmd(0x50u, 0u, 1u);
++            std::memcpy(rdram + addr + 16u + 12u, &direct, sizeof(direct));
++            for (uint32_t i = 0; i < 16u; ++i)
++                rdram[addr + 32u + i] = static_cast<uint8_t>(0x40u + i);
++
++            std::vector<std::vector<uint8_t>> captured;
++            mem.setGifPacketCallback([&](const uint8_t *data, uint32_t sizeBytes)
++            {
++                captured.emplace_back(data, data + sizeBytes);
++            });
++
++            t.IsTrue(mem.writeIORegister(kVif1Ch + 0x30u, kChain), "write VIF1 TADR should succeed");
++            t.IsTrue(mem.writeIORegister(kVif1Ch + 0x20u, 0u), "write VIF1 QWC should succeed");
++            t.IsTrue(mem.writeIORegister(kVif1Ch + 0x00u, 0x105u), "start VIF1 chain DMA should succeed");
++            mem.processPendingTransfers();
++
++            t.Equals(captured.size(), static_cast<size_t>(1u), "the DIRECT packet after 5000 tags should reach the GIF");
++            if (!captured.empty())
++                t.Equals(captured[0][0], static_cast<uint8_t>(0x40u), "the DIRECT payload should arrive intact");
++        });
++
+         tc.Run("VIF1 DMA DIRECT forwards payload to GIF callback and clears channel", [](TestCase &t)
+         {
+             PS2Memory mem;

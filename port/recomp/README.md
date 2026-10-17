@@ -37,6 +37,13 @@ or any disc file.
   - `CVT.W.S` truncating toward zero and saturating, as the R5900 always does (it rounded to nearest);
   - VU0 macro `DIV`/`SQRT`/`RSQRT` and `FTOI` giving the hardware results for zero divisors, negative inputs,
     `RSQRT`'s numerator and positive overflow;
+  - `MSKPATH3` holding PATH3 back one GIF packet at a time, as the hardware does: clearing the mask lets the next
+    queued packet through, and setting it again stops PATH3 once that packet ends (the runtime used to send
+    everything queued). SSX 3 streams its textures this way, one per unmask, between the draws that use them.
+    Sending them all at once left most of a frame drawn with whichever texture went up last, and ran the
+    end-of-frame depth effect's `TEXA` setting before the 3D, which turned the snow under the riders' shadows black;
+  - DMA chains longer than 4,096 tags being sent whole. The cut-off dropped the end of SSX 3's race list, which
+    draws the player's rider and the stadium at the start gate;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -116,8 +123,8 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 ## Status
 
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
-input through the front end to a race. In the race, the HUD, sky, distant mountains, riders and close scenery
-(start gate, trees, course walls) draw and riders stay on the course. The snow under the riders draws black and
-some course surfaces show multicoloured noise. Sound has not been tested yet.
+input through the front end to a race. In the race, the HUD, sky, mountains, start-gate stadium, riders, their
+shadows and the course draw with the right textures, and the race plays from the gate down the first slope.
+The camera sits much further behind the player's rider than it should. Sound has not been tested yet.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
