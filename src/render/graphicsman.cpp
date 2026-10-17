@@ -278,7 +278,13 @@ extern "C" void func_0036A2C0(void* self, sGmMtx_A2C0* m)
     }
 }
 
-INCLUDE_ASM("render/graphicsman", func_0036A3B0);
+extern "C" unsigned int func_0036A3B0(unsigned int x)
+{
+    unsigned int a = x & 0xFF;
+    unsigned int b = (a | (a << 4)) & 0xF0F;
+    unsigned int c = (b | (b << 2)) & 0x3333;
+    return (c | (c << 1)) & 0x5555;
+}
 
 // Spreads the low 8 bits to the even bit positions (Morton code)
 extern "C" unsigned int func_0036A3B0(unsigned int x);
@@ -868,7 +874,15 @@ extern "C" void func_003705E0(char* self, void* a1, char* d)
     func_00370058(self + 0x10, a1, d, self + 0x160, -1.0f);
 }
 
-INCLUDE_ASM("render/graphicsman", func_00370708);
+extern "C" void func_00370708(char* self, float v)
+{
+    if (v == 0.0f) {
+        func_0036D3D8(self + 0x10, 0.0f);
+    } else {
+        *(float*)self = v;
+        func_0036D3D8(self + 0x10, v);
+    }
+}
 
 //100%
 void operator_delete(int* ptr);

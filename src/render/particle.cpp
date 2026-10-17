@@ -236,7 +236,17 @@ extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int
     }
 }
 
-INCLUDE_ASM("render/particle", func_00371268);
+extern "C" void func_0036D3D8(void* self, float val);
+
+extern "C" void func_00371268(char* self, float v)
+{
+    if (v == 0.0f) {
+        func_0036D3D8(self + 0x20, 0.0f);
+    } else {
+        *(float*)self = v;
+        func_0036D3D8(self + 0x20, v);
+    }
+}
 
 //100%
 class cStream003712B8 {

@@ -576,7 +576,21 @@ void func_00231278(void* self, int val)
     *(int*)((char*)self + 0x208) = val;
 }
 
-INCLUDE_ASM("main/gameload", func_00231280);
+typedef void (*fnGL1280)(char*);
+
+extern "C" void func_00231280(char* self)
+{
+    if (*(int*)(self + 0x208) != 0) {
+        *(int*)(self + 0x208) = 0;
+    }
+    if (*(int*)(self + 0x20C) != 0) {
+        char* o = *(char**)(self + 0x204);
+        char* vt = *(char**)(o + 0xC);
+        ((fnGL1280)*(void**)(vt + 0x24))(o + *(short*)(vt + 0x20));
+        *(int*)(self + 0x20C) = 0;
+        *(void**)(self + 0x204) = 0;
+    }
+}
 
 //100%
 struct sVEntry_002312D8 {

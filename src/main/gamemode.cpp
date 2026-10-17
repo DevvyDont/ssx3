@@ -229,7 +229,12 @@ extern "C" void cGameModeMan_initGameMode(char* self, int mode)
     cGameModeMan_restartHeat(self);
 }
 
-INCLUDE_ASM("main/gamemode", func_002382B8);
+extern int D_00536730[];
+
+extern "C" void func_002382B8(void* self, int i)
+{
+    D_00536730[i] = -1;
+}
 
 //100%
 struct sVEntry_002382D8 {

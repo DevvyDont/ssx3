@@ -1489,7 +1489,25 @@ extern "C" sMenuItem_2CC7B0* func_002CC7F8(sMenuItem_2CC7B0* self, void* text)
     return self;
 }
 
-INCLUDE_ASM("util/menu", func_002CC838);
+struct sMenuItem_2CC838 {
+    char pad_0x00[0x10];
+    void* vtable;   // 0x10
+    int field_0x14;
+    int field_0x18;
+    int field_0x1C;
+    int field_0x20;
+};
+
+extern "C" sMenuItem_2CC838* func_002CC838(sMenuItem_2CC838* self, void* text, int a, int b, int c, int d)
+{
+    cMenuItem_cMenuItem((cMenuItem*)self, text);
+    self->vtable = D_00486E30;
+    self->field_0x14 = b;
+    self->field_0x20 = a;
+    self->field_0x18 = c;
+    self->field_0x1C = d;
+    return self;
+}
 
 //100%
 struct sListEntry_2CC8B0 {
