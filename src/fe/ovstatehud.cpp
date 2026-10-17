@@ -190,7 +190,89 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstatehud", func_001EA930);
 
-INCLUDE_ASM("fe/ovstatehud", func_001EC1F0);
+extern "C" char* func_002B40F0(void* self, int a1);
+
+// Handles a HUD command: toggles, counters, and the two message lines.
+extern "C" int func_001EC1F0(char* self, unsigned int cmd, unsigned short* str)
+{
+    switch (cmd) {
+    case 0:
+        *(int*)(self + 0x3D4) = 1;
+        break;
+    case 1:
+        *(int*)(self + 0x3D4) = 0;
+        break;
+    case 2:
+        *(int*)(self + 0x3D8) = 0;
+        break;
+    case 3:
+        *(int*)(self + 0x3D8) += 1;
+        break;
+    case 4:
+        if (*(int*)(self + 0x3D8) > 0)
+            *(int*)(self + 0x3D8) -= 1;
+        break;
+    case 12:
+        *(int*)(self + 0xA44) = 0;
+        *(unsigned int*)(self + 0x3CC) |= 0x20000;
+        func_002C2508((unsigned short*)(self + 0x944), str);
+        break;
+    case 13:
+        *(short*)(self + 0x944) = 0;
+        *(int*)(self + 0xA44) = 0;
+        *(unsigned int*)(self + 0x3CC) &= ~0x20000;
+        break;
+    case 14:
+        *(unsigned int*)(self + 0x3CC) |= 0x40000;
+        func_002C2508((unsigned short*)(self + 0xA48), str);
+        break;
+    case 15:
+        *(short*)(self + 0xA48) = 0;
+        *(unsigned int*)(self + 0x3CC) &= ~0x40000;
+        break;
+    case 5: {
+        *(unsigned int*)(self + 0x3CC) &= ~0x10000;
+        char* name = func_002B40F0((char*)func_0028B180() + 0x118, -1);
+        unsigned int h = 0xF0000000;
+        if (name != 0 && name[0] != 0) {
+            *(unsigned int*)(self + 0x3CC) |= 0x10000;
+            h = GetHashValue32(name);
+        }
+        if ((*(unsigned int*)(self + 0x3CC) & 0x10000) && h == *(int*)(self + 0x3B4))
+            break;
+        *(int*)(self + 0x3B4) = h;
+        *(float*)(self + 0x190) = -1.0f;
+        *(int*)(self + 0x198) = 0;
+        *(int*)(self + 0x3A4) = 0;
+        *(int*)(self + 0x3A8) = 0;
+        *(int*)(self + 0x194) = 0;
+        break;
+    }
+    case 6:
+        *(int*)(self + 0x3C8) = 0;
+        *(int*)(self + 0x3C0) = 0;
+        *(int*)(self + 0x3C4) = 8;
+        break;
+    case 7:
+        *(unsigned int*)(self + 0x3CC) &= 0xFFBDC3FF;
+        *(int*)(self + 0x3C4) = 0x50;
+        *(int*)(self + 0x3C0) = 0;
+        *(int*)(self + 0xA44) = 0;
+        *(short*)(self + 0x944) = 0;
+        *(unsigned int*)(self + 0x18C) = 0xFFFFFFFF;
+        break;
+    case 8:
+        *(int*)(self + 0x168) = 0;
+        *(int*)(self + 0x160) = 1;
+        break;
+    case 9:
+        *(int*)(self + 0x160) = 0;
+        *(int*)(self + 0x168) = 0;
+        *(int*)(self + 0x164) = 0;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onRender2D);
 

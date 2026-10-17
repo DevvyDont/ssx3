@@ -719,7 +719,64 @@ extern "C" void func_00271058(void* self, signed char* data, int size)
     *(int*)((char*)self + 0x678) += size;
 }
 
-INCLUDE_ASM("replay/replaycache", func_002710A8);
+extern "C" void func_00271228(void* self);
+extern "C" void func_002712C0(void* self);
+extern "C" void func_00271348(void* self);
+extern "C" void func_00271380_v(void* self) __asm__("func_00271380");
+extern "C" void func_002714E0(void* self);
+extern "C" void func_00271510_v(void* self) __asm__("func_00271510");
+extern "C" void func_00271620(void* self);
+extern "C" void func_00271688(void* self);
+void* func_002716F0(void* self);
+extern "C" void func_00271708(void* self);
+
+struct sRcSave10A8 {
+    char pad_0x000[0x638];
+    int state;      // 0x638
+    char* buf;      // 0x63C
+    char pad640[0x64C - 0x640];
+    int used;       // 0x64C
+    char* dst;      // 0x650
+};
+
+// Runs the save state machine until the 0x4000-byte buffer is full or saving is done; returns the filled buffer.
+extern "C" int func_002710A8(sRcSave10A8* self, char** buf, int* size)
+{
+    if (self->state == 11) {
+        *size = 0;
+        return 0;
+    }
+    self->used = 0;
+    self->dst = self->buf;
+    for (;;) {
+        func_00270FC0((sRcStream0FC0*)self);
+        if (self->used >= 0x4000)
+            goto done;
+        switch (self->state) {
+        case 0: func_00271228(self); break;
+        case 1: func_002712C0(self); break;
+        case 2: func_00271348(self); break;
+        case 3: func_00271380_v(self); break;
+        case 4: func_002714E0(self); break;
+        case 5: func_00271510_v(self); break;
+        case 6: func_00271620(self); break;
+        case 7: func_00271688(self); break;
+        case 8: func_002716F0(self); break;
+        case 9: func_00271708(self); break;
+        case 10: self->state++; break;
+        case 11: break;
+        }
+        if (self->used < 0x4000) {
+            if (self->state != 11)
+                continue;
+        }
+        break;
+    }
+done:
+    *size = self->used;
+    *buf = self->buf;
+    return 1;
+}
 
 //100%
 struct sReplayCache;

@@ -7375,7 +7375,91 @@ extern "C" void func_00266550(char* dst)
     D_004A33D4 = 0x10;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00266578);
+// Maps a login error code to a UI message id for the current connection state.
+extern "C" int func_00266578(int err)
+{
+    switch (D_004A33D4) {
+    case 2:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        }
+        break;
+    case 9:
+        switch (err) {
+        case -2: return 17;
+        }
+        break;
+    case 4:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 13;
+        case -4: return 4;
+        case -5: return 13;
+        case -7: return 13;
+        }
+        break;
+    case 8:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        default: return 17;
+        }
+        break;
+    case 5:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 14;
+        case -4: return 4;
+        case -5: return 13;
+        case -8: return 13;
+        }
+        break;
+    case 7:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        }
+        break;
+    case 6:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        case -5: return 13;
+        }
+        break;
+    case 14:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 14;
+        case -4: return 4;
+        case -5: return 13;
+        case -8: return 13;
+        }
+        break;
+    case 11:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 14;
+        case -4: return 8;
+        }
+        break;
+    case 12:
+    case 13:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        case -5: return 5;
+        case -6: return 6;
+        }
+        break;
+    case 1:
+    case 3:
+    case 10:
+        break;
+    }
+    return 3;
+}
 
 //100%
 extern char D_00481080[];
