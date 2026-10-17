@@ -4910,7 +4910,21 @@ extern "C" int func_00263128(char* self, char* name)
     return 0;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_002631E0);
+//100%
+// Returns whether any string in the pointer list at 0xBC..0xC0 equals *key.
+extern "C" int func_002631E0(char* self, char** key)
+{
+    char*** end = *(char****)(self + 0xC0);
+    char*** begin = *(char****)(self + 0xBC);
+    if (end - begin == 0)
+        return 0;
+    for (char*** it = begin; it != *(char****)(self + 0xC0); ++it)
+    {
+        if (func_004165A8(**it, *key) == 0)
+            return 1;
+    }
+    return 0;
+}
 
 //100%
 extern "C" void* func_00263270(void* self, void* name)
