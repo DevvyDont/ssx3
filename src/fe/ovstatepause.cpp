@@ -856,7 +856,204 @@ extern "C" void func_001FD268(void* self)
     func_00294F78(func_0028B180(), 0xE);
 }
 
-INCLUDE_ASM("fe/ovstatepause", func_001FD320);
+//100%
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+int cBELibrary_getCharacterID(int);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" int func_00146E98(void* iface, int a1);
+extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" const char* func_00144BF0(void* iface);
+extern "C" int func_00144BE0(void* iface);
+extern "C" int func_00145750(void* iface);
+extern "C" const char* func_0014EEC8(void* self, int player, int index);
+extern "C" int func_00146A70(void* iface, int player, int charID, int x);
+extern "C" int func_00157B08(void* reward, int id, int n);
+extern "C" int func_004139F8(float f);
+extern "C" const char* func_0020A1A8(int v);
+// PORT: func_002C2540 returns dst (see quadtree.cpp); this file declares it void further down, so bind the returning form here.
+extern "C" unsigned short* func_002C2540_r(unsigned short* dst, const char* src) __asm__("func_002C2540");
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void func_003A0E90(void* self, unsigned short* str);
+extern "C" void func_003A0D00(void* self, unsigned short* str);
+extern char D_004A2520[];
+extern char D_004A21B8[];
+extern char D_004A2140[];
+extern char D_0046E548[];
+extern char D_0046E558[];
+extern char D_004A2528[];
+extern char D_004A2530[];
+extern char D_004A21B0[];
+extern char D_0046E5F0[];
+extern char D_0046FF68[];
+extern char D_0046FF80[];
+extern char D_0046FF98[];
+extern char D_0046FE38[];
+extern char D_0046FFB0[];
+extern char D_004A2538[];
+extern char D_0046FFD0[];
+extern char D_0046FFE0[];
+extern char D_00470000[];
+extern char D_0046E918[];
+extern char D_004A2550[];
+extern char D_00470018[];
+extern char D_00470030[];
+extern char D_00470048[];
+extern char D_0046E950[];
+extern char D_004A2558[];
+extern char D_00470068[];
+extern char D_00470080[];
+extern char D_00470098[];
+
+typedef unsigned short* (*tLookup_1FD320)(void*, int);
+
+static inline unsigned short* Lookup_1FD320(char* name)
+{
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* vt = *(char**)(o + 4);
+    o += *(short*)(vt + 0x20);
+    return ((tLookup_1FD320)*(void**)(vt + 0x24))(o, GetHashValue32(name));
+}
+
+static inline int Byte_1FD320(signed char* g, int off)
+{
+    return g[off];
+}
+
+static inline void* Obj_1FD320(char* self, char* name)
+{
+    return cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+}
+
+extern "C" int func_001FD320(char* self, int show)
+{
+    unsigned short text[0x130];
+    unsigned short fmt[0x18];
+    unsigned short name[0x18];
+    unsigned short track[0x20];
+    unsigned short title[0x190];
+    unsigned short time[0x20];
+    unsigned short line[0x130];
+
+    if (show != 0) {
+        void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+        void* lib = cBE_getInterface_Fv(cBE_getBE(), 2);
+        void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        char* mode = *(char**)((char*)D_004A28A8 + 0xC0);
+        int kind = Byte_1FD320((signed char*)D_00535BC8, 0x4A);
+        void* t;
+        cUIText* goal;
+        cUIText* status;
+        unsigned short* s;
+
+        t = Obj_1FD320(self, D_004A2520);
+        cUIText_setAsciiString((cUIText*)t, func_0014EE58(lib, func_00146E98(player, 0)));
+        t = Obj_1FD320(self, D_004A21B8);
+        switch (kind) {
+        case 4:
+            func_002C2540_r(name, func_00144BF0(race));
+            func_002C2540_r(fmt, D_004A2140);
+            func_002C26D0(text, fmt, name, Lookup_1FD320(D_0046E548));
+            func_003A0E90(t, text);
+            break;
+        case 5:
+            func_002C2540_r(name, func_00144BF0(race));
+            func_002C2540_r(fmt, D_0046E558);
+            func_002C26D0(text, fmt, name);
+            func_003A0E90(t, text);
+            break;
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+            func_003A0E90(t, (unsigned short*)func_001FD190(kind));
+            break;
+        }
+        goal = (cUIText*)Obj_1FD320(self, D_004A2528);
+        status = (cUIText*)Obj_1FD320(self, D_004A2530);
+        t = Obj_1FD320(self, D_004A21B0);
+        cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_0046E5F0));
+        func_002C2540_r(track, func_0014EEC8(lib, func_00145750(race), 0));
+        if ((unsigned int)(kind - 4) < 2) {
+            s = Lookup_1FD320(D_0046FF68);
+        } else if ((unsigned int)(kind - 6) < 3) {
+            s = Lookup_1FD320(D_0046FF80);
+        } else {
+            s = Lookup_1FD320(D_0046FF98);
+        }
+        func_002C26D0(title, s, track);
+        func_003A0D00(Obj_1FD320(self, D_004A2520), title);
+        switch (kind) {
+        case 4:
+            cUIText_setUnicodeStringByID(goal, GetHashValue32(D_0046FE38));
+            cUIText_setUnicodeStringByID(status, GetHashValue32(D_0046FFB0));
+            if (Byte_1FD320((signed char*)D_00535BC8, 0x49) == 1
+                || (func_00144BE0(race) == 14 && !func_00146A70(player, 0, cBELibrary_getCharacterID(0), 6))
+                || (func_00144BE0(race) == 15 && !func_00146A70(player, 0, cBELibrary_getCharacterID(0), 7))
+                || (func_00144BE0(race) == 16 && !func_00146A70(player, 0, cBELibrary_getCharacterID(0), 8))) {
+                cUIState_hideObjSafe(self, D_004A2530);
+                cUIState_hideObjSafe(self, D_004A2538);
+            }
+            cUIState_hideObjSafe(self, D_0046FFD0);
+            break;
+        case 5:
+            cUIText_setUnicodeStringByID(goal, GetHashValue32(D_0046FFE0));
+            cUIText_setUnicodeStringByID(status, GetHashValue32(D_00470000));
+            if (Byte_1FD320((signed char*)D_00535BC8, 0x49) == 1
+                || (func_00144BE0(race) == 14 && !func_00146A70(player, 0, cBELibrary_getCharacterID(0), 9))
+                || (func_00144BE0(race) == 15 && !func_00146A70(player, 0, cBELibrary_getCharacterID(0), 10))
+                || (func_00144BE0(race) == 16 && !func_00146A70(player, 0, cBELibrary_getCharacterID(0), 11))) {
+                cUIState_hideObjSafe(self, D_004A2530);
+                cUIState_hideObjSafe(self, D_004A2538);
+            }
+            cUIState_hideObjSafe(self, D_0046FFD0);
+            break;
+        case 6:
+        case 7:
+        case 8: {
+            t = Obj_1FD320(self, D_0046FFD0);
+            int secs = func_004139F8((float)*(unsigned int*)(mode + 0x78) * 0.016666668f);
+            func_002C2540_r(time, func_0020A1A8(secs));
+            unsigned short* s2 = Lookup_1FD320(D_0046E918);
+            func_002C2540_r(name, D_004A2550);
+            func_002C26D0(line, name, s2, time);
+            func_003A0D00(t, line);
+            cUIText_setUnicodeStringByID(goal, GetHashValue32(D_00470018));
+            if (kind == 8
+                || (kind == 7 && !func_00157B08(reward, 0, 2))
+                || (kind == 6 && !func_00157B08(reward, 0, 1))) {
+                cUIText_setUnicodeStringByID(status, GetHashValue32(D_00470030));
+            } else {
+                cUIText_setUnicodeStringByID(status, GetHashValue32(D_00470048));
+            }
+            break;
+        }
+        case 9:
+        case 10:
+        case 11: {
+            int n = *(int*)(mode + 0x7C);
+            unsigned short* s3 = Lookup_1FD320(D_0046E950);
+            func_002C2540_r(name, D_004A2558);
+            func_002C26D0(time, name, s3, n);
+            func_003A0D00(Obj_1FD320(self, D_0046FFD0), time);
+            cUIText_setUnicodeStringByID(goal, GetHashValue32(D_00470068));
+            if (kind == 11
+                || (kind == 10 && !func_00157B08(reward, 0, 2))
+                || (kind == 9 && !func_00157B08(reward, 0, 1))) {
+                cUIText_setUnicodeStringByID(status, GetHashValue32(D_00470080));
+            } else {
+                cUIText_setUnicodeStringByID(status, GetHashValue32(D_00470098));
+            }
+            break;
+        }
+        }
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_001FDB78(void* self, int a1, int a2)
