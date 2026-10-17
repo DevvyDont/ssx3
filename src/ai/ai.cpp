@@ -743,7 +743,27 @@ extern "C" int func_0012A250(sAiObj12A250* self)
     return 1;
 }
 
-INCLUDE_ASM("ai/ai", func_0012A2B0);
+struct sAiObj12A2B0
+{
+    char pad0[0x28];
+    char* mRiders[20];
+    int mCount;
+};
+
+extern char D_004D33A0[];
+extern "C" void func_0026AF00(void* self);
+extern "C" void func_0026ADA8(void* self, int v);
+extern "C" void func_00112180(void* rider, int v);
+
+extern "C" void func_0012A2B0(sAiObj12A2B0* self, int arg)
+{
+    func_0026AF00(D_004D33A0);
+    func_0026ADA8(D_004D33A0, arg);
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_00112180(self->mRiders[i], 0);
+    }
+}
 
 //100%
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -824,7 +844,13 @@ extern "C" void func_0012A4D0()
     func_0026ADE8(D_004D33A0);
 }
 
-INCLUDE_ASM("ai/ai", func_0012A4F0);
+extern "C" void func_0012A4F0(sAiObj12A340* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_00112180(self->mRiders[i], 0);
+    }
+}
 
 extern "C" void func_0012A558()
 {
@@ -960,7 +986,25 @@ extern "C" void func_0012AD70(void* self)
     }
 }
 
-INCLUDE_ASM("ai/ai", func_0012ADC0);
+struct sAiObj12ADC0
+{
+    char pad0[0x70];
+    char* mRiders[6];
+    int mCount;
+};
+
+extern "C" int func_0012ADC0(sAiObj12ADC0* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
 
 //100%
 struct sAiMissionVEntry { short delta; short index; void (*fn)(void*, int); };
