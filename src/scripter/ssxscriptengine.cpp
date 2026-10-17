@@ -740,7 +740,15 @@ extern "C" int func_002795D0(void* self, int key, int a, int b, int c)
     return r;
 }
 
-INCLUDE_ASM("scripter/ssxscriptengine", func_002796B8);
+extern "C" int func_002796B8(void* self, int key, int a, int b, int c)
+{
+    for (int i = 0; i < **(int**)((char*)self + 0x52C); i++) {
+        if (*(int*)(*(char**)((char*)self + 0x530) + i * 0xC + 4) == key) {
+            return func_002795D0(self, i, a, b, c);
+        }
+    }
+    return -1;
+}
 
 //100%
 extern "C" int func_00282BF0(void* self, int a1);

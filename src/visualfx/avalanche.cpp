@@ -619,7 +619,16 @@ extern "C" void func_002D9660(void* self)
     }
 }
 
-INCLUDE_ASM("visualfx/avalanche", func_002D96B0);
+extern "C" void* func_002D96B0(void* self, int key)
+{
+    char* p;
+    for (p = *(char**)((char*)self + 0x4); p != 0; p = *(char**)(p + 0xF4)) {
+        if (*(int*)(p + 0xF8) == key) {
+            return p;
+        }
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_002D9A80(void);
@@ -637,7 +646,19 @@ extern "C" void func_002D96E0(void)
     func_002D87D0();
 }
 
-INCLUDE_ASM("visualfx/avalanche", func_002D9738);
+struct sAvPair_9738 { short v; short k; };
+struct sAv_9738 { char pad0[4]; char* head; char pad8[6]; unsigned short n; char pad10[0x100]; sAvPair_9738 pairs[0x40]; };
+// index of key in the head list (inlined helper)
+static inline int avIdx_9738(sAv_9738* s, void* key) { int k = 0; char* p; for (p = s->head; p != 0 && p != key; p = *(char**)(p + 0xF4)) k++; return k; }
+extern "C" void func_002D9738(sAv_9738* s, int v, void* key)
+{
+    if (s->n < 0x40) {
+        int k = avIdx_9738(s, key);
+        s->pairs[s->n].v = v;
+        s->pairs[s->n].k = k;
+        s->n++;
+    }
+}
 
 //100%
 extern "C" float cRenderStateMan_SnowFlakeColourR(int a);

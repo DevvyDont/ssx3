@@ -287,7 +287,13 @@ extern "C" int func_00282500(void* self, void* p, int v)
     return old;
 }
 
-INCLUDE_ASM("scripter/bxscriptengine", func_00282510);
+extern "C" int func_00282510(void* self, int a1, int v)
+{
+    char* e = (char*)func_00282CB0(self, a1);
+    int old = *(int*)(e + 0xC);
+    *(int*)(e + 0xC) = v;
+    return old;
+}
 
 extern "C" void func_002729A8(void* self, void* obj);
 // PORT: the unit declares func_00282540 as void; it returns the stopped state (6).
@@ -437,7 +443,17 @@ extern "C" int func_00282798(void* self, int a1)
     return *(int*)(s + 0x4);
 }
 
-INCLUDE_ASM("scripter/bxscriptengine", func_002827F8);
+extern "C" int func_002827F8(void* self, int a1)
+{
+    char* t = (char*)func_00282CB0(self, a1);
+    if (t == 0) {
+        return -1;
+    }
+    if (*(int*)(t + 0x4) == 1) {
+        return *(int*)(t + 0x14);
+    }
+    return *(int*)(t + 0x8);
+}
 
 //100%
 extern "C" void* func_00282CB0(void* self, int a1);
@@ -638,7 +654,11 @@ int func_00282BB0(void* self, void* a1)
     return *(int*)((char*)*(void**)((char*)a1 + 0xc) + 0xc);
 }
 
-INCLUDE_ASM("scripter/bxscriptengine", func_00282BC0);
+extern "C" void* func_00282CB0(void* self, int a1);
+extern "C" int func_00282BC0(void* self, int a1)
+{
+    return *(int*)((char*)func_00282CB0(self, a1) + 0xC);
+}
 
 //100%
 int func_00282BE0(void* self, void* a1)

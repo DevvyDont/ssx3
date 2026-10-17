@@ -2804,7 +2804,22 @@ extern "C" void func_00274860(void* self, int value)
     *(int*)((char*)self + 0x1C) = value;
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274868);
+extern "C" void func_00274868(void* self, int v)
+{
+    char* s = (char*)self;
+    float save = *(float*)(s + 0x24);
+    *(int*)(s + 0x44) = v;
+    *(float*)(s + 0x24) = 1.0f;
+    int k = *(int*)(s + 0x1C);
+    func_00274830_impl(self, 0);
+    while (*(int*)(s + 0x20) != 0) {
+        *(float*)(s + 0x24) = 1.0f;
+        func_00274A30(self);
+    }
+    *(float*)(s + 0x24) = save;
+    *(int*)(s + 0x1C) = k;
+    *(int*)(s + 0x44) = 0;
+}
 
 extern "C" void func_002748F8(void* self, int value)
 {
