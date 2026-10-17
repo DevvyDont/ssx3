@@ -72,7 +72,14 @@ extern "C" void func_003159A8(void* self)
     *(long*)((char*)self + 0x20) = -1;
 }
 
-INCLUDE_ASM("animation/gameanimmap", func_003159B8);
+//100%
+// Moves bit n from the mask at 0x0 to the mask at 0x8.
+extern "C" void func_003159B8(long* self, int n)
+{
+    long bit = 1L << n;
+    self[1] |= bit & self[0];
+    self[0] &= ~bit;
+}
 
 //100%
 extern "C" int func_003159E8(long* self, int bit)

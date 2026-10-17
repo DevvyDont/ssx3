@@ -566,7 +566,18 @@ extern "C" void func_0011FEF8(void* self)
     func_00111860(*(void**)((char*)self + 0x77C));
 }
 
-INCLUDE_ASM("ai/rider", func_0011FF18);
+//100%
+// Calls the first virtual of the object at 0x77C with a (its vtable pointer sits at 0xDE8).
+class cRiderSub_11FF18 {
+public:
+    char pad_0x000[0xDE8];
+    virtual void v01(int a);
+};
+
+extern "C" void func_0011FF18(char* self, int a)
+{
+    (*(cRiderSub_11FF18**)(self + 0x77C))->v01(a);
+}
 
 //100%
 // 0x20-byte elements with the quadword at offset 0

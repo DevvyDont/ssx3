@@ -199,7 +199,16 @@ extern char D_004A6CA8[];
 //97.94%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
 
-INCLUDE_ASM("be/beintscore", func_001552F8);
+//100%
+// Compares two scores where -1 means none: none for b gives 0, none for a gives 1, otherwise b < a.
+extern "C" int func_001552F8(void* self, int a, int b)
+{
+    if (b == -1)
+        return 0;
+    if (a == -1)
+        return 1;
+    return b < a;
+}
 
 //100%
 extern "C" int func_00155328(void* self, int a)
