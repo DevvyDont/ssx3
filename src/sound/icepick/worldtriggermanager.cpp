@@ -358,7 +358,15 @@ extern "C" void func_002B5E68(void* self)
     }
 }
 
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5ED8);
+extern "C" void func_002B5ED8(sWorldTrigger70** self, int key)
+{
+    for (int i = 0; i < 40; i++) {
+        if ((*self)[i].active == 1 && *(int*)((char*)&(*self)[i] + 0xC) == key) {
+            (*self)[i].active = 0;
+            func_002B5758(&(*self)[i]);
+        }
+    }
+}
 
 //100%
 extern "C" void* func_0028B180();
