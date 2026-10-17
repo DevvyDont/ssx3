@@ -3595,7 +3595,83 @@ extern "C" void func_001CD0B0(void* self, int v)
     *(int*)((char*)self + 0x64) = v;
 }
 
-INCLUDE_ASM("fe/fepopup", cKeyboardPopup_getObjName);
+extern char D_004A1368[];
+extern char D_0045D550[];
+extern char D_004A12A8[];
+extern char D_004A1C80[];
+extern char D_004A1C88[];
+extern char D_004A1C90[];
+extern char D_004A1350[];
+extern char D_0045D560[];
+extern char D_004A1C98[];
+extern char D_004A1CA0[];
+extern char D_004A1CA8[];
+extern char D_004A1CB0[];
+extern char D_004A1CB8[];
+extern char D_004A1CC0[];
+extern char D_004A1CC8[];
+
+// Builds the UI object name for keyboard key i (mode 1 = highlight object); returns 0 for unused keys.
+extern "C" int cKeyboardPopup_getObjName(void* self, int i, char* out, int mode)
+{
+    char buf[0x10];
+    char ch[2];
+    if (mode != 0)
+        __builtin_memcpy(out, D_004A1368, 8);
+    else
+        __builtin_memcpy(out, D_0045D550, 10);
+    switch (i) {
+    case 27:
+        func_004162D0(out, D_004A12A8);
+        break;
+    case 42:
+        func_004162D0(out, D_004A1C80);
+        break;
+    case 56:
+        func_004162D0(out, D_004A1C88);
+        break;
+    case 70:
+        func_004162D0(out, D_004A1C90);
+        break;
+    case 76:
+        func_004162D0(out, D_004A1350);
+        break;
+    case 83:
+        func_004162D0(out, D_0045D560);
+        break;
+    case 28:
+        func_004162D0(out, D_004A1C98);
+        break;
+    case 55:
+        func_004162D0(out, D_004A1CA0);
+        break;
+    case 69:
+        func_004162D0(out, D_004A1CA8);
+        break;
+    case 79:
+        func_004162D0(out, D_004A1CB0);
+        break;
+    case 75:
+        func_004162D0(out, D_004A1CB8);
+        break;
+    case 0:
+        func_004162D0(out, D_004A1CC0);
+        break;
+    case 4: case 5: case 6: case 7: case 8:
+    case 9: case 10: case 11: case 12: case 13:
+        sprintf(buf, D_004A1CC8, i - 3);
+        func_004162D0(out, buf);
+        break;
+    default:
+        if (D_00441390[i] == '*')
+            return 0;
+        ch[0] = D_00441390[i];
+        ch[1] = 0;
+        func_004162D0(out, ch);
+        break;
+    }
+    return 1;
+}
 
 //100%
 extern "C" void func_001CCC30(void* self);
