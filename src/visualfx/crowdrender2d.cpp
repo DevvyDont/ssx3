@@ -65,7 +65,48 @@ void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
     return a;
 }
 
-INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_advanceFrame);
+//100%
+extern "C" int cCrowdAnim2D_advanceFrame(void* self, int frame, int count, int* dir)
+{
+    switch (*dir) {
+    case 0:
+        frame++;
+        if (frame >= count)
+            frame = count - 1;
+        break;
+    case 1:
+        frame--;
+        if (frame < 0)
+            frame = 0;
+        break;
+    case 2:
+        if (count == 1)
+            break;
+        frame++;
+        if (frame >= count) {
+            *dir = 3;
+            frame = count - 2;
+        }
+        break;
+    case 3:
+        if (count == 1)
+            break;
+        frame--;
+        if (frame < 0) {
+            *dir = 2;
+            frame = 1;
+        }
+        break;
+    case 4:
+        if (count == 1)
+            break;
+        frame++;
+        if (frame >= count)
+            frame = 0;
+        break;
+    }
+    return frame;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct sCrowdAnimDef_BAC0 {
