@@ -1126,7 +1126,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B82B8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B83A0);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B84E0);
+// When flag 8 is set, stores the 8-byte value into entry n of the 20-byte table, then forwards the call.
+struct P8_84E0 { char c[8]; };
+struct E_84E0 { struct P8_84E0 v; char p[12]; };
+extern struct E_84E0 D_0050AB14_84E0[] __asm__("D_0050AB14");
+extern void func_003C36C8_84E0(int, int, int, struct P8_84E0 *) __asm__("func_003C36C8");
+int func_003B84E0(int n, int flags, int c, struct P8_84E0 *src) {
+    if (flags & 8) D_0050AB14_84E0[n].v = *src;
+    func_003C36C8_84E0(n, flags, c, src);
+    return 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -5440,7 +5449,12 @@ int func_003CA990(S_A990 *self) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA9D8);
+// Sets the ratio at 0x114 from two fixed-point values, then marks dirty bit 3.
+extern void func_003CE7C0_A9D8(void *, int) __asm__("func_003CE7C0");
+void func_003CA9D8(char *self, int *p) {
+    *(float *)(self + 0x114) = (float)(p[0] >> 7) / (float)(p[1] >> 8);
+    func_003CE7C0_A9D8(self + 0x20, 3);
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAA28);
 
@@ -6218,7 +6232,11 @@ int func_003CEE88(S_EE88 *self) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CEED0);
+// Sets the ratio at 0x118 from two fixed-point values, then marks dirty bit 2.
+void func_003CEED0(char *self, int *p) {
+    *(float *)(self + 0x118) = ((float)(p[0] >> 8) * 2.0f) / (float)(p[1] >> 8);
+    func_003CE7C0_A9D8(self + 0x20, 2);
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEF20);
 
