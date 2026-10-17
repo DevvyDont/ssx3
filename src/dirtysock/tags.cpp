@@ -31,7 +31,32 @@ INCLUDE_ASM("dirtysock/tags", func_003EB588);
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
 
-INCLUDE_ASM("dirtysock/tags", func_003EB840);
+//100%
+// Finds field prefix+name in record; either part may be null.
+extern "C" char* cDirtysock_tag_TagFieldFind_B840(char* record, const char* name) __asm__("cDirtysock_tag_TagFieldFind");
+extern "C" char* strcpy(char* d, const char* s);
+extern "C" char* func_004162D0(char* d, const char* s);
+
+extern "C" char* func_003EB840(char* record, const char* prefix, const char* name)
+{
+    char buf[256];
+    char* r;
+    if (prefix == 0)
+    {
+        r = cDirtysock_tag_TagFieldFind_B840(record, name);
+    }
+    else if (name == 0)
+    {
+        r = cDirtysock_tag_TagFieldFind_B840(record, prefix);
+    }
+    else
+    {
+        strcpy(buf, prefix);
+        func_004162D0(buf, name);
+        r = cDirtysock_tag_TagFieldFind_B840(record, buf);
+    }
+    return r;
+}
 
 INCLUDE_ASM("dirtysock/tags", func_003EB8B8);
 
@@ -224,7 +249,19 @@ INCLUDE_ASM("dirtysock/tags", func_003EC8B8);
 
 INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
 
-INCLUDE_ASM("dirtysock/tags", func_003ECA88);
+//100%
+// Finds field name in src, steps back to the start of its token, and sets up record from there.
+extern "C" char* cDirtysock_tag_TagFieldFind_CA88(char* record, const char* name) __asm__("cDirtysock_tag_TagFieldFind");
+
+extern "C" int func_003ECA88(char* record, int len, const char* name, char* src)
+{
+    char* p = cDirtysock_tag_TagFieldFind_CA88(src, name);
+    if (p == 0)
+        return 0;
+    while (p != src && (unsigned char)p[-1] >= 0x20)
+        p--;
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, p);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);

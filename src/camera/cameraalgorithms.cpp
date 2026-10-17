@@ -454,7 +454,28 @@ extern "C" void func_0015DAC0(void)
     *(int*)((char*)ctrl + 0x4A4) = 1;
 }
 
-INCLUDE_ASM("camera/cameraalgorithms", func_0015DAE0);
+//100%
+// Updates the first camera target and, when there are two or more, the second (virtual slot 4 of each target's object at 0xA8).
+class cCamTarget_15DAE0
+{
+public:
+    char pad_0x00[0x14];
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+};
+struct sCamTargetRef_15DAE0 { char pad[0xA8]; cCamTarget_15DAE0* obj; };
+struct sCamTargets_15DAE0 { int count; sCamTargetRef_15DAE0* first; sCamTargetRef_15DAE0* second; };
+
+extern "C" void func_0015DAE0()
+{
+    sCamTargets_15DAE0* t = *(sCamTargets_15DAE0**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    int n = t->count;
+    t->first->obj->v4();
+    if (n >= 2)
+        t->second->obj->v4();
+}
 
 //100%
 extern "C" void func_0016C968(void* self);
