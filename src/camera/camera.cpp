@@ -224,7 +224,47 @@ void* func_0015E030(void* self)
 
 INCLUDE_ASM("camera/camera", func_0015E050);
 
-INCLUDE_ASM("camera/camera", func_0015E2A8);
+//100%
+struct sCamTune_0015E2A8 {
+    float a;      // 0x0
+    float b;      // 0x4
+    float c;      // 0x8
+    float d;      // 0xC
+    float g[4][4]; // 0x10
+};
+
+extern sCamTune_0015E2A8 D_004C53E0;
+extern int D_004C5430[5];
+
+// Resets the camera tuning table to its defaults.
+extern "C" void func_0015E2A8(void)
+{
+    D_004C53E0.a = 0.05f;
+    D_004C53E0.b = 0.01f;
+    D_004C53E0.c = 0.4f;
+    D_004C53E0.d = 20000.0f;
+    D_004C5430[0] = 0;
+    D_004C53E0.g[0][0] = 0.02f;
+    D_004C53E0.g[0][1] = 0.01366f;
+    D_004C53E0.g[0][2] = 0.07f;
+    D_004C53E0.g[0][3] = -1.0f;
+    D_004C5430[1] = 1;
+    D_004C53E0.g[1][0] = 0.02f;
+    D_004C53E0.g[1][1] = 0.01366f;
+    D_004C53E0.g[1][2] = 0.08f;
+    D_004C53E0.g[1][3] = -1.0f;
+    D_004C5430[2] = 1;
+    D_004C53E0.g[2][0] = 0.02f;
+    D_004C53E0.g[2][1] = 0.01366f;
+    D_004C53E0.g[2][2] = 0.09f;
+    D_004C53E0.g[2][3] = -1.0f;
+    D_004C5430[3] = 1;
+    D_004C53E0.g[3][0] = 0.1f;
+    D_004C53E0.g[3][1] = 0.03f;
+    D_004C53E0.g[3][2] = 1.4f;
+    D_004C53E0.g[3][3] = -1.0f;
+    D_004C5430[4] = 1;
+}
 
 INCLUDE_ASM("camera/camera", func_0015E360);
 
