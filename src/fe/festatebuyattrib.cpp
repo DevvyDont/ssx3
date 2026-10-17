@@ -1148,7 +1148,21 @@ extern "C" void func_001F6840(void* self, char* name, const char* str)
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
 
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
+//100%
+extern "C" int func_001F6EE0(void* self, unsigned int mask, int n, int count)
+{
+    int i;
+    int k = -1;
+    for (i = 0; i < count; i++) {
+        if (mask & (1 << i)) {
+            k++;
+            if (k == n) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
 
 //100%
 extern "C" void* cBE_getBE();

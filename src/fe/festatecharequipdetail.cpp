@@ -569,7 +569,22 @@ extern "C" int func_0019A098(void* self, const char* name)
     return -1;
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A1E0);
+//100%
+extern void* D_004A28A8;
+struct sEquipTable;
+extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+extern "C" void func_0019A9B8(void* self);
+
+extern "C" void func_0019A1E0(void* self)
+{
+    if (*(int*)((char*)self + 0xA60) == 0) {
+        if (func_0019E238((sEquipTable*)(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+                          *(int*)((char*)self + 0xA64))) {
+            *(int*)((char*)self + 0xA60) = 1;
+            func_0019A9B8(self);
+        }
+    }
+}
 
 //100%
 struct cUIText;
@@ -799,7 +814,18 @@ extern "C" void func_0019A638(void* self)
     }
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A758);
+//100%
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0019FA78(void* r, int a1);
+
+extern "C" void func_0019A758(void* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    if (mgr != 0) {
+        func_0019FA78(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2124,7 +2150,52 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
     slot->size = size;
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D140);
+//100%
+struct sEquipTable_DC20;
+extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
+struct sEquipSlot_D140 {
+    int state;              // 0x000
+    char pad_0x4[0x118];
+    unsigned int stamp;     // 0x11C
+};
+
+extern "C" void func_0019D140(void* self, int bank)
+{
+    unsigned int best = 0;
+    int bestIdx = -1;
+    int found;
+    int i;
+    sEquipSlot_D140* p = (sEquipSlot_D140*)((char*)self + bank * 0x12000);
+    found = bank;
+    for (i = 0; i < 256; i++, p++) {
+        if (p->state == 3 && (best == 0 || p->stamp < best)) {
+            best = p->stamp;
+            bestIdx = i;
+        }
+    }
+    if (bestIdx == -1) {
+        int b;
+        for (b = 0; b < 10; b++) {
+            if (b == bank) {
+                continue;
+            }
+            p = (sEquipSlot_D140*)((char*)self + b * 0x12000);
+            for (i = 0; i < 256; i++, p++) {
+                if (p->state == 3 && (best == 0 || p->stamp < best)) {
+                    best = p->stamp;
+                    found = b;
+                    bestIdx = i;
+                }
+            }
+            if (bestIdx >= 0) {
+                break;
+            }
+        }
+    }
+    if (bestIdx >= 0) {
+        func_0019D8B8((sEquipTable_DC20*)self, found, bestIdx);
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct sEquipTable_DC20;
@@ -2655,7 +2726,26 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019DF20);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
+//100%
+struct sEquipSlotK19E1C0 {
+    unsigned int state;
+    char pad04[0x11C];
+};
+struct sEquipRowK19E1C0 {
+    sEquipSlotK19E1C0 slots[0x100];
+};
+
+extern "C" int func_0019E1C0(sEquipRowK19E1C0* self, int a)
+{
+    int i;
+    sEquipSlotK19E1C0* s = self[a].slots;
+    for (i = 0; i < 0x100; i++, s++) {
+        if (s->state >= 2) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 extern "C" int func_0019E208(char* self, int a, int b)
 {
@@ -2681,7 +2771,14 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2)
     return self->rows[a1].slots[a2].state == 1;
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
+//100%
+extern "C" char* func_0019E268(char* self, int a, int b)
+{
+    if (*(int*)(self + (a * 0x12000 + b * 0x120)) == -1) {
+        return 0;
+    }
+    return ((sEquipTable*)self)->rows[a].slots[b].pad04;
+}
 
 //100%
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2)
@@ -2692,9 +2789,29 @@ extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2)
     return self->rows[a1].slots[a2].value;
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
+//100%
+extern "C" int func_0019E2F0(char* self, int a, int b)
+{
+    if (*(int*)(self + (a * 0x12000 + b * 0x120)) != 1) {
+        return 0;
+    }
+    return ((sEquipTable*)self)->rows[a].slots[b].value;
+}
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
+//100%
+extern "C" int func_0019E330(char* self, int a, int b)
+{
+    char* p = self + 0x104;
+    char* q = self + 0x118;
+    int o = b * 0x120 + a * 0x12000;
+    p += o;
+    q += o;
+    int v = *(int*)p;
+    *(int*)p = 0;
+    *(int*)(self + 0xB4000) -= *(int*)q;
+    *(int*)q = 0;
+    return v;
+}
 
 extern "C" int func_0019E380(char* self, int a, int b)
 {
@@ -2760,5 +2877,32 @@ extern "C" void func_0019E538(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E588);
+//100%
+struct sVEntryK19E588 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+extern void* D_004A289C;
+extern "C" void func_0019E588(void* self, int a1, int a2)
+{
+    *(int*)((char*)self + 0xC24) = a1;
+    *(int*)((char*)self + 0xC28) = a2;
+    if (*(int*)self == a1 &&
+        ((*(int*)((char*)self + 0x10) != 0 && a2 != 0) || (*(int*)((char*)self + 0x10) == 0 && a2 == 0) || (*(int*)((char*)self + 0x10) != 0 && a2 == 0))) {
+        int ok = *(unsigned int*)self < 10 && *(int*)((char*)self + 0xCB8) != 0 && *(int*)((char*)self + 0xCB4) != 0;
+        if (ok) {
+            *(int*)((char*)self + 0xCD4) = -1;
+            int* p = (int*)((char*)self + 0xCC8);
+            *p = *p != 0 || *(int*)((char*)self + 0xCC4) != 0;
+            *(int*)((char*)self + 0xCC4) = 0;
+        }
+    } else if (*(int*)((char*)self + 0xCD4) < 0) {
+        char* g = (char*)D_004A289C;
+        sVEntryK19E588* vt = *(sVEntryK19E588**)(g + 0x10D8);
+        *(int*)((char*)self + 0xCD4) = vt[114].fn(g + vt[114].delta) + 4;
+        *(int*)((char*)self + 0xCC4) = *(int*)((char*)self + 0xCC8);
+        *(int*)((char*)self + 0xCC8) = 0;
+    }
+}
 
