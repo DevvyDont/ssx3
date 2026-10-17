@@ -268,7 +268,26 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EC8B8);
+//100%
+// TagFieldSetDate-style setter: converts calendar fields (minus offset seconds) to an epoch and stores it with TagFieldSetEpoch.
+extern "C" void* func_00416210_C8B8(void* p, int c, int n) __asm__("func_00416210");
+extern "C" long func_003EB090_C8B8(sDsTmK2* tm) __asm__("func_003EB090");
+
+extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int month, int day, int hour, int min, int sec, int offset)
+{
+    sDsTmK2 tm;
+    int secs;
+    func_00416210_C8B8(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    tm.tm_year = year - 1900;
+    tm.tm_mon = month - 1;
+    tm.tm_mday = day;
+    tm.tm_hour = hour;
+    tm.tm_min = min;
+    tm.tm_sec = sec;
+    secs = func_003EB090_C8B8(&tm);
+    return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs ? secs - offset : 0);
+}
 
 INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
 
@@ -675,4 +694,21 @@ extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* h
 }
 
 
-INCLUDE_ASM("dirtysock/tags", func_003EDE80);
+//100%
+// TagFieldGetDate-style accessor: packs a time tag into date (year << 16 | month << 8 | day) and time (hour << 16 | min << 8 | sec).
+extern "C" int func_003EDE80(char* data, int* date, int* time, int offset)
+{
+    sDsTmK2 tm;
+    sDsTmK2* t;
+    unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
+    if (secs < 2)
+        return -1;
+    t = func_003EAEB8(&tm, secs + offset);
+    if (t == 0)
+        return -1;
+    if (date)
+        *date = ((t->tm_year + 1900) << 16) | ((t->tm_mon + 1) << 8) | t->tm_mday;
+    if (time)
+        *time = (t->tm_hour << 16) | (t->tm_min << 8) | t->tm_sec;
+    return 0;
+}
