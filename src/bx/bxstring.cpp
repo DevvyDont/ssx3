@@ -594,7 +594,20 @@ extern "C" void func_00318D90(cBXString* self)
     }
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318DF8);
+// Replaces every from char with to, in place.
+// PORT: pointer held in int to get the target's negative load offset.
+extern "C" void func_00318DF8(cBXString* self, char from, char to)
+{
+    func_00318120(self);
+    char* p = self->str;
+    int i = *(int*)((int)p - 8);
+    while (--i >= 0)
+    {
+        if (*p == from)
+            *p = to;
+        p++;
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_00318120(cBXString* self);
@@ -605,7 +618,19 @@ extern "C" void func_00318E68(cBXString* self, int idx, char ch)
     self->str[idx] = ch;
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318EB8);
+extern "C" void* func_00416210(void* dst, int c, int n);
+
+// cBXString(ch, n): n copies of ch (func_00416210 is memset).
+extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
+{
+    self->str = D_004A3E90;
+    if (n > 0)
+    {
+        cBXString_Realloc(self, n);
+        func_00416210(self->str, ch, n);
+    }
+    return self;
+}
 
 extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str);
 
@@ -617,7 +642,7 @@ extern "C" cBXString* func_00318F20(cBXString* self, char ch)
     return self;
 }
 
-extern "C" void func_00318F90(cBXString* self, cBXString* other, int pos, int len);
+extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int pos, int n);
 
 // Mid(other, pos): everything from pos to the end.
 extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int pos)
@@ -626,7 +651,29 @@ extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int pos)
     return self;
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318F90);
+extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra);
+extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// Mid(other, pos, n): n chars from pos, clamped to the string.
+// PORT: pointer held in int for the negative header offset.
+extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int pos, int n)
+{
+    if (pos < 0)
+        pos = 0;
+    if (n < 0)
+        n = 0;
+    int len = *(int*)(*(int*)other - 8);
+    if (len < pos + n)
+        n = len - pos;
+    if (len < pos)
+        n = 0;
+    char* tmp = D_004A3E90;
+    func_003181E8(other, (cBXString*)&tmp, n, pos, 0);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
+}
 
 //100%
 struct cBXString;
@@ -679,6 +726,28 @@ extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, in
 }
 
 
-INCLUDE_ASM("bx/bxstring", func_00319120);
+extern "C" int func_0041AD10(const char* s, const char* reject);
 
-INCLUDE_ASM("bx/bxstring", func_00319170);
+// A cBXString returned by value: the copy constructor and destructor make g++
+// return it through a hidden pointer (a0), as the target's callers do.
+struct cBXStringRet {
+    char* str;
+    cBXStringRet(const cBXStringRet& o) { cBXString_cBXString1((cBXString*)this, (cBXString*)&o); }
+    ~cBXStringRet() { cBXString__cBXString((cBXString*)this, 2); }
+};
+// cBXString_cBXString5 (Left) seen as a by-value function.
+cBXStringRet cBXString_Left(cBXString* other, int n) __asm__("cBXString_cBXString5");
+
+// The leading run of chars not in set (func_0041AD10 is strcspn).
+extern "C" cBXStringRet func_00319120(cBXString* other, const char* set)
+{
+    return cBXString_Left(other, func_0041AD10(other->str, set));
+}
+
+extern "C" int func_0041AB08(const char* s, const char* accept);
+
+// The leading run of chars in set (func_0041AB08 is strspn).
+extern "C" cBXStringRet func_00319170(cBXString* other, const char* set)
+{
+    return cBXString_Left(other, func_0041AB08(other->str, set));
+}
