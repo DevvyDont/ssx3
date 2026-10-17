@@ -63,7 +63,18 @@ extern "C" int func_002593F0(void* a, void* b, int* x, int* y)
     return *y - *x;
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00259400);
+extern char D_004A2F30[];
+extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
+
+// Sort comparison: descending by the first word of each entry's tag structure.
+extern "C" int func_00259400(void* a, void* b, char* x, char* y)
+{
+    int sx[2];
+    int sy[2];
+    cDirtysock_tag_TagFieldGetStructure(x + 0x28, sx, 8, D_004A2F30);
+    cDirtysock_tag_TagFieldGetStructure(y + 0x28, sy, 8, D_004A2F30);
+    return sy[0] - sx[0];
+}
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00259468);
 
@@ -7696,7 +7707,24 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00267000);
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00267068);
 
-INCLUDE_ASM("dirtysock/tagsunk", func_002670C8);
+struct sDsListNode670C8 {
+    sDsListNode670C8* next;
+    sDsListNode670C8* prev;
+};
+void operator_delete(int*);
+
+// Frees every node of the circular list whose sentinel is at +4, leaving it empty.
+extern "C" void func_002670C8(void* self)
+{
+    sDsListNode670C8* n = (*(sDsListNode670C8**)((char*)self + 4))->next;
+    while (n != *(sDsListNode670C8**)((char*)self + 4)) {
+        sDsListNode670C8* next = n->next;
+        operator_delete((int*)n);
+        n = next;
+    }
+    (*(sDsListNode670C8**)((char*)self + 4))->next = *(sDsListNode670C8**)((char*)self + 4);
+    (*(sDsListNode670C8**)((char*)self + 4))->prev = *(sDsListNode670C8**)((char*)self + 4);
+}
 
 //100%
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
