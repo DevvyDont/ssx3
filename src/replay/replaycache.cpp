@@ -271,7 +271,23 @@ void func_002705A8(void* self)
 {
 }
 
-INCLUDE_ASM("replay/replaycache", func_002705B0);
+extern "C" void func_00270658(void* self);
+
+extern "C" void func_002705B0(void* self, int id, int flag)
+{
+    char* s = (char*)self;
+    char* r = (char*)id;
+    if (*(int*)(s + 0x3D4) != 0) {
+        if (*(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) == 1) {
+            int t, u;
+            if (flag != 0) { t = *(int*)(r + 0x9C); u = *(int*)(s + 0x474); }
+            else { t = *(int*)(r + 0xA4); u = *(int*)(s + 0x47C); }
+            t -= u;
+            if (t >= 1000) func_00270658(self);
+            else *(int*)(s + 0x3D4) = 0;
+        }
+    }
+}
 
 INCLUDE_ASM("replay/replaycache", func_00270628);
 
@@ -1078,7 +1094,14 @@ extern "C" void func_00272258(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272288);
+extern "C" void func_003E6448(void* dst, int value, int size);
+
+extern "C" void func_00272288(int* self)
+{
+    self[0] = -1;
+    *(int*)((char*)self + 0xB0) = 0;
+    func_003E6448(self + 1, 0, 0xAC);
+}
 
 extern "C" void* func_002718E8(int, int);
 
@@ -1448,7 +1471,15 @@ extern "C" void func_002729A8(sRcList272938* self, int i)
     self->freeHead = n;
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272A50);
+extern "C" void func_00272A50(sRcList272938* self)
+{
+    char* p = *(char**)((char*)self + 0x1C);
+    while (p != 0) {
+        int id = *(int*)(p + 0x4);
+        p = *(char**)(p + 0x50);
+        func_002729A8(self, id);
+    }
+}
 
 extern "C" void* func_00272CC0(void* self, int a);
 extern "C" void func_00274868(void* p, int a);
@@ -1467,7 +1498,13 @@ extern "C" void* func_00272AD0(void* self, int a1, int a2)
     return func_00274830(func_00272CC0(self, a1), a2);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272B00);
+extern "C" void func_00272B00(void* self, int a)
+{
+    char* p;
+    for (p = *(char**)((char*)self + 0x1C); p != 0; p = *(char**)(p + 0x50)) {
+        func_00272AD0(self, *(int*)(p + 0x4), a);
+    }
+}
 
 //100%
 extern "C" void* func_00272CC0(void* self, int a1);
@@ -1478,7 +1515,13 @@ extern "C" void func_00272B58(void* self, int a1)
     func_00274918(func_00272CC0(self, a1));
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272B80);
+extern "C" void func_00272B80(void* self)
+{
+    char* p;
+    for (p = *(char**)((char*)self + 0x1C); p != 0; p = *(char**)(p + 0x50)) {
+        func_00272B58(self, *(int*)(p + 0x4));
+    }
+}
 
 extern "C" void* func_00272CC0(void* self, int a);
 extern "C" void func_002749E8(void* p);
@@ -1488,7 +1531,13 @@ extern "C" void func_00272BD0(void* self, int a)
     func_002749E8(func_00272CC0(self, a));
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272BF8);
+extern "C" void func_00272BF8(void* self)
+{
+    char* p;
+    for (p = *(char**)((char*)self + 0x1C); p != 0; p = *(char**)(p + 0x50)) {
+        func_00272BD0(self, *(int*)(p + 0x4));
+    }
+}
 
 extern "C" void func_00274A08(void* p);
 
@@ -1497,7 +1546,13 @@ extern "C" void func_00272C48(void* self, int a)
     func_00274A08(func_00272CC0(self, a));
 }
 
-INCLUDE_ASM("replay/replaycache", func_00272C70);
+extern "C" void func_00272C70(void* self)
+{
+    char* p;
+    for (p = *(char**)((char*)self + 0x1C); p != 0; p = *(char**)(p + 0x50)) {
+        func_00272C48(self, *(int*)(p + 0x4));
+    }
+}
 
 //100%
 extern "C" void* func_00272CC0(void* self, int a1)
@@ -1528,12 +1583,13 @@ extern "C" unsigned char func_00272D20(void* self)
     return func_00274C68(self);
 }
 
-extern "C" void* func_00274D90();
+// Called here with the caller's own args passed through.
+void* func_00274D90_passthru() __asm__("func_00274D90");
 extern "C" int func_00274398(void* p);
 
 extern "C" void func_00272D40()
 {
-    func_00274398(func_00274D90());
+    func_00274398(func_00274D90_passthru());
 }
 
 //100%
@@ -2426,7 +2482,15 @@ extern "C" void* func_002742E0(void* self, int i)
     return 0;
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274318);
+struct sRc274318 { int a; int b; int offs[1]; };
+extern "C" void* func_00274318(char* self, int i)
+{
+    char* p = self + ((sRc274318*)self)->offs[i];
+    if (*(unsigned short*)p > 8) {
+        return p + 8;
+    }
+    return 0;
+}
 
 //100%
 int func_00274348(void* self)
@@ -2509,7 +2573,16 @@ extern "C" void* func_00274518(void* self)
     return self;
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274578);
+extern "C" void func_002746F8(void* self);
+void operator_delete(int* p);
+
+extern "C" void func_00274578(int* self, int flags)
+{
+    func_002746F8(self);
+    if (flags & 1) {
+        operator_delete(self);
+    }
+}
 
 //100%
 // PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
@@ -2922,7 +2995,14 @@ extern "C" int func_00274D70(void* self)
     return **(int**)((char*)self + 0x8);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00274D90);
+extern "C" char* func_00274D90(char* self, int n)
+{
+    char* p = self + *(unsigned short*)(self + 0x2);
+    for (; n != 0; n--) {
+        p += func_002743C0(p);
+    }
+    return p;
+}
 
 INCLUDE_ASM("replay/replaycache", func_00274DE0);
 
