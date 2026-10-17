@@ -592,7 +592,32 @@ extern "C" void* func_002530D0(int size)
     return func_00252A10_6(0, size, 0, 0, 0, 0);
 }
 
-INCLUDE_ASM("mem/memstd", func_00253100);
+struct sMemBlock_253100 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    int f8;
+    int fC;
+    sMemBlock_253100* next;
+    sMemBlock_253100* prev;
+};
+
+// First block of at least `size` bytes, walking forward or backward from the
+// class's list head; 0 if the walk hits the 'BS' end block.
+extern "C" sMemBlock_253100* func_00253100(char* cls, int size, int backward)
+{
+    sMemBlock_253100* b = (sMemBlock_253100*)(cls + 0x10);
+    if (backward == 0) {
+        do {
+            b = b->next;
+        } while (b->size < size);
+    } else {
+        do {
+            b = b->prev;
+        } while (b->size < size);
+    }
+    return b->tag != 0x4253 ? b : 0;
+}
 
 INCLUDE_ASM("mem/memstd", func_00253170);
 

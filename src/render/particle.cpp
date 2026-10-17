@@ -532,7 +532,12 @@ extern "C" void func_003717C0(sPtObj17C0* self, int a1, int a2, sPtCol17C0* col,
     func_003710D0(self, a1, a2, a4);
 }
 
-INCLUDE_ASM("render/particle", func_003718E8);
+extern "C" void func_003718E8()
+{
+    while (*(volatile unsigned int*)0x1000A000 & 0x100) {
+    }
+    *(volatile unsigned int*)0x10003010 = 4;
+}
 
 //100%
 struct sGifQuad {
@@ -609,7 +614,16 @@ INCLUDE_ASM("render/particle", func_00371EA0);
 
 INCLUDE_ASM("render/particle", func_00371F98);
 
-INCLUDE_ASM("render/particle", func_00372098);
+extern "C" void func_00372098(int on)
+{
+    if (on != 0) {
+        *(volatile unsigned int*)0x1000E000 |= 1;
+        *(volatile unsigned int*)0x1000E020;
+        *(volatile unsigned int*)0x1000E020 = 1;
+    } else {
+        *(volatile unsigned int*)0x1000E000 &= ~1;
+    }
+}
 
 //100%
 // Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
