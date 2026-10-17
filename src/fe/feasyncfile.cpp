@@ -10712,7 +10712,209 @@ void* func_001B70A8(void* self)
     return func_001B7778(self);
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001B70D0);
+//100%
+extern "C" void func_00265D08(void* self);
+extern "C" int func_00265A38(void* self);
+void func_00265DF0(void* self);
+void func_00265E00(void* self);
+void func_00265E10(void* self);
+void func_00265E20(void* self);
+void func_00265E30(void* self);
+extern "C" void func_001B7650(void* self, int a1, int a2, int b0, int b1, int a5, int a6);
+extern "C" void func_001B7E40(void* self, int a1);
+extern int* D_004A33D0;
+extern "C" void func_001B7778_v(void* self) __asm__("func_001B7778");
+extern char D_004642E0[];
+extern char D_004642F8[];
+extern char D_00463F58[];
+extern char D_00464310[];
+extern char D_00464330[];
+extern char D_00464348[];
+extern char D_00464360[];
+extern char D_00464380[];
+extern char D_00464398[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+
+static inline int Loc_1B70D0(char* label)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001A4E28* vt = *(sVEntry_001A4E28**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(label));
+}
+
+static inline void Msg_1B70D0(char* self, char* label, char* arg)
+{
+    char* text = self + 0x702;
+    func_002C26D0(text, Loc_1B70D0(label), arg);
+    func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+}
+
+static inline void Ask_1B70D0(char* self, char* label, char* arg, int next)
+{
+    char* text = self + 0x702;
+    func_002C26D0(text, Loc_1B70D0(label), arg);
+    func_001B7650(self, next, 1, GetHashValue32(D_0045DCC8), GetHashValue32(D_0045FCD8), 0, (int)text);
+}
+
+static inline void Msg2_1B70D0(char* self, char* label)
+{
+    char* text = self + 0x702;
+    func_002C2508(text, Loc_1B70D0(label));
+    func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+}
+
+static inline void Ask2_1B70D0(char* self, char* label, int next)
+{
+    char* text = self + 0x702;
+    func_002C2508(text, Loc_1B70D0(label));
+    func_001B7650(self, next, 1, GetHashValue32(D_0045DCC8), GetHashValue32(D_0045FCD8), 0, (int)text);
+}
+
+extern "C" void func_001B70D0_v(void* selfp, int state)
+{
+    char* self = (char*)selfp;
+    char buf[0x20];
+    void* mgr = D_004A28A8;
+    *(int*)(self + 0x6DC) = state;
+    char* obj = *(char**)((char*)mgr + 0x8C);
+    sVEntry_001A4E28* vt = *(sVEntry_001A4E28**)(obj + 4);
+    int name = vt[4].fn(obj + vt[4].delta, GetHashValue32(D_004642E0));
+    func_002C2718_1AFA60(buf, D_004A12C0, 1);
+    switch (state) {
+    case 1:
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        Msg_1B70D0(self, D_00463F58, buf);
+        break;
+    case 6:
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        Msg_1B70D0(self, D_00463F58, buf);
+        break;
+    case 7: {
+        int* c = D_004A33D0;
+        *(int*)(self + 0x6D8) = 0;
+        *(int*)(self + 0xB04) = 0;
+        func_00265D08(c);
+        Ask_1B70D0(self, D_004642F8, (char*)name, 8);
+        break;
+    }
+    case 8:
+        func_001B7778_v(self);
+        *(int*)(self + 0xB04) = 1;
+        if (*(int*)(self + 0x6D8) != 0) {
+            func_001B70D0_v(self, 9);
+            break;
+        }
+        func_00265E00(D_004A33D0);
+        Msg_1B70D0(self, D_00464310, buf);
+        break;
+    case 12:
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        Msg_1B70D0(self, D_00463F58, buf);
+        break;
+    case 13: {
+        int* c = D_004A33D0;
+        *(int*)(self + 0xB04) = 0;
+        *(int*)(self + 0x6D8) = 0;
+        func_00265D08(c);
+        Ask_1B70D0(self, D_00464330, buf, 0xE);
+        break;
+    }
+    case 14: {
+        int* c = D_004A33D0;
+        *(int*)(self + 0xB04) = 1;
+        func_00265E30(c);
+        Msg_1B70D0(self, D_00464348, buf);
+        break;
+    }
+    case 16:
+        *(int*)(self + 0xB04) = 0;
+        if (func_00265A38(D_004A33D0) < 0x11) {
+            *(int*)(self + 0x6D4) = 3;
+            func_001B70D0_v(self, 0x11);
+            break;
+        }
+        *(int*)(self + 0xB04) = 1;
+        func_001B7778_v(self);
+        func_00265E10(D_004A33D0);
+        Msg_1B70D0(self, D_00464310, buf);
+        break;
+    case 0:
+    case 5:
+    case 11:
+    case 19:
+        *(int*)(self + 0x6D8) = 0;
+    case 2:
+        *(int*)(self + 0xB04) = 0;
+        break;
+    case 20:
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        Msg_1B70D0(self, D_00463F58, buf);
+        break;
+    case 21: {
+        int* c = D_004A33D0;
+        *(int*)(self + 0xB04) = 0;
+        *(int*)(self + 0x6D8) = 0;
+        func_00265D08(c);
+        Ask2_1B70D0(self, D_00464360, 0x16);
+        break;
+    }
+    case 22:
+        *(int*)(self + 0xB04) = 1;
+        if (*(int*)(self + 0x6D8) != 0) {
+            func_001B70D0_v(self, 0x17);
+            break;
+        }
+        func_00265E20(D_004A33D0);
+        Msg2_1B70D0(self, D_00464380);
+        break;
+    case 23:
+        func_001B7778_v(self);
+    case 3:
+    case 9:
+    case 15:
+    case 17:
+        func_001B7E40(self, *(int*)(self + 0x6D4));
+        break;
+    case 25: {
+        int* c = D_004A33D0;
+        *(int*)(self + 0xB04) = 0;
+        *(int*)(self + 0x6D8) = 0;
+        func_00265D08(c);
+        Ask_1B70D0(self, D_00464398, buf, 0x1A);
+        break;
+    }
+    case 26:
+        *(int*)(self + 0xB04) = 1;
+        if (*(int*)(self + 0x6D8) != 0) {
+            func_001B70D0_v(self, 0x1C);
+            break;
+        }
+        func_00265E20(D_004A33D0);
+        Msg_1B70D0(self, D_00464310, buf);
+        break;
+    case 27:
+        *(int*)(self + 0xB04) = 1;
+        func_001B7778_v(self);
+        func_00265E10(D_004A33D0);
+        Msg_1B70D0(self, D_00464310, buf);
+        break;
+    case 4:
+    case 10:
+    case 18:
+    case 24:
+    case 29:
+        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 28:
+        func_001B7E40(self, *(int*)(self + 0x6D4));
+        break;
+    }
+}
 
 //100%
 extern "C" void* func_001A9C50(void* self);

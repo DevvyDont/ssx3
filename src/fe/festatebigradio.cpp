@@ -1,6 +1,190 @@
 #include "common.h"
 
-INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onCreateScreen);
+//100%
+struct cUIText;
+int GetHashValue32(char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" unsigned char cUIListBox_addEntryByStringID(void* self, int id, int data);
+extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
+extern "C" int func_0039A768(void* self, int key, unsigned char* out);
+extern "C" void func_0039A7A8(void* self, unsigned char a1);
+extern "C" void func_00192740(void* self, int a1);
+void func_00192968(void* self, int val);
+extern "C" void func_00192970(void* self, void* screen);
+extern "C" int func_00193F38(void* self, int player, int opt);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern int D_004A1A70;
+extern char D_00535BC8[];
+extern char D_004A1710[8];
+extern char D_004A1718[8];
+extern char D_004A1720[8];
+extern char D_004A1728[8];
+extern char D_004A1730[8];
+extern char D_004A1738[8];
+extern char D_004A14F8[];
+extern char* D_00441108[];
+extern char D_0045FCC8[];
+extern char D_0045FCD8[];
+extern char D_0045DCC8[];
+extern char D_0045DF40[];
+extern char D_004A16E0[];
+extern char D_004A16D8[];
+extern char D_004A1758[];
+extern char D_004A1760[];
+extern char D_004A1768[];
+extern char D_004A1770[];
+extern char D_004A1778[];
+extern char D_004A1780[];
+extern char D_004A1580[];
+extern char D_004A1588[];
+extern char D_0045FCE8[];
+extern char D_0045FCF8[];
+extern char D_0045FD08[];
+
+struct sSide_192D90 { char pad[8]; char* lb[11]; };
+
+struct sVE_192D90 { short delta; short index; void (*fn)(void*, int); };
+
+static inline void Show_192D90(char* o, int on)
+{
+    sVE_192D90* vt = *(sVE_192D90**)(o + 8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+static inline int IsOn_192D90()
+{
+    return D_004A1A70 == 1;
+}
+
+static inline char* Find_192D90(char* self, char* name)
+{
+    return (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+}
+
+extern "C" void cFEStateBraggingRights_onCreateScreen(char* self)
+{
+    char* ui = *(char**)(self + 0x10);
+    void* scr = cUIEngine_addScreenByHashName(ui, self, GetHashValue32(D_0045FCC8), 0);
+    *(void**)(self + 0x40) = scr;
+    if (scr != 0) {
+        cUIScreen_playFrame(scr, 0, 0);
+    }
+    char* a = self + 0x6D0;
+    char* b = self + 0x704;
+    if ((*(int*)(self + 0x1C) >> 4) & 1) {
+        func_00192740(a, 0);
+        func_00192740(b, 0);
+    }
+    int count = 0;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int mask = 0;
+    switch (D_00535BC8[0x4A]) {
+    case 0:
+        *(char**)(self + 0x738) = D_004A1710;
+        count = 6;
+        break;
+    case 1:
+        *(char**)(self + 0x738) = D_004A1718;
+        count = 7;
+        break;
+    case 3:
+        *(char**)(self + 0x738) = D_004A1720;
+        count = 7;
+        break;
+    case 2:
+        *(char**)(self + 0x738) = D_004A1728;
+        count = 7;
+        break;
+    case 4:
+        *(char**)(self + 0x738) = D_004A1730;
+        count = 5;
+        break;
+    case 5:
+        *(char**)(self + 0x738) = D_004A1738;
+        count = 7;
+        break;
+    }
+    int i;
+    for (i = 0; i < count; i++) {
+        mask |= 1 << i;
+    }
+    func_00192968(a, mask);
+    func_00192968(b, mask);
+    func_00192970(a, *(void**)(self + 0x40));
+    func_00192970(b, *(void**)(self + 0x40));
+    char name[2];
+    __builtin_memcpy(name, D_004A14F8, 2);
+    int row;
+    for (row = 0; row < count; row++) {
+        name[0] = row + '1';
+        cUIText* t = (cUIText*)Find_192D90(self, name);
+        if (t != 0) {
+            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00441108[(*(signed char**)(self + 0x738))[row]]));
+        }
+        int col;
+        for (col = 0; col < 2; col++) {
+            unsigned char sel = 0;
+            char* lb = ((sSide_192D90*)(self + 0x6D0))[col].lb[row];
+            int type = (*(signed char**)(self + 0x738))[row];
+            switch (type) {
+            case 1 ... 6:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FCD8), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DCC8), 1);
+                func_0039A768(lb, func_00193F38(self, col, (*(signed char**)(self + 0x738))[row]), &sel);
+                func_0039A7A8(lb, sel);
+                break;
+            case 0:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16E0, 5);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16D8, 10);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1758, 15);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1760, 20);
+                func_0039A768(lb, func_00193F38(self, col, (*(signed char**)(self + 0x738))[row]), &sel);
+                func_0039A7A8(lb, sel);
+                break;
+            case 7:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1768, 3000);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1770, 5000);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1778, 10000);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1780, 15000);
+                func_0039A768(lb, func_00193F38(self, col, (*(signed char**)(self + 0x738))[row]), &sel);
+                func_0039A7A8(lb, sel);
+                break;
+            }
+        }
+    }
+    char* o = Find_192D90(self, D_004A1580);
+    if (o != 0) {
+        if (IsOn_192D90()) {
+            Show_192D90(o, 1);
+            char* p = Find_192D90(self, D_0045FCE8);
+            if (p != 0) {
+                Show_192D90(p, 0);
+            }
+            char* q = Find_192D90(self, D_0045FCF8);
+            if (q != 0) {
+                Show_192D90(q, 0);
+            }
+        } else {
+            Show_192D90(o, 0);
+        }
+    }
+    if (IsOn_192D90()) {
+        char* p = Find_192D90(self, D_004A1588);
+        if (p != 0) {
+            Show_192D90(p, 0);
+        }
+        char* q = Find_192D90(self, D_0045FD08);
+        if (q != 0) {
+            Show_192D90(q, 0);
+        }
+    }
+}
 
 //100%
 int func_00193310(void* self)

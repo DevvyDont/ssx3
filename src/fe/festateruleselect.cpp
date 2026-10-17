@@ -1,6 +1,165 @@
 #include "common.h"
 
-INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_setupMenu);
+//100%
+struct cUIText;
+struct cUIScreen;
+int GetHashValue32(char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" unsigned char cUIListBox_addEntryByStringID(void* self, int id, int data);
+extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, unsigned int data);
+extern "C" void func_0039A670(void* self);
+extern "C" int func_0039A768(void* self, int key, unsigned char* out);
+extern "C" void func_0039A7A8(void* self, unsigned char a1);
+extern "C" int func_00192240(void* self, int opt);
+extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
+extern char D_004A16A8[];
+extern char D_004A16B0[];
+extern long long D_004A1708_1390[] __asm__("D_004A1708");
+extern long long D_0045FAD8_1390[] __asm__("D_0045FAD8");
+extern char D_00441008[];
+extern char* D_00441018[];
+extern char D_004A1398[];
+extern char D_0045E270[];
+extern char D_0045E280[];
+extern char D_0045DF40[];
+extern char D_0045E028[];
+extern char D_0045FA80[];
+extern char D_0045DCC8[];
+extern char D_0045FA90[];
+extern char D_0045FAA8[];
+extern char D_0045FAC0[];
+extern char D_004A16B8[];
+extern char D_004A16C0[];
+extern char D_004A16C8[];
+extern char D_004A16D0[];
+extern char D_004A16D8[];
+extern char D_004A16E0[];
+extern char D_004A16E8[];
+extern char D_004A16F0[];
+extern char D_004A16F8[];
+extern char D_004A1700[];
+extern char D_004A13A0[];
+extern char D_004A14F8[];
+extern char D_004A1500[];
+extern char D_004A1508[];
+extern char D_004A1510[];
+extern char D_004A1518[];
+
+struct sVE_1390 { short delta; short index; void (*fn)(void*, int); };
+
+static inline void Hide_1390(char* o)
+{
+    sVE_1390* vt = *(sVE_1390**)(o + 8);
+    vt[9].fn(o + vt[9].delta, 0);
+}
+
+extern "C" void cFEStateRuleSelect_setupMenu(void* selfp, signed char start)
+{
+    char* self = (char*)selfp;
+    char box[3];
+    char text[3];
+    unsigned char sel;
+    signed char i;
+    __builtin_memcpy(box, D_004A16A8, 3);
+    __builtin_memcpy(text, D_004A16B0, 3);
+    i = 0;
+    do {
+        char* lb = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(box));
+        cUIText* tx = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(text));
+        if (lb != 0 && tx != 0) {
+            signed char idx = i + start;
+            if (idx >= *(signed char*)(self + 0x50)) {
+                break;
+            }
+            int rule = (*(signed char**)(self + 0x48))[idx];
+            int type = D_00441008[rule];
+            cUIText_setUnicodeStringByID(tx, GetHashValue32(D_00441018[rule]));
+            func_0039A670(lb);
+            *(int*)(lb + 0x18) = rule;
+            switch (type) {
+            case 0:
+                break;
+            case 1:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045E028), 1);
+                break;
+            case 2:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FA80), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DCC8), 1);
+                break;
+            case 3:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16B8, 0x5A);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16C0, 0x50);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16C8, 0x46);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16D0, 0x3C);
+                break;
+            case 4:
+                cUIListBox_addEntryByAsciiString(lb, D_004A16D8, 10);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16E0, 5);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16E8, 3);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16F0, -3);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16F8, -5);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1700, -10);
+                break;
+            case 5:
+                cUIListBox_addEntryByAsciiString(lb, D_004A13A0, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A14F8, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1500, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1508, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1510, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1518, 0);
+                break;
+            case 6:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FA90), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FAA8), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FAC0), 0);
+                break;
+            }
+            if (rule != 0) {
+                func_0039A768(lb, func_00192240(self, rule), &sel);
+                func_0039A7A8(lb, sel);
+            } else {
+                Hide_1390(lb);
+            }
+        }
+        if (i < 9) {
+            box[0]++;
+            text[0]++;
+        } else {
+            text[0] = box[0] = i + 0x58;
+        }
+        i++;
+    } while (i < 11);
+    char frame[0x20];
+    int cur = 0xFF;
+    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1398));
+    if (o != 0) {
+        cur = *(unsigned char*)(o + 0x95);
+    }
+    if ((*(signed char**)(self + 0x48))[cur] == 0) {
+        char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E270));
+        char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E280));
+        if (a != 0) {
+            Hide_1390(a);
+        }
+        if (b != 0) {
+            Hide_1390(b);
+        }
+        __builtin_memcpy(frame, D_004A1708_1390, 7);
+    } else {
+        __builtin_memcpy(frame, D_0045FAD8_1390, 10);
+    }
+    int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(frame));
+    if (f != 0xFFFF) {
+        cUIScreen_playFrame(*(void**)(self + 0x40), f, 1);
+    }
+    cFEStateRuleSelect_updateMenuColor(self);
+}
 
 //100%
 struct cUIText;

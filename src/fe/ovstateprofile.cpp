@@ -397,7 +397,168 @@ extern "C" int func_00211B38(void* self, int a1, unsigned int key)
     return 0x101;
 }
 
-INCLUDE_ASM("fe/ovstateprofile", func_00211BC8);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_1BC8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void func_001CD088(void* self, int a1);
+extern "C" void func_001CD0B0(void* self, int a1);
+extern "C" void func_001CE3C8(void* self, int key, int a2, int a3);
+extern "C" void func_001CE408(void* self, int a1);
+extern "C" void func_001CB418(void* self, const char* str);
+extern "C" void cKeyboardPopup_setStatic(void* self, void* str);
+extern "C" const char* func_00147170(void* iface, int player);
+extern "C" void func_00147138(void* self, int a1, const char* name);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_002C2540(void* dst, const char* src);
+extern "C" void func_002C2580(char* dst, void* src);
+extern "C" void func_0023CAE8(void* mp, int a1, int a2);
+extern "C" void func_0023D570(void* mp, int a1);
+extern "C" int strlen(const char* s);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_00471DC0[];
+extern char D_00471DD8[];
+extern char D_00471DE8[];
+
+struct sVEs_1BC8 { short delta; short index; void* (*fn)(void*, int); };
+struct sVEv_1BC8 { short delta; short index; void (*fn)(void*, ...); };
+struct sVEi_1BC8 { short delta; short index; int (*fn)(void*, ...); };
+
+static inline void* Loc_1BC8(char* s)
+{
+    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEs_1BC8* vt = *(sVEs_1BC8**)(o + 4);
+    return vt[4].fn(o + vt[4].delta, GetHashValue32(s));
+}
+
+extern "C" void func_00211BC8(char* self, char* w, int ev)
+{
+    switch (ev) {
+    case 13: {
+        char* name = *(char**)(self + 0x1A4) + 0x74;
+        func_002C2540((char*)func_00227F80(D_004A28A8) + 0x276, name);
+        char* np = (char*)cBE_getInterface_1BC8(cBE_getBE(), 1);
+        if (strlen(name) != 0) {
+            func_00147138(np, *(int*)(self + 0x1CC), name);
+        } else {
+            char buf[0x70];
+            char fmt[0x70];
+            func_002C2580(fmt, Loc_1BC8(D_00471DC0));
+            sprintf(buf, fmt, *(int*)(self + 0x1CC) + 1);
+            func_00147138(np, *(int*)(self + 0x1CC), buf);
+        }
+        sVEv_1BC8* vt = *(sVEv_1BC8**)(np + 0xC);
+        vt[1].fn(np + vt[1].delta);
+        func_0023CAE8(func_00227F80(D_004A28A8), 1, *(int*)(self + 0x1CC));
+        *(int*)(self + 0x1A8) = 1;
+        *(int*)(self + 0x1DC) = 1;
+        *(int*)(self + 0x1C0) = 3;
+        break;
+    }
+    case 5: {
+        if (w == 0) {
+            return;
+        }
+        if (*(int*)(self + 0x1A8) != 0) {
+            return;
+        }
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        if (*(int*)(self + 0x214) != 3) {
+            return;
+        }
+        int idx = *(int*)(w + 0x18);
+        *(int*)(self + 0x1C4) = idx;
+        *(int*)(mp + 0xF8) = idx;
+        if (*(int*)(self + 0x1C0) != 1) {
+            return;
+        }
+        if (*(void**)(self + 0x1A4) == 0) {
+            *(char**)(self + 0x1A4) = (char*)func_001CB030(cMemMan_alloc(0x444, D_00471DD8, 0x100, 0), *(void**)(self + 0x10), self, 0, *(unsigned char*)(self + 0x15));
+            *(int*)(*(char**)(self + 0x1A4) + 0x140) = 0x37;
+            func_001CD088(*(void**)(self + 0x1A4), 8);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x4B, 1, 2);
+            *(int*)(*(char**)(self + 0x1A4) + 0x58) = 1;
+            func_001CE408(*(void**)(self + 0x1A4), 1);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0xE, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x27, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x28, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x34, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x1A, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x19, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x35, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x40, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x41, 0, 2);
+            func_001CE3C8(*(void**)(self + 0x1A4), 0x42, 0, 2);
+            func_001CD0B0(*(void**)(self + 0x1A4), 1);
+        }
+        cKeyboardPopup_setStatic(*(void**)(self + 0x1A4), Loc_1BC8(D_00471DE8));
+        *(int*)(*(char**)(self + 0x1A4) + 0x54) = 1;
+        func_001CB418(*(void**)(self + 0x1A4), func_00147170(cBE_getInterface_1BC8(cBE_getBE(), 1), *(int*)(self + 0x1CC)));
+        func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, *(void**)(self + 0x1A4));
+        *(int*)(self + 0x1A0) = 1;
+        *(int*)(self + 0x19C) = 0;
+        break;
+    }
+    case 6: {
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        if (*(int*)(self + 0x1A8) == 1) {
+            return;
+        }
+        int st = *(int*)(self + 0x1C0);
+        if (st == 6) {
+            return;
+        }
+        *(int*)(self + 0x1E4) = 1;
+        if (st == 0 || st == 2 || st == 1) {
+            sVEv_1BC8* vt = *(sVEv_1BC8**)(mp + 0x748);
+            vt[1].fn(mp + vt[1].delta, 0);
+        }
+        *(int*)(self + 0x1C0) = 6;
+        break;
+    }
+    case 7: {
+        if (*(int*)(self + 0x1A8) == 1) {
+            return;
+        }
+        if (*(int*)(self + 0x1C0) == 6) {
+            return;
+        }
+        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* o = *(char**)(mp + 0x434);
+        sVEi_1BC8* ovt = *(sVEi_1BC8**)o;
+        if (ovt[54].fn(o + ovt[54].delta, *(void**)(mp + 0x428)) == 0) {
+            return;
+        }
+        int idx = *(int*)(w + 0x18);
+        *(int*)(self + 0x1C4) = idx;
+        *(int*)(mp + 0xF8) = idx;
+        if (*(int*)(self + 0x1C0) != 1) {
+            return;
+        }
+        char* o2 = *(char**)(mp + 0x434);
+        sVEi_1BC8* ovt2 = *(sVEi_1BC8**)o2;
+        if (ovt2[67].fn(o2 + ovt2[67].delta, *(int*)(self + 0x1C4)) == 0) {
+            return;
+        }
+        *(int*)(self + 0x1A8) = 1;
+        *(int*)(self + 0x1C0) = 4;
+        func_0023D570(mp, 0);
+        sVEv_1BC8* vt = *(sVEv_1BC8**)(mp + 0x748);
+        vt[1].fn(mp + vt[1].delta, 0x18);
+        break;
+    }
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 14:
+        break;
+    }
+}
+
 
 //100%
 struct cUIText;
