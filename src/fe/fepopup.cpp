@@ -1989,7 +1989,55 @@ void* func_001CA578(void* self)
     return func_0039E6B8(self);
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CA598);
+//100%
+struct sPopVt_A598 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_001CB418(void* self, const char* str);
+extern "C" void func_001CCF00(void* self, const char* str);
+int func_0039F190_i(void* self, int a1) __asm__("func_0039F190");
+
+extern "C" void func_001CA598(char* self, void* obj, int event)
+{
+    switch (event) {
+    case 21:
+        if (obj != *(void**)(self + 0x2A8))
+            return;
+        func_001CB418(obj, *(const char**)(self + 0x2B0));
+        func_001CCF00(*(void**)(self + 0x2A8), *(const char**)(self + 0x2B4));
+        break;
+    case 15:
+        func_0039F190_i(*(char**)(self + 0x10) + 0x18, 1);
+        *(int*)(self + 0x320) = *(int*)(self + 0x324) + 15;
+        break;
+    case 16:
+    case 20:
+        *(int*)(self + 0x320) = -1;
+        func_0039F190_i(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 17:
+    case 18:
+    case 19:
+        func_0039F190_i(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 22:
+        if (obj == *(void**)(self + 0x2A8))
+            *(void**)(self + 0x2A8) = 0;
+        if (obj != *(void**)(self + 0x2AC))
+            return;
+        *(void**)(self + 0x2AC) = 0;
+        int sel = *(int*)(self + 0x320);
+        if (sel != -1) {
+            char* o = *(char**)(self + 0x20);
+            sPopVt_A598* vt = *(sPopVt_A598**)(o + 8);
+            vt[17].fn(o + vt[17].delta, self, sel);
+        }
+        break;
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
