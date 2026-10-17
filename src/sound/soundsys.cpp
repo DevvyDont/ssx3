@@ -5965,7 +5965,106 @@ extern "C" void func_002A2DA0(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("sound/soundsys", func_002A2E50);
+extern "C" int func_002A4770(void* self);
+extern "C" int func_00146E98(void* iface, int a1);
+int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
+int cBERewardInterface_getTrackMedal(void* iface, int a1, int rider, int medal, int mode);
+extern "C" void* func_0028B1E8();
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" unsigned int func_002ADF60(void* mon);
+extern "C" void func_002A2188(void* self);
+extern "C" void func_002A23D0(void* self, int mode);
+extern "C" void func_002A2018(void* self);
+extern "C" void func_002A2A10(void* self);
+extern "C" void func_002A2B88(void* self);
+extern "C" void func_002A2260(void* self);
+extern "C" void func_002A2318(void* self);
+extern "C" void func_002A20D0(void* self);
+void func_002B1758(void* self, int a1);
+
+// Pick the next front-end music track: a pending request wins, otherwise a random unplayed one.
+extern "C" void func_002A2E50(void* self_, int flag)
+{
+    char* self = (char*)self_;
+    int track = 0;
+    char* stream;
+    if (*(int*)(self + 0x5790) == 0 && *(int*)(self + 0x6258) == 0) {
+        *(int*)(self + 0x5790) = 1;
+        *(int*)(self + 0x5798) = 3;
+        *(int*)(self + 0x573C) |= 0x80;
+        stream = self + 0x5560;
+        *(int*)(self + 0x578C) = 0;
+    } else {
+        if (func_002A4770(self))
+            return;
+        int pending = *(int*)(self + 0x5798);
+        if (pending != -1 && *(int*)(self + 0x6258) == 0) {
+            track = pending;
+            *(int*)(self + 0x5798) = -1;
+            stream = self + 0x5560;
+        } else {
+            int n = flag == 0 ? 8 : 5;
+            int i = 0;
+            int avail = 0;
+            stream = self + 0x5560;
+            if (n != 0) {
+                do {
+                    avail += ((*(int*)(self + 0x573C) >> i) ^ 1) & 1;
+                    i++;
+                } while (i < n);
+            }
+            if (avail == 0) {
+                *(int*)(self + 0x573C) = 0;
+                avail = n;
+                int mode = 14;
+                void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+                signed char rider = cBENewPlayerInterface_getRiderCharID(player, func_00146E98(player, 0));
+                int r = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                if (r != 1)
+                    mode = r == 2 ? 15 : 16;
+                void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+                int gold = cBERewardInterface_getTrackMedal(reward, 0, rider, 4, mode) != -1;
+                int plat = cBERewardInterface_getTrackMedal(reward, 0, rider, 5, mode) != -1;
+                if (gold && plat)
+                    *(int*)(self + 0x573C) |= 8;
+            }
+            int k = (func_002ADF60(*(void**)(**(char***)(self + 0x118) + 0x1D8)) & 0x7FFF) * avail / 0x7FFF + 1;
+            for (int c = 0; c < k;) {
+                c += ((*(int*)(self + 0x573C) >> track) ^ 1) & 1;
+                track += c < k;
+            }
+        }
+    }
+    *(int*)(self + 0x573C) |= 1 << track;
+    switch (track) {
+    case 0:
+        func_002A2188(self);
+        break;
+    case 1:
+        func_002A23D0(self, -1);
+        break;
+    case 2:
+        func_002A2018(self);
+        break;
+    case 3:
+        func_002A2A10(self);
+        break;
+    case 4:
+        func_002A2B88(self);
+        break;
+    case 5:
+        func_002A2260(self);
+        break;
+    case 6:
+        func_002A2318(self);
+        break;
+    case 7:
+        func_002A20D0(self);
+        break;
+    }
+    func_002B1758(stream, 0);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_002A26F0(void* self, int a, int b);
