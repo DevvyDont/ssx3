@@ -11,11 +11,392 @@ index 68fec81..6be5abe 100644
  
          // Physical IOP RAM access shared by the emulator, SIF DMA, and HLE services. Addresses are IOP addresses.
          [[nodiscard]] uint32_t allocateMemory(uint32_t size, uint32_t alignment = 16u);
+diff --git a/ps2xIOP/src/emulator/core/iop_cpu.cpp b/ps2xIOP/src/emulator/core/iop_cpu.cpp
+index e09642e..369aaca 100644
+--- a/ps2xIOP/src/emulator/core/iop_cpu.cpp
++++ b/ps2xIOP/src/emulator/core/iop_cpu.cpp
+@@ -52,10 +52,9 @@ namespace ps2x::iop::detail
+         cpu.exception = true;
+     }
+ 
+-    bool IopCpuCore::executeInstruction(IopCpuState &cpu)
++    bool IopCpuCore::executeInstruction(IopCpuState &cpu, uint32_t instruction)
+     {
+         const uint32_t pc = cpu.pc;
+-        const uint32_t instruction = m_memory.read32(pc);
+         const bool wasDelaySlot = cpu.branchPending;
+         const uint32_t priorBranchTarget = cpu.branchTarget;
+ 
+diff --git a/ps2xIOP/src/emulator/core/iop_cpu.h b/ps2xIOP/src/emulator/core/iop_cpu.h
+index f236050..eac3ebf 100644
+--- a/ps2xIOP/src/emulator/core/iop_cpu.h
++++ b/ps2xIOP/src/emulator/core/iop_cpu.h
+@@ -30,7 +30,8 @@ namespace ps2x::iop::detail
+     public:
+         explicit IopCpuCore(IopMemory &memory) noexcept;
+ 
+-        [[nodiscard]] bool executeInstruction(IopCpuState &cpu);
++        // Runs `instruction`, the word at cpu.pc.
++        [[nodiscard]] bool executeInstruction(IopCpuState &cpu, uint32_t instruction);
+         void raiseException(IopCpuState &cpu, uint32_t code, uint32_t faultPc, bool delaySlot, std::optional<uint32_t> badAddress = std::nullopt) const;
+ 
+     private:
+diff --git a/ps2xIOP/src/emulator/core/iop_memory.cpp b/ps2xIOP/src/emulator/core/iop_memory.cpp
+index 25e9b36..3b1e2c7 100644
+--- a/ps2xIOP/src/emulator/core/iop_memory.cpp
++++ b/ps2xIOP/src/emulator/core/iop_memory.cpp
+@@ -39,43 +39,22 @@ namespace ps2x::iop::detail
+         m_dmaStart.reset();
+     }
+ 
+-    uint32_t IopMemory::physicalAddress(uint32_t address) noexcept
++    uint8_t IopMemory::readOther8(uint32_t phys) const
+     {
+-        return address & 0x1FFFFFFFu;
+-    }
+-
+-    uint8_t IopMemory::read8(uint32_t address) const
+-    {
+-        const uint32_t phys = physicalAddress(address);
+-        if (phys < RamSize)
+-            return m_ram[phys];
+         if (phys >= ScratchBase && phys < ScratchBase + ScratchSize)
+             return m_scratch[phys - ScratchBase];
+         const uint32_t value = readHardware32(phys & ~3u);
+         return static_cast<uint8_t>(value >> ((phys & 3u) * 8u));
+     }
+ 
+-    uint16_t IopMemory::read16(uint32_t address) const
++    uint16_t IopMemory::readOther16(uint32_t address) const
+     {
+-        const uint32_t phys = physicalAddress(address);
+-        if (phys + 1u < RamSize)
+-        {
+-            uint16_t value;
+-            std::memcpy(&value, m_ram.data() + phys, sizeof(value));
+-            return value;
+-        }
+         return static_cast<uint16_t>(read8(address) | (static_cast<uint16_t>(read8(address + 1u)) << 8u));
+     }
+ 
+-    uint32_t IopMemory::read32(uint32_t address) const
++    uint32_t IopMemory::readOther32(uint32_t address) const
+     {
+         const uint32_t phys = physicalAddress(address);
+-        if ((phys & 3u) == 0u && phys + 3u < RamSize)
+-        {
+-            uint32_t value;
+-            std::memcpy(&value, m_ram.data() + phys, sizeof(value));
+-            return value;
+-        }
+         if ((phys & 3u) == 0u && phys >= ScratchBase && phys + 3u < ScratchBase + ScratchSize)
+         {
+             uint32_t value;
+@@ -91,15 +70,8 @@ namespace ps2x::iop::detail
+                (static_cast<uint32_t>(read8(address + 3u)) << 24u);
+     }
+ 
+-    void IopMemory::write8(uint32_t address, uint8_t value)
++    void IopMemory::writeOther8(uint32_t phys, uint8_t value)
+     {
+-        const uint32_t phys = physicalAddress(address);
+-        if (phys < RamSize)
+-        {
+-            m_ram[phys] = value;
+-            markOwned(phys, sizeof(value));
+-            return;
+-        }
+         if (phys >= ScratchBase && phys < ScratchBase + ScratchSize)
+         {
+             m_scratch[phys - ScratchBase] = value;
+@@ -112,28 +84,15 @@ namespace ps2x::iop::detail
+         writeHardware32(aligned, current);
+     }
+ 
+-    void IopMemory::write16(uint32_t address, uint16_t value)
++    void IopMemory::writeOther16(uint32_t address, uint16_t value)
+     {
+-        const uint32_t phys = physicalAddress(address);
+-        if (phys + 1u < RamSize)
+-        {
+-            std::memcpy(m_ram.data() + phys, &value, sizeof(value));
+-            markOwned(phys, sizeof(value));
+-            return;
+-        }
+         write8(address, static_cast<uint8_t>(value));
+         write8(address + 1u, static_cast<uint8_t>(value >> 8u));
+     }
+ 
+-    void IopMemory::write32(uint32_t address, uint32_t value)
++    void IopMemory::writeOther32(uint32_t address, uint32_t value)
+     {
+         const uint32_t phys = physicalAddress(address);
+-        if ((phys & 3u) == 0u && phys + 3u < RamSize)
+-        {
+-            std::memcpy(m_ram.data() + phys, &value, sizeof(value));
+-            markOwned(phys, sizeof(value));
+-            return;
+-        }
+         if ((phys & 3u) == 0u && phys >= ScratchBase && phys + 3u < ScratchBase + ScratchSize)
+         {
+             std::memcpy(m_scratch.data() + (phys - ScratchBase), &value, sizeof(value));
+@@ -275,13 +234,6 @@ namespace ps2x::iop::detail
+         };
+     }
+ 
+-    std::optional<IopMemory::DmaStart> IopMemory::takeDmaStart() noexcept
+-    {
+-        std::optional<DmaStart> result = m_dmaStart;
+-        m_dmaStart.reset();
+-        return result;
+-    }
+-
+     uint32_t IopMemory::allocate(uint32_t size, uint32_t alignment, std::optional<uint32_t> fixed)
+     {
+         size = alignUp(std::max(size, 1u), 16u);
+diff --git a/ps2xIOP/src/emulator/core/iop_memory.h b/ps2xIOP/src/emulator/core/iop_memory.h
+index a932a5d..f9fec61 100644
+--- a/ps2xIOP/src/emulator/core/iop_memory.h
++++ b/ps2xIOP/src/emulator/core/iop_memory.h
+@@ -2,6 +2,7 @@
+ 
+ #include <cstddef>
+ #include <cstdint>
++#include <cstring>
+ #include <optional>
+ #include <span>
+ #include <string>
+@@ -41,12 +42,70 @@ namespace ps2x::iop::detail
+ 
+         void reset();
+ 
+-        [[nodiscard]] uint8_t read8(uint32_t address) const;
+-        [[nodiscard]] uint16_t read16(uint32_t address) const;
+-        [[nodiscard]] uint32_t read32(uint32_t address) const;
+-        void write8(uint32_t address, uint8_t value);
+-        void write16(uint32_t address, uint16_t value);
+-        void write32(uint32_t address, uint32_t value);
++        // RAM accesses are inline, since the interpreter makes several per instruction;
++        // scratchpad, hardware and unaligned accesses go through the out-of-line paths.
++        [[nodiscard]] uint8_t read8(uint32_t address) const
++        {
++            const uint32_t phys = physicalAddress(address);
++            if (phys < RamSize)
++                return m_ram[phys];
++            return readOther8(phys);
++        }
++        [[nodiscard]] uint16_t read16(uint32_t address) const
++        {
++            const uint32_t phys = physicalAddress(address);
++            if (phys + 1u < RamSize)
++            {
++                uint16_t value;
++                std::memcpy(&value, m_ram.data() + phys, sizeof(value));
++                return value;
++            }
++            return readOther16(address);
++        }
++        [[nodiscard]] uint32_t read32(uint32_t address) const
++        {
++            const uint32_t phys = physicalAddress(address);
++            if ((phys & 3u) == 0u && phys < RamSize)
++            {
++                uint32_t value;
++                std::memcpy(&value, m_ram.data() + phys, sizeof(value));
++                return value;
++            }
++            return readOther32(address);
++        }
++        void write8(uint32_t address, uint8_t value)
++        {
++            const uint32_t phys = physicalAddress(address);
++            if (phys < RamSize)
++            {
++                m_ram[phys] = value;
++                m_owned[phys] = 1u;
++                return;
++            }
++            writeOther8(phys, value);
++        }
++        void write16(uint32_t address, uint16_t value)
++        {
++            const uint32_t phys = physicalAddress(address);
++            if (phys + 1u < RamSize)
++            {
++                std::memcpy(m_ram.data() + phys, &value, sizeof(value));
++                std::memset(m_owned.data() + phys, 1, sizeof(value));
++                return;
++            }
++            writeOther16(address, value);
++        }
++        void write32(uint32_t address, uint32_t value)
++        {
++            const uint32_t phys = physicalAddress(address);
++            if ((phys & 3u) == 0u && phys < RamSize)
++            {
++                std::memcpy(m_ram.data() + phys, &value, sizeof(value));
++                std::memset(m_owned.data() + phys, 1, sizeof(value));
++                return;
++            }
++            writeOther32(address, value);
++        }
+ 
+         [[nodiscard]] bool readRam(uint32_t address, void *destination, size_t size) const;
+         [[nodiscard]] bool writeRam(uint32_t address, const void *source, size_t size);
+@@ -67,12 +126,27 @@ namespace ps2x::iop::detail
+         void setInterruptMask(uint32_t value) noexcept { m_interruptMask = value; }
+         void setInterruptControl(uint32_t value) noexcept { m_interruptControl = value & 1u; }
+ 
+-        [[nodiscard]] std::optional<DmaStart> takeDmaStart() noexcept;
++        [[nodiscard]] bool hasDmaStart() const noexcept { return m_dmaStart.has_value(); }
++        [[nodiscard]] std::optional<DmaStart> takeDmaStart() noexcept
++        {
++            std::optional<DmaStart> result = m_dmaStart;
++            m_dmaStart.reset();
++            return result;
++        }
+         [[nodiscard]] std::span<const uint8_t> ram() const noexcept { return m_ram; }
+ 
+-        [[nodiscard]] static uint32_t physicalAddress(uint32_t address) noexcept;
++        [[nodiscard]] static constexpr uint32_t physicalAddress(uint32_t address) noexcept
++        {
++            return address & 0x1FFFFFFFu;
++        }
+ 
+     private:
++        [[nodiscard]] uint8_t readOther8(uint32_t phys) const;
++        [[nodiscard]] uint16_t readOther16(uint32_t address) const;
++        [[nodiscard]] uint32_t readOther32(uint32_t address) const;
++        void writeOther8(uint32_t phys, uint8_t value);
++        void writeOther16(uint32_t address, uint16_t value);
++        void writeOther32(uint32_t address, uint32_t value);
+         [[nodiscard]] uint32_t readHardware32(uint32_t address) const;
+         void writeHardware32(uint32_t address, uint32_t value);
+         void markOwned(uint32_t address, size_t size);
 diff --git a/ps2xIOP/src/emulator/iop_emulator.cpp b/ps2xIOP/src/emulator/iop_emulator.cpp
-index e5f63a9..6b412b2 100644
+index e5f63a9..509926d 100644
 --- a/ps2xIOP/src/emulator/iop_emulator.cpp
 +++ b/ps2xIOP/src/emulator/iop_emulator.cpp
-@@ -742,10 +742,13 @@ namespace ps2x::iop::detail
+@@ -125,6 +125,7 @@ namespace ps2x::iop::detail
+             timrman.reset();
+             ioman.reset();
+             pendingDmaInterrupts.clear();
++            nextDmaInterruptCycle = UINT64_MAX;
+             pendingGuestCallbacks.clear();
+             nextModuleId = 1;
+             moduleCursor = kModuleLoadBase;
+@@ -177,7 +178,17 @@ namespace ps2x::iop::detail
+         void schedulePendingDma()
+         {
+             if (const auto dma = memory.takeDmaStart())
++            {
+                 pendingDmaInterrupts[dma->irq] = totalCycles + dma->delayCycles;
++                updateNextDmaInterrupt();
++            }
++        }
++
++        void updateNextDmaInterrupt()
++        {
++            nextDmaInterruptCycle = UINT64_MAX;
++            for (const auto &[irq, completionCycle] : pendingDmaInterrupts)
++                nextDmaInterruptCycle = std::min(nextDmaInterruptCycle, completionCycle);
+         }
+ 
+         bool readRam(uint32_t address, void *destination, size_t size) const
+@@ -378,25 +389,38 @@ namespace ps2x::iop::detail
+             if (checkInterrupt(cpu))
+                 return true;
+ 
+-            if (const auto import = imports.decode(cpu.pc))
+-            {
+-                const ImportDisposition disposition = dispatchImport(*import, cpu);
+-                ++totalInstructions;
+-                ++totalCycles;
+-                if (disposition == ImportDisposition::JumpToGuest)
+-                    return true;
+-                cpu.pc = cpu.gpr[31];
+-                cpu.branchPending = false;
+-                return !cpu.stopped;
+-            }
++            const uint32_t instruction = memory.read32(cpu.pc);
++            // Import stubs are a `jr $ra` with the ordinal in the delay slot.
++            bool running = true;
++            if (instruction == 0x03E00008u && runImport(cpu, running))
++                return running;
+ 
+-            const bool running = cpuCore.executeInstruction(cpu);
+-            schedulePendingDma();
++            running = cpuCore.executeInstruction(cpu, instruction);
++            if (memory.hasDmaStart())
++                schedulePendingDma();
+             ++totalInstructions;
+             ++totalCycles;
+             return running;
+         }
+ 
++        // Runs the import stub at cpu.pc, if there is one there, and says whether there was.
++        bool runImport(CpuState &cpu, bool &running)
++        {
++            const auto import = imports.decode(cpu.pc);
++            if (!import)
++                return false;
++            const ImportDisposition disposition = dispatchImport(*import, cpu);
++            ++totalInstructions;
++            ++totalCycles;
++            if (disposition != ImportDisposition::JumpToGuest)
++            {
++                cpu.pc = cpu.gpr[31];
++                cpu.branchPending = false;
++            }
++            running = disposition == ImportDisposition::JumpToGuest || !cpu.stopped;
++            return true;
++        }
++
+         uint32_t runCpu(CpuState &cpu, uint32_t instructionBudget)
+         {
+             CpuState *previous = activeCpu;
+@@ -406,9 +430,10 @@ namespace ps2x::iop::detail
+             {
+                 if (!step(cpu))
+                     break;
+-                if (!servicingDmaInterrupts && !pendingDmaInterrupts.empty())
++                if (!servicingDmaInterrupts && nextDmaInterruptCycle <= totalCycles)
+                     servicePendingDmaInterrupts();
+-                if (!servicingGuestCallbacks && !pendingGuestCallbacks.empty())
++                if (!servicingGuestCallbacks && !pendingGuestCallbacks.empty() &&
++                    pendingGuestCallbacks.begin()->first <= totalCycles)
+                     servicePendingGuestCallbacks();
+             }
+             activeCpu = previous;
+@@ -499,6 +524,7 @@ namespace ps2x::iop::detail
+                 completed.push_back(it->first);
+                 it = pendingDmaInterrupts.erase(it);
+             }
++            updateNextDmaInterrupt();
+             try
+             {
+                 for (const int irq : completed)
+@@ -566,9 +592,7 @@ namespace ps2x::iop::detail
+                     IopThread *next = kernel.beginNextReady(totalCycles);
+                     if (!next)
+                     {
+-                        uint64_t nextWake = kernel.nextWakeCycle(target);
+-                        for (const auto &[irq, completionCycle] : pendingDmaInterrupts)
+-                            nextWake = std::min(nextWake, completionCycle);
++                        uint64_t nextWake = std::min(kernel.nextWakeCycle(target), nextDmaInterruptCycle);
+                         if (!pendingGuestCallbacks.empty())
+                             nextWake = std::min(nextWake, pendingGuestCallbacks.begin()->first);
+                         nextWake = timrman.nextEventCycle(nextWake);
+@@ -696,6 +720,8 @@ namespace ps2x::iop::detail
+         IopLoadcore loadcore;
+         std::map<int, Module> modules;
+         std::map<int, uint64_t> pendingDmaInterrupts;
++        // The earliest completion cycle in pendingDmaInterrupts.
++        uint64_t nextDmaInterruptCycle = UINT64_MAX;
+         std::multimap<uint64_t, ScheduledGuestCallback> pendingGuestCallbacks;
+         uint32_t nextModuleId = 1;
+         uint32_t moduleCursor = kModuleLoadBase;
+@@ -742,10 +768,13 @@ namespace ps2x::iop::detail
      void IopEmulator::runEeCycles(uint64_t eeCycles) noexcept
      {
          const uint64_t total = m_impl->eeCycleCarry + eeCycles;
@@ -32,7 +413,7 @@ index e5f63a9..6b412b2 100644
      }
  
      RpcResult IopEmulator::handleRpc(const RpcRequest &request)
-@@ -763,6 +766,11 @@ namespace ps2x::iop::detail
+@@ -763,6 +792,11 @@ namespace ps2x::iop::detail
          m_impl->rpc.onSifTransfer(transfer);
      }
  
@@ -619,16 +1000,21 @@ index 0485d50..ab1e7ad 100644
  #define FPU_C_F_S(a, b) (0)
  #define FPU_C_UN_S(a, b) (isnan((float)(a)) || isnan((float)(b)))
 diff --git a/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h b/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
-index 2421f9e..6d0b9a1 100644
+index 2421f9e..8c79210 100644
 --- a/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
 +++ b/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
-@@ -33,7 +33,16 @@ public:
+@@ -33,7 +33,21 @@ public:
      void SnapshotVram(std::vector<uint8_t> &out) const override;
      GSTransferSnapshot GetTransferSnapshot() const override;
  
 +    // Draws only the rows in band `index` of every `count` bands of 16 rows, so several
 +    // backends can share one VRAM and split the drawing between them.
 +    void SetRowBand(uint32_t index, uint32_t count);
++
++    // The texel columns and rows, before wrapping, that DrawSprite reads drawing a UV
++    // (PRIM.FST) sprite in the current rounding mode. False for anything else, or when
++    // the sprite is outside the scissor.
++    static bool SpriteTexelRange(const GSPrimitiveBatch &batch, int &u0, int &u1, int &v0, int &v1);
 +
  private:
 +    bool OwnsRow(int y) const
@@ -639,7 +1025,7 @@ index 2421f9e..6d0b9a1 100644
      void ResetUnlocked();
      void LoadClutUnlocked(const GSTex0Reg &tex0, const GSTexClutReg &texclut);
      uint32_t ReadVramUnlocked(uint32_t psm, uint32_t base, uint32_t bw, uint32_t x, uint32_t y) const;
-@@ -73,6 +82,8 @@ private:
+@@ -73,6 +87,8 @@ private:
      std::array<uint16_t, 512> m_clut{};
      std::array<uint32_t, 2> m_clutCbp{};
      GSMem::TexturePageCache m_texturePageCache;
@@ -650,10 +1036,10 @@ index 2421f9e..6d0b9a1 100644
      GSTransferSnapshot m_transferState{};
 diff --git a/ps2xRuntime/include/runtime/gs/gs_threaded_backend.h b/ps2xRuntime/include/runtime/gs/gs_threaded_backend.h
 new file mode 100644
-index 0000000..fe27d27
+index 0000000..fd02c33
 --- /dev/null
 +++ b/ps2xRuntime/include/runtime/gs/gs_threaded_backend.h
-@@ -0,0 +1,165 @@
+@@ -0,0 +1,166 @@
 +#pragma once
 +
 +#include "runtime/gs/gs_backend.h"
@@ -781,8 +1167,9 @@ index 0000000..fe27d27
 +    void startBatchLocked();
 +    void waitForQueuedWork() const;
 +    void classifySubmit(Command &command);
++    // readsOwnPixels: each pixel the draw writes to drawn[0] reads only itself.
 +    void classifyDraw(Command &command, const PageTracker::Access *drawn, size_t count,
-+                      const PageTracker::PageSet &textured);
++                      const PageTracker::PageSet &textured, bool readsOwnPixels);
 +    void markRunAlone(Command &command);
 +    void runCommand(GSCpuBackend &backend, const Command &command);
 +    void runAlone(const Command &command);
@@ -857,7 +1244,7 @@ index ea86a9c..9cf92aa 100644
      struct PendingTransfer
      {
 diff --git a/ps2xRuntime/include/runtime/ps2_vu1.h b/ps2xRuntime/include/runtime/ps2_vu1.h
-index 67c8184..36b5346 100644
+index 67c8184..dacfdd4 100644
 --- a/ps2xRuntime/include/runtime/ps2_vu1.h
 +++ b/ps2xRuntime/include/runtime/ps2_vu1.h
 @@ -225,6 +225,14 @@ private:
@@ -875,6 +1262,19 @@ index 67c8184..36b5346 100644
      uint64_t m_nextWriteSequence = 0;
      uint64_t m_efuResourceReady = 0;
      uint32_t m_workingClip = 0;
+@@ -260,10 +268,10 @@ private:
+     void applyDestAcc(const float *result, uint8_t dest);
+     void applyFmacDest(float *dst, float *result, uint8_t dest);
+     void applyFmacDestAcc(float *result, uint8_t dest);
+-    void normalizeFmacResult(float *result, uint8_t dest, uint8_t laneFlags[4]);
++    // Returns the flags of the products of a product-sum op, for the sticky flags.
++    uint32_t normalizeFmacResult(float *result, uint8_t dest, uint8_t laneFlags[4]);
+     bool calculateFmacExactResult(uint32_t component, long double &result) const;
+     uint8_t normalizeFmacExactResult(float &value, long double exactResult) const;
+-    uint32_t calculateFmacProductSticky(uint8_t dest) const;
+     void updateFmacFlags(const uint8_t laneFlags[4], uint8_t dest, uint32_t extraSticky);
+     void queueFsset(uint16_t immediate);
+     void queueClip(uint32_t clip);
 @@ -277,6 +285,16 @@ private:
      void startXgkick(uint32_t qwordAddress);
  
@@ -1500,7 +1900,7 @@ index 9614016..bbd4d3a 100644
          setReturnU32(ctx, ret);
      }
 diff --git a/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp b/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
-index f0ad507..650f8d4 100644
+index f0ad507..57543b1 100644
 --- a/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
 +++ b/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
 @@ -1,3 +1,4 @@
@@ -1508,7 +1908,79 @@ index f0ad507..650f8d4 100644
  #include "runtime/gs/gs_cpu_backend.h"
  #include "runtime/gs/ps2_gs_common.h"
  #include "runtime/gs/ps2_gs_psmct16.h"
-@@ -296,7 +297,10 @@ namespace
+@@ -24,6 +25,71 @@ namespace
+         return (std::fabs(q) > 1.0e-8f) ? q : 1.0f;
+     }
+ 
++    // The pixels a sprite covers, and the ones inside the scissor (inclusive).
++    struct SpriteRect
++    {
++        int x0;
++        int y0;
++        int width;
++        int height;
++        int drawX0;
++        int drawY0;
++        int drawX1;
++        int drawY1;
++    };
++
++    // False when the sprite is outside the scissor.
++    bool spriteRect(const GSPrimitiveBatch &batch, SpriteRect &rect)
++    {
++        const GSVertex &v0 = batch.vertices[0];
++        const GSVertex &v1 = batch.vertices[1];
++        const auto &ctx = batch.state.context;
++
++        int ofx = ctx.xyoffset.ofx >> 4;
++        int ofy = ctx.xyoffset.ofy >> 4;
++
++        int x0 = static_cast<int>(v0.x) - ofx;
++        int y0 = static_cast<int>(v0.y) - ofy;
++        int x1 = static_cast<int>(v1.x) - ofx;
++        int y1 = static_cast<int>(v1.y) - ofy;
++
++        if (x0 > x1)
++            std::swap(x0, x1);
++        if (y0 > y1)
++            std::swap(y0, y1);
++
++        rect.x0 = x0;
++        rect.y0 = y0;
++        rect.width = std::max(1, x1 - x0);
++        rect.height = std::max(1, y1 - y0);
++        const int lastX = x0 + rect.width - 1;
++        const int lastY = y0 + rect.height - 1;
++
++        if (lastX < ctx.scissor.x0 || x0 > ctx.scissor.x1 ||
++            lastY < ctx.scissor.y0 || y0 > ctx.scissor.y1)
++            return false;
++
++        rect.drawX0 = clampInt(x0, ctx.scissor.x0, ctx.scissor.x1);
++        rect.drawY0 = clampInt(y0, ctx.scissor.y0, ctx.scissor.y1);
++        rect.drawX1 = clampInt(lastX, ctx.scissor.x0, ctx.scissor.x1);
++        rect.drawY1 = clampInt(lastY, ctx.scissor.y0, ctx.scissor.y1);
++        return true;
++    }
++
++    // The texel coordinate a sprite samples at the centre of the pixel `offset` pixels
++    // along a side `span` pixels long whose ends map to `first` and `last`.
++    float spriteTexelCoordinate(float first, float last, int offset, float span)
++    {
++        const float t = (static_cast<float>(offset) + 0.5f) / span;
++        return first + (last - first) * t;
++    }
++
++    // A UV sprite's texel coordinate in the 12.4 fixed point SampleTexture takes.
++    uint16_t fixedTexelCoordinate(float coordinate)
++    {
++        return static_cast<uint16_t>(clampInt(static_cast<int>((coordinate * 16.0f) + 0.5f), 0, 0xFFFF));
++    }
++
+     u16 Rgba8888ToRgba5551(u32 c)
+     {
+         uint32_t r = ((c >> 0) & 0xFF) >> 3;
+@@ -296,7 +362,10 @@ namespace
      {
          const float top = static_cast<float>(c00) + (static_cast<float>(c10) - static_cast<float>(c00)) * fx;
          const float bottom = static_cast<float>(c01) + (static_cast<float>(c11) - static_cast<float>(c01)) * fx;
@@ -1520,7 +1992,7 @@ index f0ad507..650f8d4 100644
      }
  }
  
-@@ -543,6 +547,13 @@ void GSCpuBackend::ResetUnlocked()
+@@ -543,6 +612,13 @@ void GSCpuBackend::ResetUnlocked()
      m_localToHostReadPos = 0u;
  }
  
@@ -1534,7 +2006,7 @@ index f0ad507..650f8d4 100644
  void GSCpuBackend::Submit(const GSPrimitiveBatch &batch)
  {
      std::lock_guard<std::mutex> lock(m_mutex);
-@@ -818,6 +829,54 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
+@@ -818,6 +894,54 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
          }
      });
  
@@ -1589,7 +2061,7 @@ index f0ad507..650f8d4 100644
      switch (state.prim.type)
      {
      case GS_PRIM_SPRITE:
-@@ -838,7 +897,8 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
+@@ -838,7 +962,8 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
          const auto &ctx = state.context;
          int px = static_cast<int>(v.x) - (ctx.xyoffset.ofx >> 4);
          int py = static_cast<int>(v.y) - (ctx.xyoffset.ofy >> 4);
@@ -1599,16 +2071,134 @@ index f0ad507..650f8d4 100644
          break;
      }
      default:
-@@ -1236,6 +1296,8 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+@@ -1159,43 +1284,62 @@ uint32_t GSCpuBackend::SampleTexture(const GSDrawState &state, float s, float t,
+            (static_cast<uint32_t>(a) << 24);
+ }
+ 
++bool GSCpuBackend::SpriteTexelRange(const GSPrimitiveBatch &batch, int &u0, int &u1, int &v0, int &v1)
++{
++    const GSDrawState &state = batch.state;
++    SpriteRect rect;
++    if (state.prim.type != GS_PRIM_SPRITE || !state.prim.fst || !spriteRect(batch, rect))
++        return false;
++
++    // Each step below only ever moves a pixel's texel coordinate one way across the
++    // sprite, so the pixels at the ends of the drawn span sample the first and last
++    // texels. SampleTexture reads the texel a point sample lands in, and a bilinear
++    // sample's texel centre at or before it and the next one.
++    const bool linear = state.linearFilter;
++    const auto range = [&](uint16_t firstUV, uint16_t lastUV, int unclipped, float span, int drawFirst, int drawLast,
++                           int &first, int &last)
++    {
++        const float firstCoordinate = static_cast<float>(firstUV >> 4);
++        const float lastCoordinate = static_cast<float>(lastUV >> 4);
++        const auto texel = [&](int pixel)
++        {
++            const float coordinate = static_cast<float>(fixedTexelCoordinate(
++                                         spriteTexelCoordinate(firstCoordinate, lastCoordinate, pixel - unclipped, span))) /
++                                     16.0f;
++            return linear ? static_cast<int>(std::floor(coordinate - 0.5f)) : static_cast<int>(coordinate);
++        };
++        const int a = texel(drawFirst);
++        const int b = texel(drawLast);
++        first = std::min(a, b);
++        last = std::max(a, b) + (linear ? 1 : 0);
++    };
++
++    const GSVertex &a = batch.vertices[0];
++    const GSVertex &b = batch.vertices[1];
++    range(a.u, b.u, rect.x0, static_cast<float>(rect.width), rect.drawX0, rect.drawX1, u0, u1);
++    range(a.v, b.v, rect.y0, static_cast<float>(rect.height), rect.drawY0, rect.drawY1, v0, v1);
++    return true;
++}
++
+ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+ {
+     const GSDrawState &state = batch.state;
+     const GSVertex &v0 = batch.vertices[0];
+     const GSVertex &v1 = batch.vertices[1];
+     const auto &ctx = state.context;
+-
+-    int ofx = ctx.xyoffset.ofx >> 4;
+-    int ofy = ctx.xyoffset.ofy >> 4;
+-
+-    int x0 = static_cast<int>(v0.x) - ofx;
+-    int y0 = static_cast<int>(v0.y) - ofy;
+-    int x1 = static_cast<int>(v1.x) - ofx;
+-    int y1 = static_cast<int>(v1.y) - ofy;
+     u32 z1 = static_cast<u32>(v1.z);
+ 
+-    if (x0 > x1)
+-        std::swap(x0, x1);
+-    if (y0 > y1)
+-        std::swap(y0, y1);
+-
+-    const int unclippedX0 = x0;
+-    const int unclippedY0 = y0;
+-    const int spanX = std::max(1, x1 - x0);
+-    const int spanY = std::max(1, y1 - y0);
+-    const int unclippedX1 = unclippedX0 + spanX - 1;
+-    const int unclippedY1 = unclippedY0 + spanY - 1;
+-
+     // If the sprite rectangle is fully outside scissor, nothing should render.
+-    if (unclippedX1 < ctx.scissor.x0 || unclippedX0 > ctx.scissor.x1 ||
+-        unclippedY1 < ctx.scissor.y0 || unclippedY0 > ctx.scissor.y1)
++    SpriteRect rect;
++    if (!spriteRect(batch, rect))
+         return;
+ 
+-    const int drawX0 = clampInt(unclippedX0, ctx.scissor.x0, ctx.scissor.x1);
+-    const int drawY0 = clampInt(unclippedY0, ctx.scissor.y0, ctx.scissor.y1);
+-    const int drawX1 = clampInt(unclippedX1, ctx.scissor.x0, ctx.scissor.x1);
+-    const int drawY1 = clampInt(unclippedY1, ctx.scissor.y0, ctx.scissor.y1);
++    const int unclippedX0 = rect.x0;
++    const int unclippedY0 = rect.y0;
++    const int drawX0 = rect.drawX0;
++    const int drawY0 = rect.drawY0;
++    const int drawX1 = rect.drawX1;
++    const int drawY1 = rect.drawY1;
+ 
+     const uint64_t alphaReg = ctx.alpha;
+     const uint8_t alphaMode = static_cast<uint8_t>(alphaReg & 0xFFu);
+@@ -1227,30 +1371,22 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+             v1f = (v1.t / q1) * static_cast<float>(texH);
+         }
+ 
+-        float spriteW = static_cast<float>(spanX);
+-        float spriteH = static_cast<float>(spanY);
+-        if (spriteW < 1.0f)
+-            spriteW = 1.0f;
+-        if (spriteH < 1.0f)
+-            spriteH = 1.0f;
++        const float spriteW = static_cast<float>(rect.width);
++        const float spriteH = static_cast<float>(rect.height);
  
          for (int y = drawY0; y <= drawY1; ++y)
          {
+-            float ty = (static_cast<float>(y - unclippedY0) + 0.5f) / spriteH;
+-            float texVf = v0f + (v1f - v0f) * ty;
 +            if (!OwnsRow(y))
 +                continue;
-             float ty = (static_cast<float>(y - unclippedY0) + 0.5f) / spriteH;
-             float texVf = v0f + (v1f - v0f) * ty;
++            const float texVf = spriteTexelCoordinate(v0f, v1f, y - unclippedY0, spriteH);
  
-@@ -1270,8 +1332,12 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+             for (int x = drawX0; x <= drawX1; ++x)
+             {
+-                float tx = (static_cast<float>(x - unclippedX0) + 0.5f) / spriteW;
+-                float texUf = u0f + (u1f - u0f) * tx;
++                const float texUf = spriteTexelCoordinate(u0f, u1f, x - unclippedX0, spriteW);
+                 uint32_t texel = 0xFFFF00FFu;
+                 if (state.prim.fst)
+                 {
+-                    const int fixedU = static_cast<int>((texUf * 16.0f) + 0.5f);
+-                    const int fixedV = static_cast<int>((texVf * 16.0f) + 0.5f);
+-                    const uint16_t sampleU = static_cast<uint16_t>(clampInt(fixedU, 0, 0xFFFF));
+-                    const uint16_t sampleV = static_cast<uint16_t>(clampInt(fixedV, 0, 0xFFFF));
+-                    texel = SampleTexture(state, 0.0f, 0.0f, 1.0f, sampleU, sampleV);
++                    texel = SampleTexture(state, 0.0f, 0.0f, 1.0f, fixedTexelCoordinate(texUf), fixedTexelCoordinate(texVf));
+                 }
+                 else
+                 {
+@@ -1270,8 +1406,12 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
      else
      {
          for (int y = drawY0; y <= drawY1; ++y)
@@ -1621,7 +2211,7 @@ index f0ad507..650f8d4 100644
      }
  }
  
-@@ -1311,8 +1377,19 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+@@ -1311,8 +1451,19 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
      const float invAbsDenom = 1.0f / std::fabs(denom);
      constexpr float kEdgeEpsilon = 1.0e-4f;
  
@@ -1641,7 +2231,7 @@ index f0ad507..650f8d4 100644
          float py = static_cast<float>(y) + 0.5f;
          for (int x = minX; x <= maxX; ++x)
          {
-@@ -1326,6 +1403,13 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+@@ -1326,6 +1477,13 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
                  continue;
  
              double z = v0.z * w0 + v1.z * w1 + v2.z * w2;
@@ -1655,7 +2245,7 @@ index f0ad507..650f8d4 100644
  
              uint8_t r, g, b, a;
              if (state.prim.iip)
-@@ -1388,7 +1472,7 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+@@ -1388,7 +1546,7 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
              }
  
              const uint8_t fog = clampU8(static_cast<int>(v0.fog * w0 + v1.fog * w1 + v2.fog * w2));
@@ -1664,7 +2254,7 @@ index f0ad507..650f8d4 100644
          }
      }
  }
-@@ -1440,7 +1524,8 @@ void GSCpuBackend::DrawLine(const GSPrimitiveBatch &batch)
+@@ -1440,7 +1598,8 @@ void GSCpuBackend::DrawLine(const GSPrimitiveBatch &batch)
  
          double z = (v0.z + (v1.z - v0.z) * t);
          const uint8_t fog = clampU8(static_cast<int>(v0.fog + (v1.fog - v0.fog) * t));
@@ -1674,7 +2264,7 @@ index f0ad507..650f8d4 100644
  
          if (x0 == x1 && y0 == y1)
              break;
-@@ -1732,6 +1817,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1732,6 +1891,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
                                  (static_cast<uint32_t>(b) << 16u) |
                                  (static_cast<uint32_t>(a) << 24u);
          for (uint32_t y = y0; y <= y1; ++y)
@@ -1684,7 +2274,7 @@ index f0ad507..650f8d4 100644
              for (uint32_t x = x0; x <= x1; ++x)
              {
                  uint32_t pixel = source;
-@@ -1742,6 +1830,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1742,6 +1904,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
                  }
                  WriteVramUnlocked(context.frame.psm, fbp, fbw, x, y, pixel);
              }
@@ -1692,7 +2282,7 @@ index f0ad507..650f8d4 100644
          return true;
      }
  
-@@ -1750,6 +1839,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1750,6 +1913,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
          const uint16_t source = encodeFramePixelPSMCT16(r, g, b, a);
          const uint16_t mask = static_cast<uint16_t>(context.frame.fbmsk);
          for (uint32_t y = y0; y <= y1; ++y)
@@ -1702,7 +2292,7 @@ index f0ad507..650f8d4 100644
              for (uint32_t x = x0; x <= x1; ++x)
              {
                  uint16_t pixel = source;
-@@ -1760,6 +1852,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1760,6 +1926,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
                  }
                  WriteVramUnlocked(context.frame.psm, fbp, fbw, x, y, pixel);
              }
@@ -1712,10 +2302,10 @@ index f0ad507..650f8d4 100644
      return false;
 diff --git a/ps2xRuntime/src/lib/gs/gs_threaded_backend.cpp b/ps2xRuntime/src/lib/gs/gs_threaded_backend.cpp
 new file mode 100644
-index 0000000..8c1a722
+index 0000000..30f835f
 --- /dev/null
 +++ b/ps2xRuntime/src/lib/gs/gs_threaded_backend.cpp
-@@ -0,0 +1,770 @@
+@@ -0,0 +1,841 @@
 +#include "runtime/gs/gs_threaded_backend.h"
 +#include "runtime/gs/ps2_gs_common.h"
 +
@@ -1832,6 +2422,51 @@ index 0000000..8c1a722
 +        if (state.prim.fst && triangle && (minU < 0.0f || minV < 0.0f))
 +            return false;
 +        return minU >= -65536.0f && maxU <= 65536.0f && minV >= -65536.0f && maxV <= 65536.0f;
++    }
++
++    // Whether a sprite copies its own target onto itself, each pixel reading the texel at
++    // its own address: an unfiltered, unflipped 1:1 UV sprite whose texture has the
++    // frame's base, width and pixel layout. Each pixel then reads only what its own
++    // worker drew.
++    bool readsOnlyItsOwnPixels(const GSPrimitiveBatch &batch)
++    {
++        const GSDrawState &state = batch.state;
++        const GSContext &ctx = state.context;
++        if (state.prim.type != GS_PRIM_SPRITE || !state.prim.tme || !state.prim.fst || state.linearFilter)
++            return false;
++
++        // The 32-bit colour formats and the 8- and 4-bit formats kept in their top bits
++        // all lay pixels out the same way.
++        const auto ct32Layout = [](uint32_t psm)
++        {
++            return psm == GS_PSM_CT32 || psm == GS_PSM_CT24 || psm == GS_PSM_T8H ||
++                   psm == GS_PSM_T4HL || psm == GS_PSM_T4HH;
++        };
++        if ((ctx.frame.psm != GS_PSM_CT32 && ctx.frame.psm != GS_PSM_CT24) || !ct32Layout(ctx.tex0.psm) ||
++            ctx.tex0.tbp0 != GSInternal::framePageBaseToBlock(ctx.frame.fbp) ||
++            ctx.tex0.tbw != std::max<uint32_t>(ctx.frame.fbw, 1u))
++            return false;
++
++        // REPEAT and CLAMP leave texels inside the texture where they are.
++        const uint64_t clamp = ctx.clamp;
++        if ((clamp & 3u) > 1u || ((clamp >> 2) & 3u) > 1u)
++            return false;
++
++        // The same pixel to texel mapping as GSCpuBackend::DrawSprite: the texel a pixel
++        // samples is its offset into the sprite plus the first vertex's UV.
++        const GSVertex &v0 = batch.vertices[0];
++        const GSVertex &v1 = batch.vertices[1];
++        const int ofx = static_cast<int>(ctx.xyoffset.ofx >> 4);
++        const int ofy = static_cast<int>(ctx.xyoffset.ofy >> 4);
++        const int x0 = static_cast<int>(v0.x) - ofx;
++        const int y0 = static_cast<int>(v0.y) - ofy;
++        const int x1 = static_cast<int>(v1.x) - ofx;
++        const int y1 = static_cast<int>(v1.y) - ofy;
++        const int u0 = v0.u >> 4;
++        const int t0 = v0.v >> 4;
++        return x1 > x0 && y1 > y0 && x0 >= 0 && y0 >= 0 &&
++               u0 == x0 && t0 == y0 && (v1.u >> 4) - u0 == x1 - x0 && (v1.v >> 4) - t0 == y1 - y0 &&
++               x1 <= static_cast<int>(state.textureWidth) && y1 <= static_cast<int>(state.textureHeight);
 +    }
 +
 +    // The texel columns (or rows) that coordinates in [lo, hi] reach after wrapping.
@@ -2066,17 +2701,18 @@ index 0000000..8c1a722
 +}
 +
 +void GSThreadedBackend::classifyDraw(Command &command, const PageTracker::Access *drawn, size_t count,
-+                                     const PageTracker::PageSet &textured)
++                                     const PageTracker::PageSet &textured, bool readsOwnPixels)
 +{
 +    if (m_workers.size() <= 1u)
 +        return;
 +
 +    // A draw that textures from its own target, or whose colour and depth buffers
-+    // share pages, depends on the order its own pixels are drawn in.
++    // share pages, depends on the order its own pixels are drawn in. One whose pixels
++    // each read only themselves from the colour buffer (drawn[0]) does not.
 +    bool alone = false;
 +    for (size_t i = 0; i < count && !alone; ++i)
 +    {
-+        alone = PageTracker::Intersects(drawn[i].pages, textured);
++        alone = !(readsOwnPixels && i == 0u) && PageTracker::Intersects(drawn[i].pages, textured);
 +        for (size_t j = i + 1u; j < count && !alone; ++j)
 +            alone = PageTracker::Intersects(drawn[i].pages, drawn[j].pages);
 +    }
@@ -2086,12 +2722,17 @@ index 0000000..8c1a722
 +        return;
 +    }
 +
-+    if (m_pages.Conflicts(drawn, count, textured))
++    // Its own worker drew every pixel it reads, unless an earlier draw reached those
++    // pages through another layout, which Conflicts checks along with the draws that
++    // may still be reading them. Nothing else can need what it reads.
++    static const PageTracker::PageSet kNoPages{};
++    const PageTracker::PageSet &reads = readsOwnPixels ? kNoPages : textured;
++    if (m_pages.Conflicts(drawn, count, reads))
 +    {
 +        command.waitForAll = true;
 +        m_pages.Clear();
 +    }
-+    m_pages.Add(drawn, count, textured);
++    m_pages.Add(drawn, count, reads);
 +}
 +
 +void GSThreadedBackend::classifySubmit(Command &command)
@@ -2163,11 +2804,31 @@ index 0000000..8c1a722
 +        }
 +    }
 +
++    // A copy of the target onto itself reads exactly the pixels it draws.
++    const bool readsOwnPixels = drawnCount != 0u && readsOnlyItsOwnPixels(command.batch);
 +    PageTracker::PageSet textured{};
-+    if (state.prim.tme && drawnCount != 0u)
++    if (readsOwnPixels)
 +    {
++        textured = drawn[0].pages;
++    }
++    else if (state.prim.tme && drawnCount != 0u)
++    {
++        // A UV sprite's texels can be found exactly, with the maths DrawSprite uses (this
++        // runs in the rounding mode the draw will).
 +        float minU = 0.0f, maxU = 0.0f, minV = 0.0f, maxV = 0.0f;
-+        const bool bounded = texelBounds(command.batch, vertexCount, minU, maxU, minV, maxV);
++        int spriteU0, spriteU1, spriteV0, spriteV1;
++        bool bounded = GSCpuBackend::SpriteTexelRange(command.batch, spriteU0, spriteU1, spriteV0, spriteV1);
++        if (bounded)
++        {
++            minU = static_cast<float>(spriteU0);
++            maxU = static_cast<float>(spriteU1);
++            minV = static_cast<float>(spriteV0);
++            maxV = static_cast<float>(spriteV1);
++        }
++        else
++        {
++            bounded = texelBounds(command.batch, vertexCount, minU, maxU, minV, maxV);
++        }
 +        const uint64_t clamp = ctx.clamp;
 +        int u0, u1, v0, v1;
 +        wrapTexelRange(minU, maxU, bounded, std::max<int>(state.textureWidth, 1), clamp & 3u,
@@ -2177,7 +2838,7 @@ index 0000000..8c1a722
 +        PageTracker::AddPages(textured, ctx.tex0.tbp0, ctx.tex0.tbw, ctx.tex0.psm, u0, v0, u1, v1);
 +    }
 +
-+    classifyDraw(command, drawn, drawnCount, textured);
++    classifyDraw(command, drawn, drawnCount, textured, readsOwnPixels);
 +}
 +
 +void GSThreadedBackend::runCommand(GSCpuBackend &backend, const Command &command)
@@ -2338,7 +2999,7 @@ index 0000000..8c1a722
 +        else
 +            PageTracker::AddPages(textured, tex0.cbp, texclut.cbw != 0u ? texclut.cbw : 1u, tex0.cpsm,
 +                                  texclut.cou * 16, texclut.cov, texclut.cou * 16 + 255, texclut.cov);
-+        classifyDraw(command, nullptr, 0u, textured);
++        classifyDraw(command, nullptr, 0u, textured, false);
 +    }
 +    endCommand(lock);
 +}
@@ -2431,7 +3092,7 @@ index 0000000..8c1a722
 +                              context.scissor.x0, context.scissor.y0,
 +                              std::max(context.scissor.x0, context.scissor.x1),
 +                              std::max(context.scissor.y0, context.scissor.y1));
-+        classifyDraw(command, &drawn, 1u, PageTracker::PageSet{});
++        classifyDraw(command, &drawn, 1u, PageTracker::PageSet{}, false);
 +    }
 +    endCommand(lock);
 +    return true;
@@ -3211,7 +3872,7 @@ index b02c7ca..024694b 100644
          }
      }
 diff --git a/ps2xRuntime/src/lib/vu/ps2_vu1_core.cpp b/ps2xRuntime/src/lib/vu/ps2_vu1_core.cpp
-index bd75bba..a5231c4 100644
+index bd75bba..6ec12f2 100644
 --- a/ps2xRuntime/src/lib/vu/ps2_vu1_core.cpp
 +++ b/ps2xRuntime/src/lib/vu/ps2_vu1_core.cpp
 @@ -5,6 +5,7 @@
@@ -3222,7 +3883,7 @@ index bd75bba..a5231c4 100644
  #include <cfenv>
  #include <cmath>
  #include <cstdio>
-@@ -20,6 +21,140 @@ namespace
+@@ -20,6 +21,162 @@ namespace
      {
          return static_cast<uint8_t>(1u << (3u - component));
      }
@@ -3257,9 +3918,11 @@ index bd75bba..a5231c4 100644
 +        return flags;
 +    }
 +
-+    // All four lanes of calculateFmacExactResult in double; false when the
-+    // upper op has no exact form.
-+    bool calculateFmacResultsDouble(const VU1State &state, uint32_t upper, double result[4])
++    // calculateFmacExactResult in double for the lanes in dest, and the Z/S/U/O
++    // flags of the products of product-sum ops, which accumulate into the sticky
++    // flags. False when the upper op has no exact form.
++    bool calculateFmacResultsDouble(const VU1State &state, uint32_t upper, uint8_t dest,
++                                    double result[4], uint32_t &productSticky)
 +    {
 +        const uint8_t op = static_cast<uint8_t>(upper & 0x3Fu);
 +        const bool accumulatorForm = op >= 0x3Cu;
@@ -3268,94 +3931,114 @@ index bd75bba..a5231c4 100644
 +                                 : op;
 +        const float *fs = state.vf[FS(upper)];
 +        const float *ft = state.vf[FT(upper)];
-+        double vs[4];
-+        double vt[4];
-+        double acc[4];
-+        for (uint32_t c = 0; c < 4u; ++c)
-+        {
-+            vs[c] = vuNormalizeOperand(fs[c]);
-+            vt[c] = vuNormalizeOperand(ft[c]);
-+            acc[c] = vuNormalizeOperand(state.acc[c]);
-+        }
-+        const double q = vuNormalizeOperand(state.q);
-+        const double i = vuNormalizeOperand(state.i);
-+        const double bc = vt[code & 3u];
++        productSticky = 0u;
 +
++        // How the op combines its operands: sum = vs + right, product = vs * right,
++        // and productSum = acc +/- vs * right.
++        enum class Form
++        {
++            Sum,
++            Difference,
++            Product,
++            AddProduct,
++            SubtractProduct,
++            OuterProduct,
++        };
++        enum class Right
++        {
++            Broadcast,
++            Vector,
++            Q,
++            I,
++        };
++        Form form;
++        Right right;
++        if (code <= 0x0Fu || (code >= 0x18u && code <= 0x1Bu))
++        {
++            right = Right::Broadcast;
++            form = code <= 0x03u   ? Form::Sum
++                   : code <= 0x07u ? Form::Difference
++                   : code <= 0x0Bu ? Form::AddProduct
++                   : code <= 0x0Fu ? Form::SubtractProduct
++                                   : Form::Product;
++        }
++        else
++        {
++            switch (code)
++            {
++            case 0x1Cu: form = Form::Product; right = Right::Q; break;
++            case 0x1Eu: form = Form::Product; right = Right::I; break;
++            case 0x20u: form = Form::Sum; right = Right::Q; break;
++            case 0x21u: form = Form::AddProduct; right = Right::Q; break;
++            case 0x22u: form = Form::Sum; right = Right::I; break;
++            case 0x23u: form = Form::AddProduct; right = Right::I; break;
++            case 0x24u: form = Form::Difference; right = Right::Q; break;
++            case 0x25u: form = Form::SubtractProduct; right = Right::Q; break;
++            case 0x26u: form = Form::Difference; right = Right::I; break;
++            case 0x27u: form = Form::SubtractProduct; right = Right::I; break;
++            case 0x28u: form = Form::Sum; right = Right::Vector; break;
++            case 0x29u: form = Form::AddProduct; right = Right::Vector; break;
++            case 0x2Au: form = Form::Product; right = Right::Vector; break;
++            case 0x2Cu: form = Form::Difference; right = Right::Vector; break;
++            case 0x2Du: form = Form::SubtractProduct; right = Right::Vector; break;
++            case 0x2Eu: form = Form::OuterProduct; right = Right::Vector; break;
++            default:
++                return false;
++            }
++        }
++
++        double scalar = 0.0;
++        if (right == Right::Broadcast)
++            scalar = vuNormalizeOperand(ft[code & 3u]);
++        else if (right == Right::Q)
++            scalar = vuNormalizeOperand(state.q);
++        else if (right == Right::I)
++            scalar = vuNormalizeOperand(state.i);
++
++        static constexpr uint8_t crossLeft[4] = {1u, 2u, 0u, 3u};
++        static constexpr uint8_t crossRight[4] = {2u, 0u, 1u, 3u};
 +        for (uint32_t c = 0; c < 4u; ++c)
 +        {
-+            if (code <= 0x03u)
-+                result[c] = vs[c] + bc;
-+            else if (code <= 0x07u)
-+                result[c] = vs[c] - bc;
-+            else if (code <= 0x0Bu)
-+                result[c] = acc[c] + vs[c] * bc;
-+            else if (code <= 0x0Fu)
-+                result[c] = acc[c] - vs[c] * bc;
-+            else if (code >= 0x18u && code <= 0x1Bu)
-+                result[c] = vs[c] * bc;
-+            else
++            if ((dest & laneForComponent(c)) == 0u)
++                continue;
++            if (form == Form::OuterProduct)
 +            {
-+                switch (code)
++                const double product = static_cast<double>(vuNormalizeOperand(fs[crossLeft[c]])) *
++                                       vuNormalizeOperand(ft[crossRight[c]]);
++                if (accumulatorForm) // OPMULA
 +                {
-+                case 0x1Cu:
-+                    result[c] = vs[c] * q;
-+                    break;
-+                case 0x1Eu:
-+                    result[c] = vs[c] * i;
-+                    break;
-+                case 0x20u:
-+                    result[c] = vs[c] + q;
-+                    break;
-+                case 0x21u:
-+                    result[c] = acc[c] + vs[c] * q;
-+                    break;
-+                case 0x22u:
-+                    result[c] = vs[c] + i;
-+                    break;
-+                case 0x23u:
-+                    result[c] = acc[c] + vs[c] * i;
-+                    break;
-+                case 0x24u:
-+                    result[c] = vs[c] - q;
-+                    break;
-+                case 0x25u:
-+                    result[c] = acc[c] - vs[c] * q;
-+                    break;
-+                case 0x26u:
-+                    result[c] = vs[c] - i;
-+                    break;
-+                case 0x27u:
-+                    result[c] = acc[c] - vs[c] * i;
-+                    break;
-+                case 0x28u:
-+                    result[c] = vs[c] + vt[c];
-+                    break;
-+                case 0x29u:
-+                    result[c] = acc[c] + vs[c] * vt[c];
-+                    break;
-+                case 0x2Au:
-+                    result[c] = vs[c] * vt[c];
-+                    break;
-+                case 0x2Cu:
-+                    result[c] = vs[c] - vt[c];
-+                    break;
-+                case 0x2Du:
-+                    result[c] = acc[c] - vs[c] * vt[c];
-+                    break;
-+                case 0x2Eu:
-+                {
-+                    static constexpr uint8_t left[4] = {1u, 2u, 0u, 3u};
-+                    static constexpr uint8_t right[4] = {2u, 0u, 1u, 3u};
-+                    const double product = vs[left[c]] * vt[right[c]];
-+                    if (c == 3u)
-+                        result[c] = 0.0;
-+                    else
-+                        result[c] = accumulatorForm ? product : acc[c] - product; // OPMULA : OPMSUB
-+                    break;
++                    result[c] = c == 3u ? 0.0 : product;
++                    continue;
 +                }
-+                default:
-+                    return false;
-+                }
++                // OPMSUB
++                float discarded = 0.0f;
++                productSticky |= classifyFmacExactResult(discarded, product) & 0xFu;
++                result[c] = c == 3u ? 0.0 : vuNormalizeOperand(state.acc[c]) - product;
++                continue;
++            }
++
++            const double vs = vuNormalizeOperand(fs[c]);
++            const double rhs = right == Right::Vector ? static_cast<double>(vuNormalizeOperand(ft[c])) : scalar;
++            switch (form)
++            {
++            case Form::Sum:
++                result[c] = vs + rhs;
++                break;
++            case Form::Difference:
++                result[c] = vs - rhs;
++                break;
++            case Form::Product:
++                result[c] = vs * rhs;
++                break;
++            default:
++            {
++                const double product = vs * rhs;
++                float discarded = 0.0f;
++                productSticky |= classifyFmacExactResult(discarded, product) & 0xFu;
++                const double acc = vuNormalizeOperand(state.acc[c]);
++                result[c] = form == Form::AddProduct ? acc + product : acc - product;
++                break;
++            }
 +            }
 +        }
 +        return true;
@@ -3363,7 +4046,7 @@ index bd75bba..a5231c4 100644
  }
  
  void VU1Interpreter::addVfRead(InstructionUsage &usage, uint8_t reg, uint8_t lanes)
-@@ -80,6 +215,12 @@ void VU1Interpreter::resetScheduler()
+@@ -80,6 +237,12 @@ void VU1Interpreter::resetScheduler()
      m_vfLatestWrite = {};
      m_viLatestWrite = {};
      m_accLatestWrite = {};
@@ -3376,7 +4059,7 @@ index bd75bba..a5231c4 100644
      m_nextWriteSequence = 0;
      m_efuResourceReady = 0;
      m_workingClip = m_state.clip;
-@@ -103,24 +244,12 @@ void VU1Interpreter::reset()
+@@ -103,24 +266,12 @@ void VU1Interpreter::reset()
  
  float VU1Interpreter::broadcast(const float *vf, uint8_t bc)
  {
@@ -3403,16 +4086,22 @@ index bd75bba..a5231c4 100644
  }
  
  float VU1Interpreter::normalizeResult(float value, uint32_t &laneFlags) const
-@@ -197,15 +326,27 @@ void VU1Interpreter::applyDestAcc(const float *result, uint8_t dest)
- void VU1Interpreter::normalizeFmacResult(float *result, uint8_t dest,
-                                          uint8_t laneFlags[4])
+@@ -194,18 +345,31 @@ void VU1Interpreter::applyDestAcc(const float *result, uint8_t dest)
+     applyDest(m_state.acc, result, dest);
+ }
+ 
+-void VU1Interpreter::normalizeFmacResult(float *result, uint8_t dest,
+-                                         uint8_t laneFlags[4])
++uint32_t VU1Interpreter::normalizeFmacResult(float *result, uint8_t dest,
++                                             uint8_t laneFlags[4])
  {
 +    // A double holds every product of two floats exactly, so it rounds the
 +    // sum once, toward zero, like the long double does. Both then agree on
 +    // zero, sign, underflow and overflow, except when the double lands on
 +    // FLT_MAX and the long double may still be above it.
 +    double fastResults[4];
-+    const bool exact = calculateFmacResultsDouble(m_state, m_currentUpperInstruction, fastResults);
++    uint32_t productSticky = 0u;
++    const bool exact = calculateFmacResultsDouble(m_state, m_currentUpperInstruction, dest, fastResults, productSticky);
      for (uint32_t component = 0; component < 4u; ++component)
      {
          laneFlags[component] = 0u;
@@ -3433,7 +4122,15 @@ index bd75bba..a5231c4 100644
              laneFlags[component] = normalizeFmacExactResult(result[component], exactResult);
              continue;
          }
-@@ -402,31 +543,7 @@ bool VU1Interpreter::calculateFmacExactResult(uint32_t component,
+@@ -214,6 +378,7 @@ void VU1Interpreter::normalizeFmacResult(float *result, uint8_t dest,
+         result[component] = normalizeResult(result[component], flags);
+         laneFlags[component] = static_cast<uint8_t>(flags);
+     }
++    return productSticky;
+ }
+ 
+ bool VU1Interpreter::calculateFmacExactResult(uint32_t component,
+@@ -402,90 +567,7 @@ bool VU1Interpreter::calculateFmacExactResult(uint32_t component,
  uint8_t VU1Interpreter::normalizeFmacExactResult(float &value,
                                                    long double exactResult) const
  {
@@ -3462,23 +4159,70 @@ index bd75bba..a5231c4 100644
 -    }
 -
 -    return flags;
+-}
+-
+-uint32_t VU1Interpreter::calculateFmacProductSticky(uint8_t dest) const
+-{
+-    uint32_t extraSticky = 0u;
+-    const uint32_t upper = m_currentUpperInstruction;
+-    const uint8_t op = static_cast<uint8_t>(upper & 0x3Fu);
+-    const uint8_t special = op >= 0x3Cu ? static_cast<uint8_t>((upper & 3u) | ((upper >> 4) & 0x7Cu)) : 0xFFu;
+-    const bool productSum =
+-        (op >= 0x08u && op <= 0x0Fu) ||
+-        op == 0x21u || op == 0x23u || op == 0x25u || op == 0x27u ||
+-        op == 0x29u || op == 0x2Du || op == 0x2Eu ||
+-        (special >= 0x08u && special <= 0x0Fu) ||
+-        special == 0x21u || special == 0x23u || special == 0x25u ||
+-        special == 0x27u || special == 0x29u || special == 0x2Du;
+-    if (!productSum)
+-        return 0u;
+-
+-    const uint8_t fs = FS(upper);
+-    const uint8_t ft = FT(upper);
+-    for (uint32_t component = 0; component < 4u; ++component)
+-    {
+-        if ((dest & laneForComponent(component)) == 0u)
+-            continue;
+-        static constexpr uint8_t crossLeft[4] = {1u, 2u, 0u, 3u};
+-        static constexpr uint8_t crossRight[4] = {2u, 0u, 1u, 3u};
+-        const uint8_t leftComponent = op == 0x2Eu ? crossLeft[component] : static_cast<uint8_t>(component);
+-        const float left = normalizeOperand(m_state.vf[fs][leftComponent]);
+-        float right = 0.0f;
+-        if ((op >= 0x08u && op <= 0x0Fu) || (special >= 0x08u && special <= 0x0Fu))
+-        {
+-            right = normalizeOperand(m_state.vf[ft][(op >= 0x08u && op <= 0x0Fu ? op : special) & 3u]);
+-        }
+-        else if (op == 0x21u || op == 0x25u || special == 0x21u || special == 0x25u)
+-        {
+-            right = normalizeOperand(m_state.q);
+-        }
+-        else if (op == 0x23u || op == 0x27u || special == 0x23u || special == 0x27u)
+-        {
+-            right = normalizeOperand(m_state.i);
+-        }
+-        else if (op == 0x2Eu)
+-        {
+-            right = normalizeOperand(m_state.vf[ft][crossRight[component]]);
+-        }
+-        else
+-        {
+-            right = normalizeOperand(m_state.vf[ft][component]);
+-        }
+-
+-        float product = left * right;
+-        const long double exactProduct = static_cast<long double>(left) * static_cast<long double>(right);
+-        const uint8_t productFlags = normalizeFmacExactResult(product, exactProduct);
+-        // Product-sum instructions report Z/S/U/O from the add/subtract result
+-        // as current flags, while every product condition accumulates into the
+-        // corresponding sticky flag.
+-        extraSticky |= productFlags & 0xFu;
+-    }
+-    return extraSticky;
 +    return classifyFmacExactResult(value, exactResult);
  }
  
- uint32_t VU1Interpreter::calculateFmacProductSticky(uint8_t dest) const
-@@ -478,8 +595,9 @@ uint32_t VU1Interpreter::calculateFmacProductSticky(uint8_t dest) const
-         }
- 
-         float product = left * right;
--        const long double exactProduct = static_cast<long double>(left) * static_cast<long double>(right);
--        const uint8_t productFlags = normalizeFmacExactResult(product, exactProduct);
-+        // Exact: a double holds every product of two floats.
-+        const double exactProduct = static_cast<double>(left) * static_cast<double>(right);
-+        const uint8_t productFlags = classifyFmacExactResult(product, exactProduct);
-         // Product-sum instructions report Z/S/U/O from the add/subtract result
-         // as current flags, while every product condition accumulates into the
-         // corresponding sticky flag.
-@@ -533,6 +651,7 @@ void VU1Interpreter::updateFmacFlags(const uint8_t laneFlags[4], uint8_t dest,
+ void VU1Interpreter::updateFmacFlags(const uint8_t laneFlags[4], uint8_t dest,
+@@ -533,6 +615,7 @@ void VU1Interpreter::updateFmacFlags(const uint8_t laneFlags[4], uint8_t dest,
      entry->valid = true;
      entry->issueCycle = m_cycle;
      entry->readyCycle = m_cycle + kFmacLatency;
@@ -3486,7 +4230,28 @@ index bd75bba..a5231c4 100644
      entry->mac = mac;
      entry->status = status;
      entry->extraSticky = extraSticky;
-@@ -572,6 +691,7 @@ void VU1Interpreter::queueFsset(uint16_t immediate)
+@@ -543,16 +626,16 @@ void VU1Interpreter::updateFmacFlags(const uint8_t laneFlags[4], uint8_t dest,
+ void VU1Interpreter::applyFmacDest(float *dst, float *result, uint8_t dest)
+ {
+     uint8_t laneFlags[4]{};
+-    normalizeFmacResult(result, dest, laneFlags);
+-    updateFmacFlags(laneFlags, dest, calculateFmacProductSticky(dest));
++    const uint32_t productSticky = normalizeFmacResult(result, dest, laneFlags);
++    updateFmacFlags(laneFlags, dest, productSticky);
+     applyDest(dst, result, dest);
+ }
+ 
+ void VU1Interpreter::applyFmacDestAcc(float *result, uint8_t dest)
+ {
+     uint8_t laneFlags[4]{};
+-    normalizeFmacResult(result, dest, laneFlags);
+-    updateFmacFlags(laneFlags, dest, calculateFmacProductSticky(dest));
++    const uint32_t productSticky = normalizeFmacResult(result, dest, laneFlags);
++    updateFmacFlags(laneFlags, dest, productSticky);
+     applyDestAcc(result, dest);
+ }
+ 
+@@ -572,6 +655,7 @@ void VU1Interpreter::queueFsset(uint16_t immediate)
              entry.valid = true;
              entry.issueCycle = m_cycle;
              entry.readyCycle = m_cycle + kFmacLatency;
@@ -3494,7 +4259,7 @@ index bd75bba..a5231c4 100644
              entry.status = static_cast<uint32_t>(immediate) & 0xFC0u;
              entry.writesSticky = true;
              return;
-@@ -591,6 +711,7 @@ void VU1Interpreter::queueClip(uint32_t clip)
+@@ -591,6 +675,7 @@ void VU1Interpreter::queueClip(uint32_t clip)
              entry.valid = true;
              entry.issueCycle = m_cycle;
              entry.readyCycle = m_cycle + kFmacLatency;
@@ -3502,7 +4267,7 @@ index bd75bba..a5231c4 100644
              entry.clip = m_workingClip;
              entry.writesClip = true;
              return;
-@@ -615,6 +736,7 @@ void VU1Interpreter::queueFcset(uint32_t clip)
+@@ -615,6 +700,7 @@ void VU1Interpreter::queueFcset(uint32_t clip)
              entry.valid = true;
              entry.issueCycle = m_cycle;
              entry.readyCycle = m_cycle + kFmacLatency;
@@ -3510,7 +4275,7 @@ index bd75bba..a5231c4 100644
              entry.clip = m_workingClip;
              entry.writesClip = true;
              return;
-@@ -629,6 +751,7 @@ void VU1Interpreter::queueQ(float value, uint32_t latency, uint32_t statusDi)
+@@ -629,6 +715,7 @@ void VU1Interpreter::queueQ(float value, uint32_t latency, uint32_t statusDi)
      value = normalizeResult(value, ignoredFlags);
      m_fdiv.valid = true;
      m_fdiv.readyCycle = m_cycle + latency;
@@ -3518,7 +4283,7 @@ index bd75bba..a5231c4 100644
      m_fdiv.value = value;
      m_fdiv.statusDi = statusDi & 0x30u;
  }
-@@ -643,6 +766,7 @@ void VU1Interpreter::queueP(float value, uint32_t latency)
+@@ -643,6 +730,7 @@ void VU1Interpreter::queueP(float value, uint32_t latency)
          {
              entry.valid = true;
              entry.readyCycle = m_cycle + latency;
@@ -3526,7 +4291,7 @@ index bd75bba..a5231c4 100644
              entry.value = value;
              // EFU throughput is one cycle shorter than result visibility.
              m_efuResourceReady = m_cycle + (latency > 0u ? latency - 1u : 0u);
-@@ -660,6 +784,7 @@ void VU1Interpreter::queueStore(uint32_t address, const uint32_t words[4], uint8
+@@ -660,6 +748,7 @@ void VU1Interpreter::queueStore(uint32_t address, const uint32_t words[4], uint8
          {
              store.valid = true;
              store.readyCycle = m_cycle + 1u;
@@ -3534,7 +4299,7 @@ index bd75bba..a5231c4 100644
              store.address = address;
              store.laneMask = laneMask;
              std::copy(words, words + 4, store.words.begin());
-@@ -681,6 +806,7 @@ void VU1Interpreter::queueVfWrite(uint8_t reg, uint8_t laneMask,
+@@ -681,6 +770,7 @@ void VU1Interpreter::queueVfWrite(uint8_t reg, uint8_t laneMask,
              write = {};
              write.valid = true;
              write.readyCycle = m_cycle + latency;
@@ -3542,7 +4307,7 @@ index bd75bba..a5231c4 100644
              write.sequence = ++m_nextWriteSequence;
              write.reg = reg;
              write.laneMask = laneMask;
-@@ -707,6 +833,7 @@ void VU1Interpreter::queueViWrite(uint8_t reg, int32_t value, uint32_t latency)
+@@ -707,6 +797,7 @@ void VU1Interpreter::queueViWrite(uint8_t reg, int32_t value, uint32_t latency)
              write = {};
              write.valid = true;
              write.readyCycle = m_cycle + latency;
@@ -3550,7 +4315,7 @@ index bd75bba..a5231c4 100644
              write.sequence = ++m_nextWriteSequence;
              write.reg = reg;
              write.value = value;
-@@ -728,6 +855,7 @@ void VU1Interpreter::queueAccWrite(uint8_t laneMask, const float value[4], uint3
+@@ -728,6 +819,7 @@ void VU1Interpreter::queueAccWrite(uint8_t laneMask, const float value[4], uint3
              write = {};
              write.valid = true;
              write.readyCycle = m_cycle + latency;
@@ -3558,7 +4323,7 @@ index bd75bba..a5231c4 100644
              write.sequence = ++m_nextWriteSequence;
              write.laneMask = laneMask;
              std::copy(value, value + 4, write.value.begin());
-@@ -744,100 +872,113 @@ void VU1Interpreter::queueAccWrite(uint8_t laneMask, const float value[4], uint3
+@@ -744,100 +836,113 @@ void VU1Interpreter::queueAccWrite(uint8_t laneMask, const float value[4], uint3
  
  void VU1Interpreter::commitReadyPipelines()
  {
@@ -3582,23 +4347,23 @@ index bd75bba..a5231c4 100644
 -            m_state.clip = entry.clip;
 -        entry = {};
 -    }
-+    if (m_cycle < m_nextCommitCycle)
-+        return;
- 
+-
 -    if (m_fdiv.valid && m_fdiv.readyCycle <= m_cycle)
-+    // Visits the queued slots of a pipeline in slot order, commits the ones
-+    // that are due and finds the next cycle anything becomes visible.
-+    uint64_t nextCommit = std::numeric_limits<uint64_t>::max();
-+    const auto commitDue = [&](auto &pipeline, uint32_t &pending, auto &&commit)
-     {
+-    {
 -        m_state.q = m_fdiv.value;
 -        const uint32_t currentDi = m_fdiv.statusDi & 0x30u;
 -        m_state.status = (m_state.status & 0xFCFu) | currentDi | (currentDi << 6);
 -        m_fdiv = {};
 -    }
--
++    if (m_cycle < m_nextCommitCycle)
++        return;
+ 
 -    for (ScalarPipelineEntry &entry : m_efu)
--    {
++    // Visits the queued slots of a pipeline in slot order, commits the ones
++    // that are due and finds the next cycle anything becomes visible.
++    uint64_t nextCommit = std::numeric_limits<uint64_t>::max();
++    const auto commitDue = [&](auto &pipeline, uint32_t &pending, auto &&commit)
+     {
 -        if (entry.valid && entry.readyCycle <= m_cycle)
 +        for (uint32_t slots = pending; slots != 0u; slots &= slots - 1u)
          {
@@ -3749,7 +4514,7 @@ index bd75bba..a5231c4 100644
  }
  
  void VU1Interpreter::progressXgkick()
-@@ -857,10 +998,16 @@ void VU1Interpreter::progressXgkick()
+@@ -857,10 +962,16 @@ void VU1Interpreter::progressXgkick()
          }
  
          const uint32_t qwordOffset = m_xgkick.copiedBytes;
@@ -3769,7 +4534,7 @@ index bd75bba..a5231c4 100644
          }
          m_xgkick.copiedBytes += 16u;
  
-@@ -1005,11 +1152,8 @@ uint64_t VU1Interpreter::calculatePairReadyCycle(const DecodedInstructionPair &d
+@@ -1005,11 +1116,8 @@ uint64_t VU1Interpreter::calculatePairReadyCycle(const DecodedInstructionPair &d
                      ready = std::max(ready, m_vfReady[access.reg][component]);
              }
          }
@@ -3783,7 +4548,7 @@ index bd75bba..a5231c4 100644
          for (uint32_t component = 0; component < 4u; ++component)
          {
              if ((usage->accRead & laneForComponent(component)) != 0u)
-@@ -1063,11 +1207,8 @@ void VU1Interpreter::markPairWrites(const DecodedInstructionPair &decoded)
+@@ -1063,11 +1171,8 @@ void VU1Interpreter::markPairWrites(const DecodedInstructionPair &decoded)
          }
      }
  
@@ -3797,7 +4562,7 @@ index bd75bba..a5231c4 100644
      for (uint32_t component = 0; component < 4u; ++component)
      {
          if ((decoded.upperUsage.accWrite & laneForComponent(component)) != 0u)
-@@ -1662,14 +1803,10 @@ void VU1Interpreter::run(uint8_t *vuCode, uint32_t codeSize,
+@@ -1662,14 +1767,10 @@ void VU1Interpreter::run(uint8_t *vuCode, uint32_t codeSize,
  
          uint8_t writtenVi = 0u;
          int32_t oldVi = 0;
@@ -4004,7 +4769,7 @@ index 2866d2b..ab51b27 100644
          {
              // _mm_set_ps lists lanes 3..0
 diff --git a/ps2xTest/src/ps2_gs_tests.cpp b/ps2xTest/src/ps2_gs_tests.cpp
-index 0458a8c..2f0fd18 100644
+index 0458a8c..efd7f1d 100644
 --- a/ps2xTest/src/ps2_gs_tests.cpp
 +++ b/ps2xTest/src/ps2_gs_tests.cpp
 @@ -4,6 +4,8 @@
@@ -4050,7 +4815,7 @@ index 0458a8c..2f0fd18 100644
  
              const uint64_t imrPattern = 0x0123456789ABCDEFull;
              mem.write64(kGsImr, imrPattern);
-@@ -3006,6 +3013,115 @@ void register_ps2_gs_tests()
+@@ -3006,6 +3013,279 @@ void register_ps2_gs_tests()
                       "switching raster backends must retain the logical 4 MiB GS local memory");
          });
  
@@ -4142,6 +4907,23 @@ index 0458a8c..2f0fd18 100644
 +                                     block.data(), static_cast<uint32_t>(block.size()));
 +                drawSprite(kFrameA, 8u, false);
 +
++                // Resample A into B with bilinear filtering, 256 rows of texels onto 255, as
++                // SSX 3's last full-screen pass does: B's pages start where A's rows end.
++                gs.writeRegister(GS_REG_TEXFLUSH, 0ull);
++                gs.writeRegister(GS_REG_FRAME_1, kFrameB);
++                gs.writeRegister(GS_REG_TEX0_1, (1ull << 14) | (static_cast<uint64_t>(GS_PSM_CT32) << 20) |
++                                                    (6ull << 26) | (8ull << 30) | (1ull << 34) | (1ull << 35));
++                gs.writeRegister(GS_REG_TEX1_1, (1ull << 5) | (1ull << 6));
++                gs.writeRegister(GS_REG_CLAMP_1, 1ull | (1ull << 2));
++                gs.writeRegister(GS_REG_PRIM, static_cast<uint64_t>(GS_PRIM_SPRITE) | (1ull << 4) | (1ull << 8));
++                gs.writeRegister(GS_REG_UV, 8ull << 16);
++                gs.writeRegister(GS_REG_XYZ2, 0ull);
++                gs.writeRegister(GS_REG_UV, 1024ull | (4088ull << 16));
++                gs.writeRegister(GS_REG_XYZ2, 1024ull | (4080ull << 16));
++                gs.writeRegister(GS_REG_TEX1_1, 0ull);
++                // Copy B onto itself, each pixel reading only itself.
++                drawSprite(kFrameB, 8u, false);
++
 +                (void)gs.ReadVram(GS_PSM_CT32, 0u, 1u, 0u, 0u);
 +                return vram;
 +            };
@@ -4161,6 +4943,153 @@ index 0458a8c..2f0fd18 100644
 +                         "drawing on " + std::to_string(workers) +
 +                             " GS worker threads must leave exactly the VRAM that drawing inline does");
 +            }
++        });
++
++        tc.Run("GSCpuBackend::SpriteTexelRange gives exactly the texels a UV sprite reads", [](TestCase &t)
++        {
++            // A 128x128 CT32 texture at block 0, drawn into a 128x128 frame at page 16.
++            constexpr int kSize = 128;
++            constexpr uint32_t kFramePage = 16u;
++            constexpr uint32_t kFrameBytes = kSize * kSize * 4u;
++            std::vector<uint8_t> vram(PS2_GS_VRAM_SIZE, 0u);
++            GSCpuBackend backend;
++            backend.Initialize(vram.data(), static_cast<uint32_t>(vram.size()));
++
++            uint32_t seed = 4242u;
++            auto next = [&seed](uint32_t range) -> uint32_t
++            {
++                seed = seed * 1664525u + 1013904223u;
++                return (seed >> 8) % range;
++            };
++
++            // Texel coordinates stay in 2..125, so even a bilinear sample's neighbours stay
++            // inside the texture and no wrapping is involved.
++            auto randomSprite = [&](bool linear) -> GSPrimitiveBatch
++            {
++                GSPrimitiveBatch batch;
++                batch.vertexCount = 2u;
++                GSDrawState &state = batch.state;
++                state.prim.type = GS_PRIM_SPRITE;
++                state.prim.tme = true;
++                state.prim.fst = true;
++                state.textureWidth = kSize;
++                state.textureHeight = kSize;
++                state.linearFilter = linear;
++                GSContext &ctx = state.context;
++                ctx.frame.fbp = kFramePage;
++                ctx.frame.fbw = 2u;
++                ctx.frame.psm = GS_PSM_CT32;
++                ctx.zbuf.zmask = true;
++                ctx.test = (1ull << 16) | (1ull << 17);
++                ctx.tex0.tbw = 2u;
++                ctx.tex0.psm = GS_PSM_CT32;
++                ctx.tex0.tw = 7u;
++                ctx.tex0.th = 7u;
++                ctx.tex0.tcc = 1u;
++                ctx.tex0.tfx = 1u;
++                ctx.scissor.x0 = static_cast<uint16_t>(next(48u));
++                ctx.scissor.x1 = static_cast<uint16_t>(80u + next(48u));
++                ctx.scissor.y0 = static_cast<uint16_t>(next(48u));
++                ctx.scissor.y1 = static_cast<uint16_t>(80u + next(48u));
++                for (size_t i = 0; i < 2u; ++i)
++                {
++                    GSVertex &v = batch.vertices[i];
++                    v.x = static_cast<float>(next(kSize)) + static_cast<float>(next(16u)) / 16.0f;
++                    v.y = static_cast<float>(next(kSize)) + static_cast<float>(next(16u)) / 16.0f;
++                    v.u = static_cast<uint16_t>(((2u + next(124u)) << 4) | next(16u));
++                    v.v = static_cast<uint16_t>(((2u + next(124u)) << 4) | next(16u));
++                    v.r = v.g = v.b = v.a = 0x80u;
++                }
++                return batch;
++            };
++
++            const uint32_t frameBlock = kFramePage * 32u;
++            auto clearFrame = [&]()
++            { std::memset(vram.data() + kFramePage * 8192u, 0, kFrameBytes); };
++
++            // Point sampling: each texel holds its own coordinates, so the frame shows
++            // which texels the sprite read.
++            for (int u = 0; u < kSize; ++u)
++                for (int v = 0; v < kSize; ++v)
++                    backend.WriteVram(GS_PSM_CT32, 0u, 2u, u, v, 0x805A0000u | (static_cast<uint32_t>(v) << 8) | u);
++            backend.TextureFlush();
++            int pointDraws = 0;
++            for (int run = 0; run < 200; ++run)
++            {
++                const GSPrimitiveBatch batch = randomSprite(false);
++                std::fesetround((run & 1) ? FE_TOWARDZERO : FE_TONEAREST);
++                int u0 = 0, u1 = 0, v0 = 0, v1 = 0;
++                const bool draws = GSCpuBackend::SpriteTexelRange(batch, u0, u1, v0, v1);
++                clearFrame();
++                backend.Submit(batch);
++                std::fesetround(FE_TONEAREST);
++
++                int minU = kSize, maxU = -1, minV = kSize, maxV = -1;
++                for (int y = 0; y < kSize; ++y)
++                    for (int x = 0; x < kSize; ++x)
++                    {
++                        const uint32_t pixel = backend.ReadVram(GS_PSM_CT32, frameBlock, 2u, x, y);
++                        if (pixel == 0u)
++                            continue;
++                        minU = std::min<int>(minU, pixel & 0xFFu);
++                        maxU = std::max<int>(maxU, pixel & 0xFFu);
++                        minV = std::min<int>(minV, (pixel >> 8) & 0xFFu);
++                        maxV = std::max<int>(maxV, (pixel >> 8) & 0xFFu);
++                    }
++                const bool drew = maxU >= 0;
++                t.IsTrue(draws == drew, "SpriteTexelRange should say whether the sprite draws (run " + std::to_string(run) + ")");
++                if (draws && drew)
++                {
++                    ++pointDraws;
++                    t.IsTrue(minU == u0 && maxU == u1 && minV == v0 && maxV == v1,
++                             "a point-sampled sprite should read exactly the texels SpriteTexelRange gives (run " +
++                                 std::to_string(run) + ")");
++                }
++            }
++            t.IsTrue(pointDraws > 100, "most random sprites should draw something");
++
++            // Bilinear filtering: the texels in the range all hold one colour and the rest
++            // another, so any pixel that blends in a texel outside the range shows it.
++            constexpr uint32_t kInside = 0x80102030u;
++            int linearDraws = 0;
++            for (int run = 0; run < 200; ++run)
++            {
++                const GSPrimitiveBatch batch = randomSprite(true);
++                std::fesetround((run & 1) ? FE_TOWARDZERO : FE_TONEAREST);
++                int u0 = 0, u1 = 0, v0 = 0, v1 = 0;
++                const bool draws = GSCpuBackend::SpriteTexelRange(batch, u0, u1, v0, v1);
++                std::fesetround(FE_TONEAREST);
++                if (!draws)
++                    continue;
++
++                for (int u = 0; u < kSize; ++u)
++                    for (int v = 0; v < kSize; ++v)
++                    {
++                        const bool inside = u >= u0 && u <= u1 && v >= v0 && v <= v1;
++                        backend.WriteVram(GS_PSM_CT32, 0u, 2u, u, v, inside ? kInside : 0xFFFFFFFFu);
++                    }
++                backend.TextureFlush();
++                clearFrame();
++                std::fesetround((run & 1) ? FE_TOWARDZERO : FE_TONEAREST);
++                backend.Submit(batch);
++                std::fesetround(FE_TONEAREST);
++
++                bool onlyInside = true;
++                bool drew = false;
++                for (int y = 0; y < kSize; ++y)
++                    for (int x = 0; x < kSize; ++x)
++                    {
++                        const uint32_t pixel = backend.ReadVram(GS_PSM_CT32, frameBlock, 2u, x, y);
++                        if (pixel == 0u)
++                            continue;
++                        drew = true;
++                        onlyInside = onlyInside && pixel == kInside;
++                    }
++                linearDraws += drew ? 1 : 0;
++                t.IsTrue(drew && onlyInside,
++                         "a bilinear sprite should only blend texels SpriteTexelRange gives (run " + std::to_string(run) + ")");
++            }
++            t.IsTrue(linearDraws > 100, "most random bilinear sprites should draw something");
 +        });
 +
          tc.Run("GS TEX2 updates CLUT state independently from TEX0", [](TestCase &t)
