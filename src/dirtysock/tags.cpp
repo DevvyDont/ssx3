@@ -352,7 +352,35 @@ extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
 
 INCLUDE_ASM("dirtysock/tags", func_003ECBD8);
 
-INCLUDE_ASM("dirtysock/tags", func_003ECE38);
+//100%
+// Finds the next "=" or ":" field separator in p and copies the following value into out (or dflt when there is none); returns the value start or 0.
+extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* out, int size, const char* dflt)
+{
+    int i;
+    unsigned char* p = src;
+    while (*p != 0) {
+        if ((*p == '=' || *p == ':') && p[1] < 0x20) {
+            if (p[1] == 0)
+                break;
+            p += 2;
+            if (out != 0) {
+                size--;
+                for (i = 0; i < size && p[i] != 0; i++)
+                    out[i] = p[i];
+                out[i] = 0;
+            }
+            return p;
+        }
+        p++;
+    }
+    if (out != 0 && dflt != 0) {
+        size--;
+        for (i = 0; i < size && dflt[i] != 0; i++)
+            out[i] = dflt[i];
+        out[i] = 0;
+    }
+    return 0;
+}
 
 //100%
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
