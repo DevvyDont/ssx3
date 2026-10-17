@@ -257,7 +257,22 @@ extern "C" void func_0026C898(void* p)
     self->field_0x70 = 0;
 }
 
-INCLUDE_ASM("replay/playbackman", func_0026C998);
+struct sPbEntry_CFE8 { int key; int a; int b; };
+extern "C" int func_0026CFE8(void* self, int key);
+
+extern "C" int func_0026C998(void* self, int key)
+{
+    int i = func_0026CFE8(self, key);
+    if (i >= 0) {
+        if ((*(sPbEntry_CFE8**)((char*)self + 0x58))[i].a != 0) {
+            return 1;
+        }
+        if (*(int*)((char*)self + 0x78) < 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("replay/playbackman", func_0026C9F0);
 
@@ -371,7 +386,12 @@ extern "C" void func_0026CD20(void* self)
 
 extern "C" void* func_0026CC18(void*);
 
-INCLUDE_ASM("replay/playbackman", func_0026CD98);
+extern "C" void func_0026CD98(void* self)
+{
+    func_0026CBB8(self);
+    *(int*)(*(char**)((char*)self + 0x4) + 0x8) = 0;
+    *(int*)((char*)self + 0x70) = 2;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 void func_0026CDD0(void* self)
@@ -401,7 +421,17 @@ extern "C" void func_0026CDF8(void* self)
 
 INCLUDE_ASM("replay/playbackman", func_0026CE50);
 
-INCLUDE_ASM("replay/playbackman", func_0026CFE8);
+extern "C" int func_0026CFE8(void* self, int key)
+{
+    int n = *(int*)((char*)self + 0x50);
+    int i;
+    for (i = 0; i < n; i++) {
+        if ((*(sPbEntry_CFE8**)((char*)self + 0x58))[i].key == key) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM("replay/playbackman", func_0026D020);
 

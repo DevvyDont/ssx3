@@ -297,7 +297,18 @@ extern "C" void func_002AD650(void* self, int id, float v)
     }
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002AD730);
+extern "C" int func_002AD730(void* self)
+{
+    int n = 0;
+    for (int i = 0; i < 64; i++) {
+        if (func_002ABB80((char*)*(void**)((char*)self + 0x8EC) + i * 0xC0) == 0) {
+            if (*(int*)((char*)*(void**)((char*)self + 0x8EC) + i * 0xC0 + 0x8) != 0) {
+                n++;
+            }
+        }
+    }
+    return n;
+}
 
 // Number of the 64 voices for which func_002ABB80 returns 0 (free voices).
 extern "C" int func_002AD7A8(void* self)
@@ -989,7 +1000,16 @@ extern "C" void func_002AE9F8(int i)
     }
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002AEA38);
+extern void* D_004D3E98[];
+extern "C" void func_002AEFA8(int a);
+
+extern "C" int func_002AEA38(int i)
+{
+    if (D_004D3E98[i] != 0 && *((signed char*)D_004D3E98[i] + 0x65) != 0) {
+        func_002AEFA8(0);
+    }
+    return *(int*)((char*)D_004D3E98[i] + 0x50);
+}
 
 //100%
 extern "C" void func_002AEFA8(int a0);

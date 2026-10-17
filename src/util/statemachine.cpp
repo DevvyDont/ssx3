@@ -27,11 +27,35 @@ extern "C" void cConsoleConfig_setTimeString(void* self, char* dst, int size, in
 
 INCLUDE_ASM("util/statemachine", func_002C7038);
 
-INCLUDE_ASM("util/statemachine", func_002C7100);
+extern "C" void func_002C73C0(void* self);
 
-INCLUDE_ASM("util/statemachine", func_002C7160);
+extern "C" void func_002C7100(void* self, int* a, int* b, int* c)
+{
+    func_002C73C0(self);
+    *a = *(int*)((char*)self + 0x8);
+    *b = *(int*)((char*)self + 0xC);
+    *c = *(int*)((char*)self + 0x10);
+}
 
-INCLUDE_ASM("util/statemachine", func_002C71C0);
+extern "C" void func_002C7160(void* self, int* a, int* b, int* c)
+{
+    func_002C73C0(self);
+    *a = *(int*)((char*)self + 0x1C);
+    *b = *(int*)((char*)self + 0x18);
+    *c = *(int*)((char*)self + 0x14);
+}
+
+extern "C" int func_002C71C0(void* self, int year)
+{
+    int r = 0;
+    if ((year & 3) == 0) {
+        r = 1;
+        if (year % 100 == 0) {
+            r = year % 400 == 0;
+        }
+    }
+    return r;
+}
 
 INCLUDE_ASM("util/statemachine", func_002C7208);
 
@@ -39,7 +63,23 @@ INCLUDE_ASM("util/statemachine", func_002C7260);
 
 INCLUDE_ASM("util/statemachine", func_002C7328);
 
-INCLUDE_ASM("util/statemachine", func_002C73C0);
+extern "C" int func_002C7328(void* self, int* a, int* b, int* c, int n);
+extern "C" void func_002C7260(void* self, int* a, int* b, int* c, int n);
+extern void* D_004A28A8;
+
+extern "C" void func_002C73C0(void* self)
+{
+    char* s = (char*)self;
+    int now = *(int*)((char*)D_004A28A8 + 0x18);
+    int n = (now - *(int*)(s + 0x20)) / *(int*)((char*)D_004A28A8 + 0x10);
+    if (n != 0) {
+        *(int*)(s + 0x20) = now;
+        n = func_002C7328(self, (int*)(s + 0x10), (int*)(s + 0xC), (int*)(s + 0x8), n);
+        if (n != 0) {
+            func_002C7260(self, (int*)(s + 0x1C), (int*)(s + 0x18), (int*)(s + 0x14), n);
+        }
+    }
+}
 
 //100%
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
