@@ -16,9 +16,23 @@ void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
     return cWorldPainterQuery_cWorldPainterQuery(mem, arg);
 }
 
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AA0);
+extern "C" void func_002C0AA0(void* self, int* a, int* b, float t)
+{
+    if (t == 1.0f) {
+        *a = *b;
+    } else {
+        *a = (int)((float)*a * (1.0f - t) + (float)*b * t);
+    }
+}
 
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AF0);
+extern "C" void func_002C0AF0(void* self, float* a, float* b, float t)
+{
+    if (t == 1.0f) {
+        *a = *b;
+    } else {
+        *a = *a * (1.0f - t) + *b * t;
+    }
+}
 
 extern "C" void* func_002C0B30(void* p, ...)
 {
@@ -454,7 +468,24 @@ extern "C" void func_002C1718(int* p)
     p[1] = 0;
 }
 
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1728);
+extern "C" int cQuadTree_getFreeNode(void* self);
+extern "C" void* func_002C1728(void* self, int a, int b, float x, float y, float size)
+{
+    char* s = (char*)self;
+    *(int*)(s + 0x24) = 0;
+    *(int*)(s + 0x20) = 0;
+    *(int*)(s + 0x10) = 0;
+    *(int*)(s + 0xC) = 0;
+    *(float*)(s + 0x4) = x;
+    *(float*)(s + 0x8) = y;
+    *(float*)(s + 0x0) = 32768.0f / size;
+    *(unsigned short*)(s + 0x14) = cQuadTree_getFreeNode(self);
+    *(unsigned short*)(s + 0x16) = 0;
+    func_002C16A8((int*)(*(char**)(s + 0x20) + *(unsigned short*)(s + 0x14) * 8), a, b);
+    *(int*)(s + 0x1C) = a;
+    *(int*)(s + 0x18) = b;
+    return self;
+}
 
 //100%
 void func_002C17C0(void* self)
