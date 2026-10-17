@@ -710,7 +710,32 @@ extern "C" int func_0012A180(sAiObj128A48* self)
     return result;
 }
 
-INCLUDE_ASM("ai/ai", func_0012A1F0);
+extern int D_00536708[];
+
+struct sAiIds12A1F0
+{
+    char pad0[0x18];
+    int ids[1];
+};
+
+struct sAiGlobal12A1F0
+{
+    char pad0[0xC0];
+    sAiIds12A1F0* table;
+};
+
+// Whether id slot idx of the table at +0xC0 holds one of the six ids in D_00536708.
+extern "C" int func_0012A1F0(void* self, int idx)
+{
+    int found = 0;
+    int id = ((sAiGlobal12A1F0*)D_004A28A8)->table->ids[idx];
+    for (int i = 0; i < 6; i++)
+    {
+        if (id == D_00536708[i])
+            found = 1;
+    }
+    return found;
+}
 
 extern "C" int func_0012A240(int* self)
 {
@@ -743,7 +768,27 @@ extern "C" int func_0012A250(sAiObj12A250* self)
     return 1;
 }
 
-INCLUDE_ASM("ai/ai", func_0012A2B0);
+struct sAiObj12A2B0
+{
+    char pad0[0x28];
+    char* mRiders[20];
+    int mCount;
+};
+
+extern char D_004D33A0[];
+extern "C" void func_0026AF00(void* self);
+extern "C" void func_0026ADA8(void* self, int v);
+extern "C" void func_00112180(void* rider, int v);
+
+extern "C" void func_0012A2B0(sAiObj12A2B0* self, int arg)
+{
+    func_0026AF00(D_004D33A0);
+    func_0026ADA8(D_004D33A0, arg);
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_00112180(self->mRiders[i], 0);
+    }
+}
 
 //100%
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -824,7 +869,13 @@ extern "C" void func_0012A4D0()
     func_0026ADE8(D_004D33A0);
 }
 
-INCLUDE_ASM("ai/ai", func_0012A4F0);
+extern "C" void func_0012A4F0(sAiObj12A340* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        func_00112180(self->mRiders[i], 0);
+    }
+}
 
 extern "C" void func_0012A558()
 {
@@ -834,9 +885,70 @@ INCLUDE_ASM("ai/ai", func_0012A560);
 
 INCLUDE_ASM("ai/ai", func_0012A768);
 
-INCLUDE_ASM("ai/ai", func_0012A998);
+struct sAiObj12A998
+{
+    char pad0[0x48];
+    char* mRiders[14];
+    int mCount;
+};
 
-INCLUDE_ASM("ai/ai", func_0012AA78);
+struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
+
+extern void* D_004A289C;
+
+// For each flagged rider (+0x884) whose id is in the D_00536708 list, clear the
+// flag and re-arm its timer (+0x888) from the game object's virtual 114.
+extern "C" void func_0012A998(sAiObj12A998* self)
+{
+    for (int i = 0; i < self->mCount; i++)
+    {
+        char* r = *(char**)(self->mRiders[i] + 0x18);
+        if (*(int*)(r + 0x884) != 0)
+        {
+            char* obj = r + 0x6C0;
+            sVEntry0012A998* ov = *(sVEntry0012A998**)obj;
+            if (func_0012A1F0(self, ov[7].fn(obj + ov[7].delta)))
+            {
+                char* g = (char*)D_004A289C;
+                char* r2 = *(char**)(self->mRiders[i] + 0x18);
+                *(int*)(r2 + 0x884) = 0;
+                *(int*)(r2 + 0x888) = -1;
+                char* rider = self->mRiders[i];
+                sVEntry0012A998* vt = *(sVEntry0012A998**)(g + 0x10D8);
+                *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn(g + vt[114].delta) + 4;
+            }
+        }
+    }
+}
+
+struct sAiObj12AA78
+{
+    char pad0[0x48];
+    char* mRiders[14];
+    int mCount;
+};
+
+struct sVEntry0012AA78 { short delta; short index; int (*fn)(void*); };
+
+extern "C" int func_0011C0E0(void*);
+
+// 0 if any rider that is not done (func_0011C0E0) reports an id from the
+// D_00536708 list (func_0012A1F0), else 1.
+extern "C" int func_0012AA78(sAiObj12AA78* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        {
+            char* obj = *(char**)(self->mRiders[i] + 0x18) + 0x6C0;
+            sVEntry0012AA78* vt = *(sVEntry0012AA78**)obj;
+            if (func_0012A1F0(self, vt[7].fn(obj + vt[7].delta)))
+                result = 0;
+        }
+    }
+    return result;
+}
 
 //100%
 struct sAiObj12AB20
@@ -960,7 +1072,25 @@ extern "C" void func_0012AD70(void* self)
     }
 }
 
-INCLUDE_ASM("ai/ai", func_0012ADC0);
+struct sAiObj12ADC0
+{
+    char pad0[0x70];
+    char* mRiders[6];
+    int mCount;
+};
+
+extern "C" int func_0012ADC0(sAiObj12ADC0* self)
+{
+    int result = 1;
+    for (int i = 0; i < self->mCount; i++)
+    {
+        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
 
 //100%
 struct sAiMissionVEntry { short delta; short index; void (*fn)(void*, int); };

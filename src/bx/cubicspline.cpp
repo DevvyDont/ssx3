@@ -569,11 +569,41 @@ extern "C" void func_0031F838(void* a, void* b, void* c, int e)
 
 INCLUDE_ASM("bx/cubicspline", func_0031F858);
 
-INCLUDE_ASM("bx/cubicspline", func_0031FAA8);
+struct sMState_31FAA8
+{
+    unsigned int max_fast;  // 0x0
+    char pad4[0x358];       // 0x4
+    unsigned int pagesize;  // 0x35C
+};
 
-INCLUDE_ASM("bx/cubicspline", func_0031FB00);
+extern "C" void* dl_memalign(void* ms, unsigned int alignment, unsigned int bytes) __asm__("func_0031F2C8");
 
-INCLUDE_ASM("bx/cubicspline", func_0031FB68);
+// dlmalloc 2.7 vALLOc(): memalign to the page size, consolidating first if needed.
+extern "C" void* func_0031FAA8(void* ms, unsigned int bytes)
+{
+    sMState_31FAA8* av = *(sMState_31FAA8**)ms;
+    if (av->max_fast == 0)
+        func_0031EEE8(ms, (sMState_31EEE8*)av);
+    return dl_memalign(ms, av->pagesize, bytes);
+}
+
+// dlmalloc 2.7 pVALLOc(): vALLOc() of bytes rounded up to a whole page.
+extern "C" void* func_0031FB00(void* ms, unsigned int bytes)
+{
+    sMState_31FAA8* av = *(sMState_31FAA8**)ms;
+    if (av->max_fast == 0)
+        func_0031EEE8(ms, (sMState_31EEE8*)av);
+    unsigned int pagesz = av->pagesize;
+    return dl_memalign(ms, pagesz, (bytes + pagesz - 1) & -pagesz);
+}
+
+// dlmalloc 2.7 mTRIm(): consolidate, then give memory above pad back.
+extern "C" int func_0031FB68(void* ms, unsigned int pad)
+{
+    sMState_31FAA8* av = *(sMState_31FAA8**)ms;
+    func_0031EEE8(ms, (sMState_31EEE8*)av);
+    return func_0031E6D8(ms, pad, (sMState_31E6D8*)av);
+}
 
 //100%
 unsigned int func_0031FBB8(void* self, void* mem)
@@ -810,7 +840,13 @@ int func_00320078(void* self)
 
 extern "C" int func_0031ED60(void* self);
 
-INCLUDE_ASM("bx/cubicspline", func_00320098);
+// Whether p lies inside the block [base, base + size) (exclusive at base).
+int func_00320098(void* self, unsigned int p)
+{
+    unsigned int base = *(unsigned int*)((char*)self + 0x4);
+    unsigned int end = base + *(unsigned int*)((char*)self + 0xC);
+    return base < p && p < end;
+}
 
 //100%
 int func_003200C0(void* self)
