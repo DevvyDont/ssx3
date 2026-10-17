@@ -226,7 +226,29 @@ extern "C" void func_002B97F0(void *arg0, signed char arg1) {
     (*(signed char *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (3))) = arg1;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002B9810);
+//100%
+// Stores v as the current entry's value and caches it, clamped to 0..127, in the current record.
+#define MIN_002B9810(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_002B9810(a, b) ((a) < (b) ? (b) : (a))
+struct sRec_002B9810
+{
+    unsigned char value;
+    char pad_0x01[0x17];
+};
+struct sTable_002B9810
+{
+    char pad_0x00[0x1C];
+    volatile int index;     // 0x1C
+    sRec_002B9810* recs;    // 0x20
+    char pad_0x24[0x14];
+    int* values;            // 0x38
+};
+
+extern "C" void func_002B9810(sTable_002B9810* self, int v)
+{
+    self->values[self->index] = v;
+    self->recs[self->index].value = MAX_002B9810(MIN_002B9810(self->values[self->index], 0x7F), 0);
+}
 
 //100%
 #define MIN_98A8(a, b) ((a) < (b) ? (a) : (b))
@@ -385,7 +407,12 @@ extern "C" int func_002B9DA0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x94)));
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002B9DA8);
+//100%
+// Returns the field at 0x88.
+extern "C" int func_002B9DA8(void* self)
+{
+    return *(volatile int*)((char*)self + 0x88);
+}
 
 //100%
 extern "C" float func_002B9DB8(void *arg0) {
