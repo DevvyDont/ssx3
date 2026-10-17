@@ -382,7 +382,13 @@ extern "C" cBXString* cBXString_Concat(cBXString* self, const char* str)
     return self;
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318968);
+// cBXString += char.
+extern "C" cBXString* func_00318968(cBXString* self, char ch)
+{
+    char c = ch;
+    cBXString_ConcatImpl(self, 1, &c);
+    return self;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct cBXString;
@@ -439,13 +445,32 @@ struct cBXString {
     char* str;
 };
 
-INCLUDE_ASM("bx/bxstring", func_00318AF8);
+// Resizes to len chars (unique buffer) and terminates it.
+extern "C" char* func_00318AF8(cBXString* self, int len)
+{
+    func_003189D0(self, len);
+    *(int*)(self->str - 8) = len;
+    self->str[len] = 0;
+    return self->str;
+}
 
 INCLUDE_ASM("bx/bxstring", func_00318B40);
 
-INCLUDE_ASM("bx/bxstring", func_00318BC0);
+// Makes the buffer unique, then marks it as not shareable (refcount -1).
+extern "C" char* func_00318BC0(cBXString* self)
+{
+    char* buf = func_003189D0(self, 0);
+    *(int*)(self->str - 0xC) = -1;
+    return buf;
+}
 
-INCLUDE_ASM("bx/bxstring", func_00318BF8);
+// Marks the string's buffer as singly owned (refcount 1) unless it is the shared empty string.
+extern "C" void func_00318BF8(cBXString* self)
+{
+    char* s = self->str;
+    if (s != D_0048DCD4)
+        *(int*)(s - 0xC) = 1;
+}
 
 //100%
 int cBXString_FindLastOf(cBXString* self, char ch, int len)
@@ -459,7 +484,17 @@ int cBXString_FindLastOf(cBXString* self, char ch, int len)
 
 extern "C" char* func_0041ACC0(char* str, int ch);
 
-INCLUDE_ASM("bx/bxstring", func_00318C60);
+extern "C" char* func_0041AC40(char* str, int ch);
+
+// Index of the last occurrence of ch, or -1 (func_0041AC40 is strrchr).
+extern "C" int func_00318C60(cBXString* self, int ch)
+{
+    char* result = func_0041AC40(self->str, ch);
+    if (result == 0) {
+        return -1;
+    }
+    return result - self->str;
+}
 
 //100%
 int cBXString_FindFirstOf(cBXString* self, char ch)
@@ -471,7 +506,17 @@ int cBXString_FindFirstOf(cBXString* self, char ch)
     return result - self->str;
 }
 
-INCLUDE_ASM("bx/bxstring", func_00318CE8);
+extern "C" char* func_0041AD80(const char* s, const char* sub);
+
+// Index of sub at or after pos, or -1 (func_0041AD80 is strstr).
+extern "C" int func_00318CE8(cBXString* self, const char* sub, int pos)
+{
+    char* result = func_0041AD80(self->str + pos, sub);
+    if (result == 0) {
+        return -1;
+    }
+    return result - self->str;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern unsigned char D_00499C81[];
@@ -505,9 +550,24 @@ extern "C" void func_00318E68(cBXString* self, int idx, char ch)
 
 INCLUDE_ASM("bx/bxstring", func_00318EB8);
 
-INCLUDE_ASM("bx/bxstring", func_00318F20);
+extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str);
 
-INCLUDE_ASM("bx/bxstring", func_00318F58);
+// cBXString(char): a one-character string.
+extern "C" cBXString* func_00318F20(cBXString* self, char ch)
+{
+    char c = ch;
+    cBXString_InitFromCString(self, 1, &c);
+    return self;
+}
+
+extern "C" void func_00318F90(cBXString* self, cBXString* other, int pos, int len);
+
+// Mid(other, pos): everything from pos to the end.
+extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int pos)
+{
+    func_00318F90(self, other, pos, *(int*)(other->str - 8) - pos);
+    return self;
+}
 
 INCLUDE_ASM("bx/bxstring", func_00318F90);
 
