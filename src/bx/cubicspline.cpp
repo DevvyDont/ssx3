@@ -840,7 +840,13 @@ int func_00320078(void* self)
 
 extern "C" int func_0031ED60(void* self);
 
-INCLUDE_ASM("bx/cubicspline", func_00320098);
+// Whether p lies inside the block [base, base + size) (exclusive at base).
+int func_00320098(void* self, unsigned int p)
+{
+    unsigned int base = *(unsigned int*)((char*)self + 0x4);
+    unsigned int end = base + *(unsigned int*)((char*)self + 0xC);
+    return base < p && p < end;
+}
 
 //100%
 int func_003200C0(void* self)
