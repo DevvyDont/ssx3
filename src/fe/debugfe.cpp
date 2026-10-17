@@ -328,7 +328,129 @@ extern "C" void func_0017D688(sDebugFE17D688* self)
     func_0017DB18(self);
 }
 
-INCLUDE_ASM("fe/debugfe", func_0017D6F0);
+//100%
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE(void* self, void* other);
+extern "C" void func_0025C610(void* self);
+extern "C" void func_002CC3B8(void* a, void* b);
+extern "C" void func_002CC460(void* list);
+extern "C" void func_0017DA30(char* self, int a1);
+extern "C" void func_0017DE70(char* self);
+extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" const char* func_0025F150_D6F0(void* self, int i) __asm__("func_0025F150");
+extern "C" int func_0025F120(void* self);
+extern "C" void func_0025D800(void* self, int idx, int a2);
+extern "C" void func_001DB418_D6F0(void* menu, void* src) __asm__("func_001DB418");
+extern "C" bool func_0025F430(void* self);
+void func_0025FC28_D6F0(void* self, int a1) __asm__("func_0025FC28__FPvi");
+void func_0025CD28(void* self, int a1);
+extern char D_004A1320[];
+// Same global as D_004A3028; read through a const alias so the load can be scheduled above the state store.
+extern void* const D_004A3028_D6F0 __asm__("D_004A3028");
+
+static inline void PopAll_D6F0(char* self)
+{
+    int* list = (int*)(self + 0x8);
+    while (*list != 0)
+        func_002CC460(list);
+}
+
+extern "C" void func_0017D6F0(void* self_, void* msg_)
+{
+    char* self = (char*)self_;
+    int* msg = (int*)msg_;
+    switch (msg[0]) {
+    case 277:
+        PopAll_D6F0(self);
+        if (*(int*)((char*)D_004A28A8 + 0x74)) {
+            *(int*)(self + 0x4) = 0;
+            break;
+        }
+        *(int*)(self + 0x4) = 0x13;
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 258:
+        func_0017DA30(self, msg[2]);
+        break;
+    case 201:
+        if (*(int*)((char*)D_004A28A8 + 0x74)) {
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(const char**)((char*)D_004A28A8 + 0xC4));
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)((char*)D_004A28A8 + 0xC8));
+            func_0025C610(D_004A3028);
+            *(int*)(self + 0x4) = 5;
+            break;
+        }
+        *(int*)(self + 0x4) = 3;
+        func_002CC3B8(self + 0x8, self + 0x70);
+        break;
+    case 203: {
+        char* m = (char*)D_004A3028;
+        *(int*)(self + 0x4) = 5;
+        cBXString_cBXString4(m + 0x48, *(const char**)(self + 0x1C04));
+        cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)(self + 0x1C08));
+        func_0025C610(D_004A3028);
+        break;
+    }
+    case 212:
+        if (*(int*)((char*)D_004A28A8 + 0x74)) {
+            *(int*)(self + 0x4) = 7;
+            func_0025CD28(D_004A3028_D6F0, 0);
+            break;
+        }
+        goto menu;
+    case 218:
+        if (*(int*)((char*)D_004A28A8 + 0x74)) {
+            for (int i = 0; i < func_0025F120(D_004A3028); i++) {
+                if (func_004165A8(func_0025F150_D6F0(D_004A3028, i), D_004A1320) == 0) {
+                    func_0025D800(D_004A3028, i, 0);
+                    *(int*)(self + 0x4) = 11;
+                }
+            }
+            break;
+        }
+        goto none;
+    case 214:
+    case 216:
+    menu:
+        func_001DB418_D6F0(self + 0x74C, D_004A3028);
+        func_002CC3B8(self + 0x8, self + 0x74C);
+        *(int*)(self + 0x4) = 6;
+        break;
+    case 220:
+        if (func_0025F430(D_004A3028)) {
+            func_002CC3B8(self + 0x8, self + 0x1044);
+            *(int*)(self + 0x4) = 12;
+            break;
+        }
+    none:
+        func_002CC3B8(self + 0x8, self + 0xD2C);
+        *(int*)(self + 0x4) = 10;
+        break;
+    case 237:
+    case 240:
+    case 241:
+        *(int*)(self + 0x4) = 0x11;
+        PopAll_D6F0(self);
+        func_002CC3B8(self + 0x8, self + 0x604);
+        break;
+    case 239:
+        func_0017DE70(self);
+        *(int*)(self + 0x4) = 0x10;
+        break;
+    case 236:
+        if (*(int*)(self + 0x4) == 12) {
+            PopAll_D6F0(self);
+            *(int*)(self + 0x4) = 0xF;
+            cBXString_operatorE(self + 0x1C0C, msg + 2);
+            *(int*)(self + 0x1A44) = *(int*)(self + 0x1C0C);
+            func_002CC3B8(self + 0x8, self + 0x18C0);
+            break;
+        }
+        func_0025FC28_D6F0(D_004A3028, msg[2]);
+        break;
+    }
+}
+
 
 //100%
 extern void* D_004A28A8;
