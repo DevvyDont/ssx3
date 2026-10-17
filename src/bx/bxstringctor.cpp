@@ -1984,7 +1984,27 @@ extern "C" void func_0026ADF0(void* self)
     func_0026B880(self, p);
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
+//100%
+void cMemMan_free(void*);
+
+// Loads a path file: frees the old buffer, reads the new one and parses its header.
+extern "C" void func_0026AE70(void* self, char* name)
+{
+    int header;
+    void* old = *(void**)((char*)self + 0x48);
+    if (old) {
+        cMemMan_free(old);
+    } else {
+        func_0026ADA8(self, name);
+    }
+    *(void**)((char*)self + 0x48) = 0;
+    char* p = (char*)func_003E22F0(name, 0);
+    *(char**)((char*)self + 0x48) = p;
+    func_0026BA68_2(&header, p);
+    p += 4;
+    p += func_0026B410(self, p);
+    cPathSys_resolvePaths(self, p);
+}
 
 //100%
 void cMemMan_free(void*);
