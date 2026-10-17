@@ -714,3 +714,5 @@ extern "C" void* func_001A2F38(void* self)
 
 INCLUDE_ASM("fe/fereal", func_001A2F70);
 
+
+INCLUDE_ASM("fe/fereal", func_001A3050);

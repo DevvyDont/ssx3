@@ -382,6 +382,8 @@ extern "C" void* func_0039FAE8(void* self)
 }
 #endif
 
+INCLUDE_ASM("ui/uistatestack", func_0039FB08);
+
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FB30);
 #ifdef SKIP_ASM
@@ -531,6 +533,9 @@ extern "C" void func_0039FD38(void* self)
     }
 }
 #endif
+
+INCLUDE_ASM("ui/uistatestack", func_0039FD80);
+INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
 
 INCLUDE_ASM("ui/uistatestack", func_0039FE00);
 

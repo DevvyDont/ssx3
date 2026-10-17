@@ -61,6 +61,8 @@ struct sBEInterface {
 extern sBEInterface* D_005308A8[];
 extern int D_004A11F4;
 
+INCLUDE_ASM("be/be", func_0014DD48);
+
 //100%
 INCLUDE_ASM("be/be", cBE_getInterface__Fv);
 #ifdef SKIP_ASM
@@ -148,6 +150,8 @@ extern "C" void cBE_setState(int state)
     }
 }
 #endif
+
+INCLUDE_ASM("be/be", func_0014DEE8);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/be", func_0014DF08);

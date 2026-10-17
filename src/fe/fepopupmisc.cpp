@@ -270,6 +270,8 @@ int func_001DF378(void* self)
 extern void* D_0046D0D0[];
 extern "C" void* func_0039E390(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DF380);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF3B8__FPv);
 #ifdef SKIP_ASM
@@ -281,6 +283,8 @@ void* func_001DF3B8(void* self)
 #endif
 
 extern "C" void* func_0039E390(void*);
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DF3E0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF418__FPv);
@@ -306,6 +310,8 @@ extern "C" void func_001DF440(void* self, int flags)
     }
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DF470);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF4E8);
@@ -343,6 +349,8 @@ void func_001DF578(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DF580);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF5C0__FPv);
 #ifdef SKIP_ASM
@@ -353,6 +361,8 @@ void func_001DF5C0(void* self)
 
 extern void* D_0046AD48[];
 extern "C" void* func_001A85D0(void*);
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DF5C8);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF608__FPv);
@@ -376,6 +386,8 @@ int func_001DF630(void* self)
 extern void* D_0046AB28[];
 extern "C" void* func_001A85D0(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DF638);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF678__FPv);
 #ifdef SKIP_ASM
@@ -398,6 +410,8 @@ int func_001DF6A0(void* self)
 extern void* D_0046AA18[];
 extern "C" void* func_001A85D0(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DF6A8);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF6E8__FPv);
 #ifdef SKIP_ASM
@@ -411,6 +425,8 @@ void* func_001DF6E8(void* self)
 extern void* D_0046A908[];
 extern "C" void* func_001A85D0(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DF710);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF750__FPv);
 #ifdef SKIP_ASM
@@ -420,6 +436,9 @@ void* func_001DF750(void* self)
     return func_001A85D0(self);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF780);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF7C8);
@@ -437,6 +456,8 @@ extern "C" void func_001DF7C8(void* self, int flags)
     func_001A85D0_dtor(self, flags);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DF828);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF878);
@@ -468,6 +489,11 @@ int func_001DF8E0(void* self)
 extern void* D_0046A618[];
 extern "C" void* func_0039E390(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DF8E8);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF8F0);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF8F8);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF900);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF960__FPv);
 #ifdef SKIP_ASM
@@ -486,6 +512,16 @@ int func_001DF988(void* self)
     return 0x1;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9A8);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9B0);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9D0);
+INCLUDE_ASM("fe/fepopupmisc", func_001DF9D8);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA10);
@@ -507,6 +543,9 @@ extern "C" void func_001DFA10(void* self, int flags)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DFA70);
+INCLUDE_ASM("fe/fepopupmisc", func_001DFA78);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA88__FPv);
 #ifdef SKIP_ASM
@@ -515,6 +554,8 @@ int func_001DFA88(void* self)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DFA90);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAA0__FPv);
@@ -533,6 +574,8 @@ int func_001DFAA8(void* self)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DFAB0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAC0__FPv);
@@ -585,6 +628,8 @@ int func_001DFAE8(void* self)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DFAF0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFB28);
@@ -644,6 +689,8 @@ int func_001DFBB8(void* self, void* other)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DFBC0);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFBF8);
 #ifdef SKIP_ASM
@@ -701,6 +748,8 @@ int func_001DFC88(void* self, void* other)
     return *(int*)((char*)other + 0x0);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DFC90);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFCC8);
@@ -760,6 +809,8 @@ int func_001DFD58(void* self, void* other)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DFD60);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD98);
 #ifdef SKIP_ASM
@@ -817,6 +868,8 @@ int func_001DFE28(void* self, void* other)
     return *(int*)((char*)other + 0x0);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001DFE30);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE68);
@@ -876,6 +929,8 @@ int func_001DFEF8(void* self, void* other)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DFF00);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFF38);
 #ifdef SKIP_ASM
@@ -934,6 +989,11 @@ int func_001DFFC8(void* self, void* other)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001DFFD0);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0008);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0010);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0018);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0020__FPv);
 #ifdef SKIP_ASM
@@ -952,6 +1012,17 @@ int func_001E0028(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0030);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0038);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0040);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0048);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0098);
+INCLUDE_ASM("fe/fepopupmisc", func_001E00D0);
+INCLUDE_ASM("fe/fepopupmisc", func_001E00E0);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0110);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0130);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0178);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E01B0__FPv);
 #ifdef SKIP_ASM
@@ -961,6 +1032,8 @@ void* func_001E01B0(void* self)
     return func_0039E390(self);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E01D8);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0210);
@@ -980,6 +1053,8 @@ extern "C" void func_001E0210(void* self, int flags)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0268);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E02A0__FPv);
 #ifdef SKIP_ASM
@@ -992,6 +1067,8 @@ void* func_001E02A0(void* self)
 
 extern void* D_00469518[];
 extern "C" void* func_0039E390(void*);
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E02C8);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E02D0__FPv);
@@ -1134,6 +1211,8 @@ int func_001E0508(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0510);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0548__FPv);
 #ifdef SKIP_ASM
@@ -1144,6 +1223,9 @@ void* func_001E0548(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0570);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0578);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E05B0__FPv);
 #ifdef SKIP_ASM
@@ -1153,6 +1235,18 @@ void* func_001E05B0(void* self)
     return func_0039E390(self);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E05D8);
+INCLUDE_ASM("fe/fepopupmisc", func_001E05E0);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0610);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0628);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0648);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0658);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0678);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0698);
+INCLUDE_ASM("fe/fepopupmisc", func_001E06D0);
+INCLUDE_ASM("fe/fepopupmisc", func_001E06F0);
+INCLUDE_ASM("fe/fepopupmisc", func_001E0708);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0740);
@@ -1216,6 +1310,8 @@ void func_001E07B8(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E07C0);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E07F8__FPv);
 #ifdef SKIP_ASM
@@ -1226,6 +1322,8 @@ void* func_001E07F8(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0820);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0858__FPv);
 #ifdef SKIP_ASM
@@ -1235,6 +1333,8 @@ void* func_001E0858(void* self)
     return func_0039E390(self);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0880);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E08D0__FPv);
@@ -1247,6 +1347,8 @@ int func_001E08D0(void* self)
 
 extern void* D_00468F50[];
 extern "C" void* func_001A85D0(void*);
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E08D8);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0918__FPv);
@@ -1274,6 +1376,8 @@ void func_001E0948(void* self)
 {
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0950);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E09A0);
@@ -1306,6 +1410,8 @@ int func_001E0A00(void* self)
     return 0x1;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0A08);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0A50);
@@ -1343,6 +1449,8 @@ int func_001E0AB8(void* self)
 extern void* D_00468C10[];
 extern "C" void* func_001A85D0(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0AC0);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0B00__FPv);
 #ifdef SKIP_ASM
@@ -1352,6 +1460,8 @@ void* func_001E0B00(void* self)
     return func_001A85D0(self);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0B28);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0BA0__FPv);
@@ -1369,6 +1479,8 @@ int func_001E0BA8(void* self)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0BB0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C10__FPv);
@@ -1404,6 +1516,8 @@ int func_001E0C28(void* self)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0C30);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C78__FPv);
@@ -1449,6 +1563,8 @@ int func_001E0C98(void* self)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0CA0);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0CF8);
 #ifdef SKIP_ASM
@@ -1479,6 +1595,8 @@ int func_001E0D60(void* self)
 extern void* D_004685B0[];
 extern "C" void* func_001A85D0(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0D68);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0DA8__FPv);
 #ifdef SKIP_ASM
@@ -1501,6 +1619,8 @@ int func_001E0DD0(void* self)
 extern void* D_004684A0[];
 extern "C" void* func_001A85D0(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0DD8);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E18__FPv);
 #ifdef SKIP_ASM
@@ -1519,6 +1639,8 @@ int func_001E0E40(void* self)
     return 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0E48);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E88__FPv);
@@ -1583,6 +1705,8 @@ int func_001E0EF0(void* self)
 extern void* D_00468050[];
 extern "C" void* func_001BEE78(void*);
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E0EF8);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0F30__FPv);
 #ifdef SKIP_ASM
@@ -1601,6 +1725,8 @@ int func_001E0F58(void* self)
     return 0x1;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0F60);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0FB8__FPv);
@@ -1657,6 +1783,8 @@ extern "C" int func_001E0FC0(func_001E0FC0_cObj* self)
     return 1;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E0FF0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1040__FPv);
@@ -2203,6 +2331,8 @@ void* func_001E12D0(void* self)
 #endif
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E12F0);
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E1450);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E1458);
@@ -3065,6 +3195,8 @@ extern "C" int func_001E2BB8(int type, int all)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E2C60);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
 #ifdef SKIP_ASM
@@ -3132,6 +3264,8 @@ extern "C" int func_001E2D58(int v, int i)
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E2D98);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
 #ifdef SKIP_ASM
@@ -3157,6 +3291,8 @@ extern "C" int func_001E2DC0(int idx)
     return r - 1;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E2E80);
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E2EA0);
 
@@ -3394,6 +3530,9 @@ extern "C" int func_001E3408()
 }
 #endif
 
+INCLUDE_ASM("fe/fepopupmisc", func_001E3460);
+INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
+
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3510);
 #ifdef SKIP_ASM
@@ -3435,6 +3574,8 @@ extern "C" int func_001E3570(void)
     return func_00147580(cBE_getInterface_Fv(cBE_getBE(), 1), 0) == 0;
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E35F0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3620);
@@ -3611,6 +3752,8 @@ extern "C" void func_001E3A78(int a, int b)
     func_00147A30(cBE_getInterface_Fv(cBE_getBE(), 1), 0, a, b);
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E3AC8);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3C00);
@@ -4755,6 +4898,8 @@ extern "C" void func_001E5800(void* self, void* a1, unsigned int msg)
     }
 }
 #endif
+
+INCLUDE_ASM("fe/fepopupmisc", func_001E58E0);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5A18);

@@ -18,6 +18,8 @@ void* cMCOverlayManager_getManager()
 }
 #endif
 
+INCLUDE_ASM("movie/movieplayer", func_0023C850);
+
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C860);
 #ifdef SKIP_ASM
@@ -42,6 +44,10 @@ extern "C" int func_0023C898(void* self)
     return *(int*)((char*)self + 0x130) == 1;
 }
 #endif
+
+INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
+INCLUDE_ASM("movie/movieplayer", func_0023C8B8);
+INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8D0);
@@ -510,6 +516,8 @@ extern "C" void func_0023D660(void* self)
 }
 #endif
 
+INCLUDE_ASM("movie/movieplayer", func_0023D7A8);
+
 INCLUDE_ASM("movie/movieplayer", func_0023D7D8);
 
 //100%
@@ -844,6 +852,8 @@ extern "C" void func_0023E820(void* self)
     }
 }
 #endif
+
+INCLUDE_ASM("movie/movieplayer", func_0023E8A0);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023EA30);
@@ -2706,6 +2716,8 @@ extern "C" void func_00240F30(void* self)
 }
 #endif
 
+INCLUDE_ASM("movie/movieplayer", func_00240FB0);
+
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241000);
 #ifdef SKIP_ASM
@@ -2727,6 +2739,8 @@ extern "C" void func_00241000(void* self, int a, int b, int c)
 }
 #endif
 
+INCLUDE_ASM("movie/movieplayer", func_00241050);
+
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002410A0);
 #ifdef SKIP_ASM
@@ -2737,6 +2751,8 @@ extern "C" void func_002410A0(void* self)
     vt[12].fn((char*)obj + vt[12].delta);
 }
 #endif
+
+INCLUDE_ASM("movie/movieplayer", func_002410D0);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241138);
@@ -3112,6 +3128,9 @@ extern "C" void func_00241540(char* self)
 }
 #endif
 
+INCLUDE_ASM("movie/movieplayer", func_00241678);
+INCLUDE_ASM("movie/movieplayer", func_002416C0);
+
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceDisplayString);
 #ifdef SKIP_ASM
@@ -3251,6 +3270,8 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* self, int idx, ch
     }
 }
 #endif
+
+INCLUDE_ASM("movie/movieplayer", func_00241928);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002419D8);
@@ -3476,6 +3497,8 @@ extern "C" void func_00241D40(void* self, int mode, void* buf)
     }
 }
 #endif
+
+INCLUDE_ASM("movie/movieplayer", func_00241DC0);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241DC8);

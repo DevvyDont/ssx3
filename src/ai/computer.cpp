@@ -659,6 +659,9 @@ extern "C" int func_0010D8F8(void* self)
 }
 #endif
 
+INCLUDE_ASM("ai/computer", func_0010D938);
+INCLUDE_ASM("ai/computer", func_0010D990);
+
 //100%
 INCLUDE_ASM("ai/computer", func_0010D9E8);
 #ifdef SKIP_ASM
@@ -1481,6 +1484,8 @@ extern "C" void func_0010F878(sComputer_0010F878* self)
 
 INCLUDE_ASM("ai/computer", func_0010F998);
 
+INCLUDE_ASM("ai/computer", func_0010FBF0);
+
 //100%
 INCLUDE_ASM("ai/computer", func_0010FC30);
 #ifdef SKIP_ASM
@@ -1560,6 +1565,9 @@ INCLUDE_ASM("ai/computer", func_00111630);
 
 INCLUDE_ASM("ai/computer", func_00111728);
 
+INCLUDE_ASM("ai/computer", func_00111830);
+INCLUDE_ASM("ai/computer", func_00111860);
+
 //100%
 INCLUDE_ASM("ai/computer", func_00111890);
 #ifdef SKIP_ASM
@@ -1610,6 +1618,9 @@ extern "C" void func_00111890(void* self)
 #endif
 
 extern "C" void* func_002E23E0(void*);
+
+INCLUDE_ASM("ai/computer", func_00111948);
+INCLUDE_ASM("ai/computer", func_001119F8);
 
 //100%
 INCLUDE_ASM("ai/computer", func_00111AA0__FPv);

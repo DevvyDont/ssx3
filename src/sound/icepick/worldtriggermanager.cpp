@@ -278,6 +278,8 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
 }
 #endif
 
+INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B40);
+
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B90);
 #ifdef SKIP_ASM
@@ -397,6 +399,8 @@ extern "C" void func_002B5E68(void* self)
     }
 }
 #endif
+
+INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5ED8);
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
@@ -774,6 +778,9 @@ void func_002B6900(void* self)
 }
 #endif
 
+INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6918);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6950);
+
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6988);
 #ifdef SKIP_ASM
@@ -812,6 +819,8 @@ extern "C" int func_002B69B8(void* self, void* src, void* state)
     return r;
 }
 #endif
+
+INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A38);
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A68);
@@ -1222,6 +1231,8 @@ extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, 
 #endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
+
+INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83B8);
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83F8);

@@ -281,7 +281,14 @@ extern "C" int func_00282450(void* self, int a1)
 }
 #endif
 
+INCLUDE_ASM("scripter/bxscriptengine", func_00282498);
+INCLUDE_ASM("scripter/bxscriptengine", func_00282500);
+INCLUDE_ASM("scripter/bxscriptengine", func_00282510);
+
 INCLUDE_ASM("scripter/bxscriptengine", func_00282540);
+
+INCLUDE_ASM("scripter/bxscriptengine", func_00282698);
+INCLUDE_ASM("scripter/bxscriptengine", func_002826B8);
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002826D8);
@@ -321,6 +328,8 @@ extern "C" void func_00282720(void* self, int a1)
 }
 #endif
 
+INCLUDE_ASM("scripter/bxscriptengine", func_00282790);
+
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282798);
 #ifdef SKIP_ASM
@@ -339,6 +348,8 @@ extern "C" int func_00282798(void* self, int a1)
     return *(int*)(s + 0x4);
 }
 #endif
+
+INCLUDE_ASM("scripter/bxscriptengine", func_002827F8);
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282838);
@@ -565,6 +576,8 @@ int func_00282BB0(void* self, void* a1)
     return *(int*)((char*)*(void**)((char*)a1 + 0xc) + 0xc);
 }
 #endif
+
+INCLUDE_ASM("scripter/bxscriptengine", func_00282BC0);
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282BE0__FPvT0);
