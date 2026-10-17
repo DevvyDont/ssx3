@@ -54,7 +54,46 @@ extern "C" int func_003A9890(cWorldView* self, unsigned int i)
     return *(int*)((char*)self + (i << 3) + 0x14) == 0;
 }
 
-INCLUDE_ASM("world/worldview", func_003A98C8);
+//100%
+struct sWvSlot_98C8 {
+    int state;
+    float t;
+};
+
+struct sWvTbl_98C8 {
+    char pad0[8];
+    unsigned int count; // 0x8
+};
+
+struct sWv_98C8 {
+    int pad0;
+    sWvTbl_98C8* tbl;     // 0x4
+    char pad8[0xC];
+    sWvSlot_98C8 slots[1]; // 0x14
+};
+
+extern "C" int func_003A98C8(sWv_98C8* self, unsigned int idx, float t)
+{
+    if (self->tbl != 0 && idx < self->tbl->count) {
+        self->slots[idx].t = t;
+        switch (self->slots[idx].state) {
+        case 0:
+            self->slots[idx].state = 1;
+            break;
+        case 3:
+            self->slots[idx].state = 5;
+            break;
+        case 4:
+            return 0;
+        case 1:
+        case 2:
+        case 5:
+        case 6:
+            break;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM("world/worldview", func_003A9958);
 
