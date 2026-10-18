@@ -101,7 +101,70 @@ extern "C" void func_00154A58(int rider, int a)
 
 INCLUDE_ASM("be/beintscore", func_00154AB8);
 
-INCLUDE_ASM("be/beintscore", func_00154EE8);
+//100%
+// Records the rider's race result: stores it on the profile slot, reports the event, and posts the medal (gold/silver/bronze or none) when the time or score beats the course target.
+struct sGame54EE8 {
+    char pad_0x0[0x40];
+    int course;         // 0x40
+    char pad_0x44[4];
+    signed char f48;    // 0x48
+    signed char f49;    // 0x49
+};
+extern sGame54EE8 D_005305B0_54EE8 __asm__("D_005305B0");
+extern int D_0043D950[];
+extern signed char D_00535C12[];
+struct sCourse54EE8 { int id; char pad[0x60]; };
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+signed char cBELibrary_getCharacterID(int index);
+extern "C" int func_00155328(void* self, int a);
+extern "C" void func_001E25D8(int mode, int course, int a);
+extern "C" void func_001E1EB8();
+extern "C" void func_001E1550();
+extern "C" int func_001456A0(void* self, int idx, int mode);
+extern "C" void func_001591E8(void* self, int profile, int c, int mode, int course, int medal);
+
+extern "C" void func_00154EE8(char* self, int rider, int result, int target)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    if (profile >= 2)
+        return;
+    *(int*)(self + profile * 0xB0 + 0xCC) = result;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int c = cBELibrary_getCharacterID(rider);
+    int course = ((sCourse54EE8*)D_0043D950)[D_005305B0_54EE8.course].id;
+    int mode = D_00535C12[0];
+    if (course == 0x16)
+        course = 0;
+    int medal = func_00155328(self, result);
+    if (mode == 4 || mode == 5)
+        medal = result == 0 ? 1 : -1;
+    if (D_005305B0_54EE8.f49 == 0)
+        func_001E25D8(mode, course, result);
+    if (medal == -1)
+        return;
+    if (D_005305B0_54EE8.f49 == 0)
+    {
+        func_001E1EB8();
+        if (D_005305B0_54EE8.f49 == 0 && mode != 4 && mode != 5)
+            func_001E1550();
+    }
+    void* score = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    if (D_005305B0_54EE8.f49 != 0 || D_005305B0_54EE8.f48 == 4)
+        return;
+    int best = func_001456A0(iface, course, mode);
+    if (best != -1)
+    {
+        if (mode == 0 || mode == 4)
+        {
+            if (!(best * 60 < target))
+                medal = 0;
+        }
+        else if (!(target < best))
+            medal = 0;
+    }
+    func_001591E8(score, profile, c, mode, course, medal);
+}
 
 //100%
 struct sScoreEntry_001550E8 {
