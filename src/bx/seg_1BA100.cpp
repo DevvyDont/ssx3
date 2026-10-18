@@ -945,7 +945,45 @@ extern "C" void func_002BB140(void *self, int flags) {
     }
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BB1D0);
+//100%
+// Frees the old 12-byte entry array (as func_002BB140 does) and allocates n fresh entries
+// behind a 16-byte count header.
+void* operator_new_B1D0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00483C68[];
+extern "C" void* func_002BB370(void* arg0);
+extern "C" void func_002BB1D0(void *self, int n) {
+    S12_B140 *arr = *(S12_B140**)((char*)self + 4);
+    S12_B140 **slot;
+    char *mem;
+    S12_B140 *a;
+    if (arr != 0) {
+        S12_B140 *p = arr + *(int*)((char*)arr - 0x10);
+        if (arr != p) {
+            do {
+                p--;
+                func_002BB390(p, 0);
+            } while (*(S12_B140**)((char*)self + 4) != p);
+        }
+        cMemMan_free((char*)*(S12_B140**)((char*)self + 4) - 0x10);
+    }
+    *(int*)self = n;
+    slot = (S12_B140**)((char*)self + 4);
+    mem = (char*)operator_new_B1D0(n * sizeof(S12_B140) + 0x10, D_00483C68, 0x20000000, 0);
+    a = (S12_B140*)(mem + 0x10);
+    *(int*)mem = n;
+    {
+        S12_B140 *e = a;
+        int k = n - 1;
+        if (n != 0) {
+            do {
+                func_002BB370(e);
+                k--;
+                e++;
+            } while (k != -1);
+        }
+    }
+    *slot = a;
+}
 
 //100%
 extern "C" void func_002BB3F0(void *);
