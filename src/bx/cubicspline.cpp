@@ -560,7 +560,43 @@ INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
 
 INCLUDE_ASM("bx/cubicspline", func_0031F4E8);
 
-INCLUDE_ASM("bx/cubicspline", func_0031F718);
+//100%
+// dlmalloc calloc: allocate n * size bytes and clear them (unrolled for small chunks).
+extern "C" void func_003E6448(void* p, int v, int n);
+
+extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int size)
+{
+    unsigned int* d = (unsigned int*)func_0031E818(ms, n * size);
+    if (d != 0) {
+        unsigned int head = d[-1];
+        if (!(head & 2)) {
+            unsigned int clearsize = (head & ~3) - 4;
+            unsigned int nclears = clearsize / 4;
+            if (nclears > 9) {
+                func_003E6448(d, 0, clearsize);
+            } else {
+                d[0] = 0;
+                d[1] = 0;
+                d[2] = 0;
+                if (nclears > 4) {
+                    d[3] = 0;
+                    d[4] = 0;
+                    if (nclears > 6) {
+                        d[5] = 0;
+                        d[6] = 0;
+                        if (nclears > 8) {
+                            d[7] = 0;
+                            d[8] = 0;
+                        }
+                    }
+                }
+            }
+        } else {
+            func_003E6448(d, 0, (head & ~3) - 8);
+        }
+    }
+    return d;
+}
 
 extern "C" int func_0031ED60(void* self);
 
