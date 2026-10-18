@@ -90,6 +90,13 @@ or any disc file.
     of a field already waits until its result is due. The 4,000 recorded VU1 runs still give bit-identical output,
     with 46% fewer instructions. In a race on a 4-core machine the game thread went from busy nearly all the time
     to about two thirds of it, and now waits on the two GS workers;
+  - the GS rasterizer settling a draw's texture and pixel setup once per primitive instead of for every pixel: the
+    wrap modes, texel format, frame and depth formats and blend inputs are worked out before the pixel loop, filtered
+    texels are blended four channels at a time with SSE2, and each palette entry is converted once per CLUT load
+    rather than for every texel. A primitive whose texture shares no VRAM page with the buffers it draws to reads its
+    texels straight from VRAM instead of copying each 8 KiB page first. The 8,000 recorded race packets replay to the
+    same VRAM, also with round-toward-zero and on several workers, with 22% fewer instructions. A race on a 4-core
+    machine went from about 8 to about 10 frames a second;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -177,7 +184,7 @@ shadows and the course draw with the right textures, and the race plays from the
 Sound plays through the PC's audio device: the music, and the radio track shown at the start of a race. The game
 makes sound only as fast as it runs, so while it runs slower than the PS2 the sound comes in short runs with gaps.
 
-It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 8 frames a second. There the two GS
+It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 10 frames a second. There the two GS
 worker threads set the pace: the game thread waits on them about a third of the time.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
