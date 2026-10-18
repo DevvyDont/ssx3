@@ -75,7 +75,8 @@ struct cRider {
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to func_00117540(mMetrix, v) (func_0011D390)
     /* 0x0DC */ int unk_0DC; // cleared on reset (func_0011D390)
     /* 0x0E0 */ int unk_0E0; // cleared on reset (func_0011D390)
-    /* 0x0E4 */ char unk_0E4[0xC];
+    /* 0x0E4 */ char unk_0E4[0x8];
+    /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
     /* 0x0F0 */ int unk_0F0; // cleared on reset (func_0011D390)
     /* 0x0F4 */ int unk_0F4; // cleared on reset (func_0011D390)
     /* 0x0F8 */ int unk_0F8; // set to -1 on reset (func_0011D390)
@@ -170,7 +171,8 @@ struct cRider {
     /* 0x6D0 */ void* mScriptObjRiderVtbl; // _vt$6cRider$15cScriptObjRider; start of that base
     /* 0x6D4 */ char unk_6D4[0x4];
     /* 0x6D8 */ void* unk_6D8;
-    /* 0x6DC */ char unk_6DC[0xC]; // cScriptObject data; its vptr follows
+    /* 0x6DC */ char unk_6DC[0x8]; // cScriptObject data; its vptr follows
+    /* 0x6E4 */ int unk_6E4; // count or gate in the cScriptObject data: <= 0 makes func_00123F38 return mPosition unchanged
     /* 0x6E8 */ void* mScriptObjectVtbl; // _vt$6cRider$13cScriptObject
     /* 0x6EC */ char unk_6EC[0x14];
     /* 0x700 */ t4Matrix unk_700; // start transform used by a VU0 matrix*vector (func_00123640)
@@ -261,6 +263,7 @@ struct cRider {
 CHECK_OFFSET(cRider, unk_0D8, 0xD8);
 CHECK_OFFSET(cRider, unk_0DC, 0xDC);
 CHECK_OFFSET(cRider, unk_0E0, 0xE0);
+CHECK_OFFSET(cRider, unk_0EC, 0xEC);
 CHECK_OFFSET(cRider, unk_0F0, 0xF0);
 CHECK_OFFSET(cRider, unk_0F4, 0xF4);
 CHECK_OFFSET(cRider, unk_0F8, 0xF8);
@@ -338,6 +341,7 @@ CHECK_OFFSET(cRider, mVtbl, 0x6C0);
 CHECK_OFFSET(cRider, mScriptObjRiderVtbl, 0x6D0);
 CHECK_OFFSET(cRider, unk_6D8, 0x6D8);
 CHECK_OFFSET(cRider, unk_6DC, 0x6DC);
+CHECK_OFFSET(cRider, unk_6E4, 0x6E4);
 CHECK_OFFSET(cRider, mScriptObjectVtbl, 0x6E8);
 CHECK_OFFSET(cRider, unk_700, 0x700);
 CHECK_OFFSET(cRider, unk_740, 0x740);
