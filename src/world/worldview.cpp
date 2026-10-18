@@ -97,7 +97,13 @@ extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
 #endif
 
 INCLUDE_ASM("world/worldview", func_003A9A48);
+//100%
 INCLUDE_ASM("world/worldview", func_003A9A90);
+#ifdef SKIP_ASM
+extern "C" int func_003A9A90(int arg0) {
+    return arg0 + 0x220;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003A9A98);

@@ -128,8 +128,20 @@ extern "C" void func_002C2088(void* self, func_002C2088_sOut* out, int* count, i
 #endif
 
 INCLUDE_ASM("worldpainter/quadtree", func_002C2178);
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2200);
+#ifdef SKIP_ASM
+extern "C" void func_002C2200(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2208);
+#ifdef SKIP_ASM
+extern "C" void func_002C2208(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2210);
@@ -401,22 +413,82 @@ extern "C" void func_002C2868(char* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C28A0);
+#ifdef SKIP_ASM
+extern "C" void func_003E4E98();
+
+extern "C" void func_002C28A0(void) {
+    func_003E4E98();
+}
+#endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C28C0);
 INCLUDE_ASM("worldpainter/quadtree", func_002C28F8);
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2918);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574();
+
+extern "C" int func_002C2918(int arg0) {
+    func_003E6574();
+    return arg0;
+}
+#endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C2940);
 INCLUDE_ASM("worldpainter/quadtree", func_002C29D0);
 INCLUDE_ASM("worldpainter/quadtree", func_002C2AA8);
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B08);
+#ifdef SKIP_ASM
+extern "C" void func_003E5398();
+
+extern "C" void func_002C2B08(void) {
+    func_003E5398();
+}
+#endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B28);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B68);
+#ifdef SKIP_ASM
+extern "C" void func_002C28F8(int);
+extern "C" void func_003E56E0();
+
+extern "C" void func_002C2B68(int arg0) {
+    func_003E56E0();
+    func_002C28F8(arg0);
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B98);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_lock();
+
+extern "C" void func_002C2B98(void) {
+    MUTEX_lock();
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2BB8);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_unlock();
+
+extern "C" void func_002C2BB8(void) {
+    MUTEX_unlock();
+}
+#endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C2BD8);
 INCLUDE_ASM("worldpainter/quadtree", func_002C2D30);
 INCLUDE_ASM("worldpainter/quadtree", func_002C2D68);
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2D88);
+#ifdef SKIP_ASM
+extern "C" void func_003E6574();
+
+extern "C" int func_002C2D88(int arg0) {
+    func_003E6574();
+    return arg0;
+}
+#endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C2DB0);
 INCLUDE_ASM("worldpainter/quadtree", func_002C2E40);
 INCLUDE_ASM("worldpainter/quadtree", func_002C2E78);

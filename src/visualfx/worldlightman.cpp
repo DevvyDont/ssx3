@@ -846,12 +846,52 @@ extern "C" void func_002F7B78(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
+#ifdef SKIP_ASM
+extern "C" void func_002EF6A0();
+
+extern "C" void func_002F7B80(void) {
+    func_002EF6A0();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA0);
+#ifdef SKIP_ASM
+extern "C" void func_002F7BA0(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
+#ifdef SKIP_ASM
+extern "C" void func_002F1148();
+
+extern "C" void func_002F7BA8(void) {
+    func_002F1148();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BC8);
+#ifdef SKIP_ASM
+extern "C" int func_002F7BC8(int arg0) {
+    return arg0 + 4;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BD0);
+#ifdef SKIP_ASM
+extern "C" void func_002F7BD0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x6490))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BD8);
+#ifdef SKIP_ASM
+extern "C" void func_002F7BD8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x6494))) = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BE0);
@@ -902,47 +942,367 @@ void func_002F7C30(void* self)
 #endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C70);
+#ifdef SKIP_ASM
+extern int D_004A3A30;
+
+extern "C" int *func_002F7C70(void) {
+    return &D_004A3A30;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C80);
+#ifdef SKIP_ASM
+extern int D_004A3A34;
+
+extern "C" int *func_002F7C80(void) {
+    return &D_004A3A34;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C90);
+#ifdef SKIP_ASM
+extern int D_004A3A38;
+
+extern "C" int *func_002F7C90(void) {
+    return &D_004A3A38;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7CA0);
+#ifdef SKIP_ASM
+extern int D_004A3A3C;
+
+extern "C" int *func_002F7CA0(void) {
+    return &D_004A3A3C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7CB0);
+#ifdef SKIP_ASM
+extern int D_004A3A40;
+
+extern "C" int *func_002F7CB0(void) {
+    return &D_004A3A40;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7CC0);
+#ifdef SKIP_ASM
+extern int D_004A3A44;
+
+extern "C" int *func_002F7CC0(void) {
+    return &D_004A3A44;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7CD0);
+#ifdef SKIP_ASM
+extern int D_004A3A48;
+
+extern "C" int *func_002F7CD0(void) {
+    return &D_004A3A48;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7CE0);
+#ifdef SKIP_ASM
+extern int D_004A3A4C;
+
+extern "C" int *func_002F7CE0(void) {
+    return &D_004A3A4C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7CF0);
+#ifdef SKIP_ASM
+extern int D_004A3A50;
+
+extern "C" int *func_002F7CF0(void) {
+    return &D_004A3A50;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D00);
+#ifdef SKIP_ASM
+extern int D_004A3A54;
+
+extern "C" int *func_002F7D00(void) {
+    return &D_004A3A54;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D10);
+#ifdef SKIP_ASM
+extern int D_004A3A58;
+
+extern "C" int *func_002F7D10(void) {
+    return &D_004A3A58;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D20);
+#ifdef SKIP_ASM
+extern int D_004A3A5C;
+
+extern "C" int *func_002F7D20(void) {
+    return &D_004A3A5C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D30);
+#ifdef SKIP_ASM
+extern int D_004A3A60;
+
+extern "C" int *func_002F7D30(void) {
+    return &D_004A3A60;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D40);
+#ifdef SKIP_ASM
+extern int D_004A3A64;
+
+extern "C" int *func_002F7D40(void) {
+    return &D_004A3A64;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D50);
+#ifdef SKIP_ASM
+extern int D_004A3A68;
+
+extern "C" int *func_002F7D50(void) {
+    return &D_004A3A68;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D60);
+#ifdef SKIP_ASM
+extern int D_004A3A6C;
+
+extern "C" int *func_002F7D60(void) {
+    return &D_004A3A6C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D70);
+#ifdef SKIP_ASM
+extern int D_004A3A70;
+
+extern "C" int *func_002F7D70(void) {
+    return &D_004A3A70;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D80);
+#ifdef SKIP_ASM
+extern int D_004A3A74;
+
+extern "C" int *func_002F7D80(void) {
+    return &D_004A3A74;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D90);
+#ifdef SKIP_ASM
+extern int D_004A3A78;
+
+extern "C" int *func_002F7D90(void) {
+    return &D_004A3A78;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DA0);
+#ifdef SKIP_ASM
+extern int D_004A3A7C;
+
+extern "C" int *func_002F7DA0(void) {
+    return &D_004A3A7C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DB0);
+#ifdef SKIP_ASM
+extern int D_004A3A80;
+
+extern "C" int *func_002F7DB0(void) {
+    return &D_004A3A80;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DC0);
+#ifdef SKIP_ASM
+extern int D_004A3A84;
+
+extern "C" int *func_002F7DC0(void) {
+    return &D_004A3A84;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DD0);
+#ifdef SKIP_ASM
+extern int D_004A3A88;
+
+extern "C" int *func_002F7DD0(void) {
+    return &D_004A3A88;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DE0);
+#ifdef SKIP_ASM
+extern int D_004A3A8C;
+
+extern "C" int *func_002F7DE0(void) {
+    return &D_004A3A8C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DF0);
+#ifdef SKIP_ASM
+extern int D_004A3A90;
+
+extern "C" int *func_002F7DF0(void) {
+    return &D_004A3A90;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E00);
+#ifdef SKIP_ASM
+extern int D_004A3A94;
+
+extern "C" int *func_002F7E00(void) {
+    return &D_004A3A94;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E10);
+#ifdef SKIP_ASM
+extern int D_004A3A98;
+
+extern "C" int *func_002F7E10(void) {
+    return &D_004A3A98;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E20);
+#ifdef SKIP_ASM
+extern int D_004A3A9C;
+
+extern "C" int *func_002F7E20(void) {
+    return &D_004A3A9C;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E30);
+#ifdef SKIP_ASM
+extern int D_004A3AA0;
+
+extern "C" int *func_002F7E30(void) {
+    return &D_004A3AA0;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E40);
+#ifdef SKIP_ASM
+extern int D_004A3AA4;
+
+extern "C" int *func_002F7E40(void) {
+    return &D_004A3AA4;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E50);
+#ifdef SKIP_ASM
+extern int D_004A3AA8;
+
+extern "C" int *func_002F7E50(void) {
+    return &D_004A3AA8;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E60);
+#ifdef SKIP_ASM
+extern int D_004A3AAC;
+
+extern "C" int *func_002F7E60(void) {
+    return &D_004A3AAC;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E70);
+#ifdef SKIP_ASM
+extern "C" void func_002D9B40();
+
+extern "C" void func_002F7E70(void) {
+    func_002D9B40();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E90);
+#ifdef SKIP_ASM
+extern int D_004A3AB8;
+
+extern "C" int func_002F7E90(void) {
+    return D_004A3AB8;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E98);
+#ifdef SKIP_ASM
+extern int D_004A3AC4;
+
+extern "C" int func_002F7E98(void) {
+    return D_004A3AC4;
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EA0);
+#ifdef SKIP_ASM
+extern "C" void func_002F7EA0(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EA8);
+#ifdef SKIP_ASM
+extern "C" void func_002E6640();
+
+extern "C" void func_002F7EA8(void) {
+    func_002E6640();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EC8);
+#ifdef SKIP_ASM
+extern "C" void func_002F7EC8(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
+#ifdef SKIP_ASM
+extern "C" void func_002EADC0__FPv();
+
+extern "C" void func_002F7ED0(void) {
+    func_002EADC0__FPv();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EF0);
+#ifdef SKIP_ASM
+extern "C" void func_002F7EF0(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EF8);
+#ifdef SKIP_ASM
+extern "C" void func_002F7EF8(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7F00);
@@ -1004,12 +1364,48 @@ extern "C" void func_002F7F90(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FC0);
+#ifdef SKIP_ASM
+extern "C" int func_002F7FC0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xA0)));
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FC8);
+#ifdef SKIP_ASM
+extern "C" void func_002F7FC8(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FD0);
+#ifdef SKIP_ASM
+extern "C" void func_002F7FD0(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FD8);
+#ifdef SKIP_ASM
+extern "C" int func_002F7FD8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x44)));
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FE0);
+#ifdef SKIP_ASM
+extern "C" int func_002F7FE0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x64)));
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FE8);
+#ifdef SKIP_ASM
+extern "C" int func_002F7FE8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x78)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FF0__FPv);
@@ -1020,7 +1416,13 @@ int func_002F7FF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FF8);
+#ifdef SKIP_ASM
+extern "C" int func_002F7FF8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x60)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8000);
@@ -1135,8 +1537,20 @@ void* func_002F81B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81D8);
+#ifdef SKIP_ASM
+extern "C" int func_002F81D8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81E0);
+#ifdef SKIP_ASM
+extern "C" void func_002F81E0(int *arg0) {
+    *arg0 = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81F0);

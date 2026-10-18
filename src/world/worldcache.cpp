@@ -764,7 +764,13 @@ extern "C" void func_003A84F8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8510);
+#ifdef SKIP_ASM
+extern "C" int func_003A8510(int arg0, int arg1) {
+    return (*(int *)((char*)(((arg1 * 0x18) + arg0)) + (0x3F4)));
+}
+#endif
 
 INCLUDE_ASM("world/worldcache", func_003A8528);
 
