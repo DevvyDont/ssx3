@@ -283,10 +283,6 @@ extern "C" void func_00275D90(int* self, int flags)
     }
 }
 
-INCLUDE_ASM("scripter/datamanager", func_00275DD8);
-
-//100%
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00277450(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
@@ -309,6 +305,36 @@ struct sDmCmd5ED0 {
     int a6;         // 0x18
 };
 
+//100%
+extern "C" int func_00275DD8(char* self, int a1, int a2)
+{
+    if (func_00283C58(self + 0xC) == 0) {
+        sDmCmd5ED0 cmd;
+        cmd.a1 = a1;
+        cmd.id = -1;
+        cmd.a2 = a2;
+        cmd.field_0xC = -1;
+        cmd.a4 = -1;
+        cmd.a5 = -1;
+        cmd.a6 = -1;
+        void* list = self + 0xC;
+        func_00283C80(list, &cmd);
+        if (*(int*)(self + 0xA4) != 0 && *(int*)(self + 0xBC) < 0) {
+            *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+            if (*(int*)(self + 0xA4) == 3) {
+                int ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+                if (ok) {
+                    func_002776E0(self);
+                }
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
+//100%
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int a5, int a6)
 {
     if (func_00283C58(self + 0xC) != 0) {
@@ -407,7 +433,31 @@ extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
     return 0;
 }
 
-INCLUDE_ASM("scripter/datamanager", func_00276198);
+//100%
+extern "C" int func_00283DC0(void* self, void* out);
+
+extern "C" int func_00276198(char* self, char* other)
+{
+    int n = func_00283D28_count(self + 0xC);
+    if (*(int*)(other + 0xA4) == 3) {
+        return 0;
+    }
+    if (func_00283D28_count(other + 0xC) != 0) {
+        sDmCmd5ED0 cmd;
+        while (func_00283DC0(other + 0xC, &cmd) != 0) {
+            func_00283C80(self + 0xC, &cmd);
+        }
+        func_00276868(other, 1);
+        if (*(int*)(self + 0xA4) == 0) {
+            return 1;
+        }
+        if (*(int*)(self + 0xBC) >= 0) {
+            return 1;
+        }
+        *(int*)(self + 0xBC) = func_00277450(self, n, 0);
+    }
+    return 1;
+}
 
 //100%
 extern "C" void func_00276868(void* self, int a1);

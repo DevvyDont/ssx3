@@ -276,7 +276,23 @@ extern "C" int func_00282450(void* self, int a1)
     return 0;
 }
 
-INCLUDE_ASM("scripter/bxscriptengine", func_00282498);
+void func_00274808(void* self, float t);
+extern "C" int func_00282498(void* self, int id, float t)
+{
+    if (t < 0.01f) {
+        return 0;
+    }
+    char* e = (char*)func_00282CB0(self, id);
+    if (e == 0) {
+        return 0;
+    }
+    if (*(int*)(e + 0x4) == 1) {
+        *(float*)(e + 0x18) = t;
+        return 1;
+    }
+    func_00274808(*(void**)e, t);
+    return 1;
+}
 
 //100%
 extern "C" int func_00282500(void* self, void* p, int v)

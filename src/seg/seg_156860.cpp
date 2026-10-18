@@ -1098,13 +1098,17 @@ struct Conn_7BD8 {
     char pad8[0x5C - 0x8];
     int unk5C;                      // 0x5C
     int unk60;                      // 0x60
-    char pad64[0x84 - 0x64];
+    char pad64[0x6C - 0x64];
+    int unk6C;                      // 0x6C
+    char pad70[0x84 - 0x70];
     int unk84;                      // 0x84
     char pad88[0x94 - 0x88];
     int unk94;                      // 0x94
     char pad98[0xA8 - 0x98];
     int unkA8;                      // 0xA8
-    char padAC[0x144 - 0xAC];
+    char padAC[0x134 - 0xAC];
+    Packet_7BD8* pending;           // 0x134
+    char pad138[0x144 - 0x138];
     PacketQueue_7BD8 queues[2];     // 0x144
 };
 
@@ -1137,7 +1141,33 @@ extern "C" int func_00257BD8(void* self, int ch, int dst, int unused)
     return 0;
 }
 
-INCLUDE_ASM("seg/seg_156860", func_00257CD8);
+//100%
+// PORT: func_00258188 takes no arguments; the caller passes the connection anyway.
+Packet_7BD8* func_00258188_7CD8(Conn_7BD8* c) __asm__("func_00258188");
+extern "C" void operator_delete__FPi_7CD8(void *) __asm__("operator_delete__FPi");
+
+static inline int queueFull_7CD8(PacketQueue_7BD8* q)
+{
+    return q->wr - q->rd >= 0x1F;
+}
+
+// Moves received packets into their channel queue. A packet that cannot be
+// fetched is freed; the whole fetch sits in the loop condition, as in the original.
+extern "C" void func_00257CD8(Conn_7BD8* c)
+{
+    while (c->busy == 0
+           && (c->pending != 0
+               || (c->pending = func_00258188_7CD8(c), func_00255DC0((void*)D_004A2EB8, c->unk6C, (int)c->pending, 0xF0) != 0)
+               || (operator_delete__FPi_7CD8(c->pending), c->pending = 0, 0))) {
+        Packet_7BD8* p = c->pending;
+        PacketQueue_7BD8* q = &c->queues[p->type];
+        if (queueFull_7CD8(q)) {
+            return;
+        }
+        q->slots[q->wr++ % 32] = p;
+        c->pending = 0;
+    }
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

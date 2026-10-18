@@ -252,7 +252,28 @@ INCLUDE_ASM("sound/asyncsys", func_0028A728);
 
 INCLUDE_ASM("sound/asyncsys", func_0028AAF8);
 
-INCLUDE_ASM("sound/asyncsys", func_0028B0F0);
+extern "C" int func_0028B0F0(void* self, int b)
+{
+    sAsync_A298* s = (sAsync_A298*)self;
+    int a, c;
+    sRing_A298* q0 = &s->q18C;
+    // PORT: g++ 2.95 virtual call (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
+    sVE_A298* vt = s->vt;
+    char* thisp = (char*)s + vt[3].delta;
+    int (**pf)(void*, int, int, int) = &vt[3].fn;
+    if (s->q18C.head == s->q18C.tail) {
+        a = -1;
+    } else {
+        a = q0->data[q0->tail];
+    }
+    sRing_A298* q3 = &s->q1BC;
+    if (s->q1BC.head == s->q1BC.tail) {
+        c = -1;
+    } else {
+        c = q3->data[q3->tail];
+    }
+    return (*pf)(thisp, a, b, c);
+}
 
 //100%
 extern void* D_004A3500;

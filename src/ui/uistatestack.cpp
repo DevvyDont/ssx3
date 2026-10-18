@@ -104,7 +104,68 @@ extern "C" void func_0039F400(cList* self, func_0039F400_sState* st)
     cList_addToFront(self, (cListNode*)st);
 }
 
-INCLUDE_ASM("ui/uistatestack", func_0039F4C0);
+//100%
+struct func_0039F4C0_sState {
+    int pad0;
+    func_0039F4C0_sState* next;     // 0x4
+    char pad8[0x1C - 0x8];
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int id : 6;
+    unsigned int b14 : 1;
+};
+
+static inline void func_0039F4C0_set(func_0039F4C0_sState* s, int id, int b7)
+{
+    s->id = id;
+    s->b7 = b7;
+}
+
+static inline void func_0039F4C0_setB14(func_0039F4C0_sState* s, int v)
+{
+    s->b14 = v;
+}
+
+static inline int func_0039F4C0_stateId(func_0039F4C0_sState* s) { return s->id; }
+
+extern "C" void func_0039F4C0(cList* self, func_0039F4C0_sState* st)
+{
+    int covered = 0;
+    int any = 0;
+    func_0039F4C0_sState* n = (func_0039F4C0_sState*)cList_first(self);
+    if (n != 0) {
+        if (n->b0) do {
+            if (n->id < 6) {
+                func_0039F4C0_set(n, 7, 1);
+            }
+            func_0039F4C0_setB14(n, 1);
+            n = n->next;
+            any = 1;
+        } while (n->b0);
+        int f = *(int*)((char*)n + 0x1C);
+        if (any || ((f >> 5) & 1)) {
+            if (((f >> 6) & 1) == 0 && func_0039F4C0_stateId(n) < 6) {
+                covered = 1;
+                n->id = 6;
+                n->b7 = 1;
+            }
+        }
+    }
+    if (covered) {
+        st->id = 1;
+        st->b5 = 0;
+    } else {
+        st->id = 2;
+        st->b5 = 1;
+    }
+    cList_addToFront(self, (cListNode*)st);
+}
 
 //100%
 struct cList;
@@ -517,7 +578,37 @@ extern "C" int func_0039FDD8(char* self)
     return 0;
 }
 
-INCLUDE_ASM("ui/uistatestack", func_0039FE00);
+//100%
+struct sUIStateFlags_FE00 {
+    unsigned int b0 : 1;
+    unsigned int b1 : 6;
+    unsigned int b7 : 1;
+    unsigned int b8 : 5;
+};
+
+struct sUIStateDef_FE00 {
+    int id;
+    int v4;
+    int flags;
+};
+
+struct sVEntryFE00 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0039FE00(char* self, sUIStateDef_FE00* def)
+{
+    sUIStateFlags_FE00* fl = (sUIStateFlags_FE00*)(self + 0x14);
+    *(int*)(self + 0x38) = def->v4;
+    fl->b8 = (unsigned char)def->flags;
+    fl->b0 = def->flags >> 6;
+    sVEntryFE00* vt = *(sVEntryFE00**)(self + 0x8);
+    vt[9].fn(self + vt[9].delta, (def->flags >> 9) & 1);
+    fl->b7 = def->flags >> 7;
+    *(sUIStateDef_FE00**)(self + 0x3C) = def + 1;
+}
 
 //100%
 struct sUIAlignFlags14 {
