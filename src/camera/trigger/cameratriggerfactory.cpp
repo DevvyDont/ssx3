@@ -2654,9 +2654,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A378);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A830);
 
-//100%
 struct cBXString;
 struct cBigFile;
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
@@ -2701,6 +2699,40 @@ struct sBigFile_17A978 {
     sBigFile_17A978(const sBigFile_17A978&);
 };
 
+//100%
+// Single-name form of func_0017A978: returns 0 if (name, tag) is already loaded, else whether
+// the tag's bigfile has the name.
+extern "C" int func_0017A830(void* selfp, char* name, char* tag)
+{
+    sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (func_0041AA88(name, self->entries[i].name) == 0 &&
+            func_0041AA88(tag, self->entries[i].tag) == 0)
+            return 0;
+    }
+    sStr_17A978 base;
+    sStr_17A978 s;
+    sBigFile_17A978 bf;
+    char* pre = D_0045CE20;
+    cBXString_cBXString2(&s, tag);
+    func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
+    cBXString__cBXString(&s, 2);
+    cBigFile* pbf = (cBigFile*)&bf;
+    func_00318630((cBXString*)&s, (cBXString*)&base, D_004A1298);
+    cBigFile_cBigFile1_17A978(pbf, s.s, 0x100);
+    cBXString__cBXString(&s, 2);
+    sCamName_17A978 nm;
+    nm.name = name;
+    int ok = 0;
+    if (func_003A6948(base.s, 1, &nm) != 0)
+        ok = nm.ok;
+    cBigFile__cBigFile((cBigFile*)&bf, 2);
+    cBXString__cBXString(&base, 2);
+    return ok;
+}
+
+//100%
 extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
 {
     sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
