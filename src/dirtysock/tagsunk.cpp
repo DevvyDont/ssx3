@@ -2215,7 +2215,20 @@ extern "C" void func_0025DD08(void* self, const char* key, int def)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_0025DD68);
+//100%
+// Like func_0025DD08, but takes the key and default from the current entry of the list at 0x60.
+extern "C" void* func_003EE560(void*);
+
+extern "C" void func_0025DD68(void* self)
+{
+    if (*(int*)self != 0) {
+        char* e = (char*)func_003EE560(*(void**)((char*)self + 0x60));
+        if (e != 0) {
+            const char* key = e + 8;
+            func_003E8DC0(*(void**)((char*)self + 0x54), key, func_0025A730(self, key, *(int*)(e + 0x30)), 0x1388, (void*)func_00268D88, self);
+        }
+    }
+}
 
 //100%
 extern char D_00480488[];
