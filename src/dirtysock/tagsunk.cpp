@@ -6491,7 +6491,35 @@ extern "C" void func_00265908(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00265950);
+//100%
+// Constructor of the 8-byte singleton made by func_00265880: resets its state and the module globals.
+struct sDsHandler265950 { void* vtable; int f4; };
+extern sDsHandler265950 D_004A5B48;
+extern char D_00442A18[];
+extern int D_004A33D4;
+extern int D_004A33DC;
+extern int D_004A33E0;
+extern int D_004A33E4;
+extern void* D_004A33D8;
+extern char D_00537190[];
+extern "C" void func_003F7EE0(void* handler);
+extern "C" void* func_003E6448(void* dst, int c, int n);
+extern "C" void* func_002C22C8(void);
+
+extern "C" void func_00265950(void* self)
+{
+    ((int*)self)[0] = 1;
+    D_004A33D4 = 0;
+    ((int*)self)[1] = 0;
+    D_004A5B48.vtable = D_00442A18;
+    D_004A33E0 = 0;
+    D_004A33DC = 0;
+    D_004A33E4 = 0;
+    D_004A5B48.f4 = 0;
+    func_003F7EE0(&D_004A5B48);
+    func_003E6448(D_00537190, 0, 0x40);
+    D_004A33D8 = func_002C22C8();
+}
 
 //100%
 extern void* D_004A33D8;
