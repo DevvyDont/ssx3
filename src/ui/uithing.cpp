@@ -114,7 +114,68 @@ extern "C" void func_003A0048(sUIThing0048* self, unsigned short key, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uithing", func_003A0158);
+#ifdef SKIP_ASM
+extern "C" void func_003A0158(void *vself, unsigned int count, short *p)
+{
+    char *self = (char *)vself;
+    unsigned int i = 0;
+
+    if (count != 0) {
+        do {
+            float v = (float)p[1];
+            short id = p[0];
+            switch (id) {
+            case 0:
+                *(float *)(self + 0x44) = v;
+                break;
+            case 1:
+                *(float *)(self + 0x48) = v;
+                break;
+            case 9:
+                *(float *)(self + 0x50) = v * 0.01f;
+                break;
+            case 10:
+                *(float *)(self + 0x54) = v * 0.01f;
+                break;
+            case 3:
+                *(float *)(self + 0x2C) = v * 0.017444445f;
+                break;
+            case 4:
+                *(float *)(self + 0x30) = v * 0.017444445f;
+                break;
+            case 5:
+                *(float *)(self + 0x34) = v * 0.017444445f;
+                break;
+            case 12:
+                *(int *)(self + 0x14) = (*(int *)(self + 0x14) & 0xFFF81FFF) | (((int)v & 0x3F) << 13);
+                break;
+            case 13:
+                *(float *)(self + 0x1C) = v * 0.003921569f;
+                break;
+            case 14:
+                *(float *)(self + 0x20) = v * 0.003921569f;
+                break;
+            case 15:
+                *(float *)(self + 0x24) = v * 0.003921569f;
+                break;
+            case 16:
+                *(float *)(self + 0x28) = v * 0.003921569f;
+                break;
+            case 6:
+                *(float *)(self + 0x60) = v;
+                break;
+            case 7:
+                *(float *)(self + 0x64) = v;
+                break;
+            }
+            i++;
+            p += 2;
+        } while (i < count);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uithing", func_003A0290);

@@ -2540,5 +2540,102 @@ INCLUDE_ASM("fe/ovstatepause", func_001FF7B8);
 
 INCLUDE_ASM("fe/ovstatepause", func_001FFD08);
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onGainTransition);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" char* func_00144BF0(void* iface);
+extern "C" int func_00146E98(void* iface, int idx);
+extern "C" char* func_0014EE58(void* iface, int id);
+extern "C" int func_001FD190(int id);
+extern "C" void func_002C2508(unsigned short* dst, unsigned short* src);
+extern "C" void func_002C2540(unsigned short* dst, char* src);
+extern "C" int func_002C27C0(unsigned short* buf, unsigned short* fmt, ...);
+// Called for its side effect here; the unit declares it int-returning.
+void func_002C27C0_void(unsigned short* buf, unsigned short* fmt, ...) __asm__("func_002C27C0");
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, ...);
+extern "C" void func_003A0E90(void* obj, unsigned short* s);
+extern void* D_004A28A8;
+extern char D_00535BC8[];
+extern char D_0046F520[];
+extern char D_004A2400[];
+extern char D_00470468[];
+extern char D_004A2588[];
+extern unsigned short D_004A2590[];
+extern char D_00470480[];
+extern char D_0046E398[];
+extern char D_0046E3A8[];
+extern char D_0046E3C0[];
+extern char D_0046E548[];
+
+struct sVE_1FFF78 { short delta; short index; unsigned short* (*fn)(void*, int); };
+
+static inline unsigned short* lookupString_1FFF78(char* name)
+{
+    char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVE_1FFF78* vt = *(sVE_1FFF78**)(g + 4);
+    char* t = g + vt[4].delta;
+    return vt[4].fn(t, GetHashValue32(name));
+}
+
+// Rewards overlay: fills in the event-result and reward texts the first time it is shown.
+extern "C" int cOVState_REWARDS_onGainTransition(void* self)
+{
+    if (*(int*)((char*)self + 0x48) == 0) {
+        unsigned short result[0x68];
+        unsigned short fmt[0x10];
+        unsigned short reward[0x68];
+        unsigned short name[0x20];
+        void* board = cBE_getInterface_Fv(cBE_getBE(), 2);
+        void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+        signed char* g = (signed char*)D_00535BC8;
+        int mode = g[0x48];
+        int kind = g[0x4A];
+        switch (kind) {
+        case 6 ... 11:
+            func_002C2508(result, (unsigned short*)func_001FD190(kind));
+            break;
+        case 5:
+            func_002C2540(fmt, D_0046F520);
+            func_002C26D0(result, fmt, func_00144BF0(race));
+            break;
+        default: {
+            unsigned short* label = 0;
+            switch (mode) {
+            case 0:
+            case 5:
+                label = lookupString_1FFF78(D_0046E548);
+                break;
+            case 1:
+                label = lookupString_1FFF78(D_0046E398);
+                break;
+            case 2:
+                label = lookupString_1FFF78(D_0046E3A8);
+                break;
+            case 3:
+                label = lookupString_1FFF78(D_0046E3C0);
+                break;
+            }
+            func_002C2540(fmt, D_004A2400);
+            func_002C26D0(result, fmt, func_00144BF0(race), label);
+            break;
+        }
+        }
+        func_003A0E90(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470468)), result);
+        int id = func_00146E98(player, 0);
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2588));
+        func_002C27C0_void(name, D_004A2590, func_0014EE58(board, id));
+        unsigned short* text = lookupString_1FFF78(D_00470480);
+        func_002C26D0(reward, text, name);
+        func_003A0E90(obj, reward);
+    }
+    *(int*)((char*)self + 0x48) = 1;
+    return 0;
+}
+#endif
 

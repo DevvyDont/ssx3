@@ -448,7 +448,74 @@ extern "C" void func_0020CCF8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CFD0);
+#ifdef SKIP_ASM
+extern "C" void func_0020D190(void);
+extern "C" void func_0039F840(void *);
+
+struct sFlag_CFD0 {
+    int f0;
+    int f4;
+    int f8;
+};
+
+struct sGame_CFD0 {
+    char pad28[0x28];
+    void *replay;
+    char pad2C[0x48 - 0x2C];
+    char *mgr;
+    char pad4C[0x200 - 0x4C];
+    sFlag_CFD0 *f200;
+    char pad204[0x214 - 0x204];
+    int f214;
+};
+
+struct sGlobals_CFD0 {
+    char pad[0x78];
+    void *be;
+    char pad7C[0x84 - 0x7C];
+    sGame_CFD0 *game;
+};
+
+extern "C" void func_0020CFD0(void)
+{
+    char *mgr = ((sGlobals_CFD0 *)D_004A28A8)->game->mgr;
+    char *st = 0;
+    if (mgr + 0x18) {
+        st = (char *)cUIStateStack_getCurrentState(mgr + 0x18);
+    }
+    switch (D_004A26FC) {
+    case 0:
+        break;
+    case 1:
+        func_0020CCF8();
+        break;
+    case 2:
+        D_004A26FC = 0;
+        cReplay_stopAutoReplay(((sGlobals_CFD0 *)D_004A28A8)->game->replay);
+        ((sGlobals_CFD0 *)D_004A28A8)->game->f200->f8 = 1;
+        if (st != 0 && ((sGlobals_CFD0 *)D_004A28A8)->game->f214 == 2) {
+            if (*(int *)(st + 0x98) == 8) {
+                cBE_getInterface_Fv(((sGlobals_CFD0 *)D_004A28A8)->be, 7);
+                if (D_00534B30[0] != 0) {
+                    func_0039F840(mgr + 0x18);
+                }
+            }
+        }
+        break;
+    case 3:
+        D_004A26FC = 0;
+        func_0020D190();
+        func_0039F840(((sGlobals_CFD0 *)D_004A28A8)->game->mgr + 0x18);
+        break;
+    case 4:
+        D_004A26FC = 0;
+        func_00231250(((sGlobals_CFD0 *)D_004A28A8)->game, 0xE, 2, 0);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_addPDATemplate);
