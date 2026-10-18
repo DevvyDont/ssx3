@@ -1378,7 +1378,55 @@ extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float 
 
 INCLUDE_ASM("fe/fepopup", func_001C8A38);
 
-INCLUDE_ASM("fe/fepopup", func_001C8EF0);
+//100%
+struct cUIText;
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern char D_004660A8[];
+extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
+extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3);
+
+struct sVEntry_8EF0 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern "C" void func_001C8EF0(void* self, int* info, float* pos, int which, float dy)
+{
+    cUIText* text;
+    if (which != 0)
+        text = *(cUIText**)((char*)self + 0x74);
+    else
+        text = *(cUIText**)((char*)self + 0x78);
+    if (text == 0)
+        return;
+    switch (info[0]) {
+    case 0:
+        return;
+    case 2:
+        func_001C9210(self, text, (const char*)info[1], (int)pos);
+        break;
+    case 1:
+        func_001C9038(self, text, (unsigned short*)info[1], pos);
+        break;
+    case 3: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry_8EF0* vt = *(sVEntry_8EF0**)(o + 4);
+        unsigned short* str = vt[4].fn(o + vt[4].delta, info[1]);
+        if (str) {
+            func_001C9038(self, text, str, pos);
+        } else {
+            char buf[0x40];
+            sprintf(buf, D_004660A8, info[1]);
+            func_001C9210(self, text, buf, (int)pos);
+            return;
+        }
+        break;
+    }
+    }
+    pos[1] += dy;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2696,7 +2744,55 @@ extern "C" void func_001CB500(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CB650);
+//100%
+
+extern "C" void func_001CB650(void* self, int a1)
+{
+    bool b = *(int*)((char*)self + 0x68) != 0;
+    int flag;
+    if (*(int*)((char*)self + 0x6C)) {
+        flag = b;
+        flag = !flag;
+    } else {
+        flag = b != 0;
+    }
+    int idx = *(int*)((char*)self + 0x140);
+    if (idx >= 15 && idx <= 26) {
+        // PORT: reads the int field at 0x6C as a bool (bool is 4 bytes in SN gcc 2.95); use `*(int*)... == 0` off-PS2.
+        flag = !*(bool*)((char*)self + 0x6C);
+    }
+    int old = *(int*)((char*)self + 0x434);
+    int st = *(int*)((char*)self + 0x430);
+    if (a1) {
+        *(int*)((char*)self + 0x434) = idx;
+        *(int*)((char*)self + 0x430) = 3;
+        if (st == 2) {
+            int v = *(int*)((char*)self + 0x144);
+            // the two v == 0 tests stay separate branches in retail
+            if (v == 2 || (flag && v == 0) || (!flag && v == 0)) {
+                if (func_001CE560_out(self, old, 0)) {
+                    *(int*)((char*)self + 0x140) = old;
+                    return;
+                }
+            }
+        }
+    }
+    int s = *(int*)((char*)self + 0x140);
+    if (s == 13 || s == 27 || s == 41 || s == 55 || s == 69 || s == 83)
+        *(int*)((char*)self + 0x140) -= 13;
+    else
+        *(int*)((char*)self + 0x140) = s + 1;
+    while (D_00441390[*(int*)((char*)self + 0x140)] == 0x2A)
+        *(int*)((char*)self + 0x140) += 1;
+    int val;
+    if (func_001CE560_out(self, *(int*)((char*)self + 0x140), &val)) {
+        *(int*)((char*)self + 0x144) = 2;
+    } else {
+        func_001CB650(self, 0);
+        if (val)
+            *(int*)((char*)self + 0x144) = flag == 0;
+    }
+}
 
 //100%
 // PORT: func_001CE560's third parameter is an int* out-param; the unit declares it (void*, int, int).
@@ -4415,7 +4511,33 @@ extern "C" void func_001CE520(void* self)
     }
 }
 
-INCLUDE_ASM("fe/fepopup", func_001CE560);
+//100%
+struct sPopupK1CE560 { char p[0x148]; int a[84]; int b[84]; };
+// PORT: out is an int* out-param (the unit declares it int)
+extern "C" int func_001CE560(void* self, int idx, int out)
+{
+    bool b = *(int*)((char*)self + 0x68) != 0;
+    int flag;
+    if (*(int*)((char*)self + 0x6C)) {
+        flag = b;
+        flag = !flag;
+    } else {
+        flag = b != 0;
+    }
+    if (idx >= 15 && idx <= 26) {
+        // PORT: reads the int field at 0x6C as a bool (bool is 4 bytes in SN gcc 2.95); use `*(int*)... == 0` off-PS2.
+        flag = !*(bool*)((char*)self + 0x6C);
+    }
+    if (flag) {
+        if (out)
+            *(int*)out = ((sPopupK1CE560*)self)->b[idx];
+        return ((sPopupK1CE560*)self)->a[idx];
+    } else {
+        if (out)
+            *(int*)out = ((sPopupK1CE560*)self)->a[idx];
+        return ((sPopupK1CE560*)self)->b[idx];
+    }
+}
 
 //100%
 extern "C" void* cBE_getBE();
