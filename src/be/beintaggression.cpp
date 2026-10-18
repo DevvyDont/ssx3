@@ -154,7 +154,70 @@ extern "C" void func_00155BF0(void* self, int a, int b, int event)
     D_004A6CA8[profile][ca].aggression[cb].v[0] = st;
 }
 
-INCLUDE_ASM("be/beintaggression", func_00155E58);
+//100%
+// Decays every rider's aggression toward each character by 3 points, then clamps the level for its state.
+struct sGame155E58 {
+    char pad_0x0[0x30];
+    int riders;         // 0x30
+    char pad_0x34[0x15];
+    signed char f49;    // 0x49
+};
+extern sGame155E58 D_005305B0_155E58 __asm__("D_005305B0");
+
+extern "C" void func_00155E58(void* self)
+{
+    for (int r = 0; r < D_005305B0_155E58.riders; r++)
+    {
+        int profile = cBELibrary_getProfileIndex(r);
+        for (int i = 0; i < 10; i++)
+        {
+            int c = cBELibrary_getCharacterID(r);
+            int pts = D_004A6CA8[profile][c].aggression[i].v[2] - 3;
+            int st = D_004A6CA8[profile][c].aggression[i].v[0];
+            if (pts < 0)
+                pts = 0;
+            int lvl = pts / 5;
+            if (D_005305B0_155E58.f49 == 0)
+                func_001E2A08(i, pts);
+            switch (st) {
+            case 0:
+                if (lvl >= 3) {
+                    lvl = 2;
+                    pts = 10;
+                }
+                break;
+            case 1:
+                if (lvl >= 4) {
+                    lvl = 2;
+                    pts = 10;
+                    st = 3;
+                }
+                break;
+            case 2:
+                if (lvl <= 0) {
+                    lvl = 1;
+                } else if (lvl >= 4) {
+                    lvl = 3;
+                    pts = 15;
+                }
+                break;
+            case 3:
+                if (lvl == 0) {
+                    st = 1;
+                    lvl = 3;
+                    pts = 15;
+                } else if (lvl >= 5) {
+                    lvl = 4;
+                    pts = 20;
+                }
+                break;
+            }
+            D_004A6CA8[profile][c].aggression[i].v[0] = st;
+            D_004A6CA8[profile][c].aggression[i].v[2] = pts;
+            D_004A6CA8[profile][c].aggression[i].v[1] = lvl;
+        }
+    }
+}
 
 //100%
 int cBELibrary_getProfileIndex(int);
