@@ -311,7 +311,29 @@ extern "C" void func_001DF440(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF470);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+inline void* operator new[](unsigned int, void* p) { return p; }
+extern "C" void* func_001A8500(void*, int, int);
+extern "C" void func_001926F0(void* self);
+extern void* D_0046AF68[];
+
+// Element type of an inline-constructed array (0x34 bytes, constructed by func_001926F0).
+struct sElem_F470 {
+    char pad[0x34];
+    sElem_F470() { func_001926F0(this); }
+};
+
+extern "C" void* func_001DF470(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_0046AF68;
+    new ((char*)self + 0x6D0) sElem_F470[2];
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF4E8);
@@ -561,7 +583,6 @@ extern "C" int func_001DF8F8(void *arg0) {
 INCLUDE_ASM("fe/fepopupmisc", func_001DF900);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-inline void* operator new[](unsigned int, void* p) { return p; }
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A618[];
 
