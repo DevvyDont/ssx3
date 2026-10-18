@@ -55,7 +55,190 @@ extern "C" int func_001A07C8(void* self, int a1, int hash)
 
 INCLUDE_ASM("fe/fereal", cFECustom_getNextState);
 
-INCLUDE_ASM("fe/fereal", func_001A16C0);
+//100%
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* func_001BFBB8(void* self, void* owner);
+extern "C" void* func_00181090(void* self, void* owner, int a);
+extern "C" void* func_00195FF0(void* self, void* owner, int a, int b);
+extern "C" void* func_001828C0(void* self, void* owner, int a);
+extern "C" void* func_00186610(void* self, void* owner, int a);
+extern "C" void* func_00194A60(void* self, void* owner);
+extern "C" void* func_001887A0(void* self, void* owner, int a);
+extern "C" void* func_0018D240(void* self, void* owner);
+void* func_00232720(void* self);
+class cAppMan;
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+extern "C" void* func_001C1C50(void* self, void* owner);
+extern "C" void* func_00194738(void* self, void* owner);
+extern "C" void* func_001F3700(void* self, void* owner);
+extern "C" void* func_001F3FF8(void* self, void* owner);
+extern "C" void* func_00183238(void* self, void* owner, int a);
+extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* owner, int a);
+extern "C" void* func_001D3780(void* self, void* owner, int a, int b);
+extern "C" void* func_001D4BC8(void* self, void* owner, int a, int b);
+extern signed char D_00535C11[];
+extern int D_004A19D8;
+extern int D_004A1A70;
+extern int D_004A2594;
+extern int D_004A2598;
+extern void* D_004A28A8;
+extern char D_0045FF28[];
+extern char D_00460BC0[];
+extern char D_00460650[];
+extern char D_00460C08[];
+extern char D_00460C38[];
+extern char D_00460BA8[];
+extern char D_00461198[];
+extern char D_00460D60[];
+extern char D_0045CE60[];
+extern char D_004611A8[];
+extern char D_0045E290[];
+extern char D_00461188[];
+extern char D_00460DD8[];
+extern char D_00460C68[];
+extern char D_00460DF8[];
+extern char D_00460E28[];
+extern char D_00460C80[];
+
+static inline int isOne16C0(int x) { return x == 1; }
+
+struct sFEState16C0 {
+    char pad0[0xC];
+    int id;
+    char pad10[0x34];
+    signed char x44;
+};
+
+// Case order matters: cross-jumping keeps the later copy of identical case
+// bodies, so the cases whose code the original shares come first.
+extern "C" void* func_001A16C0(void** self, sFEState16C0* st, int a2)
+{
+    switch (st->id) {
+    case 5:
+    case 11:
+    case 22:
+        return func_00194A60(cMemMan_alloc(0x58, D_00460BA8, 0, 0), *self);
+    case 42:
+        return func_001F3FF8(cMemMan_alloc(0x4C, D_00460DD8, 0, 0), *self);
+    case 12:
+        return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, st->x44);
+    case 28:
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+    case 36:
+    case 37:
+    case 38:
+        return func_001887A0(cMemMan_alloc(0x54, D_00461198, 0, 0), *self, 0);
+    case 9:
+        if (isOne16C0(D_004A1A70))
+            return func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *self);
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        switch (D_00535C11[0]) {
+        case 1:
+            return func_00194A60(cMemMan_alloc(0x58, D_00460BA8, 0, 0), *self);
+        case 0:
+            return func_00194A60(cMemMan_alloc(0x58, D_00460BA8, 0, 0), *self);
+        case 2:
+            if (st->x44 == 1)
+                return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 0);
+            return func_00194A60(cMemMan_alloc(0x58, D_00460BA8, 0, 0), *self);
+        }
+        return 0;
+    case 23:
+        return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, 1);
+    case 13:
+    case 14:
+    case 16:
+        if (D_004A19D8 != 0)
+            return func_001F3700(cMemMan_alloc(0x58, D_00461188, 0, 0), *self);
+        return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, st->x44);
+    case 15:
+    case 18:
+        if (D_004A19D8 != 0)
+            return func_001F3FF8(cMemMan_alloc(0x4C, D_00460DD8, 0, 0), *self);
+        return func_00183238(cMemMan_alloc(0x54, D_00460C68, 0, 0), *self, st->x44);
+    case 17:
+        return func_00195FF0(cMemMan_alloc(0x80, D_00460650, 0, 0), *self, st->x44, D_004A19D8);
+    case 19:
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        switch (D_00535C11[0]) {
+        case 0:
+        case 1:
+            return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 0);
+        case 2:
+            return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 1);
+        }
+        return 0;
+    case 20: {
+        D_004A2598 = 1;
+        D_004A2594 = 0;
+        char* r = (char*)func_00186610(cMemMan_alloc(0x33C, D_00460C38, 0, 0), *self, 0);
+        r[0x44] = 0;
+        return r;
+    }
+    case 21:
+        D_004A2598 = 1;
+        D_004A2594 = 0;
+        return func_00186610(cMemMan_alloc(0x33C, D_00460C38, 0, 0), *self, 0);
+    case 8:
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        switch (D_00535C11[0]) {
+        case 0:
+        case 1:
+        case 2:
+            return func_00194A60(cMemMan_alloc(0x58, D_00460BA8, 0, 0), *self);
+        }
+    case 35: {
+        int x = ((int*)self)[3];
+        if (x == 0x18)
+            return func_0018D240(cMemMan_alloc(0x4C, D_00460D60, 0, 0), *self);
+        if (x == 9)
+            return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, st->x44);
+        if (x == 0x27)
+            return func_001F3700(cMemMan_alloc(0x58, D_00461188, 0, 0), *self);
+        break;
+    }
+    case 33:
+        switch (a2) {
+        case 0:
+            if (((int*)self)[3] == 0x22)
+                return func_001887A0(cMemMan_alloc(0x54, D_00461198, 0, 0), *self, 0);
+            return func_0018D240(cMemMan_alloc(0x4C, D_00460D60, 0, 0), *self);
+        case 1:
+            cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+            break;
+        case 2:
+            if (isOne16C0(D_004A1A70))
+                return func_001C1C50(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *self);
+            return 0;
+        }
+        break;
+    case 2:
+    case 39:
+        return func_00194738(cMemMan_alloc(0x4C, D_0045E290, 0, 0), *self);
+    case 40:
+    case 41:
+        return func_001F3700(cMemMan_alloc(0x58, D_00461188, 0, 0), *self);
+    case 43:
+        if (D_004A19D8 != 0)
+            return func_001F3FF8(cMemMan_alloc(0x4C, D_00460DD8, 0, 0), *self);
+        return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, st->x44);
+    case 46:
+        if (D_004A19D8 != 0)
+            return func_001F3FF8(cMemMan_alloc(0x4C, D_00460DD8, 0, 0), *self);
+        return func_00183238(cMemMan_alloc(0x54, D_00460C68, 0, 0), *self, st->x44);
+    case 44:
+        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(0xC8, D_00460DF8, 0, 0), *self, st->x44);
+    case 45:
+        return func_001D3780(cMemMan_alloc(0xE4, D_00460E28, 0, 0), *self, st->x44, a2);
+    case 47:
+        return func_001D4BC8(cMemMan_alloc(0x50, D_00460C80, 0, 0), *self, st->x44, a2 != 0);
+    }
+    return 0;
+}
 
 //100%
 extern "C" void func_001A1CB8(void* self, int a1, int val)
