@@ -339,7 +339,146 @@ extern "C" void func_0019ED80(sFERiderED80* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019EE88);
+#ifdef SKIP_ASM
+extern void* D_004A289C;
+extern char D_005047F8[];
+extern char D_00504810[];
+extern char D_004A1620[];
+extern char D_004A1628[];
+extern char D_004A1980[];
+extern char D_004A1638[];
+extern char D_004A1640[];
+extern char D_004A1988[];
+extern char D_004A1650[];
+extern char D_004A1990[];
+extern char D_004A1660[];
+extern char D_004A1998[];
+extern char D_004A19A0[];
+
+struct sVec4_EE88 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMtx_EE88 {
+    float m[40];
+} __attribute__((aligned(16)));
+
+extern "C" void func_00389260(sMtx_EE88* m);
+extern "C" void* func_0038AC20(char* tbl, char* name);
+extern "C" void func_00389590(sMtx_EE88* m, void* a, char* b, float s);
+extern "C" void func_00389CB8(sMtx_EE88* m, sVec4_EE88* v, float s);
+extern "C" void func_00310640(void* model, int a, int b, int c);
+extern "C" void func_002F2088(void* p);
+
+struct sModel_EE88 {
+    char pad0[0x2C];
+    sVec4_EE88* bones;  // 0x2C
+};
+
+struct sFERider_EE88 {
+    int type;           // 0x0
+    char pad4[0x8 - 0x4];
+    sModel_EE88* model; // 0x8
+    char padC[0x14 - 0xC];
+    int f14;            // 0x14
+    char pad18[0xC2C - 0x18];
+    int layer;          // 0xC2C
+    char padC30[0xC70 - 0xC30];
+    void* fC70;         // 0xC70
+    char padC74[0xCD0 - 0xC74];
+    int fCD0;           // 0xCD0
+    int pending;        // 0xCD4
+};
+
+struct sVE_EE88 {
+    short delta;
+    short index;
+    void (*fn)(void*, sMtx_EE88*, int);
+};
+
+extern "C" void func_0019EE88(void* selfp)
+{
+    sFERider_EE88* self = (sFERider_EE88*)selfp;
+    sMtx_EE88 m;
+    sVec4_EE88 pos;
+    if (self->pending >= 0)
+        return;
+    if (self->model == 0)
+        return;
+    if (self->f14 == 0)
+        return;
+    func_00389260(&m);
+    int type = self->type;
+    if (self->fCD0 != 0) {
+        switch (type) {
+        case 0:
+        case 7:
+        case 8:
+            type = 6;
+            break;
+        }
+    }
+    switch (type) {
+    case 7:
+    case 8:
+        type = 6;
+        break;
+    }
+    switch (type) {
+    case 0:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1620), D_00504810, 1.0f);
+        break;
+    case 1:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1628), D_00504810, 1.0f);
+        break;
+    case 2:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1980), D_00504810, 1.0f);
+        break;
+    case 3:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1638), D_00504810, 1.0f);
+        break;
+    case 4:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1640), D_00504810, 1.0f);
+        break;
+    case 5:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1988), D_00504810, 1.0f);
+        break;
+    case 6:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1650), D_00504810, 1.0f);
+        break;
+    case 7:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1990), D_00504810, 1.0f);
+        break;
+    case 8:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1660), D_00504810, 1.0f);
+        break;
+    case 9:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1998), D_00504810, 1.0f);
+        break;
+    default:
+        func_00389590(&m, func_0038AC20(D_005047F8, D_004A19A0), D_00504810, 1.0f);
+        break;
+    }
+    int idx = func_00310C48(self->model, 0, D_004A1978);
+    pos = self->model->bones[idx * 2];
+    func_00389CB8(&m, &pos, 1.0f);
+    {
+        char* o = (char*)D_004A289C;
+        sVE_EE88* vt = *(sVE_EE88**)(o + 0x10D8);
+        vt[69].fn(o + vt[69].delta, &m, 1);
+    }
+    int* fl = (int*)(*(char**)((char*)D_004A289C + 0xE84) + 8);
+    unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
+    if (self->layer >= 0)
+        *fl = (*fl & ~0x3E0) | ((self->layer << 5) & 0x3E0);
+    func_00310640(self->model, 0, 0, 0);
+    func_002F2088(self->fC70);
+    fl = (int*)(*(char**)((char*)D_004A289C + 0xE84) + 8);
+    *fl = (*fl & ~0x3E0) | (old << 5);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feridermanager", func_0019F138);

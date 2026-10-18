@@ -658,7 +658,220 @@ extern "C" void* func_00323A68(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseTerm);
+#ifdef SKIP_ASM
+extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op);
+extern "C" void* cInputMapParser_parseUnaryFunc(void* self, int op);
+extern char D_0048E008[];
+extern char D_0048E028[];
+extern char D_0048E048[];
+extern char D_0048E070[];
+extern char D_0048E098[];
+extern char D_0048E0B8[];
+extern char D_0048E0D8[];
+
+struct sTermNode_3BD8 {
+    int type;
+    union {
+        float value;
+        int index;
+        void* a;
+    };
+    int b;
+};
+
+struct sTermVar_3BD8 {
+    char name[0x40];
+    sTermNode_3BD8* expr;       // 0x40
+};
+
+struct sTermParser_3BD8 {
+    char pad0[0x98];
+    int tok;                    // 0x98
+    char name[0x40];            // 0x9C
+    float number;               // 0xDC
+    char padE0[0x108E8 - 0xE0];
+    sTermVar_3BD8* cur;         // 0x108E8
+};
+
+extern "C" void* cInputMapParser_parseTerm(void* p)
+{
+    sTermParser_3BD8* self = (sTermParser_3BD8*)p;
+    sTermNode_3BD8* node;
+    sTermNode_3BD8* t;
+    char* name;
+    int input;
+    int mod;
+    int cfg;
+    sTermVar_3BD8* var;
+    int type;
+
+again:
+    switch (self->tok) {
+    case 2:
+        name = self->name;
+        input = func_003216E8(self, name);
+        if (input >= 0) {
+            mod = 5;
+            cInputMapParser_readToken(self);
+            if (self->tok == 4) {
+                cInputMapParser_readToken(self);
+                if (self->tok != 2) {
+                    func_00321500(self, D_0048E008);
+                    return 0;
+                }
+                mod = cInputMapParser_lookupModifierName(self, name);
+                if (mod == 6) {
+                    func_00321500(self, D_0048E028, name);
+                    return 0;
+                }
+                cInputMapParser_readToken(self);
+            }
+            node = (sTermNode_3BD8*)func_003215F8(self);
+            node->type = 2;
+            node->index = input;
+            node->b = mod;
+            return node;
+        }
+        cfg = cInputMapParser_lookupConfigName(self, name);
+        if (cfg >= 0) {
+            cInputMapParser_readToken(self);
+            node = (sTermNode_3BD8*)func_003215F8(self);
+            node->type = 3;
+            node->index = cfg;
+            return node;
+        }
+        var = (sTermVar_3BD8*)func_00321A40((sTable_321A40*)self, name);
+        if (var != 0) {
+            int mod2;
+            cInputMapParser_readToken(self);
+            if (var == self->cur) {
+                func_00321500(self, D_0048E048);
+                return 0;
+            }
+            mod2 = 5;
+            if (self->tok == 4) {
+                cInputMapParser_readToken(self);
+                if (self->tok != 2) {
+                    func_00321500(self, D_0048E008);
+                    return 0;
+                }
+                mod2 = cInputMapParser_lookupModifierName(self, name);
+                if (mod2 == 6) {
+                    func_00321500(self, D_0048E070, name);
+                    return 0;
+                }
+                cInputMapParser_readToken(self);
+            }
+            type = var->expr->type;
+            if (type == 4) {
+                node = (sTermNode_3BD8*)func_003215F8(self);
+                node->type = type;
+                node->value = var->expr->value;
+                return node;
+            }
+            node = (sTermNode_3BD8*)func_003215F8(self);
+            node->type = 1;
+            node->a = var;
+            node->b = mod2;
+            return node;
+        }
+        func_00321500(self, D_0048E098, name);
+        return 0;
+    case 11:
+        node = (sTermNode_3BD8*)func_003215F8(self);
+        node->type = 4;
+        node->value = self->number;
+        cInputMapParser_readToken(self);
+        return node;
+    case 20:
+        cInputMapParser_readToken(self);
+        goto again;
+    case 21:
+        cInputMapParser_readToken(self);
+        t = (sTermNode_3BD8*)cInputMapParser_parseTerm(self);
+        if (t == 0)
+            return 0;
+        if (t->type == 4) {
+            t->value = -t->value;
+            return t;
+        }
+        node = (sTermNode_3BD8*)func_003215F8(self);
+        node->type = 0x12;
+        node->a = t;
+        return node;
+    case 24:
+        cInputMapParser_readToken(self);
+        t = (sTermNode_3BD8*)cInputMapParser_parseTerm(self);
+        if (t == 0)
+            return 0;
+        if (t->type == 4) {
+            t->value = t->value == 0.0f ? 1.0f : 0.0f;
+            return t;
+        }
+        node = (sTermNode_3BD8*)func_003215F8(self);
+        node->type = 0x13;
+        node->a = t;
+        return node;
+    case 9:
+        cInputMapParser_readToken(self);
+        node = (sTermNode_3BD8*)cInputMapParser_parseExpression(self);
+        if (self->tok != 10) {
+            func_00321500(self, D_0048E0B8);
+            func_00321638(self, node);
+            return 0;
+        }
+        cInputMapParser_readToken(self);
+        return node;
+    case 25:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseBinaryFunc(self, 0x14);
+    case 26:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseBinaryFunc(self, 0x15);
+    case 27:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseBinaryFunc(self, 0x16);
+    case 28:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseBinaryFunc(self, 0x17);
+    case 29:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x18);
+    case 30:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x19);
+    case 31:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x1A);
+    case 32:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x1B);
+    case 33:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x1C);
+    case 34:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x1D);
+    case 35:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x1E);
+    case 36:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x1F);
+    case 37:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x20);
+    case 38:
+        cInputMapParser_readToken(self);
+        return cInputMapParser_parseUnaryFunc(self, 0x21);
+    default:
+        func_00321500(self, D_0048E0D8);
+        return 0;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseBinaryFunc);

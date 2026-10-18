@@ -2614,7 +2614,176 @@ extern "C" void func_00123E30(cRider* self, int id, float a, float b, int unused
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00123F38);
+#ifdef SKIP_ASM
+extern "C" void* func_0026B5E0(void*, int, int);
+extern char D_004D33A0[];
+int func_0027C958(void* self);
+
+struct sV_3F38 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sV_3F38 D_004FF160_3F38 __asm__("D_004FF160");
+
+struct sRay_3F38 {
+    char data[0xB0];
+} __attribute__((aligned(16)));
+
+struct sHit_3F38 {
+    sV_3F38 pos;
+    char pad[0x70];
+} __attribute__((aligned(16)));
+
+extern "C" void func_0032E100_3F38(sRay_3F38* ray, const sV_3F38& a, const sV_3F38& b, int n, float t) __asm__("func_0032E100");
+extern "C" float func_00336850(void* self, sRay_3F38* ray, sHit_3F38* out, int a3);
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sV_3F38 Scale_3F38(const sV_3F38& v, float s)
+{
+    sV_3F38 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV_3F38 Add_3F38(const sV_3F38& a, const sV_3F38& b)
+{
+    sV_3F38 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void AddTo_3F38(sV_3F38& a, const sV_3F38& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+extern "C" sV_3F38 func_00123F38(cRider* self)
+{
+    if (*(int*)((char*)self + 0x6E4) <= 0)
+        return *(sV_3F38*)&self->mPosition;
+    float lift = 0.0f;
+    // PORT: func_0027C958 returns a record pointer as int
+    char* rec = (char*)func_0027C958(self->unk_6D8);
+    sV_3F38 pos = *(sV_3F38*)&self->mPosition;
+    switch (*(signed char*)(rec + 5)) {
+    case 0:
+        break;
+    case 1:
+        {
+            float* p = (float*)func_0026B5E0(D_004D33A0, 1, self->mAIIndex);
+            sV_3F38 v;
+            v.x = p[2];
+            v.y = p[3];
+            v.z = p[4];
+            v.w = 1.0f;
+            pos = v;
+        }
+        break;
+    case 2:
+        {
+            float* p = (float*)func_0026B5E0(D_004D33A0, 2, 0);
+            sV_3F38 v;
+            v.x = p[2];
+            v.y = p[3];
+            v.z = p[4];
+            v.w = 1.0f;
+            pos = v;
+        }
+        break;
+    case 3:
+        switch (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78) + 0x1BC)) {
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+            {
+                float* p = (float*)func_0026B5E0(D_004D33A0, 2, 0);
+                sV_3F38 v;
+                v.x = p[2];
+                v.y = p[3];
+                v.z = p[4];
+                v.w = 1.0f;
+                pos = v;
+            }
+            break;
+        case 14:
+        case 15:
+        case 16:
+            {
+                float* p = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
+                sV_3F38 v;
+                v.x = p[2];
+                v.y = p[3];
+                v.z = p[4];
+                v.w = 1.0f;
+                pos = v;
+            }
+            break;
+        default:
+            {
+                float* p = (float*)func_0026B5E0(D_004D33A0, 2, 1);
+                sV_3F38 v;
+                v.x = p[2];
+                v.y = p[3];
+                v.z = p[4];
+                v.w = 1.0f;
+                pos = v;
+            }
+            break;
+        }
+        break;
+    case 4:
+        {
+            float* p = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
+            sV_3F38 v;
+            v.x = p[2];
+            v.y = p[3];
+            v.z = p[4];
+            v.w = 1.0f;
+            pos = v;
+        }
+        lift = 2999.942626953125f;
+        break;
+    }
+    sV_3F38 lo = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, -7000.0f));
+    sV_3F38 hi = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, 200.0f));
+    sHit_3F38 hit;
+    sRay_3F38 ray;
+    func_0032E100_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
+    if (func_00336850(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), &ray, &hit, 0) >= 0.0f)
+        pos = hit.pos;
+    AddTo_3F38(pos, Scale_3F38(D_004FF160_3F38, lift));
+    return pos;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001241C0);

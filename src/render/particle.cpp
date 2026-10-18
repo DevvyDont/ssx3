@@ -2868,7 +2868,157 @@ extern "C" int func_0037BD38(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037BD98);
+#ifdef SKIP_ASM
+extern "C" void func_00424020(int);
+extern "C" void func_00367078(int gs);
+void* func_00367340(void* self, int a1, int a2);
+extern "C" int func_003673D8(int gs, int size);
+extern "C" void func_00382AF0(void* self, int arg1, int arg2);
+extern "C" void func_003E6690(int a);
+extern "C" void func_003FD910(int a, int b, int c, int d);
+
+struct sParticleTarget_37BD98 {
+    char pad0[0x18F4];
+    int gs;                     // 0x18F4
+    char pad18F8[0x59D0 - 0x18F8];
+    int f59D0;                  // 0x59D0
+    char pad59D4[0x5A30 - 0x59D4];
+    unsigned int width;         // 0x5A30
+    unsigned int height;        // 0x5A34
+    unsigned int psm;           // 0x5A38
+    unsigned int psm2;          // 0x5A3C
+    unsigned int zpsm;          // 0x5A40
+    short f5A44;                // 0x5A44
+    short f5A46;                // 0x5A46
+    short f5A48;                // 0x5A48
+    int f5A4C;                  // 0x5A4C
+    unsigned int f5A50;         // 0x5A50
+    unsigned int f5A54;         // 0x5A54
+    unsigned int f5A58;         // 0x5A58
+    unsigned int f5A5C;         // 0x5A5C
+    int f5A60;                  // 0x5A60
+    int f5A64;                  // 0x5A64
+    int f5A68;                  // 0x5A68
+    int f5A6C;                  // 0x5A6C
+    int f5A70;                  // 0x5A70
+    int f5A74;                  // 0x5A74
+    int f5A78;                  // 0x5A78
+    int f5A7C;                  // 0x5A7C
+    int f5A80;                  // 0x5A80
+};
+
+extern "C" int func_0037BD98(sParticleTarget_37BD98* self, unsigned int a1, unsigned int a2, unsigned int w, unsigned int h,
+                             unsigned int psm, unsigned int psm2, unsigned int zpsm, short s0, short s1, short s2, int flag)
+{
+    if (!func_0037BD38(self, psm2, zpsm))
+        return 0;
+
+    self->f5A58 = a2;
+    self->width = w;
+    self->height = h;
+    self->psm2 = psm2;
+    self->psm = psm;
+    self->zpsm = zpsm;
+    self->f5A44 = s1;
+    self->f5A46 = s2;
+    self->f5A74 = 0;
+    self->f5A54 = a1;
+    self->f5A48 = 2;
+    self->f5A4C = flag;
+    self->f5A60 = 0;
+
+    switch (a1) {
+    case 0x100:
+        self->f5A64 = 9;
+        break;
+    case 0x140:
+        self->f5A64 = 7;
+        break;
+    case 0x180:
+        self->f5A64 = 6;
+        break;
+    case 0x200:
+        self->f5A64 = 4;
+        break;
+    case 0x280:
+        self->f5A64 = 3;
+        break;
+    }
+
+    self->f5A50 = (self->width + 0x3F) >> 6;
+    self->f5A5C = (self->f5A54 + 0x3F) >> 6;
+
+    switch (self->psm) {
+    case 0:
+    case 1:
+    case 0x30:
+    case 0x31:
+        self->f59D0 = 0;
+        self->f5A68 = self->f5A5C * ((self->f5A58 + 0x1F) >> 5);
+        break;
+    case 2:
+    case 10:
+    case 0x32:
+    case 0x3A:
+        self->f59D0 = 1;
+        self->f5A68 = self->f5A5C * ((self->f5A58 + 0x3F) >> 6);
+        break;
+    }
+
+    switch (self->psm2) {
+    case 0:
+    case 1:
+    case 0x30:
+    case 0x31:
+        self->f5A6C = self->f5A50 * ((self->height + 0x1F) >> 5);
+        break;
+    case 2:
+    case 10:
+    case 0x32:
+    case 0x3A:
+        self->f5A6C = self->f5A50 * ((self->height + 0x3F) >> 6);
+        break;
+    }
+
+    switch (self->zpsm) {
+    case 0x30:
+    case 0x31:
+        self->f5A70 = self->f5A50 * ((self->height + 0x1F) >> 5);
+        break;
+    case 0x32:
+    case 0x3A:
+        self->f5A70 = self->f5A50 * ((self->height + 0x3F) >> 6);
+        break;
+    }
+
+    int gs = self->gs;
+    func_00367078(gs);
+    self->f5A78 = func_003673D8(gs, self->f5A6C << 13);
+    self->f5A7C = func_003673D8(gs, self->f5A68 << 13);
+    self->f5A80 = func_003673D8(gs, self->f5A70 << 13);
+
+    // PORT: reads psm and psm2 as one 64-bit word.
+    if (*(long*)&self->psm == 0x100000001L)
+        func_00367340((void*)self->gs, self->f5A78 << 11, self->f5A54 * self->f5A58 + self->width * self->height * 2);
+    else if (self->psm == 1)
+        func_00367340((void*)self->gs, self->f5A7C << 11, self->f5A54 * self->f5A58 + self->width * self->height);
+    else
+        func_00367340((void*)self->gs, self->f5A80 << 11, self->width * self->height);
+
+    func_00424020(0);
+    *(volatile long*)0x12001000 = 8;
+    while (!(*(volatile long*)0x12001000 & 8)) {
+    }
+    *(volatile long*)0x12001000;
+
+    func_003FD910(s0, self->f5A44, flag ? 0x50 : self->f5A48, self->f5A46);
+    func_003E6690(flag ? 3 : 1);
+    func_00382AF0(self, 0, 1);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037C198);

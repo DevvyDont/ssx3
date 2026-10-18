@@ -2003,7 +2003,97 @@ extern "C" void func_00288D18(void* self, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288F60);
+#ifdef SKIP_ASM
+// PORT: func_00287700's real parameter order is (self, int, float); the unit declares (self, float, int).
+void func_00287700_if(void*, int, float) __asm__("func_00287700");
+
+extern "C" void func_00288F60(void* self, int mode)
+{
+    *(int*)((char*)self + 0x6470) = mode;
+    switch (mode) {
+    case 0:
+        func_00287700_if(self, 1, 0.9090909361839294f);
+        func_00287700_if(self, 5, 0.9090909361839294f);
+        func_00287700_if(self, 2, 0.9090909361839294f);
+        func_00287700_if(self, 3, 0.9090909361839294f);
+        func_00287700_if(self, 4, 0.9090909361839294f);
+        func_00287700_if(self, 6, 0.9090909361839294f);
+        func_00287700_if(self, 7, 0.9090909361839294f);
+        func_00287700_if(self, 8, 0.9090909361839294f);
+        func_00287700_if(self, 9, 0.9090909361839294f);
+        func_00287700_if(self, 10, 0.9090909361839294f);
+        func_002875D0(self, 1);
+        break;
+    case 1:
+        func_00287700_if(self, 1, 0.9090909361839294f);
+        func_00287700_if(self, 5, 0.9090909361839294f);
+        func_00287700_if(self, 2, 0.0f);
+        func_00287700_if(self, 3, 0.0f);
+        func_00287700_if(self, 4, 0.0f);
+        func_00287700_if(self, 6, 0.9090909361839294f);
+        func_00287700_if(self, 7, 0.9090909361839294f);
+        func_00287700_if(self, 8, 0.9090909361839294f);
+        func_00287700_if(self, 9, 0.0f);
+        func_00287700_if(self, 10, 0.0f);
+        func_002875D0(self, 1);
+        break;
+    case 2:
+        func_00287700_if(self, 1, 0.0f);
+        func_00287700_if(self, 5, 0.9090909361839294f);
+        func_00287700_if(self, 2, 0.9090909361839294f);
+        func_00287700_if(self, 3, 0.9090909361839294f);
+        func_00287700_if(self, 4, 0.9090909361839294f);
+        func_00287700_if(self, 6, 0.9090909361839294f);
+        func_00287700_if(self, 7, 0.9090909361839294f);
+        func_00287700_if(self, 8, 0.9090909361839294f);
+        func_00287700_if(self, 9, 0.9090909361839294f);
+        func_00287700_if(self, 10, 0.9090909361839294f);
+        func_002875D0(self, 1);
+        break;
+    case 3:
+        func_00287700_if(self, 1, 0.0f);
+        func_00287700_if(self, 5, 0.9090909361839294f);
+        func_00287700_if(self, 2, 0.0f);
+        func_00287700_if(self, 3, 0.0f);
+        func_00287700_if(self, 4, 0.0f);
+        func_00287700_if(self, 6, 0.9090909361839294f);
+        func_00287700_if(self, 7, 0.9090909361839294f);
+        func_00287700_if(self, 8, 0.9090909361839294f);
+        func_00287700_if(self, 9, 0.0f);
+        func_00287700_if(self, 10, 0.0f);
+        func_002875D0(self, 1);
+        break;
+    case 4:
+        func_00287700_if(self, 1, 0.9090909361839294f);
+        func_00287700_if(self, 5, 0.0f);
+        func_00287700_if(self, 2, 0.0f);
+        func_00287700_if(self, 3, 0.0f);
+        func_00287700_if(self, 4, 0.0f);
+        func_00287700_if(self, 6, 0.0f);
+        func_00287700_if(self, 7, 0.0f);
+        func_00287700_if(self, 8, 0.0f);
+        func_00287700_if(self, 9, 0.0f);
+        func_00287700_if(self, 10, 0.0f);
+        func_002875D0(self, 0);
+        break;
+    case 5:
+        func_00287700_if(self, 1, 0.0f);
+        func_00287700_if(self, 5, 0.0f);
+        func_00287700_if(self, 2, 0.0f);
+        func_00287700_if(self, 3, 0.0f);
+        func_00287700_if(self, 4, 0.0f);
+        func_00287700_if(self, 6, 0.0f);
+        func_00287700_if(self, 7, 0.0f);
+        func_00287700_if(self, 8, 0.0f);
+        func_00287700_if(self, 9, 0.0f);
+        func_00287700_if(self, 10, 0.0f);
+        func_002875D0(self, 0);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_00289398);
 INCLUDE_ASM("sound/ssxAudio", func_002893C8);
