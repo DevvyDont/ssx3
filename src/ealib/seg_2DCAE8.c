@@ -2484,7 +2484,27 @@ int BIG_typeofheader(unsigned char *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", BIG_sizeofheader);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int BIG_typeofheader_SZ(unsigned char *) __asm__("BIG_typeofheader");
+
+int BIG_sizeofheader_impl(unsigned char *h) __asm__("BIG_sizeofheader");
+int BIG_sizeofheader_impl(unsigned char *h) {
+    int r = 0;
+    int t = BIG_typeofheader_SZ(h);
+    if (t == 1) {
+        r = ((h[2] << 8) | h[3]) + 4;
+    } else if (t > 0) {
+        if (t < 4) {
+            unsigned char *p = h + 12;
+            r = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", BIG_debuginfo);
@@ -3492,7 +3512,48 @@ void SYNCTASK_init(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_add);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct T_STA { int fn; int mode; int due; int fC; };
+extern struct T_STA D_0051ED98_STA[16] __asm__("D_0051ED98");
+extern int D_00450E00_STA __asm__("D_00450E00");
+extern int D_00450DD0_STA __asm__("D_00450DD0");
+
+void SYNCTASK_add_impl(int fn, int mode, int delay) __asm__("SYNCTASK_add");
+void SYNCTASK_add_impl(int fn, int mode, int delay) {
+    int i;
+    int idx;
+    int skip;
+
+    idx = -1;
+    if (mode == -1) {
+        mode = 0;
+    } else if (mode == 0) {
+        mode = 1;
+    }
+    skip = D_00450E00_STA++;
+    for (i = 0; i < 16; i++) {
+        if (D_0051ED98_STA[i].fn == fn) {
+            idx = i;
+        } else if (D_0051ED98_STA[i].fn == 0 && idx == -1) {
+            if (skip != 0) {
+                skip--;
+            } else {
+                idx = i;
+            }
+        }
+    }
+    if (idx != -1) {
+        D_0051ED98_STA[idx].fn = fn;
+        D_0051ED98_STA[idx].mode = mode;
+        D_0051ED98_STA[idx].due = D_00450DD0_STA + delay;
+        D_0051ED98_STA[idx].fC = 0;
+    }
+    D_00450E00_STA--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_del);

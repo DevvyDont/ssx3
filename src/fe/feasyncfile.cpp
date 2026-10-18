@@ -356,7 +356,35 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A3DC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+extern void* D_00467F28[];
+extern void* D_004A3E90_v __asm__("D_004A3E90");
+
+// Constructor for the memory-card screen: base init, vtable and empty-string fields.
+extern "C" void* func_001A3DC8(void* self, void* a1, void* a2)
+{
+    // An unused 16-byte local is needed to reproduce the 0x30-byte frame.
+    int unused[4];
+    func_001A8500_3(self, (int)a1, (int)a2);
+    void* empty = D_004A3E90_v;
+    *(void***)((char*)self + 0x8) = D_00467F28;
+    *(void**)((char*)self + 0x6D0) = empty;
+    *(void**)((char*)self + 0x6D4) = empty;
+    *(void**)((char*)self + 0x6E0) = empty;
+    *(int*)((char*)self + 0x6F8) = -1;
+    *(int*)((char*)self + 0xC) = 0x46;
+    *(int*)((char*)self + 0x6DC) = 0;
+    *(int*)((char*)self + 0x6E8) = 0;
+    *(int*)((char*)self + 0x6EC) = 0;
+    *(int*)((char*)self + 0x6F0) = 0;
+    *(int*)((char*)self + 0x6F4) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A3E30);
@@ -384,7 +412,70 @@ extern "C" void func_001A3E30()
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A3EA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void cBXString__cBXString(void* self, int flags);
+void cMemMan_free(void* p);
+void operator_delete(int* ptr);
+extern void* D_00467F28[];
+struct sOwner1A5450;
+extern "C" void func_001A5450(sOwner1A5450* self);
+extern "C" void func_001A85D0_dtor3EA0(void* self, int flags) __asm__("func_001A85D0");
+
+struct sVE1A3EA0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline void Dealloc1A3EA0(void** p, int n)
+{
+    if (p != 0) {
+        if (n == 1) {
+            operator_delete((int*)p);
+        } else {
+            cMemMan_free(p);
+        }
+    }
+}
+
+struct sVec1A3EA0 {
+    int f0;
+    void** mBegin;  // 0x4
+    void** mEnd;    // 0x8
+    void** mCap;    // 0xC
+};
+
+struct sOwner1A3EA0 {
+    char pad0[0x8];
+    void* vt;               // 0x8
+    char padC[0x20 - 0xC];
+    char* child;            // 0x20
+    char pad24[0x6D0 - 0x24];
+    char str0[4];           // 0x6D0
+    char str1[0xC];         // 0x6D4
+    char str2[4];           // 0x6E0
+    sVec1A3EA0 mVec;        // 0x6E4
+};
+
+// Destructor for the memory-card screen.
+extern "C" void func_001A3EA0(sOwner1A3EA0* self, int flags)
+{
+    self->vt = D_00467F28;
+    char* child = self->child;
+    sVE1A3EA0* vt = *(sVE1A3EA0**)(child + 0x8);
+    vt[32].fn(child + vt[32].delta);
+    func_001A5450((sOwner1A5450*)self);
+    sVec1A3EA0* v = &self->mVec;
+    Dealloc1A3EA0(v->mBegin, self->mVec.mCap - self->mVec.mBegin);
+    cBXString__cBXString(self->str2, 2);
+    cBXString__cBXString(self->str1, 2);
+    cBXString__cBXString(self->str0, 2);
+    func_001A85D0_dtor3EA0(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A3F68);
@@ -994,7 +1085,27 @@ extern "C" void func_001A4E28(void* self, void* msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A4FB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_001A4E28(void* self, void* msg);
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+
+// While the popup is shown, routes its 0x807 result to func_001A4E28; otherwise to the base handler.
+extern "C" void func_001A4FB0(void* self, int a1, int a2)
+{
+    if (*(int*)((char*)self + 0x1C) & 6) {
+        if (*(int*)(*(char**)((char*)self + 0x6A0) + 0x18) == 0x807) {
+            func_001A4E28(self, (void*)a2);
+        } else {
+            func_001A8E40_3(self, a1, a2);
+        }
+    } else {
+        func_001A8E40_3(self, a1, a2);
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A5010);
 
@@ -1944,7 +2055,57 @@ extern "C" void func_001A71B0(void* self, unsigned int index, const char* name, 
 
 INCLUDE_ASM("fe/feasyncfile", func_001A7390);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A77A0);
+#ifdef SKIP_ASM
+void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
+extern "C" void* cBXString_cBXString2(void* self, const char* str);
+extern char D_00467E18[];
+
+struct sColor1A77A0 {
+    float r, g, b, a;
+};
+
+struct sScreen1A77A0 {
+    char pad0[0x8];
+    void* vt;               // 0x8
+    int id;                 // 0xC
+    char pad10[0x6D0 - 0x10];
+    char name[4];           // 0x6D0
+    int f6D4;               // 0x6D4
+    int f6D8;
+    int f6DC;               // 0x6DC
+    int f6E0;               // 0x6E0
+    int f6E4;               // 0x6E4
+    int f6E8;               // 0x6E8
+    sColor1A77A0 color;     // 0x6EC
+};
+
+// PORT: the unit declares this as (void*, int, void*, int); the body uses typed arguments.
+extern "C" void* func_001A77A0_impl(sScreen1A77A0* self, int a1, int a2, const char* name) __asm__("func_001A77A0");
+
+extern "C" void* func_001A77A0_impl(sScreen1A77A0* self, int a1, int a2, const char* name)
+{
+    // An unused 16-byte local is needed to reproduce the 0x50-byte frame.
+    int unused[4];
+    func_001A8500_3(self, a1, a2);
+    self->vt = D_00467E18;
+    cBXString_cBXString2(self->name, name);
+    self->f6E8 = 1;
+    self->id = 0x49;
+    self->f6D4 = 0;
+    self->f6DC = 0;
+    self->f6E0 = 0;
+    self->f6E4 = 0;
+    sColor1A77A0 c;
+    c.r = 1.0f;
+    c.g = 1.0f;
+    c.b = 1.0f;
+    c.a = 1.0f;
+    self->color = c;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A7848);
@@ -2602,7 +2763,61 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8500);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cBXString_cBXString2(void* self, const char* str);
+extern void* D_0046B808[];
+extern char D_004A1390[];
+extern char D_0045CDE8[];
+
+struct sListNode_8500 {
+    sListNode_8500* next;   // 0x0
+    sListNode_8500* prev;   // 0x4
+    int data;               // 0x8
+};
+
+struct sList_8500 {
+    int count;              // 0x0
+    sListNode_8500* head;   // 0x4
+};
+
+// PORT: the unit declares func_001A8500 with one arg; the body takes (self, engine, owner).
+extern "C" void* func_001A8500_impl(void* self, void* engine, void* owner) __asm__("func_001A8500");
+
+extern "C" void* func_001A8500_impl(void* self, void* engine, void* owner)
+{
+    // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
+    int unused[4];
+    char* s = (char*)self;
+    func_0039E318(self, engine, owner);
+    sList_8500* l = (sList_8500*)(s + 0x6C8);
+    *(int*)(s + 0x48) = 0;
+    *(int*)(s + 0x4C) = 0;
+    *(int*)(s + 0x50) = 0;
+    *(int*)(s + 0x54) = 0;
+    *(int*)(s + 0x58) = 0;
+    *(int*)(s + 0x69C) = 0;
+    *(int*)(s + 0x6A0) = 0;
+    *(int*)(s + 0x6A4) = 0;
+    *(int*)(s + 0x6AC) = 0;
+    *(int*)(s + 0x6B0) = 0;
+    *(int*)(s + 0x6B4) = 0;
+    *(int*)(s + 0x6B8) = 0;
+    *(int*)(s + 0x6A8) = 1;
+    *(int*)(s + 0x6BC) = 2;
+    *(void***)(s + 0x8) = D_0046B808;
+    cBXString_cBXString2(s + 0x6C0, D_004A1390);
+    *(int*)(s + 0x6C4) = 0;
+    *(sListNode_8500**)(s + 0x6CC) = (sListNode_8500*)cMemMan_alloc(0xC, D_0045CDE8, 0x20000000, 0);
+    l->head->next = *(sListNode_8500**)(s + 0x6CC);
+    l->head->prev = *(sListNode_8500**)(s + 0x6CC);
+    *(char*)(s + 0x44) = 0;
+    return self;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001A85D0);
 
@@ -4394,7 +4609,20 @@ extern "C" int func_001AC360(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AC408);
+#ifdef SKIP_ASM
+extern "C" int func_001AC360(void* self);
+extern "C" int func_001AC2B8(void* self);
+
+extern "C" int func_001AC408(void* self)
+{
+    bool ok = true;
+    ok = ok && func_001AC360(self);
+    ok = ok && func_001AC2B8(self);
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AC448);
@@ -5151,7 +5379,48 @@ extern "C" void func_001ADC30(void* self, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001ADDD0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_001A8500_DDD0(void* self, void* engine, void* owner) __asm__("func_001A8500");
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int cBENewRaceInterface_setGameMode_DDD0(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
+extern "C" void cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
+extern int D_004A4E88;
+extern int D_004A11B8;
+extern int D_00535C08[];
+extern char D_00441268[];
+extern void* D_00468E38[];
+
+class cRace_DDD0 {
+public:
+    int pad[3];
+    virtual int reset();
+};
+
+// Derived state constructor: sets the vtable and defaults, then resets the new-race interface (mode 0, event 0).
+extern "C" void* func_001ADDD0(void* self, void* engine, void* owner)
+{
+    char* s = (char*)self;
+    func_001A8500_DDD0(self, engine, owner);
+    *(void***)(s + 0x8) = D_00468E38;
+    *(char**)(s + 0x6D8) = D_00441268;
+    *(int*)(s + 0xC) = 0x3F;
+    *(int*)(s + 0x6D0) = 0;
+    *(int*)(s + 0x6DC) = 0;
+    D_004A4E88 = 0;
+    cRace_DDD0* race = (cRace_DDD0*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    D_004A11B8 = 1;
+    D_00535C08[0] = 0;
+    cBENewRaceInterface_setGameMode_DDD0(race, 0);
+    cBENewRaceInterface_setGameEvent_DDD0(race, 0);
+    race->reset();
+    *(int*)(s + 0x6D4) = 1;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001ADE88);
@@ -5275,7 +5544,23 @@ void* func_001AE0E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AE100);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001AE100(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001AE128);
 
@@ -5993,7 +6278,121 @@ extern "C" void* func_001AFE08(void* self, int a1, int a2, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AFE68);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv_FE68(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" char* func_00263270(void* self, int id);
+extern "C" void* cBXString_operatorE(void* self, void* other);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" int cBENewRaceInterface_setGameMode_FE68(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
+extern "C" void cBENewRaceInterface_setGameEvent_FE68(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
+extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
+extern "C" void func_001B0850(void* self, void* iface, void* screen);
+extern "C" void func_0025E6D0(void* self, const char* str);
+extern "C" void func_001AF930(void* screen);
+extern void* D_004A28A8;
+extern void* D_004A3328;
+extern char* D_004A3028_FE68 __asm__("D_004A3028");
+extern int D_004A11B8;
+extern int D_00535C08[];
+extern int D_00534B34[];
+extern char D_004635D8[];
+
+struct sVE_FE68 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sRaceSetup_FE68 {
+    int f0;
+    char* name;                     // 0x4
+    int f8;
+    int mode;                       // 0xC
+    int event;                      // 0x10
+    int f14;
+    int f18;
+    int f1C;
+    int numAI;                      // 0x20
+    int f24;
+    int info[5];                    // 0x28
+};
+
+struct sRaceFlags_FE68 {
+    char pad0[0x18];
+    unsigned int b0 : 6;
+    unsigned int b6 : 1;
+    unsigned int b7 : 1;
+    unsigned int b8 : 1;
+    unsigned int b9 : 23;
+    char pad1C[0x4];
+};
+extern sRaceFlags_FE68 D_005308B8_FE68 __asm__("D_005308B8");
+
+struct sInfo_FE68 {
+    int v[5];
+};
+
+static inline void vcall_FE68(void* p)
+{
+    sVE_FE68* vt = *(sVE_FE68**)((char*)p + 0xC);
+    ((int (*)(void*))vt[1].fn)((char*)p + vt[1].delta);
+}
+
+// Creates the race-setup screen and applies the selected online race settings.
+extern "C" void func_001AFE68(char* self)
+{
+    sVE_FE68* vt = *(sVE_FE68**)(self + 0x8);
+    vt[32].fn(self + vt[32].delta);
+    void* engine = *(void**)(self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004635D8), 0);
+    *(void**)(self + 0x40) = screen;
+    if (screen == 0)
+        return;
+    cUIScreen_playFrame(screen, 0, 0);
+    if (D_004A3328 == 0)
+        func_00260F80();
+    if (func_00261460(D_004A3328) == 0)
+        func_002613C8(D_004A3328);
+    if (D_004A3328 == 0)
+        func_0025B800(D_004A3028_FE68);
+    char* name = self + 0x6D0;
+    sRaceSetup_FE68* r = (sRaceSetup_FE68*)func_00263270(D_004A3328, *(int*)name);
+    cBXString_operatorE(D_004A3028_FE68 + 0x98, name);
+    *(sInfo_FE68*)(D_004A3028_FE68 + 0xCC) = *(sInfo_FE68*)r->info;
+    if (r == 0)
+        return;
+    cBXString_cBXString4(D_004A3028_FE68 + 0x8C, r->name);
+    func_003E6448(&D_005308B8_FE68, 0, 0x20);
+    D_005308B8_FE68.b6 = r->f18;
+    D_005308B8_FE68.b7 = r->f24;
+    D_005308B8_FE68.b8 = r->f1C;
+    void* be = cBE_getInterface_Fv_FE68(cBE_getBE(), 0);
+    D_00535C08[0] = r->f8;
+    D_004A11B8 = 1;
+    cBENewRaceInterface_setGameMode_FE68(be, r->mode);
+    cBENewRaceInterface_setGameEvent_FE68(be, r->event);
+    cBENewRaceInterface_setNumberAI(be, r->numAI);
+    vcall_FE68(be);
+    void* net = cBE_getInterface_Fv_FE68(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    D_00534B34[0] = r->f14;
+    vcall_FE68(net);
+    func_001B0850(self, be, *(void**)(self + 0x40));
+    func_0025E6D0(D_004A3028_FE68, *(char**)(D_004A3028_FE68 + 0x98));
+    func_001AF930(*(void**)(self + 0x40));
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B00B8);
@@ -6328,7 +6727,23 @@ extern "C" int func_001B0670(cFEVObj_001B0670* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B06E0);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001B06E0(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B0708);
 
@@ -7707,7 +8122,57 @@ extern "C" void func_001B27B0(void* vself, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B2CD0);
+#ifdef SKIP_ASM
+struct cUIText;
+struct sList1A83D8;
+extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern "C" void func_003A19F8(cUIText* text, char* str);
+extern char D_004A1A50[];
+extern "C" void* cBXString_cBXString1(void* self, void* other);
+extern "C" void cBXString__cBXString(void* self, int flags);
+struct cBXString;
+extern "C" void* cBXString_Concat(void* self, const char* str);
+extern "C" cBXString* func_003189A0(cBXString* self, char** other);
+
+struct sBXString1B2CD0 {
+    char* str;
+};
+
+struct sListInfo1B2CD0 {
+    char pad[0xC4];
+    unsigned short pos;     // 0xC4
+    unsigned short a5;      // 0xC6
+    unsigned short a3;      // 0xC8
+};
+
+// Shows the item's name and value text in the list and refreshes it.
+// PORT: the unit declares the info argument as int.
+extern "C" void func_001B2CD0(void* self, int infov)
+{
+    char* info = (char*)infov;
+    char* s = (char*)self;
+    if (*(int*)(s + 0x40) == 0) {
+        return;
+    }
+    sListInfo1B2CD0* list = *(sListInfo1B2CD0**)(s + 0x6F0);
+    if (list == 0) {
+        return;
+    }
+    int a3 = list->a3;
+    int first = a3 == 0;
+    int pos = list->pos;
+    int a5 = list->a5;
+    sBXString1B2CD0 text;
+    cBXString_cBXString1(&text, info + 0x8);
+    cBXString_Concat(&text, D_004A1A50);
+    func_003189A0((cBXString*)&text, (char**)(info + 0xC));
+    func_003A19F8(*(cUIText**)(s + 0x6F0), text.str);
+    func_001A83D8(*(sList1A83D8**)(s + 0x6F0), 0x40, 6, a3, pos, a5, first, 1);
+    cBXString__cBXString(&text, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B2DA0);
@@ -9935,7 +10400,23 @@ extern "C" void func_001B6798(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B6A90);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001B6A90(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B6AB8);
@@ -10176,7 +10657,23 @@ extern "C" void func_001B6E40(void* self, int a1, unsigned int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B6EA8);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001B6EA8(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B6ED0);
@@ -10989,7 +11486,26 @@ extern "C" int func_001B9488(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B9558);
+#ifdef SKIP_ASM
+// The string length is stored 8 bytes before the character data.
+static inline bool has_9558(char* s)
+{
+    return *(int*)(s - 8) != 0;
+}
+
+extern "C" bool func_001B9558(void* self)
+{
+    char** names = *(char***)((char*)self + 0x6D0);
+    bool ok = true;
+    ok = ok && has_9558(names[0]);
+    ok = ok && has_9558(names[1]);
+    ok = ok && has_9558(names[2]);
+    ok = ok && has_9558(names[3]);
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B95C0);
@@ -11491,7 +12007,18 @@ extern "C" int func_001B9FA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BA110);
+#ifdef SKIP_ASM
+extern "C" int func_001BA110(void* self)
+{
+    bool ok = true;
+    ok = ok && func_001B9D68(self);
+    ok = ok && func_001B9FA0(self);
+    ok = ok && func_001B9B18(self);
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BA178);
@@ -12409,7 +12936,58 @@ int func_001BBAA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BBAC8);
+#ifdef SKIP_ASM
+extern char D_00464BF0[];
+extern char D_00464C08[];
+extern char D_00464C20[];
+
+struct sObj1BBAC8 {
+    char data[0xD0];
+};
+
+// Shows the error popup for a failed network operation; returns 1 if the code needs no popup.
+// PORT: callers declare func_001BBAC8 as void; defined under an asm label with its int result.
+extern "C" int func_001BBAC8_impl(void* self, int code) __asm__("func_001BBAC8");
+extern "C" int func_001BBAC8_impl(void* self, int code)
+{
+    sObj1BBAC8 o;
+    func_001C55F8(&o);
+    if (code < 13) {
+        void* p = func_001A9C50(self);
+        *(int*)((char*)p + 0xBC) = 1;
+        char* sub = (char*)p + 0xBC;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00464BF0);
+        *(int*)((char*)p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+        *(int*)((char*)p + 0x150) = 0x80D;
+        func_001A9BC0(self, p);
+        func_001C5750(&o, 2);
+        return 0;
+    } else if (code < 18) {
+        void* p = func_001A9C50(self);
+        *(int*)((char*)p + 0xBC) = -1;
+        *(int*)((char*)p + 0x180) = 0x32;
+        char* sub = (char*)p + 0xBC;
+        *(int*)((char*)p + 0xCC) = GetHashValue32(D_00464C08);
+        *(int*)((char*)p + 0xC8) = 3;
+        *(int*)((char*)p + 0xD4) = GetHashValue32(D_00464C08);
+        *(int*)((char*)p + 0xD0) = 3;
+        *(int*)((char*)p + 0xDC) = *(int*)(*(char**)((char*)self + 0x6D0) + 0x10);
+        *(int*)((char*)p + 0xD8) = 2;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00464C20);
+        *(int*)((char*)p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+        *(int*)((char*)p + 0x150) = 0x821;
+        func_001A9BC0(self, p);
+        func_001C5750(&o, 2);
+        return 0;
+    }
+    func_001C5750(&o, 2);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BBC40);
@@ -17393,7 +17971,30 @@ extern "C" void func_001C4E40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4F58);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_00465F00[];
+extern char D_00465F18[];
+
+// Formats a frame count (60 fps) as hours:minutes:seconds.milliseconds, dropping the hours when zero.
+extern "C" void func_001C4F58(void* self, char* buf, int frames)
+{
+    float t = frames * (1.0f / 60.0f);
+    int ms = (int)((t - (int)t) * 1000.0f);
+    int secs = (int)t;
+    int mins = secs / 60;
+    int hours = mins / 60;
+    secs -= mins * 60;
+    mins -= hours * 60;
+    if (hours > 0) {
+        sprintf(buf, D_00465F00, hours, mins, secs, ms);
+    } else {
+        sprintf(buf, D_00465F18, mins, secs, ms);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5018);

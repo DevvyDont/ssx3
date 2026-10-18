@@ -298,11 +298,157 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D2EA0);
+#ifdef SKIP_ASM
+struct sVEi1D2EA0 { short delta; short index; int (*fn)(void*); };
+struct sVEv1D2EA0 { short delta; short index; void (*fn)(void*, int); };
+extern char D_004A5A58;
 
+static inline int IsShown1D2EA0(char* self)
+{
+    char* w = *(char**)(self + 0x48);
+    return w != 0 && ((*(int*)(w + 0x14) >> 6) & 1);
+}
+
+// Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
+extern "C" int func_001D2EA0(char* self, char* widget)
+{
+    if (IsShown1D2EA0(self)) {
+    sVEi1D2EA0* wvt = *(sVEi1D2EA0**)(widget + 8);
+    if (wvt[6].fn(widget + wvt[6].delta)) {
+        char* snd = *(char**)(*(char**)(self + 0x10) + 0x14);
+        if (snd == 0) {
+            snd = &D_004A5A58;
+        }
+        sVEv1D2EA0* svt = *(sVEv1D2EA0**)snd;
+        svt[2].fn(snd + svt[2].delta, 3);
+        char* w = *(char**)(self + 0x48);
+        sVEv1D2EA0* vt = *(sVEv1D2EA0**)(w + 8);
+        vt[9].fn(w + vt[9].delta, 0);
+    }
+    return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D2F40);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001D2F40(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetEvent);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* t, int id);
+extern "C" void func_001D32E0_MR(void* self) __asm__("func_001D32E0");
+extern "C" void func_0039F400_MR(void* list, void* item) __asm__("func_0039F400");
+extern char D_00467450[];
+extern char D_00467460[];
+extern char D_00467478[];
+extern char D_00467490[];
+
+struct sVE_MR {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sFactory_MR {
+    int pad0;
+    sVE_MR* vt;
+};
+
+struct sTVE_MR {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sText_MR {
+    int pad[2];
+    sTVE_MR* vt;
+};
+
+// Widget events of the mountain-room menu: opens sub-screens and updates the description text.
+extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned int msg)
+{
+    if (w == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5: {
+        int idx = *(int*)(w + 0x18);
+        if (idx == 0) {
+            func_001D32E0_MR(self);
+            break;
+        }
+        sFactory_MR* f = **(sFactory_MR***)(self + 0x10);
+        void* s = f->vt[4].fn((char*)f + f->vt[4].delta, self, idx - 1);
+        func_0039F400_MR(*(char**)(self + 0x10) + 0x18, s);
+        break;
+    }
+    case 6: {
+        sFactory_MR* f = **(sFactory_MR***)(self + 0x10);
+        void* s = f->vt[5].fn((char*)f + f->vt[5].delta, self, *(int*)(w + 0x18));
+        if (s == 0) {
+            break;
+        }
+        func_0039F400_MR(*(char**)(self + 0x10) + 0x18, s);
+        break;
+    }
+    case 1: {
+        if (*(void**)(self + 0x54) == 0) {
+            break;
+        }
+        int h = 0;
+        switch (*(int*)(w + 0x18)) {
+        case 0:
+            h = GetHashValue32(D_00467450);
+            break;
+        case 1:
+            h = GetHashValue32(D_00467460);
+            break;
+        case 2:
+            if (*(int*)(self + 0xB4) > 0) {
+                h = GetHashValue32(D_00467460);
+            } else {
+                h = GetHashValue32(D_00467478);
+            }
+            break;
+        case 3:
+            if (*(int*)(self + 0xB4) >= 2) {
+                h = GetHashValue32(D_00467460);
+            } else {
+                h = GetHashValue32(D_00467490);
+            }
+            break;
+        }
+        sText_MR* t = *(sText_MR**)(self + 0x54);
+        t->vt[9].fn((char*)t + t->vt[9].delta, 1);
+        cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x54), h);
+        break;
+    }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3120);
@@ -336,7 +482,66 @@ extern "C" void func_001D3160(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D31C0);
+#ifdef SKIP_ASM
+extern "C" int func_0019E238(void* mgr, int bank, int i);
+extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
+extern "C" void func_001D32E0(void* self);
+extern char D_004A1F40[];
+
+struct sVE_31C0 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, void*, int, int, int);
+};
+
+struct sWidget_31C0 {
+    char pad0[0x14];
+    int flags;      // 0x14
+};
+
+static inline int isActive_31C0(sWidget_31C0* w)
+{
+    return w != 0 && ((w->flags >> 6) & 1);
+}
+
+// Starts the preview sound of the selected lodge item once its bank entry has loaded.
+extern "C" void func_001D31C0(void* p)
+{
+    char* self = (char*)p;
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    if (*(void**)(self + 0x50) == 0) {
+        return;
+    }
+    if (func_0019E238(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC)) == 0) {
+        return;
+    }
+    char* e = (char*)func_0019E2B0(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
+    char* g = (char*)D_004A289C;
+    sVE_31C0* vt = *(sVE_31C0**)(g + 0x10D8);
+    int id = vt[46].fn(g + vt[46].delta, e + *(int*)(e + 0x14), D_004A1F40, 0, 1, -1);
+    char* snd = *(char**)(self + 0x50);
+    *(int*)(self + 0xC4) = id;
+    *(int*)(snd + 0x78) = id;
+    *(int*)(snd + 0x7C) = 0;
+    sWidget_31C0* a = *(sWidget_31C0**)(self + 0x48);
+    if (isActive_31C0(a)) {
+        int both = 0;
+        if (isActive_31C0(a)) {
+            sWidget_31C0* b = *(sWidget_31C0**)(self + 0x4C);
+            if (b != 0) {
+                both = (b->flags >> 6) & 1;
+            }
+        }
+        if (!both) {
+            func_001D32E0(self);
+        }
+    }
+    func_0019DC20(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
+    *(int*)(self + 0xBC) = -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D32E0);

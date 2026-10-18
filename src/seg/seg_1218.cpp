@@ -262,7 +262,77 @@ extern "C" float func_00100348_0348(char* self, sV4_0348* target)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00100610);
+#ifdef SKIP_ASM
+struct sV4_0610 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_0610 Add_0610(const sV4_0610& a, const sV4_0610& b)
+{
+    sV4_0610 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_0610 Sub_0610(const sV4_0610& a, const sV4_0610& b)
+{
+    sV4_0610 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_0610 Scale_0610(const sV4_0610& v, float s)
+{
+    sV4_0610 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+struct sCam_0610 {
+    char pad0[0x110];
+    sV4_0610 pos;       // 0x110
+    char pad120[0x490 - 0x120];
+    sV4_0610 target;    // 0x490
+    char pad4A0[0x10];
+    sV4_0610 base;      // 0x4B0
+};
+
+// PORT: the unit later declares func_00100610 with the out-pointer spelled out; same symbol, by-value return here
+sV4_0610 func_00100610_0610(char* self) __asm__("func_00100610");
+
+sV4_0610 func_00100610_0610(char* self)
+{
+    sV4_0610 d = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
+    d = Scale_0610(d, 0.1f);
+    return Add_0610((*(sCam_0610**)(self + 0x18))->base, d);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00100680);
@@ -677,11 +747,99 @@ extern "C" void func_00100F88(char* self, sPad_0F88* pad)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00101310);
+#ifdef SKIP_ASM
+extern "C" void func_00101688(void* self);
+
+struct sSlotA_101310 {
+    char pad[0x18];
+    unsigned int id;
+    sSlotA_101310() : id(0xFFFFFFFF) {}
+};
+
+struct sSlotB_101310 {
+    unsigned int id;
+    char pad[0xC];
+    sSlotB_101310() : id(0xFFFFFFFF) {}
+};
+
+class cTable_101310 {
+public:
+    void* owner;
+    sSlotA_101310 a[64];
+    char pad704[0x50];
+    sSlotB_101310 b[64];
+    cTable_101310(void* o);
+};
+
+cTable_101310::cTable_101310(void* o)
+{
+    owner = o;
+    func_00101688(this);
+}
+// PORT: the compiler names this ctor __13cTable_101310Pv; expose it under the address-derived name.
+__asm__(".globl func_00101310\n.type func_00101310,@function\nfunc_00101310 = __13cTable_101310Pv\n.size func_00101310,0x94\n");
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_001013A8);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00101688);
+#ifdef SKIP_ASM
+struct sSlotA_101688 {
+    int f0;
+    int f4;
+    int state;          // 0x8
+    char padC[0x10];
+};
+
+struct sPair_101688 {
+    int a;
+    int b;
+    int c;
+};
+
+struct sNode_101688 {
+    int f0;
+    int f4;
+    int f8;
+    sNode_101688* next; // 0xC
+};
+
+struct sTable_101688 {
+    void* owner;                // 0x000
+    sSlotA_101688 slots[64];    // 0x004
+    int count;                  // 0x704
+    int f708;                   // 0x708
+    sPair_101688 pairs[6];      // 0x70C
+    sNode_101688 nodes[64];     // 0x754
+    sNode_101688* freeList;     // 0xB54
+    int fB58;                   // 0xB58
+    int fB5C;                   // 0xB5C
+};
+
+extern "C" void func_00101688(void* vself)
+{
+    sTable_101688* self = (sTable_101688*)vself;
+    int i;
+    self->count = 0;
+    int j;
+    for (j = 0; j < 64; j++)
+        self->slots[j].state = 2;
+    for (i = 0; i < 6; i++) {
+        self->pairs[i].a = 0;
+        self->pairs[i].b = 0;
+    }
+    for (i = 0; i < 63; i++)
+        self->nodes[i].next = &self->nodes[i + 1];
+    self->freeList = self->nodes;
+    self->nodes[63].next = 0;
+    self->fB58 = 0;
+    self->fB5C = 0;
+    self->f708 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00101728);
@@ -1011,7 +1169,37 @@ extern "C" void func_001033B0(void *arg0, V_33B0 *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001033F8);
+#ifdef SKIP_ASM
+struct sEntry1033F8 {
+    int id;
+    int data[7];
+} __attribute__((aligned(16)));
+
+struct sList1033F8 {
+    int count;
+    char pad4[0xC];
+    sEntry1033F8 entries[6];    // 0x10
+    int fD0;                    // 0xD0
+};
+
+// Removes the entry with the given id from the list, shifting the rest down.
+extern "C" void func_001033F8(sList1033F8* self, int id)
+{
+    int i;
+    self->fD0 = -1;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i].id == id) {
+            for (i++; i < self->count; i++) {
+                self->entries[i - 1] = self->entries[i];
+            }
+            self->count--;
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103480);
@@ -3257,7 +3445,60 @@ extern "C" char* func_00108C80(char* self, int inChrg, int actor)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00108E88);
+#ifdef SKIP_ASM
+class cObj_8E88b;
+typedef void (cObj_8E88b::*Fn_8E88b)();
+extern "C" Fn_8E88b D_0043CF20_8E88b[4] __asm__("D_0043CF20");
+struct sQ_8E88 {
+    int v[4];
+} __attribute__((aligned(16)));
+extern sQ_8E88 D_004FF130_8E88 __asm__("D_004FF130");
+extern "C" void func_0010CAB8(void* self);
+extern "C" void func_0010D170(void* self);
+extern "C" void* func_003E6448_8E88(void* dst, int value, int size) __asm__("func_003E6448");
+
+// PORT: the unit later declares func_00108E88 without parameters; it takes the rider.
+void func_00108E88_self(char* self) __asm__("func_00108E88");
+
+void func_00108E88_self(char* self)
+{
+    *(int*)(self + 0xE0C) = -1;
+    *(int*)(self + 0xE10) = 0;
+    *(int*)(self + 0xE14) = 0;
+    *(int*)(self + 0xE18) = 0;
+    *(int*)(self + 0xE20) = 0;
+    *(int*)(self + 0xE24) = 0;
+    *(int*)(self + 0xE28) = 0;
+    *(int*)(self + 0xE1C) = 0;
+    *(int*)(self + 0xE2C) = 0;
+    *(int*)(self + 0xE38) = 0;
+    *(int*)(self + 0xE3C) = 0;
+    *(int*)(self + 0xE30) = 0;
+    *(int*)(self + 0xE34) = 0;
+    *(int*)(self + 0xDF0) = 0;
+    *(int*)(self + 0xE74) = 0;
+    *(int*)(self + 0xE78) = 0;
+    *(short*)(self + 0xF38) = 0;
+    *(int*)(self + 0xF30) = 0;
+    *(int*)(self + 0xF34) = 0;
+    *(sQ_8E88*)(self + 0xE50) = D_004FF130_8E88;
+    *(sQ_8E88*)(self + 0xE60) = D_004FF130_8E88;
+    *(int*)(self + 0xE40) = 0;
+    func_0010CAB8(self);
+    *(int*)(self + 0xE70) = -1;
+    *(float*)(self + 0xDF4) = 1.0f;
+    *(Fn_8E88b*)(self + 0xF44) = D_0043CF20_8E88b[1];
+    *(short*)(self + 0xF38) = 1;
+    do {
+        func_003E6448_8E88(self + 0xE7C, 0, 0x3C);
+        func_003E6448_8E88(self + 0xEB8, 0, 0x3C);
+        func_003E6448_8E88(self + 0xEF4, 0, 0x3C);
+    } while (0);
+    func_0010D170(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00108F88);
@@ -3289,7 +3530,30 @@ extern "C" void func_0010A898(char *arg0, C_A898 *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010A8E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cObj_A8E8;
+typedef void (cObj_A8E8::*Fn_A8E8)();
+extern "C" Fn_A8E8 D_0043CF20_A8E8[4] __asm__("D_0043CF20");
+extern "C" void func_00111D98(void* self, void* src);
+
+class cStream_A8E8 {
+public:
+    virtual void v1();
+    virtual void read(void* dst, int size);
+};
+
+extern "C" void func_0010A8E8(char* self, cStream_A8E8* in)
+{
+    func_00111D98(self, in);
+    in->read(self + 0xDF0, 0x150);
+    short state = *(short*)(self + 0xF38);
+    *(Fn_A8E8*)(self + 0xF44) = D_0043CF20_A8E8[state];
+    *(short*)(self + 0xF38) = state;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010A960);

@@ -624,7 +624,102 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_00189D60);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0039A7A8(void* self, int v);
+extern "C" int func_0039A738(void* self);
+extern "C" void func_00228C08(void* p);
+extern char* D_00440FD8[];
+extern void* D_004A28A8;
+extern void* D_004A289C;
+
+struct sGameCfg_189D60 {
+    unsigned int pad0 : 19;
+    unsigned int showHud : 1;       // bit 19
+    unsigned int f20 : 2;           // bits 20-21
+    unsigned int mode : 3;          // bits 22-24
+    unsigned int pad25 : 7;
+    signed char f4;
+    signed char f5;                 // 0x5
+    signed char f6;                 // 0x6
+    char pad7[0x288 - 7];
+};
+// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_189D60 D_00535610_189D60 __asm__("D_00535610");
+
+struct sOptionIface_189D60 {
+    sGameCfg_189D60 getOptions() { return D_00535610_189D60; }
+};
+
+struct sVE_189D60a {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sVE_189D60b {
+    short delta;
+    short index;
+    void (*fn)(void*, char);
+};
+struct sVE_189D60c {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int);
+};
+
+struct sOptGame_189D60 {
+    char pad0[0x40];
+    char* screen;                   // 0x40
+    char pad44[0x4];
+    signed char item[3];            // 0x48
+};
+
+static inline void* find_189D60(sOptGame_189D60* self, int i)
+{
+    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00440FD8[self->item[i]]));
+}
+
+// Pushes the current game options into the option widgets of the screen.
+extern "C" void func_00189D60(void* self_)
+{
+    sOptGame_189D60* self = (sOptGame_189D60*)self_;
+    sOptionIface_189D60* iface = (sOptionIface_189D60*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    if (self->item[0] >= 0) {
+        void* w = find_189D60(self, 0);
+        if (w != 0) {
+            func_0039A7A8(w, iface->getOptions().mode);
+            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            sVE_189D60b* vt = *(sVE_189D60b**)(o + 4);
+            vt[3].fn(o + vt[3].delta, func_0039A738(w));
+            char* scr = self->screen;
+            sVE_189D60a* vt2 = *(sVE_189D60a**)(scr + 0x48);
+            char* sub = scr + 0x40;
+            vt2[16].fn(sub + vt2[16].delta);
+        }
+    }
+    if (self->item[1] >= 0) {
+        void* w = find_189D60(self, 1);
+        if (w != 0)
+            func_0039A7A8(w, iface->getOptions().showHud);
+    }
+    if (self->item[2] >= 0) {
+        void* w = find_189D60(self, 2);
+        if (w != 0)
+            func_0039A7A8(w, iface->getOptions().f20);
+    }
+    char* g = (char*)D_004A289C;
+    sVE_189D60c* vt = *(sVE_189D60c**)(g + 0x10D8);
+    char* thisp = g + vt[12].delta;
+    void (**pf)(void*, int, int) = &vt[12].fn;
+    (*pf)(thisp, iface->getOptions().f6, iface->getOptions().f5);
+    func_00228C08(D_004A28A8);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A258);
@@ -809,7 +904,149 @@ extern "C" int func_0018A8C0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018A8D0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_0039F400(void* list, void* item);
+extern "C" int func_0039A738(void* self);
+extern "C" void func_0018BEF8(void* self, unsigned int mode);
+extern "C" void* func_0028B180();
+extern "C" void func_00287410(void* snd, int v);
+extern "C" void func_00287488(void* snd, int v);
+extern "C" void func_00287520(void* snd, int v);
+extern "C" void func_00287558(void* snd, int v);
+extern "C" void func_002875D0(void* snd, int v);
+extern char D_0045DD68[];
+extern void* D_0046B3D0[];
+extern char D_004A1568[];
+extern char D_004A1590[];
+extern char D_004A1598[];
+extern char D_004A15A0[];
+extern char D_004A15A8[];
+extern char D_004A15B0[];
+extern char D_004A15B8[];
+extern int D_004A1A70;
+extern int D_004A14D4;
+
+struct sSndCfg_18A8D0 {
+    unsigned int sfxVol : 4;        // bits 0-3
+    unsigned int musicVol : 4;      // bits 4-7
+    unsigned int speechVol : 4;     // bits 8-11
+    unsigned int output : 2;        // bits 12-13
+    unsigned int pad14 : 2;
+    int f16 : 1;                    // bit 16
+    int f17 : 1;                    // bit 17
+    int f18 : 1;                    // bit 18
+    int pad19 : 13;
+    char rest[0x288 - 4];
+};
+// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
+extern sSndCfg_18A8D0 D_00535610_18A8D0 __asm__("D_00535610");
+
+struct sVE_18A8D0a {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVE_18A8D0c {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+static inline int Is_18A8D0(int id, char* s)
+{
+    return id == GetHashValue32(s);
+}
+
+static inline sSndCfg_18A8D0 Cfg_18A8D0()
+{
+    return D_00535610_18A8D0;
+}
+
+struct sOptSound_18A8D0 {
+    char pad0[0x10];
+    char* engine;                   // 0x10
+};
+
+// Sound options screen: widget event handler (popup, apply on exit, value changes).
+extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int event)
+{
+    if (widget == 0)
+        return;
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (event) {
+    case 5: // empty case; needed for the original compare-tree shape
+        break;
+    case 7: {
+        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        func_0039E318(p, self->engine, self);
+        *(void***)(p + 8) = D_0046B3D0;
+        p[0x48] = 0;
+        func_0039F290(self->engine + 0x18, p);
+        break;
+    }
+    case 6: {
+        {
+            sVE_18A8D0a* vt = *(sVE_18A8D0a**)(iface + 0xC);
+            vt[1].fn(iface + vt[1].delta);
+        }
+        func_00287410(func_0028B180(), Cfg_18A8D0().sfxVol);
+        func_00287488(func_0028B180(), Cfg_18A8D0().speechVol);
+        func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
+        func_00287558(func_0028B180(), Cfg_18A8D0().f17 != 0);
+        func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
+        char* eng = *(char**)self->engine;
+        sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
+        void* r = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
+        if (r != 0)
+            func_0039F400(self->engine + 0x18, r);
+        break;
+    }
+    case 9:
+        if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1568)) {
+            D_00535610_18A8D0.output = func_0039A738(widget);
+            func_0018BEF8(self, func_0039A738(widget));
+        }
+        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1590)) {
+            unsigned char vol = *(unsigned char*)(widget + 0x74);
+            D_00535610_18A8D0.sfxVol = vol;
+            func_00287410(func_0028B180(), Cfg_18A8D0().sfxVol);
+        }
+        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1598)) {
+            unsigned char vol = *(unsigned char*)(widget + 0x74);
+            D_00535610_18A8D0.speechVol = vol;
+            func_00287488(func_0028B180(), Cfg_18A8D0().speechVol);
+        }
+        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15A0)) {
+            unsigned char vol = *(unsigned char*)(widget + 0x74);
+            D_00535610_18A8D0.musicVol = vol;
+            func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
+        }
+        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15A8)) {
+            D_00535610_18A8D0.f17 = func_0039A738(widget) != 0;
+            func_00287558(func_0028B180(), Cfg_18A8D0().f17 != 0);
+        }
+        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15B0)) {
+            D_00535610_18A8D0.f16 = func_0039A738(widget) != 0;
+            func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
+        }
+        bool on = D_004A1A70 == 1;
+        if (on && Is_18A8D0(*(int*)(widget + 0x38), D_004A15B8))
+            D_00535610_18A8D0.f18 = func_0039A738(widget) != 0;
+        D_004A14D4 = 1;
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
 
@@ -1388,7 +1625,44 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018CCE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00147618(void* player, int which);
+// func_0018CF50 returns void; declaring it int ($v0 set by the call) reproduces the original argument scheduling.
+extern "C" int func_0018CF50_CCE0(void* self, int on) __asm__("func_0018CF50");
+
+// Options toggle row: accept flips the setting chosen by the cursor (items 2 and 3), back is consumed.
+extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
+{
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    switch (key) {
+    case 9:
+        return 0x100;
+    case 5: {
+        int which;
+        switch (*(unsigned char*)(menu + 0x95)) {
+        case 2:
+            which = 0;
+            break;
+        case 3:
+            which = 1;
+            break;
+        default:
+            return 0x101;
+        }
+        func_0018CF50_CCE0(self, func_00147618(player, which) == 0);
+        return 0x101;
+    }
+    case 6:
+        return 0;
+    }
+    return 0x101;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018CDB0);
@@ -1645,7 +1919,23 @@ extern "C" void func_0018D3C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018D438);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_0018D438(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018D460);

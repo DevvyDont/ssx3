@@ -284,7 +284,141 @@ extern "C" void func_001C5F20(void* self, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_FillObjectPointers);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_0045DB90[];
+extern char D_00465FA8[];
+extern char D_00465FB8[];
+extern char D_00465FC8[];
+extern char D_00465FD8[];
+extern char D_00465FE8[];
+extern char D_00465FF8[];
+extern char D_00466008[];
+extern char D_00466018[];
+extern char D_00466028[];
+extern char D_00466038[];
+extern char D_00466048[];
+extern char D_00466058[];
+extern char D_00466070[];
+extern char D_004A1C60[];
+extern char D_004A1C68[];
+extern char D_004A1C70[];
+extern char D_004A1C78[];
+extern char D_00466080[];
+
+struct sV3_6260 {
+    float x, y, z;
+};
+
+struct sVE_6260 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sObj_6260 {
+    char pad0[0x8];
+    sVE_6260* vt;                   // 0x8
+    char padC[0x44 - 0xC];
+    sV3_6260 pos;                   // 0x44
+    void GetRect(void* out) { vt[20].fn((char*)this + vt[20].delta, out); }
+};
+
+static inline sObj_6260* find_6260(void* self, char* name)
+{
+    return (sObj_6260*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+}
+
+#define POS_6260(o) (*(sV3_6260*)((char*)self + (o)))
+#define OBJ_6260(o) (*(sObj_6260**)((char*)self + (o)))
+
+// Looks up the popup's widgets by name and caches them (and their positions) in the screen object.
+extern "C" void cScreenPopup_FillObjectPointers(void* self)
+{
+    if (sObj_6260* o = find_6260(self, D_004A1C60)) {
+        POS_6260(0x188) = o->pos;
+        o->GetRect((char*)self + 0x1F4);
+        OBJ_6260(0x48) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_004A1C68)) {
+        POS_6260(0x194) = o->pos;
+        OBJ_6260(0x4C) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00465FA8))
+        OBJ_6260(0x64) = o;
+    if (sObj_6260* o = find_6260(self, D_00465FB8)) {
+        POS_6260(0x230) = o->pos;
+        OBJ_6260(0x54) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00465FC8)) {
+        POS_6260(0x224) = o->pos;
+        OBJ_6260(0x50) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00465FD8)) {
+        POS_6260(0x248) = o->pos;
+        OBJ_6260(0x5C) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00465FE8)) {
+        POS_6260(0x23C) = o->pos;
+        o->GetRect((char*)self + 0x218);
+        OBJ_6260(0x58) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_004A1C70)) {
+        POS_6260(0x254) = o->pos;
+        OBJ_6260(0x60) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00465FF8))
+        OBJ_6260(0x68) = o;
+    if (sObj_6260* o = find_6260(self, D_0045DB90)) {
+        POS_6260(0x1A0) = o->pos;
+        OBJ_6260(0x6C) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_004A1C78)) {
+        POS_6260(0x1AC) = o->pos;
+        OBJ_6260(0x70) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00466008)) {
+        POS_6260(0x1C4) = o->pos;
+        OBJ_6260(0x74) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00466018)) {
+        POS_6260(0x1B8) = o->pos;
+        OBJ_6260(0x7C) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00466028)) {
+        POS_6260(0x1D0) = o->pos;
+        OBJ_6260(0x78) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00466038)) {
+        POS_6260(0x1DC) = o->pos;
+        OBJ_6260(0x80) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00466048)) {
+        POS_6260(0x1E8) = o->pos;
+        OBJ_6260(0x88) = o;
+    }
+    if (sObj_6260* o = find_6260(self, D_00466058))
+        OBJ_6260(0x84) = o;
+    if (sObj_6260* o = find_6260(self, D_00466070)) {
+        POS_6260(0x200) = o->pos;
+        o->GetRect((char*)self + 0x20C);
+        OBJ_6260(0x8C) = o;
+    }
+    for (int i = 0; i < 5; i++) {
+        char name[32];
+        sprintf(name, D_00466080, i);
+        sObj_6260* o = find_6260(self, name);
+        if (o != 0)
+            ((sObj_6260**)((char*)self + 0x90))[i] = o;
+    }
+}
+#undef POS_6260
+#undef OBJ_6260
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C66E8);
@@ -2288,7 +2422,23 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CAED8);
+#ifdef SKIP_ASM
+// Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001CAED8(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 7) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CAF00);
@@ -2651,7 +2801,63 @@ extern "C" void func_001CB500(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CB650);
+#ifdef SKIP_ASM
+// PORT: func_001CE560's third parameter is an int* out-param; the unit declares it (void*, int, int).
+int func_001CE560_out(void* self, int idx, int* out) __asm__("func_001CE560");
+extern signed char D_00441390[];
+
+extern "C" void func_001CB650(void* self, int a1)
+{
+    bool b = *(int*)((char*)self + 0x68) != 0;
+    int flag;
+    if (*(int*)((char*)self + 0x6C)) {
+        flag = b;
+        flag = !flag;
+    } else {
+        flag = b != 0;
+    }
+    int idx = *(int*)((char*)self + 0x140);
+    int old = *(int*)((char*)self + 0x434);
+    if (idx >= 15 && idx <= 26) {
+        // PORT: reads the int field at 0x6C as a bool (bool is 4 bytes in SN gcc 2.95); use `*(int*)... == 0` off-PS2.
+        flag = !*(bool*)((char*)self + 0x6C);
+    }
+    int st = *(int*)((char*)self + 0x430);
+    if (a1) {
+        *(int*)((char*)self + 0x434) = idx;
+        *(int*)((char*)self + 0x430) = 3;
+        if (st == 2) {
+            int v = *(int*)((char*)self + 0x144);
+            if (v == 2 || (flag && v == 0) || (!flag && v == 0)) {
+                if (func_001CE560_out(self, old, 0)) {
+                    // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
+                    do {
+                        *(int*)((char*)self + 0x140) = old;
+                        return;
+                    } while (0);
+                }
+            }
+        }
+    }
+    int s = *(int*)((char*)self + 0x140);
+    if (s == 13 || s == 27 || s == 41 || s == 55 || s == 69 || s == 83)
+        *(int*)((char*)self + 0x140) -= 13;
+    else
+        *(int*)((char*)self + 0x140) = s + 1;
+    while (D_00441390[*(int*)((char*)self + 0x140)] == 0x2A)
+        *(int*)((char*)self + 0x140) += 1;
+    int val;
+    if (func_001CE560_out(self, *(int*)((char*)self + 0x140), &val)) {
+        *(int*)((char*)self + 0x144) = 2;
+    } else {
+        func_001CB650(self, 0);
+        if (val)
+            *(int*)((char*)self + 0x144) = flag == 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CB7F0);
