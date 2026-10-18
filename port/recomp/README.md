@@ -55,7 +55,7 @@ or any disc file.
     fails it is dropped anyway, and rounding filtered texels without a libm call. 8,000 GS packets recorded in a race
     replay to the same VRAM about 10% faster;
   - GS drawing on worker threads. The runner queues draws, uploads and VRAM writes, and every worker runs them in
-    order, each in the rounding mode its caller had, drawing only its own bands of 16 rows. Uploads, VRAM writes, and
+    order, each in the rounding mode its caller had, drawing only its own bands of rows. Uploads, VRAM writes, and
     draws that read what another worker may still be drawing (render to texture, effects that read their own
     framebuffer) wait for every worker at that point and run on one. Anything that reads VRAM back waits for the queue
     first, so what the game sees is unchanged, and the window shows a frame once everything drawn before it is done,
@@ -78,6 +78,49 @@ or any disc file.
     builds the player's rider on a newly started loader thread, turning each bone's rest pose from a quaternion with
     code that reads `vf0`, so the bones' rest-pose matrices came out as zeros and the player's rider drew tiny, with
     stretched legs, in front of the camera;
+  - SPU2 AutoDMA transfers finishing once the SPU2 would have played them, one stereo frame per 48 kHz sample, and
+    their sound playing through the PC's audio device. SSX 3's sound driver mixes everything on the IOP and streams
+    the mix to core 0 in blocks of 512 frames. The runtime dropped the data and finished each block about 400 times
+    too soon, so the driver kept resending stale blocks. Paced, a race draws about 4% more frames;
+  - a VU1 interpreter that does about half the work for the same results. The add, subtract, multiply and
+    multiply-add instructions run on all four fields at once with SSE4.1, with a short path for their flags when
+    every result is an ordinary float. Each instruction pair's register waits are worked out once, when the code is
+    decoded. Queued flags, stores and integer writes land through a wheel of per-cycle slots instead of being
+    searched for every cycle, and vector and `ACC` results go into the registers when they issue, since every read
+    of a field already waits until its result is due. The 4,000 recorded VU1 runs still give bit-identical output,
+    with 46% fewer instructions. In a race on a 4-core machine the game thread went from busy nearly all the time
+    to about two thirds of it, and now waits on the two GS workers;
+  - the GS rasterizer settling a draw's texture and pixel setup once per primitive instead of for every pixel: the
+    wrap modes, texel format, frame and depth formats and blend inputs are worked out before the pixel loop, filtered
+    texels are blended four channels at a time with SSE2, and each palette entry is converted once per CLUT load
+    rather than for every texel. A primitive whose texture shares no VRAM page with the buffers it draws to reads its
+    texels straight from VRAM instead of copying each 8 KiB page first. The 8,000 recorded race packets replay to the
+    same VRAM, also with round-toward-zero and on several workers, with 22% fewer instructions. A race on a 4-core
+    machine went from about 8 to about 10 frames a second;
+  - the GS workers drawing bands of 4 rows instead of 16, and waiting for each other once per texture rather than
+    once per mip level: a texture's transfers, texture flushes and CLUT load now run together while the workers
+    wait. With 16-row bands a small object's rows fell to only a few workers. Replaying the recorded race packets on
+    8 workers, the busiest drew 42% more pixels between waits than the average, and 6% more with 4-row bands, for
+    the same total work. On a 4-core machine's two workers neither change moved the frame rate;
+  - a second round on the VU1 interpreter, again with the same results. `MAX`, `MINI`, `ITOF`, `FTOI`, `ABS`,
+    `OPMULA` and `OPMSUB` now run on all four fields at once too, and upper `NOP`s are skipped. `ACC` is ready for
+    the very next instruction, so the bookkeeping of when its fields land never changed anything and is gone. Flag
+    results land in the order they issued, each as bits to keep and bits to set, and an integer register
+    write due by the next cycle goes straight into the register. The 4,000 recorded VU1 runs still give
+    bit-identical output, with 18% fewer instructions, and replay 1.4 times as fast in the 32-bit build; 400,000
+    random microprograms end in the same state as before the change. In a race on a 4-core machine the GS workers
+    still set the pace: about 9 frames a second against 8.5 before, within this machine's run-to-run noise;
+  - compiled blocks for VU1 programs, again with the same results. A VU1 instruction's stall depends only on how
+    many cycles each queued result still needs, never on a value, so a straight run of instruction pairs is
+    compiled once for each start address and pipeline timing it is entered with, with every stall known ahead.
+    Blocks skip the interpreter's hazard checks and per-cycle commits and run the common pairs through decoded
+    paths; stores land as they issue, and flag results stay queued until something reads them. Anything a block
+    can't run (D or T bits, a reserved op, the end of the cycle budget, a GS packet error) hands over to the
+    interpreter at that pair with the pipeline timing rebuilt. Blocks are kept for up to 8 code images, found by
+    content, since the game uploads the same microcode again and again. The 4,000 recorded VU1 runs still give
+    bit-identical output with 48% fewer instructions, and replay twice as fast in the 32-bit build. A test runs
+    3,000 random microprograms both ways. In a race on a 4-core machine the game thread is busy about a third
+    less for the same frame rate, which the GS workers still set. `PS2X_VU1_COMPILED=0` turns them off;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -162,8 +205,10 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
 input through the front end to a race. In the race, the HUD, sky, mountains, start-gate stadium, riders, their
 shadows and the course draw with the right textures, and the race plays from the gate down the first slope.
-Sound has not been tested yet.
+Sound plays through the PC's audio device: the music, and the radio track shown at the start of a race. The game
+makes sound only as fast as it runs, so while it runs slower than the PS2 the sound comes in short runs with gaps.
 
-It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 5 to 7 frames a second.
+It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 10 frames a second. There the two GS
+worker threads set the pace: the game thread waits on them about a third of the time.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
