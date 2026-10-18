@@ -105,13 +105,98 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int f28,
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00251998);
+#ifdef SKIP_ASM
+extern "C" void func_003E56E0(void*);
+
+extern "C" int func_00251998(int id)
+{
+    void** slot = &D_004D2438[id & 0x3F];
+    sMemClass_251718* cls = (sMemClass_251718*)*slot;
+    int r = 0;
+    if (cls != 0) {
+        if (cls->locked != 0) {
+            func_003E56E0(cls->sema);
+        }
+        func_003E6448(cls, 0, 0x50);
+        *slot = 0;
+        r = 1;
+    }
+    return r;
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00251A08);
+#ifdef SKIP_ASM
+extern "C" void* func_002523A8(void* self);
+struct sMemNode_251A08 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    sMemNode_251A08* next;
+};
+
+struct sMemClass_251A08 {
+    char pad0[0x8];
+    sMemNode_251A08* first;     // 0x8
+};
+
+extern "C" void* func_00251A08(int id)
+{
+    sMemClass_251A08* cls = (sMemClass_251A08*)D_004D2438[id & 0x3F];
+    void* r = (void*)1;
+    for (sMemNode_251A08* n = cls->first; n != 0 && r != 0; n = n->next) {
+        if (!(n->flags & 0xC000)) {
+            r = func_002523A8((char*)n + 0x10);
+        }
+    }
+    return r;
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_00251A80);
 INCLUDE_ASM("mem/memstd", func_00251AC0);
 INCLUDE_ASM("mem/memstd", func_00251B50);
 INCLUDE_ASM("mem/memstd", func_00251BB0);
+//100%
 INCLUDE_ASM("mem/memstd", func_00251C38);
+#ifdef SKIP_ASM
+struct sMemNode_251C38 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    sMemNode_251C38* next;
+};
+
+struct sMemClass_251C38 {
+    char pad0[0x8];
+    sMemNode_251C38* first;     // 0x8
+};
+
+int func_00252658(void* self);
+extern "C" int func_0041AA88(int, int);
+
+extern "C" void* func_00251C38(int name)
+{
+    int i;
+    for (i = 0; i < 0x40; i++) {
+        sMemClass_251C38* cls = (sMemClass_251C38*)D_004D2438[i & 0x3F];
+        if (cls != 0) {
+            sMemNode_251C38* n = cls->first;
+            void* data = (char*)n + 0x10;
+            do {
+                int s = func_00252658(data);
+                if (s != 0 && func_0041AA88(s, name) == 0) {
+                    return data;
+                }
+                n = n->next;
+                data = (char*)n + 0x10;
+            } while (n != 0);
+        }
+    }
+    return 0;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00251CF0);
 #ifdef SKIP_ASM
@@ -601,10 +686,79 @@ extern "C" void func_002530D0(int arg0) {
     func_00252A10(0, arg0, 0, 0, 0, 0);
 }
 #endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00253100);
+#ifdef SKIP_ASM
+extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int back)
+{
+    sMemNode_251718* n = &cls->head;
+    if (back == 0) {
+        do {
+            n = n->next;
+        } while (n->size < size);
+    } else {
+        do {
+            n = n->prev;
+        } while (n->size < size);
+    }
+    return n->tag != 0x4253 ? n : 0;
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_00253170);
+//100%
 INCLUDE_ASM("mem/memstd", func_00253230);
+#ifdef SKIP_ASM
+extern "C" int func_00253230(sMemClass_251718* cls, int back)
+{
+    int total = 0;
+    if (back == 0) {
+        sMemNode_251718* n = cls->head.next;
+        while (n->tag != 0x4253) {
+            int size = n->size;
+            int rest = total - 0x10;
+            n = n->next;
+            total = rest + size;
+        }
+    } else {
+        sMemNode_251718* n = cls->head.prev;
+        while (n->tag != 0x4253) {
+            int size = n->size;
+            int rest = total - 0x10;
+            n = n->prev;
+            total = rest + size;
+        }
+    }
+    return total;
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_002532B0);
+#ifdef SKIP_ASM
+extern "C" void func_002532B0(sMemClass_251D50* cls, sMemNode_251D50* blk)
+{
+    sMemNode_251D50* q = &cls->head;
+    sMemNode_251D50* p = q;
+    int sz = blk->end - (char*)blk;
+    if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+        do
+            p = p->prev;
+        while (blk < p);
+        q = p->next;
+    } else {
+        do
+            q = q->next;
+        while (q < blk);
+        p = q->prev;
+    }
+    blk->size = sz;
+    blk->next = q;
+    blk->prev = p;
+    p->next = blk;
+    q->prev = blk;
+    blk->tag = 0x4246;
+    blk->flags |= 0x4000;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00253368);
 #ifdef SKIP_ASM
@@ -787,7 +941,71 @@ extern "C" void func_002536C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00253748);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_003AE6C8(void* p, float f);
+extern "C" int func_003AE780(void* p);
+extern "C" int func_003AE860(void* p);
+extern "C" void SYNCTASK_run(int);
+extern "C" void func_003E5398(int);
+
+struct sVE0_253748 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVE1_253748 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sWorld_253748 {
+    char pad[0x10D8];
+    sVE0_253748* vt;            // 0x10D8
+};
+extern sWorld_253748* D_004A5B80_253748 __asm__("D_004A5B80");
+
+extern "C" void func_00253748(void* self)
+{
+    sStream002535F8* s = (sStream002535F8*)self;
+    if (s->f38 != 0) {
+        func_002536C8(s);
+        do {
+            if (s->f4 != 0) {
+                char* o = (char*)s->f3C;
+                sVE0_253748* e = &(*(sVE0_253748**)(o + 4))[5];
+                e->fn(o + e->delta);
+            } else {
+                char* o = (char*)s->f3C;
+                sVE1_253748* e = &(*(sVE1_253748**)(o + 4))[4];
+                e->fn(o + e->delta, s->fC);
+            }
+            sVE0_253748* w = &D_004A5B80_253748->vt[20];
+            w->fn((char*)D_004A5B80_253748 + w->delta);
+            SYNCTASK_run(0);
+            func_003E5398(0);
+            if (func_003AE780(s->f38) != 0) {
+                char* o = (char*)s->f3C;
+                sVE0_253748* e = &(*(sVE0_253748**)(o + 4))[6];
+                e->fn(o + e->delta);
+                s->fC = (void*)func_003AE6C8(s->f38, *(float*)(s->f38 + 0x48));
+                s->f4 = 0;
+            } else {
+                s->f4 = 1;
+            }
+            if (s->fC == 0) {
+                s->f4 = 1;
+                s->f0 = func_003AE860(s->f38);
+            }
+        } while (s->f0 == 0);
+        s->f40 = 0;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253860);
