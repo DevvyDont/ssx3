@@ -47,7 +47,13 @@ extern "C" void func_00311958(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_003119E8);
+#ifdef SKIP_ASM
+extern "C" int func_003119E8(void *arg0, int arg1) {
+    return (*(int *)((char*)(arg0) + (0x50))) + (arg1 * 8);
+}
+#endif
 INCLUDE_ASM("animation/rideranimbase", func_003119F8);
 INCLUDE_ASM("animation/rideranimbase", func_00311A30);
 

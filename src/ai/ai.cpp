@@ -782,7 +782,13 @@ extern "C" int func_0012A180(sAiObj128A48* self)
 #endif
 
 INCLUDE_ASM("ai/ai", func_0012A1F0);
+//100%
 INCLUDE_ASM("ai/ai", func_0012A240);
+#ifdef SKIP_ASM
+extern "C" int func_0012A240(int *arg0) {
+    return *arg0 == 5;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012A250);
@@ -894,7 +900,13 @@ extern "C" void func_0012A490(void)
 
 INCLUDE_ASM("ai/ai", func_0012A4D0);
 INCLUDE_ASM("ai/ai", func_0012A4F0);
+//100%
 INCLUDE_ASM("ai/ai", func_0012A558);
+#ifdef SKIP_ASM
+extern "C" void func_0012A558(void) {
+
+}
+#endif
 INCLUDE_ASM("ai/ai", func_0012A560);
 INCLUDE_ASM("ai/ai", func_0012A768);
 INCLUDE_ASM("ai/ai", func_0012A998);

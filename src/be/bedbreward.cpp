@@ -120,7 +120,15 @@ INCLUDE_ASM("be/bedbreward", func_0015BBB8);
 INCLUDE_ASM("be/bedbreward", func_0015BBC8);
 INCLUDE_ASM("be/bedbreward", func_0015BBD8);
 INCLUDE_ASM("be/bedbreward", func_0015BBF0);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BBF8);
+#ifdef SKIP_ASM
+extern int D_004A11BC;
+
+extern "C" int func_0015BBF8(void) {
+    return D_004A11BC;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015BC00);
 INCLUDE_ASM("be/bedbreward", func_0015BC08);
 INCLUDE_ASM("be/bedbreward", func_0015BC10);

@@ -14,16 +14,67 @@ INCLUDE_ASM("animation/gameanimmap", func_003150F8);
 
 extern "C" void* func_003150F8(int, int);
 
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158B8);
+#ifdef SKIP_ASM
+extern "C" float func_003158B8(void *arg0) {
+    return (*(float *)((char*)(arg0) + (0x1C)));
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158C0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long func_003158C0(void *arg0) {
+    return (*(long *)((char*)(arg0) + (0x20)));
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158C8);
+#ifdef SKIP_ASM
+extern "C" int func_003158C8(int arg0) {
+    return arg0 + 0x30;
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158D0);
+#ifdef SKIP_ASM
+extern "C" int func_003158D0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x18)));
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158D8);
+#ifdef SKIP_ASM
+extern "C" void func_003158D8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158E0);
+#ifdef SKIP_ASM
+extern "C" void func_003158E0(void *arg0, float fparg0) {
+    (*(float *)((char*)(arg0) + (0x1C))) = fparg0;
+}
+#endif
 INCLUDE_ASM("animation/gameanimmap", func_003158E8);
 INCLUDE_ASM("animation/gameanimmap", func_00315988);
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_003159A0(void *arg0, long arg1) {
+    (*(long *)((char*)(arg0) + (0x20))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_003159A8(void *arg0) {
+    (*(long *)((char*)(arg0) + (0x20))) = -1;
+}
+#endif
 INCLUDE_ASM("animation/gameanimmap", func_003159B8);
 INCLUDE_ASM("animation/gameanimmap", func_003159E8);
 

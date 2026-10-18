@@ -187,7 +187,13 @@ extern "C" void func_00313CF0(void* self, int a1, float val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313D10);
+#ifdef SKIP_ASM
+extern "C" void func_00313D10(int arg0, int arg1, float fparg0) {
+    (*(float *)((char*)(((arg1 * 0x1C) + arg0)) + (0xC))) = fparg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D28);
@@ -209,7 +215,13 @@ extern "C" void func_00313D40(void* self, int a1, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313D58);
+#ifdef SKIP_ASM
+extern "C" void func_00313D58(int arg0, int arg1) {
+    (*(int *)((char*)(((arg1 * 0x1C) + arg0)) + (0x18))) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D70);
@@ -856,4 +868,10 @@ extern "C" void* func_00314C00(sMdfArchive* self, const char* name)
 #endif
 
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314C98);
+#ifdef SKIP_ASM
+extern "C" int func_00314C98(void *arg0, int arg1) {
+    return (*(int *)((char*)(arg0) + (8))) + (arg1 * 0x60);
+}
+#endif
