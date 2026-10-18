@@ -118,7 +118,7 @@ or any disc file.
     can't run (D or T bits, a reserved op, the end of the cycle budget, a GS packet error) hands over to the
     interpreter at that pair with the pipeline timing rebuilt. Blocks are kept for up to 8 code images, found by
     content, since the game uploads the same microcode again and again. The 4,000 recorded VU1 runs still give
-    bit-identical output with 48% fewer instructions, and replay twice as fast in the 32-bit build. A test runs
+    bit-identical output with 53% fewer instructions, and replay 2.3 times as fast in the 32-bit build. A test runs
     3,000 random microprograms both ways. In a race on a 4-core machine the game thread is busy about a third
     less for the same frame rate, which the GS workers still set. `PS2X_VU1_COMPILED=0` turns them off;
   - debug switches.
