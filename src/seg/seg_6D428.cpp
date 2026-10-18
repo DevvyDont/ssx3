@@ -30,4 +30,23 @@ extern "C" int readBoundObj(void) {
     return (get_camboundobj() != 0) ? 0 : 5;
 }
 
-INCLUDE_ASM("seg/seg_6D428", readAction);
+//100%
+extern "C" int get_camaction(int reader, void* out);
+extern "C" void get_camspline(int reader, void* out);
+// PORT: readBoundObj is defined above as (void); this caller passes the reader, slot and flag.
+extern "C" int readBoundObj_3(int reader, void* out, int arg2) __asm__("readBoundObj");
+
+extern "C" int readAction(int arg0, int** arg1, int arg2) {
+    if (get_camaction(arg0, arg1) == 0) {
+        return 6;
+    }
+    int* act = *arg1;
+    if (*act == 1) {
+        return readBoundObj_3(arg0, act + 2, arg2);
+    }
+    if (*act == 2) {
+        get_camspline(arg0, act + 2);
+        return 0;
+    }
+    return 0;
+}

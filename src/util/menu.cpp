@@ -953,7 +953,34 @@ extern "C" void cMenu_addItem(cMenuList* menu, void** item, int index)
     menu->count++;
 }
 
-INCLUDE_ASM("util/menu", func_002CBD50);
+//100%
+struct sMenuList_CBD50 {
+    int count;      // 0x0
+    int sel;        // 0x4
+    int pad8;
+    int items[1];   // 0xC
+};
+
+extern "C" void func_002CBD50(void* self, int index)
+{
+    sMenuList_CBD50* m = (sMenuList_CBD50*)self;
+    for (int i = index; i < m->count - 1; i++) {
+        m->items[i] = m->items[i + 1];
+    }
+    m->count--;
+    if (index < m->sel) {
+        m->sel--;
+    }
+    if (m->sel >= m->count) {
+        m->sel = m->count - 1;
+    }
+    if (index == m->sel) {
+        func_002CAAB0(m);
+    }
+    if (m->sel < 0) {
+        m->sel = 0;
+    }
+}
 
 //100%
 extern "C" void func_002CBE10(int* self)
@@ -3763,7 +3790,49 @@ extern "C" void* func_002D06E8(sMenuColD6E8* self)
     return ret;
 }
 
-INCLUDE_ASM("util/menu", func_002D0808);
+//100%
+// PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
+cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
+
+extern char D_00486808[];
+extern char D_00486738[];
+
+struct sMenuPair_D0808 {
+    long v;
+} __attribute__((packed));
+
+struct sMenuItem_D0808 {
+    char pad_0x00[0x10];
+    void* vtable;           // 0x10
+    void* vtable2;          // 0x14
+    int a1;                 // 0x18
+    int a2;                 // 0x1C
+    int a3;                 // 0x20
+    int unk24;              // 0x24
+    int a5;                 // 0x28
+    sMenuPair_D0808 p0;     // 0x2C
+    sMenuPair_D0808 p1;     // 0x34
+    int a4;                 // 0x3C
+    int unk40;              // 0x40
+};
+
+extern "C" sMenuItem_D0808* func_002D0808(sMenuItem_D0808* self, int a1, int a2, int a3, int a4, int a5,
+                                         sMenuPair_D0808* p0, sMenuPair_D0808* p1)
+{
+    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
+    self->vtable = D_00486808;
+    self->a1 = a1;
+    self->a5 = a5;
+    self->a2 = a2;
+    self->a3 = a3;
+    self->a4 = a4;
+    self->p0 = *p0;
+    self->p1 = *p1;
+    self->vtable2 = D_00486738;
+    self->unk24 = 0;
+    self->unk40 = 0;
+    return self;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 void func_002CA368(void* self);

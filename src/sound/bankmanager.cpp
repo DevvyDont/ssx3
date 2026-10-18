@@ -1435,7 +1435,24 @@ extern "C" void func_0028F140(char* self, unsigned int mode)
     }
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028F200);
+//100%
+extern "C" void func_0028F200(char* self)
+{
+    char* mon = self + 0x118;
+    *(int*)(self + 0x6294) = 0;
+    *(int*)(self + 0x6298) = 0;
+    if (*(int*)(self + 0x530) == 0 || func_002B49E0(mon) == 0xC9) {
+        if (func_0028D960(self)) {
+            if (func_002B49E0(mon) == 0xC9) {
+                *(int*)(self + 0x508) = *(int*)(self + 0x62AC);
+            }
+            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 10, D_004A3648[0].v, 0, 3, 1, 0, 0);
+        }
+        *(int*)(self + 0x6294) = 1;
+    } else {
+        *(int*)(self + 0x6298) = 1;
+    }
+}
 
 //100%
 extern "C" void* func_002B3AC0(void*);

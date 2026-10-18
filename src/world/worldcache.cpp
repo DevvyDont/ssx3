@@ -734,7 +734,56 @@ extern "C" int func_003A8510(void* self, int i)
     return *(int*)((char*)self + i * 0x18 + 0x3F4);
 }
 
-INCLUDE_ASM("world/worldcache", func_003A8528);
+//100%
+struct sWCKey_3A8528 {
+    unsigned int lo : 8;
+    unsigned int hi : 24;
+};
+
+struct sWCRef_3A8528 {
+    unsigned char kind;     // 0x0
+    unsigned char lo;       // 0x1
+    unsigned short hi;      // 0x2
+};
+
+struct sWCList_3A8528 {
+    char pad0[0x8];
+    int count;              // 0x8
+    sWCRef_3A8528* refs;    // 0xC
+};
+
+struct sWCSlot_3A8528 {
+    int state;              // 0x0
+    int f4;                 // 0x4
+    sWCList_3A8528* list;   // 0x8
+    char padC[0xC];
+};
+
+struct sWC_3A8528 {
+    char pad[0x3F0];
+    sWCSlot_3A8528 slot[1]; // 0x3F0
+};
+
+// PORT: func_003A8E20 takes the key as an unsigned int; this caller passes it as the bitfield struct.
+void func_003A8E20_k(void* self, int i, int kind, sWCKey_3A8528 key) __asm__("func_003A8E20");
+
+extern "C" void func_003A8528(void* self_, int i)
+{
+    sWC_3A8528* self = (sWC_3A8528*)self_;
+    sWCList_3A8528* list = self->slot[i].list;
+    sWCKey_3A8528 key;
+    *(unsigned int*)&key = 0xFFFFFFFF;
+    for (int j = list->count - 1; j >= 0; j--) {
+        key.lo = list->refs[j].lo;
+        key.hi = list->refs[j].hi;
+        func_003A8E20_k(self, i, list->refs[j].kind, key);
+    }
+    if (self->slot[i].list != 0) {
+        func_003A7C30((int*)self->slot[i].list, 3);
+    }
+    self->slot[i].list = 0;
+    self->slot[i].state = 0;
+}
 
 //100%
 extern "C" int func_003A8618(void* self, int a1)
