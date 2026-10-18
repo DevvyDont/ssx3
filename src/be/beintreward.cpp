@@ -354,9 +354,80 @@ extern "C" int func_00156EE0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157080);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_004A6CA8[];
+unsigned int BXrand();
+extern "C" int func_00157210(void* self, int kind);
+extern "C" int func_00157518(void* self, int a1, int a2, int kind);
 
+// Picks a random not-yet-unlocked reward bit of the given kind for the profile/character, or -1 if all are unlocked.
+extern "C" int func_00157080(void* self, int profile, int c, int kind)
+{
+    int total = func_00157210(self, kind);
+    int result = -1;
+    int have = func_00157518(self, profile, c, kind);
+    if (have >= total) {
+        return -1;
+    }
+    unsigned int n = BXrand() % (unsigned int)(total - have);
+    char* p = (char*)D_004A6CA8 + profile * 0x9B50 + c * 0xF88;
+    signed char* bits = 0;
+    switch (kind) {
+    case 3: bits = (signed char*)(p + 0xF30); break;
+    case 4: bits = (signed char*)(p + 0xF36); break;
+    case 5: bits = (signed char*)(p + 0xF45); break;
+    case 6: bits = (signed char*)(p + 0xF52); break;
+    case 7: bits = (signed char*)(p + 0xF53); break;
+    }
+    for (int i = 0; result < 0; i++) {
+        for (int k = 0; k < 8; k++) {
+            if (!((bits[i] >> k) & 1)) {
+                if (n == 0) {
+                    result = i * 8 + k;
+                    break;
+                }
+                n--;
+            }
+        }
+    }
+    return result;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00157210);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_001572B0(void* self);
+int func_001572D0(void* self);
+int func_001572F0(void* self);
+int func_00157330(void* self);
+int func_00157310(void* self);
+
+extern "C" int func_00157210(void* self, int kind)
+{
+    switch (kind) {
+    case 3:
+        return func_001572B0(self);
+    case 4:
+        return func_001572D0(self);
+    case 5:
+        return func_001572F0(self);
+    case 6:
+        return func_00157330(self);
+    case 7:
+        return func_00157310(self);
+    case 8:
+        return 20;
+    case 9:
+        return 0;
+    }
+    return 0;
+}
+#endif
 
 extern "C" void* func_0015A478(void* self);
 
@@ -466,9 +537,55 @@ extern "C" int func_00157430(void* self, int bit, char* bits)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157468);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_00157D60(void* self, int a1, int a2, int bit);
+extern "C" int func_00157DA0(void* self, int a1, int a2, int bit);
+extern "C" int func_00157DE0(void* self, int a1, int a2, int bit);
+extern "C" int func_00157E60(void* self, int a1, int a2, int bit);
+extern "C" int func_00157E20(void* self, int a1, int a2, int bit);
+extern "C" int func_00157EE0(void* self, int a1, int a2, int bit);
 
+extern "C" int func_00157468(void* self, int a1, int a2, int kind, int bit)
+{
+    switch (kind) {
+    case 3: return func_00157D60(self, a1, a2, bit);
+    case 4: return func_00157DA0(self, a1, a2, bit);
+    case 5: return func_00157DE0(self, a1, a2, bit);
+    case 6: return func_00157E60(self, a1, a2, bit);
+    case 7: return func_00157E20(self, a1, a2, bit);
+    case 8: return func_00157EE0(self, a1, a2, bit + 10);
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("be/beintreward", func_00157518);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_001575C0(void* self, int a1, int a2);
+extern "C" int func_00157620(void* self, int a1, int a2);
+extern "C" int func_00157680(void* self, int a1, int a2);
+extern "C" int func_00157740(void* self, int a1, int a2);
+extern "C" int func_001576E0(void* self, int a1, int a2);
+extern "C" int func_001577A0(void* self, int a1, int a2);
+
+extern "C" int func_00157518(void* self, int a1, int a2, int kind)
+{
+    switch (kind) {
+    case 3: return func_001575C0(self, a1, a2);
+    case 4: return func_00157620(self, a1, a2);
+    case 5: return func_00157680(self, a1, a2);
+    case 6: return func_00157740(self, a1, a2);
+    case 7: return func_001576E0(self, a1, a2);
+    case 8: return func_001577A0(self, a1, a2);
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001575C0);
@@ -837,7 +954,32 @@ extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157F20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// The award handlers are declared void elsewhere in this unit; their results are returned here.
+int func_00157FD0_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00157FD0");
+int func_001580F8_r(void* self, int a1, int a2, int bit, int give) __asm__("func_001580F8");
+int func_00158220_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158220");
+int func_00158470_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158470");
+int func_00158348_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158348");
+int func_00158618_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158618");
+
+extern "C" int func_00157F20(void* self, int a1, int a2, int kind, int bit, int give)
+{
+    switch (kind) {
+    case 3: return func_00157FD0_r(self, a1, a2, bit, give);
+    case 4: return func_001580F8_r(self, a1, a2, bit, give);
+    case 5: return func_00158220_r(self, a1, a2, bit, give);
+    case 6: return func_00158470_r(self, a1, a2, bit, give);
+    case 7: return func_00158348_r(self, a1, a2, bit, give);
+    case 8: return func_00158618_r(self, a1, a2, bit + 10, give);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00157FD0);

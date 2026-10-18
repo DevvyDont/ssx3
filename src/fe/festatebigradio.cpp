@@ -1,6 +1,213 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onCreateScreen);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+// PORT: several callees are declared with other parameter types elsewhere; bind local views by asm label
+extern "C" void func_00192740_2DB0(void* panel, int on) __asm__("func_00192740");
+void func_00192968(void* panel, int mask);
+extern "C" void func_00192970_2DB0(void* panel, void* screen) __asm__("func_00192970");
+extern "C" int func_00193F38(void* self, int player, int which);
+extern "C" unsigned char cUIListBox_addEntryByStringID_2DB0(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
+extern "C" unsigned char cUIListBox_addEntryByAsciiString_2DB0(void* box, const char* str, int data) __asm__("cUIListBox_addEntryByAsciiString");
+extern "C" int func_0039A768_2DB0(void* item, int key, unsigned char* out) __asm__("func_0039A768");
+extern "C" void func_0039A7A8_2DB0(void* item, int v) __asm__("func_0039A7A8");
+extern int D_004A1A70;
+extern signed char D_00535C12[];
+extern signed char D_004A1710[6];
+extern signed char D_004A1718[7];
+extern signed char D_004A1720[7];
+extern signed char D_004A1728[7];
+extern signed char D_004A1730[5];
+extern signed char D_004A1738[7];
+extern char* D_00441108[];
+extern char D_0045FCC8[];
+extern char D_004A14F8[];
+extern char D_0045FCD8[];
+extern char D_0045DCC8[];
+extern char D_0045DF40[];
+extern char D_004A16E0[];
+extern char D_004A16D8[];
+extern char D_004A1758[];
+extern char D_004A1760[];
+extern char D_004A1768[];
+extern char D_004A1770[];
+extern char D_004A1778[];
+extern char D_004A1780[];
+extern char D_004A1580[];
+extern char D_004A1588[];
+extern char D_0045FCE8[];
+extern char D_0045FCF8[];
+extern char D_0045FD08[];
+
+struct sStr2_2DB0 { char c[2]; };
+
+class cUIObj_2DB0 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+};
+
+struct sRadioPanel_2DB0 {
+    void* menu;          // 0x0
+    char pad4[4];
+    void* items[11];     // 0x8
+};
+
+struct sBragging_2DB0 {
+    char pad0[0x10];
+    void* engine;                   // 0x10
+    char pad14[0x8];
+    int flags;                      // 0x1C
+    char pad20[0x20];
+    void* screen;                   // 0x40
+    char pad44[0x68C];
+    sRadioPanel_2DB0 panels[2];     // 0x6D0
+    signed char* rules;             // 0x738
+};
+
+static inline void* find_2DB0(sBragging_2DB0* self, char* name)
+{
+    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+}
+
+static inline bool isNet_2DB0()
+{
+    return D_004A1A70 == 1;
+}
+
+// Bragging rights screen: builds the rule rows of both player panels for the current mode.
+extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
+{
+    void* engine = self->engine;
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FCC8), 0);
+    self->screen = screen;
+    if (screen != 0)
+        cUIScreen_playFrame(screen, 0, 0);
+    sRadioPanel_2DB0* a = &self->panels[0];
+    sRadioPanel_2DB0* b = &self->panels[1];
+    if ((self->flags >> 4) & 1) {
+        func_00192740_2DB0(a, 0);
+        func_00192740_2DB0(b, 0);
+    }
+    int n = 0;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    unsigned int mask = 0;
+    switch (D_00535C12[0]) {
+    case 0:
+        self->rules = D_004A1710;
+        n = 6;
+        break;
+    case 1:
+        self->rules = D_004A1718;
+        n = 7;
+        break;
+    case 3:
+        self->rules = D_004A1720;
+        n = 7;
+        break;
+    case 2:
+        self->rules = D_004A1728;
+        n = 7;
+        break;
+    case 4:
+        self->rules = D_004A1730;
+        n = 5;
+        break;
+    case 5:
+        self->rules = D_004A1738;
+        n = 7;
+        break;
+    }
+    for (int i = 0; i < n; i++)
+        mask |= 1 << i;
+    func_00192968(a, mask);
+    func_00192968(b, mask);
+    func_00192970_2DB0(a, self->screen);
+    func_00192970_2DB0(b, self->screen);
+    sStr2_2DB0 name = *(sStr2_2DB0*)D_004A14F8;
+    for (int row = 0; row < n; row++) {
+        name.c[0] = row + '1';
+        cUIText* txt = (cUIText*)find_2DB0(self, name.c);
+        if (txt != 0)
+            cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441108[self->rules[row]]));
+        for (int p = 0; p < 2; p++) {
+            unsigned char out = 0;
+            void* lb = ((sRadioPanel_2DB0*)((char*)self + 0x6D0))[p].items[row];
+            switch (self->rules[row]) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+                cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045FCD8), 0);
+                cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045DCC8), 1);
+                func_0039A768_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                func_0039A7A8_2DB0(lb, out);
+                break;
+            case 0:
+                cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A16E0, 5);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A16D8, 10);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1758, 15);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1760, 20);
+                func_0039A768_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                func_0039A7A8_2DB0(lb, out);
+                break;
+            case 7:
+                cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1768, 3000);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1770, 5000);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1778, 10000);
+                cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1780, 15000);
+                func_0039A768_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                func_0039A7A8_2DB0(lb, out);
+                break;
+            }
+        }
+    }
+    cUIObj_2DB0* o = (cUIObj_2DB0*)find_2DB0(self, D_004A1580);
+    if (o != 0) {
+        if (isNet_2DB0()) {
+            o->setVisible(1);
+            cUIObj_2DB0* c = (cUIObj_2DB0*)find_2DB0(self, D_0045FCE8);
+            if (c != 0)
+                c->setVisible(0);
+            cUIObj_2DB0* d = (cUIObj_2DB0*)find_2DB0(self, D_0045FCF8);
+            if (d != 0)
+                d->setVisible(0);
+        } else {
+            o->setVisible(0);
+        }
+    }
+    if (isNet_2DB0()) {
+        cUIObj_2DB0* c = (cUIObj_2DB0*)find_2DB0(self, D_004A1588);
+        if (c != 0)
+            c->setVisible(0);
+        cUIObj_2DB0* d = (cUIObj_2DB0*)find_2DB0(self, D_0045FD08);
+        if (d != 0)
+            d->setVisible(0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", func_00193310__FPv);
@@ -168,7 +375,132 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_001938F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern int D_004A1A70;
+extern void* D_004A33CC;
+extern "C" void func_001927B0(void* p);
+extern "C" void func_00194080(void* self);
+extern "C" void func_00193DE0(void* self, int player, int which, int value);
+extern "C" int func_00192918_38F8(void* panel, void* item) __asm__("func_00192918");
+extern "C" int func_0039A738_38F8(void* item) __asm__("func_0039A738");
+extern "C" void func_00192740_38F8(void* panel, int on) __asm__("func_00192740");
+extern "C" void func_00265688(void* snd);
+extern "C" void func_00265568(void* snd, int slot, int value);
+extern "C" void func_0039F400(void* list, void* obj);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_001A8918(void* self, void* widget);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern char D_0045FD98[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_005308B8[];
+
+struct sVE_38F8 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+
+struct sVObj_38F8 {
+    int f0;
+    sVE_38F8* vt;                   // 0x4
+};
+
+struct sWidget_38F8 {
+    char pad_0x0[0x18];
+    int panel;                      // 0x18
+};
+
+static inline int isOn_38F8()
+{
+    return D_004A1A70 == 1;
+}
+
+static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
+{
+    sVObj_38F8* o = **(sVObj_38F8***)(self + 0x10);
+    return o->vt[slot].fn((char*)o + o->vt[slot].delta, self, w->panel);
+}
+
+// Widget event handler of the big radio-button screen (two radio panels at self+0x6D0).
+extern "C" void func_001938F8(char* self, sWidget_38F8* w, int event)
+{
+    int panel;
+    switch (event) {
+    case 5: {
+        int i = 0;
+        do {
+            if (func_00192918_38F8(self + 0x6D0 + i * 0x34, w) != -1) {
+                if (isOn_38F8() && i == 0)
+                    func_00265688(D_004A33CC);
+                func_00192740_38F8(self + 0x6D0 + i * 0x34, 1);
+                func_00194080(self);
+                break;
+            }
+            i++;
+        } while (i < 2);
+        if (isOn_38F8())
+            break;
+        if (*(int*)(self + 0x6F8) == 0)
+            break;
+        if (*(int*)(self + 0x72C) == 0)
+            break;
+        void* r = vcall_38F8(self, 4, w);
+        if (r != 0)
+            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        break;
+    }
+    case 6:
+        if (isOn_38F8()) {
+            char* p = (char*)func_001A9C50(self);
+            char* sub = p + 0xBC;
+            *(int*)(p + 0xBC) = 2;
+            *(int*)(p + 0xC4) = GetHashValue32(D_0045FD98);
+            *(int*)(p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)(p + 0x150) = 0x838;
+            *(int*)(p + 0x168) = 1;
+            func_001A9BC0(self, p);
+        } else {
+            void* r = vcall_38F8(self, 5, w);
+            if (r != 0)
+                func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            func_003E6448(D_005308B8, 0, 0x20);
+        }
+        break;
+    case 1:
+    case 2:
+        panel = w->panel;
+        func_001927B0(self + 0x6D0 + panel * 0x34);
+        break;
+    case 7:
+        if (isOn_38F8())
+            func_001A8918(self, w);
+        break;
+    case 9:
+        if (isOn_38F8()) {
+            void* snd = D_004A33CC;
+            int slot = func_00192918_38F8(self + 0x6D0, w);
+            func_00265568(snd, slot, func_0039A738_38F8(w));
+        } else {
+            panel = w->panel;
+            int slot = func_00192918_38F8(self + 0x6D0 + panel * 0x34, w);
+            int which = (*(signed char**)(self + 0x738))[slot];
+            if (which != -1)
+                func_00193DE0(self, panel, which, func_0039A738_38F8(w));
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", func_00193C00);
@@ -198,9 +530,89 @@ extern "C" void func_00193C00(void* self, void* popup)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00193CF8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_004A1A70;
+extern void* D_004A33CC;
+extern "C" void func_001927B0(void* p);
+extern "C" void func_00265458(void* snd, int id);
+static inline int isOn00193CF8()
+{
+    return D_004A1A70 == 1;
+}
+// Handles a menu event for one of the two radio list controls.
+extern "C" int func_00193CF8(void* self, void* ctrl, int msg)
+{
+    int found = 0;
+    void** item;
+    void** p = (void**)((char*)self + 0x6D0);
+    if (*p == ctrl) {
+        item = p;
+        found = 1;
+    } else {
+        item = (void**)((char*)self + 0x704);
+        if (*item != ctrl) item = 0;
+    }
+    switch (msg) {
+    case 8: case 9:
+        return 0x100;
+    case 5:
+        if (isOn00193CF8() && found) {
+            func_00265458(D_004A33CC, *((unsigned char*)ctrl + 0x95));
+        }
+        func_001927B0(item);
+        return 0x101;
+    case 6:
+        if (*(int*)((char*)self + 0x6F8) == 0 || *(int*)((char*)self + 0x72C) == 0) return 1;
+        return 0x101;
+    case 7:
+        if (isOn00193CF8()) return 0;
+        break;
+    }
+    return 0x101;
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00193DE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sPlayerOpts_193DE0 {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 1;
+    unsigned int pad : 26;
+    int f4;     // 0x4
+    int f8;     // 0x8
+};
+extern sPlayerOpts_193DE0 D_005308B8_193DE0[] __asm__("D_005308B8");
+
+static inline int other_193DE0(int p)
+{
+    return p == 0;
+}
+
+// Sets one of the per-player radio/HUD options.
+extern "C" void func_00193DE0(void* self, int player, int which, int value)
+{
+    switch (which) {
+    case 0: D_005308B8_193DE0[other_193DE0(player)].f8 = value; break;
+    case 1: D_005308B8_193DE0[other_193DE0(player)].b3 = value; break;
+    case 2: D_005308B8_193DE0[other_193DE0(player)].b0 = value; break;
+    case 3: D_005308B8_193DE0[player].b4 = value; break;
+    case 4: D_005308B8_193DE0[player].b5 = value; break;
+    case 5: D_005308B8_193DE0[player].b1 = value; break;
+    case 6: D_005308B8_193DE0[player].b2 = value; break;
+    case 7: D_005308B8_193DE0[other_193DE0(player)].f4 = value; break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/festatebigradio", func_00193F38);
 

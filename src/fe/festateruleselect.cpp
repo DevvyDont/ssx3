@@ -1,8 +1,326 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_setupMenu);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cUIScreen;
+struct cUIText;
+int GetHashValue32(char* str);
+int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void func_0039A670(void* self);
+extern "C" unsigned char cUIListBox_addEntryByStringID(void* box, int id, int idx);
+// The entry data is unsigned here: the negative time steps are passed as 0xFFFFFFFD etc.
+extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* box, const char* str, unsigned int data);
+extern "C" int func_0039A768(void* self, int key, unsigned char* out);
+extern "C" void func_0039A7A8(void* self, int v);
+extern "C" int func_00192240(void* self, int rule);
+extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
+extern char D_004A16A8[];
+extern char D_004A16B0[];
+extern char D_004A1398[];
+extern char D_0045E270[];
+extern char D_0045E280[];
+extern char D_0045DF40[];
+extern char D_0045E028[];
+extern char D_0045FA80[];
+extern char D_0045DCC8[];
+extern char D_0045FA90[];
+extern char D_0045FAA8[];
+extern char D_0045FAC0[];
+extern char D_004A16B8[];
+extern char D_004A16C0[];
+extern char D_004A16C8[];
+extern char D_004A16D0[];
+extern char D_004A16D8[];
+extern char D_004A16E0[];
+extern char D_004A16E8[];
+extern char D_004A16F0[];
+extern char D_004A16F8[];
+extern char D_004A1700[];
+extern char D_004A13A0[];
+extern char D_004A14F8[];
+extern char D_004A1500[];
+extern char D_004A1508[];
+extern char D_004A1510[];
+extern char D_004A1518[];
+extern signed char D_00441008[];
+extern char* D_00441018[];
+// PORT: the frame labels are copied with the builtin block move (the original likely used
+// strcpy on string literals); the two strings live at these symbols.
+extern char D_0045FAD8[] __attribute__((aligned(8)));
+extern char D_004A1708[] __attribute__((aligned(8)));
 
+struct sStr3_1388 { char c[3]; };
+
+struct sVE_1388 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void SetVisible_1388(char* o, int on)
+{
+    sVE_1388* vt = *(sVE_1388**)(o + 0x8);
+    vt[9].fn(o + vt[9].delta, on);
+}
+
+struct sRuleSel_1388 {
+    char pad0[0x40];
+    void* screen;                   // 0x40
+    char pad44[0x4];
+    signed char* rules;             // 0x48
+    char pad4C[0x4];
+    signed char count;              // 0x50
+};
+
+static inline void* find_1388(sRuleSel_1388* self, char* name)
+{
+    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+}
+
+// Fills the 11 rule rows (name text plus the option list box) starting at the given scroll row.
+extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
+{
+    sRuleSel_1388* self = (sRuleSel_1388*)self_;
+    signed char i = 0;
+    sStr3_1388 name;
+    sStr3_1388 label;
+    char* lp = label.c;
+    name = *(sStr3_1388*)D_004A16A8;
+    label = *(sStr3_1388*)D_004A16B0;
+    for (; i < 11; i++) {
+        char* lb = (char*)find_1388(self, name.c);
+        cUIText* txt = (cUIText*)find_1388(self, lp);
+        if (lb != 0 && txt != 0) {
+            signed char row = i + first;
+            if (row >= self->count)
+                break;
+            int rule = self->rules[row];
+            int kind = D_00441008[rule];
+            cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441018[rule]));
+            func_0039A670(lb);
+            *(int*)(lb + 0x18) = rule;
+            switch (kind) {
+            case 0:
+                break;
+            case 1:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045E028), 1);
+                break;
+            case 2:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FA80), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DCC8), 1);
+                break;
+            case 3:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16B8, 90);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16C0, 80);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16C8, 70);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16D0, 60);
+                break;
+            case 4:
+                cUIListBox_addEntryByAsciiString(lb, D_004A16D8, 10);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16E0, 5);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16E8, 3);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16F0, -3);
+                cUIListBox_addEntryByAsciiString(lb, D_004A16F8, -5);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1700, -10);
+                break;
+            case 5:
+                cUIListBox_addEntryByAsciiString(lb, D_004A13A0, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A14F8, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1500, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1508, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1510, 0);
+                cUIListBox_addEntryByAsciiString(lb, D_004A1518, 0);
+                break;
+            case 6:
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FA90), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FAA8), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FAC0), 0);
+                break;
+            }
+            if (rule != 0) {
+                unsigned char out;
+                func_0039A768(lb, func_00192240(self, rule), &out);
+                func_0039A7A8(lb, out);
+            } else {
+                SetVisible_1388(lb, 0);
+            }
+        }
+        if (i < 9) {
+            name.c[0]++;
+            label.c[0]++;
+        } else {
+            label.c[0] = name.c[0] = i + 0x58;
+        }
+    }
+    unsigned int sel = 0xFF;
+    char* menu = (char*)find_1388(self, D_004A1398);
+    if (menu != 0)
+        sel = *(unsigned char*)(menu + 0x95);
+    char frame[32];
+    if (self->rules[sel] == 0) {
+        char* a = (char*)find_1388(self, D_0045E270);
+        char* b = (char*)find_1388(self, D_0045E280);
+        if (a) SetVisible_1388(a, 0);
+        if (b) SetVisible_1388(b, 0);
+        __builtin_memcpy(frame, D_004A1708, 7);
+    } else {
+        __builtin_memcpy(frame, D_0045FAD8, 10);
+    }
+    int f = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(frame));
+    if (f != 0xFFFF)
+        cUIScreen_playFrame(self->screen, f, 1);
+    cFEStateRuleSelect_updateMenuColor(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onCreateScreen);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cUIText;
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char a1);
+extern "C" void func_0039B760(void* menu, int count);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern char D_0045FB10[];
+extern char D_0045FB20[];
+extern char D_004A1398[];
+extern char D_005308B8[];
+extern signed char D_00535C12[];
+extern signed char D_00441098[11];
+extern signed char D_004410A8[10];
+extern signed char D_004410B8[11];
+extern signed char D_004A1690[8];
+extern signed char D_004A1698[8];
+extern signed char D_004A16A0[8];
+extern char* D_00441058[];
+struct sStr3_19188 { char c[3]; };
+struct sStr2_19188 { char c[2]; };
+// PORT: the local name templates "0b" and "0" are splat-named sdata literals; copied from the symbols.
+extern char D_004A16A8[];
+extern char D_004A13A0[];
+
+struct sVE_19188 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sUIObj_19188 {
+    char pad0[0x8];
+    sVE_19188* vt;                  // 0x8
+    char padC[0x8];
+    int flags;                      // 0x14
+};
+
+struct sRuleSel_19188 {
+    char pad0[0x10];
+    void* engine;                   // 0x10
+    char pad14[0x2C];
+    void* screen;                   // 0x40
+    char pad44[0x4];
+    signed char* rules;             // 0x48
+    char pad4C[0x4];
+    signed char count;              // 0x50
+    signed char sel[15];            // 0x51
+};
+
+static inline void* find_19188(sRuleSel_19188* self, char* name)
+{
+    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+}
+
+// Builds the rule select screen: picks the rule list for the current mode and fills the 11 rule rows.
+extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
+{
+    void* engine = self->engine;
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FB10), 0);
+    self->screen = screen;
+    if (screen != 0)
+        cUIScreen_playFrame(screen, 0, 0);
+    self->rules = 0;
+    int count = 0;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    switch (D_00535C12[0]) {
+    case 0:
+        self->rules = D_00441098;
+        count = 11;
+        break;
+    case 1:
+        self->rules = D_004410A8;
+        count = 10;
+        break;
+    case 3:
+        self->rules = D_004A1690;
+        count = 8;
+        break;
+    case 2:
+        self->rules = D_004A1698;
+        count = 8;
+        break;
+    case 4:
+        self->rules = D_004410B8;
+        count = 11;
+        break;
+    case 5:
+        self->rules = D_004A16A0;
+        count = 8;
+        break;
+    }
+    sStr3_19188 name;
+    sStr2_19188 label;
+    char* lp = label.c;
+    int n = 14;
+    signed char* p = &self->sel[14];
+    for (; n >= 0; n--)
+        *p-- = 0;
+    self->count = count;
+    func_003E6448(D_005308B8, 0, 0x20);
+    cFEStateRuleSelect_setupMenu(self, 0);
+    sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, D_004A1398);
+    if (menu != 0) {
+        menu->flags |= 0x80;
+        func_0039B760(menu, count);
+        cUIMenu_setSelectedByIndex(menu, 0);
+        cUIText* help = (cUIText*)find_19188(self, D_0045FB20);
+        int rule = self->rules[0];
+        if (help != 0)
+            cUIText_setUnicodeStringByID(help, GetHashValue32(D_00441058[rule]));
+    }
+    name = *(sStr3_19188*)D_004A16A8;
+    label = *(sStr2_19188*)D_004A13A0;
+    for (signed char i = 0; i < 11; i++) {
+        sUIObj_19188* o = (sUIObj_19188*)find_19188(self, name.c);
+        o->flags &= ~1;
+        sUIObj_19188* l = (sUIObj_19188*)find_19188(self, lp);
+        if (i >= count) {
+            l->vt[9].fn((char*)l + l->vt[9].delta, 0);
+            l->vt[8].fn((char*)l + l->vt[8].delta, 1);
+        }
+        if (i < 9) {
+            label.c[0]++;
+            name.c[0]++;
+        } else {
+            name.c[0] = label.c[0] = i + 0x58;
+        }
+    }
+}
+#endif
 
 extern "C" void* func_0039E4C0(void* self);
 
@@ -178,7 +496,53 @@ extern "C" int func_00191E48(char* self, void* unused, unsigned int type, int id
 
 INCLUDE_ASM("fe/festateruleselect", func_00192088);
 
+//100%
 INCLUDE_ASM("fe/festateruleselect", func_00192240);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned int D_005308B8_192240[] __asm__("D_005308B8");
+extern int D_005308D0[];
+extern int D_005308D4[];
+
+// Returns the current setting of a race rule (1-14), or -1 for an unknown rule.
+extern "C" int func_00192240(void* self, int rule)
+{
+    switch (rule) {
+    case 4:
+        return D_005308D0[0] & 1;
+    case 3:
+        return (D_005308B8_192240[0] >> 3) & 1;
+    case 5:
+        return (D_005308D0[0] >> 3) & 1;
+    case 14:
+        return (D_005308B8_192240[0] >> 5) & 1;
+    case 7:
+        return (D_005308B8_192240[0] >> 4) & 1;
+    case 8:
+        return (D_005308D0[0] >> 1) & 1;
+    case 1:
+        return (D_005308D0[0] >> 2) & 1;
+    case 2:
+        return D_005308D4[0];
+    case 6:
+        return (D_005308D0[0] >> 4) & 1;
+    case 9:
+        return (D_005308D0[0] >> 5) & 1;
+    case 10:
+        return (D_005308D0[0] >> 6) & 1;
+    case 11: {
+        int f = D_005308D0[0] >> 7;
+        return f & 1;
+    }
+    case 12:
+        return (D_005308D0[0] >> 8) & 1;
+    case 13:
+        return (D_005308D0[0] >> 9) & 1;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192380);

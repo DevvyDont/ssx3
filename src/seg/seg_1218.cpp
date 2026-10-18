@@ -1285,9 +1285,165 @@ extern "C" void func_00103578(sObj_3578* self, cStream_3578* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001036A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" char* cAIAnimEventMap_getBlendInTime(int id);
+// PORT: the handlers are defined later in the unit with mixed parameter/return types; bind uniform views by asm label
+extern "C" int f_001048C0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001048C0");
+extern "C" int f_00104940_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104940");
+extern "C" int f_001049C0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001049C0");
+extern "C" int f_00104110_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104110");
+extern "C" int f_00104178_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104178");
+extern "C" int f_00104238_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104238");
+extern "C" int f_001042A8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001042A8");
+extern "C" int f_00104358_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104358");
+extern "C" int f_001045D8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001045D8");
+extern "C" int f_00104660_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104660");
+extern "C" int f_001042E0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001042E0");
+extern "C" int f_001043F8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001043F8");
+extern "C" int f_001045B8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001045B8");
+extern "C" int f_001047F0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001047F0");
+extern "C" int f_00104728_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104728");
+extern "C" int f_001046B0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001046B0");
+extern "C" void func_00103AA0_36A0(void* self, void* anim) __asm__("func_00103AA0");
 
+extern "C" void func_001036A0(char* self, void* x, int* anim, float dt)
+{
+    int done = 0;
+    switch (*(int*)(cAIAnimEventMap_getBlendInTime(*anim) + 4)) {
+    case 0:
+        done = f_001048C0_36A0(self, x, anim, dt);
+        break;
+    case 1:
+        done = f_00104940_36A0(self, x, anim, dt);
+        break;
+    case 2:
+        done = f_001049C0_36A0(self, x, anim, dt);
+        break;
+    case 3:
+        done = f_00104110_36A0(self, x, anim, dt);
+        break;
+    case 4:
+        done = f_00104178_36A0(self, x, anim, dt);
+        break;
+    case 5:
+        done = f_00104238_36A0(self, x, anim, dt);
+        break;
+    case 6:
+        done = f_001042A8_36A0(self, x, anim, dt);
+        break;
+    case 7:
+        done = f_00104358_36A0(self, x, anim, dt);
+        break;
+    case 8:
+        done = f_001045D8_36A0(self, x, anim, dt);
+        break;
+    case 9:
+        done = f_00104660_36A0(self, x, anim, dt);
+        break;
+    case 10:
+        done = f_001042E0_36A0(self, x, anim, dt);
+        break;
+    case 11:
+        done = f_001043F8_36A0(self, x, anim, dt);
+        break;
+    case 12:
+        done = f_001045B8_36A0(self, x, anim, dt);
+        break;
+    case 13:
+        done = f_001047F0_36A0(self, x, anim, dt);
+        break;
+    case 14:
+        done = f_00104728_36A0(self, x, anim, dt);
+        break;
+    case 15:
+        done = f_001046B0_36A0(self, x, anim, dt);
+        break;
+    }
+    if (done == 0) {
+        char* r = *(char**)(self + 0x60);
+        if (r != 0) {
+            int ok = 0;
+            if (*(int*)(r + 0x874) != 0) {
+                ok = *(int*)(r + 0x87C) != 0;
+            }
+            if (ok) {
+                func_00103AA0_36A0(self, anim);
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00103918);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" char* cAIAnimEventMap_getBlendInTime(int id);
+extern "C" int func_00104CA0_3918(void* self, void* ev, void* data) __asm__("func_00104CA0");
+extern "C" int func_00104A40_3918(void* self, void* ev, void* data) __asm__("func_00104A40");
+extern "C" int func_00104A60_3918(void* self, void* ev, void* data) __asm__("func_00104A60");
+extern "C" int func_00104B78_3918(void* self, void* ev, void* data) __asm__("func_00104B78");
+extern "C" int func_00104C18_3918(void* self, void* ev, void* data) __asm__("func_00104C18");
+extern "C" int func_00104B48_3918(void* self, void* ev, void* data) __asm__("func_00104B48");
+extern "C" int func_00104C38_3918(void* self, void* ev, void* data) __asm__("func_00104C38");
+extern "C" int func_00104B98_3918(void* self, void* ev, void* data) __asm__("func_00104B98");
+extern "C" int func_00104BB8_3918(void* self, void* ev, void* data) __asm__("func_00104BB8");
+extern "C" int func_00104BD8_3918(void* self, void* ev, void* data) __asm__("func_00104BD8");
+extern "C" int func_00104C80_3918(void* self, void* ev, void* data) __asm__("func_00104C80");
+
+struct sEvent3918 { int a; int b; };
+
+struct sEventOwner3918 {
+    int results[20];        // 0x00
+    sEvent3918* events;     // 0x50
+};
+
+// Runs the handler for an animation event's type and stores its result in the per-event slot.
+extern "C" void func_00103918(sEventOwner3918* self, sEvent3918* ev, int* data)
+{
+    int idx = ev - self->events;
+    char* info = cAIAnimEventMap_getBlendInTime(*data);
+    switch (*(int*)(info + 8)) {
+    case 0:
+        self->results[idx] = func_00104CA0_3918(self, ev, data);
+        break;
+    case 1:
+        self->results[idx] = func_00104A40_3918(self, ev, data);
+        break;
+    case 2:
+        self->results[idx] = func_00104A60_3918(self, ev, data);
+        break;
+    case 3:
+        self->results[idx] = func_00104B78_3918(self, ev, data);
+        break;
+    case 4:
+        self->results[idx] = func_00104C18_3918(self, ev, data);
+        break;
+    case 5:
+        self->results[idx] = func_00104B48_3918(self, ev, data);
+        break;
+    case 6:
+        self->results[idx] = func_00104C38_3918(self, ev, data);
+        break;
+    case 7:
+        self->results[idx] = func_00104B98_3918(self, ev, data);
+        break;
+    case 8:
+        self->results[idx] = func_00104BB8_3918(self, ev, data);
+        break;
+    case 9:
+        self->results[idx] = func_00104BD8_3918(self, ev, data);
+        break;
+    case 10:
+        self->results[idx] = func_00104C80_3918(self, ev, data);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103AA0);
@@ -1646,7 +1802,56 @@ extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001043F8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2 abs.s helper (stands in for fabsf).
+static inline float vAbs_43F8(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+// PORT: `<?` is the g++ minimum operator (EE min.s).
+static inline float clamp_43F8(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+
+extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
+{
+    int slot = 0xA5;
+    switch (*(int*)anim) {
+    case 0x129: slot = 0xA5; break;
+    case 0x12A: slot = 0xAB; break;
+    case 0x12B: slot = 0xA8; break;
+    case 0x12C: slot = 0xAC; break;
+    case 0x12D: slot = 0xA6; break;
+    case 0x12E: slot = 0xAA; break;
+    case 0x12F: slot = 0xA7; break;
+    case 0x130: slot = 0xA9; break;
+    }
+    func_00313C50(anim, 1, *(int*)(D_004A3E7C + slot * 4 + 0x1030));
+    func_00313D40(anim, 1, 1);
+    char* rider = *(char**)(self + 0x60);
+    float b = vAbs_43F8(*(float*)(rider + 0x298));
+    float a = vAbs_43F8(*(float*)(rider + 0x28C));
+    float m = (a < b) ? b : a;
+    m = clamp_43F8(m, 0.0f, 1.0f);
+    float w = m * 0.75f + 0.25f;
+    func_00313D28(anim, 0, 1.0f - w);
+    func_00313D28(anim, 1, w);
+    func_00313CF0(anim, 0, m * *(float*)(anim + 0x10));
+    float t = dt * 0.01666666753590107f;
+    func_003135B0(anim, 1, t);
+    if (func_00313800(anim, t)) {
+        func_003145F8(x, anim);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_001045B8);
@@ -1847,7 +2052,37 @@ extern "C" void func_00104A40(int a, int b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104A60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_00312B18_4A60(void*, void*, int*, int) __asm__("func_00312B18");
+
+// Plays the landing animation that matches the current trick state.
+extern "C" int func_00104A60(void* a, void* b, int* c)
+{
+    switch (*c) {
+    case 0x10F: case 0x11D:
+        return func_00312B18_4A60(a, b, c, 0x123);
+    case 0x110: case 0x118: case 0x119: case 0x11E:
+        return func_00312B18_4A60(a, b, c, 0x124);
+    case 0x10D: case 0x116: case 0x11B:
+        return func_00312B18_4A60(a, b, c, 0x121);
+    case 0x10E: case 0x117: case 0x11C:
+        return func_00312B18_4A60(a, b, c, 0x122);
+    case 0x111:
+        return func_00312B18_4A60(a, b, c, 0x125);
+    case 0x112:
+        return func_00312B18_4A60(a, b, c, 0x126);
+    case 0x113:
+        return func_00312B18_4A60(a, b, c, 0x127);
+    case 0x114:
+        return func_00312B18_4A60(a, b, c, 0x128);
+    }
+    return 0x1B6;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00104B48);
@@ -3512,7 +3747,63 @@ extern "C" void func_00108F88(void) {
 
 INCLUDE_ASM("seg/seg_1218", func_00108FA8);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010A768);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" float func_0010DEF0(void* self);
+extern "C" void func_00120090(void* self, float v);
+int func_0011FEE8_A768(void*) __asm__("func_0011FEE8__FPv");
+extern "C" void func_0010A960_A768(void* self, void* pad) __asm__("func_0010A960");
+extern "C" void func_0010AA70_A768(void* self, void* pad) __asm__("func_0010AA70");
+extern "C" void func_0010B790_A768(void* self, void* pad) __asm__("func_0010B790");
+extern "C" void func_0010B590_A768(void* self, void* pad) __asm__("func_0010B590");
+extern "C" void func_0010AED8_A768(void* self, void* pad) __asm__("func_0010AED8");
+extern "C" void func_0010B250_A768(void* self, void* pad) __asm__("func_0010B250");
+extern "C" void func_0010B750_A768(void* self, void* pad) __asm__("func_0010B750");
+extern "C" void func_0010AD78_A768(void* self, void* pad) __asm__("func_0010AD78");
+
+// Clears the pad input, updates the rider, then runs the input handler for the rider state.
+extern "C" void func_0010A768(char* self, void* pad)
+{
+    func_003E6448(pad, 0, 8);
+    func_00120090(*(void**)(self + 0x18), func_0010DEF0(self));
+    int state = func_0011FEE8_A768(*(void**)(self + 0x18));
+    switch (state) {
+    case 0:
+        func_0010A960_A768(self, pad);
+        break;
+    case 2:
+        func_0010AA70_A768(self, pad);
+        break;
+    case 6:
+        func_0010B790_A768(self, pad);
+        break;
+    case 4:
+        func_0010B590_A768(self, pad);
+        break;
+    case 7:
+        func_0010AED8_A768(self, pad);
+        break;
+    case 5:
+        func_0010B250_A768(self, pad);
+        break;
+    case 8:
+        func_0010B750_A768(self, pad);
+        break;
+    case 1:
+        func_0010AD78_A768(self, pad);
+        break;
+    case 3: case 9: case 10: case 11: case 12: case 13:
+        break;
+    }
+    if (state != 5) {
+        *(int*)(self + 0xE34) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010A898);
@@ -4316,4 +4607,40 @@ extern "C" int func_0010C3B8(void* self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010C450);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_0010C450(void* self, int a, int b)
+{
+    switch (a) {
+    case 1:
+        if (b == 1)
+            return 1;
+        return (b == 2) ? 1 : 2;
+    case 2:
+        if (b == 1)
+            return 1;
+        return (b == 2) ? 1 : 2;
+    case 3:
+        if (b == 1)
+            return 0;
+        if (b == 2)
+            return 1;
+        return 1;
+    case 4:
+        if (b == 1)
+            return 0;
+        if (b == 2)
+            return 0;
+        return 1;
+    case 5:
+        if (b == 1)
+            return 0;
+        if (b == 2)
+            return 0;
+        return 0;
+    }
+    return 0;
+}
+#endif

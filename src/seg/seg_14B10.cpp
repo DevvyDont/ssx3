@@ -16,7 +16,68 @@ extern "C" void cAI_setAIState(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", cAI_forceAIState);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern char D_00456C58[];
+extern char D_00456C68[];
+extern char D_004A0E90[];
+extern char D_00456C78[];
+extern char D_004A0E98[];
+extern char D_004A0EA0[];
+extern char D_00456C88[];
+
+// PORT: the unit declares cAI_forceAIState(void*); defined under an asm label with its real type.
+extern "C" void cAI_forceAIState_impl(char* self, int state) __asm__("cAI_forceAIState");
+
+// Forces the AI into the given state: state id, its state block and its name.
+extern "C" void cAI_forceAIState_impl(char* self, int state)
+{
+    switch (state) {
+    case 1:
+        *(int*)(self + 0x0) = 1;
+        *(const char**)(self + 0xA0) = D_00456C58;
+        *(void**)(self + 0x98) = self + 0xAC;
+        break;
+    case 2:
+        *(int*)(self + 0x0) = 2;
+        *(const char**)(self + 0xA0) = D_00456C68;
+        *(void**)(self + 0x98) = self + 0xB0;
+        break;
+    case 3:
+        *(int*)(self + 0x0) = 3;
+        *(const char**)(self + 0xA0) = D_004A0E90;
+        *(void**)(self + 0x98) = self + 0xB4;
+        break;
+    case 4:
+        *(int*)(self + 0x0) = 4;
+        *(const char**)(self + 0xA0) = D_00456C78;
+        *(void**)(self + 0x98) = self + 0xBC;
+        break;
+    case 5:
+        *(int*)(self + 0x0) = 5;
+        *(const char**)(self + 0xA0) = D_004A0E98;
+        *(void**)(self + 0x98) = self + 0xC0;
+        break;
+    case 6:
+        *(int*)(self + 0x0) = 6;
+        *(const char**)(self + 0xA0) = D_004A0EA0;
+        *(void**)(self + 0x98) = self + 0xC4;
+        break;
+    case 7:
+        *(int*)(self + 0x0) = 7;
+        *(const char**)(self + 0xA0) = D_00456C88;
+        *(void**)(self + 0x98) = self + 0xC8;
+        break;
+    default:
+        *(void**)(self + 0x98) = 0;
+        *(const char**)(self + 0xA0) = 0;
+        *(int*)(self + 0x0) = 0;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113C20);
@@ -542,7 +603,78 @@ extern "C" float func_00115B08(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00115B58);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_00311AE8(void*, int);
+extern "C" int func_001298C8();
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void func_0029FF80(int snd, void* rider, int side);
+int func_0011FEE8(void* self);
+
+// PORT: PS2-only abs.s asm helper (fabsf off-PS2).
+static inline float vAbs_115B58(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_00115B58(char* self)
+{
+    if (*(int*)(self + 0x358) == 0) {
+        return;
+    }
+    if (func_00311AE8(*(void**)(self + 0x784), 2) == 5) {
+        return;
+    }
+    if (func_00311AE8(*(void**)(self + 0x784), 1) != 0) {
+        return;
+    }
+    if (func_00311AE8(*(void**)(self + 0x784), 2) == 10) {
+        return;
+    }
+    int d = func_001298C8() - *(int*)(self + 0x354);
+    if (d < 180) {
+        if (d < 0) {
+            return;
+        }
+        switch (*(int*)(self + 0x358)) {
+        case 1:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            func_0029FF80(func_0028B180(), self, 0);
+            break;
+        case 2:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            func_0029FF80(func_0028B180(), self, 1);
+            break;
+        case 3:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            break;
+        case 4:
+            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13A, 0, -1.0f);
+            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            break;
+        case 5:
+        case 6:
+            if (vAbs_115B58(*(float*)(self + 0x1FC)) < 0.75f && func_0011FEE8(self) == 0) {
+                cRiderAnimBase_play(*(void**)(self + 0x784), 0x13E, 0, -1.0f);
+            }
+            break;
+        }
+    }
+    *(int*)(self + 0x358) = 0;
+    *(int*)(self + 0x354) = -1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_14B10", func_00115D48);
 

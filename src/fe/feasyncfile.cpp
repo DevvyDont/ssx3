@@ -648,7 +648,141 @@ extern "C" int func_001A4300(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A4330);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" void* cUIScreen_getObjectByHashName_4330(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern char D_004A1408[];
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* func_002625C8_4330(void* session, int idx) __asm__("func_002625C8");
+extern "C" void func_001A9890_4330(void* self, void* entry) __asm__("func_001A9890");
+extern "C" void* func_001A98B0_4330(void* self) __asm__("func_001A98B0__FPv");
+extern "C" void func_001AB370_4330(void* self, void* a1, int a2) __asm__("func_001AB370");
+extern "C" void func_001A4750_4330(void* self) __asm__("func_001A4750");
+extern "C" void func_001A6070_4330(void* self, int idx) __asm__("func_001A6070");
+extern "C" void func_001A5FB8_4330(void* self, int idx) __asm__("func_001A5FB8");
+extern "C" void func_001A5128_4330(void* self, int idx, int n) __asm__("func_001A5128");
+extern "C" void func_001A66A8_4330(void* self, int idx, int on) __asm__("func_001A66A8");
+extern char D_00461540[];
+extern char D_004615A0[];
+extern char D_004615B0[];
+
+struct cVec_4330 {
+    float x, y, z, w;
+    cVec_4330(float a, float b, float c, float e) { x = a; y = b; z = c; w = e; }
+};
+
+class cObjV_4330 {
+public:
+    int pad[2];
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
+    virtual void set(const cVec_4330& v);
+};
+
+struct sVE_4330 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sObj_4330 {
+    int pad[2];
+    sVE_4330* vt;
+};
+
+// Message handler for the slot-list screen: picks a slot by its button hash, or highlights it.
+extern "C" void func_001A4330(char* self, sObj_4330* w, int msg)
+{
+    char buf[0x20];
+    switch (msg) {
+    case 6: {
+        sObj_4330* o = *(sObj_4330**)(self + 0x20);
+        o->vt[17].fn((char*)o + o->vt[17].delta, self, 0x14);
+        break;
+    }
+    case 8:
+        func_001A9150(self, 0, GetHashValue32(D_00461540), (int)D_004A1408, 0, 1, 0x10);
+        *(int*)(*(char**)(self + 0x69C) + 0x438) = 1;
+        *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+        func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+        func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        break;
+    case 5: {
+        int idx = *(int*)((char*)w + 0x18);
+        if (idx < 0) {
+            break;
+        }
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        void* e = func_002625C8_4330(D_004A3328, idx);
+        if (e == 0) {
+            break;
+        }
+        func_001A9890_4330(self, e);
+        func_001AB370_4330(self, func_001A98B0_4330(self), 0);
+        break;
+    }
+    case 13:
+        func_001A4750_4330(self);
+        break;
+    case 1:
+        for (int i = 0; i < 15; i++) {
+            sprintf(buf, D_004615A0, i);
+            int id = *(int*)((char*)w + 0x38);
+            if (id == GetHashValue32(buf)) {
+                func_001A6070_4330(self, i + *(int*)(self + 0x6F4));
+                func_001A5FB8_4330(self, i);
+                func_001A5128_4330(self, i + *(int*)(self + 0x6F4), *(int**)(self + 0x6EC) - *(int**)(self + 0x6E8));
+                func_001A66A8_4330(self, i, 1);
+                break;
+            }
+        }
+        func_001A8918(self, (int)w, msg);
+        break;
+    case 2: {
+        for (int i = 0; i < 15; i++) {
+            sprintf(buf, D_004615A0, i);
+            int id = *(int*)((char*)w + 0x38);
+            if (id == GetHashValue32(buf)) {
+                sprintf(buf, D_004615B0, i);
+                sObj_4330* o = (sObj_4330*)cUIScreen_getObjectByHashName_4330(*(void**)(self + 0x40), GetHashValue32(buf));
+                if (o != 0) {
+                    o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+                }
+                ((cObjV_4330*)w)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
+                func_001A66A8_4330(self, i, 0);
+                break;
+            }
+        }
+        func_001A8918(self, (int)w, msg);
+        break;
+    }
+    default:
+        func_001A8918(self, (int)w, msg);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A4670);
@@ -1107,7 +1241,54 @@ extern "C" void func_001A4FB0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A5010);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void func_001A5898(void* self);
+extern "C" void func_001A54D8(void* self);
+extern "C" void func_001A52B0(void* self);
+extern "C" void func_001A6978(void* self);
+int func_001A98B0(void* self);
+extern "C" void func_001AB3D0(void* self, int a1, int a2);
+extern "C" void func_001A4D90(void* self);
+extern "C" void func_001A4CE8(void* self, void* src);
+extern "C" void func_001A4FB0(void* self, int a1, int a2);
+
+// Message handler: refreshes the file list on most results, otherwise forwards to the base handler.
+extern "C" void* func_001A5010(void* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0x107:
+        func_001A5898(self);
+    case 0xEA: case 0xEC: case 0xED: case 0xEF: case 0xF1: case 0x106:
+    case 0x109: case 0x10A: case 0x10B: case 0x112: case 0x113:
+        if (*(int*)((char*)self + 0x6AC) != 0) {
+            break;
+        }
+        func_001A54D8(self);
+        func_001A52B0(self);
+        func_001A6978(self);
+        func_001AB3D0(self, func_001A98B0(self), 0);
+        break;
+    case 0x10E:
+        func_001A4D90(self);
+        break;
+    case 0xE3:
+        func_001A4CE8(self, (void*)a2);
+        break;
+    case 0x102:
+        func_001A4FB0(self, a1, a2);
+        break;
+    default:
+        func_001AB3D0(self, func_001A98B0(self), 0);
+        return func_001A8E40_3(self, a1, a2);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A5128);
@@ -3198,7 +3379,74 @@ extern "C" void func_001A8AE8(void* self, cFEVObj_001A8AE8* obj)
 
 INCLUDE_ASM("fe/feasyncfile", func_001A8B88);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8E40);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_001A9930(void* self);
+extern "C" int func_0025DA90(void* self);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001BCB58_v(void* mem, int a1) __asm__("func_001BCB58");
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001A8F98(void* self);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data);
+extern "C" void func_001A9BC0(void* self, void* popup);
+extern void* D_004A3028;
+extern char D_00461B30[];
+extern const char D_0045FF28[];
+
+struct sVE1A8E40 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, void*);
+};
+
+// PORT: the unit declares func_001A8E40 with one arg; defined under an asm label with its real type.
+extern "C" int func_001A8E40_impl(void* self, int msg, void* data) __asm__("func_001A8E40");
+
+// Message handler for the memory-card screen.
+extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
+{
+    char* s = (char*)self;
+    switch (msg) {
+    case 0x115:
+    case 0x116:
+        func_001A9930(self);
+        break;
+    case 0xDC:
+        if (func_0025DA90(D_004A3028) == 0) {
+            func_001A8A40(self, func_001BCB58_v(cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(s + 0x10)));
+        }
+        break;
+    case 0xEF:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(s + 0x10)));
+        break;
+    case 0x102:
+        if (*(int*)((char*)data + 0x8) == 0x74696D65) {
+            func_001A8F98(self);
+        } else {
+            void* popup = func_001A9C50(self);
+            func_001A9CC0(self, &popup, self, data);
+            func_001A9BC0(self, popup);
+        }
+        break;
+    case 0xDD:
+    case 0xDE:
+    case 0xE0:
+    case 0xE1: {
+        char* child = *(char**)(s + 0x20);
+        if (child != 0) {
+            sVE1A8E40* vt = *(sVE1A8E40**)(child + 0x8);
+            vt[24].fn(child + vt[24].delta, msg, data);
+        }
+        break;
+    }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8F98);
@@ -3372,7 +3620,31 @@ extern "C" void func_001A92D8(void* self, int a1, unsigned int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A93D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_0039F190(void* self, int a1);
+
+// PORT: the unit declares this with a 4th arg; defined under an asm label with its real type
+extern "C" void func_001A93D0_impl(void* self, int id, int event) __asm__("func_001A93D0");
+extern "C" void func_001A93D0_impl(void* self, int id, int event)
+{
+    switch (event) {
+    case 15: case 16: case 17: case 18: case 20:
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        break;
+    case 22:
+        if (id == *(int*)((char*)self + 0x6A0)) {
+            *(int*)((char*)self + 0x6A0) = 0;
+        }
+        break;
+    case 19:
+    case 21:
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001A9438);
@@ -3614,7 +3886,59 @@ extern "C" void func_001A9710(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A97B8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_001A94E0(void* self, int a1, int a2);
+extern "C" void func_001A9438(void* self, int a1, int a2);
+extern "C" void func_001A9268(void* self, int a1, int a2);
+extern "C" void func_001A92D8(void* self, int a1, unsigned int kind);
+extern "C" void func_001A9578(void* self, int a1, int a2);
+// PORT: func_001A9638 takes a 4th arg; this caller leaves $a3 untouched.
+void func_001A9638_3(void* self, int a1, int a2) __asm__("func_001A9638");
+extern "C" void func_001A9668(void* self, int a1, int a2);
+extern "C" void func_001A9710(void* self, int a1, int a2);
+void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
+
+// PORT: the unit declares this as returning int with a pointer a1; the body returns nothing.
+extern "C" void func_001A97B8_impl(void* self, int popup, int a2) __asm__("func_001A97B8");
+
+// Routes a closed popup to the handler for its message id.
+extern "C" void func_001A97B8_impl(void* self, int popup, int a2)
+{
+    if (popup == *(int*)((char*)self + 0x69C)) {
+        func_001A94E0(self, popup, a2);
+        return;
+    }
+    switch (*(int*)(popup + 0x18)) {
+    case 0x832:
+        func_001A9438(self, popup, a2);
+        break;
+    case 0x833:
+        func_001A9268(self, popup, a2);
+        break;
+    case 0x834:
+        func_001A92D8(self, popup, a2);
+        break;
+    case 0x837:
+        func_001A9578(self, popup, a2);
+        break;
+    case 0x836:
+        func_001A9638_3(self, popup, a2);
+        break;
+    case 0x83D:
+        func_001A9668(self, popup, a2);
+        break;
+    case 0x83E:
+        func_001A9710(self, popup, a2);
+        break;
+    default:
+        func_001A93D0_3(self, popup, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A9890);
@@ -4184,9 +4508,95 @@ extern "C" void func_001AB108(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AB178);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern char D_00462768[];
+extern char D_00462780[];
+extern char D_004627A0[];
+extern char D_00462158[];
+extern char D_004627B8[];
+extern char D_004627D8[];
+// Shows an error popup with the message matching the error code.
+extern "C" void func_001AB178(void* self, int err)
+{
+    void* p = func_001A9C50(self);
+    char* sub = (char*)p + 0xBC;
+    *(int*)((char*)p + 0xBC) = 1;
+    func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+    *(int*)((char*)p + 0x150) = 0x835;
+    *(int*)((char*)p + 0x14C) = 6;
+    *(int*)((char*)p + 0x170) = 0;
+    switch (err) {
+    case 0xF2:
+        *(int*)(sub + 0x8) = GetHashValue32(D_00462768);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0xF1: case 0x10C: case 0x113:
+        *(int*)(sub + 0x8) = GetHashValue32(D_00462780);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0x112:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627A0);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0xF0:
+        *(int*)(sub + 0x8) = GetHashValue32(D_00462158);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0xED:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627B8);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0xEE:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627D8);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    }
+    func_001A9BC0(self, p);
+}
+#endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AB288);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern char D_00461618[];
+extern char D_00462780[];
+extern char D_004627A0[];
+extern char D_004627D8[];
+// Shows an error popup with the message matching the error code.
+extern "C" void func_001AB288(void* self, int err)
+{
+    void* p = func_001A9C50(self);
+    char* sub = (char*)p + 0xBC;
+    *(int*)((char*)p + 0xBC) = 1;
+    func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+    *(int*)((char*)p + 0x150) = 0x837;
+    *(int*)((char*)p + 0x14C) = 6;
+    *(int*)((char*)p + 0x170) = 0;
+    switch (err) {
+    case 0xF1: case 0xFA: case 0x10C: case 0x113:
+        *(int*)(sub + 0x8) = GetHashValue32(D_00462780);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0x112:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627A0);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    case 0xEE: case 0xF8:
+        *(int*)(sub + 0x8) = GetHashValue32(D_004627D8);
+        *(int*)(sub + 0x4) = 3;
+        break;
+    }
+    func_001A9BC0(self, p);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AB370);
@@ -4685,7 +5095,134 @@ extern "C" int func_001AC5A8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AC5C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
+extern void* D_004A3028;
+extern char D_00461618[];
+extern char D_00462C88[];
+extern char D_00462D10[];
+extern "C" void* cUIScreen_getObjectByHashName_C5C0(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
+extern "C" int func_001AC408_C5C0(void* self) __asm__("func_001AC408");
+extern "C" int func_001AC360_C5C0(void* self) __asm__("func_001AC360");
+extern "C" void func_001ACDD0_C5C0(void* self) __asm__("func_001ACDD0");
+extern "C" void func_0025B6D8_C5C0(void* self, int a1) __asm__("func_0025B6D8");
+extern char D_00462B88[];
+extern char D_00462BA0[];
+extern char D_00462C70[];
+extern char D_00462C98[];
+extern char D_00462CB8[];
+extern char D_00462CD0[];
+extern char D_00462CE8[];
+extern char D_00462D00[];
+
+struct sState_C5C0 {
+    char pad0[0x6D8];
+    int mode;   // 0x6D8
+};
+
+// Message handler for the network-config menu.
+extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
+{
+    switch (msg) {
+    case 5:
+        switch (*(unsigned int*)((char*)a1 + 0x18)) {
+        case 4: {
+            if (!func_001AC408_C5C0(self)) {
+                break;
+            }
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 1;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)((char*)p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            ((sState_C5C0*)self)->mode = 4;
+            func_0025B6D8_C5C0(D_004A3028, 0);
+            break;
+        }
+        case 2: {
+            if (!func_001AC360_C5C0(self)) {
+                break;
+            }
+            void* p = func_001A9C50(self);
+            *(int*)((char*)p + 0xBC) = 0;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C98);
+            *(int*)((char*)p + 0xC0) = 3;
+            *(int*)((char*)p + 0x164) = 0;
+            *(int*)((char*)p + 0x150) = 0x812;
+            func_001A9BC0(self, p);
+            ((sState_C5C0*)self)->mode = 2;
+            func_0025B6D8_C5C0(D_004A3028, 0);
+            break;
+        }
+        case 3: {
+            void* p = func_001A9C50(self);
+            *(int*)((char*)p + 0xBC) = -1;
+            *(int*)((char*)p + 0x180) = 0x32;
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462CB8);
+            *(int*)((char*)p + 0xC0) = 3;
+            *(int*)((char*)p + 0xD4) = GetHashValue32(D_00462CD0);
+            *(int*)((char*)p + 0xD0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+            *(int*)((char*)p + 0x150) = 0x80F;
+            func_001A9BC0(self, p);
+            break;
+        }
+        case 0: {
+            void* obj = cUIScreen_getObjectByHashName_C5C0(*(void**)(self + 0x40), GetHashValue32(D_00462B88));
+            if (obj == 0) {
+                break;
+            }
+            int v = *(int*)((char*)D_004A3028 + 0x48);
+            func_001A9150(self, (int)obj, GetHashValue32(D_00462CE8), v, 0, 6, 0x10);
+            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            break;
+        }
+        case 1: {
+            void* obj = cUIScreen_getObjectByHashName_C5C0(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
+            if (obj == 0) {
+                break;
+            }
+            int v = *(int*)((char*)D_004A3028 + 0x4C);
+            func_001A9150(self, (int)obj, GetHashValue32(D_00462D00), v, 1, 7, 0x10);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            break;
+        }
+        }
+        break;
+    case 6: {
+        void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+        *(int*)((char*)p + 0x18) = 0x832;
+        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        break;
+    }
+    case 13:
+        func_001ACDD0_C5C0(self);
+        break;
+    default:
+        func_001A8918(self, (int)a1, msg);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AC920);
@@ -5211,7 +5748,94 @@ extern "C" void func_001AD4F0(void* self, void* menu)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AD5E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern char D_00462C88[];
+extern "C" void* func_001B88F0_D5E8(void* mem, int a1, int a2) __asm__("func_001B88F0");
+extern "C" void func_001AD208_D5E8(void* self, const char* name) __asm__("func_001AD208");
+extern "C" void func_001C5878_D5E8(void* self, int a1, int a2, int a3) __asm__("func_001C5878");
+void func_0025CD28(void* self, int a1);
+extern char D_00462ED0[];
+extern char D_00462E58[];
+extern char D_00462EE8[];
+extern char D_00462F08[];
+extern char D_00462F18[];
+
+// Message handler for the persona-select screen.
+extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
+{
+    char* self = (char*)selfp;
+    switch (a2) {
+    case 5: {
+        int idx = *(int*)((char*)a1 + 0x18);
+        if (idx == -1) {
+            func_001A8A40(self, func_001B88F0_D5E8(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)(self + 0x10), 0));
+            break;
+        }
+        if (idx >= *(int*)((char*)D_004A3028 + 0x6C)) {
+            func_001A9150(self, (int)a1, GetHashValue32(D_00462E58), (int)D_004A1408, 0, -1, 0xC);
+            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
+            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            *(int*)(self + 0x6D0) = 0;
+        } else {
+            func_0025CD28(D_004A3028, idx);
+            *(int*)(self + 0x6D0) = 1;
+        }
+        break;
+    }
+    case 6: {
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        func_00261408(D_004A3328);
+        func_0025B800(D_004A3028);
+        void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+        *(int*)((char*)p + 0x18) = 0x832;
+        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        break;
+    }
+    case 8: {
+        int idx = *(int*)((char*)a1 + 0x18);
+        if (idx < 0) {
+            break;
+        }
+        if (idx < *(int*)((char*)D_004A3028 + 0x6C)) {
+            *(int*)(self + 0x6D4) = idx;
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 2;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462EE8);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462F08));
+            func_001C57C0(sub, 1, GetHashValue32(D_00462C88));
+            func_001C5878_D5E8(sub, 0, GetHashValue32(D_00462F18), 1);
+            *(int*)((char*)p + 0x168) = 1;
+            *(int*)((char*)p + 0x150) = 0x816;
+            func_001A9BC0(self, p);
+        }
+        break;
+    }
+    case 13:
+        func_001AD208_D5E8(self, *(char**)(self + 0x69C) + 0x74);
+        break;
+    case 14:
+        break;
+    default:
+        func_001A8918(self, (int)a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AD8C0);
@@ -5314,7 +5938,100 @@ extern "C" void func_001AD9C8(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001ADA30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" void func_001ADC30(void* self, int a2);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" void func_00261408(void* self);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern const char D_0045FF28[];
+extern char D_00461618[];
+extern char D_00462E00[];
+extern char D_00462F58[];
+extern char D_00462F78[];
+
+struct sVE1ADA30 {
+    short delta;
+    short index;
+    void (*fn)(void*, cUIText*);
+};
+
+// Message handler for the network-settings screen; returns -1 when handled.
+extern "C" int func_001ADA30(void* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0xD9: {
+        void* p = func_001A9C50(self);
+        *(int*)((char*)p + 0xBC) = 0;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462F58);
+        *(int*)((char*)p + 0xC0) = 3;
+        *(int*)((char*)p + 0x150) = 0x817;
+        *(int*)((char*)p + 0x164) = 0;
+        func_001A9BC0(self, p);
+        break;
+    }
+    case 0x104: {
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        func_00261408(D_004A3328);
+        func_0025B800(D_004A3028);
+        void* p = func_001A9C50(self);
+        char* sub = (char*)p + 0xBC;
+        *(int*)((char*)p + 0xBC) = 1;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462F78);
+        *(int*)((char*)p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+        *(int*)((char*)p + 0x164) = 0;
+        *(int*)((char*)p + 0x150) = 0x819;
+        func_001A9BC0(self, p);
+    }
+    case 0xD6:
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+    case 0xD8:
+        {
+            sVE1ADA30* vt = *(sVE1ADA30**)((char*)self + 8);
+            vt[18].fn((char*)self + vt[18].delta, cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00462E00)));
+        }
+        break;
+    case 0x102:
+        func_001ADC30(self, a2);
+        break;
+    case 0x111:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
+        break;
+    default:
+        return (int)func_001A8E40_3(self, a1, a2);
+    case 0xE1:
+        break;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001ADC30);
@@ -5533,7 +6250,59 @@ extern "C" int func_001ADFB8(func_001ADFB8_cObj* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001ADFE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_001A87D0(void* self, int a1);
+extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void func_001AF098(void* self, int a1);
+extern "C" void func_001AEC60(void* self, int a1);
+extern void* D_004A28A8;
+extern int D_00534B30_1ADFE8[] __asm__("D_00534B30");
+extern signed char D_00535C12[];
+extern char D_00441268[];
+extern char D_00441278[];
+extern char D_00441288[];
+extern char D_00441298[];
+extern char D_004412A8[];
+extern char D_004412B8[];
+
+// Refreshes the race-options screen and picks the mode title for the current game mode.
+extern "C" void func_001ADFE8(void* self, int a1)
+{
+    func_001A87D0(self, a1);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    func_0039A7A8(*(void**)((char*)self + 0x6DC), D_00534B30_1ADFE8[1] ^ 1);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    switch (D_00535C12[0]) {
+    case 3:
+        *(char**)((char*)self + 0x6D8) = D_00441288;
+        break;
+    case 1:
+        *(char**)((char*)self + 0x6D8) = D_00441278;
+        break;
+    case 2:
+        *(char**)((char*)self + 0x6D8) = D_00441298;
+        break;
+    case 5:
+        *(char**)((char*)self + 0x6D8) = D_004412A8;
+        break;
+    case 4:
+        *(char**)((char*)self + 0x6D8) = D_004412B8;
+        break;
+    case 0:
+    default:
+        *(char**)((char*)self + 0x6D8) = D_00441268;
+        break;
+    }
+    func_001AF098(self, D_00534B30_1ADFE8[1]);
+    func_001AEC60(self, *(int*)((char*)self + 0x6D0));
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AE0E0__FPv);
@@ -5917,7 +6686,50 @@ extern "C" void func_001AF428(cFEVObj_001AF428* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AF470);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001AF688(void* self);
+extern "C" void func_001AB178(void* self, int err);
+extern "C" void func_001AB108(void* self);
+extern "C" void func_001AFA60(void* screen, char* msg);
+extern "C" void func_001AFD88(void* self, void* a1);
+extern const char D_00461C60[];
+
+// Message handler: opens the next screen, shows error popups, or forwards to the base handler.
+extern "C" void* func_001AF470(void* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0xF3:
+        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)((char*)self + 0x10)));
+        break;
+    case 0xED: case 0xEE: case 0xF0: case 0xF1: case 0xF2: case 0x10C: case 0x112: case 0x113:
+        func_001AF688(self);
+        func_001AB178(self, a1);
+        break;
+    case 0x110:
+        func_001AB108(self);
+        break;
+    case 0xE3:
+        func_001AFA60(*(void**)((char*)self + 0x40), (char*)a2);
+        break;
+    case 0xE5:
+        func_001AFD88(*(void**)((char*)self + 0x40), (void*)a2);
+        break;
+    default:
+        return func_001A8E40_3(self, a1, a2);
+    case 0xEF:
+        break;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AF568);
@@ -6745,7 +7557,67 @@ extern "C" int func_001B06E0(void* self, int a1, unsigned int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0708);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001B0C08(void* self);
+extern "C" void func_001AB178(void* self, int err);
+extern "C" void func_001AB108(void* self);
+extern "C" void func_001AFA60(void* screen, char* msg);
+extern "C" void func_001AFD88(void* self, void* a1);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" void func_00263018(void* self, void* a1);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern const char D_00461C60[];
+
+// Message handler: starts the memory-card task, shows error popups, or forwards to the base handler.
+extern "C" void* func_001B0708(void* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0xEF:
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        func_00263018(D_004A3328, *(void**)((char*)self + 0x6D0));
+        break;
+    case 0x110:
+        func_001AB108(self);
+        break;
+    case 0xED: case 0xEE: case 0xF0: case 0xF1: case 0x10C: case 0x112: case 0x113:
+        func_001B0C08(self);
+        func_001AB178(self, a1);
+        break;
+    case 0xF3:
+        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)((char*)self + 0x10)));
+        break;
+    case 0xE3:
+        func_001AFA60(*(void**)((char*)self + 0x40), (char*)a2);
+        break;
+    case 0xE5:
+        func_001AFD88(*(void**)((char*)self + 0x40), (void*)a2);
+        break;
+    default:
+        return func_001A8E40_3(self, a1, a2);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0850);
@@ -7310,7 +8182,72 @@ extern "C" bool func_001B1590(void* self, cFEVObj_001B1590* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B15D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+struct sFEObj_001B1F88;
+extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* mem, int a1);
+extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void* func_00192D00(void* mem, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" int func_0025DA90(void* self);
+extern "C" void func_001B1760(void* self, int index);
+extern "C" void func_001B1B10(void* self, int sel, int flag);
+extern "C" void func_001B1A08(void* self, int on, int a2);
+extern "C" void func_001AB288(void* self, int err);
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern int D_004A4E88;
+extern int D_00534B30_1B15D8[] __asm__("D_00534B30");
+extern const char D_0045FF10[];
+extern const char D_0045FF28[];
+extern const char D_00460CC8[];
+
+// Message handler for the profile list: select/scroll, error popups, and opening the follow-up screens.
+extern "C" void* func_001B15D8(void* self, int a1, int a2)
+{
+    void* obj;
+    switch (a1) {
+    case 0xF3:
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        if (D_00534B30_1B15D8[0xCB] >= 0) {
+            func_001B1760(self, D_00534B30_1B15D8[0xCB]);
+            func_001B1B10(self, D_00534B30_1B15D8[0xCB], 1);
+        }
+        break;
+    case 0xF5:
+        func_001B1A08(self, 1, 1);
+        break;
+    case 0xF7:
+        func_001B1A08(self, 0, 1);
+        break;
+    case 0xEE: case 0xF1: case 0xF8: case 0xFA: case 0x112: case 0x113:
+        func_001AB288(self, a1);
+        break;
+    case 0xF6:
+        func_001A8A40(self, func_00192D00(cMemMan_alloc(0x73C, D_00460CC8, 0, 0), *(int*)((char*)self + 0x10)));
+        break;
+    case 0x10C:
+        if (func_0025DA90(D_004A3028) != 0 && D_004A4E88 == 0) {
+            obj = func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), *(int*)((char*)self + 0x10));
+        } else {
+            obj = func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10));
+        }
+        func_001A8A40(self, obj);
+        break;
+    default:
+        return func_001A8E40_3(self, a1, a2);
+    case 0xE0:
+        break;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B1760);
@@ -8310,7 +9247,78 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B31A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_0025F248(void* self, int idx);
+extern "C" void func_0025D800(void* a, int b, const char* c);
+extern "C" void func_001A9B58(void* self);
+extern "C" void func_001B33D8(void* self);
+extern char D_00463A60[];
+extern char D_00463D20[];
+
+extern "C" void func_001B31A0(char* self, char* msg, int ev)
+{
+    char buf[32];
+    int i;
+    switch (ev) {
+    case 5: {
+        int id = *(int*)(msg + 0x18);
+        if (func_0025F248(D_004A3028, id) != 0) {
+            return;
+        }
+        func_001A9890(self, func_0025F1E0_p(D_004A3028, id, 0));
+        func_001AB370(self, func_001A98B0(self), 1);
+        return;
+    }
+    case 1:
+        for (i = 0; i < 6; i++) {
+            sprintf(buf, D_00463A60, i);
+            int h = *(int*)(msg + 0x38);
+            if (h == GetHashValue32(buf)) {
+                func_001B3D20(self, i, 1);
+                return;
+            }
+        }
+        func_001A8918(self, (int)msg, ev);
+        return;
+    case 2:
+        for (i = 0; i < 6; i++) {
+            sprintf(buf, D_00463A60, i);
+            int h = *(int*)(msg + 0x38);
+            if (h == GetHashValue32(buf)) {
+                func_001B3D20(self, i, 0);
+                return;
+            }
+        }
+        func_001A8918(self, (int)msg, ev);
+        return;
+    case 6: {
+        *(int*)(self + 0x6F8) = 1;
+        char* p = (char*)func_001A9C50(self);
+        *(int*)(p + 0xBC) = 0;
+        int h = GetHashValue32(D_00463D20);
+        *(int*)(p + 0x164) = 0;
+        *(int*)(p + 0xC4) = h;
+        *(int*)(p + 0xC0) = 3;
+        *(int*)(p + 0x150) = 0x802;
+        func_001A9BC0(self, p);
+        func_0025D800(D_004A3028, -1, 0);
+        return;
+    }
+    case 8:
+        if ((*(int*)(self + 0x1C) & 6) == 0) {
+            func_001A9B58(self);
+        }
+        return;
+    case 13:
+        func_001B33D8(self);
+        return;
+    }
+    func_001A8918(self, (int)msg, ev);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B33D8);
@@ -8433,7 +9441,72 @@ extern "C" int func_001B3568(void* self, void* sender, int event, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B35B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+int func_001A98B0(void* self);
+extern "C" void func_001ABB30(void* self, int a1, void* a2, int a3);
+extern "C" void func_001A4B20_ABC50(void* self, int a1, int* out) __asm__("func_001ABC50");
+extern "C" void func_001A4B20_ABE58(void* self, int a1, int* out) __asm__("func_001ABE58");
+extern "C" void func_001ABED8(void* self);
+extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4);
+extern "C" void func_0025DF00(void* self, int a1);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+extern void* D_004A3028;
+extern char D_00463D78[];
+
+// Memory-card result handler: runs the follow-up for each result; on 19 shows the failure popup.
+extern "C" void func_001B35B0(void* self, void* a1, int kind)
+{
+    int r17;
+    int r18;
+    switch (kind) {
+    case 15:
+        func_001ABCD0(self, func_001A98B0(self), a1, kind, 0);
+        break;
+    case 16:
+        func_001A97B8(self, a1, kind);
+        func_001ABB30(self, func_001A98B0(self), a1, kind);
+        break;
+    case 17:
+        func_001A4B20_ABE58(self, func_001A98B0(self), &r17);
+        if (r17 == 1) {
+            func_001ABED8(self);
+        } else {
+            func_001A97B8(self, a1, kind);
+        }
+        break;
+    case 18:
+        func_001A4B20_ABC50(self, func_001A98B0(self), &r18);
+        if (r18 == 1) {
+            func_001ABED8(self);
+        } else {
+            func_001A97B8(self, a1, kind);
+        }
+        break;
+    case 19: {
+        *(int*)((char*)self + 0x6C4) = 0;
+        void* mc = D_004A3028;
+        func_0025DF00(mc, func_001A98B0(self));
+        void* p = func_001A9C50(self);
+        *(int*)((char*)p + 0xBC) = 0;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00463D78);
+        *(int*)((char*)p + 0xC0) = 3;
+        *(int*)((char*)p + 0x150) = 0x805;
+        *(int*)((char*)p + 0x164) = 0;
+        func_001A9BC0(self, p);
+    }
+    default:
+        func_001A97B8(self, a1, kind);
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B3760);
@@ -8562,7 +9635,80 @@ extern "C" void func_001B3978(void* self, void* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B3A30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" void func_001B2378(void* self, int a1);
+extern "C" void func_001B3978(void* self, void* a1);
+struct sFEObj_001BCB58;
+extern "C" sFEObj_001BCB58* func_001BCB58(sFEObj_001BCB58* self, int a1);
+extern "C" void func_001B2CD0(void* self, int a1);
+extern "C" int func_0025DA90(void* self);
+int func_001A98B0(void* self);
+extern "C" void func_001AB3D0(void* self, int a1, int a2);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern void* D_004A3028;
+extern char D_00461B30[];
+extern char D_00463DC8[];
+extern char D_00461618[];
+
+// Message handler for the save/load screen; unknown ids refresh the list and go to the base handler.
+extern "C" void* func_001B3A30(void* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0xE0: {
+        char buf[32];
+        strcpy(buf, (char*)self + 0x70C);
+        func_001B2378(self, 1);
+        func_001B3978(self, buf);
+        break;
+    }
+    case 0xDC:
+        if (func_0025DA90(D_004A3028) == 0) {
+            func_001A8A40(self, func_001BCB58((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)((char*)self + 0x10)));
+            break;
+        }
+        func_001B2378(self, 1);
+        break;
+    case 0xE8: {
+        void* p = func_001A9C50(self);
+        char* sub = (char*)p + 0xBC;
+        *(int*)((char*)p + 0xBC) = 1;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00463DC8);
+        *(int*)((char*)p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+        *(int*)((char*)p + 0x150) = 0x804;
+        func_001A9BC0(self, p);
+        break;
+    }
+    case 0xDE:
+        if (*(int*)((char*)self + 0x6F8) == 0) {
+            func_001B2CD0(self, a2);
+        }
+        break;
+    case 0xE1:
+        func_001B2378(self, 1);
+        break;
+    case 0xEA: case 0xEB: case 0xEC: case 0xED: case 0xEE: case 0xEF: case 0xF0:
+    case 0x106: case 0x10A: case 0x10B:
+        func_001AB3D0(self, func_001A98B0(self), 1);
+        break;
+    default:
+        func_001AB3D0(self, func_001A98B0(self), 1);
+        return func_001A8E40_3(self, a1, a2);
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B3BF0);
@@ -9708,7 +10854,75 @@ extern "C" void func_001B5830(void* self, void* a1, unsigned int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B5A58);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_001A8A40(void* self, void* obj);
+// PORT: the unit declares func_001A97B8 as returning int; this caller ignores the result.
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" void* func_001BEE30(void* mem, int a1);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" void func_00261408(void* self);
+extern "C" int* func_002591B8();
+extern "C" void func_002636F0(void* p, int a1);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern const char D_00461CD8[];
+
+struct sVE1B5A58 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+// Tracks a pending flag; on 0x10/0x14 restarts the memory-card task and resets the list.
+extern "C" void func_001B5A58(void* self, void* a1, int a2)
+{
+    switch (a2) {
+    case 0x15:
+        *(int*)((char*)self + 0x6DC) = 0;
+        func_001A97B8_v(self, a1, a2);
+        break;
+    case 0xF:
+        func_001A97B8_v(self, a1, a2);
+        *(int*)((char*)self + 0x6DC) = 1;
+        break;
+    case 0x10: case 0x14: {
+        func_001A97B8_v(self, a1, a2);
+        if (D_004A3328 == 0) {
+            func_00260F80();
+        }
+        if (func_00261460(D_004A3328) == 0) {
+            func_002613C8(D_004A3328);
+        }
+        if (D_004A3328 == 0) {
+            func_0025B800(D_004A3028);
+        }
+        func_00261408(D_004A3328);
+        func_0025B800(D_004A3028);
+        func_002636F0(func_002591B8(), 0);
+        char* obj = *(char**)((char*)self + 0x6EC);
+        sVE1B5A58* vt = *(sVE1B5A58**)(obj + 8);
+        vt[8].fn(obj + vt[8].delta, 0);
+        break;
+    }
+    case 0x16:
+        if (*(int*)((char*)self + 0x6DC) != 0) {
+            func_001A8A40(self, func_001BEE30(cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), *(int*)((char*)self + 0x10)));
+        }
+        func_001A97B8_v(self, a1, a2);
+        break;
+    default:
+        func_001A97B8_v(self, a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B5BD8);
@@ -9806,7 +11020,45 @@ extern "C" void func_001B5CF8(void* self, void* a1, int a2)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B5D58);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_001B5A58(void* self, void* a1, int a2);
+// Dispatches a message to the matching handler, falling back to the base handler.
+extern "C" void func_001B5D58(void* self, void* a1, int a2)
+{
+    switch (*(int*)((char*)a1 + 0x18)) {
+    case 0x81C:
+        func_001B5CF8(self, a1, a2);
+        break;
+    case 0x80E:
+        func_001B55B0(self, a1, a2);
+        break;
+    case 0x81B:
+        func_001B5740(self, a1, a2);
+        break;
+    case 0x81A:
+        func_001B5830(self, a1, a2);
+        break;
+    case 0x82C:
+        func_001B5A58(self, a1, a2);
+        break;
+    case 0x840: case 0x841: case 0x842:
+        func_001B4C40(self, a1, a2);
+        break;
+    case 0x843:
+        func_001B4C00(self, a1, a2);
+        break;
+    case 0x844:
+        func_001B5BD8(self, a1, a2);
+        break;
+    default:
+        func_001A97B8(self, a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B5E28);

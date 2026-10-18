@@ -3666,7 +3666,68 @@ extern "C" void func_001CD0B0(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_getObjName);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sName8_1CD0E8 { char s[8]; };
+struct sName10_1CD0E8 { char s[10]; };
+extern char D_004A1368[];
+extern sName10_1CD0E8 D_0045D550_1CD0E8 __asm__("D_0045D550");
+extern char D_004A12A8[];
+extern char D_004A1C80[];
+extern char D_004A1C88[];
+extern char D_004A1C90[];
+extern char D_004A1350[];
+extern char D_0045D560[];
+extern char D_004A1C98[];
+extern char D_004A1CA0[];
+extern char D_004A1CA8[];
+extern char D_004A1CB0[];
+extern char D_004A1CB8[];
+extern char D_004A1CC0[];
+extern char D_004A1CC8[];
+
+extern "C" int cKeyboardPopup_getObjName(void* self, int key, char* out, int shifted)
+{
+    char num[16];
+    char ch[2];
+    if (shifted != 0) {
+        *(sName8_1CD0E8*)out = *(sName8_1CD0E8*)D_004A1368;
+    } else {
+        *(sName10_1CD0E8*)out = D_0045D550_1CD0E8;
+    }
+    switch (key) {
+    case 27: func_004162D0(out, D_004A12A8); break;
+    case 42: func_004162D0(out, D_004A1C80); break;
+    case 56: func_004162D0(out, D_004A1C88); break;
+    case 70: func_004162D0(out, D_004A1C90); break;
+    case 76: func_004162D0(out, D_004A1350); break;
+    case 83: func_004162D0(out, D_0045D560); break;
+    case 28: func_004162D0(out, D_004A1C98); break;
+    case 55: func_004162D0(out, D_004A1CA0); break;
+    case 69: func_004162D0(out, D_004A1CA8); break;
+    case 79: func_004162D0(out, D_004A1CB0); break;
+    case 75: func_004162D0(out, D_004A1CB8); break;
+    case 0: func_004162D0(out, D_004A1CC0); break;
+    case 4: case 5: case 6: case 7: case 8:
+    case 9: case 10: case 11: case 12: case 13:
+        sprintf(num, D_004A1CC8, key - 3);
+        func_004162D0(out, num);
+        break;
+    default:
+        if (D_00441390[key] == '*') {
+            return 0;
+        }
+        ch[0] = D_00441390[key];
+        ch[1] = 0;
+        func_004162D0(out, ch);
+        break;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CD2F0);
@@ -3942,7 +4003,100 @@ extern "C" void cKeyboardPopup_redrawScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_SetNameForKey);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_001CE560(void* self, int key, int a2);
+extern char D_004C67B8[];
+extern char D_004C67C8[];
+extern char D_004A1CC8[];
+extern char D_00466720[];
+extern char D_00466740[];
+extern char D_00466760[];
+extern char D_00466778[];
+extern char D_00466790[];
+extern char D_004667A8[];
+extern char D_004667C0[];
+extern char D_004667D8[];
+
+struct sTextVE_1CD9B8 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+static inline void SetColor_1CD9B8(cUIText* text, void* col)
+{
+    sTextVE_1CD9B8* vt = *(sTextVE_1CD9B8**)((char*)text + 8);
+    ((int (*)(void*, void*))vt[11].fn)((char*)text + vt[11].delta, col);
+}
+
+static inline void SetVisible_1CD9B8(cUIText* text, int on)
+{
+    sTextVE_1CD9B8* vt = *(sTextVE_1CD9B8**)((char*)text + 8);
+    ((void (*)(void*, int))vt[9].fn)((char*)text + vt[9].delta, on);
+}
+
+extern "C" void cKeyboardPopup_SetNameForKey(void* vself, cUIText* text, int key)
+{
+    char* self = (char*)vself;
+    char buf[16];
+    if (text == 0) {
+        return;
+    }
+    if (func_001CE560(self, key, 0) == 0) {
+        SetColor_1CD9B8(text, D_004C67B8);
+    } else {
+        SetColor_1CD9B8(text, D_004C67C8);
+    }
+    switch (key) {
+    case 27:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466720));
+        break;
+    case 42:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466740));
+        SetColor_1CD9B8(text, D_004C67C8);
+        break;
+    case 56:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466760));
+        SetColor_1CD9B8(text, D_004C67C8);
+        break;
+    case 70:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466778));
+        break;
+    case 28:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466790));
+        break;
+    case 55:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667A8));
+        break;
+    case 75:
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667C0));
+        break;
+    case 0:
+        if (*(int*)(self + 0x43C) == 1) {
+            SetVisible_1CD9B8(text, 0);
+        } else {
+            SetVisible_1CD9B8(text, 1);
+        }
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667D8));
+        break;
+    case 4: case 5: case 6: case 7: case 8:
+    case 9: case 10: case 11: case 12: case 13:
+        if (*(int*)(self + 0x43C) == 1) {
+            SetVisible_1CD9B8(text, 0);
+        } else {
+            SetVisible_1CD9B8(text, 1);
+        }
+        sprintf(buf, D_004A1CC8, key - 3);
+        cUIText_setAsciiString(text, buf);
+        break;
+    case 83:
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/fepopup", func_001CDB98);
 

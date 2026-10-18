@@ -96,7 +96,24 @@ extern "C" void func_0017D0A8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017D1B8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_0017D1B8(void* self, int a, int b)
+{
+    int r = (a == 2) ? 4 : 5;
+    switch (b) {
+    case 0: case 4: case 5: case 6:
+        r = 0;
+        break;
+    case 1: case 2: case 3:
+        r = 1;
+        break;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D200);
@@ -342,7 +359,58 @@ extern "C" void func_0017D688(sDebugFE17D688* self)
 
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017DA30);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_002CC3B8(void* menu, void* items);
+extern "C" void func_0025C610(void* net);
+static inline void SetMode0017DA30(void* self, int mode)
+{
+    *(int*)((char*)self + 0x4) = mode;
+    func_002CC3B8((char*)self + 0x8, (char*)self + 0x604);
+}
+// Advances the debug menu to the follow-up screen for the current mode.
+extern "C" void func_0017DA30(void* self, int a1)
+{
+    *(int*)((char*)self + 0x1C14) = a1;
+    switch (*(int*)((char*)self + 0x4)) {
+    case 2:
+        SetMode0017DA30(self, 0x12);
+        break;
+    case 4:
+        SetMode0017DA30(self, 0x14);
+        break;
+    case 5:
+        if (*(int*)((char*)D_004A28A8 + 0x74) != 0) {
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(char**)((char*)D_004A28A8 + 0xC4));
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(char**)((char*)D_004A28A8 + 0xC8));
+            func_0025C610(D_004A3028);
+        } else {
+            SetMode0017DA30(self, 0x15);
+        }
+        break;
+    case 7:
+        SetMode0017DA30(self, 0x16);
+        break;
+    case 8:
+        SetMode0017DA30(self, 0x16);
+        break;
+    case 9:
+        SetMode0017DA30(self, 0x16);
+        break;
+    case 11:
+        SetMode0017DA30(self, 0x17);
+        break;
+    case 13:
+        SetMode0017DA30(self, 0x18);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 
@@ -1118,7 +1186,29 @@ extern "C" int func_0017FBF0(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017FDF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+void* func_00320C48(int, int) __asm__("func_00320C48__FPvi");
+
+extern "C" void func_0017FDF0(void* self, signed char k)
+{
+    int id = 0;
+    switch (k) {
+    case 0: id = 0x72; break;
+    case 1: id = 0x73; break;
+    case 2: id = 0x74; break;
+    case 3: id = 0x75; break;
+    case 4: id = 0x76; break;
+    case 5: id = 0x77; break;
+    case 6: id = 0x78; break;
+    case 7: id = 0x79; break;
+    }
+    func_00320C48(*(int*)((char*)self + 0x18), id);
+}
+#endif
 
 // PORT: the real function is C++ void* func_00320C48(void* self, int) (bx/execman); these thunks pass an int handle.
 void* func_00320C48(int, int) __asm__("func_00320C48__FPvi");

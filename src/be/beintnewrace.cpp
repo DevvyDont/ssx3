@@ -681,7 +681,40 @@ extern "C" int func_00145750(void* self)
 
 INCLUDE_ASM("be/beintnewrace", func_00145818);
 
+//100%
 INCLUDE_ASM("be/beintnewrace", func_00145870);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_00145870(void* self, int idx)
+{
+    switch (idx)
+    {
+    case 14:
+    case 15:
+    case 16:
+        return 12;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        return 0;
+    case 5:
+    case 6:
+    case 7:
+        return 1;
+    case 8:
+    case 9:
+    case 10:
+        return 3;
+    case 11:
+    case 12:
+    case 13:
+        return 2;
+    }
+    return 12;
+}
+#endif
 
 
 INCLUDE_ASM("be/beintnewrace", func_001458C8);

@@ -1,7 +1,126 @@
 #include "common.h"
 #include "ai/rider.h"
 
+//100%
 INCLUDE_ASM("ai/computer", cComputer_setIndividualRiderDifficulty);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sAiTune_SIRD {
+    char pad0[0xDC];
+    float accel;     // 0xDC
+    float speed;     // 0xE0
+    int boost;       // 0xE4
+};
+
+struct cComputer_SIRD {
+    char pad0[0x18];
+    sAiTune_SIRD* tune;     // 0x18
+    char pad1C[0xDF8 - 0x1C];
+    float skillA;           // 0xDF8
+    float skillB;           // 0xDFC
+};
+
+// Applies the per-level AI tuning; mode 0 and mode 2 override the skill values with their own tables.
+// skillB is stored as a percentage and scaled to 0..1 at the end.
+extern "C" void cComputer_setIndividualRiderDifficulty(cComputer_SIRD* self, int level, int mode)
+{
+    switch (level) {
+    case 1:
+        self->skillA = 100.0f;
+        self->skillB = 86.9153976f;
+        self->tune->accel = -49670.1406f;
+        self->tune->speed = 47500.0f;
+        self->tune->boost = 0;
+        break;
+    case 2:
+        self->skillA = 80.3891449f;
+        self->skillB = 79.5998383f;
+        self->tune->accel = -70000.0f;
+        self->tune->speed = 45000.0f;
+        self->tune->boost = 1;
+        break;
+    case 3:
+        self->skillA = 51.007576f;
+        self->skillB = 68.9012375f;
+        self->tune->accel = -81571.1797f;
+        self->tune->speed = 40000.0f;
+        self->tune->boost = 1;
+        break;
+    case 4:
+        self->skillA = 46.6018982f;
+        self->skillB = 56.8430748f;
+        self->tune->accel = -80321.1797f;
+        self->tune->speed = 37500.0f;
+        self->tune->boost = 1;
+        break;
+    case 5:
+        self->skillA = 14.000701f;
+        self->skillB = 42.4410439f;
+        self->tune->accel = -92500.0f;
+        self->tune->speed = 32500.0f;
+        self->tune->boost = 1;
+        break;
+    }
+    if (mode == 0) {
+        switch (level) {
+        case 1:
+            self->skillA = 100.0f;
+            self->skillB = 83.8930817f;
+            self->tune->speed = 45000.0f;
+            break;
+        case 2:
+            self->skillA = 55.8049736f;
+            self->skillB = 64.6436768f;
+            self->tune->speed = 42500.0f;
+            break;
+        case 3:
+            self->skillA = 40.2501869f;
+            self->skillB = 60.0044975f;
+            self->tune->speed = 37500.0f;
+            break;
+        case 4:
+            self->skillA = 15.5423021f;
+            self->skillB = 52.0049553f;
+            self->tune->speed = 32500.0f;
+            break;
+        case 5:
+            self->skillA = 7.95483208f;
+            self->skillB = 35.0202637f;
+            self->tune->speed = 30000.0f;
+            break;
+        }
+    } else if (mode == 2) {
+        switch (level) {
+        case 1:
+            self->skillA = 100.0f;
+            self->skillB = 100.0f;
+            self->tune->speed = 50000.0f;
+            break;
+        case 2:
+            self->skillA = 84.9981003f;
+            self->skillB = 82.6824875f;
+            self->tune->speed = 47500.0f;
+            break;
+        case 3:
+            self->skillA = 74.9987259f;
+            self->skillB = 70.8223801f;
+            self->tune->speed = 40000.0f;
+            break;
+        case 4:
+            self->skillA = 54.9958344f;
+            self->skillB = 59.9440651f;
+            self->tune->speed = 37500.0f;
+            break;
+        case 5:
+            self->skillA = 29.9814339f;
+            self->skillB = 46.9987717f;
+            self->tune->speed = 32500.0f;
+            break;
+        }
+    }
+    self->skillB *= 0.01f;
+}
+#endif
 
 INCLUDE_ASM("ai/computer", cComputer_updateRiderDifficulty);
 
@@ -1291,7 +1410,51 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
 
 INCLUDE_ASM("ai/computer", func_0010EB30);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010F1C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVE_0010F1C0 { short delta; short index; int (*fn)(void*); };
+extern "C" void func_0010E098(void*, int, float);
+extern "C" void func_0010E8B8_i(void* self, int v) __asm__("func_0010E8B8");
+extern "C" void func_00116120(void* rider, int a, int b);
+
+static inline void computerV_0010F1C0(char* self, int i)
+{
+    char* obj = self + 0x6C0;
+    sVE_0010F1C0* vt = *(sVE_0010F1C0**)obj;
+    vt[i].fn(obj + vt[i].delta);
+}
+
+extern "C" void func_0010F1C0(char* self, int kind, float amt)
+{
+    switch (kind) {
+    case 0:
+        break;
+    case 1:
+        computerV_0010F1C0(self, 13);
+        break;
+    case 2:
+        computerV_0010F1C0(self, 14);
+        break;
+    case 3:
+        computerV_0010F1C0(self, 15);
+        break;
+    case 4:
+        func_0010E098(self, 8, amt);
+        break;
+    case 6:
+        func_0010E8B8_i(self, (int)amt);
+        break;
+    case 5:
+        func_00116120(self, 0, 4);
+        break;
+    case 7:
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", func_0010F280);
@@ -1643,13 +1806,154 @@ extern "C" void func_001112B8(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_001112F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Motion-state dispatch: the second argument is passed through to the handler.
+extern "C" void func_0013F410(void* self, int a1);
+void func_00139A18_a1(void* motion, int a1) __asm__("func_00139A18__FPv");
+void func_00136F28_a1(void* motion, int a1) __asm__("func_00136F28__FPv");
+extern "C" void func_0013C5A0(void* motion, int a1);
+extern "C" void func_00139178(void* motion, int a1);
+extern "C" void func_0013C7A8(void* self, int a1);
+extern "C" void func_001399E0(void* motion, int a1);
+extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
+extern "C" void func_0013AD20(void* motion, int a1);
+extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
+extern "C" void func_001112F8(void* self, int a1)
+{
+    switch (*(int*)((char*)self + 0xDE0)) {
+    case 0:
+        func_0013F410(self, a1);
+        break;
+    case 1:
+        func_00139A18_a1((char*)self + 0x20, a1);
+        break;
+    case 2:
+        func_00136F28_a1((char*)self + 0x30, a1);
+        break;
+    case 4:
+        func_0013C5A0((char*)self + 0xB0, a1);
+        break;
+    case 5:
+        func_00139178((char*)self + 0x110, a1);
+        break;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_00111380);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_0013F410(void* self, int a1);
+void func_00139A18_a1(void* motion, int a1) __asm__("func_00139A18__FPv");
+void func_00136F28_a1(void* motion, int a1) __asm__("func_00136F28__FPv");
+extern "C" void func_0013C5A0(void* motion, int a1);
+extern "C" void func_00139178(void* motion, int a1);
+extern "C" void func_0013C7A8(void* self, int a1);
+extern "C" void func_001399E0(void* motion, int a1);
+extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
+extern "C" void func_0013AD20(void* motion, int a1);
+extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
+extern "C" void func_00111380(void* self, int a1)
+{
+    switch (*(int*)((char*)self + 0xDE0)) {
+    case 0:
+        func_0013C7A8(self, a1);
+        break;
+    case 1:
+        func_001399E0((char*)self + 0x20, a1);
+        break;
+    case 2:
+        cWipeoutMotion_gainFocus((char*)self + 0x30, a1);
+        break;
+    case 4:
+        func_0013AD20((char*)self + 0xB0, a1);
+        break;
+    case 5:
+        cHandplantMotion_gainFocus((char*)self + 0x110, a1);
+        break;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_00111408);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_0013D818(void* self);
+extern "C" void func_00139A20(void* motion);
+extern "C" void func_00136E98(void* motion);
+extern "C" void func_00136958(void* motion);
+extern "C" void func_0013AF28(void* motion);
+extern "C" void func_001391A8(void* motion);
 
+extern "C" void func_00111408(void* self)
+{
+    switch (*(int*)((char*)self + 0xDE0)) {
+    case 0:
+        func_0013D818(self);
+        break;
+    case 1:
+        func_00139A20((char*)self + 0x20);
+        break;
+    case 2:
+        func_00136E98((char*)self + 0x30);
+        break;
+    case 3:
+        func_00136958((char*)self + 0xA0);
+        break;
+    case 4:
+        func_0013AF28((char*)self + 0xB0);
+        break;
+    case 5:
+        func_001391A8((char*)self + 0x110);
+        break;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_001114A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_0013F178(void* self);
+extern "C" void func_00139C88(void* motion);
+extern "C" void func_00136EE0(void* motion);
+void func_00136978(void* motion);
+extern "C" void func_0013BFA8(void* motion);
+void func_00139528(void* motion);
+
+extern "C" void func_001114A0(void* self)
+{
+    switch (*(int*)((char*)self + 0xDE0)) {
+    case 0:
+        func_0013F178(self);
+        break;
+    case 1:
+        func_00139C88((char*)self + 0x20);
+        break;
+    case 2:
+        func_00136EE0((char*)self + 0x30);
+        break;
+    case 3:
+        func_00136978((char*)self + 0xA0);
+        break;
+    case 4:
+        func_0013BFA8((char*)self + 0xB0);
+        break;
+    case 5:
+        func_00139528((char*)self + 0x110);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_00111538);
@@ -1666,11 +1970,182 @@ extern "C" void func_00111538(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00111578);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_00131C30(void* m, int a1);
+extern "C" void func_0012FE98(void* m, int a1);
+void func_0012E9B0_a1(void* m, int a1) __asm__("func_0012E9B0__FPv");
+extern "C" void func_0012FB68(void* m, int a1);
+extern "C" void func_00134CB0(void* m, int a1);
+extern "C" void func_00132048(void* m, int a1);
+extern "C" void func_0012E690(void* m, int a1);
+extern "C" void func_00132F98(void* m, int a1);
 
+// Controller-state dispatch: the second argument is passed through to the handler.
+extern "C" void func_00111578(void* self, int a1)
+{
+    switch (*(int*)((char*)self + 0xDE4)) {
+    case 0:
+        func_00131C30((char*)self + 0x1C0, a1);
+        break;
+    case 1:
+        func_0012FE98((char*)self + 0x1D0, a1);
+        break;
+    case 2:
+        func_0012E9B0_a1((char*)self + 0x1F0, a1);
+        break;
+    case 4:
+        func_0012FB68((char*)self + 0x210, a1);
+        break;
+    case 5:
+        func_00134CB0((char*)self + 0x230, a1);
+        break;
+    case 7:
+        func_00132048((char*)self + 0x2B0, a1);
+        break;
+    case 8:
+        func_0012E690((char*)self + 0x2C0, a1);
+        break;
+    case 11:
+        func_00132F98((char*)self + 0x370, a1);
+        break;
+    case 3: case 6: case 9: case 10: case 12: case 13:
+        break;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ai/computer", func_00111630);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_00131608(void* p);
+void func_0012FC60(void* p);
+extern "C" void func_0012E980(void* p, int a1);
+extern "C" void func_0012F620(void* p, int a1);
+extern "C" void func_00133128(void* p, int a1);
+extern "C" void func_0012BE20(void* p, int a1);
+extern "C" void func_00131D08(void* p, int a1);
+extern "C" void func_0012CA30(void* p, int a1);
+extern "C" void func_0012F230(void* p, int a1);
+extern "C" void func_0012C5C8(void* p, int a1);
+extern "C" void func_001328B0(void* p, int a1);
+extern "C" void func_00136268(void* p, int a1);
+// Forwards to the handler for the AI's current state.
+extern "C" void func_00111630(void* self, int a1)
+{
+    switch (*(int*)((char*)self + 0xDE4)) {
+    case 0:
+        func_00131608((char*)self + 0x1C0);
+        break;
+    case 1:
+        func_0012FC60((char*)self + 0x1D0);
+        break;
+    case 2:
+        func_0012E980((char*)self + 0x1F0, a1);
+        break;
+    case 4:
+        func_0012F620((char*)self + 0x210, a1);
+        break;
+    case 5:
+        func_00133128((char*)self + 0x230, a1);
+        break;
+    case 6:
+        func_0012BE20((char*)self + 0x290, a1);
+        break;
+    case 7:
+        func_00131D08((char*)self + 0x2B0, a1);
+        break;
+    case 8:
+        func_0012CA30((char*)self + 0x2C0, a1);
+        break;
+    case 9:
+        func_0012F230((char*)self + 0x350, a1);
+        break;
+    case 10:
+        func_0012C5C8((char*)self + 0x360, a1);
+        break;
+    case 11:
+        func_001328B0((char*)self + 0x370, a1);
+        break;
+    case 12:
+        func_00136268((char*)self + 0x390, a1);
+        break;
+    case 3:
+    case 13:
+        break;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00111728);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_00131620(void* p, int a1);
+extern "C" void func_0012FC80(void* p, int a1);
+extern "C" void func_0012E9B8(void* p, int a1);
+extern "C" void func_0012E778(void* p, int a1);
+extern "C" void func_0012F730(void* p, int a1);
+extern "C" void func_00133308(void* p, int a1);
+extern "C" void func_0012BF68(void* p, int a1);
+extern "C" void func_00131D30(void* p, int a1);
+extern "C" void func_0012CB68(void* p, int a1);
+extern "C" void func_0012F398(void* p, int a1);
+extern "C" void func_0012C678(void* p, int a1);
+extern "C" void func_00132A30(void* p, int a1);
+extern "C" void func_00136508(void* p, int a1);
+// Forwards to the second handler for the AI's current state.
+extern "C" void func_00111728(void* self, int a1)
+{
+    switch (*(int*)((char*)self + 0xDE4)) {
+    case 0:
+        func_00131620((char*)self + 0x1C0, a1);
+        break;
+    case 1:
+        func_0012FC80((char*)self + 0x1D0, a1);
+        break;
+    case 2:
+        func_0012E9B8((char*)self + 0x1F0, a1);
+        break;
+    case 3:
+        func_0012E778((char*)self + 0x200, a1);
+        break;
+    case 4:
+        func_0012F730((char*)self + 0x210, a1);
+        break;
+    case 5:
+        func_00133308((char*)self + 0x230, a1);
+        break;
+    case 6:
+        func_0012BF68((char*)self + 0x290, a1);
+        break;
+    case 7:
+        func_00131D30((char*)self + 0x2B0, a1);
+        break;
+    case 8:
+        func_0012CB68((char*)self + 0x2C0, a1);
+        break;
+    case 9:
+        func_0012F398((char*)self + 0x350, a1);
+        break;
+    case 10:
+        func_0012C678((char*)self + 0x360, a1);
+        break;
+    case 11:
+        func_00132A30((char*)self + 0x370, a1);
+        break;
+    case 12:
+        func_00136508((char*)self + 0x390, a1);
+        break;
+    case 13:
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("ai/computer", func_00111830);
 INCLUDE_ASM("ai/computer", func_00111860);
