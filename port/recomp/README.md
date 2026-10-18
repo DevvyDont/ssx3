@@ -78,6 +78,10 @@ or any disc file.
     builds the player's rider on a newly started loader thread, turning each bone's rest pose from a quaternion with
     code that reads `vf0`, so the bones' rest-pose matrices came out as zeros and the player's rider drew tiny, with
     stretched legs, in front of the camera;
+  - SPU2 AutoDMA transfers finishing once the SPU2 would have played them, one stereo frame per 48 kHz sample, and
+    their sound playing through the PC's audio device. SSX 3's sound driver mixes everything on the IOP and streams
+    the mix to core 0 in blocks of 512 frames. The runtime dropped the data and finished each block about 400 times
+    too soon, so the driver kept resending stale blocks. Paced, a race draws about 4% more frames;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -162,7 +166,8 @@ Keyboard: Enter is START, X is Cross, Z is Square; F1 shows the debug panel.
 With the full disc, the game plays the EA SPORTS BIG logo movie, shows the title screen, and takes keyboard
 input through the front end to a race. In the race, the HUD, sky, mountains, start-gate stadium, riders, their
 shadows and the course draw with the right textures, and the race plays from the gate down the first slope.
-Sound has not been tested yet.
+Sound plays through the PC's audio device: the music, and the radio track shown at the start of a race. The game
+makes sound only as fast as it runs, so while it runs slower than the PS2 the sound comes in short runs with gaps.
 
 It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 5 to 7 frames a second.
 
