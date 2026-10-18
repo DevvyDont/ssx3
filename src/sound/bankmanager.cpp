@@ -1522,7 +1522,37 @@ extern "C" void func_0028F140(void* self, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028F200);
+#ifdef SKIP_ASM
+extern "C" int func_0028D960(void* self);
+extern "C" int func_002B49E0(void* monitor);
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+
+struct sSndKeyF200 {
+    long v;
+} __attribute__((packed));
+extern const sSndKeyF200 D_004A3648[];
+
+// PORT: 64-bit long sound key
+extern "C" void func_0028F200(void* self)
+{
+    char* mon = (char*)self + 0x118;
+    *(int*)((char*)self + 0x6294) = 0;
+    *(int*)((char*)self + 0x6298) = 0;
+    if (*(int*)((char*)self + 0x530) == 0 || func_002B49E0(mon) == 0xC9) {
+        if (func_0028D960(self)) {
+            if (func_002B49E0(mon) == 0xC9) {
+                *(int*)((char*)self + 0x508) = *(int*)((char*)self + 0x62AC);
+            }
+            func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 0xA, D_004A3648[0].v, 0, 3, 1, 0, 0);
+        }
+        *(int*)((char*)self + 0x6294) = 1;
+    } else {
+        *(int*)((char*)self + 0x6298) = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F2C0);
@@ -1884,7 +1914,49 @@ extern "C" void func_0028FA98(void* self, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028FAE0);
+#ifdef SKIP_ASM
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028D488(void* self);
+extern "C" int func_0028D960(void* self);
+extern "C" int func_0028DEF0(void* self, int a1);
+extern int func_002ADCA0_FAE0(void*, int, long, int, int, int, int, int) __asm__("func_002ADCA0");
+extern "C" void func_002ADDE0(void* mon, long key);
+extern "C" void* func_002B3AC0(void*);
+int func_002B4908(void* mon);
+extern "C" int func_002B49E0(void* monitor);
+
+struct sBmKeyFAE0 {
+    long v;
+} __attribute__((packed));
+extern const sBmKeyFAE0 D_004A3648_FAE0[] __asm__("D_004A3648");
+extern const sBmKeyFAE0 D_004A3650_FAE0[] __asm__("D_004A3650");
+extern const sBmKeyFAE0 D_004A3658_FAE0[] __asm__("D_004A3658");
+
+// PORT: 64-bit long sound keys.
+extern "C" void func_0028FAE0(char* self)
+{
+    if (func_0028D960(self) == 0) {
+        return;
+    }
+    func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3648_FAE0[0].v);
+    func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_FAE0[0].v);
+    func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658_FAE0[0].v);
+    int st = func_002B49E0(self + 0x118);
+    if ((unsigned int)(st - 1) < 3 || st == 0x191 || *(int*)(self + 0x530) == 0) {
+        func_0028DEF0(self, 0x12);
+        *(int*)(self + 0x5828) = 1;
+        func_002B3AC0(self + 0x118);
+        func_0028D488(self);
+        func_0028CF98(self, 0, 0, -1, 0);
+        char* p = **(char***)(self + 0x118) + 0x1D8;
+        const sBmKeyFAE0* key = D_004A3650_FAE0;
+        int v = func_002B4908(self + 0x118);
+        func_002ADCA0_FAE0(p, 0xBB8, key->v, 0, 4, v, 0, 0);
+    }
+}
+#endif
 
 extern "C" void* func_002B3AC0(void*);
 

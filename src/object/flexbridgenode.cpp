@@ -562,7 +562,95 @@ extern "C" void func_00348058(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_003480C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMat_3480C8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sRS_3480C8 {
+    int f0;
+    int flagsA;
+    int flagsB;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sVE_3480C8 { short delta; short index; void* fn; };
+typedef sMat_3480C8 (*tGetMat_3480C8)(void*);
+typedef int (*tCull_3480C8)(void*, void*, void*, const sMat_3480C8&);
+
+struct sCtx_3480C8 {
+    char pad0[0xE84];
+    sRS_3480C8* top;        // 0xE84
+    char padE88[0x10D8 - 0xE88];
+    sVE_3480C8* vt;         // 0x10D8
+};
+extern sCtx_3480C8* D_004A5B80_3480C8 __asm__("D_004A5B80");
+extern int D_004A5980;
+extern float D_004FF6C0[8][4];
+
+struct sFlex_3480C8 {
+    char pad0[0x20];
+    int count;              // 0x20
+    char pad24[0xC];
+    char boxMin[0x10];      // 0x30
+    char boxMax[0x10];      // 0x40
+};
+
+extern "C" void func_003480C8(sFlex_3480C8* self)
+{
+    sCtx_3480C8* ctx = D_004A5B80_3480C8;
+    sVE_3480C8* vt = ctx->vt;
+    if (((tCull_3480C8)vt[93].fn)((char*)ctx + vt[93].delta, self->boxMin, self->boxMax,
+                                  ((tGetMat_3480C8)vt[43].fn)((char*)ctx + vt[43].delta)) == 1) return;
+    if (D_004A5980 == 0) {
+        D_004FF6C0[0][0] = 0.0f;
+        D_004FF6C0[0][1] = 0.0f;
+        D_004FF6C0[0][2] = 0.0f;
+        D_004FF6C0[0][3] = 1.0f;
+        D_004FF6C0[1][0] = 0.0029154522344470024f;
+        D_004FF6C0[1][1] = 0.020408164709806442f;
+        D_004FF6C0[1][2] = 0.1428571492433548f;
+        D_004FF6C0[1][3] = 1.0f;
+        D_004FF6C0[2][0] = 0.02332361787557602f;
+        D_004FF6C0[2][1] = 0.08163265883922577f;
+        D_004FF6C0[2][2] = 0.2857142984867096f;
+        D_004FF6C0[2][3] = 1.0f;
+        D_004FF6C0[3][0] = 0.07871722429990768f;
+        D_004FF6C0[3][1] = 0.18367350101470947f;
+        D_004FF6C0[3][2] = 0.4285714626312256f;
+        D_004FF6C0[3][3] = 1.0f;
+        D_004FF6C0[4][0] = 0.07871722429990768f;
+        D_004FF6C0[4][1] = 0.18367350101470947f;
+        D_004FF6C0[4][2] = 0.4285714626312256f;
+        D_004FF6C0[4][3] = 1.0f;
+        D_004FF6C0[5][0] = 0.07871722429990768f;
+        D_004FF6C0[5][1] = 0.18367350101470947f;
+        D_004FF6C0[5][2] = 0.4285714626312256f;
+        D_004FF6C0[5][3] = 1.0f;
+        D_004FF6C0[6][0] = 0.07871722429990768f;
+        D_004FF6C0[6][1] = 0.18367350101470947f;
+        D_004FF6C0[6][2] = 0.4285714626312256f;
+        D_004FF6C0[6][3] = 1.0f;
+        D_004FF6C0[7][0] = 0.07871722429990768f;
+        D_004FF6C0[7][1] = 0.18367350101470947f;
+        D_004FF6C0[7][2] = 0.4285714626312256f;
+        D_004FF6C0[7][3] = 1.0f;
+        D_004A5980 = 1;
+    }
+    ctx->top->tex = -1;
+    ctx->top->flagsA = (ctx->top->flagsA & ~0x7C) | 4;
+    int n = self->count - 1;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < 8; j++) {
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("object/flexbridgenode", func_00348290);
 

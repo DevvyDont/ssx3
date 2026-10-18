@@ -592,7 +592,200 @@ extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* p0, sLmQuadVec4_E118
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038EE78);
+#ifdef SKIP_ASM
+extern "C" float func_0031BF60(float a);
+extern "C" float func_0031C040(float a);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sLmMat_EE78 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sLmVEntry_EE78 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sLmCtx_EE78 {
+    char pad_0x0[0x10D8];
+    sLmVEntry_EE78* vtable;      // 0x10D8
+};
+
+extern sLmCtx_EE78* D_004A5B80_EE78 __asm__("D_004A5B80");
+extern sLmMat_EE78 D_00504D80_EE78[] __asm__("D_00504D80");
+extern sLmMat_EE78 D_004FF1A0;
+extern float D_004FF160[3];
+extern int D_004A445C;
+extern float D_004A4448;
+extern float D_004A444C;
+extern float D_004A4450;
+extern float D_004A4454;
+extern float D_004A4460;
+extern float D_004A4464;
+extern float D_004A4468;
+extern float D_004A446C;
+extern float D_004A4470;
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+static inline void lmCopy_EE78(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
+static inline void lmMul_EE78(void* out, const void* a, const void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(out), "r"(a), "r"(b)
+        : "memory");
+}
+
+
+// PORT: PS2-only VU0 inline asm (in-place 4x4 matrix multiply m = m * b); the PC port needs a plain matrix multiply.
+static inline void lmMulIn_EE78(void* m, const void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(b)
+        : "memory");
+}
+
+extern "C" void func_0038EE78(void)
+{
+    sLmMat_EE78 m0;
+    sLmMat_EE78 r;
+    sLmMat_EE78 tmp;
+    float s;
+    float c;
+    sLmCtx_EE78* g = D_004A5B80_EE78;
+    sLmVEntry_EE78* vt = g->vtable;
+    float t = (float)vt[114].fn((char*)g + vt[114].delta);
+    int i;
+    for (i = 0; i < 8; i++) {
+        sLmMat_EE78* pm = &m0;
+        float fi = (float)i * 0.125f;
+        float amp = D_004A4448 * func_0031BF60(fi + t * (float)D_004A445C * 0.0016666667f) + D_004A444C;
+        float b = func_0031BF60(fi + t * D_004A4464 * 0.0016666667f);
+        float amp2 = D_004A4450 * func_0031BF60(fi * D_004A4468 * 0.0016666667f + b);
+        float angle = D_004A4454 * func_0031BF60(fi + t * D_004A4460 * 0.0016666667f);
+        lmCopy_EE78(&m0, &D_004FF1A0);
+        func_0031BE50(&s, &c, angle);
+        float tc = 1.0f - c;
+        float x = D_004FF160[0];
+        float y = D_004FF160[1];
+        float z = D_004FF160[2];
+        float tx = tc * x;
+        float ty = tc * y;
+        float tz = tc * z;
+        float sx = s * x;
+        float sy = s * y;
+        float sz = s * z;
+        r.m[0][0] = tx * x + c;
+        r.m[1][0] = tx * y + sz;
+        r.m[2][0] = tx * z - sy;
+        r.m[0][1] = ty * x - sz;
+        r.m[1][1] = ty * y + c;
+        r.m[2][1] = ty * z + sx;
+        r.m[0][2] = tz * x + sy;
+        r.m[1][2] = tz * y - sx;
+        r.m[2][2] = tz * z + c;
+        r.m[3][0] = 0.0f;
+        r.m[3][1] = 0.0f;
+        r.m[3][2] = 0.0f;
+        r.m[0][3] = 0.0f;
+        r.m[1][3] = 0.0f;
+        r.m[2][3] = 0.0f;
+        r.m[3][3] = 1.0f;
+        lmMulIn_EE78(pm, &r);
+        sLmMat_EE78* cell = &D_00504D80_EE78[i];
+        lmCopy_EE78(cell, &D_004FF1A0);
+        cell->m[2][0] += func_0031BF60(D_004A446C * 0.017453294f) * amp;
+        cell->m[2][1] += func_0031C040(D_004A446C * 0.017453294f) * amp;
+        m0.m[0][2] += amp2 * func_0031BF60(D_004A4470 * 0.017453294f);
+        m0.m[1][2] += amp2 * func_0031C040(D_004A4470 * 0.017453294f);
+        lmMul_EE78(&tmp, cell, &m0);
+        lmCopy_EE78(&r, &tmp);
+        lmCopy_EE78(cell, &r);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F2A8);
