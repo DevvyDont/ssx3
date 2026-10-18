@@ -384,7 +384,22 @@ extern "C" int func_0014B2F8(void* self, int group)
     return n;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014B378);
+//100%
+// Copies the entries of a group whose byte 1 is clear into out; returns how many.
+extern "C" int func_0014B378(void* self, int group, sBEGroupEntry* out)
+{
+    int count = func_0014D988(D_004A6750, group);
+    sBEGroupEntry* e = (sBEGroupEntry*)func_0014D998((sBELibTables*)D_004A6750, group);
+    int n = 0;
+    for (int i = 0; i < count; i++, e++) {
+        if (e->flag == 0) {
+            *out = *e;
+            n++;
+            out++;
+        }
+    }
+    return n;
+}
 
 //100%
 extern int D_004A6CA8[];
