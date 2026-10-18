@@ -1352,7 +1352,36 @@ extern "C" int func_003AF378(const char* a, const char* b)
     return a[i] - b[i];
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF428);
+//100%
+struct sNames_AF428 { const char* n[5]; };
+struct sVals_AF428 { unsigned int v[5]; };
+extern sNames_AF428 D_00495290;
+extern sVals_AF428 D_004952A8;
+
+extern "C" unsigned int func_003AF428(char* s, unsigned int len)
+{
+    unsigned int i = 0;
+    char saved = 9;
+    for (; i < len; i++) {
+        char c = s[i];
+        if (c == 9 || c == 13) {
+            s[i] = 0;
+            saved = c;
+            break;
+        }
+    }
+    sNames_AF428 names = D_00495290;
+    sVals_AF428 vals = D_004952A8;
+    unsigned int r = 0xFFFFFFFF;
+    for (unsigned int k = 0; k < 5; k++) {
+        if (func_003AF378(names.n[k], s) == 0) {
+            r = vals.v[k];
+            break;
+        }
+    }
+    if (i != len) s[i] = saved;
+    return r;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF560);
 
