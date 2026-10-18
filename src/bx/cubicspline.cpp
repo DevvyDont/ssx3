@@ -97,7 +97,22 @@ INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
 
 INCLUDE_ASM("bx/cubicspline", func_0031DEE0);
 
-INCLUDE_ASM("bx/cubicspline", func_0031E0E0);
+//100%
+// Samples the spline in 99 even steps from the first key to the end value at 0x4. The first, empty loop is in the original.
+extern "C" float func_0031DEE0(sCubicSpline* self, float x);
+
+extern "C" void func_0031E0E0(sCubicSpline* self)
+{
+    float start = ((sCubicSplineKeyK2*)self->data)->pad_0x10;
+    float end = self->f4;
+    float step = (end - start) * 0.01010101f;
+    float t;
+    float x;
+    for (t = start; t <= end; t += step)
+        ;
+    for (x = start; x <= end; x += step)
+        func_0031DEE0(self, x);
+}
 
 INCLUDE_ASM("bx/cubicspline", func_0031E190);
 
