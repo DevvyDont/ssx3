@@ -864,7 +864,224 @@ extern "C" void func_0030A728(void* self, unsigned int id, int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A868);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0030A728(void* self, unsigned int id, int kind);
+// PORT: the unit defines func_0030C7C0 later as (cWSQueue*, int, int, int)
+extern "C" void func_0030C7C0_a(void* queue, unsigned int id, int kind, int ctx) __asm__("func_0030C7C0");
+extern "C" void* func_0030AEB8(void* self);
+extern "C" int func_0030B8C0(void* self);
+extern "C" int func_00153D78(void* iface, unsigned int id);
+extern "C" int func_00153DD0(void* iface, unsigned int id);
+extern "C" int func_00153E28(void* iface, unsigned int id);
+extern "C" int func_00153E80(void* iface, unsigned int id);
+extern "C" int func_00153ED8(void* iface, unsigned int id);
+extern "C" int func_00153FD8(void* iface, unsigned int id);
+extern "C" void* func_0028B180();
+extern "C" void func_0029D6E0(void* p, unsigned int id);
+extern "C" void func_0029DBB0(void* p, int a1);
+extern char* D_004A28A8;
+extern signed char D_00535C10[];
+
+class cWSObj_30A868 {
+public:
+    char pad_0x00[0x20];
+    unsigned int id;        // 0x20
+    char pad_0x24[0x5C - 0x24];
+    // vptr at 0x5C
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+};
+
+// PORT: the unit defines func_0030B388 later with its own class type
+extern "C" cWSObj_30A868* func_0030B388_a(void* self, unsigned int id) __asm__("func_0030B388");
+
+extern "C" int func_0030A868(char* self, unsigned int id, unsigned int cmd, int ctx)
+{
+    int force = 0;
+    if (cmd == 15 || cmd == 19) {
+        force = 1;
+    }
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (force == 0) {
+        if (D_00535C10[0] != 4) {
+            return 0;
+        }
+        if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x7C) != 1) {
+            return 0;
+        }
+    }
+    int saved = *(int*)self;
+    if (ctx != -1) {
+        *(int*)self = ctx;
+    }
+    switch (cmd) {
+    case 0:
+    case 1:
+    case 2:
+    case 18:
+        func_0030A728(self, id, cmd);
+        break;
+    case 8:
+    case 9:
+    case 11: {
+        int v = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+        int busy = v != 0 && v < 10;
+        if (!busy) {
+            func_0030C7C0_a(self + 0x1C4, id, cmd, *(int*)self);
+        }
+        break;
+    }
+    }
+    int result = 0;
+    cWSObj_30A868* obj = (cWSObj_30A868*)func_0030AEB8(self);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
+    switch (cmd) {
+    case 0:
+        break;
+    case 3:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_a(self + 0x2B8, id);
+            if (obj == 0) {
+                obj = func_0030B388_a(self + 0x2B4, id);
+            }
+        }
+        if (obj != 0) {
+            obj->v17();
+            func_0029D6E0(func_0028B180(), id);
+        }
+        break;
+    case 4:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_a(self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            obj->v02();
+        }
+        break;
+    case 5:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_a(self + 0x2B8, id);
+        }
+        if (obj != 0) {
+            obj->v19();
+            func_0029DBB0(func_0028B180(), 0);
+        }
+        break;
+    case 17:
+        if (id != 0xFFFFFFFF) {
+            obj = func_0030B388_a(self + 0x2B8, id);
+            if (obj == 0) {
+                obj = func_0030B388_a(self + 0x2B4, id);
+            }
+        }
+        if (obj != 0) {
+            obj->v20();
+        }
+        break;
+    case 13:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = obj->id;
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        result = func_00153E28(iface, id) != 0;
+        break;
+    case 12:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = obj->id;
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        result = func_00153DD0(iface, id) != 0;
+        break;
+    case 16:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = obj->id;
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        if (*(int*)(self + 0x2AC) == 1) {
+            break;
+        }
+        if (func_0030B8C0(self) != 0) {
+            break;
+        }
+        if (func_00153ED8(iface, id) != 0) {
+            result = 1;
+        } else {
+            result = 0;
+        }
+        break;
+    case 19:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = obj->id;
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        result = func_00153FD8(iface, id) == -1;
+        break;
+    case 14:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = obj->id;
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        result = func_00153E80(iface, id) != 0;
+        break;
+    case 15:
+        if (id == 0xFFFFFFFF) {
+            if (obj != 0) {
+                id = obj->id;
+            }
+            if (id == 0xFFFFFFFF) {
+                break;
+            }
+        }
+        result = func_00153D78(iface, id) != 0;
+        break;
+    }
+    *(int*)self = saved;
+    return result;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030AC98);

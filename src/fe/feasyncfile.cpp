@@ -3377,7 +3377,159 @@ extern "C" void func_001A8AE8(void* self, cFEVObj_001A8AE8* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8B88);
+#ifdef SKIP_ASM
+extern void* D_004A3328;
+void func_00261058(void* self);
+extern "C" void func_00261408(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void* p, int id);
+void operator_delete(int* ptr);
+
+struct sNode1A8B88 {
+    sNode1A8B88* next;
+    sNode1A8B88* prev;
+    void* data;
+};
+
+struct sIter1A8B88 {
+    sNode1A8B88* node;
+    sIter1A8B88(sNode1A8B88* x) : node(x) {}
+    sIter1A8B88(const sIter1A8B88& x) : node(x.node) {}
+    void*& operator*() const { return node->data; }
+};
+
+struct sList1A8B88 {
+    int alloc;
+    sNode1A8B88* node;
+    sIter1A8B88 begin() { return node->next; }
+    void*& front() { return *begin(); }
+    sIter1A8B88 erase(sIter1A8B88 pos)
+    {
+        sNode1A8B88* next = pos.node->next;
+        sNode1A8B88* prev = pos.node->prev;
+        prev->next = next;
+        next->prev = prev;
+        operator_delete((int*)pos.node);
+        return sIter1A8B88(next);
+    }
+    void pop_front() { erase(begin()); }
+};
+
+
+class cFEState1A8B88 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual int v30();
+    virtual int v31(int msg, void* data);
+};
+
+class cMsg1A8B88 {
+public:
+    int type;
+    virtual ~cMsg1A8B88();
+};
+
+// PORT: the unit declares func_001A8B88 as (void*, int, int) returning void*.
+extern "C" int func_001A8B88_impl(cFEState1A8B88* st, int msg, int* data) __asm__("func_001A8B88");
+
+extern "C" int func_001A8B88_impl(cFEState1A8B88* st, int msg, int* data)
+{
+    if ((unsigned int)(msg - 0xC8) < 0x4F) {
+        if ((unsigned int)(msg - 0x115) < 2 || *(int*)((char*)st + 0x6B4) != 0) {
+            if (msg == 0x115 && D_004A3328 != 0) {
+                func_00261058(D_004A3328);
+                func_00261408(D_004A3328);
+            }
+            if (st->v30() != 0) {
+                if ((unsigned int)(msg - 0x115) < 2) {
+                    st->v31(*data, data);
+                } else {
+                    st->v31(0x115, 0);
+                }
+                *(int*)((char*)st + 0x6B4) = 0;
+            } else {
+                *(int*)((char*)st + 0x6B4) = 1;
+            }
+            return 1;
+        }
+        if (msg != 0x114) {
+            func_001A8AE8(st, (cFEVObj_001A8AE8*)data);
+        }
+        sList1A8B88* first = (sList1A8B88*)((char*)st + 0x6C8);
+        if (first->node->next != *(sNode1A8B88**)((char*)st + 0x6CC)) {
+            if (st->v30() == 0) {
+                return 0;
+            }
+            if (*(int*)((char*)st + 0x1C) & 6) {
+                char* p = *(char**)((char*)st + 0x6A0);
+                if (p != 0 && p + 0xBC != 0 && *(int*)(p + 0x170) != 0) {
+                    return 0;
+                }
+            }
+            sList1A8B88* list = (sList1A8B88*)((char*)st + 0x6C8);
+            if (list->node->next == *(sNode1A8B88**)((char*)st + 0x6CC)) {
+                return 0;
+            }
+            do {
+                cMsg1A8B88* item = (cMsg1A8B88*)list->front();
+                list->pop_front();
+                st->v31(item->type, item);
+                switch (item->type) {
+                case 0xEC:
+                    func_00294F78(func_0028B180(), 7);
+                case 0xED:
+                case 0xEF:
+                case 0xF1:
+                case 0x112:
+                case 0x113:
+                    st->v27();
+                    break;
+                case 0x109:
+                    func_00294F78(func_0028B180(), 8);
+                    st->v27();
+                    break;
+                }
+                delete item;
+            } while (list->node->next != *(sNode1A8B88**)((char*)st + 0x6CC));
+        }
+        return 0;
+    }
+    st->v31(msg, data);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8E40);
@@ -12276,7 +12428,251 @@ void* func_001B70A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B70D0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void func_001B7650(void* self, int a1, int a2, int b0, int b1, int a5, int a6);
+// PORT: the unit declares func_001B7778 as returning void*; the result is unused here
+extern "C" void func_001B7778_v(void* self) __asm__("func_001B7778");
+extern "C" void func_001B7E40(char* self, unsigned int msg);
+extern "C" int func_00265A38(void* p);
+extern "C" void func_00265D08(void* p);
+void func_00265DF0(void* p);
+void func_00265E00(void* p);
+void func_00265E10(void* p);
+void func_00265E20(void* p);
+void func_00265E30(void* p);
+extern "C" void func_002C2508(void* str, int a1);
+// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
+extern "C" void func_002C26D0_1B70D0(void* str, int fmt, ...) __asm__("func_002C26D0");
+extern "C" void func_002C2718(char* buf, const char* fmt, int a2);
+extern "C" void func_0039F190(void* self, int a1);
+extern void* D_004A28A8;
+extern int* D_004A33D0;
+extern char D_004A12C0[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_00463F58[];
+extern char D_004642E0[];
+extern char D_004642F8[];
+extern char D_00464310[];
+extern char D_00464330[];
+extern char D_00464348[];
+extern char D_00464360[];
+extern char D_00464380[];
+extern char D_00464398[];
+
+struct sVEntry_001B70D0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Loc1B70D0(char* name)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001B70D0* vt = *(sVEntry_001B70D0**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+}
+
+struct sFEState_001B70D0 {
+    char pad0[0x10];
+    char* f10;          // 0x10
+    char pad14[0x6D4 - 0x14];
+    int f6D4;           // 0x6D4
+    int f6D8;           // 0x6D8
+    int f6DC;           // 0x6DC
+    char pad6E0[0x702 - 0x6E0];
+    char text[0xB04 - 0x702]; // 0x702
+    int fB04;           // 0xB04
+};
+
+// PORT: the unit declares func_001B70D0 as returning void*; it returns nothing useful
+extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
+
+extern "C" void func_001B70D0_v(void* vself, int state)
+{
+    sFEState_001B70D0* self = (sFEState_001B70D0*)vself;
+    char buf[0x20];
+    self->f6DC = state;
+    int str = Loc1B70D0(D_004642E0);
+    func_002C2718(buf, D_004A12C0, 1);
+    switch ((unsigned int)state) {
+    case 1: {
+        char* text = self->text;
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 6: {
+        char* text = self->text;
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 7: {
+        char* text = self->text;
+        self->f6D8 = 0;
+        self->fB04 = 0;
+        func_00265D08(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_004642F8), str);
+        int h1 = GetHashValue32(D_0045DCC8);
+        int h2 = GetHashValue32(D_0045FCD8);
+        func_001B7650(self, 8, 1, h1, h2, 0, (int)text);
+        break;
+    }
+    case 8: {
+        func_001B7778_v(self);
+        self->fB04 = 1;
+        if (self->f6D8 != 0) {
+            func_001B70D0_v(self, 9);
+            break;
+        }
+        char* text = self->text;
+        func_00265E00(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 12: {
+        char* text = self->text;
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 13: {
+        char* text = self->text;
+        self->fB04 = 0;
+        self->f6D8 = 0;
+        func_00265D08(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464330), buf);
+        int h1 = GetHashValue32(D_0045DCC8);
+        int h2 = GetHashValue32(D_0045FCD8);
+        func_001B7650(self, 0xE, 1, h1, h2, 0, (int)text);
+        break;
+    }
+    case 14: {
+        self->fB04 = 1;
+        char* text = self->text;
+        func_00265E30(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464348), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 16: {
+        self->fB04 = 0;
+        if (func_00265A38(D_004A33D0) < 17) {
+            self->f6D4 = 3;
+            func_001B70D0_v(self, 17);
+            break;
+        }
+        self->fB04 = 1;
+        char* text = self->text;
+        func_001B7778_v(self);
+        func_00265E10(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 0:
+    case 5:
+    case 11:
+    case 19:
+        self->f6D8 = 0;
+    case 2:
+        self->fB04 = 0;
+        break;
+    case 20: {
+        char* text = self->text;
+        func_00265D08(D_004A33D0);
+        func_00265DF0(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 21: {
+        char* text = self->text;
+        self->fB04 = 0;
+        self->f6D8 = 0;
+        func_00265D08(D_004A33D0);
+        func_002C2508(text, Loc1B70D0(D_00464360));
+        int h1 = GetHashValue32(D_0045DCC8);
+        int h2 = GetHashValue32(D_0045FCD8);
+        func_001B7650(self, 0x16, 1, h1, h2, 0, (int)text);
+        break;
+    }
+    case 22: {
+        self->fB04 = 1;
+        if (self->f6D8 != 0) {
+            func_001B70D0_v(self, 0x17);
+            break;
+        }
+        char* text = self->text;
+        func_00265E20(D_004A33D0);
+        func_002C2508(text, Loc1B70D0(D_00464380));
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 23:
+        func_001B7778_v(self);
+    case 3:
+    case 9:
+    case 15:
+    case 17:
+        func_001B7E40((char*)self, self->f6D4);
+        break;
+    case 25: {
+        char* text = self->text;
+        self->fB04 = 0;
+        self->f6D8 = 0;
+        func_00265D08(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464398), buf);
+        int h1 = GetHashValue32(D_0045DCC8);
+        int h2 = GetHashValue32(D_0045FCD8);
+        func_001B7650(self, 0x1A, 1, h1, h2, 0, (int)text);
+        break;
+    }
+    case 26: {
+        self->fB04 = 1;
+        if (self->f6D8 != 0) {
+            func_001B70D0_v(self, 0x1C);
+            break;
+        }
+        char* text = self->text;
+        func_00265E20(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 27: {
+        self->fB04 = 1;
+        char* text = self->text;
+        func_001B7778_v(self);
+        func_00265E10(D_004A33D0);
+        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
+        break;
+    }
+    case 4:
+    case 10:
+    case 18:
+    case 24:
+    case 29:
+        func_0039F190(self->f10 + 0x18, 1);
+        break;
+    case 28:
+        func_001B7E40((char*)self, self->f6D4);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7650);
@@ -12777,7 +13173,184 @@ extern "C" void func_001B83C0(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_001A97B8 as returning int; the result is unused here.
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" int func_001B8890(void* self, int state);
+extern "C" int func_00265D68(void* p);
+extern int* D_004A33D0;
+
+class cListener_001B84D8 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17(void* owner, int v);
+};
+
+extern "C" void func_001B84D8(void* self, void* w, unsigned int msg)
+{
+    char* s = (char*)self;
+    int v;
+    switch (*(int*)(s + 0x6DC)) {
+    case 7:
+    case 13:
+    case 21:
+    case 25:
+        switch (msg) {
+        case 15:
+            func_001A97B8_v(self, w, 15);
+            if (func_00265D68(D_004A33D0) != 0) {
+                *(int*)(s + 0x6D4) = 2;
+                func_001B70D0(self, func_001B8890(self, *(int*)(s + 0x6DC)));
+            } else if (*(int*)(s + 0x6D8) != 0) {
+                *(int*)(s + 0x6D4) = 6;
+                func_001B70D0(self, func_001B8890(self, *(int*)(s + 0x6DC)));
+            } else {
+                int x = *(int*)((char*)w + 0x18);
+                if (x != 0) {
+                    func_001B70D0(self, x);
+                }
+            }
+            break;
+        case 16:
+        case 20: {
+            func_001A97B8_v(self, w, msg);
+            int st = *(int*)(s + 0x6DC);
+            if (st == 25 || st == 13 || st == 7) {
+                *(int*)(s + 0x6D0) = 0x11;
+            } else {
+                *(int*)(s + 0x6D0) = 0x10;
+            }
+            break;
+        }
+        case 22:
+            func_001A97B8_v(self, w, 22);
+            (*(cListener_001B84D8**)(s + 0x20))->v17(self, *(int*)(s + 0x6D0));
+            break;
+        default:
+            func_001A97B8_v(self, w, msg);
+            break;
+        }
+        break;
+    case 3:
+        switch (msg) {
+        case 15:
+            func_001A97B8_v(self, w, 15);
+            if (*(int*)(s + 0x18) != 0) {
+                *(int*)(s + 0x6D0) = 0;
+                *(int*)(s + 0x6D4) = 0;
+                *(int*)(s + 0x6D8) = 0;
+                func_001B70D0(self, *(int*)(s + 0xB0C));
+            } else {
+                *(int*)(s + 0x6D0) = 0x10;
+            }
+            break;
+        case 16:
+        case 20:
+            func_001A97B8_v(self, w, msg);
+            *(int*)(s + 0x6D0) = 0xF;
+            break;
+        case 22:
+            func_001A97B8_v(self, w, 22);
+            v = *(int*)(s + 0x6D0);
+            if (v != 0) {
+                (*(cListener_001B84D8**)(s + 0x20))->v17(self, v);
+            }
+            break;
+        default:
+            func_001A97B8_v(self, w, msg);
+            break;
+        }
+        break;
+    case 9:
+    case 15:
+    case 17:
+    case 28:
+        switch (msg) {
+        case 15:
+            func_001A97B8_v(self, w, 15);
+            *(int*)(s + 0x6D0) = 0x11;
+            break;
+        case 16:
+        case 20:
+            func_001A97B8_v(self, w, msg);
+            *(int*)(s + 0x6D0) = 0xF;
+            break;
+        case 22:
+            func_001A97B8_v(self, w, 22);
+            v = *(int*)(s + 0x6D0);
+            if (v != 0) {
+                (*(cListener_001B84D8**)(s + 0x20))->v17(self, v);
+            }
+            break;
+        default:
+            func_001A97B8_v(self, w, msg);
+            break;
+        }
+        break;
+    case 23:
+        switch (msg) {
+        case 15:
+            func_001A97B8_v(self, w, 15);
+            if (*(int*)(s + 0xB08) == 0) {
+                *(int*)(s + 0x6D0) = 0x10;
+            } else {
+                *(int*)(s + 0x6D0) = 0;
+                *(int*)(s + 0x6D4) = 0;
+                *(int*)(s + 0x6D8) = 0;
+                *(int*)(s + 0xB08) = 0;
+                *(int*)(s + 0xB0C) = 0;
+                func_001B70D0(self, 0);
+            }
+            break;
+        case 22:
+            func_001A97B8_v(self, w, 22);
+            v = *(int*)(s + 0x6D0);
+            if (v != 0) {
+                (*(cListener_001B84D8**)(s + 0x20))->v17(self, v);
+            }
+            break;
+        default:
+            func_001A97B8_v(self, w, msg);
+            break;
+        }
+        break;
+    case 4:
+    case 10:
+    case 18:
+    case 24:
+    case 29:
+        if (msg == 22) {
+            func_001A97B8_v(self, w, 22);
+            (*(cListener_001B84D8**)(s + 0x20))->v17(self, 0xF);
+        } else {
+            func_001A97B8_v(self, w, msg);
+        }
+        break;
+    default:
+        func_001A97B8_v(self, w, msg);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B8860);
