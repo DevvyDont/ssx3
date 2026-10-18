@@ -138,7 +138,37 @@ extern "C" unsigned char func_0039B7B0(void* self, unsigned char start)
     return 0xFF;
 }
 
-INCLUDE_ASM("ui/uimenu", func_0039B878);
+//100%
+void* func_00397870_b878(void* list, int i) __asm__("func_00397870");
+
+struct func_0039B878_sVEntry {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, int, int);
+};
+
+extern "C" unsigned char func_0039B878(void* self, unsigned char start)
+{
+    if (start >= *(unsigned char*)((char*)self + 0x96)) {
+        start = *(unsigned char*)((char*)self + 0x96) - 1;
+    }
+    for (short i = start; i >= 0; i--) {
+        void* item = func_00397870_b878((char*)self + 0x74, i);
+        if (*(int*)((char*)self + 0x90) & 4) {
+            char* mgr = *(char**)(*(char**)((char*)self + 0x5C) + 0xD0);
+            func_0039B878_sVEntry* vt = *(func_0039B878_sVEntry**)(mgr + 8);
+            if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
+                return i;
+            }
+        } else {
+            int f = *(int*)((char*)item + 0x14);
+            if (((f >> 5) & 1) == 0) {
+                return i;
+            }
+        }
+    }
+    return 0xFF;
+}
 
 //100%
 extern "C" void cUIMenu_setSelected(char* self, char* item, int play);

@@ -106,7 +106,38 @@ extern "C" void func_002C86F8(HS_86F8 *self, unsigned i, int d) {
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C8770);
 
-INCLUDE_ASM("seg/seg_1C9348", func_002C8970);
+//100%
+struct HS_8970 {
+    char pad0[0x100];
+    int used[0x311];        // 0x100
+    int len[0x608];         // 0xD44
+    int a[256];             // 0x2564
+    int b[0x11A];           // 0x2964
+    int cur;                // 0x2DCC
+};
+extern "C" int func_002C8970(HS_8970* self, unsigned v, unsigned n)
+{
+    int best;
+    if (n != 0) {
+        best = func_002C8970(self, v, n - 1);
+        if (self->used[self->cur + n] != 0) {
+            unsigned q = v / n;
+            int c = func_002C8970(self, v - q * n, n - 1) + self->a[self->cur + n] * q;
+            if (c < best) {
+                best = c;
+            }
+        }
+    } else {
+        best = 0;
+        if (v != 0) {
+            best = 20;
+            if (v < 0xFC) {
+                best = self->a[self->cur] + 3 + self->len[v] * 2;
+            }
+        }
+    }
+    return best;
+}
 
 //100%
 struct HuffState_8A78 {

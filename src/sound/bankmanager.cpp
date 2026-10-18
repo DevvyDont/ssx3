@@ -1011,7 +1011,30 @@ extern "C" void func_0028CDF8(char* self)
 
 INCLUDE_ASM("sound/bankmanager", func_0028CF98);
 
-INCLUDE_ASM("sound/bankmanager", func_0028D488);
+//100%
+extern "C" unsigned int func_002ADF60(void* rng);
+extern "C" int func_0028D8A0(void* self);
+extern "C" void func_002B42B8(void* mon, int on, int id);
+
+extern "C" void func_0028D488(void* selfp)
+{
+    char* self = (char*)selfp;
+    unsigned int range = *(unsigned int*)(self + 0x504);
+    int prev = *(int*)(self + 0x62A4);
+    *(unsigned int*)(self + 0x508) =
+        (func_002ADF60(*(void**)(**(char***)(self + 0x118) + 0x1D8)) & 0x7FFF) * range / 0x7FFF;
+    int n = (func_002ADF60(*(void**)(**(char***)(self + 0x118) + 0x1D8)) & 0x7FFF) * 10 / 0x7FFF + 1;
+    for (int k = 0; k < n; k++) {
+        func_002B42B8(self + 0x118, 1, func_0028D8A0(self));
+    }
+    char* mon = self + 0x118;
+    if (prev == *(int*)(self + 0x508)) {
+        func_002B42B8(mon, 1, func_0028D8A0(self));
+        if (prev == *(int*)(self + 0x508)) {
+            func_002B42B8(mon, 0, 0);
+        }
+    }
+}
 
 //100%
 extern "C" int func_002B49E0(void* monitor);
@@ -1435,7 +1458,24 @@ extern "C" void func_0028F140(char* self, unsigned int mode)
     }
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028F200);
+//100%
+extern "C" void func_0028F200(char* self)
+{
+    char* mon = self + 0x118;
+    *(int*)(self + 0x6294) = 0;
+    *(int*)(self + 0x6298) = 0;
+    if (*(int*)(self + 0x530) == 0 || func_002B49E0(mon) == 0xC9) {
+        if (func_0028D960(self)) {
+            if (func_002B49E0(mon) == 0xC9) {
+                *(int*)(self + 0x508) = *(int*)(self + 0x62AC);
+            }
+            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 10, D_004A3648[0].v, 0, 3, 1, 0, 0);
+        }
+        *(int*)(self + 0x6294) = 1;
+    } else {
+        *(int*)(self + 0x6298) = 1;
+    }
+}
 
 //100%
 extern "C" void* func_002B3AC0(void*);

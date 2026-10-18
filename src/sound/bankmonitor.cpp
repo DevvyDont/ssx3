@@ -2289,7 +2289,29 @@ extern "C" void func_002B1020(void* self, int i, int value)
     }
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B1058);
+extern "C" void* func_003D8040(void* p);
+extern "C" void func_002B1058(void* self_, int i, int v, int k, int w, float t)
+{
+    char* self = (char*)self_;
+    if ((*(char***)(self + 0x4))[i] == 0) {
+        return;
+    }
+    *(int*)((*(char***)(self + 0x4))[i] + 0x8CC) = v;
+    if (0.0f < t) {
+        *(float*)((*(char***)(self + 0x4))[i] + 0x8F4) = t;
+    }
+    *(int*)((*(char***)(self + 0x4))[i] + 0x8D0) = w;
+    if (k != 0) {
+        *(int*)(self + 0x10) = i;
+        *(int*)(self + 0xC) = k;
+    }
+    func_003D8040((void*)i);
+    *(int*)(self + 0xC) = 0;
+    *(int*)(self + 0x10) = -1;
+    *(float*)((*(char***)(self + 0x4))[i] + 0x8F4) = 0.0f;
+    *(int*)((*(char***)(self + 0x4))[i] + 0x8CC) = 0;
+    *(int*)((*(char***)(self + 0x4))[i] + 0x8D0) = 0;
+}
 
 extern "C" void func_002B1058(void* self, int i, int a, int b, int c, float f);
 extern "C" void func_002B1128(void* self, int i)
@@ -2343,9 +2365,59 @@ extern "C" void func_002B1248(void* self)
     func_002AB1A0(*(void**)((char*)self + 0x0));
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B1268);
+struct sBankId_1268 {
+    long v;
+} __attribute__((packed));
+extern char D_004A37E0[];
+extern "C" int func_002AB150(void* self, int i);
+extern "C" void func_002AB0D0(void* self, int i, int v);
+extern "C" void func_002ADCA0(void* p, int a, long b, int c, int d, int e, int f, int g);
+// PORT: func_002B1248 takes the message as an ignored second argument here.
+extern "C" int func_002B1248_m(void* self, void* m) __asm__("func_002B1248");
 
-INCLUDE_ASM("sound/bankmonitor", func_002B1348);
+//100%
+extern "C" int func_002B1268(void* self_, void* m_)
+{
+    char* self = (char*)self_;
+    char* m = (char*)m_;
+    char* e = *(char**)(m + 0x18);
+    int st = func_002AB150(*(void**)self, func_002B1220(D_004A37B4, *(int*)e));
+    if (st != *(int*)(m + 0x1C)) {
+        func_002ADCA0(**(char***)D_004A37B4 + 0x1D8, 0xC8, ((sBankId_1268*)D_004A37E0)->v,
+                      *(int*)(m + 0x18), *(int*)(m + 0x1C), *(int*)(m + 0x20), 0, 0);
+        return 1;
+    }
+    int v = *(int*)(m + 0x20);
+    if (v != -1) {
+        char* vt = *(char**)(self + 0x1BC);
+        int r = (*(int (**)(void*, int, int, int))(vt + 0x1C))(self + *(short*)(vt + 0x18), *(int*)e, v, *(int*)(e + 0x8D0));
+        if (r != 0) {
+            func_002AB0D0(*(void**)self, *(int*)(e + 0x4), r);
+        }
+    }
+    return func_002B1248_m(self, m);
+}
+
+extern char D_004A37D8[];
+
+//100%
+extern "C" int func_002B1348(void* self, void* m)
+{
+    int* e = *(int**)((char*)m + 0x18);
+    if (func_002AAE08(*(void**)self, e[1]) - 1 > 0) {
+        if (func_002AB028(*(void**)self, e[1]) != 0) {
+            float f = func_002AAE78(*(void**)self, e[1]);
+            func_002ADCA0(**(char***)D_004A37B4 + 0x1D8, (int)f,
+                          ((sBankId_1268*)D_004A37D8)->v, (int)e, *(int*)((char*)m + 0x1C), *(int*)((char*)m + 0x20), 0, 0);
+            return 1;
+        }
+        if (func_002AB150(*(void**)self, func_002B1220(D_004A37B4, e[0])) == *(int*)((char*)m + 0x1C)) {
+            return func_002B1268(self, m);
+        }
+        return 0;
+    }
+    return func_002B1268(self, m);
+}
 
 //100%
 struct sBankSlot0018 {
@@ -2416,7 +2488,78 @@ extern "C" int func_002B1458(sBankEntries* self, int a, int b, int c, int d, int
     return 1;
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B1520);
+//100%
+class cBMVoice_1520 {
+public:
+    // vptr at 0; slot N at vtable offset N*8
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+};
+
+struct sBMObj_1520 {
+    char pad[0x6C0];
+    char voice[4];          // 0x6C0, a cBMVoice_1520
+    char pad6C4[0x870 - 0x6C4];
+    int z;                  // 0x870
+};
+
+struct sBMEnt_1520 {
+    int used;       // 0x18
+    int pad1C;
+    int id;         // 0x20
+    int key;        // 0x24
+    sBMObj_1520* obj;   // 0x28
+    int w;          // 0x2C
+    float t;        // 0x30
+    int k;          // 0x34
+};
+
+struct sBMon_1520 {
+    int pad0;
+    char** slots;           // 0x4
+    char pad8[0xC - 0x8];
+    int curK;               // 0xC
+    int curId;              // 0x10
+    char pad14[0x18 - 0x14];
+    sBMEnt_1520 ents[10];   // 0x18
+};
+
+extern "C" int func_002B1520(sBMon_1520* self, int id, int key)
+{
+    for (int j = 0; j < 10; j++) {
+        if (self->ents[j].used != 0 && self->ents[j].id == id && self->ents[j].key == key) {
+            int v = 0;
+            int u = 0;
+            int z = -1;
+            if (self->ents[j].obj != 0) {
+                v = ((cBMVoice_1520*)self->ents[j].obj->voice)->v05();
+                u = ((cBMVoice_1520*)self->ents[j].obj->voice)->v08();
+                z = self->ents[j].obj->z;
+            }
+            *(int*)(self->slots[id] + 0x8CC) = v;
+            *(int*)(self->slots[id] + 0x8F8) = u;
+            *(int*)(self->slots[id] + 0x8FC) = z;
+            *(float*)(self->slots[id] + 0x8F4) = self->ents[j].t;
+            *(int*)(self->slots[id] + 0x8D0) = self->ents[j].w;
+            int k = self->ents[j].k;
+            if (k != 0) {
+                self->curK = k;
+                self->curId = id;
+            } else {
+                self->curK = 0;
+                self->curId = -1;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("sound/bankmonitor", func_002B16A0);
 
@@ -3192,7 +3335,32 @@ extern "C" void func_002B3A98(void* self)
     }
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B3AC0);
+//100%
+struct sBankId_3AC0 {
+    long v;
+} __attribute__((packed));
+extern char D_004A3838[];
+extern char D_004A3840[];
+extern char D_004A3848[];
+void func_002ADDE0_3AC0(void* bm, long id) __asm__("func_002ADDE0");
+extern "C" void func_0028BCE8(void* self, int i);
+
+extern "C" void func_002B3AC0(char* self)
+{
+    func_002ADDE0_3AC0(**(char***)self + 0x1D8, ((sBankId_3AC0*)D_004A3838)->v);
+    func_002ADDE0_3AC0(**(char***)self + 0x1D8, ((sBankId_3AC0*)D_004A3840)->v);
+    func_002ADDE0_3AC0(**(char***)self + 0x1D8, ((sBankId_3AC0*)D_004A3848)->v);
+    if (*(void**)(self + 0x408) != 0) {
+        func_0028A728(**(void***)self, *(int*)(*(char**)(self + 0x408) + 0x34));
+        func_0028BCE8(**(void***)self, *(int*)(*(char**)(self + 0x408) + 0x34));
+    }
+    func_002B3A98(self);
+    *(int*)(self + 0x418) = 0;
+    if (*(void**)(self + 0x408) != 0) {
+        func_002B1F78(*(void**)(self + 0x408), 3);
+    }
+    *(void**)(self + 0x408) = 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_002B20C8(void* mon, int a1, int a2);
@@ -3472,7 +3640,35 @@ extern "C" void func_002B4180(void* self, int n)
     }
 }
 
-INCLUDE_ASM("sound/bankmonitor", func_002B41E8);
+//100%
+struct func_002B41E8_sMon {
+    char pad[0x3E4];
+    int count;              // 0x3E4
+    char pad3E8[0x3F0 - 0x3E8];
+    int current;            // 0x3F0
+    char pad3F4[0x3F8 - 0x3F4];
+    unsigned long mask;     // 0x3F8 (PORT: 64-bit long)
+    char pad400[0x420 - 0x400];
+    int table[64][5];       // 0x420
+    int counts[5];          // 0x920
+};
+
+extern "C" void func_002B41E8(func_002B41E8_sMon* self, int filter, int kind)
+{
+    if (filter == 0 || self->counts[kind] == 0) {
+        do {
+            if (--self->current < 0) {
+                self->current = self->count - 1;
+            }
+        } while (!((self->mask >> self->current) & 1));
+    } else {
+        do {
+            if (--self->current < 0) {
+                self->current = self->count - 1;
+            }
+        } while (!((self->mask >> self->current) & 1) || self->table[self->current][kind] == 0);
+    }
+}
 
 //100%
 struct func_002B42B8_sMon {
