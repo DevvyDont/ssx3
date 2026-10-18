@@ -45,7 +45,32 @@ extern "C" void func_003158E0(void* self, float value)
     *(float*)((char*)self + 0x1C) = value;
 }
 
-INCLUDE_ASM("animation/gameanimmap", func_003158E8);
+//100%
+// Copies the default vector to 0x30 and stores a rotation of -angle about the default axis at 0x40.
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sQuat_003158E8
+{
+    float x, y, z, w;
+    sQuat_003158E8() {}
+    sQuat_003158E8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+extern sQuat_003158E8 D_004FF130_3158E8 __asm__("D_004FF130");
+extern sQuat_003158E8 D_004FF160_3158E8 __asm__("D_004FF160");
+
+static inline sQuat_003158E8 AxisAngle_3158E8(const sQuat_003158E8& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQuat_003158E8(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+extern "C" void func_003158E8(void* self, float angle)
+{
+    *(sQuat_003158E8*)((char*)self + 0x30) = D_004FF130_3158E8;
+    *(sQuat_003158E8*)((char*)self + 0x40) = AxisAngle_3158E8(D_004FF160_3158E8, -angle);
+}
 
 //100%
 // Copies the 0x20-byte pair of vectors from src into self at 0x30.
