@@ -407,7 +407,7 @@ extern "C" int func_00278AD0(void* self, int key)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278B98);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3): credit them when landing (LAND_NOTE/LAND_TRAILER, notes/RESOURCES.md).
+// From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
