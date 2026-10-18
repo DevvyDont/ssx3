@@ -910,7 +910,40 @@ extern "C" void func_0012A558(void) {
 #endif
 INCLUDE_ASM("ai/ai", func_0012A560);
 INCLUDE_ASM("ai/ai", func_0012A768);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012A998);
+#ifdef SKIP_ASM
+// self is a cAI (no header yet): +0x48 is a list of rider objects (count at +0x80), each holding
+// its cRider virtual-base pointer at +0x18.
+struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
+
+extern void* D_004A289C;
+extern "C" int func_0012A1F0(void*, int);
+
+extern "C" void func_0012A998(void* self)
+{
+    for (int i = 0; i < *(int*)((char*)self + 0x80); i++)
+    {
+        char** list = (char**)((char*)self + 0x48);
+        cRider* rider = *(cRider**)(list[i] + 0x18);
+        if (rider->mRenderFlag != 0)
+        {
+            char* sub = (char*)&rider->mVtbl;
+            sVEntry0012A998* vt = *(sVEntry0012A998**)sub;
+            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)) != 0)
+            {
+                cRider* r = *(cRider**)(list[i] + 0x18);
+                r->mRenderFlag = 0;
+                r->mSafeRenderTick = -1;
+                char* g = (char*)D_004A289C;
+                char* obj = list[i];
+                sVEntry0012A998* gvt = *(sVEntry0012A998**)(g + 0x10D8);
+                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn(g + gvt[114].delta) + 4;
+            }
+        }
+    }
+}
+#endif
 INCLUDE_ASM("ai/ai", func_0012AA78);
 
 //100%
@@ -1035,7 +1068,25 @@ extern "C" int func_0012ACF8(sAiObj12ACF8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012AD70);
+#ifdef SKIP_ASM
+// self is a cAI (no header yet); +0x70 is its list of rider objects (count at +0x88),
+// each holding its cRider virtual-base pointer at +0x18.
+extern "C" void func_0012AD70(void* self)
+{
+    for (int i = 0; i < *(int*)((char*)self + 0x88); i++)
+    {
+        char* obj = ((char**)((char*)self + 0x70))[i];
+        cRider* rider = *(cRider**)(obj + 0x18);
+        if (rider->mRenderFlag != 0)
+        {
+            rider->mRenderFlag = 0;
+            rider->mSafeRenderTick = -1;
+        }
+    }
+}
+#endif
 INCLUDE_ASM("ai/ai", func_0012ADC0);
 
 //100%
