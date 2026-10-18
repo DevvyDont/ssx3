@@ -599,7 +599,39 @@ extern "C" int func_0014BBA0(void* self, int slot, sBEEntry38_14B988* a, char* b
     return func_0014B988(self, profile, func_0014AC30(slot), a, b);
 }
 
-INCLUDE_ASM("be/belibrary", func_0014BC18);
+//100%
+extern "C" int func_004165A8(const char* a, const char* b);
+
+struct sBEEntry38_14BC18 {
+    char pad_0x00[4];
+    short key;          // 0x4
+    char pad_0x06[0x22];
+    char* name;         // 0x28
+    char pad_0x2C[0xC];
+};
+
+// Collects the distinct names of a group's owned entries into names[]; returns how many.
+extern "C" int func_0014BC18(void* self, int a, int b, char (*names)[0x100])
+{
+    int n = 0;
+    sBELibTables* tbl = (sBELibTables*)func_0014BDB8_0();
+    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, a, b);
+    int count = func_0014D988(tbl, b);
+    sBEEntry38_14BC18* e = (sBEEntry38_14BC18*)func_0014D998(tbl, b);
+    for (int i = 0; i < count; i++, e++) {
+        char* s = e->name;
+        if (s == 0) continue;
+        if (!(getEntry_14AFB0(prof, e->key)->flags & 0x10)) continue;
+        int k;
+        for (k = n - 1; k >= 0; k--) {
+            if (func_004165A8(s, names[k]) == 0) break;
+        }
+        if (k >= 0) continue;
+        strcpy(names[n], s);
+        n++;
+    }
+    return n;
+}
 
 //100%
 void* func_0014BD78(void* self)
