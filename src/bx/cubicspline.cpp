@@ -554,7 +554,124 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
     }
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031F018);
+//100%
+// dlmalloc 2.7 realloc() (no mmap support: an mmapped chunk fails with ENOMEM).
+struct sMChunk_31F018
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+    sMChunk_31F018* fd;          // 0x8
+    sMChunk_31F018* bk;          // 0xC
+};
+
+extern "C" void func_003E6574(void* d, void* s, int n);
+
+extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
+{
+    char* av = *(char**)ms;
+    unsigned int nb;
+    sMChunk_31F018* oldp;
+    unsigned int oldsize;
+    sMChunk_31F018* newp;
+    unsigned int newsize;
+    char* newmem;
+    sMChunk_31F018* next;
+    sMChunk_31F018* remainder;
+    unsigned int remainder_size;
+    unsigned int head;
+
+    if (oldmem == 0)
+        return func_0031E818(ms, bytes);
+
+    if (bytes >= (unsigned int)-32)
+        goto nomem;
+    nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
+
+    head = *(unsigned int*)((char*)oldmem - 4);
+    oldp = (sMChunk_31F018*)((char*)oldmem - 8);
+    oldsize = head & ~3;
+    if (head & 2)
+        goto nomem;
+
+    if (oldsize >= nb) {
+        newp = oldp;
+        newsize = oldsize;
+    } else {
+        next = (sMChunk_31F018*)((char*)oldp + oldsize);
+        if (next == *(sMChunk_31F018**)(av + 0x30)) {
+            if ((newsize = oldsize + (next->size & ~3)) >= nb + 16) {
+                *(unsigned int*)((int)oldmem - 4) = (head & 1) | nb;
+                *(sMChunk_31F018**)(av + 0x30) = (sMChunk_31F018*)((char*)oldp + nb);
+                ((sMChunk_31F018*)((char*)oldp + nb))->size = (newsize - nb) | 1;
+                return oldmem;
+            }
+        } else if (!(((sMChunk_31F018*)((char*)next + (next->size & ~1)))->size & 1) &&
+                   (newsize = oldsize + (next->size & ~3)) >= nb) {
+            sMChunk_31F018* bck;
+            sMChunk_31F018* fwd;
+            newp = oldp;
+            fwd = next->fd;
+            bck = next->bk;
+            fwd->bk = bck;
+            bck->fd = fwd;
+            goto split;
+        }
+
+        newmem = (char*)func_0031E818(ms, nb - 15);
+        if (newmem == 0)
+            return 0;
+        newp = (sMChunk_31F018*)(newmem - 8);
+        newsize = *(unsigned int*)(newmem - 4) & ~3;
+        if (newp == next) {
+            newsize += oldsize;
+            newp = oldp;
+        } else {
+            unsigned int copysize = oldsize - 4;
+            unsigned int* sp = (unsigned int*)oldmem;
+            unsigned int* dp = (unsigned int*)newmem;
+            unsigned int ncopies = copysize / 4;
+            if (ncopies > 9) {
+                func_003E6574(dp, sp, copysize);
+            } else {
+                dp[0] = sp[0];
+                dp[1] = sp[1];
+                dp[2] = sp[2];
+                if (ncopies > 4) {
+                    dp[3] = sp[3];
+                    dp[4] = sp[4];
+                    if (ncopies > 6) {
+                        dp[5] = sp[5];
+                        dp[6] = sp[6];
+                        if (ncopies > 8) {
+                            dp[7] = sp[7];
+                            dp[8] = sp[8];
+                        }
+                    }
+                }
+            }
+            func_0031ED60_E2D8(ms, oldmem);
+            return (char*)newp + 8;
+        }
+    }
+
+split:
+    remainder_size = newsize - nb;
+    if (remainder_size < 16) {
+        newp->size = (newp->size & 1) | newsize;
+        ((sMChunk_31F018*)((char*)newp + newsize))->size |= 1;
+    } else {
+        remainder = (sMChunk_31F018*)((char*)newp + nb);
+        newp->size = (newp->size & 1) | nb;
+        remainder->size = remainder_size | 1;
+        ((sMChunk_31F018*)((char*)remainder + remainder_size))->size |= 1;
+        func_0031ED60_E2D8(ms, (char*)remainder + 8);
+    }
+    return (char*)newp + 8;
+
+nomem:
+    *func_00415FB8() = 12;
+    return 0;
+}
 
 INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
 
