@@ -4201,7 +4201,14 @@ extern "C" void func_00167EA0(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00167ED0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_00167ED0(void *arg0, long long *arg1) {
+    (*(long long *)((char*)(arg0) + (0x20))) = (long long) *arg1;
+}
+#endif
 //100%
 INCLUDE_ASM("camera/camera", func_00167EE0);
 #ifdef SKIP_ASM
@@ -4216,7 +4223,15 @@ extern "C" void func_00167EE8(void *arg0, float fparg0) {
     (*(float *)((char*)(arg0) + (0x34))) = fparg0;
 }
 #endif
+//100%
 INCLUDE_ASM("camera/camera", func_00167EF0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_00167EF0(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)(arg1) + (0x20)));
+    return arg0;
+}
+#endif
 //100%
 INCLUDE_ASM("camera/camera", func_00167F00);
 #ifdef SKIP_ASM
@@ -4482,9 +4497,31 @@ extern "C" int func_001680B0(int arg0) {
     return arg0 + 0x80;
 }
 #endif
+//100%
 INCLUDE_ASM("camera/camera", func_001680B8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_001680B8(void *arg0, long long *arg1) {
+    (*(long long *)((char*)(arg0) + (0x20))) = (long long) *arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/camera", func_001680C8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_001680C8(void *arg0, long long *arg1) {
+    (*(long long *)((char*)(arg0) + (0x30))) = (long long) *arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/camera", func_001680D8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_001680D8(void *arg0, void *arg1) {
+    (*(long long *)((char*)(arg0) + (0x20))) = (long long) (*(long long *)((char*)(arg1) + (0)));
+    (*(long long *)((char*)(arg0) + (0x30))) = (long long) (*(long long *)((char*)(arg1) + (0x10)));
+}
+#endif
 //100%
 INCLUDE_ASM("camera/camera", func_001680F0);
 #ifdef SKIP_ASM

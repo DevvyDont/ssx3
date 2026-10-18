@@ -2032,7 +2032,14 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C898);
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C8D8);
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D238);
+#ifdef SKIP_ASM
+extern "C" void func_0030D238(void *arg0, int arg1, int arg2) {
+    (*(int *)((char*)(arg0) + (0))) = arg1;
+    (*(int *)((char*)(arg0) + (4))) = arg2;
+}
+#endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D248);
 #ifdef SKIP_ASM
@@ -2203,7 +2210,13 @@ extern "C" void func_0030D300(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x290))) = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D308);
+#ifdef SKIP_ASM
+extern "C" int func_0030D308(int arg0, int arg1) {
+    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x3CC)));
+}
+#endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D318);
 #ifdef SKIP_ASM

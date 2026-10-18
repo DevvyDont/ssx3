@@ -899,7 +899,15 @@ extern "C" void func_0012A490(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012A4D0);
+#ifdef SKIP_ASM
+extern "C" void func_0026ADE8(int *);
+
+extern "C" void func_0012A4D0(void) {
+    func_0026ADE8(&(*(int*)&D_004D33A0));
+}
+#endif
 INCLUDE_ASM("ai/ai", func_0012A4F0);
 //100%
 INCLUDE_ASM("ai/ai", func_0012A558);

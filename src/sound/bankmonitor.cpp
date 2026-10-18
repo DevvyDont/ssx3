@@ -2737,7 +2737,15 @@ void* func_002B1758(void* self, int a1)
 #endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B1780);
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1A70);
+#ifdef SKIP_ASM
+extern void*** D_004A37EC;
+
+extern "C" void func_002B1A70(void) {
+    func_002AAE40(*D_004A37EC, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1A98);

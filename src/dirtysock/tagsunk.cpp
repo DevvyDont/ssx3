@@ -7814,7 +7814,18 @@ extern "C" void func_00266788(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002667C0);
+#ifdef SKIP_ASM
+extern "C" void func_00266850(int, int);
+
+extern "C" void func_002667C0(void) {
+    if ((*(int*)&D_004A33F0) != 0) {
+        func_00266850((*(int*)&D_004A33F0), 3);
+        (*(int*)&D_004A33F0) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002667E8);

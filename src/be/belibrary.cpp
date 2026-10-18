@@ -1214,8 +1214,20 @@ extern "C" void* func_0014D9D0(sBELibTables* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DA08);
+#ifdef SKIP_ASM
+extern "C" int func_0014DA08(int arg0, int arg1) {
+    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xA4)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DA18);
+#ifdef SKIP_ASM
+extern "C" int func_0014DA18(int arg0, int arg1) {
+    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x20C)));
+}
+#endif
 INCLUDE_ASM("be/belibrary", func_0014DA28);
 INCLUDE_ASM("be/belibrary", func_0014DAA0);
 INCLUDE_ASM("be/belibrary", func_0014DAC0);

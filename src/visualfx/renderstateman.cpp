@@ -1115,7 +1115,15 @@ extern "C" void func_002EF950(sTrail_EF950* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EFF90);
+#ifdef SKIP_ASM
+extern void* D_004A3B78;
+
+extern "C" int func_002EFF90(void) {
+    return (*(int*)&D_004A3B78);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EFF98);
@@ -1316,7 +1324,15 @@ extern "C" void func_002F00A0(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0360);
+#ifdef SKIP_ASM
+extern void* D_004A3B80;
+
+extern "C" int func_002F0360(void) {
+    return (*(int*)&D_004A3B80);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0368);

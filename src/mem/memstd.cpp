@@ -429,7 +429,23 @@ extern "C" void* func_002523A8(void* self)
 #endif
 
 INCLUDE_ASM("mem/memstd", func_002523D0);
+//100%
 INCLUDE_ASM("mem/memstd", func_002525F8);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern "C" int func_00319B98(int);
+extern void* D_00538B00[16];
+
+extern "C" int func_002525F8(int arg0) {
+    int temp_17;
+
+    MUTEX_lock(&D_00538B00);
+    temp_17 = func_00319B98(arg0);
+    MUTEX_unlock(&D_00538B00);
+    return temp_17;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00252648);
 #ifdef SKIP_ASM
@@ -1416,8 +1432,20 @@ void func_00255668(void* self)
 
 extern "C" void* func_00254E60(int, int);
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00255670);
+#ifdef SKIP_ASM
+extern "C" void func_00255670(int arg0) {
+    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), arg0, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_002556B0);
+#ifdef SKIP_ASM
+extern "C" void func_002556B0(int arg0) {
+    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), arg0, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_002556F0);
 INCLUDE_ASM("mem/memstd", func_00255720);
 INCLUDE_ASM("mem/memstd", func_00255750);

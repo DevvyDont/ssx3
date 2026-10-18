@@ -382,7 +382,17 @@ extern "C" void* func_0039FAE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FB08);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_0039FB08(void *arg0, void *arg1) {
+    (*(long long *)((char*)(arg0) + (0))) = (long long) (*(long long *)((char*)(arg1) + (0)));
+    (*(long long *)((char*)(arg0) + (0x10))) = (long long) (*(long long *)((char*)(arg1) + (0x10)));
+    (*(long long *)((char*)(arg0) + (0x20))) = (long long) (*(long long *)((char*)(arg1) + (0x20)));
+    (*(long long *)((char*)(arg0) + (0x30))) = (long long) (*(long long *)((char*)(arg1) + (0x30)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FB30);

@@ -2807,7 +2807,13 @@ unsigned char func_002743C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002743D8);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_002743D8(void *arg0) {
+    return (*(unsigned char *)(((char*)(arg0) + (*(int *)((char*)(arg0) + (8)))) + (3)));
+}
+#endif
 
 INCLUDE_ASM("replay/replaycache", func_002743E8);
 

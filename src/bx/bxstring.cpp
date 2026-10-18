@@ -504,7 +504,18 @@ struct cBXString {
 INCLUDE_ASM("bx/bxstring", func_00318AF8);
 INCLUDE_ASM("bx/bxstring", func_00318B40);
 INCLUDE_ASM("bx/bxstring", func_00318BC0);
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318BF8);
+#ifdef SKIP_ASM
+extern "C" void func_00318BF8(void **arg0) {
+    void *temp_4;
+
+    temp_4 = *arg0;
+    if (temp_4 != &D_0048DCD4) {
+        (*(int *)((char*)(temp_4) + (-0xC))) = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_FindLastOf__FP9cBXStringci);

@@ -4429,8 +4429,24 @@ extern "C" int func_002D1A30(int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D1A78);
+#ifdef SKIP_ASM
+extern "C" void func_0030A610(int, int);
+
+extern "C" void func_002D1A78(int arg0) {
+    func_0030A610((*(int*)&D_004A3DD8), arg0);
+}
+#endif
+//100%
 INCLUDE_ASM("util/menu", func_002D1AA0);
+#ifdef SKIP_ASM
+extern "C" void func_00309D20(int, int, int);
+
+extern "C" void func_002D1AA0(int arg0, int arg1) {
+    func_00309D20((*(int*)&D_004A3DD8), arg0, arg1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1AC8);
@@ -4552,7 +4568,13 @@ extern "C" void* func_002D1C20(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D1C40);
+#ifdef SKIP_ASM
+extern "C" int func_002D1C40(void) {
+    return (*(int *)((char*)((*(void **)((char*)((*(void **)((char*)(D_004A28A8) + (0x84)))) + (0x84)))) + (0x10)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1C58);
@@ -4576,7 +4598,13 @@ extern "C" float func_002D1C70()
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D1C80);
+#ifdef SKIP_ASM
+extern "C" float func_002D1C80(void) {
+    return (float) (*(int *)((char*)(D_004A28A8) + (0x10)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1C98);

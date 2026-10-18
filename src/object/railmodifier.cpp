@@ -2311,7 +2311,17 @@ void func_00360C00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00360C08);
+#ifdef SKIP_ASM
+extern void* D_004913B8[];
+
+extern "C" void *func_00360C08(void *arg0) {
+    (*(int **)((char*)(arg0) + (4))) = &(*(int*)&D_004913B8);
+    (*(int *)((char*)(arg0) + (0))) = 1;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360C28);
@@ -2782,7 +2792,14 @@ extern "C" sElem003610E0* func_003610E0(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00361140);
+#ifdef SKIP_ASM
+extern "C" void func_00361140(void *arg0) {
+    (*(float *)((char*)(arg0) + (8))) = 1e10f;
+    (*(float *)((char*)(arg0) + (0xC))) = 1e10f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361150__FPv);
@@ -4142,7 +4159,19 @@ extern "C" void* func_00362008(void* self, int ch)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362058);
+#ifdef SKIP_ASM
+extern "C" int func_00423AB0(int, int, int);
+extern "C" void func_00424950(int);
+extern "C" void func_004249B8(int);
+
+extern "C" void func_00362058(int arg0, int arg1, int arg2, int arg3) {
+    func_00424950(arg1);
+    (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x40))) = func_00423AB0(arg1, arg2, arg3);
+    func_004249B8(arg1);
+}
+#endif
 INCLUDE_ASM("object/railmodifier", func_003620C8);
 
 //100%

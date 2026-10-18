@@ -411,7 +411,13 @@ extern "C" int func_0015C788(void *arg0) {
     return var_3;
 }
 #endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C7B0);
+#ifdef SKIP_ASM
+extern "C" int func_0015C7B0(int arg0, int arg1) {
+    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x18)));
+}
+#endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C7C0);
 #ifdef SKIP_ASM

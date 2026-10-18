@@ -758,7 +758,15 @@ extern "C" int func_002F7A70(void *arg0) {
     return (*(int *)((char*)(arg0) + (4))) > 0;
 }
 #endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_002F7A80(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)((((*(int *)((char*)(arg1) + (0xB4))) * 0x10) + (((*(int *)((char*)(arg1) + (8))) * 0x70) + (*(int *)((char*)(arg1) + (0xC)))))) + (-0x10)));
+    return arg0;
+}
+#endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AB0);
 #ifdef SKIP_ASM

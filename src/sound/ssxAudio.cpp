@@ -1872,7 +1872,16 @@ INCLUDE_ASM("sound/ssxAudio", func_00288F60);
 INCLUDE_ASM("sound/ssxAudio", func_00289398);
 INCLUDE_ASM("sound/ssxAudio", func_002893C8);
 INCLUDE_ASM("sound/ssxAudio", func_00289400);
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289448);
+#ifdef SKIP_ASM
+extern "C" void func_002B6950(int, int, int);
+
+extern "C" int func_00289448(void) {
+    func_002B6950((*(int*)&D_004A52D4), 1, 0);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289470);

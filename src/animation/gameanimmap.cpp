@@ -58,7 +58,15 @@ extern "C" void func_003158E0(void *arg0, float fparg0) {
 }
 #endif
 INCLUDE_ASM("animation/gameanimmap", func_003158E8);
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_00315988);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_00315988(void *arg0, void *arg1) {
+    (*(long long *)((char*)(arg0) + (0x30))) = (long long) (*(long long *)((char*)(arg1) + (0)));
+    (*(long long *)((char*)(arg0) + (0x40))) = (long long) (*(long long *)((char*)(arg1) + (0x10)));
+}
+#endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A0);
 #ifdef SKIP_ASM

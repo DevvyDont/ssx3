@@ -699,7 +699,16 @@ extern "C" void func_0036CE48(void *arg0) {
     (*(float *)((char*)(arg0) + (0x1C))) = 1e20f;
 }
 #endif
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036CE58);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_0036CE58(void *arg0, long long *arg1) {
+    (*(long long *)((char*)(arg0) + (0xB0))) = (long long) *arg1;
+    (*(long long *)((char*)(arg0) + (0xC0))) = (long long) D_004FF120;
+    (*(long long *)((char*)(arg0) + (0xD0))) = (long long) D_004FF120;
+}
+#endif
 INCLUDE_ASM("render/graphicsman", func_0036CE80);
 
 //100%

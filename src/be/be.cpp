@@ -159,7 +159,15 @@ extern "C" void cBE_setState(int state)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/be", func_0014DEE8);
+#ifdef SKIP_ASM
+extern "C" void func_0014A078(int);
+
+extern "C" void func_0014DEE8(void) {
+    func_0014A078((*(int*)&D_004A11F8));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/be", func_0014DF08);

@@ -1176,7 +1176,17 @@ extern "C" float func_001762B8(void) {
     return 0.7853982f;
 }
 #endif
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762C8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern long long D_004FF120;
+
+extern "C" long long *func_001762C8(long long *arg0) {
+    *arg0 = D_004FF120;
+    return arg0;
+}
+#endif
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762E0);
 #ifdef SKIP_ASM

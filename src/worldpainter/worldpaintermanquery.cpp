@@ -641,7 +641,14 @@ extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned shor
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1718);
+#ifdef SKIP_ASM
+extern "C" void func_002C1718(void *arg0) {
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + (4))) = 0;
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1728);
 #ifdef SKIP_ASM

@@ -1050,7 +1050,16 @@ extern "C" void func_002444A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002444D8);
+#ifdef SKIP_ASM
+extern char D_0047D008[];
+
+extern "C" int **func_002444D8(int **arg0) {
+    *arg0 = &(*(int*)&D_0047D008);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002444F0);

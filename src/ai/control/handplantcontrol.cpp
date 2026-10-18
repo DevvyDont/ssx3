@@ -1955,9 +1955,33 @@ extern "C" int func_001408B8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xAA0)));
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408C0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_001408C0(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)(arg1) + (0x1B0)));
+    return arg0;
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408D0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_001408D0(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)(arg1) + (0x1A0)));
+    return arg0;
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408E0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_001408E0(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)(arg1) + (0x1C0)));
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408F0__FPv);
@@ -1975,7 +1999,15 @@ extern "C" int func_001408F8(int arg0) {
     return arg0 + 0x110;
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140900);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_00140900(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)(arg1) + (0x120)));
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140910__FPv);
@@ -1986,9 +2018,24 @@ void* func_00140910(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140918);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_00140918(void *arg0, long long *arg1) {
+    (*(long long *)((char*)(arg0) + (0x1E0))) = (long long) *arg1;
+}
+#endif
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140928);
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140958);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long long *func_00140958(long long *arg0, void *arg1) {
+    *arg0 = (*(long long *)((char*)(arg1) + (0x370)));
+    return arg0;
+}
+#endif
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140968);
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A28);

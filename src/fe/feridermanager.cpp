@@ -416,9 +416,21 @@ extern "C" void func_0019F548(void* self, sQuadRM* src)
 
 INCLUDE_ASM("fe/feridermanager", func_0019F578);
 INCLUDE_ASM("fe/feridermanager", func_0019F5E8);
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
+#ifdef SKIP_ASM
+extern "C" int func_0019F6A8(void *arg0, int arg1) {
+    return (*(int *)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x2C))) + ((*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xC7C))) << 5);
+}
+#endif
 INCLUDE_ASM("fe/feridermanager", func_0019F6C8);
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
+#ifdef SKIP_ASM
+extern "C" int func_0019F6F0(void *arg0, int arg1) {
+    return (*(int *)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x2C))) + ((*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xC7C))) << 5) + 0x10;
+}
+#endif
 INCLUDE_ASM("fe/feridermanager", func_0019F718);
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F740);

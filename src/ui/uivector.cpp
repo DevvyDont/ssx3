@@ -256,7 +256,18 @@ extern "C" void func_003A47A8(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A47D8);
+#ifdef SKIP_ASM
+extern void* D_00494CC0[];
+
+extern "C" void *func_003A47D8(void *arg0) {
+    (*(void **)((char*)(arg0) + (4))) = arg0;
+    (*(int **)((char*)(arg0) + (8))) = &(*(int*)&D_00494CC0);
+    (*(void **)((char*)(arg0) + (0))) = arg0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A47F8);

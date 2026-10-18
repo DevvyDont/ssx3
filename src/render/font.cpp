@@ -1560,7 +1560,13 @@ void func_00394688(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00394690);
+#ifdef SKIP_ASM
+extern "C" int func_00394690(void) {
+    return (*(int*)&D_004A5B80);
+}
+#endif
 //100%
 INCLUDE_ASM("render/font", func_00394698);
 #ifdef SKIP_ASM
@@ -3549,7 +3555,14 @@ extern "C" int func_003965C8(int arg0) {
     return arg0 + 0xC0;
 }
 #endif
+//100%
 INCLUDE_ASM("render/font", func_003965D0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_003965D0(void *arg0, long long *arg1) {
+    (*(long long *)((char*)(arg0) + (0xC0))) = (long long) *arg1;
+}
+#endif
 //100%
 INCLUDE_ASM("render/font", func_003965E0);
 #ifdef SKIP_ASM

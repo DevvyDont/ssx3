@@ -277,7 +277,21 @@ extern "C" void* func_0028B180()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B188);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+
+extern "C" int func_0028B188(void) {
+    int var_4;
+
+    var_4 = 0;
+    if (((*(int *)((char*)(D_004A28A8) + (0x7C))) != 0) || ((*(int *)((char*)(D_004A28A8) + (0x80))) != 0)) {
+        var_4 = 1;
+    }
+    return var_4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1B0);
@@ -357,7 +371,13 @@ extern "C" void* func_0028B210(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028B230);
+#ifdef SKIP_ASM
+extern "C" int func_0028B230(void) {
+    return (*(int *)((char*)((*(void **)((char*)(D_004A28A8) + (0x84)))) + (0x10)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B240__FPv);
