@@ -539,7 +539,67 @@ extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
 
 INCLUDE_ASM("dirtysock/tags", func_003ED0F8);
 
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetString);
+//100%
+extern "C" int strlen(const char* s);
+extern unsigned char D_004961C0[];
+extern unsigned char D_004962C0[];
+
+// Copies a tag field value (quoted or bare, with %xx decoding) into pBuffer, or the default.
+extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer, int iLength, const char* pDefval)
+{
+    int iSize;
+    unsigned char cQuote;
+    const unsigned char* p;
+
+    if (pData == 0) {
+        if (pDefval == 0) {
+            return -1;
+        }
+        if (pBuffer == 0) {
+            return strlen(pDefval);
+        }
+        for (iSize = 1; (iSize < iLength) && (*pDefval != 0); ++iSize) {
+            *pBuffer++ = *pDefval++;
+        }
+        *pBuffer = 0;
+        return iSize - 1;
+    }
+    if ((*pData == '"') || (*pData == '\'')) {
+        cQuote = *pData++;
+    } else {
+        cQuote = 0;
+    }
+    if (pBuffer == 0) {
+        p = (const unsigned char*)pData;
+        for (iSize = 0; (*p != cQuote) && (*p >= ' '); ++iSize) {
+            if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
+                p += 2;
+            }
+            ++p;
+        }
+        return iSize;
+    }
+    if (iLength <= 0) {
+        return -1;
+    }
+    p = (const unsigned char*)pData;
+    for (iSize = 1; (iSize < iLength) && (*p != cQuote) && (*p >= ' ');) {
+        if ((p[0] == '%') && (p[1] == '%')) {
+            *pBuffer++ = '%';
+            p += 2;
+            ++iSize;
+        } else if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
+            ++iSize;
+            *pBuffer++ = D_004961C0[p[1]] | D_004962C0[p[2]];
+            p += 3;
+        } else {
+            ++iSize;
+            *pBuffer++ = *p++;
+        }
+    }
+    *pBuffer = 0;
+    return iSize - 1;
+}
 
 //100%
 extern unsigned char D_004961C0[];
