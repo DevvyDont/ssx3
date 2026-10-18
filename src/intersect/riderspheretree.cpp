@@ -345,7 +345,13 @@ extern "C" int func_0032B2B8(void* tree, void* a, void* b, sSphereVec4* outPos, 
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B460);
+#ifdef SKIP_ASM
+extern "C" void func_0032B460(void) {
+
+}
+#endif
 INCLUDE_ASM("intersect/riderspheretree", func_0032B468);
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032B620);

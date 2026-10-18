@@ -19,7 +19,19 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
 
+//100%
 INCLUDE_ASM("dirtysock/tags", func_003EB578);
+#ifdef SKIP_ASM
+extern signed char D_004A4A70;
+
+extern "C" signed char func_003EB578(signed char arg0) {
+    signed char temp_2;
+
+    temp_2 = D_004A4A70;
+    D_004A4A70 = arg0;
+    return temp_2;
+}
+#endif
 INCLUDE_ASM("dirtysock/tags", func_003EB588);
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);

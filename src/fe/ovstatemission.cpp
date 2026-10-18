@@ -132,7 +132,13 @@ void func_001A34A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemission", func_001A34B0);
+#ifdef SKIP_ASM
+extern "C" int func_001A34B0(void) {
+    return -1;
+}
+#endif
 INCLUDE_ASM("fe/ovstatemission", func_001A34B8);
 
 //100%

@@ -112,7 +112,18 @@ extern "C" cLunoTableRef* func_00224DA0(cLunoTableRef* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("luno/lunovm", func_00224DD0);
+#ifdef SKIP_ASM
+extern "C" void **func_00224DD0(void **arg0, void **arg1) {
+    void *temp_6;
+
+    temp_6 = *arg1;
+    *arg0 = temp_6;
+    (*(int *)((char*)(temp_6) + (8))) = (int) ((*(int *)((char*)(temp_6) + (8))) + 1);
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00224DF0);

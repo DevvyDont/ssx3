@@ -1728,7 +1728,13 @@ extern "C" int func_0019BEE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE0);
+#ifdef SKIP_ASM
+extern "C" void func_0019BFE0(void) {
+
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
 

@@ -342,7 +342,15 @@ extern "C" void* func_00227F80()
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00227FA0);
+#ifdef SKIP_ASM
+extern "C" void func_0023C850();
+
+extern "C" void func_00227FA0(void) {
+    func_0023C850();
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_purge);

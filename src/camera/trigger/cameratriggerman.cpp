@@ -24,7 +24,13 @@ extern "C" void cCameraTriggerMan_cleanupOnExit(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA08);
+#ifdef SKIP_ASM
+extern "C" void func_0016CA08(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA10__FPv);
@@ -84,7 +90,15 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 extern void* D_004C5830[];
 extern "C" void* func_0016CEF0(void*, void*, int);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEA8);
+#ifdef SKIP_ASM
+extern "C" void func_0016CA18();
+
+extern "C" void func_0016CEA8(void) {
+    func_0016CA18();
+}
+#endif
 
 //80.0%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);
@@ -275,7 +289,13 @@ struct cCameraTriggerStack {
     int field_0x4;
 };
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D1F8);
+#ifdef SKIP_ASM
+extern "C" int func_0016D1F8(int arg0) {
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_init__FP19cCameraTriggerStack);

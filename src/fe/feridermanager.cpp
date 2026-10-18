@@ -420,8 +420,24 @@ INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
 INCLUDE_ASM("fe/feridermanager", func_0019F6C8);
 INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
 INCLUDE_ASM("fe/feridermanager", func_0019F718);
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F740);
+#ifdef SKIP_ASM
+extern "C" void func_00312AA0__FPvi(int, int);
+
+extern "C" void func_0019F740(void *arg0) {
+    func_00312AA0__FPvi((*(int *)((char*)(arg0) + (0xC))), 2);
+}
+#endif
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F760);
+#ifdef SKIP_ASM
+extern "C" void func_00312AB0(int, int);
+
+extern "C" void func_0019F760(void *arg0) {
+    func_00312AB0((*(int *)((char*)(arg0) + (0xC))), 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F780);
@@ -991,7 +1007,13 @@ extern "C" void* func_001A0548(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0558);
+#ifdef SKIP_ASM
+extern "C" int func_001A0558(int arg0, int arg1) {
+    return (*(int *)((char*)(((arg1 * 0xCE0) + arg0)) + (0xCC8)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0570);

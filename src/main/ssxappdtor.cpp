@@ -15,28 +15,148 @@ extern "C" void cSSXApp__cSSXApp(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243950);
+#ifdef SKIP_ASM
+extern "C" int func_00243950(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x78)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243958);
+#ifdef SKIP_ASM
+extern "C" int func_00243958(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x7C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243960);
+#ifdef SKIP_ASM
+extern "C" int func_00243960(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x80)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243968);
+#ifdef SKIP_ASM
+extern "C" int func_00243968(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x84)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243970);
+#ifdef SKIP_ASM
+extern "C" int func_00243970(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x88)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243978);
+#ifdef SKIP_ASM
+extern "C" int func_00243978(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x8C)));
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00243980);
 INCLUDE_ASM("main/ssxappdtor", func_00243990);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439A0);
+#ifdef SKIP_ASM
+extern "C" int func_002439A0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xC0)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439A8);
+#ifdef SKIP_ASM
+extern "C" int func_002439A8(int arg0) {
+    return arg0 + 0xC4;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439B0);
+#ifdef SKIP_ASM
+extern "C" int func_002439B0(int arg0) {
+    return arg0 + 0xC8;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439B8);
+#ifdef SKIP_ASM
+extern "C" int func_002439B8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xD0)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439C0);
+#ifdef SKIP_ASM
+extern "C" int func_002439C0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x9C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439C8);
+#ifdef SKIP_ASM
+extern "C" int func_002439C8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xA4)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439D0);
+#ifdef SKIP_ASM
+extern "C" int func_002439D0(void) {
+    return 2;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439D8);
+#ifdef SKIP_ASM
+extern "C" int func_002439D8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xA0)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439E0);
+#ifdef SKIP_ASM
+extern "C" void func_002439E0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0xA0))) = arg1;
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_002439E8);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439F8);
+#ifdef SKIP_ASM
+extern "C" void func_002439F8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0x84))) = 0;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A00);
+#ifdef SKIP_ASM
+extern "C" int func_00243A00(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x84))) != 0;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A10);
+#ifdef SKIP_ASM
+extern "C" int func_00243A10(void *arg0) {
+    int var_3;
+
+    var_3 = 0;
+    if (((*(int *)((char*)(arg0) + (0x7C))) != 0) || ((*(int *)((char*)(arg0) + (0x80))) != 0)) {
+        var_3 = 1;
+    }
+    return var_3;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A38);
+#ifdef SKIP_ASM
+extern "C" int func_00243A38(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x11C)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A40);
@@ -53,7 +173,13 @@ extern "C" void func_00243A40(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A70);
+#ifdef SKIP_ASM
+extern "C" void func_00243A70(void *arg0) {
+    (*(int *)((char*)(arg0) + (8))) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243A80);
@@ -79,7 +205,13 @@ void func_00243AB0(void* self)
 #endif
 
 INCLUDE_ASM("main/ssxappdtor", func_00243AB8);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243AD8);
+#ifdef SKIP_ASM
+extern "C" void func_00243AD8(void *arg0) {
+    (*(int *)((char*)(arg0) + (4))) = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243AE8);
@@ -419,7 +551,13 @@ extern "C" void func_00244028(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244058);
+#ifdef SKIP_ASM
+extern "C" void func_00244058(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244060);
@@ -508,8 +646,20 @@ extern "C" void func_002441C8(int* self, int flags)
 #endif
 
 INCLUDE_ASM("main/ssxappdtor", func_002441F8);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244230);
+#ifdef SKIP_ASM
+extern "C" void func_00244230(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244238);
+#ifdef SKIP_ASM
+extern "C" void func_00244238(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244240);
@@ -526,41 +676,239 @@ extern "C" void func_00244240(int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244278);
+#ifdef SKIP_ASM
+extern "C" int func_00244278(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x214)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244280);
+#ifdef SKIP_ASM
+extern "C" int func_00244280(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x218)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244288);
+#ifdef SKIP_ASM
+extern "C" int func_00244288(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x200)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244290);
+#ifdef SKIP_ASM
+extern "C" int func_00244290(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244298);
+#ifdef SKIP_ASM
+extern "C" int func_00244298(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442A0);
+#ifdef SKIP_ASM
+extern "C" int func_002442A0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x24)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442A8);
+#ifdef SKIP_ASM
+extern "C" int func_002442A8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xA4)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442B0);
+#ifdef SKIP_ASM
+extern "C" int func_002442B0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xC)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442B8);
+#ifdef SKIP_ASM
+extern "C" int func_002442B8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x48)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442C0);
+#ifdef SKIP_ASM
+extern "C" int func_002442C0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x28)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442C8);
+#ifdef SKIP_ASM
+extern "C" int func_002442C8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x2C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442D0);
+#ifdef SKIP_ASM
+extern "C" int func_002442D0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x44)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442D8);
+#ifdef SKIP_ASM
+extern "C" int func_002442D8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x4C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442E0);
+#ifdef SKIP_ASM
+extern "C" int func_002442E0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x50)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442E8);
+#ifdef SKIP_ASM
+extern "C" int func_002442E8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x54)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442F0);
+#ifdef SKIP_ASM
+extern "C" int func_002442F0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x64)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002442F8);
+#ifdef SKIP_ASM
+extern "C" int func_002442F8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x70)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244300);
+#ifdef SKIP_ASM
+extern "C" int func_00244300(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x74)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244308);
+#ifdef SKIP_ASM
+extern "C" int func_00244308(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x34)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244310);
+#ifdef SKIP_ASM
+extern "C" int func_00244310(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x78)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244318);
+#ifdef SKIP_ASM
+extern "C" int func_00244318(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x7C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244320);
+#ifdef SKIP_ASM
+extern "C" int func_00244320(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x14)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244328);
+#ifdef SKIP_ASM
+extern "C" int func_00244328(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x38)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244330);
+#ifdef SKIP_ASM
+extern "C" int func_00244330(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x3C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244338);
+#ifdef SKIP_ASM
+extern "C" int func_00244338(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x40)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244340);
+#ifdef SKIP_ASM
+extern "C" int func_00244340(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x88)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244348);
+#ifdef SKIP_ASM
+extern "C" int func_00244348(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x8C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244350);
+#ifdef SKIP_ASM
+extern "C" int func_00244350(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x90)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244358);
+#ifdef SKIP_ASM
+extern "C" int func_00244358(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x94)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244360);
+#ifdef SKIP_ASM
+extern "C" int func_00244360(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x224)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244368);
+#ifdef SKIP_ASM
+extern "C" int func_00244368(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x84)));
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00244370);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244388);
+#ifdef SKIP_ASM
+extern "C" int func_00244388(void *arg0) {
+    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x84)))) + (0x10)));
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00244398);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002443B0);
+#ifdef SKIP_ASM
+extern "C" int func_002443B0(void *arg0) {
+    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x84)))) + (0x14)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002443C0);
@@ -683,7 +1031,15 @@ extern "C" void func_002444F0(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244520);
+#ifdef SKIP_ASM
+extern int D_004A2C70;
+
+extern "C" void func_00244520(int arg0) {
+    D_004A2C70 = arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244528__FPv);
@@ -919,24 +1275,142 @@ extern "C" void func_00244720(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244750);
+#ifdef SKIP_ASM
+extern "C" int func_00244750(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x434)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244758);
+#ifdef SKIP_ASM
+extern "C" int func_00244758(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x130)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244760);
+#ifdef SKIP_ASM
+extern "C" int func_00244760(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xBC)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244768);
+#ifdef SKIP_ASM
+extern "C" int func_00244768(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xC0)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244770);
+#ifdef SKIP_ASM
+extern "C" void func_00244770(void *arg0) {
+    (*(int (**)())((char*)(arg0) + (0x78)))();
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244790);
+#ifdef SKIP_ASM
+extern "C" int func_00244790(void *arg0) {
+    int var_3;
+
+    var_3 = 0;
+    if ((*(int *)((char*)(arg0) + (0x440))) == 0) {
+        var_3 = (*(int *)((char*)(arg0) + (0x43C))) != 0;
+    }
+    return var_3;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002447B0);
+#ifdef SKIP_ASM
+extern "C" int func_002447B0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x43C))) != 0;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002447C0);
+#ifdef SKIP_ASM
+extern "C" int func_002447C0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x43C)));
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002447C8);
+#ifdef SKIP_ASM
+extern "C" void func_002447C8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0x440))) = 1;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002447D8);
+#ifdef SKIP_ASM
+extern "C" int func_002447D8(void *arg0) {
+    return (((unsigned int) (*(unsigned int *)((char*)(arg0) + (0x43C))) >> 5) & 0xF) - 1;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002447F0);
+#ifdef SKIP_ASM
+extern "C" void func_002C2508(int);
+
+extern "C" void func_002447F0(int arg0) {
+    func_002C2508(arg0 + 0x276);
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244810);
+#ifdef SKIP_ASM
+extern "C" void func_002C2540(int);
+
+extern "C" void func_00244810(int arg0) {
+    func_002C2540(arg0 + 0x276);
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244830);
+#ifdef SKIP_ASM
+extern "C" int func_00244830(int arg0) {
+    return arg0 + 0x276;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244838);
+#ifdef SKIP_ASM
+extern "C" void func_00244838(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x11C))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244840);
+#ifdef SKIP_ASM
+extern "C" void func_00244840(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x120))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244848);
+#ifdef SKIP_ASM
+extern "C" void func_00244848(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x124))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244850);
+#ifdef SKIP_ASM
+extern "C" void func_00244850(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x128))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244858);
+#ifdef SKIP_ASM
+extern "C" void func_00244858(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x12C))) = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244860__FPv);
@@ -1073,11 +1547,28 @@ extern "C" void func_00244A18(void* self)
 
 extern "C" void* func_0039E390(void* self);
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244A38);
+#ifdef SKIP_ASM
+extern "C" void func_00244A38(void) {
+
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00244A40);
 INCLUDE_ASM("main/ssxappdtor", func_00244B48);
 INCLUDE_ASM("main/ssxappdtor", func_00244E60);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245118);
+#ifdef SKIP_ASM
+extern "C" void func_002570D8(int);
+extern int D_004A2EEC;
+
+extern "C" void func_00245118(void) {
+    if (D_004A2EEC != 0) {
+        func_002570D8(D_004A2EEC);
+    }
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00245140);
 INCLUDE_ASM("main/ssxappdtor", func_00245168);
 INCLUDE_ASM("main/ssxappdtor", func_002451B0);
