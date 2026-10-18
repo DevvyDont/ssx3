@@ -8413,7 +8413,26 @@ extern "C" void func_00268460(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_002684C0);
+//100%
+// Clones an 0xE3 message (sMsgE7F0).
+struct sMsgE3_2684C0 : sMsgE7F0 {
+    sMsgE3_2684C0(const char* n, const char* t, int o, int c, const sRecE7F0& r)
+    {
+        vt = D_00481190;
+        type = 0xE3;
+        cBXString_cBXString2(name, n);
+        cBXString_cBXString2(text, t);
+        on = o;
+        count = c;
+        rec = r;
+    }
+};
+
+extern "C" void* func_002684C0(void* self)
+{
+    sMsgE7F0* src = (sMsgE7F0*)self;
+    return new (D_00480488, 0x20000000, 0) sMsgE3_2684C0(*(const char**)src->name, *(const char**)src->text, src->on, src->count, src->rec);
+}
 
 //100%
 extern void* D_004812B0[];
