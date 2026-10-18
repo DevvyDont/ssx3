@@ -685,7 +685,128 @@ extern "C" void func_00312C20(sCurveSet_312C20* self, int start, int count, floa
     }
 }
 
-INCLUDE_ASM("animation/rideranimbase", func_003130A8);
+struct sAnimCh_003130A8 {
+    int type;       // 0x0
+    union {
+        float f[4]; // 0x4
+        int i[4];
+    };
+};
+
+struct sAnimDef_003130A8 {
+    sAnimCh_003130A8* ch;   // 0x0
+    unsigned char* data;    // 0x4
+    unsigned char* data1;   // 0x8
+    unsigned char* data2;   // 0xC
+    unsigned char* data3;   // 0x10
+    unsigned char cnt[4];   // 0x14
+};
+
+union uFloatBits_003130A8 {
+    int i;
+    float f;
+};
+
+static inline float Read24_003130A8(unsigned char* p, int k)
+{
+    uFloatBits_003130A8 u;
+    u.i = (p[k] << 8) | (p[k + 1] << 16) | (p[k + 2] << 24);
+    return u.f;
+}
+
+static inline void SetType_003130A8(sAnimDef_003130A8* self, sAnimCh_003130A8* ch, int t)
+{
+    if (t == 6) {
+        ch->i[2] = self->cnt[0]++;
+    } else if (t == 7) {
+        ch->i[2] = self->cnt[1]++;
+    } else if (t == 8) {
+        ch->i[2] = self->cnt[2]++;
+    } else if (t == 9) {
+        ch->i[2] = self->cnt[3]++;
+    }
+    ch->type = t;
+}
+
+extern "C" void func_003130A8(sAnimDef_003130A8* self, unsigned char* data, int n)
+{
+    unsigned char* p = data;
+    int count = *p++;
+    if (count == 0) {
+        return;
+    }
+    sAnimCh_003130A8* ch = self->ch;
+    self->cnt[0] = 0;
+    self->cnt[1] = 0;
+    self->cnt[2] = 0;
+    self->cnt[3] = 0;
+    sAnimCh_003130A8* end = ch + count;
+    while (1) {
+        SetType_003130A8(self, ch, *p >> 4);
+        ch++;
+        if (ch == end) {
+            break;
+        }
+        SetType_003130A8(self, ch, *p & 0xF);
+        ch++;
+        if (ch == end) {
+            break;
+        }
+        p++;
+    }
+    p++;
+    ch = self->ch;
+    do {
+        switch (ch->type) {
+        case 1:
+            ch->f[0] = Read24_003130A8(p, 0);
+            p += 3;
+            break;
+        case 3:
+            ch->f[0] = Read24_003130A8(p, 0);
+            ch->f[1] = Read24_003130A8(p, 3);
+            ch->f[2] = Read24_003130A8(p, 6);
+            p += 9;
+            break;
+        case 4:
+            ch->f[0] = Read24_003130A8(p, 0);
+            ch->f[1] = Read24_003130A8(p, 3);
+            ch->f[2] = Read24_003130A8(p, 6);
+            ch->f[3] = Read24_003130A8(p, 9);
+            p += 12;
+            break;
+        case 5:
+            ch->f[0] = Read24_003130A8(p, 0);
+            ch->f[1] = Read24_003130A8(p, 3);
+            ch->f[2] = Read24_003130A8(p, 6);
+            ch->f[3] = (float)(p[9] | (p[10] << 8));
+            p += 11;
+            break;
+        case 2:
+        case 6:
+        case 7:
+        case 8:
+            ch->f[0] = Read24_003130A8(p, 0);
+            ch->f[1] = Read24_003130A8(p, 3);
+            p += 6;
+            break;
+        }
+        ch++;
+    } while (ch != end);
+    int o0 = p - data;
+    self->data = p;
+    int m = n * self->cnt[0];
+    int o1 = o0 + m;
+    unsigned char* q = p + m;
+    self->data1 = q;
+    int b = ((n - 2) / 2 + 2) * self->cnt[1];
+    int o2 = o1 + b;
+    int pad = o2 & 1;
+    int c = n * self->cnt[2] * 2;
+    int o3 = o2 + c + pad;
+    self->data2 = q + b + pad;
+    self->data3 = q + b + c + (o3 & 3);
+}
 
 //100%
 struct sAnimSlot_00313508
