@@ -644,7 +644,27 @@ extern "C" int func_00154368(void* self, int owner)
     return n;
 }
 
-INCLUDE_ASM("be/beintmission", func_001543E0);
+//100%
+// Counts missions of an owner's groups that func_00153D78 reports as done.
+extern "C" int func_001543E0(void* self, int owner)
+{
+    int n = 0;
+    for (int i = 0; i < 88; i++)
+    {
+        for (int j = 0; j < 22; j++)
+        {
+            if (D_0043EE10[i].group == j)
+            {
+                if (D_0043D950[j].owner == owner)
+                {
+                    if (func_00153D78(self, D_0043EE10[i].id))
+                        n++;
+                }
+            }
+        }
+    }
+    return n;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
