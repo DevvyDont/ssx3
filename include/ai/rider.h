@@ -25,8 +25,8 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "animation/animmodel.h"
 
-class cAnimModel;
 class cRiderAnim;
 class cAirPredictor;
 class cRiderMetrix;

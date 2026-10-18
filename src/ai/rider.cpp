@@ -790,9 +790,9 @@ struct sRiderXform {
 // Copies the quadword of the anim model's transform unk_89C into dst.
 extern "C" void* func_0011FF48(void* dst, cRider* self)
 {
-    void* q = self->mAnimModel;
+    cAnimModel* q = self->mAnimModel;
     int i = self->unk_89C;
-    sRiderXform* b = *(sRiderXform**)((char*)q + 0x2c);
+    sRiderXform* b = (sRiderXform*)q->bones;
     *(cQuad128*)dst = b[i].q;
     return dst;
 }
@@ -1058,7 +1058,7 @@ skip:
     {
         char* p = (char*)&self->mPosition;
         if (self->unk_AFC)
-            p = *(char**)((char*)self->mAnimModel + 0x2C) + (self->unk_8A0 << 5);
+            p = (char*)self->mAnimModel->bones + (self->unk_8A0 << 5);
         func_001242B0(self, p);
     }
     *(sQuad_120F20*)&self->unk_9D0 = D_004FF120_q120F20;
@@ -1738,11 +1738,6 @@ struct sRS_2898 {
     int f10;
 };
 
-struct sModel_2898 {
-    char pad0[0x30];
-    sMat_2898* bones;               // 0x30
-};
-
 struct sObj_2898 {
     char pad0[0x110];
     sMat_2898 mat;                  // 0x110
@@ -1823,10 +1818,10 @@ static inline void Set3_2898(sV3_2898& v, float x, float y, float z)
     v.z = z;
 }
 
-static inline sModel_2898* Model_2898(cRider* r) { return (sModel_2898*)r->mAnimModel; }
+static inline cAnimModel* Model_2898(cRider* r) { return r->mAnimModel; }
 static inline sObj_2898* Shadow_2898(cRider* r) { return (sObj_2898*)r->mShadow; }
 // Translation row of bone i's 0x40-byte matrix.
-static inline sV4_2898 BonePos_2898(cRider* r, int i) { return *(sV4_2898*)((char*)Model_2898(r)->bones + (i << 6) + 0x30); }
+static inline sV4_2898 BonePos_2898(cRider* r, int i) { return *(sV4_2898*)((char*)Model_2898(r)->unk_030 + (i << 6) + 0x30); }
 
 static inline void* Tex_2898(sObj_2898* o) { return o->f170; }
 
@@ -1858,7 +1853,7 @@ extern "C" void func_00122898(cRider* self)
             b.z = p.z;
         }
         float k = 0.3f;
-        func_00374D00(Shadow_2898(self), &a, &b, &D_004A5E40, Model_2898(self)->bones, 0);
+        func_00374D00(Shadow_2898(self), &a, &b, &D_004A5E40, (sMat_2898*)Model_2898(self)->unk_030, 0);
         void* g2 = D_004A289C;
         top_2898(g2)->f8 = (top_2898(g2)->f8 & ~0x3E0) | 0x20;
         top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFE7FFFFF) | 0x1000000;
@@ -2722,7 +2717,7 @@ extern "C" void func_001242B0_impl(cRider* self, void* p)
     char* o = (char*)&self->mVtbl;
     sVE_42B0* ve = &(*(sVE_42B0**)o)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(o + ve->delta));
-    float s = *(float*)((char*)self->mAnimModel + 0x140) * (*(float*)((char*)self + 0x1F0) * 45.0f);
+    float s = self->mAnimModel->unk_140.x * (*(float*)((char*)self + 0x1F0) * 45.0f);
     sV_42B0 b = Add_42B0(*(sV_42B0*)p, Scale_42B0(*(sV_42B0*)((char*)self + 0x3B0), s));
     sV_42B0 lo = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, -100.0f));
     sV_42B0 hi = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, 200.0f));

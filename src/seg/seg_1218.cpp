@@ -2195,11 +2195,6 @@ struct sQuat_6848 {
     sQuat_6848(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
 } __attribute__((aligned(16)));
 
-struct sBone_6848 {
-    t4Vector pos;       // 0x00
-    float qx, qy, qz, qw;  // 0x10
-};
-
 struct sVEH_6848 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -2332,27 +2327,27 @@ static inline float AtMost_6848(float x, float hi)
     return x <= hi ? x : hi;
 }
 
-static inline sV_6848 Side_6848(const sBone_6848* b)
+static inline sV_6848 Side_6848(const sAnimModelBone* b)
 {
-    return sV_6848(1.0f - 2.0f * (b->qy * b->qy + b->qz * b->qz),
-                   2.0f * (b->qx * b->qy + b->qw * b->qz),
-                   2.0f * (b->qx * b->qz - b->qw * b->qy),
+    return sV_6848(1.0f - 2.0f * (b->rot.y * b->rot.y + b->rot.z * b->rot.z),
+                   2.0f * (b->rot.x * b->rot.y + b->rot.w * b->rot.z),
+                   2.0f * (b->rot.x * b->rot.z - b->rot.w * b->rot.y),
                    0.0f);
 }
 
-static inline sV_6848 Front_6848(const sBone_6848* b)
+static inline sV_6848 Front_6848(const sAnimModelBone* b)
 {
-    return sV_6848(2.0f * (b->qy * b->qx - b->qw * b->qz),
-                   1.0f - 2.0f * (b->qz * b->qz + b->qx * b->qx),
-                   2.0f * (b->qy * b->qz + b->qw * b->qx),
+    return sV_6848(2.0f * (b->rot.y * b->rot.x - b->rot.w * b->rot.z),
+                   1.0f - 2.0f * (b->rot.z * b->rot.z + b->rot.x * b->rot.x),
+                   2.0f * (b->rot.y * b->rot.z + b->rot.w * b->rot.x),
                    0.0f);
 }
 
-static inline sV_6848 Up_6848(const sBone_6848* b)
+static inline sV_6848 Up_6848(const sAnimModelBone* b)
 {
-    return sV_6848(2.0f * (b->qz * b->qx + b->qw * b->qy),
-                   2.0f * (b->qz * b->qy - b->qw * b->qx),
-                   1.0f - 2.0f * (b->qx * b->qx + b->qy * b->qy),
+    return sV_6848(2.0f * (b->rot.z * b->rot.x + b->rot.w * b->rot.y),
+                   2.0f * (b->rot.z * b->rot.y - b->rot.w * b->rot.x),
+                   1.0f - 2.0f * (b->rot.x * b->rot.x + b->rot.y * b->rot.y),
                    0.0f);
 }
 
@@ -2389,7 +2384,7 @@ extern "C" int func_00106848(cRider* self)
             vt[43].fn(h + vt[43].delta, &land, Scale_6848(dv, -1.0f));
         }
     }
-    sBone_6848* bone = &(*(sBone_6848**)((char*)self->mAnimModel + 0x2C))[self->unk_8A0];
+    sAnimModelBone* bone = &self->mAnimModel->bones[self->unk_8A0];
     sV_6848 side = Side_6848(bone);
     sV_6848 up = Up_6848(bone);
     float a = Dot_6848(*(t4Vector*)&side, land.n);
