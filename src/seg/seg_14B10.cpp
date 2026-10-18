@@ -661,7 +661,55 @@ extern "C" int func_00116938(int arg0) {
 
 INCLUDE_ASM("seg/seg_14B10", gGenTrickName);
 
-INCLUDE_ASM("seg/seg_14B10", gGenMonsterTrickReqName);
+//100%
+struct sMonsterReq_6E08 {
+    int key;
+    int pad4;
+    unsigned char b8, b9, bA, bB, bC, bD, bE, bF;
+};
+
+struct sTrickBits_6E08 {
+    unsigned long pad0 : 10;
+    unsigned long f10 : 2;
+    unsigned long f12 : 4;
+    unsigned long f16 : 3;
+    unsigned long f19 : 3;
+    unsigned long pad22 : 6;
+    unsigned long f28 : 4;
+    unsigned long pad32 : 3;
+    unsigned long f35 : 7;
+    unsigned long f42 : 1;
+    unsigned long f43 : 7;
+    unsigned long pad50 : 14;
+};
+
+extern sMonsterReq_6E08 D_0043D608[];
+extern "C" void func_003E6448(void*, int, int);
+extern "C" void gGenTrickName(char*, sTrickBits_6E08*, int);
+
+extern "C" void gGenMonsterTrickReqName(char* out, int key, int a2) {
+    sMonsterReq_6E08* e = D_0043D608;
+    int i = 0;
+    do {
+        i++;
+        if (e->key == key) {
+            sTrickBits_6E08 b;
+            func_003E6448(&b, 0, 8);
+            b.f10 = e->b8;
+            b.f12 = e->b9;
+            b.f16 = e->bA;
+            b.f19 = e->bB;
+            b.f28 = e->bC;
+            b.f35 = e->bD;
+            b.f43 = e->bE;
+            if (((int*)&b)[1] & 0x3F800) b.f42 = 1;
+            gGenTrickName(out, &b, a2);
+            return;
+        }
+        e++;
+    } while (i < 0x18);
+    *out = 0;
+}
 
 //100%
 extern "C" int* func_00116FA8(int *arg0) {
