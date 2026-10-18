@@ -71,7 +71,41 @@ unsigned char *func_003B3A10(unsigned char *p) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3A50);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3BB0);
+//100%
+extern int strlen_3BB0(const char *) __asm__("strlen");
+extern int func_003B4D00(unsigned char *p, int *outlen);
+extern int f_3A50_3BB0(int, int, int, int, int) __asm__("func_003B3A50");
+
+int func_003B3BB0(unsigned char *p) {
+    int ret = 0;
+    switch ((unsigned)*p) {
+    case 'p':
+        return strlen_3BB0((char *)p + 4) + 5;
+    case 'o':
+        return *(int *)(p + 4) + 8;
+    case '|':
+        return *(int *)(p + 4) * 8 + 8;
+    case 'i':
+        if (*(unsigned short *)(p + 6) & 0x10) {
+            int n = *(unsigned short *)(p + 4);
+            if (n == 0) n = 0xF0;
+            return n + 0x10;
+        }
+        return 0x10;
+    default:
+        if (*p & 0x80) {
+            int len = 0;
+            unsigned char *q;
+            if (*(int *)(p + 0xC) & 0x1000) q = p + *(int *)(p + 0x10);
+            else q = p + 0x10;
+            if (func_003B4D00(q, &len)) ret = len + 0x10;
+        } else {
+            int w = *(int *)(p + 0xC);
+            ret = f_3A50_3BB0(*p, *(short *)(p + 4), *(short *)(p + 6), (unsigned)w >> 28, (w >> 13) & 1);
+        }
+    }
+    return ret;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3CCC);
 
@@ -2303,7 +2337,22 @@ int func_003BAA00(int h, int *pos) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BAAC0);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003BB0C8);
+//100%
+extern unsigned char D_0044C588_B0C8 __asm__("D_0044C588");
+struct E_B0C8 { char pad[0x26]; unsigned char id; char pad2[0x69 - 0x27]; signed char used; char pad3[0x8C - 0x6A]; };
+struct G_B0C8 { char pad[0x17E]; short n; char pad2[0x1F0 - 0x180]; struct E_B0C8 *ents; };
+extern struct G_B0C8 D_0050A8E8_B0C8 __asm__("D_0050A8E8");
+
+unsigned char func_003BB0C8(void) {
+    int i;
+again:
+    D_0044C588_B0C8++;
+    if (D_0044C588_B0C8 == 0) D_0044C588_B0C8++;
+    for (i = 0; i < D_0050A8E8_B0C8.n; i++) {
+        if (D_0050A8E8_B0C8.ents[i].used && D_0050A8E8_B0C8.ents[i].id == D_0044C588_B0C8) goto again;
+    }
+    return D_0044C588_B0C8;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BB140);
 
@@ -3306,7 +3355,43 @@ int func_003C2268(void) {
 void func_003C2438(void) {
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C2440);
+//100%
+struct E_2440 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
+struct G_2440 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad1[0x49 - 0x31]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2440 *ents; };
+extern struct G_2440 D_0050A8E8_2440 __asm__("D_0050A8E8");
+struct P_2440 { int v; int pad; };
+struct Q_2440 { int v; int pad[3]; };
+struct V_2440 { char pad[0x20]; struct P_2440 a[0x30]; };
+struct V2_2440 { char pad[0x1A0]; struct Q_2440 a[0x30]; };
+
+struct H_2440 { char pad[0xCB0]; struct V_2440 *m; };
+extern struct H_2440 D_0050AD00_2440 __asm__("D_0050AD00");
+extern void f_A550_2440(int) __asm__("func_003BA550");
+extern void f_8468_2440(int) __asm__("func_003C8468");
+
+int func_003C2440(int idx) {
+    struct E_2440 *e = &D_0050A8E8_2440.ents[idx];
+    int i;
+    if (e->flags & 8) {
+        for (i = 0; i < e->n; i++) {
+            D_0050AD00_2440.m->a[e->ch[i]].v = 0;
+            f_A550_2440(e->ch[i]);
+            if (D_0050A8E8_2440.mode == 2)
+                D_0050AD00_2440.m->a[e->ch[i] + 0x18].v = 0;
+        }
+    } else if (e->flags & 0x100) {
+        for (i = 0; i < e->n; i++) {
+            ((struct V2_2440 *)D_0050AD00_2440.m)->a[e->ch[i] - D_0050A8E8_2440.b30].v = 0;
+            f_A550_2440(e->ch[i]);
+        }
+    } else {
+        for (i = 0; i < e->n; i++) {
+            f_8468_2440(e->ch[i] - (D_0050A8E8_2440.b30 + D_0050A8E8_2440.b2F));
+            f_A550_2440(e->ch[i]);
+        }
+    }
+    return 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -3443,7 +3528,33 @@ int func_003C27E0(int id, int k) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2A50);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C2EC8);
+//100%
+struct E_2EC8 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
+struct G_2EC8 { char pad[0x49]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2EC8 *ents; };
+extern struct G_2EC8 D_0050A8E8_2EC8 __asm__("D_0050A8E8");
+struct M_2EC8 { char pad[8]; long mask; };
+struct H_2EC8 { char pad[0xCB0]; struct M_2EC8 *m; };
+extern struct H_2EC8 D_0050AD00_2EC8 __asm__("D_0050AD00");
+extern void f_2A50_2EC8(int) __asm__("func_003C2A50");
+
+void func_003C2EC8(int idx) {
+    struct E_2EC8 *e = &D_0050A8E8_2EC8.ents[idx];
+    int i;
+    if (e->flags & 8) {
+        for (i = 0; i < e->n; i++) {
+            if (e->on) D_0050AD00_2EC8.m->mask |= 1L << e->ch[i];
+            else D_0050AD00_2EC8.m->mask &= ~(1L << e->ch[i]);
+            if (D_0050A8E8_2EC8.mode == 2) {
+                if (e->on) D_0050AD00_2EC8.m->mask |= 1L << (e->ch[i] + 0x18);
+                else D_0050AD00_2EC8.m->mask &= ~(1L << (e->ch[i] + 0x18));
+            }
+        }
+    } else if (e->flags & 0x100) {
+        f_2A50_2EC8(idx);
+    } else {
+        f_2A50_2EC8(idx);
+    }
+}
 
 //100%
 extern void func_003C8B40(int, int);
@@ -3696,7 +3807,35 @@ void func_003C3728(unsigned int a, float *out) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3780);
+//100%
+void func_003C3780(int ang, float *x, float *y, int dx, int dy) {
+    int q, r, t;
+    if (dx < 0 && dy < 0) {
+        q = dx < dy ? 1 : 2;
+    } else if (dx >= 0 && dy >= 0) {
+        q = dx < dy ? 2 : 1;
+    } else {
+        int ax = dx > -1 ? dx : -dx;
+        if (dy < 0 ? -dy < ax : dy < ax)
+            q = 4;
+        else
+            q = 3;
+    }
+    r = 0;
+    if ((unsigned)(ang - 0x4000) < 0x8000) {
+        t = 4;
+        if (*x < *y) t = 3;
+        if (q < 3) r = (t == 3 && q == 2) ? 1 : 2;
+    } else {
+        t = 1;
+        if (*x < *y) t = 2;
+        if (q >= 3) r = (t == 2 && q == 3) ? 1 : 2;
+    }
+    if (dx < 0) *x = -*x;
+    if (dy < 0) *y = -*y;
+    if (r == 1) *x = -*x;
+    else if (r == 2) *y = -*y;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C38E0);
 
@@ -4503,7 +4642,42 @@ void func_003C60E0(void) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6158);
+//100%
+// Scans the mask table at 0x4E from *idx for an entry whose 0x71C/0xE0 bits
+// match the element's flags at 0x18; returns the matching bits (0 if none).
+struct G_6158 { char p[0x4C]; unsigned char n; char p1; unsigned short tbl[1]; };
+struct E_6158 { char p[3]; signed char b3; char p1[0x14]; unsigned short f18; };
+extern struct G_6158 D_0050A8E8_6158 __asm__("D_0050A8E8");
+
+int func_003C6158(int *idx, struct E_6158 *e) {
+    int r = 0;
+    while (*idx < D_0050A8E8_6158.n) {
+        int m = D_0050A8E8_6158.tbl[*idx] & 0x71C;
+        if (e->f18 & 0x71C) {
+            r = e->f18 & m;
+            if (r != 0) goto ok;
+            goto next;
+        } else {
+            r = m;
+        }
+    ok:
+        {
+            int m2 = D_0050A8E8_6158.tbl[*idx] & 0xE0;
+            if (e->f18 & 0xE0) {
+                int t = e->f18 & m2;
+                r |= t;
+                if (t == 0) { r = 0; goto next; }
+            } else {
+                r |= m2;
+            }
+        }
+        if (e->b3 != 1 && (r & 0x80)) { r = 0; goto next; }
+        if (r) { (*idx)++; break; }
+    next:
+        (*idx)++;
+    }
+    return r;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -6213,7 +6387,57 @@ void func_003CA388(int *self, int *arg1) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CA460);
+//100%
+// Pulls n samples into buf, refilling the stream from func_003C6DE0 when it runs
+// dry; zero-fills the rest when no more data. Returns the count delivered.
+struct S_A460 { char pad[0x1C]; void *f1C; short *f20; int f24; int f28; int f2C; int f30; int f34; unsigned char b38; };
+extern void func_003C7010_A460(int, int, int) __asm__("func_003C7010");
+extern int func_003CCF90_A460(void *, int **, int) __asm__("func_003CCF90");
+extern short *func_003C6DE0_A460(int, int, int *, int *) __asm__("func_003C6DE0");
+extern void func_003CD190_A460(void *, float *) __asm__("func_003CD190");
+extern void func_003CCF60_A460(void *, short *, int, int) __asm__("func_003CCF60");
+extern void func_00416210_A460(void *, int, int) __asm__("func_00416210");
+
+int func_003CA460(struct S_A460 *self, int n, int unused, int *buf) {
+    int flag = 0;
+    int done = 0;
+    if (self->f34) {
+        func_003C7010_A460(self->f30, self->b38, self->f34);
+        self->f34 = 0;
+    }
+    while (n > 0) {
+        int k = func_003CCF90_A460(self->f1C, &buf, n);
+        self->f28 += k;
+        buf += k;
+        done += k;
+        self->f34 += k;
+        if (k < n) {
+            int tmp;
+            short *p;
+            n -= k;
+            p = func_003C6DE0_A460(self->f30, self->b38, &self->f24, &tmp);
+            self->f20 = p;
+            if (p) {
+                if (self->f2C <= 2) flag = 1;
+                if (flag) {
+                    float v[2];
+                    v[0] = p[0];
+                    v[1] = p[1];
+                    func_003CD190_A460(self->f1C, v);
+                    self->f20 += 2;
+                }
+                self->f28 = 0;
+                func_003CCF60_A460(self->f1C, self->f20, self->f24 * 4, self->f24);
+            } else {
+                if (n > 0 && self->f34) func_00416210_A460(buf, 0, n * 4);
+                n = 0;
+            }
+        } else {
+            n -= k;
+        }
+    }
+    return done;
+}
 
 //100%
 extern void func_003CCF18(int);
@@ -8050,7 +8274,75 @@ int func_003D16E0(int arg0) {
 void func_003D16E8(void) {
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D16F0);
+//100%
+// Same walk as func_003D1038: allocates a voice for program prog in each bank
+// matching mask and registers it in the 16-entry list of every bank sharing the
+// top mask bits. Returns 0, -8 (none registered), -13 (full/bad prog) or -18.
+struct H_16F0 { int f0; int f4; int f8; };
+struct E_16F0 { int w0; int w4; int w8; unsigned int wC; };
+struct Hdr_16F0 { char pad[0xF]; unsigned char bF; };
+struct G_16F0 { char pad[0x34]; struct Hdr_16F0 *hdr; char pad2[0x40 - 0x38]; short *idx; };
+struct T_16F0 { char pad[0x30]; unsigned int f30; int f34; char pad2[0xDC - 0x38]; struct H_16F0 *list[16]; char pad3[0x91C - 0x11C]; int n; char pad4[0x928 - 0x920]; };
+extern unsigned char D_0044F42C_16F0 __asm__("D_0044F42C");
+extern int D_0044F430_16F0 __asm__("D_0044F430");
+extern struct G_16F0 *D_0044F420_16F0 __asm__("D_0044F420");
+extern struct T_16F0 D_00517610_16F0[] __asm__("D_00517610");
+extern int func_003D5450_16F0(int) __asm__("func_003D5450");
+extern struct H_16F0 *func_003D2068_16F0(struct E_16F0 *) __asm__("func_003D2068");
+extern int func_002AF370_16F0(void) __asm__("func_002AF370");
+
+static inline unsigned int has_16F0(unsigned int a, unsigned int b) { return a & b; }
+
+int func_003D16F0(unsigned int mask, short prog) {
+    int r = 0;
+    unsigned int bit;
+    unsigned int i;
+    if (D_0044F42C_16F0 == 0 || D_0044F430_16F0 != 0 || func_003D5450_16F0(-1) == 0) {
+        return -18;
+    }
+    bit = 0x1000000 << ((prog & 0xF00) >> 8);
+    prog &= 0xFF;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        struct Hdr_16F0 *hdr;
+        struct E_16F0 *e;
+        struct H_16F0 *h;
+        unsigned int top;
+        int k, err;
+        if (D_00517610_16F0[i].f34 == 0) continue;
+        v = D_00517610_16F0[i].f30;
+        if (has_16F0(v, bit) == 0) continue;
+        if (has_16F0(v & 0x0F000000, mask) == 0) continue;
+        if (has_16F0(v & 0xF0000000, mask) == 0) continue;
+        if (func_003D5450_16F0(i & 0xFF) == 0) continue;
+        hdr = D_0044F420_16F0->hdr;
+        if (prog >= hdr->bF) { r = -13; break; }
+        e = (struct E_16F0 *)((char *)hdr + D_0044F420_16F0->idx[prog] * 4);
+        if (e->wC & 0x20000000) continue;
+        err = -8;
+        e = (struct E_16F0 *)func_003D2068_16F0(e);
+        top = D_00517610_16F0[i].f30;
+        top &= 0xFF000000;
+        for (k = 0; k < 4; k++) {
+            int n;
+            if (D_00517610_16F0[k].f34 == 0) continue;
+            if ((D_00517610_16F0[k].f30 & top) != top) continue;
+            n = D_00517610_16F0[k].n;
+            if (n >= 16) { r = -13; goto next; }
+            err = 0;
+            h = (struct H_16F0 *)e;
+            h->f0 = h->f8 = func_002AF370_16F0();
+            D_00517610_16F0[k].list[n] = h;
+            n++;
+            D_00517610_16F0[k].n = n;
+        }
+        r = err;
+    next:;
+    }
+    D_0044F430_16F0 = 0;
+    D_0044F420_16F0 = 0;
+    return r;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -8122,7 +8414,39 @@ int func_003D1A88(unsigned int mask) {
     return cnt;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D1BA8);
+//100%
+// Frees voice slot idx: compacts the sample pool over it (fixing up the other
+// slot pointers) or hands it to the release hook, then shifts the slot list down.
+struct H_1BA8 { short h0; short h2; short h4; short h6; short h8; short hA; short hC; unsigned short hE; };
+struct G_1BA8 { char pad[0xDC]; struct H_1BA8 *slots[17]; char data[0x91C - 0x120]; int n91C; };
+extern struct G_1BA8 *D_0044F420_1BA8 __asm__("D_0044F420");
+extern void (*D_0044F428_1BA8)(struct H_1BA8 *, int) __asm__("D_0044F428");
+extern void func_0041605C_1BA8(void *, void *, int) __asm__("func_0041605C");
+
+void func_003D1BA8(int idx, int mode) {
+    struct H_1BA8 *v = D_0044F420_1BA8->slots[idx];
+    int size = (v->hE & 0x3F) * 16 + 16;
+    struct H_1BA8 save;
+    char *end;
+    struct G_1BA8 *g;
+    unsigned int i;
+    save = *v; /* dead copy, kept: retail copies the header to the stack */
+    end = (char *)D_0044F420_1BA8 + 0x91C;
+    if ((char *)v >= (char *)D_0044F420_1BA8 + 0x11C && (char *)v < end) {
+        func_0041605C_1BA8(v, (char *)v + size, end - (char *)v);
+        for (i = 0; i < 17; i++) {
+            struct H_1BA8 *p = D_0044F420_1BA8->slots[i];
+            if (p > v && (char *)p < end)
+                D_0044F420_1BA8->slots[i] = (struct H_1BA8 *)((char *)p - size);
+        }
+    } else if (D_0044F428_1BA8) {
+        D_0044F428_1BA8(v, mode);
+    }
+    g = D_0044F420_1BA8;
+    g->slots[idx] = 0;
+    for (idx++; idx < 16; idx++) g->slots[idx - 1] = g->slots[idx];
+    D_0044F420_1BA8->n91C--;
+}
 
 //100%
 struct P_1D28 { unsigned int f0; unsigned int f4; unsigned int f8; unsigned int fC; };
@@ -8272,7 +8596,62 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2350);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D25F0);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D2A68);
+//100%
+// Same walk as func_003D1038: releases the first voice in mask (func_002AE690),
+// then shuts the bank down; returns the released voice (or the last one seen).
+struct E_2A68 { char pad[0x54]; int f54; };
+struct G_2A68 { char pad[0x34]; int f34; char pad2[0x58 - 0x38]; struct E_2A68 *list[24]; int fB8; };
+struct T_2A68 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_2A68 __asm__("D_0044F42C");
+extern int D_0044F430_2A68 __asm__("D_0044F430");
+extern struct G_2A68 *D_0044F420_2A68 __asm__("D_0044F420");
+extern struct T_2A68 D_00517610_2A68[] __asm__("D_00517610");
+extern int func_003D5450_2A68(int) __asm__("func_003D5450");
+extern void func_002AE690_2A68(int) __asm__("func_002AE690");
+extern int func_003D5330_2A68(unsigned int) __asm__("func_003D5330");
+extern void func_003D4C40_2A68(void) __asm__("func_003D4C40");
+extern void func_002AE100_2A68(void) __asm__("func_002AE100");
+
+static inline unsigned int has_2A68(unsigned int a, unsigned int b) { return a & b; }
+
+struct E_2A68 *func_003D2A68(unsigned int mask) {
+    struct E_2A68 *e = 0;
+    int i, j, r;
+    if (D_0044F42C_2A68 == 0) return 0;
+    if (D_0044F430_2A68 != 0) return 0;
+    if (func_003D5450_2A68(-1) == 0) return 0;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_2A68[i].f34 == 0) continue;
+        v = D_00517610_2A68[i].f30;
+        if (has_2A68(v & 0xF0000000, mask) == 0) continue;
+        if (has_2A68(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_2A68(i & 0xFF) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            e = D_0044F420_2A68->list[j];
+            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                int k = e->f54;
+                D_0044F420_2A68->list[j] = 0;
+                func_002AE690_2A68(k);
+                goto found;
+            }
+        }
+    }
+found:
+    if (func_003D5330_2A68(0x1000000 << i) == 0) {
+        D_0044F420_2A68->f34 = 0;
+        D_0044F420_2A68->fB8 = 0;
+        func_003D4C40_2A68();
+    }
+    r = func_003D5330_2A68(0xF000000);
+    if (D_0044F42C_2A68 != 0 && r == 0 && e != 0) {
+        func_002AE100_2A68();
+        D_0044F42C_2A68 = 0;
+    }
+    D_0044F430_2A68 = 0;
+    D_0044F420_2A68 = 0;
+    return e;
+}
 
 //100%
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
@@ -9097,7 +9476,46 @@ void func_003D54E8(void) {
     func_003D5128(0x42);
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D5508);
+//100%
+// Same walk as func_003D1038: clamps val to 0..100 and applies it to every voice
+// in mask through func_003D62C8.
+struct G_5508 { char pad[0x58]; void *list[24]; };
+struct T_5508 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_5508 __asm__("D_0044F42C");
+extern signed char D_0044F42E_5508 __asm__("D_0044F42E");
+extern int D_0044F430_5508 __asm__("D_0044F430");
+extern struct G_5508 *D_0044F420_5508 __asm__("D_0044F420");
+extern struct T_5508 D_00517610_5508[] __asm__("D_00517610");
+extern int func_003D5450_5508(int) __asm__("func_003D5450");
+extern void func_003D62C8_5508(void *, int) __asm__("func_003D62C8");
+
+static inline unsigned int has_5508(unsigned int a, unsigned int b) { return a & b; }
+
+void func_003D5508(unsigned int mask, signed char val) {
+    int i, j;
+    if (D_0044F42C_5508 == 0) return;
+    if (D_0044F430_5508 != 0) return;
+    if (func_003D5450_5508(-1) == 0) return;
+    if (val > 100) val = 100;
+    if (val < 0) val = 0;
+    if (mask == 0xFFFFFFFF) D_0044F42E_5508 = val;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_5508[i].f34 == 0) continue;
+        v = D_00517610_5508[i].f30;
+        if (has_5508(v & 0xF0000000, mask) == 0) continue;
+        if (has_5508(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_5508(i) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            void *e = D_0044F420_5508->list[j];
+            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D62C8_5508(e, val);
+            }
+        }
+    }
+    D_0044F430_5508 = 0;
+    D_0044F420_5508 = 0;
+}
 
 //100%
 struct G_5698 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
