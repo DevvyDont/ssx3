@@ -1037,7 +1037,49 @@ extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B
     }
 }
 
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7318);
+//100%
+struct sBox_2B7318 {
+    float x0, y0, z0, w0;
+    float x1, y1, z1, w1;
+};
+struct sCell_2B7318 {
+    int pad;
+    int ix, iy, iz;
+};
+// PORT: same function as func_00328F28 used by func_002B7410 below, typed for this cell struct
+extern "C" void func_00328F28_7318(sCell_2B7318* out, sBox_2B7318* box) __asm__("func_00328F28");
+extern "C" void func_00328C20(char* node, int kind, sTriggerEntry18* e, sCell_2B7318* cell);
+
+static inline char* Child_2B7318(char* p, int i, int d) { return i > -1 ? p : p + d; }
+static inline void GetCell_2B7318(sCell_2B7318* c, sBox_2B7318* b)
+{
+    func_00328F28_7318(c, b);
+}
+
+extern "C" void func_002B7318(void* self, sTriggerEntry18* e)
+{
+    if (e == 0) return;
+    if (e->active == 0) return;
+    if (((int*)e->unk10)[1] == 0) return;
+    sVec3_2B6CF8 lo;
+    sVec3_2B6CF8 hi;
+    func_002B6CF8(self, (sWtmEnt18*)e, &lo, &hi);
+    char* base = *(char**)((char*)func_0028B1C8() + 0x20);
+    e->unk8 = 5;
+    sBox_2B7318 box;
+    float one = 1.0f;
+    box.x0 = lo.x;
+    box.y0 = lo.y;
+    box.z0 = lo.z;
+    box.w0 = one;
+    box.x1 = hi.x;
+    box.y1 = hi.y;
+    box.z1 = hi.z;
+    box.w1 = one;
+    sCell_2B7318 cell;
+    GetCell_2B7318(&cell, &box);
+    func_00328C20(Child_2B7318(Child_2B7318(Child_2B7318(base, cell.ix, 0x50), cell.iy, 0x28), cell.iz, 0x14), 2, e, &cell);
+}
 
 //100%
 struct sBox_2B7410 {
