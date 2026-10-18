@@ -7249,7 +7249,102 @@ extern "C" void func_002A3400(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A34D0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_002ADCA0_i(void*, int, long, int, int, int, int, int) __asm__("func_002ADCA0");
+struct sPacked8_34D0 {
+    long v;
+} __attribute__((packed));
+extern sPacked8_34D0 D_004A36E8_p[] __asm__("D_004A36E8");
+extern "C" int func_002A4248_p(void *) __asm__("func_002A4248");
+extern "C" int func_002A42C8_p(void *) __asm__("func_002A42C8");
+
+struct sSsVt_34D0 { short delta; short index; int (*fn)(void *); };
+
+extern "C" int func_002A34D0(void *vself, cRider *rider, int flag, int which)
+{
+    char *self = (char *)vself;
+    int sel;
+    int a;
+    int b;
+    int c;
+
+    if (func_0029F128(self) == 0) {
+        return 1;
+    }
+    if (func_00288AE0(self) != 0) {
+        return 1;
+    }
+    if (func_002A4248_p(self) != 0 && rider != 0) {
+        sPacked8_34D0 *key = &D_004A36E8_p[0];
+        char *obj = (char *)&rider->mVtbl;
+        sSsVt_34D0 *vt = *(sSsVt_34D0 **)obj;
+        char *dst = **(char ***)(self + 0x118) + 0x1D8;
+        int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+        func_002ADCA0_i(dst, 0x3E8, key->v, 0, idx, 0, 0, 0);
+        return 1;
+    }
+    if (func_002A42C8_p(self) != 0) {
+        return 1;
+    }
+    if (flag != 0) {
+        if (func_002B0E28(self + 0x5560, 0) == 0) {
+            return 0;
+        }
+    }
+    sel = 1;
+    if (rider == 0) {
+        if (func_002A4078(self) == 0) {
+            return 1;
+        }
+        if (func_002A4040(self) != 0) {
+            return 1;
+        }
+        sel = 0;
+        rider = (cRider *)func_00285D98_p(self, which);
+    }
+    if (func_00123168(rider) != 0) {
+        return 1;
+    }
+    if (func_002B1458_f(self + 0x5560, 0, 0x20C4, 0, 0xB, 0.0f, 0, 0) == 0) {
+        return 1;
+    }
+    a = func_0029F198(self);
+    b = func_002A1D48_i(self, rider);
+    if (sel != 0) {
+        c = func_002A1E68(self, rider);
+    } else {
+        switch (*(unsigned int *)((char *)rider + 0xEC)) {
+        case 0:
+            c = 1;
+            break;
+        case 1:
+            c = 2;
+            break;
+        case 2:
+            c = 4;
+            break;
+        case 3:
+            c = 8;
+            break;
+        case 4:
+            c = 0x10;
+            break;
+        case 5:
+            c = 0x200;
+            break;
+        default:
+            c = 0;
+            break;
+        }
+    }
+    D_004A482C_5(func_003D8008(1, 0, 0x20C4), 3, a, b, c);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3708);

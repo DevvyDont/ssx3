@@ -4676,7 +4676,31 @@ int func_003C5468(float *a0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C54C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int func_003B4DD8_i(void *) __asm__("func_003B4DD8");
+int func_003C54C0(unsigned int kind, int *out) {
+    unsigned char info[0xE0];
+    *out = 0;
+    func_003B4DD8_i(info);
+    switch (kind) {
+    case 1:
+        if (info[5] >= 2U) {
+            *out = 1;
+        }
+        break;
+    case 0:
+    case 4:
+    case 5:
+    case 8:
+        *out = 1;
+        break;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5538);
@@ -4955,7 +4979,89 @@ int func_003C5BF8(int arg0) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5C30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int func_003B4FC0_i(void *) __asm__("func_003B4FC0");
+extern int func_003B5158(int, int, int);
+extern int D_0044E1C0;
+extern unsigned int D_0044E1C4;
+extern int D_005157B0;
+
+struct sInfo_5C30 {
+    char pad0[0x2A];
+    unsigned short w2A;
+    unsigned short w2C;
+    char pad2E;
+    unsigned char b2F;
+    char pad30[0x47 - 0x30];
+    signed char f47;
+    signed char f48;
+    signed char f49;
+    char pad4A[2];
+    unsigned char n;
+    char pad4D;
+    short list[8];
+    char tail[0xE0 - 0x5E];
+};
+
+int func_003C5C30(int arg0) {
+    struct sInfo_5C30 info;
+    int t;
+    int ia;
+
+    func_003B4DD8(&info);
+    info.n = 0;
+    if (D_0044E1C4 == 8) {
+        info.list[0] = 0x44;
+        info.n = 1;
+    }
+    info.list[info.n] = 0x24;
+    info.n += 1;
+    if (info.b2F != 0) {
+        if (D_0044E1C4 == 8) {
+            info.list[info.n] = 0x140;
+            info.n += 1;
+        }
+        info.list[info.n] = 0x120;
+        info.n += 1;
+    }
+    if (D_0044E1C4 == 8) {
+        info.list[info.n] = 0x48;
+        info.n += 1;
+    }
+    info.list[info.n] = 0x28;
+    info.f49 = 1;
+    info.f48 = 0;
+    info.n += 1;
+    switch (D_0044E1C4) {
+    case 0:
+        info.f47 = 1;
+        break;
+    case 4:
+        info.f47 = 4;
+        info.f49 = 2;
+        break;
+    case 5:
+        info.f47 = 5;
+        info.f49 = 2;
+        break;
+    case 1:
+    case 8:
+        info.f47 = 2;
+        break;
+    }
+    ia = info.w2A;
+    t = ia & 0xFFFF;
+    if (t != info.w2C && (t != 0x8CA0 || info.w2C != 0x5DC0)) {
+        info.w2C = ia;
+    }
+    func_003B4FC0_i(&info);
+    func_003B5158(D_0044E1C0, D_005157B0, arg0);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5DF0);

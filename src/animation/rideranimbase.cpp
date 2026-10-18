@@ -811,7 +811,104 @@ extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float 
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_003130A8);
+#ifdef SKIP_ASM
+// PORT: reinterprets packed 24-bit float bits
+static inline float bitsToFloat_003130A8(int x)
+{
+    union { int i; float f; } u;
+    u.i = x;
+    return u.f;
+}
+
+#define READ24_003130A8(p, o) bitsToFloat_003130A8(((p)[o] << 8) | ((p)[(o) + 1] << 16) | ((p)[(o) + 2] << 24))
+
+static inline void setType_003130A8(sRabChannelSet* self, sRabChannel* ch, int type)
+{
+    if (type == 6) {
+        *(int*)&ch->vC = self->count6++;
+    } else if (type == 7) {
+        *(int*)&ch->vC = self->count7++;
+    } else if (type == 8) {
+        *(int*)&ch->vC = self->count8++;
+    } else if (type == 9) {
+        *(int*)&ch->vC = self->count9++;
+    }
+    ch->type = type;
+}
+
+extern "C" void func_003130A8(sRabChannelSet* self, unsigned char* data, int frames)
+{
+    unsigned char* p = data;
+    int n = *p;
+    p++;
+    if (n == 0) {
+        return;
+    }
+    sRabChannel* ch = self->channels;
+    self->count6 = 0;
+    self->count7 = 0;
+    self->count8 = 0;
+    self->count9 = 0;
+    sRabChannel* end = ch + n;
+    while (1) {
+        setType_003130A8(self, ch, *p >> 4);
+        if (++ch == end) break;
+        setType_003130A8(self, ch, *p & 0xF);
+        if (++ch == end) break;
+        p++;
+    }
+    p++;
+    ch = self->channels;
+    do {
+        switch (ch->type) {
+        case 1:
+            ch->v4 = READ24_003130A8(p, 0);
+            p += 3;
+            break;
+        case 3:
+            ch->v4 = READ24_003130A8(p, 0);
+            ch->v8 = READ24_003130A8(p, 3);
+            ch->vC = READ24_003130A8(p, 6);
+            p += 9;
+            break;
+        case 4:
+            ch->v4 = READ24_003130A8(p, 0);
+            ch->v8 = READ24_003130A8(p, 3);
+            ch->vC = READ24_003130A8(p, 6);
+            ch->v10 = READ24_003130A8(p, 9);
+            p += 12;
+            break;
+        case 5:
+            ch->v4 = READ24_003130A8(p, 0);
+            ch->v8 = READ24_003130A8(p, 3);
+            ch->vC = READ24_003130A8(p, 6);
+            ch->v10 = (float)(p[9] | (p[10] << 8));
+            p += 11;
+            break;
+        case 2:
+        case 6:
+        case 7:
+        case 8:
+            ch->v4 = READ24_003130A8(p, 0);
+            ch->v8 = READ24_003130A8(p, 3);
+            p += 6;
+            break;
+        }
+        ch++;
+    } while (ch != end);
+    int a = frames * self->count6;
+    int b = ((frames - 2) / 2 + 2) * self->count7;
+    int c = frames * self->count8 * 2;
+    int ofs = (p - data) + a + b;
+    self->data4 = p;
+    self->data8 = p + a;
+    int pad = ofs & 1;
+    self->dataC = p + a + b + pad;
+    self->data10 = p + a + b + c + ((ofs + c + pad) & 3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00313508);

@@ -680,7 +680,48 @@ extern "C" int func_0014BBA0(void* self, int rider, sBEEntry38_14B988* e, char* 
     return func_0014B988(self, profile, func_0014AC30(rider), e, out);
 }
 #endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014BC18);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(void* a, void* b);
+extern "C" char* strcpy(char* dst, const char* src);
+
+struct sBEEntry38_BC18 {
+    char pad_0x00[4];
+    short slot;         // 0x4
+    char pad_0x06[0x22];
+    char* name;         // 0x28
+    char pad_0x2C[0xC];
+};
+
+extern "C" int func_0014BC18(void* self, int profile, int ch, char* out)
+{
+    int cnt = 0;
+    void* tables = func_0014BDB8_0();
+    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, profile, ch);
+    int n = func_0014D988(tables, ch);
+    sBEEntry38_BC18* e = (sBEEntry38_BC18*)func_0014D998((sBELibTables*)tables, ch);
+    int i;
+    for (i = 0; i < n; i++, e++) {
+        char* name = e->name;
+        if (name != 0) {
+            sFlagEntry_14AFB0* f = getEntry_14AFB0(prof, e->slot);
+            if (f->flags & 0x10) {
+                int k;
+                for (k = cnt - 1; k >= 0; k--) {
+                    if (func_004165A8(name, out + (k << 8)) == 0)
+                        break;
+                }
+                if (k < 0) {
+                    strcpy(out + (cnt << 8), name);
+                    cnt++;
+                }
+            }
+        }
+    }
+    return cnt;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014BD78__FPv);
