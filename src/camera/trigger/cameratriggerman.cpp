@@ -30,8 +30,6 @@ void func_0016CA10(void* self)
 {
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA18);
-
 void operator_delete(int*);
 extern void* D_004A28A8;
 
@@ -122,6 +120,26 @@ static inline void insert_CF48(char* w, void* item, const sCtBox_CF48* box)
     sCtCell_CF48 c;
     func_00328F28(&c, box);
     func_00328C20(findRoot_CF48(w, c.x, c.y, c.z), 2, item, &c);
+}
+
+//100%
+// Unregisters every trigger from the world hash, then resets the stacks and the trigger list.
+extern "C" void func_0016BF40(void* self);
+void cCameraTriggerStack_init(cCameraTriggerStack* self);
+
+extern "C" void func_0016CA18(void* vself)
+{
+    sCtMan_CF48* self = (sCtMan_CF48*)vself;
+    for (int i = 0; i < self->count; i++) {
+        sCtTrig_CF48* t = self->trigs[i];
+        char* w = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+        sCtBox_CF48 box = t->shape->bounds();
+        remove_CF48(w, t->item, &box);
+    }
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
+    func_0016BF40(vself);
+    cCamera_resetChaseControllerSwitches();
 }
 
 //100%
