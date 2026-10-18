@@ -879,7 +879,60 @@ extern "C" void func_0023E820(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023E8A0);
+#ifdef SKIP_ASM
+struct sMovieVEntry_E8A0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sMovieDelegate_E8A0 {
+    char pad[8];
+    short delta;
+    short pad2;
+    void (*fn)(void*, int);
+};
+
+static inline int vq_E8A0(char* s, int k)
+{
+    char* o = *(char**)(s + 0x434);
+    sMovieVEntry_E8A0* vt = *(sMovieVEntry_E8A0**)o;
+    return vt[k].fn(o + vt[k].delta);
+}
+
+static inline void notify_E8A0(char* s, int v)
+{
+    sMovieDelegate_E8A0* d = *(sMovieDelegate_E8A0**)(s + 0x748);
+    d->fn(s + d->delta, v);
+}
+
+extern "C" void func_0023E8A0(void* self, int flag)
+{
+    char* s = (char*)self;
+
+    if (vq_E8A0(s, 53) == 0) {
+        if (vq_E8A0(s, 49) != 0 || vq_E8A0(s, 51) != 0 || vq_E8A0(s, 59) != 0) {
+            notify_E8A0(s, 5);
+        } else {
+            int ok = *(int*)(s + 0x130) != 4;
+            if (ok) {
+                notify_E8A0(s, 4);
+            }
+        }
+    } else {
+        if (vq_E8A0(s, 55) != 0 && vq_E8A0(s, 58) != 0 && vq_E8A0(s, 51) == 0 && vq_E8A0(s, 59) == 0) {
+            if (flag != 0) {
+                notify_E8A0(s, 6);
+            }
+        } else if (*(int*)(s + 0xBC) != 0) {
+            notify_E8A0(s, 7);
+        } else {
+            notify_E8A0(s, 0x1D);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023EA30);
@@ -2778,7 +2831,28 @@ extern "C" void func_002410A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_002410D0);
+#ifdef SKIP_ASM
+struct sMovieVEntry_2410D0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+extern "C" int func_002410D0(void* self)
+{
+    char* s = (char*)self;
+    char* o = *(char**)(s + 0x434);
+    sMovieVEntry_2410D0* vt = *(sMovieVEntry_2410D0**)o;
+    if (*(int*)(s + 0xEC) < vt[68].fn(o + vt[68].delta)) {
+        return *(int*)(s + 0xEC);
+    }
+    char* o2 = *(char**)(s + 0x434);
+    sMovieVEntry_2410D0* vt2 = *(sMovieVEntry_2410D0**)o2;
+    return vt2[68].fn(o2 + vt2[68].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241138);
