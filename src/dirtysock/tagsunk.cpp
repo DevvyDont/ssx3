@@ -4031,7 +4031,93 @@ void func_00261A20(void* self)
 {
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00261A28);
+//100%
+// PORT: TagFieldGetUnk is called here with a 4th (default) argument left in $a3.
+extern "C" void cDirtysock_tag_TagFieldGetUnk4(const char* tag, char* dst, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetUnk");
+extern "C" int func_002623B0(void* self, int name);
+extern "C" void func_00261CD0(char* self, char* name, char* text, char* date);
+extern "C" int func_00262A08(void* self, int name);
+extern "C" void func_002635A8(void* self, int i);
+extern "C" int func_003EDD70(const char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset);
+extern "C" char* func_004162D0(char* d, const char* s);
+extern char D_004A3358[];
+extern char D_004A3360[];
+extern char D_004A3368[];
+extern char D_004A3370[];
+extern char D_004A3378[];
+extern char D_00480E68[];
+extern char D_00480E78[];
+extern char D_004A2ED0[];
+
+struct sMsgListNode_00261A28 {
+    sMsgListNode_00261A28* next;
+    sMsgListNode_00261A28* prev;
+    void* data;
+};
+
+struct sMsgListIter_00261A28 {
+    sMsgListNode_00261A28* node;
+    sMsgListIter_00261A28(sMsgListNode_00261A28* x) : node(x) {}
+    sMsgListIter_00261A28(const sMsgListIter_00261A28& x) : node(x.node) {}
+};
+
+static inline sMsgListIter_00261A28 sMsgList_00261A28_insert(sMsgListIter_00261A28 pos, void* x)
+{
+    sMsgListNode_00261A28* tmp = (sMsgListNode_00261A28*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void sTagVec_00261A28_remove(char* self, char* name)
+{
+    for (unsigned int i = 0; i < (unsigned int)((*(int*)(self + 0xB0) - *(int*)(self + 0xAC)) >> 2); i++) {
+        void* e = func_00263630(self, i);
+        if (e != 0 && func_004165A8(*(void**)e, name) == 0) {
+            func_002635A8(self, i);
+            return;
+        }
+    }
+}
+
+struct sMsg_00261A28 {
+    int kind;
+    void** vt;
+    sMsg_00261A28(int k) : kind(k), vt(D_004812B0) {}
+};
+
+extern "C" void func_00261A28(char* self, char* msg)
+{
+    char raw[0x800];
+    char text[0x8D0];
+    char name[0x40];
+    char date[0x40];
+    char flag[0x10];
+    int t0, t1, t2, t3, t4, t5;
+
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3358), flag, 2, D_00480E68);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3360), name, 0x40, D_00480E68);
+    if (func_002623B0(self, (int)name))
+        return;
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3368), text, 0x8CF, D_004A2ED0);
+    cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3370), raw, 0x800, D_00480E68);
+    func_004162D0(text, raw);
+    func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3378), &t0, &t1, &t2, &t3, &t4, &t5, 0);
+    sprintf(date, D_00480E78, t1, t2, t0, t3, t4);
+    func_00261CD0(self, name, text, date);
+    if (func_00262A08(self, (int)name) >= 0x1F) {
+        sTagVec_00261A28_remove(self, name);
+    }
+    int kind = 0x109;
+    char* g = (char*)D_004A3028;
+    sMsg_00261A28* m = new (D_00480488, 0x20000000, 0) sMsg_00261A28(kind);
+    sMsgList_00261A28_insert(*(sMsgListNode_00261A28**)(g + 0xF0), m);
+}
 
 //100%
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
