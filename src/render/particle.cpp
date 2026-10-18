@@ -605,9 +605,75 @@ extern "C" void func_00371940(unsigned int madr, int qwc, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00371A58);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (D0 = VIF0 DMA channel).
+extern "C" void func_00371A58(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10008000 & 0x100) {
+        }
+    }
+    if (madr > 0x6FFFFFFF) {
+        *(volatile unsigned int*)0x10008010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile unsigned int*)0x10008010 = madr;
+    }
+    *(volatile int*)0x10008020 = qwc;
+    *(volatile int*)0x10008000 = 0x100;
+    if (flags & 2) {
+        while (*(volatile int*)0x10008000 & 0x100) {
+        }
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("render/particle", func_00371B40);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (D1 = VIF1 DMA channel).
+extern "C" void func_00371B40(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+    if (madr > 0x6FFFFFFF) {
+        *(volatile unsigned int*)0x10009010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile unsigned int*)0x10009010 = madr;
+    }
+    *(volatile int*)0x10009020 = qwc;
+    *(volatile int*)0x10009000 = 0x101;
+    if (flags & 2) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("render/particle", func_00371C28);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (D1 = VIF1 DMA channel).
+extern "C" void func_00371C28(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+    if (madr > 0x6FFFFFFF) {
+        *(volatile unsigned int*)0x10009010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile unsigned int*)0x10009010 = madr;
+    }
+    *(volatile int*)0x10009020 = qwc;
+    *(volatile int*)0x10009000 = 0x100;
+    if (flags & 2) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00371D10);
@@ -651,8 +717,60 @@ extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags)
 
 extern "C" void* func_003725B0(void* self);
 
+//100%
 INCLUDE_ASM("render/particle", func_00371EA0);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (D1 = VIF1 DMA channel, chain mode via TADR).
+extern "C" void func_00371EA0(unsigned int tadr, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+    if (tadr > 0x6FFFFFFF) {
+        *(volatile unsigned int*)0x10009030 = (tadr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile unsigned int*)0x10009030 = tadr;
+    }
+    *(volatile int*)0x10009020 = 0;
+    if (flags & 1) {
+        *(volatile int*)0x10009000 = 0x145;
+    } else {
+        *(volatile int*)0x10009000 = 0x105;
+    }
+    if (flags & 2) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("render/particle", func_00371F98);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (D2 = GIF DMA channel, chain mode via TADR; GIF_MODE).
+extern "C" void func_00371F98(unsigned int tadr, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x1000A000 & 0x100) {
+        }
+    }
+    *(volatile int*)0x10003010 = 4;
+    if (tadr > 0x6FFFFFFF) {
+        *(volatile unsigned int*)0x1000A030 = (tadr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile unsigned int*)0x1000A030 = tadr;
+    }
+    if (flags & 1) {
+        *(volatile int*)0x1000A000 = 0x144;
+    } else {
+        *(volatile int*)0x1000A000 = 0x104;
+    }
+    if (flags & 2) {
+        while (*(volatile int*)0x1000A000 & 0x100) {
+        }
+    }
+}
+#endif
 INCLUDE_ASM("render/particle", func_00372098);
 INCLUDE_ASM("render/particle", func_003720F0);
 INCLUDE_ASM("render/particle", func_00372198);
@@ -2570,7 +2688,24 @@ extern "C" void func_0037C570(void* self, sPartColour_C570* c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037C638);
+#ifdef SKIP_ASM
+struct sRGB_C638 {
+    float x, y, z;
+    sRGB_C638() {}
+    sRGB_C638(const sRGB_C638& o) { x = o.x; y = o.y; z = o.z; }
+};
+
+extern "C" sRGB_C638 func_0037C638(void* self)
+{
+    sRGB_C638 v;
+    v.x = (float)*(unsigned int*)((char*)self + 0x59EC) * 0.0078125f;
+    v.y = (float)*(unsigned int*)((char*)self + 0x59F0) * 0.0078125f;
+    v.z = (float)*(unsigned int*)((char*)self + 0x59F4) * 0.0078125f;
+    return v;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037C720);
 
@@ -4552,7 +4687,26 @@ extern "C" void func_003865D8(void *arg0, void **arg1) {
     *arg1 = arg0;
 }
 #endif
+//100%
 INCLUDE_ASM("render/particle", func_003865E8);
+#ifdef SKIP_ASM
+struct sVE3865E8 { short delta; short index; void (*fn)(void*, int); };
+
+extern "C" void func_003865E8(void* head)
+{
+    void* p = head;
+    if (p != 0) {
+        do {
+            void* next = *(void**)((char*)p + 8);
+            if (p != 0) {
+                sVE3865E8* vt = *(sVE3865E8**)((char*)p + 4);
+                vt[1].fn((char*)p + vt[1].delta, 3);
+            }
+            p = next;
+        } while (p != 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00386640);
@@ -4850,7 +5004,27 @@ extern "C" void func_00389260(sPartVec4* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00389290);
+#ifdef SKIP_ASM
+extern "C" void func_00389290(float* dst, float* src)
+{
+    for (int i = 0; i < 4; i++) {
+        dst[0] = src[0];
+        dst[4] = src[3];
+        dst[8] = -src[3];
+        dst[12] = src[6];
+        dst[16] = src[9];
+        dst[20] = src[12];
+        dst[24] = src[15];
+        dst[28] = src[18];
+        dst[32] = src[21];
+        dst[36] = src[24];
+        dst++;
+        src++;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00389308);
 
@@ -4896,8 +5070,36 @@ extern "C" void func_00389590(sPartVec4* a, sPartVec4* b, sPartVec4* c, float s)
 
 INCLUDE_ASM("render/particle", func_00389620);
 
+//100%
 INCLUDE_ASM("render/particle", func_00389660);
+#ifdef SKIP_ASM
+struct sV4_9660 { float x, y, z, w; };
+
+extern "C" void func_00389660(sV4_9660* v, float* q)
+{
+    for (int i = 0; i < 10; i++) {
+        v[i].x *= q[1];
+        v[i].y *= q[2];
+        v[i].z *= q[3];
+        v[i].w *= q[0];
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("render/particle", func_003896C0);
+#ifdef SKIP_ASM
+struct sV4_96C0 { float x, y, z, w; };
+
+extern "C" void func_003896C0(sV4_96C0* v, float* q, float s)
+{
+    for (int i = 0; i < 10; i++) {
+        v[i].x = v[i].x * s * q[1];
+        v[i].y = v[i].y * s * q[2];
+        v[i].z = v[i].z * s * q[3];
+        v[i].w = v[i].w * s * q[0];
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389730);
