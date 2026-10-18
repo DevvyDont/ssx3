@@ -277,7 +277,187 @@ extern "C" void func_00234F40(sState_234F40* self)
     self->f10 = 0;
 }
 
-INCLUDE_ASM("main/gamestate", func_00235080);
+//100%
+extern "C" int func_00278D58(void* self);
+extern "C" int func_00278F38(void* self, int i);
+extern "C" void func_00278E20(void* self, int i, int a, int b);
+extern "C" void func_00278E50(void* self, int i, int a, int b, int c, int d, int f, int g);
+extern "C" void func_0028CD48(void* self);
+extern "C" void func_002B3A70(void*);
+extern "C" int func_002791D8(void* self, int i);
+extern "C" int func_0012ABD0(void* p);
+extern "C" int func_0012ACF8(void* p);
+extern "C" void cGameModeMan_initGameMode(void* self, int mode);
+extern "C" int cBENewRaceInterface_setNumberAI(void* self, int n);
+extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
+extern "C" void func_001473D0(void* iface, int rider, int v);
+extern "C" void func_0012B030(void* p);
+extern "C" void func_0012B000(void* p);
+extern "C" void func_00128958(void* p);
+extern "C" void func_00128998(void* self, int n);
+extern "C" int func_0012A180(void* p);
+void func_001289F0(void* p);
+extern "C" void func_00128A10(void* p);
+extern "C" void func_001296F8(void* p);
+
+struct sRace_235080 {
+    char pad0[0x48];
+    signed char mode48;
+    signed char flag49;
+    signed char sub4A;
+};
+extern sRace_235080 D_00535BC8_235080 __asm__("D_00535BC8");
+
+struct sGameMode_235080 {
+    char pad0[0x10];
+    int total;
+    int humans;
+    int ch[10];
+    int ext[10];
+};
+
+struct sVE_235080 { short delta; short index; void (*fn)(void*); };
+
+struct sState_235080 {
+    int pad0[4];
+    unsigned int f10;
+    int f14;
+    int f18;
+};
+
+static inline char* Ai_235080()
+{
+    return *(char**)(D_004A2C68 + 0xC);
+}
+
+static inline void Commit_235080(char* o)
+{
+    sVE_235080* vt = *(sVE_235080**)(o + 0xC);
+    vt[1].fn(o + vt[1].delta);
+}
+
+extern "C" void func_00235080(sState_235080* self)
+{
+    self->f18++;
+    switch (self->f10) {
+    case 0: {
+        if (func_00278D58(D_004A28A4) == 0) {
+            return;
+        }
+        func_00278F38(D_004A28A4, 0);
+        char* g = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78);
+        int t = *(int*)(g + 0x1BC);
+        int sp = (unsigned int)(t - 14) < 3;
+        if (self->f14 != 0) {
+            if (t == 14) {
+                func_00278E20(D_004A28A4, 1, 0x1D, 3);
+                func_0028CD48(func_0028B180());
+                func_002B3A70((char*)func_0028B180() + 0x118);
+                func_00278E50(D_004A28A4, 1, 0, 3, 0, -1, -1, -1);
+                func_00278E50(D_004A28A4, 1, 1, 3, 0, -1, -1, -1);
+            } else {
+                func_00278E20(D_004A28A4, 1, t == 15 ? 0x1E : 0x1F, 3);
+                func_00278E50(D_004A28A4, 1, 0x10, 3, 0, -1, -1, -1);
+                func_00278E50(D_004A28A4, 1, 0x11, 3, 0, -1, -1, -1);
+            }
+            func_00278F38(D_004A28A4, 1);
+        } else if (*(int*)(g + 0x1C8) != 0 && sp) {
+            func_00278E50(D_004A28A4, 1, 0x10, 3, 0, -1, -1, -1);
+            func_00278E50(D_004A28A4, 1, 0x11, 3, 0, -1, -1, -1);
+        }
+        self->f10 = 1;
+        break;
+    }
+    case 1: {
+        // The dead `goto inner` keeps `done = 0` from being propagated into
+        // the conditional move until cse2 removes it (original keeps movn).
+        int done = 0;
+        int z = 0;
+        if ((func_002791D8(D_004A28A4, 0) ^ 1) != 0) {
+        inner:
+            if ((func_002791D8(D_004A28A4, 1) ^ 1) != 0) done = 1;
+        }
+        { int t = z + 1; if (t != 1) goto inner; }
+        if (done) {
+            self->f10 = 2;
+        }
+        break;
+    }
+    case 2: {
+        if (func_0012ABD0(Ai_235080()) == 0) {
+            return;
+        }
+        if (func_0012ACF8(Ai_235080()) == 0) {
+            return;
+        }
+        int lo = 6, hi = 11;
+        char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+        char* np = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        sGameMode_235080* gm = *(sGameMode_235080**)((char*)D_004A28A8 + 0xC0);
+        int sub = D_00535BC8_235080.sub4A;
+        if (sub < lo || sub > hi) {
+            cGameModeMan_initGameMode(gm, sub);
+        }
+        int n = gm->total - gm->humans;
+        int base = *(int*)(Ai_235080() + 0x7C);
+        cBENewRaceInterface_setNumberAI(race, n);
+        Commit_235080(race);
+        int i;
+        for (i = 0; i < n; i++) {
+            cBENewPlayerInterface_setRiderCharID(np, i + base, gm->ch[i + base]);
+            func_001473D0(np, i + base, gm->ext[i + base]);
+        }
+        Commit_235080(np);
+        func_0012B030(Ai_235080());
+        func_0012B000(Ai_235080());
+        int solo = 0;
+        if (D_00535BC8_235080.mode48 == 0) {
+            solo = D_00535BC8_235080.flag49 == 0;
+        }
+        func_00128958(Ai_235080());
+        if (n == 0 && solo) {
+            if (D_00535BC8_235080.mode48 == 0) {
+                func_00128998(Ai_235080(), 0);
+            } else {
+                func_00128998(Ai_235080(), 2);
+            }
+        }
+        self->f10 = 3;
+        break;
+    }
+    case 3: {
+        if (func_0012A180(Ai_235080()) != 0) {
+            cBE_getInterface_Fv(cBE_getBE(), 0);
+            int mode = D_00535BC8_235080.mode48;
+            if (mode == 0) {
+                func_001289F0(Ai_235080());
+                if (*(int*)(Ai_235080() + 0x80) > 0) {
+                    *(int*)(Ai_235080() + 0x14) = 1;
+                }
+                if (*(int*)(Ai_235080() + 0x84) > 0) {
+                    *(int*)(Ai_235080() + 0x8C) = 1;
+                }
+            }
+            if (mode == 5 && D_00535BC8_235080.flag49 == 0) {
+                func_00128A10(Ai_235080());
+            }
+            self->f10 = 4;
+        } else {
+            func_001296F8(Ai_235080());
+            return;
+        }
+        break;
+    }
+    case 4:
+        if (self->f14 == 0 || self->f18 >= 0xB4) {
+            self->f10 = 5;
+        }
+        break;
+    case 5:
+        break;
+    }
+}
+
 
 //100%
 extern "C" void func_00278CD8(void* a);
