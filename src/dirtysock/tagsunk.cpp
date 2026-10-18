@@ -7715,7 +7715,25 @@ extern "C" void func_002668E8(sSlots_668E8* self)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00266B80);
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00266BA8);
+//100%
+// Pops the next byte pair from slot idx's ring; a zero byte leaves its output at -1.
+extern "C" int func_00266BA8(sSlots_668E8* self, int idx, int* a, int* b)
+{
+    *a = -1;
+    *b = -1;
+    if (self->enabled != 0 && idx < func_003F6348()) {
+        if (self->slot[idx].start < self->slot[idx].count) {
+            int k = ringIdx_668E8(self->slot[idx].start);
+            if (self->slot[idx].buf[k][0] != 0)
+                *a = self->slot[idx].buf[k][0];
+            if (self->slot[idx].buf[k][1] != 0)
+                *b = self->slot[idx].buf[k][1];
+            self->slot[idx].start++;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 //100%
 extern char D_004810A0[];
