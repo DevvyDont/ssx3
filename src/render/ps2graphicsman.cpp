@@ -520,7 +520,148 @@ extern "C" void func_00368660(char* self, int a, int b, int a3, ulong** pp, void
     *pp = cur;
 }
 
-INCLUDE_ASM("render/ps2graphicsman", func_00368970);
+// PORT: 64-bit GS register words (ulong is 64-bit here).
+struct sMipTex8970 {
+    char pad_0x00[0xC];
+    int psm;                // 0xC
+    char pad_0x10[0x8];
+    int bpp;                // 0x18
+    char pad_0x1C[0x8];
+    int levels;             // 0x24
+    int addr;               // 0x28
+    int caddr;              // 0x2C
+    char pad_0x30[0x8];
+    sGsTex0Bits tex0;       // 0x38
+    ulong tex1;             // 0x40
+    ulong miptbp1;          // 0x48
+    ulong miptbp2;          // 0x50
+};
+
+struct sMipMgr8970 {
+    char pad_0x0[0x8];
+    sMipTex8970* texs[0x7D1];   // 0x8
+    int cur[2];                 // 0x1F4C
+    int clut;                   // 0x1F54
+};
+
+static inline int mipSize8970(sMipTex8970* t, int i, int shift)
+{
+    int w = (1 << t->tex0.TW) >> i;
+    int h = (1 << t->tex0.TH) >> i;
+    int bpp = t->bpp;
+    int pw;
+    int ph;
+    int bytes;
+    switch (bpp) {
+    case 4:
+        pw = 0x80;
+        ph = 0x80;
+        break;
+    case 8:
+        pw = 0x80;
+        ph = 0x40;
+        break;
+    case 15:
+    case 16:
+        pw = 0x40;
+        ph = 0x40;
+        break;
+    case 32:
+    default:
+        pw = 0x40;
+        ph = 0x20;
+        break;
+    }
+    pw = w < pw ? pw : w;
+    ph = h < ph ? ph : h;
+    bytes = pw * ph * bpp / 8;
+    return (bytes + (-bytes & 0xFF)) >> shift;
+}
+
+extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma)
+{
+    sMipMgr8970* m = (sMipMgr8970*)self;
+    ulong* p = *dma;
+    if (m->cur[slot] != idx) {
+        sMipTex8970* t;
+        int rTex0;
+        int rTex1;
+        int rMip1;
+        int rMip2;
+        int shift;
+        int n;
+        m->cur[slot] = idx;
+        t = m->texs[idx];
+        if (slot == 0) {
+            rTex0 = 6;
+            rTex1 = 0x14;
+            rMip1 = 0x34;
+            rMip2 = 0x36;
+        } else {
+            rTex0 = 7;
+            rTex1 = 0x15;
+            rMip1 = 0x35;
+            rMip2 = 0x37;
+        }
+        shift = 8;
+        if (t->psm == 9)
+            shift = 6;
+        n = 4;
+        if (t->levels < 4)
+            n = t->levels > 0 ? 3 : 2;
+        p[0] = 0x10000000 | (n + 2);
+        p[3] = (ulong)((unsigned)(n + 1) | 0x50000000) << 32;
+        p[4] = (n | 0x8000) | ((ulong)0x8000 << 45);
+        p[5] = 0xE;
+        p[1] = 0;
+        p[2] = 0;
+        p += 6;
+        if (t->levels > 0) {
+            int b1 = t->addr + mipSize8970(t, 0, shift);
+            int b2 = b1 + mipSize8970(t, 1, shift);
+            int b3 = b2 + mipSize8970(t, 2, shift);
+            p[0] = t->miptbp1 | ((b1 | (ulong)b2 << 20) | (ulong)b3 << 40);
+            p[1] = rMip1;
+            p += 2;
+            if (t->levels >= 4) {
+                int b4 = b3 + mipSize8970(t, 3, shift);
+                int b5 = b4 + mipSize8970(t, 4, shift);
+                int b6 = b5 + mipSize8970(t, 5, shift);
+                p[0] = t->miptbp2 | ((b4 | (ulong)b5 << 20) | (ulong)b6 << 40);
+                p[1] = rMip2;
+                p += 2;
+            }
+        }
+        p[0] = t->tex1;
+        p[1] = rTex1;
+        {
+            int c = 0;
+            int cc = t->caddr;
+            if (cc >= 0) {
+                m->clut = idx;
+                c = cc;
+            }
+            p[2] = *(ulong*)&t->tex0 | (t->addr | (ulong)c << 37);
+            p[3] = rTex0;
+        }
+        p += 4;
+    } else if (m->clut != idx) {
+        sMipTex8970* t = m->texs[idx];
+        if (t->caddr >= 0) {
+            m->clut = idx;
+            p[0] = 0x10000003;
+            p[3] = (ulong)0x50000002 << 32;
+            p[4] = ((ulong)0x10000000 << 32) | 0x8001;
+            p[5] = 0xE;
+            p[1] = 0;
+            p[2] = 0;
+            p[6] = *(ulong*)&t->tex0 | (ulong)t->caddr << 37;
+            p[7] = slot == 0 ? 0x16 : 0x17;
+            p += 8;
+        }
+    }
+    *dma = p;
+}
 
 //100%
 extern "C" void func_00366E30(void* list, int i);

@@ -315,7 +315,132 @@ struct sFERiderED80 {
 INCLUDE_ASM("fe/feridermanager", func_0019ED80);
 extern "C" void func_0019ED80(sFERiderED80* self);
 
-INCLUDE_ASM("fe/feridermanager", func_0019EE88);
+extern "C" void func_00389260(void* m);
+extern "C" void* func_0038AC20(void* self, const char* name);
+extern "C" void func_00389590(void* m, void* a, void* b, float s);
+extern "C" void func_00389CB8(void* m, void* q, float s);
+extern "C" void func_00310640(void* model, int lod, int a, int b);
+extern "C" void* func_002F2088(int);
+extern char D_005047F8[];
+extern char D_00504810[];
+extern char D_004A1620[];
+extern char D_004A1628[];
+extern char D_004A1980[];
+extern char D_004A1638[];
+extern char D_004A1640[];
+extern char D_004A1988[];
+extern char D_004A1650[];
+extern char D_004A1990[];
+extern char D_004A1660[];
+extern char D_004A1998[];
+extern char D_004A19A0[];
+
+struct sModelEE88 {
+    char pad_0x0[0x2C];
+    sHalfED80* bones;       // 0x2C
+};
+
+struct sFERiderEE88 {
+    int f0;                 // 0x0
+    char pad_0x4[0x8 - 0x4];
+    sModelEE88* model;      // 0x8
+    char pad_0xC[0x14 - 0xC];
+    int f14;                // 0x14
+    char pad_0x18[0xC2C - 0x18];
+    int fC2C;               // 0xC2C
+    char pad_0xC30[0xC70 - 0xC30];
+    int fC70;               // 0xC70
+    char pad_0xC74[0xCD0 - 0xC74];
+    int fCD0;               // 0xCD0
+    int fCD4;               // 0xCD4
+};
+
+struct sLodEE88 {
+    char pad_0x0[0x8];
+    int bits;         // 0x8
+};
+
+struct sVEEE88 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+extern "C" void func_0019EE88(sFERiderEE88* self)
+{
+    sQuadED80 m[10];
+    sQuadED80 q;
+    if (self->fCD4 >= 0)
+        return;
+    if (self->model == 0)
+        return;
+    if (self->f14 == 0)
+        return;
+    func_00389260(m);
+    int x = self->f0;
+    if (self->fCD0 != 0) {
+        switch (x) {
+        case 0:
+        case 7:
+        case 8:
+            x = 6;
+            break;
+        }
+    }
+    if (x < 9) {
+        if (x >= 7)
+            x = 6;
+    }
+    switch (x) {
+    case 0:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1620), D_00504810, 1.0f);
+        break;
+    case 1:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1628), D_00504810, 1.0f);
+        break;
+    case 2:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1980), D_00504810, 1.0f);
+        break;
+    case 3:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1638), D_00504810, 1.0f);
+        break;
+    case 4:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1640), D_00504810, 1.0f);
+        break;
+    case 5:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1988), D_00504810, 1.0f);
+        break;
+    case 6:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1650), D_00504810, 1.0f);
+        break;
+    case 7:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1990), D_00504810, 1.0f);
+        break;
+    case 8:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1660), D_00504810, 1.0f);
+        break;
+    case 9:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A1998), D_00504810, 1.0f);
+        break;
+    default:
+        func_00389590(m, func_0038AC20(D_005047F8, D_004A19A0), D_00504810, 1.0f);
+        break;
+    }
+    q = self->model->bones[func_00310C48(self->model, 0, D_004A1978)].a;
+    func_00389CB8(m, &q, 1.0f);
+    {
+        char* o = (char*)D_004A289C;
+        sVEEE88* vt = *(sVEEE88**)(o + 0x10D8);
+        vt[69].fn(o + vt[69].delta, m, 1);
+    }
+    sLodEE88* l = *(sLodEE88**)((char*)D_004A289C + 0xE84);
+    int old = (unsigned int)(l->bits & 0x3E0) >> 5;
+    if (self->fC2C >= 0)
+        l->bits = (l->bits & ~0x3E0) | ((self->fC2C << 5) & 0x3E0);
+    func_00310640(self->model, 0, 0, 0);
+    func_002F2088(self->fC70);
+    (*(sLodEE88**)((char*)D_004A289C + 0xE84))->bits = ((*(sLodEE88**)((char*)D_004A289C + 0xE84))->bits & ~0x3E0) | (old << 5);
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern void* D_004A289C;

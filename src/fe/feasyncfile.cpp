@@ -3158,7 +3158,139 @@ extern "C" void func_001A8AE8(void* self, cFEVObj_001A8AE8* obj)
     }
 }
 
-INCLUDE_ASM("fe/feasyncfile", func_001A8B88);
+class cFEMsg_8B88 {
+public:
+    int id;
+    virtual ~cFEMsg_8B88();
+};
+
+struct sVE_8B88 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, void*);
+};
+struct sVEV_8B88 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+struct sVEI_8B88 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sIter_8B88 {
+    sListNode1A8AE8* mNode;
+    sIter_8B88(sListNode1A8AE8* x) : mNode(x) {}
+    sIter_8B88(const sIter_8B88& x) : mNode(x.mNode) {}
+    void*& operator*() const { return mNode->mData; }
+};
+
+struct sList_8B88 {
+    int pad;
+    sListNode1A8AE8* mNode;
+    sIter_8B88 begin() { return (sListNode1A8AE8*)mNode->mNext; }
+    void*& front() { return *begin(); }
+    sIter_8B88 erase(sIter_8B88 pos)
+    {
+        sListNode1A8AE8* next = (sListNode1A8AE8*)pos.mNode->mNext;
+        sListNode1A8AE8* prev = (sListNode1A8AE8*)pos.mNode->mPrev;
+        prev->mNext = next;
+        next->mPrev = prev;
+        operator_delete((int*)pos.mNode);
+        return next;
+    }
+    void pop_front() { erase(begin()); }
+};
+
+void func_00261058(void* p);
+extern "C" void func_00261408(void* p);
+extern "C" void* func_0028B180();
+extern "C" void func_00294F78(void*, int);
+void operator_delete(int* ptr);
+extern void* D_004A3328;
+
+// PORT: the unit declares func_001A8B88 as void*(void*, int, int); the handler takes (self, msg, data)
+extern "C" int func_001A8B88_impl(char* self, int msg, int* data) __asm__("func_001A8B88");
+extern "C" int func_001A8B88_impl(char* self, int msg, int* data)
+{
+    if (msg >= 0xC8 && msg <= 0x116) {
+        if (msg == 0x115 || msg == 0x116 || *(int*)(self + 0x6B4) != 0) {
+            if (msg == 0x115 && D_004A3328 != 0) {
+                func_00261058(D_004A3328);
+                func_00261408(D_004A3328);
+            }
+            sVEI_8B88* vi = *(sVEI_8B88**)(self + 0x8);
+            if (vi[30].fn(self + vi[30].delta) != 0) {
+                if (msg == 0x115 || msg == 0x116) {
+                    sVE_8B88* vt = *(sVE_8B88**)(self + 0x8);
+                    vt[31].fn(self + vt[31].delta, *data, data);
+                } else {
+                    sVE_8B88* vt = *(sVE_8B88**)(self + 0x8);
+                    vt[31].fn(self + vt[31].delta, 0x115, 0);
+                }
+                *(int*)(self + 0x6B4) = 0;
+            } else {
+                *(int*)(self + 0x6B4) = 1;
+            }
+            return 1;
+        }
+        if (msg != 0x114) {
+            func_001A8AE8(self, (cFEVObj_001A8AE8*)data);
+        }
+        {
+            sList_8B88* l = (sList_8B88*)(self + 0x6C8);
+            if ((sListNode1A8AE8*)l->mNode->mNext == *(sListNode1A8AE8**)(self + 0x6CC)) {
+                return 0;
+            }
+        }
+        sVEI_8B88* vi = *(sVEI_8B88**)(self + 0x8);
+        if (vi[30].fn(self + vi[30].delta) == 0) {
+            return 0;
+        }
+        if ((*(int*)(self + 0x1C) & 6) != 0) {
+            char* p = *(char**)(self + 0x6A0);
+            if (p != 0 && p + 0xBC != 0 && *(int*)(p + 0x170) != 0) {
+                return 0;
+            }
+        }
+        sList_8B88* list = (sList_8B88*)(self + 0x6C8);
+        // the list end node is read through self, not through the list pointer
+        if ((sListNode1A8AE8*)list->mNode->mNext == *(sListNode1A8AE8**)(self + 0x6CC))
+            return 0;
+        do {
+            cFEMsg_8B88* m = (cFEMsg_8B88*)list->front();
+            list->pop_front();
+            sVE_8B88* vt = *(sVE_8B88**)(self + 0x8);
+            vt[31].fn(self + vt[31].delta, m->id, m);
+            switch (m->id) {
+            case 0xEC:
+                func_00294F78(func_0028B180(), 7);
+            case 0xED:
+            case 0xEF:
+            case 0xF1:
+            case 0x112:
+            case 0x113: {
+                sVEV_8B88* vv = *(sVEV_8B88**)(self + 0x8);
+                vv[27].fn(self + vv[27].delta);
+                break;
+            }
+            case 0x109: {
+                func_00294F78(func_0028B180(), 8);
+                sVEV_8B88* vv = *(sVEV_8B88**)(self + 0x8);
+                vv[27].fn(self + vv[27].delta);
+                break;
+            }
+            }
+            delete m;
+        } while ((sListNode1A8AE8*)list->mNode->mNext != *(sListNode1A8AE8**)(self + 0x6CC));
+        return 0;
+    }
+    sVE_8B88* vt = *(sVE_8B88**)(self + 0x8);
+    vt[31].fn(self + vt[31].delta, msg, data);
+    return 0;
+}
 
 extern "C" void func_001A9930(void* self);
 extern "C" int func_0025DA90(void* self);

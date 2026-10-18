@@ -1,6 +1,191 @@
 #include "common.h"
 
-INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cFEStateCharEquip);
+struct sScrK198D90 {
+    char* first;
+    char pad_0x04[0x54];
+    char obj_0x58[4];
+};
+struct sCharEquipK198D90 {
+    char pad_0x00[8];
+    void* vtable;
+    int field_0xC;
+    sScrK198D90* field_0x10;
+    char pad_0x14;
+    char field_0x15;
+    char pad_0x16[0x2E];
+    signed char player;
+    char pad_0x45[3];
+    int field_0x48[11];
+    char pad_0x74[4];
+    int field_0x78;
+    int field_0x7C;
+    int field_0x80;
+    int field_0x84;
+    int field_0x88;
+    int field_0x8C[6];
+    int field_0xA4[6];
+    int charID;
+    int field_0xC0;
+    int field_0xC4;
+    int field_0xC8;
+    int field_0xCC;
+    char field_0xD0[0x50];
+    int field_0x120;
+    char pad_0x124[0x834];
+    int field_0x958;
+    int field_0x95C;
+    char field_0x960;
+    char pad_0x961[0xFF];
+    int field_0xA60;
+    int field_0xA64[4];
+    int field_0xA74;
+    int field_0xA78[6];
+    int field_0xA90;
+    int field_0xA94;
+    int field_0xA98;
+    int field_0xA9C;
+    int field_0xAA0;
+    char pad_0xAA4[0xC];
+    int field_0xAB0;
+    char pad_0xAB4[0xC];
+    float field_0xAC0[4];
+    float field_0xAD0[4];
+    int field_0xAE0;
+    int field_0xAE4;
+};
+extern "C" void func_0039E2A0(void* self, void* owner);
+extern "C" int func_001A1CD0(char* p, int player);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
+extern "C" void func_003E6448(void* dst, unsigned int value, int size);
+int GetHashValue32(char* str);
+extern "C" int func_00398380(void* p, int hash);
+extern "C" void func_001A0508(void* p, int player, int charID, int a3);
+extern "C" int func_00150928(void* iface, int player, int charID);
+extern "C" void func_0014AEA8(void* self, int a1, int a2);
+extern "C" int func_0014B478(void* self, int a1, int a2);
+int cBELibrary_getRiderIndex(int player);
+extern "C" int func_00146D98(void* iface, int rider);
+extern "C" void func_0019B180(void* self, int id);
+extern "C" char* func_0014B700(void* iface, int rider);
+extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
+extern int D_004A11D0;
+// const view of D_004A11D0: its load does not alias the field stores, so it schedules ahead of them
+extern const int D_004A11D0_c __asm__("D_004A11D0");
+extern void* D_004A28A8;
+extern void* D_0046A548[];
+extern char D_004607A8[];
+extern char D_004607B8[];
+extern char D_0045DA48[];
+extern char D_0045DA38[];
+
+static inline int findObjK198D90(sScrK198D90* scr, char* name)
+{
+    int hash = GetHashValue32(name);
+    return func_00398380(scr->obj_0x58, hash);
+}
+
+extern "C" sCharEquipK198D90* cFEStateCharEquip_cFEStateCharEquip(sCharEquipK198D90* self, void* owner, char player, int a3, int a4)
+{
+    void* iface;
+    void* iface9;
+    int i;
+    char* name;
+    func_0039E2A0(self, owner);
+    self->vtable = D_0046A548;
+    self->field_0xAC0[0] = -105.0f;
+    self->field_0xAC0[1] = -100.0f;
+    self->field_0xAC0[2] = -80.0f;
+    self->field_0xAC0[3] = 1.0f;
+    self->field_0xAD0[0] = 265.75f;
+    self->field_0xAD0[1] = -1073.5f;
+    self->field_0xAD0[2] = -232.0f;
+    self->field_0xAD0[3] = 1.0f;
+    self->field_0xC = 14;
+    self->player = player;
+    self->field_0x15 = func_001A1CD0(self->field_0x10->first, player);
+    iface = cBE_getInterface(cBE_getBE(), 1);
+    self->charID = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
+    if (a3) {
+        self->field_0xC8 = 1;
+    } else {
+        self->field_0xC8 = 0;
+    }
+    self->field_0x958 = 0;
+    self->field_0x960 = 0;
+    self->field_0xA60 = 0;
+    self->field_0x48[0] = 0;
+    self->field_0x48[1] = 0;
+    self->field_0x48[2] = 0;
+    self->field_0x48[3] = 0;
+    self->field_0x48[4] = 0;
+    self->field_0x48[5] = 0;
+    self->field_0x48[6] = 0;
+    self->field_0x48[7] = 0;
+    self->field_0x48[8] = 0;
+    self->field_0x48[9] = 0;
+    self->field_0x48[10] = 0;
+    self->field_0x78 = 0;
+    self->field_0x7C = 0;
+    self->field_0xAB0 = 0;
+    self->field_0x95C = -1;
+    self->field_0xA64[0] = -1;
+    self->field_0xA64[1] = -1;
+    self->field_0xA64[2] = -1;
+    self->field_0xA64[3] = -1;
+    self->field_0xA74 = -1;
+    self->field_0xAE0 = 1;
+    func_003E6448(self->field_0xD0, D_004A11D0_c, 0x50);
+    self->field_0x120 = 0;
+    for (i = 0; i < 6; i++) {
+        self->field_0x8C[i] = 0;
+        self->field_0xA4[i] = 0;
+        self->field_0xA78[i] = -99999;
+    }
+    self->field_0x80 = 0;
+    self->field_0x84 = 0;
+    self->field_0x88 = 0;
+    self->field_0xA90 = findObjK198D90(self->field_0x10, D_004607A8);
+    self->field_0xA94 = findObjK198D90(self->field_0x10, D_004607B8);
+    self->field_0xA98 = findObjK198D90(self->field_0x10, D_0045DA48);
+    self->field_0xA9C = findObjK198D90(self->field_0x10, D_0045DA38);
+    self->field_0xAA0 = 0;
+    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, self->player, self->charID, 1);
+    self->field_0xC0 = func_00150928(cBE_getInterface(cBE_getBE(), 11), self->player, self->charID);
+    iface9 = cBE_getInterface(cBE_getBE(), 9);
+    func_0014AEA8(iface9, self->player, self->charID);
+    self->field_0xC4 = func_0014B478(iface9, self->player, self->charID);
+    self->field_0xAE4 = a4;
+    if (a3 || a4) {
+        switch (func_00146D98(iface, cBELibrary_getRiderIndex(self->player))) {
+        case 17:
+            self->field_0xCC = 1;
+            break;
+        case 18:
+            self->field_0xCC = 1;
+            break;
+        case 19:
+            self->field_0xCC = 2;
+            break;
+        case 20:
+            self->field_0xCC = 2;
+            break;
+        case 21:
+            self->field_0xCC = 3;
+            break;
+        default:
+            self->field_0xCC = 1;
+            break;
+        }
+    } else {
+        self->field_0xCC = -1;
+    }
+    func_0019B180(self, D_004A11D0);
+    name = func_0014B700(iface9, self->charID);
+    self->field_0xA64[0] = func_0019DA10(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70, self->charID, name, 9, 1, 0);
+    return self;
+}
 
 //100%
 struct sEquipTable_DC20;

@@ -113,7 +113,32 @@ extern "C" void func_00270238(void* self, void* node)
     func_0026E5D0((char*)self + 0x3BC, node);
 }
 
-INCLUDE_ASM("replay/replaycache", func_00270280);
+extern "C" int func_00270280(int* self)
+{
+    int r = 0;
+    switch (*self) {
+    case 1:
+    case 7: {
+        // `one` keeps the constant in its own register, so the two
+        // conditional moves share it (movn/movz) instead of folding to sltiu.
+        int one = 1;
+        if (*(int*)((char*)self + 0x604) == 0)
+            r = one;
+        if (*(int*)((char*)self + 0x484) >= *(int*)((char*)self + 0x3CC))
+            r = one;
+        break;
+    }
+    case 4:
+        r = *(int*)((char*)self + 0x484) >= *(int*)((char*)self + 0x3CC);
+        break;
+    case 3: case 5: case 6: case 8: case 9:
+        r = 1;
+        break;
+    case 0: case 2: case 10: case 11: case 12: case 13: case 14: case 15:
+        break;
+    }
+    return r;
+}
 
 //100%
 extern "C" int func_0026D4D8(void* stream, unsigned int pos);

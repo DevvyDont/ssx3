@@ -4440,7 +4440,32 @@ extern "C" void func_001E4458(void* self)
     }
 }
 
-INCLUDE_ASM("fe/fepopupmisc", func_001E4578);
+//100%
+extern "C" void func_001E4658(void* self);
+extern "C" void func_001E48B0(void* self);
+extern "C" void func_001E4458(void* self);
+
+extern "C" int func_001E4578(char* self, void* widget, int event, int value)
+{
+    switch (event) {
+    case 4:
+        *(int*)(self + 0x174) = value;
+        func_001E4658(self);
+        func_001E48B0(self);
+        break;
+    case 5:
+        func_001E4458(self);
+        return 0x101;
+    case 9:
+        return 0;
+    case 8:
+        return *(int*)(self + 0x170) != 0;
+    case 6:
+    case 7:
+        return 1;
+    }
+    return 0x101;
+}
 
 //100%
 extern "C" void func_001E48B0(void*);

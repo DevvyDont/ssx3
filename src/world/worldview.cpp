@@ -944,9 +944,368 @@ void func_003AAE60(void* self)
 {
 }
 
-INCLUDE_ASM("world/worldview", func_003AAE68);
+struct sVEntry_AE68 {
+    short delta;
+    short index;
+    void* fn;
+};
+typedef void* (*tMsg1_AE68)(void*, void*);
+typedef void* (*tMsg2_AE68)(void*, unsigned int, void*);
+typedef void* (*tMsgS_AE68)(void*, void*, const char*, int, int, unsigned int);
 
-INCLUDE_ASM("world/worldview", func_003AB498);
+struct sHashKey_AE68 {
+    int level;
+    int x;
+    int y;
+    int z;
+};
+struct sHashCell_AE68 {
+    char data[0x14];
+};
+struct sBox_AE68 {
+    float x0, y0, z0, w0;
+    float x1, y1, z1, w1;
+};
+
+// func_00328F28 is declared again further down with the removal helper's types; bind this one by symbol.
+void func_00328F28_AE68(sHashKey_AE68* out, sBox_AE68* box) __asm__("func_00328F28");
+extern "C" void func_00328C20(sHashCell_AE68* cell, int type, void* node, sHashKey_AE68* key);
+extern char* D_004A5B80;
+extern char D_00494F88[];
+extern char D_00494F98[];
+extern "C" void* func_003AD198();
+extern "C" void func_00242540(void* self, void* obj);
+extern "C" char* func_0028B1C8();
+extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
+extern char* D_004A28A8;
+extern "C" int func_0012A340(void* self, int a, unsigned int b, void* obj);
+void cMemMan_free(void* p);
+extern "C" void func_002BB348(void* self, int a, void* obj);
+extern "C" void func_003ACA10(void* self, int a, void* obj);
+extern "C" void* func_003AD188();
+extern "C" void func_00230430(void* self, int a);
+void func_0016CEC8(void* a, int b);
+extern void* D_004A28A4;
+extern "C" void func_00278A10(void* self, int a, void* obj);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+void func_001547D8_AE68(void* self, int a, void* p, int v) __asm__("func_001547D8__FPv");
+extern "C" void* func_0028B180();
+extern "C" void func_00286CA8(void* self, unsigned int arg, void* obj);
+extern "C" void func_002105D0(void* obj);
+extern "C" void func_002D9FB8(void* obj);
+
+// Puts obj into the space hash; the box is the 6 floats at obj+off.
+static inline void insert_AE68(void* self, int type, char* obj, int off)
+{
+    sBox_AE68 b;
+    sHashKey_AE68 k;
+    float one = 1.0f;
+    b.x0 = *(float*)(obj + off + 0);
+    b.y0 = *(float*)(obj + off + 4);
+    b.z0 = *(float*)(obj + off + 8);
+    b.w0 = one;
+    b.x1 = *(float*)(obj + off + 12);
+    b.y1 = *(float*)(obj + off + 16);
+    b.z1 = *(float*)(obj + off + 20);
+    b.w1 = one;
+    sHashCell_AE68* r = *(sHashCell_AE68**)((char*)self + 0xC);
+    func_00328F28_AE68(&k, &b);
+    sHashCell_AE68* c1 = k.x < 0 ? r + 4 : r;
+    sHashCell_AE68* c2 = k.y < 0 ? c1 + 2 : c1;
+    sHashCell_AE68* c3 = k.z < 0 ? c2 + 1 : c2;
+    func_00328C20(c3, type, obj, &k);
+}
+
+#define VT_AE68(self, off) ((sVEntry_AE68*)(*(char**)((char*)(self) + 8) + (off)))
+#define CALL1_AE68(self, off, obj) \
+    ((tMsg1_AE68)VT_AE68(self, off)->fn)((char*)(self) + VT_AE68(self, off)->delta, obj)
+
+extern "C" void* func_003AAE68(void* self, int msg, unsigned int arg, char* obj)
+{
+    switch (msg) {
+    case 1:
+        *(unsigned short*)(obj + 0x1A2) += *(int*)((char*)self + 0x10);
+        insert_AE68(self, 1, obj, 0x158);
+        break;
+    case 9: {
+        char* w = D_004A5B80;
+        sVEntry_AE68* e = (sVEntry_AE68*)(*(char**)(w + 0x10D8) + 0x170);
+        ((tMsgS_AE68)e->fn)(w + e->delta, obj, D_00494F88, 0, 0, arg >> 8);
+        break;
+    }
+    case 10: {
+        char* w = D_004A5B80;
+        sVEntry_AE68* e = (sVEntry_AE68*)(*(char**)(w + 0x10D8) + 0x170);
+        ((tMsgS_AE68)e->fn)(w + e->delta, obj, D_00494F98, 0, 0, (arg >> 8) + *(int*)((char*)self + 0x10));
+        break;
+    }
+    case 3:
+        CALL1_AE68(self, 0x68, obj);
+        insert_AE68(self, 0, obj, 0x60);
+        break;
+    case 2:
+        CALL1_AE68(self, 0x28, obj);
+        break;
+    case 0:
+        CALL1_AE68(self, 0x48, obj);
+        break;
+    case 6:
+        if (CALL1_AE68(self, 0xA8, obj)) {
+            *(int*)(obj + 8) = 6;
+            insert_AE68(self, 2, obj, 0x44);
+        }
+        break;
+    case 7:
+        CALL1_AE68(self, 0xA0, obj);
+        *(int*)(obj + 8) = 8;
+        insert_AE68(self, 2, obj, 0x28);
+        break;
+    case 8: {
+        CALL1_AE68(self, 0x90, obj);
+        char* p = *(char**)(obj + 0x24);
+        for (int i = 0; i < *(int*)(obj + 0x20); i++) {
+            *(int*)(p + 8) = 1;
+            insert_AE68(self, 2, p, 0x6C);
+            p = *(char**)(p + 0x64);
+        }
+        break;
+    }
+    case 5:
+        CALL1_AE68(self, 0x88, obj);
+        *(int*)(obj + 8) = 7;
+        insert_AE68(self, 2, obj, 0x68);
+        break;
+    case 4:
+        CALL1_AE68(self, 0x70, obj);
+        break;
+    case 12:
+        ((tMsg2_AE68)VT_AE68(self, 0x98)->fn)((char*)self + VT_AE68(self, 0x98)->delta, arg, obj);
+        break;
+    case 13:
+        func_002B6B08(*(void**)(func_0028B1C8() + 0x4C), obj, arg);
+        break;
+    case 17:
+        func_0016CEC8((void*)arg, (int)obj);
+        break;
+    case 15:
+        if (D_004A47B8) {
+            func_002BB348(D_004A47B8[2], arg & 0xFF, obj);
+        }
+        break;
+    case 16:
+        if (D_004A47B8) {
+            int a = arg & 0xFF;
+            func_003ACA10(D_004A47B8[1], a, obj);
+            func_00230430(func_003AD188(), a);
+        }
+        break;
+    case 18:
+        func_00278A10(D_004A28A4, arg & 0xFF, obj);
+        break;
+    case 20:
+        func_00286CA8(func_0028B180(), arg, obj);
+        break;
+    case 19:
+        func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 0xA), arg & 0xFF, obj + 4, *(int*)obj);
+        break;
+    case 21:
+        func_002105D0(obj);
+        break;
+    case 11:
+        func_00242540(func_003AD198(), obj);
+        break;
+    case 14:
+        if (!func_0012A340(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0xC), arg & 0xFF, arg >> 8, obj)) {
+            if (obj) {
+                cMemMan_free(obj);
+            }
+        }
+        break;
+    case 22:
+        func_002D9FB8(obj);
+        break;
+    }
+    return obj;
+}
+
+//100%
+struct sVEntry_B498 {
+    short delta;
+    short index;
+    void* fn;
+};
+typedef int (*tMsg1_B498)(void*, void*);
+typedef void (*tMsgS_B498)(void*, unsigned int);
+
+struct sHashKey_B498 {
+    int level;
+    int x;
+    int y;
+    int z;
+};
+struct sBox_B498 {
+    float x0, y0, z0, w0;
+    float x1, y1, z1, w1;
+};
+struct sOct_B498 {
+    void* child[8];
+    void* lists[3];
+};
+struct sHashCell_B498 {
+    char pad0[0x10];
+    sOct_B498* oct;   // 0x10
+};
+
+extern "C" void func_00328F28(sHashKey_B498* out, sBox_B498* box);
+extern "C" void func_003284B8(sOct_B498* oct, int type, void* obj, sHashKey_B498* key, sHashCell_B498* cell);
+extern char* D_004A5B80;
+extern char* D_004A28A8;
+extern void* D_004A28A4;
+extern "C" void* func_003AD198();
+extern "C" void func_00242570(void* self, void* obj);
+extern "C" char* func_0028B1C8();
+extern "C" void func_002B6B30(void* self, void* obj, unsigned int arg);
+extern "C" void func_0012A490(void* self, int a);
+extern "C" void func_002BB5A8(void* entry);
+extern "C" void func_00278A58(void* self, int a);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_001547E0__FPv is called with (iface, slot) here; bind the 2-arg form to that symbol.
+void func_001547E0_B498(void* self, int a) __asm__("func_001547E0__FPv");
+extern "C" void* func_0028B180();
+extern "C" void func_00286D18(void* self, unsigned int arg, void* obj);
+extern "C" void func_00210608(void* obj);
+extern "C" void func_002D9B40();
+void func_0016CF18(void* a);
+
+static inline int octEmpty_B498(sOct_B498* o)
+{
+    if (o->child[0] != 0 || o->child[1] != 0 || o->child[2] != 0 || o->child[3] != 0
+        || o->child[4] != 0 || o->child[5] != 0 || o->child[6] != 0 || o->child[7] != 0) {
+        return 0;
+    }
+    for (int i = 0; i < 3; i++) {
+        if (o->lists[i] != 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// Takes obj out of the space hash; the box is the 6 floats at obj+off. A nonzero state is written to obj+8 first.
+static inline void remove_B498(void* self, int type, char* obj, int off, int state = 0)
+{
+    sBox_B498 b;
+    sHashKey_B498 k;
+    if (state != 0) {
+        *(int*)(obj + 8) = state;
+    }
+    b.x0 = *(float*)(obj + off + 0);
+    b.y0 = *(float*)(obj + off + 4);
+    b.z0 = *(float*)(obj + off + 8);
+    b.w0 = 1.0f;
+    b.x1 = *(float*)(obj + off + 12);
+    b.y1 = *(float*)(obj + off + 16);
+    b.z1 = *(float*)(obj + off + 20);
+    b.w1 = 1.0f;
+    sHashCell_B498* r = *(sHashCell_B498**)((char*)self + 0xC);
+    (*(int*)((char*)r + 0xA0))++;
+    func_00328F28(&k, &b);
+    sHashCell_B498* c1 = k.x < 0 ? r + 4 : r;
+    sHashCell_B498* c2 = k.y < 0 ? c1 + 2 : c1;
+    sHashCell_B498* c3 = k.z < 0 ? c2 + 1 : c2;
+    sHashCell_B498* c = c3;
+    func_003284B8(c->oct, type, obj, &k, c);
+    if (octEmpty_B498(c->oct)) {
+        operator_delete((int*)c->oct);
+        c->oct = 0;
+    }
+}
+
+#define VT_B498(self, off) ((sVEntry_B498*)(*(char**)((char*)(self) + 8) + (off)))
+
+extern "C" void* func_003AB498(void* self, int msg, unsigned int arg, char* obj)
+{
+    switch (msg) {
+    case 0:
+        break;
+    case 1:
+        remove_B498(self, 1, obj, 0x158);
+        break;
+    case 9: {
+        char* w = D_004A5B80;
+        sVEntry_B498* e = (sVEntry_B498*)(*(char**)(w + 0x10D8) + 0x190);
+        ((tMsgS_B498)e->fn)(w + e->delta, arg >> 8);
+        break;
+    }
+    case 10: {
+        char* w = D_004A5B80;
+        sVEntry_B498* e = (sVEntry_B498*)(*(char**)(w + 0x10D8) + 0x190);
+        ((tMsgS_B498)e->fn)(w + e->delta, (arg >> 8) + *(int*)((char*)self + 0x10));
+        break;
+    }
+    case 3:
+        remove_B498(self, 0, obj, 0x60);
+        break;
+    case 8: {
+        char* p = *(char**)(obj + 0x24);
+        for (int i = 0; i < *(int*)(obj + 0x20); i++) {
+            remove_B498(self, 2, p, 0x6C, 1);
+            p = *(char**)(p + 0x64);
+        }
+        break;
+    }
+    case 6:
+        if (((tMsg1_B498)VT_B498(self, 0xB0)->fn)((char*)self + VT_B498(self, 0xB0)->delta, obj)) {
+            *(int*)(obj + 8) = 6;
+            remove_B498(self, 2, obj, 0x44);
+        }
+        break;
+    case 7:
+        *(int*)(obj + 8) = 8;
+        remove_B498(self, 2, obj, 0x28);
+        break;
+    case 5:
+        *(int*)(obj + 8) = 7;
+        remove_B498(self, 2, obj, 0x68);
+        break;
+    case 13:
+        func_002B6B30(*(void**)(func_0028B1C8() + 0x4C), obj, arg);
+        break;
+    case 17:
+        func_0016CF18((void*)arg);
+        break;
+    case 15:
+        if (D_004A47B8) {
+            func_002BB5A8(D_004A47B8[2][1] + (arg & 0xFF) * 12);
+        }
+        break;
+    case 18:
+        func_00278A58(D_004A28A4, arg & 0xFF);
+        break;
+    case 20:
+        func_00286D18(func_0028B180(), arg, obj);
+        break;
+    case 19:
+        func_001547E0_B498(cBE_getInterface_Fv(cBE_getBE(), 0xA), arg & 0xFF);
+        break;
+    case 21:
+        func_00210608(obj);
+        break;
+    case 11:
+        func_00242570(func_003AD198(), obj);
+        break;
+    case 14:
+        obj = 0;
+        func_0012A490(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0xC), arg & 0xFF);
+        break;
+    case 22:
+        func_002D9B40();
+        break;
+    }
+    return obj;
+}
 
 //100%
 struct func_003ABE40_sTab {
