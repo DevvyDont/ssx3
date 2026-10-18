@@ -442,7 +442,129 @@ extern "C" int func_001298C8()
     return *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x8);
 }
 
-INCLUDE_ASM("ai/ai", cAI_InitPlayers);
+extern int D_00534B30[];
+extern char D_00535BC8[];
+extern void* D_004A28A0;
+extern char D_004A1108[];
+extern "C" int func_00147290(void* iface, int i);
+extern "C" int func_00147618(void* iface, int i);
+extern "C" int func_00237140(void* a, void* b);
+extern "C" int func_00237280(void* a, void* b);
+extern "C" void func_0012B498(void* self, void* obj, int i);
+// PORT: func_00125C70 returns self here (declared void elsewhere in this unit); bound by asm label.
+extern "C" char* func_00125C70_IP(void* self, int inChrg) __asm__("func_00125C70");
+extern "C" void cRider_addFocusBox(void* self);
+extern "C" void cRider_initOnce(void* self, int immediate);
+struct cRider;
+void cRider_addRiderMetrix(cRider* rider);
+void func_00144D70(void*, int, int);
+
+struct sRiderIP { char pad[0x86C]; int mIndex; int mCtrl; char pad874[8]; int f87C; };
+class cBEIfaceIP {
+public:
+    int pad[3];
+    virtual void update();
+};
+
+struct sAiObjIP
+{
+    char pad0[0x28];
+    sRiderIP* mRiders[6];
+    char* mPlayers[2];
+    char pad48[0x30];
+    int mCount;
+    int mNumPlayers;
+};
+
+static inline void SetHud_IP(char* obj, int a, int b)
+{
+    *(int*)(obj + 0xDF0) = a;
+    *(int*)(obj + 0xDF4) = b;
+}
+
+static inline int HudTab_IP(int ch)
+{
+    int* h = (int*)D_004A28A0;
+    h += ch;
+    return h[0xBBB];
+}
+
+static inline char* Cfg_IP() { return D_00535BC8; }
+
+// PORT: cMemMan_alloc with unsigned size / int flags (the argument order retail sets up); bound by asm label.
+extern "C" void* cMemMan_alloc_IP(unsigned int size, const char* tag, int flags, int d) __asm__("cMemMan_alloc");
+
+// Creates the human players' riders and hooks them up to their input and HUD slots.
+extern "C" void cAI_InitPlayers(void* p)
+{
+    sAiObjIP* self = (sAiObjIP*)p;
+    for (int k = 1; k >= 0; k--)
+        self->mPlayers[k] = 0;
+    int idx = 0;
+    char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    int i = 0;
+    int nPlayers = 0;
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    int n = *(int*)(Cfg_IP() + 0x34);
+    for (; i < n; i++) {
+        int ch = func_00147290(iface, i);
+        char* obj = func_00125C70_IP(cMemMan_alloc_IP(0x1950, D_004A1108, 0x80000000, 0), 1);
+        self->mRiders[i] = obj ? *(sRiderIP**)(obj + 0x18) : 0;
+        self->mRiders[i]->mIndex = idx;
+        self->mRiders[i]->mCtrl = idx;
+        int ctrl = func_00147618(iface, idx);
+        if (D_00534B30[0] != 0) {
+            if ((D_00534B30[2] != 0 && i != 1) || (D_00534B30[2] == 0 && i != 0)) {
+                char* d = (char*)D_004A28A8;
+                char** box = (char**)(d + 0xB0);
+                box += ch;
+                int* c = (int*)d;
+                c += ctrl;
+                *(int*)(*box + 4) = c[46];
+                SetHud_IP(obj, func_00237140(*(void**)(*(char**)(d + 0x84) + 0x7C), *box), HudTab_IP(ch));
+            } else {
+                char* d = (char*)D_004A28A8;
+                (*(sRiderIP**)(obj + 0x18))->f87C = 0;
+                int* c = (int*)d;
+                c += ctrl;
+                SetHud_IP(obj, func_00237280(*(void**)(*(char**)(d + 0x84) + 0x7C), (void*)c[46]), 0);
+            }
+        } else {
+            char* d = (char*)D_004A28A8;
+            char** box = (char**)(d + 0xB0);
+            int* hud = (int*)D_004A28A0;
+            int* c = (int*)d;
+            box += ch;
+            c += ctrl;
+            hud += ch;
+            *(int*)(*box + 4) = c[46];
+            SetHud_IP(obj, (int)*box, hud[0xBBB]);
+            self->mRiders[i]->mCtrl = idx;
+        }
+        cRider_addFocusBox(*(void**)(obj + 0x18));
+        nPlayers++;
+        cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
+        func_0012B498(self, obj, i);
+        *(int*)(*(char**)(obj + 0x18) + 0x2F8) = 0;
+        cRider_initOnce(self->mRiders[i], 0);
+        func_00144D70(rm, idx, idx);
+        idx++;
+        self->mPlayers[i] = obj;
+    }
+    if (D_00534B30[0] != 0) {
+        if (D_00534B30[2] != 0) {
+            (*(sRiderIP**)(self->mPlayers[0] + 0x18))->mCtrl = 0;
+            (*(sRiderIP**)(self->mPlayers[1] + 0x18))->mCtrl = -2;
+        } else {
+            (*(sRiderIP**)(self->mPlayers[0] + 0x18))->mCtrl = -2;
+            (*(sRiderIP**)(self->mPlayers[1] + 0x18))->mCtrl = 0;
+        }
+    }
+    ((cBEIfaceIP*)rm)->update();
+    self->mCount = idx;
+    self->mNumPlayers = nPlayers;
+}
 
 //100%
 extern void* D_004A28A8;
