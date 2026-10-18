@@ -1250,11 +1250,170 @@ void* func_00279EF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279F18);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sLvlObj_279F18 {
+    char pad0[0x18];
+    void* obj;       // 0x18
+};
+
+struct sLvl_279F18 {
+    char pad0[0x28];
+    void* riders[6];             // 0x28
+    sLvlObj_279F18* a40[2];      // 0x40
+    sLvlObj_279F18* a48[5];      // 0x48
+    sLvlObj_279F18* a5C[5];      // 0x5C
+    char pad70[8];
+    int n78;                     // 0x78
+    int n7C;                     // 0x7C
+    int n80;                     // 0x80
+    int n84;                     // 0x84
+};
+
+static inline sLvl_279F18* Lvl_279F18()
+{
+    return *(sLvl_279F18**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+}
+
+static inline void* ObjOf_279F18(sLvlObj_279F18* o)
+{
+    return o ? o->obj : 0;
+}
+
+extern "C" void* func_00279F18(void* self, int slot, int arg)
+{
+    int r;
+    switch (slot) {
+    case 0: {
+        int* p = (int*)func_0027A668_2(self, arg);
+        if (p[0] < 0) break;
+        return Lvl_279F18()->riders[p[0]];
+    }
+    case 1:
+        r = ((int*)func_0027A668_2(self, arg))[1];
+        if (r < 0) break;
+        return Lvl_279F18()->riders[r];
+    case 2:
+        r = ((int*)func_0027A668_2(self, arg))[2];
+        if (r < 0) break;
+        return Lvl_279F18()->riders[r];
+    case 3: case 4: {
+        sLvl_279F18* lvl = Lvl_279F18();
+        int j = slot - 3;
+        if (j >= lvl->n7C) break;
+        return ObjOf_279F18(lvl->a40[j]);
+    }
+    case 5: case 6: case 7: case 8: case 9: {
+        sLvl_279F18* lvl = Lvl_279F18();
+        int j = slot - 5;
+        if (j >= lvl->n80 + lvl->n84) break;
+        if (j < lvl->n80) return ObjOf_279F18(lvl->a48[j]);
+        return ObjOf_279F18(lvl->a5C[j - lvl->n80]);
+    }
+    case 10: case 11: case 12: case 13: case 14: {
+        sLvl_279F18* lvl = Lvl_279F18();
+        int j = slot - 10;
+        if (j >= lvl->n84 + lvl->n80) break;
+        if (j < lvl->n84) return ObjOf_279F18(lvl->a5C[j]);
+        return ObjOf_279F18(lvl->a48[j - lvl->n84]);
+    }
+    case 15: case 16: case 17: case 18: case 19: case 20: {
+        sLvl_279F18* lvl = Lvl_279F18();
+        int j = slot - 15;
+        if (j >= lvl->n78) break;
+        return lvl->riders[j];
+    }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A4A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void* func_002E4D70(void* self);
+extern void* D_004880C0[];
+// PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
+extern "C" void* func_002E4CE8_sz(unsigned size) __asm__("func_002E4CE8");
+
+struct sColor_27A4A0
+{
+    float r, g, b, a;
+    sColor_27A4A0() {}
+    sColor_27A4A0(float ar, float ag, float ab, float aa) { r = ar; g = ag; b = ab; a = aa; }
+};
+
+struct sFx_27A4A0
+{
+    void** vt;
+    sColor_27A4A0 c;
+};
+
+extern "C" void* func_002EBBA8(void* self, const sColor_27A4A0* col, int dx, int dy);
+extern "C" void* func_002EBE20(void* self, const sColor_27A4A0* col);
+
+static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
+{
+    func_002E4D70(p);
+    p->vt = D_004880C0;
+    p->c = col;
+    return p;
+}
+
+extern "C" void* func_0027A4A0(void* self, int type, int mode)
+{
+    sColor_27A4A0 c;
+    switch (mode) {
+    case 0:
+        c.r = 1.0f;
+        c.g = 0.0f;
+        c.b = 0.0f;
+        c.a = 0.0f;
+        break;
+    case 1:
+        c.r = 1.0f;
+        c.g = 1.0f;
+        c.b = 1.0f;
+        c.a = 1.0f;
+        break;
+    }
+    switch (type) {
+    case 1: {
+        sFx_27A4A0* p = (sFx_27A4A0*)func_002E4CE8_sz(0x14);
+        sColor_27A4A0 t = c;
+        return initFx_27A4A0(p, t);
+    }
+    case 2:
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, -1, 0);
+    case 3:
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, 1, 0);
+    case 4:
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, 0, -1);
+    case 5:
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, 0, 1);
+    case 6:
+        return func_002EBE20(func_002E4CE8_sz(0x1C), &c);
+    case 7: {
+        sFx_27A4A0* p = (sFx_27A4A0*)func_002E4CE8_sz(0x14);
+        sColor_27A4A0 t;
+        t.r = 1.0f;
+        t.g = 1.0f;
+        t.b = 1.0f;
+        t.a = 1.0f;
+        return initFx_27A4A0(p, t);
+    }
+    case 0:
+    case 8:
+        break;
+    }
+    return 0;
+}
+#endif
 
 // PORT: the real function is func_00282BB0__FPvT0 (void*, void*); this caller passes only $a0.
 void* func_00282BB0(void* self) __asm__("func_00282BB0__FPvT0");
@@ -1395,7 +1554,34 @@ extern "C" void func_0027A860(void* self, int online, int intro)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A9F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_00279148_r(void* self, int a1, int a2) __asm__("func_00279148");
+extern "C" void func_00279070(void* self, int a1, int a2, int a3);
+
+extern "C" bool func_0027A9F0(void* self)
+{
+    int v = 0;
+    switch (func_00279148_r(self, 1, 0)) {
+    case 12: case 18:
+        v = 3;
+        break;
+    case 13: case 19:
+        v = 2;
+        break;
+    case 14: case 20:
+        v = 1;
+        break;
+    case 15: case 16: case 17:
+        break;
+    }
+    func_00279070(self, 1, v, 1);
+    return v != 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027AA80);
@@ -2267,7 +2453,93 @@ void func_0027BD90(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BDB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_00123128(void* self);
+extern char* D_004A28A8;
+extern int D_00481BB0[];
+
+struct sRiderObj_BDB8 {
+    char pad_0x0[0x18];
+    void* rider;                    // 0x18
+};
+
+struct sRiderSet_BDB8 {
+    char pad_0x0[0x28];
+    void* players[6];               // 0x28
+    sRiderObj_BDB8* groupA[2];      // 0x40
+    sRiderObj_BDB8* groupB[5];      // 0x48
+    sRiderObj_BDB8* groupC[5];      // 0x5C
+    char pad_0x70[0x8];
+    int numPlayers;                 // 0x78
+    int numA;                       // 0x7C
+    int numB;                       // 0x80
+    int numC;                       // 0x84
+};
+
+// PORT: callers pass only (self, flags); the three player slots arrive in a2..a4.
+extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2) __asm__("func_0027BDB8");
+
+// Fills the 21 per-slot team flags of the script engine from the current rider set.
+extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2)
+{
+    sRiderSet_BDB8* set = *(sRiderSet_BDB8**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    int numA = set->numA;
+    int numB = set->numB;
+    int i;
+    for (i = 0; i < 21; i++) {
+        flags[i] = 0;
+        switch (i) {
+        case 0:
+            if (p0 >= 0)
+                flags[i] = D_00481BB0[func_00123128(set->players[p0])];
+            break;
+        case 1:
+            if (p1 >= 0)
+                flags[i] = D_00481BB0[func_00123128(set->players[p1])];
+            break;
+        case 2:
+            if (p2 >= 0)
+                flags[i] = D_00481BB0[func_00123128(set->players[p2])];
+            break;
+        case 3:
+        case 4:
+            if (i - 3 < numA)
+                flags[i] = D_00481BB0[func_00123128(set->groupA[i - 3]->rider)];
+            break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            if (i - 5 < numB)
+                flags[i] = D_00481BB0[func_00123128(set->groupB[i - 5]->rider)];
+            break;
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+            if (i - 10 < set->numC)
+                flags[i] = D_00481BB0[func_00123128(set->groupC[i - 10]->rider)];
+            break;
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+            if (i - 15 < set->numPlayers)
+                flags[i] = D_00481BB0[func_00123128(set->players[i - 15])];
+            break;
+        default:
+            break;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BF50);

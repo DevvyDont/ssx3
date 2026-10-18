@@ -2724,7 +2724,54 @@ extern "C" int func_003B1878(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B1988);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" unsigned int func_003B1258(int a0);
+extern "C" unsigned int func_003B1300_u(int n) __asm__("func_003B1300");
+extern "C" void func_003B1340(void);
+extern "C" void func_003B1498_v(void) __asm__("func_003B1498");
+extern "C" void func_003B2380_v(void) __asm__("func_003B2380__FPv");
+extern "C" void func_003B1AB0(void);
+extern "C" void func_003B1CC0(void);
+extern "C" void func_003B1D58(void);
+extern "C" void sequence_scalable_extension(void);
+extern "C" void func_003B1FC8(void);
+extern "C" void func_003B20B8(void);
+extern "C" void picture_spatial_scalable_extension(void);
+extern "C" void func_003B22F8(void);
+extern "C" void copyright_extension(void);
+
+// Parses a script block: runs one command per 0x1B5 token, skips 0x1B2 sections.
+extern "C" void func_003B1988(void)
+{
+    unsigned int tok;
+    func_003B1498_v();
+    while ((tok = func_003B1258(0x20)) == 0x1B5 || tok == 0x1B2) {
+        if (tok == 0x1B5) {
+            func_003B1340();
+            switch (func_003B1300_u(4)) {
+            case 1: func_003B1AB0(); break;
+            case 2: func_003B1CC0(); break;
+            case 3: func_003B1D58(); break;
+            case 5: sequence_scalable_extension(); break;
+            case 7: func_003B1FC8(); break;
+            case 8: func_003B20B8(); break;
+            case 9: picture_spatial_scalable_extension(); break;
+            case 10: func_003B22F8(); break;
+            case 4: copyright_extension(); break;
+            case 6: break;
+            }
+            func_003B1498_v();
+        } else {
+            func_003B1340();
+            func_003B2380_v();
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B1AB0);
