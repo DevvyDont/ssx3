@@ -2232,7 +2232,16 @@ int func_0027C098(void* self)
 #endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0A0);
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0C0);
+#ifdef SKIP_ASM
+extern "C" void func_00274318(int, int);
+extern "C" int func_00274D90();
+
+extern "C" void func_0027C0C0(void* self, void* arg1, int arg2) {
+    func_00274318(func_00274D90(), arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0F0);
@@ -2276,7 +2285,16 @@ int func_0027C2A8(void* self)
 #endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2B0);
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2D0);
+#ifdef SKIP_ASM
+extern "C" void func_00274318(int, int);
+extern "C" int func_00274D90();
+
+extern "C" void func_0027C2D0(void* self, void* arg1, int arg2) {
+    func_00274318(func_00274D90(), arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C300);
@@ -2320,7 +2338,16 @@ int func_0027C4B8(void* self)
 #endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4C0);
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4E0);
+#ifdef SKIP_ASM
+extern "C" void func_00274318(int, int);
+extern "C" int func_00274D90();
+
+extern "C" void func_0027C4E0(void* self, void* arg1, int arg2) {
+    func_00274318(func_00274D90(), arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C510);
@@ -2363,7 +2390,16 @@ int func_0027C6A0(void* self)
 #endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6A8);
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6C8);
+#ifdef SKIP_ASM
+extern "C" void func_00274318(int, int);
+extern "C" int func_00274D90();
+
+extern "C" void func_0027C6C8(void* self, void* arg1, int arg2) {
+    func_00274318(func_00274D90(), arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6F8);
@@ -2406,7 +2442,16 @@ int func_0027C888(void* self)
 #endif
 
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C890);
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C8B0);
+#ifdef SKIP_ASM
+extern "C" void func_00274318(int, int);
+extern "C" int func_00274D90();
+
+extern "C" void func_0027C8B0(void* self, void* arg1, int arg2) {
+    func_00274318(func_00274D90(), arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C8E0);
@@ -2451,7 +2496,16 @@ void* func_0027C960(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C980);
+#ifdef SKIP_ASM
+extern "C" void func_00274318(int, int);
+extern "C" int func_00274D90();
+
+extern "C" void func_0027C980(void* self, void* arg1, int arg2) {
+    func_00274318(func_00274D90(), arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C9B0);

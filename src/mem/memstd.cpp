@@ -532,7 +532,15 @@ void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252F80);
+#ifdef SKIP_ASM
+extern "C" void func_00252A10(int, int, int, int, int, int);
+
+extern "C" void func_00252F80(int a0, int a1, int a2, int a3, int a4) {
+    func_00252A10(a0, a1, a2, a3, a4, 1);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252FA0);
@@ -548,7 +556,15 @@ extern "C" void* func_00252FA0(void* a0, int a1, int a2)
 
 INCLUDE_ASM("mem/memstd", func_00252FC8);
 INCLUDE_ASM("mem/memstd", func_00252FF0);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253018);
+#ifdef SKIP_ASM
+extern "C" void func_00252A10(int, int, int, int, int, int);
+
+extern "C" void func_00253018(int a0, int a1, int a2) {
+    func_00252A10(a0, a1, 0, 0, a2, 0);
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_00253040);
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253070);
@@ -573,7 +589,27 @@ INCLUDE_ASM("mem/memstd", func_00253100);
 INCLUDE_ASM("mem/memstd", func_00253170);
 INCLUDE_ASM("mem/memstd", func_00253230);
 INCLUDE_ASM("mem/memstd", func_002532B0);
+//100%
 INCLUDE_ASM("mem/memstd", func_00253368);
+#ifdef SKIP_ASM
+struct sMemBlock {
+    unsigned short magic;
+    unsigned short flags;
+    int size;
+    char pad[8];
+    sMemBlock* next;
+    sMemBlock* prev;
+};
+
+extern "C" void func_00253368(sMemBlock* blk) {
+    sMemBlock* prev = blk->prev;
+    sMemBlock* next = blk->next;
+    prev->next = next;
+    next->prev = prev;
+    blk->magic = 0x424F;
+    blk->flags &= 0xBFFF;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00253390);
@@ -1386,7 +1422,13 @@ INCLUDE_ASM("mem/memstd", func_002556F0);
 INCLUDE_ASM("mem/memstd", func_00255720);
 INCLUDE_ASM("mem/memstd", func_00255750);
 INCLUDE_ASM("mem/memstd", func_00255778);
+//100%
 INCLUDE_ASM("mem/memstd", func_002557A0);
+#ifdef SKIP_ASM
+extern "C" int func_002557A0(void* self, int value) {
+    return value;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_002557A8);
 #ifdef SKIP_ASM
@@ -1394,7 +1436,13 @@ extern "C" void func_002557A8(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("mem/memstd", func_002557B0);
+#ifdef SKIP_ASM
+extern "C" int func_002557B0(void* self, int value) {
+    return value;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_002557B8);
 #ifdef SKIP_ASM

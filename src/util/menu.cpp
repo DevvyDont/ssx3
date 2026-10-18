@@ -120,7 +120,19 @@ extern "C" int func_002CA3B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CA3C0);
+#ifdef SKIP_ASM
+extern "C" void func_002CA3C0(void *self, int enable) {
+    int *flags = (int *)((char *)self + 4);
+
+    if (enable != 0) {
+        *flags |= 8;
+    } else {
+        *flags &= ~8;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA3E8);
@@ -1169,7 +1181,14 @@ extern "C" void cMenu_addItem(cMenuList* menu, void** item, int index)
 #endif
 
 INCLUDE_ASM("util/menu", func_002CBD50);
+//100%
 INCLUDE_ASM("util/menu", func_002CBE10);
+#ifdef SKIP_ASM
+extern "C" void func_002CBE10(void *self) {
+    *(int *)((char *)self + 4) = 0;
+    *(int *)((char *)self + 0) = 0;
+}
+#endif
 INCLUDE_ASM("util/menu", func_002CBE20);
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1639,7 +1658,22 @@ extern "C" void func_002CC758(void* self, int a1)
 INCLUDE_ASM("util/menu", func_002CC7B0);
 INCLUDE_ASM("util/menu", func_002CC7F8);
 INCLUDE_ASM("util/menu", func_002CC838);
+//100%
 INCLUDE_ASM("util/menu", func_002CC8B0);
+#ifdef SKIP_ASM
+extern "C" void func_002CC8B0(void *self, int *table) {
+    int index;
+
+    *(int **)((char *)self + 0x1C) = table;
+    *(int *)((char *)self + 0x18) = 0;
+    if (*table != 0) {
+        do {
+            index = *(int *)((char *)self + 0x18) + 1;
+            *(int *)((char *)self + 0x18) = index;
+        } while (table[index * 2] != 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CC8F0);
@@ -2034,7 +2068,14 @@ extern "C" void func_002CD0E8(void* self, int a1)
 
 INCLUDE_ASM("util/menu", func_002CD128);
 INCLUDE_ASM("util/menu", func_002CD168);
+//100%
 INCLUDE_ASM("util/menu", func_002CD1C0);
+#ifdef SKIP_ASM
+extern "C" void func_002CD1C0(void *self, int a, int b) {
+    *(int *)((char *)self + 0x14) = a;
+    *(int *)((char *)self + 0x18) = b;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CD1D0);

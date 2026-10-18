@@ -57,8 +57,20 @@ extern "C" int func_00243978(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x8C)));
 }
 #endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243980);
+#ifdef SKIP_ASM
+extern "C" int func_00243980(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0xB0);
+}
+#endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243990);
+#ifdef SKIP_ASM
+extern "C" int func_00243990(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0xB8);
+}
+#endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002439A0);
 #ifdef SKIP_ASM
@@ -122,7 +134,14 @@ extern "C" void func_002439E0(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0xA0))) = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002439E8);
+#ifdef SKIP_ASM
+extern "C" void func_002439E8(void *self) {
+    *(int *)((char *)self + 0x7C) = 0;
+    *(int *)((char *)self + 0x80) = 0;
+}
+#endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002439F8);
 #ifdef SKIP_ASM
@@ -261,7 +280,13 @@ extern "C" void func_00243B80(int* self, int flags)
 #endif
 
 INCLUDE_ASM("main/ssxappdtor", func_00243BB0);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243BF0);
+#ifdef SKIP_ASM
+extern "C" int func_00243BF0(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243C00);
@@ -280,7 +305,13 @@ extern "C" void func_00243C00(int* self, int flags)
 #endif
 
 INCLUDE_ASM("main/ssxappdtor", func_00243C30);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00243C70);
+#ifdef SKIP_ASM
+extern "C" int func_00243C70(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x10);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243C80);
@@ -893,7 +924,13 @@ extern "C" int func_00244368(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x84)));
 }
 #endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244370);
+#ifdef SKIP_ASM
+extern "C" int func_00244370(void *self, int index) {
+    return *(int *)((char *)(*(int *)((char *)self + 0x84)) + (index << 2) + 4);
+}
+#endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244388);
 #ifdef SKIP_ASM

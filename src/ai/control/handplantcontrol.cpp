@@ -2822,11 +2822,41 @@ extern "C" int func_00144098(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x88)));
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440A0);
+#ifdef SKIP_ASM
+extern "C" int func_001440A0(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x28);
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440B0);
+#ifdef SKIP_ASM
+extern "C" int func_001440B0(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x40);
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440C0);
+#ifdef SKIP_ASM
+extern "C" int func_001440C0(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x48);
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440D0);
+#ifdef SKIP_ASM
+extern "C" int func_001440D0(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x5C);
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440E0);
+#ifdef SKIP_ASM
+extern "C" int func_001440E0(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x70);
+}
+#endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440F0);
 #ifdef SKIP_ASM
@@ -2905,8 +2935,20 @@ extern "C" void func_00144168(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x1C))) = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144170);
+#ifdef SKIP_ASM
+extern "C" void func_00144170(void *self, int index, int value) {
+    *(int *)((char *)self + (index << 2) + 0x20) = value;
+}
+#endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144180);
+#ifdef SKIP_ASM
+extern "C" int func_00144180(void *self, int index) {
+    return *(int *)((char *)self + (index << 2) + 0x20);
+}
+#endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
 #ifdef SKIP_ASM
@@ -3061,7 +3103,14 @@ extern "C" bool func_001446B8(void* self, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446D0);
+#ifdef SKIP_ASM
+extern "C" void func_001446D0(void *self, int a, int b) {
+    *(int *)((char *)self + 0xDF0) = a;
+    *(int *)((char *)self + 0xDF4) = b;
+}
+#endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446E0);
 #ifdef SKIP_ASM
