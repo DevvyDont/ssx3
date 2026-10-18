@@ -141,7 +141,42 @@ INCLUDE_ASM("mem/memstd", func_00251B50);
 
 INCLUDE_ASM("mem/memstd", func_00251BB0);
 
-INCLUDE_ASM("mem/memstd", func_00251C38);
+//100%
+int func_00252658(void* self);
+extern "C" int func_0041AA88(const char* a, const char* b);
+
+struct sMemBlk_251C38 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    sMemBlk_251C38* next;   // 0x8
+    void* fC;
+};
+
+struct sMemClass_251C38 {
+    char pad0[0x8];
+    sMemBlk_251C38* first;  // 0x8
+};
+
+// Find the allocation named name in any memory class; returns its data pointer.
+extern "C" void* func_00251C38(const char* name)
+{
+    for (int i = 0; i < 0x40; i++) {
+        sMemClass_251C38* cls = (sMemClass_251C38*)D_004D2438[i & 0x3F];
+        if (cls != 0) {
+            sMemBlk_251C38* blk = cls->first;
+            do {
+                char* data = (char*)blk + 0x10;
+                const char* n = (const char*)func_00252658(data);
+                if (n != 0 && func_0041AA88(n, name) == 0) {
+                    return data;
+                }
+                blk = blk->next;
+            } while (blk != 0);
+        }
+    }
+    return 0;
+}
 
 extern "C" int func_00251CF0()
 {
@@ -619,11 +654,93 @@ extern "C" sMemBlock_253100* func_00253100(char* cls, int size, int backward)
     return b->tag != 0x4253 ? b : 0;
 }
 
-INCLUDE_ASM("mem/memstd", func_00253170);
+//100%
+// Largest block in the class whose payload exceeds size - 1, walking forward
+// (dir 0) or backward; 0 if none.
+extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int dir)
+{
+    int best = size - 1;
+    if (best < 0) {
+        best = 0;
+    }
+    sMemNode_251718* r = 0;
+    sMemNode_251718* p;
+    if (dir == 0) {
+        p = cls->head.next;
+        for (;;) {
+            if (best < p->size - 0x10) {
+                if (p->tag == 0x4253) {
+                    break;
+                }
+                r = p;
+                best = r->size - 0x10;
+            }
+            p = p->next;
+        }
+    } else {
+        p = cls->head.prev;
+        for (;;) {
+            if (best < p->size - 0x10) {
+                if (p->tag == 0x4253) {
+                    break;
+                }
+                r = p;
+                best = r->size - 0x10;
+            }
+            p = p->prev;
+        }
+    }
+    return r;
+}
 
-INCLUDE_ASM("mem/memstd", func_00253230);
+//100%
+// Total payload bytes in a class's block list, walked forward (dir 0) or backward.
+extern "C" int func_00253230(sMemClass_251718* cls, int dir)
+{
+    int total = 0;
+    if (dir == 0) {
+        sMemNode_251718* node = cls->head.next;
+        while (node->tag != 0x4253) {
+            total += node->size - 0x10;
+            node = node->next;
+        }
+    } else {
+        sMemNode_251718* node = cls->head.prev;
+        while (node->tag != 0x4253) {
+            total += node->size - 0x10;
+            node = node->prev;
+        }
+    }
+    return total;
+}
 
-INCLUDE_ASM("mem/memstd", func_002532B0);
+//100%
+// Mark blk free and link it into the class's address-ordered block list,
+// searching from whichever end is nearer.
+extern "C" void func_002532B0(sMemClass_251718* cls, sMemNode_251718* blk)
+{
+    sMemNode_251718* next = &cls->head;
+    sMemNode_251718* prev = next;
+    int size = blk->end - (char*)blk;
+    if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+        do {
+            prev = prev->prev;
+        } while (blk < prev);
+        next = prev->next;
+    } else {
+        do {
+            next = next->next;
+        } while (next < blk);
+        prev = next->prev;
+    }
+    blk->size = size;
+    blk->next = next;
+    blk->prev = prev;
+    prev->next = blk;
+    next->prev = blk;
+    blk->tag = 0x4246;
+    blk->flags |= 0x4000;
+}
 
 // Unlink a node and mark it free ('BO').
 extern "C" void func_00253368(sMemNode_251718* n)

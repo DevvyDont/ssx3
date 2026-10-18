@@ -1019,7 +1019,31 @@ void func_00356B30_2(void* self, void* stream)
     }
 }
 
-INCLUDE_ASM("object/movenode", func_00356BF0);
+//100%
+struct sMnVEntryI {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sMnBlock {
+    char* node;
+};
+
+extern "C" int func_00356BF0(char* self)
+{
+    sMnBlock* block = *(sMnBlock**)(self + 0x1C);
+    if (block != 0) {
+        char* node = block->node;
+        if (node != 0) {
+            sMnVEntryI* vt = *(sMnVEntryI**)node;
+            if (vt[26].fn(node + vt[26].delta) == 2) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 //100%
 struct sMnVEntryI6C48 {

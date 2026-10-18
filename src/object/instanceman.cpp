@@ -50,7 +50,20 @@ extern "C" sInstSlot* func_003512C0(sInstPool* self, unsigned int handle)
     return 0;
 }
 
-INCLUDE_ASM("object/instanceman", func_00351330);
+//100%
+extern "C" void func_003513D0(void* self);
+extern "C" void func_00351398(void* self, float* src);
+void func_00351538_impl(char* self, float t) __asm__("func_00351538");
+extern char D_00490AF0[];
+
+extern "C" void* func_00351330(char* self, float* src, float f)
+{
+    *(void**)(self + 0x84) = D_00490AF0;
+    func_003513D0(self);
+    func_00351398(self, src);
+    func_00351538_impl(self, f);
+    return self;
+}
 
 //100%
 extern "C" void func_00351398(void* self, float* src)
@@ -90,7 +103,19 @@ extern "C" void func_00351448(void* self, char* obj)
 
 INCLUDE_ASM("object/instanceman", func_00351480);
 
-INCLUDE_ASM("object/instanceman", func_00351508);
+//100%
+// PORT: reads q->r before the q null check (as the original does); guard it off-PS2.
+struct sI3 { char pad[0x10]; float f; };
+struct sI2 { int pad; sI3* s; };
+struct sI1 { sI2* r; };
+extern "C" float func_00351508(char* self)
+{
+    sI1* q = *(sI1**)(*(char**)(self + 0x40) + 0x20);
+    sI2* r = q->r;
+    float f = 0.0f;
+    if (q != 0 && r != 0 && r->s != 0) f = r->s->f;
+    return f;
+}
 
 //100%
 struct sImRange;
@@ -309,10 +334,22 @@ extern "C" void func_00351948(void* self, sImMat44* m)
 
 extern "C" void* func_00351538(void* self);
 
-INCLUDE_ASM("object/instanceman", func_00351A10);
+//100%
+// PORT: func_00351A60 also takes the float arg in $f12; the asm label keeps
+// its original one-arg symbol name.
+void* func_00351A60(void* self, float f) __asm__("func_00351A60__FPv");
+extern char D_00490AB0[];
+
+void* func_00351A10(char* self, float* src, float f)
+{
+    func_00351330(self, src, f);
+    *(void**)(self + 0x84) = D_00490AB0;
+    func_00351A60(self, f);
+    return self;
+}
 
 //99.29%
-void* func_00351A60(void* self)
+void* func_00351A60(void* self, float f)
 {
     return func_00351538(self);
 }

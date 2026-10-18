@@ -16,9 +16,32 @@ extern "C" void cInputMap_init(void* self, int count)
     *(int*)((char*)self + 0x10) = 0;
 }
 
-INCLUDE_ASM("input/inputmap", func_00320D08);
+//100%
+void cMemMan_free(void* p);
 
-INCLUDE_ASM("input/inputmap", func_00320D50);
+extern "C" void func_00320D08(void* self)
+{
+    if (*(void**)((char*)self + 0x4) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x4));
+    }
+    if (*(void**)((char*)self + 0x14) != 0) {
+        cMemMan_free(*(void**)((char*)self + 0x14));
+    }
+}
+
+//100%
+extern "C" unsigned char* func_003E1A10(const char* name, int* size, int flags);
+extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2);
+
+extern "C" void func_00320D50(void* self, const char* name)
+{
+    int size;
+    unsigned char* buf = func_003E1A10(name, &size, 0x100);
+    cInputMap_loadMapFile(self, buf, (void*)size);
+    if (buf != 0) {
+        cMemMan_free(buf);
+    }
+}
 
 //100%
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);

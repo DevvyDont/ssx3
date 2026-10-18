@@ -3854,7 +3854,16 @@ INCLUDE_ASM("render/particle", func_00382760);
 
 INCLUDE_ASM("render/particle", func_00382AF0);
 
-INCLUDE_ASM("render/particle", func_00383770);
+//100%
+extern "C" void func_00424020(int a);
+extern "C" void func_00383808(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+
+extern "C" int func_00383770(char* self, int a1, int a2, int a3, int a4, int a5)
+{
+    func_00424020(0);
+    func_00383808(self, a5, *(int*)(self + 0x5A84) << 5, a3, a4, *(int*)(self + 0x5A30), *(int*)(self + 0x5A3C), a1, a2);
+    return 1;
+}
 
 INCLUDE_ASM("render/particle", func_00383808);
 
@@ -4445,7 +4454,24 @@ extern "C" void func_00389260(sPartVec4* v)
     }
 }
 
-INCLUDE_ASM("render/particle", func_00389290);
+//100%
+extern "C" void func_00389290(float* dst, const float* src)
+{
+    for (int i = 0; i < 4; i++) {
+        dst[0] = src[0];
+        dst[4] = src[3];
+        dst[8] = -src[3];
+        dst[12] = src[6];
+        dst[16] = src[9];
+        dst[20] = src[12];
+        dst[24] = src[15];
+        dst[28] = src[18];
+        dst[32] = src[21];
+        dst[36] = src[24];
+        dst++;
+        src++;
+    }
+}
 
 INCLUDE_ASM("render/particle", func_00389308);
 
@@ -4506,7 +4532,17 @@ extern "C" void func_00389660(float* dst, float* src)
     }
 }
 
-INCLUDE_ASM("render/particle", func_003896C0);
+//100%
+extern "C" void func_003896C0(float* dst, const float* v, float s)
+{
+    for (int i = 0; i < 10; i++) {
+        dst[0] = dst[0] * s * v[1];
+        dst[1] = dst[1] * s * v[2];
+        dst[2] = dst[2] * s * v[3];
+        dst[3] = dst[3] * s * v[0];
+        dst += 4;
+    }
+}
 
 //100%
 struct sPartVec4x10 {

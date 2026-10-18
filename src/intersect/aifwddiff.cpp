@@ -373,7 +373,17 @@ extern "C" int func_00328030(void* self, sVec4_28030* p, void* a2, void* a3, sVe
     return func_0032CA78(self, p, a2, a3, dir, a5, a6);
 }
 
-INCLUDE_ASM("intersect/aifwddiff", func_00328170);
+//100%
+extern "C" void func_003281D0(void* self, int a1, void* a2, int a3, int a4);
+
+extern "C" void func_00328170(void* self)
+{
+    void* m = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)m + 8) != 0) {
+        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = func_0032DF28(m);
+    }
+    func_003281D0(self, *(int*)(*(char**)((char*)self + 0x98) + 0xC), (char*)self + 0x80, 0, 0);
+}
 
 INCLUDE_ASM("intersect/aifwddiff", func_003281D0);
 

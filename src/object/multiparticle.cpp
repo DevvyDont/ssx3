@@ -223,7 +223,16 @@ extern "C" void func_00358380(sMultiPart_58380* self, void* stream)
     }
 }
 
-INCLUDE_ASM("object/multiparticle", func_00358468);
+//100%
+extern char D_004913B8[];
+
+extern "C" void* func_00358468(char* self, void* stream)
+{
+    *(void**)(self + 0x4) = D_004913B8;
+    sSerVEntry_58380* e = &(*(sSerVEntry_58380**)stream)[2];
+    e->fn((char*)stream + e->delta, self, 4);
+    return self;
+}
 
 //100%
 class func_003584B8_cObj {

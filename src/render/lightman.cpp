@@ -207,7 +207,18 @@ extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, flo
     func_0038DC68_8(obj->v02(a), b, c, d, x, y, e, z);
 }
 
-INCLUDE_ASM("render/lightman", func_0038E0A8);
+//100%
+struct sLmVec4_E0A8 {
+    float x, y, z, w;
+    sLmVec4_E0A8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+// 2D affine transform of v by the 3x3 matrix m (rows of 3), as a homogeneous point.
+sLmVec4_E0A8 func_0038E0A8(const float* v, const float* m)
+{
+    sLmVec4_E0A8 r(m[0] * v[0] + m[3] * v[1] + m[6], m[1] * v[0] + m[4] * v[1] + m[7], 0.0f, 1.0f);
+    return r;
+}
 
 INCLUDE_ASM("render/lightman", func_0038E118);
 

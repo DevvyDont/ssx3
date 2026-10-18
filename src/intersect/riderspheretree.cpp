@@ -600,7 +600,32 @@ extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4)
     return func_0032D028(self, a1, a2, (char*)self + 0x80, 0, 0, a3, a4);
 }
 
-INCLUDE_ASM("intersect/riderspheretree", func_0032C9B8);
+//100%
+extern "C" int func_0032DF28(void* self);
+extern "C" void func_0032DB40(void* self, void* v);
+extern "C" int func_0032D208(void* self, void* a1, void* pos, int a3, int a4, void* a5, void* a6);
+
+static inline sSphereVec4 flat_C9B8(sSphereVec4 p)
+{
+    p.w = 0.0f;
+    return p;
+}
+
+extern "C" int func_0032C9B8(void* self, sSphereVec4* a1, void* a2, void* a3)
+{
+    void* t = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)t + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+    }
+    sSphereVec4 v = flat_C9B8(*a1);
+    func_0032DB40(self, &v);
+    *(float*)((char*)self + 0x94) = 0.0f;
+    func_0032D208(self, a1, (char*)self + 0x80, 0, 0, a2, a3);
+    if (*(float*)((char*)self + 0x94) < 0.0f) {
+        return 1;
+    }
+    return 0;
+}
 
 //100%
 extern "C" int func_0032DF28(void* self);

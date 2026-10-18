@@ -320,7 +320,29 @@ extern "C" int func_0034EBA0(sAnimNode_EBA0* self)
     return link->list->head == link;
 }
 
-INCLUDE_ASM("object/animnode", func_0034EBE0);
+//100%
+struct sAnRange {
+    char pad_0x0[0x8];
+    float lo;   // 0x8 (1e10 = unset)
+    float hi;   // 0xC
+};
+
+// Is t inside the half-open range between lo and hi (either order)?
+extern "C" int func_0034EBE0(sAnRange* self, float t)
+{
+    if (self->lo != 1e10f) {
+        if (self->lo < self->hi) {
+            if (self->lo <= t && t < self->hi) {
+                return 1;
+            }
+        } else {
+            if (self->hi <= t && t < self->lo) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("object/animnode", func_0034EC58);
 

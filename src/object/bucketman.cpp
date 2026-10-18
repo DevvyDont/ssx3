@@ -212,7 +212,13 @@ extern "C" void func_00354E48(cBucketMan* self, sBucketNode* node)
     }
 }
 
-INCLUDE_ASM("object/bucketman", func_00354E78);
+//100%
+extern "C" void func_00354E78(cBucketMan* self, sBucketNode* node)
+{
+    func_00354E48(self, node);
+    node->prev = 0;
+    node->next = 0;
+}
 
 //100%
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.

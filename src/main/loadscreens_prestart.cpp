@@ -518,7 +518,21 @@ extern "C" void func_00232B28(void* self)
     }
 }
 
-INCLUDE_ASM("main/loadscreens_prestart", func_00232C98);
+//100%
+extern "C" void func_00369FF8(void* self);
+extern int D_004A4324;
+extern int D_004A45D8;
+extern int D_004A43C8;
+
+extern "C" void func_00232C98(void* self)
+{
+    func_00369FF8(D_004A289C);
+    *(int*)((char*)self + 0x14) = 0;
+    *(int*)&D_004A4324 = 0;
+    *(int*)&D_004A45D8 = 0;
+    *(int*)&D_004A43C8 = 0;
+    ((cWorld232488*)D_004A289C)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
+}
 
 extern "C" void* func_00231CF0(void* self);
 
@@ -832,7 +846,19 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
     }
 }
 
-INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
+//100%
+extern "C" void cSSXApp_startGameLoad(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_0028F768(void* self);
+
+extern "C" void func_00233260(void)
+{
+    func_00369FF8(D_004A289C);
+    cSSXApp_startGameLoad(D_004A28A8);
+    *(int*)&D_004A4324 = 0;
+    ((cWorld232488*)D_004A289C)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
+    func_0028F768(func_0028B180());
+}
 
 extern "C" void* func_00231C70(void* self);
 
