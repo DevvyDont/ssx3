@@ -1652,7 +1652,464 @@ extern "C" int func_002C55C0(void* self, int a1)
     return *(int*)(p + 0x1ac) != 0;
 }
 
-INCLUDE_ASM("worldpainter/quadtree", func_002C55D8);
+//100%
+struct sMCPort_55D8 {
+    int a;
+    int b;
+    int status;
+    int d;
+    int e;
+};
+struct sMCEnt_55D8 {
+    int f0;
+    int f4;
+    int f8;
+    char name[0x40];
+    char x4C[0x22];
+    char x6E[8];
+    char pad76[2];
+};
+struct sMC_55D8 {
+    char* vt;
+    int state;
+    int x08;
+    int port;
+    int port2;
+    int count;
+    int x18;
+    int x1C;
+    int size;
+    int x24;
+    int index;
+    int x2C;
+    int x30;
+    int x34;
+    int handle;
+    int x3C;
+    int busy;
+    int x44;
+    int x48;
+    int x4C;
+    int x50;
+    int x54;
+    char name[0x21];
+    char path[0x40];
+    char dir[0x40];
+    char padF9[0x83];
+    sMCPort_55D8 ports[2];
+    sMCEnt_55D8 entries[6];
+    char pad474[0x14];
+    char x488[8];
+    int x490;
+    char pad494[0x4C];
+    char dirbuf[0x40][0x40];
+};
+typedef int (*fn1_55D8)(void*);
+typedef int (*fn2_55D8)(void*, int);
+typedef void (*fn2v_55D8)(void*, int);
+// PORT: the unit declares these later with other signatures; bound by asm label.
+extern "C" int func_0040A360_i(int a0, int* a1, int* out) __asm__("func_0040A360");
+extern "C" int func_002C51D0_i(void* self, int i) __asm__("func_002C51D0");
+extern "C" void func_002C6280_v(void* self) __asm__("func_002C6280");
+extern "C" int func_002C63E8(void* self, unsigned int a1);
+extern "C" int func_003DF980(int h);
+extern "C" void ASYNCFILE_release(int h, int* a, int* b);
+extern "C" void func_002C4210(void* self);
+extern "C" void func_002C42B0(void* self);
+extern "C" void func_002C4388(void* self);
+extern "C" void func_002C4410(void* self);
+extern "C" void func_002C6848(void* self);
+extern "C" void func_002C69A0(void* self);
+extern "C" void func_002C6A28(void* self);
+extern "C" void func_002C6A88(void* self);
+extern "C" void func_002C6B00(void* self);
+extern "C" void func_002C6B78(void* self);
+extern "C" void func_002C6BF8(void* self);
+extern "C" void func_002C6C88(void* self);
+extern "C" void func_002C6D18(void* self);
+extern int D_00487450[];
+// PORT: void-returning alias of func_003E6448 (memset); the unused result changes register choice in case 6.
+extern "C" void func_003E6448_v(void* dst, int c, int n) __asm__("func_003E6448");
+extern short D_005377B8[];
+
+#define VC1_55D8(s, o) (((fn1_55D8)*(void**)((s)->vt + (o) + 4))((char*)(s) + *(short*)((s)->vt + (o))))
+#define VC2v_55D8(s, o, x) (((fn2v_55D8)*(void**)((s)->vt + (o) + 4))((char*)(s) + *(short*)((s)->vt + (o)), x))
+#define VC2_55D8(s, o, x) (((fn2_55D8)*(void**)((s)->vt + (o) + 4))((char*)(s) + *(short*)((s)->vt + (o)), x))
+
+extern "C" void func_002C55D8(sMC_55D8* self)
+{
+    if (self->ports[self->port].d == 0) {
+        self->x50 = 0;
+        self->x54 = 0;
+        func_003E6448(self->entries, 0, 0x2D0);
+    }
+    int one = 1;
+    self->x3C = one;
+    if (self->busy != 0) {
+        int tmp;
+        D_004A3940 = 0;
+        tmp = 0;
+        if (func_0040A360_i(1, &tmp, &D_004A3940) == 0) {
+            return;
+        }
+        int r = D_004A3940;
+        if (r == -1) {
+            goto set;
+        }
+        if (r == -2) {
+        set:
+            *(int*)((char*)self + self->port2 * 0x14 + 0x18C) = one;
+            r = D_004A3940;
+        }
+        if ((unsigned)(r + 19) < 9 || (unsigned)(r + 49) < 10 || (unsigned)(r + 59) < 10 || (unsigned)(r + 79) < 10) {
+            D_004A3940 = -10;
+        }
+        if (func_002C63E8(self, D_004A3940) == 0) {
+            if (D_004A3938 != 2) {
+                D_004A3940 = -10002;
+            } else if (D_004A3944 == 0) {
+                D_004A3940 = -2;
+            }
+        }
+        self->busy = 0;
+        self->ports[self->port2].status = D_004A3940;
+        self->ports[self->port2].a = D_004A3938;
+        self->ports[self->port2].b = D_004A393C;
+        self->ports[self->port2].d = D_004A3944;
+    }
+    switch (self->state) {
+    case 2: case 6: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+    case 18: case 22: case 23: case 24: case 28: case 29: case 30: case 35: case 36: case 37:
+    case 38: case 39: case 41: case 42: case 43: case 45: case 46: case 47: case 49: case 50:
+    case 51: case 54: case 55: case 56: case 57: case 58: case 59: case 61: case 64: case 66:
+    case 68: case 70: case 72: case 74: case 76: case 78:
+        {
+            self->x3C = 0;
+            D_004A3940 = 0;
+            if (func_0040A360_i(1, 0, &D_004A3940) == 0) {
+                return;
+            }
+            self->x3C = 1;
+            if (D_004A3940 == -1) {
+                self->ports[self->port].e = 1;
+            }
+            int r = D_004A3940;
+            if (r < 0) {
+                int st = self->state;
+                if (st != 36 && (unsigned)(st - 54) >= 6) {
+                    if ((unsigned)(st - 8) < 8 && r != -1 && func_002C63E8(self, r) == 0) {
+                        VC2v_55D8(self, 0x140, self->index);
+                        func_002C48C0(self, 0x10);
+                        return;
+                    }
+                } else {
+                    if (r == -4) {
+                        D_004A3940 = 0;
+                    }
+                }
+                if (D_004A3940 < 0) {
+                    if (self->state == 35 || self->state == 7) {
+                        func_002C52D8(self);
+                    }
+                    if (self->state == 19) {
+                        self->x1C = -1;
+                    }
+                    func_002C48C0(self, 1);
+                    return;
+                }
+            }
+            self->ports[self->port].status = 0;
+        }
+        break;
+    }
+    if (self->x44 != 0) {
+        self->x44 = 0;
+        func_002C48C0(self, 0x1E);
+        return;
+    }
+    if (self->x48 != 0) {
+        self->x48 = 0;
+        func_002C48C0(self, 0x18);
+        return;
+    }
+    switch (self->state) {
+    case 0:
+    case 1:
+    case 78:
+        break;
+    case 2:
+        D_004A3940 = 0;
+        if (func_0040A360_i(1, 0, &D_004A3940) == 0) {
+            return;
+        }
+        if (D_004A3940 == -1) {
+            self->ports[self->port].e = 1;
+        }
+        break;
+    case 3:
+        func_002C48C0(self, 4);
+        break;
+    case 5:
+        if (VC1_55D8(self, 0x248) == 0) {
+            func_002C4210(self);
+            return;
+        }
+        break;
+    case 34:
+        if (VC1_55D8(self, 0x248) == 0) {
+            func_002C42B0(self);
+            return;
+        }
+        break;
+    case 6:
+        {
+            int i;
+            self->x50 = self->count;
+            func_003E6448_v(self->entries, 0, 0x2D0);
+            for (i = 0; i < self->count; i++) {
+                unsigned char c = i + '1';
+                int j;
+                for (j = 0; j < self->x50; j++) {
+                    int n = strlen(self->dirbuf[j]);
+                    if (n != 0 && (unsigned char)self->dirbuf[j][n - 1] == c) {
+                        strcpy(self->entries[i].name, self->dirbuf[j]);
+                        break;
+                    }
+                }
+            }
+            D_004A3940 = 0;
+            func_002C48C0(self, 7);
+            return;
+        }
+    case 8:
+        self->x18 = D_004A3940;
+        func_002C48C0(self, 10);
+        return;
+    case 10:
+        func_002C2268(self, self->entries[self->index].x4C, D_005377B8);
+        func_002C48C0(self, 9);
+        return;
+    case 9:
+        func_002C48C0(self, 11);
+        return;
+    case 11:
+        if (self->x490 != self->x24) {
+            VC2v_55D8(self, 0x140, self->index);
+            func_002C48C0(self, 0x10);
+        }
+        __builtin_memcpy(self->entries[self->index].x6E, self->x488, 8);
+        func_002C48C0(self, 12);
+        return;
+    case 12:
+    case 13:
+    case 14:
+        {
+            int k;
+            if (self->state != 13) {
+                k = self->state == 14 ? 2 : 0;
+            } else {
+                k = 1;
+            }
+            if (self->x490 != D_00487450[k]) {
+                func_002C5570(self, self->index);
+                func_002C48C0(self, 0x10);
+                return;
+            }
+        }
+        goto next;
+    case 15:
+    case 16:
+    next:
+        while (++self->index < self->count) {
+            if (VC2_55D8(self, 0x218, self->index) != 0) {
+                goto found;
+            }
+        }
+    case 7:
+        func_002C6280_v(self);
+        break;
+    case 35:
+        if (D_004A3940 != 1) {
+            func_002C52D8(self);
+        }
+        D_004A3940 = 0;
+        break;
+    case 17:
+        if (self->ports[self->port].d != 0) {
+            break;
+        }
+        func_002C4388(self);
+        return;
+    case 19:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C4410(self);
+        return;
+    case 40:
+    case 44:
+    case 48:
+        if (func_003DF980(self->handle) != 1) {
+            return;
+        }
+        self->x30 = 0;
+        self->x34 = 0;
+        ASYNCFILE_release(self->handle, &self->x30, &self->x34);
+        func_002C48C0(self, self->state + 1);
+        return;
+    case 22:
+    case 28:
+    case 37:
+    case 41:
+    case 45:
+    case 49:
+        self->x18 = D_004A3940;
+        func_002C48C0(self, self->state + 1);
+        return;
+    case 20:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C48C0(self, 0x24);
+        return;
+    case 27:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C48C0(self, 0x1C);
+        return;
+    case 55:
+    case 56:
+        func_002C48C0(self, 0x3A);
+        return;
+    case 36:
+    case 38:
+    case 39:
+    case 42:
+    case 46:
+    case 50:
+    case 54:
+    case 57:
+    case 58:
+        func_002C48C0(self, self->state + 1);
+        return;
+    case 21:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C48C0(self, 0x16);
+        return;
+    case 23:
+        func_002C48C0(self, 0x34);
+        return;
+    case 29:
+        if (D_004A3940 != self->size) {
+            D_004A3940 = -10001;
+            func_002C48C0(self, 1);
+            return;
+        }
+        func_002C48C0(self, 0x35);
+        return;
+    case 25:
+        self->x3C = 0;
+        self->entries[self->x1C].f4 = 0;
+        self->entries[self->x1C].f0 = 0;
+        self->entries[self->x1C].f8 = 0;
+        strcpy(self->entries[self->x1C].name, self->dir);
+        strcpy(self->entries[self->x1C].x4C, self->name);
+        break;
+    case 60:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C6848(self);
+        return;
+    case 61:
+        self->x54 = D_004A3940;
+        break;
+    case 63:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C69A0(self);
+        return;
+    case 73:
+        if (VC1_55D8(self, 0x248) != 0 || self->x18 < 0) {
+            break;
+        }
+        func_002C6A28(self);
+        return;
+    case 65:
+        if (VC1_55D8(self, 0x248) != 0 || self->x18 < 0) {
+            break;
+        }
+        func_002C6A88(self);
+        return;
+    case 71:
+        if (VC1_55D8(self, 0x248) != 0 || self->x18 < 0) {
+            break;
+        }
+        func_002C6B00(self);
+        return;
+    case 67:
+        if (VC1_55D8(self, 0x248) != 0 || self->x18 < 0) {
+            break;
+        }
+        func_002C6B78(self);
+        return;
+    case 69:
+        if (VC1_55D8(self, 0x248) != 0 || self->x18 < 0) {
+            break;
+        }
+        func_002C6BF8(self);
+        return;
+    case 75:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C6C88(self);
+        return;
+    case 77:
+        if (VC1_55D8(self, 0x248) != 0) {
+            break;
+        }
+        func_002C6D18(self);
+        return;
+    case 64:
+        {
+            int v = D_004A3940;
+            self->state = 0;
+            self->x18 = v;
+        }
+        break;
+    case 74:
+        self->state = 0;
+        self->x18 = -1;
+        break;
+    found:
+        sprintf(self->path, D_004A3948, self->entries[self->index].name, D_00487460);
+        func_002C48C0(self, 8);
+        return;
+    case 52:
+    case 53:
+        return;
+    case 66:
+    case 68:
+    case 70:
+    case 72:
+        self->state = 0;
+        break;
+    }
+    if (func_002C51D0_i(self, self->port) == -10 || func_002C51D0_i(self, self->port) == -1) {
+        func_002C5250((sQTState*)self);
+    }
+    if (func_002C51D0_i(self, self->port) == -10 || func_002C51D0_i(self, self->port) == -2) {
+        func_002C5278(self);
+    }
+    if (self->state != 0) {
+        func_002C48C0(self, 0);
+    }
+}
 
 //100%
 struct sQTVt6128 {
