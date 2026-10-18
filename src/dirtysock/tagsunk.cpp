@@ -5047,7 +5047,36 @@ extern "C" int func_002634C0(void* self, int a1, void* a, void* b)
     return (int)func_0041AA88(a, b);
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00263500);
+//100%
+// Removes obj from the pointer vector at 0xA8 and deletes it. The search walks back from
+// mFinish itself (not mFinish - 1) and stops before mStart, as the retail code does.
+struct sVEntry_263500 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00263500(char* self, void* obj)
+{
+    void** p = *(void***)(self + 0xB0);
+    if (p == *(void***)(self + 0xAC))
+        return;
+    do {
+        void* x = *p;
+        if (x == obj) {
+            sObjVec_262EC0* v = (sObjVec_262EC0*)(self + 0xA8);
+            if (p + 1 != *(void***)(self + 0xB0))
+                sObjVec_262EC0_copy(p + 1, v->mFinish, p);
+            --*(void***)(self + 0xB0);
+            if (x != 0) {
+                sVEntry_263500* vt = *(sVEntry_263500**)((char*)x + 0xC);
+                vt[1].fn((char*)x + vt[1].delta, 3);
+            }
+            return;
+        }
+        p--;
+    } while (p != *(void***)(self + 0xAC));
+}
 
 //100%
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
