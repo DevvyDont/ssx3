@@ -693,7 +693,62 @@ int func_00198AE8(void* self)
     return 0x1388;
 }
 
-INCLUDE_ASM("fe/messagecenter", func_00198AF0);
+//100%
+struct sOpts_198AF0 {
+    unsigned int flags;         // money format in bits 22-24
+    char pad4[0x284];
+};
+extern sOpts_198AF0 D_00535610_198AF0 __asm__("D_00535610");
+extern char D_004C6310[];
+extern char D_004A12C0[];
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+
+extern "C" const char* func_00198AF0(void* a0)
+{
+    int v = (int)a0;
+    int prefix = 1;
+    char sep = 0x20;
+    signed char i;
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    {
+        sOpts_198AF0 o = D_00535610_198AF0;
+        switch ((o.flags >> 22) & 7) {
+        case 0: sep = ','; break;
+        case 1: prefix = 0; break;
+        case 2: sep = '.'; break;
+        case 3: prefix = 0; break;
+        }
+    }
+    i = 0;
+    if (prefix) {
+        D_004C6310[0] = '$';
+        D_004C6310[1] = ' ';
+        i = 2;
+    }
+    if (v < 0) {
+        D_004C6310[i++] = '-';
+        v = -v;
+    }
+    {
+        char tmp[0x288];
+        sprintf(tmp, D_004A12C0, v);
+        signed char len = strlen(tmp);
+        signed char j;
+        for (j = 0; j != len; j++) {
+            D_004C6310[i++] = tmp[j];
+            signed char rem = len - j - 1;
+            if (rem != 0 && rem % 3 == 0) {
+                D_004C6310[i++] = sep;
+            }
+        }
+    }
+    if (!prefix) {
+        D_004C6310[i++] = ' ';
+        D_004C6310[i++] = '$';
+    }
+    D_004C6310[i] = 0;
+    return D_004C6310;
+}
 
 //100%
 extern "C" int func_00198DA0(void* self, void* a1)

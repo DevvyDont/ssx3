@@ -507,9 +507,118 @@ INCLUDE_ASM("render/graphicsman", func_0036B5E8);
 
 INCLUDE_ASM("render/graphicsman", func_0036B9D8);
 
-INCLUDE_ASM("render/graphicsman", func_0036C188);
+//100%
+// PORT: ulong is 64-bit here (GIF/DMA packet words).
+extern "C" void func_0036C188(void* self, int x, int w, int y, int grey, int alpha, int* handle)
+{
+    int cols = w / 32;
+    int step = (w / cols) << 4;
+    void* dma = D_004A4474;
+    ulong* p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    int fbw = w / 64;
+    if (fbw <= 0) fbw = 1;
+    p[0] = (cols * 2 + 7) | 0x10000000;
+    p[1] = 0;
+    p += 2;
+    p[0] = (cols * 2 + 6) | ((ulong)0x8000 << 45);
+    p[1] = 0xE;
+    p[2] = (x >> 5) | ((ulong)fbw << 16) | 0xFF00000001000000;
+    p[3] = 0x4C;
+    p[4] = 0;
+    p[5] = 0x18;
+    p[6] = 0xA1 | ((ulong)alpha << 32);
+    p[7] = 0x42;
+    p[8] = 0;
+    p[9] = 0x3F;
+    p += 10;
+    p[0] = 0x146;
+    p[1] = 0;
+    p[2] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | 0x3F80000080000000;
+    p[3] = 1;
+    p += 4;
+    int x0 = 0;
+    int x1 = step;
+    for (int i = 0; i < cols; i++) {
+        p[0] = x0;
+        p[1] = 5;
+        p[2] = x1 | ((ulong)(y << 4) << 16);
+        p[3] = 5;
+        x0 += step;
+        x1 += step;
+        p += 4;
+    }
+    *handle = func_0038F668(dma, (char*)p, 4);
+}
 
-INCLUDE_ASM("render/graphicsman", func_0036C398);
+//100%
+// PORT: ulong is 64-bit here (GIF/DMA packet words).
+extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int h,
+                              int grey, int alpha, int* handle)
+{
+    char* self = (char*)vself;
+    int cols = w / 32;
+    int step = (tw / cols) << 4;
+    void* dma = D_004A4474;
+    int zbp = *(int*)(self + 0x5A80);
+    ulong* p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    p[0] = (cols * 4 + 13) | 0x10000000;
+    p[1] = 0;
+    p += 2;
+    p[0] = (cols * 4 + 12) | ((ulong)0x8000 << 45);
+    p[1] = 0xE;
+    ulong fr = fbp >> 5;
+    ulong* q = p + 2;
+    if (gmCall_AE20(self, 10) >> 6) {
+        fr = fr | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16) | 0xFF00000001000000;
+    } else {
+        fr = fr | 0xFF00000001010000;
+    }
+    *q = fr;
+    int tbw = tw / 64;
+    if (tbw <= 0) tbw = 1;
+    p[3] = 0x4C;
+    p[4] = (zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    p[5] = 0x4E;
+    p[6] = 0x30000;
+    p[7] = 0x47;
+    p[8] = 0;
+    p[9] = 0x18;
+    p[10] = 0x29 | ((ulong)alpha << 32);
+    p[11] = 0x42;
+    p[12] = 0;
+    p[13] = 0x3F;
+    p[14] = x | ((ulong)(x + w - 1) << 16) | ((ulong)y << 32) | ((ulong)(y + h - 1) << 48);
+    p[15] = 0x40;
+    p[16] = 0x60;
+    p[17] = 0x14;
+    p[18] = tbp | ((ulong)tbw << 14) | ((ulong)0xD502 << 19);
+    p[19] = 6;
+    p[20] = 0xA | ((ulong)(tw - 1) << 14) | ((ulong)(th - 1) << 34);
+    p[21] = 8;
+    p[22] = 0x156;
+    p[23] = 0;
+    p[24] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | ((ulong)grey << 24) | 0x3F80000000000000;
+    p[25] = 1;
+    p += 26;
+    int u0 = 8;
+    int u1 = step + 8;
+    int x0 = x << 4;
+    for (int i = 0; i < cols; i++) {
+        p[0] = u0;
+        p[1] = 3;
+        p[2] = x0 | ((ulong)(y << 4) << 16);
+        p[3] = 5;
+        p[4] = u1 | ((ulong)(th << 4) << 16);
+        p[5] = 3;
+        p[6] = (x0 + 0x200) | ((ulong)((y + h) << 4) << 16);
+        p[7] = 5;
+        x0 += 0x200;
+        u0 += step;
+        u1 += step;
+        p += 8;
+    }
+    *handle = func_0038F668(dma, (char*)p, 4);
+}
 
 //100%
 extern float D_004A43D4;
