@@ -557,7 +557,28 @@ extern "C" int func_001DF8F8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x6E4)));
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF900);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+inline void* operator new[](unsigned int, void* p) { return p; }
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_0046A618[];
+
+// Element type of an inline-constructed array; its empty constructor leaves only the loop counters.
+struct sSlot_F900 {
+    int v;
+    sSlot_F900() {}
+};
+
+extern "C" void* func_001DF900(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_0046A618;
+    new ((char*)self + 0x20) sSlot_F900[7];
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF960__FPv);
@@ -1777,7 +1798,34 @@ void* func_001E0B00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0B28);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_00468B00[];
+
+extern "C" void* func_001E0B28(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(void***)((char*)self + 0x8) = D_00468B00;
+    *(int*)((char*)self + 0x6D4) = 0;
+    *(int*)((char*)self + 0x6D8) = 0;
+    *(int*)((char*)self + 0x6DC) = 0;
+    *(int*)((char*)self + 0x6E4) = 0;
+    *(int*)((char*)self + 0x6E8) = 0;
+    *(int*)((char*)self + 0x6F0) = 0;
+    *(int*)((char*)self + 0x6F4) = 0;
+    *(int*)((char*)self + 0x6F8) = 0;
+    *(int*)((char*)self + 0x6FC) = 0;
+    *(int*)((char*)self + 0x700) = 0;
+    *(int*)((char*)self + 0x704) = 0;
+    *(int*)((char*)self + 0x710) = 0;
+    *(int*)((char*)self + 0x714) = 0;
+    *(int*)((char*)self + 0x718) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0BA0__FPv);
@@ -1796,7 +1844,25 @@ int func_001E0BA8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0BB0);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_004689F0[];
+
+extern "C" void* func_001E0BB0(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_004689F0;
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(int*)((char*)self + 0x6D4) = 0;
+    *(int*)((char*)self + 0x6E4) = 0;
+    *(int*)((char*)self + 0x6F4) = 2;
+    *(int*)((char*)self + 0x6F8) = 0x1E;
+    *(int*)((char*)self + 0x6FC) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C10__FPv);
@@ -1879,7 +1945,26 @@ int func_001E0C98(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0CA0);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_004686C0[];
+extern int D_004A3E90;
+
+extern "C" void* func_001E0CA0(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int v = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_004686C0;
+    *(int*)((char*)self + 0x6D4) = v;
+    *(int*)((char*)self + 0x6D8) = v;
+    *(int*)((char*)self + 0x6DC) = v;
+    *(int*)((char*)self + 0x6EC) = 1;
+    *(int*)((char*)self + 0x6F0) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0CF8);
@@ -3996,7 +4081,27 @@ extern "C" int func_001E3408()
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3460);
+#ifdef SKIP_ASM
+// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
+extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
+extern "C" int func_001E3620(int idx);
+
+extern "C" int func_001E3460(int* out)
+{
+    sPopupList* t = func_001E39F8_list();
+    int i;
+    for (i = 0; i < t->count; i++) {
+        int bit = 1 << i;
+        if (!(t->mask & bit)) {
+            *out = i;
+            return func_001E3620(i);
+        }
+    }
+    return -1;
+}
+#endif
 INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
 
 //100%
@@ -4219,7 +4324,39 @@ extern "C" void func_001E3A78(int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3AC8);
+#ifdef SKIP_ASM
+extern char* D_004A28A0;
+
+class cSnd_3AC8 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual int getState();
+    virtual void setVolume(int ch, float v);
+};
+
+// PORT: uses g++'s >? (max) operator.
+extern "C" void func_001E3AC8(int idx, float x, float y)
+{
+    signed char i = idx;
+    float t = x * 0.9133333563804626f - 18.518518447875977f;
+    float a = 0.0f;
+    if (t >= 0.0f) {
+        a = t;
+    }
+    y = y * 0.9916666746139526f;
+    cSnd_3AC8* s = 0;
+    if (D_004A28A0 != 0) {
+        s = *(cSnd_3AC8**)(D_004A28A0 + (i << 2) + 0x2EEC);
+    }
+    if (s->getState() == 2) {
+        s->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (a - 2.0f) / 972.2222290039062f) >? 0.0f);
+        s->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (a - 100.0f) / 5000.0f) >? 0.0f);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3C00);
