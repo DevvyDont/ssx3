@@ -102,6 +102,14 @@ or any disc file.
     wait. With 16-row bands a small object's rows fell to only a few workers. Replaying the recorded race packets on
     8 workers, the busiest drew 42% more pixels between waits than the average, and 6% more with 4-row bands, for
     the same total work. On a 4-core machine's two workers neither change moved the frame rate;
+  - a second round on the VU1 interpreter, again with the same results. `MAX`, `MINI`, `ITOF`, `FTOI`, `ABS`,
+    `OPMULA` and `OPMSUB` now run on all four fields at once too, and upper `NOP`s are skipped. `ACC` is ready for
+    the very next instruction, so the bookkeeping of when its fields land never changed anything and is gone. Flag
+    results land in the order they issued, each as bits to keep and bits to set, and an integer register
+    write due by the next cycle goes straight into the register. The 4,000 recorded VU1 runs still give
+    bit-identical output, with 18% fewer instructions, and replay 1.4 times as fast in the 32-bit build; 400,000
+    random microprograms end in the same state as before the change. In a race on a 4-core machine the GS workers
+    still set the pace: about 9 frames a second against 8.5 before, within this machine's run-to-run noise;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
