@@ -22,7 +22,50 @@ void cCrowdRender2D__cCrowdRender2D(int* param_1, int param_2)
 	return;
 }
 
-INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_init__Fv);
+//100%
+struct sCR2D_init {
+    void* file;     // 0x0
+    int w;          // 0x4
+    int h;          // 0x8
+    int fmt;        // 0xC
+};
+struct sCrowdDef_B7A8 {
+    int f0;
+    int count;              // 0x4
+    char names[16][5];      // 0x8
+    char* shapes[16];       // 0x58
+    int frames[16];         // 0x98
+};
+struct sVEnt_B7A8 {
+    short delta;
+    short index;
+    int (*fn)(void*, char*, char*, int, int, int);
+};
+// PORT: same table as D_00445D38 below, typed with the name and shape fields this function fills
+extern sCrowdDef_B7A8 D_00445D38_B7A8[] __asm__("D_00445D38");
+extern const char D_004875C0[];
+extern char* D_004A5B80;
+extern "C" void* FILE_load(const char* name, int flags);
+extern "C" char* SHAPE_locate(void* file, const char* name);
+// PORT: the mangled name says (void) but the code takes the object in $a0
+void cCrowdRender2D_init_impl(sCR2D_init* self) __asm__("cCrowdRender2D_init__Fv");
+void cCrowdRender2D_init_impl(sCR2D_init* self)
+{
+    self->file = FILE_load(D_004875C0, 0x5000000);
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < D_00445D38_B7A8[i].count; j++) {
+            char* s = SHAPE_locate(self->file, D_00445D38_B7A8[i].names[j]);
+            D_00445D38_B7A8[i].shapes[j] = s;
+            char* g = D_004A5B80;
+            sVEnt_B7A8* vt = *(sVEnt_B7A8**)(g + 0x10D8);
+            D_00445D38_B7A8[i].frames[j] = vt[46].fn(g + vt[46].delta, s, D_00445D38_B7A8[i].names[j], 0, 0, -1);
+        }
+    }
+    char* s = D_00445D38_B7A8[0].shapes[0];
+    self->w = *(short*)(s + 4);
+    self->h = *(short*)(s + 6);
+    self->fmt = *(unsigned char*)s;
+}
 
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_purge__FPi);
 
