@@ -905,7 +905,38 @@ extern "C" void cWorldCache_updatePages(void* p)
     self->slot[best].state = 2;
 }
 
-INCLUDE_ASM("world/worldcache", func_003A88A8);
+//100%
+extern "C" void func_003A88A8(void* p)
+{
+    sWCPCache_8668* self = (sWCPCache_8668*)p;
+    int now = *(int*)(D_004A5B64 + 0x1C);
+    for (unsigned int i = 0; i < self->count; i++)
+    {
+        int st = self->slot[i].state;
+        if (st == 0)
+            continue;
+        int expired = 0;
+        if (self->slot[i].locked == 0 && self->slot[i].time < now)
+            expired = 1;
+        switch (st)
+        {
+        case 2:
+            break;
+        case 1:
+            if (expired)
+                self->slot[i].state = 0;
+            break;
+        case 3:
+            if (!expired)
+                break;
+            self->slot[i].state = 4;
+        case 4:
+            func_003A8528(self, i);
+            self->slot[i].state = 0;
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM("world/worldcache", func_003A89C8);
 
