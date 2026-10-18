@@ -5563,7 +5563,69 @@ unsigned char *func_003EAE68(unsigned char *a0, int *a1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003EAEB8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern int D_004969E0[];
+
+struct sTm_3EAEB8 {
+    int sec;
+    int min;
+    int hour;
+    int mday;
+    int mon;
+    int year;
+    int wday;
+    int yday;
+    int isdst;
+};
+
+// Seconds since 1970 -> broken-down time (no wday). D_004969E0 holds two rows of month
+// lengths: row 0 is picked for a 366-day year, row 1 for a 365-day year.
+struct sTm_3EAEB8* func_003EAEB8(struct sTm_3EAEB8* tm, long t)
+{
+    int days;
+    int rem;
+    int y = 1970;
+    int ylen;
+    int* ip;
+    days = (unsigned int)t / 86400;
+    rem = (unsigned int)t % 86400;
+    tm->sec = rem % 60;
+    rem /= 60;
+    tm->min = rem % 60;
+    tm->hour = rem / 60;
+    for (;;) {
+        ylen = ((y & 3) == 0 && (y % 100 != 0 || y % 400 == 0)) ? 366 : 365;
+        if (days < ylen) {
+            break;
+        }
+        {
+            int yg = y + days / 366;
+            if (yg == y) {
+                yg++;
+            }
+            days -= (yg - y) * 365;
+            days += ((y - 1) / 4 - (y - 1) / 100 + (y - 1) / 400);
+            days -= ((yg - 1) / 4 - (yg - 1) / 100 + (yg - 1) / 400);
+            y = yg;
+        }
+    }
+    tm->year = y - 1900;
+    tm->yday = days;
+    tm->mon = 0;
+    ip = D_004969E0 + (ylen & 1) * 12;
+    while (days >= *ip) {
+        days -= *ip;
+        ip++;
+        tm->mon++;
+    }
+    tm->mday = days + 1;
+    tm->isdst = 0;
+    return tm;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003EB090);
 

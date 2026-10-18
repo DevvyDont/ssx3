@@ -68,7 +68,25 @@ extern "C" void func_0015AE00(sBEDB_0015AE00* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015AEC0);
+#ifdef SKIP_ASM
+extern "C" int func_0019E238(void* self, int bank, int i);
+extern "C" int func_0019E330(void* self, int bank, int i);
+extern "C" void func_0015A818(int* self, int v);
+
+extern "C" void func_0015AEC0(int* self)
+{
+    if (*self >= 0) {
+        char* snd = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+        if (func_0019E238(snd, 0, *self) != 0) {
+            func_0015A818(self, func_0019E330(snd, 0, *self));
+            func_0019DC20(snd, 0, *self);
+            *self = -1;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015AF40);
@@ -260,8 +278,28 @@ extern "C" void func_0015BD08(int arg0) {
 #endif
 INCLUDE_ASM("be/bedbreward", func_0015BD18);
 INCLUDE_ASM("be/bedbreward", func_0015BD30);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BD58);
+#ifdef SKIP_ASM
+struct sBEOpt_BE10 { int v[0xA2]; };
+extern sBEOpt_BE10 D_00535610;
+
+extern "C" sBEOpt_BE10* func_0015BD58(sBEOpt_BE10* dst)
+{
+    *dst = D_00535610;
+    return dst;
+}
+#endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BE10);
+#ifdef SKIP_ASM
+extern sBEOpt_BE10 D_00535610;
+
+extern "C" void func_0015BE10(void* self, sBEOpt_BE10* src)
+{
+    D_00535610 = *src;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015BEC0);
 INCLUDE_ASM("be/bedbreward", func_0015BEE8);
 INCLUDE_ASM("be/bedbreward", func_0015BF10);
@@ -351,9 +389,28 @@ INCLUDE_ASM("be/bedbreward", func_0015C3D8);
 INCLUDE_ASM("be/bedbreward", func_0015C3E8);
 INCLUDE_ASM("be/bedbreward", func_0015C3F8);
 INCLUDE_ASM("be/bedbreward", func_0015C408);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C418);
+#ifdef SKIP_ASM
+struct sBEBlk_C418 { int v[0x2B]; };
+extern sBEBlk_C418 D_00534E60;
+
+extern "C" void func_0015C418(void* self, sBEBlk_C418* src)
+{
+    D_00534E60 = *src;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C4D0);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C4E0);
+#ifdef SKIP_ASM
+extern sBEBlk_C418 D_00534F0C;
+
+extern "C" void func_0015C4E0(void* self, sBEBlk_C418* src)
+{
+    D_00534F0C = *src;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C598);
 INCLUDE_ASM("be/bedbreward", func_0015C5A8);
 INCLUDE_ASM("be/bedbreward", func_0015C5B8);

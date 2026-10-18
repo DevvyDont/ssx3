@@ -1111,7 +1111,32 @@ extern "C" void* func_003A51D0(void* self, func_003A51D0_cFunctor* fn)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5230);
+#ifdef SKIP_ASM
+extern void* D_00494928[];
+// PORT: the other ctor in the unit calls this base ctor with (self, 0, 0)
+extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+extern "C" void* func_003977E8(void* p);
+extern "C" void* func_003A5338(void* self);
+
+extern "C" void* func_003A5230(char* self)
+{
+    func_0039FB30_self(self);
+    *(void***)(self + 0x8) = D_004949E8;
+    func_003977E8(self + 0x74);
+    *(void***)(self + 0x8) = D_00494928;
+    func_003A5338(self + 0x90);
+    *(unsigned char*)(self + 0xA4) = 0xFF;
+    *(unsigned char*)(self + 0x95) = 0;
+    *(unsigned char*)(self + 0x96) = 0;
+    *(unsigned char*)(self + 0x97) = 0;
+    *(unsigned char*)(self + 0x98) = 0;
+    *(int*)(self + 0x9C) = 0;
+    *(int*)(self + 0xA0) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A52A0);
@@ -1300,7 +1325,28 @@ extern "C" int func_003A5580(void *arg0) {
 }
 #endif
 INCLUDE_ASM("ui/uivector", func_003A5588);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A55D8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" unsigned char *func_003A65A0(unsigned char *arg0);
+extern "C" void *func_003A65B8(void *arg0);
+extern void* D_00494798[];
+
+extern "C" void* func_003A55D8(char* self)
+{
+    int i;
+    func_0039FB30(self, 0, 0);
+    *(void***)(self + 8) = D_00494798;
+    func_003A65A0((unsigned char*)(self + 0x74));
+    char* p = self + 0x98;
+    for (i = 0x1F; i != -1; i--) {
+        func_003A65B8(p);
+        p += 0x14;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5658);
@@ -1777,8 +1823,54 @@ extern "C" void func_003A5B48(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5B98);
+#ifdef SKIP_ASM
+extern "C" void* func_001DD580(void* self);
+extern "C" void* func_003977E8(void* p);
+extern "C" void* func_0039FB30(void* self, int a, int b);
+extern void* D_00494670[];
+
+extern "C" void* func_003A5B98(char* self)
+{
+    *(void**)(self + 4) = self;
+    *(void**)(self + 0) = self;
+    *(void***)(self + 8) = D_00494670;
+    func_001DD580(self + 0x14);
+    func_003977E8(self + 0x18);
+    func_0039FB30(self + 0x40, 0, 0);
+    *(void***)(self + 0x48) = D_004949E8;
+    func_003977E8(self + 0xB4);
+    return self;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5C08);
+#ifdef SKIP_ASM
+extern "C" void* func_001DD580(void* self);
+extern "C" void* func_003977E8(void* p);
+extern "C" void* func_0039FB30(void* self, int a, int b);
+extern void* D_00494670[];
+
+extern "C" void* func_003A5C08(char* self, int arg)
+{
+    *(void**)(self + 4) = self;
+    *(void**)(self + 0) = self;
+    *(int*)(self + 0xC) = 0;
+    *(int*)(self + 0x10) = 0;
+    *(void***)(self + 8) = D_00494670;
+    func_001DD580(self + 0x14);
+    func_003977E8(self + 0x18);
+    *(int*)(self + 0x34) = 0;
+    *(int*)(self + 0x38) = 0;
+    *(int*)(self + 0x3C) = 0;
+    func_0039FB30(self + 0x40, 0, 0);
+    *(void***)(self + 0x48) = D_004949E8;
+    func_003977E8(self + 0xB4);
+    *(int*)(self + 0xD0) = arg;
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5C98);
 #ifdef SKIP_ASM
@@ -1972,7 +2064,31 @@ extern "C" int func_003A5F58(void *arg0) {
 }
 #endif
 INCLUDE_ASM("ui/uivector", func_003A5F60);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5FA0);
+#ifdef SKIP_ASM
+extern void* D_004944C8[];
+// PORT: the other ctors in the unit call this base ctor with (self, 0, 0)
+extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+
+extern "C" void* func_003A5FA0(char* self)
+{
+    func_0039FB30_self(self);
+    *(int*)(self + 0x74) = 0;
+    *(void***)(self + 0x8) = D_004944C8;
+    *(int*)(self + 0x78) = 0;
+    *(int*)(self + 0x7C) = 0;
+    *(int*)(self + 0x80) = 0;
+    *(int*)(self + 0x84) = 0;
+    *(int*)(self + 0x88) = 0;
+    *(int*)(self + 0xC0) = 0;
+    *(int*)(self + 0xC4) = 0;
+    *(int*)(self + 0xC8) = 0;
+    *(char*)(self + 0x8C) = 0;
+    *(char*)(self + 0xA5) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6000__FPv);
@@ -2316,7 +2432,37 @@ int func_003A6540(void* self)
 
 extern "C" void* func_003A3F48(int, int);
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6548);
+#ifdef SKIP_ASM
+struct sFlags_6548 {
+    unsigned b0 : 1;
+    unsigned b1 : 1;
+    unsigned b2 : 1;
+    unsigned b3 : 1;
+    unsigned b4 : 1;
+    unsigned b5 : 1;
+    unsigned b6 : 1;
+    unsigned b7 : 1;
+    unsigned f8 : 5;
+    unsigned f13 : 6;
+};
+
+extern "C" sFlags_6548* func_003A6548(sFlags_6548* f)
+{
+    f->b0 = 1;
+    f->b7 = 0;
+    f->f8 = 0;
+    f->b5 = 0;
+    f->b4 = 0;
+    f->b2 = 0;
+    f->b1 = 1;
+    f->b3 = 1;
+    f->b6 = 1;
+    f->f13 = 9;
+    return f;
+}
+#endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A65A0);
 #ifdef SKIP_ASM

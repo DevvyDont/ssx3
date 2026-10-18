@@ -194,10 +194,62 @@ extern "C" void* func_002D21C0(void* p)
 
 INCLUDE_ASM("util/objectinterface", func_002D21D0);
 INCLUDE_ASM("util/objectinterface", func_002D2210);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/objectinterface", func_002D2248);
+#ifdef SKIP_ASM
+extern "C" void func_002D21D0(void* self, float v);
+
+extern "C" int func_002D2248(void* self, float* v)
+{
+    int i;
+    for (i = 0; i < 3; i++) {
+        func_002D21D0(self, v[i]);
+    }
+    return 0xC;
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/objectinterface", func_002D22A8);
+#ifdef SKIP_ASM
+extern "C" void func_002D21D0(void* self, float v);
+
+extern "C" int func_002D22A8(void* self, float* v)
+{
+    int i;
+    for (i = 0; i < 4; i++) {
+        func_002D21D0(self, v[i]);
+    }
+    return 0x10;
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/objectinterface", func_002D2308);
+#ifdef SKIP_ASM
+extern "C" void func_002D21D0(void* self, float v);
+
+extern "C" int func_002D2308(void* self, float* v)
+{
+    int i;
+    for (i = 0; i < 16; i++) {
+        func_002D21D0(self, v[i]);
+    }
+    return 0x40;
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/objectinterface", func_002D2368);
+#ifdef SKIP_ASM
+extern "C" void func_002D21D0(void* self, float v);
+
+extern "C" int func_002D2368(void* self, float* q)
+{
+    func_002D21D0(self, q[3]);
+    func_002D21D0(self, q[0]);
+    func_002D21D0(self, q[1]);
+    func_002D21D0(self, q[2]);
+    return 0x10;
+}
+#endif
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D23C8);
 #ifdef SKIP_ASM
@@ -207,5 +259,40 @@ extern "C" int func_002D23C8(signed char **arg0, signed char arg1) {
     return 1;
 }
 #endif
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D23E8);
+#ifdef SKIP_ASM
+extern "C" int func_002D23C8(signed char **arg0, signed char arg1);
+extern "C" unsigned int strlen(const char* s);
+
+extern "C" int func_002D23E8(signed char** out, const char* s)
+{
+    unsigned int i;
+    int n = 0;
+    for (i = 0; i < strlen(s); i++) {
+        n += func_002D23C8(out, s[i]);
+    }
+    func_002D23C8(out, 0);
+    return n + 1;
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/objectinterface", func_002D2478);
+#ifdef SKIP_ASM
+extern "C" int func_002D2210(signed char** out, unsigned int len);
+
+struct sStr_2478 {
+    unsigned int len;
+    signed char* data;
+};
+
+extern "C" int func_002D2478(signed char** out, sStr_2478** pp)
+{
+    unsigned int i;
+    int n = func_002D2210(out, (*pp)->len);
+    for (i = 0; i < (*pp)->len; i++) {
+        n += func_002D23C8(out, (*pp)->data[i]);
+    }
+    return n;
+}
+#endif
