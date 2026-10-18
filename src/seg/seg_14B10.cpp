@@ -659,33 +659,115 @@ extern "C" int func_00116938(int arg0) {
     return D_0043D160[arg0];
 }
 
-INCLUDE_ASM("seg/seg_14B10", gGenTrickName);
+struct sTrickDesc {
+    unsigned int f0 : 3;
+    unsigned int f3 : 4;
+    unsigned int f7 : 3;
+    unsigned int f10 : 2;
+    unsigned int f12 : 4;
+    unsigned int f16 : 3;
+    unsigned int f19 : 3;
+    unsigned int f22 : 6;
+    unsigned int f28 : 4;
+    unsigned int f32 : 3;
+    unsigned int f35 : 7;
+    unsigned int f42 : 1;
+    unsigned int f43 : 7;
+    unsigned int f50 : 2;
+    unsigned int f52 : 4;
+    unsigned int f56 : 3;
+    unsigned int f59 : 5;
+};
 
 //100%
+extern char* D_0043D118[];
+extern char* D_0043D130[];
+extern char* D_0043CF40[];
+extern char* D_0043CF60[];
+extern char* D_0043CF70[];
+extern char* D_0043CFB0[];
+extern char* D_0043CFC8[];
+extern char* D_0043CFE0[];
+extern char* D_0043D0C0[];
+extern char* D_004A0FF0[2];
+extern char* D_0043D2B8[];
+extern char* D_0043D2D0[];
+extern char* D_0043D2E0[];
+extern char* D_0043D100[];
+extern char* D_0043D320[];
+
+extern "C" void gGenTrickName(char* out, sTrickDesc* t, int)
+{
+    const char* p;
+    p = D_0043D118[t->f0];
+    while (*p) *out++ = *p++;
+    p = D_0043D130[t->f3];
+    while (*p) *out++ = *p++;
+    p = D_0043CF40[t->f7];
+    while (*p) *out++ = *p++;
+    p = D_0043CF60[t->f10];
+    while (*p) *out++ = *p++;
+    p = D_0043CF70[t->f12];
+    while (*p) *out++ = *p++;
+    p = D_0043CFB0[t->f16];
+    while (*p) *out++ = *p++;
+    p = D_0043CFC8[t->f19];
+    while (*p) *out++ = *p++;
+    p = D_0043CFE0[t->f22];
+    while (*p) *out++ = *p++;
+    p = D_0043D0C0[t->f28];
+    while (*p) *out++ = *p++;
+    p = ((char**)D_0043D160)[t->f35];
+    while (*p) *out++ = *p++;
+    p = D_004A0FF0[t->f42];
+    while (*p) *out++ = *p++;
+    p = ((char**)D_0043D160)[t->f43];
+    while (*p) *out++ = *p++;
+    p = D_0043D2B8[t->f32];
+    while (*p) *out++ = *p++;
+    p = D_0043D2D0[t->f50];
+    while (*p) *out++ = *p++;
+    p = D_0043D2E0[t->f52];
+    while (*p) *out++ = *p++;
+    p = D_0043D100[t->f56];
+    while (*p) *out++ = *p++;
+    p = D_0043D320[t->f59];
+    while (*p) *out++ = *p++;
+    *out = 0;
+}
+
+//100%
+// PORT: same layout as sTrickDesc, but the request builder packs it
+// through 64-bit fields, so it gets its own type and an asm-label alias.
+struct sTrickDesc64 {
+    unsigned long f0 : 3;
+    unsigned long f3 : 4;
+    unsigned long f7 : 3;
+    unsigned long f10 : 2;
+    unsigned long f12 : 4;
+    unsigned long f16 : 3;
+    unsigned long f19 : 3;
+    unsigned long f22 : 6;
+    unsigned long f28 : 4;
+    unsigned long f32 : 3;
+    unsigned long f35 : 7;
+    unsigned long f42 : 1;
+    unsigned long f43 : 7;
+    unsigned long f50 : 2;
+    unsigned long f52 : 4;
+    unsigned long f56 : 3;
+    unsigned long f59 : 5;
+};
 struct sMonsterReq_6E08 {
     int key;
     int pad4;
     unsigned char b8, b9, bA, bB, bC, bD, bE, bF;
 };
 
-struct sTrickBits_6E08 {
-    unsigned long pad0 : 10;
-    unsigned long f10 : 2;
-    unsigned long f12 : 4;
-    unsigned long f16 : 3;
-    unsigned long f19 : 3;
-    unsigned long pad22 : 6;
-    unsigned long f28 : 4;
-    unsigned long pad32 : 3;
-    unsigned long f35 : 7;
-    unsigned long f42 : 1;
-    unsigned long f43 : 7;
-    unsigned long pad50 : 14;
-};
 
 extern sMonsterReq_6E08 D_0043D608[];
 extern "C" void func_003E6448(void*, int, int);
-extern "C" void gGenTrickName(char*, sTrickBits_6E08*, int);
+extern "C" void gGenTrickName_6E08(char*, sTrickDesc64*, int) __asm__("gGenTrickName");
 
 extern "C" void gGenMonsterTrickReqName(char* out, int key, int a2) {
     sMonsterReq_6E08* e = D_0043D608;
@@ -693,7 +775,7 @@ extern "C" void gGenMonsterTrickReqName(char* out, int key, int a2) {
     do {
         i++;
         if (e->key == key) {
-            sTrickBits_6E08 b;
+            sTrickDesc64 b;
             func_003E6448(&b, 0, 8);
             b.f10 = e->b8;
             b.f12 = e->b9;
@@ -703,7 +785,7 @@ extern "C" void gGenMonsterTrickReqName(char* out, int key, int a2) {
             b.f35 = e->bD;
             b.f43 = e->bE;
             if (((int*)&b)[1] & 0x3F800) b.f42 = 1;
-            gGenTrickName(out, &b, a2);
+            gGenTrickName_6E08(out, &b, a2);
             return;
         }
         e++;
