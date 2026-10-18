@@ -349,9 +349,218 @@ extern "C" void func_00358700(int kind)
     }
 }
 
-INCLUDE_ASM("object/multiparticle", func_00358780);
+//100%
+void operator_delete(int*);
+extern "C" void* func_002D1BE0();
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 
-INCLUDE_ASM("object/multiparticle", func_00358998);
+struct sMpVec4_8780 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sMpBox_8780 {
+    sMpVec4_8780 min;
+    sMpVec4_8780 max;
+};
+struct sMpCell_8780 {
+    int level;
+    int x, y, z;
+};
+struct sMpNode_8780 {
+    sMpNode_8780* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sMpRoot_8780 {
+    sMpCell_8780 cell;              // 0x00
+    sMpNode_8780* node;             // 0x10
+};
+struct sMpSeg_8780 {
+    char pad0[0x64];
+    sMpSeg_8780* next;              // 0x64
+    char pad68[4];
+    float minx, miny, minz;         // 0x6C
+    float maxx, maxy, maxz;         // 0x78
+};
+struct sMpTrack_8780 {
+    char pad0[0x20];
+    int count;                      // 0x20
+    sMpSeg_8780* first;             // 0x24
+};
+struct sMpSet_8780 {
+    char pad0[0x44];
+    unsigned int* refs;             // 0x44
+};
+struct sMpWorld_8780 {
+    char pad0[0x8];
+    sMpSet_8780** sets;             // 0x8
+};
+
+static inline sMpRoot_8780* findRoot_8780(char* w, int x, int y, int z)
+{
+    sMpRoot_8780* r = (sMpRoot_8780*)w;
+    sMpRoot_8780* rx = x >= 0 ? r : r + 4;
+    sMpRoot_8780* ry = y >= 0 ? rx : rx + 2;
+    sMpRoot_8780* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sMpCell_8780 c;
+    func_00328F28(&c, box);
+    sMpRoot_8780* r = findRoot_8780(w, c.x, c.y, c.z);
+    func_003284B8(r->node, 2, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+static inline sMpTrack_8780* toT_8780(unsigned int p)
+{
+    return (sMpTrack_8780*)(p << 2);
+}
+
+static inline sMpTrack_8780* refT_8780(unsigned int v)
+{
+    unsigned int p = v >> 8;
+    if (p != 0) return toT_8780(p);
+    return 0;
+}
+
+static inline sMpTrack_8780* getTrack_8780(unsigned int id)
+{
+    sMpSet_8780* set = (*(sMpWorld_8780**)(void*)func_002D1BD8())->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    return refT_8780(set->refs[id >> 8]);
+}
+
+extern "C" void func_00358780(void* self, int idx)
+{
+    sMpTrack_8780* t = getTrack_8780(((unsigned int*)((char*)self + 0x18))[idx]);
+    sMpSeg_8780* seg = t->first;
+    for (int i = 0; i < t->count; i++) {
+        sMpBox_8780 b;
+        b.min.x = seg->minx;
+        b.min.y = seg->miny;
+        b.min.z = seg->minz;
+        b.min.w = 1.0f;
+        b.max.x = seg->maxx;
+        b.max.y = seg->maxy;
+        b.max.z = seg->maxz;
+        b.max.w = 1.0f;
+        remove_8780((char*)func_002D1BE0(), seg, &b);
+        seg = seg->next;
+    }
+}
+
+//100%
+extern "C" void* func_002D1BE0();
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+
+struct sMpVec4_8998 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sMpBox_8998 {
+    sMpVec4_8998 min;
+    sMpVec4_8998 max;
+};
+struct sMpCell_8998 {
+    int level;
+    int x, y, z;
+};
+struct sMpRoot_8998 {
+    sMpCell_8998 cell;              // 0x00
+    void* node;                     // 0x10
+};
+struct sMpSeg_8998 {
+    char pad0[0x64];
+    sMpSeg_8998* next;              // 0x64
+    char pad68[4];
+    float minx, miny, minz;         // 0x6C
+    float maxx, maxy, maxz;         // 0x78
+};
+struct sMpTrack_8998 {
+    char pad0[0x20];
+    int count;                      // 0x20
+    sMpSeg_8998* first;             // 0x24
+};
+struct sMpSet_8998 {
+    char pad0[0x44];
+    unsigned int* refs;             // 0x44
+};
+struct sMpWorld_8998 {
+    char pad0[0x8];
+    sMpSet_8998** sets;             // 0x8
+};
+
+static inline sMpRoot_8998* findRoot_8998(char* w, int x, int y, int z)
+{
+    sMpRoot_8998* r = (sMpRoot_8998*)w;
+    sMpRoot_8998* rx = x >= 0 ? r : r + 4;
+    sMpRoot_8998* ry = y >= 0 ? rx : rx + 2;
+    sMpRoot_8998* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline sMpTrack_8998* toT_8998(unsigned int p)
+{
+    return (sMpTrack_8998*)(p << 2);
+}
+static inline sMpTrack_8998* refT_8998(unsigned int v)
+{
+    unsigned int p = v >> 8;
+    if (p != 0) return toT_8998(p);
+    return 0;
+}
+static inline sMpTrack_8998* getTrack_8998(unsigned int id)
+{
+    sMpSet_8998* set = (*(sMpWorld_8998**)(void*)func_002D1BD8())->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    return refT_8998(set->refs[id >> 8]);
+}
+static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
+{
+    sMpCell_8998 c;
+    func_00328F28(&c, box);
+    func_00328C20(findRoot_8998(w, c.x, c.y, c.z), 2, item, &c);
+}
+extern "C" void func_00358998(void* self, int idx)
+{
+    sMpTrack_8998* t = getTrack_8998(((unsigned int*)((char*)self + 0x18))[idx]);
+    sMpSeg_8998* seg = t->first;
+    for (int i = 0; i < t->count; i++) {
+        sMpBox_8998 b;
+        b.min.x = seg->minx;
+        b.min.y = seg->miny;
+        b.min.z = seg->minz;
+        b.min.w = 1.0f;
+        b.max.x = seg->maxx;
+        b.max.y = seg->maxy;
+        b.max.z = seg->maxz;
+        b.max.w = 1.0f;
+        insert_8998((char*)func_002D1BE0(), seg, &b);
+        seg = seg->next;
+    }
+    ((unsigned int*)((char*)self + 0x18))[idx] = 0xFFFFFFFF;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

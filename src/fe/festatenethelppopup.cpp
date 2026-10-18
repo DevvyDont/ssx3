@@ -147,7 +147,58 @@ extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidg
     }
 }
 
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA110);
+//100%
+extern "C" int USTR_length(unsigned short* s);
+extern "C" void func_002C2688(unsigned short* dst, unsigned short* src);
+extern "C" void func_003A0D00(void* self, unsigned short* str);
+void cMemMan_free(void*);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag_A110(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00461A70[];
+
+struct sTxtVE_A110 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+static inline unsigned short* getText_A110(int id)
+{
+    char* tm = *(char**)((char*)D_004A28A8 + 0x8C);
+    sTxtVE_A110* vt = *(sTxtVE_A110**)(tm + 4);
+    return vt[4].fn(tm + vt[4].delta, id);
+}
+
+extern "C" void func_001DA110(void* self)
+{
+    unsigned short* strs[3];
+    int n = 0;
+    int total = 0;
+    unsigned short* buf = 0;
+    int i = 0;
+    unsigned short** sp = strs;
+    int* ids = (int*)((char*)self + 0x58);
+    do {
+        if (*ids == 0) break;
+        i++;
+        n++;
+        unsigned short* t = getText_A110(*ids++);
+        *sp = t;
+        sp++;
+        total += USTR_length(t) + 1;
+    } while (i < 3);
+    if (total > 0) {
+        buf = (unsigned short*)operator_new_tag_A110(total * 2, D_00461A70, 0x100, 0);
+        *buf = 0;
+        for (int k = 0; k < n; k++) {
+            func_002C2688(buf, strs[k]);
+        }
+    }
+    func_003A0D00(*(void**)((char*)self + 0xAC), buf);
+    if (buf) {
+        cMemMan_free(buf);
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct cUIText;

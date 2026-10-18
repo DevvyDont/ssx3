@@ -536,11 +536,82 @@ extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
     }
 }
 
-INCLUDE_ASM("object/movenode", func_00356078);
+//100%
+struct sMnVt_6078 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
 
-INCLUDE_ASM("object/movenode", func_003560C0);
+struct sMnNodeObj_6078 {
+    sMnVt_6078* vt;     // 0x0
+};
 
-INCLUDE_ASM("object/movenode", func_00356128);
+struct sMnMod_6078 {
+    sMnNodeObj_6078* node;
+};
+
+static inline sMnNodeObj_6078* modNode_6078(sMnMod_6078* m)
+{
+    return m->node;
+}
+
+static inline sMnNodeObj_6078* mnNode_6078(cMoveNode* n)
+{
+    if (n->field_0x1C != 0) {
+        return modNode_6078((sMnMod_6078*)n->field_0x1C);
+    }
+    return 0;
+}
+
+static inline void* vcall_6078(sMnNodeObj_6078* o, int k)
+{
+    return o->vt[k].fn((char*)o + o->vt[k].delta);
+}
+
+extern "C" void* func_00356078(cMoveNode* self)
+{
+    sMnNodeObj_6078* node = mnNode_6078(self);
+    if (node != 0) {
+        return vcall_6078(node, 18);
+    }
+    return *(char**)((char*)self + 0x18) + 0x10;
+}
+
+//100%
+struct sMnVtA_60C0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+extern "C" void* func_003560C0(cMoveNode* self, int arg)
+{
+    sMnNodeObj_6078* node = mnNode_6078(self);
+    if (node != 0) {
+        sMnVtA_60C0* nv = (sMnVtA_60C0*)node->vt;
+        void* r = nv[23].fn((char*)node + nv[23].delta, arg);
+        if (r != 0) {
+            return r;
+        }
+    }
+    sMnVt_6078* vt = *(sMnVt_6078**)((char*)self + 0xC);
+    return vt[27].fn((char*)self + vt[27].delta);
+}
+
+//100%
+extern "C" void* func_00356128(cMoveNode* self)
+{
+    sMnNodeObj_6078* node = mnNode_6078(self);
+    if (node != 0) {
+        void* r = vcall_6078(node, 19);
+        if (r != 0) {
+            return r;
+        }
+        return vcall_6078(node, 18);
+    }
+    return *(char**)((char*)self + 0x18) + 0x10;
+}
 
 //100%
 int func_0034FCE0(void* self);
@@ -885,11 +956,124 @@ extern "C" void func_00356298(cMnNode_6298* self)
     ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, *(float*)((char*)self + 0x24));
 }
 
-INCLUDE_ASM("object/movenode", func_00356608);
+//100%
+extern "C" void func_00356608(cMnNode_6298* self, void* tex, int flags)
+{
+    sMnCam_6298* cam = *D_004A47B8_6298;
+    if (!Visible_6298(cam, OBJ_6298(self))) {
+        return;
+    }
+    void* rot = 0;
+    cMnGfx_6298* gfx = D_004A5B80_6298;
+    sMnMat_6298 rm;
+    if (HasRot_6298(MOD_6298(self))) {
+        rot = RotOf_6298(self, &rm);
+        flags |= 2;
+    }
+    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
+    sMnGfxVt_6298* vt = gfx->vt;
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, D_004FF1A0, tex, rot, flags, *(float*)((char*)self + 0x24));
+}
 
-INCLUDE_ASM("object/movenode", cMoveNode_setupOverlapSystem);
+//100%
+struct sOvBox_6780 {
+    float v[8];
+} __attribute__((aligned(16)));
 
-INCLUDE_ASM("object/movenode", func_003567E0);
+struct sOvMod_6780 {
+    void* node;
+};
+
+extern "C" void cInstanceNode_getBoundBoxInfo_6780(void* self, sOvBox_6780* box, float* radius) __asm__("cInstanceNode_getBoundBoxInfo");
+void tModifierBlock_setBoundBox_6780(void* mb, sOvBox_6780* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
+void tModifierBlock_setRadius_6780(void* mb, float r) __asm__("tModifierBlock_setRadius__FP14tModifierBlock");
+
+static inline void* modNode_6780(sOvMod_6780* m)
+{
+    return m->node;
+}
+
+static inline void* mnNode_6780(cMoveNode* n)
+{
+    if (n->field_0x1C != 0) {
+        return modNode_6780((sOvMod_6780*)n->field_0x1C);
+    }
+    return 0;
+}
+
+extern "C" void cMoveNode_setupOverlapSystem(void* selfp)
+{
+    cMoveNode* self = (cMoveNode*)selfp;
+    if (mnNode_6780(self)) {
+        sOvBox_6780 box;
+        float r;
+        cInstanceNode_getBoundBoxInfo_6780(self, &box, &r);
+        tModifierBlock_setBoundBox_6780(self->field_0x1C, &box);
+        tModifierBlock_setRadius_6780(self->field_0x1C, r);
+    }
+}
+
+//100%
+struct sVec4_67E0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_67E0 {
+    sVec4_67E0 min;
+    sVec4_67E0 max;
+};
+
+struct sInst_67E0 {
+    char pad_0x00[0x60];
+    float min[3];   // 0x60
+    float max[3];   // 0x6C
+};
+
+struct sMod_67E0 {
+    int active;
+};
+
+extern "C" sBox_67E0* func_00352B88_67E0(void*) __asm__("func_00352B88");
+void tModifierBlock_setBoundBox_67E0(void* mb, sBox_67E0* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
+extern "C" void* func_002D1BE0();
+extern "C" void func_003291E0_67E0(void* world, int type, void* id, sBox_67E0* box, sBox_67E0* old) __asm__("func_003291E0");
+
+static inline int modActive_67E0(sMod_67E0* m)
+{
+    return m->active;
+}
+
+static inline int mnActive_67E0(cMoveNode* n)
+{
+    if (n->field_0x1C != 0) {
+        return modActive_67E0((sMod_67E0*)n->field_0x1C);
+    }
+    return 0;
+}
+
+extern "C" void func_003567E0(void* selfp)
+{
+    cMoveNode* self = (cMoveNode*)selfp;
+    if (mnActive_67E0(self)) {
+        sBox_67E0 nb;
+        sBox_67E0 old = *func_00352B88_67E0(self->field_0x1C);
+        sInst_67E0* inst = *(sInst_67E0**)((char*)self + 0x18);
+        sVec4_67E0 t;
+        t.x = inst->min[0];
+        t.y = inst->min[1];
+        t.z = inst->min[2];
+        t.w = 1.0f;
+        nb.min = t;
+        t.x = inst->max[0];
+        t.y = inst->max[1];
+        t.z = inst->max[2];
+        nb.max = t;
+        tModifierBlock_setBoundBox_67E0(self->field_0x1C, &nb);
+        void* id = *(void**)((char*)self + 0x18);
+        func_003291E0_67E0(func_002D1BE0(), 0, id, &nb, &old);
+    }
+}
+
 
 INCLUDE_ASM("object/movenode", func_003568B0);
 

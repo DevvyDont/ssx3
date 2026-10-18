@@ -1412,7 +1412,83 @@ extern "C" void func_00244A38()
 {
 }
 
-INCLUDE_ASM("main/ssxappdtor", func_00244A40);
+//100%
+struct sGfxVEntry_44A40 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sGfx_44A40 {
+    char pad_0x0[0x10D8];
+    sGfxVEntry_44A40* vtable;   // 0x10D8
+};
+
+struct sView_44A40 {
+    char pad_0x0[0x3D4];
+    int paused;                 // 0x3D4
+};
+
+struct sViewRef_44A40 {
+    sView_44A40* view;          // 0x0
+};
+
+struct sRace_44A40 {
+    char pad_0x0[0x1D0];
+    int over;                   // 0x1D0
+};
+
+struct sApp_44A40 {
+    char pad_0x0[0x10];
+    sViewRef_44A40* view;       // 0x10
+    char pad_0x14[0x78 - 0x14];
+    sRace_44A40* race;          // 0x78
+    char pad_0x7C[0x84 - 0x7C];
+    void* menu;                 // 0x84
+    char pad_0x88[0x9C - 0x88];
+    int f9C;                    // 0x9C
+    int fA0;                    // 0xA0
+};
+
+void func_003A6928(void* p);
+extern "C" void cGameViewMan_updateAll(void* list);
+extern "C" void func_00230F40(void* self);
+extern "C" void func_0022D8D8(void* p);
+extern "C" void func_003A88A8(void* p);
+extern sGfx_44A40* D_004A289C;
+
+extern "C" int func_00244A40(sApp_44A40* self)
+{
+    if (func_0022E920(self->menu) == 0 || self->race->over == 0) {
+        self->view->view->paused = 0;
+        func_003A6928(self->view);
+        cGameViewMan_updateAll(self->menu);
+        if (self->race->over == 0) {
+            func_00230F40(self);
+            func_0022D8D8(self->race);
+        }
+        if (self->f9C == 0 && func_0022E920(self->menu) == 0) {
+            self->fA0 = 1;
+        }
+        self->f9C = 1;
+        if (self->fA0 != 0) {
+            sGfx_44A40* g = D_004A289C;
+            sGfxVEntry_44A40* e = &g->vtable[19];
+            e->fn((char*)g + e->delta);
+            func_0022E8B8(self->menu);
+            func_003A88A8(self->view->view);
+            self->fA0 = 0;
+        }
+        return 0;
+    }
+    self->view->view->paused = 1;
+    self->f9C = 0;
+    self->fA0 = 0;
+    func_003A6928(self->view);
+    func_0022D8D8(self->race);
+    return 1;
+}
+
 
 INCLUDE_ASM("main/ssxappdtor", func_00244B48);
 

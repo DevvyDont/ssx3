@@ -122,7 +122,23 @@ extern "C" float func_00320FA8(void* self, void* a1, int a2)
     return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2));
 }
 
-INCLUDE_ASM("input/inputmap", func_00321010);
+//100%
+// As func_00320FA8 with the user word and eight float inputs set in the parser.
+extern "C" float func_00321010(void* self, void* a1, int a2, int user, float v0, float v1, float v2, float v3, float v4, float v5, float v6, float v7)
+{
+    char parser[0x190];
+    func_00325250(parser);
+    *(int*)parser = user;
+    *(float*)(parser + 0x10C) = v0;
+    *(float*)(parser + 0x110) = v1;
+    *(float*)(parser + 0x114) = v2;
+    *(float*)(parser + 0x118) = v3;
+    *(float*)(parser + 0x11C) = v4;
+    *(float*)(parser + 0x120) = v5;
+    *(float*)(parser + 0x124) = v6;
+    *(float*)(parser + 0x128) = v7;
+    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2));
+}
 
 //100%
 void* func_00325250(void* self);
@@ -135,7 +151,23 @@ extern "C" int func_00321108(void* self, void* a1, int a2)
     return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2)) != 0.0f;
 }
 
-INCLUDE_ASM("input/inputmap", func_00321188);
+//100%
+// As func_00320FA8 with the user word and eight float inputs set in the parser.
+extern "C" int func_00321188(void* self, void* a1, int a2, int user, float v0, float v1, float v2, float v3, float v4, float v5, float v6, float v7)
+{
+    char parser[0x190];
+    func_00325250(parser);
+    *(int*)parser = user;
+    *(float*)(parser + 0x10C) = v0;
+    *(float*)(parser + 0x110) = v1;
+    *(float*)(parser + 0x114) = v2;
+    *(float*)(parser + 0x118) = v3;
+    *(float*)(parser + 0x11C) = v4;
+    *(float*)(parser + 0x120) = v5;
+    *(float*)(parser + 0x124) = v6;
+    *(float*)(parser + 0x128) = v7;
+    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2)) != 0.0f;
+}
 
 //100%
 struct sBtn_00321298 {
@@ -201,7 +233,64 @@ extern "C" void func_00321298(sBtnSet_00321298* self, int n, float* vals)
     }
 }
 
-INCLUDE_ASM("input/inputmap", func_00321428);
+//100%
+struct sParseNode_1428 {
+    int f0;
+    sParseNode_1428* next;      // 0x4
+    int f8;
+    int fC;
+};
+
+struct sParser_1428 {
+    char* src;                  // 0x0
+    int len;                    // 0x4
+    char* cur;                  // 0x8
+    char tok[0x80];             // 0xC
+    int line;                   // 0x8C
+    int col;                    // 0x90
+    int err;                    // 0x94
+    char pad_0x98[0x48];
+    sParseNode_1428* freeNodes; // 0xE0
+    sParseNode_1428 nodes[0x800];   // 0xE4
+    int f80E4;                  // 0x80E4
+    char pad_0x80E8[0x108EC - 0x80E8];
+    int freeRegs[63];           // 0x108EC
+    int numFree;                // 0x109E8
+};
+
+extern "C" void func_00323098(void* self);
+
+// Sets up the expression parser over src: free register list 63..1 and the node free list.
+extern "C" void* func_00321428(void* selfp, void* srcp, void* lenp)
+{
+    sParser_1428* self = (sParser_1428*)selfp;
+    char* src = (char*)srcp;
+    int len = (int)lenp;
+    self->len = len;
+    self->src = src;
+    self->cur = src;
+    self->f80E4 = 0;
+    self->line = 1;
+    self->col = 1;
+    self->tok[0] = 0;
+    self->err = 0;
+    self->numFree = 0;
+    for (int i = 0x3F; i > 0; i--) {
+        self->freeRegs[self->numFree++] = i;
+    }
+    self->freeNodes = self->nodes;
+    // Link the node free list (walks the next fields 16 bytes at a time).
+    sParseNode_1428** pn = &self->nodes[0].next;
+    sParseNode_1428* m = self->nodes + 1;
+    for (int j = 0x7FE; j >= 0; j--) {
+        *pn = m;
+        pn += 4;
+        m++;
+    }
+    self->nodes[0x7FF].next = 0;
+    func_00323098(self);
+    return self;
+}
 
 //100%
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.

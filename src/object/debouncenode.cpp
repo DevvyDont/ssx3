@@ -1120,7 +1120,54 @@ extern "C" void func_00345248(sDebTrack5248* self, float t, sDebVec4* pos, sDebV
     func_00345048((sDebCurve*)self->key, t, pos, vel, acc);
 }
 
-INCLUDE_ASM("object/debouncenode", func_00345320);
+//100%
+struct sDebV4_5320 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sDebMat_5320 {
+    sDebV4_5320 r[4];
+};
+
+struct sDebNode_5320 {
+    int f0;
+    float min[3];           // 0x4
+    float max[3];           // 0x10
+};
+
+struct sDebGfxVt_5320 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct cDebGfx_5320 {
+    char pad_0x0[0x10D8];
+    sDebGfxVt_5320* vt;     // 0x10D8
+};
+
+typedef sDebMat_5320 (*DebViewFn_5320)(void*);
+typedef int (*DebCullFn_5320)(void*, sDebV4_5320*, sDebV4_5320*, const sDebMat_5320&);
+
+extern cDebGfx_5320* D_004A5B80_5320 __asm__("D_004A5B80");
+
+extern "C" int func_00345320(sTrackRef51C0* self)
+{
+    sDebNode_5320* n = (sDebNode_5320*)self->get();
+    sDebV4_5320 b[2];
+    b[0].x = n->min[0];
+    b[0].y = n->min[1];
+    b[0].z = n->min[2];
+    b[0].w = 1.0f;
+    b[1].x = n->max[0];
+    b[1].y = n->max[1];
+    b[1].z = n->max[2];
+    b[1].w = 1.0f;
+    cDebGfx_5320* gfx = D_004A5B80_5320;
+    sDebGfxVt_5320* vt = gfx->vt;
+    char* thisp = (char*)gfx + vt[93].delta;
+    return ((DebCullFn_5320)vt[93].fn)(thisp, &b[0], &b[1], ((DebViewFn_5320)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta)) != 1;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.

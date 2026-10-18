@@ -220,21 +220,200 @@ sLmVec4_E0A8 func_0038E0A8(const float* v, const float* m)
     return r;
 }
 
-INCLUDE_ASM("render/lightman", func_0038E118);
+//100%
+struct sLmRectVec4 {
+    float x, y, z, w;
+    sLmRectVec4() {}
+    sLmRectVec4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
 
-INCLUDE_ASM("render/lightman", func_0038E200);
+struct sLmRectVtx {
+    float s;                // 0x0
+    float t;                // 0x4
+    char pad_0x8[0x18];
+    sLmRectVec4 pos;        // 0x20
+};
 
-INCLUDE_ASM("render/lightman", func_0038E2E8);
+struct sLmRectVEntry {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sLmRectVtx*, int);
+};
 
-INCLUDE_ASM("render/lightman", func_0038E468);
+struct sLmRectCtx {
+    char pad_0x0[0x10D8];
+    sLmRectVEntry* vtable;      // 0x10D8
+};
 
-INCLUDE_ASM("render/lightman", func_0038E5E8);
+extern sLmRectCtx* D_004A5B80_E118 __asm__("D_004A5B80");
+sLmRectVec4 func_0038E0A8_r(const sLmRectVec4* v, const float* m) __asm__("func_0038E0A8__FPCfT0");
 
-INCLUDE_ASM("render/lightman", func_0038E738);
+// Fills a 4-vertex strip with the corners of rect (x, y, w, h) and draws it.
+extern "C" void func_0038E118(void* self, sLmRectVtx* v, float* r)
+{
+    v[0].pos = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    v[1].pos = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[2].pos = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[3].pos = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
 
-INCLUDE_ASM("render/lightman", func_0038E880);
+//100%
+// Same as func_0038E118 with the corners in rotated strip order.
+extern "C" void func_0038E200(void* self, sLmRectVtx* v, float* r)
+{
+    v[1].pos = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    v[3].pos = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[0].pos = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].pos = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
 
-INCLUDE_ASM("render/lightman", func_0038EA60);
+//100%
+// func_0038E118 with each corner transformed by the 3x3 matrix m.
+extern "C" void func_0038E2E8(void* self, sLmRectVtx* v, float* r, float* m)
+{
+    sLmRectVec4* p0 = &v[0].pos;
+    sLmRectVec4* p1 = &v[1].pos;
+    sLmRectVec4* p2 = &v[2].pos;
+    sLmRectVec4* p3 = &v[3].pos;
+    *p0 = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    *p1 = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    *p2 = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    *p3 = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    *p0 = func_0038E0A8_r(p0, m);
+    *p1 = func_0038E0A8_r(p1, m);
+    *p2 = func_0038E0A8_r(p2, m);
+    *p3 = func_0038E0A8_r(p3, m);
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
+
+//100%
+// func_0038E2E8 with the corners in rotated strip order.
+extern "C" void func_0038E468(void* self, sLmRectVtx* v, float* r, float* m)
+{
+    sLmRectVec4* p0 = &v[0].pos;
+    sLmRectVec4* p1 = &v[1].pos;
+    sLmRectVec4* p2 = &v[2].pos;
+    sLmRectVec4* p3 = &v[3].pos;
+    *p1 = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    *p3 = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    *p0 = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    *p2 = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    *p0 = func_0038E0A8_r(p0, m);
+    *p1 = func_0038E0A8_r(p1, m);
+    *p2 = func_0038E0A8_r(p2, m);
+    *p3 = func_0038E0A8_r(p3, m);
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
+
+//100%
+// func_0038E118 with texture coordinates from the rect uv (u, v, w, h).
+extern "C" void func_0038E5E8(void* self, sLmRectVtx* v, float* r, float* uv)
+{
+    v[0].pos = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    v[0].s = uv[0];
+    v[0].t = uv[1];
+    v[1].pos = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[1].s = uv[0] + uv[2];
+    v[1].t = uv[1];
+    v[2].pos = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].s = uv[0];
+    v[2].t = uv[1] + uv[3];
+    v[3].pos = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    v[3].s = uv[0] + uv[2];
+    v[3].t = uv[1] + uv[3];
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
+
+//100%
+// func_0038E5E8 with the texture rotated a quarter turn.
+extern "C" void func_0038E738(void* self, sLmRectVtx* v, float* r, float* uv)
+{
+    v[0].pos = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    v[0].s = uv[0] + uv[2];
+    v[0].t = uv[1];
+    v[1].pos = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[1].s = uv[0] + uv[2];
+    v[1].t = uv[1] + uv[3];
+    v[2].pos = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].s = uv[0];
+    v[2].t = uv[1];
+    v[3].pos = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    v[3].s = uv[0];
+    v[3].t = uv[1] + uv[3];
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
+
+//100%
+// func_0038E5E8 with each corner transformed by the 3x3 matrix m.
+extern "C" void func_0038E880(void* self, sLmRectVtx* v, float* r, float* uv, float* m)
+{
+    sLmRectVec4* p0 = &v[0].pos;
+    sLmRectVec4* p1 = &v[1].pos;
+    sLmRectVec4* p2 = &v[2].pos;
+    sLmRectVec4* p3 = &v[3].pos;
+    *p0 = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    v[0].s = uv[0];
+    v[0].t = uv[1];
+    *p1 = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[1].s = uv[0] + uv[2];
+    v[1].t = uv[1];
+    *p2 = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].s = uv[0];
+    v[2].t = uv[1] + uv[3];
+    *p3 = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    v[3].s = uv[0] + uv[2];
+    v[3].t = uv[1] + uv[3];
+    *p0 = func_0038E0A8_r(p0, m);
+    *p1 = func_0038E0A8_r(p1, m);
+    *p2 = func_0038E0A8_r(p2, m);
+    *p3 = func_0038E0A8_r(p3, m);
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
+
+//100%
+// func_0038E738 with each corner transformed by the 3x3 matrix m.
+extern "C" void func_0038EA60(void* self, sLmRectVtx* v, float* r, float* uv, float* m)
+{
+    sLmRectVec4* p0 = &v[0].pos;
+    sLmRectVec4* p1 = &v[1].pos;
+    sLmRectVec4* p2 = &v[2].pos;
+    sLmRectVec4* p3 = &v[3].pos;
+    *p0 = sLmRectVec4(r[0], r[1], 0.0f, 1.0f);
+    v[0].s = uv[0] + uv[2];
+    v[0].t = uv[1];
+    *p1 = sLmRectVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[1].s = uv[0] + uv[2];
+    v[1].t = uv[1] + uv[3];
+    *p2 = sLmRectVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].s = uv[0];
+    v[2].t = uv[1];
+    *p3 = sLmRectVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    v[3].s = uv[0];
+    v[3].t = uv[1] + uv[3];
+    *p0 = func_0038E0A8_r(p0, m);
+    *p1 = func_0038E0A8_r(p1, m);
+    *p2 = func_0038E0A8_r(p2, m);
+    *p3 = func_0038E0A8_r(p3, m);
+    sLmRectCtx* ctx = D_004A5B80_E118;
+    sLmRectVEntry* e = &ctx->vtable[0x47];
+    e->fn((char*)ctx + e->delta, 4, v, 0);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -919,7 +1098,67 @@ extern "C" void func_00391480(void* self, sQuad16* dst)
 INCLUDE_ASM("render/lightman", func_003914F8);
 extern "C" int func_003914F8(void);
 
-INCLUDE_ASM("render/lightman", func_00391508);
+//100%
+struct sLmV2_1508 {
+    float x, y;
+    sLmV2_1508() {}
+    sLmV2_1508(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sLmV4_1508 {
+    float x, y, z, w;
+    sLmV4_1508() {}
+    sLmV4_1508(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+struct sLmState_1508 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    char pad_0x18[0x10];
+    sLmV2_1508 a;           // 0x28
+    sLmV2_1508 b;           // 0x30
+    sLmV2_1508 c;           // 0x38
+    sLmV4_1508 d;           // 0x40
+    sLmV4_1508 e;           // 0x50
+    int f60;
+    char f64;
+};
+
+// Resets the state to defaults and returns it.
+extern "C" sLmState_1508* func_00391508(sLmState_1508* self)
+{
+    self->a = sLmV2_1508(0.0f, 0.0f);
+    self->b = sLmV2_1508(1.0f, 1.0f);
+    self->c = self->b;
+    {
+        sLmV4_1508 t;
+        t.x = 1.0f;
+        t.y = 1.0f;
+        t.z = 1.0f;
+        t.w = 1.0f;
+        self->d = t;
+    }
+    self->e = sLmV4_1508(1.0f, 0.0f, 0.0f, 0.0f);
+    self->f60 = -1;
+    self->f0 = 0;
+    self->f4 = 0;
+    self->f8 = 0;
+    self->f14 = 0;
+    self->fC = 0;
+    self->f10 = 0;
+    self->f64 = 0;
+    return self;
+}
 
 //100%
 struct sLmVec2_15E8 {

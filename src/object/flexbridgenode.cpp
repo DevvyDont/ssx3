@@ -229,7 +229,82 @@ extern "C" void func_003475A8(void* self)
 
 INCLUDE_ASM("object/flexbridgenode", func_003475D8);
 
-INCLUDE_ASM("object/flexbridgenode", func_00347B80);
+//100%
+extern char* D_004A5B80;
+extern char* D_004A47B8;
+
+struct sRS_7B80 {
+    unsigned int f0;
+    unsigned int f4;
+    int f8;
+    int fC;
+    int f10;
+};
+
+struct sVec4_7B80 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_7B80 {
+    sVec4_7B80 r[4];
+};
+
+struct sModel_7B80 {
+    char pad_0x0[0x7D];
+    unsigned char page;     // 0x7D
+    short slot;             // 0x7E
+};
+
+static inline int IsLoaded_7B80(sModel_7B80* m)
+{
+    char* wc = *(char**)D_004A47B8;
+    if (m->page == 0xFF)
+        return 1;
+    int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;
+    return ok ? *(int*)(wc + m->slot * 0x18 + 0x3F0) == 3 : 0;
+}
+
+struct sVE43_7B80 { short delta; short index; sMat_7B80 (*fn)(void*); };
+struct sVE93_7B80 { short delta; short index; int (*fn)(void*, sVec4_7B80*, sVec4_7B80*, sMat_7B80*); };
+struct sVE96_7B80 { short delta; short index; void (*fn)(void*, void*, int, int, int); };
+struct sVE7_7B80 { short delta; short index; void (*fn)(void*, void*, void*, sMat_7B80*); };
+struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
+
+#define TOP_7B80(c) (*(sRS_7B80**)((c) + 0xE84))
+
+extern "C" void func_00347B80(char* self)
+{
+    if (!IsLoaded_7B80(*(sModel_7B80**)(self + 0x18))) {
+        return;
+    }
+    char* ctx = D_004A5B80;
+    {
+        sVE93_7B80* vt = *(sVE93_7B80**)(ctx + 0x10D8);
+        char* thisp = ctx + vt[93].delta;
+        sVec4_7B80* a = (sVec4_7B80*)(self + 0x90);
+        sVec4_7B80* b = (sVec4_7B80*)(self + 0xA0);
+        sVE43_7B80* vt43 = *(sVE43_7B80**)(ctx + 0x10D8);
+        sMat_7B80 c = vt43[43].fn(ctx + vt43[43].delta);
+        if (vt[93].fn(thisp, a, b, &c) == 1) {
+            return;
+        }
+    }
+    sVE24_7B80* sv = *(sVE24_7B80**)(self + 0xC);
+    void* pos = sv[24].fn(self + sv[24].delta);
+    TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
+    sRS_7B80* t = TOP_7B80(ctx);
+    TOP_7B80(ctx) = t + 1;
+    ((int*)t)[6] = (((int*)t)[6] & ~0x7C) | 0x14;
+    char* h = *(char**)(self + 0x78);
+    if (h != 0) {
+        sVE7_7B80* hv = *(sVE7_7B80**)(h + 4);
+        hv[7].fn(h + hv[7].delta, pos, *(void**)(*(char**)(self + 0x18) + 0x94), 0);
+    } else {
+        sVE96_7B80* v96 = *(sVE96_7B80**)(ctx + 0x10D8);
+        v96[96].fn(ctx + v96[96].delta, *(void**)(self + 0x18), 0, 0, 0);
+    }
+    TOP_7B80(ctx)--;
+}
 
 //100%
 struct sFlexBridgeVEntry7D38 {

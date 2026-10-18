@@ -173,7 +173,54 @@ extern "C" void func_00329B40(sSphereTreeNode* s, sSphereVec4* v)
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329B90);
 
-INCLUDE_ASM("intersect/riderspheretree", func_00329CE0);
+//100%
+struct sSphV4_9CE0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSphKid_9CE0 {
+    sSphV4_9CE0 pos;        // 0x00
+    float radius;           // 0x10
+    int pad[3];
+};
+
+struct sSphNode_9CE0 {
+    char pad_0x00[0x10];
+    sSphV4_9CE0 center;     // 0x10
+    float radius;           // 0x20
+    int pad_0x24;
+    unsigned int mask;      // 0x28
+    int count;              // 0x2C
+    sSphKid_9CE0 kids[1];   // 0x30
+};
+
+struct sSphBox_9CE0 {
+    sSphV4_9CE0 min;
+    sSphV4_9CE0 max;
+};
+
+extern "C" void func_00329CE0(sSphNode_9CE0* self, sSphBox_9CE0* box)
+{
+    box->min = box->max = self->center;
+    for (int i = 0; i < self->count; i++) {
+        sSphKid_9CE0* k = &self->kids[i];
+        float r = k->radius;
+        float v;
+        v = k->pos.x - r;
+        if (v < box->min.x) box->min.x = v;
+        v = k->pos.y - r;
+        if (v < box->min.y) box->min.y = v;
+        v = k->pos.z - r;
+        if (v < box->min.z) box->min.z = v;
+        v = k->pos.x + r;
+        if (box->max.x < v) box->max.x = v;
+        v = k->pos.y + r;
+        if (box->max.y < v) box->max.y = v;
+        v = k->pos.z + r;
+        if (box->max.z < v) box->max.z = v;
+    }
+}
+
 
 //100%
 struct sSphereV4_9DC8 {

@@ -11,7 +11,64 @@ void* cBezierMan_construct()
     return cPSPBezierMan_cPSPBezierMan(mem);
 }
 
-INCLUDE_ASM("render/bezierman", func_0038AF30);
+//100%
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag_AF30(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void func_00372B78(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+struct cBezierVirt;
+extern "C" void func_0038D638(cBezierVirt* self);
+extern const char D_00492EB0[];
+extern const char D_00492EC0[];
+extern const char D_00492ED0[];
+
+struct sUV_AF30 {
+    float u, v;
+};
+
+struct sUVTables_AF30 {
+    char pad0[0x40];
+    sUV_AF30 grid6[8][6];       // 0x40
+    sUV_AF30 grid8[8][8];       // 0x1C0
+};
+
+extern sUVTables_AF30 D_005049C0;
+
+extern "C" void func_0038AF30(void* self)
+{
+    char* s = (char*)self;
+    func_00372B78(s + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
+    *(void**)(s + 0x440) = operator_new_tag_AF30(0x38400, D_00492EB0, 0, 0);
+    *(void**)(s + 0x444) = operator_new_tag_AF30(0xDC00, D_00492EC0, 0, 0);
+    *(void**)(s + 0x448) = operator_new_tag_AF30(0x8C00, D_00492ED0, 0, 0);
+    *(void**)(s + 0x44C) = *(void**)(s + 0x440);
+    *(void**)(s + 0x450) = *(void**)(s + 0x444);
+    *(void**)(s + 0x454) = *(void**)(s + 0x448);
+    *(int*)(s + 0x344) = 1;
+    *(int*)(s + 0x348) = 1;
+    *(int*)(s + 0x34C) = 1;
+    *(int*)(s + 0x350) = 1;
+    *(int*)(s + 0x354) = 0;
+    *(float*)(s + 0x358) = 8.0f;
+    *(float*)(s + 0x33C) = 3000.0f;
+    *(float*)(s + 0x340) = 15000.0f;
+    func_0038D638((cBezierVirt*)self);
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 6; j++) {
+            sUV_AF30 t;
+            t.v = (float)i * 0.2f;
+            t.u = (float)j * 0.2f;
+            D_005049C0.grid6[j][i] = t;
+        }
+    }
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            sUV_AF30 t;
+            t.v = (float)i * 0.1428571492433548f;
+            t.u = (float)j * 0.1428571492433548f;
+            D_005049C0.grid8[j][i] = t;
+        }
+    }
+}
 
 //100%
 void func_0038D660(void*);
