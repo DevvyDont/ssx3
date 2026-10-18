@@ -425,8 +425,78 @@ extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
 }
 #endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E880);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+
+// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, transforms each position by the 3x3 matrix m, then submits it.
+extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv, float* m)
+{
+    sLmQuadVec4_E118* p0 = &vtx[0].pos;
+    sLmQuadVec4_E118* p1 = &vtx[1].pos;
+    sLmQuadVec4_E118* p2 = &vtx[2].pos;
+    sLmQuadVec4_E118* p3 = &vtx[3].pos;
+    *p0 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    vtx[0].s = uv[0];
+    vtx[0].t = uv[1];
+    *p1 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    vtx[1].s = uv[0] + uv[2];
+    vtx[1].t = uv[1];
+    *p2 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    vtx[2].s = uv[0];
+    vtx[2].t = uv[1] + uv[3];
+    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    vtx[3].s = uv[0] + uv[2];
+    vtx[3].t = uv[1] + uv[3];
+    *p0 = func_0038E0A8(&p0->x, m);
+    *p1 = func_0038E0A8(&p1->x, m);
+    *p2 = func_0038E0A8(&p2->x, m);
+    *p3 = func_0038E0A8(&p3->x, m);
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038EA60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+
+// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad (rotated mapping), transforms each position by the 3x3 matrix m, then submits it.
+extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv, float* m)
+{
+    sLmQuadVec4_E118* p0 = &vtx[0].pos;
+    sLmQuadVec4_E118* p1 = &vtx[1].pos;
+    sLmQuadVec4_E118* p2 = &vtx[2].pos;
+    sLmQuadVec4_E118* p3 = &vtx[3].pos;
+    *p0 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    vtx[0].s = uv[0] + uv[2];
+    vtx[0].t = uv[1];
+    *p1 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    vtx[1].s = uv[0] + uv[2];
+    vtx[1].t = uv[1] + uv[3];
+    *p2 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    vtx[2].s = uv[0];
+    vtx[2].t = uv[1];
+    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    vtx[3].s = uv[0];
+    vtx[3].t = uv[1] + uv[3];
+    *p0 = func_0038E0A8(&p0->x, m);
+    *p1 = func_0038E0A8(&p1->x, m);
+    *p2 = func_0038E0A8(&p2->x, m);
+    *p3 = func_0038E0A8(&p3->x, m);
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038EC40);

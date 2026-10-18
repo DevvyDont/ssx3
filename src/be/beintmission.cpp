@@ -75,7 +75,29 @@ extern "C" int func_00153390(void* self, int owner)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001533F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+
+extern "C" int func_001533F8(void* self, int rider, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int sum = 0;
+    int off = idx * 12 + c * 0xF88 + profile * 0x9B50;
+    char* p = D_004A6CA8_raw + off;
+    for (int i = 0; i < 17; i++)
+    {
+        sum += *(signed char*)(p + 4);
+        p += 12;
+    }
+    return sum;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00153498);
@@ -203,7 +225,25 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
 
 INCLUDE_ASM("be/beintmission", func_00153708);
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153858);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern int D_005305F0[];
+extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+
+extern "C" char* func_00153858(void* self, int rider, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    char* b = D_004A6CA8_raw + c * 0xF88;
+    // PORT: pointer held as int (index-first addu)
+    char* p = (char*)(profile * 0x9B50 + (int)b);
+    char* q = p + (D_005305F0[0] * 12 + 4);
+    return q + idx * 12 + 4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_001538E8);

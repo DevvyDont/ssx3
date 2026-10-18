@@ -3828,7 +3828,20 @@ extern "C" void func_001A9090(void* self, int a1, int a2, int a3, int a4, int a5
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A90F0);
+#ifdef SKIP_ASM
+extern "C" void cKeyboardPopup_setStatic(void* popup, int a);
+extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_001CB418(void* p, int a);
+
+extern "C" void func_001A90F0(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+{
+    func_001A91B0(self, a1, a4, a5, a6);
+    cKeyboardPopup_setStatic(*(void**)((char*)self + 0x69C), a2);
+    func_001CB418(*(void**)((char*)self + 0x69C), a3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A9150);
@@ -8260,7 +8273,30 @@ extern "C" void func_001B0C08(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0D30);
+#ifdef SKIP_ASM
+extern char D_004637B0[];
+
+extern "C" void func_001B0D30(void* self)
+{
+    *(int*)((char*)self + 0x6D4) = 0;
+    if (*(void**)((char*)self + 0x40) != 0) {
+        cFEVObj_001B0C08* o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004635F8));
+        if (o != 0) {
+            o->v08(0);
+        }
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
+        if (o != 0) {
+            o->v09(0);
+        }
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463618));
+        if (o != 0) {
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_004637B0));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0E10);
@@ -15603,7 +15639,26 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB9B0);
 
 extern "C" void* func_001BBC40(void* self);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BBA18);
+#ifdef SKIP_ASM
+extern "C" int func_001BBA18(void* self, const char* s)
+{
+    int hasDot = 0;
+    int hasAt = 0;
+    int n = strlen(s);
+    int i;
+    for (i = 0; i < n; i++) {
+        if (s[i] == '@')
+            hasAt = 1;
+        else if (s[i] == '.')
+            hasDot = 1;
+    }
+    if (hasAt)
+        return hasDot != 0;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BBAA8__FPv);
@@ -20588,7 +20643,23 @@ extern "C" void* func_001C2D18(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C2D90);
+#ifdef SKIP_ASM
+extern void* D_00468278[];
+
+extern "C" void* func_001C2D90(void* self)
+{
+    func_001A8500_3(self, 0, 0);
+    *(int*)((char*)self + 0x6E0) = 0;
+    *(int*)((char*)self + 0x6E4) = 0;
+    *(void***)((char*)self + 0x8) = D_00468278;
+    *(int*)((char*)self + 0x6E8) = 0;
+    for (int i = 0; i < 4; i++)
+        *(int*)((char*)self + 0x6D0 + i * 4) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C2E00);

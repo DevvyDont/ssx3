@@ -611,8 +611,117 @@ extern "C" void func_0019F3E8(void* self, sQuadRM* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F418);
+#ifdef SKIP_ASM
+extern "C" void func_0019F2D0(void* self);
+
+struct sVec_F418 {
+    float x, y, z, w;
+    sVec_F418() {}
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sVec_F418 Rot_F418(const sVec_F418& q, const sVec_F418& v)
+{
+    sVec_F418 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "+m"(dst)
+        : "m"(b)
+        : "memory");
+}
+
+// Moves the rider model's first transform by the vector v rotated into its current orientation.
+extern "C" void func_0019F418(void* self, sVec_F418* v)
+{
+    sVec_F418* pos = (sVec_F418*)((char*)self + 0xC30);
+    sVec_F418* rot = (sVec_F418*)((char*)self + 0xC40);
+    AddTo_F418(*pos, Rot_F418(*rot, *v));
+    func_0019F2D0(self);
+}
+#endif
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F488);
+#ifdef SKIP_ASM
+extern "C" void func_0019F2D0(void* self);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sQuat_F488 {
+    float x, y, z, w;
+    sQuat_F488() {}
+    sQuat_F488(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQuat_F488 QuatMul_F488(const sQuat_F488& a, const sQuat_F488& b)
+{
+    sQuat_F488 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// Turns the rider model's first transform about the given axis by the given angle.
+extern "C" void func_0019F488(void* self, sQuat_F488* axis, float angle)
+{
+    sQuat_F488* rot = (sQuat_F488*)((char*)self + 0xC40);
+    sQuat_F488 q;
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    sQuat_F488 r;
+    r.w = c;
+    r.x = s * axis->x;
+    r.y = s * axis->y;
+    r.z = s * axis->z;
+    q = r;
+    *rot = QuatMul_F488(*rot, q);
+    func_0019F2D0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F548);
@@ -627,8 +736,117 @@ extern "C" void func_0019F548(void* self, sQuadRM* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F578);
+#ifdef SKIP_ASM
+extern "C" void func_0019F2D0(void* self);
+
+struct sVec_F578 {
+    float x, y, z, w;
+    sVec_F578() {}
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sVec_F578 Rot_F578(const sVec_F578& q, const sVec_F578& v)
+{
+    sVec_F578 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "+m"(dst)
+        : "m"(b)
+        : "memory");
+}
+
+// Moves the rider model's first transform by the vector v rotated into its current orientation.
+extern "C" void func_0019F578(void* self, sVec_F578* v)
+{
+    sVec_F578* pos = (sVec_F578*)((char*)self + 0xC50);
+    sVec_F578* rot = (sVec_F578*)((char*)self + 0xC60);
+    AddTo_F578(*pos, Rot_F578(*rot, *v));
+    func_0019F2D0(self);
+}
+#endif
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F5E8);
+#ifdef SKIP_ASM
+extern "C" void func_0019F2D0(void* self);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sQuat_F5E8 {
+    float x, y, z, w;
+    sQuat_F5E8() {}
+    sQuat_F5E8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
+{
+    sQuat_F5E8 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// Turns the rider model's first transform about the given axis by the given angle.
+extern "C" void func_0019F5E8(void* self, sQuat_F5E8* axis, float angle)
+{
+    sQuat_F5E8* rot = (sQuat_F5E8*)((char*)self + 0xC60);
+    sQuat_F5E8 q;
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    sQuat_F5E8 r;
+    r.w = c;
+    r.x = s * axis->x;
+    r.y = s * axis->y;
+    r.z = s * axis->z;
+    q = r;
+    *rot = QuatMul_F5E8(*rot, q);
+    func_0019F2D0(self);
+}
+#endif
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
 #ifdef SKIP_ASM

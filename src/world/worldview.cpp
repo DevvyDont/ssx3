@@ -173,7 +173,88 @@ int func_003A9AB0(void* self)
 #endif
 
 INCLUDE_ASM("world/worldview", func_003A9AC0);
+//100%
 INCLUDE_ASM("world/worldview", func_003A9BB8);
+#ifdef SKIP_ASM
+extern "C" int func_003A8618(void* self, int a1);
+
+struct sV4_9BB8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSecInfo_9BB8 {
+    short f0;
+    unsigned short id;  // 0x02
+};
+
+struct sSection_9BB8;
+struct sSection_9BB8 {
+    float bmin[4];      // 0x00
+    float bmax[4];      // 0x10
+    sV4_9BB8 n0;        // 0x20
+    sV4_9BB8 n1;        // 0x30
+    char pad40[0x10];
+    sSection_9BB8* child0; // 0x50
+    sSection_9BB8* child1; // 0x54
+    sSecInfo_9BB8* info; // 0x58
+};
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_9BB8(const sV4_9BB8& a, const sV4_9BB8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline int overlap_9BB8(const sV4_9BB8* c, const sSection_9BB8* s)
+{
+    int r = 0;
+    if (c[0].x <= s->bmax[0] && c[1].x >= s->bmin[0] &&
+        c[0].y <= s->bmax[1] && c[1].y >= s->bmin[1] &&
+        c[0].z <= s->bmax[2] && c[1].z >= s->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+extern "C" void func_003A9BB8(void* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
+{
+    if (*ok == 0)
+        return;
+    if (!overlap_9BB8(box, sec))
+        return;
+    if (sec->info != 0) {
+        if (func_003A8618(*(void**)world, sec->info->id) == 0) {
+            *ok = 0;
+            return;
+        }
+    }
+    if (sec->child0 != 0) {
+        if (Dot_9BB8(sec->n0, box[0]) < 0.0f) {
+            func_003A9BB8(world, sec->child0, box, ok);
+            if (*ok == 0)
+                return;
+        }
+    }
+    if (sec->child1 != 0) {
+        if (Dot_9BB8(sec->n1, box[1]) < 0.0f)
+            func_003A9BB8(world, sec->child1, box, ok);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003A9D60);
@@ -954,7 +1035,36 @@ extern "C" int func_003AACA8(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AACE0);
+#ifdef SKIP_ASM
+extern "C" float func_0040D758(float);
+extern "C" float func_0040DA10(float);
+
+extern "C" float func_003AACE0(void* self, void* p, float arg)
+{
+    float prod = *(float*)((char*)p + 0x14) * *(float*)((char*)p + 0x18);
+    float v = prod / arg;
+    switch (*(char*)((char*)p + 0x64)) {
+    case 1:
+        return v * 100.0f;
+    case 2: {
+        float r;
+        // PORT: sqrt.s (sqrtf without errno check)
+        __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+        return r * 100.0f;
+    }
+    case 3:
+    {
+        float third = 0.33333334f;
+        float l = func_0040DA10(v);
+        return func_0040D758(l * third) * 100.0f;
+    }
+    default:
+        return 1e7f;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldview", func_003AAD98);
@@ -1448,7 +1558,48 @@ extern "C" int func_003AC358(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AC438);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern char D_2320[];
+extern char D_2358[];
+
+extern "C" char* func_003AC438(int a0, int a1, char* ctx, char* p)
+{
+    int done = 0;
+    int first = 1;
+    long tag;
+    do {
+        tag = *(long*)p;
+        switch (((int)((tag << 4) >> 32)) & 7) {
+        case 3: {
+            *(int*)(p + 4) = *(int*)(ctx + 0x24) + *(int*)(p + 4);
+            p += 0x10;
+            tag = *(long*)p;
+            int* ap = (int*)(p + 4);
+            *ap = *(int*)(ctx + 0x24) + *ap;
+            int qwc = ((int)tag) & 0xFFFF;
+            p += 0x10;
+            char* e = *(char**)ap;
+            e += (qwc - 1) * 0x10;
+            if (first) {
+                *(int*)(e + 8) = ((unsigned int)D_2320 >> 3) | 0x14000000;
+                first = 0;
+            } else {
+                *(int*)(e + 8) = ((unsigned int)D_2358 >> 3) | 0x14000000;
+            }
+            break;
+        }
+        case 6:
+            p += 0x10;
+            done = 1;
+            break;
+        }
+    } while (done == 0);
+    return p;
+}
+#endif
 
 INCLUDE_ASM("world/worldview", func_003AC508);
 
