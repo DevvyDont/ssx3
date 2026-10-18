@@ -224,7 +224,47 @@ void* func_0015E030(void* self)
 
 INCLUDE_ASM("camera/camera", func_0015E050);
 
-INCLUDE_ASM("camera/camera", func_0015E2A8);
+//100%
+struct sCamTune_0015E2A8 {
+    float a;      // 0x0
+    float b;      // 0x4
+    float c;      // 0x8
+    float d;      // 0xC
+    float g[4][4]; // 0x10
+};
+
+extern sCamTune_0015E2A8 D_004C53E0;
+extern int D_004C5430[5];
+
+// Resets the camera tuning table to its defaults.
+extern "C" void func_0015E2A8(void)
+{
+    D_004C53E0.a = 0.05f;
+    D_004C53E0.b = 0.01f;
+    D_004C53E0.c = 0.4f;
+    D_004C53E0.d = 20000.0f;
+    D_004C5430[0] = 0;
+    D_004C53E0.g[0][0] = 0.02f;
+    D_004C53E0.g[0][1] = 0.01366f;
+    D_004C53E0.g[0][2] = 0.07f;
+    D_004C53E0.g[0][3] = -1.0f;
+    D_004C5430[1] = 1;
+    D_004C53E0.g[1][0] = 0.02f;
+    D_004C53E0.g[1][1] = 0.01366f;
+    D_004C53E0.g[1][2] = 0.08f;
+    D_004C53E0.g[1][3] = -1.0f;
+    D_004C5430[2] = 1;
+    D_004C53E0.g[2][0] = 0.02f;
+    D_004C53E0.g[2][1] = 0.01366f;
+    D_004C53E0.g[2][2] = 0.09f;
+    D_004C53E0.g[2][3] = -1.0f;
+    D_004C5430[3] = 1;
+    D_004C53E0.g[3][0] = 0.1f;
+    D_004C53E0.g[3][1] = 0.03f;
+    D_004C53E0.g[3][2] = 1.4f;
+    D_004C53E0.g[3][3] = -1.0f;
+    D_004C5430[4] = 1;
+}
 
 INCLUDE_ASM("camera/camera", func_0015E360);
 
@@ -2219,7 +2259,56 @@ void func_00162310(void* self, int val)
     *(int*)((char*)self + 0x30) = val;
 }
 
-INCLUDE_ASM("camera/camera", func_00162318);
+//100%
+extern void* D_0045BBC0[];
+extern cQuad128 D_004FF120_q162318 __asm__("D_004FF120");
+extern "C" float func_00167D88(void);
+// PORT: these take an unused self; they are called here with none.
+float func_00167D98_0() __asm__("func_00167D98");
+float func_00167DA8_0() __asm__("func_00167DA8");
+struct sCamFilter;
+extern "C" void func_00167DB8(sCamFilter* self, float value);
+
+// Constructor: base ctor, five splines, the filter and default tuning.
+extern "C" void* func_00162318(void* self)
+{
+    func_001622B0(self);
+    char* p = (char*)self;
+    sCamFilter* filter = (sCamFilter*)(p + 0x340);
+    *(void***)(p + 0x10) = D_0045BBC0;
+    func_0031D5E8(p + 0x304);
+    func_0031D5E8(p + 0x310);
+    func_0031D5E8(p + 0x31C);
+    func_0031D5E8(p + 0x328);
+    func_0031D5E8(p + 0x334);
+    *(float*)(p + 0x380) = func_00167D88();
+    *(float*)(p + 0x384) = func_00167D98_0();
+    *(float*)(p + 0x388) = func_00167DA8_0();
+    func_00167DB8(filter, 0.0f);
+    *(cQuad128*)(p + 0x40) = D_004FF130;
+    *(int*)(p + 0x54) = 0;
+    *(int*)(p + 0xC) = 0x54;
+    *(int*)(p + 0x50) = 0;
+    *(int*)(p + 0x58) = 0;
+    *(cQuad128*)(p + 0x90) = D_004FF120_q162318;
+    *(float*)(p + 0x1D0) = 200.0f;
+    *(int*)(p + 0x1D4) = 0;
+    *(float*)(p + 0x1D8) = *(float*)(p + 0x54);
+    *(float*)(p + 0x1DC) = 1.0f;
+    *(float*)(p + 0x1E0) = 10.0f;
+    *(float*)(p + 0x1E4) = *(float*)(p + 0x54);
+    *(int*)(p + 0x2C0) = 5000;
+    *(int*)(p + 0x2D0) = 0;
+    *(int*)(p + 0x2D8) = 0;
+    *(cQuad128*)(p + 0xC0) = D_004FF120_q162318;
+    *(cQuad128*)(p + 0xD0) = D_004FF120_q162318;
+    *(cQuad128*)(p + 0xE0) = D_004FF120_q162318;
+    *(float*)p = 0.7853981852531433f;
+    *(float*)(p + 0x388) = 0.0012785084545612335f;
+    *(float*)(p + 0x384) = *(float*)(p + 0x54);
+    *(float*)(p + 0x380) = 0.01139452401548624f;
+    return self;
+}
 
 //100%
 extern void* D_0045BBC0[];

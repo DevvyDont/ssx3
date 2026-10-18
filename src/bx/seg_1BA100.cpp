@@ -643,11 +643,186 @@ extern "C" void func_002BA208(Arg_A208* arg, int v) {
     arg->vals[arg->o->sub.idx] = v;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BA448);
+//100%
+struct Rec_A448 { signed char v; char pad[0x17]; };
+struct Q_A448 { int a, b, c, d; };
+struct Obj_A448 {
+    int pad0;
+    Rec_A448 cur;
+    volatile int idx;
+    Rec_A448* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_A448* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BA6B0);
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BA920);
+struct Outer_A448 { char pad[0x1D8]; Obj_A448 sub; };
+struct Arg_A448 { Outer_A448* o; int* vals; int* vals2; };
+extern "C" void func_002BA448(Arg_A448* arg, int v, int v2) {
+    Outer_A448* o = arg->o;
+    Obj_A448* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+}
+
+
+//100%
+struct Rec_A6B0 { signed char v; char pad[0x17]; };
+struct Q_A6B0 { int a, b, c, d; };
+struct Obj_A6B0 {
+    int pad0;
+    Rec_A6B0 cur;
+    volatile int idx;
+    Rec_A6B0* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_A6B0* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+
+struct Outer_A6B0 { char pad[0x1D8]; Obj_A6B0 sub; };
+struct Arg_A6B0 { Outer_A6B0* o; int* vals; int* vals2; };
+extern "C" void func_002906B8(void* arg);
+extern "C" void func_002BA6B0(Arg_A6B0* arg, int v, int v2) {
+    Outer_A6B0* o = arg->o;
+    Obj_A6B0* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+    func_002906B8(arg);
+}
+
+
+//100%
+struct Rec_A920 { signed char v; char pad[0x17]; };
+struct Q_A920 { int a, b, c, d; };
+struct Obj_A920 {
+    int pad0;
+    Rec_A920 cur;
+    volatile int idx;
+    Rec_A920* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_A920* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+
+struct Outer_A920 { char pad[0x1D8]; Obj_A920 sub; };
+struct Arg_A920 { Outer_A920* o; int* vals; int* vals2; };
+extern "C" void func_002BA920(Arg_A920* arg, int v, int v2, int v3) {
+    Outer_A920* o = arg->o;
+    Obj_A920* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+    Outer_A920* o2 = arg->o;
+    Obj_A920* q = &o2->sub;
+    q->vals[o2->sub.idx] = v3;
+    // Clamp the value to 0..127 as MAX(MIN(v, 127), 0); each use re-reads it.
+    q->recs[o2->sub.idx].v = ((q->vals[q->idx] < 127 ? q->vals[q->idx] : 127) < 0 ? 0
+                         : (q->vals[q->idx] < 127 ? q->vals[q->idx] : 127));
+    func_002906B8(arg);
+}
+
+
 
 //100%
 extern "C" int func_002BAC30(void *arg0) {
@@ -945,7 +1120,45 @@ extern "C" void func_002BB140(void *self, int flags) {
     }
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BB1D0);
+//100%
+// Frees the old 12-byte entry array (as func_002BB140 does) and allocates n fresh entries
+// behind a 16-byte count header.
+void* operator_new_B1D0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00483C68[];
+extern "C" void* func_002BB370(void* arg0);
+extern "C" void func_002BB1D0(void *self, int n) {
+    S12_B140 *arr = *(S12_B140**)((char*)self + 4);
+    S12_B140 **slot;
+    char *mem;
+    S12_B140 *a;
+    if (arr != 0) {
+        S12_B140 *p = arr + *(int*)((char*)arr - 0x10);
+        if (arr != p) {
+            do {
+                p--;
+                func_002BB390(p, 0);
+            } while (*(S12_B140**)((char*)self + 4) != p);
+        }
+        cMemMan_free((char*)*(S12_B140**)((char*)self + 4) - 0x10);
+    }
+    *(int*)self = n;
+    slot = (S12_B140**)((char*)self + 4);
+    mem = (char*)operator_new_B1D0(n * sizeof(S12_B140) + 0x10, D_00483C68, 0x20000000, 0);
+    a = (S12_B140*)(mem + 0x10);
+    *(int*)mem = n;
+    {
+        S12_B140 *e = a;
+        int k = n - 1;
+        if (n != 0) {
+            do {
+                func_002BB370(e);
+                k--;
+                e++;
+            } while (k != -1);
+        }
+    }
+    *slot = a;
+}
 
 //100%
 extern "C" void func_002BB3F0(void *);
@@ -1594,7 +1807,47 @@ extern "C" void *func_002BC980(void *arg0) {
     return arg0;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BC9B0);
+//100%
+// Query impl constructor: clears eight pairs, copies the default pair into each slot pair, sets weights.
+struct sPair_002BC9B0
+{
+    int a;
+    int b;
+};
+extern sPair_002BC9B0 D_004A53D0_2BC9B0 __asm__("D_004A53D0");
+extern char D_00484290[];
+struct sQuery_002BC9B0
+{
+    float minValue;         // 0x00
+    char* vtable;           // 0x04
+    sPair_002BC9B0 p[8];    // 0x08
+    float w0;               // 0x48
+    float w1;               // 0x4C
+    float w2;               // 0x50
+    float w3;               // 0x54
+};
+extern "C" void* func_002BC9B0(sQuery_002BC9B0* o)
+{
+    o->vtable = D_00484290;
+    o->minValue = -99999.0f;
+    o->p[0].a = o->p[0].b = 0;
+    o->p[1].a = o->p[1].b = 0;
+    o->p[2].a = o->p[2].b = 0;
+    o->p[3].a = o->p[3].b = 0;
+    o->p[4].a = o->p[4].b = 0;
+    o->p[5].a = o->p[5].b = 0;
+    o->p[6].a = o->p[6].b = 0;
+    o->p[7].a = o->p[7].b = 0;
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[0] = o->p[1] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[2] = o->p[3] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[4] = o->p[5] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[6] = o->p[7] = t; }
+    o->w1 = 1.0f;
+    o->w3 = 0.75f;
+    o->w0 = 1.0f;
+    o->w2 = 0.75f;
+    return o;
+}
 
 //100%
 extern char D_00484058[];
@@ -1854,7 +2107,52 @@ extern "C" void func_002BD5A8(void *self, void *p, float f) {
     o->vt();
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BD698);
+//100%
+// Blends 19 channel values toward p's by f squared, keeping p's raw value beside each.
+extern "C" void func_002BD698(void *self, void *p, float f) {
+    cD5A8 *o = (cD5A8*)self;
+    o->vt();
+    f = f * f;
+    *(float*)((char*)self + 0x8) = f * *(float*)((char*)p + 0x4) + (1.0f - f) * *(float*)((char*)self + 0x8);
+    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 0x4);
+    *(float*)((char*)self + 0x10) = f * *(float*)((char*)p + 0x8) + (1.0f - f) * *(float*)((char*)self + 0x10);
+    *(float*)((char*)self + 0x14) = *(float*)((char*)p + 0x8);
+    *(float*)((char*)self + 0x18) = f * *(float*)((char*)p + 0xC) + (1.0f - f) * *(float*)((char*)self + 0x18);
+    *(float*)((char*)self + 0x1C) = *(float*)((char*)p + 0xC);
+    *(float*)((char*)self + 0x20) = f * *(float*)((char*)p + 0x10) + (1.0f - f) * *(float*)((char*)self + 0x20);
+    *(float*)((char*)self + 0x24) = *(float*)((char*)p + 0x10);
+    *(float*)((char*)self + 0x28) = f * *(float*)((char*)p + 0x14) + (1.0f - f) * *(float*)((char*)self + 0x28);
+    *(float*)((char*)self + 0x2C) = *(float*)((char*)p + 0x14);
+    *(float*)((char*)self + 0x30) = f * *(float*)((char*)p + 0x18) + (1.0f - f) * *(float*)((char*)self + 0x30);
+    *(float*)((char*)self + 0x34) = *(float*)((char*)p + 0x18);
+    *(float*)((char*)self + 0x38) = f * *(float*)((char*)p + 0x1C) + (1.0f - f) * *(float*)((char*)self + 0x38);
+    *(float*)((char*)self + 0x3C) = *(float*)((char*)p + 0x1C);
+    *(float*)((char*)self + 0x40) = f * *(float*)((char*)p + 0x20) + (1.0f - f) * *(float*)((char*)self + 0x40);
+    *(float*)((char*)self + 0x44) = *(float*)((char*)p + 0x20);
+    *(float*)((char*)self + 0x48) = f * *(float*)((char*)p + 0x24) + (1.0f - f) * *(float*)((char*)self + 0x48);
+    *(float*)((char*)self + 0x4C) = *(float*)((char*)p + 0x24);
+    *(float*)((char*)self + 0x50) = f * *(float*)((char*)p + 0x28) + (1.0f - f) * *(float*)((char*)self + 0x50);
+    *(float*)((char*)self + 0x54) = *(float*)((char*)p + 0x28);
+    *(float*)((char*)self + 0x58) = f * *(float*)((char*)p + 0x2C) + (1.0f - f) * *(float*)((char*)self + 0x58);
+    *(float*)((char*)self + 0x5C) = *(float*)((char*)p + 0x2C);
+    *(float*)((char*)self + 0x60) = f * *(float*)((char*)p + 0x30) + (1.0f - f) * *(float*)((char*)self + 0x60);
+    *(float*)((char*)self + 0x64) = *(float*)((char*)p + 0x30);
+    *(float*)((char*)self + 0x68) = f * *(float*)((char*)p + 0x34) + (1.0f - f) * *(float*)((char*)self + 0x68);
+    *(float*)((char*)self + 0x6C) = *(float*)((char*)p + 0x34);
+    *(float*)((char*)self + 0x70) = f * *(float*)((char*)p + 0x38) + (1.0f - f) * *(float*)((char*)self + 0x70);
+    *(float*)((char*)self + 0x74) = *(float*)((char*)p + 0x38);
+    *(float*)((char*)self + 0x78) = f * *(float*)((char*)p + 0x3C) + (1.0f - f) * *(float*)((char*)self + 0x78);
+    *(float*)((char*)self + 0x7C) = *(float*)((char*)p + 0x3C);
+    *(float*)((char*)self + 0x80) = f * *(float*)((char*)p + 0x40) + (1.0f - f) * *(float*)((char*)self + 0x80);
+    *(float*)((char*)self + 0x84) = *(float*)((char*)p + 0x40);
+    *(float*)((char*)self + 0x88) = f * *(float*)((char*)p + 0x44) + (1.0f - f) * *(float*)((char*)self + 0x88);
+    *(float*)((char*)self + 0x8C) = *(float*)((char*)p + 0x44);
+    *(float*)((char*)self + 0x90) = f * *(float*)((char*)p + 0x48) + (1.0f - f) * *(float*)((char*)self + 0x90);
+    *(float*)((char*)self + 0x94) = *(float*)((char*)p + 0x48);
+    *(float*)((char*)self + 0x98) = f * *(float*)((char*)p + 0x4C) + (1.0f - f) * *(float*)((char*)self + 0x98);
+    *(float*)((char*)self + 0x9C) = *(float*)((char*)p + 0x4C);
+    o->vt();
+}
 
 //100%
 class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
@@ -2028,7 +2326,29 @@ extern "C" int func_002BDE30(char *a, char *b) {
     return 1;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
+//100%
+extern "C" int func_002BDEE0(void *a, void *b) {
+    if (*(float*)((char*)a + 0x8) != *(float*)((char*)b + 0x4)) return 0;
+    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 0x8)) return 0;
+    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
+    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
+    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
+    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+    if (*(float*)((char*)a + 0x38) != *(float*)((char*)b + 0x1C)) return 0;
+    if (*(float*)((char*)a + 0x40) != *(float*)((char*)b + 0x20)) return 0;
+    if (*(float*)((char*)a + 0x48) != *(float*)((char*)b + 0x24)) return 0;
+    if (*(float*)((char*)a + 0x50) != *(float*)((char*)b + 0x28)) return 0;
+    if (*(float*)((char*)a + 0x58) != *(float*)((char*)b + 0x2C)) return 0;
+    if (*(float*)((char*)a + 0x60) != *(float*)((char*)b + 0x30)) return 0;
+    if (*(float*)((char*)a + 0x68) != *(float*)((char*)b + 0x34)) return 0;
+    if (*(float*)((char*)a + 0x70) != *(float*)((char*)b + 0x38)) return 0;
+    if (*(float*)((char*)a + 0x78) != *(float*)((char*)b + 0x3C)) return 0;
+    if (*(float*)((char*)a + 0x80) != *(float*)((char*)b + 0x40)) return 0;
+    if (*(float*)((char*)a + 0x88) != *(float*)((char*)b + 0x44)) return 0;
+    if (*(float*)((char*)a + 0x90) != *(float*)((char*)b + 0x48)) return 0;
+    if (*(float*)((char*)a + 0x98) != *(float*)((char*)b + 0x4C)) return 0;
+    return 1;
+}
 
 //100%
 extern "C" int func_002BE078(void *arg0, void *arg1) {
@@ -2384,7 +2704,87 @@ extern "C" void func_002BECC8(char* self, Stream_ECC8* s) {
     Wr_ECC8(s, self, 4);
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BEE48);
+//100%
+// Streams the 19 channel values, each followed by the 4-byte header at self.
+struct VE_EE48 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BEE48(char *self, char *s) {
+    VE_EE48 *e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x8, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x18, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x20, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x28, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x30, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x38, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x40, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x48, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x50, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x58, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x60, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x68, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x70, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x78, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x80, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x88, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x90, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x98, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+}
 
 //100%
 struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
@@ -2606,7 +3006,87 @@ extern "C" void func_002BFD30(char* self, Stream_FD30* s) {
     Wr_FD30(s, self, 4);
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BFEB0);
+//100%
+// Streams the 19 channel values, each followed by the 4-byte header at self.
+struct VE_FEB0 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BFEB0(char *self, char *s) {
+    VE_FEB0 *e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x8, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x18, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x20, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x28, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x30, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x38, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x40, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x48, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x50, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x58, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x60, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x68, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x70, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x78, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x80, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x88, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x90, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x98, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+}
 
 //100%
 struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };

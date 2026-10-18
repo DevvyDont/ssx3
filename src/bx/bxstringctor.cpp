@@ -1984,7 +1984,27 @@ extern "C" void func_0026ADF0(void* self)
     func_0026B880(self, p);
 }
 
-INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
+//100%
+void cMemMan_free(void*);
+
+// Loads a path file: frees the old buffer, reads the new one and parses its header.
+extern "C" void func_0026AE70(void* self, char* name)
+{
+    int header;
+    void* old = *(void**)((char*)self + 0x48);
+    if (old) {
+        cMemMan_free(old);
+    } else {
+        func_0026ADA8(self, name);
+    }
+    *(void**)((char*)self + 0x48) = 0;
+    char* p = (char*)func_003E22F0(name, 0);
+    *(char**)((char*)self + 0x48) = p;
+    func_0026BA68_2(&header, p);
+    p += 4;
+    p += func_0026B410(self, p);
+    cPathSys_resolvePaths(self, p);
+}
 
 //100%
 void cMemMan_free(void*);
@@ -2031,5 +2051,46 @@ int func_0026AF98_impl(void* self, void* a1, void** out, int maxOut)
 
 INCLUDE_ASM("bx/bxstringctor", func_0026AFB8);
 
-INCLUDE_ASM("bx/bxstringctor", func_0026B178);
+//100%
+// Collects up to maxOut boxes nearest to pos: first the ones containing it, then by distance.
+static inline int Min_0026B178(int a, int b) { return a < b ? a : b; }
+
+extern "C" int func_0026B178(void* self, float* pos, char** out, int maxOut)
+{
+    float dist[52];
+    int found = 0;
+    int i = 0;
+    int limit = Min_0026B178(*(int*)((char*)self + 0x10), maxOut);
+
+    for (; i < *(int*)((char*)self + 0x10); i++)
+    {
+        float d = func_0026A9B0((sBXBox*)(*(char**)((char*)self + 0x14) + i * 0x3C), pos);
+        dist[i] = d;
+        if (d == 0.0f)
+        {
+            dist[i] = 1e37f;
+            out[found] = *(char**)((char*)self + 0x14) + i * 0x3C;
+            found++;
+            if (found == limit)
+                break;
+        }
+    }
+
+    for (; found < limit; found++)
+    {
+        float best = dist[0];
+        int bi = 0;
+        for (i = 1; i < *(int*)((char*)self + 0x10); i++)
+        {
+            if (dist[i] < best)
+            {
+                best = dist[i];
+                bi = i;
+            }
+        }
+        dist[bi] = 1e37f;
+        out[found] = *(char**)((char*)self + 0x14) + bi * 0x3C;
+    }
+    return found;
+}
 

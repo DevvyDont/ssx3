@@ -127,7 +127,70 @@ void cRider_addRiderMetrix(cRider* self)
     cRiderMetrix_linkToRider_impl(metrix, self);
 }
 
-INCLUDE_ASM("ai/rider", func_0011BBE8);
+//100%
+extern "C" void* cBE_getBE();
+void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBELibrary_getCharacterID(int c);
+extern "C" int func_0014A0B0(int c);
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+extern "C" void* func_0014AD50(void* iface, int id);
+int func_0014D988(void* tbl, int g);
+extern "C" void* func_0014D998(void* tbl, int g);
+
+struct sItem_11BBE8 {
+    short a;
+    unsigned short flags;
+};
+
+struct sDb_11BBE8 {
+    char pad0[0x288];
+    short* map;                 // 0x288
+    char pad28C[0x4];
+    sItem_11BBE8 items[1];      // 0x290
+};
+
+struct sEnt_11BBE8 {
+    char pad0[0x4];
+    short item;                 // 0x04
+    char pad6[0x32];
+};
+
+static inline sItem_11BBE8* lookup_11BBE8(sDb_11BBE8* d, int i)
+{
+    short k = d->map[i];
+    if (k >= 0) {
+        return &d->items[k];
+    }
+    return 0;
+}
+
+extern "C" int func_0011BBE8(void* selfp, char** listp)
+{
+    char* self = (char*)selfp;
+    sEnt_11BBE8** list = (sEnt_11BBE8**)listp;
+    int n = 0;
+    void* iface = cBE_getInterface(cBE_getBE(), 9);
+    int g = cBELibrary_getCharacterID(*(int*)(self + 0x86C));
+    int alt = func_0014A0B0(*(int*)(self + 0x86C));
+    void* tbl = func_0014BDB8_noarg();
+    if (alt) {
+        g = alt;
+        sEnt_11BBE8* e = (sEnt_11BBE8*)func_0014D998(tbl, g);
+        int cnt = func_0014D988(tbl, g);
+        for (int i = 0; i < cnt; i++, e++)
+            list[n++] = e;
+        return n;
+    }
+    sDb_11BBE8* db = (sDb_11BBE8*)func_0014AD50(iface, *(int*)(self + 0x86C));
+    int cnt = func_0014D988(tbl, g);
+    sEnt_11BBE8* e = (sEnt_11BBE8*)func_0014D998(tbl, g);
+    for (int i = 0; i < cnt; i++, e++) {
+        if (lookup_11BBE8(db, e->item)->flags & 0x10)
+            list[n++] = e;
+    }
+    return n;
+}
 
 //100%
 extern "C" int func_004165A8(const void* a, const void* b);

@@ -72,7 +72,32 @@ extern "C" void func_00313AD8(void* self, int key)
     n->unk8 = 0;
 }
 
-INCLUDE_ASM("animation/animsequencer", func_00313B38);
+//100%
+void operator_delete(int* ptr);
+
+struct sSeqNode313B38
+{
+    int key;
+    int active;
+    float weight;
+    sSeqNode313B38* next;
+};
+
+// Removes the first inactive node matching key and weight.
+extern "C" void func_00313B38(void* self, int key, float weight)
+{
+    sSeqNode313B38** link = (sSeqNode313B38**)((char*)self + 0xAC);
+    for (; *link != 0; link = &(*link)->next)
+    {
+        sSeqNode313B38* n = *link;
+        if (n->key == key && n->weight == weight && n->active == 0)
+        {
+            *link = n->next;
+            operator_delete((int*)n);
+            return;
+        }
+    }
+}
 
 //100%
 void operator_delete(int* ptr);

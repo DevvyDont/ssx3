@@ -384,7 +384,22 @@ extern "C" int func_0014B2F8(void* self, int group)
     return n;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014B378);
+//100%
+// Copies the entries of a group whose byte 1 is clear into out; returns how many.
+extern "C" int func_0014B378(void* self, int group, sBEGroupEntry* out)
+{
+    int count = func_0014D988(D_004A6750, group);
+    sBEGroupEntry* e = (sBEGroupEntry*)func_0014D998((sBELibTables*)D_004A6750, group);
+    int n = 0;
+    for (int i = 0; i < count; i++, e++) {
+        if (e->flag == 0) {
+            *out = *e;
+            n++;
+            out++;
+        }
+    }
+    return n;
+}
 
 //100%
 extern int D_004A6CA8[];
@@ -517,13 +532,47 @@ extern "C" void* func_0014B700(void* self, unsigned int i)
     return 0;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014B7A8);
+//100%
+struct sBEEntry38_14B7A8 {
+    char pad_0x00[4];
+    short key;          // 0x4
+    char pad_0x06[0x26];
+    char* name;         // 0x2C
+    char pad_0x30[8];
+};
 
-extern "C" int func_0014B7A8(void* self, int profile, int character, int a);
+extern "C" int func_0014B988_14B7A8(void* self, int a, int b, sBEEntry38_14B7A8* e, char* out) __asm__("func_0014B988");
+extern "C" int func_004165A8(const char* a, const char* b);
+
+// Builds the display names of a group's owned entries into names[], skipping duplicates.
+extern "C" int func_0014B7A8(void* self, int a, int b, char (*names)[0x100])
+{
+    int n = 0;
+    sBELibTables* tbl = (sBELibTables*)func_0014BDB8_0();
+    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, a, b);
+    sBEEntry38_14B7A8* e = (sBEEntry38_14B7A8*)func_0014D998(tbl, b);
+    int count = func_0014D988(tbl, b);
+    for (int i = 0; i < count; i++, e++) {
+        if (e->name == 0) continue;
+        if (!(getEntry_14AFB0(prof, e->key)->flags & 0x10)) continue;
+        char* out = names[n];
+        if (func_0014B988_14B7A8(self, a, b, e, out) == 0) continue;
+        int k;
+        for (k = n - 1; k >= 0; k--) {
+            if (func_004165A8(out, names[k]) == 0) {
+                n--;
+                break;
+            }
+        }
+        n++;
+    }
+    return n;
+}
+
 extern "C" int func_0014B920(void* self, int slot, int a)
 {
     int profile = func_0014AC50(slot);
-    return func_0014B7A8(self, profile, func_0014AC30(slot), a);
+    return func_0014B7A8(self, profile, func_0014AC30(slot), (char (*)[0x100])a);
 }
 
 //100%
@@ -584,7 +633,39 @@ extern "C" int func_0014BBA0(void* self, int slot, sBEEntry38_14B988* a, char* b
     return func_0014B988(self, profile, func_0014AC30(slot), a, b);
 }
 
-INCLUDE_ASM("be/belibrary", func_0014BC18);
+//100%
+extern "C" int func_004165A8(const char* a, const char* b);
+
+struct sBEEntry38_14BC18 {
+    char pad_0x00[4];
+    short key;          // 0x4
+    char pad_0x06[0x22];
+    char* name;         // 0x28
+    char pad_0x2C[0xC];
+};
+
+// Collects the distinct names of a group's owned entries into names[]; returns how many.
+extern "C" int func_0014BC18(void* self, int a, int b, char (*names)[0x100])
+{
+    int n = 0;
+    sBELibTables* tbl = (sBELibTables*)func_0014BDB8_0();
+    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, a, b);
+    int count = func_0014D988(tbl, b);
+    sBEEntry38_14BC18* e = (sBEEntry38_14BC18*)func_0014D998(tbl, b);
+    for (int i = 0; i < count; i++, e++) {
+        char* s = e->name;
+        if (s == 0) continue;
+        if (!(getEntry_14AFB0(prof, e->key)->flags & 0x10)) continue;
+        int k;
+        for (k = n - 1; k >= 0; k--) {
+            if (func_004165A8(s, names[k]) == 0) break;
+        }
+        if (k >= 0) continue;
+        strcpy(names[n], s);
+        n++;
+    }
+    return n;
+}
 
 //100%
 void* func_0014BD78(void* self)
@@ -1023,7 +1104,56 @@ extern "C" void func_0014D240(void* self)
     p->buf2 = 0;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014D368);
+//100%
+struct sLibItem_0014D368 {
+    signed char category; // 0x00
+    signed char sub;      // 0x01
+    short pad_0x02;
+    short id;             // 0x04
+    char pad_0x06[0x12];
+    int key18;            // 0x18
+    char pad_0x1C[0xC];
+    int key28;            // 0x28
+    int key2C;            // 0x2C
+    char pad_0x30[0x8];
+};
+
+struct sLib_0014D368 {
+    int field_0x0;
+    sLibItem_0014D368* items; // 0x04
+    char pad_0x08[0x14];
+    int itemCount;            // 0x1C
+    char pad_0x20[0xC];
+    int catCount[30];         // 0x2C
+    int catStart[30];         // 0xA4
+};
+
+// Returns the index of an item: directly if it points into the table, else by matching its keys.
+extern "C" int func_0014D368(sLib_0014D368* self, sLibItem_0014D368* item)
+{
+    sLibItem_0014D368* items = self->items;
+    int idx = item - items;
+    if (idx < 0 || idx >= self->itemCount) {
+        int start = self->catStart[item->category];
+        int end = start + self->catCount[item->category];
+        int i = start;
+        if (i < end) {
+            sLibItem_0014D368* p = &items[start];
+            do {
+                if (p->id == item->id && p->sub == item->sub && p->key28 == item->key28 &&
+                    p->key18 == item->key18 && p->key2C == item->key2C) {
+                    idx = i;
+                    goto done;
+                }
+                i++;
+                p++;
+            } while (i < end);
+        }
+        idx = -1;
+    }
+done:
+    return idx;
+}
 
 //100%
 extern "C" int func_0014D448(sBEGroupTable* self, int g, int key)
@@ -1248,7 +1378,53 @@ extern "C" int func_0014DAA0(void* self, int a, int b)
     return func_0014DAC0(self, a, b, &out);
 }
 
-INCLUDE_ASM("be/belibrary", func_0014DAC0);
+//100%
+struct sLibEntry_0014DAC0 {
+    short field_0x0;
+    short key;      // 0x2
+    int field_0x4;
+    int field_0x8;
+};
+
+struct sLib_0014DAC0 {
+    int field_0x0;
+    int field_0x4;
+    sLibEntry_0014DAC0* entries; // 0x8
+    char pad_0xC[0x200];
+    int count[30];               // 0x20C
+    int start[30];               // 0x284
+};
+
+// Finds the first entry with this key in a sorted bucket; also counts matches.
+extern "C" int func_0014DAC0(void* self, int a, int b, int* out)
+{
+    sLib_0014DAC0* lib = (sLib_0014DAC0*)self;
+    *out = 0;
+    int n = lib->count[a];
+    if (n <= 0) {
+        return 0;
+    }
+    int start = lib->start[a];
+    int end = start + n;
+    int i = start;
+    sLibEntry_0014DAC0* found = 0;
+    if (i < end) {
+        do {
+            int off = i * 12;
+            sLibEntry_0014DAC0* e = (sLibEntry_0014DAC0*)(off + (int)lib->entries);
+            if (e->key == b) {
+                if (found == 0) {
+                    found = e;
+                }
+                (*out)++;
+            } else if (b < e->key) {
+                break;
+            }
+            i++;
+        } while (i < end);
+    }
+    return (int)found;
+}
 
 //100%
 struct sBEEntryC {

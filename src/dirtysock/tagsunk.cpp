@@ -2215,7 +2215,20 @@ extern "C" void func_0025DD08(void* self, const char* key, int def)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_0025DD68);
+//100%
+// Like func_0025DD08, but takes the key and default from the current entry of the list at 0x60.
+extern "C" void* func_003EE560(void*);
+
+extern "C" void func_0025DD68(void* self)
+{
+    if (*(int*)self != 0) {
+        char* e = (char*)func_003EE560(*(void**)((char*)self + 0x60));
+        if (e != 0) {
+            const char* key = e + 8;
+            func_003E8DC0(*(void**)((char*)self + 0x54), key, func_0025A730(self, key, *(int*)(e + 0x30)), 0x1388, (void*)func_00268D88, self);
+        }
+    }
+}
 
 //100%
 extern char D_00480488[];
@@ -2767,7 +2780,105 @@ extern "C" void func_0025EAA0(void* self, const char* value)
     func_003E8B10(*(void**)((char*)self + 0x54), 0x6F6E6C6E, buf, (int)func_00268E50, self);
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_0025EB00);
+//100%
+// Handles a user record: with no type code it parses the record's name fields, counts and
+// stats into a 0x10D message; any type other than 'uusr' becomes a 0x102 message.
+extern char D_004A31D8[];
+extern char D_004A2F38[];
+extern char D_004A31E0[];
+extern char D_004A31E8[];
+extern char D_004A31F0[];
+extern char D_004A31F8[];
+extern char D_004A3130[];
+extern void* D_00481110[];
+
+struct sMsgListNode_25EB00 {
+    sMsgListNode_25EB00* next;
+    sMsgListNode_25EB00* prev;
+    void* data;
+};
+
+struct sMsgListIter_25EB00 {
+    sMsgListNode_25EB00* node;
+    sMsgListIter_25EB00(sMsgListNode_25EB00* x) : node(x) {}
+    sMsgListIter_25EB00(const sMsgListIter_25EB00& x) : node(x.node) {}
+};
+
+struct sMsgList_25EB00 {
+    sMsgListNode_25EB00* head;
+    sMsgListIter_25EB00 end() { return head; }
+    sMsgListIter_25EB00 insert(sMsgListIter_25EB00 pos, void* const& x)
+    {
+        sMsgListNode_25EB00* tmp = (sMsgListNode_25EB00*)operator new(0xC, D_004804A8, 0x20000000, 0);
+        void** data = &tmp->data;
+        if (data != 0)
+            *data = x;
+        tmp->next = pos.node;
+        tmp->prev = pos.node->prev;
+        pos.node->prev->next = tmp;
+        pos.node->prev = tmp;
+        return tmp;
+    }
+};
+
+struct sUserStats_25EB00 { int a, b, c, d, e; };
+
+struct sUserMsg_25EB00 {
+    int kind;
+    void** vt;
+    char name[0x20];
+    char s2[0x20];
+    char s3[0x100];
+    int n2;                     // 0x148
+    int n1;                     // 0x14C
+    sUserStats_25EB00 stats;    // 0x150
+};
+
+extern "C" void func_0025EB00(char* self, char* msg)
+{
+    int type = *(int*)(msg + 0x8);
+    if (type == 0) {
+        char name[0x100];
+        char s2[0x100];
+        char s3[0x100];
+        char raw[0x20];
+        int st[0x10];
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31D8), name, 0x100, D_004A2F40);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F38), s2, 0x100, D_004A2F40);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E0), s3, 0x100, D_004A2F40);
+        int n1 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E8), -1);
+        int n2 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F0), -1);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F8), raw, 0x14, D_004A2F40);
+        int n3 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3130), 0);
+        cDirtysock_tag_TagFieldGetStructure(raw, st, 0x40, D_004A2F30);
+        sUserStats_25EB00 info;
+        info.a = n3;
+        info.b = st[2];
+        info.c = st[2] + st[3] + st[4];
+        info.d = st[6];
+        info.e = n1;
+        sUserMsg_25EB00* m = (sUserMsg_25EB00*)operator new(0x164, D_00480488, 0x20000000, 0);
+        m->kind = 0x10D;
+        m->vt = D_00481110;
+        m->n2 = n2;
+        m->n1 = n1;
+        strcpy(m->name, name);
+        strcpy(m->s2, s2);
+        strcpy(m->s3, s3);
+        m->stats = info;
+        sMsgList_25EB00* l = (sMsgList_25EB00*)(self + 0xF0);
+        void* mp = m;
+        l->insert(l->end(), mp);
+    } else if (type != 0x75757372) {
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = type;
+        sMsgList_25EB00* l = (sMsgList_25EB00*)(self + 0xF0);
+        void* mp = m;
+        l->insert(l->end(), mp);
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern char D_004A3200[];
@@ -4018,7 +4129,93 @@ void func_00261A20(void* self)
 {
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00261A28);
+//100%
+// PORT: TagFieldGetUnk is called here with a 4th (default) argument left in $a3.
+extern "C" void cDirtysock_tag_TagFieldGetUnk4(const char* tag, char* dst, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetUnk");
+extern "C" int func_002623B0(void* self, int name);
+extern "C" void func_00261CD0(char* self, char* name, char* text, char* date);
+extern "C" int func_00262A08(void* self, int name);
+extern "C" void func_002635A8(void* self, int i);
+extern "C" int func_003EDD70(const char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset);
+extern "C" char* func_004162D0(char* d, const char* s);
+extern char D_004A3358[];
+extern char D_004A3360[];
+extern char D_004A3368[];
+extern char D_004A3370[];
+extern char D_004A3378[];
+extern char D_00480E68[];
+extern char D_00480E78[];
+extern char D_004A2ED0[];
+
+struct sMsgListNode_00261A28 {
+    sMsgListNode_00261A28* next;
+    sMsgListNode_00261A28* prev;
+    void* data;
+};
+
+struct sMsgListIter_00261A28 {
+    sMsgListNode_00261A28* node;
+    sMsgListIter_00261A28(sMsgListNode_00261A28* x) : node(x) {}
+    sMsgListIter_00261A28(const sMsgListIter_00261A28& x) : node(x.node) {}
+};
+
+static inline sMsgListIter_00261A28 sMsgList_00261A28_insert(sMsgListIter_00261A28 pos, void* x)
+{
+    sMsgListNode_00261A28* tmp = (sMsgListNode_00261A28*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void sTagVec_00261A28_remove(char* self, char* name)
+{
+    for (unsigned int i = 0; i < (unsigned int)((*(int*)(self + 0xB0) - *(int*)(self + 0xAC)) >> 2); i++) {
+        void* e = func_00263630(self, i);
+        if (e != 0 && func_004165A8(*(void**)e, name) == 0) {
+            func_002635A8(self, i);
+            return;
+        }
+    }
+}
+
+struct sMsg_00261A28 {
+    int kind;
+    void** vt;
+    sMsg_00261A28(int k) : kind(k), vt(D_004812B0) {}
+};
+
+extern "C" void func_00261A28(char* self, char* msg)
+{
+    char raw[0x800];
+    char text[0x8D0];
+    char name[0x40];
+    char date[0x40];
+    char flag[0x10];
+    int t0, t1, t2, t3, t4, t5;
+
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3358), flag, 2, D_00480E68);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3360), name, 0x40, D_00480E68);
+    if (func_002623B0(self, (int)name))
+        return;
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3368), text, 0x8CF, D_004A2ED0);
+    cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3370), raw, 0x800, D_00480E68);
+    func_004162D0(text, raw);
+    func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3378), &t0, &t1, &t2, &t3, &t4, &t5, 0);
+    sprintf(date, D_00480E78, t1, t2, t0, t3, t4);
+    func_00261CD0(self, name, text, date);
+    if (func_00262A08(self, (int)name) >= 0x1F) {
+        sTagVec_00261A28_remove(self, name);
+    }
+    int kind = 0x109;
+    char* g = (char*)D_004A3028;
+    sMsg_00261A28* m = new (D_00480488, 0x20000000, 0) sMsg_00261A28(kind);
+    sMsgList_00261A28_insert(*(sMsgListNode_00261A28**)(g + 0xF0), m);
+}
 
 //100%
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -5034,7 +5231,36 @@ extern "C" int func_002634C0(void* self, int a1, void* a, void* b)
     return (int)func_0041AA88(a, b);
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00263500);
+//100%
+// Removes obj from the pointer vector at 0xA8 and deletes it. The search walks back from
+// mFinish itself (not mFinish - 1) and stops before mStart, as the retail code does.
+struct sVEntry_263500 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_00263500(char* self, void* obj)
+{
+    void** p = *(void***)(self + 0xB0);
+    if (p == *(void***)(self + 0xAC))
+        return;
+    do {
+        void* x = *p;
+        if (x == obj) {
+            sObjVec_262EC0* v = (sObjVec_262EC0*)(self + 0xA8);
+            if (p + 1 != *(void***)(self + 0xB0))
+                sObjVec_262EC0_copy(p + 1, v->mFinish, p);
+            --*(void***)(self + 0xB0);
+            if (x != 0) {
+                sVEntry_263500* vt = *(sVEntry_263500**)((char*)x + 0xC);
+                vt[1].fn((char*)x + vt[1].delta, 3);
+            }
+            return;
+        }
+        p--;
+    } while (p != *(void***)(self + 0xAC));
+}
 
 //100%
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
@@ -6478,7 +6704,35 @@ extern "C" void func_00265908(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00265950);
+//100%
+// Constructor of the 8-byte singleton made by func_00265880: resets its state and the module globals.
+struct sDsHandler265950 { void* vtable; int f4; };
+extern sDsHandler265950 D_004A5B48;
+extern char D_00442A18[];
+extern int D_004A33D4;
+extern int D_004A33DC;
+extern int D_004A33E0;
+extern int D_004A33E4;
+extern void* D_004A33D8;
+extern char D_00537190[];
+extern "C" void func_003F7EE0(void* handler);
+extern "C" void* func_003E6448(void* dst, int c, int n);
+extern "C" void* func_002C22C8(void);
+
+extern "C" void func_00265950(void* self)
+{
+    ((int*)self)[0] = 1;
+    D_004A33D4 = 0;
+    ((int*)self)[1] = 0;
+    D_004A5B48.vtable = D_00442A18;
+    D_004A33E0 = 0;
+    D_004A33DC = 0;
+    D_004A33E4 = 0;
+    D_004A5B48.f4 = 0;
+    func_003F7EE0(&D_004A5B48);
+    func_003E6448(D_00537190, 0, 0x40);
+    D_004A33D8 = func_002C22C8();
+}
 
 //100%
 extern void* D_004A33D8;
@@ -7645,7 +7899,25 @@ extern "C" void func_002668E8(sSlots_668E8* self)
 
 INCLUDE_ASM("dirtysock/tagsunk", func_00266B80);
 
-INCLUDE_ASM("dirtysock/tagsunk", func_00266BA8);
+//100%
+// Pops the next byte pair from slot idx's ring; a zero byte leaves its output at -1.
+extern "C" int func_00266BA8(sSlots_668E8* self, int idx, int* a, int* b)
+{
+    *a = -1;
+    *b = -1;
+    if (self->enabled != 0 && idx < func_003F6348()) {
+        if (self->slot[idx].start < self->slot[idx].count) {
+            int k = ringIdx_668E8(self->slot[idx].start);
+            if (self->slot[idx].buf[k][0] != 0)
+                *a = self->slot[idx].buf[k][0];
+            if (self->slot[idx].buf[k][1] != 0)
+                *b = self->slot[idx].buf[k][1];
+            self->slot[idx].start++;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 //100%
 extern char D_004810A0[];
@@ -8372,7 +8644,26 @@ extern "C" void func_00268460(void* self, int flags)
     }
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_002684C0);
+//100%
+// Clones an 0xE3 message (sMsgE7F0).
+struct sMsgE3_2684C0 : sMsgE7F0 {
+    sMsgE3_2684C0(const char* n, const char* t, int o, int c, const sRecE7F0& r)
+    {
+        vt = D_00481190;
+        type = 0xE3;
+        cBXString_cBXString2(name, n);
+        cBXString_cBXString2(text, t);
+        on = o;
+        count = c;
+        rec = r;
+    }
+};
+
+extern "C" void* func_002684C0(void* self)
+{
+    sMsgE7F0* src = (sMsgE7F0*)self;
+    return new (D_00480488, 0x20000000, 0) sMsgE3_2684C0(*(const char**)src->name, *(const char**)src->text, src->on, src->count, src->rec);
+}
 
 //100%
 extern void* D_004812B0[];

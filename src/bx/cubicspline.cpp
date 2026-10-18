@@ -97,7 +97,22 @@ INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
 
 INCLUDE_ASM("bx/cubicspline", func_0031DEE0);
 
-INCLUDE_ASM("bx/cubicspline", func_0031E0E0);
+//100%
+// Samples the spline in 99 even steps from the first key to the end value at 0x4. The first, empty loop is in the original.
+extern "C" float func_0031DEE0(sCubicSpline* self, float x);
+
+extern "C" void func_0031E0E0(sCubicSpline* self)
+{
+    float start = ((sCubicSplineKeyK2*)self->data)->pad_0x10;
+    float end = self->f4;
+    float step = (end - start) * 0.01010101f;
+    float t;
+    float x;
+    for (t = start; t <= end; t += step)
+        ;
+    for (x = start; x <= end; x += step)
+        func_0031DEE0(self, x);
+}
 
 INCLUDE_ASM("bx/cubicspline", func_0031E190);
 
@@ -539,13 +554,316 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
     }
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031F018);
+//100%
+// dlmalloc 2.7 realloc() (no mmap support: an mmapped chunk fails with ENOMEM).
+struct sMChunk_31F018
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+    sMChunk_31F018* fd;          // 0x8
+    sMChunk_31F018* bk;          // 0xC
+};
 
-INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
+extern "C" void func_003E6574(void* d, void* s, int n);
 
-INCLUDE_ASM("bx/cubicspline", func_0031F4E8);
+extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
+{
+    char* av = *(char**)ms;
+    unsigned int nb;
+    sMChunk_31F018* oldp;
+    unsigned int oldsize;
+    sMChunk_31F018* newp;
+    unsigned int newsize;
+    char* newmem;
+    sMChunk_31F018* next;
+    sMChunk_31F018* remainder;
+    unsigned int remainder_size;
+    unsigned int head;
 
-INCLUDE_ASM("bx/cubicspline", func_0031F718);
+    if (oldmem == 0)
+        return func_0031E818(ms, bytes);
+
+    if (bytes >= (unsigned int)-32)
+        goto nomem;
+    nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
+
+    head = *(unsigned int*)((char*)oldmem - 4);
+    oldp = (sMChunk_31F018*)((char*)oldmem - 8);
+    oldsize = head & ~3;
+    if (head & 2)
+        goto nomem;
+
+    if (oldsize >= nb) {
+        newp = oldp;
+        newsize = oldsize;
+    } else {
+        next = (sMChunk_31F018*)((char*)oldp + oldsize);
+        if (next == *(sMChunk_31F018**)(av + 0x30)) {
+            if ((newsize = oldsize + (next->size & ~3)) >= nb + 16) {
+                *(unsigned int*)((int)oldmem - 4) = (head & 1) | nb;
+                *(sMChunk_31F018**)(av + 0x30) = (sMChunk_31F018*)((char*)oldp + nb);
+                ((sMChunk_31F018*)((char*)oldp + nb))->size = (newsize - nb) | 1;
+                return oldmem;
+            }
+        } else if (!(((sMChunk_31F018*)((char*)next + (next->size & ~1)))->size & 1) &&
+                   (newsize = oldsize + (next->size & ~3)) >= nb) {
+            sMChunk_31F018* bck;
+            sMChunk_31F018* fwd;
+            newp = oldp;
+            fwd = next->fd;
+            bck = next->bk;
+            fwd->bk = bck;
+            bck->fd = fwd;
+            goto split;
+        }
+
+        newmem = (char*)func_0031E818(ms, nb - 15);
+        if (newmem == 0)
+            return 0;
+        newp = (sMChunk_31F018*)(newmem - 8);
+        newsize = *(unsigned int*)(newmem - 4) & ~3;
+        if (newp == next) {
+            newsize += oldsize;
+            newp = oldp;
+        } else {
+            unsigned int copysize = oldsize - 4;
+            unsigned int* sp = (unsigned int*)oldmem;
+            unsigned int* dp = (unsigned int*)newmem;
+            unsigned int ncopies = copysize / 4;
+            if (ncopies > 9) {
+                func_003E6574(dp, sp, copysize);
+            } else {
+                dp[0] = sp[0];
+                dp[1] = sp[1];
+                dp[2] = sp[2];
+                if (ncopies > 4) {
+                    dp[3] = sp[3];
+                    dp[4] = sp[4];
+                    if (ncopies > 6) {
+                        dp[5] = sp[5];
+                        dp[6] = sp[6];
+                        if (ncopies > 8) {
+                            dp[7] = sp[7];
+                            dp[8] = sp[8];
+                        }
+                    }
+                }
+            }
+            func_0031ED60_E2D8(ms, oldmem);
+            return (char*)newp + 8;
+        }
+    }
+
+split:
+    remainder_size = newsize - nb;
+    if (remainder_size < 16) {
+        newp->size = (newp->size & 1) | newsize;
+        ((sMChunk_31F018*)((char*)newp + newsize))->size |= 1;
+    } else {
+        remainder = (sMChunk_31F018*)((char*)newp + nb);
+        newp->size = (newp->size & 1) | nb;
+        remainder->size = remainder_size | 1;
+        ((sMChunk_31F018*)((char*)remainder + remainder_size))->size |= 1;
+        func_0031ED60_E2D8(ms, (char*)remainder + 8);
+    }
+    return (char*)newp + 8;
+
+nomem:
+    *func_00415FB8() = 12;
+    return 0;
+}
+
+//100%
+// dlmalloc 2.7 memalign().
+extern "C" void* func_0031F2C8_impl(void* ms, unsigned int alignment, unsigned int bytes) __asm__("func_0031F2C8");
+extern "C" void* func_0031F2C8_impl(void* ms, unsigned int alignment, unsigned int bytes)
+{
+    unsigned int nb;
+    char* m;
+    char* p;
+    char* brk;
+    char* newp;
+    unsigned int newsize;
+    unsigned int leadsize;
+    unsigned int size;
+    unsigned int req;
+    unsigned int head;
+
+    if (alignment <= 16)
+        return func_0031E818(ms, bytes);
+
+    if (alignment < 16)
+        alignment = 16;
+
+    if ((alignment & (alignment - 1)) != 0) {
+        unsigned int a = 32;
+        while (a < alignment)
+            a <<= 1;
+        alignment = a;
+    }
+
+    req = bytes;
+    if (req >= (unsigned int)-32) {
+        *func_00415FB8() = 12;
+        return 0;
+    }
+    nb = (req + 4 + 15 < 16) ? 16 : (req + 4 + 15) & ~15;
+
+    m = (char*)func_0031E818(ms, nb + alignment + 16);
+    if (m == 0)
+        return 0;
+
+    p = m - 8;
+
+    if ((unsigned int)(m) % alignment != 0) {
+        brk = (char*)(((unsigned int)(m + alignment - 1)) & -alignment) - 8;
+        if ((unsigned int)(brk - p) < 16)
+            brk += alignment;
+
+        newp = brk;
+        leadsize = brk - p;
+        head = *(unsigned int*)((int)m - 4);
+        newsize = (head & ~3) - leadsize;
+
+        if (head & 2) {
+            *(unsigned int*)newp = *(unsigned int*)((int)m - 8) + leadsize;
+            *(unsigned int*)(newp + 4) = newsize | 2;
+            return newp + 8;
+        }
+
+        *(unsigned int*)(newp + 4) = newsize | 1;
+        *(unsigned int*)(newp + newsize + 4) |= 1;
+        *(unsigned int*)((int)m - 4) = (*(unsigned int*)((int)m - 4) & 1) | leadsize;
+        func_0031ED60_E2D8(ms, m);
+        p = newp;
+    }
+
+    if (!(*(unsigned int*)(p + 4) & 2)) {
+        size = *(unsigned int*)(p + 4) & ~3;
+        if (size > nb + 16) {
+            char* remainder = p + nb;
+            *(unsigned int*)(remainder + 4) = (size - nb) | 1;
+            *(unsigned int*)(p + 4) = (*(unsigned int*)(p + 4) & 1) | nb;
+            func_0031ED60_E2D8(ms, remainder + 8);
+        }
+    }
+    return p + 8;
+}
+
+//100%
+// dlmalloc 2.7 memalign() with an offset: returns memory where (mem + offset) is aligned.
+extern "C" void* func_0031F4E8_impl(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset) __asm__("func_0031F4E8");
+extern "C" void* func_0031F4E8_impl(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset)
+{
+    unsigned int nb;
+    char* m;
+    char* p;
+    char* brk;
+    char* newp;
+    unsigned int newsize;
+    unsigned int leadsize;
+    unsigned int size;
+    unsigned int req;
+    unsigned int head;
+
+    if (alignment <= 16)
+        return func_0031E818(ms, bytes);
+
+    if (alignment < 16)
+        alignment = 16;
+
+    if ((alignment & (alignment - 1)) != 0) {
+        unsigned int a = 32;
+        while (a < alignment)
+            a <<= 1;
+        alignment = a;
+    }
+
+    req = bytes + offset;
+    if (req >= (unsigned int)-32) {
+        *func_00415FB8() = 12;
+        return 0;
+    }
+    nb = (req + 4 + 15 < 16) ? 16 : (req + 4 + 15) & ~15;
+
+    m = (char*)func_0031E818(ms, nb + alignment + 16);
+    if (m == 0)
+        return 0;
+
+    p = m - 8;
+
+    if ((unsigned int)(m + offset) % alignment != 0) {
+        brk = (char*)(((unsigned int)(m + offset + alignment - 1)) & -alignment) - offset - 8;
+        if ((unsigned int)(brk - p) < 16)
+            brk += alignment;
+
+        newp = brk;
+        leadsize = brk - p;
+        head = *(unsigned int*)((int)m - 4);
+        newsize = (head & ~3) - leadsize;
+
+        if (head & 2) {
+            *(unsigned int*)newp = *(unsigned int*)((int)m - 8) + leadsize;
+            *(unsigned int*)(newp + 4) = newsize | 2;
+            return newp + 8;
+        }
+
+        *(unsigned int*)(newp + 4) = newsize | 1;
+        *(unsigned int*)(newp + newsize + 4) |= 1;
+        *(unsigned int*)((int)m - 4) = (*(unsigned int*)((int)m - 4) & 1) | leadsize;
+        func_0031ED60_E2D8(ms, m);
+        p = newp;
+    }
+
+    if (!(*(unsigned int*)(p + 4) & 2)) {
+        size = *(unsigned int*)(p + 4) & ~3;
+        if (size > nb + 16) {
+            char* remainder = p + nb;
+            *(unsigned int*)(remainder + 4) = (size - nb) | 1;
+            *(unsigned int*)(p + 4) = (*(unsigned int*)(p + 4) & 1) | nb;
+            func_0031ED60_E2D8(ms, remainder + 8);
+        }
+    }
+    return p + 8;
+}
+
+//100%
+// dlmalloc calloc: allocate n * size bytes and clear them (unrolled for small chunks).
+extern "C" void func_003E6448(void* p, int v, int n);
+
+extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int size)
+{
+    unsigned int* d = (unsigned int*)func_0031E818(ms, n * size);
+    if (d != 0) {
+        unsigned int head = d[-1];
+        if (!(head & 2)) {
+            unsigned int clearsize = (head & ~3) - 4;
+            unsigned int nclears = clearsize / 4;
+            if (nclears > 9) {
+                func_003E6448(d, 0, clearsize);
+            } else {
+                d[0] = 0;
+                d[1] = 0;
+                d[2] = 0;
+                if (nclears > 4) {
+                    d[3] = 0;
+                    d[4] = 0;
+                    if (nclears > 6) {
+                        d[5] = 0;
+                        d[6] = 0;
+                        if (nclears > 8) {
+                            d[7] = 0;
+                            d[8] = 0;
+                        }
+                    }
+                }
+            }
+        } else {
+            func_003E6448(d, 0, (head & ~3) - 8);
+        }
+    }
+    return d;
+}
 
 extern "C" int func_0031ED60(void* self);
 
@@ -567,7 +885,90 @@ extern "C" void func_0031F838(void* a, void* b, void* c, int e)
     func_0031F858(a, b, c, 0, e);
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031F858);
+//100%
+// dlmalloc 2.7 independent_calloc/comalloc core (iALLOc): carve n chunks out of one allocation.
+#define REQ2SIZE_31F858(req) (((req) + 4 + 15 < 16) ? 16 : ((req) + 4 + 15) & ~15)
+
+extern "C" void** func_0031F858_impl(void* ms, unsigned int n_elements, unsigned int* sizes, int opts, void** chunks) __asm__("func_0031F858");
+extern "C" void** func_0031F858_impl(void* ms, unsigned int n_elements, unsigned int* sizes, int opts, void** chunks)
+{
+    char* av = *(char**)ms;
+    unsigned int element_size;
+    unsigned int contents_size;
+    unsigned int array_size;
+    char* mem;
+    char* p;
+    unsigned int remainder_size;
+    void** marray;
+    char* array_chunk;
+    int mmx;
+    unsigned int size;
+    unsigned int i;
+
+    if (*(unsigned int*)av == 0)
+        func_0031EEE8(ms, (sMState_31EEE8*)av);
+
+    if (chunks != 0) {
+        if (n_elements == 0)
+            return chunks;
+        marray = chunks;
+        array_size = 0;
+    } else {
+        if (n_elements == 0)
+            return (void**)func_0031E818(ms, 0);
+        marray = 0;
+        array_size = REQ2SIZE_31F858(n_elements * sizeof(void*));
+    }
+
+    if (opts & 1) {
+        element_size = REQ2SIZE_31F858(*sizes);
+        contents_size = n_elements * element_size;
+    } else {
+        element_size = 0;
+        contents_size = 0;
+        for (i = 0; i != n_elements; ++i)
+            contents_size += REQ2SIZE_31F858(sizes[i]);
+    }
+
+    size = contents_size + array_size - 15;
+
+    mmx = *(int*)(av + 0x354);
+    *(int*)(av + 0x354) = 0;
+    mem = (char*)func_0031E818(ms, size);
+    *(int*)(av + 0x354) = mmx;
+    if (mem == 0)
+        return 0;
+
+    remainder_size = *(unsigned int*)(mem - 4) & ~3;
+    p = mem - 8;
+
+    if (opts & 2)
+        func_003E6448(mem, 0, remainder_size - 4 - array_size);
+
+    if (marray == 0) {
+        array_chunk = p + contents_size;
+        marray = (void**)(array_chunk + 8);
+        *(unsigned int*)(array_chunk + 4) = (remainder_size - contents_size) | 1;
+        remainder_size = contents_size;
+    }
+
+    for (i = 0; ; ++i) {
+        marray[i] = p + 8;
+        if (i != n_elements - 1) {
+            if (element_size != 0)
+                size = element_size;
+            else
+                size = REQ2SIZE_31F858(sizes[i]);
+            remainder_size -= size;
+            *(unsigned int*)(p + 4) = size | 1;
+            p = p + size;
+        } else {
+            *(unsigned int*)(p + 4) = remainder_size | 1;
+            break;
+        }
+    }
+    return marray;
+}
 
 struct sMState_31FAA8
 {

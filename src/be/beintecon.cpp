@@ -685,14 +685,108 @@ extern "C" void func_00151C48(sEconItems_00151C48* self, int id, int on)
 
 INCLUDE_ASM("be/beintecon", func_00151C90);
 
-INCLUDE_ASM("be/beintecon", func_00151EF0);
+//100%
+// Applies item id's dependency list: each linked item whose state differs from the wanted one
+// (or that is off and marked 0x8) is switched on or off, recursing through func_00151C90.
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_151EF0() __asm__("func_0014BDB8__FPv");
+extern "C" void* func_0014DB40(void* self, int g, int key, int want, int* out);
+extern "C" int func_0014D448(void* self, int g, int key);
+
+struct sEconItem_151EF0
+{
+    short id;
+    unsigned short flags;
+};
+
+struct sEconItems_151EF0
+{
+    char pad[0x288];
+    short* lookup;                  // 0x288
+    int count;                      // 0x28C
+    sEconItem_151EF0 items[0x20D];  // 0x290
+    char pad2[0xBC0 - 0x290 - 0x20D * 4];
+    signed char kind;               // 0xBC0
+};
+
+struct sEconDep_151EF0
+{
+    char pad0[0x5];
+    signed char reqOn;  // 0x5
+    short reqId;        // 0x6
+    char pad8;
+    signed char on;     // 0x9
+    short id;           // 0xA
+};
+
+struct sEconDef_151EF0
+{
+    char pad0[0x34];
+    int flags;          // 0x34
+};
+
+struct sEconDb_151EF0
+{
+    char pad0[0x4];
+    sEconDef_151EF0* defs;  // 0x4
+};
+
+static inline sEconItem_151EF0* getItem_151EF0(sEconItems_151EF0* self, int id)
+{
+    int idx = self->lookup[id];
+    if (idx >= 0)
+        return &self->items[idx];
+    return 0;
+}
+
+static inline sEconDef_151EF0* getDef_151EF0(sEconDb_151EF0* db, int i)
+{
+    if (i < 0)
+        return 0;
+    return &db->defs[i];
+}
+
+extern "C" int func_00151EF0(sEconItems_151EF0* self, int id, int on)
+{
+    sEconDb_151EF0* db = (sEconDb_151EF0*)func_0014BDB8_151EF0();
+    int n = 0;
+    sEconDep_151EF0* d = (sEconDep_151EF0*)func_0014DB40(db, self->kind, id, on, &n);
+    sEconItem_151EF0* me = getItem_151EF0(self, id);
+    for (int i = 0; i < n; i++, d++)
+    {
+        if (d->id == -1)
+            continue;
+        if (d->reqId != -1)
+        {
+            int req = getItem_151EF0(self, d->reqId)->flags & 0x10;
+            if ((req != 0) != (d->reqOn != 0))
+                continue;
+        }
+        sEconItem_151EF0* it = &self->items[self->lookup[d->id]];
+        int has = it->flags & 0x10;
+        int h = has != 0;
+        if ((h != (d->on != 0)) || (!h && (getDef_151EF0(db, func_0014D448(db, self->kind, d->id))->flags & 0x8)))
+        {
+            if (it->id == id)
+            {
+                if (d->on)
+                    me->flags |= 0x10;
+                else
+                    me->flags &= ~0x10;
+            }
+            else if (func_00151C90(self, it->id, d->on != 0) == 0)
+            {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 //100%
 void* func_0014BDB8(void* self);
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
-extern "C" int func_00151EF0(void* self, int id, int on);
-
 struct sEconItem_001520E8
 {
     short id;
@@ -736,7 +830,7 @@ extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
             if (getItem_001520E8(self, d->id)->flags & 0x10)
             {
                 *changed = 1;
-                if (func_00151EF0(self, d->id, 1) == 0)
+                if (func_00151EF0((sEconItems_151EF0*)self, d->id, 1) == 0)
                     return 0;
             }
         }

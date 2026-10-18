@@ -72,7 +72,31 @@ extern "C" float func_0031B098(float a, float b, float c, float d, float e, floa
     return a * func_0031B088(e, f, h, i) - d * func_0031B088(b, c, h, i) + g * func_0031B088(b, c, e, f);
 }
 
-INCLUDE_ASM("bx/ps2main", func_0031B178);
+//100%
+// 4x4 determinant by cofactor expansion along the first row.
+extern "C" float func_0031B178(void* vm)
+{
+    float (*m)[4] = (float (*)[4])vm;
+    float a1, a2, a3, a4, b1, b2, b3, b4;
+    float c1, c2, c3, c4, d1, d2, d3, d4;
+
+    a1 = m[0][0]; b1 = m[0][1];
+    c1 = m[0][2]; d1 = m[0][3];
+
+    a2 = m[1][0]; b2 = m[1][1];
+    c2 = m[1][2]; d2 = m[1][3];
+
+    a3 = m[2][0]; b3 = m[2][1];
+    c3 = m[2][2]; d3 = m[2][3];
+
+    a4 = m[3][0]; b4 = m[3][1];
+    c4 = m[3][2]; d4 = m[3][3];
+
+    return a1 * func_0031B098(b2, b3, b4, c2, c3, c4, d2, d3, d4)
+         - b1 * func_0031B098(a2, a3, a4, c2, c3, c4, d2, d3, d4)
+         + c1 * func_0031B098(a2, a3, a4, b2, b3, b4, d2, d3, d4)
+         - d1 * func_0031B098(a2, a3, a4, b2, b3, b4, c2, c3, c4);
+}
 
 //100%
 extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i);
@@ -149,7 +173,31 @@ extern "C" void func_0031B6C8(void* m)
         : "memory");
 }
 
-INCLUDE_ASM("bx/ps2main", func_0031B748);
+//100%
+struct sV_0031B748 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPair_0031B748 {
+    sV_0031B748 a;
+    sV_0031B748 b;
+};
+
+extern "C" void func_0031B7A8(sV_0031B748* out, float (*m)[4]);
+
+// Splits a matrix into its translation row and a rotation from func_0031B7A8.
+// PORT: g++ named return value extension (`return r`); a modern compiler does NRVO itself.
+extern "C" sPair_0031B748 func_0031B748(float (*m)[4]) return r
+{
+    sV_0031B748 v;
+    v.x = m[3][0];
+    v.y = m[3][1];
+    v.z = m[3][2];
+    v.w = m[3][3];
+    r.a = v;
+    func_0031B7A8(&v, m);
+    r.b = v;
+}
 
 INCLUDE_ASM("bx/ps2main", func_0031B7A8);
 
