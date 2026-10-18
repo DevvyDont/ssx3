@@ -788,7 +788,30 @@ extern "C" void func_0023E820(void* self)
     }
 }
 
-INCLUDE_ASM("movie/movieplayer", func_0023E8A0);
+//100%
+static inline int StateIsNot_E8A0(void* self, int st)
+{
+    return *(int*)((char*)self + 0x130) != st;
+}
+
+extern "C" void func_0023E8A0(void* self, int allow)
+{
+    if (!Pad_E540(self, 53)) {
+        if (Pad_E540(self, 49) || Pad_E540(self, 51) || Pad_E540(self, 59)) {
+            Post_E540(self, 5);
+        } else if (StateIsNot_E8A0(self, 4)) {
+            Post_E540(self, 4);
+        }
+    } else if (Pad_E540(self, 55) && Pad_E540(self, 58) && !Pad_E540(self, 51) && !Pad_E540(self, 59)) {
+        if (allow) {
+            Post_E540(self, 6);
+        }
+    } else if (*(int*)((char*)self + 0xBC)) {
+        Post_E540(self, 7);
+    } else {
+        Post_E540(self, 0x1D);
+    }
+}
 
 //100%
 extern int D_004A2C78;

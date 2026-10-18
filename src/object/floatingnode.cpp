@@ -167,7 +167,61 @@ INCLUDE_ASM("object/floatingnode", func_0034F600);
 
 INCLUDE_ASM("object/floatingnode", func_0034F790);
 
-INCLUDE_ASM("object/floatingnode", func_0034F930);
+//100%
+extern char* D_004A5B64_F930 __asm__("D_004A5B64");
+
+struct sFloatSpring_F930 {
+    float k;            // 0x2C
+    float d;            // 0x30
+    float c;            // 0x34
+    float k2;           // 0x38
+    float d2;           // 0x3C
+    float c2;           // 0x40
+    float force;        // 0x44
+    float vel;          // 0x48
+    float rest;         // 0x4C
+    float pos;          // 0x50
+    float ang0;         // 0x54
+    float pad58;
+    float vel0;         // 0x5C
+    float force0;       // 0x60
+    float ang1;         // 0x64
+    float pad68;
+    float vel1;         // 0x6C
+    float force1;       // 0x70
+};
+
+struct sFloatNode_F930 {
+    char pad0[0x12];
+    unsigned short flags;       // 0x12
+    char pad14[0x2C - 0x14];
+    sFloatSpring_F930 s;        // 0x2C
+};
+
+extern "C" int func_0034F930(sFloatNode_F930* self)
+{
+    float dt = 1.0f / (float)*(int*)(D_004A5B64_F930 + 0x10);
+    float a = -self->s.k * (self->s.pos - self->s.rest) + self->s.c * self->s.force + -self->s.d * self->s.vel;
+    float a0 = -self->s.k2 * self->s.ang0 + self->s.c2 * self->s.force0 + -self->s.d2 * self->s.vel0;
+    float a1 = -self->s.k2 * self->s.ang1 + self->s.c2 * self->s.force1 + -self->s.d2 * self->s.vel1;
+    self->s.pos += self->s.vel * dt;
+    self->s.vel += a * dt;
+    self->s.ang0 += self->s.vel0 * dt;
+    self->s.vel0 += a0 * dt;
+    self->s.ang1 += self->s.vel1 * dt;
+    self->s.vel1 += a1 * dt;
+    sFloatSpring_F930* s = &self->s;
+    float lo = -1.3962634801864624f;
+    float hi = 1.3962634801864624f;
+    // PORT: `<?` is the g++ minimum operator (EE min.s).
+    self->s.ang0 = lo <= s->ang0 ? s->ang0 <? hi : lo;
+    self->s.ang1 = lo <= s->ang1 ? s->ang1 <? hi : lo;
+    self->s.force = 0.0f;
+    self->s.force0 = 0.0f;
+    self->s.force1 = 0.0f;
+    self->flags |= 1;
+    return 1;
+}
 
 //100%
 struct sFloatingVEntryFA88 {

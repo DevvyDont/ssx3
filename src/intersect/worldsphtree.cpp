@@ -1538,7 +1538,40 @@ extern "C" float func_00340A18(void* self)
     return *(float*)((char*)self + 0x70) * 2.0f;
 }
 
-INCLUDE_ASM("intersect/worldsphtree", func_00340A40);
+//100%
+struct sOctNode_0A40 {
+    sOctNode_0A40* child[8];
+};
+
+// Visits node and every descendant with func_003309D8.
+extern "C" void func_00340A40(sOctNode_0A40* self, sCtx_3309D8* ctx)
+{
+    func_003309D8(ctx, self);
+    if (self->child[0] != 0) {
+        func_00340A40(self->child[0], ctx);
+    }
+    if (self->child[1] != 0) {
+        func_00340A40(self->child[1], ctx);
+    }
+    if (self->child[2] != 0) {
+        func_00340A40(self->child[2], ctx);
+    }
+    if (self->child[3] != 0) {
+        func_00340A40(self->child[3], ctx);
+    }
+    if (self->child[4] != 0) {
+        func_00340A40(self->child[4], ctx);
+    }
+    if (self->child[5] != 0) {
+        func_00340A40(self->child[5], ctx);
+    }
+    if (self->child[6] != 0) {
+        func_00340A40(self->child[6], ctx);
+    }
+    if (self->child[7] != 0) {
+        func_00340A40(self->child[7], ctx);
+    }
+}
 
 //100%
 struct sOctCollect {
@@ -1562,7 +1595,77 @@ extern "C" void func_00340B18(void* self, sOctCollect* out)
     if (*(void**)((char*)self + 0x1C)) func_00340B18(*(void**)((char*)self + 0x1C), out);
 }
 
-INCLUDE_ASM("intersect/worldsphtree", func_00340C20);
+//100%
+struct sCtx_3309D8;
+extern "C" void func_003309D8(sCtx_3309D8* ctx, void* tree);
+
+struct sBox_340C20 {
+    float min[4];
+    float max[4];
+};
+
+struct sSub_340C20 {
+    void** list;
+    int* count;
+    int pad08;
+    sBox_340C20* box;
+};
+
+struct sCtx_340C20 {
+    sSub_340C20 nodes;
+    sSub_340C20 objs;
+};
+
+struct sObjNode_340C20 {
+    sObjNode_340C20* next;
+    int pad04[85];
+    float bmin[3];
+    float bmax[3];
+};
+
+struct sTree_340C20 {
+    sTree_340C20* child[8];
+    void* nodes;
+    sObjNode_340C20* objs;
+};
+
+static inline void add_340C20(sSub_340C20* s, void* p)
+{
+    int* cnt = s->count;
+    int n = *cnt;
+    s->list[n] = p;
+    *cnt = n + 1;
+}
+
+static inline int overlap_340C20(const sBox_340C20* b, const sObjNode_340C20* n)
+{
+    int r = 0;
+    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
+        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
+        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+extern "C" void func_00340C20(sTree_340C20* self, sCtx_340C20* ctx)
+{
+    func_003309D8((sCtx_3309D8*)ctx, self);
+    sSub_340C20* s = &ctx->objs;
+    for (sObjNode_340C20* p = self->objs; p != 0; p = p->next) {
+        if (overlap_340C20(s->box, p)) {
+            add_340C20(s, p);
+        }
+    }
+    if (self->child[0]) func_00340C20(self->child[0], ctx);
+    if (self->child[1]) func_00340C20(self->child[1], ctx);
+    if (self->child[2]) func_00340C20(self->child[2], ctx);
+    if (self->child[3]) func_00340C20(self->child[3], ctx);
+    if (self->child[4]) func_00340C20(self->child[4], ctx);
+    if (self->child[5]) func_00340C20(self->child[5], ctx);
+    if (self->child[6]) func_00340C20(self->child[6], ctx);
+    if (self->child[7]) func_00340C20(self->child[7], ctx);
+}
 
 //100%
 struct sCtx_3309D8;
@@ -1686,7 +1789,39 @@ extern "C" void func_003410C0(void* self, void* ctx)
 
 extern "C" void* func_003400D8(int, int);
 
-INCLUDE_ASM("intersect/worldsphtree", func_003411B8);
+//100%
+struct sCtx_3411B8 {
+    sWsVec4* pos;               // 0x00
+    int a2;                     // 0x04
+    int mask;                   // 0x08
+    int* cnt;                   // 0x0C
+    float* dist;                // 0x10
+    sBox_00334680* box;         // 0x14
+};
+
+extern "C" void func_003411B8(void* self, sCtx_3411B8* ctx)
+{
+    for (char* o = *(char**)((char*)self + 0x28); o != 0; o = *(char**)o) {
+        int type = *(int*)(o + 8);
+        if (type == 2) {
+            func_0035C698(*(void**)(o + 0xC), ctx->box, ctx->box, ctx->pos, ctx->mask, ctx->cnt, ctx->dist, ctx->a2);
+        } else if (type == 3) {
+            func_00348290(*(void**)(o + 0xC), ctx->box, ctx->box, ctx->pos, ctx->mask, ctx->cnt, ctx->dist, ctx->a2);
+        } else if (type == 1) {
+            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & ctx->mask) {
+                func_00335128(o, ctx->box, ctx->pos, ctx->cnt, ctx->dist, ctx->a2);
+            }
+        }
+    }
+    if (*(void**)((char*)self + 0x0)) func_003411B8(*(void**)((char*)self + 0x0), ctx);
+    if (*(void**)((char*)self + 0x4)) func_003411B8(*(void**)((char*)self + 0x4), ctx);
+    if (*(void**)((char*)self + 0x8)) func_003411B8(*(void**)((char*)self + 0x8), ctx);
+    if (*(void**)((char*)self + 0xC)) func_003411B8(*(void**)((char*)self + 0xC), ctx);
+    if (*(void**)((char*)self + 0x10)) func_003411B8(*(void**)((char*)self + 0x10), ctx);
+    if (*(void**)((char*)self + 0x14)) func_003411B8(*(void**)((char*)self + 0x14), ctx);
+    if (*(void**)((char*)self + 0x18)) func_003411B8(*(void**)((char*)self + 0x18), ctx);
+    if (*(void**)((char*)self + 0x1C)) func_003411B8(*(void**)((char*)self + 0x1C), ctx);
+}
 
 //99.38%
 void* func_00341368(void* self)

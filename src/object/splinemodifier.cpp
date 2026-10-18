@@ -610,7 +610,86 @@ void* func_0035A5D8(void* self)
 
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupOverlapSystem);
 
-INCLUDE_ASM("object/splinemodifier", func_0035A780);
+//100%
+void operator_delete(int*);
+extern "C" void* func_002D1BE0();
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+
+struct sSmVec4_A780 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sSmBox_A780 {
+    sSmVec4_A780 min;
+    sSmVec4_A780 max;
+};
+struct sSmCell_A780 {
+    int level;
+    int x, y, z;
+};
+struct sSmNode_A780 {
+    sSmNode_A780* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sSmRoot_A780 {
+    sSmCell_A780 cell;              // 0x00
+    sSmNode_A780* node;             // 0x10
+};
+struct sSmElem_A780 {
+    char pad0[0x30];
+    sSmBox_A780 box;                // 0x30
+    char pad50[0x10];
+};
+struct sSmMulti_A780 {
+    int f0;
+    int count;                      // 0x04
+    char pad8[0x3C - 0x8];
+    sSmElem_A780* elems;            // 0x3C
+    char pad40[4];
+    void** items;                   // 0x44
+};
+
+static inline sSmRoot_A780* findRoot_A780(char* w, int x, int y, int z)
+{
+    sSmRoot_A780* r = (sSmRoot_A780*)w;
+    sSmRoot_A780* rx = x >= 0 ? r : r + 4;
+    sSmRoot_A780* ry = y >= 0 ? rx : rx + 2;
+    sSmRoot_A780* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void remove_A780(char* w, void* item, const sSmBox_A780* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sSmCell_A780 c;
+    func_00328F28(&c, box);
+    sSmRoot_A780* r = findRoot_A780(w, c.x, c.y, c.z);
+    func_003284B8(r->node, 0, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+extern "C" void func_0035A780(void* p)
+{
+    sSmMulti_A780* self = (sSmMulti_A780*)p;
+    for (int i = 1; i < self->count; i++) {
+        void* item = self->items[i];
+        remove_A780((char*)func_002D1BE0(), item, &self->elems[i].box);
+    }
+}
 
 //100%
 struct sSmVec4_A918 {
@@ -1422,7 +1501,37 @@ extern "C" char* func_0035BA88(char* self, cSmStream_BA88* src)
     return self;
 }
 
-INCLUDE_ASM("object/splinemodifier", func_0035BD70);
+//100%
+extern char D_00491200[];
+struct sSplineLink;
+extern "C" void func_0035B6D0(sSplineLink* link);
+
+extern "C" void func_0035BD70(char* self, int flags)
+{
+    *(void**)(self + 0x8) = D_004911D0;
+    remove_BA88((char*)func_002D1BE0(), *(void**)(self + 0x44), (sSmBox_BA88*)(self + 0x10));
+    operator_delete(*(int**)(self + 0x44));
+    sSmTrack_BA88* t = ((sSmRef_BA88*)(self + 0x30))->get();
+    sSmSeg_BA88* seg = t->first;
+    for (int i = 0; i < t->count; i++) {
+        sSmBox_BA88 b;
+        b.min.x = seg->minx;
+        b.min.y = seg->miny;
+        b.min.z = seg->minz;
+        b.min.w = 1.0f;
+        b.max.x = seg->maxx;
+        b.max.y = seg->maxy;
+        b.max.z = seg->maxz;
+        b.max.w = 1.0f;
+        insert_BA88((char*)func_002D1BE0(), seg, &b);
+        seg = seg->next;
+    }
+    *(void**)(self + 0x8) = D_00491200;
+    func_0035B6D0((sSplineLink*)self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
 
 //100%
 struct sSmVec4_C040 {

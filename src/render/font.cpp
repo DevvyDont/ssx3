@@ -1658,7 +1658,44 @@ extern "C" void func_003947C8(void* self)
     *(char**)((char*)self + 0xE84) -= 0x14;
 }
 
-INCLUDE_ASM("render/font", func_003947D8);
+//100%
+struct sFontRS47D8 {
+    int w[4];               // 0x0
+    short h[2];             // 0x10
+};
+
+struct sFontVEntry47D8 {
+    short delta;
+    short index;
+    sFontRS47D8* (*fn)(void*);
+};
+
+struct sFontCtx47D8 {
+    char pad_0x0[0xE84];
+    sFontRS47D8* top;           // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sFontVEntry47D8* vtable;    // 0x10D8
+};
+
+extern "C" int func_003947D8(sFontCtx47D8* self)
+{
+    int i;
+    for (i = 0; i < 4; i++) {
+        sFontVEntry47D8* vt = self->vtable;
+        if (self->top->w[i] != vt[64].fn((char*)self + vt[64].delta)->w[i]) {
+            return 1;
+        }
+    }
+    unsigned int j;
+    for (j = 0; j < 2; j++) {
+        sFontVEntry47D8* vt = self->vtable;
+        if (self->top->h[j] != vt[64].fn((char*)self + vt[64].delta)->h[j]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 
 struct sfunc_003948B0 {
     char pad[0xF50];
@@ -2424,7 +2461,51 @@ extern "C" float func_003955A8(void* self)
     return *(float*)((char*)self + 0x59FC);
 }
 
-INCLUDE_ASM("render/font", func_003955B0);
+//100%
+struct sRS_55B0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+struct sEnt_55B0 {
+    sRS_55B0 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+struct sRing_55B0 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_55B0 ents[1];              // 0x80
+};
+struct sGfx_55B0 {
+    char pad_0x0[0xE84];
+    sRS_55B0* top;                  // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sRing_55B0* ring;               // 0x18F0
+};
+
+// Queues a draw entry with the current render state in the uncached ring.
+extern "C" void func_003955B0(sGfx_55B0* gfx, unsigned int buf, unsigned int next, int flag)
+{
+    sRS_55B0* rs = gfx->top;
+    sRing_55B0* ring = gfx->ring;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_55B0* e = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
 
 extern "C" int func_00395658(void* self)
 {

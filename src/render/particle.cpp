@@ -578,11 +578,65 @@ extern "C" void func_00371940(unsigned int madr, int qwc, int flags)
     }
 }
 
-INCLUDE_ASM("render/particle", func_00371A58);
+//100%
+extern "C" void func_00371A58(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10008000 & 0x100) {
+        }
+    }
+    if (madr > 0x6FFFFFFF) {
+        *(volatile int*)0x10008010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile int*)0x10008010 = madr;
+    }
+    *(volatile int*)0x10008020 = qwc;
+    *(volatile int*)0x10008000 = 0x100;
+    if (flags & 2) {
+        while (*(volatile int*)0x10008000 & 0x100) {
+        }
+    }
+}
 
-INCLUDE_ASM("render/particle", func_00371B40);
+//100%
+extern "C" void func_00371B40(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+    if (madr > 0x6FFFFFFF) {
+        *(volatile int*)0x10009010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile int*)0x10009010 = madr;
+    }
+    *(volatile int*)0x10009020 = qwc;
+    *(volatile int*)0x10009000 = 0x101;
+    if (flags & 2) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+}
 
-INCLUDE_ASM("render/particle", func_00371C28);
+//100%
+extern "C" void func_00371C28(unsigned int madr, int qwc, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+    if (madr > 0x6FFFFFFF) {
+        *(volatile int*)0x10009010 = (madr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile int*)0x10009010 = madr;
+    }
+    *(volatile int*)0x10009020 = qwc;
+    *(volatile int*)0x10009000 = 0x100;
+    if (flags & 2) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+}
 
 //100%
 extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags)
@@ -620,9 +674,55 @@ extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags)
 
 extern "C" void* func_003725B0(void* self);
 
-INCLUDE_ASM("render/particle", func_00371EA0);
+//100%
+// Starts a VIF1 source-chain DMA at tadr (flags: 1 = tag transfer, 2 = wait after, 4 = wait before).
+extern "C" void func_00371EA0(unsigned int tadr, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+    if (tadr > 0x6FFFFFFF) {
+        *(volatile int*)0x10009030 = (tadr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile int*)0x10009030 = tadr;
+    }
+    *(volatile int*)0x10009020 = 0;
+    if (flags & 1) {
+        *(volatile int*)0x10009000 = 0x145;
+    } else {
+        *(volatile int*)0x10009000 = 0x105;
+    }
+    if (flags & 2) {
+        while (*(volatile int*)0x10009000 & 0x100) {
+        }
+    }
+}
 
-INCLUDE_ASM("render/particle", func_00371F98);
+//100%
+// Starts a GIF source-chain DMA at tadr (flags as func_00371EA0).
+extern "C" void func_00371F98(unsigned int tadr, int flags)
+{
+    if (flags & 4) {
+        while (*(volatile int*)0x1000A000 & 0x100) {
+        }
+    }
+    *(volatile int*)0x10003010 = 4;
+    if (tadr > 0x6FFFFFFF) {
+        *(volatile int*)0x1000A030 = (tadr & 0x3FF0) | 0x80000000;
+    } else {
+        *(volatile int*)0x1000A030 = tadr;
+    }
+    if (flags & 1) {
+        *(volatile int*)0x1000A000 = 0x144;
+    } else {
+        *(volatile int*)0x1000A000 = 0x104;
+    }
+    if (flags & 2) {
+        while (*(volatile int*)0x1000A000 & 0x100) {
+        }
+    }
+}
 
 extern "C" void func_00372098(int on)
 {
@@ -840,7 +940,74 @@ extern "C" void* func_00372B30(void* self);
 
 INCLUDE_ASM("render/particle", func_00372B78);
 
-INCLUDE_ASM("render/particle", func_003737D0);
+//100%
+void cMemMan_free(void*);
+
+struct sPtBufs_37D0 {
+    void* a;
+    void* b;
+    void* c;
+};
+
+struct sPtMgr_37D0 {
+    char pad0[0xC];
+    sPtBufs_37D0 g0;            // 0x0C
+    char pad18[0x24 - 0x18];
+    sPtBufs_37D0 g1;            // 0x24
+    char pad30[0x48 - 0x30];
+    sPtBufs_37D0 g2;            // 0x48
+    sPtBufs_37D0 g3;            // 0x54
+    sPtBufs_37D0 g4;            // 0x60
+    char pad6C[0x1B4 - 0x6C];
+    sPtBufs_37D0 g5;            // 0x1B4
+    sPtBufs_37D0 g6;            // 0x1C0
+};
+
+extern "C" void func_003737D0(sPtMgr_37D0* self)
+{
+    if (self->g0.a) cMemMan_free(self->g0.a);
+    if (self->g0.b) cMemMan_free(self->g0.b);
+    if (self->g0.c) cMemMan_free(self->g0.c);
+    self->g0.a = 0;
+    self->g0.b = 0;
+    self->g0.c = 0;
+    if (self->g1.a) cMemMan_free(self->g1.a);
+    if (self->g1.b) cMemMan_free(self->g1.b);
+    if (self->g1.c) cMemMan_free(self->g1.c);
+    self->g1.a = 0;
+    self->g1.b = 0;
+    self->g1.c = 0;
+    if (self->g2.a) cMemMan_free(self->g2.a);
+    if (self->g2.b) cMemMan_free(self->g2.b);
+    if (self->g2.c) cMemMan_free(self->g2.c);
+    self->g2.a = 0;
+    self->g2.b = 0;
+    self->g2.c = 0;
+    if (self->g3.a) cMemMan_free(self->g3.a);
+    if (self->g3.b) cMemMan_free(self->g3.b);
+    if (self->g3.c) cMemMan_free(self->g3.c);
+    self->g3.a = 0;
+    self->g3.b = 0;
+    self->g3.c = 0;
+    if (self->g4.a) cMemMan_free(self->g4.a);
+    if (self->g4.b) cMemMan_free(self->g4.b);
+    if (self->g4.c) cMemMan_free(self->g4.c);
+    self->g4.a = 0;
+    self->g4.b = 0;
+    self->g4.c = 0;
+    if (self->g5.a) cMemMan_free(self->g5.a);
+    if (self->g5.b) cMemMan_free(self->g5.b);
+    if (self->g5.c) cMemMan_free(self->g5.c);
+    self->g5.a = 0;
+    self->g5.b = 0;
+    self->g5.c = 0;
+    if (self->g6.a) cMemMan_free(self->g6.a);
+    if (self->g6.b) cMemMan_free(self->g6.b);
+    if (self->g6.c) cMemMan_free(self->g6.c);
+    self->g6.a = 0;
+    self->g6.b = 0;
+    self->g6.c = 0;
+}
 
 //100%
 struct sPtSlot39D0 {
@@ -1994,7 +2161,47 @@ extern "C" void func_00376768(sPtGfx6768* self)
     self->i6B90 = 0;
 }
 
-INCLUDE_ASM("render/particle", func_00376938);
+//100%
+struct sPtVEntry_6938 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+static inline int vcall_6938(void* self, int i)
+{
+    sPtVEntry_6938* vt = *(sPtVEntry_6938**)((char*)self + 0x10D8);
+    return vt[i].fn((char*)self + vt[i].delta);
+}
+static inline int clamp_6938(int a, int b)
+{
+    return a >= 0 ? (b < a ? b : a) : 0;
+}
+extern "C" void func_00376938(void* self, float x, float y, float w, float h)
+{
+    char* s = (char*)self;
+    int sw = vcall_6938(self, 10);
+    int sh = vcall_6938(self, 11);
+    if (x < 0.0f) {
+        w += x;
+        x = 0.0f;
+    }
+    if (y < 0.0f) {
+        h += y;
+        y = 0.0f;
+    }
+    int ix = (int)x;
+    int mx = sw - 1;
+    int iy = (int)y;
+    int my = sh - 1;
+    int iw = (int)w;
+    if (ix < mx) mx = ix;
+    *(unsigned short*)(s + 0x5900) = mx;
+    if (iy < my) my = iy;
+    *(unsigned short*)(s + 0x5902) = my;
+    *(unsigned short*)(s + 0x5904) = clamp_6938(iw, sw - *(unsigned short*)(s + 0x5900));
+    *(unsigned short*)(s + 0x5906) = clamp_6938((int)h, sh - *(unsigned short*)(s + 0x5902));
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 struct sPtVEntryI6A70 {
@@ -2297,7 +2504,88 @@ INCLUDE_ASM("render/particle", func_00379BD0);
 
 INCLUDE_ASM("render/particle", func_0037A260);
 
-INCLUDE_ASM("render/particle", func_0037A430);
+//100%
+struct sPtRS_A430 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_A430 {
+    sPtRS_A430 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_A430 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_A430 ents[1];            // 0x80
+};
+
+struct sPtGfx_A430 {
+    char pad_0x0[0xE84];
+    sPtRS_A430* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_A430* ring;             // 0x18F0
+    void* texSet;                   // 0x18F4
+    char pad_0x18F8[0x5A00 - 0x18F8];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x5A28 - 0x5A04];
+    unsigned int pendBuf;           // 0x5A28
+    unsigned long* pendEnd;         // 0x5A2C
+};
+
+// Queues a draw entry with the current render state (inline copy of func_003955B0).
+static inline void queue_A430(sPtGfx_A430* gfx, unsigned int buf, unsigned int next, int flag)
+{
+    sPtRS_A430* rs = gfx->top;
+    sPtRing_A430* ring = gfx->ring;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_A430* e = (sPtEnt_A430*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
+
+extern int D_004A4474;
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+
+// Closes the pending packet and queues it with the current render state.
+extern "C" void func_0037A430(sPtGfx_A430* self)
+{
+    unsigned int next = func_0038F668(D_004A4474, self->pendEnd, 4);
+    self->bufAddr = next;
+    unsigned int buf = self->pendBuf;
+    sPtRing_A430* ring = self->ring;
+    sPtRS_A430* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_A430* e = (sPtEnt_A430*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+    self->pendBuf = 0;
+    self->pendEnd = 0;
+}
 
 //100%
 struct sPartVEntryI_A540 {
@@ -2506,7 +2794,22 @@ extern "C" void func_0037C570(void* self, sPartColour_C570* c)
     *(int*)((char*)self + 0x59F4) = func_004139F8(clamp_C570(c->b, one) * 128.0f);
 }
 
-INCLUDE_ASM("render/particle", func_0037C638);
+//100%
+struct sColour3_C638 {
+    float r, g, b;
+    sColour3_C638() {}
+    sColour3_C638(const sColour3_C638& o) : r(o.r), g(o.g), b(o.b) {}
+};
+
+// The colour set by func_0037C570, back as 0..2 floats.
+extern "C" sColour3_C638 func_0037C638(char* self)
+{
+    sColour3_C638 c;
+    c.r = *(unsigned int*)(self + 0x59EC) * 0.0078125f;
+    c.g = *(unsigned int*)(self + 0x59F0) * 0.0078125f;
+    c.b = *(unsigned int*)(self + 0x59F4) * 0.0078125f;
+    return c;
+}
 
 extern "C" void func_0037C720(char* self, float f)
 {
@@ -2691,7 +2994,32 @@ extern "C" void func_0037D318(char* self, int a1, int a2, int a3, int a4, int a5
     func_00367D20(*(void**)(self + 0x18F4), a1, a2, a3, a4, a5, a6, a7, a8, a9);
 }
 
-INCLUDE_ASM("render/particle", func_0037D348);
+//100%
+extern "C" void func_00367DB8_pt(void* set, int idx, unsigned long** pp) __asm__("func_00367DB8");
+
+// Uploads texture idx through the texture set and queues the packet.
+extern "C" int func_0037D348(sPtGfx_A430* self, int idx)
+{
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    func_00367DB8_pt(self->texSet, idx, &p);
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    sPtRing_A430* ring = self->ring;
+    sPtRS_A430* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_A430* e = (sPtEnt_A430*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    return 1;
+}
 
 INCLUDE_ASM("render/particle", func_0037D450);
 
@@ -2755,7 +3083,20 @@ extern "C" void func_0037D758(sPartDrawList* self, sPartQ16* q, sPartMtx* m0, sP
     self->count++;
 }
 
-INCLUDE_ASM("render/particle", func_0037D800);
+//100%
+extern "C" void func_00367F18_pt(void* set, int idx, float* color, unsigned long** pp) __asm__("func_00367F18");
+
+// As func_0037D348 through the coloured upload (entry flag 1).
+extern "C" void func_0037D800(sPtGfx_A430* self, int idx, float* color)
+{
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    func_00367F18_pt(self->texSet, idx, color, &p);
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    queue_A430(self, buf, next, 1);
+    self->bufAddr += 0x10;
+}
 
 //100%
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
@@ -4440,7 +4781,61 @@ extern "C" void func_00389118(void* self)
     func_00423AD0(0, *(int*)((char*)self + 0x5AC4));
 }
 
-INCLUDE_ASM("render/particle", func_00389160);
+//100%
+struct sVec4_9160 {
+    float x, y, z;
+    int w;
+};
+
+struct sVecSet_9160 {
+    sVec4_9160 v[10];
+};
+
+// Fills ten xyz vectors (w = 0).
+extern "C" sVecSet_9160* func_00389160(sVecSet_9160* self, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, float x5, float y5, float z5, float x6, float y6, float z6, float x7, float y7, float z7, float x8, float y8, float z8, float x9, float y9, float z9)
+{
+    self->v[0].x = x0;
+    self->v[1].x = x1;
+    self->v[2].x = x2;
+    self->v[3].x = x3;
+    self->v[4].x = x4;
+    self->v[5].x = x5;
+    self->v[6].x = x6;
+    self->v[7].x = x7;
+    self->v[8].x = x8;
+    self->v[9].x = x9;
+    self->v[0].y = y0;
+    self->v[1].y = y1;
+    self->v[2].y = y2;
+    self->v[3].y = y3;
+    self->v[4].y = y4;
+    self->v[5].y = y5;
+    self->v[6].y = y6;
+    self->v[7].y = y7;
+    self->v[8].y = y8;
+    self->v[9].y = y9;
+    self->v[0].z = z0;
+    self->v[1].z = z1;
+    self->v[2].z = z2;
+    self->v[3].z = z3;
+    self->v[4].z = z4;
+    self->v[5].z = z5;
+    self->v[6].z = z6;
+    self->v[7].z = z7;
+    self->v[8].z = z8;
+    self->v[9].z = z9;
+    self->v[0].w = 0;
+    self->v[1].w = 0;
+    self->v[2].w = 0;
+    self->v[3].w = 0;
+    self->v[4].w = 0;
+    self->v[5].w = 0;
+    self->v[6].w = 0;
+    self->v[7].w = 0;
+    self->v[8].w = 0;
+    self->v[9].w = 0;
+    return self;
+}
 
 //100%
 struct sPartVec4 {

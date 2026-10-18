@@ -264,7 +264,37 @@ void cUITemplate_MAP_setupEventUnlock(cUITemplate_MAP* self)
     }
 }
 
-INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakUnlock);
+//100%
+int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
+extern "C" int cBENewPlayerInterface_isPeakLocked(void* iface, int player, int ch, int peak);
+extern "C" int cBENewPlayerInterface_isPeakLocked1(void* iface, int player, int peak);
+extern signed char D_00535BC8[];
+
+struct sMapPeaks_PU {
+    int f0;
+    int open[3];    // 0x4
+};
+
+extern "C" void cUITemplate_MAP_setupPeakUnlock(void* selfp)
+{
+    sMapPeaks_PU* self = (sMapPeaks_PU*)selfp;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    self->open[0] = 1;
+    self->open[1] = 1;
+    self->open[2] = 1;
+    for (int i = 1; i < 3; i++) {
+        if (D_00535BC8[0x49] == 2) {
+            if (cBENewPlayerInterface_isPeakLocked(player, 0, cBENewPlayerInterface_getPlayerCharID(player, 0), i)
+                && cBENewPlayerInterface_isPeakLocked(player, 1, cBENewPlayerInterface_getPlayerCharID(player, 1), i)) {
+                self->open[i] = 0;
+            }
+        } else if (cBENewPlayerInterface_isPeakLocked1(player, 0, i)) {
+            self->open[i] = 0;
+        }
+    }
+}
+
 
 //100%
 struct sVEntry00201868 {

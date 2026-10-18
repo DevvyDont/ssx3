@@ -119,7 +119,29 @@ extern "C" int func_001A34B0()
     return -0x1;
 }
 
-INCLUDE_ASM("fe/ovstatemission", func_001A34B8);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_34B8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00146E98(void* iface, int which);
+extern "C" int cBENewPlayerInterface_isPeakLocked1(void* iface, int h, int peak);
+
+//100%
+extern "C" int func_001A34B8()
+{
+    unsigned char best = 0;
+    void* iface = cBE_getInterface_34B8(cBE_getBE(), 1);
+    for (signed char i = 0; i < 2; i++) {
+        int h = func_00146E98(iface, i != 0);
+        unsigned char sum = 0;
+        for (signed char j = 1; j < 3; j++) {
+            sum += cBENewPlayerInterface_isPeakLocked1(iface, h, j);
+        }
+        if (best < sum) {
+            best = sum;
+        }
+    }
+    return best;
+}
+
 
 //100%
 extern "C" int BXFILE_exists(char* name);

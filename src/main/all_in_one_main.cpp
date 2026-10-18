@@ -203,9 +203,97 @@ extern "C" void func_001DB718(L_B718 *self) {
     self->head->prev = self->head;
 }
 
-INCLUDE_ASM("main/all_in_one_main", func_001DB778);
+//100%
+// vector<T*>::_M_insert_aux (SGI STL), two identical instantiations.
+void* operator_new_tag_B778(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
+void* cMemMan_free(void* ptr);
+extern char D_0045CDE8[];
 
-INCLUDE_ASM("main/all_in_one_main", func_001DB918);
+struct sPtrVecB778 {
+    void* alloc;
+    void** start;
+    void** finish;
+    void** eos;
+};
+
+static inline void** sPtrVecB778_allocate(unsigned int n)
+{
+    if (n == 1)
+        return (void**)cMemMan_alloc(4, D_0045CDE8, 0x20000000, 0);
+    return (void**)operator_new_tag_B778(n * 4, D_0045CDE8, 0x20000000, 0);
+}
+
+static inline void sPtrVecB778_deallocate(void** p, unsigned int n)
+{
+    if (p != 0) {
+        if (n == 1)
+            operator_delete((int*)p);
+        else
+            cMemMan_free(p);
+    }
+}
+
+static inline void** sPtrVecB778_copy(void** first, void** last, void** result)
+{
+    func_0041610C(result, first, (last - first) * sizeof(void*));
+    return result + (last - first);
+}
+
+static inline void** sPtrVecB778_ucopy(void** first, void** last, void** result)
+{
+    return sPtrVecB778_copy(first, last, result);
+}
+
+static inline void sPtrVecB778_construct(void** p, void* const& v)
+{
+    if (p != 0)
+        *p = v;
+}
+
+static inline void** sPtrVecB778_copy_backward(void** first, void** last, void** result)
+{
+    int n = last - first;
+    func_0041610C(result - n, first, n * sizeof(void*));
+    return result - n;
+}
+
+static inline void sPtrVecB778_insert_aux(sPtrVecB778* self, void** pos, void* const& x)
+{
+    if (self->finish != self->eos) {
+        if (self->finish != 0)
+            *self->finish = self->finish[-1];
+        ++self->finish;
+        void* x_copy = x;
+        sPtrVecB778_copy_backward(pos, self->finish - 2, self->finish - 1);
+        *pos = x_copy;
+    } else {
+        unsigned int old_size = self->finish - self->start;
+        unsigned int len = old_size != 0 ? 2 * old_size : 1;
+        void** new_start = sPtrVecB778_allocate(len);
+        void** new_finish = new_start;
+        new_finish = sPtrVecB778_ucopy(self->start, pos, new_start);
+        sPtrVecB778_construct(new_finish, x);
+        ++new_finish;
+        new_finish = sPtrVecB778_ucopy(pos, self->finish, new_finish);
+        sPtrVecB778_deallocate(self->start, self->eos - self->start);
+        self->start = new_start;
+        self->finish = new_finish;
+        self->eos = new_start + len;
+    }
+}
+
+extern "C" void func_001DB778(sPtrVecB778* self, void** pos, void* const& x)
+{
+    sPtrVecB778_insert_aux(self, pos, x);
+}
+
+//100%
+extern "C" void func_001DB918(sPtrVecB778* self, void** pos, void* const& x)
+{
+    sPtrVecB778_insert_aux(self, pos, x);
+}
 
 //100%
 extern "C" void func_0017E558(int);

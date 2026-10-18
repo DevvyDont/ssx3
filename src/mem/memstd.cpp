@@ -121,7 +121,34 @@ extern "C" int func_00251998(int id)
     return r;
 }
 
-INCLUDE_ASM("mem/memstd", func_00251A08);
+//100%
+struct sMemBlk_251A08 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    sMemBlk_251A08* next;   // 0x8
+    void* fC;
+};
+
+struct sMemClass_251A08 {
+    char pad0[0x8];
+    sMemBlk_251A08* first;  // 0x8
+};
+
+extern "C" void* func_002523A8(void* self);
+
+// Runs func_002523A8 over each in-use block of class id; stops at the first failure.
+extern "C" void* func_00251A08(int id)
+{
+    sMemClass_251A08* cls = (sMemClass_251A08*)D_004D2438[id & 0x3F];
+    void* ok = (void*)1;
+    for (sMemBlk_251A08* blk = cls->first; blk != 0 && ok != 0; blk = blk->next) {
+        if ((blk->flags & 0xC000) == 0) {
+            ok = func_002523A8((char*)blk + 0x10);
+        }
+    }
+    return ok;
+}
 
 // First free memory class id (slots 0 and 1 are reserved), or 0x40 if full.
 extern "C" int func_00251A80()
@@ -912,7 +939,76 @@ extern "C" void func_002536C8(void* self)
     D_004A2E9C++;
 }
 
-INCLUDE_ASM("mem/memstd", func_00253748);
+//100%
+struct sVEntry_253748 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sObj_253748 {
+    int f0;
+    sVEntry_253748* vt;     // 0x4
+};
+
+struct sWorld_253748 {
+    char pad[0x10D8];
+    sVEntry_253748* vt;     // 0x10D8
+};
+
+struct sStream_253748 {
+    int done;               // 0x0
+    int idle;               // 0x4
+    int f8;
+    void* buf;              // 0xC
+    char pad10[0x28];
+    char* file;             // 0x38
+    sObj_253748* obj;       // 0x3C
+    int open;               // 0x40
+};
+
+extern sWorld_253748* D_004A5B80_253748 __asm__("D_004A5B80");
+extern "C" void SYNCTASK_run(int a);
+extern "C" void func_003E5398(int a);
+extern "C" int func_003AE780(void* self);
+extern "C" int func_003AE6C8(void* self, float f);
+extern "C" int func_003AE860(void* self);
+
+// Streams the whole file through obj, running the sync tasks between reads.
+extern "C" void func_00253748(sStream_253748* s)
+{
+    if (s->file == 0) {
+        return;
+    }
+    func_002536C8(s);
+    do {
+        if (s->idle != 0) {
+            sVEntry_253748* e = &s->obj->vt[5];
+            ((void (*)(void*))e->fn)((char*)s->obj + e->delta);
+        } else {
+            sVEntry_253748* e = &s->obj->vt[4];
+            e->fn((char*)s->obj + e->delta, s->buf);
+        }
+        sWorld_253748* w = D_004A5B80_253748;
+        sVEntry_253748* we = &w->vt[20];
+        ((void (*)(void*))we->fn)((char*)w + we->delta);
+        SYNCTASK_run(0);
+        func_003E5398(0);
+        if (func_003AE780(s->file) != 0) {
+            sVEntry_253748* e = &s->obj->vt[6];
+            ((void (*)(void*))e->fn)((char*)s->obj + e->delta);
+            s->buf = (void*)func_003AE6C8(s->file, *(float*)(s->file + 0x48));
+            s->idle = 0;
+        } else {
+            s->idle = 1;
+        }
+        if (s->buf == 0) {
+            s->idle = 1;
+            s->done = func_003AE860(s->file);
+        }
+    } while (s->done == 0);
+    s->open = 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" void func_002536C8(void* self);
