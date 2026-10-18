@@ -66,7 +66,9 @@ struct cAnimModel {
     /* 0x014 */ int maxPartIndex;           // i > this -> no such part (func_0030E9E0, func_00310CE8)
     /* 0x018 */ int unk_018;                // nonzero: draw per-part LOD refs, else one call with lodInfo (func_00310640)
     /* 0x01C */ int* partIndex;             // part number -> index into parts, < 0 = none
-    /* 0x020 */ char unk_020[0xC];
+    /* 0x020 */ int* boneChannelIndex;      // per-bone first-component index into the channel data (func_0030ECD8: first = arr[k] - arr[firstBone])
+    /* 0x024 */ t4Vector* localPos;         // numBones local bone positions, scaled componentwise by unk_140 (func_00310200)
+    /* 0x028 */ t4Vector* localRot;         // numBones local bone rotation quaternions (func_00310200)
     /* 0x02C */ sAnimModelBone* bones;      // numBones of them; streamed as numBones << 5 bytes (func_00310EA8)
     /* 0x030 */ t4Matrix* unk_030;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
     /* 0x034 */ t4Matrix* unk_034;          // numBones, translated with the model (func_00310530)
@@ -90,6 +92,9 @@ CHECK_OFFSET(cAnimModel, numBones, 0x10);
 CHECK_OFFSET(cAnimModel, maxPartIndex, 0x14);
 CHECK_OFFSET(cAnimModel, unk_018, 0x18);
 CHECK_OFFSET(cAnimModel, partIndex, 0x1C);
+CHECK_OFFSET(cAnimModel, boneChannelIndex, 0x20);
+CHECK_OFFSET(cAnimModel, localPos, 0x24);
+CHECK_OFFSET(cAnimModel, localRot, 0x28);
 CHECK_OFFSET(cAnimModel, bones, 0x2C);
 CHECK_OFFSET(cAnimModel, unk_030, 0x30);
 CHECK_OFFSET(cAnimModel, unk_034, 0x34);

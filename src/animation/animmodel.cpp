@@ -435,10 +435,10 @@ extern "C" void func_00310200(cAnimModel* self, sAnimModelBone* roots)
                 parent = roots++;
             else
                 parent = &self->bones[p];
-            t4Vector* lp = (t4Vector*)((k << 4) + *(int*)((char*)self + 0x24));
+            t4Vector* lp = (t4Vector*)((k << 4) + (int)self->localPos);
             sAmXform_0200 local;
             local.pos = sAmQuat_0200(lp->x * self->unk_140.x, lp->y * self->unk_140.y, lp->z * self->unk_140.z, lp->w * self->unk_140.w);
-            local.rot = *(sAmQuat_0200*)((k << 4) + *(int*)((char*)self + 0x28));
+            local.rot = *(sAmQuat_0200*)((k << 4) + (int)self->localRot);
             *(sAmXform_0200*)((k << 5) + (int)self->bones) = amCombine_0200(*(sAmXform_0200*)parent, local);
         }
     }
