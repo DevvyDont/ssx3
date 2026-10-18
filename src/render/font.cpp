@@ -1703,7 +1703,23 @@ extern "C" float func_003948D0(int power, float d)
     return 1.0f;
 }
 
-INCLUDE_ASM("render/font", func_003949A0);
+//100%
+// Scaled attenuation: (x*100)^power for power 1..3 while x*100 < 1, else 1.
+extern "C" float func_003949A0(int power, float x)
+{
+    x = x * 100.0f;
+    if (x < 1.0f) {
+        switch (power) {
+        case 1:
+            return x;
+        case 2:
+            return x * x;
+        case 3:
+            return x * x * x;
+        }
+    }
+    return 1.0f;
+}
 
 //100%
 extern "C" float func_00394A20(int n, float x)

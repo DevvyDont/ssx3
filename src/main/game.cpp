@@ -948,5 +948,15 @@ extern "C" int func_0022E0E0(void* self, int a1)
     return 50;
 }
 
+//100%
+extern signed char D_00535C11[];
+extern "C" void func_0022D088(void* self, void* a1, int a2);
 
-INCLUDE_ASM("main/game", func_0022E118);
+extern "C" void func_0022E118(void* self, void* a1)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] == 0) {
+        func_0022D088(self, a1, 1);
+        *(int*)((char*)self + 0x1CC) = 1;
+    }
+}

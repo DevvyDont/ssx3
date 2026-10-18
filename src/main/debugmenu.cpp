@@ -1916,4 +1916,11 @@ extern "C" void* MEM_initblock(void* self, int p1, void* p2, int p3, short p4, i
 }
 
 
-INCLUDE_ASM("main/debugmenu", func_002516F0);
+extern "C" void func_003E6448(void* p, int v, int n);
+extern char D_004D2438[0x100];
+
+//100%
+void func_002516F0()
+{
+    func_003E6448(D_004D2438, 0, 0x100);
+}
