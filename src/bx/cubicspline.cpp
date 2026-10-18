@@ -618,7 +618,90 @@ extern "C" void func_0031F838(void* a, void* b, void* c, int e)
     func_0031F858(a, b, c, 0, e);
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031F858);
+//100%
+// dlmalloc 2.7 independent_calloc/comalloc core (iALLOc): carve n chunks out of one allocation.
+#define REQ2SIZE_31F858(req) (((req) + 4 + 15 < 16) ? 16 : ((req) + 4 + 15) & ~15)
+
+extern "C" void** func_0031F858_impl(void* ms, unsigned int n_elements, unsigned int* sizes, int opts, void** chunks) __asm__("func_0031F858");
+extern "C" void** func_0031F858_impl(void* ms, unsigned int n_elements, unsigned int* sizes, int opts, void** chunks)
+{
+    char* av = *(char**)ms;
+    unsigned int element_size;
+    unsigned int contents_size;
+    unsigned int array_size;
+    char* mem;
+    char* p;
+    unsigned int remainder_size;
+    void** marray;
+    char* array_chunk;
+    int mmx;
+    unsigned int size;
+    unsigned int i;
+
+    if (*(unsigned int*)av == 0)
+        func_0031EEE8(ms, (sMState_31EEE8*)av);
+
+    if (chunks != 0) {
+        if (n_elements == 0)
+            return chunks;
+        marray = chunks;
+        array_size = 0;
+    } else {
+        if (n_elements == 0)
+            return (void**)func_0031E818(ms, 0);
+        marray = 0;
+        array_size = REQ2SIZE_31F858(n_elements * sizeof(void*));
+    }
+
+    if (opts & 1) {
+        element_size = REQ2SIZE_31F858(*sizes);
+        contents_size = n_elements * element_size;
+    } else {
+        element_size = 0;
+        contents_size = 0;
+        for (i = 0; i != n_elements; ++i)
+            contents_size += REQ2SIZE_31F858(sizes[i]);
+    }
+
+    size = contents_size + array_size - 15;
+
+    mmx = *(int*)(av + 0x354);
+    *(int*)(av + 0x354) = 0;
+    mem = (char*)func_0031E818(ms, size);
+    *(int*)(av + 0x354) = mmx;
+    if (mem == 0)
+        return 0;
+
+    remainder_size = *(unsigned int*)(mem - 4) & ~3;
+    p = mem - 8;
+
+    if (opts & 2)
+        func_003E6448(mem, 0, remainder_size - 4 - array_size);
+
+    if (marray == 0) {
+        array_chunk = p + contents_size;
+        marray = (void**)(array_chunk + 8);
+        *(unsigned int*)(array_chunk + 4) = (remainder_size - contents_size) | 1;
+        remainder_size = contents_size;
+    }
+
+    for (i = 0; ; ++i) {
+        marray[i] = p + 8;
+        if (i != n_elements - 1) {
+            if (element_size != 0)
+                size = element_size;
+            else
+                size = REQ2SIZE_31F858(sizes[i]);
+            remainder_size -= size;
+            *(unsigned int*)(p + 4) = size | 1;
+            p = p + size;
+        } else {
+            *(unsigned int*)(p + 4) = remainder_size | 1;
+            break;
+        }
+    }
+    return marray;
+}
 
 struct sMState_31FAA8
 {
