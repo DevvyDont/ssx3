@@ -80,7 +80,30 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 
 INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
 
-INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
+//100%
+// Cuts the record at its first "=" or ":" that ends a line, then appends "=\n" and val if they fit (-1 when fewer than 5 bytes remain).
+extern "C" int func_003EBCB0(unsigned char* buf, int size, const char* val)
+{
+    unsigned char* p = buf;
+    unsigned char* end;
+    while (*p != 0) {
+        if ((*p == '=' || *p == ':') && p[1] < 0x20)
+            break;
+        p++;
+    }
+    *p = 0;
+    if (val == 0)
+        return 0;
+    end = buf + size - 1;
+    if (end - p < 5)
+        return -1;
+    *p++ = '=';
+    *p++ = '\n';
+    while (*val != 0 && p != end)
+        *p++ = *val++;
+    *p = 0;
+    return 0;
+}
 
 INCLUDE_ASM("dirtysock/tags", func_003EBD70);
 
@@ -245,9 +268,44 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
     return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EC8B8);
+//100%
+// TagFieldSetDate-style setter: converts calendar fields (minus offset seconds) to an epoch and stores it with TagFieldSetEpoch.
+extern "C" void* func_00416210_C8B8(void* p, int c, int n) __asm__("func_00416210");
+extern "C" long func_003EB090_C8B8(sDsTmK2* tm) __asm__("func_003EB090");
 
-INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
+extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int month, int day, int hour, int min, int sec, int offset)
+{
+    sDsTmK2 tm;
+    int secs;
+    func_00416210_C8B8(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    tm.tm_year = year - 1900;
+    tm.tm_mon = month - 1;
+    tm.tm_mday = day;
+    tm.tm_hour = hour;
+    tm.tm_min = min;
+    tm.tm_sec = sec;
+    secs = func_003EB090_C8B8(&tm);
+    return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs ? secs - offset : 0);
+}
+
+//100%
+// Like func_003EC8B8, but takes the date (year << 16 | month << 8 | day) and time (hour << 16 | min << 8 | sec) packed.
+extern "C" int func_003EC9A0(char* record, int len, char* name, int date, int time, int offset)
+{
+    sDsTmK2 tm;
+    int secs;
+    func_00416210_C8B8(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    tm.tm_year = ((date >> 16) & 0xFFFF) - 1900;
+    tm.tm_mon = ((date >> 8) & 0xFF) - 1;
+    tm.tm_mday = date & 0xFF;
+    tm.tm_hour = (time >> 16) & 0xFF;
+    tm.tm_min = (time >> 8) & 0xFF;
+    tm.tm_sec = time & 0xFF;
+    secs = func_003EB090_C8B8(&tm);
+    return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs ? secs - offset : 0);
+}
 
 //100%
 // Finds field name in src, steps back to the start of its token, and sets up record from there.
@@ -294,7 +352,35 @@ extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
 
 INCLUDE_ASM("dirtysock/tags", func_003ECBD8);
 
-INCLUDE_ASM("dirtysock/tags", func_003ECE38);
+//100%
+// Finds the next "=" or ":" field separator in p and copies the following value into out (or dflt when there is none); returns the value start or 0.
+extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* out, int size, const char* dflt)
+{
+    int i;
+    unsigned char* p = src;
+    while (*p != 0) {
+        if ((*p == '=' || *p == ':') && p[1] < 0x20) {
+            if (p[1] == 0)
+                break;
+            p += 2;
+            if (out != 0) {
+                size--;
+                for (i = 0; i < size && p[i] != 0; i++)
+                    out[i] = p[i];
+                out[i] = 0;
+            }
+            return p;
+        }
+        p++;
+    }
+    if (out != 0 && dflt != 0) {
+        size--;
+        for (i = 0; i < size && dflt[i] != 0; i++)
+            out[i] = dflt[i];
+        out[i] = 0;
+    }
+    return 0;
+}
 
 //100%
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
@@ -652,4 +738,21 @@ extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* h
 }
 
 
-INCLUDE_ASM("dirtysock/tags", func_003EDE80);
+//100%
+// TagFieldGetDate-style accessor: packs a time tag into date (year << 16 | month << 8 | day) and time (hour << 16 | min << 8 | sec).
+extern "C" int func_003EDE80(char* data, int* date, int* time, int offset)
+{
+    sDsTmK2 tm;
+    sDsTmK2* t;
+    unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
+    if (secs < 2)
+        return -1;
+    t = func_003EAEB8(&tm, secs + offset);
+    if (t == 0)
+        return -1;
+    if (date)
+        *date = ((t->tm_year + 1900) << 16) | ((t->tm_mon + 1) << 8) | t->tm_mday;
+    if (time)
+        *time = (t->tm_hour << 16) | (t->tm_min << 8) | t->tm_sec;
+    return 0;
+}
