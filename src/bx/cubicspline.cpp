@@ -673,7 +673,82 @@ nomem:
     return 0;
 }
 
-INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
+//100%
+// dlmalloc 2.7 memalign().
+extern "C" void* func_0031F2C8_impl(void* ms, unsigned int alignment, unsigned int bytes) __asm__("func_0031F2C8");
+extern "C" void* func_0031F2C8_impl(void* ms, unsigned int alignment, unsigned int bytes)
+{
+    unsigned int nb;
+    char* m;
+    char* p;
+    char* brk;
+    char* newp;
+    unsigned int newsize;
+    unsigned int leadsize;
+    unsigned int size;
+    unsigned int req;
+    unsigned int head;
+
+    if (alignment <= 16)
+        return func_0031E818(ms, bytes);
+
+    if (alignment < 16)
+        alignment = 16;
+
+    if ((alignment & (alignment - 1)) != 0) {
+        unsigned int a = 32;
+        while (a < alignment)
+            a <<= 1;
+        alignment = a;
+    }
+
+    req = bytes;
+    if (req >= (unsigned int)-32) {
+        *func_00415FB8() = 12;
+        return 0;
+    }
+    nb = (req + 4 + 15 < 16) ? 16 : (req + 4 + 15) & ~15;
+
+    m = (char*)func_0031E818(ms, nb + alignment + 16);
+    if (m == 0)
+        return 0;
+
+    p = m - 8;
+
+    if ((unsigned int)(m) % alignment != 0) {
+        brk = (char*)(((unsigned int)(m + alignment - 1)) & -alignment) - 8;
+        if ((unsigned int)(brk - p) < 16)
+            brk += alignment;
+
+        newp = brk;
+        leadsize = brk - p;
+        head = *(unsigned int*)((int)m - 4);
+        newsize = (head & ~3) - leadsize;
+
+        if (head & 2) {
+            *(unsigned int*)newp = *(unsigned int*)((int)m - 8) + leadsize;
+            *(unsigned int*)(newp + 4) = newsize | 2;
+            return newp + 8;
+        }
+
+        *(unsigned int*)(newp + 4) = newsize | 1;
+        *(unsigned int*)(newp + newsize + 4) |= 1;
+        *(unsigned int*)((int)m - 4) = (*(unsigned int*)((int)m - 4) & 1) | leadsize;
+        func_0031ED60_E2D8(ms, m);
+        p = newp;
+    }
+
+    if (!(*(unsigned int*)(p + 4) & 2)) {
+        size = *(unsigned int*)(p + 4) & ~3;
+        if (size > nb + 16) {
+            char* remainder = p + nb;
+            *(unsigned int*)(remainder + 4) = (size - nb) | 1;
+            *(unsigned int*)(p + 4) = (*(unsigned int*)(p + 4) & 1) | nb;
+            func_0031ED60_E2D8(ms, remainder + 8);
+        }
+    }
+    return p + 8;
+}
 
 //100%
 // dlmalloc 2.7 memalign() with an offset: returns memory where (mem + offset) is aligned.
