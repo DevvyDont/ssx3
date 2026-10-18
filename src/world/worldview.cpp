@@ -1016,7 +1016,208 @@ void func_003AAE60(void* self)
 
 INCLUDE_ASM("world/worldview", func_003AAE68);
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AB498);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+void operator_delete(int*);
+extern "C" void func_0012A490(void* p, unsigned char id);
+// PORT: func_001547E0__FPv is called with a second (byte) argument here.
+void func_001547E0_2(void* iface, unsigned char id) __asm__("func_001547E0__FPv");
+extern "C" void func_0016CF18(unsigned int param);
+extern "C" void func_00210608(void* data);
+extern "C" void func_00242570(void* p, void* data);
+extern "C" void func_00278A58(void* p, unsigned char id);
+extern "C" void func_00286D18(void* p, unsigned int param, void* data);
+extern "C" void* func_0028B180();
+extern "C" void* func_0028B1C8();
+extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
+extern "C" void func_002BB5A8(void* entry);
+extern "C" void func_002D9B40();
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void* func_003AD198();
+extern void* D_004A28A4;
+extern void* D_004A28A8;
+extern char*** D_004A47B8;
+extern char* D_004A5B80;
+
+struct sWVVec4_B498 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sWVBox_B498 {
+    sWVVec4_B498 min;
+    sWVVec4_B498 max;
+};
+struct sWVCell_B498 {
+    int level;
+    int x, y, z;
+};
+struct sWVNode_B498 {
+    sWVNode_B498* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sWVRoot_B498 {
+    sWVCell_B498 cell;              // 0x00
+    sWVNode_B498* node;             // 0x10
+};
+struct sWVEntry_B498 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+static inline sWVRoot_B498* findRoot_B498(char* w, int x, int y, int z)
+{
+    sWVRoot_B498* r = (sWVRoot_B498*)w;
+    sWVRoot_B498* rx = x >= 0 ? r : r + 4;
+    sWVRoot_B498* ry = y >= 0 ? rx : rx + 2;
+    sWVRoot_B498* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+#define WV_MAKEBOX_B498(box, base, off)               \
+    (box).min.x = *(float*)((base) + (off) + 0x0);     \
+    (box).min.y = *(float*)((base) + (off) + 0x4);     \
+    (box).min.z = *(float*)((base) + (off) + 0x8);     \
+    (box).min.w = 1.0f;                                \
+    (box).max.x = *(float*)((base) + (off) + 0xC);     \
+    (box).max.y = *(float*)((base) + (off) + 0x10);    \
+    (box).max.z = *(float*)((base) + (off) + 0x14);    \
+    (box).max.w = 1.0f
+
+static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sWVCell_B498 c;
+    func_00328F28(&c, box);
+    sWVRoot_B498* r = findRoot_B498(w, c.x, c.y, c.z);
+    func_003284B8(r->node, idx, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param, char* data)
+{
+    switch (msg) {
+    case 0:
+        break;
+    case 1: {
+        sWVBox_B498 box;
+        WV_MAKEBOX_B498(box, data, 0x158);
+        update_B498(*(char**)(self + 0xC), 1, data, &box);
+        break;
+    }
+    case 9: {
+        char* o = D_004A5B80;
+        sWVEntry_B498* vt = *(sWVEntry_B498**)(o + 0x10D8);
+        ((void (*)(void*, unsigned int))vt[50].fn)(o + vt[50].delta, param >> 8);
+        break;
+    }
+    case 10: {
+        char* o = D_004A5B80;
+        sWVEntry_B498* vt = *(sWVEntry_B498**)(o + 0x10D8);
+        ((void (*)(void*, unsigned int))vt[50].fn)(o + vt[50].delta, (param >> 8) + *(int*)(self + 0x10));
+        break;
+    }
+    case 3: {
+        sWVBox_B498 box;
+        WV_MAKEBOX_B498(box, data, 0x60);
+        update_B498(*(char**)(self + 0xC), 0, data, &box);
+        break;
+    }
+    case 8: {
+        int i = 0;
+        char* e = *(char**)(data + 0x24);
+        if (i < *(int*)(data + 0x20)) {
+            int one = 1;
+            do {
+                *(int*)(e + 0x8) = one;
+                sWVBox_B498 box;
+                WV_MAKEBOX_B498(box, e, 0x6C);
+                update_B498(*(char**)(self + 0xC), 2, e, &box);
+                e = *(char**)(e + 0x64);
+                i++;
+            } while (i < *(int*)(data + 0x20));
+        }
+        break;
+    }
+    case 6: {
+        sWVEntry_B498* vt = *(sWVEntry_B498**)(self + 0x8);
+        if (((int (*)(void*, void*))vt[22].fn)(self + vt[22].delta, data)) {
+            *(int*)(data + 0x8) = 6;
+            sWVBox_B498 box;
+            WV_MAKEBOX_B498(box, data, 0x44);
+            update_B498(*(char**)(self + 0xC), 2, data, &box);
+        }
+        break;
+    }
+    case 7: {
+        *(int*)(data + 0x8) = 8;
+        sWVBox_B498 box;
+        WV_MAKEBOX_B498(box, data, 0x28);
+        update_B498(*(char**)(self + 0xC), 2, data, &box);
+        break;
+    }
+    case 5: {
+        *(int*)(data + 0x8) = 7;
+        sWVBox_B498 box;
+        WV_MAKEBOX_B498(box, data, 0x68);
+        update_B498(*(char**)(self + 0xC), 2, data, &box);
+        break;
+    }
+    case 13:
+        func_002B6B30(*(void**)((char*)func_0028B1C8() + 0x4C), data, param);
+        break;
+    case 17:
+        func_0016CF18(param);
+        break;
+    case 15:
+        if (D_004A47B8 != 0) {
+            func_002BB5A8(((char**)D_004A47B8[2])[1] + (unsigned char)param * 12);
+        }
+        break;
+    case 18:
+        func_00278A58(D_004A28A4, param);
+        break;
+    case 20:
+        func_00286D18(func_0028B180(), param, data);
+        break;
+    case 19:
+        func_001547E0_2(cBE_getInterface_Fv(cBE_getBE(), 10), param);
+        break;
+    case 21:
+        func_00210608(data);
+        break;
+    case 11:
+        func_00242570(func_003AD198(), data);
+        break;
+    case 14:
+        data = 0;
+        func_0012A490(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC), param);
+        break;
+    case 22:
+        func_002D9B40();
+        break;
+    }
+    return data;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003ABE40);

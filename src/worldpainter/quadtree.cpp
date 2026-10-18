@@ -1197,7 +1197,396 @@ void* func_002C48A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C48C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_002523A8(void* p);
+extern "C" void func_002C2210(void* self, short* dst, const char* src);
+extern "C" int func_002C50E0(void* self);
+extern "C" void func_002C5570(void* self, int a1);
+extern "C" int func_003DF690(char* path, int a1);
+extern "C" void* func_003E6448(void* dst, int c, int n);
+extern "C" void func_003E6574_K(void* dst, const void* src, int n) __asm__("func_003E6574");
+extern "C" int func_00409D10(int h, int a1, char* name, int a3);
+extern "C" int func_00409E38(int h, int a1, char* name);
+extern "C" int func_00409E70(int h);
+extern "C" int func_0040A090(int h, int a1, int a2);
+extern "C" int func_0040A1A8(int h, int a1, int a2);
+extern "C" int func_0040A688(int h, int a1, char* name, int a3, int a4, void* buf);
+extern "C" int func_0040AA68(int h, int a1, char* name);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int strlen(const char* s);
+extern "C" void* memcpy(void* dst, const void* src, unsigned int n);
+extern int D_004A3940;
+extern char D_004A3948[];
+extern char D_004A3958[];
+extern char D_004A3960[] __attribute__((aligned(4)));
+extern char D_00487460[];
+extern char* D_004459F0[];
+extern char D_00445A00[];
+extern char D_00445A40[];
+extern char D_00445A70[];
+extern char D_00445AA0[];
+
+struct sIconSys_48C0 {
+    char head[4];               // 0x000
+    unsigned short reserv1;     // 0x004
+    unsigned short offsLF;      // 0x006
+    unsigned int reserv2;       // 0x008
+    unsigned int transRate;     // 0x00C
+    int bgColor[4][4];          // 0x010
+    float lightDir[3][4];       // 0x050
+    float lightColor[3][4];     // 0x080
+    float ambient[4];           // 0x0B0
+    short title[34];            // 0x0C0
+    char fnameView[64];         // 0x104
+    char fnameCopy[64];         // 0x144
+    char fnameDel[64];          // 0x184
+    char reserve3[512];         // 0x1C4
+};
+extern sIconSys_48C0 D_005376F8;
+
+class cMemCard_48C0 {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
+    virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20();
+    virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25();
+    virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30();
+    virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
+    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39(); virtual void v40();
+    virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
+    virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49(); virtual void v50();
+    virtual void v51(); virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
+    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59(); virtual void v60();
+    virtual void v61(); virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
+    virtual void v66();
+    virtual int v67(int idx); // 0x218
+};
+
+static inline int slotOf_48C0(int state, int a, int b)
+{
+    return state == a ? 1 : (state == b ? 2 : 0);
+}
+
+#define S_48C0(off) ((char*)self + (off))
+#define I_48C0(off) (*(int*)((char*)self + (off)))
+
+extern "C" void* func_002C48C0(void* vself, int state)
+{
+    cMemCard_48C0* self = (cMemCard_48C0*)vself;
+    I_48C0(0x4) = state;
+    switch (state) {
+    case 1: {
+        *(int*)((char*)self + I_48C0(0xC) * 0x14 + 0x184) = D_004A3940;
+        if (I_48C0(0x30) != 0) {
+            func_002523A8(*(void**)S_48C0(0x30));
+            I_48C0(0x30) = 0;
+        }
+        if (I_48C0(0x18) >= 0) {
+            int r = func_00409E70(I_48C0(0x18));
+            D_004A3940 = r;
+            if (r >= 0) {
+                func_002C48C0(self, 2);
+            }
+            I_48C0(0x18) = -1;
+        }
+        I_48C0(0x2C) = 0;
+        I_48C0(0x1C) = -1;
+        I_48C0(0x20) = 0;
+        break;
+    }
+    case 3:
+        func_002C50E0(self);
+        break;
+    case 0x24: {
+        I_48C0(0x48) = 0;
+        int r = func_00409E38(I_48C0(0xC), 0, S_48C0(0xF9));
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x25: {
+        char* path = S_48C0(0x79);
+        sprintf(path, D_004A3958, S_48C0(0xF9), D_00487460);
+        int r = func_00409D10(I_48C0(0xC), 0, path, 0x203);
+        D_004A3940 = r;
+        I_48C0(0x18) = -1;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x26: {
+        char* title = S_48C0(0x58);
+        func_003E6448(&D_005376F8, 0, 0x3C4);
+        memcpy(&D_005376F8, D_004A3960, 5);
+        func_002C2210(self, D_005376F8.title, title);
+        if (I_48C0(0x8) > 0)
+            D_005376F8.offsLF = I_48C0(0x8);
+        else
+            D_005376F8.offsLF = strlen(title) * 2;
+        D_005376F8.transRate = 0x60;
+        func_003E6574_K(D_005376F8.bgColor, D_00445A00, 0x40);
+        func_003E6574_K(D_005376F8.lightDir, D_00445A40, 0x30);
+        func_003E6574_K(D_005376F8.lightColor, D_00445A70, 0x30);
+        func_003E6574_K(D_005376F8.ambient, D_00445AA0, 0x10);
+        strcpy(D_005376F8.fnameView, D_004459F0[0]);
+        strcpy(D_005376F8.fnameCopy, D_004459F0[1]);
+        strcpy(D_005376F8.fnameDel, D_004459F0[2]);
+        int r = func_0040A1A8(I_48C0(0x18), (int)&D_005376F8, 0x3C4);
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x27: {
+        int r = func_00409E70(I_48C0(0x18));
+        D_004A3940 = r;
+        if (r < 0) {
+            I_48C0(0x18) = -1;
+            func_002C48C0(self, 1);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 0x28: case 0x2C: case 0x30: {
+        char path[64];
+        if (I_48C0(0x30) != 0) {
+            func_002523A8(*(void**)S_48C0(0x30));
+            I_48C0(0x30) = 0;
+        }
+        int slot = slotOf_48C0(I_48C0(0x4), 0x2C, 0x30);
+        sprintf(path, D_004A3958, S_48C0(0x14C0), D_004459F0[slot]);
+        I_48C0(0x38) = func_003DF690(path, 0x100);
+        break;
+    }
+    case 0x29: case 0x2D: case 0x31: {
+        int slot = slotOf_48C0(I_48C0(0x4), 0x2D, 0x31);
+        char* path = S_48C0(0x79);
+        sprintf(path, D_004A3948, S_48C0(0xB9), D_004459F0[slot]);
+        int r = func_00409D10(I_48C0(0xC), 0, path, 0x203);
+        D_004A3940 = r;
+        if (r < 0) {
+            I_48C0(0x18) = -1;
+            func_002C48C0(self, 1);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 0x2A: case 0x2E: case 0x32: {
+        int r = func_0040A1A8(I_48C0(0x18), I_48C0(0x30), I_48C0(0x34));
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x2B: case 0x2F: case 0x33: {
+        if (I_48C0(0x30) != 0) {
+            func_002523A8(*(void**)S_48C0(0x30));
+            I_48C0(0x30) = 0;
+        }
+        int r = func_00409E70(I_48C0(0x18));
+        D_004A3940 = r;
+        if (r < 0) {
+            I_48C0(0x18) = -1;
+            func_002C48C0(self, 1);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 0x16: {
+        int r = func_00409D10(I_48C0(0xC), 0, S_48C0(0xF9), 0x203);
+        D_004A3940 = r;
+        if (r < 0) {
+            I_48C0(0x18) = -1;
+            func_002C48C0(self, 1);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 0x17: {
+        int r = func_0040A1A8(I_48C0(0x18), I_48C0(0x2C), I_48C0(0x20));
+        D_004A3940 = r;
+        I_48C0(0x2C) = 0;
+        I_48C0(0x20) = 0;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x18:
+        if (I_48C0(0x18) >= 0) {
+            int r = func_00409E70(I_48C0(0x18));
+            D_004A3940 = r;
+            if (r < 0) {
+                I_48C0(0x18) = -1;
+                func_002C48C0(self, 1);
+            } else {
+                I_48C0(0x18) = -1;
+            }
+        } else {
+            func_002C48C0(self, 0x19);
+        }
+        break;
+    case 0x1C: {
+        I_48C0(0x44) = 0;
+        int r = func_00409D10(I_48C0(0xC), 0, S_48C0(0xF9), 1);
+        D_004A3940 = r;
+        I_48C0(0x18) = -1;
+        if (r != 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x1D: {
+        int r = func_0040A090(I_48C0(0x18), I_48C0(0x2C), I_48C0(0x20));
+        D_004A3940 = r;
+        if (r != 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x1E:
+        if (I_48C0(0x18) >= 0) {
+            int r = func_00409E70(I_48C0(0x18));
+            D_004A3940 = r;
+            if (r < 0) {
+                I_48C0(0x18) = -1;
+                func_002C48C0(self, 1);
+            } else {
+                I_48C0(0x18) = -1;
+            }
+        } else {
+            func_002C48C0(self, 0x1F);
+        }
+        break;
+    case 0x36: {
+        *(int*)((char*)self + I_48C0(0xC) * 0x14 + 0x184) = 0;
+        int r = func_0040AA68(I_48C0(0xC), 0, S_48C0(0xF9));
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x37: case 0x38: case 0x39: {
+        int slot = slotOf_48C0(I_48C0(0x4), 0x38, 0x39);
+        char* path = S_48C0(0x79);
+        sprintf(path, D_004A3948, S_48C0(0xB9), D_004459F0[slot]);
+        int r = func_0040AA68(I_48C0(0xC), 0, path);
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x3A: {
+        char* path = S_48C0(0x79);
+        sprintf(path, D_004A3948, S_48C0(0xB9), D_00487460);
+        int r = func_0040AA68(I_48C0(0xC), 0, path);
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 0x3B: {
+        int r = func_0040AA68(I_48C0(0xC), 0, S_48C0(0xB9));
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 1);
+        break;
+    }
+    case 7:
+        for (I_48C0(0x28) = 0; I_48C0(0x28) < I_48C0(0x14); I_48C0(0x28)++) {
+            if (self->v67(I_48C0(0x28))) {
+                sprintf(S_48C0(0x79), D_004A3948, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, D_00487460);
+                func_002C48C0(self, 8);
+                break;
+            }
+        }
+        break;
+    case 8: {
+        int r = func_00409D10(I_48C0(0xC), 0, S_48C0(0x79), 1);
+        D_004A3940 = r;
+        if (r < 0) {
+            I_48C0(0x18) = -1;
+            func_002C5570(self, I_48C0(0x28));
+            func_002C48C0(self, 0x10);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 0xA: {
+        int r = func_0040A090(I_48C0(0x18), (int)&D_005376F8, 0x3C4);
+        D_004A3940 = r;
+        if (r < 0) {
+            func_002C5570(self, I_48C0(0x28));
+            func_002C48C0(self, 0xF);
+        }
+        break;
+    }
+    case 9: {
+        int r = func_00409E70(I_48C0(0x18));
+        D_004A3940 = r;
+        if (r < 0) {
+            func_002C48C0(self, 0x10);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 0xB: {
+        char* path = S_48C0(0xF9);
+        I_48C0(0x3C) = 0;
+        char* buf = S_48C0(0x480);
+        char* name = (char*)self + I_48C0(0x28) * 0x78 + 0x1B0;
+        sprintf(path, D_004A3948, name, name);
+        func_003E6448(buf, 0, 0x40);
+        int r = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 0x10);
+        break;
+    }
+    case 0xC: case 0xD: case 0xE: {
+        int slot = slotOf_48C0(I_48C0(0x4), 0xD, 0xE);
+        char* path = S_48C0(0x79);
+        char* buf = S_48C0(0x480);
+        sprintf(path, D_004A3948, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, D_004459F0[slot]);
+        func_003E6448(buf, 0, 0x40);
+        int r = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
+        D_004A3940 = r;
+        if (r < 0)
+            func_002C48C0(self, 0x10);
+        break;
+    }
+    case 0xF: {
+        int r = func_00409E70(I_48C0(0x18));
+        D_004A3940 = r;
+        if (r < 0) {
+            I_48C0(0x18) = -1;
+            func_002C48C0(self, 0x10);
+        } else {
+            I_48C0(0x18) = -1;
+        }
+        break;
+    }
+    case 2: case 4: case 6: case 0x10: case 0x12: case 0x15: case 0x19: case 0x1B: case 0x1F:
+    case 0x23: case 0x34: case 0x35: case 0x3D: case 0x40: case 0x42: case 0x44: case 0x46:
+    case 0x48: case 0x4A: case 0x4C: case 0x4E:
+        break;
+    default:
+        if (I_48C0(0x40) == 0)
+            func_002C50E0(self);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C50E0);
