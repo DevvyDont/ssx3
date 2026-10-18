@@ -1307,7 +1307,40 @@ void* func_00236B90(void* self)
     return func_00233B28(self);
 }
 
-INCLUDE_ASM("main/gamestate", func_00236BB0);
+//100%
+extern "C" void func_002EA820(void* p);
+extern "C" void func_0020A8F8(int n);
+extern int D_004A2A50;
+extern int D_004A2A54;
+extern int D_005366E8[];
+extern int D_004428F4[];
+struct sGsOwner_6BB0 {
+    char pad0[0x64];
+    void* obj;
+};
+struct sGsMgr_6BB0 {
+    char pad0[0x84];
+    sGsOwner_6BB0* owner;
+};
+extern sGsMgr_6BB0* D_004A28A8_6BB0 __asm__("D_004A28A8");
+
+extern "C" void func_00236BB0(void* self)
+{
+    char* p = D_004A2EEC;
+    *(int*)((char*)self + 8) = 0;
+    if (p != 0 && *(int*)(p + 4) != 0) {
+        func_002EA820(D_004A28A8_6BB0->owner->obj);
+        cBE_setState(0);
+        return;
+    }
+    func_0020A8F8(2);
+    int n = D_004A2A54 + 1;
+    D_005366E8[n] = 1;
+    D_004A2A50 = D_004428F4[0];
+    D_004A2A54 = n;
+    func_002EA820(D_004A28A8_6BB0->owner->obj);
+    cBE_setState(0);
+}
 
 //100%
 extern "C" void func_00233AA0(void* self);

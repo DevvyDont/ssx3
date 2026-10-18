@@ -210,7 +210,90 @@ INCLUDE_ASM("render/bezierman", func_0038B370);
 
 INCLUDE_ASM("render/bezierman", func_0038C590);
 
-INCLUDE_ASM("render/bezierman", func_0038C788);
+//100%
+struct sBezMan_C788 {
+    char pad0[0x58];
+    unsigned int vtx[3];
+    unsigned int nrm[3];
+    unsigned int col[3];
+    char pad7C[0x44C - 0x7C];
+    unsigned int pkt[3];
+};
+
+static inline unsigned int bezVtx_C788(sBezMan_C788* self, int mode, int idx)
+{
+    switch (mode) {
+    case 0:
+        return self->vtx[0] + idx * 0xC0;
+    case 1:
+        return self->vtx[1] + idx * 0x1B0;
+    case 2:
+        return self->vtx[2] + idx * 0x300;
+    }
+    return 0;
+}
+
+static inline unsigned int bezNrm_C788(sBezMan_C788* self, int mode, int idx)
+{
+    switch (mode) {
+    case 0:
+        return self->nrm[0] + idx * 0x80;
+    case 1:
+        return self->nrm[1] + idx * 0x120;
+    case 2:
+        return self->nrm[2] + idx * 0x200;
+    }
+    return 0;
+}
+
+static inline unsigned int bezCol_C788(sBezMan_C788* self, int mode, int idx)
+{
+    switch (mode) {
+    case 0:
+        return self->col[0] + idx * 0x80;
+    case 1:
+        return self->col[1] + idx * 0x120;
+    case 2:
+        return self->col[2] + idx * 0x200;
+    }
+    return 0;
+}
+
+extern "C" void func_0038C788(sBezMan_C788* self, int mode, int idx)
+{
+    int n = mode * 2 + 4;
+    unsigned int a0 = bezVtx_C788(self, mode, idx);
+    unsigned int a1 = bezNrm_C788(self, mode, idx);
+    unsigned int a2 = bezCol_C788(self, mode, idx);
+    int sq = n * n;
+    ulong* p = (ulong*)((self->pkt[mode] + idx * 0x100) | 0x30000000);
+    p[0] = 0x10000003;
+    p[1] = 0;
+    p[2] = 0x3000000005000000;
+    p[3] = 0;
+    p[4] = 0x3F8000003F800000;
+    p[5] = 0x4040404020000000;
+    p[6] = 0;
+    p[7] = (ulong)((sq << 16) | 0x78008000) << 32;
+    p[8] = ((sq * 3) >> 2) | 0x30000000 | ((ulong)a0 << 32);
+    p[9] = 0;
+    p[10] = 0x10000001;
+    p[11] = 0;
+    p[12] = 0x5050505020000000;
+    p[13] = (ulong)((sq << 16) | 0x74008040) << 32;
+    p[14] = (sq >> 1) | 0x30000000 | ((ulong)a1 << 32);
+    p[15] = 0;
+    p += 16;
+    p[0] = 0x10000001;
+    p[1] = 0;
+    p[2] = 0x5050505020000000;
+    p[3] = (ulong)((sq << 16) | 0x74008080) << 32;
+    p[4] = (sq >> 1) | 0x30000000 | ((ulong)a2 << 32);
+    p[5] = 0;
+    p += 6;
+    p[0] = 0x60000000;
+    p[1] = 0;
+}
 
 //100%
 extern void* D_004A5B80;
@@ -236,9 +319,257 @@ extern "C" void func_0038CA08(void* self, void* obj)
     func_0037DF88(D_004A5B80, &a, &b);
 }
 
-INCLUDE_ASM("render/bezierman", func_0038CA70);
+struct sBezRS_CE20 {
+    int w0;
+    int w4;
+    int w8;
+    int wC;
+    short h10;
+    short h12;
+};
 
-INCLUDE_ASM("render/bezierman", func_0038CE20);
+struct sBezRec_CE20 {
+    sBezRS_CE20 rs;
+    unsigned int start;
+    unsigned int end;
+    short tag;
+    short pad;
+    char pad20[0x60];
+};
+
+struct sBezCnt_CE20 {
+    int count;
+    char pad4[0x80 - 4];
+    sBezRec_CE20 recs[1];
+};
+
+struct sBezGfx_CE20 {
+    char pad0[0xE84];
+    sBezRS_CE20* top;
+    char padE88[0x18F0 - 0xE88];
+    sBezCnt_CE20* cnt;
+};
+
+struct sBezObj_CE20 {
+    char pad0[0xC];
+    int flags;
+    char pad10[0x1A0 - 0x10];
+    short tx;
+    short ty;
+};
+
+struct sBezMan_CE20 {
+    char pad0[0x30];
+    unsigned int vtx;
+    char pad34[0x454 - 0x34];
+    unsigned int pkt;
+};
+
+struct sBezTex_CE20 {
+    unsigned int reg;
+    unsigned int pad;
+};
+
+extern sBezGfx_CE20* D_004A5B80_CE20 __asm__("D_004A5B80");
+extern int D_004A44D8;
+extern int D_004A44DC;
+extern sBezTex_CE20 D_00504960[];
+extern "C" void* func_0038F708(void* obj, int a1, int a2);
+extern "C" int func_0038CA08_r(void* self, void* obj) __asm__("func_0038CA08");
+extern "C" void func_0038D168(void* self, unsigned int vtx, void* obj, int mode, sBezTex_CE20* tex, unsigned int* a2, unsigned int* pp);
+extern "C" void func_0038D448(void* self, int mode, sBezTex_CE20* tex, unsigned int* a2, int r, unsigned int* pp);
+
+//100%
+struct sBezQ_CA70 {
+    short tx;
+    short ty;
+    int mode;
+    unsigned int base;
+    int* a3;
+};
+
+struct sBezMan_CA70 {
+    char pad0[0x28];
+    unsigned int vtx[3];
+    char pad34[0x44C - 0x34];
+    unsigned int pkt[3];
+    char pad458[0x5364 - 0x458];
+    int qn;
+    sBezQ_CA70 q[1];
+};
+
+extern sBezTex_CE20* D_0044B9D0[];
+
+extern "C" void func_0038CA70(sBezMan_CA70* self, int mode, int idx, int* a3, unsigned int* pp)
+{
+    unsigned int vtx = self->vtx[mode] + idx * 0xC;
+    sBezObj_CE20* obj = (sBezObj_CE20*)func_0038F708((void*)a3[0], 0x1B0, 2);
+    int any = 0;
+    unsigned int base = self->pkt[mode] + idx * 0x100;
+    int dim = mode * 2 + 4;
+    sBezGfx_CE20* gfx = D_004A5B80_CE20;
+    int a = (obj->flags & 0x600000) && dim;
+    if (a) {
+        if (D_004A44D8 != 0) {
+            a = 0;
+        } else {
+            any = a != 0;
+        }
+    }
+    int r = 0;
+    if (mode == 2) {
+        r = func_0038CA08_r(self, obj);
+    }
+    int b = r != 0;
+    if (b) {
+        if (D_004A44DC != 0) {
+            b = 0;
+        } else {
+            any |= b;
+        }
+    }
+    switch (obj->flags & 0x180000) {
+    case 0x80000:
+        any = 1;
+        gfx->top->w0 = (gfx->top->w0 & ~0xC) | 8;
+        break;
+    case 0x100000:
+        any = 1;
+        gfx->top->w0 = (gfx->top->w0 & ~0xC) | 4;
+        break;
+    case 0x180000:
+        any = 1;
+        gfx->top->w0 |= 0xC;
+        break;
+    default:
+        gfx->top->w0 &= ~0xC;
+        break;
+    }
+    if (any) {
+        int tx = obj->tx;
+        gfx->top->h10 = tx;
+        int ty = obj->ty;
+        gfx->top->h12 = ty;
+        unsigned int q = *pp;
+        ulong* p = (ulong*)(q | 0x30000000);
+        p[0] = ((ulong)base << 32) | 0x50000000;
+        p[1] = 0;
+        p[2] = 0x10000001;
+        p[3] = 0;
+        int k = a3[1];
+        sBezTex_CE20* tex = D_0044B9D0[mode];
+        p[4] = 0;
+        p[5] = (ulong)(tex[k + 2].reg | 0x14000000) << 32;
+        p += 6;
+        unsigned int end = (unsigned int)p & 0x0FFFFFFF;
+        *pp = end;
+        sBezCnt_CE20* cnt = gfx->cnt;
+        sBezRS_CE20* top = gfx->top;
+        if (cnt->count < 0xA28) {
+            top->w8 = (top->w8 & ~0x1F) | (*(int*)((char*)cnt + 0x69CC4) & 0x1F);
+            int key = *(int*)((char*)cnt + 0x69CC0);
+            sBezRec_CE20* rec = (sBezRec_CE20*)((cnt->count++ << 7) + ((unsigned int)cnt->recs | 0x30000000));
+            rec->rs = *top;
+            rec->start = q;
+            rec->end = end;
+            rec->tag = key;
+            rec->pad = 0;
+        }
+        *pp += 0x10;
+        if (a) {
+            func_0038D168(self, vtx, obj, mode, tex, (unsigned int*)a3, pp);
+        }
+        if (b) {
+            func_0038D448(self, mode, tex, (unsigned int*)a3, r, pp);
+        }
+    } else {
+        self->q[self->qn].tx = obj->tx;
+        self->q[self->qn].ty = obj->ty;
+        self->q[self->qn].mode = mode;
+        self->q[self->qn].base = base;
+        self->q[self->qn].a3 = a3;
+        self->qn++;
+    }
+}
+
+//100%
+extern "C" void func_0038CE20(sBezMan_CE20* self, int idx, unsigned int* a2, int* a3, unsigned int* pp)
+{
+    unsigned int vtx = self->vtx + idx * 0xC;
+    sBezObj_CE20* obj = (sBezObj_CE20*)func_0038F708((void*)a2[0], 0x1B0, 2);
+    unsigned int base = self->pkt + idx * 0x100;
+    sBezGfx_CE20* gfx = D_004A5B80_CE20;
+    int a = (obj->flags & 0x600000) != 0;
+    if (a && D_004A44D8 != 0) {
+        a = 0;
+    }
+    int r = func_0038CA08_r(self, obj);
+    int tx = obj->tx;
+    int b = r != 0;
+    gfx->top->h10 = tx;
+    if (D_004A44DC != 0) {
+        b = 0;
+    }
+    int ty = obj->ty;
+    gfx->top->h12 = ty;
+    switch (obj->flags & 0x180000) {
+    case 0x80000:
+        gfx->top->w0 = (gfx->top->w0 & ~0xC) | 8;
+        break;
+    case 0x100000:
+        gfx->top->w0 = (gfx->top->w0 & ~0xC) | 4;
+        break;
+    case 0x180000:
+        gfx->top->w0 |= 0xC;
+        break;
+    default:
+        gfx->top->w0 &= ~0xC;
+        break;
+    }
+    unsigned int q = *pp;
+    ulong* p = (ulong*)(q | 0x30000000);
+    if (a3 != 0) {
+        p[0] = 0x10000002;
+        p[1] = 0;
+        p[2] = ((ulong)*a3 << 32) | 0x6E0180D0;
+        p[3] = 0;
+        p[4] = 0;
+        p[5] = (ulong)0x6C1080C0 << 32;
+        p[6] = ((ulong)(*a2 + 0x40) << 32) | 0x30000010;
+        p[7] = 0;
+        p += 8;
+    }
+    sBezTex_CE20* tex = D_00504960;
+    p[0] = ((ulong)base << 32) | 0x50000000;
+    p[1] = 0;
+    p[2] = 0x10000001;
+    p[3] = 0;
+    int k = a2[1] + 2;
+    p[4] = 0;
+    p[5] = (ulong)(tex[k].reg | 0x14000000) << 32;
+    p += 6;
+    unsigned int end = (unsigned int)p & 0x0FFFFFFF;
+    *pp = end;
+    sBezCnt_CE20* cnt = gfx->cnt;
+    sBezRS_CE20* top = gfx->top;
+    if (cnt->count < 0xA28) {
+        top->w8 = (top->w8 & ~0x1F) | (*(int*)((char*)cnt + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)cnt + 0x69CC0);
+        sBezRec_CE20* rec = (sBezRec_CE20*)((cnt->count++ << 7) + ((unsigned int)cnt->recs | 0x30000000));
+        rec->rs = *top;
+        rec->start = q;
+        rec->end = end;
+        rec->tag = key;
+        rec->pad = 0;
+    }
+    *pp += 0x10;
+    if (a) {
+        func_0038D168(self, vtx, obj, 2, tex, a2, pp);
+    }
+    if (b) {
+        func_0038D448(self, 2, tex, a2, r, pp);
+    }
+}
 
 INCLUDE_ASM("render/bezierman", func_0038D168);
 
