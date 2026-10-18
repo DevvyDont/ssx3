@@ -2106,7 +2106,29 @@ extern "C" int func_002BDE30(char *a, char *b) {
     return 1;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
+//100%
+extern "C" int func_002BDEE0(void *a, void *b) {
+    if (*(float*)((char*)a + 0x8) != *(float*)((char*)b + 0x4)) return 0;
+    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 0x8)) return 0;
+    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
+    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
+    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
+    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+    if (*(float*)((char*)a + 0x38) != *(float*)((char*)b + 0x1C)) return 0;
+    if (*(float*)((char*)a + 0x40) != *(float*)((char*)b + 0x20)) return 0;
+    if (*(float*)((char*)a + 0x48) != *(float*)((char*)b + 0x24)) return 0;
+    if (*(float*)((char*)a + 0x50) != *(float*)((char*)b + 0x28)) return 0;
+    if (*(float*)((char*)a + 0x58) != *(float*)((char*)b + 0x2C)) return 0;
+    if (*(float*)((char*)a + 0x60) != *(float*)((char*)b + 0x30)) return 0;
+    if (*(float*)((char*)a + 0x68) != *(float*)((char*)b + 0x34)) return 0;
+    if (*(float*)((char*)a + 0x70) != *(float*)((char*)b + 0x38)) return 0;
+    if (*(float*)((char*)a + 0x78) != *(float*)((char*)b + 0x3C)) return 0;
+    if (*(float*)((char*)a + 0x80) != *(float*)((char*)b + 0x40)) return 0;
+    if (*(float*)((char*)a + 0x88) != *(float*)((char*)b + 0x44)) return 0;
+    if (*(float*)((char*)a + 0x90) != *(float*)((char*)b + 0x48)) return 0;
+    if (*(float*)((char*)a + 0x98) != *(float*)((char*)b + 0x4C)) return 0;
+    return 1;
+}
 
 //100%
 extern "C" int func_002BE078(void *arg0, void *arg1) {
