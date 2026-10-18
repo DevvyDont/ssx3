@@ -14,7 +14,95 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
     return dst;
 }
 
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
+extern char D_004A4A70;
+extern unsigned char D_004964C0[];
+extern "C" int func_00415FC8(const void* a, const void* b, unsigned int n);
+extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
+extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
+
+// Adds or replaces the "name=value" term temp in the record. Names compare
+// through the D_004964C0 class table; "~..." terms are appended at the end.
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp)
+{
+    unsigned char* rec = (unsigned char*)record;
+    unsigned char* p;
+    unsigned char* start;
+    unsigned char* end;
+    int n;
+    int d;
+    unsigned int a;
+    unsigned int b;
+    if (rec == 0) return -1;
+    if (temp == 0 || (unsigned char)*temp <= ' ') return -1;
+    if (*temp == '~') {
+        p = rec;
+        while (*p != 0) p++;
+        if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
+            *p++ = D_004A4A70;
+            *p = 0;
+        }
+        end = p;
+        start = p;
+    } else {
+        p = rec;
+        for (;;) {
+            if (*p == 0) {
+                if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
+                    *p++ = D_004A4A70;
+                    *p = 0;
+                }
+                end = p;
+                start = p;
+                break;
+            }
+            if (*p <= ' ') {
+                p++;
+                continue;
+            }
+            if (D_004964C0[*p] == 1) {
+                end = p;
+                start = p;
+                break;
+            }
+            a = D_004964C0[*p];
+            b = D_004964C0[*temp];
+            n = 0;
+            while (a == b && a >= 2) {
+                n++;
+                a = D_004964C0[p[n]];
+                b = D_004964C0[temp[n]];
+            }
+            if (a + b == 2) {
+                end = p;
+                start = p;
+                while (*end >= 0x20) end++;
+                if (*end != 0) end++;
+                goto found;
+            }
+            p++;
+            while (*p >= 0x20) p++;
+        }
+    }
+found:
+    int old = end - p;
+    n = 0;
+    while (temp[n] >= 0x20) n++;
+    p = end;
+    n++;
+    d = n - old;
+    while (*p != 0) p++;
+    p++;
+    if (d > 0 && rec + len - p < d) return -1;
+    if (d == 0 && func_00415FC8(start, temp, n) == 0) return 0;
+    if (d > 0) func_0041610C(end + d, end, p - end);
+    if (d < 0) func_0041610C(start, start - d, p - (start - d));
+    func_0041605C(start, temp, n);
+    if (start[n] == 0 && D_004A4A70 != '\n')
+        start[n - 1] = 0;
+    else
+        start[n - 1] = D_004A4A70;
+    return n - 1;
+}
 
 //100%
 // Sets the byte flag at D_004A4A70 and returns its old value.
