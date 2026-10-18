@@ -876,7 +876,51 @@ extern "C" void func_0031FE28(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FE30);
+#ifdef SKIP_ASM
+extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
+    char* ms = (char*)*self;
+    func_0031EEE8(self, (sMState_31EEE8*)ms);
+    switch (kind) {
+    case 1:
+        if (val < 0x51U) {
+            int low = (*(int*)ms) & 3;
+            int res;
+            if (val != 0) {
+                unsigned int t = val + 0x13;
+                if (t >= 0x10U) {
+                    res = (t & 0xFFFFFFF0) | low;
+                } else {
+                    res = low | 0x10;
+                }
+            } else {
+                res = low | 8;
+            }
+            *(int*)ms = res;
+            return 1;
+        }
+        return 0;
+    case -1:
+        *(unsigned int*)(ms + 0x344) = val;
+        return 1;
+    case -2:
+        *(unsigned int*)(ms + 0x348) = val;
+        return 1;
+    case -3:
+        *(unsigned int*)(ms + 0x34C) = val;
+        return 1;
+    case -4:
+        if (val == 0) {
+            *(int*)(ms + 0x354) = 0;
+            return 1;
+        }
+        return 0;
+    default:
+        return 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FF20__FPv);

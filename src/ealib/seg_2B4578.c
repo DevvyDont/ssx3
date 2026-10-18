@@ -183,7 +183,36 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B3E40);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4010);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4218);
+#ifdef SKIP_ASM
+extern int func_003B42B0(int, int, int);
+extern int func_003B4338(int, int, int);
+extern int func_003B43C0(int, int, int);
+extern int func_003B4448(int, int, int);
+
+int func_003B4218(int a0, int a1, int a2, int a3, int kind) {
+    int result = 0;
+    switch (kind) {
+    case 4:
+        result = func_003B42B0(a0, a1, a2);
+        break;
+    case 8:
+        result = func_003B4338(a0, a1, a2);
+        break;
+    case 15:
+        result = func_003B43C0(a0, a1, a2);
+        break;
+    case 16:
+        result = func_003B43C0(a0, a1, a2);
+        break;
+    case 32:
+        result = func_003B4448(a0, a1, a2);
+        break;
+    }
+    return result;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B42B0);
 
@@ -4649,7 +4678,54 @@ int func_003C5468(float *a0) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C54C0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5538);
+#ifdef SKIP_ASM
+extern char D_004958C8[];
+extern char D_004958D0[];
+extern char D_004958D8[];
+extern char D_004958E0[];
+extern char D_004958E8[];
+extern char D_004958F0[];
+extern char D_004958F8[];
+extern char D_00495910[];
+extern char D_00495920[];
+
+int func_003C5538(unsigned int kind, char **out) {
+    switch (kind) {
+    case 0:
+        *out = D_004958C8;
+        break;
+    case 1:
+        *out = D_004958D0;
+        break;
+    case 2:
+        *out = D_004958D8;
+        break;
+    case 3:
+        *out = D_004958E0;
+        break;
+    case 4:
+        *out = D_004958E8;
+        break;
+    case 5:
+        *out = D_004958F0;
+        break;
+    case 6:
+        *out = D_004958F8;
+        break;
+    case 7:
+        *out = D_00495910;
+        break;
+    case 8:
+        *out = D_00495920;
+        break;
+    default:
+        return -5;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5600);

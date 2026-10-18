@@ -298,7 +298,48 @@ extern "C" int func_001511B0(void* self, int level)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_001511E8);
+#ifdef SKIP_ASM
+struct sEconRec {
+    char pad0[0xBDF];
+    signed char f[7];
+    char pad1[0xF88 - 0xBDF - 7];
+};
+extern "C" int func_001511E8(void* self, int arg1, int arg2, unsigned int arg3) {
+    signed char *p;
+    if (arg1 >= 2) {
+        return 0;
+    }
+    {
+        p = 0;
+        switch (arg3) {
+        case 0:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[0];
+            break;
+        case 1:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[1];
+            break;
+        case 2:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[2];
+            break;
+        case 3:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[3];
+            break;
+        case 4:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[4];
+            break;
+        case 5:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[5];
+            break;
+        case 6:
+            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[6];
+            break;
+        }
+        return ((sEconTable*)D_00440550)->entries[(*p + 1) / 5].value;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00151368);

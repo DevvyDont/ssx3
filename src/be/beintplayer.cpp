@@ -519,7 +519,46 @@ extern "C" int func_00146A70(void* self, int index, int c, int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00146C10);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sPlayerSub_6C10 {
+    char pad0[0x278];
+    unsigned long pad_bits : 14;
+    unsigned long b14 : 1;
+    unsigned long b15 : 1;
+    unsigned long b16 : 1;
+    unsigned long b17 : 1;
+    unsigned long b18 : 1;
+    unsigned long b19 : 1;
+    char pad1[0xF88 - 0x280];
+};
+
+extern "C" void func_00146C10(void* self, int arg1, int arg2, int arg3, int arg4) {
+    int profile = cBELibrary_getProfileIndex(arg1);
+    switch (arg3) {
+    case 6:
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b14 = arg4;
+        break;
+    case 7:
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b15 = arg4;
+        break;
+    case 8:
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b16 = arg4;
+        break;
+    case 9:
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b17 = arg4;
+        break;
+    case 10:
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b18 = arg4;
+        break;
+    case 11:
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b19 = arg4;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00146D98);

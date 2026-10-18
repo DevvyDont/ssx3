@@ -1195,7 +1195,36 @@ extern "C" void func_00293410(void* self, int id, void* rider, int* out, int* si
     }
 }
 #endif
+//100%
 INCLUDE_ASM("sound/soundsys", func_002934D0);
+#ifdef SKIP_ASM
+extern "C" int func_002934D0(void *self, int kind, void *arg)
+{
+    int r;
+
+    switch (kind) {
+    case 3:
+        r = ((func_0011FE98(arg) ^ 4) != 0) ? 0 : 2;
+        break;
+    case 1:
+    case 2:
+        r = 1;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+        r = 2;
+        break;
+    case 0:
+    default:
+        r = 0;
+        break;
+    }
+    return r;
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293538);
 #ifdef SKIP_ASM
@@ -6443,7 +6472,32 @@ extern "C" int func_002A1E20(void* self, unsigned int x)
 
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1FA0);
+#ifdef SKIP_ASM
+extern "C" int func_002A1FA0(void *self, void *obj)
+{
+    if (func_00123168(obj) == 0) {
+        switch (func_00123128(obj)) {
+        case 1:
+        case 2:
+        case 4:
+        case 6:
+            return 2;
+        case 0:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 9:
+            return 1;
+        default:
+            return 0;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2018);

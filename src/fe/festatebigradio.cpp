@@ -614,7 +614,47 @@ extern "C" void func_00193DE0(void* self, int player, int which, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebigradio", func_00193F38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+static inline int other_3F38(int c) { return c == 0; }
+struct sRadioChan_3F38 {
+    unsigned b0 : 1;
+    unsigned b1 : 1;
+    unsigned b2 : 1;
+    unsigned b3 : 1;
+    unsigned b4 : 1;
+    unsigned b5 : 1;
+    unsigned rest : 26;
+    int f4;
+    int f8;
+};
+extern sRadioChan_3F38 D_005308B8_a[] __asm__("D_005308B8");
+
+extern "C" int func_00193F38(void *self, int chan, int kind) {
+    switch (kind) {
+    case 0:
+        return D_005308B8_a[other_3F38(chan)].f8;
+    case 1:
+        return D_005308B8_a[other_3F38(chan)].b3;
+    case 2:
+        return D_005308B8_a[other_3F38(chan)].b0;
+    case 3:
+        return D_005308B8_a[chan].b4;
+    case 4:
+        return D_005308B8_a[chan].b5;
+    case 5:
+        return D_005308B8_a[chan].b1;
+    case 6:
+        return D_005308B8_a[chan].b2;
+    case 7:
+        return D_005308B8_a[other_3F38(chan)].f4;
+    default:
+        return -1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", func_00194080);

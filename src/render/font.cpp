@@ -1878,7 +1878,43 @@ extern "C" float func_003949A0(int mode, float x)
     return 1.0f;
 }
 #endif
+//100%
 INCLUDE_ASM("render/font", func_00394A20);
+#ifdef SKIP_ASM
+extern "C" float func_00394A20(int n, float x) {
+    float r;
+
+    switch (n) {
+    case 0:
+        return 1.0f;
+    case 1:
+        return x;
+    case 2:
+        return x * x;
+    case 3:
+        return x * x * x;
+    case 4:
+        return x * x * x * x;
+    default:
+        r = 0.0f;
+        if (x != 0.0f) {
+            if (n < 0) {
+                n = -n;
+                x = 1.0f / x;
+            }
+            r = 1.0f;
+            while (n != 0) {
+                if (n & 1) {
+                    r *= x;
+                }
+                n >>= 1;
+                x *= x;
+            }
+        }
+        return r;
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("render/font", func_00394AD8);
 #ifdef SKIP_ASM
