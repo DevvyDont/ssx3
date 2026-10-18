@@ -317,7 +317,7 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
 
     cross = "mips-linux-gnu-"
 
-    ld_args = "-EL -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -Map $mapfile -T $in -o $out"
+    ld_args = "-EL -T config/undefined_syms.txt -T config/undefined_syms_auto.txt -T config/undefined_funcs_auto.txt -Map $mapfile -T $in -o $out"
 
     as_cpp = "cpp"
     as_filter = ""
