@@ -500,7 +500,98 @@ extern "C" void func_0026F180(cReplayFramePtr_F180* self)
     func_0026F228(self);
 }
 
-INCLUDE_ASM("replay/frameptr", func_0026F228);
+//100%
+void func_0026D168(void* self);
+void func_0026E5C0(void* self);
+extern "C" void func_0026E5D0(void* list, void* block);
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+struct sFpSlot_F228 {
+    int id;
+    char data[0xAC];
+    int fB0;
+};
+
+extern "C" void func_0026F228(void* self)
+{
+    char* s = (char*)self;
+    unsigned int st = *(int*)s - 14;
+    bool b = !(st < 2);
+    if (!b) return;
+    func_0026F498(self);
+    int i = 0;
+    char* l0 = s + 0x3B0;
+    char* l1 = s + 0x3BC;
+    int none = -1;
+    *(int*)(s + 0x4) = 15;
+    func_0026F4A0(self, 10);
+    *(int*)(s + 0x60C) = 0;
+    *(int*)(s + 0x610) = 0;
+    *(int*)(s + 0x614) = 0;
+    *(int*)(s + 0x628) = 0;
+    *(int*)(s + 0x62C) = 0;
+    *(int*)(s + 0x28) = 0;
+    *(int*)(s + 0x608) = 0;
+    *(int*)(s + 0x484) = 0;
+    *(int*)(s + 0x3C8) = 0;
+    *(int*)(s + 0x3CC) = 0;
+    *(int*)(s + 0x488) = 0;
+    *(int*)(s + 0x3D4) = 0;
+    *(int*)(s + 0x3AC) = 0;
+    *(int*)(s + 0x3D0) = 0;
+    *(int*)(s + 0x1C) = 0;
+    *(int*)(s + 0x20) = 0;
+    *(int*)(s + 0x618) = 0;
+    *(int*)(s + 0x61C) = 0;
+    *(int*)(s + 0x620) = 0;
+    *(int*)(s + 0x624) = 0;
+    *(int*)(s + 0x63C) = 0;
+    *(int*)(s + 0x650) = 0;
+    *(int*)(s + 0x640) = 0;
+    *(int*)(s + 0x644) = 0;
+    *(int*)(s + 0x648) = 0;
+    *(int*)(s + 0x638) = 0;
+    *(int*)(s + 0x64C) = 0;
+    *(int*)(s + 0x654) = 0;
+    *(int*)(s + 0x658) = 0;
+    *(int*)(s + 0x65C) = 0;
+    *(int*)(s + 0x660) = 0;
+    *(int*)(s + 0x664) = 0;
+    *(int*)(s + 0x66C) = 0;
+    *(int*)(s + 0x674) = 0;
+    *(int*)(s + 0x678) = 0;
+    *(int*)(s + 0x67C) = 0;
+    *(int*)(s + 0x668) = 0;
+    sFpSlot_F228* e = (sFpSlot_F228*)(s + 0x494);
+    char* d = s + 0x498;
+    void** pp = (void**)(s + 0x48C);
+    do {
+        if (*pp) func_0026D168(*pp);
+        e->fB0 = 0;
+        e->id = none;
+        func_003E6448(d, 0, 0xAC);
+        d += 0xB4;
+        pp++;
+        e->id = i;
+        i++;
+        e++;
+    } while (i < 2);
+    func_0026E5C0(l0);
+    func_0026E5C0(l1);
+    for (i = 0; i < *(int*)(s + 8); i++) {
+        func_0026E5D0(l1, s + 0x2C + i * 0x38);
+    }
+    int three = 3;
+    *(int*)(s + 0x630) = 0;
+    *(int*)(s + 0x634) = 0;
+    if (*(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) == 1) {
+        *(int*)(s + 0xC) = three;
+        *(int*)(s + 0x10) = three;
+    } else {
+        *(int*)(s + 0xC) = 1;
+        *(int*)(s + 0x10) = 0;
+    }
+}
 
 //100%
 void func_0026E5C0(void* self);
