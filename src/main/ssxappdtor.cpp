@@ -1569,7 +1569,18 @@ extern "C" void func_00245118(void) {
     }
 }
 #endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00245140);
+#ifdef SKIP_ASM
+extern "C" void func_003F42A0();
+extern int D_004A2EB8;
+
+extern "C" void func_00245140(void) {
+    if (D_004A2EB8 != 0) {
+        func_003F42A0();
+    }
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00245168);
 INCLUDE_ASM("main/ssxappdtor", func_002451B0);
 

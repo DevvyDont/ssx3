@@ -18,7 +18,13 @@ void* cMCOverlayManager_getManager()
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023C850);
+#ifdef SKIP_ASM
+extern "C" int func_0023C850(void) {
+    return D_004A2C74 != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C860);
@@ -45,9 +51,29 @@ extern "C" int func_0023C898(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
+#ifdef SKIP_ASM
+extern "C" int func_0023C8A8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x130))) == 0x23;
+}
+#endif
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8B8);
+#ifdef SKIP_ASM
+extern "C" int func_0023C8B8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xDC)));
+}
+#endif
+//100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
+#ifdef SKIP_ASM
+extern int D_004A2C78;
+
+extern "C" int func_0023C8C0(void) {
+    return D_004A2C78 != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8D0);
@@ -3498,7 +3524,13 @@ extern "C" void func_00241D40(void* self, int mode, void* buf)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241DC0);
+#ifdef SKIP_ASM
+extern "C" int func_00241DC0(void) {
+    return 0x30;
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241DC8);

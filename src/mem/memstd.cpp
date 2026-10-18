@@ -112,9 +112,27 @@ INCLUDE_ASM("mem/memstd", func_00251AC0);
 INCLUDE_ASM("mem/memstd", func_00251B50);
 INCLUDE_ASM("mem/memstd", func_00251BB0);
 INCLUDE_ASM("mem/memstd", func_00251C38);
+//100%
 INCLUDE_ASM("mem/memstd", func_00251CF0);
+#ifdef SKIP_ASM
+extern "C" int func_00251CF0(void) {
+    return 0;
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00251CF8);
+#ifdef SKIP_ASM
+extern "C" int func_00251CF8(void) {
+    return 0;
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00251D00);
+#ifdef SKIP_ASM
+extern "C" void func_00251D00(void) {
+
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_00251D08);
 
 //100%
@@ -388,7 +406,13 @@ extern "C" int func_002522B0(sMemBlock002522B0* blk)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002523A0);
+#ifdef SKIP_ASM
+extern "C" int func_002523A0(void) {
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002523A8);
@@ -406,8 +430,20 @@ extern "C" void* func_002523A8(void* self)
 
 INCLUDE_ASM("mem/memstd", func_002523D0);
 INCLUDE_ASM("mem/memstd", func_002525F8);
+//100%
 INCLUDE_ASM("mem/memstd", func_00252648);
+#ifdef SKIP_ASM
+extern "C" int func_00252648(void *arg0) {
+    return (*(int *)((char*)(arg0) + (-0xC)));
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00252650);
+#ifdef SKIP_ASM
+extern "C" unsigned short func_00252650(void *arg0) {
+    return (*(unsigned short *)((char*)(arg0) + (-0xE)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00252658__FPv);
@@ -514,9 +550,25 @@ INCLUDE_ASM("mem/memstd", func_00252FC8);
 INCLUDE_ASM("mem/memstd", func_00252FF0);
 INCLUDE_ASM("mem/memstd", func_00253018);
 INCLUDE_ASM("mem/memstd", func_00253040);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00253070);
+#ifdef SKIP_ASM
+extern "C" void func_00252A10(int, int, int, int, int, int);
+
+extern "C" void func_00253070(int arg0) {
+    func_00252A10(0, arg0, 0, 0, 0, 1);
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_002530A0);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_002530D0);
+#ifdef SKIP_ASM
+extern "C" void func_00252A10(int, int, int, int, int, int);
+
+extern "C" void func_002530D0(int arg0) {
+    func_00252A10(0, arg0, 0, 0, 0, 0);
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_00253100);
 INCLUDE_ASM("mem/memstd", func_00253170);
 INCLUDE_ASM("mem/memstd", func_00253230);
@@ -1335,9 +1387,21 @@ INCLUDE_ASM("mem/memstd", func_00255720);
 INCLUDE_ASM("mem/memstd", func_00255750);
 INCLUDE_ASM("mem/memstd", func_00255778);
 INCLUDE_ASM("mem/memstd", func_002557A0);
+//100%
 INCLUDE_ASM("mem/memstd", func_002557A8);
+#ifdef SKIP_ASM
+extern "C" void func_002557A8(void) {
+
+}
+#endif
 INCLUDE_ASM("mem/memstd", func_002557B0);
+//100%
 INCLUDE_ASM("mem/memstd", func_002557B8);
+#ifdef SKIP_ASM
+extern "C" void func_002557B8(void) {
+
+}
+#endif
 
 //99.38%
 INCLUDE_ASM("mem/memstd", func_002557C0__FPv);
