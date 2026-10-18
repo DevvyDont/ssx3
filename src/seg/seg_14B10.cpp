@@ -385,7 +385,38 @@ extern "C" void func_00115168(char* s)
 
 INCLUDE_ASM("seg/seg_14B10", func_00115358);
 
-INCLUDE_ASM("seg/seg_14B10", func_00115640);
+//100%
+extern "C" int cRiderAnimBase_play_5B58(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+int func_0011FE98(void* self);
+extern "C" void func_0011DFE0(char* self, Q_5168 q, float angle);
+// PORT: the unit defines func_00116930 with no parameters; this call passes self.
+extern "C" void func_00116930_5640(char* self) __asm__("func_00116930");
+
+extern "C" void func_00115640(char* s)
+{
+    if (*(int*)(s + 0x328) == 0) return;
+    if (func_0011FE98(s) == 1) {
+        if ((unsigned int)(*(int*)(s + 0x328) - 3) < 2) {
+            SetHeading_5168(*(char**)(s + 0x784), 0.0f);
+        }
+        if (*(int*)(s + 0x328) == 3) cRiderAnimBase_play_5B58(*(void**)(s + 0x784), 0x11A, 0, -1.0f);
+        else if (*(int*)(s + 0x328) == 4) cRiderAnimBase_play_5B58(*(void**)(s + 0x784), 0x115, 0, -1.0f);
+        else cRiderAnimBase_play_5B58(*(void**)(s + 0x784), 0x10C, 0, -1.0f);
+    } else if (func_0011FE98(s) == 0) {
+        if (*(int*)(s + 0x328) == 3) {
+            func_0011DFE0(s, *(Q_5168*)(s + 0x1C0), 1.5707963705062866f);
+            cRiderAnimBase_changeHeadingOffset(*(void**)(s + 0x784), 1.5707963705062866f);
+            SetHeading_5168(*(char**)(s + 0x784), 0.0f);
+        } else if (*(int*)(s + 0x328) == 4) {
+            func_0011DFE0(s, *(Q_5168*)(s + 0x1C0), -1.5707963705062866f);
+            cRiderAnimBase_changeHeadingOffset(*(void**)(s + 0x784), -1.5707963705062866f);
+            SetHeading_5168(*(char**)(s + 0x784), 0.0f);
+        }
+        cRiderAnimBase_play_5B58(*(void**)(s + 0x784), 5, 0, -1.0f);
+    }
+    *(int*)(s + 0x328) = 0;
+    func_00116930_5640(s);
+}
 
 //100%
 extern "C" float func_0031C228(float x);
