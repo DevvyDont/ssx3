@@ -54,8 +54,30 @@ extern "C" int func_003119E8(void *arg0, int arg1) {
     return (*(int *)((char*)(arg0) + (0x50))) + (arg1 * 8);
 }
 #endif
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_003119F8);
+#ifdef SKIP_ASM
+extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern int D_0044AF80[];
+
+extern "C" int func_003119F8(void* self, int anim)
+{
+    int i = cAIAnimEventMap_getBlendInTime(anim)[3];
+    return D_0044AF80[i];
+}
+#endif
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311A30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// func_00311860 is matched as (void) but this caller passes the anim in $4.
+extern "C" const char* func_00311860_anim(int anim) __asm__("func_00311860");
+
+extern "C" const char* func_00311A30(void* self, int anim)
+{
+    return func_00311860_anim(anim);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311A50);
@@ -271,8 +293,35 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_003
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311D88);
+#ifdef SKIP_ASM
+// Sets the field at 0x80 of every sequence node of all 6 sequencers.
+extern "C" void func_00311D88(sRiderAnimBase* self, int value)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        int j = 0;
+        if (j < ((cAnimSequencer*)self->mSequencers)[i].mCount)
+        {
+            do
+            {
+                *(int*)((char*)cAnimSequencer_getSequence(&((cAnimSequencer*)self->mSequencers)[i], j++) + 0x80) = value;
+            } while (j < ((cAnimSequencer*)self->mSequencers)[i].mCount);
+        }
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311E38);
+#ifdef SKIP_ASM
+// Resets sequencer i and marks its slot empty (0x1B6 = no anim, see func_00311AE8).
+extern "C" void func_00311E38(sRiderAnimBase* self, int i)
+{
+    func_00314668(self->mSequencers + (i << 3));
+    self->mAnims[i] = 0x1B6;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311E88);
@@ -385,7 +434,45 @@ extern "C" void func_00312598(void* p, int a1)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", func_00312660);
+#ifdef SKIP_ASM
+extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
+extern "C" void func_00313CF0(void* node, int i, float t);
+extern char* D_004A3E7C;
+extern int D_004A5950;
+
+struct sVEntry00312660 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+// The 0x50-byte state func_00314418 fills (sAnimState_00312598), 16-byte aligned: it is returned by value (lq/sq copy).
+struct sAnimState_00312660
+{
+    char data[0x50];
+    sAnimState_00312660() {}
+} __attribute__((aligned(16)));
+
+// Samples anim at time t on a scratch sequencer and returns the first resulting state.
+extern "C" sAnimState_00312660 func_00312660(char* self, int anim, int h, float t)
+{
+    sAnimState_00312660 states[0x40];
+    cAnimSequencer seq;
+    func_003142E8(&seq);
+    if (h == D_004A5950)
+    {
+        sVEntry00312660* vt = *(sVEntry00312660**)(self + 0x58);
+        h = *(int*)(vt[4].fn(self + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
+    }
+    func_00311F00(self, &seq, anim, h, 1, 0, 0.0f);
+    func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, t);
+    func_00314418(&seq, (sAnimState_00312598*)states, 0x40);
+    func_00314668(&seq);
+    return states[0];
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00312790);

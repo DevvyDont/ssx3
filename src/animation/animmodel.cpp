@@ -234,9 +234,216 @@ INCLUDE_ASM("animation/animmodel", func_0030ECD8);
 
 INCLUDE_ASM("animation/animmodel", func_0030F2B0);
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310120);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 macro-mode asm. Builds bone matrix unk_030[i] from the bone's quaternion
+// (rot, rows 0-2) and position (pos, row 3), then unk_034[i] = unk_030[i] with each row scaled
+// by the matching component of unk_140.
+// PORT: index-first (int) address arithmetic (pointer in int).
+extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* p)
+{
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2       $vf4, 0x10(%0)\n"
+        "lqc2       $vf3, 0x0(%0)\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf3, 0x30(%1)\n"
+        "sqc2       $vf10, 0x0(%1)\n"
+        "sqc2       $vf11, 0x10(%1)\n"
+        "sqc2       $vf12, 0x20(%1)\n"
+        ".set pop\n"
+        :
+        : "r"(p), "r"((t4Matrix*)((i << 6) + (int)self->unk_030))
+        : "memory");
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2       $vf1, 0x140(%2)\n"
+        "lqc2       $vf4, 0x0(%0)\n"
+        "lqc2       $vf5, 0x10(%0)\n"
+        "lqc2       $vf6, 0x20(%0)\n"
+        "lqc2       $vf7, 0x30(%0)\n"
+        "vmulx.xyzw $vf8, $vf4, $vf1x\n"
+        "vmuly.xyzw $vf9, $vf5, $vf1y\n"
+        "vmulz.xyzw $vf10, $vf6, $vf1z\n"
+        "vmulw.xyzw $vf11, $vf7, $vf1w\n"
+        "sqc2       $vf8, 0x0(%1)\n"
+        "sqc2       $vf9, 0x10(%1)\n"
+        "sqc2       $vf10, 0x20(%1)\n"
+        "sqc2       $vf11, 0x30(%1)\n"
+        ".set pop\n"
+        :
+        : "r"((t4Matrix*)((i << 6) + (int)self->unk_030)), "r"((t4Matrix*)((i << 6) + (int)self->unk_034)), "r"(self)
+        : "memory");
+}
+#endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310200);
+#ifdef SKIP_ASM
+// Vector/quaternion with constructors (the result temps go straight into the return slot).
+struct sAmQuat_0200
+{
+    float x, y, z, w;
+    sAmQuat_0200() {}
+    sAmQuat_0200(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+struct sAmXform_0200
+{
+    sAmQuat_0200 pos;
+    sAmQuat_0200 rot;
+};
+
+extern t4Vector D_004FF130;
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sAmQuat_0200 amQuatMul_0200(const sAmQuat_0200& a, const sAmQuat_0200& b)
+{
+    sAmQuat_0200 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sAmQuat_0200 amSub_0200(const sAmQuat_0200& a, const sAmQuat_0200& b)
+{
+    sAmQuat_0200 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sAmQuat_0200 amAdd_0200(const sAmQuat_0200& a, const sAmQuat_0200& b)
+{
+    sAmQuat_0200 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sAmQuat_0200 amRot_0200(const sAmQuat_0200& q, const sAmQuat_0200& v)
+{
+    sAmQuat_0200 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// Child transform = parent transform a composed with local transform b.
+static inline sAmXform_0200 amCombine_0200(const sAmXform_0200& a, const sAmXform_0200& b)
+{
+    sAmXform_0200 r;
+    r.rot = amQuatMul_0200(a.rot, b.rot);
+    r.pos = amAdd_0200(amRot_0200(a.rot, amSub_0200(b.pos, *(const sAmQuat_0200*)&D_004FF130)), a.pos);
+    return r;
+}
+
+// One boneNames entry (0x50 bytes): the name, then the parent bone (< 0 = root).
+struct sAmBoneInfo_0200 {
+    char name[0x12];
+    short parent;
+    char pad[0x3C];
+};
+
+// Rebuilds the world bones from the local pose: bone k = parent (or the next root transform) * local k.
+extern "C" void func_00310200(cAnimModel* self, sAnimModelBone* roots)
+{
+    for (int i = 0; i < self->numParts; i++)
+    {
+        // PORT: pointer arithmetic through int (offset-first addu).
+        sAmBoneInfo_0200* info = (sAmBoneInfo_0200*)((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->boneNames;
+        for (int j = 0; j < ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->numBones; j++)
+        {
+            int k = j + ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->firstBone;
+            sAnimModelBone* parent;
+            sAmBoneInfo_0200* e = &info[j];
+            short p = e->parent;
+            if (p < 0)
+                parent = roots++;
+            else
+                parent = &self->bones[p];
+            t4Vector* lp = (t4Vector*)((k << 4) + *(int*)((char*)self + 0x24));
+            sAmXform_0200 local;
+            local.pos = sAmQuat_0200(lp->x * self->unk_140.x, lp->y * self->unk_140.y, lp->z * self->unk_140.z, lp->w * self->unk_140.w);
+            local.rot = *(sAmQuat_0200*)((k << 4) + *(int*)((char*)self + 0x28));
+            *(sAmXform_0200*)((k << 5) + (int)self->bones) = amCombine_0200(*(sAmXform_0200*)parent, local);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animmodel", func_003103F0);
@@ -253,7 +460,60 @@ extern "C" void func_003103F0(cAnimModel* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00310458);
+#ifdef SKIP_ASM
+extern t4Vector D_004FF130;
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline t4Vector amMulMat_0458(const t4Matrix* m, const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+struct sAmPoint_0458 {
+    float x, y, z;
+    int bone;
+};
+
+// Returns point `index` of the part with this id, transformed by its bone matrix (unk_034),
+// or D_004FF130 when no part has the id.
+extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
+{
+    for (int i = 0; i < model->numParts; i++)
+    {
+        // PORT: pointer arithmetic through int (offset-first addu).
+        sAnimModelPart* part = (sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)model->parts);
+        if (part->id == id)
+        {
+            sAmPoint_0458* pt = (sAmPoint_0458*)((index << 4) + (int)part->unk_3C);
+            t4Matrix* m = (t4Matrix*)(((pt->bone + part->firstBone) << 6) + (int)model->unk_034);
+            t4Vector v;
+            v.x = pt->x;
+            v.y = pt->y;
+            v.z = pt->z;
+            v.w = 1.0f;
+            return amMulMat_0458(m, v);
+        }
+    }
+    return D_004FF130;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_00310530);
@@ -731,7 +991,24 @@ extern "C" void* func_00311048(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animmodel", func_00311088);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+void operator_delete(int*);
+// func_00311110 ignores its argument (matched as (void)); the call here passes self in a0.
+extern "C" void func_00311110_self(void* self) __asm__("func_00311110");
+
+extern "C" void func_00311088(void* self, int flags)
+{
+    D_004A3DF8 = 0;
+    func_00311110_self(self);
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", func_003110D0);
