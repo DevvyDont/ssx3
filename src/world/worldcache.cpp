@@ -940,7 +940,116 @@ extern "C" void func_003A88A8(void* p)
 
 INCLUDE_ASM("world/worldcache", func_003A89C8);
 
-INCLUDE_ASM("world/worldcache", cWorldCache_addBxStreamDataTest);
+extern char D_00494D40[];
+extern char D_00494E98[];
+
+struct sWCRef_8A90 {
+    unsigned char type;
+    unsigned char sub;
+    unsigned short idx;
+};
+
+struct sWCRefList_8A90 {
+    int f0;
+    int f4;
+    int count;
+    sWCRef_8A90* refs;
+};
+
+struct sWCEnt_8A90 {
+    unsigned char count;
+    unsigned char pad1;
+    unsigned short pad2;
+};
+
+struct sWCTab_8A90 {
+    sWCEnt_8A90* ents;
+    int n;
+};
+
+struct sWCSection_8A90 {
+    int f0;
+    sWCTab_8A90 tab[1];
+};
+
+struct sWCPools_8A90 {
+    char pad0[0x3C];
+    sWCPool_7878* pool[1];
+};
+
+static inline int AddRef_8A90(sWCEnt_8A90* e)
+{
+    if (e->count != 0) {
+        e->count++;
+        return 1;
+    }
+    e->count++;
+    return 0;
+}
+
+// Counts a reference to stream data (type, id); on first use allocates its buffer, otherwise queues the ref on the slot.
+extern "C" unsigned int cWorldCache_addBxStreamDataTest(char* self, int slot, int type, unsigned int id, int size)
+{
+    int sub = id & 0xFF;
+    unsigned int idx = id >> 8;
+    sWCSection_8A90* sec;
+    if (sub == 0xFF)
+        sec = *(sWCSection_8A90**)(self + 4);
+    else
+        sec = (*(sWCSection_8A90***)(self + 8))[sub];
+    // Scaled index first, so the entry address reuses its register (addu a0,a0,v1).
+    sWCEnt_8A90* e = (sWCEnt_8A90*)((idx << 2) + (int)sec->tab[type].ents);
+    int used = AddRef_8A90(e);
+    if (used) {
+        sWCRefList_8A90* l = *(sWCRefList_8A90**)(self + slot * 0x18 + 0x3F8);
+        l->refs[l->count].type = type;
+        l->refs[l->count].sub = id;
+        l->refs[l->count].idx = id >> 8;
+        l->count++;
+        return 0;
+    }
+    if (size == 0)
+        return 0;
+    void* p;
+    sWCPools_8A90* pools;
+    switch (type) {
+    case 9:
+    case 10:
+        pools = *(sWCPools_8A90**)(self + 0xC);
+        if (sub == 0xFF)
+            p = operator_new_tag(size, D_00494D40, 0x45000000, 0);
+        else
+            p = func_003A7878(pools->pool[sub], size, 0x45000000);
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 11:
+    case 12:
+        pools = *(sWCPools_8A90**)(self + 0xC);
+        if (sub == 0xFF)
+            p = operator_new_tag(size, D_00494D40, 0x22000000, 0);
+        else
+            p = func_003A7878(pools->pool[sub], size, 0x22000000);
+        break;
+    case 14:
+        p = operator_new_tag(size, D_00494E98, 0, 0);
+        break;
+    default:
+        pools = *(sWCPools_8A90**)(self + 0xC);
+        if (sub == 0xFF)
+            p = operator_new_tag(size, D_00494D40, 0, 0);
+        else
+            p = func_003A7878(pools->pool[sub], size, 0);
+        break;
+    }
+    if (p != 0)
+        return (unsigned int)p;
+    sWCEnt_8A90* e2 = (sWCEnt_8A90*)((idx << 2) + (int)sec->tab[type].ents);
+    if (--e2->count == 0)
+        *(int*)e2 = e2->count;
+    return 0xFFFFFFFF;
+}
 
 //100%
 struct sWCEntry8CD0 {
