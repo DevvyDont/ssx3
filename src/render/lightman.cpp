@@ -237,13 +237,194 @@ extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, flo
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038E0A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+struct sLmQuadVec4_E118 {
+    float x, y, z, w;
+    sLmQuadVec4_E118() {}
+    sLmQuadVec4_E118(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+// Transforms the 2D point p by the 3x3 row-vector matrix m (rows at +0, +0xC, +0x18).
+// Returned by value: the caller passes the hidden result pointer in a0.
+extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m)
+{
+    sLmQuadVec4_E118 r;
+    float x = p[0];
+    float y = p[1];
+    r.z = 0.0f;
+    r.w = 1.0f;
+    r.x = m[0] * x + m[3] * y + m[6];
+    r.y = m[1] * x + m[4] * y + m[7];
+    return r;
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E118);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+struct sLmQuadVtx_E118 {
+    float s;                // 0x0
+    float t;                // 0x4
+    float q;                // 0x8
+    int pad_0xC;
+    int c[4];               // 0x10
+    sLmQuadVec4_E118 pos;   // 0x20
+};
+
+struct sLmQuadVEntry_E118 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sLmQuadVtx_E118*, int);
+};
+
+struct sLmQuadCtx_E118 {
+    char pad_0x0[0x10D8];
+    sLmQuadVEntry_E118* vtable;      // 0x10D8
+};
+
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+// Fills the four corner positions of a quad from a rect {x, y, w, h}, then submits it.
+extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* v, float* r)
+{
+    v[0].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    v[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E200);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+// Fills the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, then submits it.
+extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* v, float* r)
+{
+    v[1].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    v[0].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    v[2].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E2E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+
+// Builds the four corner positions of a quad from a rect {x, y, w, h}, transforms each by the 3x3 matrix m, then submits it.
+extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* v, float* r, float* m)
+{
+    sLmQuadVec4_E118* p0 = &v[0].pos;
+    sLmQuadVec4_E118* p1 = &v[1].pos;
+    sLmQuadVec4_E118* p2 = &v[2].pos;
+    sLmQuadVec4_E118* p3 = &v[3].pos;
+    *p0 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    *p1 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    *p2 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    *p0 = func_0038E0A8(&p0->x, m);
+    *p1 = func_0038E0A8(&p1->x, m);
+    *p2 = func_0038E0A8(&p2->x, m);
+    *p3 = func_0038E0A8(&p3->x, m);
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E468);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+
+// Builds the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, transforms each by the 3x3 matrix m, then submits it.
+extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* v, float* r, float* m)
+{
+    sLmQuadVec4_E118* p0 = &v[0].pos;
+    sLmQuadVec4_E118* p1 = &v[1].pos;
+    sLmQuadVec4_E118* p2 = &v[2].pos;
+    sLmQuadVec4_E118* p3 = &v[3].pos;
+    *p1 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    *p0 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    *p2 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    *p0 = func_0038E0A8(&p0->x, m);
+    *p1 = func_0038E0A8(&p1->x, m);
+    *p2 = func_0038E0A8(&p2->x, m);
+    *p3 = func_0038E0A8(&p3->x, m);
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E5E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, then submits it.
+extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv)
+{
+    vtx[0].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    vtx[0].s = uv[0];
+    vtx[0].t = uv[1];
+    vtx[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    vtx[1].s = uv[0] + uv[2];
+    vtx[1].t = uv[1];
+    vtx[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    vtx[2].s = uv[0];
+    vtx[2].t = uv[1] + uv[3];
+    vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    vtx[3].s = uv[0] + uv[2];
+    vtx[3].t = uv[1] + uv[3];
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038E738);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, (rotated mapping), then submits it.
+extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv)
+{
+    vtx[0].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    vtx[0].s = uv[0] + uv[2];
+    vtx[0].t = uv[1];
+    vtx[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    vtx[1].s = uv[0] + uv[2];
+    vtx[1].t = uv[1] + uv[3];
+    vtx[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    vtx[2].s = uv[0];
+    vtx[2].t = uv[1];
+    vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    vtx[3].s = uv[0];
+    vtx[3].t = uv[1] + uv[3];
+    sLmQuadCtx_E118* g = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = g->vtable;
+    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+}
+#endif
 INCLUDE_ASM("render/lightman", func_0038E880);
 INCLUDE_ASM("render/lightman", func_0038EA60);
 
@@ -311,7 +492,35 @@ extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, floa
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038ED90);
+#ifdef SKIP_ASM
+// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
+extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("D_004A5B80");
+
+// Submits two coloured points/vertices at the positions *p0 and *p1; col is {alpha, r, g, b} in 0..1.
+extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* p0, sLmQuadVec4_E118* p1, float* col)
+{
+    sLmQuadVtx_E118 v[2];
+    int r = (int)(col[1] * 255.0f);
+    int g = (int)(col[2] * 255.0f);
+    int b = (int)(col[3] * 255.0f);
+    int a = (int)(col[0] * 128.0f);
+    v[0].pos = *p0;
+    v[1].pos = *p1;
+    v[1].c[0] = r;
+    v[1].c[1] = g;
+    v[1].c[2] = b;
+    v[1].c[3] = a;
+    v[0].c[0] = r;
+    v[0].c[1] = g;
+    v[0].c[2] = b;
+    v[0].c[3] = a;
+    sLmQuadCtx_E118* ctx = D_004A5B80_E118;
+    sLmQuadVEntry_E118* vt = ctx->vtable;
+    vt[73].fn((char*)ctx + vt[73].delta, 2, v, 0);
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_0038EE78);
 
@@ -984,7 +1193,42 @@ extern "C" int func_003914F8(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_00391508);
+#ifdef SKIP_ASM
+struct sV2_1508 {
+    float x, y;
+    sV2_1508() {}
+    sV2_1508(float ax, float ay) : x(ax), y(ay) {}
+};
+struct sV4_1508 {
+    float x, y, z, w;
+    sV4_1508() {}
+    sV4_1508(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+};
+
+extern "C" void* func_00391508(char* self)
+{
+    *(sV2_1508*)(self + 0x28) = sV2_1508(0.0f, 0.0f);
+    *(sV2_1508*)(self + 0x30) = sV2_1508(1.0f, 1.0f);
+    *(sV2_1508*)(self + 0x38) = *(sV2_1508*)(self + 0x30);
+    {
+        sV4_1508 t;
+        t.x = 1.0f; t.y = 1.0f; t.z = 1.0f; t.w = 1.0f;
+        *(sV4_1508*)(self + 0x40) = t;
+    }
+    *(sV4_1508*)(self + 0x50) = sV4_1508(1.0f, 0.0f, 0.0f, 0.0f);
+    *(int*)(self + 0x60) = -1;
+    *(int*)(self + 0x0) = 0;
+    *(int*)(self + 0x4) = 0;
+    *(int*)(self + 0x8) = 0;
+    *(int*)(self + 0x14) = 0;
+    *(int*)(self + 0xC) = 0;
+    *(int*)(self + 0x10) = 0;
+    *(char*)(self + 0x64) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_003915E8);

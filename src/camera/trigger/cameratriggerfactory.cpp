@@ -1366,9 +1366,37 @@ void* func_00176460(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176468);
+#ifdef SKIP_ASM
+extern void* D_0045C3A0[];
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sCTBoundK_6468 : sCTBoundObjG {
+    sCTBoundK_6468() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3A0) {}
+};
+
+extern "C" void* func_00176468(void* self)
+{
+    return new (self) sCTBoundK_6468;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001764E8);
+#ifdef SKIP_ASM
+extern "C" void* func_001764E8(void* self)
+{
+    return new (self) sCTVolEllG;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176570);
+#ifdef SKIP_ASM
+extern "C" void* func_00176570(void* self)
+{
+    return new (self) sCTVolBoxG;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001765F8__FPv);
@@ -1378,9 +1406,39 @@ void func_001765F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176600);
+#ifdef SKIP_ASM
+extern "C" void* func_00176600(void* self)
+{
+    return new (self) sCTBoundEllG;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176688);
+#ifdef SKIP_ASM
+extern "C" void* func_00176688(void* self)
+{
+    return new (self) sCTBoundBoxG;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176710);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sCTBoundLineK : sCTBoundObjG {
+    int type;
+    sCTVec3G pts[2];
+    sCTBoundLineK() __asm__("func_00176710");
+};
+
+sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
+{
+    type = 2;
+    pts[0] = D_004FF0D8;
+    pts[1] = D_004FF0D8;
+}
+#endif
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001767F8);
 #ifdef SKIP_ASM
@@ -2913,7 +2971,83 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A378);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A830);
+#ifdef SKIP_ASM
+struct cBXString;
+struct cBigFile;
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+// PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
+cBigFile* cBigFile_cBigFile1_A830(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
+void cBigFile__cBigFile(cBigFile* self, int flags);
+extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int func_003A6948(const char* path, int n, void* names);
+extern char D_0045CE20[];
+extern char D_004A1298[];
+
+struct sCamEntry_A830 {
+    char name[0x40];    // 0x00
+    char tag[4];        // 0x40
+    char pad_44[0x48];
+};
+
+struct sCamMgr_A830 {
+    int count;                          // 0x0000
+    sCamEntry_A830 entries[0x100];    // 0x0004
+};
+
+struct sCamName_A830 {
+    char* name;
+    int ok;
+};
+
+// Non-POD (user-declared copy ctor, never defined) so locals get the 16-byte slots g++ gives classes.
+struct sStr_A830 {
+    char* s;
+    sStr_A830() {}
+    sStr_A830(const sStr_A830&);
+};
+
+struct sBigFile_A830 {
+    int f0;
+    int f4;
+    sBigFile_A830() {}
+    sBigFile_A830(const sBigFile_A830&);
+};
+
+// Returns 0 when (name, tag) is already registered; otherwise looks the name up in the bigfile.
+extern "C" int func_0017A830(sCamMgr_A830* self, char* name, char* tag)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (func_0041AA88(name, self->entries[i].name) == 0 &&
+            func_0041AA88(tag, self->entries[i].tag) == 0) {
+            return 0;
+        }
+    }
+    sStr_A830 base;
+    sStr_A830 s;
+    sBigFile_A830 bf;
+    sCamName_A830 nm;
+    char* pre = D_0045CE20;
+    cBXString_cBXString2(&s, tag);
+    func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
+    cBXString__cBXString(&s, 2);
+    cBigFile* pbf = (cBigFile*)&bf;
+    func_00318630((cBXString*)&s, (cBXString*)&base, D_004A1298);
+    cBigFile_cBigFile1_A830(pbf, s.s, 0x100);
+    cBXString__cBXString(&s, 2);
+    nm.name = name;
+    int r = func_003A6948(base.s, 1, &nm);
+    int result = r == 0 ? 0 : nm.ok;
+    cBigFile__cBigFile((cBigFile*)&bf, 2);
+    cBXString__cBXString(&base, 2);
+    return result;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A978);
