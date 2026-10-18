@@ -1407,7 +1407,35 @@ extern "C" int func_003AF560(char** ps, unsigned int* plen, int* out)
     return 1;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF670);
+//100%
+extern "C" void func_003AF670(char** ps, unsigned int* plen, char** words, unsigned int* lens, unsigned int nwords, unsigned int* outIdx)
+{
+    char* s = *ps;
+    if (s == 0) {
+        *ps = 0;
+        *plen = 0;
+        *outIdx = 0xFFFFFFFF;
+        return;
+    }
+    func_003AF300(&s, plen);
+    for (unsigned int i = 0; i < *plen; i++) {
+        for (unsigned int k = 0; k < nwords; k++) {
+            unsigned int j;
+            for (j = 0; j < lens[k] && i + j < *plen && words[k][j] == s[i + j]; j++) {
+            }
+            if (j == lens[k]) {
+                unsigned int t = i + j;
+                *ps = s + t;
+                *plen -= t;
+                *outIdx = k;
+                return;
+            }
+        }
+    }
+    *ps = 0;
+    *plen = 0;
+    *outIdx = 0xFFFFFFFF;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF7F0);
 
