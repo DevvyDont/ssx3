@@ -1096,7 +1096,38 @@ void func_003B6AD8(void *arg0) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6B10);
+#ifdef SKIP_ASM
+struct Q_6B10 { int p0; int p1; int p2; volatile int owner; int p4; volatile unsigned int pos; volatile unsigned int end; volatile unsigned int left; };
+struct C_6B10 { char pad[0x11C]; struct Q_6B10 *q; };
+
+void func_003B6B10(int a, unsigned int n, struct C_6B10 *c) {
+    unsigned int rem = 0;
+    int i = 0;
+    while (1) {
+        struct Q_6B10 *q;
+        i++;
+        q = c->q;
+        if (i >= 201) {
+            func_003B6A70(q->owner);
+            return;
+        }
+        if (q->left < n) {
+            rem = n - q->left;
+            n -= rem;
+        }
+        q->pos += n;
+        q->left -= n;
+        if (q->pos >= q->end) {
+            func_003B6A70(q->owner);
+        }
+        if (rem == 0) return;
+        n = rem;
+        rem = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
 

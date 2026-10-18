@@ -2298,7 +2298,230 @@ extern "C" void func_00104DE0(char* self, cStream_4DE0* s) {
 
 INCLUDE_ASM("seg/seg_1218", func_00104E70);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00105398);
+#ifdef SKIP_ASM
+struct sV4_5398 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sTri_5398 {
+    int a;
+    float b;
+    unsigned short flags;
+    unsigned short pad;
+};
+
+struct sMat_5398 {
+    char pad[0x10];
+    sTri_5398 tris[1];
+};
+
+struct sSurf_5398 {
+    char pad[8];
+    int flags;
+    char padC[0x88 - 0xC];
+    sMat_5398* mat;
+};
+
+struct sContact_5398 {
+    sV4_5398 pos;
+    sV4_5398 normal;
+    sV4_5398 vel;
+    char pad30[0x20];
+    sSurf_5398* surf;
+    int pad54;
+    int pad58;
+    int idx;
+    char pad60[0x20];
+} __attribute__((aligned(16)));
+
+struct sInfo_5398 {
+    sV4_5398 pos;
+    sV4_5398 dir;
+    sV4_5398 normal;
+    float speed;
+} __attribute__((aligned(16)));
+
+struct cScope_5398 {
+    char data[0x320];
+    cScope_5398(void* tree, int flag) __asm__("func_0032F650");
+};
+
+int func_0011FEE8_5398(void*) __asm__("func_0011FEE8__FPv");
+int func_0011FE98(void*);
+extern "C" void func_00106F78(void*);
+extern "C" float func_00104E70_5398(char*, cScope_5398*, sContact_5398*) __asm__("func_00104E70");
+extern "C" int func_001231A8(void*);
+extern "C" void func_001057B8_5398(char*, sSurf_5398*, sInfo_5398*, sContact_5398*, float) __asm__("func_001057B8");
+extern "C" void func_00296088_5398(void*, char*, sSurf_5398*, int) __asm__("func_00296088");
+extern "C" void func_0016D320(void*, void*);
+extern "C" void func_0032F708(void* self, int flags);
+extern char* D_004A3500_5398 __asm__("D_004A3500");
+extern char D_004C5830_5398[] __asm__("D_004C5830");
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_5398(const sV4_5398& a, const sV4_5398& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_5398(const sV4_5398& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_5398 Sub_5398(const sV4_5398& a, const sV4_5398& b)
+{
+    sV4_5398 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_5398 Scale_5398(const sV4_5398& v, float s)
+{
+    sV4_5398 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline sV4_5398 Div_5398(const sV4_5398& v, float s)
+{
+    sV4_5398 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_5398 Norm_5398(const sV4_5398& v)
+{
+    sV4_5398 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v));
+    return r;
+}
+
+static inline unsigned short TriFlags_5398(sSurf_5398* s, int i)
+{
+    return ((sTri_5398*)(i * sizeof(sTri_5398) + (int)s->mat->tris))->flags; // PORT: pointer in int
+}
+
+extern "C" void func_00105398(char* self, sV4_5398* norm)
+{
+    sContact_5398 c;
+    sInfo_5398 info;
+    if (func_0011FEE8_5398(self) == 9)
+        return;
+    float zero = 0.0f;
+    func_00106F78(self);
+    cScope_5398 sc(*(void**)(self + 0xAA0), 1);
+    cScope_5398* ps = &sc;
+    float d = func_00104E70_5398(self, ps, &c);
+    if (d >= zero) {
+        if (func_001231A8(self))
+            norm = (sV4_5398*)(self + 0x370);
+        if (norm) {
+            sV4_5398 t = Sub_5398(c.normal, Scale_5398(*norm, Dot_5398(c.normal, *norm)));
+            float len = Len_5398(t);
+            if (len < 0.0010000000474974513f)
+                c.normal = *norm;
+            else
+                c.normal = Div_5398(t, len);
+        } else if (func_0011FE98(self) == 4) {
+            sV4_5398* up = (sV4_5398*)(*(char**)(self + 0x77C) + 0xB0);
+            if (Dot_5398(c.normal, *up) > zero)
+                c.normal = *up;
+            else
+                c.normal = Scale_5398(*up, -1.0f);
+        }
+        float k = Dot_5398(Scale_5398(c.normal, -1.0f), Sub_5398(*(sV4_5398*)(self + 0x1E0), c.vel)) >= 0.0f
+                      ? Dot_5398(Scale_5398(c.normal, -1.0f), Sub_5398(*(sV4_5398*)(self + 0x1E0), c.vel))
+                      : 0.0f;
+        info.pos = c.pos;
+        info.dir = Norm_5398(*(sV4_5398*)(self + 0x1E0));
+        info.normal = c.normal;
+        info.speed = k;
+        if ((TriFlags_5398(c.surf, c.idx) & 2) && !(c.surf->flags & 0x2000)) {
+            *(sContact_5398*)(self + 0x9E0) = c;
+            *(sInfo_5398*)(self + 0xA60) = info;
+        }
+        if (TriFlags_5398(c.surf, c.idx) & 1)
+            func_001057B8_5398(self, c.surf, &info, &c, d);
+        if (!(c.surf->flags & 0x2000))
+            func_00296088_5398(D_004A3500_5398, self, c.surf, c.idx);
+    }
+    func_0016D320(D_004C5830_5398, self);
+    func_0032F708(&sc, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_001057B8);

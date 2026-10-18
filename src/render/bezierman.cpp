@@ -171,7 +171,89 @@ INCLUDE_ASM("render/bezierman", func_0038B370);
 
 INCLUDE_ASM("render/bezierman", func_0038C590);
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038C788);
+#ifdef SKIP_ASM
+// PORT: builds a DMA/VIF/GIF packet in uncached (0x30000000) memory; addresses held in int and packed into 64-bit words.
+extern "C" void func_0038C788(void* self, int type, int idx)
+{
+    char* s = (char*)self;
+    int n = type * 2 + 4;
+    int a;
+    switch (type) {
+    case 0:
+        a = *(int*)(s + 0x58) + idx * 0xC0;
+        break;
+    case 1:
+        a = *(int*)(s + 0x5C) + idx * 0x1B0;
+        break;
+    case 2:
+        a = *(int*)(s + 0x60) + idx * 0x300;
+        break;
+    default:
+        a = 0;
+        break;
+    }
+    int b;
+    switch (type) {
+    case 0:
+        b = *(int*)(s + 0x64) + idx * 0x80;
+        break;
+    case 1:
+        b = *(int*)(s + 0x68) + idx * 0x120;
+        break;
+    case 2:
+        b = *(int*)(s + 0x6C) + idx * 0x200;
+        break;
+    default:
+        b = 0;
+        break;
+    }
+    int c;
+    switch (type) {
+    case 0:
+        c = *(int*)(s + 0x70) + idx * 0x80;
+        break;
+    case 1:
+        c = *(int*)(s + 0x74) + idx * 0x120;
+        break;
+    case 2:
+        c = *(int*)(s + 0x78) + idx * 0x200;
+        break;
+    default:
+        c = 0;
+        break;
+    }
+    int nn = n * n;
+    long* p = (long*)((*(int*)(s + (type << 2) + 0x44C) + (idx << 8)) | 0x30000000);
+    p[0] = 0x10000003;
+    p[1] = 0;
+    p[2] = 0x3000000005000000;
+    p[3] = 0;
+    p[4] = 0x3F8000003F800000;
+    p[5] = 0x4040404020000000;
+    p[6] = 0;
+    p[7] = (long)((nn << 16) | 0x78008000) << 32;
+    p[8] = (((nn * 3) >> 2) | 0x30000000) | ((long)a << 32);
+    p[9] = 0;
+    p[10] = 0x10000001;
+    p[11] = 0;
+    p[12] = 0x5050505020000000;
+    p[13] = (long)((nn << 16) | 0x74008040) << 32;
+    p[14] = ((nn >> 1) | 0x30000000) | ((long)b << 32);
+    p[15] = 0;
+    p += 16;
+    p[0] = 0x10000001;
+    p[1] = 0;
+    p[2] = 0x5050505020000000;
+    p[3] = (long)((nn << 16) | 0x74008080) << 32;
+    p[4] = ((nn >> 1) | 0x30000000) | ((long)c << 32);
+    p[5] = 0;
+    p += 6;
+    p[0] = 0x60000000;
+    p[1] = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/bezierman", func_0038CA08);
