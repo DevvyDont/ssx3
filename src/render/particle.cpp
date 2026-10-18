@@ -844,7 +844,75 @@ extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
     *(unsigned long*)buf = (tag & 0xFFFF0000) | (count & 0xFFFF);
 }
 
-INCLUDE_ASM("render/particle", func_00372348);
+extern "C" void* func_003E6574(void*, void*, int);
+
+extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
+{
+    char* src = buf;
+    char* dst = buf + 0x10;
+    int count = 0;
+    unsigned long* hdr = (unsigned long*)buf;
+    int done = 0;
+
+    while (done == 0) {
+        unsigned long tag = *(unsigned long*)src;
+        int id = (int)(tag >> 28) & 7;
+        int addr = (long)tag >> 32;
+        int qwc = (int)tag & 0xFFFF;
+
+        switch (id) {
+        case 0:
+        case 2:
+        case 4:
+        case 5:
+        case 7:
+            break;
+        case 1: {
+            int size = qwc << 4;
+            src += 0x10;
+            func_003E6574(dst, src, size);
+            src += size;
+            dst += size;
+            count += qwc;
+            break;
+        }
+        case 3:
+            if (addr == addrA || addr == addrB) {
+                *(unsigned long*)dst = 0;
+                count++;
+                dst += 8;
+                src += 0x10;
+                *(unsigned long*)dst = 0;
+                dst += 8;
+            } else if (addr == addrC) {
+                hdr[0] = count | 0x10000000;
+                hdr[1] = 0;
+                count = 0;
+                *(unsigned long*)dst = ((unsigned long)(int)(buf + addr) << 32) | *(unsigned int*)src;
+                src += 0x10;
+                dst += 8;
+                *(unsigned long*)dst = 0;
+                dst += 8;
+                hdr = (unsigned long*)dst;
+                dst += 0x10;
+            }
+            break;
+        case 6:
+            if (count > 0) {
+                hdr[0] = count | 0x10000000;
+                hdr[1] = 0;
+                count = 0;
+            }
+            func_003E6574(dst, src, (qwc + 1) * 0x10);
+            src += 0x10;
+            dst += 0x10;
+            src += qwc * 0x10;
+            dst += qwc * 0x10;
+            done = 1;
+            break;
+        }
+    }
+}
 
 //100%
 void* func_00372500(void* self)
