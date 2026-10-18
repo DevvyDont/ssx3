@@ -1240,9 +1240,13 @@ extern "C" void* func_003AF010(void* self)
 }
 
 //100%
+extern char D_00495260[];
 struct sElem_AF020 {
     char pad[0x34];
+    // PORT: the constructor is func_003B0340, defined later in this unit as a C function.
+    sElem_AF020() __asm__("func_003B0340");
     ~sElem_AF020() {}
+    void* operator new[](unsigned int size) { return D_00509430_ADEC8.alloc(D_00495260, size, 0, 0, D_00509430_ADEC8.flags); }
     void operator delete[](void* p) { D_00509430_ADEC8.free(p); }
 };
 struct sArr_AF020 {
@@ -1260,7 +1264,27 @@ extern "C" void func_003AF020(sArr_AF020* self, int flags)
     if (flags & 1) D_00509430_ADEC8.free(self);
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF0C8);
+//100%
+extern "C" void func_003B03A8(void* self, int value);
+extern "C" void func_003B03B0(void* self, int value);
+extern "C" void func_003B03B8(void* self, int value);
+extern "C" void func_003B03C0(void* self, int value);
+extern "C" void func_003B03C8(void* self, int value);
+extern "C" void func_003B03D0(void* self, int value);
+
+extern "C" void func_003AF0C8(sArr_AF020* self, int n, int a, int b, int c, int d)
+{
+    self->arr = new sElem_AF020[n];
+    self->n = n;
+    if (n) func_003B03D0(self->arr, 0);
+    for (unsigned int i = 0; i < (unsigned int)self->n; i++) {
+        func_003B03A8(&self->arr[i], a);
+        func_003B03B0(&self->arr[i], b);
+        func_003B03B8(&self->arr[i], c);
+        func_003B03C0(&self->arr[i], d);
+        func_003B03C8(&self->arr[i], i);
+    }
+}
 
 // Entry i of the 0x34-byte entries, or 0 past the count
 extern "C" void* func_003AF230(void* self, unsigned int i)
