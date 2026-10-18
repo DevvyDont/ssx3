@@ -32,87 +32,6 @@ void func_0016CA10(void* self)
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA18);
 
-INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_purge);
-
-//100%
-struct sCamTrigMan {
-    char** triggers; // 0x0
-    int count;       // 0x4
-};
-
-extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* file);
-
-extern "C" int cCameraTriggerMan_loadTriggers(sCamTrigMan* self, const char* file)
-{
-    int err = cCameraTriggerList_loadFromFile(self, file);
-    if (err != 0)
-        return err;
-    for (int i = 0; i < self->count; i++)
-        *(int*)(self->triggers[i] + 0x20) = 0;
-    return 0;
-}
-
-//100%
-struct sCamTrigManB {
-    char** triggers; // 0x0
-    int count;       // 0x4
-};
-
-extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
-void cCameraTriggerMan_setInGameTriggers(void* self);
-
-extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
-{
-    cCameraTriggerMan_cleanupOnExit(self);
-    cCameraTriggerList_loadFromBuffer(self, stream);
-    sCamTrigManB* m = (sCamTrigManB*)self;
-    for (int i = 0; i < m->count; i++)
-        *(int*)(m->triggers[i] + 0x20) = 0;
-    cCameraTriggerMan_setInGameTriggers(self);
-}
-
-extern void* D_004C5830[];
-extern "C" void* func_0016CEF0(void*, void*, int);
-
-//100%
-// Forwards to func_0016CA18.
-extern "C" void func_0016CA18(void* self);
-
-extern "C" void func_0016CEA8(void* self)
-{
-    func_0016CA18(self);
-}
-
-//80.0%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);
-
-//100% - objdiff report; single-function view differs only in a relocation name
-extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);
-
-// PORT: the unit declares func_0016CEF0 as returning void*, but the body returns nothing.
-void func_0016CEF0_impl(void* self, void* unused, void* stream) __asm__("func_0016CEF0");
-void func_0016CEF0_impl(void* self, void* unused, void* stream)
-{
-    if (stream != 0) {
-        cCameraTriggerMan_streamIn(self, stream);
-    }
-}
-
-//100%
-// PORT: func_0016CF40__FPv is mangled as (void*), but this caller passes two args.
-void func_0016CF40_2(void* mgr, void* self) __asm__("func_0016CF40__FPv");
-
-extern "C" void func_0016CF18(void* self)
-{
-    func_0016CF40_2((void*)D_004C5830, self);
-}
-
-//100%
-void func_0016CF40(void* self)
-{
-}
-
-//100%
 void operator_delete(int*);
 extern void* D_004A28A8;
 
@@ -205,6 +124,110 @@ static inline void insert_CF48(char* w, void* item, const sCtBox_CF48* box)
     func_00328C20(findRoot_CF48(w, c.x, c.y, c.z), 2, item, &c);
 }
 
+//100%
+// Unregisters every trigger from the world hash, then resets the stacks and active lists.
+void cActiveTriggerList_purge(cActiveTriggerList* self);
+void cCameraTriggerStack_init(cCameraTriggerStack* self);
+extern "C" void func_0016C098(void* self);
+
+extern "C" void cCameraTriggerMan_purge(void* vself)
+{
+    sCtMan_CF48* self = (sCtMan_CF48*)vself;
+    for (int i = 0; i < self->count; i++) {
+        sCtTrig_CF48* t = self->trigs[i];
+        if (t->reg != 0) {
+            char* w = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+            sCtBox_CF48 box = t->shape->bounds();
+            remove_CF48(w, t->item, &box);
+        }
+    }
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
+    func_0016C098(vself);
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)vself + 0x14));
+    cActiveTriggerList_purge((cActiveTriggerList*)((char*)vself + 0x18));
+    cCamera_resetChaseControllerSwitches();
+}
+
+//100%
+struct sCamTrigMan {
+    char** triggers; // 0x0
+    int count;       // 0x4
+};
+
+extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* file);
+
+extern "C" int cCameraTriggerMan_loadTriggers(sCamTrigMan* self, const char* file)
+{
+    int err = cCameraTriggerList_loadFromFile(self, file);
+    if (err != 0)
+        return err;
+    for (int i = 0; i < self->count; i++)
+        *(int*)(self->triggers[i] + 0x20) = 0;
+    return 0;
+}
+
+//100%
+struct sCamTrigManB {
+    char** triggers; // 0x0
+    int count;       // 0x4
+};
+
+extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
+void cCameraTriggerMan_setInGameTriggers(void* self);
+
+extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
+{
+    cCameraTriggerMan_cleanupOnExit(self);
+    cCameraTriggerList_loadFromBuffer(self, stream);
+    sCamTrigManB* m = (sCamTrigManB*)self;
+    for (int i = 0; i < m->count; i++)
+        *(int*)(m->triggers[i] + 0x20) = 0;
+    cCameraTriggerMan_setInGameTriggers(self);
+}
+
+extern void* D_004C5830[];
+extern "C" void* func_0016CEF0(void*, void*, int);
+
+//100%
+// Forwards to func_0016CA18.
+extern "C" void func_0016CA18(void* self);
+
+extern "C" void func_0016CEA8(void* self)
+{
+    func_0016CA18(self);
+}
+
+//80.0%
+INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);
+
+// PORT: the unit declares func_0016CEF0 as returning void*, but the body returns nothing.
+void func_0016CEF0_impl(void* self, void* unused, void* stream) __asm__("func_0016CEF0");
+void func_0016CEF0_impl(void* self, void* unused, void* stream)
+{
+    if (stream != 0) {
+        cCameraTriggerMan_streamIn(self, stream);
+    }
+}
+
+//100%
+// PORT: func_0016CF40__FPv is mangled as (void*), but this caller passes two args.
+void func_0016CF40_2(void* mgr, void* self) __asm__("func_0016CF40__FPv");
+
+extern "C" void func_0016CF18(void* self)
+{
+    func_0016CF40_2((void*)D_004C5830, self);
+}
+
+//100%
+void func_0016CF40(void* self)
+{
+}
+
+//100%
 // PORT: the unit declares func_0016CF48 as returning void*; it returns nothing.
 extern "C" void func_0016CF48_impl(void* vself, int mask) __asm__("func_0016CF48");
 
