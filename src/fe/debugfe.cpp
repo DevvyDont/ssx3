@@ -984,7 +984,257 @@ extern "C" void func_0017E558(sDebugFEState17E558* self)
     func_0025F628(D_004A3028, 1, 0);
 }
 
-INCLUDE_ASM("fe/debugfe", func_0017E5C8);
+//100%
+extern void* D_004A28A8;
+extern void* D_004A3028;
+extern void* D_004A2EB8;
+extern char D_0045D258[];
+extern char D_0045D270[];
+extern char D_0045D288[];
+extern char D_0045D2A0[];
+extern char D_0045D2B8[];
+extern char D_0045D2D0[];
+extern char D_0045D2E8[];
+extern char D_0045D300[];
+extern char D_0045D310[];
+extern char D_0045D328[];
+extern char D_0045D340[];
+extern char D_0045D358[];
+extern char D_0045D378[];
+extern char D_0045D390[];
+extern char D_0045D3A0[];
+extern char D_0045D3C0[];
+extern char D_0045D3D8[];
+extern char D_0045D3F8[];
+extern char D_0045D408[];
+extern char D_0045D418[];
+extern char D_0045D428[];
+extern char D_0045D438[];
+extern char D_0045CF98[];
+extern char D_004A1328[];
+extern char D_004A12F8[];
+extern char D_004A1330[];
+extern char D_004A1338[];
+extern char D_004A12C0[];
+extern "C" void func_00392908(void* self, const char* str, float x, float y);
+extern "C" void func_00392A60(void* self, const char* str, float x, float y);
+extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
+extern "C" void func_001DCA80(void* self, float x, float y, const char* fmt, ...);
+extern "C" void func_001DCA40(void* self, float x, float y, const char* fmt, ...);
+extern "C" void func_002CC350(void* self);
+extern "C" void func_00256038(void* comm, int* out);
+extern "C" void cBXString__cBXString(void* self, int flags);
+
+struct sColor17E5C8 {
+    float r, g, b, a;
+    sColor17E5C8(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+struct sFont17E5C8 {
+    char pad0[0x30];
+    float bx, by;
+    float sx, sy;
+    sColor17E5C8 color;
+};
+
+// Returned by value through a hidden pointer and destroyed at the end of the
+// full expression, so it shares its stack slot with the colour temporaries.
+struct sBXStr17E5C8 {
+    char* p;
+    sBXStr17E5C8(const sBXStr17E5C8&);
+    ~sBXStr17E5C8() { cBXString__cBXString(this, 2); }
+};
+sBXStr17E5C8 getStr17E5C8(void* self, unsigned int tag) __asm__("func_00260E50");
+
+struct sDebugFE17E5C8 {
+    int f0;
+    int state;
+    int count;
+    void* items[0x1C14 / 4 - 3];
+    unsigned int tag;
+};
+
+static inline void scale17E5C8(sFont17E5C8* f, float s)
+{
+    f->sx = f->bx * s;
+    f->sy = f->by * s;
+}
+
+static inline void* top17E5C8(sDebugFE17E5C8* self)
+{
+    if (self->count > 0)
+        return self->items[self->count - 1];
+    return 0;
+}
+
+// Kept as an inline helper: its end label splits the block, so the 530.0f
+// constants after it are loaded again instead of being shared.
+static inline void onOff17E5C8(void* font, int on, float x, float y)
+{
+    func_00392A60(font, on ? D_004A12F8 : D_004A1330, x, y);
+}
+
+static inline int isEq17E5C8(int a, int b) { return a == b; }
+
+extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
+{
+    sFont17E5C8* font = *(sFont17E5C8**)(*(char**)((char*)D_004A28A8 + 0x80) + 0x18);
+    switch (self->state) {
+    case 0:
+    case 1:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D258, 320.0f, 200.0f);
+        break;
+    case 2:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D270, 320.0f, 200.0f);
+        break;
+    case 4:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D288, 320.0f, 200.0f);
+        break;
+    case 5:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D2A0, 320.0f, 200.0f);
+        break;
+    case 8:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D2B8, 320.0f, 200.0f);
+        break;
+    case 9:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D2D0, 320.0f, 200.0f);
+        break;
+    case 7:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D2E8, 320.0f, 200.0f);
+        break;
+    case 11:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D300, 320.0f, 200.0f);
+        break;
+    case 13:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D310, 320.0f, 100.0f);
+        break;
+    case 17:
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D328, 320.0f, 100.0f);
+        break;
+    case 18: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D340, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 19: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D358, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 20: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D378, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 22: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D390, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 21: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D3A0, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 23: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D3C0, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 24: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D3D8, 320.0f, 100.0f);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        break;
+    }
+    case 16: {
+        scale17E5C8(font, 1.5f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        func_00392908(font, D_0045D3F8, 320.0f, 100.0f);
+        scale17E5C8(font, 0.7f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
+        float y = 200.0f;
+        func_00391CB0(font, 110.0f, y, D_004A1328);
+        func_00392A60(font, *(char**)((char*)D_004A3028 + 0x88), 530.0f, y);
+        y += 20.0f;
+        func_00391CB0(font, 110.0f, y, D_0045D408);
+        func_00392A60(font, *(char**)((char*)D_004A3028 + 0x98), 530.0f, y);
+        y += 20.0f;
+        func_00391CB0(font, 110.0f, y, D_0045D418);
+        onOff17E5C8(font, *(int*)((char*)D_004A3028 + 0xB4), 530.0f, y);
+        y += 20.0f;
+        func_00391CB0(font, 110.0f, y, D_0045D428);
+        unsigned int ip = *(unsigned int*)((char*)D_004A3028 + 0xA8);
+        func_001DCA80(font, 530.0f, y, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+        y += 20.0f;
+        func_00391CB0(font, 110.0f, y, D_0045D438);
+        unsigned int ip2 = *(unsigned int*)((char*)D_004A3028 + 0xAC);
+        func_001DCA80(font, 530.0f, y, D_0045CF98, ip2 >> 24, (ip2 >> 16) & 0xFF, (ip2 >> 8) & 0xFF, ip2 & 0xFF);
+        y += 20.0f;
+        func_00391CB0(font, 110.0f, y, D_004A1338);
+        func_001DCA80(font, 530.0f, y, D_004A12C0, *(int*)((char*)D_004A3028 + 0xB0));
+        break;
+    }
+    }
+    scale17E5C8(font, 0.9f);
+    if (top17E5C8(self) != 0)
+        func_002CC350(&self->count);
+    if (isEq17E5C8(*(int*)((char*)D_004A2EB8 + 0x20), 5)) {
+        unsigned int ip;
+        func_00256038(D_004A2EB8, (int*)&ip);
+        scale17E5C8(font, 0.8f);
+        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
+        unsigned int v = ip;
+        func_001DCA40(font, 320.0f, 420.0f, D_0045CF98, v >> 24, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+    }
+}
 
 //100%
 extern "C" float func_0031BF60(float x);
