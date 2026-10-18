@@ -1963,7 +1963,15 @@ extern "C" func_002CCF98_sItem* func_002CCF98(func_002CCF98_sItem* self, void* t
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CCFF8);
+#ifdef SKIP_ASM
+extern "C" void func_002CCFF8(void *arg0, int arg1, int arg2) {
+    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+    (*(int *)((char*)(arg0) + (0x1C))) = arg2;
+    (*(int *)((char*)(arg0) + (0x18))) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CD008);
@@ -2357,7 +2365,29 @@ extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem_sItem* sel
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD978);
+#ifdef SKIP_ASM
+extern "C" void func_002CD978(void *arg0, int arg1, int arg2) {
+    int *temp_3;
+    int *temp_3_2;
+    int temp_4;
+
+    temp_3 = (*(int **)((char*)(arg0) + (0x18)));
+    (*(int *)((char*)(arg0) + (0x20))) = arg2;
+    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
+    if (temp_3 != 0) {
+        if (*temp_3 < arg1) {
+            *temp_3 = arg1;
+        }
+        temp_3_2 = (*(int **)((char*)(arg0) + (0x18)));
+        temp_4 = (*(int *)((char*)(arg0) + (0x20)));
+        if (temp_4 < *temp_3_2) {
+            *temp_3_2 = temp_4;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CD9B8);
@@ -3466,7 +3496,15 @@ void cExpandMenuItem_addItem(void* self, void* item)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CF928);
+#ifdef SKIP_ASM
+extern "C" void func_002CBD50(int);
+
+extern "C" void func_002CF928(int arg0) {
+    func_002CBD50(arg0 + 0x18);
+}
+#endif
 INCLUDE_ASM("util/menu", func_002CF948);
 INCLUDE_ASM("util/menu", func_002CF988);
 

@@ -981,16 +981,76 @@ extern "C" int func_003A5380(void *arg0) {
 }
 #endif
 INCLUDE_ASM("ui/uivector", func_003A5390);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A53B0);
+#ifdef SKIP_ASM
+extern "C" int func_003A53B0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x90))) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A53C0);
+#ifdef SKIP_ASM
+extern "C" void func_003A53C0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x90))) = (int) (((*(int *)((char*)(arg0) + (0x90))) & ~1) | (arg1 != 0));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A53E0);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A53E0(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x95)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A53E8);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A53E8(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x98)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A53F0);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A53F0(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x96)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A53F8);
+#ifdef SKIP_ASM
+extern "C" void func_003A53F8(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (0x95))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5400);
+#ifdef SKIP_ASM
+extern "C" void func_003A5400(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (0x96))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5408);
+#ifdef SKIP_ASM
+extern "C" void func_003A5408(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (0x98))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5410);
+#ifdef SKIP_ASM
+extern "C" int func_003A5410(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xA0)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5418);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A5418(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x95)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5420);
 INCLUDE_ASM("ui/uivector", func_003A5468);
 
@@ -1031,9 +1091,21 @@ extern "C" void* func_003A5508(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5528);
+#ifdef SKIP_ASM
+extern "C" int func_003A5528(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x78)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5530);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5580);
+#ifdef SKIP_ASM
+extern "C" int func_003A5580(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x7C)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5588);
 INCLUDE_ASM("ui/uivector", func_003A55D8);
 
@@ -1063,8 +1135,20 @@ int func_003A56A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A56A8);
+#ifdef SKIP_ASM
+extern "C" void func_003A56A8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x74))) = (int) (((*(int *)((char*)(arg0) + (0x74))) & ~3) | (arg1 & 3));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A56C8);
+#ifdef SKIP_ASM
+extern "C" int func_003A56C8(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 2) & 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A56D8);
@@ -1074,7 +1158,13 @@ extern "C" void func_003A56D8(void* self, int enable) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A56F8);
+#ifdef SKIP_ASM
+extern "C" int func_003A56F8(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 5) & 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5708);
@@ -1089,41 +1179,227 @@ INCLUDE_ASM("ui/uivector", func_003A5728);
 INCLUDE_ASM("ui/uivector", func_003A5738);
 INCLUDE_ASM("ui/uivector", func_003A5758);
 INCLUDE_ASM("ui/uivector", func_003A5780);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A57A8);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A57A8(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x319)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A57B0);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A57B0(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x318)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A57B8);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5800);
+#ifdef SKIP_ASM
+extern "C" void func_003A5800(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0xC))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5808);
+#ifdef SKIP_ASM
+extern "C" int func_003A5808(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xC)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5810);
+#ifdef SKIP_ASM
+extern "C" int func_003A5810(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5818);
+#ifdef SKIP_ASM
+extern "C" void func_003A5818(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (0x14))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5820);
+#ifdef SKIP_ASM
+extern "C" signed char func_003A5820(void *arg0) {
+    return (*(signed char *)((char*)(arg0) + (0x14)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5828);
+#ifdef SKIP_ASM
+extern "C" void func_003A5828(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (0x15))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5830);
+#ifdef SKIP_ASM
+extern "C" unsigned char func_003A5830(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x15)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5838);
+#ifdef SKIP_ASM
+extern "C" int func_003A5838(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x18)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5840);
+#ifdef SKIP_ASM
+extern "C" void func_003A5840(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5848);
+#ifdef SKIP_ASM
+extern "C" int func_003A5848(void *arg0) {
+    return (*(unsigned char *)((char*)(arg0) + (0x1D))) & 0x3F;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5858);
+#ifdef SKIP_ASM
+extern "C" void func_003A5858(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~0x3F00) | ((arg1 & 0x3F) << 8));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5878);
+#ifdef SKIP_ASM
+extern "C" int func_003A5878(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x1C))) >> 4) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5888);
+#ifdef SKIP_ASM
+extern "C" void func_003A5888(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~0x10) | ((arg1 & 1) * 0x10));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A58A8);
+#ifdef SKIP_ASM
+extern "C" int func_003A58A8(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x1C))) >> 5) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A58B8);
+#ifdef SKIP_ASM
+extern "C" void func_003A58B8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~0x20) | ((arg1 & 1) << 5));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A58D8);
+#ifdef SKIP_ASM
+extern "C" int func_003A58D8(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x1C))) >> 0xE) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A58E8);
+#ifdef SKIP_ASM
+extern "C" void func_003A58E8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~0x4000) | ((arg1 & 1) << 0xE));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5908);
+#ifdef SKIP_ASM
+extern "C" int func_003A5908(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x1C))) >> 0xF) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5918);
+#ifdef SKIP_ASM
+extern "C" void func_003A5918(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & 0xFFFF7FFF) | ((arg1 & 1) << 0xF));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5940);
+#ifdef SKIP_ASM
+extern "C" int func_003A5940(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x1C))) >> 6) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5950);
+#ifdef SKIP_ASM
+extern "C" void func_003A5950(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~0x40) | ((arg1 & 1) << 6));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5970);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5980);
+#ifdef SKIP_ASM
+extern "C" void func_003A5980(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~0x80) | ((arg1 & 1) << 7));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A59A0);
+#ifdef SKIP_ASM
+extern "C" int func_003A59A0(void *arg0) {
+    return ((*(int *)((char*)(arg0) + (0x1C))) & 6) != 0;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A59B0);
+#ifdef SKIP_ASM
+extern "C" int func_003A59B0(void *arg0) {
+    return ((unsigned int) (*(unsigned int *)((char*)(arg0) + (0x1C))) >> 1) & 3;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A59C0);
+#ifdef SKIP_ASM
+extern "C" void func_003A59C0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~6) | ((arg1 & 3) * 2));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A59E0);
 INCLUDE_ASM("ui/uivector", func_003A5A10);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5A48);
+#ifdef SKIP_ASM
+extern "C" int func_003A5A48(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x1C))) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5A58);
+#ifdef SKIP_ASM
+extern "C" void func_003A5A58(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~1) | (arg1 & 1));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5A78);
+#ifdef SKIP_ASM
+extern "C" int func_003A5A78(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x1C))) >> 3) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5A88);
+#ifdef SKIP_ASM
+extern "C" void func_003A5A88(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x1C))) = (int) (((*(int *)((char*)(arg0) + (0x1C))) & ~8) | ((arg1 & 1) * 8));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AA8__FPv);
@@ -1185,11 +1461,41 @@ int func_003A5AD8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5AE0);
+#ifdef SKIP_ASM
+extern "C" void func_003A5AE0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x20))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5AE8);
+#ifdef SKIP_ASM
+extern "C" int func_003A5AE8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x20)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5AF0);
+#ifdef SKIP_ASM
+extern "C" int func_003A5AF0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x40)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5AF8);
+#ifdef SKIP_ASM
+extern "C" void func_003A5AF8(void *arg0, signed char arg1) {
+    (*(signed char *)((char*)(arg0) + (0x44))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5B00);
+#ifdef SKIP_ASM
+extern "C" signed char func_003A5B00(void *arg0) {
+    return (*(signed char *)((char*)(arg0) + (0x44)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5B08__FPv);
@@ -1280,16 +1586,73 @@ extern "C" void func_003A5B48(int* self, int flags)
 
 INCLUDE_ASM("ui/uivector", func_003A5B98);
 INCLUDE_ASM("ui/uivector", func_003A5C08);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5C98);
+#ifdef SKIP_ASM
+extern "C" int func_003A5C98(void *arg0) {
+    return *(*(int **)((char*)(arg0) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5CA8);
+#ifdef SKIP_ASM
+extern "C" unsigned short *func_003A5CA8(unsigned short *arg0) {
+    *arg0 = (*arg0 | 1) & 0xFFFD;
+    return arg0;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5CC0);
+#ifdef SKIP_ASM
+extern "C" int func_003A5CC0(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x14))) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5CD0);
+#ifdef SKIP_ASM
+extern "C" void func_003A5CD0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x14))) = (int) (((*(int *)((char*)(arg0) + (0x14))) & ~1) | (arg1 != 0));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5CF0);
+#ifdef SKIP_ASM
+extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
+
+extern "C" void func_003A5CF0(int arg0) {
+    cList_addToEnd__FP5cListP9cListNode(arg0 + 0xB4);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5D10);
+#ifdef SKIP_ASM
+extern "C" int func_003A5D10(int arg0) {
+    return arg0 + 0x40;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5D18);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5D38);
+#ifdef SKIP_ASM
+extern "C" int func_003A5D38(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x54))) >> 6) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5D48);
+#ifdef SKIP_ASM
+extern "C" int func_003A5D48(void *arg0) {
+    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0xD0)))) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5D58);
+#ifdef SKIP_ASM
+extern "C" int func_003A5D58(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xD0)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5D60);
 
 //100%
@@ -1318,12 +1681,48 @@ int func_003A5DF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5DF8);
+#ifdef SKIP_ASM
+extern "C" void func_003A5DF8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x74))) = (int) (((*(int *)((char*)(arg0) + (0x74))) & ~3) | (arg1 & 3));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E18);
+#ifdef SKIP_ASM
+extern "C" int func_003A5E18(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 2) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E28);
+#ifdef SKIP_ASM
+extern "C" int func_003A5E28(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 3) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E38);
+#ifdef SKIP_ASM
+extern "C" int func_003A5E38(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 4) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E48);
+#ifdef SKIP_ASM
+extern "C" int func_003A5E48(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 5) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5E58);
+#ifdef SKIP_ASM
+extern "C" int func_003A5E58(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 6) & 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E68);
@@ -1372,7 +1771,13 @@ extern "C" void func_003A5EE8(void* self, int enable)
 
 INCLUDE_ASM("ui/uivector", func_003A5F08);
 INCLUDE_ASM("ui/uivector", func_003A5F30);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A5F58);
+#ifdef SKIP_ASM
+extern "C" int func_003A5F58(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xB0)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A5F60);
 INCLUDE_ASM("ui/uivector", func_003A5FA0);
 
@@ -1385,15 +1790,57 @@ int func_003A6000(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6008);
+#ifdef SKIP_ASM
+extern "C" void func_003A6008(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x74))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6010);
+#ifdef SKIP_ASM
+extern "C" void func_003A6010(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x78))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6018);
+#ifdef SKIP_ASM
+extern "C" void func_003A6018(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x7C))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6020);
+#ifdef SKIP_ASM
+extern "C" void func_003A6020(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x80))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6028);
+#ifdef SKIP_ASM
+extern "C" void func_003A6028(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x84))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6030);
+#ifdef SKIP_ASM
+extern "C" void func_003A6030(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x88))) = arg1;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A6038);
 INCLUDE_ASM("ui/uivector", func_003A6088);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A60D8);
+#ifdef SKIP_ASM
+extern "C" int func_003A60D8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0xC0)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A60E0);
 INCLUDE_ASM("ui/uivector", func_003A6120);
 
@@ -1406,10 +1853,34 @@ int func_003A6168(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6170);
+#ifdef SKIP_ASM
+extern "C" void func_003A6170(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x74))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6178);
+#ifdef SKIP_ASM
+extern "C" void func_003A6178(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x78))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6180);
+#ifdef SKIP_ASM
+extern "C" int func_003A6180(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x7C)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6188);
+#ifdef SKIP_ASM
+extern "C" void func_003A6188(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x80))) = arg1;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A6190);
 INCLUDE_ASM("ui/uivector", func_003A61D0);
 
@@ -1422,11 +1893,41 @@ int func_003A6220(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6228);
+#ifdef SKIP_ASM
+extern "C" int func_003A6228(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x74)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6230);
+#ifdef SKIP_ASM
+extern "C" void func_003A6230(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x74))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6238);
+#ifdef SKIP_ASM
+extern "C" void func_003A6238(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x78))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6240);
+#ifdef SKIP_ASM
+extern "C" void func_003A6240(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x88))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6248);
+#ifdef SKIP_ASM
+extern "C" void func_003A6248(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x8C))) = arg1;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A6250);
 
 //100%
@@ -1466,9 +1967,27 @@ int func_003A6330(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6338);
+#ifdef SKIP_ASM
+extern "C" void func_003A6338(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x74))) = (int) (((*(int *)((char*)(arg0) + (0x74))) & ~6) | ((arg1 & 3) * 2));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6358);
+#ifdef SKIP_ASM
+extern "C" int func_003A6358(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 3) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6368);
+#ifdef SKIP_ASM
+extern "C" int func_003A6368(void *arg0) {
+    return ((int) (*(int *)((char*)(arg0) + (0x74))) >> 4) & 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6378);
@@ -1489,20 +2008,108 @@ extern "C" void func_003A6398(void* self, int enable)
 #endif
 
 INCLUDE_ASM("ui/uivector", func_003A63B8);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A63E0);
+#ifdef SKIP_ASM
+extern "C" void cList_first__FP5cList(int);
+
+extern "C" void func_003A63E0(int arg0) {
+    cList_first__FP5cList(arg0 + 0x8C);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6400);
+#ifdef SKIP_ASM
+extern "C" void func_00397858(int);
+
+extern "C" void func_003A6400(int arg0) {
+    func_00397858(arg0 + 0x8C);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6420);
+#ifdef SKIP_ASM
+extern "C" void func_00397870(int);
+
+extern "C" void func_003A6420(int arg0) {
+    func_00397870(arg0 + 0x8C);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6440);
+#ifdef SKIP_ASM
+extern "C" void cList_addToFront__FP5cListP9cListNode(int);
+
+extern "C" void func_003A6440(int arg0) {
+    cList_addToFront__FP5cListP9cListNode(arg0 + 0x8C);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6460);
+#ifdef SKIP_ASM
+extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
+
+extern "C" void func_003A6460(int arg0) {
+    cList_addToEnd__FP5cListP9cListNode(arg0 + 0x8C);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6480);
+#ifdef SKIP_ASM
+extern "C" void func_003A6480(void *arg0) {
+    (*(int *)((char*)(arg0) + (0x74))) = (int) ((*(int *)((char*)(arg0) + (0x74))) | 1);
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6490);
+#ifdef SKIP_ASM
+extern "C" int func_003A6490(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x74))) & 1;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A64A0);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A64C8);
+#ifdef SKIP_ASM
+extern "C" void func_003A64C8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0xB8))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A64D0);
+#ifdef SKIP_ASM
+extern "C" void func_003A64D0(void *arg0, short arg1) {
+    (*(short *)((char*)(arg0) + (0xC6))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A64D8);
+#ifdef SKIP_ASM
+extern "C" unsigned short func_003A64D8(void *arg0) {
+    return (*(unsigned short *)((char*)(arg0) + (0xC6)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A64E0);
+#ifdef SKIP_ASM
+extern "C" unsigned short func_003A64E0(void *arg0) {
+    return (*(unsigned short *)((char*)(arg0) + (0xC8)));
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A64E8);
+#ifdef SKIP_ASM
+extern "C" void func_003A64E8(void *arg0, short arg1) {
+    (*(short *)((char*)(arg0) + (0xC4))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A64F0);
+#ifdef SKIP_ASM
+extern "C" unsigned short func_003A64F0(void *arg0) {
+    return (*(unsigned short *)((char*)(arg0) + (0xC4)));
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A64F8);
 
 //100%
@@ -1517,11 +2124,43 @@ int func_003A6540(void* self)
 extern "C" void* func_003A3F48(int, int);
 
 INCLUDE_ASM("ui/uivector", func_003A6548);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A65A0);
+#ifdef SKIP_ASM
+extern "C" unsigned char *func_003A65A0(unsigned char *arg0) {
+    *arg0 = (*arg0 | 4) & 0xC4;
+    return arg0;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A65B8);
+#ifdef SKIP_ASM
+extern "C" void *func_003A65B8(void *arg0) {
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + (4))) = 0;
+    (*(int *)((char*)(arg0) + (8))) = 0;
+    (*(int *)((char*)(arg0) + (0xC))) = 0;
+    (*(signed char *)((char*)(arg0) + (0x10))) = 0;
+    return arg0;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A65D8);
+//100%
 INCLUDE_ASM("ui/uivector", func_003A65E8);
+#ifdef SKIP_ASM
+extern "C" unsigned char *func_003A65E8(unsigned char *arg0) {
+    *arg0 = (*arg0 | 4) & 0x87;
+    return arg0;
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6600);
+#ifdef SKIP_ASM
+extern "C" unsigned char *func_003A6600(unsigned char *arg0) {
+    *arg0 &= 0xC6;
+    return arg0;
+}
+#endif
 INCLUDE_ASM("ui/uivector", func_003A6618);
 
 //99.38%

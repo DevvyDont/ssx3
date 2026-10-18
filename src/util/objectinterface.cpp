@@ -82,13 +82,37 @@ INCLUDE_ASM("util/objectinterface", func_002D20F8);
 
 INCLUDE_ASM("util/objectinterface", func_002D2100);
 
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D2138);
+#ifdef SKIP_ASM
+extern "C" void func_002D2138(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D2140);
+#ifdef SKIP_ASM
+extern "C" void func_002D2140(void) {
+
+}
+#endif
 INCLUDE_ASM("util/objectinterface", func_002D2148);
 INCLUDE_ASM("util/objectinterface", func_002D2160);
 INCLUDE_ASM("util/objectinterface", func_002D2178);
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D2190);
+#ifdef SKIP_ASM
+extern "C" float func_002D2190(void) {
+    return 0.0f;
+}
+#endif
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D21A0);
+#ifdef SKIP_ASM
+extern "C" float func_002D21A0(void) {
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D21B0__FPv);
@@ -125,6 +149,14 @@ INCLUDE_ASM("util/objectinterface", func_002D2248);
 INCLUDE_ASM("util/objectinterface", func_002D22A8);
 INCLUDE_ASM("util/objectinterface", func_002D2308);
 INCLUDE_ASM("util/objectinterface", func_002D2368);
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D23C8);
+#ifdef SKIP_ASM
+extern "C" int func_002D23C8(signed char **arg0, signed char arg1) {
+    **arg0 = arg1;
+    *arg0 += 1;
+    return 1;
+}
+#endif
 INCLUDE_ASM("util/objectinterface", func_002D23E8);
 INCLUDE_ASM("util/objectinterface", func_002D2478);

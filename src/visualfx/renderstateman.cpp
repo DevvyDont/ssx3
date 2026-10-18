@@ -1333,7 +1333,13 @@ extern "C" void* func_002F0368(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0388);
+#ifdef SKIP_ASM
+extern "C" void func_002F0388(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0390);

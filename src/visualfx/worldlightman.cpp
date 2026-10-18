@@ -734,7 +734,13 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F6B48);
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B88);
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A60);
+#ifdef SKIP_ASM
+extern "C" void func_002F7A60(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A68__FPv);
@@ -745,19 +751,101 @@ void* func_002F7A68(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
+#ifdef SKIP_ASM
+extern "C" int func_002F7A70(void *arg0) {
+    return (*(int *)((char*)(arg0) + (4))) > 0;
+}
+#endif
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AB0);
+#ifdef SKIP_ASM
+extern "C" void func_002F7AB0(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AB8);
+#ifdef SKIP_ASM
+extern "C" void func_002DCF28();
+
+extern "C" void func_002F7AB8(void) {
+    func_002DCF28();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AD8);
+#ifdef SKIP_ASM
+extern "C" void func_002F7AD8(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AE0);
+#ifdef SKIP_ASM
+extern "C" void func_002DAA78();
+
+extern "C" void func_002F7AE0(void) {
+    func_002DAA78();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B00);
+#ifdef SKIP_ASM
+extern "C" void func_002F7B00(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B08);
+#ifdef SKIP_ASM
+extern "C" void func_002E8560();
+
+extern "C" void func_002F7B08(void) {
+    func_002E8560();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B28);
+#ifdef SKIP_ASM
+extern "C" void func_002F7B28(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B30);
+#ifdef SKIP_ASM
+extern "C" void func_002D4BE0();
+
+extern "C" void func_002F7B30(void) {
+    func_002D4BE0();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B50);
+#ifdef SKIP_ASM
+extern "C" void func_002F7B50(void) {
+
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B58);
+#ifdef SKIP_ASM
+extern "C" void func_002E3930();
+
+extern "C" void func_002F7B58(void) {
+    func_002E3930();
+}
+#endif
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B78);
+#ifdef SKIP_ASM
+extern "C" void func_002F7B78(void) {
+
+}
+#endif
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA0);
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
