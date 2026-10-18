@@ -656,7 +656,160 @@ extern "C" void func_00312BD0(void* self, void* unused, void* rider, int anim)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00312C20);
+#ifdef SKIP_ASM
+// Packed animation channel table (built by func_003130A8, sampled here).
+struct sRabChannel {
+    int type;      // 0x0
+    float v4;      // 0x4
+    float v8;      // 0x8
+    float vC;      // 0xC (key index for types 6..9)
+    float v10;     // 0x10
+};
+
+struct sRabChannelSet {
+    sRabChannel* channels;   // 0x0
+    unsigned char* data4;    // 0x4: type 6 keys, u8, one row per frame
+    unsigned char* data8;    // 0x8: type 7 keys, u8, one row per 2 frames
+    unsigned char* dataC;    // 0xC: type 8 keys, u16
+    unsigned char* data10;   // 0x10: type 9 keys, float
+    unsigned char count6;    // 0x14
+    unsigned char count7;    // 0x15
+    unsigned char count8;    // 0x16
+    unsigned char count9;    // 0x17
+};
+
+extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float t, float* out)
+{
+    float half = t * 0.5f;
+    int it = (int)t;
+    int ih = (int)half;
+    float frac = t - (float)it;
+    float fracHalf = half - (float)ih;
+    sRabChannel* ch = self->channels + first;
+    sRabChannel* end = ch + count;
+    unsigned char* row4 = self->data4 + it * self->count6;
+    unsigned char* row8 = self->data8 + ih * self->count7;
+    unsigned short* rowC = (unsigned short*)self->dataC + it * self->count8;
+    float* row10 = (float*)self->data10 + it * self->count9;
+    if (frac < 0.001f) {
+        frac = 0.0f;
+    }
+    if (fracHalf < 0.001f) {
+        fracHalf = 0.0f;
+    }
+    if (frac != 0.0f || fracHalf != 0.0f) {
+        unsigned char* next4 = row4 + self->count6;
+        unsigned char* next8 = row8 + self->count7;
+        unsigned short* nextC = rowC + self->count8;
+        float* next10 = row10 + self->count9;
+        for (;;) {
+            switch (ch->type) {
+            case 0:
+                *out++ = 0.0f;
+                break;
+            case 1:
+                *out++ = ch->v4;
+                break;
+            case 2:
+                *out++ = t * ch->v4 + ch->v8;
+                break;
+            case 3:
+                *out++ = t * (t * ch->v4 + ch->v8) + ch->vC;
+                break;
+            case 4:
+                *out++ = t * (t * (t * ch->v4 + ch->v8) + ch->vC) + ch->v10;
+                break;
+            case 5: {
+                float split = ch->v10;
+                float a = ch->v4;
+                float b = ch->v8;
+                float c = ch->vC;
+                if (t <= split) {
+                    *out++ = t * a + b;
+                } else {
+                    *out++ = a * split + b + c * (t - split);
+                }
+                break;
+            }
+            case 6: {
+                int k = *(int*)&ch->vC;
+                float a = row4[k];
+                *out++ = (a + frac * ((float)next4[k] - a)) * ch->v8 + ch->v4;
+                break;
+            }
+            case 7: {
+                int k = *(int*)&ch->vC;
+                float a = row8[k];
+                *out++ = (a + fracHalf * ((float)next8[k] - a)) * ch->v8 + ch->v4;
+                break;
+            }
+            case 8: {
+                int k = *(int*)&ch->vC;
+                float a = rowC[k];
+                *out++ = (a + frac * ((float)nextC[k] - a)) * ch->v8 + ch->v4;
+                break;
+            }
+            case 9: {
+                int k = *(int*)&ch->vC;
+                float a = row10[k];
+                *out++ = a + frac * (next10[k] - a);
+                break;
+            }
+            }
+            ch++;
+            if (ch == end) return;
+        }
+    } else {
+        for (;;) {
+            switch (ch->type) {
+            case 0:
+                *out++ = 0.0f;
+                break;
+            case 1:
+                *out++ = ch->v4;
+                break;
+            case 2:
+                *out++ = t * ch->v4 + ch->v8;
+                break;
+            case 3:
+                *out++ = t * (t * ch->v4 + ch->v8) + ch->vC;
+                break;
+            case 4:
+                *out++ = t * (t * (t * ch->v4 + ch->v8) + ch->vC) + ch->v10;
+                break;
+            case 5: {
+                float split = ch->v10;
+                float a = ch->v4;
+                float b = ch->v8;
+                float c = ch->vC;
+                if (t <= split) {
+                    *out++ = t * a + b;
+                } else {
+                    *out++ = a * split + b + c * (t - split);
+                }
+                break;
+            }
+            case 6:
+                *out++ = (float)row4[*(int*)&ch->vC] * ch->v8 + ch->v4;
+                break;
+            case 7:
+                *out++ = (float)row8[*(int*)&ch->vC] * ch->v8 + ch->v4;
+                break;
+            case 8:
+                *out++ = (float)rowC[*(int*)&ch->vC] * ch->v8 + ch->v4;
+                break;
+            case 9:
+                *out++ = row10[*(int*)&ch->vC];
+                break;
+            }
+            ch++;
+            if (ch == end) break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("animation/rideranimbase", func_003130A8);
 
