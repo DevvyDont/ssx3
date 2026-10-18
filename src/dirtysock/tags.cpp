@@ -27,7 +27,40 @@ extern "C" int func_003EB578(int v)
     return old;
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EB588);
+// Normalizes a record in place: header control runs become `sep` (stopping at the first
+// key line), a trailing sep becomes a newline (or the end), then each control run in the
+// body becomes one '\n' (a run of the same char stays separate lines).
+extern "C" void func_003EB588(unsigned char* d, unsigned char sep)
+{
+    unsigned char* buf = d;
+    unsigned char* s = d;
+    if (*s != 0) {
+        do {
+            if (*s < 0x20) {
+                *d++ = sep;
+                while (*s != 0 && *s < 0x20)
+                    s++;
+                if ((*s == '=' || *s == ':') && s[1] < 0x20)
+                    break;
+            } else {
+                *d++ = *s++;
+            }
+        } while (*s != 0);
+    }
+    if (d != buf && d[-1] == sep)
+        d[-1] = (sep == '\n' || *s != 0) ? '\n' : 0;
+    while (*s != 0) {
+        if (*s < 0x20) {
+            *d++ = '\n';
+            unsigned char c = *s++;
+            while (*s != 0 && *s < 0x20 && *s != c)
+                s++;
+        } else {
+            *d++ = *s++;
+        }
+    }
+    *d = 0;
+}
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
 
