@@ -1239,7 +1239,26 @@ extern "C" void* func_003AF010(void* self)
     return self;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF020);
+//100%
+struct sElem_AF020 {
+    char pad[0x34];
+    ~sElem_AF020() {}
+    void operator delete[](void* p) { D_00509430_ADEC8.free(p); }
+};
+struct sArr_AF020 {
+    sElem_AF020* arr;
+    int n;
+};
+
+extern "C" void func_003AF020(sArr_AF020* self, int flags)
+{
+    if (self->arr) {
+        delete[] self->arr;
+        self->arr = 0;
+    }
+    self->n = 0;
+    if (flags & 1) D_00509430_ADEC8.free(self);
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF0C8);
 
