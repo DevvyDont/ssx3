@@ -532,13 +532,47 @@ extern "C" void* func_0014B700(void* self, unsigned int i)
     return 0;
 }
 
-INCLUDE_ASM("be/belibrary", func_0014B7A8);
+//100%
+struct sBEEntry38_14B7A8 {
+    char pad_0x00[4];
+    short key;          // 0x4
+    char pad_0x06[0x26];
+    char* name;         // 0x2C
+    char pad_0x30[8];
+};
 
-extern "C" int func_0014B7A8(void* self, int profile, int character, int a);
+extern "C" int func_0014B988_14B7A8(void* self, int a, int b, sBEEntry38_14B7A8* e, char* out) __asm__("func_0014B988");
+extern "C" int func_004165A8(const char* a, const char* b);
+
+// Builds the display names of a group's owned entries into names[], skipping duplicates.
+extern "C" int func_0014B7A8(void* self, int a, int b, char (*names)[0x100])
+{
+    int n = 0;
+    sBELibTables* tbl = (sBELibTables*)func_0014BDB8_0();
+    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, a, b);
+    sBEEntry38_14B7A8* e = (sBEEntry38_14B7A8*)func_0014D998(tbl, b);
+    int count = func_0014D988(tbl, b);
+    for (int i = 0; i < count; i++, e++) {
+        if (e->name == 0) continue;
+        if (!(getEntry_14AFB0(prof, e->key)->flags & 0x10)) continue;
+        char* out = names[n];
+        if (func_0014B988_14B7A8(self, a, b, e, out) == 0) continue;
+        int k;
+        for (k = n - 1; k >= 0; k--) {
+            if (func_004165A8(out, names[k]) == 0) {
+                n--;
+                break;
+            }
+        }
+        n++;
+    }
+    return n;
+}
+
 extern "C" int func_0014B920(void* self, int slot, int a)
 {
     int profile = func_0014AC50(slot);
-    return func_0014B7A8(self, profile, func_0014AC30(slot), a);
+    return func_0014B7A8(self, profile, func_0014AC30(slot), (char (*)[0x100])a);
 }
 
 //100%
