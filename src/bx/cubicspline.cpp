@@ -116,7 +116,27 @@ extern "C" void func_0031E0E0(sCubicSpline* self)
 
 INCLUDE_ASM("bx/cubicspline", func_0031E190);
 
-INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
+//100%
+// dlmalloc 2.7 largebin_index() (portable highest-bit version).
+extern "C" int func_0031E1D8(unsigned int sz)
+{
+    unsigned int x = sz >> 8;
+    unsigned int m;
+    if (x >= 0x10000)
+        return 95;
+    {
+        unsigned int n = ((x - 0x100) >> 16) & 8;
+        x <<= n;
+        m = ((x - 0x1000) >> 16) & 4;
+        n += m;
+        x <<= m;
+        m = ((x - 0x4000) >> 16) & 2;
+        n += m;
+        x = (x << m) >> 14;
+        m = 13 - n + (x & ~(x >> 1));
+    }
+    return 32 + (m << 2) + ((sz >> (m + 6)) & 3);
+}
 
 //100%
 void func_0031E260(void* self)
