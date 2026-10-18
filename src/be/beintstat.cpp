@@ -124,7 +124,21 @@ extern "C" float func_00149208(void* self, int rider, int value)
     return (float)v / (float)D_005308D8_func_00149208[c].v[0xE];
 }
 
-INCLUDE_ASM("be/beintstat", func_001492F0);
+//100%
+// Same as func_00149208, kept as its own copy like the rest of the unit.
+extern "C" float func_001492F0(void* self, int rider, int value)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    if (cBENewPlayerInterface_isMissionMan(rider))
+        return 0.5f;
+    int v;
+    if (value > 0)
+        v = value;
+    else
+        v = D_00535538_func_00149208[profile].e[c][6] / 5;
+    return (float)v / (float)D_005308D8_func_00149208[c].v[0xE];
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
