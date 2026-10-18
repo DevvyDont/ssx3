@@ -971,7 +971,50 @@ extern "C" void func_0035F3A8(sRailModSelect* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035F410);
+#ifdef SKIP_ASM
+// Advances the rail timer; each whole step moves to the next/previous frame (mode 0), or alternates between a
+// fixed 10-per-second step (mode 1) and a random 25..100% rate (mode 2).
+extern "C" void func_0035F410(sRailTimer* self)
+{
+    if (!(0.0f < self->f8)) {
+        return;
+    }
+    float one = 1.0f;
+    float* acc = (float*)&self->f4;
+    *acc += self->f8;
+    if (!(one <= *acc)) {
+        return;
+    }
+    *acc -= one;
+    if (self->f0 == 0) {
+        if (self->f10 == 0) {
+            if (++self->f14 >= self->f20) {
+                self->f14 = 0;
+            }
+        } else if (--self->f14 < 0) {
+            self->f14 = self->f20 - 1;
+        }
+    } else if (self->f0 == 1) {
+        self->f8 = 10.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        self->f0 = 2;
+        if (++self->f14 >= self->f20) {
+            self->f14 = 0;
+        }
+    } else if (self->f0 == 2) {
+        union { int i; float f; } u;
+        float base = 0.25f;
+        u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+        self->f0 = 1;
+        self->f8 = self->fC * ((u.f - one) * 0.75f + base);
+        if (++self->f14 >= self->f20) {
+            self->f14 = 0;
+        }
+    }
+    func_0035F378((sRailModSelect*)self, self->f14);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F598);
@@ -5066,7 +5109,71 @@ extern "C" void func_00366008(sRailNodeMan* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003660A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only MMI count-leading-sign-bits (plzcw); off-PS2 use a clz builtin. Volatile so it stays before
+// the size-class multiply, as in the target schedule.
+static inline int railFloorLog2_60A8(int x)
+{
+    long r;
+    __asm__ __volatile__("plzcw %0, %1\n\txori %0, %0, 0x1f\n\taddiu %0, %0, -1" : "=r"(r) : "r"(x));
+    return r;
+}
+
+// Links node idx into its size-class list (list A ordered by field_0x0, list B by size).
+extern "C" void func_003660A8(void* selfp, int idx)
+{
+    sRailNodeMan* self = (sRailNodeMan*)selfp;
+    sRailNode* node = &self->nodes[idx];
+    sRailNode* heads;
+    int tag;
+    if (node->field_0x0 & 1) {
+        heads = self->headsA;
+        tag = 0x90000000;
+    } else {
+        heads = self->headsB;
+        tag = 0xA0000000;
+    }
+    int b = railFloorLog2_60A8(node->size) - 6;
+    sRailNode* head = &heads[b];
+    int first = head->next2;
+    if (first == -1) {
+        head->next2 = idx;
+        node->prev2 = b | tag;
+        node->next2 = first;
+        return;
+    }
+    for (int i = first; i >= 0; i = self->nodes[i].next2) {
+        sRailNode* n = &self->nodes[i];
+        if (n->next2 == -1) {
+            n->next2 = idx;
+            node->prev2 = i;
+            node->next2 = -1;
+            return;
+        }
+        if ((heads == self->headsA && n->field_0x0 > node->field_0x0) ||
+            (heads == self->headsB && n->size >= node->size)) {
+            int link = n->prev2;
+            node->next2 = i;
+            node->prev2 = link;
+            sRailNode* prev;
+            if (link < 0) {
+                if ((link & 0x70000000) == 0x10000000) {
+                    prev = &self->headsA[link & 0x0FFFFFFF];
+                } else {
+                    prev = &self->headsB[link & 0x0FFFFFFF];
+                }
+            } else {
+                prev = &self->nodes[link];
+            }
+            prev->next2 = idx;
+            self->nodes[node->next2].prev2 = idx;
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366238);
@@ -5166,9 +5273,82 @@ extern "C" void func_003663D8(void* selfp, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366548);
+#ifdef SKIP_ASM
+struct sRailLink6548 {
+    int flags;      // 0x0
+    int f4;
+    int prev;       // 0x8
+    int fC;
+    int next;       // 0x10
+    int f14;
+    int f18;
+};
 
+// Walks the rail's link list and calls func_003663D8 on every enabled link without flag bit 1.
+extern "C" void func_00366548(void* self)
+{
+    char* s = (char*)self;
+    int i = *(int*)(s + 0x23C0);
+    while (i >= 0) {
+        sRailLink6548* links = *(sRailLink6548**)(s + 0x1FF0);
+        sRailLink6548* cur = &links[i];
+        int next = cur->next;
+        while (next >= 0) {
+            if ((*(sRailLink6548**)(s + 0x1FF0))[next].flags & 1) {
+                break;
+            }
+            next = (*(sRailLink6548**)(s + 0x1FF0))[next].next;
+        }
+        if (cur->flags & 1) {
+            if (((cur->flags >> 1) & 1) == 0) {
+                func_003663D8(self, i);
+            }
+        }
+        i = next;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366618);
+#ifdef SKIP_ASM
+struct sRailLink6618 {
+    int flags;      // 0x0
+    int f4;
+    int prev;       // 0x8
+    int fC;
+    int next;       // 0x10
+    int f14;
+    int f18;
+};
+
+// Walks the rail's link list, clearing flag bit 1 and calling func_003663D8 on every enabled link.
+extern "C" void func_00366618(void* self)
+{
+    char* s = (char*)self;
+    int i = *(int*)(s + 0x23C0);
+    while (i >= 0) {
+        sRailLink6618* links = *(sRailLink6618**)(s + 0x1FF0);
+        sRailLink6618* cur = &links[i];
+        int next = cur->next;
+        while (next >= 0) {
+            if ((*(sRailLink6618**)(s + 0x1FF0))[next].flags & 1) {
+                break;
+            }
+            next = (*(sRailLink6618**)(s + 0x1FF0))[next].next;
+        }
+        if (cur->flags & 1) {
+            if ((cur->flags >> 1) & 1) {
+                cur->flags &= ~2;
+            }
+            func_003663D8(self, i);
+        }
+        i = next;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003666F8);
@@ -5250,7 +5430,54 @@ extern "C" int func_003667F8(sRailNodeMan* self, int size)
 
 INCLUDE_ASM("object/railmodifier", func_00366888);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003668F8);
+#ifdef SKIP_ASM
+extern "C" void func_003663D8(void* selfp, int idx);
+
+// PORT: PS2-only MMI count-leading-sign-bits (plzcw); off-PS2 use a clz builtin. Volatile here: this caller's
+// schedule keeps the prologue and the loop constants on either side of it.
+static inline int railFloorLog2v(int x)
+{
+    long r;
+    __asm__ __volatile__("plzcw %0, %1\n\txori %0, %0, 0x1f\n\taddiu %0, %0, -1" : "=r"(r) : "0"(x));
+    return r;
+}
+
+// Picks the cheapest free node of at least 'size' bytes from its size class (skipping locked nodes and the two
+// given owners; owners whose limit is above 'age' cost size*weight) and frees it. Returns 1 if one was freed.
+extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int age)
+{
+    int i = self->headsA[railFloorLog2v(size) - 6].next2;
+    int bestIdx = -1;
+    int best = 0x7FFFFFFF;
+    for (; i >= 0; i = self->nodes[i].next2) {
+        sRailNode* n = &self->nodes[i];
+        int sz = n->size;
+        if (sz < size) {
+            continue;
+        }
+        if ((n->field_0x0 >> 1) & 1) {
+            continue;
+        }
+        int owner = n->field_0x8;
+        if (owner == skipA || owner == skipB) {
+            continue;
+        }
+        sRailPair66F8* pr = &((sRailPair66F8*)D_0053AB80)[owner];
+        int cost = age < pr->a ? sz * pr->b : 0;
+        if (cost < best) {
+            best = cost;
+            bestIdx = i;
+        }
+    }
+    if (bestIdx < 0) {
+        return 0;
+    }
+    func_003663D8(self, bestIdx);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_003669F0);
 

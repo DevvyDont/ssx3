@@ -635,11 +635,90 @@ extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356078);
+#ifdef SKIP_ASM
+struct sMnVEntryP_6078 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+// Virtual call through the modifier object's vtable (slot 18); taking the object by reference matches the register allocation.
+static inline void* VCall18_6078(char*& o)
+{
+    sMnVEntryP_6078* vt = *(sMnVEntryP_6078**)o;
+    return vt[18].fn(o + vt[18].delta);
+}
+extern "C" void* func_00356078(char* self)
+{
+    char** h = *(char***)(self + 0x1C);
+    char* o = h ? *h : 0;
+    if (o != 0)
+        return VCall18_6078(o);
+    return *(char**)(self + 0x18) + 0x10;
+}
+#endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003560C0);
+#ifdef SKIP_ASM
+struct sMnVEntryI2_60C0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sMnVEntryI_60C0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+// Taking the object by reference matches the target's register allocation (see func_00356078).
+static inline int VCall23_60C0(char*& o, int a)
+{
+    sMnVEntryI2_60C0* vt = *(sMnVEntryI2_60C0**)o;
+    return vt[23].fn(o + vt[23].delta, a);
+}
+// Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
+extern "C" int func_003560C0(char* self, int a)
+{
+    char** h = *(char***)(self + 0x1C);
+    char* o = h ? *h : 0;
+    if (o != 0) {
+        int r = VCall23_60C0(o, a);
+        if (r != 0) return r;
+    }
+    sMnVEntryI_60C0* vs = *(sMnVEntryI_60C0**)(self + 0xC);
+    return vs[27].fn(self + vs[27].delta);
+}
+#endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356128);
+#ifdef SKIP_ASM
+struct sMnVEntryP_6128 {
+    short delta;
+    short index;
+    void* (*fn)(void*);
+};
+// Taking the object by reference matches the target's register allocation (see func_00356078).
+static inline void* VCall_6128(char*& o, int i)
+{
+    sMnVEntryP_6128* vt = *(sMnVEntryP_6128**)o;
+    return vt[i].fn(o + vt[i].delta);
+}
+// Returns the modifier object's slot-19 value, else its slot-18 value; without one, the node's object position.
+extern "C" void* func_00356128(char* self)
+{
+    char** h = *(char***)(self + 0x1C);
+    char* o = h ? *h : 0;
+    if (o != 0) {
+        void* r = VCall_6128(o, 19);
+        if (r != 0) return r;
+        return VCall_6128(o, 18);
+    }
+    return *(char**)(self + 0x18) + 0x10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00356198);
@@ -990,7 +1069,29 @@ extern "C" void func_00356298(cMnNode_6298* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356608);
+#ifdef SKIP_ASM
+// Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in func_00356298).
+extern "C" void func_00356608(cMnNode_6298* self, void* tex, int flags)
+{
+    sMnCam_6298* cam = *D_004A47B8_6298;
+    sMnObj_6298* obj = OBJ_6298(self);
+    if (!Visible_6298(cam, obj)) {
+        return;
+    }
+    void* rot = 0;
+    cMnGfx_6298* gfx = D_004A5B80_6298;
+    sMnMat_6298 rm;
+    if (HasRot_6298(MOD_6298(self))) {
+        rot = RotOf_6298(self, &rm);
+        flags |= 2;
+    }
+    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
+    sMnGfxVt_6298* vt = gfx->vt;
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, D_004FF1A0, tex, rot, flags, *(float*)((char*)self + 0x24));
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_setupOverlapSystem);
@@ -1025,7 +1126,53 @@ extern "C" void cMoveNode_setupOverlapSystem(void* self_)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_003567E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+#include "common.h"
+struct tModifierBlock;
+void tModifierBlock_setBoundBox_K(tModifierBlock* mb, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
+struct sMnVec4_67E0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMnBox_67E0 {
+    sMnVec4_67E0 min, max;
+};
+
+extern "C" sMnBox_67E0* func_00352B88_67E0(void* mb) __asm__("func_00352B88");
+extern "C" void* func_002D1BE0(void);
+extern "C" void func_003291E0_67E0(void* mgr, int a, void* obj, sMnBox_67E0* box, sMnBox_67E0* old) __asm__("func_003291E0");
+
+// Sets the modifier block's bound box from the node's own extents (self->18 + 0x60) and re-files it.
+extern "C" void func_003567E0(void* vself)
+{
+    char* self = (char*)vself;
+    char** h = *(char***)(self + 0x1C);
+    char* blk = h ? *h : 0;
+    // Binding a reference to the object matches the target register allocation (see func_00356078).
+    char*& o = blk;
+    if (o == 0)
+        return;
+    sMnBox_67E0 box;
+    sMnBox_67E0 old = *func_00352B88_67E0(*(void**)(self + 0x1C));
+    char* n = *(char**)(self + 0x18);
+    sMnVec4_67E0 v;
+    v.x = *(float*)(n + 0x60);
+    v.y = *(float*)(n + 0x64);
+    v.z = *(float*)(n + 0x68);
+    v.w = 1.0f;
+    box.min = v;
+    v.x = *(float*)(n + 0x6C);
+    v.y = *(float*)(n + 0x70);
+    v.z = *(float*)(n + 0x74);
+    box.max = v;
+    tModifierBlock_setBoundBox_K(*(tModifierBlock**)(self + 0x1C), &box);
+    void* obj = *(void**)(self + 0x18);
+    func_003291E0_67E0(func_002D1BE0(), 0, obj, &box, &old);
+}
+#endif
 
 INCLUDE_ASM("object/movenode", func_003568B0);
 
@@ -1179,7 +1326,31 @@ void func_00356B30_2(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/movenode", func_00356BF0);
+#ifdef SKIP_ASM
+struct sMnVEntryI_6BF0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+static inline int VCall_6BF0(char* o, int i)
+{
+    sMnVEntryI_6BF0* vt = *(sMnVEntryI_6BF0**)o;
+    return vt[i].fn(o + vt[i].delta);
+}
+// Does the modifier object's virtual slot 26 report state 2?
+extern "C" int func_00356BF0(char* self)
+{
+    char** h = *(char***)(self + 0x1C);
+    if (h != 0) {
+        char* o = *h;
+        if (o != 0 && VCall_6BF0(o, 26) == 2)
+            return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00356C48);

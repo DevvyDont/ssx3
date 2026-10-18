@@ -2229,7 +2229,62 @@ extern "C" void func_00376768(sPtGfx6768* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00376938);
+#ifdef SKIP_ASM
+struct sPtVEntryI6938 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sPtGfx6938 {
+    char pad_0x0[0x10D8];
+    sPtVEntryI6938* vtable;         // 0x10D8
+    char pad_0x10DC[0x5900 - 0x10DC];
+    unsigned short scissor[4];      // 0x5900: x, y, w, h
+};
+
+// Clips the rectangle to the screen (negative origins shrink the size) and stores it as the scissor box.
+extern "C" void func_00376938(void* p, float x, float y, float w, float h)
+{
+    sPtGfx6938* self = (sPtGfx6938*)p;
+    sPtVEntryI6938* e = &self->vtable[10];
+    int width = e->fn((char*)self + e->delta);
+    e = &self->vtable[11];
+    int height = e->fn((char*)self + e->delta);
+    if (x < 0.0f) {
+        w += x;
+        x = 0.0f;
+    }
+    if (y < 0.0f) {
+        h += y;
+        y = 0.0f;
+    }
+    int ix = (int)x;
+    self->scissor[0] = ix < width - 1 ? ix : width - 1;
+    int iy = (int)y;
+    self->scissor[1] = iy < height - 1 ? iy : height - 1;
+    int iw = (int)w;
+    int maxw = width - self->scissor[0];
+    int rw;
+    if (iw >= 0) {
+        rw = maxw < iw ? maxw : iw;
+    } else {
+        rw = 0;
+    }
+    self->scissor[2] = rw;
+    int ih = (int)h;
+    int maxh = height - self->scissor[1];
+    int rh;
+    if (ih >= 0) {
+        rh = maxh < ih ? maxh : ih;
+    } else {
+        rh = 0;
+    }
+    self->scissor[3] = rh;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_00376A70);
@@ -2553,7 +2608,74 @@ INCLUDE_ASM("render/particle", func_00379BD0);
 
 INCLUDE_ASM("render/particle", func_0037A260);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037A430);
+#ifdef SKIP_ASM
+struct sPtRS_A430 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_A430 {
+    sPtRS_A430 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_A430 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_A430 ents[1];            // 0x80
+};
+
+struct sPtGfx_A430 {
+    char pad_0x0[0xE84];
+    sPtRS_A430* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_A430* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x5A28 - 0x5A04];
+    unsigned int pendBuf;           // 0x5A28
+    unsigned long* pend;            // 0x5A2C
+};
+
+extern int D_004A4474;
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+
+// PORT: uncached (0x30000000) pointers held in int.
+// Flushes the pending packet into a ring entry and resets the render state's layer bits.
+extern "C" void func_0037A430(sPtGfx_A430* self)
+{
+    unsigned int next = func_0038F668(D_004A4474, self->pend, 4);
+    self->bufAddr = next;
+    unsigned int buf = self->pendBuf;
+    sPtRing_A430* ring = self->ring;
+    sPtRS_A430* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_A430* e = (sPtEnt_A430*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+    self->pendBuf = 0;
+    self->pend = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037A540);
@@ -2734,7 +2856,21 @@ extern "C" sRGB_C638 func_0037C638(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037C720);
+#ifdef SKIP_ASM
+// PORT: g++ `<?` (min) operator; needs a macro / std::min on a modern compiler.
+static inline float clamp_C720(float x, float hi)
+{
+    return x >= 0.0f ? (x <? hi) : 0.0f;
+}
+
+// Stores the inverted alpha (1 - clamped a) as a 0..128 value.
+extern "C" void func_0037C720(void* self, float a)
+{
+    *(int*)((char*)self + 0x59F8) = func_004139F8((1.0f - clamp_C720(a, 1.0f)) * 128.0f);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037C770);
 
@@ -2946,7 +3082,70 @@ extern "C" void func_0037D318(char* self, int a1, int a2, int a3, int a4, int a5
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D348);
+#ifdef SKIP_ASM
+struct sPtRS_D348 {
+    int f0;
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_D348 {
+    sPtRS_D348 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_D348 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_D348 ents[1];            // 0x80
+};
+
+struct sPtGfx_D348 {
+    char pad_0x0[0xE84];
+    sPtRS_D348* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_D348* ring;             // 0x18F0
+    void* texset;                   // 0x18F4
+    char pad_0x18F8[0x5A00 - 0x18F8];
+    unsigned int bufAddr;           // 0x5A00
+};
+
+extern "C" void func_00367DB8_D348(void* texset, int idx, unsigned int* buf) __asm__("func_00367DB8");
+
+// PORT: uncached (0x30000000) pointers held in int.
+// Uploads texture idx into the uncached buffer and queues a ring entry for it.
+extern "C" int func_0037D348(sPtGfx_D348* self, int idx)
+{
+    unsigned int buf = self->bufAddr;
+    unsigned int p = buf | 0x30000000;
+    func_00367DB8_D348(self->texset, idx, &p);
+    unsigned int next = p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    sPtRing_D348* ring = self->ring;
+    sPtRS_D348* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_D348* e = (sPtEnt_D348*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037D450);
 
@@ -3016,7 +3215,73 @@ extern "C" void func_0037D758(sPartDrawList* self, sPartQ16* q, sPartMtx* m0, sP
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D800);
+#ifdef SKIP_ASM
+struct sPtRS_D800 {
+    int f0;
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_D800 {
+    sPtRS_D800 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_D800 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_D800 ents[1];            // 0x80
+};
+
+struct sPtGfx_D800 {
+    char pad_0x0[0xE84];
+    sPtRS_D800* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_D800* ring;             // 0x18F0
+    void* texset;                   // 0x18F4
+    char pad_0x18F8[0x5A00 - 0x18F8];
+    unsigned int bufAddr;           // 0x5A00
+};
+
+extern "C" void func_00367F18_D800(void* texset, int idx, float* color, unsigned int* buf) __asm__("func_00367F18");
+
+// Release-build assert: expands to an empty do { } while (0); its loop notes keep the target's scheduling.
+#define ASSERT_D800(cond) do { } while (0)
+
+// PORT: uncached (0x30000000) pointers held in int.
+// Like func_0037D348 for the two-argument upload; the queued entry is flagged.
+extern "C" void func_0037D800(sPtGfx_D800* self, int idx, float* color)
+{
+    unsigned int buf = self->bufAddr;
+    unsigned int p = buf | 0x30000000;
+    func_00367F18_D800(self->texset, idx, color, &p);
+    unsigned int next = p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    sPtRing_D800* ring = self->ring;
+    sPtRS_D800* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_D800* e = (sPtEnt_D800*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ASSERT_D800(e != 0);
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 1;
+    }
+    self->bufAddr += 0x10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037D908);
@@ -4362,7 +4627,89 @@ extern "C" void func_00384DC0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00384E50);
+#ifdef SKIP_ASM
+struct sPtRS_4E50 {
+    int f0;
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_4E50 {
+    sPtRS_4E50 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_4E50 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_4E50 ents[1];            // 0x80
+};
+
+struct sPtGfx_4E50 {
+    char pad_0x0[0xE84];
+    sPtRS_4E50* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_4E50* ring;             // 0x18F0
+};
+
+struct sPktBuilder_4E50 {
+    unsigned int* where;            // 0x0
+    unsigned int cur;               // 0x4 (uncached)
+    unsigned int start;             // 0x8 (uncached)
+    int open;                       // 0xC
+};
+
+extern sPtGfx_4E50* D_004A5B80_4E50 __asm__("D_004A5B80");
+extern "C" void func_00384DC0(void* self);
+void operator_delete(int*);
+
+// PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `ulong`.
+// Packet builder destructor: closes the packet with its DMA tags and queues it on the particle ring.
+extern "C" void func_00384E50(sPktBuilder_4E50* self, int flags)
+{
+    if (self->start != 0) {
+        if (self->open != 0)
+            func_00384DC0(self);
+        unsigned long* p = (unsigned long*)self->start;
+        int qwc = ((unsigned long*)self->cur - p) / 2;
+        p[0] = (qwc - 1) | 0x10000000;
+        ((unsigned long*)self->start)[1] = 0;
+        ((unsigned long*)self->start)[2] = 0;
+        unsigned int n = qwc;
+        ((unsigned long*)self->start)[3] = (unsigned long)((n - 2) | 0x50000000) << 32;
+        unsigned int buf = self->start & 0x0FFFFFFF;
+        unsigned int next = self->cur & 0x0FFFFFFF;
+        self->cur = next;
+        self->start = buf;
+        sPtGfx_4E50* g = D_004A5B80_4E50;
+        sPtRing_4E50* ring = g->ring;
+        sPtRS_4E50* rs = g->top;
+        if (ring->count < 0xA28) {
+            rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+            int key = *(int*)((char*)ring + 0x69CC0);
+            sPtEnt_4E50* e = (sPtEnt_4E50*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+            e->rs = *rs;
+            e->buf = buf;
+            e->next = next;
+            e->key = key;
+            e->flag = 0;
+        }
+        self->cur += 0x10;
+        *self->where = self->cur;
+    }
+    if (flags & 1)
+        operator_delete((int*)self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00384FD0);
@@ -5095,7 +5442,25 @@ extern "C" void func_00389590(sPartVec4* a, sPartVec4* b, sPartVec4* c, float s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00389620);
+#ifdef SKIP_ASM
+struct sVec4_9620 {
+    float x, y, z, w;
+};
+
+// Integrates the w channel of ten particle vectors: dst.w += src.w * dt.
+extern "C" void func_00389620(sVec4_9620* dst, sVec4_9620* src, float dt)
+{
+    float* s = &src->w;
+    float* d = &dst->w;
+    for (int i = 0; i < 10; i++) {
+        *d += *s * dt;
+        d += 4;
+        s += 4;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389660);

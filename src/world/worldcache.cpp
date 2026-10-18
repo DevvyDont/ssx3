@@ -772,7 +772,55 @@ extern "C" int func_003A8510(int arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8528);
+#ifdef SKIP_ASM
+struct sHandle_8528 {
+    unsigned int type : 8;
+    unsigned int index : 24;
+};
+struct sRef_8528 {
+    unsigned char kind;
+    unsigned char type;
+    unsigned short index;
+};
+struct sRefList_8528 {
+    int f0;
+    int f4;
+    int count;          // 0x8
+    sRef_8528* refs;    // 0xC
+};
+struct sCell_8528 {
+    int loaded;             // 0x0
+    int f4;
+    sRefList_8528* list;    // 0x8
+    int pad[3];
+};
+struct sCache_8528 {
+    char pad[0x3F0];
+    sCell_8528 cells[1];    // 0x3F0
+};
+extern "C" void func_003A8E20(void* self, int cell, int kind, sHandle_8528 h);
+extern "C" void func_003A7C30(int* self, int flags);
+
+// Unloads a cache cell: reports each referenced object (kind, handle) to func_003A8E20, then frees the list.
+extern "C" void func_003A8528(void* vself, int cell)
+{
+    sCache_8528* self = (sCache_8528*)vself;
+    sRefList_8528* list = self->cells[cell].list;
+    sHandle_8528 h;
+    *(unsigned int*)&h = 0xFFFFFFFF;  // starts as the invalid handle
+    for (int i = list->count - 1; i >= 0; i--) {
+        h.type = list->refs[i].type;
+        h.index = list->refs[i].index;
+        func_003A8E20(self, cell, list->refs[i].kind, h);
+    }
+    if (self->cells[cell].list != 0)
+        func_003A7C30((int*)self->cells[cell].list, 3);
+    self->cells[cell].list = 0;
+    self->cells[cell].loaded = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8618);
@@ -994,9 +1042,44 @@ extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned
 
 INCLUDE_ASM("world/worldcache", func_003A8E20);
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8F10);
+#ifdef SKIP_ASM
+static inline char *refToPtr_8F10(unsigned i) { return (char*)(i << 2); }
+static inline char *conv_8F10(unsigned i) { if (i == 0) return 0; return refToPtr_8F10(i); }
+// Sets flag 0x40 on every object listed for cell idx.
+extern "C" void func_003A8F10(char** self, int idx)
+{
+    int n = *(short*)(*(char**)(self[0] + 0x14) + idx * 0x58 + 0x22);
+    char* list = ((char**)self[2])[idx];
+    for (unsigned i = 0; i < n; i++) {
+        char* o = conv_8F10(((unsigned*)*(char**)(list + 0xC))[i] >> 8);
+        *(unsigned short*)(o + 0xA) |= 0x40;
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A8F80);
+#ifdef SKIP_ASM
+inline void* operator new[](unsigned int, void* p) { return p; }
+// The cache's leading two-entry member array has an empty constructor; the
+// vec_mark compiler leaves only its dead loop setup behind.
+struct sCacheHead_3A8F80 {
+    int v;
+    sCacheHead_3A8F80() {}
+};
+extern "C" void func_003A9188_8F80(void* self) __asm__("func_003A9188");
+
+// PORT: the unit declares this as void(void*); defined under an asm label with its real type
+extern "C" void* func_003A8F80_impl(void* self) __asm__("func_003A8F80");
+extern "C" void* func_003A8F80_impl(void* self)
+{
+    new (self) sCacheHead_3A8F80[2];
+    func_003A9188_8F80(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8FB8);

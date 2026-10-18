@@ -98,7 +98,36 @@ extern "C" void func_003581B8(sParticleList* list, int item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_003581F0);
+#ifdef SKIP_ASM
+struct sMoveList_81F0 {
+    int field_0x0;          // 0x0
+    int count;              // 0x4
+    int field_0x8;          // 0x8
+    unsigned int* entries;  // 0xC
+};
+
+// Removes the first entry equal to key, filling the hole with the last entry.
+extern "C" void func_003581F0(sMoveList_81F0* self, unsigned int key)
+{
+    int i;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i] == key) {
+            self->count--;
+            // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
+            do {
+                if (i < self->count) {
+                    self->entries[i] = self->entries[self->count];
+                } else {
+                    self->entries[i] = 0xFFFFFFFF;
+                }
+                return;
+            } while (0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358260);
@@ -381,9 +410,234 @@ extern "C" void func_00358700(int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358780);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMpVec4_8780 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sMpBox_8780 {
+    sMpVec4_8780 min;
+    sMpVec4_8780 max;
+};
+struct sMpCell_8780 {
+    int level;
+    int x, y, z;
+};
+struct sMpNode_8780 {
+    sMpNode_8780* child[2][2][2];   // 0x00
+    void* lists[3];                 // 0x20
+    int empty()
+    {
+        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
+            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
+            return 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (lists[i]) return 0;
+        }
+        return 1;
+    }
+};
+struct sMpRoot_8780 {
+    sMpCell_8780 cell;
+    sMpNode_8780* node;
+};
+struct sMpPart_8780 {
+    char pad[0x20];
+    int count;             // 0x20
+    char* first;           // 0x24
+};
+struct sMpTable_8780 {
+    char pad[0x44];
+    unsigned int* entries; // 0x44
+};
+struct sMpMgr_8780 {
+    char pad[0x8];
+    sMpTable_8780** tables; // 0x8
+};
 
+extern "C" sMpMgr_8780** func_002D1BD8_8780(void) __asm__("func_002D1BD8");
+extern "C" char* func_002D1BE0(void);
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+void operator_delete(int*);
+
+static inline void* refToPtr_8780(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* lookup_8780(sMpTable_8780* t, unsigned int idx)
+{
+    unsigned int p = t->entries[idx] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr_8780(p);
+}
+
+struct sMpRef_8780 {
+    unsigned int id;
+
+    void* get(sMpMgr_8780* w)
+    {
+        sMpTable_8780* t = w->tables[id & 0xFF];
+        if (t == 0) {
+            return 0;
+        }
+        return lookup_8780(t, id >> 8);
+    }
+};
+
+static inline sMpRoot_8780* findRoot_8780(char* w, int x, int y, int z)
+{
+    sMpRoot_8780* r = (sMpRoot_8780*)w;
+    sMpRoot_8780* rx = x >= 0 ? r : r + 4;
+    sMpRoot_8780* ry = y >= 0 ? rx : rx + 2;
+    sMpRoot_8780* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
+{
+    (*(int*)(w + 0xA0))++;
+    sMpCell_8780 c;
+    func_00328F28(&c, box);
+    sMpRoot_8780* r = findRoot_8780(w, c.x, c.y, c.z);
+    func_003284B8(r->node, 2, item, &c, &r->cell);
+    if (r->node->empty()) {
+        operator_delete((int*)r->node);
+        r->node = 0;
+    }
+}
+
+// Removes every particle node of slot 'idx' from the world's spatial tree.
+extern "C" void func_00358780(void* self, int idx)
+{
+    sMpRef_8780 ref = ((sMpRef_8780*)((char*)self + 0x18))[idx];
+    sMpPart_8780* part = (sMpPart_8780*)ref.get(*func_002D1BD8_8780());
+    char* node = part->first;
+    for (int i = 0; i < part->count; i++) {
+        sMpBox_8780 box;
+        box.min.x = *(float*)(node + 0x6C);
+        box.min.y = *(float*)(node + 0x70);
+        box.min.z = *(float*)(node + 0x74);
+        box.min.w = 1.0f;
+        box.max.x = *(float*)(node + 0x78);
+        box.max.y = *(float*)(node + 0x7C);
+        box.max.z = *(float*)(node + 0x80);
+        box.max.w = 1.0f;
+        remove_8780(func_002D1BE0(), node, &box);
+        node = *(char**)(node + 0x64);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358998);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMpVec4_8998 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sMpBox_8998 {
+    sMpVec4_8998 min;
+    sMpVec4_8998 max;
+};
+struct sMpCell_8998 {
+    int level;
+    int x, y, z;
+};
+struct sMpRoot_8998 {
+    sMpCell_8998 cell;
+    void* node;
+};
+struct sMpPart_8998 {
+    char pad[0x20];
+    int count;             // 0x20
+    char* first;           // 0x24
+};
+struct sMpTable_8998 {
+    char pad[0x44];
+    unsigned int* entries; // 0x44
+};
+struct sMpMgr_8998 {
+    char pad[0x8];
+    sMpTable_8998** tables; // 0x8
+};
+
+extern "C" sMpMgr_8998** func_002D1BD8_8998(void) __asm__("func_002D1BD8");
+extern "C" char* func_002D1BE0(void);
+extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+
+static inline void* refToPtr_8998(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* lookup_8998(sMpTable_8998* t, unsigned int idx)
+{
+    unsigned int p = t->entries[idx] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr_8998(p);
+}
+
+struct sMpRef_8998 {
+    unsigned int id;
+
+    void* get(sMpMgr_8998* w)
+    {
+        sMpTable_8998* t = w->tables[id & 0xFF];
+        if (t == 0) {
+            return 0;
+        }
+        return lookup_8998(t, id >> 8);
+    }
+};
+
+static inline sMpRoot_8998* findRoot_8998(char* w, int x, int y, int z)
+{
+    sMpRoot_8998* r = (sMpRoot_8998*)w;
+    sMpRoot_8998* rx = x >= 0 ? r : r + 4;
+    sMpRoot_8998* ry = y >= 0 ? rx : rx + 2;
+    sMpRoot_8998* rz = z >= 0 ? ry : ry + 1;
+    return rz;
+}
+
+static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
+{
+    sMpCell_8998 c;
+    func_00328F28(&c, box);
+    func_00328C20(findRoot_8998(w, c.x, c.y, c.z), 2, item, &c);
+}
+
+// Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
+extern "C" void func_00358998(void* self, int idx)
+{
+    sMpRef_8998 ref = ((sMpRef_8998*)((char*)self + 0x18))[idx];
+    sMpPart_8998* part = (sMpPart_8998*)ref.get(*func_002D1BD8_8998());
+    char* node = part->first;
+    for (int i = 0; i < part->count; i++) {
+        sMpBox_8998 box;
+        box.min.x = *(float*)(node + 0x6C);
+        box.min.y = *(float*)(node + 0x70);
+        box.min.z = *(float*)(node + 0x74);
+        box.min.w = 1.0f;
+        box.max.x = *(float*)(node + 0x78);
+        box.max.y = *(float*)(node + 0x7C);
+        box.max.z = *(float*)(node + 0x80);
+        box.max.w = 1.0f;
+        insert_8998(func_002D1BE0(), node, &box);
+        node = *(char**)(node + 0x64);
+    }
+    ((unsigned int*)((char*)self + 0x18))[idx] = 0xFFFFFFFF;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358B28);
@@ -465,7 +719,39 @@ extern "C" void func_00358C30(void* self, void* stream)
 
 INCLUDE_ASM("object/multiparticle", func_00358C80);
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358DB0);
+#ifdef SKIP_ASM
+extern "C" void* func_00341C80(void* self, void* a, void* stream);
+extern "C" void func_00359030(void* self);
+extern char D_0048EC28[];
+extern char D_0048EA20[];
+
+struct sStreamVE_8DB0 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+// Element type with an empty constructor; the array new leaves only its loop counters.
+struct sParticle_8DB0 {
+    char data[0x40];
+    sParticle_8DB0() {}
+};
+
+extern "C" void* func_00358DB0(void* self, void* a1, void* stream)
+{
+    char* s = (char*)self;
+    sParticle_8DB0** pp = (sParticle_8DB0**)(s + 0x84);
+    func_00341C80(s + 0x18, a1, stream);
+    *(void**)(s + 0x54) = D_0048EC28;
+    sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
+    vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
+    *pp = new (D_0048EA20, 0x20000000, 0) sParticle_8DB0[*(int*)(s + 0x74)];
+    func_00359030(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358E50);
@@ -574,7 +860,86 @@ extern "C" void func_00358FD0(void* self, int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00359030);
+#ifdef SKIP_ASM
+struct sMpItem_9030 {
+    char pad_0x0[0x90];
+    float mtx[16];          // 0x90
+} __attribute__((aligned(16)));
+
+struct sMpPart_9030 {
+    int field_0x0;
+    int field_0x4;
+    void* info;             // 0x8
+    int field_0xc;
+};
+
+struct sMpModel_9030 {
+    int field_0x0;
+    int count;              // 0x4
+    sMpPart_9030* parts;    // 0x8
+};
+
+struct sMpInst_9030 {
+    char pad_0x0[0x80];
+    sMpModel_9030* model;   // 0x80
+};
+
+struct sMpNode_9030 {
+    char pad_0x0[0x48];
+    sMpItem_9030* items;    // 0x48 (self + 0x7C)
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMatrix_9030(void* dst, void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct sMtx_9030 {
+    float m[16];
+};
+
+struct sMp_9030 {
+    char pad_0x0[0x60];
+    sMpInst_9030* inst;     // 0x60
+    char pad_0x64[0x10];
+    int count;              // 0x74
+    char pad_0x78[0xC];
+    sMtx_9030* mtx;         // 0x84
+};
+
+// Gathers the world matrices of the model's active parts into the matrix buffer at 0x84.
+extern "C" void func_00359030(void* vself)
+{
+    sMp_9030* self = (sMp_9030*)vself;
+    if (self->count <= 0) {
+        return;
+    }
+    sMpModel_9030* model = self->inst->model;
+    int n = 0;
+    sMpPart_9030* p = model->parts;
+    for (int i = 0; i < model->count; i++, p++) {
+        if (p->info != 0) {
+            sMpNode_9030* node = (sMpNode_9030*)((char*)self + 0x34);
+            vu0CopyMatrix_9030(&self->mtx[n], node->items[n].mtx);
+            n++;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", func_003590C8);
