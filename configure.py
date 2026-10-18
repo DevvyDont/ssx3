@@ -351,6 +351,25 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         command=f"{COMPILE_CXX_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
     )
 
+    # Objects mode, obj/current only: the same compiles through tools/jtbl_cc.py, which points each switch jump
+    # table that matches the retail one entry for entry at its jtbl_* symbol (see that file).
+    jt = "python3 tools/jtbl_cc.py --unit $unit -- "
+    ninja.rule(
+        "cc_jt",
+        description="cc $in (jtbl)",
+        command=f"{jt}{COMPILE_C_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+    ninja.rule(
+        "cc_unit_jt",
+        description="cc $in ($ccdir, jtbl)",
+        command=f"{jt}{COMPILE_C_RULE.replace(CC_DIR, '$ccdir')} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+    ninja.rule(
+        "cpp_jt",
+        description="cpp $in (jtbl)",
+        command=f"{jt}{COMPILE_CXX_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
     ninja.rule(
         "ld",
         description="link $out",
@@ -415,8 +434,9 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
                 build(entry.object_path, entry.src_paths, task, out_dir="obj/target", collect_objdiff=True, orig_entry=entry,
                       extra_flags=unit_flags or None, variables=tvars)
                 flags, inc = current_c_flags(entry)
-                build(entry.object_path, entry.src_paths, task, out_dir="obj/current",
-                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc, variables=tvars)
+                build(entry.object_path, entry.src_paths, task + "_jt", out_dir="obj/current",
+                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc + ["tools/jtbl_cc.py"],
+                      variables={**(tvars or {}), "unit": seg.name})
             else:
                 build(entry.object_path, entry.src_paths, task, extra_flags=unit_flags or None, variables=tvars)
         elif isinstance(seg, splat.segtypes.common.cpp.CommonSegCpp):
