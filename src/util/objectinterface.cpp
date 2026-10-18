@@ -88,7 +88,18 @@ extern "C" int func_002D20F8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D2100);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern const char D_00486758[];
+extern "C" void* func_002D21C0(void* p);
+
+extern "C" void* func_002D2100(void)
+{
+    return func_002D21C0(cMemMan_alloc(1, D_00486758, 0, 0));
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2138);

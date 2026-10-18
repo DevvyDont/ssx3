@@ -84,7 +84,38 @@ extern "C" float func_0031B098(float a, float b, float c, float d, float e, floa
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031B178);
+#ifdef SKIP_ASM
+extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i);
+
+// 4x4 determinant by cofactor expansion along the first row.
+extern "C" float func_0031B178(void* vm)
+{
+    float (*m)[4] = (float (*)[4])vm;
+    float ans;
+    float a1, a2, a3, a4, b1, b2, b3, b4;
+    float c1, c2, c3, c4, d1, d2, d3, d4;
+
+    a1 = m[0][0]; b1 = m[0][1];
+    c1 = m[0][2]; d1 = m[0][3];
+
+    a2 = m[1][0]; b2 = m[1][1];
+    c2 = m[1][2]; d2 = m[1][3];
+
+    a3 = m[2][0]; b3 = m[2][1];
+    c3 = m[2][2]; d3 = m[2][3];
+
+    a4 = m[3][0]; b4 = m[3][1];
+    c4 = m[3][2]; d4 = m[3][3];
+
+    ans = a1 * func_0031B098(b2, b3, b4, c2, c3, c4, d2, d3, d4)
+        - b1 * func_0031B098(a2, a3, a4, c2, c3, c4, d2, d3, d4)
+        + c1 * func_0031B098(a2, a3, a4, b2, b3, b4, d2, d3, d4)
+        - d1 * func_0031B098(a2, a3, a4, b2, b3, b4, c2, c3, c4);
+    return ans;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031B310);
@@ -167,9 +198,94 @@ extern "C" void func_0031B6C8(void* m)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031B748);
+#ifdef SKIP_ASM
+struct sVec4_B748 {
+    float x, y, z, w;
 
+    sVec4_B748() {}
+    sVec4_B748(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sMtx_B748 {
+    float m[4][4];
+};
+
+struct sXform_B748 {
+    sVec4_B748 pos;     // 0x0
+    sVec4_B748 rot;     // 0x10, quaternion
+};
+
+// PORT: func_0031B7A8 returns the quaternion by value (hidden result pointer).
+extern "C" sVec4_B748 func_0031B7A8_v(sMtx_B748* mat) __asm__("func_0031B7A8");
+
+// Splits a rigid transform matrix into its translation row and rotation quaternion.
+extern "C" sXform_B748* func_0031B748(sXform_B748* out, sMtx_B748* mat)
+{
+    out->pos = sVec4_B748(mat->m[3][0], mat->m[3][1], mat->m[3][2], mat->m[3][3]);
+    out->rot = func_0031B7A8_v(mat);
+    return out;
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/ps2main", func_0031B7A8);
+#ifdef SKIP_ASM
+struct sMtx_B7A8 {
+    float m[4][4];
+};
+
+struct sQuat_B7A8 {
+    float x, y, z, w;
+};
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float sqrtB7A8(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+// Rotation matrix to quaternion (Shoemake): from the trace when positive, else from the largest diagonal term.
+extern "C" sQuat_B7A8* func_0031B7A8(sQuat_B7A8* qu, sMtx_B7A8* mat)
+{
+    float tr = mat->m[0][0] + mat->m[1][1] + mat->m[2][2];
+    if (0.0f < tr) {
+        float s = sqrtB7A8(tr + 1.0f);
+        qu->w = s * 0.5f;
+        s = 0.5f / s;
+        qu->x = (mat->m[1][2] - mat->m[2][1]) * s;
+        qu->y = (mat->m[2][0] - mat->m[0][2]) * s;
+        qu->z = (mat->m[0][1] - mat->m[1][0]) * s;
+    } else {
+        float q[4];
+        int i = 0;
+        if (mat->m[0][0] < mat->m[1][1]) {
+            i = 1;
+        }
+        if (mat->m[i][i] < mat->m[2][2]) {
+            i = 2;
+        }
+        int j = (i + 1) % 3;
+        int k = (j + 1) % 3;
+        float s = sqrtB7A8(mat->m[i][i] - mat->m[j][j] - mat->m[k][k] + 1.0f);
+        q[i] = s * 0.5f;
+        if (s != 0.0f) {
+            s = 0.5f / s;
+        }
+        q[3] = (mat->m[j][k] - mat->m[k][j]) * s;
+        q[j] = (mat->m[i][j] + mat->m[j][i]) * s;
+        q[k] = (mat->m[i][k] + mat->m[k][i]) * s;
+        qu->x = q[0];
+        qu->y = q[1];
+        qu->z = q[2];
+        qu->w = q[3];
+    }
+    return qu;
+}
+#endif
 
 INCLUDE_ASM("bx/ps2main", func_0031B9B0);
 

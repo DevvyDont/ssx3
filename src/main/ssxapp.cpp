@@ -1127,7 +1127,91 @@ extern "C" void func_002297D8(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229820);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sHTable_229820 {
+    char pad[0x1C];
+    unsigned int* entries;      // 0x1C
+};
+
+struct sHMgr_229820 {
+    char pad[0x8];
+    sHTable_229820** tables;    // 0x8
+};
+
+extern "C" sHMgr_229820** func_002D1BD8(void);
+
+struct sPart_229820 {
+    char pad[0x1C];
+    int count;                  // 0x1C
+    short** bones;              // 0x20
+};
+
+struct sPartRef_229820 {
+    int f0;
+    sPart_229820* part;         // 0x4
+    int f8, fC;
+};
+
+struct sSkel_229820 {
+    int f0;
+    int count;                  // 0x4
+    sPartRef_229820* parts;     // 0x8
+};
+
+struct sModel_229820 {
+    char pad[0x80];
+    sSkel_229820* skel;         // 0x80
+    char pad84[0x94 - 0x84];
+    struct {
+        int f0;
+        void* bones[1];
+    }* pose;                    // 0x94
+};
+
+extern char D_00536690_229820[] __asm__("D_00536690");
+
+static inline sModel_229820* refToPtr_229820(unsigned int p)
+{
+    return (sModel_229820*)(p << 2);
+}
+
+static inline sModel_229820* lookup_229820(sHTable_229820* t, unsigned int idx)
+{
+    unsigned int p = t->entries[idx] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr_229820(p);
+}
+
+static inline sModel_229820* HandleToModel_229820(unsigned int h)
+{
+    sHTable_229820* t = (*func_002D1BD8())->tables[h & 0xFF];
+    if (t == 0) {
+        return 0;
+    }
+    return lookup_229820(t, h >> 8);
+}
+
+// Points bone b of part a of the model behind handle at the shared crowd pose.
+extern "C" void func_00229820(void* self, unsigned int handle, int a, int b)
+{
+    sModel_229820* m = HandleToModel_229820(handle);
+    if (m != 0) {
+        sSkel_229820* s = m->skel;
+        void** dst = m->pose->bones;
+        sPartRef_229820* parts = s->parts;
+        if (a < s->count) {
+            sPart_229820* p = parts[a].part;
+            if (b < p->count)
+                dst[*p->bones[b]] = D_00536690_229820;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("main/ssxapp", func_00229910);
 
@@ -1378,7 +1462,101 @@ extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
 
 INCLUDE_ASM("main/ssxapp", func_0022A5A0);
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_0022A698);
+#ifdef SKIP_ASM
+struct sVisNode_A698 {
+    sVisNode_A698* next;    // 0x000
+    char pad_0x4[0x13C];
+    int sphere[4];          // 0x140
+    char pad_0x150[0x5];
+    unsigned char slot;     // 0x155
+    short path;             // 0x156
+};
+
+struct sVisSrc_A698 {
+    char pad_0x0[0x24];
+    sVisNode_A698* head;    // 0x24
+};
+
+struct sVisList_A698 {
+    sVisSrc_A698* src;
+    int vuFrustum;
+};
+
+struct sVisSlot_A698 {
+    int f0;
+    int type;
+};
+
+struct sVisCam_A698 {
+    char pad_0x0[0x20];
+    sVisSlot_A698 slots[(0x3F0 - 0x20) / 8];  // 0x20
+    struct {
+        int kind;
+        char pad[0x14];
+    } paths[1];                     // 0x3F0
+};
+
+struct sVisOwner_A698 {
+    char pad_0x0[0x90];
+    sVisCam_A698** cam;             // 0x90
+    char pad_0x94[0x50A8 - 0x94];
+    int count;                      // 0x50A8
+    sVisNode_A698* nodes[1];        // 0x50AC
+};
+
+// PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
+// version of the microprogram at 0xEF0 (sphere vs frustum test; 2 = outside).
+static inline int visSphereTest_A698(int* sphere, int frustum)
+{
+    int r;
+    __asm__ __volatile__(
+        "lqc2      $vf22, 0x0(%1)\n"
+        "ctc2.ni   %2, $vi14\n"
+        "vcallms   0xEF0\n"
+        "cfc2.i    %0, $vi1\n"
+        : "=&r"(r)
+        : "r"(sphere), "r"(frustum));
+    return r;
+}
+
+static inline bool IsT6_A698(sVisCam_A698* c, int i)
+{
+    return c->slots[i].type == 6;
+}
+
+static inline int visOnPath_A698(sVisCam_A698* cam, sVisNode_A698* n)
+{
+    if (n->path < 0)
+        return 0;
+    if (IsT6_A698(cam, n->slot))
+        return cam->paths[n->path].kind == 3;
+    return 0;
+}
+
+// Collects the visible path-bound nodes of each source list (sphere-vs-frustum tested on VU0).
+extern "C" void func_0022A698(void* self_, void* list_, int count)
+{
+    sVisOwner_A698* self = (sVisOwner_A698*)self_;
+    sVisList_A698* list = (sVisList_A698*)list_;
+    for (; count > 0; count--, list++) {
+        sVisNode_A698* n = list->src->head;
+        while (n != 0) {
+            // A do/while(0) block around the body (as a macro would) reproduces the target's register choice.
+            do {
+                int frustum = list->vuFrustum;
+                if (visOnPath_A698(*self->cam, n)) {
+                    if (frustum == 0 || visSphereTest_A698(n->sphere, frustum) != 2) {
+                        self->nodes[self->count++] = n;
+                    }
+                }
+                n = n->next;
+            } while (0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_0022A770);

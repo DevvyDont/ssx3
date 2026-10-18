@@ -628,7 +628,49 @@ extern "C" void func_002ADDA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADDE0);
+#ifdef SKIP_ASM
+extern "C" void func_002AD940(void*);
+
+struct sBmKeyDDE0 {
+    short a;
+    short id;
+    union {
+        int v;
+        short s;
+    };
+};
+
+static inline int func_002ADDE0_match(char* e, sBmKeyDDE0 k)
+{
+    int r = 0;
+    if (k.id == *(short*)(e + 0xE)) {
+        if ((k.id != -1 && k.s == *(short*)(e + 0x10)) || k.v == *(int*)(e + 0x10)) {
+            r = 1;
+        }
+    }
+    return r;
+}
+
+// Release-build assert: expands to an empty do { } while (0). Its loop notes keep GCC from reversing the
+// slot loop into a count-down, as in the target.
+#define ASSERT_DDE0(cond) do { } while (0)
+
+// PORT: callers in this unit declare func_002ADDE0(void*, long); the key is the same 8 bytes viewed as a struct.
+void func_002ADDE0_impl(void* self, sBmKeyDDE0 key) __asm__("func_002ADDE0");
+
+// Stops every one of the 48 monitored sounds that matches the key.
+void func_002ADDE0_impl(void* self, sBmKeyDDE0 key)
+{
+    for (int i = 0; i < 48; i++) {
+        if (func_002ADDE0_match((char*)self + 0x98 + i * 0x2C, key)) {
+            func_002AD940((char*)self + 0x98 + i * 0x2C);
+        }
+        ASSERT_DDE0(i < 48);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADE88);
@@ -886,7 +928,39 @@ extern "C" void func_002AE1F0(int* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE230);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sBankSlot_2AE230 {
+    int id;         // 0x0
+    int pad4;
+    int bank;       // 0x8
+    char pad[0x28 - 0xC];
+};
+// D_004D3EF8's own type is defined later in the unit; bind a same-layout view.
+extern sBankSlot_2AE230 D_004D3EF8_2AE230[24] __asm__("D_004D3EF8");
+
+// Finds a slot: bank < 0 asks for a free slot, otherwise the slot holding bank (and id, unless id < 0).
+extern "C" int func_002AE230(int bank, int id)
+{
+    sBankSlot_2AE230* s = D_004D3EF8_2AE230;
+    for (int i = 0; i < 24; i++, s++) {
+        if (bank < 0) {
+            if (s->bank < 0) {
+                // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
+                do {
+                    return i;
+                } while (0);
+            }
+        } else if (s->bank == bank) {
+            if (id < 0 || s->id == id)
+                return i;
+        }
+    }
+    return -8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE290);
@@ -2727,12 +2801,13 @@ extern "C" void func_002B1720(sBankSlots* self)
 
 extern "C" void* func_002AFD10(int);
 
-//96.5%
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1758__FPvi);
 #ifdef SKIP_ASM
 void* func_002B1758(void* self, int a1)
 {
-    return func_002AFD10(*(int*)((char*)*(void**)((char*)self + 0x4) + a1 * 4));
+    // a1 also stays in $5 as func_002AFD10's second argument
+    return func_002AFD10_impl((void*)(*(int**)((char*)self + 0x4))[a1], (void*)a1);
 }
 #endif
 

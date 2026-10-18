@@ -276,7 +276,24 @@ extern "C" int func_002AA1B8(void* self)
 
 INCLUDE_ASM("sound/streamsys", func_002AA1E8);
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA210);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// func_002AA020 returns the status (the unit declares it void); the int return keeps $2 free as the target has it.
+int func_002AA020_st(void* self, int* out) __asm__("func_002AA020");
+
+// Returns the stream's second status word, or -1 when the stream is not active.
+extern "C" int func_002AA210(void* self)
+{
+    int st[2];
+    func_002AA020_st(self, st);
+    if (st[0] == 0) {
+        return -1;
+    }
+    return st[1];
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AA240);
 INCLUDE_ASM("sound/streamsys", func_002AA260);
@@ -486,7 +503,19 @@ extern "C" void func_002AA648(void* p, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA7F0);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern char D_00483228[];
+
+extern "C" void func_002AA7F0(void* self, int idx, int heap, int extra)
+{
+    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
+    void* mem = cMemMan_alloc(0x84, D_00483228, heap, 0);
+    *slot = cStreamInstance_cStreamInstance((sStreamInst_99D8*)mem, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), heap, extra);
+}
+#endif
 
 INCLUDE_ASM("sound/streamsys", func_002AA870);
 

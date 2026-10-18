@@ -3212,7 +3212,65 @@ extern "C" int func_002CED78(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CEEE8);
+#ifdef SKIP_ASM
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" int func_00413AF8(float f);
+extern char D_00486700[];
+extern char* D_00487470[];
+
+struct sRect_2CEEE8 { float x, y, w, h; };
+
+struct sFont_2CEEE8 {
+    char pad_0x0[0x14];
+    int lineHeight;                 // 0x14
+    char pad_0x18[0x18];
+    float scaleX;                   // 0x30
+    float scaleY;                   // 0x34
+    float drawScaleX;               // 0x38
+    float drawScaleY;               // 0x3C
+};
+
+struct sMenuValueItem_2CEEE8 {
+    char* menu;                     // 0x00
+    char pad_0x4[0x10];
+    float* values;                  // 0x14
+    int index;                      // 0x18
+};
+
+static inline sFont_2CEEE8* font_2CEEE8(sMenuValueItem_2CEEE8* item)
+{
+    return *(sFont_2CEEE8**)(*(char**)(item->menu + 0x124) + 0x58);
+}
+
+static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* str)
+{
+    sFont_2CEEE8* f = font_2CEEE8(item);
+    return func_00391FB0(f, str, 0, 0, f->drawScaleX, f->drawScaleY);
+}
+
+#define MAX_2CEEE8(a, b) ((a) > (b) ? (a) : (b))
+
+// Returns the rect of a value menu item: sized for the widest of the three option labels plus the formatted value.
+extern "C" sRect_2CEEE8* func_002CEEE8(sRect_2CEEE8* ret, sMenuValueItem_2CEEE8* item)
+{
+    sRect_2CEEE8 r;
+    char buf[64];
+    sprintf(buf, D_00486700, func_00413AF8(*(float*)((char*)item->values + (item->index << 2))));
+    float z = 0.0f;
+    r.y = z;
+    r.x = z;
+    sFont_2CEEE8* font = font_2CEEE8(item);
+    r.h = (float)font->lineHeight * font->scaleY + 12.0f;
+    r.w = MAX_2CEEE8(MAX_2CEEE8(textWidth_2CEEE8(item, D_00487470[0]), textWidth_2CEEE8(item, D_00487470[1])),
+                     textWidth_2CEEE8(item, D_00487470[2]));
+    r.w = r.w + textWidth_2CEEE8(item, buf) + 144.0f;
+    *ret = r;
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CF1C8);
@@ -3498,7 +3556,38 @@ extern "C" void func_002CF7B8(void* self, int a)
 
 INCLUDE_ASM("util/menu", func_002CF7E8);
 
+//100%
 INCLUDE_ASM("util/menu", func_002CF860);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+inline void* operator new[](unsigned int, void* p) { return p; }
+void* func_002CAA58(void* self);
+extern void* D_004869B8[];
+extern void* D_00486A18[];
+void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
+
+// Element type of an inline-constructed array; its empty constructor leaves only the loop counters.
+struct sMenuSlot_F860 {
+    void* item;
+    sMenuSlot_F860() {}
+};
+
+extern "C" void* func_002CF860(void* self, void* name, void* parent)
+{
+    char* s = (char*)self;
+    cMenuItem_cMenuItem((cMenuItem*)self, name);
+    *(void**)(s + 0x14) = parent;
+    *(void***)(s + 0x10) = D_004869B8;
+    func_002CAA58(s + 0x18);
+    *(void***)(s + 0x144) = D_00486A18;
+    new (s + 0x24) sMenuSlot_F860[70];
+    *(void**)(s + 0x148) = self;
+    if (*(void**)(s + 0x14) != 0) {
+        cExpandMenuItem_addItem3(self, *(void**)(s + 0x14), -1);
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CF8D8);
@@ -3754,7 +3843,27 @@ extern "C" void func_002CFD28(func_002CFD28_sOwner* self, func_002CFD28_sRect* r
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CFE78);
+#ifdef SKIP_ASM
+// PORT: the target leaves mode in $a1 for func_002CA368; bind a 2-arg form to that symbol.
+void func_002CA368_2(void* self, int a1) __asm__("func_002CA368__FPv");
+extern "C" void func_002CBE68_v(void* self, int index) __asm__("func_002CBE68");
+
+extern "C" void func_002CFE78(void* self, int mode)
+{
+    func_002CA368_2(self, mode);
+    switch (mode) {
+    case 0:
+        func_002CBE68_v((char*)self + 0x18, 0);
+        break;
+    case 1:
+        func_002CBE68_v((char*)self + 0x18, -1);
+        break;
+    }
+    func_002CBF60((char*)self + 0x18, *(int*)(*(char**)self + 0x124));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CFEF8);
@@ -4484,7 +4593,25 @@ extern "C" void* func_002D1B08(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D1B30);
+#ifdef SKIP_ASM
+class func_002D1B30_cObj {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual int v07();
+};
+
+extern "C" void func_002D1B30(func_002D1B30_cObj* obj)
+{
+    obj->v07();
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1B58);

@@ -1257,7 +1257,41 @@ extern "C" void func_002BB140(void *self, int flags) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB1D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void *func_002BB370(void *arg0);
+int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
+extern char D_00483C68[];
+struct sArr_B1D0 { int n; S12_B140 *arr; };
+
+// Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
+extern "C" void func_002BB1D0(sArr_B1D0 *self, int n) {
+    if (self->arr != 0) {
+        S12_B140 *p = self->arr + *(int*)((char*)self->arr - 0x10);
+        if (self->arr != p) {
+            do {
+                p--;
+                func_002BB390(p, 0);
+            } while (self->arr != p);
+        }
+        cMemMan_free((char*)self->arr - 0x10);
+    }
+    self->n = n;
+    S12_B140 **dst = &self->arr;
+    int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, D_00483C68, 0x20000000, 0);
+    blk[0] = n;
+    S12_B140 *a = (S12_B140*)(blk + 4);
+    S12_B140 *q = a;
+    int i;
+    for (i = n - 1; i != -1; i--) {
+        func_002BB370(q);
+        q++;
+    }
+    *dst = a;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB2B8);
@@ -1417,7 +1451,55 @@ extern "C" void func_002BB5A8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB5F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_002BAF08_B5F0(int p) __asm__("func_002BAF08");
+
+struct sReloc_B5F0 {
+    int magic;          // 0x0 (0x10 once relocated)
+    int count;          // 0x4
+    int offs[1];        // 0x8
+};
+
+struct sRes_B5F0 {
+    short state;        // 0x0
+    short keep;         // 0x2
+    int pad4;
+    sReloc_B5F0* data;  // 0x8
+};
+
+// Relocates the loaded block's offset table (dropping it if it has the wrong magic) and marks it ready.
+extern "C" void func_002BB5F0(void* vself)
+{
+    sRes_B5F0* self = (sRes_B5F0*)vself;
+    if (self->data == 0) {
+        self->state = 3;
+        return;
+    }
+    {
+        if (self->data->magic != 0x10) {
+            if (self->keep == 0) {
+                cMemMan_free(self->data);
+            }
+            self->data = 0;
+        }
+        if (self->data != 0) {
+            int* p = self->data->offs;
+            for (int i = 0; i < self->data->count; i++, p++) {
+                if (*p == -1) {
+                    *p = 0;
+                } else {
+                    *p = (int)self->data + *p;
+                    func_002BAF08_B5F0(*p);
+                }
+            }
+        }
+    }
+    self->state = 3;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB6B8);
@@ -2272,7 +2354,19 @@ extern "C" void func_002BCE08(void *self, void *p, float f) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCEA8);
+#ifdef SKIP_ASM
+class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BCEA8(void *self, void *p, float f) {
+    cCEA8 *o = (cCEA8*)self;
+    o->vt();
+    f = f * f;
+    *(float*)((char*)self + 8) = f * *(float*)((char*)p + 4) + (1.0f - f) * *(float*)((char*)self + 8);
+    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 4);
+    o->vt();
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BCF38);
@@ -2463,7 +2557,57 @@ extern "C" void func_002BD5A8(void *self, void *p, float f) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD698);
+#ifdef SKIP_ASM
+// Environment property blend: w^2 blend of all 19 current values toward the
+// incoming set, which is then stored as the target.
+class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
+extern "C" void func_002BD698(void *self, void *p, float f) {
+    cD698 *o = (cD698*)self;
+    o->vt();
+    f = f * f;
+    *(float*)((char*)self + 0x8) = f * *(float*)((char*)p + 0x4) + (1.0f - f) * *(float*)((char*)self + 0x8);
+    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 0x4);
+    *(float*)((char*)self + 0x10) = f * *(float*)((char*)p + 0x8) + (1.0f - f) * *(float*)((char*)self + 0x10);
+    *(float*)((char*)self + 0x14) = *(float*)((char*)p + 0x8);
+    *(float*)((char*)self + 0x18) = f * *(float*)((char*)p + 0xC) + (1.0f - f) * *(float*)((char*)self + 0x18);
+    *(float*)((char*)self + 0x1C) = *(float*)((char*)p + 0xC);
+    *(float*)((char*)self + 0x20) = f * *(float*)((char*)p + 0x10) + (1.0f - f) * *(float*)((char*)self + 0x20);
+    *(float*)((char*)self + 0x24) = *(float*)((char*)p + 0x10);
+    *(float*)((char*)self + 0x28) = f * *(float*)((char*)p + 0x14) + (1.0f - f) * *(float*)((char*)self + 0x28);
+    *(float*)((char*)self + 0x2C) = *(float*)((char*)p + 0x14);
+    *(float*)((char*)self + 0x30) = f * *(float*)((char*)p + 0x18) + (1.0f - f) * *(float*)((char*)self + 0x30);
+    *(float*)((char*)self + 0x34) = *(float*)((char*)p + 0x18);
+    *(float*)((char*)self + 0x38) = f * *(float*)((char*)p + 0x1C) + (1.0f - f) * *(float*)((char*)self + 0x38);
+    *(float*)((char*)self + 0x3C) = *(float*)((char*)p + 0x1C);
+    *(float*)((char*)self + 0x40) = f * *(float*)((char*)p + 0x20) + (1.0f - f) * *(float*)((char*)self + 0x40);
+    *(float*)((char*)self + 0x44) = *(float*)((char*)p + 0x20);
+    *(float*)((char*)self + 0x48) = f * *(float*)((char*)p + 0x24) + (1.0f - f) * *(float*)((char*)self + 0x48);
+    *(float*)((char*)self + 0x4C) = *(float*)((char*)p + 0x24);
+    *(float*)((char*)self + 0x50) = f * *(float*)((char*)p + 0x28) + (1.0f - f) * *(float*)((char*)self + 0x50);
+    *(float*)((char*)self + 0x54) = *(float*)((char*)p + 0x28);
+    *(float*)((char*)self + 0x58) = f * *(float*)((char*)p + 0x2C) + (1.0f - f) * *(float*)((char*)self + 0x58);
+    *(float*)((char*)self + 0x5C) = *(float*)((char*)p + 0x2C);
+    *(float*)((char*)self + 0x60) = f * *(float*)((char*)p + 0x30) + (1.0f - f) * *(float*)((char*)self + 0x60);
+    *(float*)((char*)self + 0x64) = *(float*)((char*)p + 0x30);
+    *(float*)((char*)self + 0x68) = f * *(float*)((char*)p + 0x34) + (1.0f - f) * *(float*)((char*)self + 0x68);
+    *(float*)((char*)self + 0x6C) = *(float*)((char*)p + 0x34);
+    *(float*)((char*)self + 0x70) = f * *(float*)((char*)p + 0x38) + (1.0f - f) * *(float*)((char*)self + 0x70);
+    *(float*)((char*)self + 0x74) = *(float*)((char*)p + 0x38);
+    *(float*)((char*)self + 0x78) = f * *(float*)((char*)p + 0x3C) + (1.0f - f) * *(float*)((char*)self + 0x78);
+    *(float*)((char*)self + 0x7C) = *(float*)((char*)p + 0x3C);
+    *(float*)((char*)self + 0x80) = f * *(float*)((char*)p + 0x40) + (1.0f - f) * *(float*)((char*)self + 0x80);
+    *(float*)((char*)self + 0x84) = *(float*)((char*)p + 0x40);
+    *(float*)((char*)self + 0x88) = f * *(float*)((char*)p + 0x44) + (1.0f - f) * *(float*)((char*)self + 0x88);
+    *(float*)((char*)self + 0x8C) = *(float*)((char*)p + 0x44);
+    *(float*)((char*)self + 0x90) = f * *(float*)((char*)p + 0x48) + (1.0f - f) * *(float*)((char*)self + 0x90);
+    *(float*)((char*)self + 0x94) = *(float*)((char*)p + 0x48);
+    *(float*)((char*)self + 0x98) = f * *(float*)((char*)p + 0x4C) + (1.0f - f) * *(float*)((char*)self + 0x98);
+    *(float*)((char*)self + 0x9C) = *(float*)((char*)p + 0x4C);
+    o->vt();
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BD968);
@@ -2676,7 +2820,71 @@ extern "C" int func_002BDE30(char *a, char *b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
+#ifdef SKIP_ASM
+// Environment property compare: all 19 current values against the incoming set.
+extern "C" int func_002BDEE0(void *arg0, void *arg1) {
+    if ((*(float *)((char*)(arg0) + (0x8))) != (*(float *)((char*)(arg1) + (0x4)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x10))) != (*(float *)((char*)(arg1) + (0x8)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x18))) != (*(float *)((char*)(arg1) + (0xC)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x20))) != (*(float *)((char*)(arg1) + (0x10)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x28))) != (*(float *)((char*)(arg1) + (0x14)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x30))) != (*(float *)((char*)(arg1) + (0x18)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x38))) != (*(float *)((char*)(arg1) + (0x1C)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x40))) != (*(float *)((char*)(arg1) + (0x20)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x48))) != (*(float *)((char*)(arg1) + (0x24)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x50))) != (*(float *)((char*)(arg1) + (0x28)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x58))) != (*(float *)((char*)(arg1) + (0x2C)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x60))) != (*(float *)((char*)(arg1) + (0x30)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x68))) != (*(float *)((char*)(arg1) + (0x34)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x70))) != (*(float *)((char*)(arg1) + (0x38)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x78))) != (*(float *)((char*)(arg1) + (0x3C)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x80))) != (*(float *)((char*)(arg1) + (0x40)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x88))) != (*(float *)((char*)(arg1) + (0x44)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x90))) != (*(float *)((char*)(arg1) + (0x48)))) {
+        return 0;
+    }
+    if ((*(float *)((char*)(arg0) + (0x98))) != (*(float *)((char*)(arg1) + (0x4C)))) {
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE078);
@@ -2818,7 +3026,32 @@ extern "C" void func_002BE1E0(void *arg0) {
 
 INCLUDE_ASM("bx/seg_1BA100", func_002BE1F8);
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE258);
+#ifdef SKIP_ASM
+extern "C" void func_002BE258(void *arg0) {
+    *(int *)((char *)arg0 + 0x8) = 0;
+    *(float *)((char *)arg0 + 0x10) = 6.0f;
+    *(int *)((char *)arg0 + 0x18) = 0;
+    *(int *)((char *)arg0 + 0x20) = 0;
+    *(int *)((char *)arg0 + 0x28) = 0;
+    *(float *)((char *)arg0 + 0x30) = 10.0f;
+    *(float *)((char *)arg0 + 0x38) = 1.0f;
+    *(float *)((char *)arg0 + 0x40) = 1.0f;
+    *(int *)((char *)arg0 + 0x48) = 0;
+    *(int *)((char *)arg0 + 0x50) = 0;
+    *(int *)((char *)arg0 + 0x58) = 0;
+    *(float *)((char *)arg0 + 0x60) = 1.0f;
+    *(float *)((char *)arg0 + 0x68) = 1.0f;
+    *(float *)((char *)arg0 + 0x70) = 1.0f;
+    *(float *)((char *)arg0 + 0x78) = 1.0f;
+    *(float *)((char *)arg0 + 0x80) = 0.06f;
+    *(float *)((char *)arg0 + 0x88) = 1.0f;
+    *(float *)((char *)arg0 + 0x90) = 1.0f;
+    *(float *)((char *)arg0 + 0x98) = 1.0f;
+    *(int *)((char *)arg0 + 0x0) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE2C8);

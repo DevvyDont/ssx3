@@ -303,7 +303,62 @@ extern "C" void func_00275D90(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275DD8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" void func_002776E0(void* self);
+extern "C" void* func_00282BF0(void* self, int a1);
+int func_00283C58(void* self);
+extern "C" int func_00283C80(void* list, void* cmd);
+extern "C" void* func_00283D70(void* list, int i);
+// The unit declares func_00283D28 as returning void*, but it returns the list's count.
+int func_00283D28_count(void* list) __asm__("func_00283D28");
+struct sDmCmd5DD8 {
+    int a1;         // 0x0
+    int id;         // 0x4
+    int a2;         // 0x8
+    int field_0xC;  // 0xC
+    int a4;         // 0x10
+    int a5;         // 0x14
+    int a6;         // 0x18
+};
+
+// Queues a plain command (no lookup) and starts it when the queue was idle.
+extern "C" int func_00275DD8(char* self, int a1, int a2)
+{
+    if (func_00283C58(self + 0xC) != 0) {
+        return 0;
+    }
+    sDmCmd5DD8 cmd;
+    cmd.a1 = a1;
+    cmd.id = -1;
+    cmd.a2 = a2;
+    cmd.field_0xC = -1;
+    cmd.a4 = -1;
+    cmd.a5 = -1;
+    // 64-bit "none" value compared against the pending index below; needed for the target's branch layout
+    long none = 0;
+    cmd.a6 = -1;
+    void* list = self + 0xC;
+    func_00283C80(list, &cmd);
+    if (*(int*)(self + 0xA4) == 0) {
+        return 1;
+    }
+    if (*(int*)(self + 0xBC) >= none) {
+        return 1;
+    }
+    *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+    if (*(int*)(self + 0xA4) == 3) {
+        int ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+        if (ok)
+            func_002776E0(self);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275ED0);
@@ -1723,7 +1778,67 @@ extern "C" sScriptMgr_7F20* func_00277F20(sScriptMgr_7F20* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_002780B8);
+#ifdef SKIP_ASM
+extern void* D_00482260[];
+extern void* D_00482298[];
+extern void* D_004822E0[];
+extern void* D_00482318[];
+extern "C" void func_00278308(void* self);
+extern "C" void func_00283518(void* self, int flags);
+extern "C" void func_00275498(void* self, int flags);
+extern "C" void func_00283228(void* self, int flags);
+extern "C" void func_002758C0(void* self, int flags);
+extern "C" void func_002837C8(void* self, int flags);
+extern "C" void func_00281ED8(void* self, int flags);
+
+struct sVE_780B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sSlot_780B8 {
+    char pad[0xC];
+    sVE_780B8* vt;              // 0xC
+    char rest[0x120 - 0x10];
+};
+
+// Script manager destructor: members in reverse order, then the base.
+extern "C" void func_002780B8(char* self, int flags)
+{
+    *(void***)(self + 0x2AC) = D_00482100;
+    *(void***)(self + 0x518) = D_004821A0;
+    *(void***)(self + 0x528) = D_00482168;
+    *(void***)(self + 0x2A8) = D_004821B8;
+    if (*(int*)(self + 0x52C) != 0) {
+        func_00278308(self);
+    }
+    D_004A34B0 = 0;
+    func_00283518(self + 0xA38, 2);
+    func_00275498(self + 0xA28, 2);
+    *(void***)(self + 0x944) = D_00482298;
+    *(void***)(self + 0x92C) = D_00482260;
+    func_00283228(self + 0x938, 0);
+    *(void***)(self + 0x928) = D_00482318;
+    *(void***)(self + 0x910) = D_004822E0;
+    func_00283228(self + 0x91C, 0);
+    sSlot_780B8* p = (sSlot_780B8*)(self + 0x910);
+    sSlot_780B8* begin = (sSlot_780B8*)(self + 0x6D0);
+    if (begin != 0) {
+        do {
+            while (begin != p) {
+                p--;
+                p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+            }
+        } while (0);
+    }
+    func_002758C0(self + 0x51C, 0);
+    func_002837C8(self + 0x500, 0);
+    func_00281ED8(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00278210);

@@ -183,7 +183,23 @@ extern "C" void func_001F3A38(char* self, char* w, int event)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F3CC8);
+#ifdef SKIP_ASM
+// Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001F3CC8(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 7) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatelodge", func_001F3CF0);
@@ -462,7 +478,23 @@ extern "C" void func_001F4380(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F43D8);
+#ifdef SKIP_ASM
+// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+extern "C" int func_001F43D8(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 10) {
+        if (key < 8) {
+            r = 0x101;
+        } else {
+            return 0x100;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatelodge", func_001F4400);
@@ -561,5 +593,43 @@ extern "C" void func_001F4400(char* self, char* w, int event)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatelodge", func_001F4728);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_0039E2A0_4728(void* self, int a1) __asm__("func_0039E2A0");
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" unsigned char func_001A1CD0_4728(void* p, int a1) __asm__("func_001A1CD0");
+extern "C" int func_00148158_4728(void* iface, int a1, int stat) __asm__("func_00148158");
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern void* D_00473908[];
+extern const int D_004780B0[];
+
+struct sLodgeStats_4728 {
+    char pad0[0x4C];
+    int base[7];        // 0x4C
+    int level[7];       // 0x68
+    char pad84[0x1C];   // 0x84
+};
+
+// Lodge stats state constructor: records the seven attribute values from the player interface and their value/5 levels.
+extern "C" void* func_001F4728(void* p, int a1)
+{
+    sLodgeStats_4728* self = (sLodgeStats_4728*)p;
+    char* s = (char*)p;
+    func_0039E2A0_4728(self, a1);
+    *(int*)(s + 0xC) = 0x29;
+    *(void***)(s + 0x8) = D_00473908;
+    *(signed char*)(s + 0x44) = 0;
+    *(unsigned char*)(s + 0x15) = func_001A1CD0_4728(**(void***)(s + 0x10), 0);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
+    func_003E6448(s + 0x84, 0, 0x1C);
+    for (int i = 0; i < 7; i++) {
+        self->base[i] = func_00148158_4728(iface, 0, D_004780B0[i]);
+        self->level[i] = (signed char)(func_00148158_4728(iface, 0, D_004780B0[i]) / 5);
+    }
+    return p;
+}
+#endif
 

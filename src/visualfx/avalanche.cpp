@@ -463,7 +463,59 @@ extern "C" void func_002D83B8(int direct, char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D87D0);
+#ifdef SKIP_ASM
+extern void* D_004A3AB4;
+extern int D_004A3AB8;
+extern int D_004A3ABC;
+extern int D_004A3AC4;
+extern int D_004A3A4C;
+extern char D_004A3AD8[];
+// PORT: the read call returns func_003DEB50's result (bytes read); the ealib unit declares it void.
+extern "C" int func_003DEC60_i(int fd, int off, void* data, int size, int prio) __asm__("func_003DEC60");
+extern "C" void func_002D9A80(void);
+extern "C" void cAvalanche_resolveDataPointers(void);
+
+// Loads the avalanche data file for the current mountain (magic 0x2BEEF00, then the data size) into a fresh buffer.
+extern "C" void func_002D87D0(void)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    char buf[0x100];
+    sprintf(buf, D_004A3AF0, func_00144C48(iface, func_00144BE0(iface)), D_004A3AD8);
+    D_004A3ABC = 0;
+    D_004A3AC4 = 1;
+    int fd;
+    if (func_003DEBF0(buf, 1, 0x64, &fd)) {
+        func_002D9A80();
+        if (D_004A3AB4 != 0 && D_004A3AB8 != 0) {
+            cMemMan_free(D_004A3AB4);
+        }
+        int* hdr = (int*)operator_new_tag(8, buf, 0, 0);
+        func_003DEC60_i(fd, 0, hdr, 8, 0x64);
+        if (hdr[0] != 0x2BEEF00) {
+            if (hdr != 0) {
+                cMemMan_free(hdr);
+            }
+            D_004A3AB4 = 0;
+            D_004A3AB8 = 0;
+        } else {
+            int size = hdr[1];
+            if (hdr != 0) {
+                cMemMan_free(hdr);
+            }
+            void* data = operator_new_tag(size, buf, 0, 0);
+            D_004A3AB8 = 1;
+            D_004A3AB4 = data;
+            func_003DEC60_i(fd, 0, data, size + 8, 0x64);
+            func_003DECA0(fd, 0x64);
+            D_004A3AC4 = 0;
+        }
+    }
+    D_004A3A4C = 0;
+    cAvalanche_resolveDataPointers();
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D8948);
@@ -682,7 +734,35 @@ extern "C" void func_002D96E0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9738);
+#ifdef SKIP_ASM
+struct sAvNode_9738 { char pad[0xF4]; sAvNode_9738* next; };
+struct sAvEnt_9738 { short a; short depth; };
+struct sAv_9738 {
+    int f0;
+    sAvNode_9738* head;      // 0x4
+    char pad8[6];
+    unsigned short count;    // 0xE
+    char pad10[0x100];
+    sAvEnt_9738 ents[64];    // 0x110
+};
+// Records (a, depth of stop in the node list) while there is room for it.
+extern "C" void func_002D9738(sAv_9738* self, int a, sAvNode_9738* stop)
+{
+    if (self->count < 64) {
+        int depth = 0;
+        sAvNode_9738* p = self->head;
+        while (p != 0 && p != stop) {
+            depth++;
+            p = p->next;
+        }
+        self->ents[self->count].a = a;
+        self->ents[self->count].depth = depth;
+        self->count++;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_triggerAvalanche);

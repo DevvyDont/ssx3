@@ -490,7 +490,93 @@ extern "C" void func_002F1150(sFx_1150* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1510);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sV2_1510 {
+    float x, y;
+    sV2_1510(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+
+struct sGs_1510 {
+    unsigned int w0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 5;
+    unsigned int f4_12 : 8;
+    unsigned int f4_20 : 2;
+    unsigned int f4_22 : 1;
+    unsigned int f4_23 : 2;
+    unsigned int f4_25 : 7;
+    unsigned int f8_0 : 5;
+    unsigned int f8_5 : 5;
+    unsigned int f8_10 : 19;
+    unsigned int f8_29 : 3;
+    unsigned int wC;
+    unsigned int f10 : 16;
+    unsigned int f10hi : 16;
+    void SetF22(int v) { f4_22 = v; }
+};
+
+extern sGs_1510 D_00501420_1510 __asm__("D_00501420");
+
+class cGfx_1510 {
+public:
+    char pad[0xE84];
+    sGs_1510* stateTop;
+    char padE88[0xFB0 - 0xE88];
+    int fFB0;
+    int GetFB0() { return fFB0; }
+    void PushState() { stateTop[1] = stateTop[0]; stateTop++; }
+    char padFB4[0x10D8 - 0xFB4];
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
+    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
+    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
+    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
+    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
+    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43();
+    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
+    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
+    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
+    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
+    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
+    virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67();
+    virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
+    virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
+    virtual void v76();
+    virtual void DrawSprite(const sVec4_1150&, const sV2_1510&, const sV2_1510&, const sV2_1510&, const sCol_1150&);
+};
+
+extern "C" void func_002F1510(sFx_1150* self)
+{
+    if (self->active == 0)
+        return;
+    ((cGfx_1510*)D_004A289C)->PushState();
+    *((cGfx_1510*)D_004A289C)->stateTop = D_00501420_1510;
+    // Raw char** read of the stack top (as in ovstatehud) so the global is re-read afterwards.
+    *(short*)(*(char**)(D_004A289C + 0xE84) + 0x10) = ((cGfx_1510*)D_004A289C)->GetFB0();
+    ((cGfx_1510*)D_004A289C)->stateTop->w0 |= 0xC;
+    ((cGfx_1510*)D_004A289C)->stateTop->f4_23 = 0;
+    ((cGfx_1510*)D_004A289C)->stateTop->f4_20 = 0;
+    ((cGfx_1510*)D_004A289C)->stateTop->f4_12 = 0x14;
+    ((cGfx_1510*)D_004A289C)->stateTop->f4_0 = 2;
+    ((cGfx_1510*)D_004A289C)->stateTop->f8_10 = 0;
+    ((cGfx_1510*)D_004A289C)->stateTop->f8_5 = 7;
+    ((cGfx_1510*)D_004A289C)->stateTop->f4_2 = 7;
+    ((cGfx_1510*)D_004A289C)->stateTop->SetF22(1);
+    for (int i = 0; i < 4; i++) {
+        ((cGfx_1510*)D_004A289C)->DrawSprite(self->pos[i], sV2_1510(self->size[i], self->size[i]),
+                                            sV2_1510(0.0f, 0.0f), sV2_1510(1.0f, 1.0f), self->col[i]);
+    }
+    ((cGfx_1510*)D_004A289C)->stateTop--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1768);
@@ -662,7 +748,43 @@ extern "C" void func_002F1A00(void *arg0) {
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2088);
+#ifdef SKIP_ASM
+extern "C" void func_00371380(void* obj, int level);
+
+struct sRiderInfo_2088 {
+    char pad[0xB18];
+    int fB18;               // 0xB18
+    char padB1C[0xC2C - 0xB1C];
+    int fC2C;               // 0xC2C
+    char padC30[0xCC8 - 0xC30];
+    int fCC8;               // 0xCC8
+};
+
+struct sOwner_2088 {
+    char pad[0x6C];
+    void* items[10];        // 0x6C
+    char pad94[4];
+    sRiderInfo_2088* a;     // 0x98
+    sRiderInfo_2088* b;     // 0x9C
+};
+
+extern "C" void func_002F2088(sOwner_2088* self)
+{
+    int i;
+    for (i = 0; i < 10; i++) {
+        if (self->items[i] != 0) {
+            int level = 7;
+            if (self->b != 0)
+                level = (self->b->fC2C < 0) ? 0x16 : self->b->fC2C + 1;
+            sRiderInfo_2088* r = self->b;
+            if ((self->a != 0 && self->a->fB18 != 0) || (r != 0 && r->fCC8 != 0))
+                func_00371380(self->items[i], level);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2130);
@@ -699,7 +821,28 @@ extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2218);
+#ifdef SKIP_ASM
+struct sVE_2F2218 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_002F2218(char* self, int idx)
+{
+    int off = idx * 4;
+    self += 0x6C;
+    char** slot = (char**)(self + off);
+    char* o = *slot;
+    if (o != 0) {
+        sVE_2F2218* vt = *(sVE_2F2218**)(o + 0x1F8);
+        vt[4].fn(o + vt[4].delta, 3);
+    }
+    *slot = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
@@ -1021,7 +1164,53 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F3030);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F3418);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F3550);
+#ifdef SKIP_ASM
+extern "C" void* func_00354648(void* self, void* a1);
+extern "C" int* func_002F2588(int* arg0);
+extern "C" void* func_002F2D60(void* arg0);
+extern "C" void func_002F39C8(void* arg0);
+extern char D_00488230[];
+
+// Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
+extern "C" void* func_002F3550(void* p, void* a1, int a2)
+{
+    char* self = (char*)p;
+    func_00354648(self, a1);
+    *(int*)(self + 0x10) = a2;
+    *(int*)(self + 0x14) = 0;
+    *(char**)(self + 0xC) = D_00488230;
+    *(int*)(self + 0x18) = 0;
+    {
+        char* e = self + 0x1C;
+        int i = 29;
+        do {
+            func_002F2588((int*)e);
+            i--;
+            e += 0x3C;
+        } while (i != -1);
+    }
+    {
+        char* e = self + 0x724;
+        int i = 29;
+        do {
+            func_002F2D60(e);
+            i--;
+            e += 0x4C;
+        } while (i != -1);
+    }
+    *(int*)(self + 0x100C) = 0;
+    *(int*)(self + 0x1010) = 0;
+    *(int*)(self + 0x1014) = 0;
+    *(int*)(self + 0x1018) = 0;
+    *(float*)(self + 0x101C) = 1.0f;
+    *(int*)(self + 0x1020) = 0;
+    *(int*)(self + 0x1024) = 0;
+    func_002F39C8(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F3618);
@@ -1228,7 +1417,65 @@ extern "C" void func_002F41A8(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4260);
+#ifdef SKIP_ASM
+struct sV4_4260 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_4260 Sub_4260(const sV4_4260& a, const sV4_4260& b)
+{
+    sV4_4260 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector length via vsqrt).
+static inline float Length_4260(const sV4_4260& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern float D_004A4270;
+extern float D_004A4274;
+extern float D_004A4278;
+extern float D_004A427C;
+
+extern "C" void func_002F4260(char* self, sV4_4260* p, float speed)
+{
+    float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)(self + 0x1010), *p)) / D_004A4270;
+    if (k > 0.0f && *(float*)(self + 0x1028) > D_004A4278) {
+        float lo = D_004A4274;
+        float t = (speed * 0.036f - lo) / (120.0f - lo);
+        float c = (t >= 0.0f) ? (t <? 1.0f) : 0.0f;
+        *(float*)(self + 0x1024) += k * c * D_004A427C;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4330);
