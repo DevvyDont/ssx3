@@ -648,7 +648,17 @@ extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
     return -1;
 }
 
-INCLUDE_ASM("seg/seg_1F1548", func_002F2218);
+struct sVt_2218 { short delta; short index; void (*fn)(void*, int); };
+struct sS_2218 { char pad[0x6C]; char* arr[8]; };
+extern "C" void func_002F2218(sS_2218* self, int i)
+{
+    char* o = self->arr[i];
+    if (o != 0) {
+        sVt_2218* vt = *(sVt_2218**)(o + 0x1F8);
+        vt[4].fn(o + vt[4].delta, 3);
+    }
+    self->arr[i] = 0;
+}
 
 //100%
 extern "C" void func_002F2268(void *arg0, int arg1) {

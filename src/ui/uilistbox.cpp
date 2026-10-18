@@ -127,7 +127,12 @@ extern "C" void func_0039A7A8(void* self, int a1)
     }
 }
 
-INCLUDE_ASM("ui/uilistbox", func_0039A7C8);
+extern "C" void func_0039A7C8(void* self, unsigned char idx, int v)
+{
+    if (idx < *(unsigned char*)((char*)self + 0x318)) {
+        *(int*)((idx * 0x14) + (char*)self + 0xA4) = v;
+    }
+}
 
 //100%
 extern "C" int strlen(const char*);
