@@ -23,3 +23,14 @@ rom:0x2DF24C reloc:MIPS_LO16 symbol:D_00519AB0
 rom:0x12EA04 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA48 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA98 reloc:MIPS_LO16 symbol:D_00442168
+// fe/festateloadhint func_002464E8: `lui $16, %hi(D_0047BB70)` hoisted ahead of a loop (the relocated copy is at rom 0x147594),
+// and six `addiu $2, $17, %lo(D_00535BC8)` (the relocated sibling at rom 0x1478C0 has the same bytes).
+rom:0x147530 reloc:MIPS_HI16 symbol:D_0047BB70
+rom:0x1477FC reloc:MIPS_LO16 symbol:D_00535BC8
+rom:0x14781C reloc:MIPS_LO16 symbol:D_00535BC8
+rom:0x14783C reloc:MIPS_LO16 symbol:D_00535BC8
+rom:0x14785C reloc:MIPS_LO16 symbol:D_00535BC8
+rom:0x14787C reloc:MIPS_LO16 symbol:D_00535BC8
+rom:0x14789C reloc:MIPS_LO16 symbol:D_00535BC8
+// fe/ovstatepause func_001FD320: the bnel delay slot holds reorg's copy of the target's `lui $4, %hi(D_00470048)` (its %lo is at rom 0xFEA14).
+rom:0xFEA00 reloc:MIPS_HI16 symbol:D_00470048
