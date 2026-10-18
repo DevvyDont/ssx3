@@ -157,6 +157,7 @@ def link_unit_lit4(ld_text):
 ROM_TO_VRAM = 0x100000 - 0x1000
 ADDR_LINE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8})(?: [0-9A-F]{8})? \*/")
 JTBL = re.compile(r"^dlabel (jtbl_([0-9A-F]{8}))\n(.*?)^enddlabel \1$", re.M | re.S)
+DLABEL = re.compile(r"^dlabel (D_[0-9A-F]{8})\n(.*?)^enddlabel \1$", re.M | re.S)
 JTBL_WORD = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/ \.word (?:\.L|lbl_|0x)([0-9A-F]{8})")
 
 
@@ -181,6 +182,11 @@ def c_jump_tables(rodata_path):
     for f in used:
         referenced.update(re.findall(r"jtbl_[0-9A-F]{8}", f.read_text()))
     starts = [u[0] for u in units]
+    labels = {}
+    for m in DLABEL.finditer(rodata_path.read_text()):
+        words = JTBL_WORD.findall(m.group(2))
+        if words:
+            labels[int(words[0][0], 16)] = words
     tables = {}
     for m in JTBL.finditer(rodata_path.read_text()):
         if m.group(1) in referenced:
@@ -190,7 +196,21 @@ def c_jump_tables(rodata_path):
         assert words, m.group(1)
         _, kind, name = units[bisect.bisect_right(starts, int(words[0][1], 16)) - 1]
         assert kind in ("c", "cpp"), f"{m.group(1)} belongs to no asm and no C unit"
-        tables[int(m.group(2), 16)] = (int(words[-1][0], 16) + 4, f"{name}.{kind}")
+        end = int(words[-1][0], 16) + 4
+        # A stray .data word equal to an address inside a table makes splat start a data label there
+        # (jtbl_00461020 runs into D_00461024): the table goes on through that label's code addresses.
+        # The label goes with the table's asm, and tools/address_syms.py defines it at its address.
+        lo = starts[bisect.bisect_right(starts, int(words[0][1], 16)) - 1]
+        hi = next((s for s in starts if s > lo), 1 << 32)
+        while end in labels:
+            more = labels[end]
+            n = next((i for i, w in enumerate(more) if not lo <= int(w[1], 16) < hi), len(more))
+            if n == 0:
+                break
+            end = int(more[n - 1][0], 16) + 4
+            if n < len(more):
+                break
+        tables[int(m.group(2), 16)] = (end, f"{name}.{kind}")
     per_unit = {}
     for addr in sorted(tables):
         end, unit = tables[addr]
@@ -217,13 +237,17 @@ def link_c_jump_tables(ld_text):
     obj_line = f"        obj/{rodata_path}.o(.rodata);\n"
     assert obj_line in ld_text, obj_line
     out, pending, links = [], [], [obj_line]
-    part, part_start, skip_until = 0, start, None
+    part, part_start, skip_until, dropped = 0, start, None, set()
     for line in rodata_path.read_text().split("\n"):
         m = ADDR_LINE.match(line)
         addr = int(m.group(1), 16) if m else None
         if skip_until is not None:
             if addr is not None and addr + 4 >= skip_until:
                 skip_until = None
+            elif line.startswith("dlabel "):
+                dropped.add(line.split()[1])
+            continue
+        if line.startswith("enddlabel ") and line.split()[1] in dropped:
             continue
         label = re.match(r"(?:dlabel|enddlabel|nonmatching) (jtbl_([0-9A-F]{8}))$", line)
         if label and int(label.group(2), 16) in tables:
