@@ -825,7 +825,19 @@ void* func_0031AAF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memblockman", func_0031AB10);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Wakes the thread at 0xC, then idles forever.
+extern "C" void func_0031AB10(void* self)
+{
+    func_00423DC0(*(int*)((char*)self + 0xC));
+    for (;;) {
+        func_00423CC0();
+    }
+}
+#endif
 
 INCLUDE_ASM("bx/memblockman", func_0031AB30);
 

@@ -432,7 +432,25 @@ extern "C" void func_003714F8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_Allocate);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern char D_00492690[];
+
+struct sEmitColour_1548 {
+    unsigned char rgba[4];
+    sEmitColour_1548() {}
+};
+
+extern "C" void cDynamicColourEmitter_Allocate(void* self)
+{
+    char* s = (char*)self;
+    sEmitColour_1548** pc = (sEmitColour_1548**)(s + 0x204);
+    cBaseClass_DynamicEmitter_Allocate(self);
+    *pc = new (D_00492690, 0, 0) sEmitColour_1548[*(int*)(s + 0x178)];
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_003715B0);
@@ -2722,7 +2740,57 @@ INCLUDE_ASM("render/particle", func_0037A610);
 
 INCLUDE_ASM("render/particle", func_0037B548);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037BA50);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only GS packet build; uncached (0x30000000) pointers held in int and 128-bit qword copies.
+typedef int cQuad128_BA50 __attribute__((mode(TI)));
+
+struct sRS_BA50 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMat_BA50(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// Emits a particle-batch header packet: GIF tag, the batch matrix and two parameter qwords.
+extern "C" void func_0037BA50(char* self, void* mat, cQuad128_BA50* a, cQuad128_BA50* b)
+{
+    unsigned int buf = *(unsigned int*)(self + 0x5A00);
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    p[0] = 0x60000007;
+    p[2] = (unsigned long)0x8000 << 45;
+    p[3] = (unsigned long)0xD80C << 47;
+    p[1] = 0;
+    CopyMat_BA50(p + 4, mat);
+    ((cQuad128_BA50*)p)[6] = *a;
+    ((cQuad128_BA50*)p)[7] = *b;
+    p += 16;
+    *(unsigned int*)(self + 0x5A00) = (unsigned int)p & 0x0FFFFFFF;
+    sRS_BA50* rs = *(sRS_BA50**)(self + 0xE84);
+    rs->f0 = (rs->f0 & ~0x3C0) | 0x1C0;
+    sRS_BA50* rs2 = *(sRS_BA50**)(self + 0xE84);
+    rs2->fC = (rs2->fC & 0xC0000000) | (buf & 0x3FFFFFFF);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037BB10);
 
@@ -3803,7 +3871,112 @@ extern "C" void func_00380380(void* self, char* obj, int idx, float* pos, float*
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00380518);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sPtRS_0518 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_0518 {
+    sPtRS_0518 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_0518 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_0518 ents[1];            // 0x80
+};
+
+struct sQuad_0518 {
+    unsigned int w[4];
+} __attribute__((aligned(16)));
+
+struct sPtGfx_0518 {
+    char pad_0x0[0xE84];
+    sPtRS_0518* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_0518* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+extern int D_004A44F8;
+extern int D_004A4474;
+extern char D_0[];
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_0037D968(void* self);
+
+static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
+{
+    const sQuad_0518* src = (const sQuad_0518*)srcp;
+    sQuad_0518* d = (sQuad_0518*)*pp;
+    sQuad_0518* end = d + n;
+    while (d != end) {
+        *d++ = *src++;
+    }
+    *pp = (unsigned long*)d;
+}
+
+// Sends obj's 0x15 quads to the VU1 program at address 0 under a pushed render state.
+extern "C" void func_00380518(sPtGfx_0518* self, sQuad_0518* obj)
+{
+    if (D_004A44F8 != 0)
+        return;
+    self->top[1] = *self->top;
+    self->top++;
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x100;
+    self->top->fC &= 0xC0000000;
+    self->top->f4 = (self->top->f4 & ~3) | 2;
+    self->top->f8 &= 0xE00003FF;
+    self->top->f8 = (self->top->f8 & ~0x3E0) | 0xE0;
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
+    p[0] = 0x10000017;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = (unsigned long)0xD82B << 47;
+    p += 4;
+    CopyQuads_0518(&p, obj, 0x15);
+    p[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
+    p[1] = (unsigned long)0x8800 << 45;
+    p += 2;
+    self->bufAddr = func_0038F668(D_004A4474, p, 4);
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    sPtRing_0518* ring = self->ring;
+    unsigned int next = self->bufAddr;
+    sPtRS_0518* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_0518* e = (sPtEnt_0518*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003807A0);
@@ -3978,7 +4151,193 @@ extern "C" void func_003807A0(sPtGfx_07A0* self, sTrail_07A0* obj)
 
 INCLUDE_ASM("render/particle", func_00380CE0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00381310);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sPtRS_1310 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_1310 {
+    sPtRS_1310 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_1310 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_1310 ents[1];            // 0x80
+};
+
+struct sQuad_1310 {
+    unsigned int w[4];
+} __attribute__((aligned(16)));
+
+struct sMat_1310 {
+    float m[4][4];
+    sMat_1310() {}
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+    sMat_1310(const sMat_1310& s)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+} __attribute__((aligned(16)));
+
+struct sVec4_1310 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPtGfx_1310 {
+    char pad_0x0[0xE84];
+    sPtRS_1310* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_1310* ring;             // 0x18F0
+    char pad_0x18F4[0x5860 - 0x18F4];
+    sMat_1310 m5860;                // 0x5860
+    char pad_0x58A0[0x5A00 - 0x58A0];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+struct sPtObj_1310 {
+    sQuad_1310 q[5];                // 0x00
+    sMat_1310 mat;                  // 0x50
+};
+
+extern int D_004A4474;
+extern char D_0[];
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_0037D968(void* self);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix product).
+static inline sMat_1310 MulMat_1310(const sMat_1310& a, const sMat_1310& b)
+{
+    sMat_1310 d;
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(&d), "r"(&a), "r"(&b)
+        : "memory");
+    return d;
+}
+
+static inline void CopyQuads_1310(unsigned long** pp, const void* srcp, int n)
+{
+    const sQuad_1310* src = (const sQuad_1310*)srcp;
+    sQuad_1310* d = (sQuad_1310*)*pp;
+    sQuad_1310* end = d + n;
+    while (d != end) {
+        *d++ = *src++;
+    }
+    *pp = (unsigned long*)d;
+}
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
+extern "C" void func_00381310(sPtGfx_1310* self, sPtObj_1310* obj)
+{
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x140;
+    self->top->fC &= 0xC0000000;
+    self->top->f4 = (self->top->f4 & ~3) | 2;
+    self->top->f8 &= 0xE00003FF;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    sMat_1310 m = MulMat_1310(self->m5860, obj->mat);
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
+    p[0] = 0x1000000D;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = (unsigned long)0xD817 << 47;
+    p += 4;
+    sVec4_1310 v0;
+    v0.x = 0.0f;
+    v0.y = 0.0f;
+    v0.z = 0.0f;
+    v0.w = 0.0f;
+    sVec4_1310 v1;
+    v1.x = 1.0f;
+    v1.y = 1.0f;
+    v1.z = 0.0f;
+    v1.w = 0.0f;
+    CopyQuads_1310(&p, (const sQuad_1310*)&m, 4);
+    CopyQuads_1310(&p, (const sQuad_1310*)&v0, 1);
+    CopyQuads_1310(&p, (const sQuad_1310*)&v1, 1);
+    CopyQuads_1310(&p, obj->q, 5);
+    p[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
+    p[1] = (unsigned long)0x8800 << 45;
+    p += 2;
+    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    self->bufAddr = next;
+    sPtRing_1310* ring = self->ring;
+    sPtRS_1310* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_1310* e = (sPtEnt_1310*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top->f4 &= ~3;
+    self->top->f8 &= 0xE00003FF;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003816F0);
