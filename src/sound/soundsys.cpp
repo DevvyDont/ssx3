@@ -1134,9 +1134,120 @@ extern "C" void func_00293410(void* self, int id, void* rider, int* out, int* si
 }
 #endif
 INCLUDE_ASM("sound/soundsys", func_002934D0);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293538);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sSsVt_3538 { short delta; short index; int (*fn)(void*); };
+extern const func_00290B58_sCurve D_00482B78;
+extern const func_00290B58_sCurve D_00482BA0;
+
+static inline float* getLevels_3538(void* self) { return (float*)((char*)self + 0x59B8); }
+
+void func_00293538_impl(void* self, cRider* rider, int* volume, int* pitch) __asm__("func_00293538");
+void func_00293538_impl(void* self, cRider* rider, int* volume, int* pitch)
+{
+    float level = rider->mAudioPressure;
+    level *= 1.0f - (rider->mAudioEdging + rider->mAudioBraking);
+    float speed = rider->mAudioSpeed;
+    if (speed < 0.1f) {
+        level = level * speed * 10.0f;
+    }
+    char* obj = (char*)&rider->mVtbl;
+    sSsVt_3538* vt = *(sSsVt_3538**)obj;
+    int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+    float prev = *(float*)((char*)getLevels_3538(self) + (idx << 2));
+    float d = prev - level;
+    if (__builtin_fabsf(d) > 0.1f) {
+        if (level < prev) {
+            level = prev - d * 0.25f;
+        } else if (prev < level) {
+            level = prev + (level - prev) * 0.25f;
+        }
+    }
+    func_00290B58_sCurve c1 = D_00482B78;
+    *(float*)((char*)getLevels_3538(self) + (idx << 2)) = level;
+    func_00290B58_sCurve c2 = D_00482BA0;
+    *volume = (int)func_00290B58(&c1, level);
+    *pitch = (int)(func_00290B58(&c2, level) * 4096.0f);
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293740);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sSsVt_3740 { short delta; short index; int (*fn)(void*); };
+extern const func_00290B58_sCurve D_00482BC8;
+extern const func_00290B58_sCurve D_00482BF0;
+
+static inline float* getLevels_3740(void* self) { return (float*)((char*)self + 0x59B8); }
+
+void func_00293740_impl(void* self, cRider* rider, int* volume, int* pitch) __asm__("func_00293740");
+void func_00293740_impl(void* self, cRider* rider, int* volume, int* pitch)
+{
+    float level = rider->mAudioPressure;
+    level *= 1.0f - (rider->mAudioEdging + rider->mAudioBraking);
+    float speed = rider->mAudioSpeed;
+    if (speed < 0.1f) {
+        level = level * speed * 10.0f;
+    }
+    char* obj = (char*)&rider->mVtbl;
+    sSsVt_3740* vt = *(sSsVt_3740**)obj;
+    int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+    float prev = *(float*)((char*)getLevels_3740(self) + (idx << 2));
+    float d = prev - level;
+    if (__builtin_fabsf(d) > 0.1f) {
+        if (level < prev) {
+            level = prev - d * 0.25f;
+        } else if (prev < level) {
+            level = prev + (level - prev) * 0.25f;
+        }
+    }
+    func_00290B58_sCurve c1 = D_00482BC8;
+    *(float*)((char*)getLevels_3740(self) + (idx << 2)) = level;
+    func_00290B58_sCurve c2 = D_00482BF0;
+    *volume = (int)func_00290B58(&c1, level);
+    *pitch = (int)(func_00290B58(&c2, level) * 4096.0f);
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293948);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sSsVt_3948 { short delta; short index; int (*fn)(void*); };
+extern const func_00290B58_sCurve D_00482C18;
+extern const func_00290B58_sCurve D_00482C40;
+
+static inline float* getLevels_3948(void* self) { return (float*)((char*)self + 0x59B8); }
+
+void func_00293948_impl(void* self, cRider* rider, int* volume, int* pitch) __asm__("func_00293948");
+void func_00293948_impl(void* self, cRider* rider, int* volume, int* pitch)
+{
+    float level = rider->mAudioPressure;
+    level *= 1.0f - (rider->mAudioEdging + rider->mAudioBraking);
+    float speed = rider->mAudioSpeed;
+    if (speed < 0.1f) {
+        level = level * speed * 10.0f;
+    }
+    char* obj = (char*)&rider->mVtbl;
+    sSsVt_3948* vt = *(sSsVt_3948**)obj;
+    int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+    float prev = *(float*)((char*)getLevels_3948(self) + (idx << 2));
+    float d = prev - level;
+    if (__builtin_fabsf(d) > 0.1f) {
+        if (level < prev) {
+            level = prev - d * 0.25f;
+        } else if (prev < level) {
+            level = prev + (level - prev) * 0.25f;
+        }
+    }
+    func_00290B58_sCurve c1 = D_00482C18;
+    *(float*)((char*)getLevels_3948(self) + (idx << 2)) = level;
+    func_00290B58_sCurve c2 = D_00482C40;
+    *volume = (int)func_00290B58(&c1, level);
+    *pitch = (int)(func_00290B58(&c2, level) * 4096.0f);
+}
+#endif
 //100%
 INCLUDE_ASM("sound/soundsys", func_00293B50);
 #ifdef SKIP_ASM
@@ -1165,8 +1276,74 @@ extern "C" void func_00293B90(void) {
 }
 #endif
 INCLUDE_ASM("sound/soundsys", func_00293BB0);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293DC0);
+#ifdef SKIP_ASM
+struct sSsVt_3DC0 { short delta; short index; int (*fn)(void*); };
+extern const func_00290B58_sCurve D_00482CB8;
+extern const func_00290B58_sCurve D_00482CE0;
+
+static inline float* getLevels_3DC0(void* self) { return (float*)((char*)self + 0x5990); }
+
+extern "C" void func_00293DC0(void* self, cRider* rider, int* volume, int* pitch)
+{
+    float level = rider->mAudioEdging + rider->mAudioBraking;
+    float speed = rider->mAudioSpeed;
+    if (speed < 0.1f) {
+        level = level * speed * 10.0f;
+    }
+    float pressure = rider->mAudioPressure;
+    char* obj = (char*)&rider->mVtbl;
+    sSsVt_3DC0* vt = *(sSsVt_3DC0**)obj;
+    int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+    float prev = *(float*)((char*)getLevels_3DC0(self) + (idx << 2));
+    float d = prev - level;
+    if (__builtin_fabsf(d) > 0.1f) {
+        if (level < prev) {
+            level = prev - d * 0.5f;
+        } else if (prev < level) {
+            level = prev + (level - prev) * 0.125f;
+        }
+    }
+    func_00290B58_sCurve c1 = D_00482CB8;
+    *(float*)((char*)getLevels_3DC0(self) + (idx << 2)) = level;
+    func_00290B58_sCurve c2 = D_00482CE0;
+    *volume = (int)func_00290B58(&c1, level);
+    *pitch = (int)(func_00290B58(&c2, pressure) * 4096.0f);
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293FC8);
+#ifdef SKIP_ASM
+struct sSsVt_3FC8 { short delta; short index; int (*fn)(void*); };
+extern const func_00290B58_sCurve D_00482D08;
+
+extern "C" void func_00293FC8(void* self, cRider* rider, int* volume, int* pitch)
+{
+    float pressure = rider->mAudioPressure;
+    float level = rider->mAudioEdging + rider->mAudioBraking;
+    char* obj = (char*)&rider->mVtbl;
+    sSsVt_3FC8* vt = *(sSsVt_3FC8**)obj;
+    int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+    float prev = *(float*)((char*)self + (idx << 2) + 0x5990);
+    float d = prev - level;
+    if (__builtin_fabsf(d) > 0.1f) {
+        if (level < prev) {
+            level = prev - d * 0.5f;
+        } else if (prev < level) {
+            level = prev + (level - prev) * 0.125f;
+        }
+    }
+    *(float*)((char*)self + (idx << 2) + 0x5990) = level;
+    *volume = 0x7F;
+    func_00290B58_sCurve c = D_00482D08;
+    *pitch = (int)(func_00290B58(&c, pressure) * 4096.0f);
+    float speed = rider->mAudioSpeed;
+    if (speed < 0.1f) {
+        *volume = (int)((float)*volume * speed * 10.0f);
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_00294170);
 
@@ -1242,7 +1419,133 @@ extern "C" void func_002948A0(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002948D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_00285D98(void* self, int which);
+extern "C" int func_00288B40(void* self, int which, float f);
+extern "C" void func_002A7438(void* self, int i);
+extern "C" void func_002A73A8(void* self, int level, int i);
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B8AB8(int id);
+extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+// func_00291710 takes the rider here (the unit declares (void*, int)).
+int func_00291710_p(void* self, cRider* rider) __asm__("func_00291710");
+extern const func_00290B58_sCurve D_00482D30;
+
+struct sSsVt48D0 { short delta; short index; int (*fn)(void*); };
+
+extern "C" void func_002948D0(void* vself, cRider* rider, float v)
+{
+    sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
+    int idx = -1;
+    if (func_00288AE0(self) != 0) {
+        idx = 0;
+    } else {
+        int ok = rider->mIsHuman != 0 && rider->mIsLocal != 0;
+        if (ok) {
+            idx = rider->mViewIndex;
+        }
+    }
+    if ((cRider*)func_00285D98(self, idx) == rider) {
+        if (v <= 0.0f) {
+            func_002A7438(self, idx);
+        } else if (v < 0.25f) {
+            func_002A73A8(self, 0, idx);
+        } else if (v < 0.65f) {
+            func_002A73A8(self, 1, idx);
+        } else {
+            func_002A73A8(self, 2, idx);
+        }
+    }
+    char* obj = (char*)&rider->mVtbl;
+    sSsVt48D0* vt = *(sSsVt48D0**)obj;
+    if (vt[kRiderVt_isComputer].fn(obj + vt[kRiderVt_isComputer].delta) != 0 || rider->mIsLocal == 0) {
+        sSsVt48D0* vt2 = *(sSsVt48D0**)obj;
+        if (func_00288B40(self, vt2[kRiderVt_getPosition].fn(obj + vt2[kRiderVt_getPosition].delta), 100.0f) < 0) {
+            return;
+        }
+    }
+    func_00290B58_sCurve c = D_00482D30;
+    int vol = (int)func_00290B58(&c, *(float*)((char*)rider + 0x770));
+    if (vol > 127) {
+        vol = 127;
+    }
+    if (vol < 0) {
+        vol = 0;
+    }
+    int prio;
+    int local = rider->mIsHuman != 0 && rider->mIsLocal != 0;
+    if (local) {
+        prio = func_00291710_p(self, rider) * 8 + 1;
+    } else {
+        prio = func_00291710_p(self, rider) * 8 + 5;
+    }
+    func_003B58A0();
+    int busy = func_003B8AB8(*(int*)((char*)self + 0x5FB8)) != 0;
+    func_003B58D8();
+    if (!busy) {
+        func_002AD5F0(&(*self->p118)->sub, *(int*)((char*)self + 0x5FB8), 1, 0.0f);
+    }
+    int flag = 0;
+    int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
+    if (ok3) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 2) {
+            flag = func_00288AE0(self) == 0;
+        }
+    }
+    int a = 10;
+    sSnd17D0Mgr* m = self->mgr;
+    sSnd17D0Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = prio;
+    sSnd17D0Mgr* m3 = *self->p118;
+    sSnd17D0Sub* s3 = &m3->sub;
+    s3->vals[m3->sub.cur] = vol;
+    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    sSnd17D0Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, 6, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    func_002A9988(&(*self->p118)->sub, 30.0f, -1.0f);
+    {
+        sSnd17D0Mgr* m2 = *self->p118;
+        m2->sub.tgt[m2->sub.cur] = &rider->mPosition;
+    }
+    {
+        sSnd17D0Mgr** pq = self->p118;
+        int q = func_00288A20(self, rider);
+        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+    }
+    if (flag) {
+        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
+    }
+    *(int*)((char*)self + 0x5FB8) = func_002906B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00294F48);
@@ -4841,7 +5144,120 @@ extern "C" int func_0029F620(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029F660);
+#ifdef SKIP_ASM
+extern "C" int func_002A10C0(void* self, int id);
+extern "C" int func_002A1028(void* self, int id);
+extern "C" unsigned int func_002ADF60(void* mon);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" int func_002906B8(void* self);
+extern "C" int func_00288A20(void* self, void* obj);
+
+struct sSsVtF660 { short delta; short index; void* (*fn)(void*); };
+
+extern "C" void func_0029F660(void* vself, void* vrider, int a, int b)
+{
+    sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
+    cRider* rider = (cRider*)vrider;
+    if (func_0029F0A0(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    int ok = rider->mIsHuman != 0 && rider->mIsLocal != 0;
+    if (!ok && b == 0) {
+        if (func_002A10C0(self, func_00123128(rider)) != 0) return;
+    }
+    int past = rider->mFinishTime >= 0.0f;
+    if (past) return;
+    if (func_00295028(self, 3, 0) != 0) return;
+    func_002A1028(self, func_00123128(rider));
+    int kind = func_0029F620(self, rider);
+    int prio;
+    if (kind == 0xE) {
+        if (a == 1) {
+            prio = (func_002ADF60(*(void**)((char*)*self->p118 + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF;
+        } else if (a == 0) {
+            prio = (func_002ADF60(*(void**)((char*)*self->p118 + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF + 3;
+        } else {
+            prio = *(int*)((char*)self + 0x5734);
+            *(int*)((char*)self + 0x5734) = prio + 1;
+            if (prio + 1 >= 6) {
+                *(int*)((char*)self + 0x5734) = 0;
+            }
+        }
+    } else if (a == 1) {
+        prio = func_0029F378(self, rider) * 2 + 1;
+    } else {
+        prio = func_0029F378(self, rider) * 2;
+    }
+    int flag = 0;
+    int ok2 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
+    if (ok2) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 2) {
+            flag = func_00288AE0(self) == 0;
+        }
+    }
+    int vol = func_00290C40(self, rider);
+    sSnd17D0Mgr* m = self->mgr;
+    sSnd17D0Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = kind;
+    self->a8[self->mgr->sub.cur] = prio;
+    sSnd17D0Mgr* m3 = *self->p118;
+    sSnd17D0Sub* s3 = &m3->sub;
+    s3->vals[m3->sub.cur] = vol;
+    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    {
+        sSnd17D0Mgr** pq = self->p118;
+        int q = func_00288A20(self, rider);
+        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+    }
+    {
+        sSnd17D0Mgr** pp = self->p118;
+        int r = (int)func_00287968(self, 4, func_00123128(rider));
+        (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    }
+    int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
+    if (ok3) {
+        func_002A9988(&(*self->p118)->sub, 29.997713088989258f, -1.0f);
+    } else {
+        func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
+    }
+    {
+        sSnd17D0Mgr** pt = self->p118;
+        char* obj = (char*)&rider->mVtbl;
+        sSsVtF660* vt = *(sSsVtF660**)obj;
+        void* pos = vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
+        (*pt)->sub.tgt[(*pt)->sub.cur] = pos;
+    }
+    if (flag) {
+        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
+    }
+    int h = func_002906B8(self);
+    func_00295628(self, (void*)3, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029FCC8);
