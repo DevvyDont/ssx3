@@ -1106,7 +1106,7 @@ index 0485d50..ab1e7ad 100644
  #define FPU_C_F_S(a, b) (0)
  #define FPU_C_UN_S(a, b) (isnan((float)(a)) || isnan((float)(b)))
 diff --git a/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h b/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
-index 2421f9e..d47ddad 100644
+index 2421f9e..cf86b6c 100644
 --- a/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
 +++ b/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
 @@ -33,7 +33,23 @@ public:
@@ -1133,9 +1133,18 @@ index 2421f9e..d47ddad 100644
      void ResetUnlocked();
      void LoadClutUnlocked(const GSTex0Reg &tex0, const GSTexClutReg &texclut);
      uint32_t ReadVramUnlocked(uint32_t psm, uint32_t base, uint32_t bw, uint32_t x, uint32_t y) const;
-@@ -44,8 +60,90 @@ private:
+@@ -43,9 +59,106 @@ private:
+     void DrawPrimitive(const GSPrimitiveBatch &batch);
      void DrawSprite(const GSPrimitiveBatch &batch);
      void DrawTriangle(const GSPrimitiveBatch &batch);
++    // Calls draw.operator()<FramePsm, DepthPsm>() with the state's buffer PSMs
++    // when they are a common pair, else with kAnyPsm for both.
++    template <typename Draw>
++    void DispatchPixelFormats(const GSDrawState &state, Draw &&draw);
++    template <uint32_t FramePsm, uint32_t DepthPsm>
++    void DrawSpriteAs(const GSPrimitiveBatch &batch);
++    template <uint32_t FramePsm, uint32_t DepthPsm>
++    void DrawTriangleAs(const GSPrimitiveBatch &batch);
      void DrawLine(const GSPrimitiveBatch &batch);
 +    // What WritePixel takes from a primitive's draw state, worked out once per
 +    // primitive.
@@ -1160,6 +1169,11 @@ index 2421f9e..d47ddad 100644
 +    };
 +    void PreparePixelTarget(const GSDrawState &state, PixelTarget &target);
 +    void WritePixel(const PixelTarget &target, int x, int y, int z, uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t fog);
++    // WritePixel with the frame and depth buffer PSMs fixed at compile time
++    // (kAnyPsm: read from the target); see DispatchPixelFormats.
++    static constexpr uint32_t kAnyPsm = 0xFFu;
++    template <uint32_t FramePsm, uint32_t DepthPsm>
++    void WritePixelAs(const PixelTarget &target, int x, int y, int z, uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t fog);
      void WritePixel(const GSDrawState &state, int x, int y, int z, uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t fog);
 -    uint32_t SampleTexture(const GSDrawState &state, float s, float t, float q, uint16_t u, uint16_t v);
 +    // How a texel read from VRAM becomes RGBA, by the texture's PSM.
@@ -1172,6 +1186,7 @@ index 2421f9e..d47ddad 100644
 +        Indexed,  // T8, T8H, T4, T4HL, T4HH: through the CLUT
 +        Unknown
 +    };
++    static constexpr TexelFormat TexelFormatFor(uint8_t psm);
 +
 +    // What sampling a primitive's texture takes from its draw state, worked out
 +    // once per primitive instead of for every pixel.
@@ -1218,14 +1233,15 @@ index 2421f9e..d47ddad 100644
 +        GSCpuBackend &m_backend;
 +    };
 +    uint32_t SampleTexture(const TextureSampler &sampler, float s, float t, float q, uint16_t u, uint16_t v);
-+    template <TexelFormat Format>
++    // Templated on the texture's PSM, so each format's swizzle is inlined.
++    template <uint8_t Psm>
 +    uint32_t SampleTexels(const TextureSampler &sampler, float texUf, float texVf);
-+    template <TexelFormat Format>
++    template <uint8_t Psm>
 +    uint32_t FetchTexel(const TextureSampler &sampler, int u, int v);
      uint32_t LookupCLUT(const GSDrawState &state, uint8_t index, uint8_t cpsm, uint8_t csm, uint8_t csa, uint8_t sourcePsm);
  
      void PerformLocalToLocalTransfer();
-@@ -72,7 +170,26 @@ private:
+@@ -72,7 +185,26 @@ private:
      std::array<WriteVramFunc, kPsmHandlerCount> m_writeVramFuncs{};
      std::array<uint16_t, 512> m_clut{};
      std::array<uint32_t, 2> m_clutCbp{};
@@ -1477,6 +1493,95 @@ index 0000000..43fe622
 +    bool m_presentQueued = false;
 +    PresentationFrame m_lastPresented;
 +};
+diff --git a/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h b/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h
+index c784ff7..22fb5b7 100644
+--- a/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h
++++ b/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h
+@@ -540,6 +540,84 @@ namespace GSMem
+ 
+ 	void InitLookupTables();
+ 
++	// The page tables InitLookupTables fills, for the inlined reads below.
++	extern PixelStorageTraits<C32>::PageLookupTableT PageTableC32;
++	extern PixelStorageTraits<Z32>::PageLookupTableT PageTableZ32;
++	extern PixelStorageTraits<C16>::PageLookupTableT PageTableC16;
++	extern PixelStorageTraits<C16S>::PageLookupTableT PageTableC16S;
++	extern PixelStorageTraits<Z16>::PageLookupTableT PageTableZ16;
++	extern PixelStorageTraits<Z16S>::PageLookupTableT PageTableZ16S;
++	extern PixelStorageTraits<P8>::PageLookupTableT PageTableP8;
++	extern PixelStorageTraits<P4>::PageLookupTableT PageTableP4;
++
++	template<PixelStorageMode psm>
++	constexpr const auto& PageTableFor()
++	{
++		if constexpr (psm == C32 || psm == C24 || psm == P8H || psm == P4HL || psm == P4HH)
++			return PageTableC32;
++		else if constexpr (psm == Z32 || psm == Z24)
++			return PageTableZ32;
++		else if constexpr (psm == C16)
++			return PageTableC16;
++		else if constexpr (psm == C16S)
++			return PageTableC16S;
++		else if constexpr (psm == Z16)
++			return PageTableZ16;
++		else if constexpr (psm == Z16S)
++			return PageTableZ16S;
++		else if constexpr (psm == P8)
++			return PageTableP8;
++		else
++			return PageTableP4;
++	}
++
++	// ReadTexture for one PSM known at compile time, inlined into the caller.
++	template<PixelStorageMode psm>
++	inline u32 ReadTextureAs(TexturePageCache& cache, const u8* data, u32 bp, u32 bw, u32 x, u32 y)
++	{
++		if constexpr (IsValidPsm(psm))
++			return PixelStorageTraits<psm>::Read(PageTableFor<psm>(), data, bp, bw, x, y, &cache);
++		else
++			return 0u;
++	}
++
++	// For formats of 16 bits or more: a pixel's byte address as Read and Write
++	// work it out, and the load and store they do there, so a caller can
++	// read and then write the same pixel from one address.
++	template<PixelStorageMode psm>
++	inline u32 ByteAddress(u32 bp, u32 bw, u32 x, u32 y)
++	{
++		using Traits = PixelStorageTraits<psm>;
++		static_assert(UnpackedBitWidth(psm) >= 16 && Traits::BitOffset() == 0);
++		return (Traits::Address(PageTableFor<psm>(), bp, bw, x, y) * static_cast<u32>(UnpackedBitWidth(psm) / 8)) &
++			static_cast<u32>(MEMORY_SIZE - sizeof(typename Traits::PackedT));
++	}
++
++	template<PixelStorageMode psm>
++	inline u32 LoadPixel(const u8* data, u32 byteAddress)
++	{
++		typename PixelStorageTraits<psm>::PackedT v;
++		std::memcpy(&v, data + byteAddress, sizeof(v));
++		if constexpr (psm == C24 || psm == Z24)
++			return v & 0x00FFFFFF;
++		else
++			return v;
++	}
++
++	template<PixelStorageMode psm>
++	inline void StorePixel(u8* data, u32 byteAddress, u32 value)
++	{
++		using PackedT = typename PixelStorageTraits<psm>::PackedT;
++		PackedT packed = static_cast<PackedT>(value);
++		if constexpr (psm == C24 || psm == Z24)
++		{
++			PackedT old;
++			std::memcpy(&old, data + byteAddress, sizeof(old));
++			packed = (old & 0xFF000000) | (packed & 0x00FFFFFF);
++		}
++		std::memcpy(data + byteAddress, &packed, sizeof(packed));
++	}
++
+     // Shares swizzle, VRAM wrapping, and lane extraction with the direct reads.
+     u32 ReadTexture(TexturePageCache& cache, const u8* data, u32 psm, u32 bp, u32 bw, u32 x, u32 y);
+ 
 diff --git a/ps2xRuntime/include/runtime/ps2_audio.h b/ps2xRuntime/include/runtime/ps2_audio.h
 index a8c2a55..642e8cb 100644
 --- a/ps2xRuntime/include/runtime/ps2_audio.h
@@ -2501,7 +2606,7 @@ index 9614016..bbd4d3a 100644
          setReturnU32(ctx, ret);
      }
 diff --git a/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp b/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
-index f0ad507..c937bde 100644
+index f0ad507..f42a7fd 100644
 --- a/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
 +++ b/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp
 @@ -1,3 +1,4 @@
@@ -2509,7 +2614,7 @@ index f0ad507..c937bde 100644
  #include "runtime/gs/gs_cpu_backend.h"
  #include "runtime/gs/ps2_gs_common.h"
  #include "runtime/gs/ps2_gs_psmct16.h"
-@@ -15,6 +16,10 @@
+@@ -15,8 +16,92 @@
  #include <iostream>
  #include <stdexcept>
  
@@ -2519,8 +2624,90 @@ index f0ad507..c937bde 100644
 +
  using namespace GSInternal;
  
++namespace
++{
++    // Which pixels of a row can pass DrawTriangle's edge tests. The tests run in
++    // float; this solves each edge's line in double with room for the float
++    // rounding (bounded by 1e-6 of the size of the terms, several times the
++    // worst case), so every pixel it leaves out fails the float tests too.
++    class TriangleRowSpans
++    {
++    public:
++        TriangleRowSpans(float fx0, float fy0, float fx1, float fy1, float fx2, float fy2, float winding, float invAbsDenom,
++                         int minX, int maxX, int minY, int maxY, float edgeEpsilon)
++            : m_fy2(fy2), m_minX(minX), m_maxX(maxX)
++        {
++            // Too narrow to gain anything, or values the bounds don't cover.
++            if (maxX - minX < 4 || !std::isfinite(fx0) || !std::isfinite(fy0) || !std::isfinite(fx1) || !std::isfinite(fy1) ||
++                !std::isfinite(fx2) || !std::isfinite(fy2) || !std::isfinite(invAbsDenom))
++                return;
++            const float edgeA[2] = {fy1 - fy2, fy2 - fy0};
++            const float edgeC[2] = {fx2 - fx1, fx0 - fx2};
++            const double scale = static_cast<double>(winding) * static_cast<double>(invAbsDenom);
++            const double spanX = std::max(std::fabs(minX + 0.5 - fx2), std::fabs(maxX + 0.5 - fx2));
++            const double spanY = std::max(std::fabs(minY + 0.5 - fy2), std::fabs(maxY + 0.5 - fy2));
++            constexpr double kRelativeError = 1.0e-6;
++            constexpr double kAbsoluteError = 1.0e-30;
++            double size[2];
++            for (int i = 0; i < 2; ++i)
++            {
++                m_a[i] = edgeA[i] * scale;
++                m_c[i] = edgeC[i] * scale;
++                m_base[i] = -static_cast<double>(edgeA[i]) * fx2 * scale;
++                size[i] = (std::fabs(edgeA[i]) * spanX + std::fabs(edgeC[i]) * spanY) * std::fabs(scale);
++                m_threshold[i] = -edgeEpsilon - (kRelativeError * size[i] + kAbsoluteError);
++            }
++            if (!(size[0] < 1.0e30 && size[1] < 1.0e30))
++                return;
++            // w2 = 1 - w0 - w1 carries the error of both and of its own two steps.
++            m_a[2] = -(m_a[0] + m_a[1]);
++            m_c[2] = -(m_c[0] + m_c[1]);
++            m_base[2] = 1.0 - m_base[0] - m_base[1];
++            m_threshold[2] = -edgeEpsilon - (kRelativeError * (1.0 + 2.0 * size[0] + 2.0 * size[1]) + kAbsoluteError);
++            m_usable = true;
++        }
++
++        // Narrows [x0, x1] to the pixels of row py that may pass, with a pixel
++        // to spare on each side. Leaves x0 > x1 when none can.
++        void Narrow(float py, int &x0, int &x1) const
++        {
++            if (!m_usable)
++                return;
++            double lo = m_minX, hi = m_maxX;
++            for (int i = 0; i < 3; ++i)
++            {
++                // a * (x + 0.5) + b >= threshold
++                const double b = m_c[i] * (static_cast<double>(py) - m_fy2) + m_base[i];
++                const double rest = m_threshold[i] - b;
++                if (m_a[i] > 0.0)
++                    lo = std::max(lo, rest / m_a[i] - 0.5);
++                else if (m_a[i] < 0.0)
++                    hi = std::min(hi, rest / m_a[i] - 0.5);
++                else if (rest > 0.0)
++                    lo = hi + 3.0;
++            }
++            if (!(lo <= hi + 2.0))
++            {
++                x0 = 1;
++                x1 = 0;
++                return;
++            }
++            x0 = std::max(x0, static_cast<int>(std::ceil(lo)) - 1);
++            x1 = std::min(x1, static_cast<int>(std::floor(hi)) + 1);
++        }
++
++    private:
++        double m_a[3]{}, m_c[3]{}, m_base[3]{}, m_threshold[3]{};
++        double m_fy2 = 0.0;
++        int m_minX = 0, m_maxX = 0;
++        bool m_usable = false;
++    };
++}
++
  namespace
-@@ -24,6 +29,71 @@ namespace
+ {
+     float fabsQ(float q)
+@@ -24,6 +109,71 @@ namespace
          return (std::fabs(q) > 1.0e-8f) ? q : 1.0f;
      }
  
@@ -2592,7 +2779,7 @@ index f0ad507..c937bde 100644
      u16 Rgba8888ToRgba5551(u32 c)
      {
          uint32_t r = ((c >> 0) & 0xFF) >> 3;
-@@ -101,27 +171,6 @@ namespace
+@@ -101,27 +251,6 @@ namespace
      std::atomic<uint32_t> s_debugContext1PrimitiveCount{0};
      std::atomic<uint32_t> s_debugFbp150PixelCount{0};
  
@@ -2620,7 +2807,34 @@ index f0ad507..c937bde 100644
      bool passesAlphaTest(uint64_t testReg, uint8_t alpha)
      {
          if ((testReg & 0x1u) == 0u)
-@@ -292,11 +341,128 @@ namespace
+@@ -170,7 +299,7 @@ namespace
+         }
+     };
+ 
+-    PixelWriteMask classifyAlphaTest(uint64_t testReg, uint8_t alpha, uint8_t framePsm)
++    __attribute__((always_inline)) inline PixelWriteMask classifyAlphaTest(uint64_t testReg, uint8_t alpha, uint8_t framePsm)
+     {
+         const bool pass = passesAlphaTest(testReg, alpha);
+         if (pass)
+@@ -195,7 +324,7 @@ namespace
+         }
+     }
+ 
+-    bool passesDestinationAlphaTest(uint64_t testReg, uint8_t framePsm, uint32_t rawFramebufferPixel)
++    __attribute__((always_inline)) inline bool passesDestinationAlphaTest(uint64_t testReg, uint8_t framePsm, uint32_t rawFramebufferPixel)
+     {
+         const bool date = ((testReg >> 14) & 0x1u) != 0u;
+         if (!date)
+@@ -225,7 +354,7 @@ namespace
+         uint8_t a;
+     };
+ 
+-    TextureCombineResult combineTexture(const GSTex0Reg &tex,
++    __attribute__((always_inline)) inline TextureCombineResult combineTexture(const GSTex0Reg &tex,
+                                         uint8_t vr,
+                                         uint8_t vg,
+                                         uint8_t vb,
+@@ -292,11 +421,128 @@ namespace
          return psm == GS_PSM_T8 || psm == GS_PSM_T8H;
      }
  
@@ -2750,7 +2964,7 @@ index f0ad507..c937bde 100644
      }
  }
  
-@@ -533,6 +699,7 @@ void GSCpuBackend::Reset()
+@@ -533,6 +779,7 @@ void GSCpuBackend::Reset()
  void GSCpuBackend::ResetUnlocked()
  {
      m_clut.fill(0u);
@@ -2758,7 +2972,7 @@ index f0ad507..c937bde 100644
      m_clutCbp.fill(0u);
      m_texturePageCache.Invalidate();
      m_transfer = {};
-@@ -543,6 +710,13 @@ void GSCpuBackend::ResetUnlocked()
+@@ -543,6 +790,13 @@ void GSCpuBackend::ResetUnlocked()
      m_localToHostReadPos = 0u;
  }
  
@@ -2772,7 +2986,7 @@ index f0ad507..c937bde 100644
  void GSCpuBackend::Submit(const GSPrimitiveBatch &batch)
  {
      std::lock_guard<std::mutex> lock(m_mutex);
-@@ -602,6 +776,7 @@ void GSCpuBackend::LoadClutUnlocked(const GSTex0Reg &tex0, const GSTexClutReg &t
+@@ -602,6 +856,7 @@ void GSCpuBackend::LoadClutUnlocked(const GSTex0Reg &tex0, const GSTexClutReg &t
  
      const bool loadCsm1Suffix = tex0.csm == 0u && thirtyTwoBit && !fourBit;
      const uint32_t firstEntry = loadCsm1Suffix ? destinationBase : 0u;
@@ -2780,7 +2994,7 @@ index f0ad507..c937bde 100644
  
      for (uint32_t entry = firstEntry; entry < entryCount; ++entry)
      {
-@@ -818,6 +993,54 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
+@@ -818,6 +1073,54 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
          }
      });
  
@@ -2835,7 +3049,7 @@ index f0ad507..c937bde 100644
      switch (state.prim.type)
      {
      case GS_PRIM_SPRITE:
-@@ -838,7 +1061,8 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
+@@ -838,7 +1141,8 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
          const auto &ctx = state.context;
          int px = static_cast<int>(v.x) - (ctx.xyoffset.ofx >> 4);
          int py = static_cast<int>(v.y) - (ctx.xyoffset.ofy >> 4);
@@ -2845,7 +3059,7 @@ index f0ad507..c937bde 100644
          break;
      }
      default:
-@@ -846,8 +1070,39 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
+@@ -846,8 +1150,50 @@ void GSCpuBackend::DrawPrimitive(const GSPrimitiveBatch &batch)
      }
  }
  
@@ -2881,11 +3095,22 @@ index f0ad507..c937bde 100644
 +
 +void GSCpuBackend::WritePixel(const PixelTarget &target, int x, int y, int z, uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t fog)
 +{
++    WritePixelAs<kAnyPsm, kAnyPsm>(target, x, y, z, r, g, b, a, fog);
++}
++
++template <uint32_t FramePsm, uint32_t DepthPsm>
++__attribute__((always_inline)) inline void GSCpuBackend::WritePixelAs(const PixelTarget &target, int x, int y, int z, uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t fog)
++{
++    // A known PSM reads and writes through the inlined swizzle, at one address per buffer.
++    constexpr bool frameKnown = FramePsm != kAnyPsm;
++    constexpr bool depthKnown = DepthPsm != kAnyPsm;
++    constexpr auto framePsm = static_cast<GSMem::PixelStorageMode>(FramePsm);
++    constexpr auto depthPsm = static_cast<GSMem::PixelStorageMode>(DepthPsm);
 +    const GSDrawState &state = *target.state;
      const auto &ctx = state.context;
      if (x < ctx.scissor.x0 || x > ctx.scissor.x1 || y < ctx.scissor.y0 || y > ctx.scissor.y1)
          return;
-@@ -865,11 +1120,11 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+@@ -865,11 +1211,11 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
          b = applyFog(b, state.fogB);
      }
  
@@ -2896,13 +3121,13 @@ index f0ad507..c937bde 100644
 -    const u32 zpsm = ctx.zbuf.psm;
 +    const u32 fbp = target.fbp;
 +    const u32 fbw = target.fbw;
-+    const u32 fpsm = target.fpsm;
++    const u32 fpsm = frameKnown ? FramePsm : target.fpsm;
 +    const u32 zbp = target.zbp;
-+    const u32 zpsm = target.zpsm;
++    const u32 zpsm = depthKnown ? DepthPsm : target.zpsm;
  
      const PixelWriteMask writeMask = classifyAlphaTest(ctx.test, a, static_cast<uint8_t>(fpsm));
      if (!writeMask.writesAnything())
-@@ -877,14 +1132,12 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+@@ -877,23 +1223,30 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
          return;
      }
  
@@ -2919,8 +3144,19 @@ index f0ad507..c937bde 100644
  
      u32 rawFramebufferPixel = 0;
      u32 fbrgba = 0;
-@@ -893,7 +1146,7 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
-         rawFramebufferPixel = ReadVramUnlocked(fpsm, fbp, fbw, x, y);
++    u32 frameAddress = 0;
+     if (frmw)
+     {
+-        rawFramebufferPixel = ReadVramUnlocked(fpsm, fbp, fbw, x, y);
++        if constexpr (frameKnown)
++        {
++            frameAddress = GSMem::ByteAddress<framePsm>(fbp, fbw, x, y);
++            rawFramebufferPixel = GSMem::LoadPixel<framePsm>(m_vram, frameAddress);
++        }
++        else
++        {
++            rawFramebufferPixel = ReadVramUnlocked(fpsm, fbp, fbw, x, y);
++        }
          fbrgba = rawFramebufferPixel;
  
 -        if (bitsPerPixel(fpsm) == 16)
@@ -2928,7 +3164,41 @@ index f0ad507..c937bde 100644
          {
              fbrgba = Rgba5551ToRgba8888(fbrgba);
          }
-@@ -950,12 +1203,11 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+@@ -911,6 +1264,19 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+ 
+     bool zpass = false;
+     uint32_t storedZ = 0u;
++    u32 depthAddress = 0;
++    const auto readDepth = [&]() -> uint32_t
++    {
++        if constexpr (depthKnown)
++        {
++            depthAddress = GSMem::ByteAddress<depthPsm>(zbp, fbw, x, y);
++            return GSMem::LoadPixel<depthPsm>(m_vram, depthAddress);
++        }
++        else
++        {
++            return ReadVramUnlocked(zpsm, zbp, fbw, x, y);
++        }
++    };
+     switch (ztestMethod)
+     {
+     case 0:
+@@ -920,11 +1286,11 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+         zpass = true;
+         break;
+     case 2:
+-        storedZ = ReadVramUnlocked(zpsm, zbp, fbw, x, y);
++        storedZ = readDepth();
+         zpass = static_cast<uint32_t>(z) >= storedZ;
+         break;
+     case 3:
+-        storedZ = ReadVramUnlocked(zpsm, zbp, fbw, x, y);
++        storedZ = readDepth();
+         zpass = static_cast<uint32_t>(z) > storedZ;
+         break;
+     }
+@@ -950,12 +1316,11 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
              // PABE disables alpha blending when the source alpha MSB is clear.
              if (!(state.pabe && (a & 0x80u) == 0u))
              {
@@ -2946,7 +3216,7 @@ index f0ad507..c937bde 100644
  
                  auto pickRGB = [&](uint8_t sel, int cs, int cd) -> int
                  {
-@@ -980,7 +1232,7 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+@@ -980,7 +1345,7 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
              }
          }
  
@@ -2955,7 +3225,7 @@ index f0ad507..c937bde 100644
          {
              a = static_cast<uint8_t>(a | 0x80u);
          }
-@@ -998,7 +1250,7 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
+@@ -998,17 +1363,35 @@ void GSCpuBackend::WritePixel(const GSDrawState &state, int x, int y, int z, uin
          }
  
          // format conversion
@@ -2964,12 +3234,42 @@ index f0ad507..c937bde 100644
          {
              pixel = Rgba8888ToRgba5551(pixel);
          }
-@@ -1055,68 +1307,139 @@ uint32_t GSCpuBackend::LookupCLUT(const GSDrawState &state,
+ 
+-        WriteVramUnlocked(fpsm, fbp, fbw, x, y, pixel);
++        if constexpr (frameKnown)
++        {
++            if (!frmw)
++                frameAddress = GSMem::ByteAddress<framePsm>(fbp, fbw, x, y);
++            GSMem::StorePixel<framePsm>(m_vram, frameAddress, pixel);
++        }
++        else
++        {
++            WriteVramUnlocked(fpsm, fbp, fbw, x, y, pixel);
++        }
+     }
+ 
+     if (writeMask.writeDepth && !ctx.zbuf.zmask)
+     {
+-        WriteVramUnlocked(zpsm, zbp, fbw, x, y, z);
++        if constexpr (depthKnown)
++        {
++            if (ztestMethod < 2u)
++                depthAddress = GSMem::ByteAddress<depthPsm>(zbp, fbw, x, y);
++            GSMem::StorePixel<depthPsm>(m_vram, depthAddress, static_cast<u32>(z));
++        }
++        else
++        {
++            WriteVramUnlocked(zpsm, zbp, fbw, x, y, z);
++        }
+     }
+ }
+ 
+@@ -1055,68 +1438,141 @@ uint32_t GSCpuBackend::LookupCLUT(const GSDrawState &state,
      return 0xFFFF00FFu;
  }
  
 -uint32_t GSCpuBackend::SampleTexture(const GSDrawState &state, float s, float t, float q, uint16_t u, uint16_t v)
-+void GSCpuBackend::PrepareTextureSampler(const GSDrawState &state, TextureSampler &sampler)
++constexpr GSCpuBackend::TexelFormat GSCpuBackend::TexelFormatFor(uint8_t psm)
  {
 -    const auto &ctx = state.context;
 -    const auto &tex = ctx.tex0;
@@ -2986,6 +3286,49 @@ index f0ad507..c937bde 100644
 -
 -    float texUf, texVf;
 -    if (state.prim.fst)
++    switch (psm)
+     {
+-        texUf = static_cast<float>(u) / 16.0f;
+-        texVf = static_cast<float>(v) / 16.0f;
+-    }
+-    else
+-    {
+-        const float invQ = 1.0f / fabsQ(q);
+-        texUf = s * invQ * static_cast<float>(texW);
+-        texVf = t * invQ * static_cast<float>(texH);
++    case GS_PSM_CT32:
++    case GS_PSM_Z32:
++    case GS_PSM_Z24:
++        return TexelFormat::Direct;
++    case GS_PSM_CT24:
++        return TexelFormat::Texa24;
++    case GS_PSM_CT16:
++    case GS_PSM_CT16S:
++        return TexelFormat::Texa16;
++    case GS_PSM_Z16:
++    case GS_PSM_Z16S:
++        return TexelFormat::Expand16;
++    case GS_PSM_T8:
++    case GS_PSM_T8H:
++    case GS_PSM_T4:
++    case GS_PSM_T4HL:
++    case GS_PSM_T4HH:
++        return TexelFormat::Indexed;
++    default:
++        return TexelFormat::Unknown;
+     }
++}
+ 
+-    auto samplePoint = [&](int sampleU, int sampleV) -> uint32_t
+-    {
+-        sampleU = wrapTextureCoordinate(sampleU, texW, wrapU, minU, maxU);
+-        sampleV = wrapTextureCoordinate(sampleV, texH, wrapV, minV, maxV);
+-
+-        u32 out = ReadTextureVramUnlocked(tex.psm, tex.tbp0, tex.tbw, sampleU, sampleV);
+-
+-        switch (tex.psm)
++void GSCpuBackend::PrepareTextureSampler(const GSDrawState &state, TextureSampler &sampler)
++{
 +    const auto &tex = state.context.tex0;
 +    const uint64_t clamp = state.context.clamp;
 +    sampler.state = &state;
@@ -2997,7 +3340,23 @@ index f0ad507..c937bde 100644
 +    const auto wrap = [](uint8_t mode, int size, uint16_t regionMin, uint16_t regionMax, int &low, int &high, bool &clamps)
 +    {
 +        switch (mode)
-+        {
+         {
+-        case GS_PSM_CT32:
+-        case GS_PSM_Z32:
+-        case GS_PSM_CT24:
+-        case GS_PSM_Z24:
+-            return applyTexa(state.texa, tex.psm, out);
+-        case GS_PSM_CT16:
+-        case GS_PSM_CT16S:
+-        case GS_PSM_Z16:
+-        case GS_PSM_Z16S:
+-            return applyTexa(state.texa, tex.psm, Rgba5551ToRgba8888(out));
+-        case GS_PSM_T8:
+-        case GS_PSM_T8H:
+-        case GS_PSM_T4:
+-        case GS_PSM_T4HL:
+-        case GS_PSM_T4HH:
+-            return LookupCLUT(state, static_cast<u8>(out), tex.cpsm, tex.csm, tex.csa, tex.psm);
 +        case 0: // REPEAT
 +            low = size - 1;
 +            high = 0;
@@ -3018,7 +3377,7 @@ index f0ad507..c937bde 100644
 +            high = regionMax;
 +            clamps = false;
 +            break;
-+        }
+         }
 +    };
 +    wrap(static_cast<uint8_t>(clamp & 0x3u), sampler.texW, static_cast<uint16_t>((clamp >> 4) & 0x3FFu),
 +         static_cast<uint16_t>((clamp >> 14) & 0x3FFu), sampler.lowU, sampler.highU, sampler.clampU);
@@ -3027,45 +3386,10 @@ index f0ad507..c937bde 100644
 +    sampler.psm = tex.psm;
 +    sampler.fst = state.prim.fst;
 +    sampler.linear = state.linearFilter;
-+    switch (tex.psm)
-     {
--        texUf = static_cast<float>(u) / 16.0f;
--        texVf = static_cast<float>(v) / 16.0f;
-+    case GS_PSM_CT32:
-+    case GS_PSM_Z32:
-+    case GS_PSM_Z24: // read with alpha clear, which applyTexa keeps
-+        sampler.format = TexelFormat::Direct;
-+        break;
-+    case GS_PSM_CT24:
-+        sampler.format = TexelFormat::Texa24;
-+        break;
-+    case GS_PSM_CT16:
-+    case GS_PSM_CT16S:
-+        sampler.format = TexelFormat::Texa16;
-+        break;
-+    case GS_PSM_Z16:
-+    case GS_PSM_Z16S:
-+        sampler.format = TexelFormat::Expand16;
-+        break;
-+    case GS_PSM_T8:
-+    case GS_PSM_T8H:
-+    case GS_PSM_T4:
-+    case GS_PSM_T4HL:
-+    case GS_PSM_T4HH:
-+        sampler.format = TexelFormat::Indexed;
-+        break;
-+    default:
-+        sampler.format = TexelFormat::Unknown;
-+        break;
-     }
--    else
--    {
--        const float invQ = 1.0f / fabsQ(q);
--        texUf = s * invQ * static_cast<float>(texW);
--        texVf = t * invQ * static_cast<float>(texH);
++    sampler.format = TexelFormatFor(tex.psm);
 +    if (sampler.format != TexelFormat::Indexed)
 +        return;
-+
+ 
 +    PaletteCache &palette = m_palette;
 +    if (!palette.valid || palette.clutGeneration != m_clutGeneration || palette.psm != tex.psm ||
 +        palette.cpsm != tex.cpsm || palette.csm != tex.csm || palette.csa != tex.csa ||
@@ -3079,29 +3403,28 @@ index f0ad507..c937bde 100644
 +        palette.csa = tex.csa;
 +        palette.texa = state.texa;
 +        palette.valid = true;
-     }
++    }
 +}
- 
--    auto samplePoint = [&](int sampleU, int sampleV) -> uint32_t
--    {
--        sampleU = wrapTextureCoordinate(sampleU, texW, wrapU, minU, maxU);
--        sampleV = wrapTextureCoordinate(sampleV, texH, wrapV, minV, maxV);
-+template <GSCpuBackend::TexelFormat Format>
-+inline uint32_t GSCpuBackend::FetchTexel(const TextureSampler &sampler, int u, int v)
++
++template <uint8_t Psm>
++__attribute__((always_inline)) inline uint32_t GSCpuBackend::FetchTexel(const TextureSampler &sampler, int u, int v)
 +{
++    constexpr TexelFormat Format = TexelFormatFor(Psm);
 +    if constexpr (Format == TexelFormat::Unknown)
-+        return 0xFFFF00FFu;
+         return 0xFFFF00FFu;
+-    };
  
--        u32 out = ReadTextureVramUnlocked(tex.psm, tex.tbp0, tex.tbw, sampleU, sampleV);
+-    if (!state.linearFilter)
 +    u = sampler.clampU ? std::min(std::max(u, sampler.lowU), sampler.highU)
 +                       : static_cast<int>((static_cast<uint32_t>(u) & static_cast<uint32_t>(sampler.lowU)) |
 +                                          static_cast<uint32_t>(sampler.highU));
 +    v = sampler.clampV ? std::min(std::max(v, sampler.lowV), sampler.highV)
 +                       : static_cast<int>((static_cast<uint32_t>(v) & static_cast<uint32_t>(sampler.lowV)) |
 +                                          static_cast<uint32_t>(sampler.highV));
-+    const u32 out = ReadTextureVramUnlocked(sampler.psm, sampler.tbp0, sampler.tbw, u, v);
- 
--        switch (tex.psm)
++    const u32 out = m_vram ? GSMem::ReadTextureAs<static_cast<GSMem::PixelStorageMode>(Psm)>(m_texturePageCache, m_vram,
++                                                                                          sampler.tbp0, sampler.tbw, u, v)
++                           : 0u;
++
 +    if constexpr (Format == TexelFormat::Direct)
 +        return out;
 +    else if constexpr (Format == TexelFormat::Texa24)
@@ -3111,52 +3434,30 @@ index f0ad507..c937bde 100644
 +    else if constexpr (Format == TexelFormat::Expand16)
 +        return Rgba5551ToRgba8888(out);
 +    else
-+    {
+     {
+-        return samplePoint(static_cast<int>(texUf), static_cast<int>(texVf));
 +        const uint8_t index = static_cast<u8>(out);
 +        uint32_t &filled = m_palette.filled[index >> 5];
 +        const uint32_t bit = 1u << (index & 31u);
 +        if ((filled & bit) == 0u)
-         {
--        case GS_PSM_CT32:
--        case GS_PSM_Z32:
--        case GS_PSM_CT24:
--        case GS_PSM_Z24:
--            return applyTexa(state.texa, tex.psm, out);
--        case GS_PSM_CT16:
--        case GS_PSM_CT16S:
--        case GS_PSM_Z16:
--        case GS_PSM_Z16S:
--            return applyTexa(state.texa, tex.psm, Rgba5551ToRgba8888(out));
--        case GS_PSM_T8:
--        case GS_PSM_T8H:
--        case GS_PSM_T4:
--        case GS_PSM_T4HL:
--        case GS_PSM_T4HH:
--            return LookupCLUT(state, static_cast<u8>(out), tex.cpsm, tex.csm, tex.csa, tex.psm);
++        {
 +            const auto &tex = sampler.state->context.tex0;
 +            m_palette.entries[index] = LookupCLUT(*sampler.state, index, tex.cpsm, tex.csm, tex.csa, tex.psm);
 +            filled |= bit;
-         }
--
--        return 0xFFFF00FFu;
--    };
--
--    if (!state.linearFilter)
--    {
--        return samplePoint(static_cast<int>(texUf), static_cast<int>(texVf));
++        }
 +        return m_palette.entries[index];
      }
 +}
 +
-+template <GSCpuBackend::TexelFormat Format>
-+uint32_t GSCpuBackend::SampleTexels(const TextureSampler &sampler, float texUf, float texVf)
++template <uint8_t Psm>
++__attribute__((always_inline)) inline uint32_t GSCpuBackend::SampleTexels(const TextureSampler &sampler, float texUf, float texVf)
 +{
 +    if (!sampler.linear)
-+        return FetchTexel<Format>(sampler, static_cast<int>(texUf), static_cast<int>(texVf));
++        return FetchTexel<Psm>(sampler, static_cast<int>(texUf), static_cast<int>(texVf));
  
      const float sampleU = texUf - 0.5f;
      const float sampleV = texVf - 0.5f;
-@@ -1127,36 +1450,81 @@ uint32_t GSCpuBackend::SampleTexture(const GSDrawState &state, float s, float t,
+@@ -1127,87 +1583,170 @@ uint32_t GSCpuBackend::SampleTexture(const GSDrawState &state, float s, float t,
      const float fx = sampleU - static_cast<float>(u0);
      const float fy = sampleV - static_cast<float>(v0);
  
@@ -3191,10 +3492,10 @@ index f0ad507..c937bde 100644
 -           (static_cast<uint32_t>(b) << 16) |
 -           (static_cast<uint32_t>(a) << 24);
 +    // In this order: a texel read can refill the texture page cache.
-+    const uint32_t c00 = FetchTexel<Format>(sampler, u0, v0);
-+    const uint32_t c10 = FetchTexel<Format>(sampler, u1, v0);
-+    const uint32_t c01 = FetchTexel<Format>(sampler, u0, v1);
-+    const uint32_t c11 = FetchTexel<Format>(sampler, u1, v1);
++    const uint32_t c00 = FetchTexel<Psm>(sampler, u0, v0);
++    const uint32_t c10 = FetchTexel<Psm>(sampler, u1, v0);
++    const uint32_t c01 = FetchTexel<Psm>(sampler, u0, v1);
++    const uint32_t c11 = FetchTexel<Psm>(sampler, u1, v1);
 +    return lerpTexels(c00, c10, c01, c11, fx, fy);
 +}
 +
@@ -3213,20 +3514,36 @@ index f0ad507..c937bde 100644
 +        texVf = t * invQ * static_cast<float>(sampler.texH);
 +    }
 +
-+    switch (sampler.format)
++    switch (sampler.psm)
 +    {
-+    case TexelFormat::Direct:
-+        return SampleTexels<TexelFormat::Direct>(sampler, texUf, texVf);
-+    case TexelFormat::Texa24:
-+        return SampleTexels<TexelFormat::Texa24>(sampler, texUf, texVf);
-+    case TexelFormat::Texa16:
-+        return SampleTexels<TexelFormat::Texa16>(sampler, texUf, texVf);
-+    case TexelFormat::Expand16:
-+        return SampleTexels<TexelFormat::Expand16>(sampler, texUf, texVf);
-+    case TexelFormat::Indexed:
-+        return SampleTexels<TexelFormat::Indexed>(sampler, texUf, texVf);
++    case GS_PSM_CT32:
++        return SampleTexels<GS_PSM_CT32>(sampler, texUf, texVf);
++    case GS_PSM_CT24:
++        return SampleTexels<GS_PSM_CT24>(sampler, texUf, texVf);
++    case GS_PSM_CT16:
++        return SampleTexels<GS_PSM_CT16>(sampler, texUf, texVf);
++    case GS_PSM_CT16S:
++        return SampleTexels<GS_PSM_CT16S>(sampler, texUf, texVf);
++    case GS_PSM_T8:
++        return SampleTexels<GS_PSM_T8>(sampler, texUf, texVf);
++    case GS_PSM_T4:
++        return SampleTexels<GS_PSM_T4>(sampler, texUf, texVf);
++    case GS_PSM_T8H:
++        return SampleTexels<GS_PSM_T8H>(sampler, texUf, texVf);
++    case GS_PSM_T4HL:
++        return SampleTexels<GS_PSM_T4HL>(sampler, texUf, texVf);
++    case GS_PSM_T4HH:
++        return SampleTexels<GS_PSM_T4HH>(sampler, texUf, texVf);
++    case GS_PSM_Z32:
++        return SampleTexels<GS_PSM_Z32>(sampler, texUf, texVf);
++    case GS_PSM_Z24:
++        return SampleTexels<GS_PSM_Z24>(sampler, texUf, texVf);
++    case GS_PSM_Z16:
++        return SampleTexels<GS_PSM_Z16>(sampler, texUf, texVf);
++    case GS_PSM_Z16S:
++        return SampleTexels<GS_PSM_Z16S>(sampler, texUf, texVf);
 +    default:
-+        return SampleTexels<TexelFormat::Unknown>(sampler, texUf, texVf);
++        return SampleTexels<0xFFu>(sampler, texUf, texVf);
 +    }
 +}
 +
@@ -3265,10 +3582,46 @@ index f0ad507..c937bde 100644
 +    range(a.u, b.u, rect.x0, static_cast<float>(rect.width), rect.drawX0, rect.drawX1, u0, u1);
 +    range(a.v, b.v, rect.y0, static_cast<float>(rect.height), rect.drawY0, rect.drawY1, v0, v1);
 +    return true;
++}
++
++template <typename Draw>
++inline void GSCpuBackend::DispatchPixelFormats(const GSDrawState &state, Draw &&draw)
++{
++    // Common frame and depth buffer pairs get their own copy of the pixel loop.
++    if (m_vram)
++    {
++        const uint32_t pair = (static_cast<uint32_t>(state.context.frame.psm) << 8) | state.context.zbuf.psm;
++        switch (pair)
++        {
++        case (GS_PSM_CT32 << 8) | GS_PSM_Z32:
++            return draw.template operator()<GS_PSM_CT32, GS_PSM_Z32>();
++        case (GS_PSM_CT32 << 8) | GS_PSM_Z24:
++            return draw.template operator()<GS_PSM_CT32, GS_PSM_Z24>();
++        case (GS_PSM_CT32 << 8) | GS_PSM_Z16:
++            return draw.template operator()<GS_PSM_CT32, GS_PSM_Z16>();
++        case (GS_PSM_CT24 << 8) | GS_PSM_Z24:
++            return draw.template operator()<GS_PSM_CT24, GS_PSM_Z24>();
++        case (GS_PSM_CT16 << 8) | GS_PSM_Z24:
++            return draw.template operator()<GS_PSM_CT16, GS_PSM_Z24>();
++        case (GS_PSM_CT16 << 8) | GS_PSM_Z16:
++            return draw.template operator()<GS_PSM_CT16, GS_PSM_Z16>();
++        default:
++            break;
++        }
++    }
++    draw.template operator()<kAnyPsm, kAnyPsm>();
  }
  
  void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
-@@ -1165,49 +1533,36 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
++{
++    DispatchPixelFormats(batch.state, [&]<uint32_t FramePsm, uint32_t DepthPsm>()
++                         { DrawSpriteAs<FramePsm, DepthPsm>(batch); });
++}
++
++template <uint32_t FramePsm, uint32_t DepthPsm>
++void GSCpuBackend::DrawSpriteAs(const GSPrimitiveBatch &batch)
+ {
+     const GSDrawState &state = batch.state;
      const GSVertex &v0 = batch.vertices[0];
      const GSVertex &v1 = batch.vertices[1];
      const auto &ctx = state.context;
@@ -3331,7 +3684,7 @@ index f0ad507..c937bde 100644
  
          float u0f, v0f, u1f, v1f;
          if (state.prim.fst)
-@@ -1227,34 +1582,26 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+@@ -1227,34 +1766,26 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
              v1f = (v1.t / q1) * static_cast<float>(texH);
          }
  
@@ -3374,12 +3727,12 @@ index f0ad507..c937bde 100644
                  }
  
                  uint8_t tr = static_cast<uint8_t>(texel & 0xFF);
-@@ -1263,15 +1610,19 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+@@ -1263,19 +1794,30 @@ void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
                  uint8_t ta = static_cast<uint8_t>((texel >> 24) & 0xFF);
  
                  const TextureCombineResult color = combineTexture(tex, r, g, b, a, tr, tg, tb, ta);
 -                WritePixel(state, x, y, z1, color.r, color.g, color.b, color.a, v1.fog);
-+                WritePixel(target, x, y, z1, color.r, color.g, color.b, color.a, v1.fog);
++                WritePixelAs<FramePsm, DepthPsm>(target, x, y, z1, color.r, color.g, color.b, color.a, v1.fog);
              }
          }
      }
@@ -3391,12 +3744,23 @@ index f0ad507..c937bde 100644
 +                continue;
              for (int x = drawX0; x <= drawX1; ++x)
 -                WritePixel(state, x, y, z1, r, g, b, a, v1.fog);
-+                WritePixel(target, x, y, z1, r, g, b, a, v1.fog);
++                WritePixelAs<FramePsm, DepthPsm>(target, x, y, z1, r, g, b, a, v1.fog);
 +        }
      }
  }
  
-@@ -1311,8 +1662,26 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
++{
++    DispatchPixelFormats(batch.state, [&]<uint32_t FramePsm, uint32_t DepthPsm>()
++                         { DrawTriangleAs<FramePsm, DepthPsm>(batch); });
++}
++
++template <uint32_t FramePsm, uint32_t DepthPsm>
++void GSCpuBackend::DrawTriangleAs(const GSPrimitiveBatch &batch)
+ {
+     const GSDrawState &state = batch.state;
+     const GSVertex &v0 = batch.vertices[0];
+@@ -1311,10 +1853,31 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
      const float invAbsDenom = 1.0f / std::fabs(denom);
      constexpr float kEdgeEpsilon = 1.0e-4f;
  
@@ -3416,28 +3780,43 @@ index f0ad507..c937bde 100644
 +    PixelTarget target;
 +    PreparePixelTarget(state, target);
 +
++    const TriangleRowSpans spans(fx0, fy0, fx1, fy1, fx2, fy2, winding, invAbsDenom, minX, maxX, minY, maxY, kEdgeEpsilon);
      for (int y = minY; y <= maxY; ++y)
      {
 +        if (!OwnsRow(y))
 +            continue;
          float py = static_cast<float>(y) + 0.5f;
-         for (int x = minX; x <= maxX; ++x)
+-        for (int x = minX; x <= maxX; ++x)
++        int rowX0 = minX, rowX1 = maxX;
++        spans.Narrow(py, rowX0, rowX1);
++        for (int x = rowX0; x <= rowX1; ++x)
          {
-@@ -1326,6 +1695,13 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+             float px = static_cast<float>(x) + 0.5f;
+ 
+@@ -1326,6 +1889,22 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
                  continue;
  
              double z = v0.z * w0 + v1.z * w1 + v2.z * w2;
 +            const u32 depth = static_cast<u32>(z + 0.5);
 +            if (ztestMethod >= 2u)
 +            {
-+                const uint32_t storedZ = ReadVramUnlocked(zpsm, zbp, zbw, x, y);
++                uint32_t storedZ;
++                if constexpr (DepthPsm != kAnyPsm)
++                {
++                    constexpr auto depthPsm = static_cast<GSMem::PixelStorageMode>(DepthPsm);
++                    storedZ = GSMem::LoadPixel<depthPsm>(m_vram, GSMem::ByteAddress<depthPsm>(zbp, zbw, x, y));
++                }
++                else
++                {
++                    storedZ = ReadVramUnlocked(zpsm, zbp, zbw, x, y);
++                }
 +                if (ztestMethod == 2u ? depth < storedZ : depth <= storedZ)
 +                    continue;
 +            }
  
              uint8_t r, g, b, a;
              if (state.prim.iip)
-@@ -1367,7 +1743,7 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+@@ -1367,7 +1946,7 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
                      iv = 0;
                  }
  
@@ -3446,16 +3825,16 @@ index f0ad507..c937bde 100644
  
                  uint8_t tr = static_cast<uint8_t>(texel & 0xFF);
                  uint8_t tg = static_cast<uint8_t>((texel >> 8) & 0xFF);
-@@ -1388,7 +1764,7 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
+@@ -1388,7 +1967,7 @@ void GSCpuBackend::DrawTriangle(const GSPrimitiveBatch &batch)
              }
  
              const uint8_t fog = clampU8(static_cast<int>(v0.fog * w0 + v1.fog * w1 + v2.fog * w2));
 -            WritePixel(state, x, y, static_cast<u32>(z + 0.5), r, g, b, a, fog);
-+            WritePixel(target, x, y, depth, r, g, b, a, fog);
++            WritePixelAs<FramePsm, DepthPsm>(target, x, y, depth, r, g, b, a, fog);
          }
      }
  }
-@@ -1418,6 +1794,8 @@ void GSCpuBackend::DrawLine(const GSPrimitiveBatch &batch)
+@@ -1418,6 +1997,8 @@ void GSCpuBackend::DrawLine(const GSPrimitiveBatch &batch)
      if (totalSteps == 0)
          totalSteps = 1;
      int step = 0;
@@ -3464,7 +3843,7 @@ index f0ad507..c937bde 100644
  
      for (;;)
      {
-@@ -1440,7 +1818,8 @@ void GSCpuBackend::DrawLine(const GSPrimitiveBatch &batch)
+@@ -1440,7 +2021,8 @@ void GSCpuBackend::DrawLine(const GSPrimitiveBatch &batch)
  
          double z = (v0.z + (v1.z - v0.z) * t);
          const uint8_t fog = clampU8(static_cast<int>(v0.fog + (v1.fog - v0.fog) * t));
@@ -3474,7 +3853,7 @@ index f0ad507..c937bde 100644
  
          if (x0 == x1 && y0 == y1)
              break;
-@@ -1732,6 +2111,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1732,6 +2314,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
                                  (static_cast<uint32_t>(b) << 16u) |
                                  (static_cast<uint32_t>(a) << 24u);
          for (uint32_t y = y0; y <= y1; ++y)
@@ -3484,7 +3863,7 @@ index f0ad507..c937bde 100644
              for (uint32_t x = x0; x <= x1; ++x)
              {
                  uint32_t pixel = source;
-@@ -1742,6 +2124,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1742,6 +2327,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
                  }
                  WriteVramUnlocked(context.frame.psm, fbp, fbw, x, y, pixel);
              }
@@ -3492,7 +3871,7 @@ index f0ad507..c937bde 100644
          return true;
      }
  
-@@ -1750,6 +2133,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1750,6 +2336,9 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
          const uint16_t source = encodeFramePixelPSMCT16(r, g, b, a);
          const uint16_t mask = static_cast<uint16_t>(context.frame.fbmsk);
          for (uint32_t y = y0; y <= y1; ++y)
@@ -3502,7 +3881,7 @@ index f0ad507..c937bde 100644
              for (uint32_t x = x0; x <= x1; ++x)
              {
                  uint16_t pixel = source;
-@@ -1760,6 +2146,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
+@@ -1760,6 +2349,7 @@ bool GSCpuBackend::ClearFramebuffer(const GSContext &context, uint32_t rgba)
                  }
                  WriteVramUnlocked(context.frame.psm, fbp, fbw, x, y, pixel);
              }
@@ -4391,6 +4770,33 @@ index 0000000..c0fd907
 +    std::lock_guard<std::mutex> lock(m_transferMutex);
 +    return m_transferSnapshot;
 +}
+diff --git a/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp b/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp
+index a8f9fa8..27a6c62 100644
+--- a/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp
++++ b/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp
+@@ -192,14 +192,14 @@ namespace GSMem
+     }};
+ 
+     // this is going to be massive (an entire page of addess lookups)
+-    static C32PageLookupTable  PageTableC32{ };
+-    static Z32PageLookupTableT PageTableZ32{ };
+-    static C16PageLookupTable  PageTableC16{ };
+-    static C16SPageLookupTable PageTableC16S{ };
+-    static Z16PageLookupTable  PageTableZ16{ };
+-    static Z16SPageLookupTable PageTableZ16S{ };
+-    static P8PageLookupTable   PageTableP8{ };
+-    static P4PageLookupTable   PageTableP4{ };
++    C32PageLookupTable  PageTableC32{ };
++    Z32PageLookupTableT PageTableZ32{ };
++    C16PageLookupTable  PageTableC16{ };
++    C16SPageLookupTable PageTableC16S{ };
++    Z16PageLookupTable  PageTableZ16{ };
++    Z16SPageLookupTable PageTableZ16S{ };
++    P8PageLookupTable   PageTableP8{ };
++    P4PageLookupTable   PageTableP4{ };
+ 
+     void InitLookupTables()
+     {
 diff --git a/ps2xRuntime/src/lib/ps2_audio.cpp b/ps2xRuntime/src/lib/ps2_audio.cpp
 index 6bb6494..4b9444d 100644
 --- a/ps2xRuntime/src/lib/ps2_audio.cpp
