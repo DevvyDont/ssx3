@@ -4188,7 +4188,15 @@ extern "C" int *func_003970D8(void) {
     return &D_004A4690;
 }
 #endif
+//100%
 INCLUDE_ASM("render/font", func_003970E8);
+#ifdef SKIP_ASM
+extern int D_004A4694;
+
+extern "C" int *func_003970E8(void) {
+    return &D_004A4694;
+}
+#endif
 
 //99.38%
 INCLUDE_ASM("render/font", func_003970F8__FPv);

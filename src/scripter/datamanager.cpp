@@ -1047,7 +1047,15 @@ extern "C" int func_002770C0(void* self)
 #endif
 
 INCLUDE_ASM("scripter/datamanager", func_00277100);
+//100%
 INCLUDE_ASM("scripter/datamanager", func_002771A8);
+#ifdef SKIP_ASM
+extern "C" void func_00283C58__FPv(int);
+
+extern "C" void func_002771A8(int arg0) {
+    func_00283C58__FPv(arg0 + 0xC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_002771C8);

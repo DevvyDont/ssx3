@@ -278,7 +278,28 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B40);
+#ifdef SKIP_ASM
+extern "C" void cMemMan_free__FPv(int);
+extern "C" void func_002523A8(int);
+
+extern "C" void func_002B5B40(void *arg0) {
+    int temp_4;
+    int temp_4_2;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0x338)));
+    if (temp_4 != 0) {
+        func_002523A8(temp_4);
+        temp_4_2 = (*(int *)((char*)(arg0) + (0x33C)));
+        (*(int *)((char*)(arg0) + (0x338))) = 0;
+        if (temp_4_2 != 0) {
+            cMemMan_free__FPv(temp_4_2);
+        }
+        (*(int *)((char*)(arg0) + (0x340))) = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B90);

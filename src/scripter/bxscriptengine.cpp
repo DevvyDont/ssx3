@@ -287,8 +287,24 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282510);
 
 INCLUDE_ASM("scripter/bxscriptengine", func_00282540);
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282698);
+#ifdef SKIP_ASM
+extern "C" void func_00272BF8(int);
+
+extern "C" void func_00282698(void *arg0) {
+    func_00272BF8((*(int *)((char*)(arg0) + (0x2B8))));
+}
+#endif
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002826B8);
+#ifdef SKIP_ASM
+extern "C" void func_00272C70(int);
+
+extern "C" void func_002826B8(void *arg0) {
+    func_00272C70((*(int *)((char*)(arg0) + (0x2B8))));
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002826D8);
@@ -328,7 +344,15 @@ extern "C" void func_00282720(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282790);
+#ifdef SKIP_ASM
+extern int D_004A34E8;
+
+extern "C" int func_00282790(void) {
+    return D_004A34E8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282798);

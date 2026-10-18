@@ -975,7 +975,17 @@ extern "C" void func_0039E390(void* self, int flags)
 
 extern "C" void* func_00397948(void*);
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E438);
+#ifdef SKIP_ASM
+extern "C" void func_0039E438(void *arg0, signed char arg1) {
+    if (arg1 < 0) {
+        (*(unsigned char *)((char*)(arg0) + (0x15))) = 0xFFU;
+        return;
+    }
+    (*(unsigned char *)((char*)(arg0) + (0x15))) = (unsigned char) ((*(unsigned char *)((char*)(arg0) + (0x15))) | ((int) (0x01000000 << arg1) >> 0x18));
+}
+#endif
 INCLUDE_ASM("ui/uiscreen", func_0039E470);
 
 //100%

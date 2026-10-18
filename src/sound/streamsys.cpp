@@ -57,7 +57,17 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* s
 #endif
 
 INCLUDE_ASM("sound/streamsys", func_002A9C00);
+//100%
 INCLUDE_ASM("sound/streamsys", func_002A9DD8);
+#ifdef SKIP_ASM
+extern "C" void *func_002A9DD8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (8))) = arg1;
+    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + (0x74))) = 0;
+    (*(int *)((char*)(arg0) + (0x78))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9DF0);
@@ -270,8 +280,24 @@ INCLUDE_ASM("sound/streamsys", func_002AA210);
 
 INCLUDE_ASM("sound/streamsys", func_002AA240);
 INCLUDE_ASM("sound/streamsys", func_002AA260);
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA2B0);
+#ifdef SKIP_ASM
+extern "C" void func_002AA2B0(void *arg0) {
+    func_003B58A0();
+    func_003B7FB8((*(int *)((char*)(arg0) + (8))), 0);
+    func_003B58D8();
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA2E8);
+#ifdef SKIP_ASM
+extern "C" void func_002AA2E8(void *arg0) {
+    func_003B58A0();
+    func_003B7FB8((*(int *)((char*)(arg0) + (8))), 0x1000);
+    func_003B58D8();
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA320);
@@ -318,7 +344,20 @@ extern "C" int func_002AA428(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA448);
+#ifdef SKIP_ASM
+extern "C" int func_003B80E0(int, int);
+
+extern "C" int func_002AA448(void *arg0, int arg1) {
+    int temp_16;
+
+    func_003B58A0();
+    temp_16 = func_003B80E0((*(int *)((char*)(arg0) + (8))), arg1);
+    func_003B58D8();
+    return temp_16;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", cStreamSys_cStreamSys);

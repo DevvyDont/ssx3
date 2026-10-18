@@ -112,7 +112,13 @@ extern "C" void func_0039B760(void* self, char a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", func_0039B7A8);
+#ifdef SKIP_ASM
+extern "C" void func_0039B7A8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x9C))) = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039B7B0);

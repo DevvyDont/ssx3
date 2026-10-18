@@ -818,7 +818,13 @@ extern "C" void* func_00372AA0(sPtObj_2AA0* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00372B20);
+#ifdef SKIP_ASM
+extern "C" int func_00372B20(int *arg0, int *arg1) {
+    return *arg0 - *arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00372B30);
@@ -4145,7 +4151,18 @@ INCLUDE_ASM("render/particle", func_00382760);
 
 INCLUDE_ASM("render/particle", func_00382AF0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00383770);
+#ifdef SKIP_ASM
+extern "C" void func_00383808(void *, int, int, int, int, int, int, int, int);
+extern "C" void func_00424020(int);
+
+extern "C" int func_00383770(void *arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
+    func_00424020(0);
+    func_00383808(arg0, arg5, (*(int *)((char*)(arg0) + (0x5A84))) << 5, arg3, arg4, (*(int *)((char*)(arg0) + (0x5A30))), (*(int *)((char*)(arg0) + (0x5A3C))), arg1, arg2);
+    return 1;
+}
+#endif
 INCLUDE_ASM("render/particle", func_00383808);
 
 INCLUDE_ASM("render/particle", func_00383A10);
@@ -4527,7 +4544,14 @@ INCLUDE_ASM("render/particle", func_00385EB0);
 
 INCLUDE_ASM("render/particle", func_00386128);
 
+//100%
 INCLUDE_ASM("render/particle", func_003865D8);
+#ifdef SKIP_ASM
+extern "C" void func_003865D8(void *arg0, void **arg1) {
+    (*(void **)((char*)(arg0) + (8))) = (void *) *arg1;
+    *arg1 = arg0;
+}
+#endif
 INCLUDE_ASM("render/particle", func_003865E8);
 
 //100%
@@ -4763,7 +4787,53 @@ extern "C" void func_00389118(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00389160);
+#ifdef SKIP_ASM
+extern "C" void *func_00389160(void *arg0, float fparg0, float fparg1, float fparg2, float fparg3, float fparg4, float fparg5, float fparg6, float fparg7, float arg_sp0, float arg_sp8, float arg_sp10, float arg_sp18, float arg_sp20, float arg_sp28, float arg_sp30, float arg_sp38, float arg_sp40, float arg_sp48, float arg_sp50, float arg_sp58, float arg_sp60, float arg_sp68, float arg_sp70, float arg_sp78, float arg_sp80, float arg_sp88, float arg_sp90, float arg_sp98, float arg_spA0, float arg_spA8) {
+    (*(float *)((char*)(arg0) + (0x10))) = fparg3;
+    (*(float *)((char*)(arg0) + (0x20))) = fparg6;
+    (*(float *)((char*)(arg0) + (0x30))) = arg_sp8;
+    (*(float *)((char*)(arg0) + (0x40))) = arg_sp20;
+    (*(float *)((char*)(arg0) + (0x50))) = arg_sp38;
+    (*(float *)((char*)(arg0) + (0x60))) = arg_sp50;
+    (*(float *)((char*)(arg0) + (0x70))) = arg_sp68;
+    (*(float *)((char*)(arg0) + (0x80))) = arg_sp80;
+    (*(float *)((char*)(arg0) + (0x90))) = arg_sp98;
+    (*(float *)((char*)(arg0) + (4))) = fparg1;
+    (*(float *)((char*)(arg0) + (0))) = fparg0;
+    (*(float *)((char*)(arg0) + (0x14))) = fparg4;
+    (*(float *)((char*)(arg0) + (0x24))) = fparg7;
+    (*(float *)((char*)(arg0) + (0x34))) = arg_sp10;
+    (*(float *)((char*)(arg0) + (0x44))) = arg_sp28;
+    (*(float *)((char*)(arg0) + (0x54))) = arg_sp40;
+    (*(float *)((char*)(arg0) + (0x64))) = arg_sp58;
+    (*(float *)((char*)(arg0) + (0x74))) = arg_sp70;
+    (*(float *)((char*)(arg0) + (0x84))) = arg_sp88;
+    (*(float *)((char*)(arg0) + (0x94))) = arg_spA0;
+    (*(float *)((char*)(arg0) + (8))) = fparg2;
+    (*(float *)((char*)(arg0) + (0x18))) = fparg5;
+    (*(float *)((char*)(arg0) + (0x28))) = arg_sp0;
+    (*(float *)((char*)(arg0) + (0x38))) = arg_sp18;
+    (*(float *)((char*)(arg0) + (0x48))) = arg_sp30;
+    (*(float *)((char*)(arg0) + (0x58))) = arg_sp48;
+    (*(float *)((char*)(arg0) + (0x68))) = arg_sp60;
+    (*(float *)((char*)(arg0) + (0x78))) = arg_sp78;
+    (*(float *)((char*)(arg0) + (0x88))) = arg_sp90;
+    (*(float *)((char*)(arg0) + (0x98))) = arg_spA8;
+    (*(int *)((char*)(arg0) + (0xC))) = 0;
+    (*(int *)((char*)(arg0) + (0x1C))) = 0;
+    (*(int *)((char*)(arg0) + (0x2C))) = 0;
+    (*(int *)((char*)(arg0) + (0x3C))) = 0;
+    (*(int *)((char*)(arg0) + (0x4C))) = 0;
+    (*(int *)((char*)(arg0) + (0x5C))) = 0;
+    (*(int *)((char*)(arg0) + (0x6C))) = 0;
+    (*(int *)((char*)(arg0) + (0x7C))) = 0;
+    (*(int *)((char*)(arg0) + (0x8C))) = 0;
+    (*(int *)((char*)(arg0) + (0x9C))) = 0;
+    return arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389260);

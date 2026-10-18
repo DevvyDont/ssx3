@@ -535,7 +535,23 @@ extern "C" void func_0039FD38(void* self)
 #endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039FD80);
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
+#ifdef SKIP_ASM
+extern "C" int func_00397440(int);
+
+extern "C" int func_0039FDD8(void *arg0) {
+    int temp_4;
+    int var_2;
+
+    temp_4 = (*(int *)((char*)(arg0) + (0xC)));
+    var_2 = 0;
+    if (temp_4 != 0) {
+        var_2 = func_00397440(temp_4);
+    }
+    return var_2;
+}
+#endif
 
 INCLUDE_ASM("ui/uistatestack", func_0039FE00);
 

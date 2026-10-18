@@ -639,7 +639,13 @@ extern "C" void func_002ADEE8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADF58);
+#ifdef SKIP_ASM
+extern "C" void func_002ADF58(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADF60);
@@ -842,7 +848,13 @@ extern "C" void func_002AE1F0(int* self)
 
 INCLUDE_ASM("sound/bankmonitor", func_002AE230);
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE290);
+#ifdef SKIP_ASM
+extern "C" int func_002AE290(void) {
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002AE298);
@@ -1476,8 +1488,32 @@ extern "C" void func_002AF370(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF3B8);
+#ifdef SKIP_ASM
+extern "C" int func_002AF3B8(int arg0) {
+    void *temp_4;
+
+    temp_4 = D_004D3E98[arg0];
+    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + (0x64))) != 0)) {
+        return (*(int *)((char*)(temp_4) + (0)));
+    }
+    return -1;
+}
+#endif
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF3F0);
+#ifdef SKIP_ASM
+extern "C" int func_002AF3F0(int arg0) {
+    void *temp_4;
+
+    temp_4 = D_004D3E98[arg0];
+    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + (0x64))) == 0)) {
+        return (*(int *)((char*)(temp_4) + (0)));
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF428);
@@ -2124,8 +2160,20 @@ extern "C" int func_002B03B8(const char* name)
 INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 
 INCLUDE_ASM("sound/bankmonitor", func_002B07C0);
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B07E8);
+#ifdef SKIP_ASM
+extern "C" void func_002B07E8(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x8C4))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B07F0);
+#ifdef SKIP_ASM
+extern "C" void func_002B07F0(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x8C8))) = arg1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B07F8);
@@ -2428,7 +2476,15 @@ extern "C" int func_002B1220(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1248);
+#ifdef SKIP_ASM
+extern "C" void func_002AB1A0(int);
+
+extern "C" void func_002B1248(int *arg0) {
+    func_002AB1A0(*arg0);
+}
+#endif
 INCLUDE_ASM("sound/bankmonitor", func_002B1268);
 INCLUDE_ASM("sound/bankmonitor", func_002B1348);
 
@@ -2817,7 +2873,15 @@ extern "C" void func_002B2120()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2140);
+#ifdef SKIP_ASM
+extern "C" void func_003D15C8(int);
+
+extern "C" void func_002B2140(void) {
+    func_003D15C8(0x11000001);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2160);
@@ -3054,7 +3118,15 @@ extern "C" float func_002B2690(void* self)
 #endif
 
 INCLUDE_ASM("sound/bankmonitor", func_002B26B8);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B26F8);
+#ifdef SKIP_ASM
+extern "C" void func_002B2640();
+
+extern "C" void func_002B26F8(void) {
+    func_002B2640();
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B2718);
@@ -3349,7 +3421,23 @@ extern "C" void func_002B3C28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3C60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_002B2140_3C60(int) __asm__("func_002B2140");
+
+extern "C" void func_002B3C60(void *arg0) {
+    int temp_4;
+
+    if ((*(int *)((char*)(arg0) + (0x418))) != 0) {
+        temp_4 = (*(int *)((char*)(arg0) + (0x408)));
+        if (temp_4 != 0) {
+            func_002B2140_3C60(temp_4);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3C98);
@@ -3501,7 +3589,14 @@ void func_002B4060(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4068);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" long func_002B4068(void *arg0) {
+    return (*(long *)((char*)(arg0) + (0x3F8)));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B4070);
@@ -3776,7 +3871,13 @@ extern "C" int func_002B4878(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B48B8);
+#ifdef SKIP_ASM
+extern "C" int func_002B48B8(void **arg0) {
+    return (*(int *)((char*)(*arg0) + (0x98)));
+}
+#endif
 INCLUDE_ASM("sound/bankmonitor", func_002B48C8);
 
 //100%

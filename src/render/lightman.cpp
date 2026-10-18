@@ -19,9 +19,21 @@ void* cLightMan_construct()
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038DC20);
+#ifdef SKIP_ASM
+extern "C" void func_0038DC20(void) {
+
+}
+#endif
 INCLUDE_ASM("render/lightman", func_0038DC28);
+//100%
 INCLUDE_ASM("render/lightman", func_0038DC48);
+#ifdef SKIP_ASM
+extern "C" void func_0038DC48(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC50__FPv);
