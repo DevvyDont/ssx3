@@ -2704,7 +2704,87 @@ extern "C" void func_002BECC8(char* self, Stream_ECC8* s) {
     Wr_ECC8(s, self, 4);
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BEE48);
+//100%
+// Streams the 19 channel values, each followed by the 4-byte header at self.
+struct VE_EE48 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BEE48(char *self, char *s) {
+    VE_EE48 *e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x8, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x18, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x20, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x28, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x30, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x38, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x40, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x48, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x50, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x58, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x60, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x68, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x70, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x78, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x80, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x88, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x90, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self + 0x98, 4);
+    e = &(*(VE_EE48 **)s)[2];
+    e->fn(s + e->delta, self, 4);
+}
 
 //100%
 struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
@@ -2926,7 +3006,87 @@ extern "C" void func_002BFD30(char* self, Stream_FD30* s) {
     Wr_FD30(s, self, 4);
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BFEB0);
+//100%
+// Streams the 19 channel values, each followed by the 4-byte header at self.
+struct VE_FEB0 { short delta; short idx; int (*fn)(void *, void *, int); };
+extern "C" void func_002BFEB0(char *self, char *s) {
+    VE_FEB0 *e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x8, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x10, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x18, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x20, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x28, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x30, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x38, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x40, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x48, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x50, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x58, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x60, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x68, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x70, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x78, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x80, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x88, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x90, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self + 0x98, 4);
+    e = &(*(VE_FEB0 **)s)[1];
+    e->fn(s + e->delta, self, 4);
+}
 
 //100%
 struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
